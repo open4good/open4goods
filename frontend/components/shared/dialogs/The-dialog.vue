@@ -1,6 +1,6 @@
 <template>
   <v-dialog max-width="500">
-    <template v-slot:activator="{ props: activatorProps }">
+    <template #activator="{ props: activatorProps }">
       <v-btn
         v-bind="activatorProps"
         color="surface-variant"
@@ -9,7 +9,7 @@
       ></v-btn>
     </template>
 
-    <template v-slot:default="{ isActive }">
+    <template #default="{ isActive }">
       <v-card title="Dialog">
         <v-card-text>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do

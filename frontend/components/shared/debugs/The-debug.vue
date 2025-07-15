@@ -58,7 +58,7 @@ const fetchDebugData = async () => {
             {{ props.title }}
           </v-alert>
 
-          <v-btn @click="fetchDebugData" :loading="loading" class="mb-4">
+          <v-btn :loading="loading" class="mb-4" @click="fetchDebugData">
             Charger les données de debug
           </v-btn>
 
@@ -77,7 +77,7 @@ const fetchDebugData = async () => {
               </v-card-text>
             </v-card>
 
-            <v-card class="mb-4" v-if="debugData.debug?.sampleArticle">
+            <v-card v-if="debugData.debug?.sampleArticle" class="mb-4">
               <v-card-title>Exemple d'article</v-card-title>
               <v-card-text>
                 <pre>{{
@@ -86,7 +86,7 @@ const fetchDebugData = async () => {
               </v-card-text>
             </v-card>
 
-            <v-card class="mb-4" v-if="debugData.debug?.imageUrls">
+            <v-card v-if="debugData.debug?.imageUrls" class="mb-4">
               <v-card-title>URLs des images</v-card-title>
               <v-card-text>
                 <div

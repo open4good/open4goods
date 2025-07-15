@@ -48,7 +48,7 @@ onMounted(() => {
       <v-alert type="error" variant="tonal">
         {{ error }}
       </v-alert>
-      <v-btn @click="fetchArticles" class="mt-4"> Réessayer </v-btn>
+      <v-btn class="mt-4" @click="fetchArticles"> Réessayer </v-btn>
     </div>
 
     <div v-else class="articles">
@@ -71,7 +71,7 @@ onMounted(() => {
               cover
               class="article-image"
             >
-              <template v-slot:placeholder>
+              <template #placeholder>
                 <div class="image-placeholder">
                   <v-icon size="48" color="grey-lighten-1">
                     mdi-image-off
