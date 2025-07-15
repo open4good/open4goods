@@ -73,11 +73,11 @@ services:
       - o4g-network
 
   frontend-ssr:
-    image: node:20
+    image: node:22
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:
-      - /opt/open4goods/bin/latest/frontend-ssr:/usr/src/app
+      - /opt/open4goods/bin/frontend-ssr:/usr/src/app
     command: ["node", ".output/server/index.mjs"]
     restart: unless-stopped
     networks:
