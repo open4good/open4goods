@@ -272,6 +272,10 @@ describe('Button', () => {
   - Vercel/Netlify (with Nitro adapter)
 - Static generation (if suitable): `pnpm generate`
 
+  Security headers such as `Content-Security-Policy` are configured in
+  `public/_headers`.  Netlify and similar static hosts read this file to
+  apply HTTP response headers on all routes.
+
   - Production deployments are served from **GitHub Pages** at
   [https://static.nudger.fr](https://static.nudger.fr).
 
