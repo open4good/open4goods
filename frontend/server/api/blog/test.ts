@@ -3,7 +3,7 @@ import { blogService } from '~/services/blog.services'
 /**
  * Test endpoint to debug blog data
  */
-export default defineEventHandler(async event => {
+export default defineEventHandler(async _event => {
   try {
     // Get raw data from the external API
     const response = await blogService.getArticles()

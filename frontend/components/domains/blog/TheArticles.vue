@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useBlog } from '~/composables/blog/useBlog'
 const { articles, loading, error, fetchArticles } = useBlog()
-const config = useRuntimeConfig()
 
 // Format date helper
 const formatDate = (timestamp: number) => {

@@ -5,7 +5,7 @@ import type {
 } from '~/server/api/blog/types/blog.models'
 
 const props = defineProps<{
-  data: any
+  data: PaginatedBlogResponse
   title: string
 }>()
 // Define the debug response type
