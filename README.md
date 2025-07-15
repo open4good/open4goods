@@ -114,6 +114,12 @@ Elastic, kibana and Redis should be available on :
 * Kibana : [http://localhost:5601](http://localhost:5601)
 * Redis : [http://localhost:6379](http://localhost:6379)
 
+The compose file also defines a `frontend-ssr` service. During the CI/CD
+deployment, the Nuxt build directory (`.output`) is copied to
+`/opt/open4goods/bin/latest/frontend-ssr` on the server. The container mounts
+this path and runs `node .output/server/index.mjs` to serve the production
+frontend.
+
 > Before running the docker compose check that the value of 'vm.max_map_count' is higher or equal to 262144. If not, you will have to raise your max map  args to be able to rune the Elastic image, see the [Hint's section](https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)
 
 
