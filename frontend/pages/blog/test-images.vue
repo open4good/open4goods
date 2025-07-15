@@ -19,7 +19,7 @@
             <v-alert type="error">
               {{ error }}
             </v-alert>
-            <v-btn @click="fetchArticles" class="mt-4"> Réessayer </v-btn>
+            <v-btn class="mt-4" @click="fetchArticles"> Réessayer </v-btn>
           </div>
 
           <div v-else>

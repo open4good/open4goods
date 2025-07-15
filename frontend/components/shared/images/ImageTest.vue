@@ -72,15 +72,15 @@ const dataSize = computed(() => {
         <v-btn
           size="small"
           variant="outlined"
-          @click="toggleExpanded"
           :icon="isExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          @click="toggleExpanded"
         />
         <v-btn
           size="small"
           variant="outlined"
-          @click="copyToClipboard"
           :icon="copySuccess ? 'mdi-check' : 'mdi-content-copy'"
           :color="copySuccess ? 'success' : undefined"
+          @click="copyToClipboard"
         />
       </div>
     </div>
