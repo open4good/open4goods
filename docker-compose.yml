@@ -61,7 +61,7 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:9.0.3
     container_name: kibana
-    depends_on: 
+    depends_on:
       - elastic
     ports:
       - "5601:5601"
@@ -71,6 +71,19 @@ services:
 
     networks:
       - o4g-network
+
+  frontend-ssr:
+    image: node:20
+    container_name: frontend-ssr
+    working_dir: /usr/src/app
+    volumes:
+      - /opt/open4goods/bin/latest/frontend-ssr:/usr/src/app
+    command: ["node", ".output/server/index.mjs"]
+    restart: unless-stopped
+    networks:
+      - o4g-network
+    ports:
+      - "3000:3000"
 
     
 volumes:
