@@ -64,6 +64,9 @@ To get the project up and running locally, follow these steps:
    pnpm build && pnpm preview
    ```
 
+   Les outils de développement Nuxt sont automatiquement désactivés lorsque
+   `NODE_ENV` vaut `production`.
+
 7. **Static Generation (optional)**:
 
    ```bash
