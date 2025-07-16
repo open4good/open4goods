@@ -1,0 +1,30 @@
+name: 'Deploy JAR'
+description: 'Copy a JAR to the remote server using ssh-deploy'
+inputs:
+  source:
+    description: 'Local JAR path'
+    required: true
+  target:
+    description: 'Remote target path'
+    required: true
+  host:
+    description: 'Remote host'
+    required: true
+  user:
+    description: 'Remote user'
+    required: true
+  key:
+    description: 'SSH private key'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Deploy JAR
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.key }}
+        ARGS: "-rltgoDzvO --delete"
+        SOURCE: ${{ inputs.source }}
+        REMOTE_HOST: ${{ inputs.host }}
+        REMOTE_USER: ${{ inputs.user }}
+        TARGET: ${{ inputs.target }}
