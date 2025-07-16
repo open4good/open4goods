@@ -12,6 +12,9 @@ jobs:
   deploy:
     name: Beta Test, Build, and Publish
     runs-on: self-hosted
+    concurrency:
+      group: deploy-beta
+      cancel-in-progress: true
 
     steps:
 
