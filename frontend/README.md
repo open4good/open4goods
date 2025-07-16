@@ -26,10 +26,10 @@ Use this document as the bible for:
 To get the project up and running locally, follow these steps:
 
 1. **Prerequisites**:
-   Ensure you have Node.js `>=20` and `pnpm 8.15+` installed. Install it globally via:
+   Ensure you have Node.js `>=20` and `pnpm 10.12.1` installed. Install it globally via:
 
    ```bash
-   npm install -g pnpm
+   npm install -g pnpm@10.12.1
    ```
 
 2. **Clone the Repository**:
