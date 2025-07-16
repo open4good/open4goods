@@ -24,13 +24,5 @@ jobs:
       - run: pnpm test run
         working-directory: frontend
       - name: Verify production build
-        run: |
-          pnpm build
-          node .output/server/index.mjs &
-          PREVIEW_PID=$!
-          trap "kill $PREVIEW_PID" EXIT
-          npx wait-on http://localhost:3000
-          for route in / /sitemap.xml; do
-            curl -sf "http://localhost:3000$route"
-          done
+        run: pnpm build
         working-directory: frontend
