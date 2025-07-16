@@ -42,7 +42,7 @@ class PostsControllerIT {
         post.setUrl("slug");
         given(blogService.getPosts(any())).willReturn(List.of(post));
 
-        mockMvc.perform(get("/contents/posts").with(jwt()))
+        mockMvc.perform(get("/blog/posts").with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.data[0].title").value("Title"));
@@ -52,7 +52,7 @@ class PostsControllerIT {
     void postEndpointReturns404WhenMissing() throws Exception {
         given(blogService.getPostsByUrl()).willReturn(Map.of());
 
-        mockMvc.perform(get("/contents/posts/{slug}", "missing").with(jwt()))
+        mockMvc.perform(get("/blog/posts/{slug}", "missing").with(jwt()))
                 .andExpect(status().isNotFound());
     }
 
@@ -64,7 +64,7 @@ class PostsControllerIT {
         post.setCreated(new Date(1L));
         given(blogService.getPostsByUrl()).willReturn(Map.of("slug", post));
 
-        mockMvc.perform(get("/contents/posts/{slug}", "slug").with(jwt()))
+        mockMvc.perform(get("/blog/posts/{slug}", "slug").with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.url").value("slug"))
                 .andExpect(jsonPath("$.title").value("Title"));
