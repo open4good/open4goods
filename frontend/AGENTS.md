@@ -17,7 +17,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 
 ## Getting Started: Installation & Setup
 
-1. **Prerequisites**: Node.js 20+, `pnpm` (`npm install -g pnpm`)
+1. **Prerequisites**: Node.js 20+, `pnpm@10.12.1` (`npm install -g pnpm@10.12.1`)
 2. **Clone the Repository**: `git clone https://github.com/your-org/nudger-nuxt-front.git`
 3. **Install Dependencies**: `pnpm install`
 4. **Environment Variables**:
