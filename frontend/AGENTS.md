@@ -110,16 +110,15 @@ export const useCartStore = defineStore('cart', {
 
 ## OpenAPI Client Generation & Integration
 
-- OpenAPI spec (e.g., `nudger-api.json`)
-- Script: `pnpm generate:api` → generates a TypeScript fetch client in `src/api/`
-- Use generated API classes for type-safe calls
-- Don’t manually edit generated files
+Le dossier `src/api` est **entièrement généré** à partir de la spécification exposée par `front-api` (`/v3/api-docs/front`).
 
 Workflow:
-1. Update spec
-2. Run `generate:api`
-3. Use types in code
-4. Write tests
+1. Modifier les contrôleurs ou DTOs du projet `front-api` pour faire évoluer l’API.
+2. Construire `front-api` (`mvn -pl nudger-front-api -am clean install`) pour publier le nouveau contrat.
+3. Dans ce module, exécuter `pnpm generate:api` pour mettre à jour `src/api/`.
+4. Utiliser les nouvelles classes générées.
+
+Ne jamais éditer les fichiers générés à la main.
 
 ---
 
