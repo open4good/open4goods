@@ -79,7 +79,7 @@ Issues are organised using GitHub Projects V2. The workflow
 assigns newly opened issues to the right project board based on their labels.
 If an issue has no `squad:*` label or carries the `EPIC` label, it is routed to
 the PMO board and placed in the `Triage` column. A manual workflow named
-[label-to-project-dispatch.yml](.github/workflows/label-to-project-dispatch.yml)
+[label-to-project.yml](.github/workflows/label-to-project.yml)
 can be triggered to reapply these rules to existing issues.
 
 ### Standard GitHub workflow
