@@ -4,7 +4,10 @@
   >
     <v-row>
       <v-card class="text-center pa-8 mb-8 bg-green" elevation="4" rounded="lg">
-        <h1 class="text-h3 font-weight-bold text-white mb-4">Hello Nudger !</h1>
+        <h1 class="text-h3 font-weight-bold text-white mb-4"> Hello Nudger !</h1>
+        <p>
+            beta2.nudger.fr est reflète l'état du main, livraison continue au travers de la CI/CD github.
+        </p>
         <v-icon icon="mdi-thumb-up" color="white" size="x-large" />
       </v-card>
     </v-row>
