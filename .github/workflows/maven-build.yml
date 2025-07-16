@@ -1,0 +1,48 @@
+name: Maven Build
+
+on:
+  workflow_call:
+    inputs:
+      goals:
+        description: "Maven goals to run"
+        required: false
+        default: "install"
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Set up Maven Repositories
+        uses: s4u/maven-settings-action@v3.1.0
+        with:
+          repositories: |
+            [
+              {
+                "id": "xwiki-releases",
+                "name": "xwiki-releases",
+                "url": "https://maven.xwiki.org/releases/",
+                "snapshots": { "enabled": false }
+              }
+            ]
+
+      - name: Build with Maven
+        run: mvn --batch-mode --update-snapshots ${{ inputs.goals }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-build
+          path: |
+            **/target/*.jar
+            target/staging/**
