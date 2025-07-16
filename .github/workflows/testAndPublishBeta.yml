@@ -9,57 +9,28 @@ on:
 name: 🔘 Beta - Build, Test, and Publish
 
 jobs:
+  build:
+    uses: ./.github/workflows/maven-build.yml
+    with:
+      goals: install
+    secrets: inherit
+
   deploy:
     name: Beta Test, Build, and Publish
     runs-on: self-hosted
-
+    needs: build
     steps:
-
-      ############################################
-      # 1. Checkout the Main Repository
-      ############################################
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      ############################################
-      # 2. Set up JDK 21 (avec cache Maven intégré)
-      ############################################
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+          name: maven-build
+          path: .
 
-      ############################################
-      # 3. Set up Maven Repositories
-      ############################################
-      - name: Set up Maven Repositories
-        uses: s4u/maven-settings-action@v3.1.0
-        with:
-          repositories: |
-            [
-              {
-                "id": "xwiki-releases",
-                "name": "xwiki-releases",
-                "url": "https://maven.xwiki.org/releases/",
-                "snapshots": {
-                  "enabled": false
-                }
-              }
-            ]
-
-      ############################################
-      # 4. Maven Dependency Tree Submission
-      ############################################      
       - name: Maven Dependency Submission
         uses: advanced-security/maven-dependency-submission-action@v5.0.0
-
-      ############################################
-      # 5. Build and Test with Maven
-      ############################################    
-      - name: Build and Test with Maven
-        run: mvn --batch-mode --update-snapshots install
 
       ############################################
       # 6. Deploy JAR Files to Qualification Environment
