@@ -82,8 +82,8 @@ importers:
         specifier: ^1.4.1
         version: 1.5.2(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(typescript@5.8.3)
       '@nuxt/scripts':
-        specifier: 0.11.8
-        version: 0.11.8(@unhead/vue@2.0.12)(nuxt@3.17.6)(typescript@5.8.3)(vue@3.5.17)
+        specifier: 0.11.9
+        version: 0.11.9(@unhead/vue@2.0.12)(nuxt@3.17.6)(typescript@5.8.3)(vue@3.5.17)
       '@nuxt/test-utils':
         specifier: 3.19.2
         version: 3.19.2(@vue/test-utils@2.4.6)(happy-dom@18.0.1)(jsdom@26.1.0)(typescript@5.8.3)(vitest@3.2.4)
@@ -2908,8 +2908,8 @@ packages:
       pathe: 2.0.3
       std-env: 3.9.0
 
-  /@nuxt/scripts@0.11.8(@unhead/vue@2.0.12)(nuxt@3.17.6)(typescript@5.8.3)(vue@3.5.17):
-    resolution: {integrity: sha512-0PjUBmNt9Zi4vSkHY0BSQwyqfQLcPOfpqNozeuamZLcwI6dYZT0G5yHZ89PfH+N4C8Qzr59N0c6oGlF0b4msIQ==}
+  /@nuxt/scripts@0.11.9(@unhead/vue@2.0.12)(nuxt@3.17.6)(typescript@5.8.3)(vue@3.5.17):
+    resolution: {integrity: sha512-TQzCbIk99cDQOFhfd1Pzy9HOCYRLn066WXcb6iSVY9CaGzlrB8P1IJoJL3r/DinFIo7w6esq1oSwlHRYY2fUPw==}
     peerDependencies:
       '@stripe/stripe-js': ^7.0.0
       '@types/google.maps': ^3.58.1
