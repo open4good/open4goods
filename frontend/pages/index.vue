@@ -5,10 +5,11 @@
     <v-row>
       <v-card class="text-center pa-8 mb-8 bg-green" elevation="4" rounded="lg">
         <h1 class="text-h3 font-weight-bold text-white mb-4"> Hello Nudger !</h1>
-        <p>
-            beta2.nudger.fr est reflète l'état du main, livraison continue au travers de la CI/CD github.
-        </p>
         <v-icon icon="mdi-thumb-up" color="white" size="x-large" />
+        <p>
+            beta2.nudger.fr reflète l'état du <a href="https://github.com/open4good/open4goods/tree/main/frontend" target="_blank"> main</a>.
+            Il est livré en continue au travers de la CI/CD github.
+        </p>
       </v-card>
     </v-row>
 
