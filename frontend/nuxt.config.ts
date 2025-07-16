@@ -63,7 +63,7 @@ export default defineNuxtConfig({
     transpile: ['vuetify'],
   },
   nitro: {
-    preset: 'static',
+    preset: 'node-server',
     experimental: {
       wasm: true
     }
