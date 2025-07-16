@@ -178,4 +178,10 @@ Follow java / spring documentation best practices :
 | Tests only      | `mvn test`           |
 
 ---
+## 11. Contract-first workflow
+- Les contrôleurs et DTOs sont la **source unique** du contrat OpenAPI.
+- Toute évolution utilisée par le frontend doit être implémentée ici (contrôleur ou DTO), puis validée via `mvn clean install`.
+- Le fichier `/v3/api-docs/front` obtenu sert ensuite à régénérer le client dans le dépôt `frontend` (`pnpm generate:api`).
+- Ne jamais modifier manuellement la spécification ou le code généré.
+
 END
