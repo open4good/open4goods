@@ -10,7 +10,7 @@ env:
   PROJECT_ID_MAPPING: |
     squad:pmo=PVT_kwDOBOJOp84A8tDc
     EPIC=PVT_kwDOBOJOp84A8tDc
-    RISKY=PVT_kwDOBOJOp84A8tDc        
+    RISKY=PVT_kwDOBOJOp84A8tDc
     squad:ux=PVT_kwDOBOJOp84A2ZQ8
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
     squad:exposition=PVT_kwDOBOJOp84A83dE
