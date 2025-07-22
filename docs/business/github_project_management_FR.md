@@ -25,7 +25,7 @@ Il sera classique d'utiliser des sub issues pour décrire et formaliser les tâc
 
 ### Board PMO
 
-Le board "PMO - Global Board" permet le pilotage macro et la gestion des tâches non affectés aux squads. Pour cela TOUS les tickets remontent dans ce board. 
+Le board "PMO - Global Board" permet le pilotage macro et la gestion des tâches non affectés aux squads. Pour cela TOUS les tickets sans label OU avec l'etiquette 
 
 La PMO a donc accès à tous les tickets, mais portera une attention particulière, grâce aux systèmes de filtrages  : 
 * Aux tickets labellisés EPIC et/ou USER STORY,
@@ -85,3 +85,14 @@ TODO: Animation autour des Releases
 > On gere les taches "projet / communication" egalement comme cela
 PArler du cycle de Release
 > 
+
+
+
+## Regles d'automatisation de workflow
+
+Décrit dans le workflow Github **label-to-project**
+
+1 - Routage automatique des "squad **" vers board associés
+2 - TODO : Enlever du board quand pas l'étiquette
+3 - Renovate : assign to board, depending on project
+4 - TODO : associer automatiquement les 
