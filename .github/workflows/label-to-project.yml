@@ -2,8 +2,8 @@ name: Assign Issues to GitHub Projects V2
 
 on:
   issues:
-    types: [opened, labeled]
-  workflow_dispatch:  # Manual trigger for processing all issues
+    types: [opened, labeled, unlabeled]
+  workflow_dispatch:
 
 env:
   ORG_NAME: open4good
@@ -31,20 +31,62 @@ jobs:
               process.env.PROJECT_ID_MAPPING
                 .trim()
                 .split('\n')
-                .map(line => line.trim().split('='))
+                .map(l => l.trim().split('='))
             );
+
+            const PMO_PROJECT_ID = process.env.PMO_PROJECT_ID;
+
+            async function removeFromProject(projectId, contentId) {
+              const q = await github.graphql(
+                `query($contentId: ID!) {
+                  node(id: $contentId) {
+                    ... on Issue {
+                      projectItems(first: 50, includeArchived: true) {
+                        nodes { id project { id } }
+                      }
+                    }
+                    ... on PullRequest {
+                      projectItems(first: 50, includeArchived: true) {
+                        nodes { id project { id } }
+                      }
+                    }
+                  }
+                }`,
+                { contentId }
+              );
+
+              const items = q.node?.projectItems?.nodes || [];
+              for (const it of items.filter(n => n.project.id === projectId)) {
+                await github.graphql(
+                  `mutation($projectId: ID!, $itemId: ID!) {
+                    deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
+                      deletedItemId
+                    }
+                  }`,
+                  { projectId, itemId: it.id }
+                );
+                console.log(`Removed item ${it.id} from project ${projectId}.`);
+              }
+            }
 
             const issue = context.payload.issue;
             const labels = issue.labels.map(l => l.name);
             const hasSquad = labels.some(n => n.startsWith('squad:'));
-            const hasEpic = labels.includes('EPIC');
-            const labelName = context.payload.action === 'labeled' ? context.payload.label.name : null;
+            const hasEpic  = labels.includes('EPIC');
+            const labelName = context.payload.action === 'labeled' ? context.payload.label.name
+                             : context.payload.action === 'unlabeled' ? context.payload.label.name
+                             : null;
 
+            // 1. Add to specific project when the triggering label matches mapping
             if (labelName && mapping[labelName]) {
               const projectId = mapping[labelName];
               try {
                 await github.graphql(
-                  `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
+                  `mutation($projectId: ID!, $contentId: ID!) {
+                    addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                      item { id }
+                    }
+                  }`,
                   { projectId, contentId: issue.node_id }
                 );
                 console.log(`Issue #${issue.number} added to project ID ${projectId}.`);
@@ -53,23 +95,39 @@ jobs:
               }
             }
 
+            // 2. PMO routing logic
             if (!hasSquad || hasEpic) {
-              const projectId = process.env.PMO_PROJECT_ID;
+              // Ensure it's in PMO + set status to TRIAGE
               const addRes = await github.graphql(
-                `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
-                { projectId, contentId: issue.node_id }
+                `mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                    item { id }
+                  }
+                }`,
+                { projectId: PMO_PROJECT_ID, contentId: issue.node_id }
               );
               const itemId = addRes.addProjectV2ItemById.item.id;
+
               await github.graphql(
-                `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) { updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { item { id } } }`,
+                `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId,
+                    itemId: $itemId,
+                    fieldId: $fieldId,
+                    value: { singleSelectOptionId: $optionId }
+                  }) { item { id } }
+                }`,
                 {
-                  projectId,
+                  projectId: PMO_PROJECT_ID,
                   itemId,
                   fieldId: process.env.PMO_STATUS_FIELD_ID,
                   optionId: process.env.PMO_TRIAGE_OPTION_ID,
                 }
               );
               console.log(`Issue #${issue.number} routed to PMO project.`);
+            } else {
+              // hasSquad && !hasEpic -> ensure it's NOT in PMO
+              await removeFromProject(PMO_PROJECT_ID, issue.node_id);
             }
 
   bulk-assign-on-dispatch:
@@ -84,25 +142,54 @@ jobs:
               process.env.PROJECT_ID_MAPPING
                 .trim()
                 .split('\n')
-                .map(line => line.trim().split('='))
+                .map(l => l.trim().split('='))
             );
+
+            const PMO_PROJECT_ID = process.env.PMO_PROJECT_ID;
+
+            async function removeFromProject(projectId, contentId) {
+              const q = await github.graphql(
+                `query($contentId: ID!) {
+                  node(id: $contentId) {
+                    ... on Issue {
+                      projectItems(first: 50, includeArchived: true) {
+                        nodes { id project { id } }
+                      }
+                    }
+                    ... on PullRequest {
+                      projectItems(first: 50, includeArchived: true) {
+                        nodes { id project { id } }
+                      }
+                    }
+                  }
+                }`,
+                { contentId }
+              );
+              const items = q.node?.projectItems?.nodes || [];
+              for (const it of items.filter(n => n.project.id === projectId)) {
+                await github.graphql(
+                  `mutation($projectId: ID!, $itemId: ID!) {
+                    deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
+                      deletedItemId
+                    }
+                  }`,
+                  { projectId, itemId: it.id }
+                );
+                console.log(`Removed item ${it.id} from project ${projectId}.`);
+              }
+            }
 
             const issues = await github.paginate(
               github.rest.issues.listForRepo,
-              {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                state: 'open',
-                per_page: 100,
-              }
+              { owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100 }
             );
 
             for (const issue of issues) {
-              if (issue.pull_request) continue; // skip PRs
+              if (issue.pull_request) continue;
 
               const labels = issue.labels.map(l => l.name);
               const hasSquad = labels.some(n => n.startsWith('squad:'));
-              const hasEpic = labels.includes('EPIC');
+              const hasEpic  = labels.includes('EPIC');
 
               let assigned = false;
               for (const label of labels) {
@@ -127,7 +214,6 @@ jobs:
               }
 
               if (!assigned && (!hasSquad || hasEpic)) {
-                const projectId = process.env.PMO_PROJECT_ID;
                 try {
                   const addRes = await github.graphql(
                     `mutation($projectId: ID!, $contentId: ID!) {
@@ -135,7 +221,7 @@ jobs:
                         item { id }
                       }
                     }`,
-                    { projectId, contentId: issue.node_id }
+                    { projectId: PMO_PROJECT_ID, contentId: issue.node_id }
                   );
                   const itemId = addRes.addProjectV2ItemById.item.id;
 
@@ -146,12 +232,10 @@ jobs:
                         itemId: $itemId,
                         fieldId: $fieldId,
                         value: { singleSelectOptionId: $optionId }
-                      }) {
-                        item { id }
-                      }
+                      }) { item { id } }
                     }`,
                     {
-                      projectId,
+                      projectId: PMO_PROJECT_ID,
                       itemId,
                       fieldId: process.env.PMO_STATUS_FIELD_ID,
                       optionId: process.env.PMO_TRIAGE_OPTION_ID,
@@ -161,5 +245,7 @@ jobs:
                 } catch (e) {
                   console.log(`Error routing issue #${issue.number} to PMO: ${e.message}`);
                 }
+              } else if (hasSquad && !hasEpic) {
+                await removeFromProject(PMO_PROJECT_ID, issue.node_id);
               }
             }
