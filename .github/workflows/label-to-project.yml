@@ -1,9 +1,9 @@
-name: Assign Issues to GitHub Projects V2 (bi-directional sync)
+name: Assign Issues to GitHub Projects V2
 
 on:
   issues:
-    types: [opened, labeled, unlabeled]
-  workflow_dispatch:
+    types: [opened, labeled]
+  workflow_dispatch:  # Manual trigger for processing all issues
 
 env:
   ORG_NAME: open4good
@@ -38,120 +38,39 @@ jobs:
             const labels = issue.labels.map(l => l.name);
             const hasSquad = labels.some(n => n.startsWith('squad:'));
             const hasEpic = labels.includes('EPIC');
-            const noLabels = labels.length === 0;
-            const shouldBeInPMO = noLabels || !hasSquad || hasEpic;
+            const labelName = context.payload.action === 'labeled' ? context.payload.label.name : null;
 
-            async function getItemIdsByProject(contentId) {
-              const res = await github.graphql(
-                `query($contentId: ID!) {
-                  node(id: $contentId) {
-                    ... on Issue {
-                      projectItems(first: 100) {
-                        nodes {
-                          id
-                          project { id }
-                        }
-                      }
-                    }
-                  }
-                }`,
-                { contentId }
+            if (labelName && mapping[labelName]) {
+              const projectId = mapping[labelName];
+              try {
+                await github.graphql(
+                  `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
+                  { projectId, contentId: issue.node_id }
+                );
+                console.log(`Issue #${issue.number} added to project ID ${projectId}.`);
+              } catch (e) {
+                console.log(`Unable to add to project ${projectId}: ${e.message}`);
+              }
+            }
+
+            if (!hasSquad || hasEpic) {
+              const projectId = process.env.PMO_PROJECT_ID;
+              const addRes = await github.graphql(
+                `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
+                { projectId, contentId: issue.node_id }
               );
-              const out = {};
-              for (const n of res.node.projectItems.nodes) out[n.project.id] = n.id;
-              return out;
-            }
-
-            async function addToProject(projectId, contentId) {
-              try {
-                const addRes = await github.graphql(
-                  `mutation($projectId: ID!, $contentId: ID!) {
-                    addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
-                      item { id }
-                    }
-                  }`,
-                  { projectId, contentId }
-                );
-                console.log(\`Added issue #${issue.number} to project ${projectId}\`);
-                return addRes.addProjectV2ItemById.item.id;
-              } catch (e) {
-                console.log(\`Add failed for project ${projectId}: ${e.message}\`);
-                return null;
-              }
-            }
-
-            async function deleteFromProject(projectId, itemId) {
-              try {
-                await github.graphql(
-                  `mutation($projectId: ID!, $itemId: ID!) {
-                    deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
-                      deletedItemId
-                    }
-                  }`,
-                  { projectId, itemId }
-                );
-                console.log(\`Removed item ${itemId} from project ${projectId}\`);
-              } catch (e) {
-                console.log(\`Remove failed for project ${projectId}: ${e.message}\`);
-              }
-            }
-
-            async function setPMOTriage(projectId, itemId) {
-              if (!itemId) return;
-              try {
-                await github.graphql(
-                  `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                    updateProjectV2ItemFieldValue(input: {
-                      projectId: $projectId,
-                      itemId: $itemId,
-                      fieldId: $fieldId,
-                      value: { singleSelectOptionId: $optionId }
-                    }) {
-                      item { id }
-                    }
-                  }`,
-                  {
-                    projectId,
-                    itemId,
-                    fieldId: process.env.PMO_STATUS_FIELD_ID,
-                    optionId: process.env.PMO_TRIAGE_OPTION_ID,
-                  }
-                );
-                console.log(\`Set TRIAGE on PMO for issue #${issue.number}\`);
-              } catch (e) {
-                console.log(\`PMO status update failed: ${e.message}\`);
-              }
-            }
-
-            const itemIdsByProject = await getItemIdsByProject(issue.node_id);
-
-            // Sync for each mapped label/project
-            for (const [label, projectId] of Object.entries(mapping)) {
-              const hasLabel = labels.includes(label);
-              const itemId = itemIdsByProject[projectId];
-
-              if (hasLabel && !itemId) {
-                const newId = await addToProject(projectId, issue.node_id);
-                if (projectId === process.env.PMO_PROJECT_ID) {
-                  await setPMOTriage(projectId, newId);
+              const itemId = addRes.addProjectV2ItemById.item.id;
+              await github.graphql(
+                `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) { updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { item { id } } }`,
+                {
+                  projectId,
+                  itemId,
+                  fieldId: process.env.PMO_STATUS_FIELD_ID,
+                  optionId: process.env.PMO_TRIAGE_OPTION_ID,
                 }
-              } else if (!hasLabel && itemId) {
-                await deleteFromProject(projectId, itemId);
-              }
+              );
+              console.log(`Issue #${issue.number} routed to PMO project.`);
             }
-
-            // Explicit PMO fallback sync
-            const pmoProjectId = process.env.PMO_PROJECT_ID;
-            const pmoItemId = itemIdsByProject[pmoProjectId];
-
-            if (shouldBeInPMO && !pmoItemId) {
-              const newId = await addToProject(pmoProjectId, issue.node_id);
-              await setPMOTriage(pmoProjectId, newId);
-            } else if (!shouldBeInPMO && pmoItemId) {
-              await deleteFromProject(pmoProjectId, pmoItemId);
-            }
-
-            console.log(`Sync done for issue #${issue.number}`);
 
   bulk-assign-on-dispatch:
     if: github.event_name == 'workflow_dispatch'
@@ -168,85 +87,6 @@ jobs:
                 .map(line => line.trim().split('='))
             );
 
-            async function getItemIdsByProject(contentId) {
-              const res = await github.graphql(
-                `query($contentId: ID!) {
-                  node(id: $contentId) {
-                    ... on Issue {
-                      projectItems(first: 100) {
-                        nodes {
-                          id
-                          project { id }
-                        }
-                      }
-                    }
-                  }
-                }`,
-                { contentId }
-              );
-              const out = {};
-              for (const n of res.node.projectItems.nodes) out[n.project.id] = n.id;
-              return out;
-            }
-
-            async function addToProject(projectId, contentId) {
-              try {
-                const addRes = await github.graphql(
-                  `mutation($projectId: ID!, $contentId: ID!) {
-                    addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
-                      item { id }
-                    }
-                  }`,
-                  { projectId, contentId }
-                );
-                return addRes.addProjectV2ItemById.item.id;
-              } catch (e) {
-                console.log(\`Add failed for project ${projectId}: ${e.message}\`);
-                return null;
-              }
-            }
-
-            async function deleteFromProject(projectId, itemId) {
-              try {
-                await github.graphql(
-                  `mutation($projectId: ID!, $itemId: ID!) {
-                    deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
-                      deletedItemId
-                    }
-                  }`,
-                  { projectId, itemId }
-                );
-              } catch (e) {
-                console.log(\`Remove failed for project ${projectId}: ${e.message}\`);
-              }
-            }
-
-            async function setPMOTriage(projectId, itemId) {
-              if (!itemId) return;
-              try {
-                await github.graphql(
-                  `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                    updateProjectV2ItemFieldValue(input: {
-                      projectId: $projectId,
-                      itemId: $itemId,
-                      fieldId: $fieldId,
-                      value: { singleSelectOptionId: $optionId }
-                    }) {
-                      item { id }
-                    }
-                  }`,
-                  {
-                    projectId,
-                    itemId,
-                    fieldId: process.env.PMO_STATUS_FIELD_ID,
-                    optionId: process.env.PMO_TRIAGE_OPTION_ID,
-                  }
-                );
-              } catch (e) {
-                console.log(\`PMO status update failed: ${e.message}\`);
-              }
-            }
-
             const issues = await github.paginate(
               github.rest.issues.listForRepo,
               {
@@ -258,41 +98,68 @@ jobs:
             );
 
             for (const issue of issues) {
-              if (issue.pull_request) continue;
+              if (issue.pull_request) continue; // skip PRs
 
               const labels = issue.labels.map(l => l.name);
               const hasSquad = labels.some(n => n.startsWith('squad:'));
               const hasEpic = labels.includes('EPIC');
-              const noLabels = labels.length === 0;
-              const shouldBeInPMO = noLabels || !hasSquad || hasEpic;
 
-              const itemIdsByProject = await getItemIdsByProject(issue.node_id);
-
-              // Sync per mapping
-              for (const [label, projectId] of Object.entries(mapping)) {
-                const hasLabel = labels.includes(label);
-                const itemId = itemIdsByProject[projectId];
-
-                if (hasLabel && !itemId) {
-                  const newId = await addToProject(projectId, issue.node_id);
-                  if (projectId === process.env.PMO_PROJECT_ID) {
-                    await setPMOTriage(projectId, newId);
+              let assigned = false;
+              for (const label of labels) {
+                if (mapping[label]) {
+                  const projectId = mapping[label];
+                  try {
+                    await github.graphql(
+                      `mutation($projectId: ID!, $contentId: ID!) {
+                        addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                          item { id }
+                        }
+                      }`,
+                      { projectId, contentId: issue.node_id }
+                    );
+                    console.log(`Issue #${issue.number} added to project ID ${projectId}.`);
+                    assigned = true;
+                    break;
+                  } catch (e) {
+                    console.log(`Unable to add issue #${issue.number} to project ${projectId}: ${e.message}`);
                   }
-                } else if (!hasLabel && itemId) {
-                  await deleteFromProject(projectId, itemId);
                 }
               }
 
-              // PMO fallback sync
-              const pmoProjectId = process.env.PMO_PROJECT_ID;
-              const pmoItemId = itemIdsByProject[pmoProjectId];
+              if (!assigned && (!hasSquad || hasEpic)) {
+                const projectId = process.env.PMO_PROJECT_ID;
+                try {
+                  const addRes = await github.graphql(
+                    `mutation($projectId: ID!, $contentId: ID!) {
+                      addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                        item { id }
+                      }
+                    }`,
+                    { projectId, contentId: issue.node_id }
+                  );
+                  const itemId = addRes.addProjectV2ItemById.item.id;
 
-              if (shouldBeInPMO && !pmoItemId) {
-                const newId = await addToProject(pmoProjectId, issue.node_id);
-                await setPMOTriage(pmoProjectId, newId);
-              } else if (!shouldBeInPMO && pmoItemId) {
-                await deleteFromProject(pmoProjectId, pmoItemId);
+                  await github.graphql(
+                    `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                      updateProjectV2ItemFieldValue(input: {
+                        projectId: $projectId,
+                        itemId: $itemId,
+                        fieldId: $fieldId,
+                        value: { singleSelectOptionId: $optionId }
+                      }) {
+                        item { id }
+                      }
+                    }`,
+                    {
+                      projectId,
+                      itemId,
+                      fieldId: process.env.PMO_STATUS_FIELD_ID,
+                      optionId: process.env.PMO_TRIAGE_OPTION_ID,
+                    }
+                  );
+                  console.log(`Issue #${issue.number} routed to PMO project.`);
+                } catch (e) {
+                  console.log(`Error routing issue #${issue.number} to PMO: ${e.message}`);
+                }
               }
-
-              console.log(`Synced issue #${issue.number}`);
             }
