@@ -4,7 +4,6 @@
 - Translate all code comments in english curent language.
 - Never delete code comments without ask to user.
 - Always explain your choices (at least briefly)
-- speak to me in French
 
 # Global context
 Nudger is a search engine for electronics and household appliances, aggregating energy data from different sources to create an "Impact Score." This allows users to make the best choice of appliance before purchasing.
