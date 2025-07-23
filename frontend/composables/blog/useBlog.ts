@@ -1,7 +1,5 @@
-import type {
-  BlogArticleData,
-  PaginatedBlogResponse,
-} from '~/server/api/blog/types/blog.models'
+import type { BlogArticleData } from '~/server/api/blog/types/blog.models'
+import { blogService } from '~/services/blog.services'
 
 /**
  * Composable for blog-related functionality
@@ -18,25 +16,34 @@ export const useBlog = () => {
     totalElements: 0,
     totalPages: 0,
   })
+  const currentPage = ref(0)
+  const hasMore = ref(true)
 
   /**
    * Fetch all blog articles
    */
-  const fetchArticles = async () => {
+  const fetchArticles = async (page = 0) => {
     loading.value = true
     error.value = null
 
     try {
-      // Use our server API as proxy instead of calling external API directly
-      const response = await $fetch<PaginatedBlogResponse>('/api/blog/articles')
+      const response = await blogService.getArticles(page, pagination.value.size)
 
-      articles.value = response.data || []
+      if (page === 0) {
+        articles.value = response.data || []
+      } else {
+        articles.value = [...articles.value, ...(response.data || [])]
+      }
+
       pagination.value = {
         page: response.page?.number || 0,
-        size: response.page?.size || 10,
+        size: response.page?.size || pagination.value.size,
         totalElements: response.page?.totalElements || 0,
         totalPages: response.page?.totalPages || 0,
       }
+
+      currentPage.value = pagination.value.page
+      hasMore.value = currentPage.value + 1 < pagination.value.totalPages
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : 'Failed to fetch articles'
@@ -44,6 +51,13 @@ export const useBlog = () => {
     } finally {
       loading.value = false
     }
+  }
+
+  const loadMoreArticles = async () => {
+    if (loading.value || !hasMore.value) {
+      return
+    }
+    await fetchArticles(currentPage.value + 1)
   }
 
   /**
@@ -88,9 +102,12 @@ export const useBlog = () => {
     loading: readonly(loading),
     error: readonly(error),
     pagination: readonly(pagination),
+    currentPage: readonly(currentPage),
+    hasMore: readonly(hasMore),
 
     // Actions
     fetchArticles,
+    loadMoreArticles,
     fetchArticleById,
     clearCurrentArticle,
     clearError,

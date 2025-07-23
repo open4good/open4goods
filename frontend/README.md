@@ -239,6 +239,12 @@ const { data: postRes } = await useFetch(
 const post = postRes.value?.data[0]?.attributes
 ```
 
+## Blog pagination
+
+The list of articles uses an infinite scroll component (`v-infinite-scroll`).
+Pages are fetched using `pageNumber` and `pageSize` query parameters and the
+current page index is synchronised with the `page` URL query.
+
 ## Vitest (Testing)
 
 - Colocate tests as `Component.spec.ts`

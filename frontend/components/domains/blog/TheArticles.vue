@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { useBlog } from '~/composables/blog/useBlog'
-const { articles, loading, error, fetchArticles } = useBlog()
+import { useRoute, useRouter } from '#imports'
+
+const route = useRoute()
+const router = useRouter()
+const {
+  articles,
+  loading,
+  error,
+  fetchArticles,
+  loadMoreArticles,
+  currentPage,
+  hasMore,
+} = useBlog()
 
 // Format date helper
 const formatDate = (timestamp: number) => {
@@ -10,9 +22,11 @@ const formatDate = (timestamp: number) => {
 // Debug mode - use environment variable or default to false
 const debugMode = ref(false)
 
-// Fetch articles on component mount
-onMounted(() => {
-  fetchArticles()
+const initialPage = Number(route.query.page || 0)
+await fetchArticles(initialPage)
+
+watch(currentPage, value => {
+  router.replace({ query: { page: value } })
 })
 </script>
 
@@ -52,15 +66,16 @@ onMounted(() => {
     </div>
 
     <div v-else class="articles">
-      <v-row>
-        <v-col
-          v-for="article in articles"
-          :key="article.url"
-          cols="12"
-          sm="6"
-          md="4"
-          lg="4"
-        >
+      <v-infinite-scroll @load="loadMoreArticles" :disabled="!hasMore">
+        <v-row>
+          <v-col
+            v-for="article in articles"
+            :key="article.url"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="4"
+          >
           <v-card class="article-card" elevation="6" hover>
             <!-- Image de l'article -->
             <v-img
@@ -122,7 +137,8 @@ onMounted(() => {
             </v-card-actions>
           </v-card>
         </v-col>
-      </v-row>
+        </v-row>
+      </v-infinite-scroll>
     </div>
   </div>
 </template>

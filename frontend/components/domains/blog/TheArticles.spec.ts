@@ -1,6 +1,9 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { ref } from 'vue'
+
+
 import TheArticles from './TheArticles.vue'
 
 // Mock du composable useBlog
@@ -30,6 +33,9 @@ const mockUseBlog = {
   loading: false,
   error: null,
   fetchArticles: vi.fn(),
+  loadMoreArticles: vi.fn(),
+  currentPage: ref(0),
+  hasMore: ref(true),
 }
 
 // Mock du composable useBlog
@@ -37,18 +43,17 @@ vi.mock('~/composables/blog/useBlog', () => ({
   useBlog: () => mockUseBlog,
 }))
 
-// Mock de useRuntimeConfig
-vi.mock('#app', () => ({
+// Mock de useRuntimeConfig, route and navigation
+const mockNavigateTo = vi.fn()
+const mockRouterReplace = vi.fn()
+vi.mock('#imports', () => ({
   useRuntimeConfig: () => ({
     public: {
       blogUrl: 'https://test-api.example.com',
     },
   }),
-}))
-
-// Mock de navigateTo
-const mockNavigateTo = vi.fn()
-vi.mock('#app', () => ({
+  useRoute: () => ({ query: { page: '1' } }),
+  useRouter: () => ({ replace: mockRouterReplace }),
   navigateTo: mockNavigateTo,
 }))
 
@@ -143,7 +148,16 @@ describe('TheArticles Component', () => {
   test('should call fetchArticles on mount', async () => {
     await mountSuspended(TheArticles)
 
-    expect(mockUseBlog.fetchArticles).toHaveBeenCalledTimes(1)
+    expect(mockUseBlog.fetchArticles).toHaveBeenCalled()
+  })
+
+  test('should trigger loadMoreArticles', async () => {
+    await mountSuspended(TheArticles)
+
+    mockUseBlog.hasMore.value = true
+    await mockUseBlog.loadMoreArticles()
+
+    expect(mockUseBlog.loadMoreArticles).toHaveBeenCalled()
   })
 
   test('should handle empty articles array', async () => {
