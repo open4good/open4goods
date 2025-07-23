@@ -130,6 +130,13 @@ jobs:
             async function processOneIssue(issueNumber, dryRun, mapping, IF_UNMATCH) {
               const { owner, repo } = context.repo;
               const issue = (await github.rest.issues.get({ owner, repo, issue_number: issueNumber })).data;
+              
+              // Si c'est un PR, on skippe (REST renvoie un champ pull_request pour les PR)
+               if (issue.pull_request) {
+                 core.info(`PR #${issueNumber} détecté, ignoré.`);
+                 return;
+              }
+
               const labels = issue.labels.map(l => (typeof l === 'string' ? l : l.name)).map(s => s.toLowerCase());
               core.info(`Issue #${issueNumber} labels: ${labels.join(', ') || '(none)'}`);
 
