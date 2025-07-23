@@ -106,17 +106,17 @@ jobs:
               return github.graphql(mutation, { projectId, contentId: issueNodeId });
             }
 
-            async function removeItem(itemId) {
+            async function removeItem(itemId, projectId) {
               const mutation = `
-                mutation($itemId: ID!) {
-                  deleteProjectV2ItemById(input: {itemId: $itemId}) {
+                mutation DeleteItem($projectId: ID!, $itemId: ID!) {
+                  deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
                     deletedItemId
                   }
                 }
               `;
-              await github.graphql(mutation, { itemId });
+              await github.graphql(mutation, { projectId, itemId });
             }
-
+            
             function desiredProjectsForLabels(labels, mapping, ifUnmatch) {
               const projects = new Set();
               labels.forEach(l => {
@@ -170,7 +170,7 @@ jobs:
 
               for (const item of toRemove) {
                 try {
-                  await removeItem(item.itemId);
+                  await removeItem(item.itemId, item.projectId);
                   core.info(`🗑️ Removed issue #${issueNumber} from project ${item.projectId}`);
                 } catch (e) {
                   core.setFailed(`❌ Failed to remove issue #${issueNumber} from project ${item.projectId}: ${e.message}`);
