@@ -90,9 +90,69 @@ PArler du cycle de Release
 
 ## Regles d'automatisation de workflow
 
-Décrit dans le workflow Github **label-to-project**
+### 1. Objectif
+Automatiser l’affectation des issues GitHub à des projets GitHub Projects V2 en fonction de leurs labels, maintenir la cohérence lors des changements de labels et garantir une affectation par défaut lorsqu’aucune règle ne correspond.
 
-1 - Routage automatique des "squad **" vers board associés
-2 - TODO : Enlever du board quand pas l'étiquette
-3 - Renovate : assign to board, depending on project
-4 - TODO : associer automatiquement les 
+### 2. Périmètre
+- **Événements couverts** : création d’issue, ajout/retrait de label sur issue.
+- **Relance manuelle** : traitement complet de toutes les issues ouvertes via `workflow_dispatch`.
+- **Artefacts concernés** : Issues uniquement (les Pull Requests ne sont pas incluses).
+- **Projets concernés** : Tous ceux listés dans le mapping + le projet de fallback `IF_UNMATCH`.
+
+### 3. Rôles & responsabilités
+| Rôle | Responsabilité |
+|------|-----------------|
+| Équipe DevOps / Mainteneur du repo | Maintenir le workflow, les secrets et le mapping. |
+| Contributeurs / Développeurs | Appliquer les labels adéquats sur les issues. |
+| Bot GitHub Actions | Exécuter le workflow, ajouter/retirer les issues des projets, journaliser et échouer si nécessaire. |
+
+### 4. Données d’entrée
+- **Labels de l’issue** (en minuscules).
+- **Mapping `label → ProjectNodeID`** défini dans `PROJECT_ID_MAPPING`.
+- **ProjectNodeID par défaut** défini dans `IF_UNMATCH`.
+- **Secret `PROJECT_PAT`** (Personal Access Token) possédant les scopes requis.
+
+### 5. Règles de gestion (Business Rules)
+1. **Normalisation des labels** : tous les labels sont traités en minuscules.
+2. **Affectation principale** : chaque label présent dans l’issue et défini dans `PROJECT_ID_MAPPING` entraîne l’ajout de l’issue au projet correspondant.
+3. **Fallback** : si aucun label de l’issue ne correspond au mapping, l’issue est ajoutée au projet `IF_UNMATCH`.
+4. **Symétrie stricte** :
+   - Tout projet lié à l’issue mais **non désiré** (i.e. non issu du calcul ci-dessus ou du fallback) est retiré — y compris les ajouts manuels.
+5. **Validation préalable** : si un ProjectNodeID du mapping ou de `IF_UNMATCH` n’existe pas, le workflow échoue immédiatement (aucune modification).
+6. **Relance complète** : le `workflow_dispatch` retraitera **toutes les issues ouvertes** du dépôt, avec option `dry_run` pour n’appliquer aucun changement.
+7. **Logs clairs** :
+   - Informations : projets désirés, projets actuels, actions prévues.
+   - Avertissements : absence d’issues à traiter, échecs individuels.
+   - Erreurs bloquantes : projet introuvable, échec d’ajout/retrait.
+
+### 6. Scénarios d’usage
+
+#### 6.1 Création d’une nouvelle issue
+1. L’issue est créée sans labels → ajout direct au projet `IF_UNMATCH`.
+2. L’issue est créée avec un label mappé → ajout au(x) projet(s) mappé(s).
+
+#### 6.2 Ajout d’un label mappé
+- Le workflow ajoute l’issue au projet associé si elle n’y est pas déjà.
+
+#### 6.3 Retrait d’un label mappé
+- Le workflow retire l’issue du projet correspondant, sauf si d’autres labels mappés gardent l’issue dans ce même projet.
+- Si aucun autre label mappé n’existe, l’issue est déplacée vers `IF_UNMATCH`.
+
+#### 6.4 Relance manuelle (`workflow_dispatch`)
+- Traitement de toutes les issues ouvertes pour remettre en conformité :
+  - Ajout aux projets désirés manquants.
+  - Retrait des projets non désirés.
+- Option `dry_run = true` pour valider le comportement sans modifier les données.
+
+### 7. Paramétrages & secrets
+
+#### 7.1 Variables d’environnement
+- `PROJECT_ID_MAPPING` : liste `label=ProjectNodeID` (une paire par ligne).
+- `IF_UNMATCH` : ProjectNodeID du projet de fallback.
+
+#### 7.2 Secret
+- `PROJECT_PAT` : PAT GitHub avec scopes minimum :
+  - `repo`
+  - `read:org`
+  - `project` / `projectv2`
+  - `workflow` (si nécessaire pour déclencher d’autres workflows)

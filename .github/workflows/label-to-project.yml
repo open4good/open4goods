@@ -33,8 +33,6 @@ jobs:
         with:
           github-token: ${{ secrets.PROJECT_PAT }}
           script: |
-            const core = require('@actions/core');
-            const { context, github } = require('@actions/github');
 
             // ---------- Helpers ----------
             function parseMapping(str) {
