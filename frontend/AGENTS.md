@@ -133,6 +133,14 @@ const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
 - Handle nested `data[].attributes`
 - Consider `useStrapiContent()` composable abstraction
 
+## Blog pagination and infinite scroll
+
+- Blog article lists use `v-infinite-scroll` to load pages incrementally.
+- The `useBlog` composable exposes `fetchArticles` and `loadMoreArticles` for
+  pagination handling.
+- Code under `src/api/` and `server/api/blog/` is generated from the backend
+  OpenAPI contract. Do not edit these files manually.
+
 ---
 
 ## Testing with Vitest

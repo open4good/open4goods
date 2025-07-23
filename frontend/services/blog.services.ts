@@ -13,12 +13,21 @@ export class BlogService {
 
   /**
    * Fetch paginated blog articles
+   *
+   * @param pageNumber - zero based page index
+   * @param pageSize - page size
    * @returns Promise<PaginatedBlogResponse>
    */
-  async getArticles(): Promise<PaginatedBlogResponse> {
+  async getArticles(
+    pageNumber = 0,
+    pageSize = 10
+  ): Promise<PaginatedBlogResponse> {
     try {
       const response = await $fetch<PaginatedBlogResponse>(
-        `${this.baseUrl}${this.blogEndpoint}`
+        `${this.baseUrl}${this.blogEndpoint}`,
+        {
+          params: { pageNumber, pageSize },
+        }
       )
       return response
     } catch (error) {
