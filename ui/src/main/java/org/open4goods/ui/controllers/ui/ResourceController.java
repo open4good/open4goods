@@ -33,7 +33,7 @@ import org.open4goods.services.remotefilecaching.service.RemoteFileCachingServic
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.DatasourceImageService;
-import org.open4goods.ui.services.GtinService;
+import org.open4goods.services.feedservice.service.GtinService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

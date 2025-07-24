@@ -47,6 +47,7 @@
         <module>services/product-repository</module>
         <module>services/captcha</module>
         <module>services/remotefilecaching</module>
+        <module>services/feedservice</module>
         <module>services/favicon</module>
         <module>services/github-feedback</module>
         <module>services/xwiki-spring-boot-starter</module>
