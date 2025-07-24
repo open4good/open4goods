@@ -4,7 +4,7 @@ package org.open4goods.crawler.config.yml;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.api.services.feed.FeedConfiguration;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.commons.config.yml.datasource.CrawlProperties;
 import org.open4goods.commons.model.crawlers.ApiSynchConfig;
 import org.open4goods.model.constants.UrlConstants;

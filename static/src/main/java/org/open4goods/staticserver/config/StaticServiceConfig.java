@@ -3,8 +3,8 @@ package org.open4goods.staticserver.config;
 import java.util.Collections;
 import java.util.List;
 
-import org.open4goods.api.services.feed.AbstractFeedService;
-import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.services.feedservice.service.AbstractFeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;

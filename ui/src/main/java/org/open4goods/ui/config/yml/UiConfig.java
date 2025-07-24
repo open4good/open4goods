@@ -7,8 +7,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.api.services.feed.AffiliationConfig;
-import org.open4goods.api.services.feed.FeedConfiguration;
+import org.open4goods.services.feedservice.config.AffiliationConfig;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.commons.config.yml.BanCheckerConfig;
 import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
