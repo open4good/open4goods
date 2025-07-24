@@ -11,6 +11,8 @@ Experience Nudger frontend online:
 - [https://static.nudger.fr](https://static.nudger.fr) – statically generated version hosted on GitHub Pages.
 - [https://demo.nudger.fr](https://demo.nudger.fr) – server-rendered demo.
 
+The default home page now features a Vuetify-based landing page.
+
 **Welcome** to the Nudger front-end project. This guide is a comprehensive overview of the Nudger UI application structure, coding conventions, and tooling.
 
 The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from  Pinia, to Vitest – to maintain a robust, scalable codebase.
