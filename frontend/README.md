@@ -84,8 +84,9 @@ To get the project up and running locally, follow these steps:
    - `pnpm format` – check formatting
    - `pnpm test` – run tests with Vitest
    - `pnpm generate:api` – regenerate the OpenAPI fetch client
-   - `pnpm preview` – serve the production build locally
-   - `pnpm build:ssr` – build with increased memory
+  - `pnpm preview` – serve the production build locally
+  - `pnpm build:ssr` – build with increased memory
+  - Visit `/opendata` to view the open data page.
 
 ## Blog environment variables
 
@@ -218,6 +219,9 @@ const cart = useCartStore();
   ```
 - Generated files under `src/api/`
 - Example usage:
+Generated files under `src/api/`. After adding backend endpoints
+run the command to update the client.
+Example usage:
   ```ts
   import { DefaultApi } from '@/api'
   const api = new DefaultApi()

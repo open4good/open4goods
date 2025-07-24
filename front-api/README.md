@@ -9,6 +9,9 @@ Use the main `api` service for search operations.
 
 - `GET /blocs/{blocId}` – return a small HTML bloc from XWiki.
 - `GET /pages/{xwikiPageId}` – return a rendered XWiki page with metadata.
+- `GET /opendata/meta` – dataset metadata (counts, file sizes, dates).
+- `GET /opendata/gtin-open-data.zip` – download the GTIN dataset.
+- `GET /opendata/isbn-open-data.zip` – download the ISBN dataset.
 
 ## Default Port
 

@@ -6,6 +6,8 @@ import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+import org.open4goods.nudgerfrontapi.service.OpenDataService;
+import org.open4goods.nudgerfrontapi.config.OpenDataProperties;
 
 import org.open4goods.nudgerfrontapi.config.CacheProperties;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +41,16 @@ public class AppConfig {
     @Bean
     BlogService blogService(XwikiFacadeService xwikiFacadeService) {
         return new BlogService(xwikiFacadeService, new BlogConfiguration(), null);
+    }
+
+    @Bean
+    OpenDataProperties openDataProperties() {
+        return new OpenDataProperties();
+    }
+
+    @Bean
+    OpenDataService openDataService(ProductRepository repository, OpenDataProperties properties) {
+        return new OpenDataService(repository, properties);
     }
 
 }
