@@ -22,17 +22,17 @@ Fetches URLs with caching.
 From this directory:
 
 ```bash
-mvn clean install
+mvn --offline clean install
 ```
 
 Run only the tests with:
 
 ```bash
-mvn test
+mvn --offline test
 ```
 
 From the repository root you can also execute:
 
 ```bash
-mvn -pl services/urlfetching -am clean install
+mvn --offline -pl services/urlfetching -am clean install
 ```

@@ -22,17 +22,17 @@ Interacts with generative AI using prompt templates.
 From this directory:
 
 ```bash
-mvn clean install
+mvn --offline clean install
 ```
 
 Run only the tests with:
 
 ```bash
-mvn test
+mvn --offline test
 ```
 
 From the repository root you can also execute:
 
 ```bash
-mvn -pl services/prompt -am clean install
+mvn --offline -pl services/prompt -am clean install
 ```
