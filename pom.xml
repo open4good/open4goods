@@ -53,11 +53,12 @@
         <module>services/image-processing</module>
         <module>services/icecat</module>
         <module>services/blog</module>
+        <module>services/gtinservice</module>
         <module>services/feedservice</module>
 
 
 
-	</modules>
+        </modules>
 
 	<issueManagement>
 		<url>https://github.com/open4good/open4goods/issues</url>
