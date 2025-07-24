@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;

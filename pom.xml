@@ -53,6 +53,7 @@
         <module>services/image-processing</module>
         <module>services/icecat</module>
         <module>services/blog</module>
+        <module>services/feedservice</module>
 
 
 
