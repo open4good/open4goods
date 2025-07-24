@@ -12,6 +12,7 @@ import java.util.Set;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.model.AwinMerchant;
 import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -39,17 +40,17 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 public class AwinFeedService extends AbstractFeedService {
 
     private final Logger logger = LoggerFactory.getLogger(AwinFeedService.class);
-    
+
     // CSV mapper for parsing the catalog file.
     private final CsvMapper csvMapper;
-    
+
     // ObjectMapper for JSON processing.
     private final ObjectMapper objectMapper;
-    
+
     // Placeholder Awin API credentials; in production these would be injected via configuration.
     private final String awinAccessToken;
     private final String advertiserId;
-    
+
     /**
      * Constructor.
      *
@@ -74,87 +75,87 @@ public class AwinFeedService extends AbstractFeedService {
         this.awinAccessToken = awinAccessToken;
         this.advertiserId = advertiserId;
     }
-    
+
     /**
      * Scheduled refresh of Awin datasource properties every day at a random time.
      */
-    @Scheduled(cron = "0 " 
-            + "#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(0,60)} " 
+    @Scheduled(cron = "0 "
+            + "#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(0,60)} "
             + "#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(0,24)} * * ?")
     public void scheduledLoad() {
         logger.info("Scheduled refresh of Awin datasources initiated.");
         load();
     }
-    
+
     @Override
     protected Set<DataSourceProperties> loadDatasources() throws Exception {
         Set<DataSourceProperties> result = new HashSet<>();
-        
+
         // Use RemoteFileCachingService to download and cache the CSV catalog file (with a one-day refresh).
         CacheResourceConfig cacheConfig = new CacheResourceConfig();
         cacheConfig.setUrl(feedConfig.getCatalogUrl());
         cacheConfig.setRefreshInDays(1);
         File cachedCatalog = remoteFileCachingService.retrieve(cacheConfig);
-        
+
         // Define CSV schema based on the feed configuration (header, comma separator, quoted values).
         CsvSchema schema = CsvSchema.emptySchema()
                 .withHeader()
                 .withColumnSeparator(',')
                 .withQuoteChar('"');
         ObjectReader oReader = csvMapper.readerFor(HashMap.class).with(schema);
-        
+
         MappingIterator<Map<String, String>> it = oReader.readValues(cachedCatalog);
         // Retrieve additional metadata from the Awin API and update datasource properties.
         List<AwinMerchant> merchants = retrieveAwinMerchantMetadata(awinAccessToken, advertiserId);
 
         while (it.hasNext()) {
             Map<String, String> line = it.next();
-            
+
             //TODO : from conf
             if (!line.get("Membership Status").equalsIgnoreCase("Active")) {
             	continue;
             }
             // Retrieve the feed key using the attribute defined in the feed configuration.
             String feedKey = line.get(feedConfig.getDatasourceKeyAttribute());
-            Integer programId = Integer.valueOf(line.get("Advertiser ID")); 
+            Integer programId = Integer.valueOf(line.get("Advertiser ID"));
             if (feedKey == null || feedKey.trim().isEmpty()) {
                 logger.warn("Skipping CSV line due to missing feed key: {}", line);
                 continue;
             }
-            
+
             // (Optional) Apply filtering logic based on feedConfig.filterAttributes and excludeFeedKeyContains.
             String feedUrl = line.get(feedConfig.getDatasourceUrlAttribute());
-            
+
             // Instantiate a volatile datasource (cloning an existing one or creating a new one).
             DataSourceProperties ds = getVolatileDatasource(feedKey, feedConfig, feedUrl);
-            
+
             // Optionally set additional CSV parsing options (e.g. language).
             if (feedConfig.getDatasourceLanguageAttribute() != null) {
                 String language = line.get(feedConfig.getDatasourceLanguageAttribute());
                 ds.setLanguage(language);
             }
-            
+
             if (!merchants.isEmpty()) {
-            	//TODO(performance) : should use a map 
+            	//TODO(performance) : should use a map
                 AwinMerchant merchant = merchants.stream().filter(e-> (e.getId() == (programId)) || (e.getName().equalsIgnoreCase(feedKey)) ).findFirst().orElse(null);
                 if (null != merchant ) {
                 ds.setDatasourceConfigName(merchant.getName());
-                    
+
                 ds.setLogo(merchant.getLogoUrl());
                 ds.setPortalUrl(merchant.getDisplayUrl());
                 ds.setName(extractNameAndTld(ds.getPortalUrl()));
-                
+
                 }
             } else {
                 logger.warn("No Awin merchant metadata found for feed key '{}'.", feedKey);
             }
-            
+
             result.add(ds);
         }
         logger.info("Awin datasources loaded: {} entries", result.size());
         return result;
     }
-    
+
     /**
      * Retrieves Awin merchant metadata using file caching.
      * <p>
@@ -167,17 +168,17 @@ public class AwinFeedService extends AbstractFeedService {
      * @throws Exception if the API call or parsing fails
      */
     public List<AwinMerchant> retrieveAwinMerchantMetadata(String accessToken, String advertiserId) throws Exception {
-        String endpoint = "https://api.awin.com/publishers/" + advertiserId 
+        String endpoint = "https://api.awin.com/publishers/" + advertiserId
                 + "/programmes?relationship=joined&accessToken=" + accessToken;
         logger.info("Retrieving Awin merchant metadata from endpoint: {}", endpoint);
-        
+
         // TODO(p3,conf) : refresh in days from conf
         File cachedResponse = remoteFileCachingService.getResource(endpoint,1);
-        
+
         if (cachedResponse == null || !cachedResponse.exists()) {
             throw new Exception("Cached response file not found for Awin merchant metadata");
         }
-        
+
         // Read the file content as a UTF-8 string.
         String jsonResponse = new String(Files.readAllBytes(cachedResponse.toPath()), StandardCharsets.UTF_8);
         // Parse the JSON response to a list of AwinMerchant objects.
