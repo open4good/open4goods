@@ -97,13 +97,13 @@ No class in a lower layer may depend on a higher one.
 To compile **all modules**:
 
 ```bash
-mvn clean install
+mvn --offline clean install
 ```
 
 To build a **single** module (example `api`):
 
 ```bash
-mvn -pl api -am clean install
+mvn --offline -pl api -am clean install
 ```
 
 ---
@@ -111,7 +111,7 @@ mvn -pl api -am clean install
 ## 8  Pull-request checklist
 
 1. Clear commit & PR description (**why** and **what**).  
-2. `mvn clean install` passes locally.  
+2. `mvn --offline clean install` passes locally.  
 3. Tests added/updated; coverage not reduced.  
 4. Docs (agents.md, README, Javadoc, spring-configuration-metadata.json) updated.  
 

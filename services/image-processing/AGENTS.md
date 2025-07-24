@@ -22,17 +22,17 @@ Provides image generation and manipulation utilities.
 From this directory:
 
 ```bash
-mvn clean install
+mvn --offline clean install
 ```
 
 Run only the tests with:
 
 ```bash
-mvn test
+mvn --offline test
 ```
 
 From the repository root you can also execute:
 
 ```bash
-mvn -pl services/image-processing -am clean install
+mvn --offline -pl services/image-processing -am clean install
 ```
