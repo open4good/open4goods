@@ -1,4 +1,4 @@
-package org.open4goods.ui.services;
+package org.open4goods.services.gtinservice.service;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -18,6 +18,7 @@ import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * The ui customisation of alerting service. Simply log as CSV the affiliated
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Goulven.Furet
  *
  */
+@Service
 public class GtinService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(GtinService.class);
