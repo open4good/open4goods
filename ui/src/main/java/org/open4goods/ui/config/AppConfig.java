@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.api.services.feed.AbstractFeedService;
-import org.open4goods.api.services.feed.AwinFeedService;
-import org.open4goods.api.services.feed.EffiliationFeedService;
-import org.open4goods.api.services.feed.FeedConfiguration;
-import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.services.feedservice.service.AbstractFeedService;
+import org.open4goods.services.feedservice.service.AwinFeedService;
+import org.open4goods.services.feedservice.service.EffiliationFeedService;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
