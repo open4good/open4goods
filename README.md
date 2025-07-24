@@ -21,8 +21,6 @@ Open4goods (o4g) is an open-source and open-data product aggregator, search engi
 
 * **aggregate data fragments into well structured product data**. The [api](api/) module orchestrates this through the `AggregationFacadeService`, handling scoring, attribute merging, conflict detection and NLP processing.
 
-* **integrate Icecat data through a dedicated microservice**, located under [services/icecat](services/icecat), which loads Icecat XML resources and exposes them to API and UI modules.
-
 * **Serve data to the Nuxt&nbsp;3 frontend** through the [front-api](front-api/) module. The [frontend](frontend/) project consumes this API. The legacy [ui](ui/) module is **deprecated**.
 
 * **Gradually migrate commons and API features into dedicated microservices** located under [services](services/). This ongoing refactoring aims at a cleaner, service‑oriented architecture.
