@@ -47,7 +47,7 @@ import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.services.ContributionService;
 import org.open4goods.ui.services.GoogleIndexationService;
-import org.open4goods.ui.services.GtinService;
+import org.open4goods.services.feedservice.service.GtinService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;

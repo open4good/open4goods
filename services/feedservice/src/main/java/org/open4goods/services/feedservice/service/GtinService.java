@@ -1,4 +1,4 @@
-package org.open4goods.ui.services;
+package org.open4goods.services.feedservice.service;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,12 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The ui customisation of alerting service. Simply log as CSV the affiliated
- * links click
- *
- *
- * @author Goulven.Furet
- *
+ * Service for generating GTIN barcode images.
  */
 public class GtinService {
 
