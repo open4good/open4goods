@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;

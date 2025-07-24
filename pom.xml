@@ -54,6 +54,7 @@
         <module>services/icecat</module>
         <module>services/blog</module>
         <module>services/gtinservice</module>
+        <module>services/feedservice</module>
 
 
 
