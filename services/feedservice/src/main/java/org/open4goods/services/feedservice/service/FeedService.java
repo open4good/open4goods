@@ -1,4 +1,4 @@
-package org.open4goods.api.services.feed;
+package org.open4goods.services.feedservice.service;
 
 import java.util.HashSet;
 import java.util.List;

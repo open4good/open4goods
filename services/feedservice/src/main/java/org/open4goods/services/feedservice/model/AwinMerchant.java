@@ -1,4 +1,4 @@
-package org.open4goods.api.services.feed;
+package org.open4goods.services.feedservice.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
