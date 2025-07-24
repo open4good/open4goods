@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
+    "build:ssr": "NODE_OPTIONS='--max-old-space-size=8192' nuxt build",
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "lint": "eslint .",
@@ -43,7 +44,7 @@
     "@nuxt/devtools": "^2.5.0",
     "@nuxt/eslint": "1.5.2",
     "@nuxt/eslint-config": "^1.4.1",
-    "@nuxt/scripts": "0.11.10",
+    "@nuxt/scripts": "0.11.8",
     "@nuxt/test-utils": "3.19.2",
     "@nuxtjs/i18n": "9.5.6",
     "@nuxtjs/plausible": "^1.2.0",
@@ -77,7 +78,7 @@
     "vue-tsc": "^3.0.1",
     "vuetify": "^3.7.3"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@8.15.9",
   "engines": {
     "node": ">=20.x"
   },
@@ -90,6 +91,6 @@
     "vue": "3.5.17"
   },
   "overrides": {
-    "glob": "^11.0.0"
+    "glob": "^10.0.0"
   }
 }
