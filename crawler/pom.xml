@@ -11,8 +11,8 @@
 		    <name>In Project Repo</name>
 		    <url>file://${project.basedir}/libs</url>
 		</repository>
-		
-		
+
+
 	</repositories>
 
 	<parent>
@@ -26,21 +26,26 @@
 		<main.basedir>${basedir}/../..</main.basedir>
 	</properties>
 
-	<dependencies> 
-		<dependency>  
+	<dependencies>
+		<dependency>
 		    <groupId>com.amazon.paapi5</groupId>
 		    <artifactId>paapi5-java-sdk</artifactId>
 		    <version>1.1.0</version>
-		</dependency> 
+		</dependency>
 
 		<dependency>
 			<groupId>org.open4goods</groupId>
 			<artifactId>commons</artifactId>
 			<version>${global.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>feedservice</artifactId>
+            <version>${global.version}</version>
+        </dependency>
 
 <!--
-    
+
 		<dependency>
 			<groupId>edu.uci.ics</groupId>
 			<artifactId>crawler4j</artifactId>
@@ -52,7 +57,7 @@
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
             <version>3.2.1</version> <!-- or the latest version -->
-        </dependency>      
+        </dependency>
 
         <dependency>
             <groupId>org.apache.tika</groupId>
@@ -104,8 +109,8 @@
 			<optional>true</optional>
 		</dependency>
 
-		
-		
+
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
