@@ -41,13 +41,13 @@ src/test/java       ← unit tests
 ## 5. Build & Test
 ~~~bash
 # Build the module
-mvn clean install
+mvn --offline clean install
 
 # Run only the tests
-mvn test
+mvn --offline test
 
 # From the repo root
-mvn -pl nudger-front-api -am clean install
+mvn --offline -pl nudger-front-api -am clean install
 ~~~
 
 ### Configuration properties
@@ -174,13 +174,13 @@ Follow java / spring documentation best practices :
 |-----------------|----------------------|
 | Raw spec        | `GET /v3/api-docs`   |
 | Swagger UI      | `GET /swagger-ui.html` |
-| Build module    | `mvn clean install`  |
-| Tests only      | `mvn test`           |
+| Build module    | `mvn --offline clean install`  |
+| Tests only      | `mvn --offline test`           |
 
 ---
 ## 11. Contract-first workflow
 - Les contrôleurs et DTOs sont la **source unique** du contrat OpenAPI.
-- Toute évolution utilisée par le frontend doit être implémentée ici (contrôleur ou DTO), puis validée via `mvn clean install`.
+- Toute évolution utilisée par le frontend doit être implémentée ici (contrôleur ou DTO), puis validée via `mvn --offline clean install`.
 - Le fichier `/v3/api-docs/front` obtenu sert ensuite à régénérer le client dans le dépôt `frontend` (`pnpm generate:api`).
 - Ne jamais modifier manuellement la spécification ou le code généré.
 
