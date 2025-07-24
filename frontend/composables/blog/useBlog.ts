@@ -1,15 +1,21 @@
-import type {
-  BlogArticleData,
-  PaginatedBlogResponse,
-} from '~/server/api/blog/types/blog.models'
+import {
+  BlogApi,
+  Configuration,
+  type BlogPostDto,
+  type PageDto,
+} from '~/src/api'
 
 /**
  * Composable for blog-related functionality
  */
 export const useBlog = () => {
+  // Runtime config for API base URL
+  const config = useRuntimeConfig()
+  const api = new BlogApi(new Configuration({ basePath: config.public.blogUrl }))
+
   // Reactive state
-  const articles = ref<BlogArticleData[]>([])
-  const currentArticle = ref<BlogArticleData | null>(null)
+  const articles = ref<BlogPostDto[]>([])
+  const currentArticle = ref<BlogPostDto | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
   const pagination = ref({
@@ -27,19 +33,16 @@ export const useBlog = () => {
     error.value = null
 
     try {
-      // Use our server API as proxy instead of calling external API directly
-      const response = await $fetch<PaginatedBlogResponse>('/api/blog/articles')
-
-      articles.value = response.data || []
+      const response: PageDto = await api.posts()
+      articles.value = (response.data ?? []) as BlogPostDto[]
       pagination.value = {
-        page: response.page?.number || 0,
-        size: response.page?.size || 10,
-        totalElements: response.page?.totalElements || 0,
-        totalPages: response.page?.totalPages || 0,
+        page: response.page?.number ?? 0,
+        size: response.page?.size ?? 10,
+        totalElements: response.page?.totalElements ?? 0,
+        totalPages: response.page?.totalPages ?? 0,
       }
     } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : 'Failed to fetch articles'
+      error.value = err instanceof Error ? err.message : 'Failed to fetch articles'
       console.error('Error in fetchArticles:', err)
     } finally {
       loading.value = false
@@ -55,12 +58,10 @@ export const useBlog = () => {
     error.value = null
 
     try {
-      // Use our server API as proxy
-      const article = await $fetch<BlogArticleData>(`/api/blog/articles/${id}`)
+      const article = await api.post({ slug: id })
       currentArticle.value = article
     } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : 'Failed to fetch article'
+      error.value = err instanceof Error ? err.message : 'Failed to fetch article'
       console.error('Error in fetchArticleById:', err)
     } finally {
       loading.value = false
