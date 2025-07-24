@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: static
+
+static:
+  root-folder: /opt/open4goods/
+
+remote-file-caching:
+  connection-timeout: 30000
+  read-timeout: 30000
