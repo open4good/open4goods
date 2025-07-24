@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
-import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.constants.RolesConstants;

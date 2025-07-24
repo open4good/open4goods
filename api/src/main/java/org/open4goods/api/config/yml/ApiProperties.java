@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.open4goods.api.services.feed.AffiliationConfig;
+import org.open4goods.services.feedservice.config.AffiliationConfig;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.crawler.config.yml.FetcherProperties;

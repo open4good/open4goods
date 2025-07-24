@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
-import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.model.constants.CacheConstants;

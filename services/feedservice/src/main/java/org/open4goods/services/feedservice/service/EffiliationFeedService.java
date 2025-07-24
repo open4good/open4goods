@@ -1,4 +1,4 @@
-package org.open4goods.api.services.feed;
+package org.open4goods.services.feedservice.service;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
