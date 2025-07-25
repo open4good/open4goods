@@ -104,7 +104,7 @@ onMounted(() => {
                     mdi-calendar
                   </v-icon>
                   <span class="date-text">{{
-                    formatDate(article.createdMs)
+                    formatDate(article.createdMs ?? 0)
                   }}</span>
                 </div>
               </div>
