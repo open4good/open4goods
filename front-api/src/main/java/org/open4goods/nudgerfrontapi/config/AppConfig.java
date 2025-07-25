@@ -16,6 +16,8 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 @Configuration
@@ -37,8 +39,9 @@ public class AppConfig {
     }
 
     @Bean
-    BlogService blogService(XwikiFacadeService xwikiFacadeService) {
-        return new BlogService(xwikiFacadeService, new BlogConfiguration(), null);
+    BlogService blogService(@Autowired XwikiFacadeService xwikiFacadeService, @Autowired BlogConfiguration blogConfig) {
+    	// TODO : the null maps the I18n localisable, used for RSS articles gen
+        return new BlogService(xwikiFacadeService, blogConfig, null);
     }
 
 }
