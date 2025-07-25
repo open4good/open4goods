@@ -44,14 +44,45 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      ############################################
-      # Maven Build
-      ###########################################
-      - uses: ./.github/workflows/maven-build.yml
-        with:
-          runner: ubuntu-latest
-          goals: "clean install site site:stage"
 
+
+
+      ############################################
+      # Set up JDK 21 and Maven Cache
+      ###########################################
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'  # Link this to the previously cached maven dependencies
+
+      ############################################
+      # Set up Maven Repositories
+      ###########################################
+      - name: Set up Maven Repositories
+        uses: s4u/maven-settings-action@v3.1.0
+        with:
+          repositories: |
+            [
+              {
+                "id": "xwiki-releases",
+                "name": "xwiki-releases",
+                "url": "https://maven.xwiki.org/releases/",
+                "snapshots": {
+                  "enabled": false
+                }
+              }
+            ]
+
+            
+     
+
+      ############################################
+      # Build Maven site and Artifacts
+      ###########################################
+      - name: Build Maven Site
+        run: mvn --batch-mode clean install site site:stage
 
       ############################################
       # Create the Release Changelog
