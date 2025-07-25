@@ -1,23 +1,31 @@
 package org.open4goods.services.blog.config;
 
 import org.open4goods.model.Localisable;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Configuration for an XWiki connexion
  * @author goulven
  *
  */
+@Component
+@ConfigurationProperties(prefix = "blog")
 public class BlogConfiguration {
-	
-	
+
+
 	private String feedType = "rss_2.0";
 	private String blogUrl = "blog/";
 	private String feedUrl = "blog/rss/";
-	
+
+	// If set, this domain prefix will be used with all blog
+	// resources
+	private String staticDomain;
+
 	private Localisable<String,String> feedTitle = new Localisable<String,String>();
 	private Localisable<String,String> feedDescription = new Localisable<String,String>();
-	
-	
+
+
 	public String getFeedType() {
 		return feedType;
 	}
@@ -25,7 +33,7 @@ public class BlogConfiguration {
 		this.feedType = feedType;
 	}
 
-	
+
 	public Localisable<String, String> getFeedTitle() {
 		return feedTitle;
 	}
@@ -50,8 +58,14 @@ public class BlogConfiguration {
 	public void setFeedUrl(String feedUrl) {
 		this.feedUrl = feedUrl;
 	}
-	
-	
-	
-	
+	public String getStaticDomain() {
+		return staticDomain;
+	}
+	public void setStaticDomain(String staticDomain) {
+		this.staticDomain = staticDomain;
+	}
+
+
+
+
 }

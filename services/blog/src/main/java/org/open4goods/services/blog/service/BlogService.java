@@ -390,6 +390,12 @@ public class BlogService implements HealthIndicator {
         if (basePath.endsWith("/")) {
             basePath = basePath.substring(0, basePath.length() - 1);
         }
+
+        // Adding domain prefix if set
+        if (null != config.getStaticDomain()) {
+        	basePath = config.getStaticDomain() + basePath;
+        }
+
         return basePath + '/' + name + '/' + image;
     }
 
