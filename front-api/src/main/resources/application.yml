@@ -21,6 +21,11 @@ front:
   security:
     enabled: false
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
+  opendata:
+    gtin-zip-path: ./opendata/gtin.zip
+    isbn-zip-path: ./opendata/isbn.zip
+    download-speed-kb: 256
+    concurrent-downloads: 4
     
 xwiki:
     username: nudger

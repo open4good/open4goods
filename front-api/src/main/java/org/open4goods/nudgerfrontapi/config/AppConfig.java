@@ -6,6 +6,8 @@ import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+import org.open4goods.nudgerfrontapi.service.OpenDataService;
+import org.open4goods.nudgerfrontapi.config.OpenDataProperties;
 
 import org.open4goods.nudgerfrontapi.config.CacheProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +44,16 @@ public class AppConfig {
     BlogService blogService(@Autowired XwikiFacadeService xwikiFacadeService, @Autowired BlogConfiguration blogConfig) {
     	// TODO : the null maps the I18n localisable, used for RSS articles gen
         return new BlogService(xwikiFacadeService, blogConfig, null);
+    }
+
+    @Bean
+    OpenDataProperties openDataProperties() {
+        return new OpenDataProperties();
+    }
+
+    @Bean
+    OpenDataService openDataService(ProductRepository repository, OpenDataProperties properties) {
+        return new OpenDataService(repository, properties);
     }
 
 }

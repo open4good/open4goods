@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <TheNavbar />
     <v-main>
       <slot />
     </v-main>
@@ -7,5 +8,6 @@
 </template>
 
 <script setup lang="ts">
-// Layout par défaut avec Vuetify
+// Layout with simple navigation bar
+import TheNavbar from '~/components/shared/TheNavbar.vue'
 </script>
