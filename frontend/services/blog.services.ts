@@ -2,13 +2,18 @@ import type {
   BlogArticleData,
   PaginatedBlogResponse,
 } from '~/server/api/blog/types/blog.models'
+import { useRuntimeConfig } from '#imports'
 
 /**
  * Blog service for handling blog-related API calls
  */
 export class BlogService {
-  private readonly baseUrl =
-    process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  /**
+   * Base URL is derived from Nuxt runtime configuration so it works in every environment.
+   */
+  private get baseUrl(): string {
+    return useRuntimeConfig().public.blogUrl
+  }
   private readonly blogEndpoint = '/blog/posts'
 
   /**

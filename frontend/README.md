@@ -217,28 +217,22 @@ const cart = useCartStore();
   pnpm generate:api
   ```
 - Generated files under `src/api/`
-- Example usage:
+- Example usage with the blog client:
   ```ts
-  import { DefaultApi } from '@/api'
-  const api = new DefaultApi()
-  const response = await api.listVersionsv2()
+  import { BlogApi, Configuration } from '@/api'
+  const config = useRuntimeConfig()
+  const api = new BlogApi(new Configuration({ basePath: config.public.blogUrl }))
+  const { data } = await api.posts({ pageNumber: 1 })
   ```
 
 ## Fetching Content from blog
 
 ```ts
+import { BlogApi, Configuration } from '@/api'
 const config = useRuntimeConfig()
-const { data: postRes } = await useFetch(
-  `${config.public.blogUrl}/blog/posts`,
-  {
-    params: { filters: { slug } },
-    // TODO: provisoirement desactivé 
-    // headers: {
-    //   Authorization: `Bearer ${BLOG token}`,
-    // },
-  },
-)
-const post = postRes.value?.data[0]?.attributes
+const api = new BlogApi(new Configuration({ basePath: config.public.blogUrl }))
+const { data: page } = await api.posts({ pageNumber: 1 })
+const posts = page.items
 ```
 
 ## Vitest (Testing)
