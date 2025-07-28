@@ -83,7 +83,7 @@ To get the project up and running locally, follow these steps:
    - `pnpm lint` – run ESLint
    - `pnpm format` – check formatting
    - `pnpm test` – run tests with Vitest
-   - `pnpm generate:api` – regenerate the OpenAPI fetch client
+   - `pnpm generate:api` – regenerate the OpenAPI axios client
    - `pnpm preview` – serve the production build locally
    - `pnpm build:ssr` – build with increased memory
 
@@ -212,7 +212,7 @@ const cart = useCartStore();
 
 ## OpenAPI Integration
 
-- We use `@openapitools/openapi-generator-cli` with the `typescript-fetch` generator:
+- We use `@openapitools/openapi-generator-cli` with the `typescript-axios` generator:
   ```bash
   pnpm generate:api
   ```
