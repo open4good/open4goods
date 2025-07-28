@@ -1,16 +1,19 @@
-import type { BlogPostDto, PageDto, PageMetaDto } from '~/src/api/models'
+import type {
+  BlogArticleData,
+  PaginatedBlogResponse,
+} from '~/server/api/blog/types/blog.models'
 
 /**
  * Composable for blog-related functionality
  */
 export const useBlog = () => {
   // Reactive state
-  const articles = ref<BlogPostDto[]>([])
-  const currentArticle = ref<BlogPostDto | null>(null)
+  const articles = ref<BlogArticleData[]>([])
+  const currentArticle = ref<BlogArticleData | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const pagination = ref<PageMetaDto>({
-    number: 0,
+  const pagination = ref({
+    page: 0,
     size: 10,
     totalElements: 0,
     totalPages: 0,
@@ -25,11 +28,11 @@ export const useBlog = () => {
 
     try {
       // Use our server API as proxy instead of calling external API directly
-      const response = await $fetch<PageDto>('/api/blog/articles')
+      const response = await $fetch<PaginatedBlogResponse>('/api/blog/articles')
 
-      articles.value = (response.data as BlogPostDto[]) || []
+      articles.value = response.data || []
       pagination.value = {
-        number: response.page?.number || 0,
+        page: response.page?.number || 0,
         size: response.page?.size || 10,
         totalElements: response.page?.totalElements || 0,
         totalPages: response.page?.totalPages || 0,
@@ -53,7 +56,7 @@ export const useBlog = () => {
 
     try {
       // Use our server API as proxy
-      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${id}`)
+      const article = await $fetch<BlogArticleData>(`/api/blog/articles/${id}`)
       currentArticle.value = article
     } catch (err) {
       error.value =

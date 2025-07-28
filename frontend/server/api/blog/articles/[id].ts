@@ -1,11 +1,11 @@
 import { blogService } from '~/services/blog.services'
-import type { BlogPostDto } from '~/src/api/models'
+import type { BlogArticleData } from '../types/blog.models'
 
 /**
  * Blog article by ID API endpoint
  * Handles GET requests for a single blog article
  */
-export default defineEventHandler(async (event): Promise<BlogPostDto> => {
+export default defineEventHandler(async (event): Promise<BlogArticleData> => {
   const id = getRouterParam(event, 'id')
 
   if (!id) {
