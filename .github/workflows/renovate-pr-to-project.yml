@@ -1,0 +1,188 @@
+# .github/workflows/assign-renovate-prs-to-projects.yml
+name: Assign Renovate PRs to GitHub Projects V2
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Ne rien modifier, seulement logguer"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  ORG_NAME: open4good
+  FILTER_AUTHOR: renovate[bot]
+  # mapping label → projectId (Projects V2)
+  PROJECT_ID_MAPPING: |
+    squad:ux=PVT_kwDOBOJOp84A2ZQ8
+    squad:backend=PVT_kwDOBOJOp84A2ZRZ
+
+jobs:
+  assign-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run PR-to‑Project assignment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_PAT }}
+          script: |
+            const filterAuthor = (process.env.FILTER_AUTHOR || '').trim();
+            const mapping = Object.fromEntries(
+              process.env.PROJECT_ID_MAPPING
+                .trim()
+                .split('\n')
+                .map(l => l.split('=').map(s => s.trim().toLowerCase()))
+            );
+
+            // Vérifie que tous les project IDs existent
+            async function assertProjectsExist(projectIds) {
+              const unique = [...new Set(projectIds)];
+              if (!unique.length) return;
+              const query = `
+                query($ids: [ID!]!) {
+                  nodes(ids: $ids) {
+                    __typename
+                    ... on ProjectV2 { id title }
+                  }
+                }
+              `;
+              const res = await github.graphql(query, { ids: unique });
+              const missing = unique.filter((id, i) => {
+                const node = res.nodes[i];
+                return !node || node.__typename !== 'ProjectV2';
+              });
+              if (missing.length) {
+                core.setFailed(`Project IDs introuvables: ${missing.join(', ')}`);
+                throw new Error('Unknown project ids');
+              }
+            }
+
+            // Récupère les items Projects V2 pour une PR
+            async function getPRProjectItems(prNodeId) {
+              const q = `
+                query($id: ID!) {
+                  node(id: $id) {
+                    ... on PullRequest {
+                      projectItems(first: 100) {
+                        nodes {
+                          id
+                          project { id title }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              const r = await github.graphql(q, { id: prNodeId });
+              return r.node.projectItems.nodes.map(n => ({
+                itemId: n.id,
+                projectId: n.project.id
+              }));
+            }
+
+            async function addPRToProject(prNodeId, projectId) {
+              const mutation = `
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                    item { id }
+                  }
+                }
+              `;
+              return github.graphql(mutation, { projectId, contentId: prNodeId });
+            }
+
+            async function removeItem(itemId, projectId) {
+              const mutation = `
+                mutation($projectId: ID!, $itemId: ID!) {
+                  deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
+                    deletedItemId
+                  }
+                }
+              `;
+              return github.graphql(mutation, { projectId, itemId });
+            }
+
+            // Calcule les projets cibles : only if 'renovate' label + un squad:*
+            function desiredProjects(labels) {
+              const hasRenovate = labels.includes('renovate');
+              if (!hasRenovate) return [];
+              return labels
+                .filter(l => mapping[l])
+                .map(l => mapping[l]);
+            }
+
+            async function processOnePR(prNumber, dryRun) {
+              const { owner, repo } = context.repo;
+              const pr = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data;
+
+              if (pr.user.login !== filterAuthor) {
+                core.info(`ℹ️ PR #${prNumber} auteur '${pr.user.login}' ignoré.`);
+                return;
+              }
+
+              const labels = pr.labels.map(l => (typeof l === 'string' ? l : l.name)).map(s => s.toLowerCase());
+              core.info(`🔖 PR #${prNumber} labels: ${labels.join(', ') || '(aucun)'}`);
+
+              const desired = desiredProjects(labels);
+              core.info(`🎯 Projets souhaités: ${desired.join(', ') || '(aucun)'}`);
+
+              const existingItems = await getPRProjectItems(pr.node_id);
+              const existingProjectIds = existingItems.map(i => i.projectId);
+
+              const toAdd = desired.filter(id => !existingProjectIds.includes(id));
+              const toRemove = existingItems.filter(i => !desired.includes(i.projectId));
+
+              core.info(`📦 Actuels: ${existingProjectIds.join(', ') || '(aucun)'}`);
+              core.info(`➕ À ajouter: ${toAdd.join(', ') || '(aucun)'}`);
+              core.info(`🗑️ À supprimer: ${toRemove.map(i => i.projectId).join(', ') || '(aucun)'}`);
+
+              if (dryRun) {
+                core.info('🔍 [DRY RUN] Aucun changement appliqué.');
+                return;
+              }
+
+              for (const p of toAdd) {
+                await addPRToProject(pr.node_id, p)
+                  .then(() => core.info(`✅ Ajouté à ${p}`))
+                  .catch(e => core.setFailed(`❌ Échec ajout à ${p}: ${e.message}`));
+              }
+              for (const item of toRemove) {
+                await removeItem(item.itemId, item.projectId)
+                  .then(() => core.info(`🗑️ Supprimé de ${item.projectId}`))
+                  .catch(e => core.setFailed(`❌ Échec suppression de ${item.projectId}: ${e.message}`));
+              }
+            }
+
+            // MAIN
+            const dryRun = (core.getInput('dry_run') === 'true');
+            await assertProjectsExist(Object.values(mapping));
+
+            let prNumbers = [];
+            if (context.eventName === 'pull_request') {
+              prNumbers = [ context.payload.pull_request.number ];
+            } else {
+              // workflow_dispatch -> traiter toutes les PR ouvertes du bot
+              const { owner, repo } = context.repo;
+              let page = 1;
+              while (true) {
+                const res = await github.rest.pulls.list({
+                  owner, repo, state: 'open', per_page: 100, page
+                });
+                if (res.data.length === 0) break;
+                res.data
+                  .filter(pr => pr.user.login === filterAuthor)
+                  .forEach(pr => prNumbers.push(pr.number));
+                page++;
+              }
+            }
+
+            core.startGroup(`Processing ${prNumbers.length} PR(s)`);
+            for (const num of prNumbers) {
+              await processOnePR(num, dryRun);
+            }
+            core.endGroup();
+
+            core.info('🎉 Terminé.');
