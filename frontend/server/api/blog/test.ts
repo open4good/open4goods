@@ -1,4 +1,4 @@
-import { blogService } from '~/services/blog.services'
+import { blogService } from '~/services/blog.service'
 
 /**
  * Test endpoint to debug blog data
