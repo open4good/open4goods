@@ -4,11 +4,13 @@
   "packageRules": [
     {
       "groupName": "nuxt modules",
-      "matchPackageNames": ["/^@nuxtjs//", "/^@nuxt//"]
+      "matchPackageNames": ["/^@nuxtjs//", "/^@nuxt//"],
+      "labels": ["squad:ux"]
     },
     {
       "groupName": "vite ecosystem",
-      "matchPackageNames": ["vite", "vite-node", "vitest", "@vitejs/plugin-vue"]
+      "matchPackageNames": ["vite", "vite-node", "vitest", "@vitejs/plugin-vue"],
+      "labels": ["squad:ux"]
     }
   ]
 }
