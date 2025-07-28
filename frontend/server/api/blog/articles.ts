@@ -1,12 +1,12 @@
 import { blogService } from '~/services/blog.services'
-import type { PaginatedBlogResponse } from './types/blog.models'
+import type { PageDto } from '~/src/api'
 
 /**
  * Blog articles API endpoint
  * Handles GET requests for blog articles with caching
  */
 export default defineEventHandler(
-  async (event): Promise<PaginatedBlogResponse> => {
+  async (event): Promise<PageDto> => {
     // Set cache headers for 1 hour
     setResponseHeader(
       event,

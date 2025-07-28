@@ -1,7 +1,4 @@
-import type {
-  BlogArticleData,
-  PaginatedBlogResponse,
-} from '~/server/api/blog/types/blog.models'
+import type { BlogPostDto, PageDto } from '~/src/api'
 
 /**
  * Blog service for handling blog-related API calls
@@ -13,11 +10,11 @@ export class BlogService {
 
   /**
    * Fetch paginated blog articles
-   * @returns Promise<PaginatedBlogResponse>
+   * @returns Promise<PageDto>
    */
-  async getArticles(): Promise<PaginatedBlogResponse> {
+  async getArticles(): Promise<PageDto> {
     try {
-      const response = await $fetch<PaginatedBlogResponse>(
+      const response = await $fetch<PageDto>(
         `${this.baseUrl}${this.blogEndpoint}`
       )
       return response
@@ -30,11 +27,11 @@ export class BlogService {
   /**
    * Fetch a single blog article by ID
    * @param id - Article ID
-   * @returns Promise<BlogArticleData>
+   * @returns Promise<BlogPostDto>
    */
-  async getArticleById(id: string): Promise<BlogArticleData> {
+  async getArticleById(id: string): Promise<BlogPostDto> {
     try {
-      const response = await $fetch<BlogArticleData>(
+      const response = await $fetch<BlogPostDto>(
         `${this.baseUrl}${this.blogEndpoint}/${id}`
       )
       return response
