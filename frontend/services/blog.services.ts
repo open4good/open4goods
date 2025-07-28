@@ -1,3 +1,9 @@
+import {
+  BlogApi,
+  Configuration,
+  type BlogPostDto,
+  type PageDto,
+} from '~/src/api'
 import type {
   BlogArticleData,
   PaginatedBlogResponse,
@@ -7,20 +13,31 @@ import type {
  * Blog service for handling blog-related API calls
  */
 export class BlogService {
-  private readonly baseUrl =
-    process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  private readonly blogEndpoint = '/blog/posts'
+  /**
+   * Instantiate the OpenAPI client with runtime config
+   */
+  private getApi(): BlogApi {
+    const config = useRuntimeConfig()
+    return new BlogApi(new Configuration({ basePath: config.public.blogUrl }))
+  }
 
   /**
-   * Fetch paginated blog articles
-   * @returns Promise<PaginatedBlogResponse>
+   * Fetch paginated blog articles using the OpenAPI client
    */
   async getArticles(): Promise<PaginatedBlogResponse> {
     try {
-      const response = await $fetch<PaginatedBlogResponse>(
-        `${this.baseUrl}${this.blogEndpoint}`
-      )
-      return response
+      const api = this.getApi()
+      const page: PageDto = await api.posts()
+
+      return {
+        page: {
+          number: page.page?.number ?? 0,
+          size: page.page?.size ?? 10,
+          totalElements: page.page?.totalElements ?? 0,
+          totalPages: page.page?.totalPages ?? 0,
+        },
+        data: (page.data ?? []) as BlogArticleData[],
+      }
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       throw new Error('Failed to fetch blog articles')
@@ -28,16 +45,13 @@ export class BlogService {
   }
 
   /**
-   * Fetch a single blog article by ID
-   * @param id - Article ID
-   * @returns Promise<BlogArticleData>
+   * Fetch a single blog article by slug
    */
   async getArticleById(id: string): Promise<BlogArticleData> {
     try {
-      const response = await $fetch<BlogArticleData>(
-        `${this.baseUrl}${this.blogEndpoint}/${id}`
-      )
-      return response
+      const api = this.getApi()
+      const article: BlogPostDto = await api.post({ slug: id })
+      return article as BlogArticleData
     } catch (error) {
       console.error(`Error fetching blog article ${id}:`, error)
       throw new Error(`Failed to fetch blog article ${id}`)
