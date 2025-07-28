@@ -37,10 +37,10 @@ public class XwikiFacadeService {
 	private UrlManagementHelper urlHelper;
 
 	private XWikiConstantsResourcesPath pathHelper;
-	
+
 
 	public XwikiFacadeService( XwikiMappingService mappingService, XWikiObjectService xWikiObjectService, XWikiHtmlService xWikiHtmlService,XWikiReadService xWikiReadService, XWikiObjectService xWikiObjectService2, XWikiHtmlService xWikiHtmlService2, XWikiServiceProperties properties) {
-		this.mappingService = mappingService;		
+		this.mappingService = mappingService;
 		this.xWikiReadService = xWikiReadService;
 		this.xWikiHtmlService = xWikiHtmlService2;
 		this.xWikiObjectService = xWikiObjectService2;
@@ -49,47 +49,47 @@ public class XwikiFacadeService {
 		this.pathHelper = new XWikiConstantsResourcesPath(properties.getBaseUrl(), properties.getApiEntrypoint(), properties.getApiWiki());
 
 	}
-	
+
 	// TODO : I18n
 	// @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME)
 	public FullPage getFullPage (String restPath) {
 		FullPage ret = new FullPage();
-		
+
 		String htmlContent = xWikiHtmlService.html(restPath.replaceAll("\\.|:","/"));
 		// TODO : When xwiki jakarta compliant
 //		String htmlContent = xWikiHtmlService.renderXWiki20SyntaxAsXHTML(wikiPage.getContent());
-		
+
 		Page wikiPage  = xWikiReadService.getPage(restPath);
 		// TODO : Seems useless
 //		Objects objects = mappingService.getPageObjects(wikiPage);
 		Map<String, String> properties = xWikiObjectService.getProperties(wikiPage);
-	
+
 		ret.setHtmlContent(htmlContent);
 		ret.setWikiPage(wikiPage);
 //		ret.setObjects(objects);
 		ret.setProperties(properties);
-		
-		
-		return ret;		
+
+
+		return ret;
 	}
 
 	public FullPage getFullPage(String space, String name) {
 		return getFullPage(space+":"+name);
 	}
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param url
-	 * TODO : Should provide a streamed version 
+	 * TODO : Should provide a streamed version
 	 * @return
 	 */
 	public byte[] downloadAttachment( String space, String page, String attachmentName) {
-		String url = pathHelper.getDownloadAttachlmentUrl(space, page, attachmentName);		
+		String url = pathHelper.getDownloadAttachlmentUrl(space, page, attachmentName);
 		return mappingService.downloadAttachment(url);
 	}
-	
-	
+
+
 
     public byte[] downloadAttachment(String attachmentPath) {
             if (attachmentPath.contains("..")) {
@@ -100,7 +100,7 @@ public class XwikiFacadeService {
             return mappingService.downloadAttachment(url);
     }
 
-	
+
 	public String detectMimeType (String filename) {
         // TODO : ugly, should fetch the meta (mime type is availlable in xwiki service), but does not work for the blog image, special class and not appears in attachments list
 		if (filename.endsWith(".pdf")) {
@@ -116,13 +116,13 @@ public class XwikiFacadeService {
 			return "";
 		}
 	}
-	
-	
-	
 
-	
-	
-	
+
+
+
+
+
+
 	// TODO : Remove, or be more exaustiv
 	public Pages getPages(String path) {
 		return xWikiReadService.getPages(path);
