@@ -1,4 +1,4 @@
-import { blogService } from '~/services/blog.services'
+import { blogService } from '~/services/blog.service'
 import type { PaginatedBlogResponse } from './types/blog.models'
 
 /**
