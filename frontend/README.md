@@ -66,8 +66,8 @@ To get the project up and running locally, follow these steps:
    pnpm build && pnpm preview
    ```
 
-   Les outils de développement Nuxt sont automatiquement désactivés lorsque
-   `NODE_ENV` vaut `production`.
+   Nuxt's development tools are automatically disabled when
+   `NODE_ENV` is set to `production`.
 
 7. **Static Generation (optional)**:
 
@@ -232,7 +232,7 @@ const { data: postRes } = await useFetch(
   `${config.public.blogUrl}/blog/posts`,
   {
     params: { filters: { slug } },
-    // TODO: provisoirement desactivé 
+    // TODO: temporarily disabled
     // headers: {
     //   Authorization: `Bearer ${BLOG token}`,
     // },
