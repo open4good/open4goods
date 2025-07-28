@@ -31,11 +31,14 @@ jobs:
           script: |
             const filterAuthor = (process.env.FILTER_AUTHOR || '').trim();
             const mapping = Object.fromEntries(
-              process.env.PROJECT_ID_MAPPING
-                .trim()
-                .split('\n')
-                .map(l => l.split('=').map(s => s.trim().toLowerCase()))
-            );
+               process.env.PROJECT_ID_MAPPING
+                 .trim()
+                 .split('\n')
+                 .map(line => {
+                   const [label, projectId] = line.split('=');
+                   return [label.trim().toLowerCase(), projectId.trim()];
+                 })
+             );
 
             // Vérifie que tous les project IDs existent
             async function assertProjectsExist(projectIds) {
