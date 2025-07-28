@@ -33,18 +33,21 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    (_options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', (config) => {
-        config.plugins = config.plugins ?? []
-        config.plugins.push(vuetify.default({ autoImport: true }))
-      })
-    },
     "@nuxtjs/i18n",
     "@nuxt/image",
     '@vueuse/nuxt',
     "@nuxt/icon",
     "@pinia/nuxt",
+    'vuetify-nuxt-module',
   ],
+  vuetify: {
+     moduleOptions: {
+       /* options module… */
+     },
+     vuetifyOptions: {
+       /* options createVuetify() si besoin */
+     }
+   },
   i18n: {
     defaultLocale: 'fr-FR',
     locales: [
@@ -57,6 +60,7 @@ export default defineNuxtConfig({
     },
   },
   css: [
+    'vuetify/styles',
     'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
   ],
   build: {

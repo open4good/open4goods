@@ -37,7 +37,8 @@
     "unhead": "^2.0.0",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1",
-    "axios": "^1.6.8"
+    "vuetify-nuxt-module": "0.18.7"
+
   },
   "devDependencies": {
     "@iconify-json/bxl": "^1.1.10",
