@@ -1,26 +1,29 @@
-import type {
-  BlogArticleData,
-  PaginatedBlogResponse,
-} from '~/server/api/blog/types/blog.models'
+import { BlogApi, Configuration } from '~/src/api'
+import type { BlogPostDto, PageDto } from '~/src/api'
 
 /**
  * Blog service for handling blog-related API calls
  */
 export class BlogService {
-  private readonly baseUrl =
-    process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  private readonly blogEndpoint = '/blog/posts'
+  private readonly api: BlogApi
+
+  constructor() {
+    const config = useRuntimeConfig()
+    const apiConfig = new Configuration({ basePath: config.public.blogUrl })
+    this.api = new BlogApi(apiConfig)
+  }
 
   /**
    * Fetch paginated blog articles
-   * @returns Promise<PaginatedBlogResponse>
+   * @returns Promise<PageDto>
    */
-  async getArticles(): Promise<PaginatedBlogResponse> {
+  async getArticles(params: {
+    tag?: string
+    pageNumber?: number
+    pageSize?: number
+  } = {}): Promise<PageDto> {
     try {
-      const response = await $fetch<PaginatedBlogResponse>(
-        `${this.baseUrl}${this.blogEndpoint}`
-      )
-      return response
+      return await this.api.posts(params)
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       throw new Error('Failed to fetch blog articles')
@@ -28,19 +31,16 @@ export class BlogService {
   }
 
   /**
-   * Fetch a single blog article by ID
-   * @param id - Article ID
-   * @returns Promise<BlogArticleData>
+   * Fetch a single blog article by slug
+   * @param slug - Article slug
+   * @returns Promise<BlogPostDto>
    */
-  async getArticleById(id: string): Promise<BlogArticleData> {
+  async getArticleById(slug: string): Promise<BlogPostDto> {
     try {
-      const response = await $fetch<BlogArticleData>(
-        `${this.baseUrl}${this.blogEndpoint}/${id}`
-      )
-      return response
+      return await this.api.post({ slug })
     } catch (error) {
-      console.error(`Error fetching blog article ${id}:`, error)
-      throw new Error(`Failed to fetch blog article ${id}`)
+      console.error(`Error fetching blog article ${slug}:`, error)
+      throw new Error(`Failed to fetch blog article ${slug}`)
     }
   }
 }
