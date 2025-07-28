@@ -51,6 +51,11 @@
         </v-col>
       </v-row>
     </section>
+
+    <!-- Example content bloc -->
+    <section>
+      <TextContent blocId="Main.WebHome" />
+    </section>
   </v-container>
 </template>
 
