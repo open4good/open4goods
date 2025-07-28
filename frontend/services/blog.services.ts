@@ -1,26 +1,33 @@
-import type {
-  BlogArticleData,
-  PaginatedBlogResponse,
-} from '~/server/api/blog/types/blog.models'
+import { BlogApi } from '@/api/apis/BlogApi'
+import { Configuration } from '@/api'
+import type { BlogPostDto, BlogTagDto, PageDto } from '@/api/models'
+import { useRuntimeConfig } from '#app'
 
 /**
  * Blog service for handling blog-related API calls
  */
 export class BlogService {
-  private readonly baseUrl =
-    process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  private readonly blogEndpoint = '/blog/posts'
+  private readonly api: BlogApi
+
+  constructor() {
+    const config = useRuntimeConfig()
+    const headers: Record<string, string> = {}
+    if (config.blogToken) {
+      headers['Authorization'] = `Bearer ${config.blogToken}`
+    }
+    const apiConfig = new Configuration({
+      basePath: config.public.blogUrl,
+      headers,
+    })
+    this.api = new BlogApi(apiConfig)
+  }
 
   /**
    * Fetch paginated blog articles
-   * @returns Promise<PaginatedBlogResponse>
    */
-  async getArticles(): Promise<PaginatedBlogResponse> {
+  async getArticles(): Promise<PageDto> {
     try {
-      const response = await $fetch<PaginatedBlogResponse>(
-        `${this.baseUrl}${this.blogEndpoint}`
-      )
-      return response
+      return await this.api.posts()
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       throw new Error('Failed to fetch blog articles')
@@ -28,19 +35,26 @@ export class BlogService {
   }
 
   /**
-   * Fetch a single blog article by ID
-   * @param id - Article ID
-   * @returns Promise<BlogArticleData>
+   * Fetch a single blog article by slug
    */
-  async getArticleById(id: string): Promise<BlogArticleData> {
+  async getArticleById(slug: string): Promise<BlogPostDto> {
     try {
-      const response = await $fetch<BlogArticleData>(
-        `${this.baseUrl}${this.blogEndpoint}/${id}`
-      )
-      return response
+      return await this.api.post({ slug })
     } catch (error) {
-      console.error(`Error fetching blog article ${id}:`, error)
-      throw new Error(`Failed to fetch blog article ${id}`)
+      console.error(`Error fetching blog article ${slug}:`, error)
+      throw new Error(`Failed to fetch blog article ${slug}`)
+    }
+  }
+
+  /**
+   * List available blog tags
+   */
+  async getTags(): Promise<BlogTagDto[]> {
+    try {
+      return await this.api.tags()
+    } catch (error) {
+      console.error('Error fetching blog tags:', error)
+      throw new Error('Failed to fetch blog tags')
     }
   }
 }
