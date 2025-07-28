@@ -2,7 +2,6 @@
 name: "🔧 Dev Task (EN)"
 about: A development task that is part of a larger epic or user story
 title: "[Task]: "
-labels: task
 assignees: ''
 ---
 

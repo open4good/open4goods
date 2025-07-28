@@ -2,7 +2,7 @@
 name: "💡 Feature Request (EN)"
 about: Propose a new feature or improvement
 title: "[Feature]: "
-labels: enhancement
+labels: feature
 assignees: ''
 ---
 

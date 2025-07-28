@@ -2,7 +2,7 @@
 name: "🚀 Epic / User Story (EN)"
 about: High-level user story (epic) that can be broken down into smaller tasks
 title: "[Epic]: "
-labels: epic
+labels: epic, userstory
 assignees: ''
 ---
 
