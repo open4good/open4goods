@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import type {
-  BlogArticleData,
-  PaginatedBlogResponse,
-} from '~/server/api/blog/types/blog.models'
+import type { BlogPostDto, PageDto } from '~/src/api/models'
 
 const props = defineProps<{
-  data: PaginatedBlogResponse
+  data: PageDto
   title: string
 }>()
 // Define the debug response type
 interface DebugResponse {
   success: boolean
   timestamp: string
-  data?: PaginatedBlogResponse
+  data?: PageDto
   debug?: {
     articlesCount: number
-    sampleArticle: BlogArticleData | null
+    sampleArticle: BlogPostDto | null
     imageUrls: Array<{
       title: string
       image: string
