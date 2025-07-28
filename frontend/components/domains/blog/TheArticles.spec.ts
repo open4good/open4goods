@@ -38,7 +38,7 @@ vi.mock('~/composables/blog/useBlog', () => ({
 }))
 
 // Mock de useRuntimeConfig
-vi.mock('#app', () => ({
+vi.mock('#imports', () => ({
   useRuntimeConfig: () => ({
     public: {
       blogUrl: 'https://test-api.example.com',
@@ -48,7 +48,7 @@ vi.mock('#app', () => ({
 
 // Mock de navigateTo
 const mockNavigateTo = vi.fn()
-vi.mock('#app', () => ({
+vi.mock('#imports', () => ({
   navigateTo: mockNavigateTo,
 }))
 
