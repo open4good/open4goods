@@ -1,12 +1,21 @@
 import type { BlogPostDto, PageDto } from '~/src/api/models'
 
+
 /**
  * Blog service for handling blog-related API calls
  */
 export class BlogService {
-  private readonly baseUrl =
-    process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  private readonly blogEndpoint = '/blog/posts'
+  private readonly api: BlogApi
+
+  constructor(api?: BlogApi) {
+    if (api) {
+      this.api = api
+    } else {
+      const baseUrl =
+        process.env.BLOG_URL || 'https://beta.front-api.nudger.fr'
+      this.api = new BlogApi(new Configuration({ basePath: baseUrl }))
+    }
+  }
 
   /**
    * Fetch paginated blog articles
@@ -18,6 +27,7 @@ export class BlogService {
         `${this.baseUrl}${this.blogEndpoint}`
       )
       return response
+
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       throw new Error('Failed to fetch blog articles')
@@ -35,6 +45,7 @@ export class BlogService {
         `${this.baseUrl}${this.blogEndpoint}/${id}`
       )
       return response
+
     } catch (error) {
       console.error(`Error fetching blog article ${id}:`, error)
       throw new Error(`Failed to fetch blog article ${id}`)
