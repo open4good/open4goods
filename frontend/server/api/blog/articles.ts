@@ -1,5 +1,6 @@
 import { blogService } from '~/services/blog.services'
 import type { PageDto } from '~/src/api'
+import { _handleError } from '~/utils/server/_handdleErrors'
 
 /**
  * Blog articles API endpoint
@@ -19,15 +20,7 @@ export default defineEventHandler(
       const response = await blogService.getArticles()
       return response
     } catch (error) {
-      // Log the error for debugging
-      console.error('Error fetching blog articles:', error)
-
-      // Throw a proper HTTP error
-      throw createError({
-        statusCode: 500,
-        statusMessage: 'Failed to fetch blog articles',
-        cause: error,
-      })
+      _handleError(error, 'Failed to fetch blog articles')
     }
   }
 )

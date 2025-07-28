@@ -1,5 +1,6 @@
 import { contentService } from '~/services/content.services'
 import type { XwikiContentBlocDto } from '~/src/api'
+import { _handleError } from '~/utils/server/_handdleErrors'
 
 export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> => {
   const blocId = getRouterParam(event, 'blocId')
@@ -12,11 +13,6 @@ export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> =>
   try {
     return await contentService.getBloc(blocId)
   } catch (error) {
-    console.error('Error fetching bloc', error)
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch content bloc',
-      cause: error,
-    })
+    _handleError(error, 'Failed to fetch content bloc')
   }
 })
