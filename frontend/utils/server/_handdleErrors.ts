@@ -1,4 +1,4 @@
-//Ici, créer une fonction qui va gérer les erreurs de façon plus globale
+// Helper to throw consistent server errors
 export function _handleError(error: unknown, message: string) {
   console.error(message, error)
   throw createError({
