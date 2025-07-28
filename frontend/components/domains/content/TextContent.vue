@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useContentBloc } from '~/composables/content/useContentBloc'
 const props = defineProps<{ blocId: string }>()
 
 const { htmlContent, loading, error, fetchBloc } = useContentBloc()
