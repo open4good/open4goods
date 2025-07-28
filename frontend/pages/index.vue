@@ -54,7 +54,8 @@
 
     <!-- Example content bloc -->
     <section>
-      <TextContent blocId="Main.WebHome" />
+        <h2>Demo Xwiki as headless CMS</h2>
+        <TextContent blocId="Main" />
     </section>
   </v-container>
 </template>
