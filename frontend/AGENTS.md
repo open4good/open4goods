@@ -109,12 +109,12 @@ export const useCartStore = defineStore('cart', {
 
 ## OpenAPI Client Generation & Integration
 
-Le dossier `src/api` est **entièrement généré** à partir de la spécification exposée par `front-api` (`/v3/api-docs/front`).
+Le dossier `src/api` est **entièrement généré** à partir de la spécification exposée par `front-api` (`/v3/api-docs/front`). Le client est généré avec le générateur `typescript-axios` (Axios au lieu de Fetch).
 
 Workflow:
 1. Modifier les contrôleurs ou DTOs du projet `front-api` pour faire évoluer l’API.
 2. Construire `front-api` (`mvn -pl nudger-front-api -am clean install`) pour publier le nouveau contrat.
-3. Dans ce module, exécuter `pnpm --offline generate:api` pour mettre à jour `src/api/`.
+3. Dans ce module, exécuter `pnpm --offline generate:api` pour mettre à jour `src/api/`. Ce script utilise désormais Axios via `typescript-axios`.
 4. Utiliser les nouvelles classes générées.
 
 Ne jamais éditer les fichiers générés à la main.
