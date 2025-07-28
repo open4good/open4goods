@@ -1,7 +1,7 @@
-# Traduction avec bard:
+# Translation with Bard:
 
-- traduit moi ce fichier json en allemand > suivi du fichier tout simplement
+- Translate this JSON file into German and output only the file content.
 
-* penser à modifier le fichier de config > locales/i18n.config.js
+* Remember to update the configuration file > `locales/i18n.config.js`.
 
-* Tous laisser dans le même fichier (plus simple à traduire)
+* Keep everything in the same file (easier to translate).
