@@ -57,7 +57,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 - Use `@/` or `~/` aliases
 - Component structure: separate logic/UI
 - Nuxt page features: `definePageMeta`, `useFetch`, `useAsyncData`
-- les noms de fonctions utilitaires commenceront par un underscore : exemple _sanitizeHtml
+- Utility function names should start with an underscore: for example `_sanitizeHtml`.
 
 ---
 
@@ -109,15 +109,15 @@ export const useCartStore = defineStore('cart', {
 
 ## OpenAPI Client Generation & Integration
 
-Le dossier `src/api` est **entièrement généré** à partir de la spécification exposée par `front-api` (`/v3/api-docs/front`).
+The `src/api` folder is **fully generated** from the specification exposed by `front-api` (`/v3/api-docs/front`).
 
 Workflow:
-1. Modifier les contrôleurs ou DTOs du projet `front-api` pour faire évoluer l’API.
-2. Construire `front-api` (`mvn -pl nudger-front-api -am clean install`) pour publier le nouveau contrat.
-3. Dans ce module, exécuter `pnpm --offline generate:api` pour mettre à jour `src/api/`.
-4. Utiliser les nouvelles classes générées.
+1. Modify controllers or DTOs in the `front-api` project to evolve the API.
+2. Build `front-api` (`mvn -pl nudger-front-api -am clean install`) to publish the new contract.
+3. In this module, run `pnpm --offline generate:api` to update `src/api/`.
+4. Use the newly generated classes.
 
-Ne jamais éditer les fichiers générés à la main.
+Never edit the generated files manually.
 
 ---
 
