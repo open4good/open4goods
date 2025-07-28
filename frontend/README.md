@@ -241,6 +241,24 @@ const { data: postRes } = await useFetch(
 const post = postRes.value?.data[0]?.attributes
 ```
 
+## Fetching dynamic content blocs
+
+The generated `ContentApi` client allows retrieval of HTML blocs from the
+`front-api` service. The `<TextContent>` component wraps this logic.
+
+```ts
+import { ContentApi, Configuration } from '@/api'
+const config = useRuntimeConfig()
+const api = new ContentApi(new Configuration({ basePath: config.public.blogUrl }))
+const bloc = await api.contentBloc({ blocId: 'Main.WebHome' })
+```
+
+Example usage in a page:
+
+```vue
+<TextContent blocId="Main.WebHome" />
+```
+
 ## Vitest (Testing)
 
 - Colocate tests as `Component.spec.ts`
