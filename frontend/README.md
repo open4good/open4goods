@@ -47,9 +47,11 @@ To get the project up and running locally, follow these steps:
    ```
 
 4. **Environment Variables**:
-   Create a `.env` file with the following variable:
+   Create a `.env` file with the following variables:
    - `API_URL`: Base URL of the backend API (defaults to `http://localhost:8082`).
      The value is available via `config.public.apiUrl` in `nuxt.config.ts`.
+   - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
+   - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
 
 5. **Run the Dev Server**:
 
@@ -88,12 +90,22 @@ To get the project up and running locally, follow these steps:
 
 ## API environment variables
 
-Runtime configuration only requires the backend API URL. It is declared in
-`nuxt.config.ts`:
+Runtime configuration uses the following variables defined in `nuxt.config.ts`:
 
 - **`API_URL`** – base URL of the backend API. Defaults to
   `http://localhost:8082` and is exposed as
   `config.public.apiUrl`.
+- **`TOKEN_COOKIE_NAME`** – cookie name for the JWT. Defaults to
+  `access_token`.
+- **`REFRESH_COOKIE_NAME`** – cookie name for the refresh token. Defaults to
+  `refresh_token`.
+
+## Authentication cookies
+
+The login route stores the JWT and refresh token in HTTP‑only cookies. In
+production these cookies are marked `Secure` and `SameSite=None` to allow usage
+across subdomains. During local development the cookies fall back to
+`SameSite=Lax` and are not forced to be secure.
 
 ## Design Tokens
 

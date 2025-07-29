@@ -34,9 +34,6 @@ export default defineNuxtConfig({
       { code: 'en-US', name: 'English' },
     ],
     strategy: 'prefix_except_default',
-    bundle: {
-      optimizeTranslationDirective: false,
-    },
   },
   css: [
     'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
@@ -72,6 +69,8 @@ export default defineNuxtConfig({
   ],
   // Runtime configuration for environment variables
   runtimeConfig: {
+    tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
+    refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
 
     // Public keys (exposed to client-side)
     public: {
