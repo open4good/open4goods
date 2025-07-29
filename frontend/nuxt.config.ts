@@ -1,6 +1,4 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import * as vuetify from 'vite-plugin-vuetify'
-import { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -14,31 +12,9 @@ export default defineNuxtConfig({
     }
   },
 
-  // Suppress Vue Router warnings for Chrome DevTools requests
-  vite: {
-    define: {
-      __VUE_PROD_DEVTOOLS__: false,
-    },
-    vue: {
-      template: {
-        transformAssetUrls,
-      },
-    },
-    // ✅ Hide specific warnings
-    build: {
-      rollupOptions: {
-        external: ['virtual:#nitro-internal-virtual/storage'],
-      },
-    },
-  },
 
   modules: [
-    (_options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', (config) => {
-        config.plugins = config.plugins ?? []
-        config.plugins.push(vuetify.default({ autoImport: true }))
-      })
-    },
+    "vuetify-nuxt-module",
     "@nuxtjs/i18n",
     "@nuxt/image",
     '@vueuse/nuxt',
@@ -46,7 +22,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
   ],
   i18n: {
-    defaultLocale: 'fr-FR',
+    defaultLocale: 'en-US',
     locales: [
       { code: 'fr-FR', name: 'Français' },
       { code: 'en-US', name: 'English' },
@@ -59,6 +35,7 @@ export default defineNuxtConfig({
   css: [
     'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
   ],
+
   build: {
     transpile: ['vuetify'],
   },
@@ -89,8 +66,6 @@ export default defineNuxtConfig({
   ],
   // Runtime configuration for environment variables
   runtimeConfig: {
-    // Private keys (only available on server-side)
-    blogToken: process.env.BLOG_TOKEN,
 
     // Public keys (exposed to client-side)
     public: {
