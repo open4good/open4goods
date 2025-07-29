@@ -43,19 +43,18 @@ To get the project up and running locally, follow these steps:
 3. **Install Dependencies**:
 
    ```bash
-   pnpm install
+   pnpm install --offline
    ```
 
 4. **Environment Variables**:
-   Copy `.env.example` to `.env` and set the following:
-   - `BASE_URL`: Base path for the Nuxt app (default `/`)
-   - Other optional variables: `NUXT_PUBLIC_SITE_URL`, etc.
-     These are declared in `nuxt.config.ts` under `runtimeConfig`.
+   Create a `.env` file with the following variable:
+   - `API_URL`: Base URL of the backend API (defaults to `http://localhost:8082`).
+     The value is available via `config.public.apiUrl` in `nuxt.config.ts`.
 
 5. **Run the Dev Server**:
 
    ```bash
-   pnpm dev
+   pnpm --offline dev
    ```
 
    Access it at [http://localhost:3000](http://localhost:3000)
@@ -63,7 +62,7 @@ To get the project up and running locally, follow these steps:
 6. **Production Build**:
 
    ```bash
-   pnpm build
+   pnpm --offline build
    ```
 
    Nuxt's development tools are automatically disabled when
@@ -72,7 +71,7 @@ To get the project up and running locally, follow these steps:
 7. **Static Generation (optional)**:
 
    ```bash
-   pnpm generate
+   pnpm --offline generate
    ```
   note : Precautions (window): Place the project near the root of
   your disk to avoid problems. Build problems on generate are
@@ -80,23 +79,21 @@ To get the project up and running locally, follow these steps:
 
 
 8. **Other Useful Scripts**:
-   - `pnpm lint` – run ESLint
-   - `pnpm format` – check formatting
-   - `pnpm test` – run tests with Vitest
-   - `pnpm generate:api` – regenerate the OpenAPI fetch client
-   - `pnpm preview` – serve the production build locally
-   - `pnpm build:ssr` – build with increased memory
+   - `pnpm --offline lint` – run ESLint
+   - `pnpm --offline format` – check formatting
+   - `pnpm --offline test` – run tests with Vitest
+   - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
+   - `pnpm --offline preview` – serve the production build locally
+   - `pnpm --offline build:ssr` – build with increased memory
 
 ## API environment variables
 
-Runtime configuration only requires the backend API URL and an optional blog
-token. They are declared in `nuxt.config.ts`:
+Runtime configuration only requires the backend API URL. It is declared in
+`nuxt.config.ts`:
 
 - **`API_URL`** – base URL of the backend API. Defaults to
   `http://localhost:8082` and is exposed as
   `config.public.apiUrl`.
-- **`BLOG_TOKEN`** – authentication token for protected blog endpoints. It is
-  a private runtime key (`config.blogToken`) available only on the server side.
 
 ## Design Tokens
 
@@ -109,16 +106,19 @@ your design token generation command to pull the latest tokens.
 ## Project Structure
 
 ```
-src/
-├── server/          # API client (OpenAPI)
+project/
 ├── assets/       # Images, fonts, global CSS
 ├── components/   # Reusable UI components
 ├── composables/  # Logic hooks (e.g., useX)
+├── constants/    # Shared constants
 ├── layouts/      # Page layout wrappers
-├── middleware/   # Route guards
 ├── pages/        # File-based routes
+├── services/     # API service abstractions
 ├── plugins/      # Nuxt plugins (e.g. `fetch-logger.ts` logs all backend requests)
 ├── stores/       # Pinia state stores
+├── server/       # Server API endpoints
+├── utils/        # Helper utilities
+├── src/api/      # OpenAPI generated client
 ```
 
 - `tests/` or `*.spec.ts` files live next to components.
@@ -135,7 +135,6 @@ src/
 - `pnpm-workspace.yaml` – workspace and package management
 - `package.json` – scripts and dependencies
 - `nudger-api.json` – OpenAPI specification used by `generate:api`
-- `.env.example` – example environment variables
 - `.husky/` – Git hooks executed on commit
 
 ## Vue 3 & Nuxt 3 Conventions
@@ -213,7 +212,7 @@ const cart = useCartStore();
 
 - We use `@openapitools/openapi-generator-cli` with the `typescript-fetch` generator:
   ```bash
-  pnpm generate:api
+  pnpm --offline generate:api
   ```
 - Generated files under `src/api/`
 - Example usage:
@@ -263,7 +262,7 @@ Example usage in a page:
 - Colocate tests as `Component.spec.ts`
 - Run tests:
   ```bash
-  pnpm test
+  pnpm --offline test
   ```
 
 ### Example Test
@@ -284,7 +283,7 @@ describe('Button', () => {
 
 - Use ESLint with Vue/TypeScript rules
 - Use Prettier for formatting (pnpm format + --write)
-- Git hooks via Husky run `pnpm lint` and `pnpm test` on commit
+- Git hooks via Husky run `pnpm --offline lint` and `pnpm --offline test` on commit
 
 ## SSR Best Practices
 
@@ -299,13 +298,13 @@ describe('Button', () => {
 - Build with:
 
   ```bash
-  pnpm build
+  pnpm --offline build
   ```
 
 - Deploy via:
   - Node server: `.output/server/index.mjs`
   - Vercel/Netlify (with Nitro adapter)
-- Static generation (if suitable): `pnpm generate`
+ - Static generation (if suitable): `pnpm --offline generate`
 
   Security headers such as `Content-Security-Policy` are configured in
   `public/_headers`.  Netlify and similar static hosts read this file to
@@ -326,7 +325,7 @@ We welcome pull requests! To contribute:
 
 1. Fork this repository and create a feature branch.
 2. Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
-3. Run `pnpm lint`, `pnpm generate`, and `pnpm test` before committing.
+3. Run `pnpm --offline lint`, `pnpm --offline generate`, and `pnpm --offline test` before committing.
 4. Open a pull request against the `main` branch.
 
 ## Semantic Commit Examples
