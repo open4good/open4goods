@@ -23,18 +23,6 @@ CORS origins using the `front.security.cors-allowed-hosts` property. You can ove
 via the `FRONT_SECURITY_CORS_ALLOWED_HOSTS` environment variable. By default it permits requests from
 `http://localhost:8082`.
 
-## Local development tips
-
-When starting the application locally you may be tempted to call the beta API
-(`https://beta.front-api.nudger.fr`). That server does not set CORS headers for
-`http://localhost:8082`, which leads the browser to reject the requests. Either
-set `FRONT_SECURITY_CORS_ALLOWED_HOSTS=http://localhost:3000` on the API server
-or keep your frontend pointed to the local API base URL:
-
-```bash
-export API_URL=http://localhost:8082
-```
-
 With this configuration all calls stay on the same origin and the built-in CORS
 rules apply correctly.
 
