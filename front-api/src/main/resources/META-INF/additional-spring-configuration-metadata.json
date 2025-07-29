@@ -25,6 +25,24 @@
       "defaultValue": "http://localhost:8082"
     },
     {
+      "name": "front.security.jwt-secret",
+      "type": "java.lang.String",
+      "description": "Secret key used to sign JWT tokens.",
+      "defaultValue": "changeMe"
+    },
+    {
+      "name": "front.security.access-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Access token validity duration.",
+      "defaultValue": "PT30M"
+    },
+    {
+      "name": "front.security.refresh-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Refresh token validity duration.",
+      "defaultValue": "P7D"
+    },
+    {
       "name": "front.cache.path",
       "type": "java.lang.String",
       "description": "Path used to store cached files.",
