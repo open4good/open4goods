@@ -63,7 +63,7 @@ To get the project up and running locally, follow these steps:
 6. **Production Build**:
 
    ```bash
-   pnpm build && pnpm preview
+   pnpm build
    ```
 
    Nuxt's development tools are automatically disabled when
