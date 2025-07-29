@@ -34,9 +34,6 @@ export default defineNuxtConfig({
       { code: 'en-US', name: 'English' },
     ],
     strategy: 'prefix_except_default',
-    bundle: {
-      optimizeTranslationDirective: false,
-    },
   },
   css: [
     'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
