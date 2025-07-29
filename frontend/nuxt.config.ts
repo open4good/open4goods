@@ -72,7 +72,7 @@ export default defineNuxtConfig({
   ],
   // Runtime configuration for environment variables
   runtimeConfig: {
-
+    authCookieDomain: process.env.AUTH_COOKIE_DOMAIN,
     // Public keys (exposed to client-side)
     public: {
       apiUrl: process.env.API_URL || 'http://localhost:8082',
