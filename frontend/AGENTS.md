@@ -199,6 +199,7 @@ Nuxt 3 Specifics
 - Take advantage of VueUse functiontoenhance reactivity and performan(except for color mode management).
 - Use the Server API (within thserverapi directory) to handlserver-sideoperations like databasinteractions,authentication, oprocessing sensitivedata that must remaiconfidential.
 - use useRuntimeConfig to accesandmanage runtime configuratiovariablesthat differ between environmentandare needed both on the serveandclient sides.
+- The plugin `plugins/fetch-logger.ts` wraps `fetch` on the server to log each backend request to `API_URL`.
 - For SEO use useHead and useSeoMeta.
 - For images use <NuxtImageor<NuxtPicture> component and foIconsuse Nuxt Icons module.
 
