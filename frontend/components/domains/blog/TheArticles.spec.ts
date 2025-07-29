@@ -41,7 +41,7 @@ vi.mock('~/composables/blog/useBlog', () => ({
 vi.mock('#app', () => ({
   useRuntimeConfig: () => ({
     public: {
-      blogUrl: 'https://test-api.example.com',
+      apiUrl: 'https://test-api.example.com',
     },
   }),
 }))
