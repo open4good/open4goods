@@ -117,7 +117,7 @@ src/
 ├── layouts/      # Page layout wrappers
 ├── middleware/   # Route guards
 ├── pages/        # File-based routes
-├── plugins/      # Nuxt plugins
+├── plugins/      # Nuxt plugins (e.g. `fetch-logger.ts` logs all backend requests)
 ├── stores/       # Pinia state stores
 ```
 
