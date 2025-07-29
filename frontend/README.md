@@ -88,12 +88,19 @@ To get the project up and running locally, follow these steps:
 
 ## API environment variables
 
-Runtime configuration only requires the backend API URL. It is declared in
+Runtime configuration requires a few environment variables declared in
 `nuxt.config.ts`:
 
 - **`API_URL`** – base URL of the backend API. Defaults to
   `http://localhost:8082` and is exposed as
   `config.public.apiUrl`.
+- **`AUTH_COOKIE_DOMAIN`** – optional domain used when setting
+  authentication cookies. Leave empty for localhost.
+
+The `/auth/login` API route stores JWT and refresh tokens in HTTP‑only cookies
+named `jwt` and `refresh_token`. In production these cookies are set with the
+`Secure` attribute and `SameSite=None` so they can be sent on cross‑site
+requests.
 
 ## Design Tokens
 
