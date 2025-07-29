@@ -93,7 +93,7 @@ Runtime configuration only requires the backend API URL and an optional blog
 token. They are declared in `nuxt.config.ts`:
 
 - **`API_URL`** – base URL of the backend API. Defaults to
-  `https://beta.front-api.nudger.fr` and is exposed as
+  `http://localhost:8082` and is exposed as
   `config.public.apiUrl`.
 - **`BLOG_TOKEN`** – authentication token for protected blog endpoints. It is
   a private runtime key (`config.blogToken`) available only on the server side.
