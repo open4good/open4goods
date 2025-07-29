@@ -52,7 +52,7 @@ public class ContentsController {
             summary = "Get content bloc",
             description = "Return the HTML content of the given XWiki bloc.",
             parameters = {
-                    @Parameter(name = "blocId", description = "XWiki page path", example = "Main.WebHome", in = ParameterIn.PATH, required = true)
+                    @Parameter(name = "blocId", description = "XWiki page path", example = "Main", in = ParameterIn.PATH, required = true)
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Bloc found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = XwikiContentBlocDto.class))),
