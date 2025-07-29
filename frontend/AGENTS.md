@@ -20,7 +20,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 2. **Clone the Repository**: `git clone https://github.com/your-org/nudger-nuxt-front.git`
 3. **Install Dependencies**: `pnpm install --offline`
 4. **Environment Variables**:
-   - `NUXT_PUBLIC_SITE_URL`, etc.
+   - `API_URL` – base URL of the backend API (defaults to `http://localhost:8082`).
 5. **Run Dev Server**: `pnpm --offline dev` → http://localhost:3000
 6. **Production Build**: `pnpm --offline build` then `pnpm --offline preview`
 7. **Static Generation**: `pnpm --offline generate`
@@ -34,15 +34,15 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 
 ## Project Structure and Directories
 
-- `src/pages/` → file-based routing
-- `src/components/` → reusable components
-- `src/layouts/` → page layouts
-- `src/composables/` → reusable logic (e.g. `useFeature.ts`)
-- `src/stores/` → Pinia stores
+- `pages/` → file-based routing
+- `components/` → reusable components
+- `layouts/` → page layouts
+- `composables/` → reusable logic (e.g. `useFeature.ts`)
+- `stores/` → Pinia stores
 - `src/api/` → OpenAPI generated client & API helpers
-- `src/assets/` → static assets & global CSS
-- `src/middleware/` → route guards
-- `src/plugins/` → Nuxt plugins
+- `assets/` → static assets & global CSS
+- `server/` → API routes for server-side logic
+- `plugins/` → Nuxt plugins
 - `tests/` or `*.spec.ts` → colocated or standalone test files
 
 ---
