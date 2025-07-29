@@ -87,17 +87,16 @@ To get the project up and running locally, follow these steps:
    - `pnpm preview` – serve the production build locally
    - `pnpm build:ssr` – build with increased memory
 
-## Blog environment variables
+## API environment variables
 
-The frontend interacts with the blog service using two runtime variables
-declared in `nuxt.config.ts`:
+Runtime configuration only requires the backend API URL and an optional blog
+token. They are declared in `nuxt.config.ts`:
 
-- **`BLOG_URL`** – base URL of the blog API. If not specified, it defaults to
-  `https://beta.front-api.nudger.fr`. This value is part of the public runtime
-  configuration (`config.public.blogUrl`).
+- **`API_URL`** – base URL of the backend API. Defaults to
+  `https://beta.front-api.nudger.fr` and is exposed as
+  `config.public.apiUrl`.
 - **`BLOG_TOKEN`** – authentication token for protected blog endpoints. It is
-  defined as a private runtime key (`config.blogToken`) and is therefore only
-  available on the server side.
+  a private runtime key (`config.blogToken`) available only on the server side.
 
 ## Design Tokens
 
@@ -229,7 +228,7 @@ const cart = useCartStore();
 ```ts
 const config = useRuntimeConfig()
 const { data: postRes } = await useFetch(
-  `${config.public.blogUrl}/blog/posts`,
+  `${config.public.apiUrl}/blog/posts`,
   {
     params: { filters: { slug } },
     // TODO: temporarily disabled
@@ -249,7 +248,7 @@ The generated `ContentApi` client allows retrieval of HTML blocs from the
 ```ts
 import { ContentApi, Configuration } from '@/api'
 const config = useRuntimeConfig()
-const api = new ContentApi(new Configuration({ basePath: config.public.blogUrl }))
+const api = new ContentApi(new Configuration({ basePath: config.public.apiUrl }))
 const bloc = await api.contentBloc({ blocId: 'Main.WebHome' })
 ```
 

@@ -94,7 +94,7 @@ export default defineNuxtConfig({
 
     // Public keys (exposed to client-side)
     public: {
-      blogUrl: process.env.BLOG_URL || 'https://beta.front-api.nudger.fr',
+      apiUrl: process.env.API_URL || 'https://beta.front-api.nudger.fr',
     }
   },
 })
