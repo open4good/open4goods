@@ -7,3 +7,4 @@ ui/src/main/resources/application-devsec.yml
 /code
 
 apache-maven-*-bin.tar.gz
+/.vscode/
