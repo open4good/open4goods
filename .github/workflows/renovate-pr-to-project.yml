@@ -1,9 +1,13 @@
-# .github/workflows/assign-renovate-prs-to-projects.yml
-name: Assign Renovate PRs to GitHub Projects V2
+name: Assign PRs to GitHub Projects V2
 
 on:
   pull_request:
-    types: [opened, labeled, unlabeled]
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+      - synchronize
   workflow_dispatch:
     inputs:
       dry_run:
@@ -13,36 +17,39 @@ on:
         default: false
 
 env:
-  ORG_NAME: open4good
-  FILTER_AUTHOR: renovate[bot]
-  # mapping label → projectId (Projects V2)
+  # mapping label → ProjectV2 ID
   PROJECT_ID_MAPPING: |
+    squad:pmo=PVT_kwDOBOJOp84A8tDc
     squad:ux=PVT_kwDOBOJOp84A2ZQ8
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
+  # projet fallback si aucun label ne matche
+  IF_UNMATCH: PVT_kwDOBOJOp84A8tDc
+  # ne traiter que les PR dont l’auteur est ce bot
+  FILTER_AUTHOR: renovate[bot]
 
 jobs:
-  assign-prs:
+  assign:
     runs-on: ubuntu-latest
     steps:
-      - name: Run PR-to‑Project assignment
+      - name: Assign PR to Projects
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.PROJECT_PAT }}
           script: |
-            const filterAuthor = (process.env.FILTER_AUTHOR || '').trim();
-            const mapping = Object.fromEntries(
-               process.env.PROJECT_ID_MAPPING
-                 .trim()
-                 .split('\n')
-                 .map(line => {
-                   const [label, projectId] = line.split('=');
-                   return [label.trim().toLowerCase(), projectId.trim()];
-                 })
-             );
+            // --- Helpers ---
+            function parseMapping(raw) {
+              return Object.fromEntries(
+                raw
+                  .trim()
+                  .split('\n')
+                  .map(l => l.trim().split('='))
+                  .map(([k,v]) => [k.toLowerCase(), v.trim()])
+                  .filter(([k,v]) => k && v)
+              );
+            }
 
-            // Vérifie que tous les project IDs existent
-            async function assertProjectsExist(projectIds) {
-              const unique = [...new Set(projectIds)];
+            async function assertProjectsExist(ids) {
+              const unique = [...new Set(ids.filter(Boolean))];
               if (!unique.length) return;
               const query = `
                 query($ids: [ID!]!) {
@@ -58,12 +65,11 @@ jobs:
                 return !node || node.__typename !== 'ProjectV2';
               });
               if (missing.length) {
-                core.setFailed(`Project IDs introuvables: ${missing.join(', ')}`);
+                core.setFailed(\`Project IDs introuvables: \${missing.join(', ')}\`);
                 throw new Error('Unknown project ids');
               }
             }
 
-            // Récupère les items Projects V2 pour une PR
             async function getPRProjectItems(prNodeId) {
               const q = `
                 query($id: ID!) {
@@ -72,7 +78,7 @@ jobs:
                       projectItems(first: 100) {
                         nodes {
                           id
-                          project { id title }
+                          project { id }
                         }
                       }
                     }
@@ -81,93 +87,92 @@ jobs:
               `;
               const r = await github.graphql(q, { id: prNodeId });
               return r.node.projectItems.nodes.map(n => ({
-                itemId: n.id,
+                itemId:    n.id,
                 projectId: n.project.id
               }));
             }
 
-            async function addPRToProject(prNodeId, projectId) {
-              const mutation = `
+            async function addPRToProject(contentId, projectId) {
+              const m = `
                 mutation($projectId: ID!, $contentId: ID!) {
                   addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
                     item { id }
                   }
                 }
               `;
-              return github.graphql(mutation, { projectId, contentId: prNodeId });
+              return github.graphql(m, { projectId, contentId });
             }
 
             async function removeItem(itemId, projectId) {
-              const mutation = `
+              const m = `
                 mutation($projectId: ID!, $itemId: ID!) {
                   deleteProjectV2Item(input: { projectId: $projectId, itemId: $itemId }) {
                     deletedItemId
                   }
                 }
               `;
-              return github.graphql(mutation, { projectId, itemId });
+              return github.graphql(m, { projectId, itemId });
             }
 
-            // Calcule les projets cibles : only if 'renovate' label + un squad:*
-            function desiredProjects(labels) {
-              const hasRenovate = labels.includes('renovate');
-              if (!hasRenovate) return [];
-              return labels
-                .filter(l => mapping[l])
-                .map(l => mapping[l]);
+            function desiredProjects(labels, mapping, fallback) {
+              const set = new Set();
+              labels.forEach(l => {
+                if (mapping[l]) set.add(mapping[l]);
+              });
+              if (set.size === 0 && fallback) set.add(fallback);
+              return [...set];
             }
 
             async function processOnePR(prNumber, dryRun) {
               const { owner, repo } = context.repo;
               const pr = (await github.rest.pulls.get({ owner, repo, pull_number: prNumber })).data;
 
-              if (pr.user.login !== filterAuthor) {
-                core.info(`ℹ️ PR #${prNumber} auteur '${pr.user.login}' ignoré.`);
+              if (filterAuth && pr.user.login !== filterAuth) {
+                core.info(\`ℹ️ PR #\${prNumber} auteur '\${pr.user.login}' ignoré.\`);
                 return;
               }
 
-              const labels = pr.labels.map(l => (typeof l === 'string' ? l : l.name)).map(s => s.toLowerCase());
-              core.info(`🔖 PR #${prNumber} labels: ${labels.join(', ') || '(aucun)'}`);
+              const labels = pr.labels.map(l => l.name.toLowerCase());
+              core.info(\`🔖 PR #\${prNumber} labels: \${labels.join(', ') || '(aucun)'}\`);
 
-              const desired = desiredProjects(labels);
-              core.info(`🎯 Projets souhaités: ${desired.join(', ') || '(aucun)'}`);
+              const desired   = desiredProjects(labels, mapping, fallback);
+              const existing  = await getPRProjectItems(pr.node_id);
+              const existIds  = existing.map(x => x.projectId);
 
-              const existingItems = await getPRProjectItems(pr.node_id);
-              const existingProjectIds = existingItems.map(i => i.projectId);
+              const toAdd    = desired.filter(id => !existIds.includes(id));
+              const toRemove = existing.filter(x => !desired.includes(x.projectId));
 
-              const toAdd = desired.filter(id => !existingProjectIds.includes(id));
-              const toRemove = existingItems.filter(i => !desired.includes(i.projectId));
-
-              core.info(`📦 Actuels: ${existingProjectIds.join(', ') || '(aucun)'}`);
-              core.info(`➕ À ajouter: ${toAdd.join(', ') || '(aucun)'}`);
-              core.info(`🗑️ À supprimer: ${toRemove.map(i => i.projectId).join(', ') || '(aucun)'}`);
+              core.info(\`➕ À ajouter: \${toAdd.join(', ') || '(aucun)'}\`);
+              core.info(\`🗑️ À supprimer: \${toRemove.map(x => x.projectId).join(', ') || '(aucun)'}\`);
 
               if (dryRun) {
                 core.info('🔍 [DRY RUN] Aucun changement appliqué.');
                 return;
               }
 
-              for (const p of toAdd) {
-                await addPRToProject(pr.node_id, p)
-                  .then(() => core.info(`✅ Ajouté à ${p}`))
-                  .catch(e => core.setFailed(`❌ Échec ajout à ${p}: ${e.message}`));
+              for (const proj of toAdd) {
+                await addPRToProject(pr.node_id, proj)
+                  .then(() => core.info(\`✅ Ajouté à \${proj}\`))
+                  .catch(e => core.setFailed(\`❌ Échec ajout \${proj}: \${e.message}\`));
               }
-              for (const item of toRemove) {
-                await removeItem(item.itemId, item.projectId)
-                  .then(() => core.info(`🗑️ Supprimé de ${item.projectId}`))
-                  .catch(e => core.setFailed(`❌ Échec suppression de ${item.projectId}: ${e.message}`));
+              for (const { itemId, projectId } of toRemove) {
+                await removeItem(itemId, projectId)
+                  .then(() => core.info(\`🗑️ Supprimé de \${projectId}\`))
+                  .catch(e => core.setFailed(\`❌ Échec suppression \${projectId}: \${e.message}\`));
               }
             }
 
-            // MAIN
-            const dryRun = (core.getInput('dry_run') === 'true');
-            await assertProjectsExist(Object.values(mapping));
+            // ==== Main ====
+            const mapping    = parseMapping(process.env.PROJECT_ID_MAPPING || '');
+            const fallback   = (process.env.IF_UNMATCH || '').trim();
+            const filterAuth = (process.env.FILTER_AUTHOR || '').trim();
+            const dryRun     = core.getInput('dry_run') === 'true';
 
+            await assertProjectsExist(Object.values(mapping).concat(fallback));
+
+            // Déterminer la liste des PR à traiter
             let prNumbers = [];
-            if (context.eventName === 'pull_request') {
-              prNumbers = [ context.payload.pull_request.number ];
-            } else {
-              // workflow_dispatch -> traiter toutes les PR ouvertes du bot
+            if (context.eventName === 'workflow_dispatch') {
               const { owner, repo } = context.repo;
               let page = 1;
               while (true) {
@@ -175,17 +180,16 @@ jobs:
                   owner, repo, state: 'open', per_page: 100, page
                 });
                 if (res.data.length === 0) break;
-                res.data
-                  .filter(pr => pr.user.login === filterAuthor)
-                  .forEach(pr => prNumbers.push(pr.number));
+                res.data.forEach(pr => prNumbers.push(pr.number));
                 page++;
               }
+            } else {
+              prNumbers = [ context.payload.pull_request.number ];
             }
 
-            core.startGroup(`Processing ${prNumbers.length} PR(s)`);
+            core.startGroup(\`Processing \${prNumbers.length} PR(s)\`);
             for (const num of prNumbers) {
               await processOnePR(num, dryRun);
             }
             core.endGroup();
-
             core.info('🎉 Terminé.');

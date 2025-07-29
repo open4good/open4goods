@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import * as vuetify from 'vite-plugin-vuetify'
+import { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -35,7 +36,7 @@ export default defineNuxtConfig({
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
         config.plugins = config.plugins ?? []
-        config.plugins.push(...vuetify({ autoImport: true }))
+        config.plugins.push(vuetify.default({ autoImport: true }))
       })
     },
     "@nuxtjs/i18n",
