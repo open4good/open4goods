@@ -8,8 +8,9 @@ export class ContentService {
   private readonly api: ContentApi
 
   constructor() {
-    const basePath = process.env.API_URL || 'http://localhost:8082'
-    this.api = new ContentApi(new Configuration({ basePath }))
+    const config = useRuntimeConfig()
+    const apiConfig = new Configuration({ basePath: config.public.blogUrl })
+    this.api = new ContentApi(apiConfig)
   }
 
   /**
