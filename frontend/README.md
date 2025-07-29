@@ -113,8 +113,8 @@ project/
 ├── constants/    # Shared constants
 ├── layouts/      # Page layout wrappers
 ├── pages/        # File-based routes
-├── plugins/      # Nuxt plugins
 ├── services/     # API service abstractions
+├── plugins/      # Nuxt plugins (e.g. `fetch-logger.ts` logs all backend requests)
 ├── stores/       # Pinia state stores
 ├── server/       # Server API endpoints
 ├── utils/        # Helper utilities
