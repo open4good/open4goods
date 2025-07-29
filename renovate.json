@@ -9,8 +9,8 @@
   "packageRules": [
     {
       "matchManagers": ["maven"],
-      "matchPaths": ["!frontend/**"],
-      "automerge": true,
+      "matchPaths": ["!frontend/**","!ui/**"],
+      "automerge": false,
       "automergeType": "branch",
       "labels": ["squad:backend"]
     },
