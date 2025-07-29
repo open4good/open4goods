@@ -9,7 +9,7 @@ export class BlogService {
 
   constructor() {
     const config = useRuntimeConfig()
-    const apiConfig = new Configuration({ basePath: config.public.blogUrl })
+    const apiConfig = new Configuration({ basePath: config.public.apiUrl })
     this.api = new BlogApi(apiConfig)
   }
 
