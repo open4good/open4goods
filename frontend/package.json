@@ -27,8 +27,10 @@
     "@unhead/vue": "^2.0.11",
     "@vueuse/core": "^13.0.0",
     "@vueuse/nuxt": "^13.0.0",
+    "cookie-es": "^2.0.0",
     "dompurify": "^3.2.6",
     "i": "^0.3.7",
+    "jwt-decode": "^4.0.0",
     "npm": "^11.4.2",
     "nuxt": "^3.17.6",
     "nuxt-device": "^2.1.0",
@@ -37,8 +39,7 @@
     "unhead": "^2.0.0",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1",
-    "vuetify-nuxt-module": "^0.18.7",
-    "jwt-decode": "^4.0.0"
+    "vuetify-nuxt-module": "^0.18.7"
   },
   "devDependencies": {
     "@iconify-json/bxl": "^1.1.10",

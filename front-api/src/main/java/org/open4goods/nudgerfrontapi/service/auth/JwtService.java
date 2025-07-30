@@ -64,7 +64,7 @@ public class JwtService {
      * Validate a token and return the authentication subject.
      */
     public String validateRefreshToken(String token) {
-        return Jwts.parserBuilder()
+        return Jwts.parser()
                 .setSigningKey(Keys.hmacShaKeyFor(properties.getJwtSecret().getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parseClaimsJws(token)

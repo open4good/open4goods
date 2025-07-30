@@ -27,7 +27,8 @@ public class SecurityProperties {
     /**
      * Secret key used to sign JWT tokens.
      */
-    private String jwtSecret = "changeMe";
+    // TODO : aDD VALIDATION, MUST NOT BE BLANK, MUST BE > 32 CHARS
+    private String jwtSecret;
 
     /**
      * Access token validity duration.

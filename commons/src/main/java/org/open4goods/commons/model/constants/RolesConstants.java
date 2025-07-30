@@ -12,6 +12,4 @@ public class RolesConstants {
 	public static final String ACTUATOR_ADMIN_ROLE = "XWIKIADMINGROUP";
 	//public static final String ROLE_XWIKI_ALL = "ROLE_XWIKIALLGROUP";
 	public static final String ROLE_XWIKI_ALL = "XWIKIALLGROUP";
-
-
 }
