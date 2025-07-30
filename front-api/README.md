@@ -23,6 +23,12 @@ CORS origins using the `front.security.cors-allowed-hosts` property. You can ove
 via the `FRONT_SECURITY_CORS_ALLOWED_HOSTS` environment variable. By default it permits requests from
 `http://localhost:8082`.
 
+Additional properties configure token generation:
+
+- `front.security.jwt-secret` – secret key used to sign JWT tokens.
+- `front.security.access-token-expiry` – duration before an access token expires (default `PT30M`).
+- `front.security.refresh-token-expiry` – duration before a refresh token expires (default `P7D`).
+
 With this configuration all calls stay on the same origin and the built-in CORS
 rules apply correctly.
 
