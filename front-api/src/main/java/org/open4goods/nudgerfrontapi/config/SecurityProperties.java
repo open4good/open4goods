@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,21 @@ public class SecurityProperties {
      */
     private List<String> corsAllowedHosts = new ArrayList<>();
 
+    /**
+     * Secret key used to sign JWT tokens.
+     */
+    private String jwtSecret = "changeMe";
+
+    /**
+     * Access token validity duration.
+     */
+    private Duration accessTokenExpiry = Duration.ofMinutes(30);
+
+    /**
+     * Refresh token validity duration.
+     */
+    private Duration refreshTokenExpiry = Duration.ofDays(7);
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -37,5 +53,29 @@ public class SecurityProperties {
 
     public void setCorsAllowedHosts(List<String> corsAllowedHosts) {
         this.corsAllowedHosts = corsAllowedHosts;
+    }
+
+    public String getJwtSecret() {
+        return jwtSecret;
+    }
+
+    public void setJwtSecret(String jwtSecret) {
+        this.jwtSecret = jwtSecret;
+    }
+
+    public Duration getAccessTokenExpiry() {
+        return accessTokenExpiry;
+    }
+
+    public void setAccessTokenExpiry(Duration accessTokenExpiry) {
+        this.accessTokenExpiry = accessTokenExpiry;
+    }
+
+    public Duration getRefreshTokenExpiry() {
+        return refreshTokenExpiry;
+    }
+
+    public void setRefreshTokenExpiry(Duration refreshTokenExpiry) {
+        this.refreshTokenExpiry = refreshTokenExpiry;
     }
 }
