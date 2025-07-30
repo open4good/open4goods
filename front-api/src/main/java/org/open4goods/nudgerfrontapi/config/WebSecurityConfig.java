@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/auth/**").permitAll()
                     .anyRequest().authenticated())
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                .httpBasic(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults());
         } else {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         }
