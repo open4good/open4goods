@@ -6,7 +6,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://auth.example.com/issuer
+          secret-key: ${front.security.jwt-secret}
 
 springdoc:
   api-docs:
@@ -21,6 +21,7 @@ front:
   security:
     enabled: true
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
+    jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     
 xwiki:
     username: nudger

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(properties = {
         "front.cache.path=${java.io.tmpdir}",
-        "front.security.jwt-secret=testsecret"})
+        "front.security.jwt-secret=0123456789ABCDEF0123456789ABCDEF"})
 @AutoConfigureMockMvc
 class AuthControllerIT {
 

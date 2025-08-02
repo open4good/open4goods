@@ -1,23 +1,32 @@
 package org.open4goods.nudgerfrontapi.config;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import javax.crypto.SecretKey;
+
+import org.open4goods.nudgerfrontapi.config.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.LocaleResolver;
-import java.util.Arrays;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.LocaleResolver;
 
-import org.open4goods.nudgerfrontapi.config.SecurityProperties;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * Web security configuration for the frontend API.
@@ -36,6 +45,24 @@ public class WebSecurityConfig {
                              AuthenticationProvider authenticationProvider) {
         this.securityProperties = securityProperties;
         this.authenticationProvider = authenticationProvider;
+    }
+
+    @Bean
+    /**
+     * JWT encoder backed by the shared secret.
+     */
+    JwtEncoder jwtEncoder() {
+        SecretKey key = Keys.hmacShaKeyFor(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8));
+        return NimbusJwtEncoder.withSecretKey(key).build();
+    }
+
+    @Bean
+    /**
+     * JWT decoder using the same shared secret.
+     */
+    JwtDecoder jwtDecoder() {
+        SecretKey key = Keys.hmacShaKeyFor(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8));
+        return NimbusJwtDecoder.withSecretKey(key).build();
     }
 
     @Bean
