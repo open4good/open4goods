@@ -117,6 +117,22 @@ class ProductControllerIT {
     }
 
     @Test
+    void productsEndpointReturns400OnInvalidSort() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("sort", "invalid,asc")
+                        .with(jwt()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void productsEndpointReturns400OnInvalidInclude() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("include", "wrong")
+                        .with(jwt()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void sortableFieldsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/sortable").with(jwt()))
                 .andExpect(status().isOk())
