@@ -47,10 +47,11 @@ public class WebSecurityConfig {
 
         if (securityProperties.isEnabled()) {
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/auth/**").permitAll()
+                    .requestMatchers("/", "/auth/**").permitAll()
                     .anyRequest().authenticated())
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults());
         } else {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         }
