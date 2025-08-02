@@ -1,18 +1,16 @@
 package org.open4goods.nudgerfrontapi.service.auth;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Date;
-import java.util.stream.Collectors;
 
 import org.open4goods.nudgerfrontapi.config.SecurityProperties;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.stereotype.Service;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
 /**
  * Utility service to issue and validate JWT tokens for the frontend API.
@@ -20,9 +18,13 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
+    private final JwtEncoder encoder;
+    private final JwtDecoder decoder;
     private final SecurityProperties properties;
 
-    public JwtService(SecurityProperties properties) {
+    public JwtService(JwtEncoder encoder, JwtDecoder decoder, SecurityProperties properties) {
+        this.encoder = encoder;
+        this.decoder = decoder;
         this.properties = properties;
     }
 
@@ -36,14 +38,15 @@ public class JwtService {
     public String generateAccessToken(Authentication auth) {
         Instant now = Instant.now();
         Instant exp = now.plus(properties.getAccessTokenExpiry());
-        return Jwts.builder()
-                .setSubject(auth.getName())
+        JwsHeader header = JwsHeader.with(() -> "HS256").build();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .subject(auth.getName())
                 .claim("roles", auth.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(exp))
-                .signWith(Keys.hmacShaKeyFor(properties.getJwtSecret().getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
-                .compact();
+                        .map(GrantedAuthority::getAuthority).toList())
+                .issuedAt(now)
+                .expiresAt(exp)
+                .build();
+        return encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
 
     /**
@@ -52,23 +55,19 @@ public class JwtService {
     public String generateRefreshToken(Authentication auth) {
         Instant now = Instant.now();
         Instant exp = now.plus(properties.getRefreshTokenExpiry());
-        return Jwts.builder()
-                .setSubject(auth.getName())
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(exp))
-                .signWith(Keys.hmacShaKeyFor(properties.getJwtSecret().getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
-                .compact();
+        JwsHeader header = JwsHeader.with(() -> "HS256").build();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .subject(auth.getName())
+                .issuedAt(now)
+                .expiresAt(exp)
+                .build();
+        return encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
 
     /**
      * Validate a token and return the authentication subject.
      */
     public String validateRefreshToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(Keys.hmacShaKeyFor(properties.getJwtSecret().getBytes(StandardCharsets.UTF_8)))
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return decoder.decode(token).getSubject();
     }
 }
