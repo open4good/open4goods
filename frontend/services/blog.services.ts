@@ -19,16 +19,19 @@ export class BlogService {
    * Fetch paginated blog articles
    * @returns Promise<PageDto>
    */
-  async getArticles(params: {
-    tag?: string
-    pageNumber?: number
-    pageSize?: number
-  } = {}): Promise<PageDto> {
+  async getArticles(
+    params: {
+      tag?: string
+      pageNumber?: number
+      pageSize?: number
+    } = {}
+  ): Promise<PageDto> {
     try {
       return await this.api.posts(params)
     } catch (error) {
       console.error('Error fetching blog articles:', error)
-      throw new Error('Failed to fetch blog articles')
+      // Rethrow original error so callers can access status and message
+      throw error
     }
   }
 
@@ -42,7 +45,8 @@ export class BlogService {
       return await this.api.post({ slug })
     } catch (error) {
       console.error(`Error fetching blog article ${slug}:`, error)
-      throw new Error(`Failed to fetch blog article ${slug}`)
+      // Preserve original error details for upstream handlers
+      throw error
     }
   }
 }
