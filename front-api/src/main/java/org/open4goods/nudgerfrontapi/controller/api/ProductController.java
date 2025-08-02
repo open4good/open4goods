@@ -180,26 +180,32 @@ public class ProductController {
 		/////////////////////
 
 		// Validating sort field
-		page.getSort().stream().forEach(s -> {
-			if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+                for (var order : page.getSort()) {
+                        if (ProductDtoSortableFields.fromText(order.getProperty()).isEmpty()) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid sort parameter");
+                                pd.setDetail("Unknown sort field: " + order.getProperty());
+                                @SuppressWarnings({"unchecked", "rawtypes"})
+                                ResponseEntity<Page<ProductDto>> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                return response;
+                        }
+                }
+                // Validating requested components
 
-				// TODO : HAndle this invalid value, raise approriate http code and
-				// problemdetail to the client.
-				return;
-			}
-		});
-
-		// Validating requested components
-		if (null != include) {
-			include.forEach(i -> {
-				if (null == ProductDtoComponent.valueOf(i)) {
-					// TODO : Handle this invalid value, raise approriate http code and
-					// problemdetail to the client.
-					return;
-				}
-
-			});
-		}
+                if (include != null) {
+                        for (String i : include) {
+                                try {
+                                        ProductDtoComponent.valueOf(i);
+                                } catch (IllegalArgumentException ex) {
+                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                        pd.setTitle("Invalid include parameter");
+                                        pd.setDetail("Unknown component: " + i);
+                                        @SuppressWarnings({"unchecked", "rawtypes"})
+                                        ResponseEntity<Page<ProductDto>> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        return response;
+                                }
+                        }
+                }
 
 
 		////////////////////////
