@@ -32,6 +32,29 @@ Additional properties configure token generation:
 With this configuration all calls stay on the same origin and the built-in CORS
 rules apply correctly.
 
+## API documentation
+
+Access to the Swagger UI (`/swagger-ui.html`) and the raw OpenAPI specification
+(`/v3/api-docs`) requires valid XWiki credentials. Use HTTP Basic
+authentication when requesting these endpoints. Example commands:
+
+```bash
+curl -u XWIKI_USER:XWIKI_PASS http://localhost:8082/swagger-ui.html
+curl -u XWIKI_USER:XWIKI_PASS http://localhost:8082/v3/api-docs
+```
+
+To call secured REST endpoints you must obtain a JWT by authenticating with the
+same credentials:
+
+```bash
+curl -X POST http://localhost:8082/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"XWIKI_USER","password":"XWIKI_PASS"}'
+```
+
+The response returns `accessToken` and `refreshToken`; include the access token
+in subsequent requests using the `Authorization: Bearer <token>` header.
+
 ## Building
 
 From this directory run:
