@@ -44,7 +44,7 @@ const onSubmit = async () => {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/api/auth/login', {
+    await $fetch('/auth/login', {
       method: 'POST',
       body: { username: username.value, password: password.value }
     })

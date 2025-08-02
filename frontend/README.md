@@ -102,10 +102,11 @@ Runtime configuration uses the following variables defined in `nuxt.config.ts`:
 
 ## Authentication cookies
 
-The login route stores the JWT and refresh token in HTTP‑only cookies. In
-production these cookies are marked `Secure` and `SameSite=None` to allow usage
-across subdomains. During local development the cookies fall back to
-`SameSite=Lax` and are not forced to be secure.
+Credentials are submitted to `/auth/login`. The handler stores the returned JWT
+and refresh token in HTTP‑only cookies. In production these cookies are marked
+`Secure` and `SameSite=None` to allow usage across subdomains. During local
+development the cookies fall back to `SameSite=Lax` and are not forced to be
+secure.
 
 ## Design Tokens
 

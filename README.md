@@ -118,6 +118,21 @@ deployment, the Nuxt build directory (`.output`) is copied to
 this path and runs `node .output/server/index.mjs` to serve the production
 frontend.
 
+### Frontend environment variables
+
+The Nuxt frontend reads its API endpoint and cookie names from environment
+variables. Create a `.env` file in `frontend/` with:
+
+```
+API_URL=http://localhost:8082
+TOKEN_COOKIE_NAME=access_token
+REFRESH_COOKIE_NAME=refresh_token
+```
+
+On login, the `/auth/login` route stores JWT and refresh tokens in HTTP-only
+cookies using these names. In production they are marked `Secure` and
+`SameSite=None`.
+
 > Before running the docker compose check that the value of 'vm.max_map_count' is higher or equal to 262144. If not, you will have to raise your max map  args to be able to rune the Elastic image, see the [Hint's section](https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)
 
 

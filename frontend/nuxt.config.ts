@@ -68,12 +68,16 @@ export default defineNuxtConfig({
     },
   ],
   // Runtime configuration for environment variables
+  // These can be overridden via a .env file
   runtimeConfig: {
+    // Name of the cookie storing the JWT
     tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
+    // Name of the cookie storing the refresh token
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
 
     // Public keys (exposed to client-side)
     public: {
+      // Base URL of the backend API
       apiUrl: process.env.API_URL || 'http://localhost:8082',
     }
   },

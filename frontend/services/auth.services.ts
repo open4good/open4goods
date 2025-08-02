@@ -1,6 +1,6 @@
 export class AuthService {
   async login(username: string, password: string) {
-    return await $fetch('/api/auth/login', {
+    return await $fetch('/auth/login', {
       method: 'POST',
       body: { username, password },
     })
