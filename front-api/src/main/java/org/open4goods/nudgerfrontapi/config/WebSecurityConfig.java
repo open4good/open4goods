@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
-import org.open4goods.nudgerfrontapi.config.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +25,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.LocaleResolver;
+
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 
 import io.jsonwebtoken.security.Keys;
 
@@ -48,12 +52,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    /**
-     * JWT encoder backed by the shared secret.
-     */
-    JwtEncoder jwtEncoder() {
-        SecretKey key = Keys.hmacShaKeyFor(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8));
-        return NimbusJwtEncoder.withSecretKey(key).build();
+    public JwtEncoder jwtEncoder() {
+        SecretKey key = new SecretKeySpec(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        JWKSource<SecurityContext> jwkSource = new ImmutableSecret<>(key);
+        return new NimbusJwtEncoder(jwkSource);
     }
 
     @Bean
