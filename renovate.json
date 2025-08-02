@@ -16,9 +16,8 @@
     },
     {
       "matchPaths": ["frontend/**"],
-      "matchManagers": ["pnpm"],
+      "matchManagers": ["pnpm", "npm", "node"],
       "enabled": true,
-      "matchUpdateTypes": ["major", "minor", "patch"],
       "labels": ["squad:ux"]
     }
   ]
