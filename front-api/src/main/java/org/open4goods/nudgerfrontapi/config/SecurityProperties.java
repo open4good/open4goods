@@ -33,7 +33,7 @@ public class SecurityProperties {
     /**
      * Access token validity duration.
      */
-    private Duration accessTokenExpiry = Duration.ofMinutes(30);
+    private Duration accessTokenExpiry = Duration.ofMinutes(15);
 
     /**
      * Refresh token validity duration.
