@@ -59,20 +59,8 @@ public class AuthController {
             String access = jwtService.generateAccessToken(auth);
             String refresh = jwtService.generateRefreshToken(auth);
 
-            ResponseCookie accessCookie = ResponseCookie.from("access-token", access)
-                    .httpOnly(true)
-                    .path("/")
-                    .maxAge(jwtService.getProperties().getAccessTokenExpiry())
-                    .build();
-            ResponseCookie refreshCookie = ResponseCookie.from("refresh-token", refresh)
-                    .httpOnly(true)
-                    .path("/auth/refresh")
-                    .maxAge(jwtService.getProperties().getRefreshTokenExpiry())
-                    .build();
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                     .body(new AuthTokensDto(access, refresh));
         } catch (AuthenticationException ex) {
             return ResponseEntity.status(401).build();
@@ -96,20 +84,8 @@ public class AuthController {
             String access = jwtService.generateAccessToken(auth);
             String newRefresh = jwtService.generateRefreshToken(auth);
 
-            ResponseCookie accessCookie = ResponseCookie.from("access-token", access)
-                    .httpOnly(true)
-                    .path("/")
-                    .maxAge(jwtService.getProperties().getAccessTokenExpiry())
-                    .build();
-            ResponseCookie refreshCookie = ResponseCookie.from("refresh-token", newRefresh)
-                    .httpOnly(true)
-                    .path("/auth/refresh")
-                    .maxAge(jwtService.getProperties().getRefreshTokenExpiry())
-                    .build();
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                     .body(new AuthTokensDto(access, newRefresh));
         } catch (Exception ex) {
             return ResponseEntity.status(401).build();
