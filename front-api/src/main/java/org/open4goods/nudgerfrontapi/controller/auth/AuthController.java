@@ -94,14 +94,23 @@ public class AuthController {
             String user = jwtService.validateRefreshToken(refreshToken);
             Authentication auth = new UsernamePasswordAuthenticationToken(user, "N/A");
             String access = jwtService.generateAccessToken(auth);
+            String newRefresh = jwtService.generateRefreshToken(auth);
+
             ResponseCookie accessCookie = ResponseCookie.from("access-token", access)
                     .httpOnly(true)
                     .path("/")
                     .maxAge(jwtService.getProperties().getAccessTokenExpiry())
                     .build();
+            ResponseCookie refreshCookie = ResponseCookie.from("refresh-token", newRefresh)
+                    .httpOnly(true)
+                    .path("/auth/refresh")
+                    .maxAge(jwtService.getProperties().getRefreshTokenExpiry())
+                    .build();
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                    .body(new AuthTokensDto(access, refreshToken));
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(new AuthTokensDto(access, newRefresh));
         } catch (Exception ex) {
             return ResponseEntity.status(401).build();
         }
