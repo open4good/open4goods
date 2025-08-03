@@ -58,6 +58,12 @@ The module exposes configurable security settings via
 - `front.security.enabled` – toggle Spring Security.
 - `front.security.cors-allowed-hosts` – list of allowed CORS origins.
 
+Rate limiting is configured via `front.rate-limit.*` mapped by
+`RateLimitProperties`:
+
+- `front.rate-limit.anonymous` – requests per minute for unauthenticated users.
+- `front.rate-limit.authenticated` – requests per minute for authenticated users.
+
 ---
 
 ## 6. SpringDoc Rules

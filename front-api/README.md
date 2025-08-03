@@ -32,6 +32,16 @@ Additional properties configure token generation:
 With this configuration all calls stay on the same origin and the built-in CORS
 rules apply correctly.
 
+## Rate limiting
+
+Requests are limited using an in-memory token bucket. Defaults can be changed in
+`application.yml`:
+
+- `front.rate-limit.anonymous` – requests per minute allowed for unauthenticated users.
+- `front.rate-limit.authenticated` – requests per minute allowed for authenticated users.
+
+When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
+
 ## API documentation
 
 Access to the Swagger UI (`/swagger-ui.html`) and the raw OpenAPI specification
