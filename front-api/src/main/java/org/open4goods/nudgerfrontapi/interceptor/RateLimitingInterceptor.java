@@ -3,7 +3,7 @@ package org.open4goods.nudgerfrontapi.interceptor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.open4goods.commons.helper.IpHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.nudgerfrontapi.config.RateLimitProperties;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,7 +51,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
-        response.setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+        response.setStatus(429);
         return false;
     }
 
@@ -60,6 +60,30 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             return "auth:" + auth.getName();
         }
-        return "ip:" + IpHelper.getIp(request);
+        return "ip:" + getIp(request);
     }
+
+
+
+    /**
+     * TODO : mutualize with Iphelper.getIp
+     * @param request
+     * @return
+     */
+	private String getIp(final HttpServletRequest request) {
+
+		String ip = request.getHeader("X-Real-Ip");
+
+		if (StringUtils.isEmpty(ip)) {
+			ip = request.getHeader("X-Forwarded-For");
+		}
+
+		if (StringUtils.isEmpty(ip)) {
+			ip = request.getRemoteAddr();
+		}
+
+		return ip;
+
+	}
+
 }
