@@ -77,6 +77,10 @@ Execute the tests with:
 mvn test
 ```
 
+## Observability
+
+Each request is logged with endpoint, status, client IP and user subject. Metrics counters are exposed via Spring Boot Actuator at /actuator/metrics.
+
 ## Migration notes
 
 DTO classes such as `ProductDto` are now implemented using Java records. This

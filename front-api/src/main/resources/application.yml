@@ -28,3 +28,9 @@ xwiki:
     password: nudger 
     baseUrl: https://wiki.nudger.fr
         
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
