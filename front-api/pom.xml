@@ -54,6 +54,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>commons</artifactId>
+      <version>${global.version}</version>
+    </dependency>
+
+    <dependency>
         <groupId>org.open4goods</groupId>
         <artifactId>xwiki-spring-boot-starter</artifactId>
         <version>0.0.1</version>
@@ -92,6 +98,7 @@
       <artifactId>jjwt-api</artifactId>
       <version>0.12.6</version>
     </dependency>
+
 
     <dependency>
       <groupId>org.springdoc</groupId>
