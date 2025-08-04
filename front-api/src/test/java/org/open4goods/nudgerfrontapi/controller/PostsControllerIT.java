@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.controller.api.PostsController;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
@@ -22,7 +23,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(properties = "front.cache.path=${java.io.tmpdir}")
+@SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
+        "front.security.enabled=true",
+        "front.security.shared-token=test-token"})
 @AutoConfigureMockMvc
 class PostsControllerIT {
 
@@ -35,6 +38,8 @@ class PostsControllerIT {
     @MockBean
     private BlogService blogService;
 
+    private static final String SHARED_TOKEN = "test-token";
+
     @Test
     void postsEndpointReturnsList() throws Exception {
         BlogPost post = new BlogPost();
@@ -42,7 +47,9 @@ class PostsControllerIT {
         post.setUrl("slug");
         given(blogService.getPosts(any())).willReturn(List.of(post));
 
-        mockMvc.perform(get("/blog/posts").with(jwt()))
+        mockMvc.perform(get("/blog/posts")
+                .header("X-Shared-Token", SHARED_TOKEN)
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page.number").value(0))
                 .andExpect(jsonPath("$.data[0].title").value("Title"));
@@ -52,7 +59,9 @@ class PostsControllerIT {
     void postEndpointReturns404WhenMissing() throws Exception {
         given(blogService.getPostsByUrl()).willReturn(Map.of());
 
-        mockMvc.perform(get("/blog/posts/{slug}", "missing").with(jwt()))
+        mockMvc.perform(get("/blog/posts/{slug}", "missing")
+                .header("X-Shared-Token", SHARED_TOKEN)
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isNotFound());
     }
 
@@ -64,7 +73,9 @@ class PostsControllerIT {
         post.setCreated(new Date(1L));
         given(blogService.getPostsByUrl()).willReturn(Map.of("slug", post));
 
-        mockMvc.perform(get("/blog/posts/{slug}", "slug").with(jwt()))
+        mockMvc.perform(get("/blog/posts/{slug}", "slug")
+                .header("X-Shared-Token", SHARED_TOKEN)
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.url").value("slug"))
                 .andExpect(jsonPath("$.title").value("Title"));
@@ -76,7 +87,9 @@ class PostsControllerIT {
         tags.put("eco", 2);
         given(blogService.getTags()).willReturn(tags);
 
-        mockMvc.perform(get("/blog/tags").with(jwt()))
+        mockMvc.perform(get("/blog/tags")
+                .header("X-Shared-Token", SHARED_TOKEN)
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("eco"))
                 .andExpect(jsonPath("$[0].count").value(2));
