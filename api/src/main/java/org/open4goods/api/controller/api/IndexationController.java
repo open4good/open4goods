@@ -2,8 +2,8 @@
 package org.open4goods.api.controller.api;
 
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.dto.api.IndexationResponse;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;

@@ -1,4 +1,4 @@
-package org.open4goods.commons.model.constants;
+package org.open4goods.model;
 
 /**
  * Constants for roles

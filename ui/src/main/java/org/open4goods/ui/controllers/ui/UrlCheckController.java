@@ -1,6 +1,6 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.commons.model.constants.RolesConstants;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.UrlCheckService;
 import org.springframework.beans.factory.annotation.Autowired;

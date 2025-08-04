@@ -3,15 +3,15 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.Locale;
 
+import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.model.EnrichmentFacet;
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BarcodeValidationService;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;

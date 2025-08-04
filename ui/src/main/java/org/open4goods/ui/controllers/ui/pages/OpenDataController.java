@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.model.constants.RolesConstants;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.OpenDataService;

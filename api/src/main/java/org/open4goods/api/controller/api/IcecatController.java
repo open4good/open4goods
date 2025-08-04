@@ -3,9 +3,9 @@ package org.open4goods.api.controller.api;
 
 import java.util.Map;
 
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.springframework.context.annotation.Profile;
