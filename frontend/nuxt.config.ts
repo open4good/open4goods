@@ -4,11 +4,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: {
     enabled: process.env.NODE_ENV !== 'production',
-
     timeline: {
       enabled: true,
     },
   },
+
   typescript: {
     typeCheck: true,
     tsConfig: {
@@ -18,7 +18,14 @@ export default defineNuxtConfig({
     }
   },
 
-
+  routeRules: {
+    '/blog/**': { swr: 60 }, // revalide le cache après 60s
+    //'/blog/**': { isr: { expiration: 60 } } // re-génère toutes les 60s
+    // pages générées une seule fois de manière statique
+    //'/articles/**': { static: true },
+    // zone d’admin rendue côté client
+    '/admin/**': { ssr: false },
+  },
   modules: [
     "vuetify-nuxt-module",
     "@nuxtjs/i18n",
