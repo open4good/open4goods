@@ -347,7 +347,9 @@ describe('Button', () => {
   - Tests and lint on PRs
   - Semantic release (automated versioning via commit messages)
   - Node SSR deployed to the beta server via
-    `.github/workflows/frontend-deploy-ssr.yml`
+    `.github/workflows/frontend-deploy-ssr.yml`, which injects
+    `API_URL` and `MACHINE_TOKEN` from repository secrets during
+    the build.
 
 ## Contributing
 
