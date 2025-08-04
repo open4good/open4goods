@@ -183,7 +183,7 @@ Before issueing a PR, systematically validate and check global non regession usi
 - pnpm --offline lint
 - pnpm --offline test run
 - pnpm --offline generate
-- pnpm --offline preview, then tests URLS are HTTP 200 or act as expected
+- pnpm --offline build
 
 # Best practices for Nuxt3 project
 
