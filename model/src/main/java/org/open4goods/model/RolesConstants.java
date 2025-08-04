@@ -14,6 +14,8 @@ public class RolesConstants {
 	public static final String ROLE_XWIKI_ALL = "XWIKIALLGROUP";
 	public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 	public static final String ROLE_FRONTEND = "ROLE_FRONTEND";
+	public static final String ROLE_EDITOR = "ROLE_SITEEDITOR";
+
 
 
 

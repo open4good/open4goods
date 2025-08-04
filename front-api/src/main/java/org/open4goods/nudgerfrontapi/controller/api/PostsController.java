@@ -46,7 +46,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/blog")
 @Validated
-@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_FRONTEND + "')")
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
 @Tag(name = "Blog", description = "Blog posts, tags and RSS feed")
 public class PostsController {
 

@@ -56,7 +56,7 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public JwtEncoder jwtEncoder() {
+    JwtEncoder jwtEncoder() {
         SecretKey key = new SecretKeySpec(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         JWKSource<SecurityContext> jwkSource = new ImmutableSecret<>(key);
         return new NimbusJwtEncoder(jwkSource);
@@ -72,7 +72,7 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                   LocaleResolver localeResolver,
                                                   JwtAuthenticationConverter jwtAuthenticationConverter,
                                                   SharedTokenFilter sharedTokenFilter) throws Exception {
@@ -97,7 +97,7 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
         grantedAuthoritiesConverter.setAuthorityPrefix("");
@@ -108,7 +108,7 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.authenticationProvider(authenticationProvider);
         return builder.build();
