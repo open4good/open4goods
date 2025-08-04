@@ -16,9 +16,11 @@ import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
+import org.open4goods.commons.model.constants.RolesConstants;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +45,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/blog")
 @Validated
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
 @Tag(name = "Blog", description = "Blog posts, tags and RSS feed")
 public class PostsController {
 

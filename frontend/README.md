@@ -52,6 +52,7 @@ To get the project up and running locally, follow these steps:
      The value is available via `config.public.apiUrl` in `nuxt.config.ts`.
    - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
    - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
+   - `MACHINE_TOKEN`: Shared secret used for server-to-server requests. This value is loaded only on the server and never exposed to the client.
 
 5. **Run the Dev Server**:
 
@@ -99,6 +100,7 @@ Runtime configuration uses the following variables defined in `nuxt.config.ts`:
   `access_token`.
 - **`REFRESH_COOKIE_NAME`** – cookie name for the refresh token. Defaults to
   `refresh_token`.
+- **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.public.apiUrl`.
 
 ## Authentication cookies
 
@@ -107,6 +109,21 @@ and refresh token in HTTP‑only cookies. In production these cookies are marked
 `Secure` and `SameSite=None` to allow usage across subdomains. During local
 development the cookies fall back to `SameSite=Lax` and are not forced to be
 secure.
+
+## Role-based UI with Pinia
+
+The `useAuthStore` decodes the JWT to keep the user's roles and login state.
+Use the `useAuth()` composable inside components or pages:
+
+```ts
+const { isLoggedIn, hasRole } = useAuth()
+```
+
+Template example:
+
+```vue
+<v-alert v-if="hasRole('ADMIN')">Admin specific content</v-alert>
+```
 
 ## Design Tokens
 

@@ -33,6 +33,8 @@
 </template>
 
 <script setup lang="ts">
+import { authService } from '~/services'
+
 const username = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -44,10 +46,7 @@ const onSubmit = async () => {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/auth/login', {
-      method: 'POST',
-      body: { username: username.value, password: password.value }
-    })
+    await authService.login(username.value, password.value)
     await router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
