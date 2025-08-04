@@ -11,6 +11,8 @@ import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,7 +66,8 @@ public class ContentsController {
             }
     )
     public ResponseEntity<XwikiContentBlocDto> contentBloc(@PathVariable String blocId,
-                                                           Locale locale) {
+                                                           Locale locale,
+                                                           @AuthenticationPrincipal UserDetails userDetails) {
 
         String htmlContent = xwikiHtmlService.html(blocId);
         String editLink = xwikiHtmlService.getEditPageUrl(blocId);
