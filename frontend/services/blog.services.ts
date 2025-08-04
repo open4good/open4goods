@@ -7,12 +7,8 @@ import type { BlogPostDto, PageDto } from '~/src/api'
 export class BlogService {
   private readonly api: BlogApi
 
-  constructor() {
-    const config = useRuntimeConfig()
-    const apiConfig = new Configuration({ basePath: config.apiUrl })
-    console.log('[ContentService] baseUrl =', config.apiUrl)
-
-    this.api = new BlogApi(apiConfig)
+  constructor(api: BlogApi) {
+    this.api = api
   }
 
   /**
@@ -51,5 +47,14 @@ export class BlogService {
   }
 }
 
-// Export singleton instance
-export const blogService = new BlogService()
+/**
+ * Factory to create a BlogService with runtime configuration
+ */
+export const useBlogService = (): BlogService => {
+  const config = useRuntimeConfig()
+  const apiConfig = new Configuration({ basePath: config.apiUrl })
+  console.log('[BlogService] baseUrl =', config.apiUrl)
+
+  const api = new BlogApi(apiConfig)
+  return new BlogService(api)
+}

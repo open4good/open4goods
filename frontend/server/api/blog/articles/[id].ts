@@ -1,4 +1,4 @@
-import { blogService } from '~/services/blog.services'
+import { useBlogService } from '~/services/blog.services'
 import type { BlogPostDto } from '~/src/api'
 import { ResponseError } from '~/src/api'
 
@@ -7,6 +7,7 @@ import { ResponseError } from '~/src/api'
  * Handles GET requests for a single blog article
  */
 export default defineEventHandler(async (event): Promise<BlogPostDto> => {
+  const blogService = useBlogService()
   const slug = getRouterParam(event, 'id')
 
   if (!slug) {

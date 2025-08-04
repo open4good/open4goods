@@ -1,4 +1,4 @@
-import { blogService } from '~/services/blog.services'
+import { useBlogService } from '~/services/blog.services'
 import type { PageDto } from '~/src/api'
 import { ResponseError } from '~/src/api'
 
@@ -7,6 +7,7 @@ import { ResponseError } from '~/src/api'
  * Handles GET requests for blog articles with caching
  */
 export default defineEventHandler(async (event): Promise<PageDto> => {
+  const blogService = useBlogService()
   // Set cache headers for 1 hour
   setResponseHeader(
     event,
