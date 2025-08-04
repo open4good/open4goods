@@ -57,11 +57,19 @@
         <h2>Demo Xwiki as headless CMS</h2>
         <TextContent blocId="Main" />
     </section>
+
+    <v-alert
+      v-if="hasRole('ADMIN')"
+      type="info"
+      class="mt-6"
+    >
+      Admin specific content
+    </v-alert>
   </v-container>
 </template>
 
 <script setup lang="ts">
-// Static landing page - no specific script logic yet
+const { hasRole } = useAuth()
 </script>
 
 <style lang="sass" scoped>
