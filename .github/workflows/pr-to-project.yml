@@ -29,7 +29,6 @@ jobs:
         with:
           github-token: ${{ secrets.PROJECT_PAT }}
           script: |
-            const core         = require('@actions/core');
             const mapping      = Object.fromEntries(
               (process.env.PROJECT_ID_MAPPING || '')
                 .split('\n')
