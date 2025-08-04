@@ -81,6 +81,8 @@ export default defineNuxtConfig({
     tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
     // Name of the cookie storing the refresh token
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
+    // Shared token for server-to-server authentication (server-only)
+    machineToken: process.env.MACHINE_TOKEN || '',
 
     // Public keys (exposed to client-side)
     public: {

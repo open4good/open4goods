@@ -52,6 +52,7 @@ To get the project up and running locally, follow these steps:
      The value is available via `config.public.apiUrl` in `nuxt.config.ts`.
    - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
    - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
+   - `MACHINE_TOKEN`: Shared secret used for server-to-server requests. This value is loaded only on the server and never exposed to the client.
 
 5. **Run the Dev Server**:
 
@@ -99,6 +100,7 @@ Runtime configuration uses the following variables defined in `nuxt.config.ts`:
   `access_token`.
 - **`REFRESH_COOKIE_NAME`** – cookie name for the refresh token. Defaults to
   `refresh_token`.
+- **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.public.apiUrl`.
 
 ## Authentication cookies
 
