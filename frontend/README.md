@@ -49,7 +49,7 @@ To get the project up and running locally, follow these steps:
 4. **Environment Variables**:
    Create a `.env` file with the following variables:
    - `API_URL`: Base URL of the backend API (defaults to `http://localhost:8082`).
-     The value is available via `config.public.apiUrl` in `nuxt.config.ts`.
+     The value is available via `config.apiUrl` in `nuxt.config.ts`.
    - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
    - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
    - `MACHINE_TOKEN`: Shared secret used for server-to-server requests. This value is loaded only on the server and never exposed to the client.
@@ -95,12 +95,12 @@ Runtime configuration uses the following variables defined in `nuxt.config.ts`:
 
 - **`API_URL`** – base URL of the backend API. Defaults to
   `http://localhost:8082` and is exposed as
-  `config.public.apiUrl`.
+  `config.apiUrl`.
 - **`TOKEN_COOKIE_NAME`** – cookie name for the JWT. Defaults to
   `access_token`.
 - **`REFRESH_COOKIE_NAME`** – cookie name for the refresh token. Defaults to
   `refresh_token`.
-- **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.public.apiUrl`.
+- **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.apiUrl`.
 
 ## Authentication cookies
 
@@ -257,7 +257,7 @@ const cart = useCartStore();
 ```ts
 const config = useRuntimeConfig()
 const { data: postRes } = await useFetch(
-  `${config.public.apiUrl}/blog/posts`,
+  `${config.apiUrl}/blog/posts`,
   {
     params: { filters: { slug } },
     // TODO: temporarily disabled
@@ -277,7 +277,7 @@ The generated `ContentApi` client allows retrieval of HTML blocs from the
 ```ts
 import { ContentApi, Configuration } from '@/api'
 const config = useRuntimeConfig()
-const api = new ContentApi(new Configuration({ basePath: config.public.apiUrl }))
+const api = new ContentApi(new Configuration({ basePath: config.apiUrl }))
 const bloc = await api.contentBloc({ blocId: 'Main.WebHome' })
 ```
 

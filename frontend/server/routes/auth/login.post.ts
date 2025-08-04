@@ -12,7 +12,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const config = useRuntimeConfig()
   try {
-    const tokens = await $fetch<LoginResponse>(`${config.public.apiUrl}/auth/login`, {
+    const tokens = await $fetch<LoginResponse>(`${config.apiUrl}/auth/login`, {
       method: 'POST',
       body,
     })

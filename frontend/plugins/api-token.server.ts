@@ -7,7 +7,7 @@ export default defineNuxtPlugin(() => {
   globalObj.__apiTokenInstalled = true
 
   const config = useRuntimeConfig()
-  const apiUrl = config.public.apiUrl
+  const apiUrl = config.apiUrl
   const token = config.machineToken
   const originalFetch = globalObj.fetch
   const toUrl = (input: unknown): string => {

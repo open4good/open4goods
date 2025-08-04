@@ -9,7 +9,7 @@ export class ContentService {
 
   constructor() {
     const config = useRuntimeConfig()
-    const apiConfig = new Configuration({ basePath: config.public.apiUrl })
+    const apiConfig = new Configuration({ basePath: config.apiUrl })
     this.api = new ContentApi(apiConfig)
   }
 

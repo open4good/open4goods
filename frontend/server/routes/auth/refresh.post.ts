@@ -14,7 +14,7 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   try {
-    const tokens = await $fetch<RefreshResponse>(`${config.public.apiUrl}/auth/refresh`, {
+    const tokens = await $fetch<RefreshResponse>(`${config.apiUrl}/auth/refresh`, {
       method: 'POST',
       headers: { cookie: `${config.refreshCookieName}=${refreshToken}` },
     })

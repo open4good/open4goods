@@ -83,11 +83,11 @@ export default defineNuxtConfig({
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
     // Shared token for server-to-server authentication (server-only)
     machineToken: process.env.MACHINE_TOKEN || '',
+    apiUrl: process.env.API_URL || 'http://localhost:8082',
 
     // Public keys (exposed to client-side)
     public: {
       // Base URL of the backend API
-      apiUrl: process.env.API_URL || 'http://localhost:8082',
     }
   },
 })
