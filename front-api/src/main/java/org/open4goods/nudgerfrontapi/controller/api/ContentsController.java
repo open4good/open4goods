@@ -31,7 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping
 @Validated
-@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
 @Tag(name = "Content", description = "Content blocs")
 public class ContentsController {
 
