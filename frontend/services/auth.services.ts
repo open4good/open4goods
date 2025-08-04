@@ -1,23 +1,50 @@
 /**
  * Authentication service handling login and token refresh calls.
  */
+import { jwtDecode } from 'jwt-decode'
+import { useAuthStore } from '~/stores/useAuthStore'
+
+interface JwtPayload { roles?: string[] }
+
 export class AuthService {
+  private syncAuthState() {
+    const config = useRuntimeConfig()
+    const token = useCookie<string | null>(config.tokenCookieName)
+    const authStore = useAuthStore()
+
+    if (token.value) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(token.value)
+        authStore.$patch({ roles: decoded.roles ?? [], isLoggedIn: true })
+      } catch (err) {
+        console.error('Failed to decode JWT', err)
+        authStore.$patch({ roles: [], isLoggedIn: false })
+      }
+    } else {
+      authStore.$patch({ roles: [], isLoggedIn: false })
+    }
+  }
+
   async login(username: string, password: string) {
-    return await $fetch('/auth/login', {
+    const res = await $fetch('/auth/login', {
       method: 'POST',
       body: { username, password },
       credentials: 'include',
     })
+    this.syncAuthState()
+    return res
   }
 
   /**
    * Request a new access token using the refresh token cookie.
    */
   async refresh() {
-    return await $fetch('/auth/refresh', {
+    const res = await $fetch('/auth/refresh', {
       method: 'POST',
       credentials: 'include',
     })
+    this.syncAuthState()
+    return res
   }
 }
 

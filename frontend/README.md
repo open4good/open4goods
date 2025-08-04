@@ -108,6 +108,21 @@ and refresh token in HTTP‑only cookies. In production these cookies are marked
 development the cookies fall back to `SameSite=Lax` and are not forced to be
 secure.
 
+## Role-based UI with Pinia
+
+The `useAuthStore` decodes the JWT to keep the user's roles and login state.
+Use the `useAuth()` composable inside components or pages:
+
+```ts
+const { isLoggedIn, hasRole } = useAuth()
+```
+
+Template example:
+
+```vue
+<v-alert v-if="hasRole('ADMIN')">Admin specific content</v-alert>
+```
+
 ## Design Tokens
 
 Design tokens are configured in `tokens.config.json`. Replace the
