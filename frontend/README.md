@@ -53,6 +53,7 @@ To get the project up and running locally, follow these steps:
    - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
    - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
    - `MACHINE_TOKEN`: Shared secret used for server-to-server requests. This value is loaded only on the server and never exposed to the client.
+   - `EDITOR_ROLES`: Comma-separated roles allowed to edit content. Users with these roles see edit links in the UI.
 
 5. **Run the Dev Server**:
 
@@ -124,6 +125,8 @@ Template example:
 ```vue
 <v-alert v-if="hasRole('ADMIN')">Admin specific content</v-alert>
 ```
+
+The `<TextContent>` component checks the `EDITOR_ROLES` environment variable and displays an edit link when the user has any matching role.
 
 ## Design Tokens
 
