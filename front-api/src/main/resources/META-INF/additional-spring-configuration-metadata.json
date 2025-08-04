@@ -9,6 +9,11 @@
       "name": "front.cache",
       "type": "org.open4goods.nudgerfrontapi.config.CacheProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.CacheProperties"
+    },
+    {
+      "name": "front.rate-limit",
+      "type": "org.open4goods.nudgerfrontapi.config.RateLimitProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.RateLimitProperties"
     }
   ],
   "properties": [
@@ -31,6 +36,12 @@
       "defaultValue": "changeMe"
     },
     {
+      "name": "front.security.shared-token",
+      "type": "java.lang.String",
+      "description": "Shared secret expected in the X-Shared-Token header for authenticated requests.",
+      "defaultValue": "changeMeSharedToken"
+    },
+    {
       "name": "front.security.access-token-expiry",
       "type": "java.time.Duration",
       "description": "Access token validity duration.",
@@ -47,6 +58,18 @@
       "type": "java.lang.String",
       "description": "Path used to store cached files.",
       "defaultValue": "./cache"
+    },
+    {
+      "name": "front.rate-limit.anonymous",
+      "type": "java.lang.Integer",
+      "description": "Maximum requests per minute for anonymous users.",
+      "defaultValue": 100
+    },
+    {
+      "name": "front.rate-limit.authenticated",
+      "type": "java.lang.Integer",
+      "description": "Maximum requests per minute for authenticated users.",
+      "defaultValue": 1000
     }
   ]
 }
