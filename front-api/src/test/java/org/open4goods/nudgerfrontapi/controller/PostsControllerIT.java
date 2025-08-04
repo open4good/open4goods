@@ -94,4 +94,14 @@ class PostsControllerIT {
                 .andExpect(jsonPath("$[0].name").value("eco"))
                 .andExpect(jsonPath("$[0].count").value(2));
     }
+
+    @Test
+    void postsEndpointReturns403WhenAccessDenied() throws Exception {
+        mockMvc.perform(get("/blog/posts")
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Forbidden"))
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.detail").value("Access Denied"));
+    }
 }
