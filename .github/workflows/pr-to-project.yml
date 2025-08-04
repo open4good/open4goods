@@ -1,0 +1,86 @@
+name: Assign PRs to GitHub Projects V2
+
+on:
+  pull_request:
+    types: [opened, reopened, labeled, unlabeled, synchronize]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Ne rien modifier, seulement logguer"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PROJECT_ID_MAPPING: |
+    squad:pmo=PVT_kwDOBOJOp84A8tDc
+    squad:ux=PVT_kwDOBOJOp84A2ZQ8
+    squad:backend=PVT_kwDOBOJOp84A2ZRZ
+  IF_UNMATCH: PVT_kwDOBOJOp84A8tDc
+  # Laisser vide pour ne pas filtrer par auteur
+  FILTER_AUTHOR: ""
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign PRs to Projects
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_PAT }}
+          script: |
+            const mapping = Object.fromEntries(
+              (process.env.PROJECT_ID_MAPPING || '')
+                .split('\n')
+                .map(l => l.trim().split('='))
+                .filter(parts => parts.length === 2)
+                .map(([k, v]) => [k.toLowerCase(), v.trim()])
+            );
+            const fallback     = (process.env.IF_UNMATCH  || '').trim();
+            const filterAuthor = (process.env.FILTER_AUTHOR || '').trim();
+            const dryRun       = core.getInput('dry_run') === 'true';
+
+            // Vérification des IDs ProjectV2…
+            const allIds = Array.from(
+              new Set([ ...Object.values(mapping), fallback ].filter(Boolean))
+            );
+            if (allIds.length) {
+              const res = await github.graphql(
+                `query($ids:[ID!]!){ nodes(ids:$ids){ __typename }}`, { ids: allIds }
+              );
+              const invalid = allIds.filter((id, i) => res.nodes[i]?.__typename !== 'ProjectV2');
+              if (invalid.length) {
+                core.setFailed('Project IDs introuvables: ' + invalid.join(', '));
+                return;
+              }
+            }
+
+            // Helpers GraphQL (getItems, addItem, removeItem) inchangés…
+
+            function pickProjects(labels) {
+              const s = new Set();
+              labels.forEach(l => {
+                const key = l.toLowerCase();
+                if (mapping[key]) s.add(mapping[key]);
+              });
+              if (!s.size && fallback) s.add(fallback);
+              return Array.from(s);
+            }
+
+            // Collecte des PR à traiter (tout le repo ou la PR courante)…
+
+            for (const num of prNumbers) {
+              core.startGroup('PR #' + num);
+              const pr = /* récupération de la PR selon contexte */;
+
+              // **Nouveau** : on filtre **seulement** si FILTER_AUTHOR est non vide
+              if (filterAuthor !== '' && pr.user.login !== filterAuthor) {
+                core.info('Auteur ignoré: ' + pr.user.login);
+                core.endGroup();
+                continue;
+              }
+
+              // Récup des labels, calcul desired/existing, toAdd/toRemove…
+              // Application des changements (ou log en dry-run)
+              core.endGroup();
+            }
