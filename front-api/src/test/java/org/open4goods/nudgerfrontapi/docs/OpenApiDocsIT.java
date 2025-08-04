@@ -15,7 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 
-@SpringBootTest(properties = "front.cache.path=${java.io.tmpdir}")
+@SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
+        "front.security.enabled=true",
+        "front.security.shared-token=test-token"})
 @AutoConfigureMockMvc
 class OpenApiDocsIT {
 
@@ -24,6 +26,8 @@ class OpenApiDocsIT {
 
     @MockBean
     private XWikiAuthenticationService authService;
+
+    private static final String SHARED_TOKEN = "test-token";
 
     @Test
     void unauthenticatedRequestIsRejected() throws Exception {
@@ -34,7 +38,9 @@ class OpenApiDocsIT {
     @Test
     void apiDocsAccessibleWithBasicAuth() throws Exception {
         given(authService.login("user", "pass")).willReturn(List.of("XWiki.XWikiUsers"));
-        mockMvc.perform(get("/v3/api-docs").with(httpBasic("user", "pass")))
+        mockMvc.perform(get("/v3/api-docs")
+                .with(httpBasic("user", "pass"))
+                .header("X-Shared-Token", SHARED_TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.openapi").exists());
     }

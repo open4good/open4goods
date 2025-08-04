@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -73,7 +74,8 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                   LocaleResolver localeResolver,
-                                                  JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+                                                  JwtAuthenticationConverter jwtAuthenticationConverter,
+                                                  SharedTokenFilter sharedTokenFilter) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
@@ -81,11 +83,12 @@ public class WebSecurityConfig {
 
         if (securityProperties.isEnabled()) {
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/auth/**").permitAll()
+                    .requestMatchers("/", "/auth/**", "/actuator/**").permitAll()
                     .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .addFilterBefore(sharedTokenFilter, BearerTokenAuthenticationFilter.class);
         } else {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         }
