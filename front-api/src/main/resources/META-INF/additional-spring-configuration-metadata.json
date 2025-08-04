@@ -31,6 +31,12 @@
       "defaultValue": "changeMe"
     },
     {
+      "name": "front.security.shared-token",
+      "type": "java.lang.String",
+      "description": "Shared token expected in the X-Shared-Token header.",
+      "defaultValue": "changeMe"
+    },
+    {
       "name": "front.security.access-token-expiry",
       "type": "java.time.Duration",
       "description": "Access token validity duration.",

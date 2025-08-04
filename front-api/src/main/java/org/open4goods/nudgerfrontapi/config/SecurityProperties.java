@@ -40,6 +40,11 @@ public class SecurityProperties {
      */
     private Duration refreshTokenExpiry = Duration.ofDays(7);
 
+    /**
+     * Shared token expected in the {@code X-Shared-Token} header for internal calls.
+     */
+    private String sharedToken;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -78,5 +83,13 @@ public class SecurityProperties {
 
     public void setRefreshTokenExpiry(Duration refreshTokenExpiry) {
         this.refreshTokenExpiry = refreshTokenExpiry;
+    }
+
+    public String getSharedToken() {
+        return sharedToken;
+    }
+
+    public void setSharedToken(String sharedToken) {
+        this.sharedToken = sharedToken;
     }
 }

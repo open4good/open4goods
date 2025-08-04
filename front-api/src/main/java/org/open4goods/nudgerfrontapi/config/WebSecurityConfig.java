@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -68,7 +69,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, LocaleResolver localeResolver) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, LocaleResolver localeResolver,
+                                                   SharedTokenFilter sharedTokenFilter) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
@@ -76,8 +78,9 @@ public class WebSecurityConfig {
 
         if (securityProperties.isEnabled()) {
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/auth/**").permitAll()
+                    .requestMatchers(SharedTokenFilter.PUBLIC_ENDPOINTS).permitAll()
                     .anyRequest().authenticated())
+                .addFilterBefore(sharedTokenFilter, BearerTokenAuthenticationFilter.class)
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
