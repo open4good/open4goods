@@ -221,5 +221,10 @@ UI and Styling
 - Use Vuetify UI forcomponents and styling.
 - Implement responsive Vuetify approach and mobile-firstapproach.
 
+## Dynamic XWiki pages
+- Full pages are served from the `/pages/{xwikiPageId}` endpoint of `front-api`.
+- Use the `useFullPage` composable and the `pages/pages/[...xwikiPageId].vue` route.
+- Compute edit links on the frontend by replacing `/view/` with `/edit/` and display them only to users with roles listed in `config.public.editRoles`.
+
 # Model error journal
 ## Here are listed all recurring errors of the model.

@@ -292,6 +292,29 @@ Example usage in a page:
 <TextContent blocId="Main.WebHome" />
 ```
 
+## Rendering dynamic pages
+
+Full pages from XWiki can be fetched via the `/pages/{xwikiPageId}` endpoint and
+rendered with the `useFullPage` composable. The page route is automatically
+registered under `/pages/*`.
+
+```vue
+<!-- pages/pages/[...xwikiPageId].vue -->
+<template>
+  <div v-html="htmlContent" />
+</template>
+
+<script setup lang="ts">
+const route = useRoute()
+const { htmlContent, fetchPage } = useFullPage()
+fetchPage(route.params.xwikiPageId as string)
+</script>
+```
+
+The composable also exposes an `editLink` computed by replacing `/view/` with
+`/edit/` on the page's absolute URL. Display this link only for users with roles
+listed in `config.public.editRoles`.
+
 ## Vitest (Testing)
 
 - Colocate tests as `Component.spec.ts`
