@@ -20,7 +20,7 @@
 		<jacoco.version>0.8.13</jacoco.version>
 		<xwiki.version>11.10.2</xwiki.version>
 
-		<processDependencyManagement>false</processDependencyManagement>
+		<processDependencyManagement>true</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
 		<maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
