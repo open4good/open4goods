@@ -26,7 +26,8 @@ export default defineEventHandler(async (event: H3Event) => {
     }
     setCookie(event, config.tokenCookieName, tokens.accessToken, cookieOptions)
     setCookie(event, config.refreshCookieName, tokens.refreshToken, cookieOptions)
-    return { success: true }
+    // Return tokens so the client can decode and update its state immediately
+    return tokens
   } catch (err) {
     console.error('Login error', err)
     throw createError({ statusCode: 401, statusMessage: 'Invalid credentials' })

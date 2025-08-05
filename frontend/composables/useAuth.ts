@@ -3,11 +3,12 @@ import { useAuthStore } from '~/stores/useAuthStore'
 
 export const useAuth = () => {
   const authStore = useAuthStore()
-  const { isLoggedIn, username } = storeToRefs(authStore)
+  const { isLoggedIn, username, roles } = storeToRefs(authStore)
 
   return {
     isLoggedIn,
     username,
+    roles,
     hasRole: authStore.hasRole,
   }
 }

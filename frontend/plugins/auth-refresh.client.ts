@@ -8,8 +8,6 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const token = useCookie<string | null>(config.tokenCookieName)
 
-  authService.syncAuthState()
-
   const checkExpiration = async () => {
     if (!token.value) return
     try {
