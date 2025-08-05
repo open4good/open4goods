@@ -11,7 +11,7 @@ interface JwtPayload {
 }
 
 export class AuthService {
-  private syncAuthState() {
+  syncAuthState() {
     const config = useRuntimeConfig()
     const token = useCookie<string | null>(config.tokenCookieName)
     const authStore = useAuthStore()
