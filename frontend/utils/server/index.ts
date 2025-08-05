@@ -1,3 +1,3 @@
-import * as handleErrors from './_handdleErrors'
+import * as handleErrors from './_handleErrors'
 
 export { handleErrors }
