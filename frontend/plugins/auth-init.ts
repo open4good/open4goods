@@ -1,8 +1,9 @@
-import { authService } from '~/services/auth.services'
+import { useAuthService } from '~/services/auth.service'
 
 /**
  * Hydrates the authentication store on app startup using the token cookie.
  */
 export default defineNuxtPlugin(() => {
-  authService.syncAuthState()
+  const { syncAuthState } = useAuthService()
+  syncAuthState()
 })

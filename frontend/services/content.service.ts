@@ -1,5 +1,6 @@
 import { ContentApi, Configuration } from '~/src/api'
 import type { XwikiContentBlocDto } from '~/src/api'
+import { handleErrors } from '~/utils'
 
 /**
  * Content service for fetching HTML blocs from the backend
@@ -14,7 +15,11 @@ export const useContentService = () => {
    * @param blocId - XWiki bloc identifier
    */
   const getBloc = async (blocId: string): Promise<XwikiContentBlocDto> => {
-    return await api.contentBloc({ blocId })
+    try {
+      return await api.contentBloc({ blocId })
+    } catch (error) {
+      handleErrors._handleError(error, `Failed to fetch bloc ${blocId}`)
+    }
   }
 
   return { getBloc }

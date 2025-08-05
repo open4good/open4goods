@@ -1,6 +1,7 @@
-import { useBlogService } from '~/services/blog.services'
+import { useBlogService } from '~/services/blog.service'
 import type { BlogPostDto } from '~/src/api'
 import { ResponseError } from '~/src/api'
+import { handleErrors } from '~/utils'
 
 /**
  * Blog article by ID API endpoint
@@ -23,25 +24,14 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
     const response = await blogService.getArticleById(slug)
     return response
   } catch (error) {
-    console.error('Error fetching blog article:', error)
-
+    let message = 'Failed to fetch blog article'
     if (error instanceof ResponseError) {
-      const message = await error.response.text().catch(() => undefined)
-
-      // Forward backend status code and message
-      throw createError({
-        statusCode: error.response.status,
-        statusMessage: message || error.response.statusText,
-        cause: error,
-      })
+      message =
+        (await error.response.text().catch(() => undefined)) ||
+        error.response.statusText
+    } else if (error instanceof Error) {
+      message = error.message
     }
-
-    // Fallback generic error
-    throw createError({
-      statusCode: 500,
-      statusMessage:
-        error instanceof Error ? error.message : 'Failed to fetch blog article',
-      cause: error,
-    })
+    handleErrors._handleError(error, message)
   }
 })

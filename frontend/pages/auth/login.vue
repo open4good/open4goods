@@ -33,7 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { authService } from '~/services/auth.services'
+import { useAuthService } from '~/services/auth.service'
+
+const { login } = useAuthService()
 
 const username = ref('')
 const password = ref('')
@@ -46,7 +48,7 @@ const onSubmit = async () => {
   loading.value = true
   error.value = ''
   try {
-    await authService.login(username.value, password.value)
+    await login(username.value, password.value)
     await router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'

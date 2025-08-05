@@ -1,5 +1,6 @@
 import { BlogApi, Configuration } from '~/src/api'
 import type { BlogPostDto, PageDto } from '~/src/api'
+import { handleErrors } from '~/utils'
 
 /**
  * Blog service for handling blog-related API calls
@@ -7,8 +8,6 @@ import type { BlogPostDto, PageDto } from '~/src/api'
 export const useBlogService = () => {
   const config = useRuntimeConfig()
   const apiConfig = new Configuration({ basePath: config.apiUrl })
-  console.log('[ContentService] baseUrl =', config.apiUrl)
-
   const api = new BlogApi(apiConfig)
 
   /**
@@ -25,9 +24,7 @@ export const useBlogService = () => {
     try {
       return await api.posts(params)
     } catch (error) {
-      console.error('Error fetching blog articles:', error)
-      // Rethrow original error so callers can access status and message
-      throw error
+      handleErrors._handleError(error, 'Error fetching blog articles')
     }
   }
 
@@ -40,9 +37,7 @@ export const useBlogService = () => {
     try {
       return await api.post({ slug })
     } catch (error) {
-      console.error(`Error fetching blog article ${slug}:`, error)
-      // Preserve original error details for upstream handlers
-      throw error
+      handleErrors._handleError(error, `Error fetching blog article ${slug}`)
     }
   }
 
