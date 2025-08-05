@@ -6,7 +6,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://auth.example.com/issuer
+          secret-key: ${front.security.jwt-secret}
 
 springdoc:
   api-docs:
@@ -21,9 +21,21 @@ front:
   security:
     enabled: true
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
+    jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
+    shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
+    
+  rate-limit:
+    anonymous: 100
+    authenticated: 1000
     
 xwiki:
     username: nudger
     password: nudger 
     baseUrl: https://wiki.nudger.fr
         
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

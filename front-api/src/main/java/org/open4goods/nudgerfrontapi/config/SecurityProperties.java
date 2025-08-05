@@ -31,9 +31,15 @@ public class SecurityProperties {
     private String jwtSecret;
 
     /**
+     * Shared secret expected in the {@code X-Shared-Token} header for
+     * authenticated requests.
+     */
+    private String sharedToken;
+
+    /**
      * Access token validity duration.
      */
-    private Duration accessTokenExpiry = Duration.ofMinutes(30);
+    private Duration accessTokenExpiry = Duration.ofMinutes(15);
 
     /**
      * Refresh token validity duration.
@@ -62,6 +68,14 @@ public class SecurityProperties {
 
     public void setJwtSecret(String jwtSecret) {
         this.jwtSecret = jwtSecret;
+    }
+
+    public String getSharedToken() {
+        return sharedToken;
+    }
+
+    public void setSharedToken(String sharedToken) {
+        this.sharedToken = sharedToken;
     }
 
     public Duration getAccessTokenExpiry() {

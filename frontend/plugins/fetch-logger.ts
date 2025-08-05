@@ -7,7 +7,7 @@ export default defineNuxtPlugin(() => {
   ;(globalThis as { __fetchLoggerInstalled?: boolean }).__fetchLoggerInstalled = true
   globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
-    if (url.startsWith(config.public.apiUrl)) {
+    if (url.startsWith(config.apiUrl)) {
       const method = init?.method ?? 'GET'
       console.log(`[nuxt] ${method} ${url}`)
     }

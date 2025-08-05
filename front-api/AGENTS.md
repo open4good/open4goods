@@ -58,6 +58,12 @@ The module exposes configurable security settings via
 - `front.security.enabled` – toggle Spring Security.
 - `front.security.cors-allowed-hosts` – list of allowed CORS origins.
 
+Rate limiting is configured via `front.rate-limit.*` mapped by
+`RateLimitProperties`:
+
+- `front.rate-limit.anonymous` – requests per minute for unauthenticated users.
+- `front.rate-limit.authenticated` – requests per minute for authenticated users.
+
 ---
 
 ## 6. SpringDoc Rules
@@ -137,8 +143,8 @@ public record OfferDto(
 ---
 
 ## 7. Validation checklist
-1. `mvn spring-boot:run`  
-2. Open `/swagger-ui.html`  
+1. `mvn spring-boot:run`
+2. Open `/swagger-ui.html` (requires XWiki credentials via Basic auth)
 3. Verify:  
    - all endpoints are listed  
    - each DTO field has description & example  
@@ -172,8 +178,8 @@ Follow java / spring documentation best practices :
 
 | Action          | URL / Command        |
 |-----------------|----------------------|
-| Raw spec        | `GET /v3/api-docs`   |
-| Swagger UI      | `GET /swagger-ui.html` |
+| Raw spec        | `GET /v3/api-docs` (Basic auth)  |
+| Swagger UI      | `GET /swagger-ui.html` (Basic auth) |
 | Build module    | `mvn --offline clean install`  |
 | Tests only      | `mvn --offline test`           |
 

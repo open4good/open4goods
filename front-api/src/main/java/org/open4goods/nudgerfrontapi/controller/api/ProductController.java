@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
@@ -18,7 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +55,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/products")
 @Validated
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductController {
 
@@ -180,26 +185,32 @@ public class ProductController {
 		/////////////////////
 
 		// Validating sort field
-		page.getSort().stream().forEach(s -> {
-			if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+                for (var order : page.getSort()) {
+                        if (ProductDtoSortableFields.fromText(order.getProperty()).isEmpty()) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid sort parameter");
+                                pd.setDetail("Unknown sort field: " + order.getProperty());
+                                @SuppressWarnings({"unchecked", "rawtypes"})
+                                ResponseEntity<Page<ProductDto>> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                return response;
+                        }
+                }
+                // Validating requested components
 
-				// TODO : HAndle this invalid value, raise approriate http code and
-				// problemdetail to the client.
-				return;
-			}
-		});
-
-		// Validating requested components
-		if (null != include) {
-			include.forEach(i -> {
-				if (null == ProductDtoComponent.valueOf(i)) {
-					// TODO : Handle this invalid value, raise approriate http code and
-					// problemdetail to the client.
-					return;
-				}
-
-			});
-		}
+                if (include != null) {
+                        for (String i : include) {
+                                try {
+                                        ProductDtoComponent.valueOf(i);
+                                } catch (IllegalArgumentException ex) {
+                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                        pd.setTitle("Invalid include parameter");
+                                        pd.setDetail("Unknown component: " + i);
+                                        @SuppressWarnings({"unchecked", "rawtypes"})
+                                        ResponseEntity<Page<ProductDto>> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        return response;
+                                }
+                        }
+                }
 
 
 		////////////////////////

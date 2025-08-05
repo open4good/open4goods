@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
@@ -33,7 +34,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(properties = "front.cache.path=${java.io.tmpdir}")
+@SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
+        "front.security.enabled=true",
+        "front.security.shared-token=test-token"})
 @AutoConfigureMockMvc
 class ProductControllerIT {
 
@@ -48,10 +51,7 @@ class ProductControllerIT {
 
     @Autowired
     private HealthEndpoint healthEndpoint;
-
-
-
-
+    private static final String SHARED_TOKEN = "test-token";
     @Test
     void reviewsEndpointReturnsList() throws Exception {
         long gtin = 123L;
@@ -60,7 +60,8 @@ class ProductControllerIT {
 
         mockMvc.perform(get("/products/{gtin}/reviews", gtin)
                 .header("Accept-Language", "de")
-                .with(jwt()))
+                .header("X-Shared-Token", SHARED_TOKEN)
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isOk())
             .andExpect(header().string("Cache-Control", "public, max-age=3600"))
             .andExpect(header().string("X-Locale", "de"))
@@ -76,7 +77,8 @@ class ProductControllerIT {
 
         mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("include", "gtin")
-                        .with(jwt()))
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gtin").value(gtin))
                 .andExpect(jsonPath("$.metadatas").doesNotExist());
@@ -88,7 +90,9 @@ class ProductControllerIT {
         given(service.getProduct(anyLong(), any(Locale.class), anySet()))
                 .willThrow(new ResourceNotFoundException());
 
-        mockMvc.perform(get("/products/{gtin}", gtin).with(jwt()))
+        mockMvc.perform(get("/products/{gtin}", gtin)
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isNotFound());
     }
 
@@ -98,7 +102,8 @@ class ProductControllerIT {
         given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any())).willReturn(page);
 
         mockMvc.perform(get("/products")
-                        .with(jwt()))
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", "public, max-age=3600"))
                 .andExpect(jsonPath("$.page.number").value(0));
@@ -112,27 +117,52 @@ class ProductControllerIT {
 
         mockMvc.perform(get("/products")
                         .param("aggregation", "{\"aggs\":[{\"name\":\"brands\",\"field\":\"offersCount\",\"type\":\"terms\"}]}")
-                        .with(jwt()))
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
     }
 
     @Test
+    void productsEndpointReturns400OnInvalidSort() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("sort", "invalid,asc")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void productsEndpointReturns400OnInvalidInclude() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("include", "wrong")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void sortableFieldsEndpointReturnsList() throws Exception {
-        mockMvc.perform(get("/products/fields/sortable").with(jwt()))
+        mockMvc.perform(get("/products/fields/sortable")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
 
     @Test
     void componentsEndpointReturnsList() throws Exception {
-        mockMvc.perform(get("/products/fields/components").with(jwt()))
+        mockMvc.perform(get("/products/fields/components")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
 
     @Test
     void aggregatableFieldsEndpointReturnsList() throws Exception {
-        mockMvc.perform(get("/products/fields/aggregatable").with(jwt()))
+        mockMvc.perform(get("/products/fields/aggregatable")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -146,7 +176,8 @@ class ProductControllerIT {
 
         mockMvc.perform(post("/products/{gtin}/reviews", gtin)
                 .param("hcaptchaResponse", "resp")
-                .with(jwt()))
+                .header("X-Shared-Token", SHARED_TOKEN)
+                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isAccepted());
     }
 }

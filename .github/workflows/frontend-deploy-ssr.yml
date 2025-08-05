@@ -26,6 +26,9 @@ jobs:
       - name: Build Nuxt (Node SSR)
         run: pnpm build
         working-directory: frontend
+        env:
+          API_URL: ${{ secrets.BETA_API_URL }}
+          MACHINE_TOKEN: ${{ secrets.BETA_MACHINE_TOKEN }}
 
       - name: Deploy SSR output to Beta server
         uses: easingthemes/ssh-deploy@main

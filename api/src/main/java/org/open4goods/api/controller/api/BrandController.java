@@ -5,8 +5,8 @@ package org.open4goods.api.controller.api;
 import java.util.List;
 import java.util.Map;
 
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BrandService;
+import org.open4goods.model.RolesConstants;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

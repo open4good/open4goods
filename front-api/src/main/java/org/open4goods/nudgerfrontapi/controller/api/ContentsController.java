@@ -3,12 +3,16 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.Locale;
 
+import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +33,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping
 @Validated
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
 @Tag(name = "Content", description = "Content blocs")
 public class ContentsController {
 
@@ -61,7 +66,8 @@ public class ContentsController {
             }
     )
     public ResponseEntity<XwikiContentBlocDto> contentBloc(@PathVariable String blocId,
-                                                           Locale locale) {
+                                                           Locale locale,
+                                                           @AuthenticationPrincipal UserDetails userDetails) {
 
         String htmlContent = xwikiHtmlService.html(blocId);
         String editLink = xwikiHtmlService.getEditPageUrl(blocId);

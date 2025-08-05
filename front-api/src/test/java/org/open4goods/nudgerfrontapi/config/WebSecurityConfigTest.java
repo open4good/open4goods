@@ -1,0 +1,25 @@
+package org.open4goods.nudgerfrontapi.config;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+
+/**
+ * Unit tests for {@link WebSecurityConfig}.
+ */
+class WebSecurityConfigTest {
+
+    @Test
+    void shouldCreateJwtDecoder() {
+        SecurityProperties properties = new SecurityProperties();
+        properties.setJwtSecret("0123456789012345678901234567890123456789012345678901234567890123");
+        AuthenticationProvider authProvider = mock(AuthenticationProvider.class);
+
+        JwtDecoder decoder = new WebSecurityConfig(properties, authProvider).jwtDecoder();
+
+        assertThat(decoder).isNotNull();
+    }
+}

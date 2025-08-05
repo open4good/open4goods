@@ -3,16 +3,25 @@
     <!-- Hero section with call to action -->
     <section class="hero d-flex flex-column align-center justify-center">
       <v-img src="/nudger-icon-512x512.png" width="120" class="mb-4" alt="Nudger logo" />
-      <h1 class="text-h3 text-center font-weight-bold mb-2">Welcome to Nudger</h1>
+      <h1 class="text-h3 text-center font-weight-bold mb-2">Welcome {{ isLoggedIn ? 'USER' : 'Nudger' }}</h1>
       <p class="text-subtitle-1 mb-6 text-center">
         Compare appliances and make greener choices thanks to our Impact Score
       </p>
-      <router-link to="/blog">
-        <v-btn color="primary" size="large" rounded="pill" class="elevation-2">
-          <v-icon start icon="mdi-book-open" />
-          Read our blog
-        </v-btn>
-      </router-link>
+      <div class="d-flex ga-4">
+        <router-link to="/blog">
+          <v-btn color="primary" size="large" rounded="pill" class="elevation-2">
+            <v-icon start icon="mdi-book-open" />
+            Read our blog
+          </v-btn>
+        </router-link>
+        <!-- Display login button only when the user is not authenticated -->
+        <router-link v-if="!isLoggedIn" to="/auth/login">
+          <v-btn color="secondary" size="large" rounded="pill" class="elevation-2">
+            <v-icon start icon="mdi-login" />
+            Login
+          </v-btn>
+        </router-link>
+      </div>
     </section>
 
     <!-- Key features section -->
@@ -57,11 +66,19 @@
         <h2>Demo Xwiki as headless CMS</h2>
         <TextContent blocId="Main" />
     </section>
+
+    <v-alert
+      v-if="hasRole('XWIKIADMINGROUP')"
+      type="info"
+      class="mt-6"
+    >
+      Admin specific content
+    </v-alert>
   </v-container>
 </template>
 
 <script setup lang="ts">
-// Static landing page - no specific script logic yet
+const { hasRole, isLoggedIn } = useAuth()
 </script>
 
 <style lang="sass" scoped>

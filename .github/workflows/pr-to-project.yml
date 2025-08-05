@@ -17,7 +17,8 @@ env:
     squad:ux=PVT_kwDOBOJOp84A2ZQ8
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
   IF_UNMATCH: PVT_kwDOBOJOp84A8tDc
-  FILTER_AUTHOR: renovate[bot]
+  # Laisser vide pour ne filtrer par auteur
+  FILTER_AUTHOR: ""
 
 jobs:
   assign:
@@ -28,17 +29,16 @@ jobs:
         with:
           github-token: ${{ secrets.PROJECT_PAT }}
           script: |
-            // --- Préparation ---
-            const mapping = Object.fromEntries(
+            const mapping      = Object.fromEntries(
               (process.env.PROJECT_ID_MAPPING || '')
                 .split('\n')
                 .map(l => l.trim().split('='))
                 .filter(parts => parts.length === 2)
                 .map(([k, v]) => [k.toLowerCase(), v.trim()])
             );
-            const fallback      = (process.env.IF_UNMATCH  || '').trim();
-            const filterAuthor  = (process.env.FILTER_AUTHOR || '').trim();
-            const dryRun        = core.getInput('dry_run') === 'true';
+            const fallback     = (process.env.IF_UNMATCH  || '').trim();
+            const filterAuthor = (process.env.FILTER_AUTHOR || '').trim();
+            const dryRun       = core.getInput('dry_run') === 'true';
 
             // --- Validation des ProjectV2 IDs ---
             const allIds = Array.from(
@@ -46,8 +46,7 @@ jobs:
             );
             if (allIds.length) {
               const res = await github.graphql(
-                `query($ids:[ID!]!){ nodes(ids:$ids){ __typename }}`
-                , { ids: allIds }
+                `query($ids:[ID!]!){ nodes(ids:$ids){ __typename }}`, { ids: allIds }
               );
               const invalid = allIds.filter((id, i) => res.nodes[i]?.__typename !== 'ProjectV2');
               if (invalid.length) {
@@ -56,7 +55,7 @@ jobs:
               }
             }
 
-            // --- GraphQL helpers ---
+            // --- Helpers GraphQL ---
             async function getItems(nodeId) {
               const q = `
                 query($id:ID!){ node(id:$id){ ... on PullRequest {
@@ -123,6 +122,7 @@ jobs:
             // --- Traitement de chaque PR ---
             for (const num of prNumbers) {
               core.startGroup('PR #' + num);
+
               // Récupération de la PR
               const pr = (context.eventName === 'workflow_dispatch')
                 ? (await github.rest.pulls.get({
@@ -132,9 +132,9 @@ jobs:
                   })).data
                 : context.payload.pull_request;
 
-              // Filtre sur l’auteur
-              if (filterAuthor && pr.user.login !== filterAuthor) {
-                core.info('Author ignored: ' + pr.user.login);
+              // Filtre sur l’auteur (uniquement si FILTER_AUTHOR est non vide)
+              if (filterAuthor !== '' && pr.user.login !== filterAuthor) {
+                core.info('Auteur ignoré: ' + pr.user.login);
                 core.endGroup();
                 continue;
               }

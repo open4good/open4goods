@@ -3,21 +3,23 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.open4goods.model.RolesConstants;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
+import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
+import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
+import org.open4goods.services.blog.model.BlogPost;
+import org.open4goods.services.blog.service.BlogService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-
-import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
-import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
-import org.open4goods.nudgerfrontapi.dto.PageDto;
-import org.open4goods.services.blog.model.BlogPost;
-import org.open4goods.services.blog.service.BlogService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,10 +32,10 @@ import com.rometools.rome.io.FeedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -43,6 +45,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/blog")
 @Validated
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
 @Tag(name = "Blog", description = "Blog posts, tags and RSS feed")
 public class PostsController {
 
@@ -76,7 +79,8 @@ public class PostsController {
     )
     public ResponseEntity<Page<BlogPostDto>> posts(
             @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
-            @RequestParam(required = false) String tag) {
+            @RequestParam(required = false) String tag,
+            @AuthenticationPrincipal UserDetails userDetails) {
         List<BlogPostDto> posts = blogService.getPosts(tag).stream()
                 .map(this::map)
                 .toList();

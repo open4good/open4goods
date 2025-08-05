@@ -167,7 +167,7 @@
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
 			<artifactId>xwiki-commons-component-default</artifactId>
-		    <version>17.5.0</version>
+		    <version>17.6.0</version>
 		</dependency>
 
         <dependency>
@@ -178,7 +178,7 @@
 		<dependency>
 			<groupId>org.xwiki.rendering</groupId>
 			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>17.5.0</version>
+		    <version>17.6.0</version>
 		</dependency>
 
 

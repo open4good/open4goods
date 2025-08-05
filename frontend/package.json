@@ -22,7 +22,7 @@
     "@mdi/font": "^7.4.47",
     "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "1.15.0",
-    "@nuxt/image": "1.10.0",
+    "@nuxt/image": "1.11.0",
     "@pinia/nuxt": "^0.11.1",
     "@unhead/vue": "^2.0.11",
     "@vueuse/core": "^13.0.0",
@@ -81,7 +81,7 @@
     "vue-tsc": "^3.0.1",
     "vuetify": "^3.7.3"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.14.0",
   "engines": {
     "node": ">=20.x"
   },
