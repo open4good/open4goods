@@ -38,7 +38,7 @@ const formatDate = (timestamp: number) =>
       {{ formatDate(article.createdMs ?? 0) }}
     </div>
 
-    <div class="article-content" v-html="article.content" />
+    <div class="article-content" v-html="article.body" />
   </div>
 </template>
 
