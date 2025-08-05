@@ -68,7 +68,7 @@
     </section>
 
     <v-alert
-      v-if="hasRole('ADMIN')"
+      v-if="hasRole('XWIKIADMINGROUP')"
       type="info"
       class="mt-6"
     >

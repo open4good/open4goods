@@ -88,8 +88,8 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       // Base URL of the backend API
-      // Roles allowed to edit content blocs
-      editRoles: (process.env.EDITOR_ROLES || 'ADMIN').split(','),
+      // Roles allowed to edit content blocs (defaults to backend role names)
+      editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
     }
   },
 })

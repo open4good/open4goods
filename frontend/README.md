@@ -53,7 +53,7 @@ To get the project up and running locally, follow these steps:
    - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
    - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
    - `MACHINE_TOKEN`: Shared secret used for server-to-server requests. This value is loaded only on the server and never exposed to the client.
-   - `EDITOR_ROLES`: Comma-separated roles allowed to edit content blocs. Defaults to `ADMIN` and is exposed as `config.public.editRoles`.
+   - `EDITOR_ROLES`: Comma-separated roles allowed to edit content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`—the role names issued in the JWT—and is exposed as `config.public.editRoles`.
 
 5. **Run the Dev Server**:
 
@@ -102,7 +102,7 @@ Runtime configuration uses the following variables defined in `nuxt.config.ts`:
 - **`REFRESH_COOKIE_NAME`** – cookie name for the refresh token. Defaults to
   `refresh_token`.
 - **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.apiUrl`.
-- **`EDITOR_ROLES`** – comma-separated roles that enable edit links on content blocs. Defaults to `ADMIN` and is exposed as `config.public.editRoles`.
+- **`EDITOR_ROLES`** – comma-separated roles that enable edit links on content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP` (roles returned by the backend) and is exposed as `config.public.editRoles`.
 
 ## Authentication cookies
 
@@ -115,6 +115,7 @@ secure.
 ## Role-based UI with Pinia
 
 The `useAuthStore` decodes the JWT to keep the user's roles and login state.
+Typical roles returned by the backend are `ROLE_SITEEDITOR` for content editors and `XWIKIADMINGROUP` for administrators.
 Use the `useAuth()` composable inside components or pages:
 
 ```ts
@@ -124,7 +125,7 @@ const { isLoggedIn, hasRole } = useAuth()
 Template example:
 
 ```vue
-<v-alert v-if="hasRole('ADMIN')">Admin specific content</v-alert>
+<v-alert v-if="hasRole('XWIKIADMINGROUP')">Admin specific content</v-alert>
 ```
 
 Users with any role listed in `config.public.editRoles` will see an edit link on content blocs.
