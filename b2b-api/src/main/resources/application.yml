@@ -1,0 +1,13 @@
+server:
+  port: 7081
+
+logging:
+  level:
+    org.open4goods: INFO
+    org.springframework.data.elasticsearch: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /api-doc
+  api-docs:
+    path: /api-doc/openapi.json
