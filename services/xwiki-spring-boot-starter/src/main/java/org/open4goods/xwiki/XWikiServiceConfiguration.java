@@ -65,14 +65,14 @@ public class XWikiServiceConfiguration {
 	 */
 	@Bean(name = "xwikiFacadeService")
 	
-	XwikiFacadeService xwikiFacadeService(
-										  @Autowired XwikiMappingService mappingService,
-										  @Autowired XWikiReadService xWikiReadService,
-										  @Autowired XWikiHtmlService xWikiHtmlService,
-										  @Autowired XWikiObjectService xWikiObjectService) {
-		logger.info("Creating xwikiFacadeservice");
-		return new XwikiFacadeService(mappingService, xWikiObjectService, xWikiHtmlService, xWikiReadService, xWikiObjectService, xWikiHtmlService, xWikiProperties);
-	}
+XwikiFacadeService xwikiFacadeService(
+                        @Autowired XwikiMappingService mappingService,
+                        @Autowired XWikiReadService xWikiReadService,
+                        @Autowired XWikiHtmlService xWikiHtmlService,
+                        @Autowired XWikiObjectService xWikiObjectService) {
+                logger.info("Creating xwikiFacadeservice");
+                return new XwikiFacadeService(mappingService, xWikiObjectService, xWikiHtmlService, xWikiReadService, xWikiProperties);
+        }
 	
 	/**
 	 * restTemplate dedicated to restful api request

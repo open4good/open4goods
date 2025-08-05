@@ -39,16 +39,19 @@ public class XwikiFacadeService {
 	private XWikiConstantsResourcesPath pathHelper;
 
 
-	public XwikiFacadeService( XwikiMappingService mappingService, XWikiObjectService xWikiObjectService, XWikiHtmlService xWikiHtmlService,XWikiReadService xWikiReadService, XWikiObjectService xWikiObjectService2, XWikiHtmlService xWikiHtmlService2, XWikiServiceProperties properties) {
-		this.mappingService = mappingService;
-		this.xWikiReadService = xWikiReadService;
-		this.xWikiHtmlService = xWikiHtmlService2;
-		this.xWikiObjectService = xWikiObjectService2;
-		this.properties = properties;
-		this.urlHelper = new UrlManagementHelper(properties);
-		this.pathHelper = new XWikiConstantsResourcesPath(properties.getBaseUrl(), properties.getApiEntrypoint(), properties.getApiWiki());
-
-	}
+        public XwikiFacadeService(XwikiMappingService mappingService,
+                        XWikiObjectService objectService,
+                        XWikiHtmlService htmlService,
+                        XWikiReadService readService,
+                        XWikiServiceProperties properties) {
+                this.mappingService = mappingService;
+                this.xWikiObjectService = objectService;
+                this.xWikiHtmlService = htmlService;
+                this.xWikiReadService = readService;
+                this.properties = properties;
+                this.urlHelper = new UrlManagementHelper(properties);
+                this.pathHelper = new XWikiConstantsResourcesPath(properties.getBaseUrl(), properties.getApiEntrypoint(), properties.getApiWiki());
+        }
 
 	// TODO : I18n
 	// @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME)
