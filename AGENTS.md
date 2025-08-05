@@ -100,14 +100,6 @@ To compile **all modules**:
 mvn --offline clean install
 ```
 
-To build a **single** module (example `api`):
-
-```bash
-mvn --offline -pl api -am clean install
-```
-
----
-
 ## 8  Pull-request checklist
 
 1. Clear commit & PR description (**why** and **what**).  
