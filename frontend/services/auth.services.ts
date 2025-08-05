@@ -4,7 +4,11 @@
 import { jwtDecode } from 'jwt-decode'
 import { useAuthStore } from '~/stores/useAuthStore'
 
-interface JwtPayload { roles?: string[] }
+interface JwtPayload {
+  roles?: string[]
+  username?: string
+  sub?: string
+}
 
 export class AuthService {
   private syncAuthState() {
@@ -15,13 +19,17 @@ export class AuthService {
     if (token.value) {
       try {
         const decoded = jwtDecode<JwtPayload>(token.value)
-        authStore.$patch({ roles: decoded.roles ?? [], isLoggedIn: true })
+        authStore.$patch({
+          roles: decoded.roles ?? [],
+          isLoggedIn: true,
+          username: decoded.username ?? decoded.sub ?? null,
+        })
       } catch (err) {
         console.error('Failed to decode JWT', err)
-        authStore.$patch({ roles: [], isLoggedIn: false })
+        authStore.$patch({ roles: [], isLoggedIn: false, username: null })
       }
     } else {
-      authStore.$patch({ roles: [], isLoggedIn: false })
+      authStore.$patch({ roles: [], isLoggedIn: false, username: null })
     }
   }
 
