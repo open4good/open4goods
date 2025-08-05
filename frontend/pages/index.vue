@@ -3,9 +3,12 @@
     <!-- Hero section with call to action -->
     <section class="hero d-flex flex-column align-center justify-center">
       <v-img src="/nudger-icon-512x512.png" width="120" class="mb-4" alt="Nudger logo" />
-      <h1 class="text-h3 text-center font-weight-bold mb-2">Welcome {{ isLoggedIn ? 'USER' : 'Nudger' }}</h1>
-      <p class="text-subtitle-1 mb-6 text-center">
+      <h1 class="text-h3 text-center font-weight-bold mb-2">Welcome {{ username || 'Nudger' }}</h1>
+      <p class="text-subtitle-1 mb-4 text-center">
         Compare appliances and make greener choices thanks to our Impact Score
+      </p>
+      <p v-if="isLoggedIn" class="text-subtitle-2 mb-6 text-center">
+        Roles: {{ roles.join(', ') }}
       </p>
       <div class="d-flex ga-4">
         <router-link to="/blog">
@@ -78,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-const { hasRole, isLoggedIn } = useAuth()
+const { hasRole, isLoggedIn, username, roles } = useAuth()
 </script>
 
 <style lang="sass" scoped>

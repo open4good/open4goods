@@ -11,6 +11,9 @@ interface JwtPayload {
 }
 
 export class AuthService {
+  /**
+   * Hydrates the auth store from the access token cookie.
+   */
   syncAuthState() {
     const config = useRuntimeConfig()
     const token = useCookie<string | null>(config.tokenCookieName)
@@ -34,25 +37,39 @@ export class AuthService {
   }
 
   async login(username: string, password: string) {
-    const res = await $fetch('/auth/login', {
+    const tokens = await $fetch<{ accessToken: string; refreshToken: string }>('/auth/login', {
       method: 'POST',
       body: { username, password },
       credentials: 'include',
     })
-    this.syncAuthState()
-    return res
+    // Decode the access token and update the store reactively
+    const decoded = jwtDecode<JwtPayload>(tokens.accessToken)
+    const authStore = useAuthStore()
+    authStore.$patch({
+      roles: decoded.roles ?? [],
+      isLoggedIn: true,
+      username: decoded.username ?? decoded.sub ?? null,
+    })
+    return tokens
   }
 
   /**
    * Request a new access token using the refresh token cookie.
    */
   async refresh() {
-    const res = await $fetch('/auth/refresh', {
+    const tokens = await $fetch<{ accessToken: string; refreshToken: string }>('/auth/refresh', {
       method: 'POST',
       credentials: 'include',
     })
-    this.syncAuthState()
-    return res
+    // Decode the refreshed access token and patch the auth store
+    const decoded = jwtDecode<JwtPayload>(tokens.accessToken)
+    const authStore = useAuthStore()
+    authStore.$patch({
+      roles: decoded.roles ?? [],
+      isLoggedIn: true,
+      username: decoded.username ?? decoded.sub ?? null,
+    })
+    return tokens
   }
 }
 

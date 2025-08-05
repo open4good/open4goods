@@ -29,7 +29,8 @@ export default defineEventHandler(async (event: H3Event) => {
     }
     setCookie(event, config.tokenCookieName, tokens.accessToken, cookieOptions)
     setCookie(event, config.refreshCookieName, tokens.refreshToken, cookieOptions)
-    return { success: true }
+    // Return tokens to allow the client to update the auth store reactively
+    return tokens
   } catch (err) {
     console.error('Refresh error', err)
     throw createError({ statusCode: 401, statusMessage: 'Refresh failed' })
