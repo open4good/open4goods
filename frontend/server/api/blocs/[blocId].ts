@@ -1,4 +1,4 @@
-import { contentService } from '~/services/content.services'
+import { useContentService } from '~/services/content.services'
 import type { XwikiContentBlocDto } from '~/src/api'
 
 export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> => {
@@ -9,6 +9,7 @@ export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> =>
 
   // Cache content for 1 hour
   setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+  const contentService = useContentService()
   try {
     return await contentService.getBloc(blocId)
   } catch (error) {

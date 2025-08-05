@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { authService } from '~/services'
+import { authService } from '~/services/auth.services'
 
 const username = ref('')
 const password = ref('')

@@ -1,4 +1,4 @@
-import { blogService } from '~/services/blog.services'
+import { useBlogService } from '~/services/blog.services'
 import type { BlogPostDto } from '~/src/api'
 import { ResponseError } from '~/src/api'
 
@@ -15,6 +15,8 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
       statusMessage: 'Article ID is required',
     })
   }
+
+  const blogService = useBlogService()
 
   try {
     // Use the service to fetch the article

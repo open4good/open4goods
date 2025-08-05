@@ -4,30 +4,26 @@ import type { BlogPostDto, PageDto } from '~/src/api'
 /**
  * Blog service for handling blog-related API calls
  */
-export class BlogService {
-  private readonly api: BlogApi
+export const useBlogService = () => {
+  const config = useRuntimeConfig()
+  const apiConfig = new Configuration({ basePath: config.apiUrl })
+  console.log('[ContentService] baseUrl =', config.apiUrl)
 
-  constructor() {
-    const config = useRuntimeConfig()
-    const apiConfig = new Configuration({ basePath: config.apiUrl })
-    console.log('[ContentService] baseUrl =', config.apiUrl)
-
-    this.api = new BlogApi(apiConfig)
-  }
+  const api = new BlogApi(apiConfig)
 
   /**
    * Fetch paginated blog articles
    * @returns Promise<PageDto>
    */
-  async getArticles(
+  const getArticles = async (
     params: {
       tag?: string
       pageNumber?: number
       pageSize?: number
     } = {}
-  ): Promise<PageDto> {
+  ): Promise<PageDto> => {
     try {
-      return await this.api.posts(params)
+      return await api.posts(params)
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       // Rethrow original error so callers can access status and message
@@ -40,16 +36,15 @@ export class BlogService {
    * @param slug - Article slug
    * @returns Promise<BlogPostDto>
    */
-  async getArticleById(slug: string): Promise<BlogPostDto> {
+  const getArticleById = async (slug: string): Promise<BlogPostDto> => {
     try {
-      return await this.api.post({ slug })
+      return await api.post({ slug })
     } catch (error) {
       console.error(`Error fetching blog article ${slug}:`, error)
       // Preserve original error details for upstream handlers
       throw error
     }
   }
-}
 
-// Export singleton instance
-export const blogService = new BlogService()
+  return { getArticles, getArticleById }
+}

@@ -1,4 +1,4 @@
-import { blogService } from '~/services/blog.services'
+import { useBlogService } from '~/services/blog.services'
 import type { PageDto } from '~/src/api'
 import { ResponseError } from '~/src/api'
 
@@ -13,6 +13,8 @@ export default defineEventHandler(async (event): Promise<PageDto> => {
     'Cache-Control',
     'public, max-age=3600, s-maxage=3600'
   )
+
+  const blogService = useBlogService()
 
   try {
     // Use the service to fetch articles
