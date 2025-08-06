@@ -81,12 +81,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          # supprime l'ancienne branche si elle existe
-          git branch -D weekly-report-${END_DATE} || true
+          git fetch origin weekly-report-${END_DATE} || true
           git checkout -B weekly-report-${END_DATE}
           git add ${{ steps.fetch.outputs.json_file }}
           git commit -m "KPI JSON report (${END_DATE})"
-          git push -u origin weekly-report-${END_DATE}
+          git push -u origin weekly-report-${END_DATE} --force-with-lease
 
   generate_report:
     needs: fetch_kpi
