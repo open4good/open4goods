@@ -25,14 +25,19 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set default dates
-        id: dates
         run: |
-          START_DATE=${{ github.event.inputs.start_date || $(date -d "7 days ago" +%Y-%m-%d) }}
-          END_DATE=${{ github.event.inputs.end_date || $(date +%Y-%m-%d) }}
+          if [ -z "${{ github.event.inputs.start_date }}" ]; then
+            START_DATE=$(date -d '7 days ago' +%F)
+          else
+            START_DATE="${{ github.event.inputs.start_date }}"
+          fi
+          if [ -z "${{ github.event.inputs.end_date }}" ]; then
+            END_DATE=$(date +%F)
+          else
+            END_DATE="${{ github.event.inputs.end_date }}"
+          fi
           echo "START_DATE=$START_DATE" >> $GITHUB_ENV
           echo "END_DATE=$END_DATE" >> $GITHUB_ENV
-          echo "START_DATE=$START_DATE" >> $GITHUB_OUTPUT
-          echo "END_DATE=$END_DATE" >> $GITHUB_OUTPUT
 
       - name: Fetch KPI data
         id: fetch
