@@ -18,7 +18,7 @@ env:
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
   IF_UNMATCH: PVT_kwDOBOJOp84A8tDc
   # Laisser vide pour ne filtrer par auteur
-  FILTER_AUTHOR: ""
+  FILTER_AUTHOR: "renovate[bot]"
 
 jobs:
   assign:
