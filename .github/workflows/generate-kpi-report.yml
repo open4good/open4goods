@@ -91,20 +91,21 @@ jobs:
     needs: fetch_kpi
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.create_PR == 'true' }}
-
+    outputs:
+      end_date: ${{ needs.fetch_kpi.outputs.end_date }}
     steps:
       - name: Checkout report branch
         uses: actions/checkout@v4
         with:
           ref: weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
           fetch-depth: 0
-
+  
       - name: Download KPI JSON
         uses: actions/download-artifact@v4
         with:
           name: kpi-json
           path: .
-
+  
       - name: Generate Markdown & CSV
         run: |
           pip install pandas jinja2 matplotlib
@@ -113,13 +114,12 @@ jobs:
             docs/templates/weekly_report_template.md \
             docs/weekly_${{ needs.fetch_kpi.outputs.end_date }}.md \
             docs/_kpi_tracking.csv
-
+  
       - name: Commit Markdown & CSV
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-
-          # ne planter que s'il y a des changements
+  
           if ! git diff --quiet docs/; then
             git add docs/
             git commit -m "Weekly KPI Markdown & CSV (${{ needs.fetch_kpi.outputs.end_date }})"
@@ -128,31 +128,34 @@ jobs:
             echo "Rien à committer."
           fi
 
-  create_issue_pr:
-    needs: generate_report
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.create_PR == 'true' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-  
-      - name: Create issue
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ISSUE_URL=$(gh issue create \
-            --title "Weekly KPI Follow-up - ${{ needs.fetch_kpi.outputs.end_date }}" \
-            --body "- [ ] Vérification des KPI\n- [ ] Discussion des alertes\n- [ ] Actions à prévoir\n")
-          echo "ISSUE_URL=$ISSUE_URL" >> $GITHUB_ENV
-  
-      - name: Create PR linking issue
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --head weekly-report-${{ needs.fetch_kpi.outputs.end_date }} \
-            --base main \
-            --title "Weekly KPI report - ${{ needs.fetch_kpi.outputs.end_date }}" \
-            --body "Automated weekly KPI report.\n\nLinked Issue: ${{ env.ISSUE_URL }}"
+          create_issue_pr:
+            needs: generate_report
+            runs-on: ubuntu-latest
+            if: ${{ github.event.inputs.create_PR == 'true' }}
+            steps:
+              - name: Checkout repository
+                uses: actions/checkout@v4
+                with:
+                  ref: weekly-report-${{ needs.generate_report.outputs.end_date }}
+                  fetch-depth: 0
+
+              - name: Create issue
+                env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                run: |
+                  ISSUE_URL=$(gh issue create \
+                    --title "Weekly KPI Follow-up - ${{ needs.generate_report.outputs.end_date }}" \
+                    --body "- [ ] Vérification des KPI\n- [ ] Discussion des alertes\n- [ ] Actions à prévoir\n")
+                  echo "ISSUE_URL=$ISSUE_URL" >> $GITHUB_ENV
+
+              - name: Create PR linking issue
+                env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                run: |
+                  gh pr create \
+                    --head weekly-report-${{ needs.generate_report.outputs.end_date }} \
+                    --base main \
+                    --title "Weekly KPI report - ${{ needs.generate_report.outputs.end_date }}" \
+                    --body "Automated weekly KPI report.
+
+          Linked Issue: ${{ env.ISSUE_URL }}"
