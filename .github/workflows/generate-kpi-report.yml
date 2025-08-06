@@ -22,6 +22,11 @@ jobs:
       start_date: ${{ steps.dates.outputs.START_DATE }}
       end_date: ${{ steps.dates.outputs.END_DATE }}
     steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+                
       - uses: actions/checkout@v4
 
       - name: Set default dates
@@ -75,13 +80,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          ref: weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
+          fetch-depth: 0
     
       - name: Download KPI JSON
         uses: actions/download-artifact@v4
         with:
           name: kpi-json
-                      
+          path: docs/json                      
       
       - name: Generate Markdown and CSV
         run: |
