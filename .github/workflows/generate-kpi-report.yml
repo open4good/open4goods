@@ -25,6 +25,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set default dates
+        id: dates
         run: |
           if [ -z "${{ github.event.inputs.start_date }}" ]; then
             START_DATE=$(date -d '7 days ago' +%F)
