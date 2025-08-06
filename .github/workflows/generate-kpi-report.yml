@@ -69,8 +69,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Checkout weekly report branch
         run: |
-          git fetch origin weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
-          git checkout weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
+          git checkout .
                     
       - name: Generate Markdown and CSV
         run: |
