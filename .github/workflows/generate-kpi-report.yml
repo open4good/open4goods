@@ -67,10 +67,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout weekly report branch
-        run: |
-          git checkout .
-                    
+        with:
+          ref: weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
+
       - name: Generate Markdown and CSV
         run: |
           pip install pandas jinja2 matplotlib
