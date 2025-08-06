@@ -133,6 +133,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.create_PR == 'true' }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+  
       - name: Create issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -141,7 +146,7 @@ jobs:
             --title "Weekly KPI Follow-up - ${{ needs.fetch_kpi.outputs.end_date }}" \
             --body "- [ ] Vérification des KPI\n- [ ] Discussion des alertes\n- [ ] Actions à prévoir\n")
           echo "ISSUE_URL=$ISSUE_URL" >> $GITHUB_ENV
-
+  
       - name: Create PR linking issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
