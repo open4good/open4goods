@@ -88,39 +88,46 @@ jobs:
           git commit -m "KPI JSON report (${END_DATE})"
           git push -u origin weekly-report-${END_DATE}
 
-  generate_report:
-    needs: fetch_kpi
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.create_PR == 'true' }}
-    steps:
-      - name: Checkout new report branch
-        uses: actions/checkout@v4
-        with:
-          ref: weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
-          fetch-depth: 0
+          generate_report:
+            needs: fetch_kpi
+            runs-on: ubuntu-latest
+            if: ${{ github.event.inputs.create_PR == 'true' }}
 
-      - name: Download KPI JSON
-        uses: actions/download-artifact@v4
-        with:
-          name: kpi-json
-          path: .
+            steps:
+              - name: Checkout report branch
+                uses: actions/checkout@v4
+                with:
+                  ref: weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
+                  fetch-depth: 0
 
-      - name: Generate Markdown & CSV
-        run: |
-          pip install pandas jinja2 matplotlib
-          python scripts/generate_markdown.py \
-            docs/json/weekly_${{ needs.fetch_kpi.outputs.end_date }}.json \
-            docs/templates/weekly_report_template.md \
-            docs/weekly_${{ needs.fetch_kpi.outputs.end_date }}.md \
-            docs/_kpi_tracking.csv
+              - name: Download KPI JSON
+                uses: actions/download-artifact@v4
+                with:
+                  name: kpi-json
+                  path: .
 
-      - name: Commit Markdown & CSV
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add docs/
-          git commit -m "Weekly KPI Markdown & CSV (${needs.fetch_kpi.outputs.end_date})"
-          git push
+              - name: Generate Markdown & CSV
+                run: |
+                  pip install pandas jinja2 matplotlib
+                  python scripts/generate_markdown.py \
+                    "${{ needs.fetch_kpi.outputs.json_file }}" \
+                    docs/templates/weekly_report_template.md \
+                    docs/weekly_${{ needs.fetch_kpi.outputs.end_date }}.md \
+                    docs/_kpi_tracking.csv
+
+              - name: Commit Markdown & CSV
+                run: |
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@github.com"
+
+                  # ne planter que s'il y a des changements
+                  if ! git diff --quiet docs/; then
+                    git add docs/
+                    git commit -m "Weekly KPI Markdown & CSV (${{ needs.fetch_kpi.outputs.end_date }})"
+                    git push
+                  else
+                    echo "Rien à committer."
+                  fi
 
   create_issue_pr:
     needs: generate_report
