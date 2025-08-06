@@ -128,34 +128,32 @@ jobs:
             echo "Rien à committer."
           fi
 
-          create_issue_pr:
-            needs: generate_report
-            runs-on: ubuntu-latest
-            if: ${{ github.event.inputs.create_PR == 'true' }}
-            steps:
-              - name: Checkout repository
-                uses: actions/checkout@v4
-                with:
-                  ref: weekly-report-${{ needs.generate_report.outputs.end_date }}
-                  fetch-depth: 0
+  create_issue_pr:
+    needs: generate_report
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.create_PR == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: weekly-report-${{ needs.generate_report.outputs.end_date }}
+          fetch-depth: 0
 
-              - name: Create issue
-                env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                run: |
-                  ISSUE_URL=$(gh issue create \
-                    --title "Weekly KPI Follow-up - ${{ needs.generate_report.outputs.end_date }}" \
-                    --body "- [ ] Vérification des KPI\n- [ ] Discussion des alertes\n- [ ] Actions à prévoir\n")
-                  echo "ISSUE_URL=$ISSUE_URL" >> $GITHUB_ENV
+      - name: Create issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_URL=$(gh issue create \
+            --title "Weekly KPI Follow-up - ${{ needs.generate_report.outputs.end_date }}" \
+            --body "- [ ] Vérification des KPI\n- [ ] Discussion des alertes\n- [ ] Actions à prévoir\n")
+          echo "ISSUE_URL=$ISSUE_URL" >> $GITHUB_ENV
 
-              - name: Create PR linking issue
-                env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                run: |
-                  gh pr create \
-                    --head weekly-report-${{ needs.generate_report.outputs.end_date }} \
-                    --base main \
-                    --title "Weekly KPI report - ${{ needs.generate_report.outputs.end_date }}" \
-                    --body "Automated weekly KPI report.
-
-          Linked Issue: ${{ env.ISSUE_URL }}"
+      - name: Create PR linking issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --head weekly-report-${{ needs.generate_report.outputs.end_date }} \
+            --base main \
+            --title "Weekly KPI report - ${{ needs.generate_report.outputs.end_date }}" \
+            --body "Automated weekly KPI report. Linked Issue: ${{ env.ISSUE_URL }}"
