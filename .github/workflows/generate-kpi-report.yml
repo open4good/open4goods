@@ -53,7 +53,7 @@ jobs:
           echo "json_file=docs/json/weekly_${END_DATE}.json" >> $GITHUB_OUTPUT
 
       - name: Upload KPI JSON
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kpi-json
           path: ${{ steps.fetch.outputs.json_file }}
@@ -76,7 +76,7 @@ jobs:
 
     
       - name: Download KPI JSON
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: kpi-json
                       
