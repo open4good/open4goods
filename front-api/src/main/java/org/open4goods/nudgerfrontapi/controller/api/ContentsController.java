@@ -4,6 +4,10 @@ import java.time.Duration;
 import java.util.Locale;
 
 import org.open4goods.model.RolesConstants;
+import java.util.Collections;
+import java.util.List;
+
+import org.open4goods.nudgerfrontapi.dto.xwiki.FullPageDto;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XWikiHtmlService;
@@ -83,14 +87,14 @@ public class ContentsController {
             summary = "List XWiki pages",
             description = "List of pages available for rendering",
             responses = {
-                    @ApiResponse(responseCode = "501", description = "Not implemented")
+                    @ApiResponse(responseCode = "200", description = "List of page identifiers", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class, type = "array")))
             }
     )
-    public ResponseEntity<Void> pages() {
-        // TODO: implement listing of pages
-
-
-    	return ResponseEntity.status(501).build();
+    public ResponseEntity<List<String>> pages() {
+        // TODO: Replace with real listing from XWiki when available
+        return ResponseEntity.ok()
+                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .body(Collections.emptyList());
     }
 
     @GetMapping("/pages/{xwikiPageId}")
@@ -101,18 +105,27 @@ public class ContentsController {
                     @Parameter(name = "xwikiPageId", description = "XWiki page path", example = "Main.WebHome", in = ParameterIn.PATH, required = true)
             },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Page found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FullPage.class))),
+                    @ApiResponse(responseCode = "200", description = "Page found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FullPageDto.class))),
                     @ApiResponse(responseCode = "404", description = "Page not found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<FullPage> page(@PathVariable String xwikiPageId,
-                                         Locale locale) {
+    public ResponseEntity<FullPageDto> page(@PathVariable String xwikiPageId,
+                                            Locale locale) {
         String normalized = translatePageId(xwikiPageId);
         FullPage page = xwikiFacadeService.getFullPage(normalized);
+        String editLink = xwikiHtmlService.getEditPageUrl(normalized);
+        FullPageDto dto = new FullPageDto(
+                page.getProp("metaTitle"),
+                page.getProp("metaDescription"),
+                page.getProp("pageTitle"),
+                page.getHtmlContent(),
+                page.getProp("width"),
+                editLink
+        );
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
-                .body(page);
+                .body(dto);
     }
 
     private String translatePageId(String raw) {

@@ -44,6 +44,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 - `server/` → API routes for server-side logic
 - `plugins/` → Nuxt plugins
 - `tests/` or `*.spec.ts` → colocated or standalone test files
+- `pages/[...slug].vue` + `composables/wiki/useWikiPage.ts` → dynamic XWiki pages
 
 ---
 
