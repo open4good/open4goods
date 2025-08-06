@@ -1,7 +1,10 @@
-import sys, json
+import sys, json, os
 from datetime import datetime
 
 start_date, end_date, output = sys.argv[1], sys.argv[2], sys.argv[3]
+
+# Make sure the output directory exists
+os.makedirs(os.path.dirname(output), exist_ok=True)
 
 data = {
     "plausible": {"visits": 12345},
