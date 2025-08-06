@@ -87,6 +87,7 @@ To get the project up and running locally, follow these steps:
    - `pnpm --offline format` – check formatting
    - `pnpm --offline test` – run tests with Vitest
    - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
+   - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
    - `pnpm --offline preview` – serve the production build locally
    - `pnpm --offline build:ssr` – build with increased memory
 

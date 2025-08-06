@@ -3,8 +3,7 @@ import { onMounted, watch, computed, unref } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
-import '~/assets/css/bootstrap.css'
-import '~/assets/css/xwiki.css'
+import '~/assets/css/text-content.css'
 
 // Props
 const props = defineProps<{ blocId: string }>()
