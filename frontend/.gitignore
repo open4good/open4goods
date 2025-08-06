@@ -36,3 +36,6 @@ node_modules/
 !/.husky/pre-commit
 !/.husky/
 .cursorrules
+
+# Generated TextContent CSS
+assets/css/text-content.css

@@ -14,8 +14,10 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -o src/api --skip-validate-spec",
+    "preprocess:css": "cat assets/css/bootstrap.css assets/css/xwiki.css | postcss --config postcss.config.js -o assets/css/text-content.css",
     "semantic-release": "semantic-release",
     "postinstall": "nuxt prepare",
+    "prebuild": "pnpm preprocess:css",
     "prepare": "husky"
   },
   "dependencies": {
@@ -72,6 +74,8 @@
     "happy-dom": "^18.0.1",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
     "postcss-prefix-selector": "^2.1.1",
     "prettier": "^3.5.3",
     "resize-observer-polyfill": "^1.5.1",
