@@ -3,6 +3,8 @@ import { onMounted, watch, computed, unref } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
+import '~/assets/css/bootstrap.css'
+import '~/assets/css/xwiki.css'
 
 // Props
 const props = defineProps<{ blocId: string }>()
@@ -30,23 +32,6 @@ watch(
     if (newId) fetchBloc(newId)
   }
 )
-
-// --- Style Injection ---
-const BOOTSTRAP_HREF = 'https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css'
-const XWIKI_HREF = 'https://wiki.nudger.fr/bin/skin/skins/flamingo/style.min.css'
-
-function injectStylesOnce(href: string) {
-  if (document.querySelector(`link[href="${href}"]`)) return
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = href
-  document.head.appendChild(link)
-}
-
-onMounted(() => {
-  injectStylesOnce(BOOTSTRAP_HREF)
-  injectStylesOnce(XWIKI_HREF)
-})
 </script>
 
 <template>
