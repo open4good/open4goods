@@ -78,6 +78,21 @@ public class ContentsController {
                 .body(body);
     }
 
+    @GetMapping("/pages")
+    @Operation(
+            summary = "List XWiki pages",
+            description = "List of pages available for rendering",
+            responses = {
+                    @ApiResponse(responseCode = "501", description = "Not implemented")
+            }
+    )
+    public ResponseEntity<Void> pages() {
+        // TODO: implement listing of pages
+
+
+    	return ResponseEntity.status(501).build();
+    }
+
     @GetMapping("/pages/{xwikiPageId}")
     @Operation(
             summary = "Get XWiki page",
