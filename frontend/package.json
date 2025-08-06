@@ -72,6 +72,7 @@
     "happy-dom": "^18.0.1",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "postcss-prefix-selector": "^2.1.1",
     "prettier": "^3.5.3",
     "resize-observer-polyfill": "^1.5.1",
     "sass": "^1.80.4",
