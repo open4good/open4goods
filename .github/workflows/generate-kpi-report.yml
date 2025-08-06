@@ -22,12 +22,14 @@ jobs:
       start_date: ${{ steps.dates.outputs.START_DATE }}
       end_date: ${{ steps.dates.outputs.END_DATE }}
     steps:
-      - uses: actions/setup-python@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python (sans cache pip)
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'
-                
-      - uses: actions/checkout@v4
+          # cache: 'pip'   <-- retiré parce que pas de requirements.txt
 
       - name: Set default dates
         id: dates
@@ -43,21 +45,24 @@ jobs:
             END_DATE="${{ github.event.inputs.end_date }}"
           fi
           echo "START_DATE=$START_DATE" >> $GITHUB_ENV
-          echo "END_DATE=$END_DATE" >> $GITHUB_ENV
+          echo "END_DATE=$END_DATE"   >> $GITHUB_ENV
           echo "START_DATE=$START_DATE" >> $GITHUB_OUTPUT
-          echo "END_DATE=$END_DATE"   >> $GITHUB_OUTPUT
+          echo "END_DATE=$END_DATE"     >> $GITHUB_OUTPUT
 
       - name: Fetch KPI data
         id: fetch
         env:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
-          XWIKI_API_TOKEN: ${{ secrets.XWIKI_API_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          XWIKI_API_TOKEN:  ${{ secrets.XWIKI_API_TOKEN }}
+          GITHUB_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           CUSTOM_API_TOKEN: ${{ secrets.CUSTOM_API_TOKEN }}
         run: |
           pip install requests
-          python scripts/fetch_kpi.py $START_DATE $END_DATE docs/json/weekly_${END_DATE}.json
+          mkdir -p docs/json
+          python scripts/fetch_kpi.py \
+            $START_DATE $END_DATE docs/json/weekly_${END_DATE}.json
           echo "json_file=docs/json/weekly_${END_DATE}.json" >> $GITHUB_OUTPUT
+
 
       - name: Upload KPI JSON
         uses: actions/upload-artifact@v4
