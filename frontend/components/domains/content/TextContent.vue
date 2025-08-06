@@ -89,15 +89,12 @@ onMounted(() => {
 
 /* Scoped sandbox to contain Bootstrap + XWiki styles */
 .xwiki-sandbox {
-  all: initial;
   display: block;
   font-family: inherit;
 }
 
 .xwiki-sandbox * {
-  all: unset;
-  display: revert;
-  font-family: inherit;
   box-sizing: border-box;
+  font-family: inherit;
 }
 </style>
