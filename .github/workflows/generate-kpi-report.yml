@@ -77,14 +77,10 @@ jobs:
       - uses: actions/checkout@v4
 
     
-      - name: Préparer le dossier JSON
-        run: mkdir -p docs/json
-
       - name: Download KPI JSON
         uses: actions/download-artifact@v4
         with:
           name: kpi-json
-          path: docs/json
                       
       
       - name: Generate Markdown and CSV
@@ -110,6 +106,8 @@ jobs:
   create_issue_pr:
     needs: [generate_report, fetch_kpi]
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.create_PR == 'true' }}
+
     steps:
       - uses: actions/checkout@v4
         with:
