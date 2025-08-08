@@ -1,0 +1,21 @@
+{
+  "start_date": "2025-07-30",
+  "end_date": "2025-08-06",
+  "data": {
+    "plausible": {
+      "visits": 12345
+    },
+    "xwiki": {
+      "new_content": 25
+    },
+    "github": {
+      "issues_closed": 10,
+      "issues_opened": 5,
+      "pr_merged": 8,
+      "loc_added": 500
+    },
+    "custom_api": {
+      "conversion_rate": 3.2
+    }
+  }
+}
