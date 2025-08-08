@@ -209,8 +209,9 @@ Fetching Data
 3. Use useAsyncData wheimplementingcomplex data fetching logilikecombining multiple API calls ocustomcaching and error handling.
 4. Set server: false in useFetcoruseAsyncData options to fetch datonlyon the client side, bypassing SSR.
 5. Set lazy: true in useFetcoruseAsyncData options tdefernon-critical data fetching untiafterthe initial render.
+
 Naming Conventions
-- Utilize composables, naming theasuse<MyComposable>.
+- Utilize composables, naming it use[COMPOSABLE_NAME] (eg. useBlog)
 - Use **PascalCase** for componenfilenames (e.g., componentMyComponentvue).
 - Favor named exports for functiontomaintain consistency and readability.
 TypeScript Usage
@@ -220,6 +221,17 @@ TypeScript Usage
 UI and Styling
 - Use Vuetify UI forcomponents and styling.
 - Implement responsive Vuetify approach and mobile-firstapproach.
+
+Pages structure : 
+
+Pages naming will respect kebab-case.
+
+To respect components loading and initialisation, be aware :
+- Pages (located under /pages/*) must contains ONLY components
+- Direct use of Html code, or vuetify components is stricly prohibited
+- When needed, you will always create intermediary components (under /components folder)
+
+
 
 # Model error journal
 ## Here are listed all recurring errors of the model.
