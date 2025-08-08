@@ -26,14 +26,10 @@ public class ProductMappingService {
     }
 
     // Retrieves a paginated list of simplified product DTOs, optionally filtered by vertical presence and minimum offers.
-    public Page<ProductSimpleDto> getProducts(Pageable pageable, boolean withVerticalOnly, Integer minOffers) {
-        SearchHits<Product> hits = (withVerticalOnly || minOffers != null)
-                ? searchWithFilters(pageable, withVerticalOnly, minOffers)
+    public Page<ProductSimpleDto> getProducts(Pageable pageable, boolean requireVertical, Integer minOffers) {
+        SearchHits<Product> hits = (requireVertical || minOffers != null)
+                ? searchWithFilters(pageable, requireVertical, minOffers)
                 : repository.get(pageable);
-
-        if (hits == null) {
-            return Page.empty(pageable);
-        }
 
         List<ProductSimpleDto> dtos = hits.stream()
                 .map(hit -> mapToDto(hit.getContent()))
