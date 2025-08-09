@@ -3,16 +3,23 @@ import type { BlogPostDto } from '~/src/api'
 import { ResponseError } from '~/src/api'
 
 /**
- * Blog article by ID API endpoint
+ * Blog article by slug API endpoint
  * Handles GET requests for a single blog article
  */
 export default defineEventHandler(async (event): Promise<BlogPostDto> => {
-  const slug = getRouterParam(event, 'id')
+  // Cache the article for one hour
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600'
+  )
+
+  const slug = getRouterParam(event, 'slug')
 
   if (!slug) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Article ID is required',
+      statusMessage: 'Article slug is required',
     })
   }
 
@@ -20,7 +27,7 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
 
   try {
     // Use the service to fetch the article
-    const response = await blogService.getArticleById(slug)
+    const response = await blogService.getArticleBySlug(slug)
     return response
   } catch (error) {
     console.error('Error fetching blog article:', error)
