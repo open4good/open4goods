@@ -88,8 +88,8 @@ To get the project up and running locally, follow these steps:
    - `pnpm --offline test` – run tests with Vitest
    - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
    - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
-   - `pnpm --offline preview` – serve the production build locally
-   - `pnpm --offline build:ssr` – build with increased memory
+ - `pnpm --offline preview` – serve the production build locally
+  - `pnpm --offline build:ssr` – build with increased memory
 
 ## API environment variables
 
@@ -104,6 +104,10 @@ Runtime configuration uses the following variables defined in `nuxt.config.ts`:
   `refresh_token`.
 - **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.apiUrl`.
 - **`EDITOR_ROLES`** – comma-separated roles that enable edit links on content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP` (roles returned by the backend) and is exposed as `config.public.editRoles`.
+
+## Dynamic wiki pages
+
+The application can render XWiki pages directly. Any path is resolved on demand by the catch‑all page located at `pages/[...slug].vue`, which loads data through the `useWikiPage` composable. Retrieved metadata is injected via `useHead`, and authenticated users with roles listed in `EDITOR_ROLES` see an edit link.
 
 ## Authentication cookies
 
