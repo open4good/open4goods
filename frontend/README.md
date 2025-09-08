@@ -321,6 +321,9 @@ describe('Button', () => {
 - Use Prettier for formatting (pnpm format + --write)
 - Git hooks via Husky run `pnpm --offline lint` and `pnpm --offline test` on commit
 
+  ### use cSpell:words
+    Doc : `https://cspell.org/` 
+
 ## SSR Best Practices
 
 - Use `useFetch`, `useAsyncData` for server-safe data fetching
