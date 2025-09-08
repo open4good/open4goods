@@ -19,6 +19,14 @@
       "matchManagers": ["pnpm", "npm", "node"],
       "enabled": true,
       "labels": ["squad:ux"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "labels": ["squad:platform"]
+    },
+    {
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "labels": ["squad:platform"]
     }
   ]
 }
