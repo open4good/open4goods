@@ -206,6 +206,13 @@ project/
 </template>
 ```
 
+## CSS/SASS : BEM Convention
+  SASS classes (excluding Vuetify classes) must follow the BEM convention:
+    - Block/Element/Modifiers
+      `.block__elem--mod`
+    Documentation here: `https://getbem.com/naming/`
+    Note for Claude users : use slash-command `/css-class-validator` for validate & auto-fix your class.
+
 ## Pinia (State Management)
 
 ```ts
