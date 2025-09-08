@@ -16,6 +16,7 @@ env:
     squad:pmo=PVT_kwDOBOJOp84A8tDc
     squad:ux=PVT_kwDOBOJOp84A2ZQ8
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
+    squad:platform=PVT_kwDOBOJOp84BB-GS
   IF_UNMATCH: PVT_kwDOBOJOp84A8tDc
   # Laisser vide pour ne filtrer par auteur
   FILTER_AUTHOR: "renovate[bot]"
