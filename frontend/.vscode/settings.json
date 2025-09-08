@@ -80,5 +80,21 @@
   "vetur.format.enable": false,
   "vetur.validation.template": false,
   "vetur.validation.script": false,
-  "vetur.validation.style": false
+  "vetur.validation.style": false,
+
+  // Configuration cSpell
+  "cSpell.enabled": true,
+  "cSpell.language": "en",
+  "cSpell.diagnosticLevel": "Hint",
+  "cSpell.showStatus": true,
+  "cSpell.allowCompoundWords": true,
+  "cSpell.ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.nuxt/**",
+    "**/coverage/**",
+    "**/.git/**",
+    "**/pnpm-lock.yaml",
+    "**/package-lock.json"
+  ]
 }
