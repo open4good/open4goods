@@ -187,6 +187,15 @@ project/
 ## Vuetify
 - (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
 - (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
+ ### Vuetify MCP & Claude-code
+  - install Vuetify MCP server : The project is in development that is not yet available on npm.
+    install from pnpm here : `pnpm add git+https://github.com/vuetifyjs/mcp.git`
+  - Check install in claude: `npx -y @vuetify/mcp config`
+    The Vuetify MCP server provides tools for:
+      - Generating Vuetify components with the correct props
+      - Accessing APIs and documentation
+      - Installation guides
+      - Release notes
 
 ## Example Button Component
 ```vue
