@@ -96,33 +96,50 @@ STEP 2: Conversion and Adaptation
 - Component structure:
   * <template>: Convert HTML/React structure to Vue.js
   * <script setup>: Use Composition API
-  * <style lang="sass" scoped>: Component-specific styles
+  * <style lang="sass" scoped>: Component-specific styles only when needed
 - Required conversions:
   * React/JSX → Vue template syntax
-  * Tailwind classes → Vuetify + custom BEM classes
+  * Custom CSS → Vuetify responsive utility classes (PRIORITY)
   * React Props → Vue Props with TypeScript validation
   * React Events → Vue Events (@click, @input, etc.)
   * Icons: Use Figma icon names directly in v-icon (e.g., icon="mdi-home")
+
+- CRITICAL: NEVER use custom responsive mixins (@include mobile, @include tablet). Always use Vuetify native responsive system:
+  * Grid System: v-container, v-row, v-col with breakpoint props (xs, sm, md, lg, xl)
+  * Display: d-{breakpoint}-{value} (e.g., d-lg-none, d-sm-flex)
+  * Spacing: {property}{direction}-{breakpoint}-{size} (e.g., ma-lg-8, pa-sm-4)
+  * Flex: flex-{breakpoint}-{value} (e.g., flex-lg-row, flex-sm-column)
+  * Dynamic classes with $vuetify.display: :class="{ 'ga-4': $vuetify.display.mdAndUp }"
+  * Reactive props: :size="$vuetify.display.smAndDown ? 'small' : 'default'"
+  * Breakpoints: xs (0-600px), sm (600-960px), md (960-1264px), lg (1264-1904px), xl (1904px+)
 ```
 
 
-### 3. Reusable Styles Extraction
+### 3. Vuetify-First Styling Approach
 ```
-STEP 3: Optimization and Reusability
-- Identify reusable elements in the design:
-  * Buttons with variants (.btn-nudge-tools, .btn-menu-link)
-  * Cards and containers
-  * Form elements
-  * Icons and badges
-- Create/update: assets/sass/components/_[type].sass
-- Recommended SASS structure:
-  .component-name
-    &__element
-      // Element styles
-    &--modifier
-      // Component variant
-    &:hover, &:focus
-      // Interactive states
+STEP 3: Vuetify Utilities Before Custom Styles
+- PRIORITY: Use Vuetify built-in classes and components:
+  * v-btn variants (color, size, variant props)
+  * v-card, v-sheet for containers
+  * v-form components for form elements
+  * Built-in spacing and display utilities
+
+- Only create custom SASS when Vuetify utilities are insufficient:
+  * Identify elements that CANNOT be achieved with Vuetify classes
+  * Create minimal custom styles: assets/sass/components/_[type].sass
+  * Recommended SASS structure:
+    .component-name
+      &__element
+        // Element styles (only when Vuetify classes insufficient)
+      &--modifier
+        // Component variant (prefer Vuetify props when possible)
+      &:hover, &:focus
+        // Interactive states (use Vuetify state classes first)
+
+- Examples of Vuetify-first approach:
+  * Instead of custom .btn-primary → use v-btn color="primary"
+  * Instead of custom spacing → use ma-4, pa-2, etc.
+  * Instead of custom grid → use v-container, v-row, v-col
 ```
 
 
@@ -132,35 +149,55 @@ STEP 4: Ecosystem Integration
 - Import component in parent page/component
 - Check compatibility with:
   * Vue Router (if navigation)
-  * Vuetify theme and breakpoints
+  * Vuetify theme, breakpoints, and responsive behavior
   * Pinia Store (if state management)
 - Test different states and props
-- Validate responsive design
+- Validate responsive design using Vuetify's breakpoint system:
+  * Test on different screen sizes (xs, sm, md, lg, xl)
+  * Verify Vuetify responsive classes work correctly
+  * Use browser DevTools or $vuetify.display for breakpoint testing
 ```
 
 
-## Available SASS Resources
+## Vuetify Resources & SASS Fallback
 
 
-### Existing Variables (assets/sass/base/_variables.sass)
-- Colors: `$primary`, `$secondary`, `$accent`, `$error`, `$info`, `$success`, `$warning`
+### PRIORITY: Vuetify Built-in Classes
+- **Colors**: Use Vuetify color system (primary, secondary, accent, error, info, success, warning)
+  * Apply via props: `color="primary"` or classes: `text-primary`, `bg-secondary`
+- **Spacing**: Use Vuetify spacing utilities instead of custom CSS
+  * Margins: `ma-{0-16}`, `mx-4`, `my-2`, responsive: `ma-lg-8`
+  * Padding: `pa-{0-16}`, `px-4`, `py-2`, responsive: `pa-sm-4`
+- **Typography**: Use Vuetify text classes
+  * `text-h1` to `text-h6`, `text-body-1`, `text-body-2`, `text-caption`
+- **Layout**: Use Vuetify grid and flex utilities
+  * Grid: `v-container`, `v-row`, `v-col` with breakpoint props
+  * Flex: `d-flex`, `flex-column`, `justify-center`, `align-center`
+  * Responsive display: `d-sm-none`, `d-lg-block`
+
+
+### SASS Fallback (Only when Vuetify insufficient)
+
+**Existing Variables (assets/sass/base/_variables.sass)**
+- Colors: `$primary`, `$secondary`, `$accent` (should match Vuetify theme)
 - Typography: `$body-font-family: 'Poppins'`
 - Layout: `$border-radius-root: 8px`, `$font-size-root: 16px`
 
+**Available Mixins (assets/sass/base/_mixins.sass)**
+- ❌ **NEVER USE**: `@include mobile`, `@include tablet`, `@include desktop` - Use Vuetify responsive system instead
+- Transitions: `@include transition($property, $duration, $easing)` (prefer Vuetify component transitions)
+- Shadows: `@include box-shadow($level)` (prefer Vuetify elevation classes)
+- Buttons: `@include button-style($bg-color, $text-color)` (prefer v-btn)
 
-### Available Mixins (assets/sass/base/_mixins.sass)
-- Responsive: `@include mobile`, `@include tablet`, `@include desktop`
-- Transitions: `@include transition($property, $duration, $easing)`
-- Shadows: `@include box-shadow($level)`
-- Buttons: `@include button-style($bg-color, $text-color)`
-
-
-### Existing Component Classes (assets/sass/components/)
+**Existing Component Classes (assets/sass/components/)**
 - Menu components: `.menu-item-base`, `.btn-nudge-tools`, `.main-menu-container`
 - Check other component files: `_buttons.sass`, `_cards.sass`, `_menus.sass`
 
 
-**IMPORTANT**: Always reuse existing classes and variables instead of creating duplicates!
+**IMPORTANT**: 
+1. FIRST try to achieve the design with Vuetify classes
+2. Only create custom SASS when Vuetify utilities cannot achieve the desired result
+3. Always reuse existing classes and variables instead of creating duplicates
 
 
 ### Icons Implementation
@@ -181,9 +218,16 @@ STEP 4: Ecosystem Integration
 ### Vue Component Structure
 ```vue
 <template>
-  <div class="component-name">
-    <!-- Optimized HTML structure -->
-  </div>
+  <!-- Use Vuetify components and utility classes -->
+  <v-card class="component-name" elevation="1">
+    <v-container>
+      <v-row>
+        <v-col cols="12" sm="6" md="4">
+          <!-- Responsive grid using Vuetify -->
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-card>
 </template>
 
 
@@ -204,27 +248,26 @@ const emit = defineEmits<{
 </script>
 
 
+<!-- Minimal custom styles - prefer Vuetify classes in template -->
 <style lang="sass" scoped>
 @use '@/assets/sass/base/variables' as *
 @use '@/assets/sass/base/mixins' as *
 
-
 .component-name
-  // Use existing variables and mixins
-  color: $primary
-  border-radius: $border-radius-root
-  @include transition()
-  @include box-shadow(1)
- 
-  // Responsive design with existing mixins
-  @include mobile
-    // Mobile styles
-   
-  @include tablet
-    // Tablet styles
-   
-  @include desktop
-    // Desktop styles
+  // Only add custom styles when Vuetify utilities are insufficient
+  // Most styling should be done via Vuetify classes in template
+
+  // Example: Custom styling only when needed
+  // color: $primary  // Prefer text-primary class instead
+  // @include transition()  // Vuetify components have built-in transitions
+  
+  // ❌ NEVER USE custom responsive mixins - use Vuetify responsive system instead:
+  // @include mobile - FORBIDDEN, use $vuetify.display.smAndDown in template
+  // @include tablet - FORBIDDEN, use $vuetify.display.md in template  
+  // @include desktop - FORBIDDEN, use $vuetify.display.lgAndUp in template
+  
+  // ✅ If absolute necessity for custom responsive CSS (extremely rare):
+  // Use standard media queries as last resort, but prefer Vuetify classes
 </style>
 ```
 
@@ -238,12 +281,14 @@ const emit = defineEmits<{
 ## Final Checklist
 - [ ] Figma design correctly analyzed and reproduced
 - [ ] Vue component created with proper structure
-- [ ] Styles extracted to appropriate SASS files
-- [ ] BEM classes applied correctly
+- [ ] **PRIORITY**: Vuetify responsive classes used instead of custom CSS where possible
+- [ ] Minimal custom SASS created only when Vuetify insufficient
+- [ ] BEM classes applied correctly (only for custom styles)
 - [ ] Component integrated and functional
 - [ ] TypeScript code validated
-- [ ] Responsive design tested
-- [ ] Interactive states functional
+- [ ] Responsive design tested across Vuetify breakpoints (xs, sm, md, lg, xl)
+- [ ] Interactive states functional using Vuetify components/utilities
+- [ ] MCP Vuetify server consulted for component best practices when available
 
 
 ## Dynamic Arguments
