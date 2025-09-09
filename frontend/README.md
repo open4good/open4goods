@@ -188,14 +188,46 @@ project/
 - (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
 - (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
  ### Vuetify MCP & Claude-code
-  - install Vuetify MCP server : The project is in development that is not yet available on npm.
-    install from pnpm here : `pnpm add git+https://github.com/vuetifyjs/mcp.git`
-  - Check install in claude: `npx -y @vuetify/mcp config`
-    The Vuetify MCP server provides tools for:
-      - Generating Vuetify components with the correct props
-      - Accessing APIs and documentation
-      - Installation guides
-      - Release notes
+  - Install Vuetify MCP server: `pnpm add @vuetify/mcp@latest`
+  - Configure in Claude: `npx @vuetify/mcp config`
+  - **Start MCP server**: `node node_modules/@vuetify/mcp/dist/index.js` (run in background)
+  
+  The Vuetify MCP server provides tools for:
+    - Generating Vuetify components with the correct props
+    - Accessing APIs and documentation (`get_component_api_by_version`, `get_directive_api_by_version`)
+    - Installation guides (`get_installation_guide`)
+    - Release notes (`get_release_notes_by_version`)
+    - Available features (`get_available_features`)
+    - FAQ (`get_frequently_asked_questions`)
+  
+  **Quick start next time**:
+  ```bash
+  # Start the MCP server in background
+  node node_modules/@vuetify/mcp/dist/index.js &
+  
+  # Or with npm
+  npx @vuetify/mcp
+
+### Vuetify MCP API Tools
+  - get_vuetify_api_by_version: Download and cache Vuetify API types by version
+  - get_component_api_by_version: Get the API for a specific component (props, events, slots, methods)
+  - get_directive_api_by_version: Get the API for a Vuetify directive (v-ripple, v-scroll, etc.)
+
+  Documentation Tools
+
+  - get_installation_guide: Installation guides for Vue CLI, Nuxt, Vite
+  - get_available_features: List of available components, directives, and composables
+  - get_exposed_exports: Available exports of the Vuetify package
+  - get_frequently_asked_questions: FAQs from the Vuetify documentation
+  - get_release_notes_by_version: Release notes to understand the changes
+
+  Practical Use Cases
+
+  - Generate Vuetify components with the correct props
+  - Create layouts Best-practice UI
+  - Access documentation without leaving your IDE
+  - Get AI help that understands Vuetify's component structure
+    ```
 
 ## Example Button Component
 ```vue
