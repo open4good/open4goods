@@ -37,6 +37,7 @@
         <module>api</module>
         <module>ui</module>
         <module>front-api</module>
+        <module>b2b</module>
         <module>static</module>
         <module>services/urlfetching</module>
         <module>services/googlesearch</module>

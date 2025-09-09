@@ -1,0 +1,21 @@
+server:
+  port: 8082
+
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+  swagger-ui:
+    use-root-path: true
+
+front:
+  security:
+    enabled: true
+    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
+      
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
