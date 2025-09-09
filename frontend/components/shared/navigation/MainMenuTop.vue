@@ -75,6 +75,12 @@
   border-radius: 8px
   @include transition()
 
+  // Forcer la couleur du texte pour tous les états
+  :deep(.v-list-item-title)
+    color: #203c26 !important
+    font-family: 'Nunito Sans', sans-serif !important
+    font-weight: 900 !important
+
   // Focus visible pour l'accessibilité
   &:focus-visible,
   &.v-list-item--focused
@@ -85,19 +91,18 @@
   // État actif (page courante)
   &[aria-current="page"]
     background-color: rgba(32, 60, 38, 0.1)
-    font-weight: 700
     
-    .menu-link
-      color: #203c26
-      font-weight: 700
+    :deep(.v-list-item-title)
+      color: #203c26 !important
+      font-weight: 700 !important
 
   &:hover:not([aria-current="page"])
     background-color: rgba(32, 60, 38, 0.05)
 
 .menu-link
-  font-family: 'Nunito Sans', sans-serif
-  font-weight: 900
-  color: #203c26 // Contraste vérifié: 7.1:1 sur fond blanc
+  font-family: 'Nunito Sans', sans-serif !important
+  font-weight: 900 !important
+  color: #203c26 !important // Contraste vérifié: 7.1:1 sur fond blanc
   text-align: center
   line-height: 1.348
   @include transition()
