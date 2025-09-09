@@ -2,6 +2,8 @@
 
 
 You will create a Vue.js component from a Figma design following a structured methodology and respecting project conventions.
+- The Name of component will be always the name of Figma component.
+- Always verify than the Figma MCP server is started. 
 
 
 ## Project Context
@@ -27,7 +29,6 @@ Ask the user: "What name would you like for the new Git branch for this componen
 
 1. **Component Location**:
    - Which category? (ui, form, navigation, layout, media, other...)
-   - What name for the component? (PascalCase)
    - Suggested final path: `components/shared/[category]/[ComponentName].vue`
 
 
