@@ -1,0 +1,99 @@
+// assets/sass/components/_menus.sass
+// Styles réutilisables pour les composants de menu
+
+@use '../base/variables' as *
+@use '../base/mixins' as *
+
+// Variables de couleurs pour les menus
+$menu-text-color: #203c26
+$menu-button-bg: #00de9f
+$menu-button-text: #000000
+
+// Base pour les conteneurs de menu
+.main-menu-container
+  display: flex
+  align-items: center
+  justify-content: space-between
+  position: relative
+  width: 100%
+
+// Base pour les éléments de menu
+.menu-item-base
+  display: flex
+  align-items: center
+  justify-content: center
+
+// Liens de menu
+.menu-link
+  font-family: 'Nunito Sans', sans-serif
+  font-weight: 900
+  font-size: 18px
+  color: $menu-text-color
+  text-decoration: none
+  text-align: center
+  line-height: 1.348
+  transition: all 0.3s ease
+
+  &:hover
+    opacity: 0.8
+
+  // Variantes de taille
+  &--small
+    font-size: 16px
+
+  &--large
+    font-size: 20px
+
+// Bouton Nudge-tools réutilisable
+.btn-nudge-tools
+  font-family: 'Rubik One', sans-serif !important
+  font-size: 17px !important
+  font-weight: normal !important
+  text-transform: none !important
+  background-color: $menu-button-bg !important
+  color: $menu-button-text !important
+  border: 1px solid black
+  border-radius: 9px !important
+  min-width: 120px
+  transition: all 0.3s ease
+
+  &:hover
+    opacity: 0.9
+
+  // Variantes de taille
+  &--small
+    font-size: 15px !important
+    min-width: 100px
+    padding: 8px 16px
+
+  &--large
+    font-size: 19px !important
+    min-width: 140px
+    padding: 14px 28px
+
+// Navigation horizontale
+.nav-horizontal
+  .menu-main-top
+    display: flex
+    align-items: center
+    flex: 1
+    gap: 2rem
+
+    @include mobile
+      gap: 1rem
+
+    @include tablet
+      gap: 1.5rem
+
+// Responsive pour les menus
+@include mobile
+  .menu-link
+    font-size: 16px
+
+  .btn-nudge-tools
+    font-size: 15px !important
+    min-width: 100px
+
+@include tablet
+  .menu-link
+    font-size: 17px

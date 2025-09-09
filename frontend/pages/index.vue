@@ -1,5 +1,7 @@
 <template>
   <v-container class="pa-0">
+    <!-- Top Navigation Menu -->
+    <MainMenuTop />
     <!-- Hero section with call to action -->
     <section class="hero d-flex flex-column align-center justify-center">
       <v-img src="/nudger-icon-512x512.png" width="120" class="mb-4" alt="Nudger logo" />

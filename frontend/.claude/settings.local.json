@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "mcp__figma__get_code",
+      "mcp__figma__get_image",
+      "Bash(pnpm lint:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
