@@ -60,6 +60,7 @@ public class ProductAccessService {
 		ProductDto productDto = new ProductDto(p.getId());
 
 		RequestMetadata metadatas = new RequestMetadata();
+		metadatas.setTimestampEpoch(System.currentTimeMillis());
 
 		if (null != includedFacets) {
 		    for (AvailableFacets requiredFacet : includedFacets) {
@@ -79,6 +80,8 @@ public class ProductAccessService {
 
 		// computing total cost
 		metadatas.setRequestCost(metadatas.getFacetsCosts().values().stream().mapToInt(Short::intValue).sum());
+		// Computing duration
+		metadatas.setDurationMs(System.currentTimeMillis() - metadatas.getTimestampEpoch());
 
 		// Setting metadatas
 		productDto.setRequestMetadatas(metadatas);

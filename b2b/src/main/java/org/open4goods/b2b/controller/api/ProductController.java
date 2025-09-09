@@ -63,7 +63,6 @@ public class ProductController {
             parameters = {
                     @Parameter(name = "gtin",
                             description = "Global Trade Item Number (8–14 digit numeric code)",
-                            example = "8806095491998",
                             required = true),
                     @Parameter(
                             name        = "include",
