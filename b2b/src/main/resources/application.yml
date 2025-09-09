@@ -8,11 +8,6 @@ springdoc:
 
   swagger-ui:
     use-root-path: true
-
-front:
-  security:
-    enabled: true
-    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
       
 management:
   endpoints:
