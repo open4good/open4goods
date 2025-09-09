@@ -202,11 +202,14 @@ project/
   
   **Quick start next time**:
   ```bash
-  # Start the MCP server in background
+  # Start the MCP server in background in Claude Code
   node node_modules/@vuetify/mcp/dist/index.js &
   
   # Or with npm
   npx @vuetify/mcp
+  ```
+  
+**Important**: The MCP server must be running **while** you use Claude Code to benefit from Vuetify tools. It communicates directly with Claude Code via the MCP protocol.
 
 ### Vuetify MCP API Tools
   - get_vuetify_api_by_version: Download and cache Vuetify API types by version
