@@ -1,4 +1,5 @@
-name: "datasource"
+---
+name: "datasource (EN)"
 about: Possible external datasource addition
 title: "[Datasource]: "
 labels: datasource,squad:backend
