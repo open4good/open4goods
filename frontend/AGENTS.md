@@ -4,6 +4,8 @@
 - Translate all code comments in english curent language.
 - Never delete code comments without ask to user.
 - Always explain your choices (at least briefly)
+- Composables must call server API routes for backend communication; do not reimplement service logic or talk to backend services directly.
+- When the proper layer is unclear, ask for clarification before coding.
 
 # Global context
 Nudger is a search engine for electronics and household appliances, aggregating energy data from different sources to create an "Impact Score." This allows users to make the best choice of appliance before purchasing.
