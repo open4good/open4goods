@@ -6,9 +6,8 @@ labels: datasource,squad:backend
 assignees: ''
 ---
 
-### Datasource name  
-name :  
-URL :  
+### Datasource  
+- []() 
 
 ### Justification  
 Adding this datasource could  

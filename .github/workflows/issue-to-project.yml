@@ -20,6 +20,7 @@ env:
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
     squad:platform=PVT_kwDOBOJOp84BB-GS
     epic=PVT_kwDOBOJOp84A8tDc
+    EPIC=PVT_kwDOBOJOp84A8tDc
     userstory=PVT_kwDOBOJOp84A8tDc
     risky=PVT_kwDOBOJOp84A8tDc
   IF_UNMATCH: PVT_kwDOBOJOp84A8tDc
