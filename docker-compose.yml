@@ -4,7 +4,7 @@ services:
 ###################################################################
        
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.3
     container_name: elastic
     environment:
       - http.max_content_length=200mb
