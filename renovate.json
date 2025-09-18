@@ -1,23 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "schedule": ["after 10pm and before 5am"],
+  "ignorePaths": ["ui/**"],
   "github-actions": { "enabled": true },
-  "dependencyDashboard": false,
+  "dependencyDashboard": true,
   "packageRules": [
     {
       "matchManagers": ["maven"],
-      "matchPaths": ["!frontend/**","!ui/**"],
       "automerge": false,
-      "automergeType": "branch",
       "labels": ["squad:backend"]
     },
     {
       "matchPaths": ["frontend/**"],
-      "matchManagers": ["pnpm", "npm", "node"],
-      "enabled": true,
+      "matchManagers": ["npm", "pnpm", "yarn"],
       "labels": ["squad:ux"]
     },
     {

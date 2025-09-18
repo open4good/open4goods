@@ -28,9 +28,15 @@
 
 	<dependencies>
 		<dependency>
-		    <groupId>com.amazon.paapi5</groupId>
-		    <artifactId>paapi5-java-sdk</artifactId>
-		    <version>1.1.0</version>
+			<groupId>com.amazon.paapi5</groupId>
+			<artifactId>paapi5-java-sdk</artifactId>
+			<version>1.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.swagger</groupId>
+					<artifactId>swagger-annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

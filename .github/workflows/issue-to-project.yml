@@ -19,7 +19,11 @@ env:
     squad:ux=PVT_kwDOBOJOp84A2ZQ8
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
     squad:platform=PVT_kwDOBOJOp84BB-GS
+    squad:exposition=PVT_kwDOBOJOp84BCvRN
+    partenariat=PVT_kwDOBOJOp84BCvRN
+    seo=PVT_kwDOBOJOp84BCvRN
     epic=PVT_kwDOBOJOp84A8tDc
+    EPIC=PVT_kwDOBOJOp84A8tDc
     userstory=PVT_kwDOBOJOp84A8tDc
     risky=PVT_kwDOBOJOp84A8tDc
   IF_UNMATCH: PVT_kwDOBOJOp84A8tDc

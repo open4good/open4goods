@@ -44,32 +44,11 @@ export const useBlog = () => {
   }
 
   /**
-   * Fetch a single article by ID
-   * @param id - Article ID
-   */
-  const fetchArticleById = async (id: string) => {
-    loading.value = true
-    error.value = null
-
-    try {
-      // Use our server API as proxy
-      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${id}`)
-      currentArticle.value = article
-    } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : 'Failed to fetch article'
-      console.error('Error in fetchArticleById:', err)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * Fetch a single article by URL slug
-   * @param slug - Article URL slug
+   * Fetch a single article by slug
+   * @param slug - Article slug
    * @returns The fetched article or null if not found
    */
-  const getArticleByUrl = async (slug: string) => {
+  const fetchArticle = async (slug: string) => {
     loading.value = true
     error.value = null
 
@@ -80,7 +59,7 @@ export const useBlog = () => {
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : 'Failed to fetch article'
-      console.error('Error in getArticleByUrl:', err)
+      console.error('Error in fetchArticle:', err)
       return null
     } finally {
       loading.value = false
@@ -111,8 +90,7 @@ export const useBlog = () => {
 
     // Actions
     fetchArticles,
-    fetchArticleById,
-    getArticleByUrl,
+    fetchArticle,
     clearCurrentArticle,
     clearError,
   }
