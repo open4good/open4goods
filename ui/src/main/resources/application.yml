@@ -196,6 +196,17 @@ team-config:
     linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
     imageUrl: /assets/img/team/Thomas.jpeg
 
+  - name: Candide Chérel
+    title: Gestion et conduite de projet
+    linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
+    imageUrl: /assets/img/team/Candide.jpeg
+
+    
+  - name: Yann Mingant
+    title: Lead UX / UI
+    linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
+    imageUrl: /assets/img/team/Yann.jpeg
+        
   - name: Louis-Marie Toudoire
     title: Développeur Backend
     linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
@@ -211,12 +222,13 @@ team-config:
     linkedInUrl: https://www.linkedin.com/in/maxziliani/
     imageUrl: /assets/img/team/Max.jpeg
 
-  - name: Candide Chérel
-    title: Gestion et conduite de projet
-    linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
-    imageUrl: /assets/img/team/Candide.jpeg
         
   contributors:
+  - name: Loïc Gourmelon
+    title: Devops
+    linkedInUrl: https://www.linkedin.com/in/gourmelonloic/
+    imageUrl: /assets/img/team/Loic.jpeg
+          
   - name: Thierry Ledan
     title: Développements backend
     linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
