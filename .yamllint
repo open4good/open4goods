@@ -1,0 +1,7 @@
+# .yamllint
+extends: default
+
+rules:
+  document-start: disable   # pas besoin de '---' en tête de fichier
+  truthy: disable           # évite les faux positifs sur yes/no
+
