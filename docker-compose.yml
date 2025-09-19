@@ -59,7 +59,7 @@ services:
 
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.1.3
+    image: docker.elastic.co/kibana/kibana:9.1.4
     container_name: kibana
     depends_on:
       - elastic
