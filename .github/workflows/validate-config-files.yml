@@ -1,4 +1,4 @@
-name: Lint YAML/JSON/XML
+name: Validate YAML/JSON/XML files
 
 on:
   pull_request:
