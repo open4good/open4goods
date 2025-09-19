@@ -39,19 +39,21 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 
 ### Project Structure
 ```
-├── components/     # Reusable UI components (auto-imported)
-├── pages/         # File-based routing
-├── layouts/       # Page layout wrappers
-├── stores/        # Pinia stores (useAuthStore, useAppStore)
-├── composables/   # Composition API hooks
-├── services/      # API service abstractions
-├── src/api/       # Generated OpenAPI client (do not edit manually)
-├── server/        # Server API endpoints
-├── assets/        # Static assets, SASS files
-├── constants/     # Shared constants
-├── utils/         # Helper utilities
-├── plugins/       # Nuxt plugins
-└── i18n/         # Internationalization
+├── app/
+│   ├── components/     # Reusable UI components (auto-imported)
+│   ├── pages/          # File-based routing
+│   ├── layouts/        # Page layout wrappers
+│   ├── stores/         # Pinia stores (useAuthStore, useAppStore)
+│   ├── composables/    # Composition API hooks
+│   ├── services/       # API service abstractions
+│   ├── src/api/        # Generated OpenAPI client (do not edit manually)
+│   ├── server/         # Server API endpoints
+│   ├── assets/         # Static assets, SASS files
+│   ├── constants/      # Shared constants
+│   ├── utils/          # Helper utilities
+│   ├── plugins/        # Nuxt plugins
+│   └── i18n/           # Internationalization
+└── public/             # Static assets served directly
 ```
 
 ### Key Patterns
@@ -63,7 +65,7 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 - Use `useAuth()` composable for role checks
 
 #### API Integration
-- OpenAPI-generated client in `src/api/` (regenerate with `pnpm generate:api`)
+- OpenAPI-generated client in `app/src/api/` (regenerate with `pnpm generate:api`)
 - Server-side auth headers injected via `MACHINE_TOKEN`
 - Runtime config for API URLs and tokens
 

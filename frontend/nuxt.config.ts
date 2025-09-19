@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
+  srcDir: 'app',
   compatibilityDate: '2024-11-01',
   devtools: {
     enabled: process.env.NODE_ENV !== 'production',
@@ -43,8 +44,12 @@ export default defineNuxtConfig({
     strategy: 'prefix_except_default',
   },
   css: [
-    'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
+    '~/assets/sass/main.sass', // Gardez seulement le fichier SASS principal
   ],
+
+  dir: {
+    public: 'public',
+  },
 
   build: {
     transpile: ['vuetify'],

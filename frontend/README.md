@@ -86,8 +86,8 @@ To get the project up and running locally, follow these steps:
    - `pnpm --offline lint` – run ESLint
    - `pnpm --offline format` – check formatting
    - `pnpm --offline test` – run tests with Vitest
-   - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
-   - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
+   - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client under `app/src/api`
+   - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>` using `app/assets/css`
    - `pnpm --offline preview` – serve the production build locally
    - `pnpm --offline build:ssr` – build with increased memory
 
@@ -143,18 +143,20 @@ your design token generation command to pull the latest tokens.
 
 ```
 project/
-├── assets/       # Images, fonts, global CSS
-├── components/   # Reusable UI components
-├── composables/  # Logic hooks (e.g., useX)
-├── constants/    # Shared constants
-├── layouts/      # Page layout wrappers
-├── pages/        # File-based routes
-├── services/     # API service abstractions
-├── plugins/      # Nuxt plugins (e.g. `fetch-logger.ts` logs all backend requests)
-├── stores/       # Pinia state stores
-├── server/       # Server API endpoints
-├── utils/        # Helper utilities
-├── src/api/      # OpenAPI generated client
+├── app/
+│   ├── assets/       # Images, fonts, global CSS
+│   ├── components/   # Reusable UI components
+│   ├── composables/  # Logic hooks (e.g., useX)
+│   ├── constants/    # Shared constants
+│   ├── layouts/      # Page layout wrappers
+│   ├── pages/        # File-based routes
+│   ├── services/     # API service abstractions
+│   ├── plugins/      # Nuxt plugins (e.g. `fetch-logger.ts` logs all backend requests)
+│   ├── stores/       # Pinia state stores
+│   ├── server/       # Server API endpoints
+│   ├── utils/        # Helper utilities
+│   └── src/api/      # OpenAPI generated client
+├── public/           # Static assets served directly
 ```
 
 - `tests/` or `*.spec.ts` files live next to components.
@@ -301,7 +303,7 @@ const cart = useCartStore();
   ```bash
   pnpm --offline generate:api
   ```
-- Generated files under `src/api/`
+- Generated files under `app/src/api/`
 - Example usage:
   ```ts
   import { DefaultApi } from '@/api'

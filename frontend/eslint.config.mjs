@@ -22,5 +22,5 @@ export default createConfigForNuxt({
     },
   })
   .append({
-    ignores: ['src/api/**'],
+    ignores: ['app/src/api/**'],
   })
