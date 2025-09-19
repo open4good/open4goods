@@ -80,14 +80,33 @@ def iter_yaml_files(root: Path, excluded_names: set[str], excluded_paths: set[Pa
                 yield path
 
 
+SCALAR_TYPES = (str, int, float, bool, bytes)
+
+
+def _is_scalar(value: object) -> bool:
+    return isinstance(value, SCALAR_TYPES)
+
+
 def validate_yaml_file(path: Path) -> None:
     try:
         with path.open("r", encoding="utf-8") as handle:
-            yaml.safe_load(handle)
+            documents = list(yaml.safe_load_all(handle))
     except UnicodeDecodeError as exc:
         raise ValidationError(f"{path}: unable to decode as UTF-8 ({exc})") from exc
     except yaml.YAMLError as exc:
         raise ValidationError(f"{path}: {exc}") from exc
+
+    if not documents:
+        raise ValidationError(f"{path}: contains no YAML documents")
+
+    for index, document in enumerate(documents, start=1):
+        if document is None:
+            raise ValidationError(f"{path}: document #{index} is empty")
+        if _is_scalar(document):
+            typename = type(document).__name__
+            raise ValidationError(
+                f"{path}: document #{index} is a scalar ({typename}); expected mapping or sequence"
+            )
 
 
 def main(argv: Iterable[str] | None = None) -> int:
