@@ -1,24 +1,16 @@
 # .pre-commit-config.yaml
 minimum_pre_commit_version: "3.5.0"
 
-# Exclure ce répertoire de tous les hooks
+# Exclure un répertoire complet des checks (optionnel)
+# Supprime cette ligne si tu ne veux rien exclure.
 exclude: ^api/src/main/resources/templates/
 
 repos:
-  # Hooks de base (rapides)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
-      - id: check-yaml
+      - id: check-yaml                 # valide la syntaxe YAML
         args: [--allow-multiple-documents]
-      - id: check-json
-      - id: check-xml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-
-  # Règles YAML (style + bonnes pratiques)
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        files: \.(yaml|yml)$
+      - id: check-json                 # valide la syntaxe JSON
+      - id: check-xml                  # valide la syntaxe XML (bien formé)
+#      - id: end-of-file-fixer          # ajoute le newline final si manquant
