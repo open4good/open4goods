@@ -4,4 +4,8 @@ extends: default
 rules:
   document-start: disable   # pas besoin de '---' en tête de fichier
   truthy: disable           # évite les faux positifs sur yes/no
-
+  line-length: disable
+  indentation: disable
+  comments-indentation: disable
+  comments:
+    require-starting-space: false
