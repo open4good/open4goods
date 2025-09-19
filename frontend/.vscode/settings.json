@@ -10,12 +10,10 @@
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
 
-  // Configuration Prettier
   "prettier.requireConfig": true,
   "prettier.useEditorConfig": false,
   "prettier.configPath": "./.prettierrc",
 
-  // Configuration spécifique par type de fichier
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -56,11 +54,9 @@
     "editor.formatOnSave": true
   },
 
-  // Configuration ESLint
   "eslint.validate": ["javascript", "typescript", "vue"],
   "eslint.format.enable": false,
 
-  // Configuration Vue.js spécifique
   "volar.format.initialIndent": {
     "html": false,
     "css": false,
@@ -76,13 +72,11 @@
   "volar.completion.preferredTagNameCase": "kebab",
   "volar.completion.preferredAttrNameCase": "kebab-case",
 
-  // Configuration Vetur (si utilisé)
   "vetur.format.enable": false,
   "vetur.validation.template": false,
   "vetur.validation.script": false,
   "vetur.validation.style": false,
 
-  // Configuration cSpell
   "cSpell.enabled": true,
   "cSpell.language": "en",
   "cSpell.diagnosticLevel": "Hint",
