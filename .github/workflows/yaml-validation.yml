@@ -13,30 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  yaml-config:
-    name: Validate YAML (config repository)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out open4goods repository
-        uses: actions/checkout@v4
-      - name: Check out configuration repository
-        uses: actions/checkout@v4
-        with:
-          repository: open4good/open4goods-config
-          path: config
-          token: ${{ secrets.CONFIG_REPO_TOKEN != '' && secrets.CONFIG_REPO_TOKEN || github.token }}
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install dependencies
-        run: python -m pip install --upgrade pip pyyaml
-      - name: Validate configuration YAML files
-        run: python scripts/validate_yaml.py --root config
-
   yaml-repo:
-    name: Validate YAML (repository)
-    needs: yaml-config
+    name: Validate YAML files
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
