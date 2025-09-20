@@ -67,23 +67,28 @@ export default defineNuxtConfig({
     strategy: 'prefix_except_default',
   },
   css: [
-    'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
+    'assets/sass/main.sass',        // app’s styles (NOT prefixed)
+    'assets/css/prefixed.entry.css' // only Bootstrap + XWiki (Prefixed)
   ],
 
   postcss: {
-      plugins: {
-        'postcss-prefix-selector': {
-          prefix: '.xwiki-sandbox',
-          transform: (prefix: string, selector: string, prefixedSelector: string) => {
-            if (selector.startsWith(prefix)) return selector
-            if (/^(html|body)/.test(selector)) {
-              return selector.replace(/^(html|body)/, prefix)
-            }
-            return prefixedSelector
-          },
+    plugins: {
+      'postcss-prefix-selector': {
+        includeFiles: [
+                 (file: string) =>
+                   file.includes('./assets/css/prefixed.entry.css')
+               ],
+        prefix: '.xwiki-sandbox',
+        transform: (prefix: string, selector: string, prefixed: string) => {
+          if (selector.startsWith(prefix)) return selector
+          if (/^(html|body|:root)/.test(selector)) {
+            return selector.replace(/^(html|body|:root)/, prefix)
+          }
+          return prefixed
         },
       },
     },
+  },
 
   build: {
     transpile: ['vuetify'],
