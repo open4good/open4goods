@@ -12,7 +12,7 @@ export default {
           return selector.replace(/^(html|body)/, prefix)
         }
         return prefixedSelector
-      }
-    })
-  ]
+      },
+    }),
+  ],
 }

@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -o src/api --skip-validate-spec",
-    "preprocess:css": "cat assets/css/bootstrap.css assets/css/xwiki.css | postcss --config postcss.config.js -o assets/css/text-content.css",
+    "preprocess:css": "cat assets/css/bootstrap.css assets/css/xwiki.css | postcss --config scripts/postcss-prefixer.config.js -o assets/css/text-content.css",
     "semantic-release": "semantic-release",
     "postinstall": "nuxt prepare",
     "prebuild": "pnpm preprocess:css",
