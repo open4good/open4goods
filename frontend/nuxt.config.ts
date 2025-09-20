@@ -1,3 +1,18 @@
+import postcssPrefixSelector from 'postcss-prefix-selector'
+
+const xwikiPrefixPlugin = postcssPrefixSelector({
+  prefix: '.xwiki-sandbox',
+  transform: (prefix, selector, prefixedSelector) => {
+    if (selector.startsWith(prefix)) {
+      return selector
+    }
+    if (/^(html|body)/.test(selector)) {
+      return selector.replace(/^(html|body)/, prefix)
+    }
+    return prefixedSelector
+  },
+})
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
@@ -45,6 +60,12 @@ export default defineNuxtConfig({
   css: [
     'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
   ],
+
+  postcss: {
+    plugins: {
+      [xwikiPrefixPlugin.postcssPlugin]: xwikiPrefixPlugin,
+    },
+  },
 
   build: {
     transpile: ['vuetify'],
