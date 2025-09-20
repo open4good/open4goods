@@ -1,5 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
+import xwikiSandboxPrefixerOptions from './xwikiSandboxPrefixerOptions.js'
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: {
@@ -66,8 +68,20 @@ export default defineNuxtConfig({
     strategy: 'prefix_except_default',
   },
   css: [
-    'assets/sass/main.sass', // Gardez seulement le fichier SASS principal
+    'assets/sass/main.sass', // Keep only the main SASS file
   ],
+
+  postcss: {
+    plugins: {
+      'postcss-prefix-selector': {
+        includeFiles: [
+          /\/assets\/css\/bootstrap\.css$/i,
+          /\/assets\/css\/xwiki\.css$/i,
+        ],
+        ...xwikiSandboxPrefixerOptions,
+      },
+    },
+  },
 
   build: {
     transpile: ['vuetify'],
