@@ -2,7 +2,7 @@ import postcssPrefixSelector from 'postcss-prefix-selector'
 
 const xwikiPrefixPlugin = postcssPrefixSelector({
   prefix: '.xwiki-sandbox',
-  transform: (prefix, selector, prefixedSelector) => {
+  transform: (prefix: string, selector: string, prefixedSelector: string) => {
     if (selector.startsWith(prefix)) {
       return selector
     }
