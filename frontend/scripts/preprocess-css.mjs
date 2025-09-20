@@ -1,0 +1,30 @@
+import { readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import postcss from 'postcss'
+import prefixer from 'postcss-prefix-selector'
+import xwikiSandboxPrefixerOptions from '../xwikiSandboxPrefixerOptions.js'
+
+const currentFilePath = fileURLToPath(import.meta.url)
+const projectRoot = path.resolve(path.dirname(currentFilePath), '..')
+const assetsDir = path.join(projectRoot, 'assets', 'css')
+
+const bootstrapCssPath = path.join(assetsDir, 'bootstrap.css')
+const xwikiCssPath = path.join(assetsDir, 'xwiki.css')
+const outputPath = path.join(assetsDir, 'text-content.css')
+
+const [bootstrapCss, xwikiCss] = await Promise.all([
+  readFile(bootstrapCssPath, 'utf8'),
+  readFile(xwikiCssPath, 'utf8'),
+])
+
+const combinedCss = `${bootstrapCss}\n${xwikiCss}`
+
+const prefixedCss = await postcss([
+  prefixer(xwikiSandboxPrefixerOptions),
+]).process(combinedCss, {
+  from: undefined,
+  to: outputPath,
+})
+
+await writeFile(outputPath, prefixedCss.css, 'utf8')
