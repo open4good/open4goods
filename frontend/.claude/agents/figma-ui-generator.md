@@ -1,5 +1,5 @@
 ---
-name: figma-ui-generator
+name: figma-component-generator
 description: Use this agent when you need to generate a new Vue component from a Figma design using the Figma MCP (Model Context Protocol). Examples: <example>Context: User wants to create a new component from a Figma design they've selected. user: 'I've selected a button component in Figma, can you generate the Vue component for it?' assistant: 'I'll use the figma-component-generator agent to create a Vue component from your selected Figma design.' <commentary>Since the user wants to generate a component from Figma, use the figma-component-generator agent to handle the Figma MCP integration and component creation.</commentary></example> <example>Context: User is working on converting Figma designs to code and needs a new component generated. user: 'Please create a card component from the design I have open in Figma' assistant: 'Let me use the figma-component-generator agent to extract the design from Figma and create the corresponding Vue component.' <commentary>The user needs a component generated from Figma, so use the figma-component-generator agent to handle the MCP integration and code generation.</commentary></example>
 model: haiku
 color: green
