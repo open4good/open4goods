@@ -44,9 +44,9 @@ Your mission is to create Vue components that EXACTLY reproduce the Figma design
 
 ### Step 3: Component Creation - STRICT Figma Adherence
 
-**File Location**: `components/generations/ui/ComponentName.vue`
+**File Location**: `components/dev/generations/ui/ComponentName.vue`
 - ComponentName : extract fom the component name in figma
-- Generate component in : `components/generations/ui/ComponentName.vue`
+- Generate component in : `components/dev/generations/ui/ComponentName.vue`
 
 **CRITICAL RULES - DO NOT ADD**:
 - ❌ Slots unless explicitly visible in Figma design

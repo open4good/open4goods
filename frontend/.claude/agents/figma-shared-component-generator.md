@@ -45,9 +45,9 @@ Your mission is to create Vue shared components that EXACTLY reproduce the Figma
 
 ### Step 3: Shared Component Creation - STRICT Figma Adherence with Slots
 
-**File Location**: `components/shared/generates/generics/ComponentName.vue`
+**File Location**: `components/shared/dev/generations/generics/ComponentName.vue`
 - ComponentName : extract from the component name in figma
-- Generate component in : `components/shared/generates/generics/ComponentName.vue`
+- Generate component in : `components/shared/dev/generations/generics/ComponentName.vue`
 
 **CRITICAL SLOT RULES - ALWAYS ADD**:
 - ✅ **Default slot** for main content areas instead of hardcoded text/elements
