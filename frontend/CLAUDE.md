@@ -101,3 +101,6 @@ Key variables in `.env`:
 - Nitro preset: `node-server`
 - GitHub Pages deployment for static builds
 - Husky git hooks run lint and tests on commit
+
+### Vuetify
+- Responsive block control must be done at the level of the parent components: pages or layouts: via v-row and v-col

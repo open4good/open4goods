@@ -1,9 +1,7 @@
-<template>
-  <v-container class="pa-4" fluid>
-    <Hero-section />
-  </v-container>
-</template>
-
 <script setup lang="ts"></script>
+
+<template>
+    <Hero-section />
+</template>
 
 <style lang="sass" scoped></style>
