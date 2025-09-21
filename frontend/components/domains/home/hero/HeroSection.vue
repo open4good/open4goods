@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+defineEmits<{
+  'toggle-drawer': []
+}>()
+</script>
 
 <template>
   <v-container fluid>
@@ -7,7 +11,7 @@
         <the-main-logo />
       </v-col>
       <v-col cols="9">
-        <the-hero-menu />
+        <the-hero-menu @toggle-drawer="$emit('toggle-drawer')" />
       </v-col>
     </v-row>
   </v-container>
