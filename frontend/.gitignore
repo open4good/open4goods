@@ -36,5 +36,6 @@ node_modules/
 !/.husky/pre-commit
 !/.husky/
 .cursorrules
+./frontend\components\shared\dev\generations
 
 # Generated TextContent CSS

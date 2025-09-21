@@ -18,6 +18,10 @@
       </v-col>
     </v-row>
   </v-container>
+
+  <The-items-selector />
+
+  <Bloc3Hz />
 </template>
 
 <style scoped lang="sass"></style>
