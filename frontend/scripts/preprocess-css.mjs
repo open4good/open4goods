@@ -10,15 +10,13 @@ const projectRoot = path.resolve(path.dirname(currentFilePath), '..')
 const assetsDir = path.join(projectRoot, 'app', 'assets', 'css')
 
 const bootstrapCssPath = path.join(assetsDir, 'bootstrap.css')
-const xwikiCssPath = path.join(assetsDir, 'xwiki.css')
 const outputPath = path.join(assetsDir, 'text-content.css')
 
-const [bootstrapCss, xwikiCss] = await Promise.all([
+const [bootstrapCss] = await Promise.all([
   readFile(bootstrapCssPath, 'utf8'),
-  readFile(xwikiCssPath, 'utf8'),
 ])
 
-const combinedCss = `${bootstrapCss}\n${xwikiCss}`
+const combinedCss = `${bootstrapCss}`
 
 const prefixedCss = await postcss([
   prefixer(xwikiSandboxPrefixerOptions),
