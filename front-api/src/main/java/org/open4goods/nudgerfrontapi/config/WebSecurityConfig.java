@@ -83,7 +83,7 @@ public class WebSecurityConfig {
 
         if (securityProperties.isEnabled()) {
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/auth/**", "/actuator/**").permitAll()
+                    .requestMatchers("/", "/v3/api-docs/front",  "/auth/**", "/actuator/**").permitAll()
                     .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .formLogin(Customizer.withDefaults())
