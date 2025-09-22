@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>xwiki-spring-boot-starter</artifactId>
-	<name>spring-boot-starter-xwiki</name>
+	<name>xwiki-spring-boot-starter</name>
 	<inceptionYear>2024</inceptionYear>
 	<description>A Xwiki Spring Starter, allowing authentication delegation and	content retrieval</description>
 	<packaging>jar</packaging>
