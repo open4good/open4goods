@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,8 @@ class AuthControllerIT {
         LoginRequest req = new LoginRequest("user", "pass");
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsBytes(req)))
+                        .content(mapper.writeValueAsBytes(req))
+                        .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
                 .andExpect(cookie().exists("access-token"))
                 .andExpect(cookie().exists("refresh-token"));
@@ -54,9 +56,10 @@ class AuthControllerIT {
     @Test
     void refreshIssuesNewAccessToken() throws Exception {
         var auth = new UsernamePasswordAuthenticationToken("user", "N/A");
-        String refresh = jwtService.generateRefreshToken(auth);
+        String refresh = jwtService.generateRefreshToken(auth, DomainLanguage.FR);
         mockMvc.perform(post("/auth/refresh")
-                        .cookie(new jakarta.servlet.http.Cookie("refresh-token", refresh)))
+                        .cookie(new jakarta.servlet.http.Cookie("refresh-token", refresh))
+                        .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
                 .andExpect(cookie().exists("access-token"));
     }

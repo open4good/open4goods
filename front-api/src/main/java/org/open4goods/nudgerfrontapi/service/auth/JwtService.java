@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.service.auth;
 import java.time.Instant;
 
 import org.open4goods.nudgerfrontapi.config.SecurityProperties;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -35,7 +36,7 @@ public class JwtService {
     /**
      * Generate an access token for the given authentication.
      */
-    public String generateAccessToken(Authentication auth) {
+    public String generateAccessToken(Authentication auth, DomainLanguage domainLanguage) {
         Instant now = Instant.now();
         Instant exp = now.plus(properties.getAccessTokenExpiry());
         JwsHeader header = JwsHeader.with(() -> "HS256").build();
@@ -52,7 +53,7 @@ public class JwtService {
     /**
      * Generate a refresh token for the given authentication.
      */
-    public String generateRefreshToken(Authentication auth) {
+    public String generateRefreshToken(Authentication auth, DomainLanguage domainLanguage) {
         Instant now = Instant.now();
         Instant exp = now.plus(properties.getRefreshTokenExpiry());
         JwsHeader header = JwsHeader.with(() -> "HS256").build();
@@ -67,7 +68,7 @@ public class JwtService {
     /**
      * Validate a token and return the authentication subject.
      */
-    public String validateRefreshToken(String token) {
+    public String validateRefreshToken(String token, DomainLanguage domainLanguage) {
         return decoder.decode(token).getSubject();
     }
 }

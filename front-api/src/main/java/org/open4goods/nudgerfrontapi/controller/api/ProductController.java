@@ -14,6 +14,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatab
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,13 +78,20 @@ public class ProductController {
     @Operation(
             summary = "Get available components",
             description = "Return the list of components that can be included in product responses.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise component labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Components returned",
+                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
     )
-    public ResponseEntity<List<String>> components() {
+    public ResponseEntity<List<String>> components(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<String> body = Arrays.stream(ProductDtoComponent.values())
                 .map(Enum::name)
                 .toList();
@@ -97,13 +105,20 @@ public class ProductController {
     @Operation(
             summary = "Get sortable fields",
             description = "Return the list of fields accepted by the sort parameter.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise field labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
+                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
     )
-    public ResponseEntity<List<String>> sortableFields() {
+    public ResponseEntity<List<String>> sortableFields(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<String> body = Arrays.stream(ProductDtoSortableFields.values())
                 .map(ProductDtoSortableFields::getText)
                 .toList();
@@ -117,13 +132,20 @@ public class ProductController {
     @Operation(
             summary = "Get aggregatable fields",
             description = "Return the list of fields available for aggregation.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise aggregation labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
+                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
     )
-    public ResponseEntity<List<String>> aggregatableFields() {
+    public ResponseEntity<List<String>> aggregatableFields(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<String> body = Arrays.stream(ProductDtoAggregatableFields.values())
                 .map(ProductDtoAggregatableFields::getText)
                 .toList();
@@ -162,11 +184,18 @@ public class ProductController {
                     )),
                     @Parameter(name = "aggregation", in = ParameterIn.QUERY,
                             description = "Aggregations definition as JSON",
-                            schema = @Schema(implementation = AggregationRequestDto.class))
+                            schema = @Schema(implementation = AggregationRequestDto.class)),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Products returned",
-                            headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
+                            headers = {
+                                    @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
+                                    @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                            schema = @Schema(type = "string", example = "fr-FR"))
+                            },
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageDto.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
@@ -174,9 +203,10 @@ public class ProductController {
             }
     )
     public ResponseEntity<Page<ProductDto>> products(
-    		@Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
+                @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
                 @RequestParam(required=false) Set<String> include,
                 @RequestParam(required=false, name = "aggregation") String aggregation,
+                @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                   Locale locale) {
 
 
@@ -226,7 +256,7 @@ public class ProductController {
                         }
                 }
 
-                Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include, aggDto);
+                Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include, aggDto, domainLanguage);
 
 
 
@@ -262,10 +292,15 @@ public class ProductController {
                             array       = @ArraySchema(
                                 schema = @Schema(implementation = ProductDtoComponent.class)
                             )
-                        )
+                        ),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
+                                    headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                            schema = @Schema(type = "string", example = "fr-FR")),
                                     content = @Content(mediaType = "application/json",
                                             schema = @Schema(implementation = ProductDto.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid GTIN or include parameter"),
@@ -279,9 +314,10 @@ public class ProductController {
                                                        Long gtin,
                                                        @RequestParam(required = false)
                                                        Set<String> include,
+                                                       @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                                        Locale locale) throws ResourceNotFoundException {
 
-        ProductDto body = service.getProduct(gtin, locale, include);
+        ProductDto body = service.getProduct(gtin, locale, include, domainLanguage);
 
 
 

@@ -111,6 +111,16 @@ Rate limiting is configured via `front.rate-limit.*` mapped by
 public ResponseEntity<List<OfferDto>> getOffers(@PathVariable String gtin) { … }
 ~~~
 
+### 6.4 Domain language contract
+
+- Every exposed controller method **must** declare a required
+  `@RequestParam DomainLanguage domainLanguage` query parameter and document it
+  in the `@Operation.parameters` array.
+- Document the localisation hint by adding an `X-Locale` header to successful
+  `@ApiResponse` entries.
+- Pass the `DomainLanguage` argument through to the service layer even if it is
+  not used yet.
+
 ### 6.2 DTO annotations  
 *Every field* must have `@Schema`.
 

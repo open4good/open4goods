@@ -18,6 +18,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +53,15 @@ public class ProductMappingService {
      * @param includes
      * @return
      */
-    public ProductDto getProduct(long gtin, Locale local, Set<String> includes)
+    public ProductDto getProduct(long gtin, Locale local, Set<String> includes, DomainLanguage domainLanguage)
             throws ResourceNotFoundException {
         Product p = repository.getById(gtin);
 
-        ProductDto pdto = mapProduct(p, local, includes);
+        ProductDto pdto = mapProduct(p, local, includes, domainLanguage);
         return pdto;
     }
 
-	private ProductDto mapProduct(  Product p, Locale local, Set<String> includes) {
+        private ProductDto mapProduct(  Product p, Locale local, Set<String> includes, DomainLanguage domainLanguage) {
         ProductBaseDto base = null;
         ProductNamesDto names = null;
         ProductResourcesDto resources = null;
@@ -156,13 +157,13 @@ public class ProductMappingService {
 
 
     public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes,
-                                        AggregationRequestDto aggregation) {
+                                        AggregationRequestDto aggregation, DomainLanguage domainLanguage) {
 
                 // TODO implement aggregation handling once search service is ready
                 SearchHits<Product> response = repository.get(pageable);
                 List<ProductDto> items = response
                                 .map(e -> e.getContent())
-                                .map(e -> mapProduct(e, locale, includes))
+                                .map(e -> mapProduct(e, locale, includes, domainLanguage))
                                 .toList();
 
 		return  new PageImpl<ProductDto>(items, pageable, response.getTotalHits());

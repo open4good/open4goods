@@ -9,6 +9,7 @@ import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.springframework.data.domain.Page;
@@ -68,11 +69,18 @@ public class PostsController {
                             schema = @Schema(type = "integer", minimum = "0")),
                     @Parameter(name = "pageSize", in = ParameterIn.QUERY,
                             description = "Page size",
-                            schema = @Schema(type = "integer", minimum = "0"))
+                            schema = @Schema(type = "integer", minimum = "0")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Posts returned",
-                            headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
+                            headers = {
+                                    @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
+                                    @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                            schema = @Schema(type = "string", example = "fr-FR"))
+                            },
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = PageDto.class)))
             }
@@ -80,6 +88,7 @@ public class PostsController {
     public ResponseEntity<Page<BlogPostDto>> posts(
             @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(required = false) String tag,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @AuthenticationPrincipal UserDetails userDetails) {
         List<BlogPostDto> posts = blogService.getPosts(tag).stream()
                 .map(this::map)
@@ -99,16 +108,22 @@ public class PostsController {
             summary = "Get blog post",
             description = "Return a single blog post identified by its slug.",
             parameters = {
-                    @Parameter(name = "slug", in = ParameterIn.PATH, required = true, description = "Post slug")
+                    @Parameter(name = "slug", in = ParameterIn.PATH, required = true, description = "Post slug"),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Post found",
+                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = BlogPostDto.class))),
                     @ApiResponse(responseCode = "404", description = "Post not found")
             }
     )
-    public ResponseEntity<BlogPostDto> post(@PathVariable String slug) {
+    public ResponseEntity<BlogPostDto> post(@PathVariable String slug,
+                                            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         BlogPost post = blogService.getPostsByUrl().get(slug);
         if (post == null) {
             return ResponseEntity.notFound().build();
@@ -122,13 +137,20 @@ public class PostsController {
     @Operation(
             summary = "List blog tags",
             description = "Return the list of available blog tags with post counts.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Tags returned",
+                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(implementation = BlogTagDto.class))))
             }
     )
-    public ResponseEntity<List<BlogTagDto>> tags() {
+    public ResponseEntity<List<BlogTagDto>> tags(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<BlogTagDto> body = blogService.getTags().entrySet().stream()
                 .map(e -> new BlogTagDto(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
@@ -142,12 +164,20 @@ public class PostsController {
     @Operation(
             summary = "Blog RSS feed",
             description = "Return an RSS feed for all blog posts.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Feed returned",
+                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/rss+xml"))
             }
     )
-    public ResponseEntity<String> rss(Locale locale) throws FeedException {
+    public ResponseEntity<String> rss(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                                      Locale locale) throws FeedException {
         String feed = blogService.rss(locale == null ? Locale.getDefault().getLanguage() : locale.getLanguage());
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache())

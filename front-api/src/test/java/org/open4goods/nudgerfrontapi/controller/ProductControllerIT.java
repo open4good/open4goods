@@ -22,9 +22,10 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
-import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ class ProductControllerIT {
         mockMvc.perform(get("/products/{gtin}/reviews", gtin)
                 .header("Accept-Language", "de")
                 .header("X-Shared-Token", SHARED_TOKEN)
+                .param("domainLanguage", "FR")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isOk())
             .andExpect(header().string("Cache-Control", "public, max-age=3600"))
@@ -73,10 +75,12 @@ class ProductControllerIT {
     @Test
     void includeParameterFiltersFields() throws Exception {
         long gtin = 321L;
-        given(service.getProduct(anyLong(), Locale.ENGLISH, anySet())).willReturn(new ProductDto(0L, null, null, null, null, null, null));
+        given(service.getProduct(anyLong(), any(Locale.class), anySet(), any(DomainLanguage.class)))
+                .willReturn(new ProductDto(0L, null, null, null, null, null, null));
 
         mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("include", "gtin")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -87,10 +91,11 @@ class ProductControllerIT {
     @Test
     void productEndpointReturns404WhenServiceThrows() throws Exception {
         long gtin = 999L;
-        given(service.getProduct(anyLong(), any(Locale.class), anySet()))
+        given(service.getProduct(anyLong(), any(Locale.class), anySet(), any(DomainLanguage.class)))
                 .willThrow(new ResourceNotFoundException());
 
         mockMvc.perform(get("/products/{gtin}", gtin)
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isNotFound());
@@ -99,9 +104,10 @@ class ProductControllerIT {
     @Test
     void productsEndpointReturnsPage() throws Exception {
         var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
-        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any())).willReturn(page);
+        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class))).willReturn(page);
 
         mockMvc.perform(get("/products")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -113,10 +119,11 @@ class ProductControllerIT {
     @Test
     void productsEndpointAcceptsAggregationParameter() throws Exception {
         var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
-        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any())).willReturn(page);
+        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class))).willReturn(page);
 
         mockMvc.perform(get("/products")
                         .param("aggregation", "{\"aggs\":[{\"name\":\"brands\",\"field\":\"offersCount\",\"type\":\"terms\"}]}")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -126,6 +133,7 @@ class ProductControllerIT {
     void productsEndpointReturns400OnInvalidSort() throws Exception {
         mockMvc.perform(get("/products")
                         .param("sort", "invalid,asc")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -135,6 +143,7 @@ class ProductControllerIT {
     void productsEndpointReturns400OnInvalidInclude() throws Exception {
         mockMvc.perform(get("/products")
                         .param("include", "wrong")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -143,6 +152,7 @@ class ProductControllerIT {
     @Test
     void sortableFieldsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/sortable")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -152,6 +162,7 @@ class ProductControllerIT {
     @Test
     void componentsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/components")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -161,6 +172,7 @@ class ProductControllerIT {
     @Test
     void aggregatableFieldsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/aggregatable")
+                        .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -176,6 +188,7 @@ class ProductControllerIT {
 
         mockMvc.perform(post("/products/{gtin}/reviews", gtin)
                 .param("hcaptchaResponse", "resp")
+                .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isAccepted());

@@ -15,15 +15,15 @@ public record ProductDto(
         long gtin,
         @Schema(description = "Basic product metadata")
         ProductBaseDto base,
-        @Schema(description = "Localised textual information")
+        @Schema(description = "Localised textual information resolved using the domainLanguage query parameter when available.")
         ProductNamesDto names,
         @Schema(description = "Associated media resources")
         ProductResourcesDto resources,
-        @Schema(description = "AI generated texts")
+        @Schema(description = "AI generated texts localised according to the requested domainLanguage when implemented.")
         ProductAiTextsDto aiTexts,
-        @Schema(description = "AI-generated review")
+        @Schema(description = "AI-generated review matching the requested domainLanguage when localisation is enabled.")
         ProductAiReviewDto aiReview,
-        @Schema(description = "Product offers")
+        @Schema(description = "Product offers with textual content meant to align with the requested domainLanguage in the future.")
         ProductOffersDto offers
 ) {
 
