@@ -1,5 +1,5 @@
-import { useContentService } from '~/services/content.services'
-import type { XwikiContentBlocDto } from '~/src/api'
+import { useContentService } from '~~/shared/api-client/services/content.services'
+import type { XwikiContentBlocDto } from '~~/shared/api-client'
 
 export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> => {
   const blocId = getRouterParam(event, 'blocId')

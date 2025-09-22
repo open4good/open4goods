@@ -4,6 +4,7 @@ import xwikiSandboxPrefixerOptions from './xwikiSandboxPrefixerOptions.js'
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
+  srcDir: 'app',
   devtools: {
     enabled: process.env.NODE_ENV !== 'production',
     timeline: {
@@ -21,11 +22,11 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/blog/**': { swr: 60 }, // revalide le cache après 60s
-    //'/blog/**': { isr: { expiration: 60 } } // re-génère toutes les 60s
-    // pages générées une seule fois de manière statique
+    '/blog/**': { swr: 60 }, // revalidates the cache after 60s
+    //'/blog/**': { isr: { expiration: 60 } } // regenerates every 60s
+    // Pages generated once as static output
     //'/articles/**': { static: true },
-    // zone d’admin rendue côté client
+    // Admin area rendered on the client side
     '/admin/**': { ssr: false },
   },
   modules: [
@@ -68,7 +69,7 @@ export default defineNuxtConfig({
     strategy: 'prefix_except_default',
   },
   css: [
-    'assets/sass/main.sass', // Keep only the main SASS file
+    '~/assets/sass/main.sass', // Keep only the main SASS file
   ],
 
   postcss: {
@@ -122,10 +123,10 @@ export default defineNuxtConfig({
     machineToken: process.env.MACHINE_TOKEN || '',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
 
-    // Public keys (exposed to client-side)
+    // Public keys (exposed to the client side)
     public: {
       // Base URL of the backend API
-      // Roles allowed to edit content blocs (defaults to backend role names)
+      // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
     }
   },

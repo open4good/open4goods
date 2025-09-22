@@ -143,18 +143,22 @@ your design token generation command to pull the latest tokens.
 
 ```
 project/
-├── assets/       # Images, fonts, global CSS
-├── components/   # Reusable UI components
-├── composables/  # Logic hooks (e.g., useX)
-├── constants/    # Shared constants
-├── layouts/      # Page layout wrappers
-├── pages/        # File-based routes
-├── services/     # API service abstractions
-├── plugins/      # Nuxt plugins (e.g. `fetch-logger.ts` logs all backend requests)
-├── stores/       # Pinia state stores
-├── server/       # Server API endpoints
-├── utils/        # Helper utilities
-├── src/api/      # OpenAPI generated client
+├── app/                 # Nuxt application source
+│   ├── assets/          # Images, fonts, global CSS
+│   ├── components/      # Reusable UI components
+│   ├── composables/     # Logic hooks (e.g., useX)
+│   ├── layouts/         # Page layout wrappers
+│   ├── pages/           # File-based routes
+│   ├── plugins/         # Nuxt plugins (e.g. `fetch-logger.ts` logs backend requests)
+│   ├── stores/          # Pinia state stores
+│   └── utils/           # Client-side helpers (e.g., image utilities)
+├── shared/              # Code shared between client and server
+│   ├── api-client/      # OpenAPI generated client and service wrappers
+│   └── utils/           # Cross-cutting utilities (e.g., HTML sanitizer)
+├── server/              # Server API endpoints and utilities
+├── api-specs/           # OpenAPI specifications and generator config
+├── public/              # Static public assets
+└── scripts/             # Project maintenance scripts
 ```
 
 - `tests/` or `*.spec.ts` files live next to components.
@@ -168,9 +172,9 @@ project/
 - `tokens.config.json` – design tokens pulled from Figma
 - `.releaserc.json` – Semantic Release setup
 - `renovate.json` – Renovate bot configuration
-- `pnpm-workspace.yaml` – workspace and package management
 - `package.json` – scripts and dependencies
-- `nudger-api.json` – OpenAPI specification used by `generate:api`
+- `api-specs/nudger-api.json` – OpenAPI specification used by `generate:api`
+- `api-specs/openapitools.json` – OpenAPI generator CLI configuration
 - `.husky/` – Git hooks executed on commit
 
 ## Vue 3 & Nuxt 3 Conventions
@@ -301,10 +305,10 @@ const cart = useCartStore();
   ```bash
   pnpm --offline generate:api
   ```
-- Generated files under `src/api/`
+- Generated files under `shared/api-client/`
 - Example usage:
   ```ts
-  import { DefaultApi } from '@/api'
+  import { DefaultApi } from '~~/shared/api-client'
   const api = new DefaultApi()
   const response = await api.listVersionsv2()
   ```

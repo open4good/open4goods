@@ -39,19 +39,22 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 
 ### Project Structure
 ```
-├── components/     # Reusable UI components (auto-imported)
-├── pages/         # File-based routing
-├── layouts/       # Page layout wrappers
-├── stores/        # Pinia stores (useAuthStore, useAppStore)
-├── composables/   # Composition API hooks
-├── services/      # API service abstractions
-├── src/api/       # Generated OpenAPI client (do not edit manually)
-├── server/        # Server API endpoints
-├── assets/        # Static assets, SASS files
-├── constants/     # Shared constants
-├── utils/         # Helper utilities
-├── plugins/       # Nuxt plugins
-└── i18n/         # Internationalization
+├── app/                # Nuxt application source (components, pages, layouts, stores)
+│   ├── components/     # Reusable UI components (auto-imported)
+│   ├── pages/          # File-based routing
+│   ├── layouts/        # Page layout wrappers
+│   ├── stores/         # Pinia stores (useAuthStore, useAppStore)
+│   ├── composables/    # Composition API hooks
+│   ├── assets/         # Static assets, SASS files
+│   ├── plugins/        # Nuxt plugins
+│   └── utils/          # Client-side helper utilities
+├── shared/             # Code shared between client and server
+│   ├── api-client/     # Generated OpenAPI client and typed service wrappers
+│   ├── constants/      # Shared constants
+│   └── utils/          # Cross-cutting helpers (sanitizers, etc.)
+├── server/             # Server API endpoints and utilities
+├── i18n/               # Internationalization resources
+└── public/             # Static public assets
 ```
 
 ### Key Patterns
@@ -63,7 +66,7 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 - Use `useAuth()` composable for role checks
 
 #### API Integration
-- OpenAPI-generated client in `src/api/` (regenerate with `pnpm generate:api`)
+- OpenAPI-generated client in `shared/api-client/` (regenerate with `pnpm generate:api`)
 - Server-side auth headers injected via `MACHINE_TOKEN`
 - Runtime config for API URLs and tokens
 
