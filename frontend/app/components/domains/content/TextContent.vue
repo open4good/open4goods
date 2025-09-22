@@ -3,10 +3,14 @@ import { onMounted, watch, computed, unref } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
+import { DEFAULT_LOREM_LENGTH, _generateLoremIpsum } from '~/utils/content/_loremIpsum'
 import '~/assets/css/text-content.css'
 
 // Props
-const props = defineProps<{ blocId: string }>()
+
+const props = withDefaults(defineProps<{ blocId: string; defaultLength?: number }>(), {
+  defaultLength: DEFAULT_LOREM_LENGTH,
+})
 
 // Composables
 const { htmlContent, editLink, loading, error, fetchBloc } = useContentBloc()
@@ -18,6 +22,15 @@ const canEdit = computed(() => {
   const link = unref(editLink)
   const roles = (config.public.editRoles as string[]) || []
   return isLoggedIn.value && !!link && roles.some(role => hasRole(role))
+})
+
+const displayHtml = computed(() => {
+  const rawContent = (unref(htmlContent) ?? '').trim()
+  if (rawContent) {
+    return rawContent
+  }
+
+  return _generateLoremIpsum(props.defaultLength)
 })
 
 // Watcher / mount
@@ -39,7 +52,7 @@ watch(
     <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
     <!-- Encapsulated XWiki content -->
-    <div v-else class="xwiki-sandbox" v-html="htmlContent" />
+    <div v-else class="xwiki-sandbox" v-html="displayHtml" />
 
     <!-- Edit link -->
     <a
