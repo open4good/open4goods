@@ -1,6 +1,7 @@
 import { useBlogService } from '~~/shared/api-client/services/blog.services'
 import type { PageDto } from '~~/shared/api-client'
-import { ResponseError } from '~~/shared/api-client'
+
+import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 
 /**
  * Blog articles API endpoint
@@ -21,27 +22,14 @@ export default defineEventHandler(async (event): Promise<PageDto> => {
     const response = await blogService.getArticles()
     return response
   } catch (error) {
+    const backendError = await extractBackendErrorDetails(error)
     // Log the error for debugging
-    console.error('Error fetching blog articles:', error)
+    console.error('Error fetching blog articles:', backendError.logMessage)
 
-    if (error instanceof ResponseError) {
-      const message = await error.response.text().catch(() => undefined)
-
-      // Forward backend status code and message
-      throw createError({
-        statusCode: error.response.status,
-        statusMessage: message || error.response.statusText,
-        cause: error,
-      })
-    }
-
-    // Fallback generic error
+    // Forward backend status code and message when available
     throw createError({
-      statusCode: 500,
-      statusMessage:
-        error instanceof Error
-          ? error.message
-          : 'Failed to fetch blog articles',
+      statusCode: backendError.statusCode,
+      statusMessage: backendError.statusMessage,
       cause: error,
     })
   }
