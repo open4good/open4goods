@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
@@ -39,7 +40,7 @@ public class StatsService {
      *
      * @return DTO describing the category statistics used by the frontend.
      */
-    public CategoriesStatsDto categories() {
+    public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
         VerticalConfig defaultConfig = loadDefaultConfig();
         Resource[] resources = loadVerticalResources();
 

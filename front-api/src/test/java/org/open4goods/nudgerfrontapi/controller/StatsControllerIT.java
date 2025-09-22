@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.controller.api.StatsController;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,9 +39,10 @@ class StatsControllerIT {
 
     @Test
     void categoriesEndpointReturnsStats() throws Exception {
-        given(statsService.categories()).willReturn(new CategoriesStatsDto(7));
+        given(statsService.categories(any(DomainLanguage.class))).willReturn(new CategoriesStatsDto(7));
 
         mockMvc.perform(get("/stats/categories")
+                .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -50,6 +52,7 @@ class StatsControllerIT {
     @Test
     void categoriesEndpointReturns403WhenMissingSharedToken() throws Exception {
         mockMvc.perform(get("/stats/categories")
+                .param("domainLanguage", "FR")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.title").value("Forbidden"))

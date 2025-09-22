@@ -48,6 +48,7 @@ class PostsControllerIT {
         given(blogService.getPosts(any())).willReturn(List.of(post));
 
         mockMvc.perform(get("/blog/posts")
+                .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -60,6 +61,7 @@ class PostsControllerIT {
         given(blogService.getPostsByUrl()).willReturn(Map.of());
 
         mockMvc.perform(get("/blog/posts/{slug}", "missing")
+                .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isNotFound());
@@ -74,6 +76,7 @@ class PostsControllerIT {
         given(blogService.getPostsByUrl()).willReturn(Map.of("slug", post));
 
         mockMvc.perform(get("/blog/posts/{slug}", "slug")
+                .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -88,6 +91,7 @@ class PostsControllerIT {
         given(blogService.getTags()).willReturn(tags);
 
         mockMvc.perform(get("/blog/tags")
+                .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -98,6 +102,7 @@ class PostsControllerIT {
     @Test
     void postsEndpointReturns403WhenAccessDenied() throws Exception {
         mockMvc.perform(get("/blog/posts")
+                .param("domainLanguage", "FR")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.title").value("Forbidden"))

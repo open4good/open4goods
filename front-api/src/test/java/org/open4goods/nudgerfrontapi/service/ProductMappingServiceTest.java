@@ -18,6 +18,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 
 class ProductMappingServiceTest {
@@ -47,7 +48,7 @@ class ProductMappingServiceTest {
 
         when(repository.getById(gtin)).thenReturn(product);
 
-        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"));
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.EN);
 
         assertThat(dto.aiReview()).isNotNull();
         assertThat(dto.aiReview().review()).isEqualTo(holder.getReview());
@@ -62,7 +63,7 @@ class ProductMappingServiceTest {
 
         when(repository.getById(gtin)).thenReturn(product);
 
-        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"));
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.EN);
 
         assertThat(dto.base()).isNotNull();
         assertThat(dto.base().gtin()).isEqualTo(gtin);
