@@ -79,8 +79,8 @@ public class ContentsController {
                                                            Locale locale,
                                                            @AuthenticationPrincipal UserDetails userDetails) {
 
-        String htmlContent = xwikiHtmlService.html(blocId);
-        String editLink = xwikiHtmlService.getEditPageUrl(blocId);
+        String htmlContent = xwikiHtmlService.html(blocId, domainLanguage.languageTag());
+        String editLink = xwikiHtmlService.getEditPageUrl(blocId, domainLanguage.languageTag());
         XwikiContentBlocDto body = new XwikiContentBlocDto(blocId, htmlContent, editLink);
 
         return ResponseEntity.ok()
@@ -135,7 +135,7 @@ public class ContentsController {
                                          @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                          Locale locale) {
         String normalized = translatePageId(xwikiPageId);
-        FullPage page = xwikiFacadeService.getFullPage(normalized);
+        FullPage page = xwikiFacadeService.getFullPage(normalized, domainLanguage.languageTag());
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(page);

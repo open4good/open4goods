@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This controller pages pageSize Xwiki content
- * 
+ *
  * @author gof TODO : Could put in the xwiki-starter
  *
  */
@@ -60,7 +60,8 @@ public class XwikiController extends AbstractController {
 
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		FullPage fullPage = xwikiService.getFullPage(frags);
+		// TODO : Temporary  set default domain language
+		FullPage fullPage = xwikiService.getFullPage(frags,"en");
 
 		ModelAndView mv = uiService.defaultModelAndView("xwiki-" + fullPage.getProp("layout"), request);
 
@@ -81,7 +82,7 @@ public class XwikiController extends AbstractController {
 
 	/**
 	 * Get the XWIKI corresponding html for a wiki page
-	 * 
+	 *
 	 * @param fullPage
 	 * @return
 	 */

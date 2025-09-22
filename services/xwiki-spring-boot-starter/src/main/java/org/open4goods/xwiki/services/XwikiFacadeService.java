@@ -55,10 +55,10 @@ public class XwikiFacadeService {
 
 	// TODO : I18n
 	// @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME)
-	public FullPage getFullPage (String restPath) {
+	public FullPage getFullPage (String restPath, String language) {
 		FullPage ret = new FullPage();
 
-		String htmlContent = xWikiHtmlService.html(restPath.replaceAll("\\.|:","/"));
+		String htmlContent = xWikiHtmlService.html(restPath.replaceAll("\\.|:","/"), language);
 		// TODO : When xwiki jakarta compliant
 //		String htmlContent = xWikiHtmlService.renderXWiki20SyntaxAsXHTML(wikiPage.getContent());
 
@@ -76,9 +76,7 @@ public class XwikiFacadeService {
 		return ret;
 	}
 
-	public FullPage getFullPage(String space, String name) {
-		return getFullPage(space+":"+name);
-	}
+
 
 
 	/**

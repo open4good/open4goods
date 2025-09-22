@@ -48,7 +48,7 @@ class ProductMappingServiceTest {
 
         when(repository.getById(gtin)).thenReturn(product);
 
-        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.EN);
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.en);
 
         assertThat(dto.aiReview()).isNotNull();
         assertThat(dto.aiReview().review()).isEqualTo(holder.getReview());
@@ -63,7 +63,7 @@ class ProductMappingServiceTest {
 
         when(repository.getById(gtin)).thenReturn(product);
 
-        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.EN);
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.en);
 
         assertThat(dto.base()).isNotNull();
         assertThat(dto.base().gtin()).isEqualTo(gtin);

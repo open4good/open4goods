@@ -56,7 +56,7 @@ class AuthControllerIT {
     @Test
     void refreshIssuesNewAccessToken() throws Exception {
         var auth = new UsernamePasswordAuthenticationToken("user", "N/A");
-        String refresh = jwtService.generateRefreshToken(auth, DomainLanguage.FR);
+        String refresh = jwtService.generateRefreshToken(auth, DomainLanguage.fr);
         mockMvc.perform(post("/auth/refresh")
                         .cookie(new jakarta.servlet.http.Cookie("refresh-token", refresh))
                         .param("domainLanguage", "FR"))

@@ -183,7 +183,8 @@ public class BlogService implements HealthIndicator {
                         continue;
                     }
 
-                    FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
+                    // TODO : Default internationalisation
+                    FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace()+":"+ page.getName(),"en");
 
                     // Evict the default blog page with title "Blog"
                     if ("Blog".equals(fullPage.getProperties().get("title"))) {

@@ -243,7 +243,8 @@ public class SitemapGenerationService {
 		for (Entry<String, Localisable<String,String>> entry : uiConfig.getWikiPagesMapping().entrySet()) {
 			FullPage page = null;
 			try {
-				page = xwikiService.getFullPage(entry.getKey());
+				// TODO : Temp : default language for now
+				page = xwikiService.getFullPage(entry.getKey(),"en");
 			} catch (Exception e) {
 				LOGGER.error("Error while retrieving wiki page  {} : {}",entry.getValue(),e.getMessage() ,e);
 			}
@@ -313,7 +314,8 @@ public class SitemapGenerationService {
 			for (WikiPageConfig e : i18n.getWikiPages()) {
 				FullPage page = null;
 				try {
-					page = xwikiService.getFullPage(e.getWikiUrl());
+					// TODO : Temp : default language for now
+					page = xwikiService.getFullPage(e.getWikiUrl(),"en");
 
 					String url = baseUrl+ i18n.getVerticalHomeUrl()+"/" + e.getVerticalUrl();
 					LOGGER.info("Adding to sitemap : {}",url);

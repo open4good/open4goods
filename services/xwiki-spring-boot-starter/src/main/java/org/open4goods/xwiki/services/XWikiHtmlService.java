@@ -55,15 +55,14 @@ public class XWikiHtmlService {
 //	}
 
 
-	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath")
-	public String html( String xwikiPath) {
+	public String html( String xwikiPath, String language) {
 
-		return getWebPage(xwikiPath, false);
+		return getWebPage(xwikiPath, false, language);
 	}
 
-	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath + ':' + #plain")
-	public String htmlWithProxifiedResource( String xwikiPath, Boolean plain) {
-		String ret = getWebPage(xwikiPath, false);
+	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath + ':' + #plain + ':' + #language "  )
+	public String htmlWithProxifiedResource( String xwikiPath, Boolean plain, String language) {
+		String ret = getWebPage(xwikiPath, false, language);
 		// TODO : From const
 		// TODO : Make it generic ? Provide the associated resource controller ?
 		if (!StringUtils.isEmpty(ret)) {
@@ -87,8 +86,8 @@ public class XWikiHtmlService {
 	 * 	 * TODO : Remove when rendering client side possible (waiting for jakarta migration)
 	 */
 	// TODO: manage response error / exceptions
-	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath +':' + #withAbsolutePath" )
-	public String getWebPage( String xwikiPath, boolean withAbsolutePath ) {
+	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath +':' + #withAbsolutePath  +':' + #language " )
+	public String getWebPage( String xwikiPath, boolean withAbsolutePath, String language ) {
 
 		String MARKER = "<div id=\"xwikicontent\" class=\"col-xs-12\">";
 
@@ -99,6 +98,11 @@ public class XWikiHtmlService {
 		if( ! withAbsolutePath ) {
 			xwikiWebUrl = resourcesPathManager.getViewpath() + xwikiWebUrl;
 		}
+
+		// Adding language tag
+		// TODO : Weak, should have a complete url parsing / formating
+		xwikiWebUrl += "?language="+language;
+
 		// request server
 		ResponseEntity<String> response = this.restTemplateService.getWebResponse( xwikiWebUrl );
 		if( response == null ) {
@@ -216,8 +220,10 @@ public class XWikiHtmlService {
 	 * @param xwikiPath
 	 * @return
 	 */
-	public String getEditPageUrl( String xwikiPath ) {
-		return resourcesPathManager.getEditpath() + URLDecoder.decode(xwikiPath, Charset.defaultCharset());
+	public String getEditPageUrl( String xwikiPath, String language ) {
+		return resourcesPathManager.getEditpath() + URLDecoder.decode(xwikiPath, Charset.defaultCharset())
+		// TODO : Weak
+		+"?language="+language;
 	}
 
 

@@ -33,7 +33,7 @@ class StatsServiceTest {
 
         StatsService service = new StatsService(serialisationService, resolver);
 
-        CategoriesStatsDto dto = service.categories(DomainLanguage.FR);
+        CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 
         assertThat(dto.enabledVerticalConfigs()).isEqualTo(1);
     }
