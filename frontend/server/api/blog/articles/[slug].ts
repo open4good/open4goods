@@ -32,7 +32,11 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
     return response
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching blog article:', backendError.logMessage)
+    console.error(
+      'Error fetching blog article:',
+      backendError.logMessage,
+      backendError
+    )
 
     // Forward backend status code and message when available
     throw createError({

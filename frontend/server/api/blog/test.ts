@@ -31,7 +31,11 @@ export default defineEventHandler(async _event => {
     }
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error('Error in test endpoint:', backendError.logMessage)
+    console.error(
+      'Error in test endpoint:',
+      backendError.logMessage,
+      backendError
+    )
 
     throw createError({
       statusCode: backendError.statusCode,

@@ -16,7 +16,7 @@ export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> =>
     return await contentService.getBloc(blocId)
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching bloc', backendError.logMessage)
+    console.error('Error fetching bloc', backendError.logMessage, backendError)
 
     throw createError({
       statusCode: backendError.statusCode,
