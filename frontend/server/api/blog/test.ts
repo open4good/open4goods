@@ -1,5 +1,7 @@
 import { useBlogService } from '~~/shared/api-client/services/blog.services'
 
+import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+
 /**
  * Test endpoint to debug blog data
  */
@@ -28,12 +30,13 @@ export default defineEventHandler(async _event => {
       },
     }
   } catch (error) {
-    console.error('Error in test endpoint:', error)
+    const backendError = await extractBackendErrorDetails(error)
+    console.error('Error in test endpoint:', backendError.logMessage)
 
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
-    }
+    throw createError({
+      statusCode: backendError.statusCode,
+      statusMessage: backendError.statusMessage,
+      cause: error,
+    })
   }
 })

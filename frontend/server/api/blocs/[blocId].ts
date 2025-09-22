@@ -1,6 +1,8 @@
 import { useContentService } from '~~/shared/api-client/services/content.services'
 import type { XwikiContentBlocDto } from '~~/shared/api-client'
 
+import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+
 export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> => {
   const blocId = getRouterParam(event, 'blocId')
   if (!blocId) {
@@ -13,10 +15,12 @@ export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> =>
   try {
     return await contentService.getBloc(blocId)
   } catch (error) {
-    console.error('Error fetching bloc', error)
+    const backendError = await extractBackendErrorDetails(error)
+    console.error('Error fetching bloc', backendError.logMessage)
+
     throw createError({
-      statusCode: 500,
-      statusMessage: 'Failed to fetch content bloc',
+      statusCode: backendError.statusCode,
+      statusMessage: backendError.statusMessage,
       cause: error,
     })
   }
