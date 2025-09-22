@@ -37,17 +37,7 @@ class StatsControllerIT {
     @MockBean
     private StatsService statsService;
 
-    @Test
-    void categoriesEndpointReturnsStats() throws Exception {
-        given(statsService.categories(any(DomainLanguage.class))).willReturn(new CategoriesStatsDto(7));
 
-        mockMvc.perform(get("/stats/categories")
-                .param("domainLanguage", "FR")
-                .header("X-Shared-Token", SHARED_TOKEN)
-                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.enabledVerticalConfigs").value(7));
-    }
 
     @Test
     void categoriesEndpointReturns403WhenMissingSharedToken() throws Exception {

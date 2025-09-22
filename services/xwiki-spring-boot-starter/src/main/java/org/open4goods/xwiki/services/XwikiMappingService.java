@@ -35,8 +35,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import io.micrometer.common.util.StringUtils;
 
 /**
- * Services related to XWiki object mapping 
- * 
+ * Services related to XWiki object mapping
+ *
  * @author Thierry.Ledan
  *
  */
@@ -47,13 +47,13 @@ public class XwikiMappingService {
 	RestTemplateService restTemplateService;
 	XWikiServiceProperties properties;
 	private UrlManagementHelper urlHelper;
-	
+
 	public XwikiMappingService(RestTemplateService restTemplateService, XWikiServiceProperties properties){
 		this.restTemplateService = restTemplateService;
 		this.properties = properties;
 		this.urlHelper = new UrlManagementHelper(properties);
 	}
-	
+
 	/**
 	 * Map 'Page' object from json response endpoint
 	 * @param endpoint
@@ -67,13 +67,13 @@ public class XwikiMappingService {
 		ResponseEntity<String> response = restTemplateService.getRestResponse(endpoint);
 		if (response != null ) {
 			page = deserializePage(response);
-		} 
+		}
 		return page;
 	}
-	
+
 	/**
 	 * Map 'Pages' object from json response endpoint
-	 * @param String endpoint 
+	 * @param String endpoint
 	 * @return a 'Pages' object if response and mapping were successful, null otherwise
 	 */
 	public Pages mapPages(String endpoint) {
@@ -83,14 +83,14 @@ public class XwikiMappingService {
 		ResponseEntity<String> response = restTemplateService.getRestResponse(endpoint);
 		if (response != null ) {
 			pages = deserializePages(response);
-		} 
+		}
 		return pages;
 	}
-	
-	
+
+
 	/**
 	 * Map 'SearchResults' object from json response endpoint
-	 * @param String endpoint 
+	 * @param String endpoint
 	 * @return a 'SearchResults' object if response and mapping were successful, null otherwise
 	 */
 	public SearchResults mapSearchResults(String endpoint) {
@@ -102,14 +102,14 @@ public class XwikiMappingService {
 		}
 		return results;
 	}
-	
-	
+
+
 	/**
 	 * Get properties related to 'page'
 	 * To find out the good url to properties, it's a tricky method:
 	 * First get the 'Objects' from 'Page' that contains a list of 'ObjectSummary'.
 	 * Pick up the first one (!!!!) and get the href link from the 'properties' rel link
-	 * 
+	 *
 	 * @param page
 	 * @return page's properties
 	 */
@@ -119,10 +119,10 @@ public class XwikiMappingService {
 		Properties propertiesObject = new Properties();
 		Objects objects = page.getObjects();
 		if( objects == null ) {
-			// request to server 
+			// request to server
 			objects = getPageObjects(page);
-		} 
-		if( objects != null ) {
+		}
+		if( objects != null && objects.getObjectSummaries().size() > 0) {
 			// TODO: hard coding - objects.getObjectSummaries().get(0).getLinks() NOT GOOD , try to find the good summary !!
 			String pagePropsEndpoint = urlHelper.getHref(XWikiConstantsRelations.REL_PROPERTIES, objects.getObjectSummaries().get(0).getLinks());
 
@@ -138,12 +138,12 @@ public class XwikiMappingService {
 		}
 		return properties;
 	}
-		
-		
+
+
 	/**
 	 *
 	 * Get properties related to an object of class 'className' in the ObjectSummary list
-	 * 
+	 *
 	 * @param page
 	 * @return page's properties
 	 */
@@ -175,8 +175,8 @@ public class XwikiMappingService {
 		}
 		return properties;
 	}
-	
-	
+
+
 	/**
 	 * fetch value for page's field 'objects'
 	 * @param page
@@ -187,8 +187,8 @@ public class XwikiMappingService {
 		String objectsUrl = urlHelper.getHref(XWikiConstantsRelations.REL_OBJECTS, page.getLinks());
 		return getObjects(objectsUrl);
 	}
-	
-	
+
+
 	/**
 	 * fetch value for page's field 'objects'
 	 * @param page
@@ -205,11 +205,11 @@ public class XwikiMappingService {
 		}
 		return objects;
 	}
-	
-	
+
+
 	/**
 	 * Get page attachments
-	 * 
+	 *
 	 * @param page targeted Page
 	 * @return Attachments object
 	 */
@@ -227,8 +227,8 @@ public class XwikiMappingService {
 		}
 		return attachments;
 	}
-	
-	
+
+
 	/**
 	 * Retrieve attachments associated to a Page
 	 * @param response
@@ -252,8 +252,8 @@ public class XwikiMappingService {
 		}
 		return attachmentsList;
 	}
-	
-	
+
+
 	/**
 	 * return attachment url (../bin/download/....)
 	 * @param attachment
@@ -262,12 +262,12 @@ public class XwikiMappingService {
 //	public String getAttachmentUrl(Attachment attachment) {
 //
 //		String absoluteUrl = attachment.getXwikiAbsoluteUrl();
-//		return restTemplateService.updateUrlScheme(absoluteUrl);	 
+//		return restTemplateService.updateUrlScheme(absoluteUrl);
 //	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @param url
 	 * TODO : Should provide a streamed version. See IcecatFeatureService.downloadTo()
 	 * @return
@@ -280,9 +280,9 @@ public class XwikiMappingService {
 		}
 		return blob;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Retrieve available wikis
 	 * @param endpoint
@@ -300,13 +300,13 @@ public class XwikiMappingService {
 		}
 		return wikisList;
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 
 	/**
 	 * Return true if 'wiki' exists in available wikis list
@@ -341,14 +341,14 @@ public class XwikiMappingService {
 //					}
 //				}
 //			}
-//		} 
+//		}
 //		return exists;
 //	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	//-----------------------------------------------------------
 	// DESERIALIZATION MANAGEMENT
 	//-----------------------------------------------------------
@@ -371,7 +371,7 @@ public class XwikiMappingService {
 		}
 		return objects;
 	}
-	
+
 	/**
 	 * Deserialize json response to 'Attachments' object
 	 * @param response
@@ -390,8 +390,8 @@ public class XwikiMappingService {
 		}
 		return attachments;
 	}
-	
-	
+
+
 	/**
 	 * Deserialize json response to 'Page' object
 	 * @param response
@@ -411,7 +411,7 @@ public class XwikiMappingService {
 		}
 		return page;
 	}
-	
+
 	/**
 	 * Deserialize json response to 'SearchResults' object
 	 * @param response
@@ -419,7 +419,7 @@ public class XwikiMappingService {
 	 */
 	public SearchResults deserializeSearchResults(ResponseEntity<String> response) {
 
-		SearchResults results = null;	
+		SearchResults results = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			results = mapper.readValue(response.getBody(), new TypeReference<SearchResults>() {});
@@ -464,13 +464,13 @@ public class XwikiMappingService {
 		}
 		return pages;
 	}
-	
+
 	/**
 	 * Deserialize json response to 'Properties' object
 	 * @param response
 	 * @return a 'Properties' object if the mapping was successful, null otherwise
 	 */
-	private Properties deserializeProperties(ResponseEntity<String> response) {		
+	private Properties deserializeProperties(ResponseEntity<String> response) {
 
 		Properties properties = null;
 		if( response != null ) {
@@ -483,7 +483,7 @@ public class XwikiMappingService {
 				ManageMappingExceptions(e, "Map<String,String>", response.getBody());
 			}
 		}
-		return properties;	
+		return properties;
 	}
 
 	/**
@@ -498,7 +498,7 @@ public class XwikiMappingService {
 			ObjectMapper mapper = new ObjectMapper();
 			xWiki = mapper.readValue(response.getBody(),new TypeReference<Xwiki>(){});
 			logger.debug("Object 'Xwiki' mapped correctly}");
-		}	
+		}
 		catch(Exception e) {
 			ManageMappingExceptions(e, "Xwiki", response.getBody());
 		}
@@ -543,12 +543,12 @@ public class XwikiMappingService {
 		return wikis;
 	}
 
-	
+
 
 	//-----------------------------------------------------------
 	// EXCEPTION MANAGEMENT
 	//----------------------------------------------------------
-	
+
 	/**
 	 * Manage error messages depending on exception type
 	 * @param e the exception
@@ -558,13 +558,13 @@ public class XwikiMappingService {
 	private void ManageMappingExceptions(Exception e, String typeToMap, String responseBody) {
 
 		if(e instanceof UnrecognizedPropertyException) {
-			logger.warn("Unable to map '{}' object from json: Unrecognized property:'{}' in Object:'{}'. Known properties:'{}'", 
+			logger.warn("Unable to map '{}' object from json: Unrecognized property:'{}' in Object:'{}'. Known properties:'{}'",
 					typeToMap,
 					((UnrecognizedPropertyException)e).getPropertyName(),
-					((UnrecognizedPropertyException)e).getReferringClass().toString(), 
+					((UnrecognizedPropertyException)e).getReferringClass().toString(),
 					((UnrecognizedPropertyException)e).getKnownPropertyIds().toString());
 		} else {
-			logger.warn("Unable to map '{}' object from json:{}", 
+			logger.warn("Unable to map '{}' object from json:{}",
 					typeToMap,
 					responseBody);
 		}

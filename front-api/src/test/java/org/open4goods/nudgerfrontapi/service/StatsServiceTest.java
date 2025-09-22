@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -32,7 +33,7 @@ class StatsServiceTest {
 
         StatsService service = new StatsService(serialisationService, resolver);
 
-        CategoriesStatsDto dto = service.categories();
+        CategoriesStatsDto dto = service.categories(DomainLanguage.FR);
 
         assertThat(dto.enabledVerticalConfigs()).isEqualTo(1);
     }
