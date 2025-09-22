@@ -68,7 +68,7 @@ in subsequent requests using the `Authorization: Bearer <token>` header.
 ## Domain localisation contract
 
 Every HTTP endpoint now requires a `domainLanguage` query parameter. The value
-is constrained to the `DomainLanguage` enum (`FR`, `EN`) and is echoed back via
+is constrained to the `DomainLanguage` enum (`fr`, `en`) and is echoed back via
 the `X-Locale` response header so the frontend can confirm which locale was
 resolved. While localisation behaviour is not implemented yet, controllers and
 DTOs are annotated to document which fields will eventually depend on this
