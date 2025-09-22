@@ -12,3 +12,4 @@ export const xwikiSandboxPrefixerOptions = {
 }
 
 export default xwikiSandboxPrefixerOptions
+
