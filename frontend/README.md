@@ -434,7 +434,10 @@ docs: update README with new install steps
 
 ### Frontend internationalisation
 
-The Nuxt 3 frontend picks the visitor's language from the request hostname instead of URL prefixes or browser detection. Production domains map to English (`nudger.com`) and French (`nudger.fr`), while local development can toggle between French (`localhost`) and English (`127.0.0.1`). Unknown domains fall back to English but emit a warning during SSR so misconfigurations can be spotted quickly. Refer to [`frontend/docs/internationalisation.md`](frontend/docs/internationalisation.md) for the full workflow and update procedure.
+The Nuxt 3 frontend picks the visitor's language from the request hostname instead of URL prefixes or browser detection. 
+Production domains map to English (`nudger.com`) and French (`nudger.fr`), while local development can toggle between French (`localhost`) and English (`127.0.0.1`). 
+Unknown domains fall back to English but emit a warning during SSR so misconfigurations can be spotted quickly. 
+Refer to [`/docs/internationalisation.md`](frontend/docs/internationalisation.md) for the full workflow and update procedure.
 ---
 
 Happy coding!
