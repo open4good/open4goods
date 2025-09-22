@@ -66,7 +66,8 @@ export default defineNuxtConfig({
       { code: 'fr-FR', name: 'Français' },
       { code: 'en-US', name: 'English' },
     ],
-    strategy: 'prefix_except_default',
+    strategy: 'no_prefix',
+    detectBrowserLanguage: false,
   },
   css: [
     '~/assets/sass/main.sass', // Keep only the main SASS file
