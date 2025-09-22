@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.xwiki.config.UrlManagementHelper;
 import org.open4goods.xwiki.config.XWikiConstantsResourcesPath;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
@@ -23,9 +24,10 @@ public class XWikiHtmlService {
 
 	public static final String PROXYFIED_FOLDER = "/wiki-files";
 	private XWikiServiceProperties xWikiProperties;
-	private XWikiConstantsResourcesPath resourcesPathManager;
-	private XwikiMappingService mappingService;
-	private RestTemplateService restTemplateService;
+        private XWikiConstantsResourcesPath resourcesPathManager;
+        private XwikiMappingService mappingService;
+        private RestTemplateService restTemplateService;
+        private final UrlManagementHelper urlHelper;
 	
 	private static Logger LOGGER = LoggerFactory.getLogger(XWikiHtmlService.class);
 
@@ -34,7 +36,8 @@ public class XWikiHtmlService {
 		this.mappingService = mappingService;
 		this.restTemplateService = restTemplateService;
 		
-		this.resourcesPathManager = new XWikiConstantsResourcesPath(xWikiProperties.getBaseUrl(), xWikiProperties.getApiEntrypoint(), xWikiProperties.getApiWiki());
+                this.resourcesPathManager = new XWikiConstantsResourcesPath(xWikiProperties.getBaseUrl(), xWikiProperties.getApiEntrypoint(), xWikiProperties.getApiWiki());
+                this.urlHelper = new UrlManagementHelper(xWikiProperties);
 
 	}
 	
@@ -55,15 +58,20 @@ public class XWikiHtmlService {
 //	}
 	
 	
-	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath")
-	public String html( String xwikiPath) {
-		
-		return getWebPage(xwikiPath, false);
-	}
+        @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath")
+        public String html( String xwikiPath) {
+
+                return getWebPage(xwikiPath, false, null);
+        }
+
+        @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath + ':' + (#language == null ? '' : #language)")
+        public String html(String xwikiPath, String language) {
+                return getWebPage(xwikiPath, false, language);
+        }
 	
 	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath + ':' + #plain")
 	public String htmlWithProxifiedResource( String xwikiPath, Boolean plain) {
-		String ret = getWebPage(xwikiPath, false);
+                String ret = getWebPage(xwikiPath, false, null);
 		// TODO : From const
 		// TODO : Make it generic ? Provide the associated resource controller ?
 		if (!StringUtils.isEmpty(ret)) {
@@ -87,23 +95,29 @@ public class XWikiHtmlService {
 	 * 	 * TOTO : Remove when rendering client side possible (waiting for jakarta migration)
 	 */
 	// TODO: manage response error / exceptions
-	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath +':' + #withAbsolutePath" )
-	public String getWebPage( String xwikiPath, boolean withAbsolutePath ) {
-		
-		String MARKER = "<div id=\"xwikicontent\" class=\"col-xs-12\">";
-		
-		String htmlResult = null;
-		
-		// web Page url
-		String xwikiWebUrl = URLDecoder.decode(xwikiPath, Charset.defaultCharset());
-		if( ! withAbsolutePath ) {
-			xwikiWebUrl = resourcesPathManager.getViewpath() + xwikiWebUrl;
-		} 
-		// request server
-		ResponseEntity<String> response = this.restTemplateService.getWebResponse( xwikiWebUrl );
-		if( response == null ) {
-			// manage error/exception
-			// TODO
+        @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath +':' + #withAbsolutePath + ':' + (#language == null ? '' : #language)" )
+        public String getWebPage( String xwikiPath, boolean withAbsolutePath, String language ) {
+
+                String MARKER = "<div id=\"xwikicontent\" class=\"col-xs-12\">";
+
+                String htmlResult = null;
+
+                // web Page url
+                String xwikiWebUrl = URLDecoder.decode(xwikiPath, Charset.defaultCharset());
+                if( ! withAbsolutePath ) {
+                        xwikiWebUrl = resourcesPathManager.getViewpath() + xwikiWebUrl;
+                }
+                if (StringUtils.isNotBlank(language)) {
+                        String withLanguage = urlHelper.addLanguageQueryParam(xwikiWebUrl, language);
+                        if (StringUtils.isNotBlank(withLanguage)) {
+                                xwikiWebUrl = withLanguage;
+                        }
+                }
+                // request server
+                ResponseEntity<String> response = this.restTemplateService.getWebResponse( xwikiWebUrl );
+                if( response == null ) {
+                        // manage error/exception
+                        // TODO
 		} else {
 			// code status 2xx
 			try {
@@ -124,9 +138,13 @@ public class XWikiHtmlService {
 			catch (Exception e) {
 				LOGGER.error("Cannot render to html page at " + xwikiWebUrl,e);
 			}
-		}
-		return htmlResult;
-	}
+                }
+                return htmlResult;
+        }
+
+        public String getWebPage(String xwikiPath, boolean withAbsolutePath) {
+                return getWebPage(xwikiPath, withAbsolutePath, null);
+        }
 	
 
 	/**

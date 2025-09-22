@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -67,11 +68,11 @@ public class UrlManagementHelper {
 	 * @param value
 	 * @return this url with query param key=value if process succedded, null otherwise
 	 */
-	public String addQueryParam(String url, String key, String value) {
+        public String addQueryParam(String url, String key, String value) {
 
-		String uriWithParams = null;
-		try{
-			URI uri = UriComponentsBuilder.fromUriString(url)
+                String uriWithParams = null;
+                try{
+                        URI uri = UriComponentsBuilder.fromUriString(url)
 					.queryParam(key, value)
 					.build()
 					.toUri();
@@ -84,9 +85,16 @@ public class UrlManagementHelper {
 		} catch(Exception e) {
 			logger.warn("Unable to add query params {}={} to uri {}. Error Message:{}",key, value, url, e.getMessage());
 		}       
-		return uriWithParams;
+                return uriWithParams;
 
-	}
+        }
+
+        public String addLanguageQueryParam(String url, String language) {
+                if (!StringUtils.isNotBlank(url) || !StringUtils.isNotBlank(language)) {
+                        return null;
+                }
+                return addQueryParam(url, "language", language);
+        }
 	
 	/**
 	 * Get href link from rel link in 'links'  

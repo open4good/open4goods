@@ -86,36 +86,82 @@ public class XWikiReadService {
 	 *
 	 */
 //	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME)
-	public Page getPage(String pagePath) throws ResponseStatusException {
+        public Page getPage(String pagePath) throws ResponseStatusException {
 
+                String endpoint = buildPageEndpoint(pagePath);
+                return this.mappingService.mapPage(endpoint);
+        }
 
-		String wikiPath = pagePath;
-		if (wikiPath.startsWith("/")) {
-			// Removing / prefix
-			wikiPath = wikiPath.substring(1);
-		}
+        @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #pagePath + ':' + #language", unless = "#result == null")
+        public PageTranslation getPageTranslation(Page basePage, String pagePath, String language) {
+                if (!StringUtils.isNotBlank(language)) {
+                        return null;
+                }
+                PageTranslation viaLink = tryLoadTranslationFromLink(basePage, language);
+                if (viaLink != null) {
+                        return viaLink;
+                }
+                return tryLoadTranslationFromEndpoint(pagePath, language);
+        }
 
+        private PageTranslation tryLoadTranslationFromLink(Page basePage, String language) {
+                if (basePage == null || basePage.getLinks() == null) {
+                        return null;
+                }
+                String translationEndpoint = urlHelper.getHref(XWikiConstantsRelations.REL_TRANSLATION, basePage.getLinks());
+                return fetchPageWithLanguage(translationEndpoint, language);
+        }
 
-		// TODO : Mutualize
-		String [] path = wikiPath.split("/|\\.|:");
+        private PageTranslation tryLoadTranslationFromEndpoint(String pagePath, String language) {
+                String endpoint = buildPageEndpoint(pagePath);
+                return fetchPageWithLanguage(endpoint, language);
+        }
 
-		if (path.length < 2) {
-			LOGGER.warn("Must have at least a space and a page name");
-		}
-		StringBuilder spacePath = new StringBuilder(resourcesPathManager.getSpacesEndpoint());
-		List<String> frags = Arrays.asList(path);
+        private PageTranslation fetchPageWithLanguage(String endpoint, String language) {
+                if (!StringUtils.isNotBlank(endpoint)) {
+                        return null;
+                }
+                String endpointWithLanguage = urlHelper.addLanguageQueryParam(endpoint, language);
+                if (!StringUtils.isNotBlank(endpointWithLanguage)) {
+                        return null;
+                }
+                try {
+                        Page page = this.mappingService.mapPage(endpointWithLanguage);
+                        return page != null ? new PageTranslation(page, language) : null;
+                } catch (ResponseStatusException ex) {
+                        if (ex.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
+                                return null;
+                        }
+                        throw ex;
+                }
+        }
 
-		List<String> spaces = frags.subList(0, path.length-1);
-		String page = frags.getLast();
+        public record PageTranslation(Page page, String language) { }
 
-		spacePath.append(StringUtils.join(spaces,"/spaces/"));
-		spacePath.append("/pages/");
-		spacePath.append(page);
+        private String buildPageEndpoint(String pagePath) {
 
+                String wikiPath = pagePath == null ? "" : pagePath;
+                if (wikiPath.startsWith("/")) {
+                        wikiPath = wikiPath.substring(1);
+                }
 
+                String [] path = wikiPath.split("/|\\.|:");
 
-		return this.mappingService.mapPage(spacePath.toString());
-	}
+                if (path.length < 2) {
+                        LOGGER.warn("Must have at least a space and a page name");
+                }
+                StringBuilder spacePath = new StringBuilder(resourcesPathManager.getSpacesEndpoint());
+                List<String> frags = Arrays.asList(path);
+
+                List<String> spaces = frags.subList(0, Math.max(path.length - 1, 0));
+                String page = frags.isEmpty() ? "" : frags.getLast();
+
+                spacePath.append(StringUtils.join(spaces,"/spaces/"));
+                spacePath.append("/pages/");
+                spacePath.append(page);
+
+                return spacePath.toString();
+        }
 
 
 

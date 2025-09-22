@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,7 +58,9 @@ public class ContentsController {
             summary = "Get content bloc",
             description = "Return the HTML content of the given XWiki bloc.",
             parameters = {
-                    @Parameter(name = "blocId", description = "XWiki page path", example = "Main", in = ParameterIn.PATH, required = true)
+                    @Parameter(name = "blocId", description = "XWiki page path", example = "Main", in = ParameterIn.PATH, required = true),
+                    @Parameter(name = "lang", description = "Preferred translation language (ISO 639-1 code)", example = "fr", in = ParameterIn.QUERY,
+                            schema = @Schema(type = "string"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Bloc found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = XwikiContentBlocDto.class))),
@@ -66,12 +69,13 @@ public class ContentsController {
             }
     )
     public ResponseEntity<XwikiContentBlocDto> contentBloc(@PathVariable String blocId,
+                                                           @RequestParam(name = "lang", required = false) String requestedLanguage,
                                                            Locale locale,
                                                            @AuthenticationPrincipal UserDetails userDetails) {
 
-        String htmlContent = xwikiHtmlService.html(blocId);
+        XwikiFacadeService.LocalizedHtml localizedBloc = xwikiFacadeService.getLocalizedBloc(blocId, requestedLanguage, locale);
         String editLink = xwikiHtmlService.getEditPageUrl(blocId);
-        XwikiContentBlocDto body = new XwikiContentBlocDto(blocId, htmlContent, editLink);
+        XwikiContentBlocDto body = new XwikiContentBlocDto(blocId, localizedBloc.htmlContent(), editLink, localizedBloc.resolvedLanguage());
 
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
@@ -98,7 +102,9 @@ public class ContentsController {
             summary = "Get XWiki page",
             description = "Return the rendered XWiki page along with metadata.",
             parameters = {
-                    @Parameter(name = "xwikiPageId", description = "XWiki page path", example = "Main.WebHome", in = ParameterIn.PATH, required = true)
+                    @Parameter(name = "xwikiPageId", description = "XWiki page path", example = "Main.WebHome", in = ParameterIn.PATH, required = true),
+                    @Parameter(name = "lang", description = "Preferred translation language (ISO code)", example = "fr", in = ParameterIn.QUERY,
+                            schema = @Schema(type = "string"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Page found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FullPage.class))),
@@ -107,9 +113,10 @@ public class ContentsController {
             }
     )
     public ResponseEntity<FullPage> page(@PathVariable String xwikiPageId,
+                                         @RequestParam(name = "lang", required = false) String requestedLanguage,
                                          Locale locale) {
         String normalized = translatePageId(xwikiPageId);
-        FullPage page = xwikiFacadeService.getFullPage(normalized);
+        FullPage page = xwikiFacadeService.getFullPage(normalized, requestedLanguage, locale);
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(page);

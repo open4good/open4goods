@@ -20,23 +20,29 @@ import { mapValues } from '../runtime';
  */
 export interface XwikiContentBlocDto {
     /**
-     * 
+     *
      * @type {string}
      * @memberof XwikiContentBlocDto
      */
     blocId?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof XwikiContentBlocDto
      */
     htmlContent?: string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof XwikiContentBlocDto
      */
     editLink?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof XwikiContentBlocDto
+     */
+    resolvedLanguage?: string;
 }
 
 /**
@@ -59,6 +65,7 @@ export function XwikiContentBlocDtoFromJSONTyped(json: any, ignoreDiscriminator:
         'blocId': json['blocId'] == null ? undefined : json['blocId'],
         'htmlContent': json['htmlContent'] == null ? undefined : json['htmlContent'],
         'editLink': json['editLink'] == null ? undefined : json['editLink'],
+        'resolvedLanguage': json['resolvedLanguage'] == null ? undefined : json['resolvedLanguage'],
     };
 }
 
@@ -76,6 +83,7 @@ export function XwikiContentBlocDtoToJSONTyped(value?: XwikiContentBlocDto | nul
         'blocId': value['blocId'],
         'htmlContent': value['htmlContent'],
         'editLink': value['editLink'],
+        'resolvedLanguage': value['resolvedLanguage'],
     };
 }
 
