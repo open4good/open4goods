@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-import xwikiSandboxPrefixerOptions from './xwikiSandboxPrefixerOptions.js'
+import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',

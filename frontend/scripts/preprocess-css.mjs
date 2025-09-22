@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import postcss from 'postcss'
 import prefixer from 'postcss-prefix-selector'
-import xwikiSandboxPrefixerOptions from '../xwikiSandboxPrefixerOptions.js'
+import xwikiSandboxPrefixerOptions from '../config/postcss/xwiki-sandbox-prefixer-options.js'
 
 const currentFilePath = fileURLToPath(import.meta.url)
 const projectRoot = path.resolve(path.dirname(currentFilePath), '..')
