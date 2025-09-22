@@ -1,6 +1,6 @@
-import { useBlogService } from '~/services/blog.services'
-import type { BlogPostDto } from '~/src/api'
-import { ResponseError } from '~/src/api'
+import { useBlogService } from '~~/shared/api-client/services/blog.services'
+import type { BlogPostDto } from '~~/shared/api-client'
+import { ResponseError } from '~~/shared/api-client'
 
 /**
  * Blog article by slug API endpoint

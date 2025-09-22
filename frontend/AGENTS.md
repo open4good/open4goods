@@ -36,15 +36,17 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 
 ## Project Structure and Directories
 
-- `pages/` → file-based routing
-- `components/` → reusable components
-- `layouts/` → page layouts
-- `composables/` → reusable logic (e.g. `useFeature.ts`)
-- `stores/` → Pinia stores
-- `src/api/` → OpenAPI generated client & API helpers
-- `assets/` → static assets & global CSS
+- `app/pages/` → file-based routing
+- `app/components/` → reusable components
+- `app/layouts/` → page layouts
+- `app/composables/` → reusable logic (e.g. `useFeature.ts`)
+- `app/stores/` → Pinia stores
+- `app/assets/` → static assets & global CSS
+- `app/plugins/` → Nuxt plugins
+- `app/utils/` → client-side helpers
+- `shared/api-client/` → OpenAPI generated client & API helpers
+- `shared/utils/` → utilities shared between client and server
 - `server/` → API routes for server-side logic
-- `plugins/` → Nuxt plugins
 - `tests/` or `*.spec.ts` → colocated or standalone test files
 
 ---
@@ -111,12 +113,12 @@ export const useCartStore = defineStore('cart', {
 
 ## OpenAPI Client Generation & Integration
 
-The `src/api` folder is **fully generated** from the specification exposed by `front-api` (`/v3/api-docs/front`).
+The `shared/api-client` folder is **fully generated** from the specification exposed by `front-api` (`/v3/api-docs/front`).
 
 Workflow:
 1. Modify controllers or DTOs in the `front-api` project to evolve the API.
 2. Build `front-api` (`mvn -pl nudger-front-api -am clean install`) to publish the new contract.
-3. In this module, run `pnpm --offline generate:api` to update `src/api/`.
+3. In this module, run `pnpm --offline generate:api` to update `shared/api-client/`.
 4. Use the newly generated classes.
 
 Never edit the generated files manually.

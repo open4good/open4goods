@@ -7,7 +7,7 @@ import xwikiSandboxPrefixerOptions from '../xwikiSandboxPrefixerOptions.js'
 
 const currentFilePath = fileURLToPath(import.meta.url)
 const projectRoot = path.resolve(path.dirname(currentFilePath), '..')
-const assetsDir = path.join(projectRoot, 'assets', 'css')
+const assetsDir = path.join(projectRoot, 'app', 'assets', 'css')
 
 const bootstrapCssPath = path.join(assetsDir, 'bootstrap.css')
 const xwikiCssPath = path.join(assetsDir, 'xwiki.css')

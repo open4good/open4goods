@@ -8,7 +8,7 @@ export default createConfigForNuxt({
   .append({
     rules: {
       'vue/multi-word-component-names': 'off',
-      // Désactiver les règles ESLint qui peuvent entrer en conflit avec Prettier
+      // Disable ESLint rules that could conflict with Prettier formatting
       'vue/html-indent': 'off',
       'vue/html-self-closing': 'off',
       'vue/max-attributes-per-line': 'off',
@@ -22,5 +22,5 @@ export default createConfigForNuxt({
     },
   })
   .append({
-    ignores: ['src/api/**'],
+    ignores: ['shared/api-client/**'],
   })
