@@ -8,8 +8,6 @@
 		<relativePath>../..</relativePath>
 	</parent>
 
-	<groupId>org.open4goods</groupId>
-	<version>0.0.1</version>
 	<artifactId>xwiki-spring-boot-starter</artifactId>
 	<name>spring-boot-starter-xwiki</name>
 	<inceptionYear>2024</inceptionYear>
