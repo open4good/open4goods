@@ -26,19 +26,19 @@ public class XWikiHtmlService {
 	private XWikiConstantsResourcesPath resourcesPathManager;
 	private XwikiMappingService mappingService;
 	private RestTemplateService restTemplateService;
-	
+
 	private static Logger LOGGER = LoggerFactory.getLogger(XWikiHtmlService.class);
 
 	public XWikiHtmlService( XwikiMappingService mappingService, RestTemplateService restTemplateService, XWikiServiceProperties xWikiProperties) {
 		this.xWikiProperties = xWikiProperties;
 		this.mappingService = mappingService;
 		this.restTemplateService = restTemplateService;
-		
+
 		this.resourcesPathManager = new XWikiConstantsResourcesPath(xWikiProperties.getBaseUrl(), xWikiProperties.getApiEntrypoint(), xWikiProperties.getApiWiki());
 
 	}
-	
-	
+
+
 	/**
 	 * Returns xwiki web server response from wikiPage
 	 * with an absolute or relative path
@@ -50,17 +50,17 @@ public class XWikiHtmlService {
 //		String xwikiWebUrl = URLDecoder.decode(xwikiPath, Charset.defaultCharset());
 //		if( ! withAbsolutePath ) {
 //			xwikiWebUrl = resourcesPathManager.getViewpath() + xwikiWebUrl;
-//		} 
+//		}
 //		return getWebResponse( xwikiWebUrl );
 //	}
-	
-	
+
+
 	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath")
 	public String html( String xwikiPath) {
-		
+
 		return getWebPage(xwikiPath, false);
 	}
-	
+
 	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath + ':' + #plain")
 	public String htmlWithProxifiedResource( String xwikiPath, Boolean plain) {
 		String ret = getWebPage(xwikiPath, false);
@@ -68,7 +68,7 @@ public class XWikiHtmlService {
 		// TODO : Make it generic ? Provide the associated resource controller ?
 		if (!StringUtils.isEmpty(ret)) {
 			ret = ret.replace("/bin/download", XWikiHtmlService.PROXYFIED_FOLDER);
-			
+
 			if (null != plain && plain.booleanValue()) {
 				// We remove the <p>
 				ret = ret.replace("<p>", "").replace("</p>","");
@@ -76,29 +76,29 @@ public class XWikiHtmlService {
 		}
 		return ret;
 	}
-	
-	
+
+
 	/**
 	 * Returns xwiki web server response from wikiPage
 	 * with an absolute or relative path
 	 * @param xwikiPath path to web page
 	 * @param withAbsolutePath true if 'xwikiPath' is absolute
 	 * @return html response
-	 * 	 * TOTO : Remove when rendering client side possible (waiting for jakarta migration)
+	 * 	 * TODO : Remove when rendering client side possible (waiting for jakarta migration)
 	 */
 	// TODO: manage response error / exceptions
 	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath +':' + #withAbsolutePath" )
 	public String getWebPage( String xwikiPath, boolean withAbsolutePath ) {
-		
+
 		String MARKER = "<div id=\"xwikicontent\" class=\"col-xs-12\">";
-		
+
 		String htmlResult = null;
-		
+
 		// web Page url
 		String xwikiWebUrl = URLDecoder.decode(xwikiPath, Charset.defaultCharset());
 		if( ! withAbsolutePath ) {
 			xwikiWebUrl = resourcesPathManager.getViewpath() + xwikiWebUrl;
-		} 
+		}
 		// request server
 		ResponseEntity<String> response = this.restTemplateService.getWebResponse( xwikiWebUrl );
 		if( response == null ) {
@@ -127,23 +127,23 @@ public class XWikiHtmlService {
 		}
 		return htmlResult;
 	}
-	
+
 
 	/**
-	 * Ge!t HTML content for a WebPAge instance 
+	 * Ge!t HTML content for a WebPAge instance
 	 * TOTO : Remove when rendering client side possible (waiting for jakarta migration)
 	 * @param xwikiRelativeUrl
 	 * @return
 	 */
-	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiRelativeUrl")	
+	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiRelativeUrl")
 	public String getHtmlClassWebPage(String xwikiRelativeUrl) {
-	
-		
+
+
 		xwikiRelativeUrl = xwikiRelativeUrl.replace("xwiki:", "");
 		xwikiRelativeUrl = xwikiRelativeUrl.replace(".", "/");
-		
+
 		String htmlResult = null;
-		
+
 		// web Page url
 		String xwikiWebUrl = URLDecoder.decode(xwikiRelativeUrl, Charset.defaultCharset());
 
@@ -165,14 +165,14 @@ public class XWikiHtmlService {
 				LOGGER.error("Cannot render to html page at " + xwikiWebUrl,e);
 			}
 		}
-		
+
 		//TODO : Markup should be mutualized with BlogController / downloadAttachment mapping
 		htmlResult = htmlResult.replace("\"/bin/download","\""+PROXYFIED_FOLDER);
-		
+
 		return htmlResult;
 	}
-	
-	
+
+
 	 public String renderXWiki20SyntaxAsXHTML(String contentXwiki21)
 	    {
 	        try {
@@ -192,36 +192,36 @@ public class XWikiHtmlService {
 				LOGGER.error("Error while rendering XWiki content to XHTML.",e);
 				return "Error while rendering XWiki content to XHTML.";
 			}
-	       
+
 	    }
-	
-	
+
+
 	// TODO : Below should be in XWikiConstantsResourcesPath ?
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Get the absolute url to the wiki page in view mode
 	 * @param xwikiPath
 	 * @return
 	 */
-	public String getViewPageUrl( String xwikiPath ) {	
+	public String getViewPageUrl( String xwikiPath ) {
 		return resourcesPathManager.getViewpath() + URLDecoder.decode(xwikiPath, Charset.defaultCharset());
 	}
-	
-	
+
+
 	/**
 	 * Get the absolute url to web page in edit mode
 	 * @param xwikiPath
 	 * @return
 	 */
-	public String getEditPageUrl( String xwikiPath ) {	
+	public String getEditPageUrl( String xwikiPath ) {
 		return resourcesPathManager.getEditpath() + URLDecoder.decode(xwikiPath, Charset.defaultCharset());
 	}
-	
-	
-	
+
+
+
 	/**
 	 * TODO : wrong place (see other, have to mutualize in the properties class, i guess)
 	 * Get the URL of a Page attachment (image...) given its name and space
@@ -233,9 +233,9 @@ public class XWikiHtmlService {
 	public String getAttachmentUrl(String space, String name, String attachmentName) {
 		return resourcesPathManager.getDownloadAttachlmentUrl(space, name, attachmentName);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -244,6 +244,6 @@ public class XWikiHtmlService {
 	}
 
 
-	
-	
+
+
 }
