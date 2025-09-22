@@ -1,12 +1,20 @@
 import { ContentApi, Configuration } from '..'
 import type { XwikiContentBlocDto } from '..'
+import { resolveDomainResolutionFromRuntime } from '~~/shared/utils/domain-language'
+import { createDomainLanguageMiddleware } from './utils'
 
 /**
  * Content service for fetching HTML blocs from the backend
  */
 export const useContentService = () => {
   const config = useRuntimeConfig()
-  const apiConfig = new Configuration({ basePath: config.apiUrl })
+  const resolution = resolveDomainResolutionFromRuntime()
+
+  const normalizedApiUrl = config.apiUrl.replace(/\/+$/, '')
+  const apiConfig = new Configuration({
+    basePath: normalizedApiUrl,
+    middleware: [createDomainLanguageMiddleware(normalizedApiUrl, resolution.domainLanguage)],
+  })
   const api = new ContentApi(apiConfig)
 
   /**

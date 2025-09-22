@@ -1,6 +1,10 @@
 import type { H3Event } from 'h3'
 import type { CookieSerializeOptions } from 'cookie-es'
 import { FetchError } from 'ofetch'
+import {
+  resolveDomainResolutionFromHeaders,
+  warnOnUnknownHostname,
+} from '~~/shared/utils/domain-language'
 
 interface LoginResponse { accessToken: string; refreshToken: string }
 interface LoginBody { username: string; password: string }
@@ -12,10 +16,17 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   const config = useRuntimeConfig()
+  const resolution = resolveDomainResolutionFromHeaders(
+    event.node.req.headers as Record<string, string | string[] | undefined>
+  )
+
+  warnOnUnknownHostname(resolution)
+
   try {
     const tokens = await $fetch<LoginResponse>(`${config.apiUrl}/auth/login`, {
       method: 'POST',
       body,
+      query: { domainLanguage: resolution.domainLanguage },
     })
     const secure = process.env.NODE_ENV === 'production'
     const sameSite: 'lax' | 'none' = secure ? 'none' : 'lax'

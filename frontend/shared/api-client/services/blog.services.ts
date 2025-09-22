@@ -1,13 +1,21 @@
 import { BlogApi, Configuration } from '..'
 import type { BlogPostDto, PageDto } from '..'
+import { resolveDomainResolutionFromRuntime } from '~~/shared/utils/domain-language'
+import { createDomainLanguageMiddleware } from './utils'
 
 /**
  * Blog service for handling blog-related API calls
  */
 export const useBlogService = () => {
   const config = useRuntimeConfig()
-  const apiConfig = new Configuration({ basePath: config.apiUrl })
-  console.log('[ContentService] baseUrl =', config.apiUrl)
+  const resolution = resolveDomainResolutionFromRuntime()
+
+  const normalizedApiUrl = config.apiUrl.replace(/\/+$/, '')
+  const apiConfig = new Configuration({
+    basePath: normalizedApiUrl,
+    middleware: [createDomainLanguageMiddleware(normalizedApiUrl, resolution.domainLanguage)],
+  })
+  console.log('[ContentService] baseUrl =', normalizedApiUrl)
 
   const api = new BlogApi(apiConfig)
 
@@ -48,3 +56,4 @@ export const useBlogService = () => {
 
   return { getArticles, getArticleBySlug }
 }
+
