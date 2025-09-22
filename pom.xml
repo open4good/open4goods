@@ -23,7 +23,7 @@
 
 		<processDependencyManagement>true</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
-		<maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
+		<maven-compiler-plugin-version>3.14.1</maven-compiler-plugin-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<exclude.tests>nothing-to-exclude</exclude.tests>
