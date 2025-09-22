@@ -8,3 +8,4 @@ ui/src/main/resources/application-devsec.yml
 
 apache-maven-*-bin.tar.gz
 /.vscode/
+/frontend/components/dev/generations
