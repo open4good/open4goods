@@ -36,7 +36,7 @@ export const useBlogService = () => {
    * @param slug - Article slug
    * @returns Promise<BlogPostDto>
    */
-  const getArticleById = async (slug: string): Promise<BlogPostDto> => {
+  const getArticleBySlug = async (slug: string): Promise<BlogPostDto> => {
     try {
       return await api.post({ slug })
     } catch (error) {
@@ -46,5 +46,5 @@ export const useBlogService = () => {
     }
   }
 
-  return { getArticles, getArticleById }
+  return { getArticles, getArticleBySlug }
 }

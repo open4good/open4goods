@@ -85,6 +85,9 @@ describe('TheArticles Component', () => {
 
     // Check first article content
     const firstCard = articleCards[0]
+    if (!firstCard) {
+      throw new Error('Expected at least one article card')
+    }
     expect(firstCard.find('.article-title').text()).toBe('Test Article 1')
     expect(firstCard.find('.article-summary').text()).toContain(
       'This is a test summary for article 1'
@@ -95,7 +98,11 @@ describe('TheArticles Component', () => {
   test('should handle articles without images', async () => {
     mockUseBlog.loading = false
     mockUseBlog.error = null
-    mockUseBlog.articles = [mockArticles[1]] // Article without image
+    const imagelessArticle = mockArticles.find((article) => !article.image)
+    if (!imagelessArticle) {
+      throw new Error('Expected at least one article without an image')
+    }
+    mockUseBlog.articles = [imagelessArticle]
 
     const wrapper = await mountSuspended(TheArticles)
 

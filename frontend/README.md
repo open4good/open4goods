@@ -187,6 +187,50 @@ project/
 ## Vuetify
 - (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
 - (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
+ ### Vuetify MCP & Claude-code
+  - Install Vuetify MCP server: `pnpm add @vuetify/mcp@latest`
+  - Configure in Claude: `npx @vuetify/mcp config`
+  - **Start MCP server**: `node node_modules/@vuetify/mcp/dist/index.js` (run in background)
+  
+  The Vuetify MCP server provides tools for:
+    - Generating Vuetify components with the correct props
+    - Accessing APIs and documentation (`get_component_api_by_version`, `get_directive_api_by_version`)
+    - Installation guides (`get_installation_guide`)
+    - Release notes (`get_release_notes_by_version`)
+    - Available features (`get_available_features`)
+    - FAQ (`get_frequently_asked_questions`)
+  
+  **Quick start next time**:
+  ```bash
+  # Start the MCP server in background in Claude Code
+  node node_modules/@vuetify/mcp/dist/index.js &
+  
+  # Or with npm
+  npx @vuetify/mcp
+  ```
+  
+**Important**: The MCP server must be running **while** you use Claude Code to benefit from Vuetify tools. It communicates directly with Claude Code via the MCP protocol.
+
+### Vuetify MCP API Tools
+  - get_vuetify_api_by_version: Download and cache Vuetify API types by version
+  - get_component_api_by_version: Get the API for a specific component (props, events, slots, methods)
+  - get_directive_api_by_version: Get the API for a Vuetify directive (v-ripple, v-scroll, etc.)
+
+  Documentation Tools
+
+  - get_installation_guide: Installation guides for Vue CLI, Nuxt, Vite
+  - get_available_features: List of available components, directives, and composables
+  - get_exposed_exports: Available exports of the Vuetify package
+  - get_frequently_asked_questions: FAQs from the Vuetify documentation
+  - get_release_notes_by_version: Release notes to understand the changes
+
+  Practical Use Cases
+
+  - Generate Vuetify components with the correct props
+  - Create layouts Best-practice UI
+  - Access documentation without leaving your IDE
+  - Get AI help that understands Vuetify's component structure
+    ```
 
 ## Example Button Component
 ```vue
@@ -196,6 +240,13 @@ project/
   </v-btn>
 </template>
 ```
+
+## CSS/SASS : BEM Convention
+  SASS classes (excluding Vuetify classes) must follow the BEM convention:
+    - Block/Element/Modifiers
+      `.block__elem--mod`
+    Documentation here: `https://getbem.com/naming/`
+    Note for Claude users : use slash-command `/css-class-validator` for validate & auto-fix your class.
 
 ## Pinia (State Management)
 
@@ -320,6 +371,9 @@ describe('Button', () => {
 - Use ESLint with Vue/TypeScript rules
 - Use Prettier for formatting (pnpm format + --write)
 - Git hooks via Husky run `pnpm --offline lint` and `pnpm --offline test` on commit
+
+  ### use cSpell:words
+    Doc : `https://cspell.org/` 
 
 ## SSR Best Practices
 

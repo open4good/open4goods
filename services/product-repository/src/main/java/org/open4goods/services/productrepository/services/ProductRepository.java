@@ -706,17 +706,23 @@ public class ProductRepository {
 		return elasticsearchOperations.count(Query.findAll(), CURRENT_INDEX);
 	}
 
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public Long countMainIndexHavingRecentPrices() {
-		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchOperations.count(query, CURRENT_INDEX);
-	}
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingRecentPrices() {
+                CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
 
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public Long countMainIndexHavingScore(String scoreName, String vertical) {
-		CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
-		return elasticsearchOperations.count(query, CURRENT_INDEX);
-	}
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingVertical() {
+                CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").exists());
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingScore(String scoreName, String vertical) {
+                CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
 
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
