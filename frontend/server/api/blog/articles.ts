@@ -24,7 +24,11 @@ export default defineEventHandler(async (event): Promise<PageDto> => {
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
     // Log the error for debugging
-    console.error('Error fetching blog articles:', backendError.logMessage)
+    console.error(
+      'Error fetching blog articles:',
+      backendError.logMessage,
+      backendError
+    )
 
     // Forward backend status code and message when available
     throw createError({
