@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * </p>
  */
 @Schema(description = "Domain language hint used to drive localisation of responses.",
-        example = "fr",
-        allowableValues = {"fr", "en"})
+        example = "fr"
+        )
 public enum DomainLanguage {
 
     /** French content (language tag {@code fr}). */
