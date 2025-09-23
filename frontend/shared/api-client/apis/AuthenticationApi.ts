@@ -26,12 +26,10 @@ import {
 } from '../models/index';
 
 export interface LoginOperationRequest {
-    domainLanguage: LoginOperationDomainLanguageEnum;
     loginRequest: LoginRequest;
 }
 
 export interface RefreshRequest {
-    domainLanguage: RefreshDomainLanguageEnum;
     refreshToken: string;
 }
 
@@ -45,13 +43,6 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Login with XWiki credentials
      */
     async loginRaw(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthTokensDto>> {
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling login().'
-            );
-        }
-
         if (requestParameters['loginRequest'] == null) {
             throw new runtime.RequiredError(
                 'loginRequest',
@@ -60,10 +51,6 @@ export class AuthenticationApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -105,13 +92,6 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Refresh access token
      */
     async refreshRaw(requestParameters: RefreshRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthTokensDto>> {
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling refresh().'
-            );
-        }
-
         if (requestParameters['refreshToken'] == null) {
             throw new runtime.RequiredError(
                 'refreshToken',
@@ -120,10 +100,6 @@ export class AuthenticationApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -158,20 +134,3 @@ export class AuthenticationApi extends runtime.BaseAPI {
     }
 
 }
-
-/**
- * @export
- */
-export const LoginOperationDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type LoginOperationDomainLanguageEnum = typeof LoginOperationDomainLanguageEnum[keyof typeof LoginOperationDomainLanguageEnum];
-/**
- * @export
- */
-export const RefreshDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type RefreshDomainLanguageEnum = typeof RefreshDomainLanguageEnum[keyof typeof RefreshDomainLanguageEnum];

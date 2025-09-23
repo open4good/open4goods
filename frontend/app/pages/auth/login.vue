@@ -1,5 +1,5 @@
 <template>
-  <v-container class="py-10" style="max-width:400px">
+  <v-container style="margin-top: 300px;max-width:400px" class="py-10">
     <v-form v-model="valid" @submit.prevent="onSubmit">
       <v-text-field
         v-model="username"

@@ -3,7 +3,7 @@
     <!-- Hero section with call to action -->
     <section class="hero d-flex flex-column align-center justify-center">
       <v-img src="/nudger-icon-512x512.png" width="120" class="mb-4" alt="Nudger logo" />
-      <h1 class="text-h3 text-center font-weight-bold mb-2">Welcome {{ username || 'Nudger' }}</h1>
+      <h1 class="text-h3 text-center font-weight-bold mb-2">{{ t('welcome')}} {{ username || 'Nudger' }}</h1>
       <p class="text-subtitle-1 mb-4 text-center">
         Compare appliances and make greener choices thanks to our Impact Score
       </p>
@@ -64,10 +64,10 @@
       </v-row>
     </section>
 
-    <!-- Example content bloc -->
+    <!-- Example contendefaultLengtht bloc -->
     <section>
      <h2>Demo Xwiki as headless CMS (non existing content)</h2>
-        <TextContent bloc-id="Main.NON_EXISTS" />
+        <TextContent :ipsum-length="450" bloc-id="Main.NON_EXISTS" />
 
 
         <h2>Demo Xwiki as headless CMS (existing content)</h2>
@@ -86,6 +86,7 @@
 
 <script setup lang="ts">
 const { hasRole, isLoggedIn, username, roles } = useAuth()
+const { t } = useI18n()
 </script>
 
 <style lang="sass" scoped>
