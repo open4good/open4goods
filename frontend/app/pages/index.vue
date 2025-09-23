@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const drawerStore = useState("mobileDrawer", () => false);
+const drawerStore = useState("mobileDrawer", () => false)
 
 const toggleDrawer = () => {
   drawerStore.value = !drawerStore.value;
@@ -7,18 +7,20 @@ const toggleDrawer = () => {
 </script>
 
 <template>
-  <div class="full-height">
-    <Hero-section @toggle-drawer="toggleDrawer" />
+  <div>
+    <div class="full-height">
+      <Hero-section @toggle-drawer="toggleDrawer" />
 
-    <The-items-selector />
+      <The-items-selector />
 
-    <Bloc3Hz />
+      <Bloc3Hz />
 
-    <TheMainFooter>
-      <template #footer>
-        <the-main-footer-content />
-      </template>
-    </TheMainFooter>
+      <TheMainFooter>
+        <template #footer>
+          <the-main-footer-content />
+        </template>
+      </TheMainFooter>
+    </div>
   </div>
 </template>
 
