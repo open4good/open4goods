@@ -8,9 +8,13 @@ import '~/assets/css/text-content.css'
 
 // Props
 
-const props = withDefaults(defineProps<{ blocId: string; defaultLength?: number }>(), {
-  defaultLength: DEFAULT_LOREM_LENGTH,
-})
+const props = withDefaults(
+  defineProps<{ blocId: string; defaultLength?: number; ipsumLength?: number }>(),
+  {
+    defaultLength: DEFAULT_LOREM_LENGTH,
+    ipsumLength: undefined,
+  }
+)
 
 // Composables
 const { htmlContent, editLink, loading, error, fetchBloc } = useContentBloc()
@@ -24,13 +28,15 @@ const canEdit = computed(() => {
   return isLoggedIn.value && !!link && roles.some(role => hasRole(role))
 })
 
+const fallbackLoremLength = computed(() => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH)
+
 const displayHtml = computed(() => {
   const rawContent = (unref(htmlContent) ?? '').trim()
   if (rawContent) {
     return rawContent
   }
 
-  return _generateLoremIpsum(props.defaultLength)
+  return _generateLoremIpsum(fallbackLoremLength.value)
 })
 
 // Watcher / mount
