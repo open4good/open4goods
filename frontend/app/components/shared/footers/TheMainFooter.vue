@@ -7,6 +7,12 @@
 </template>
 
 <style scoped>
+.main-footer {
+  width: 100%;
+  --v-layout-left: 0px;
+  --v-layout-right: 0px;
+}
+
 .main-footer :deep(a) {
   color: inherit;
 }
