@@ -1,7 +1,10 @@
 package org.open4goods.nudgerfrontapi.config;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +14,7 @@ import java.util.List;
  * frontend API.
  */
 @Component
+@Validated
 @ConfigurationProperties(prefix = "front.security")
 public class SecurityProperties {
 
@@ -27,7 +31,8 @@ public class SecurityProperties {
     /**
      * Secret key used to sign JWT tokens.
      */
-    // TODO : aDD VALIDATION, MUST NOT BE BLANK, MUST BE > 32 CHARS
+    @NotBlank(message = "front.security.jwt-secret must be provided")
+    @Size(min = 33, message = "front.security.jwt-secret must contain more than 32 characters")
     private String jwtSecret;
 
     /**
