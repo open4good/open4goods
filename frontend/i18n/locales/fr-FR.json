@@ -16,7 +16,41 @@
       }
     },
     "footer": {
-      "rightsReserved": "Tous droits réservés"
+      "rightsReserved": "Tous droits réservés",
+      "accessibleTitle": "Informations du pied de page",
+      "mission": "nudger.fr est une approche ouverte pour évaluer écologiquement les biens de consommation et compenser partiellement l'impact de vos achats en ligne.",
+      "blogLink": "Notre blog",
+      "highlightLinks": {
+        "ecoscore": "Évaluation environnementale",
+        "compensation": "Contribution écologique"
+      },
+      "comparator": {
+        "title": "Comparateur de bien commun",
+        "links": {
+          "openData": "Open data",
+          "openSource": "Open source",
+          "privacy": "Politique de confidentialité",
+          "legal": "Mentions légales"
+        }
+      },
+      "community": {
+        "title": "Vous n'êtes pas seuls",
+        "links": {
+          "team": "Notre équipe",
+          "partners": "Nos partenaires"
+        }
+      },
+      "feedback": {
+        "title": "Feedback",
+        "links": {
+          "idea": "Une idée ?",
+          "issue": "Un bug ?",
+          "contact": "Nous contacter",
+          "linkedin": "Nous suivre"
+        }
+      },
+      "logoAlt": "Icône Nudger orange",
+      "copyright": "Copyright ©{year} open4goods. Produit de bien commun."
     },
     "hero": {
       "mainTitle": "Le comparateur qui pense à demain",
