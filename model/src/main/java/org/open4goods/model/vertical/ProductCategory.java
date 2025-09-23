@@ -1,4 +1,4 @@
-package org.open4goods.commons.model;
+package org.open4goods.model.vertical;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import org.open4goods.model.Localisable;
 import org.open4goods.model.helper.IdHelper;
-import org.open4goods.model.vertical.VerticalConfig;
 
 /**
  * A ProductCategory is an tree node of ProductCategories. It is built from 

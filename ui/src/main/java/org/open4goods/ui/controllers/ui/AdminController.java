@@ -2,7 +2,6 @@ package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
 
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -11,6 +10,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.SitemapGenerationService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

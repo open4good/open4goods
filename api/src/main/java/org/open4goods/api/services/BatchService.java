@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
@@ -17,6 +16,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

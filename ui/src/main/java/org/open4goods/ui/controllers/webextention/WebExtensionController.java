@@ -5,7 +5,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
@@ -13,6 +12,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.helper.UiHelper;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

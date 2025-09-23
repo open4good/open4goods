@@ -1,4 +1,4 @@
-package org.open4goods.commons.model;
+package org.open4goods.model.vertical;
 
 import java.util.ArrayList;
 import java.util.HashMap;

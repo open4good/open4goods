@@ -1,4 +1,4 @@
-package org.open4goods.commons.services;
+package org.open4goods.verticals;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,34 +6,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
-import org.open4goods.commons.model.dto.ExpandedTaxonomy;
-import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.query.Criteria;
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 
@@ -69,9 +56,7 @@ public class VerticalsConfigService {
 	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
 
 
-	private ProductRepository productRepository;
 
-	private GoogleTaxonomyService googleTaxonomyService;
 
 	private ResourcePatternResolver resourceResolver;
 
@@ -83,11 +68,9 @@ public class VerticalsConfigService {
 	private VerticalConfig defaultConfig;
 
 
-	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver) {
+	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver) {
 		super();
 		this.serialisationService = serialisationService;
-		this.googleTaxonomyService = googleTaxonomyService;
-		this.productRepository = productRepository;
 		this.resourceResolver = resourceResolver;
 
 		// initial configs loads
@@ -349,24 +332,7 @@ public class VerticalsConfigService {
 		return configs.values().stream().filter(e ->googleCategoryId.equals(e.getGoogleTaxonomyId())).findFirst().orElse(null);
 	}
 
-	/**
-	 * Return all expanded taxonomies, from the taxonomy service and from queryning on the store
-	 * @return
-	 */
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
-	public List<ExpandedTaxonomy> expandedTaxonomies() {
-		List<ExpandedTaxonomy> ret = new ArrayList<>();
-		productRepository.byTaxonomy().entrySet().forEach(t -> {
-            ExpandedTaxonomy et = new ExpandedTaxonomy();
-            et.setTaxonomyId(t.getKey());
-            et.setTaxonomyName(googleTaxonomyService.getTaxonomyName(t.getKey())+"");
-            et.setTotal(t.getValue());
-            et.setAssociatedVertical(getVerticalForTaxonomy(t.getKey()));
-            ret.add(et);
-        });
 
-		return ret;
-	}
 
 	/**
 	 * Return a vertical config for a given taxonomy id
@@ -457,42 +423,6 @@ public class VerticalsConfigService {
 	}
 
 
-	/**
-	 * Return all products matching the vertical in the config or already having a
-	 * vertical defined
-	 *
-	 * @param v
-	 * @return
-	 */
-	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
-	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
 
-		// We match larger, on all matching categories cause those fields are not indexed
-		Set<String> datasources = new HashSet<String>();
-		v.getMatchingCategories().values().forEach(cat -> {
-			cat.forEach(elem -> {
-				datasources.add(elem);
-			});
-		});
-
-		Criteria c = new Criteria("datasourceCategories").in(datasources)
-				.or(new Criteria("vertical").is(v.getId()));
-
-		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
-
-		return productRepository.getElasticsearchOperations()
-				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX).stream()
-				.map(SearchHit::getContent);
-				// We have all categories matching, refine here to match the standard agg behaviour
-//				.filter(e -> {
-//					VerticalConfig cat = getVerticalForCategories(e.getCategoriesByDatasources());
-//					if (null != cat && cat.getId().equals(v.getId())) {
-//						return true;
-//					}
-//					return false;
-//				});
-
-
-	}
 
 }

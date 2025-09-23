@@ -4,13 +4,13 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

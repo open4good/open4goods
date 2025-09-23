@@ -33,7 +33,6 @@ import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.helper.IdHelper;
@@ -46,6 +45,7 @@ import org.open4goods.model.resource.ResourceTag;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

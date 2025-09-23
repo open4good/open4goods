@@ -19,7 +19,6 @@ import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.ResourceService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.TechnicalException;
@@ -33,6 +32,7 @@ import org.open4goods.services.remotefilecaching.service.RemoteFileCachingServic
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.DatasourceImageService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.services.gtinservice.service.GtinService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

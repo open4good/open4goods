@@ -25,7 +25,6 @@ import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.loader.FeatureLoader;
@@ -33,7 +32,6 @@ import org.open4goods.commons.services.loader.CategoryLoader;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -61,6 +59,8 @@ import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.verticals.GoogleTaxonomyService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -237,8 +237,8 @@ public class ApiConfig {
     }
 
 	@Bean
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService) throws IOException {
+		return new VerticalsConfigService(serialisationService, googleTaxonomyService, resolver);
 	}
 
 

@@ -3,7 +3,6 @@ package org.open4goods.ui.controllers.api;
 import java.util.concurrent.CompletableFuture;
 
 import org.open4goods.commons.helper.IpHelper;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.captcha.service.HcaptchaService;
@@ -11,6 +10,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

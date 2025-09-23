@@ -15,13 +15,11 @@ import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.loader.CategoryLoader;
 import org.open4goods.commons.services.loader.FeatureLoader;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
@@ -51,6 +49,8 @@ import org.open4goods.services.gtinservice.service.GtinService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
+import org.open4goods.verticals.GoogleTaxonomyService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
@@ -370,8 +370,8 @@ public class AppConfig {
 
 
 	@Bean
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService( serialisationService, googleTaxonomyService, productRepository, resourceResolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService) throws IOException {
+		return new VerticalsConfigService( serialisationService, googleTaxonomyService, resourceResolver);
 	}
 
 	////////////////////////////////////

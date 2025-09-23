@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.BarcodeAggregationProperties;
@@ -27,6 +26,7 @@ import org.open4goods.nudgerfrontapi.controller.api.CategoriesController;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

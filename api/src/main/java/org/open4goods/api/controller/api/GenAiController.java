@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
@@ -20,6 +19,7 @@ import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
