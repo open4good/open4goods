@@ -170,14 +170,16 @@ describe('TheHeroVideo', () => {
 
       // Simulate the onMounted logic for cached video
       const componentInstance = wrapper.getCurrentComponent().exposed
-      componentInstance.onVideoLoaded()
-      componentInstance.attemptAutoplay()
+      expect(componentInstance).toBeTruthy()
+
+      componentInstance!.onVideoLoaded()
+      componentInstance!.attemptAutoplay()
 
       await wrapper.vm.$nextTick()
 
       // Check that video is marked as loaded
-      expect(componentInstance.isVideoLoaded.value).toBe(true)
-      expect(componentInstance.showPlaceholder.value).toBe(false)
+      expect(componentInstance!.isVideoLoaded.value).toBe(true)
+      expect(componentInstance!.showPlaceholder.value).toBe(false)
     })
   })
 
