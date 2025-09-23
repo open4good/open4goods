@@ -24,6 +24,17 @@
             Login
           </v-btn>
         </router-link>
+        <v-btn
+          v-else
+          color="secondary"
+          size="large"
+          rounded="pill"
+          class="elevation-2"
+          @click="handleLogout"
+        >
+          <v-icon start icon="mdi-logout" />
+          Logout
+        </v-btn>
       </div>
     </section>
 
@@ -85,8 +96,19 @@
 </template>
 
 <script setup lang="ts">
-const { hasRole, isLoggedIn, username, roles } = useAuth()
+const { hasRole, isLoggedIn, username, roles, logout } = useAuth()
 const { t } = useI18n()
+
+const router = useRouter()
+
+const handleLogout = async () => {
+  try {
+    await logout()
+    await router.push('/')
+  } catch (error) {
+    console.error('Logout failed', error)
+  }
+}
 </script>
 
 <style lang="sass" scoped>
