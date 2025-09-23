@@ -16,7 +16,41 @@
       }
     },
     "footer": {
-      "rightsReserved": "All Rights Reserved"
+      "rightsReserved": "All Rights Reserved",
+      "accessibleTitle": "Footer information",
+      "mission": "nudger.fr is an open approach to assess the environmental impact of consumer goods and partially offset the impact of your online purchases.",
+      "blogLink": "Our blog",
+      "highlightLinks": {
+        "ecoscore": "Environmental assessment",
+        "compensation": "Ecological contribution"
+      },
+      "comparator": {
+        "title": "Common good comparator",
+        "links": {
+          "openData": "Open data",
+          "openSource": "Open source",
+          "privacy": "Privacy policy",
+          "legal": "Legal notice"
+        }
+      },
+      "community": {
+        "title": "You are not alone",
+        "links": {
+          "team": "Our team",
+          "partners": "Our partners"
+        }
+      },
+      "feedback": {
+        "title": "Feedback",
+        "links": {
+          "idea": "Have an idea?",
+          "issue": "Found a bug?",
+          "contact": "Contact us",
+          "linkedin": "Follow us"
+        }
+      },
+      "logoAlt": "Nudger orange logo icon",
+      "copyright": "Copyright ©{year} open4goods. Common good product."
     },
     "hero": {
       "mainTitle": "The Comparator That Thinks About Tomorrow",
