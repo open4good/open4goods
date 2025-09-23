@@ -14,13 +14,15 @@
         </v-list-item>
       </v-list>
       <v-btn
+        v-if="isLoggedIn"
         color="secondary"
         rounded="pill"
         class="font-weight-bold"
-        @click="handleAuthAction"
+        data-testid="hero-logout"
+        @click="handleLogout"
       >
-        <v-icon start :icon="authIcon" />
-        {{ authLabel }}
+        <v-icon start icon="mdi-logout" />
+        Logout
       </v-btn>
     </div>
   </menu>
@@ -38,20 +40,17 @@ const route = useRoute();
 const router = useRouter();
 const { isLoggedIn, logout } = useAuth();
 
-const authLabel = computed(() => (isLoggedIn.value ? 'Logout' : 'Login'));
-const authIcon = computed(() => (isLoggedIn.value ? 'mdi-logout' : 'mdi-login'));
-
-const handleAuthAction = async () => {
-  if (isLoggedIn.value) {
-    try {
-      await logout();
-      await router.push('/');
-    } catch (error) {
-      console.error('Logout failed', error);
-    }
+const handleLogout = async () => {
+  if (!isLoggedIn.value) {
     return;
   }
-  router.push('/auth/login');
+
+  try {
+    await logout();
+    await router.push('/');
+  } catch (error) {
+    console.error('Logout failed', error);
+  }
 };
 
 defineEmits<{
