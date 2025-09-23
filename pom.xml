@@ -381,19 +381,24 @@
 				<version>3.9.0</version>
 			</plugin>
 
-              <plugin>
+                 <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-dependency-plugin</artifactId>
-                  <version>3.6.1</version>
+                  <version>3.8.1</version>
                   <executions>
                     <execution>
                       <id>warmup-offline</id>
                       <phase>validate</phase>
                       <goals>
                         <goal>go-offline</goal>
+                        <goal>resolve-plugins</goal>
                       </goals>
+                      <!-- paramètres utiles (tous optionnels) -->
                       <configuration>
-                        <includePlugins>true</includePlugins>
+                        <!-- couvre compile+runtime+test -->
+                        <includeScope>test</includeScope>
+                        <!-- par défaut true: ne résout pas les plugins du reactor -->
+                        <excludeReactor>true</excludeReactor>
                       </configuration>
                     </execution>
                   </executions>
