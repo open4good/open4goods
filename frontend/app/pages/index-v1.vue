@@ -67,7 +67,7 @@
     <!-- Example content bloc -->
     <section>
         <h2>Demo Xwiki as headless CMS</h2>
-        <TextContent blocId="Main" />
+        <TextContent bloc-id="Main" />
     </section>
 
     <v-alert
