@@ -1,10 +1,11 @@
 import { ContentApi, Configuration } from '..'
 import type { XwikiContentBlocDto } from '..'
+import type { DomainLanguage } from '../../utils/domain-language'
 
 /**
  * Content service for fetching HTML blocs from the backend
  */
-export const useContentService = () => {
+export const useContentService = (domainLanguage: DomainLanguage) => {
   const config = useRuntimeConfig()
   const apiConfig = new Configuration({ basePath: config.apiUrl })
   const api = new ContentApi(apiConfig)
@@ -14,7 +15,7 @@ export const useContentService = () => {
    * @param blocId - XWiki bloc identifier
    */
   const getBloc = async (blocId: string): Promise<XwikiContentBlocDto> => {
-    return await api.contentBloc({ blocId })
+    return await api.contentBloc({ blocId, domainLanguage })
   }
 
   return { getBloc }

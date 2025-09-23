@@ -1,10 +1,11 @@
 import { BlogApi, Configuration } from '..'
 import type { BlogPostDto, PageDto } from '..'
+import type { DomainLanguage } from '../../utils/domain-language'
 
 /**
  * Blog service for handling blog-related API calls
  */
-export const useBlogService = () => {
+export const useBlogService = (domainLanguage: DomainLanguage) => {
   const config = useRuntimeConfig()
   const apiConfig = new Configuration({ basePath: config.apiUrl })
   console.log('[ContentService] baseUrl =', config.apiUrl)
@@ -23,7 +24,7 @@ export const useBlogService = () => {
     } = {}
   ): Promise<PageDto> => {
     try {
-      return await api.posts(params)
+      return await api.posts({ ...params, domainLanguage })
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       // Rethrow original error so callers can access status and message
@@ -38,7 +39,7 @@ export const useBlogService = () => {
    */
   const getArticleBySlug = async (slug: string): Promise<BlogPostDto> => {
     try {
-      return await api.post({ slug })
+      return await api.post({ slug, domainLanguage })
     } catch (error) {
       console.error(`Error fetching blog article ${slug}:`, error)
       // Preserve original error details for upstream handlers

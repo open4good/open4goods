@@ -5,6 +5,9 @@ import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   srcDir: 'app',
+  dir: {
+    public: 'app/public',
+  },
   devtools: {
     enabled: process.env.NODE_ENV !== 'production',
     timeline: {
@@ -92,6 +95,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'node-server',
+    publicAssets: [{ dir: 'app/public' }],
     experimental: {
       wasm: true
     }

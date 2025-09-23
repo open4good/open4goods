@@ -1,5 +1,6 @@
 import { useContentService } from '~~/shared/api-client/services/content.services'
 import type { XwikiContentBlocDto } from '~~/shared/api-client'
+import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 
@@ -11,7 +12,11 @@ export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> =>
 
   // Cache content for 1 hour
   setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
-  const contentService = useContentService()
+  const rawHost =
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  const { domainLanguage } = resolveDomainLanguage(rawHost)
+
+  const contentService = useContentService(domainLanguage)
   try {
     return await contentService.getBloc(blocId)
   } catch (error) {
