@@ -8,8 +8,7 @@ const props = defineProps({
   },
   posterUrl: {
     type: String,
-    default:
-      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgdmlld0JveD0iMCAwIDMyMCAyNDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMjQwIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF8xKSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfMSIgeDE9IjAiIHkxPSIwIiB4Mj0iMzIwIiB5Mj0iMjQwIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM2NjdlZWEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNzY0YmEyIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+Cg==',
+    default: '~/assets/images/video-image-placeholder.png',
   },
 });
 
@@ -198,12 +197,12 @@ $subtitle-max-width: 600px
 .video-placeholder
   @include position-absolute-fullsize
   z-index: $z-index-video
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 50%, #4facfe 100%)
-  background-size: 200% 200%
-  animation: gradientShift $animation-duration-gradient ease infinite
+  background-image: url('~/assets/images/video-image-placeholder.png')
+  background-size: cover
+  background-position: center
+  background-repeat: no-repeat
   opacity: 1
   transition: opacity $transition-duration ease-in-out
-  will-change: background-position
 
 // ACTUAL VIDEO ELEMENT
 .hero-video
