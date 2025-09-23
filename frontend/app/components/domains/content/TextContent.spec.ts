@@ -117,4 +117,15 @@ describe('TextContent', () => {
     const plainTextLength = sandbox.textContent?.trim().length ?? 0
     expect(plainTextLength).toBeGreaterThanOrEqual(customLength)
   })
+
+  test('prefers ipsumLength over defaultLength for lorem ipsum fallback', async () => {
+    htmlContent.value = ''
+    const ipsumLength = 650
+    const wrapper = await mountSuspended(TextContent, {
+      props: { blocId: 'Main.WebHome', defaultLength: 120, ipsumLength },
+    })
+    const sandbox = wrapper.find('.xwiki-sandbox').element
+    const plainTextLength = sandbox.textContent?.trim().length ?? 0
+    expect(plainTextLength).toBeGreaterThanOrEqual(ipsumLength)
+  })
 })
