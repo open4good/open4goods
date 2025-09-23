@@ -1,5 +1,5 @@
 <template>
-  <v-container class="full-height">
+  <v-container class="container-section_bloc-3" fluid>
     <v-row justify="center" align="center" no-gutters>
       <v-col
         v-for="(section, index) in sections"
@@ -45,4 +45,6 @@ withDefaults(
 </script>
 
 <style lang="sass" scoped>
+.container-section_bloc-3
+  min-height: 100vh
 </style>

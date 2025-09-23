@@ -7,7 +7,7 @@ const toggleDrawer = () => {
 </script>
 
 <template>
-  <div>
+  <div class="full-height">
     <Hero-section @toggle-drawer="toggleDrawer" />
 
     <The-items-selector />
