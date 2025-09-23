@@ -46,12 +46,7 @@ public class AuthController {
                     required = true,
                     content = @Content(schema = @Schema(implementation = LoginRequest.class))
             ),
-            parameters = {
-                    @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
-                            required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
+
             responses = {
                     @ApiResponse(responseCode = "200", description = "Authentication success",
                             headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
@@ -61,13 +56,12 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "Authentication failed")
             }
     )
-    public ResponseEntity<AuthTokensDto> login(@RequestBody LoginRequest request,
-                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+    public ResponseEntity<AuthTokensDto> login(@RequestBody LoginRequest request) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-            String access = jwtService.generateAccessToken(auth, domainLanguage);
-            String refresh = jwtService.generateRefreshToken(auth, domainLanguage);
+            String access = jwtService.generateAccessToken(auth);
+            String refresh = jwtService.generateRefreshToken(auth);
 
 
             return ResponseEntity.ok()
@@ -81,12 +75,7 @@ public class AuthController {
     @Operation(
             summary = "Refresh access token",
             description = "Issue a new access token using the refresh token cookie.",
-            parameters = {
-                    @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
-                            required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
+
             responses = {
                     @ApiResponse(responseCode = "200", description = "Token refreshed",
                             headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
@@ -96,13 +85,12 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "Invalid refresh token")
             }
     )
-    public ResponseEntity<AuthTokensDto> refresh(@CookieValue("refresh-token") String refreshToken,
-                                                 @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+    public ResponseEntity<AuthTokensDto> refresh(@CookieValue("refresh-token") String refreshToken                                                ) {
         try {
-            String user = jwtService.validateRefreshToken(refreshToken, domainLanguage);
+            String user = jwtService.validateRefreshToken(refreshToken);
             Authentication auth = new UsernamePasswordAuthenticationToken(user, "N/A");
-            String access = jwtService.generateAccessToken(auth, domainLanguage);
-            String newRefresh = jwtService.generateRefreshToken(auth, domainLanguage);
+            String access = jwtService.generateAccessToken(auth);
+            String newRefresh = jwtService.generateRefreshToken(auth);
 
 
             return ResponseEntity.ok()

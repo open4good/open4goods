@@ -36,7 +36,7 @@ public class JwtService {
     /**
      * Generate an access token for the given authentication.
      */
-    public String generateAccessToken(Authentication auth, DomainLanguage domainLanguage) {
+    public String generateAccessToken(Authentication auth) {
         Instant now = Instant.now();
         Instant exp = now.plus(properties.getAccessTokenExpiry());
         JwsHeader header = JwsHeader.with(() -> "HS256").build();
@@ -53,7 +53,7 @@ public class JwtService {
     /**
      * Generate a refresh token for the given authentication.
      */
-    public String generateRefreshToken(Authentication auth, DomainLanguage domainLanguage) {
+    public String generateRefreshToken(Authentication auth) {
         Instant now = Instant.now();
         Instant exp = now.plus(properties.getRefreshTokenExpiry());
         JwsHeader header = JwsHeader.with(() -> "HS256").build();
@@ -68,7 +68,7 @@ public class JwtService {
     /**
      * Validate a token and return the authentication subject.
      */
-    public String validateRefreshToken(String token, DomainLanguage domainLanguage) {
+    public String validateRefreshToken(String token) {
         return decoder.decode(token).getSubject();
     }
 }
