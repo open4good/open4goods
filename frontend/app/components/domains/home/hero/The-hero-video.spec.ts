@@ -3,6 +3,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { VueWrapper } from '@vue/test-utils'
 import TheHeroVideo from './The-hero-video.vue'
 
+// Mock vue-i18n
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'siteIdentity.hero.mainTitle': 'Test Main Title',
+        'siteIdentity.hero.mainSubtitle': 'Test Main Subtitle'
+      }
+      return translations[key] || key
+    }
+  })
+}))
+
 // Mock IntersectionObserver
 const mockIntersectionObserver = vi.fn()
 mockIntersectionObserver.mockReturnValue({

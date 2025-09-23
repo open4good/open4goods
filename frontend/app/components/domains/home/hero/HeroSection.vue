@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 const videoDemo1 = '/videos/video-concept1.mp4'
+const { t } = useI18n()
 
 defineProps<{
   title?: string
@@ -19,14 +22,14 @@ defineEmits<{
       <v-col cols="12">
         <The-hero-video :video-src="videoDemo1">
           <template #title>
-            {{ title || 'Titre par défaut' }}
+            {{ title || t('siteIdentity.hero.defaultTitle') }}
           </template>
           <template #subtitle>
-            {{ subtitle || 'Démo vidéo hero pour montrer une intégration propre dans une application Vue 3.' }}
+            {{ subtitle || t('siteIdentity.hero.defaultSubtitle') }}
           </template>
           <template #cta>
             <a :href="ctaUrl || '#'">
-              {{ ctaText || 'Appel à l\'action' }}
+              {{ ctaText || t('siteIdentity.hero.defaultCtaText') }}
             </a>
           </template>
         </The-hero-video>

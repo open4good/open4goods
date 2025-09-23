@@ -5,6 +5,26 @@
     "en": "English"
   },
   "siteIdentity": {
+    "menu": {
+      "title": "Menu",
+      "closeLabel": "Close menu",
+      "items": {
+        "impactScore": "Impact Score",
+        "products": "Products",
+        "blog": "Blog",
+        "contact": "Contact"
+      }
+    },
+    "footer": {
+      "rightsReserved": "All Rights Reserved"
+    },
+    "hero": {
+      "mainTitle": "The Comparator That Thinks About Tomorrow",
+      "mainSubtitle": "Your Free and Independent Shopping Assistant",
+      "defaultTitle": "Default Title",
+      "defaultSubtitle": "Video demo hero to show a clean integration in a Vue 3 application.",
+      "defaultCtaText": "Call to Action"
+    },
     "siteName": "Nudger"
   }
 }
