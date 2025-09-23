@@ -68,7 +68,7 @@ export interface ProductDto {
      */
     base?: ProductBaseDto;
     /**
-     * Localised textual information
+     * Localised textual information resolved using the domainLanguage query parameter when available.
      * @type {ProductNamesDto}
      * @memberof ProductDto
      */
@@ -80,13 +80,13 @@ export interface ProductDto {
      */
     resources?: ProductResourcesDto;
     /**
-     * AI generated texts
+     * AI generated texts localised according to the requested domainLanguage when implemented.
      * @type {ProductAiTextsDto}
      * @memberof ProductDto
      */
     aiTexts?: ProductAiTextsDto;
     /**
-     * AI-generated review
+     * AI-generated review matching the requested domainLanguage when localisation is enabled.
      * @type {ProductAiReviewDto}
      * @memberof ProductDto
      */

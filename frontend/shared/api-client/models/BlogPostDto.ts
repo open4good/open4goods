@@ -26,31 +26,31 @@ export interface BlogPostDto {
      */
     url?: string;
     /**
-     * Post title
+     * Post title that will align with the requested domainLanguage when localisation is enabled.
      * @type {string}
      * @memberof BlogPostDto
      */
     title?: string;
     /**
-     * Author full name
+     * Author full name, unaffected by domainLanguage
      * @type {string}
      * @memberof BlogPostDto
      */
     author?: string;
     /**
-     * Post summary
+     * Post summary prepared for domainLanguage-driven localisation.
      * @type {string}
      * @memberof BlogPostDto
      */
     summary?: string;
     /**
-     * HTML body
+     * HTML body that will match the requested domainLanguage when localisation is in place.
      * @type {string}
      * @memberof BlogPostDto
      */
     body?: string;
     /**
-     * Post categories
+     * Post categories (labels expected to follow the requested domainLanguage once implemented)
      * @type {Array<string>}
      * @memberof BlogPostDto
      */

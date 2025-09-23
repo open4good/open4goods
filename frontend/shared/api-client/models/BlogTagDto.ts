@@ -20,7 +20,7 @@ import { mapValues } from '../runtime';
  */
 export interface BlogTagDto {
     /**
-     * Tag name
+     * Tag name that will be localised using the requested domainLanguage when implemented.
      * @type {string}
      * @memberof BlogTagDto
      */

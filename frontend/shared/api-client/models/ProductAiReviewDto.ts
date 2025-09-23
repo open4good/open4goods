@@ -28,31 +28,31 @@ import {
  */
 export interface ProductAiReviewDto {
     /**
-     * 
+     * AI-generated review that will be aligned with the requested domainLanguage once localisation is active.
      * @type {AiReview}
      * @memberof ProductAiReviewDto
      */
     review?: AiReview;
     /**
-     * 
+     * Source weighting for the review content
      * @type {{ [key: string]: number; }}
      * @memberof ProductAiReviewDto
      */
     sources?: { [key: string]: number; };
     /**
-     * 
+     * Whether enough data was available to generate the review
      * @type {boolean}
      * @memberof ProductAiReviewDto
      */
     enoughData?: boolean;
     /**
-     * 
+     * Total tokens consumed by the AI generation
      * @type {number}
      * @memberof ProductAiReviewDto
      */
     totalTokens?: number;
     /**
-     * 
+     * Creation timestamp ms
      * @type {number}
      * @memberof ProductAiReviewDto
      */

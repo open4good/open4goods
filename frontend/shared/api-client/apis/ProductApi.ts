@@ -31,17 +31,31 @@ import {
     ProductDtoToJSON,
 } from '../models/index';
 
+export interface AggregatableFieldsRequest {
+    domainLanguage: AggregatableFieldsDomainLanguageEnum;
+}
+
+export interface ComponentsRequest {
+    domainLanguage: ComponentsDomainLanguageEnum;
+}
+
 export interface ProductRequest {
     gtin: number;
+    domainLanguage: ProductDomainLanguageEnum;
     include?: Array<ProductIncludeEnum>;
 }
 
 export interface ProductsRequest {
+    domainLanguage: ProductsDomainLanguageEnum;
     include?: Array<ProductsIncludeEnum>;
     pageNumber?: number;
     pageSize?: number;
     sort?: Array<ProductsSortEnum>;
     aggregation?: AggregationRequestDto;
+}
+
+export interface SortableFieldsRequest {
+    domainLanguage: SortableFieldsDomainLanguageEnum;
 }
 
 /**
@@ -53,11 +67,30 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of fields available for aggregation.
      * Get aggregatable fields
      */
-    async aggregatableFieldsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async aggregatableFieldsRaw(requestParameters: AggregatableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling aggregatableFields().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/products/fields/aggregatable`;
 
@@ -75,8 +108,8 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of fields available for aggregation.
      * Get aggregatable fields
      */
-    async aggregatableFields(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
-        const response = await this.aggregatableFieldsRaw(initOverrides);
+    async aggregatableFields(requestParameters: AggregatableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.aggregatableFieldsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -84,11 +117,30 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of components that can be included in product responses.
      * Get available components
      */
-    async componentsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async componentsRaw(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling components().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/products/fields/components`;
 
@@ -106,8 +158,8 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of components that can be included in product responses.
      * Get available components
      */
-    async components(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
-        const response = await this.componentsRaw(initOverrides);
+    async components(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.componentsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -123,14 +175,33 @@ export class ProductApi extends runtime.BaseAPI {
             );
         }
 
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling product().'
+            );
+        }
+
         const queryParameters: any = {};
 
         if (requestParameters['include'] != null) {
             queryParameters['include'] = requestParameters['include'];
         }
 
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/products/{gtin}`;
         urlPath = urlPath.replace(`{${"gtin"}}`, encodeURIComponent(String(requestParameters['gtin'])));
@@ -159,6 +230,13 @@ export class ProductApi extends runtime.BaseAPI {
      * List products
      */
     async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDto>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling products().'
+            );
+        }
+
         const queryParameters: any = {};
 
         if (requestParameters['include'] != null) {
@@ -181,8 +259,20 @@ export class ProductApi extends runtime.BaseAPI {
             queryParameters['aggregation'] = requestParameters['aggregation'];
         }
 
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/products`;
 
@@ -200,7 +290,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return paginated products.
      * List products
      */
-    async products(requestParameters: ProductsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
+    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
         const response = await this.productsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -209,11 +299,30 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of fields accepted by the sort parameter.
      * Get sortable fields
      */
-    async sortableFieldsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async sortableFieldsRaw(requestParameters: SortableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling sortableFields().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/products/fields/sortable`;
 
@@ -231,13 +340,37 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of fields accepted by the sort parameter.
      * Get sortable fields
      */
-    async sortableFields(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
-        const response = await this.sortableFieldsRaw(initOverrides);
+    async sortableFields(requestParameters: SortableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.sortableFieldsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
 }
 
+/**
+ * @export
+ */
+export const AggregatableFieldsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type AggregatableFieldsDomainLanguageEnum = typeof AggregatableFieldsDomainLanguageEnum[keyof typeof AggregatableFieldsDomainLanguageEnum];
+/**
+ * @export
+ */
+export const ComponentsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type ComponentsDomainLanguageEnum = typeof ComponentsDomainLanguageEnum[keyof typeof ComponentsDomainLanguageEnum];
+/**
+ * @export
+ */
+export const ProductDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type ProductDomainLanguageEnum = typeof ProductDomainLanguageEnum[keyof typeof ProductDomainLanguageEnum];
 /**
  * @export
  */
@@ -249,6 +382,14 @@ export const ProductIncludeEnum = {
     Offers: 'offers'
 } as const;
 export type ProductIncludeEnum = typeof ProductIncludeEnum[keyof typeof ProductIncludeEnum];
+/**
+ * @export
+ */
+export const ProductsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type ProductsDomainLanguageEnum = typeof ProductsDomainLanguageEnum[keyof typeof ProductsDomainLanguageEnum];
 /**
  * @export
  */
@@ -268,3 +409,11 @@ export const ProductsSortEnum = {
     OffersCount: 'offersCount'
 } as const;
 export type ProductsSortEnum = typeof ProductsSortEnum[keyof typeof ProductsSortEnum];
+/**
+ * @export
+ */
+export const SortableFieldsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type SortableFieldsDomainLanguageEnum = typeof SortableFieldsDomainLanguageEnum[keyof typeof SortableFieldsDomainLanguageEnum];

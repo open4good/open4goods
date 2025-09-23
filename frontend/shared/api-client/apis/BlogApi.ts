@@ -30,12 +30,22 @@ import {
 
 export interface PostRequest {
     slug: string;
+    domainLanguage: PostDomainLanguageEnum;
 }
 
 export interface PostsRequest {
+    domainLanguage: PostsDomainLanguageEnum;
     tag?: string;
     pageNumber?: number;
     pageSize?: number;
+}
+
+export interface RssRequest {
+    domainLanguage: RssDomainLanguageEnum;
+}
+
+export interface TagsRequest {
+    domainLanguage: TagsDomainLanguageEnum;
 }
 
 /**
@@ -55,10 +65,29 @@ export class BlogApi extends runtime.BaseAPI {
             );
         }
 
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling post().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/blog/posts/{slug}`;
         urlPath = urlPath.replace(`{${"slug"}}`, encodeURIComponent(String(requestParameters['slug'])));
@@ -87,6 +116,13 @@ export class BlogApi extends runtime.BaseAPI {
      * List blog posts
      */
     async postsRaw(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDto>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling posts().'
+            );
+        }
+
         const queryParameters: any = {};
 
         if (requestParameters['tag'] != null) {
@@ -101,8 +137,20 @@ export class BlogApi extends runtime.BaseAPI {
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/blog/posts`;
 
@@ -120,7 +168,7 @@ export class BlogApi extends runtime.BaseAPI {
      * Return paginated blog posts optionally filtered by tag.
      * List blog posts
      */
-    async posts(requestParameters: PostsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
+    async posts(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
         const response = await this.postsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -129,11 +177,30 @@ export class BlogApi extends runtime.BaseAPI {
      * Return an RSS feed for all blog posts.
      * Blog RSS feed
      */
-    async rssRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async rssRaw(requestParameters: RssRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling rss().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/blog/rss`;
 
@@ -151,19 +218,38 @@ export class BlogApi extends runtime.BaseAPI {
      * Return an RSS feed for all blog posts.
      * Blog RSS feed
      */
-    async rss(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.rssRaw(initOverrides);
+    async rss(requestParameters: RssRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.rssRaw(requestParameters, initOverrides);
     }
 
     /**
      * Return the list of available blog tags with post counts.
      * List blog tags
      */
-    async tagsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<BlogTagDto>>> {
+    async tagsRaw(requestParameters: TagsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<BlogTagDto>>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling tags().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/blog/tags`;
 
@@ -181,9 +267,42 @@ export class BlogApi extends runtime.BaseAPI {
      * Return the list of available blog tags with post counts.
      * List blog tags
      */
-    async tags(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<BlogTagDto>> {
-        const response = await this.tagsRaw(initOverrides);
+    async tags(requestParameters: TagsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<BlogTagDto>> {
+        const response = await this.tagsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
 }
+
+/**
+ * @export
+ */
+export const PostDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type PostDomainLanguageEnum = typeof PostDomainLanguageEnum[keyof typeof PostDomainLanguageEnum];
+/**
+ * @export
+ */
+export const PostsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type PostsDomainLanguageEnum = typeof PostsDomainLanguageEnum[keyof typeof PostsDomainLanguageEnum];
+/**
+ * @export
+ */
+export const RssDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type RssDomainLanguageEnum = typeof RssDomainLanguageEnum[keyof typeof RssDomainLanguageEnum];
+/**
+ * @export
+ */
+export const TagsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type TagsDomainLanguageEnum = typeof TagsDomainLanguageEnum[keyof typeof TagsDomainLanguageEnum];

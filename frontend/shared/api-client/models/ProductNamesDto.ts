@@ -20,37 +20,37 @@ import { mapValues } from '../runtime';
  */
 export interface ProductNamesDto {
     /**
-     * H1 title
+     * H1 title expected to align with the requested domainLanguage when localisation is available.
      * @type {string}
      * @memberof ProductNamesDto
      */
     h1Title?: string;
     /**
-     * Meta description
+     * Meta description aligned to the requested domainLanguage once localisation is wired.
      * @type {string}
      * @memberof ProductNamesDto
      */
     metaDescription?: string;
     /**
-     * OpenGraph title
+     * OpenGraph title prepared for domainLanguage-driven localisation.
      * @type {string}
      * @memberof ProductNamesDto
      */
     ogTitle?: string;
     /**
-     * OpenGraph description
+     * OpenGraph description prepared for domainLanguage-driven localisation.
      * @type {string}
      * @memberof ProductNamesDto
      */
     ogDescription?: string;
     /**
-     * Twitter title
+     * Twitter title mirroring the requested domainLanguage in the future.
      * @type {string}
      * @memberof ProductNamesDto
      */
     twitterTitle?: string;
     /**
-     * Twitter description
+     * Twitter description mirroring the requested domainLanguage in the future.
      * @type {string}
      * @memberof ProductNamesDto
      */

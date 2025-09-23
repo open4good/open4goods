@@ -1,7 +1,8 @@
-.openapi-generator-ignore
+apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/ContentApi.ts
 apis/ProductApi.ts
+apis/StatsApi.ts
 apis/index.ts
 index.ts
 models/Agg.ts
@@ -12,14 +13,17 @@ models/AiSource.ts
 models/Attachment.ts
 models/Attachments.ts
 models/Attribute.ts
+models/AuthTokensDto.ts
 models/BlogPostDto.ts
 models/BlogTagDto.ts
+models/CategoriesStatsDto.ts
 models/Class.ts
 models/ExternalIds.ts
 models/FullPage.ts
 models/Hierarchy.ts
 models/HierarchyItem.ts
 models/Link.ts
+models/LoginRequest.ts
 models/ObjectSummary.ts
 models/Objects.ts
 models/Page.ts
