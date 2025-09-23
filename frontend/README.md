@@ -178,7 +178,6 @@ project/
 - `.husky/` – Git hooks executed on commit
 
 ## Vue 3 & Nuxt 3 Conventions
-
 - Use `<script setup lang="ts">` in all components
 - Write components in TypeScript
 - Use `useFetch`, `useAsyncData` for SSR-friendly data fetching
@@ -188,7 +187,35 @@ project/
 - Use `definePageMeta({ layout, middleware })` in pages
 - Prefer server-side data fetching for SEO-critical content
 
-## Vuetify
+# NUXT MCP
+#### Source : [`https://github.com/antfu/nuxt-mcp?tab=readme-ov-file`](Antfu: nuxt-mcp)
+### Benefits: 
+#### Project Understanding:
+- Nuxt folder structure
+- Configuration (nuxt.config.ts)
+- Available auto-imports
+- Existing components and pages
+
+#### Available Actions:
+- List components/pages/layouts
+- Analyze Vite/Nuxt configuration
+- Generate contextual code
+- Scaffold new elements
+
+#### Practical Benefits:
+- Claude/Codex knows your exact stack
+- Code suggestions tailored to your project
+- Consistent component generation
+- Respects your app conventions
+## install the mcp server of nuxt for Claude-code or Codex usage
+- pnpm add nuxt-mcp
+- pnpm approve-builds
+- Select all packages (tab & space)
+- yes
+- For Claude-code cli : install the server : claude mcp add --transport sse nuxt-local http://localhost:3000/__mcp/sse
+- Important : start project first : pnpm dev & use the same port for mcp-server
+
+## Vuetify & vuetify MCP
 - (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
 - (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
  ### Vuetify MCP & Claude-code

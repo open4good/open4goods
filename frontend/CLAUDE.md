@@ -107,3 +107,7 @@ Key variables in `.env`:
 
 ### Vuetify
 - Responsive block control must be done at the level of the parent components: pages or layouts: via v-row and v-col
+
+# Mcp servers 
+- Check that the Nuxt mcp server is running and if not, launch it on port 3000.
+- Always use the nuxt mcp server to better understand the structure and best practices of Nuxt js

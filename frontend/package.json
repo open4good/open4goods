@@ -27,9 +27,9 @@
     "@nuxt/image": "1.11.0",
     "@pinia/nuxt": "^0.11.2",
     "@unhead/vue": "^2.0.14",
+    "@vuetify/mcp": "^0.1.1",
     "@vueuse/core": "^13.9.0",
     "@vueuse/nuxt": "^13.9.0",
-    "@vuetify/mcp": "^0.1.1",
     "cookie-es": "^2.0.0",
     "dompurify": "^3.2.6",
     "i": "^0.3.7",
@@ -37,6 +37,7 @@
     "npm": "^11.6.0",
     "nuxt": "^4.0.0",
     "nuxt-device": "^2.1.0",
+    "nuxt-mcp": "^0.2.4",
     "pinia": "^3.0.3",
     "unhead": "^2.0.14",
     "vue": "3.5.18",
@@ -91,7 +92,15 @@
   "pnpm": {
     "overrides": {
       "vue": "3.5.18"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@openapitools/openapi-generator-cli",
+      "@parcel/watcher",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "resolutions": {
     "vue": "3.5.18"

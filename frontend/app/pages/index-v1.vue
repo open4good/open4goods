@@ -3,9 +3,7 @@
     <!-- Hero section with call to action -->
     <section class="hero d-flex flex-column align-center justify-center">
       <v-img src="/nudger-icon-512x512.png" width="120" class="mb-4" alt="Nudger logo" />
-      <h1 class="text-h3 text-center font-weight-bold mb-2">
-        {{ t('welcome') }} {{ username || t('siteIdentity.siteName') }}
-      </h1>
+      <h1 class="text-h3 text-center font-weight-bold mb-2">Welcome {{ username || 'Nudger' }}</h1>
       <p class="text-subtitle-1 mb-4 text-center">
         Compare appliances and make greener choices thanks to our Impact Score
       </p>
@@ -83,8 +81,7 @@
 </template>
 
 <script setup lang="ts">
-const { hasRole, isLoggedIn, username, roles } = useAuth();
-const { t } = useI18n();
+const { hasRole, isLoggedIn, username, roles } = useAuth()
 </script>
 
 <style lang="sass" scoped>
