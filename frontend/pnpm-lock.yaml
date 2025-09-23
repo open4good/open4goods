@@ -138,6 +138,9 @@ importers:
       '@vue/test-utils':
         specifier: ^2.4.6
         version: 2.4.6
+      cssnano:
+        specifier: ^7.1.1
+        version: 7.1.1(postcss@8.5.6)
       dayjs-nuxt:
         specifier: ^2.1.11
         version: 2.1.11(magicast@0.3.5)
