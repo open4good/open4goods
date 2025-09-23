@@ -14,11 +14,6 @@ const toggleDrawer = () => {
 
     <Bloc3Hz />
 
-    <TheMainFooter>
-      <template #footer>
-        <the-main-footer-content />
-      </template>
-    </TheMainFooter>
   </div>
 </template>
 

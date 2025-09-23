@@ -16,6 +16,12 @@
     <v-main>
       <slot />
     </v-main>
+
+    <TheMainFooter>
+      <template #footer>
+        <TheMainFooterContent />
+      </template>
+    </TheMainFooter>
   </v-app>
 </template>
 
