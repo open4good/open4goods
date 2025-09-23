@@ -15,7 +15,6 @@ const props = defineProps({
 
 const isVideoLoaded = ref(false);
 const showPlaceholder = ref(true);
-const showLoading = ref(true);
 const heroVideoRef = ref<HTMLVideoElement | null>(null);
 const intersectionObserver = ref<IntersectionObserver | null>(null);
 const isLoadingError = ref(false);
@@ -27,65 +26,42 @@ const videoClasses = computed(() => ({
 
 const loadingClasses = computed(() => ({
   'loading-indicator': true,
-  hidden: !showLoading.value,
+  hidden: isVideoLoaded.value,
 }));
 
 // Handles video loading and transitions
 const onVideoLoaded = () => {
-  console.log('✅ Video loaded and ready to play.');
   isVideoLoaded.value = true;
-  showLoading.value = false;
-  // Use a small delay for a smooth transition
-  setTimeout(() => {
-    showPlaceholder.value = false;
-  }, 300);
+  showPlaceholder.value = false;
 };
 
 // Handles loading errors
-const onVideoError = (e: Event) => {
-  console.error('❌ Video loading error:', e);
+const onVideoError = () => {
   isLoadingError.value = true;
-  showLoading.value = false;
-  showPlaceholder.value = true; // Ensures placeholder remains visible
-  // Display error message or reload button can be added here
+  showPlaceholder.value = true;
 };
 
 // Attempts to start autoplay
 const attemptAutoplay = () => {
   if (!heroVideoRef.value) return;
-  const playPromise = heroVideoRef.value.play();
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => {
-        console.log('🎬 Autoplay successful.');
-      })
-      .catch((error: Error) => {
-        console.log('🚫 Autoplay blocked by browser:', error);
-        // If autoplay is blocked, we can leave the placeholder
-        // or add a "play" button
-      });
-  }
+  heroVideoRef.value.play().catch(() => {});
 };
 
 onMounted(() => {
   const videoElement = heroVideoRef.value;
   if (!videoElement) {
-    console.warn('🎥 Video element not found. Using CSS fallback.');
     showPlaceholder.value = true;
-    showLoading.value = false;
     return;
   }
 
   // Check if video is already loaded (cache case)
   if (videoElement.readyState >= 3) {
-    console.log('🎥 Video already cached, immediate loading.');
     onVideoLoaded();
     attemptAutoplay();
   }
 
-  // Events to handle loading
-  videoElement.addEventListener('loadeddata', onVideoLoaded);
-  videoElement.addEventListener('canplaythrough', onVideoLoaded);
+  // Events to handle loading - using loadstart for faster response
+  videoElement.addEventListener('loadstart', onVideoLoaded);
   videoElement.addEventListener('canplay', attemptAutoplay);
   videoElement.addEventListener('error', onVideoError);
 
@@ -115,8 +91,7 @@ onBeforeUnmount(() => {
   // Cleanup events and observer
   const videoElement = heroVideoRef.value;
   if (videoElement) {
-    videoElement.removeEventListener('loadeddata', onVideoLoaded);
-    videoElement.removeEventListener('canplaythrough', onVideoLoaded);
+    videoElement.removeEventListener('loadstart', onVideoLoaded);
     videoElement.removeEventListener('canplay', attemptAutoplay);
     videoElement.removeEventListener('error', onVideoError);
   }
@@ -143,7 +118,7 @@ onBeforeUnmount(() => {
       muted
       loop
       autoplay
-      preload="metadata"
+      preload="none"
       :poster="props.posterUrl"
     >
       <source :src="props.videoSrc" type="video/mp4" />
@@ -157,14 +132,13 @@ onBeforeUnmount(() => {
 <style lang="sass" scoped>
 // SASS Variables
 $hero-min-height: 600px
-$z-index-placeholder: 1
-$z-index-video: 2
-$z-index-overlay: 3
-$z-index-content: 4
-$z-index-loading: 5
+$z-index-video: 1
+$z-index-overlay: 2
+$z-index-content: 3
+$z-index-loading: 4
 
-$transition-duration: 0.8s
-$animation-duration-gradient: 8s
+$transition-duration: 0.3s
+$animation-duration-gradient: 4s
 $animation-duration-fadeup: 1.2s
 
 $max-content-width: 1200px
@@ -223,12 +197,13 @@ $subtitle-max-width: 600px
 // VIDEO PLACEHOLDER
 .video-placeholder
   @include position-absolute-fullsize
-  z-index: $z-index-placeholder
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)
-  background-size: 400% 400%
+  z-index: $z-index-video
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 50%, #4facfe 100%)
+  background-size: 200% 200%
   animation: gradientShift $animation-duration-gradient ease infinite
   opacity: 1
   transition: opacity $transition-duration ease-in-out
+  will-change: background-position
 
 // ACTUAL VIDEO ELEMENT
 .hero-video
