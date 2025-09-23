@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import type { CookieSerializeOptions } from 'cookie-es'
 import { FetchError } from 'ofetch'
+import { resolveDomainLanguageFromEvent } from '~~/server/utils/domain-language'
 
 interface LoginResponse { accessToken: string; refreshToken: string }
 interface LoginBody { username: string; password: string }
@@ -12,8 +13,11 @@ export default defineEventHandler(async (event: H3Event) => {
   }
 
   const config = useRuntimeConfig()
+  const { domainLanguage } = resolveDomainLanguageFromEvent(event)
+  const loginUrl = new URL('/auth/login', config.apiUrl)
+  loginUrl.searchParams.set('domainLanguage', domainLanguage)
   try {
-    const tokens = await $fetch<LoginResponse>(`${config.apiUrl}/auth/login`, {
+    const tokens = await $fetch<LoginResponse>(loginUrl.toString(), {
       method: 'POST',
       body,
     })

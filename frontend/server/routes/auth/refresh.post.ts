@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import type { CookieSerializeOptions } from 'cookie-es'
 import { FetchError } from 'ofetch'
+import { resolveDomainLanguageFromEvent } from '~~/server/utils/domain-language'
 
 /**
  * Proxy endpoint to renew access and refresh tokens using the backend API.
@@ -9,13 +10,16 @@ interface RefreshResponse { accessToken: string; refreshToken: string }
 
 export default defineEventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig()
+  const { domainLanguage } = resolveDomainLanguageFromEvent(event)
   const refreshToken = getCookie(event, config.refreshCookieName)
   if (!refreshToken) {
     throw createError({ statusCode: 401, statusMessage: 'Missing refresh token' })
   }
 
   try {
-    const tokens = await $fetch<RefreshResponse>(`${config.apiUrl}/auth/refresh`, {
+    const refreshUrl = new URL('/auth/refresh', config.apiUrl)
+    refreshUrl.searchParams.set('domainLanguage', domainLanguage)
+    const tokens = await $fetch<RefreshResponse>(refreshUrl.toString(), {
       method: 'POST',
       headers: { cookie: `${config.refreshCookieName}=${refreshToken}` },
     })
