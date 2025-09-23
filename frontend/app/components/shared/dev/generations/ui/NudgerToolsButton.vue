@@ -7,7 +7,8 @@ interface NudgerToolsButtonProps {
 }
 
 const props = withDefaults(defineProps<NudgerToolsButtonProps>(), {
-  label: 'Nudger tools'
+  label: 'Nudger tools',
+  onClick: undefined
 })
 
 const emit = defineEmits<{

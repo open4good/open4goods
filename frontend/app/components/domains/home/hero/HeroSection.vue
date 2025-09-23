@@ -14,17 +14,7 @@ defineEmits<{
 </script>
 
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="3">
-        <the-main-logo />
-      </v-col>
-      <v-col cols="9">
-        <the-hero-menu @toggle-drawer="$emit('toggle-drawer')" />
-      </v-col>
-    </v-row>
-  </v-container>
-  <v-container fluid class="fill-height align-start pt-0">
+  <v-container fluid class="align-start container-video">
     <v-row class="fill-height">
       <v-col cols="12">
         <The-hero-video :video-src="videoDemo1">
@@ -43,10 +33,9 @@ defineEmits<{
       </v-col>
     </v-row>
   </v-container>
-
-  <The-items-selector />
-
-  <Bloc3Hz />
 </template>
 
-<style scoped lang="sass"></style>
+<style scoped lang="sass">
+.container-video
+  margin-top: 14vh
+</style>

@@ -1,6 +1,6 @@
 <template>
   <v-container class="py-10" style="max-width:400px">
-    <v-form @submit.prevent="onSubmit" v-model="valid">
+    <v-form v-model="valid" @submit.prevent="onSubmit">
       <v-text-field
         v-model="username"
         label="Username"

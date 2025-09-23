@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { mount, type VueWrapper } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import TheHeroVideo from './The-hero-video.vue'
 
@@ -29,7 +29,7 @@ Object.defineProperty(HTMLVideoElement.prototype, 'pause', {
 })
 
 describe('TheHeroVideo', () => {
-  let wrapper: any
+  let wrapper: VueWrapper<InstanceType<typeof TheHeroVideo>>
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -177,7 +177,7 @@ describe('TheHeroVideo', () => {
 
       // Check that video is marked as loaded
       expect(wrapper.vm.isVideoLoaded).toBe(true)
-      expect(wrapper.vm.showLoading).toBe(false)
+      expect(wrapper.vm.showPlaceholder).toBe(false)
     })
   })
 

@@ -26,7 +26,7 @@ onMounted(() => {
   <v-container class="py-10">
     <v-row justify="center">
       <v-col cols="12" md="10" lg="8">
-        <v-btn variant="text" @click="router.back()" prepend-icon="mdi-arrow-left">
+        <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">
           Retour
         </v-btn>
 
