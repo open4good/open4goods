@@ -239,3 +239,7 @@ To respect components loading and initialisation, be aware :
 
 # Model error journal
 ## Here are listed all recurring errors of the model.
+
+# Mcp servers 
+- Check that the Nuxt mcp server is running and if not, launch it on port 3000.
+- Always use the nuxt mcp server to better understand the structure and best practices of Nuxt js
