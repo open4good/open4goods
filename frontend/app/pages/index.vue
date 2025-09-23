@@ -1,19 +1,25 @@
 <script setup lang="ts">
-// Accès au state drawer du layout parent
-const drawerStore = useState('mobileDrawer', () => false)
+const drawerStore = useState("mobileDrawer", () => false);
 
 const toggleDrawer = () => {
-  drawerStore.value = !drawerStore.value
-}
+  drawerStore.value = !drawerStore.value;
+};
 </script>
 
 <template>
+  <div>
     <Hero-section @toggle-drawer="toggleDrawer" />
-          <TheMainFooter>
-        <template #footer>
-          <the-main-footer-content />
-        </template>
-      </TheMainFooter>
+
+    <The-items-selector />
+
+    <Bloc3Hz />
+
+    <TheMainFooter>
+      <template #footer>
+        <the-main-footer-content />
+      </template>
+    </TheMainFooter>
+  </div>
 </template>
 
 <style lang="sass" scoped></style>

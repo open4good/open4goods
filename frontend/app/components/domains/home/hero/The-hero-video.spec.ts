@@ -177,7 +177,7 @@ describe('TheHeroVideo', () => {
 
       // Check that video is marked as loaded
       expect(wrapper.vm.isVideoLoaded).toBe(true)
-      expect(wrapper.vm.showLoading).toBe(false)
+      expect(wrapper.vm.showPlaceholder).toBe(false)
     })
   })
 

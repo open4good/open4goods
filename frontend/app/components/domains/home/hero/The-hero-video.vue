@@ -8,7 +8,7 @@ const props = defineProps({
   },
   posterUrl: {
     type: String,
-    default: '~/assets/images/video-image-placeholder.png',
+    default: '',
   },
 });
 
@@ -97,6 +97,15 @@ onBeforeUnmount(() => {
   if (intersectionObserver.value) {
     intersectionObserver.value.disconnect();
   }
+});
+
+// Expose properties and methods for testing
+defineExpose({
+  isVideoLoaded,
+  showPlaceholder,
+  isLoadingError,
+  onVideoLoaded,
+  attemptAutoplay,
 });
 </script>
 
@@ -197,7 +206,7 @@ $subtitle-max-width: 600px
 .video-placeholder
   @include position-absolute-fullsize
   z-index: $z-index-video
-  background-image: url('~/assets/images/video-image-placeholder.png')
+  background-image: url('@/assets/images/video-image-placeholder.png')
   background-size: cover
   background-position: center
   background-repeat: no-repeat

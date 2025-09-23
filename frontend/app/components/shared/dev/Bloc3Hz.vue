@@ -1,5 +1,5 @@
 <template>
-  <v-container class="">
+  <v-container class="full-height">
     <v-row justify="center" align="center" no-gutters>
       <v-col
         v-for="(section, index) in sections"

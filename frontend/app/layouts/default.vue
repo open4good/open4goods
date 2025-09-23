@@ -1,5 +1,8 @@
 <template>
   <v-app>
+    <The-main-menu-container @toggle-drawer="toggleDrawer" />
+
+    <!-- Mobile menu -->
     <v-navigation-drawer
       v-model="drawer"
       location="start"
@@ -10,7 +13,7 @@
       <the-mobile-menu @close="drawer = false" />
     </v-navigation-drawer>
 
-    <v-main class="fill-height">
+    <v-main>
       <slot />
     </v-main>
   </v-app>
@@ -18,5 +21,10 @@
 
 <script setup lang="ts">
 const drawer = useState('mobileDrawer', () => false)
+const drawerStore = useState("mobileDrawer", () => false);
+
+const toggleDrawer = () => {
+  drawerStore.value = !drawerStore.value;
+};
 </script>
 
