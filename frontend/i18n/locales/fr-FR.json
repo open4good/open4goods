@@ -5,6 +5,26 @@
     "en": "Anglais"
   },
   "siteIdentity": {
+    "menu": {
+      "title": "Menu",
+      "closeLabel": "Fermer le menu",
+      "items": {
+        "impactScore": "Impact-score",
+        "products": "Les produits",
+        "blog": "Blog",
+        "contact": "Contact"
+      }
+    },
+    "footer": {
+      "rightsReserved": "Tous droits réservés"
+    },
+    "hero": {
+      "mainTitle": "Le comparateur qui pense à demain",
+      "mainSubtitle": "Ton assistant achat, Libre et Indépendant",
+      "defaultTitle": "Titre par défaut",
+      "defaultSubtitle": "Démo vidéo hero pour montrer une intégration propre dans une application Vue 3.",
+      "defaultCtaText": "Appel à l'action"
+    },
     "siteName": "Nudger"
   }
 }

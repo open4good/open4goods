@@ -5,14 +5,14 @@
         class="px-6 py-4 border-bottom d-flex justify-space-between align-center"
       >
         <v-list-item-title class="text-h6 font-weight-bold">
-          Menu
+          {{ t('siteIdentity.menu.title') }}
         </v-list-item-title>
         <template #append>
           <v-btn
             icon
             variant="text"
             size="small"
-            aria-label="Fermer le menu"
+            :aria-label="t('siteIdentity.menu.closeLabel')"
             @click="$emit('close')"
           >
             <v-icon>mdi-close</v-icon>
@@ -39,6 +39,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 interface MenuItem {
   title: string
   to: string
@@ -51,22 +55,22 @@ defineEmits<{
 
 const menuItems: MenuItem[] = [
   {
-    title: 'Impact-score',
+    title: t('siteIdentity.menu.items.impactScore'),
     to: '/impact-score',
     icon: 'mdi-chart-line'
   },
   {
-    title: 'Les produits',
+    title: t('siteIdentity.menu.items.products'),
     to: '/produits',
     icon: 'mdi-package-variant'
   },
   {
-    title: 'Blog',
+    title: t('siteIdentity.menu.items.blog'),
     to: '/blog',
     icon: 'mdi-post'
   },
   {
-    title: 'Contact',
+    title: t('siteIdentity.menu.items.contact'),
     to: '/contact',
     icon: 'mdi-email'
   }
