@@ -75,6 +75,22 @@ export class AuthService {
     })
     return tokens
   }
+
+  async logout() {
+    await $fetch('/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    })
+
+    const authStore = useAuthStore()
+    authStore.$reset()
+
+    const config = useRuntimeConfig()
+    const tokenCookie = useCookie<string | null>(config.tokenCookieName)
+    const refreshCookie = useCookie<string | null>(config.refreshCookieName)
+    tokenCookie.value = null
+    refreshCookie.value = null
+  }
 }
 
 export const authService = new AuthService()

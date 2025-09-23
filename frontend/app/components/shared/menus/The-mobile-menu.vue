@@ -25,13 +25,22 @@
         :key="index"
         :to="item.to"
         class="px-6 py-4"
-        @click="$emit('close')"
+        @click="emit('close')"
       >
         <template #prepend>
           <v-icon :icon="item.icon" class="me-4" />
         </template>
         <v-list-item-title class="text-body-1">
           {{ item.title }}
+        </v-list-item-title>
+      </v-list-item>
+
+      <v-list-item class="px-6 py-4" @click="handleAuthAction">
+        <template #prepend>
+          <v-icon :icon="authIcon" class="me-4" />
+        </template>
+        <v-list-item-title class="text-body-1">
+          {{ authLabel }}
         </v-list-item-title>
       </v-list-item>
     </v-list>
@@ -49,9 +58,32 @@ interface MenuItem {
   icon: string
 }
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
 }>()
+
+const { isLoggedIn, logout } = useAuth()
+const router = useRouter()
+
+const authLabel = computed(() => (isLoggedIn.value ? 'Logout' : 'Login'))
+const authIcon = computed(() => (isLoggedIn.value ? 'mdi-logout' : 'mdi-login'))
+
+const handleAuthAction = async () => {
+  try {
+    if (isLoggedIn.value) {
+      await logout()
+      await router.push('/')
+    } else {
+      await router.push('/auth/login')
+    }
+  } catch (error) {
+    if (isLoggedIn.value) {
+      console.error('Logout failed', error)
+    }
+  } finally {
+    emit('close')
+  }
+}
 
 const menuItems: MenuItem[] = [
   {

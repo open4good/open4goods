@@ -10,5 +10,6 @@ export const useAuth = () => {
     username,
     roles,
     hasRole: authStore.hasRole,
+    logout: authStore.logout,
   }
 }

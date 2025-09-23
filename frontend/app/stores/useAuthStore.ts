@@ -15,4 +15,10 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     hasRole: (state) => (role: string) => state.roles.includes(role),
   },
+  actions: {
+    async logout() {
+      const { authService } = await import('~~/shared/api-client/services/auth.services')
+      await authService.logout()
+    },
+  },
 })

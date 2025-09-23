@@ -1,17 +1,28 @@
 <template>
   <menu id="container-main-menu" class="d-none d-md-block">
   <!-- Desktop menu -->
-    <v-list class="d-flex justify-end font-weight-bold">
-      <v-list-item
-        v-for="item in menuItems"
-        :key="item.path"
-        class="main-menu-items"
-        :class="{ 'active': isActiveRoute(item.path) }"
-        @click="navigateToPage(item.path)"
+    <div class="d-flex justify-end align-center ga-4">
+      <v-list class="d-flex justify-end font-weight-bold">
+        <v-list-item
+          v-for="item in menuItems"
+          :key="item.path"
+          class="main-menu-items"
+          :class="{ 'active': isActiveRoute(item.path) }"
+          @click="navigateToPage(item.path)"
+        >
+          <v-list-item-title>{{ item.label }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+      <v-btn
+        color="secondary"
+        rounded="pill"
+        class="font-weight-bold"
+        @click="handleAuthAction"
       >
-        <v-list-item-title>{{ item.label }}</v-list-item-title>
-      </v-list-item>
-    </v-list>
+        <v-icon start :icon="authIcon" />
+        {{ authLabel }}
+      </v-btn>
+    </div>
   </menu>
 
   <!-- Mobile menu command -->
@@ -25,6 +36,23 @@
 <script setup lang="ts">
 const route = useRoute();
 const router = useRouter();
+const { isLoggedIn, logout } = useAuth();
+
+const authLabel = computed(() => (isLoggedIn.value ? 'Logout' : 'Login'));
+const authIcon = computed(() => (isLoggedIn.value ? 'mdi-logout' : 'mdi-login'));
+
+const handleAuthAction = async () => {
+  if (isLoggedIn.value) {
+    try {
+      await logout();
+      await router.push('/');
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+    return;
+  }
+  router.push('/auth/login');
+};
 
 defineEmits<{
   "toggle-drawer": [];
