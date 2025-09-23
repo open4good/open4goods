@@ -9,6 +9,11 @@ const toggleDrawer = () => {
 
 <template>
     <Hero-section @toggle-drawer="toggleDrawer" />
+          <TheMainFooter>
+        <template #footer>
+          <the-main-footer-content />
+        </template>
+      </TheMainFooter>
 </template>
 
 <style lang="sass" scoped></style>
