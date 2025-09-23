@@ -188,7 +188,15 @@ project/
 - Use `definePageMeta({ layout, middleware })` in pages
 - Prefer server-side data fetching for SEO-critical content
 
-## Vuetify
+# Nuxt MCP
+## install the mcp server of nuxt for Claude-code or Codex usage
+- pnpm add nuxt-mcp
+- pnpm approve-builds
+- Select all packages (tab & space)
+- yes
+- For Claude-code cli : install the server : claude mcp add --transport http nuxt-local http://localhost:3000/__mcp/sse
+
+## Vuetify & vuetify MCP
 - (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
 - (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
  ### Vuetify MCP & Claude-code

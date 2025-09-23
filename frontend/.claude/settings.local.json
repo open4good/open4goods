@@ -5,7 +5,8 @@
       "mcp__figma__get_screenshot",
       "Bash(mkdir:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": [],
     "ask": []
