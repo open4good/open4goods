@@ -1,20 +1,19 @@
 <template>
   <v-app>
-      <!-- Mobile menu -->
-      <v-navigation-drawer
-        v-model="drawer"
-        location="start"
-        temporary
-        width="300"
-        class="mobile-menu-drawer"
-      >
-        <the-mobile-menu @close="drawer = false" />
-      </v-navigation-drawer>
+    <!-- Mobile menu -->
+    <v-navigation-drawer
+      v-model="drawer"
+      location="start"
+      temporary
+      width="300"
+      class="mobile-menu-drawer"
+    >
+      <the-mobile-menu @close="drawer = false" />
+    </v-navigation-drawer>
     <div class="app-bar-container">
       <The-main-menu-container @toggle-drawer="toggleDrawer" />
     </div>
     <v-layout>
-
       <!-- Main content -->
       <v-main class="main-content">
         <slot />
@@ -39,9 +38,9 @@ const toggleDrawer = () => {
   left: 0
   right: 0
   width: 100%
-  height: 18vh
+  height: 14vh
   z-index: 1000
 
 .main-content
-  margin-top: 18vh
+  margin-top: 14vh
 </style>
