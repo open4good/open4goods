@@ -7,17 +7,49 @@ const runtimeConfig = {
   refreshCookieName: 'refresh_token',
 }
 
-const mockComposables = {
-  useRuntimeConfig: () => runtimeConfig,
-  useCookie: () => ({ value: null }),
-}
+type CookieMock = { value: string | null }
 
-vi.mock('#app', () => mockComposables)
-vi.mock('#imports', () => mockComposables)
-vi.mock('nuxt/app', () => mockComposables)
+const cookieStore = new Map<string, CookieMock>()
+const useRuntimeConfigMock = vi.fn(() => runtimeConfig)
+const useCookieMockImpl = (name: string) => {
+  if (!cookieStore.has(name)) {
+    cookieStore.set(name, { value: null })
+  }
+  return cookieStore.get(name) as CookieMock
+}
+const useCookieMock = vi.fn(useCookieMockImpl)
+
+vi.mock('#app', async () => {
+  const actual = await vi.importActual<typeof import('#app')>('#app')
+  return {
+    ...actual,
+    useRuntimeConfig: useRuntimeConfigMock,
+    useCookie: useCookieMock,
+  }
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual<typeof import('#imports')>('#imports')
+  return {
+    ...actual,
+    useRuntimeConfig: useRuntimeConfigMock,
+    useCookie: useCookieMock,
+  }
+})
+
+vi.mock('nuxt/app', async () => {
+  const actual = await vi.importActual<typeof import('nuxt/app')>('nuxt/app')
+  return {
+    ...actual,
+    useRuntimeConfig: useRuntimeConfigMock,
+    useCookie: useCookieMock,
+  }
+})
 
 const fetchMock = vi.fn()
 vi.stubGlobal('$fetch', fetchMock)
+vi.stubGlobal('useRuntimeConfig', useRuntimeConfigMock)
+vi.stubGlobal('useCookie', useCookieMock)
 
 let authService: typeof import('./auth.services')['authService']
 
@@ -26,7 +58,11 @@ describe('AuthService.logout', () => {
     setActivePinia(createPinia())
     fetchMock.mockReset()
     fetchMock.mockResolvedValue(undefined)
-    vi.resetModules()
+    useRuntimeConfigMock.mockReset()
+    useRuntimeConfigMock.mockReturnValue(runtimeConfig)
+    cookieStore.clear()
+    useCookieMock.mockReset()
+    useCookieMock.mockImplementation(useCookieMockImpl)
     ;({ authService } = await import('./auth.services'))
   })
 
@@ -38,15 +74,29 @@ describe('AuthService.logout', () => {
       username: 'john',
     })
 
+    const tokenCookie = { value: 'token-value' as string | null }
+    const refreshCookie = { value: 'refresh-value' as string | null }
+    useCookieMock
+      .mockImplementationOnce(() => tokenCookie)
+      .mockImplementationOnce(() => refreshCookie)
+      .mockImplementationOnce(() => tokenCookie)
+      .mockImplementationOnce(() => refreshCookie)
+    useCookieMock(runtimeConfig.tokenCookieName)
+    useCookieMock(runtimeConfig.refreshCookieName)
+
     await authService.logout()
 
-    expect(fetchMock).toHaveBeenCalledWith('/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(useCookieMock).toHaveBeenCalledTimes(4)
+    expect(useCookieMock).toHaveBeenNthCalledWith(1, runtimeConfig.tokenCookieName)
+    expect(useCookieMock).toHaveBeenNthCalledWith(2, runtimeConfig.refreshCookieName)
+    expect(useCookieMock).toHaveBeenNthCalledWith(3, runtimeConfig.tokenCookieName)
+    expect(useCookieMock).toHaveBeenNthCalledWith(4, runtimeConfig.refreshCookieName)
     expect(authStore.isLoggedIn).toBe(false)
     expect(authStore.roles).toEqual([])
     expect(authStore.username).toBeNull()
+    expect(tokenCookie.value).toBeNull()
+    expect(refreshCookie.value).toBeNull()
   })
 })
 

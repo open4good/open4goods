@@ -1,6 +1,7 @@
 /**
  * Authentication service handling login and token refresh calls.
  */
+import { useCookie, useRuntimeConfig } from '#app'
 import { jwtDecode } from 'jwt-decode'
 import { useAuthStore } from '~/stores/useAuthStore'
 
@@ -77,11 +78,6 @@ export class AuthService {
   }
 
   async logout() {
-    await $fetch('/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
-
     const authStore = useAuthStore()
     authStore.$reset()
 
