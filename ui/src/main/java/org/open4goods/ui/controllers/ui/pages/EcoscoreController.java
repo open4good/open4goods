@@ -1,8 +1,8 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.ui.controllers.ui.UiService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

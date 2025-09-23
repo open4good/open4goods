@@ -66,7 +66,11 @@
 
     <!-- Example content bloc -->
     <section>
-        <h2>Demo Xwiki as headless CMS</h2>
+     <h2>Demo Xwiki as headless CMS (non existing content)</h2>
+        <TextContent bloc-id="Main.NON_EXISTS" />
+
+
+        <h2>Demo Xwiki as headless CMS (existing content)</h2>
         <TextContent bloc-id="Main" />
     </section>
 

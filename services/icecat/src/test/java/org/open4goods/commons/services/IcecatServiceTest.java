@@ -17,6 +17,7 @@ import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.icecat.IcecatName;
 import org.open4goods.model.icecat.IcecatNames;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+import org.open4goods.verticals.VerticalsConfigService;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 

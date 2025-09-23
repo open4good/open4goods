@@ -20,19 +20,19 @@ import { mapValues } from '../runtime';
  */
 export interface XwikiContentBlocDto {
     /**
-     * 
+     * Identifier of the XWiki bloc
      * @type {string}
      * @memberof XwikiContentBlocDto
      */
     blocId?: string;
     /**
-     * 
+     * Rendered HTML content, expected to be localised according to domainLanguage in the future.
      * @type {string}
      * @memberof XwikiContentBlocDto
      */
     htmlContent?: string;
     /**
-     * 
+     * Direct edit link for the XWiki page
      * @type {string}
      * @memberof XwikiContentBlocDto
      */

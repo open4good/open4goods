@@ -12,7 +12,6 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
@@ -26,6 +25,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 public class AttributeRealtimeAggregationService extends AbstractAggregationService {

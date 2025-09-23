@@ -1,9 +1,5 @@
 # Nudger Frontend Project
 
-[![CI](https://github.com/open4good/nudger-front/actions/workflows/ci.yml/badge.svg)](https://github.com/open4good/nudger-front/actions/workflows/ci.yml)
-[![Static Deploy](https://github.com/open4good/nudger-front/actions/workflows/deploy-static.yml/badge.svg)](https://github.com/open4good/nudger-front/actions/workflows/deploy-static.yml)
-[![Release](https://github.com/open4good/nudger-front/actions/workflows/release.yml/badge.svg)](https://github.com/open4good/nudger-front/actions/workflows/release.yml)
-[![CodeQL](https://github.com/open4good/nudger-front/actions/workflows/codeql.yml/badge.svg)](https://github.com/open4good/nudger-front/actions/workflows/codeql.yml)
 
 ## Nudger UI in action
 
@@ -461,10 +457,13 @@ docs: update README with new install steps
 
 ## Frontend internationalisation
 
-The Nuxt 3 frontend picks the visitor's language from the request hostname instead of URL prefixes or browser detection. 
-Production domains map to English (`nudger.com`) and French (`nudger.fr`), while local development can toggle between French (`localhost`) and English (`127.0.0.1`). 
-Unknown domains fall back to English but emit a warning during SSR so misconfigurations can be spotted quickly. 
-Refer to [`/frontend/docs/internationalisation.md`](/frontend/docs/internationalisation.md) for the full workflow and update procedure.
+Hostname-driven language resolution is centralised in [`shared/utils/domain-language.ts`](./shared/utils/domain-language.ts). The helper normalises the incoming host, maps it to a domain language (`'en' | 'fr'`), and exposes the matching Nuxt locale (`'en-US' | 'fr-FR'`).
+
+- The i18n hostname plugin imports the helper so both SSR and CSR pick the same locale for a given domain.
+- Server API routes reuse the helper to read the `x-forwarded-host`/`host` headers and forward the resolved `domainLanguage` to downstream services (e.g. blog and CMS clients).
+- Unknown domains fall back to English and emit a warning on the server so misconfigurations surface in logs without breaking the response.
+
+Refer to [`/frontend/docs/internationalisation.md`](/frontend/docs/internationalisation.md) for the full workflow, current mappings, and update procedure.
 
 ---
 

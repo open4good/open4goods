@@ -1,17 +1,23 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { ref } from 'vue'
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { DEFAULT_LOREM_LENGTH } from '~/utils/content/_loremIpsum'
 
 const mockBloc = {
   htmlContent: '<p>Hello bloc</p>',
   editLink: '/edit',
 }
 
+const htmlContent = ref(mockBloc.htmlContent)
+const editLink = ref(mockBloc.editLink)
+const loading = ref(false)
+const error = ref<string | null>(null)
+
 const mockUseContentBloc = {
-  htmlContent: mockBloc.htmlContent,
-  editLink: mockBloc.editLink,
-  loading: false,
-  error: null,
+  htmlContent,
+  editLink,
+  loading,
+  error,
   fetchBloc: vi.fn(),
 }
 
@@ -46,6 +52,11 @@ beforeAll(async () => {
 describe('TextContent', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    htmlContent.value = mockBloc.htmlContent
+    editLink.value = mockBloc.editLink
+    loading.value = false
+    error.value = null
+    mockUseAuth.hasRole.mockReturnValue(true)
   })
 
   test('renders bloc content and calls fetch on mount', async () => {
@@ -77,11 +88,33 @@ describe('TextContent', () => {
   })
 
   test('shows loader when loading', async () => {
-    mockUseContentBloc.loading = true
+    loading.value = true
     const wrapper = await mountSuspended(TextContent, {
       props: { blocId: 'id' },
     })
     expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-    mockUseContentBloc.loading = false
+    loading.value = false
+  })
+
+  test('renders lorem ipsum fallback when bloc content is empty', async () => {
+    htmlContent.value = '    '
+    const wrapper = await mountSuspended(TextContent, {
+      props: { blocId: 'Main.WebHome' },
+    })
+    const sandbox = wrapper.find('.xwiki-sandbox').element
+    const plainTextLength = sandbox.textContent?.trim().length ?? 0
+    expect(sandbox.innerHTML).toContain('Lorem ipsum dolor sit amet')
+    expect(plainTextLength).toBeGreaterThanOrEqual(DEFAULT_LOREM_LENGTH)
+  })
+
+  test('extends fallback length when custom defaultLength is provided', async () => {
+    htmlContent.value = ''
+    const customLength = 900
+    const wrapper = await mountSuspended(TextContent, {
+      props: { blocId: 'Main.WebHome', defaultLength: customLength },
+    })
+    const sandbox = wrapper.find('.xwiki-sandbox').element
+    const plainTextLength = sandbox.textContent?.trim().length ?? 0
+    expect(plainTextLength).toBeGreaterThanOrEqual(customLength)
   })
 })

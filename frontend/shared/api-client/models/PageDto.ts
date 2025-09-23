@@ -34,7 +34,7 @@ export interface PageDto {
      */
     page?: PageMetaDto;
     /**
-     * Current page content
+     * Current page content, to be localised using the domainLanguage query parameter when supported.
      * @type {Array<any>}
      * @memberof PageDto
      */

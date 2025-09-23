@@ -23,7 +23,7 @@
 
 		<processDependencyManagement>true</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
-		<maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
+		<maven-compiler-plugin-version>3.14.1</maven-compiler-plugin-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<exclude.tests>nothing-to-exclude</exclude.tests>
@@ -39,7 +39,6 @@
         <module>ui</module>
         <module>front-api</module>
         <module>b2b</module>
-        <module>static</module>
         <module>services/urlfetching</module>
         <module>services/googlesearch</module>
         <module>services/evaluation</module>
@@ -452,12 +451,12 @@
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.1.4</version>
                   </plugin>
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.1.4</version>
                   </plugin>
 
                 <!-- Spring Boot plugin configuration -->

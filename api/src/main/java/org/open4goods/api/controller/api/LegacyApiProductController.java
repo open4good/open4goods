@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.open4goods.commons.services.ProductNameSelectionService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

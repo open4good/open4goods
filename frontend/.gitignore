@@ -39,3 +39,4 @@ node_modules/
 ./frontend\components\shared\dev\generations
 
 # Generated TextContent CSS
+/openapitools.json

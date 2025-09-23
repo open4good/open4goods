@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductI18nElements;
@@ -24,6 +23,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
 import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;

@@ -9,12 +9,12 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.services.GoogleTaxonomyService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.verticals.GoogleTaxonomyService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**

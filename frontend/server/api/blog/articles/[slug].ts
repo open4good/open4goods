@@ -1,5 +1,6 @@
 import { useBlogService } from '~~/shared/api-client/services/blog.services'
 import type { BlogPostDto } from '~~/shared/api-client'
+import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../../utils/log-backend-error'
 
@@ -24,7 +25,11 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
     })
   }
 
-  const blogService = useBlogService()
+  const rawHost =
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  const { domainLanguage } = resolveDomainLanguage(rawHost)
+
+  const blogService = useBlogService(domainLanguage)
 
   try {
     // Use the service to fetch the article

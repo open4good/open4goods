@@ -1,7 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.commons.model.ProductCategory;
-import org.open4goods.commons.services.GoogleTaxonomyService;
+import org.open4goods.model.vertical.ProductCategory;
+import org.open4goods.verticals.GoogleTaxonomyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;

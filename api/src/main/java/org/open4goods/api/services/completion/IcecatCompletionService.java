@@ -23,7 +23,6 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
@@ -32,6 +31,7 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceTag;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

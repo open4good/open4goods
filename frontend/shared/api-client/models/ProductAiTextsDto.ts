@@ -20,7 +20,7 @@ import { mapValues } from '../runtime';
  */
 export interface ProductAiTextsDto {
     /**
-     * AI description
+     * AI description aligned with the requested domainLanguage once localisation is available.
      * @type {string}
      * @memberof ProductAiTextsDto
      */

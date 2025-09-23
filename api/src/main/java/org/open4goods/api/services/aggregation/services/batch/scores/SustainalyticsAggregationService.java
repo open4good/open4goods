@@ -8,10 +8,10 @@ import org.open4goods.commons.model.data.Brand;
 import org.open4goods.commons.model.data.BrandScore;
 import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**

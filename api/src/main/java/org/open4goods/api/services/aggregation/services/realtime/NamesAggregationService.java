@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -17,6 +16,7 @@ import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

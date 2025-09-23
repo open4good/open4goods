@@ -27,10 +27,16 @@ import {
 
 export interface ContentBlocRequest {
     blocId: string;
+    domainLanguage: ContentBlocDomainLanguageEnum;
 }
 
 export interface PageRequest {
     xwikiPageId: string;
+    domainLanguage: PageDomainLanguageEnum;
+}
+
+export interface PagesRequest {
+    domainLanguage: PagesDomainLanguageEnum;
 }
 
 /**
@@ -50,10 +56,29 @@ export class ContentApi extends runtime.BaseAPI {
             );
         }
 
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling contentBloc().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/blocs/{blocId}`;
         urlPath = urlPath.replace(`{${"blocId"}}`, encodeURIComponent(String(requestParameters['blocId'])));
@@ -89,10 +114,29 @@ export class ContentApi extends runtime.BaseAPI {
             );
         }
 
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling page().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
 
         let urlPath = `/pages/{xwikiPageId}`;
         urlPath = urlPath.replace(`{${"xwikiPageId"}}`, encodeURIComponent(String(requestParameters['xwikiPageId'])));
@@ -116,4 +160,78 @@ export class ContentApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * List of pages available for rendering
+     * List XWiki pages
+     */
+    async pagesRaw(requestParameters: PagesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling pages().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/pages`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * List of pages available for rendering
+     * List XWiki pages
+     */
+    async pages(requestParameters: PagesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.pagesRaw(requestParameters, initOverrides);
+    }
+
 }
+
+/**
+ * @export
+ */
+export const ContentBlocDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type ContentBlocDomainLanguageEnum = typeof ContentBlocDomainLanguageEnum[keyof typeof ContentBlocDomainLanguageEnum];
+/**
+ * @export
+ */
+export const PageDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type PageDomainLanguageEnum = typeof PageDomainLanguageEnum[keyof typeof PageDomainLanguageEnum];
+/**
+ * @export
+ */
+export const PagesDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type PagesDomainLanguageEnum = typeof PagesDomainLanguageEnum[keyof typeof PagesDomainLanguageEnum];
