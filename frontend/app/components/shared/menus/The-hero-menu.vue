@@ -1,6 +1,6 @@
 <template>
+  <menu id="container-main-menu" class="d-none d-md-block">
   <!-- Mobile menu command -->
-  <menu class="d-none d-md-block">
     <!-- TODO: translate -->
     <v-list class="d-flex justify-end font-weight-bold">
       <v-list-item
