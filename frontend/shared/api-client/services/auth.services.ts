@@ -15,6 +15,10 @@ export class AuthService {
    * Hydrates the auth store from the access token cookie.
    */
   syncAuthState() {
+    if (import.meta.client) {
+      // The httpOnly cookie is not exposed to the browser, therefore we keep the state provided by SSR.
+      return
+    }
     const config = useRuntimeConfig()
     const token = useCookie<string | null>(config.tokenCookieName)
     const authStore = useAuthStore()
