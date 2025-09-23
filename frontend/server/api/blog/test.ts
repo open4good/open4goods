@@ -1,12 +1,16 @@
 import { useBlogService } from '~~/shared/api-client/services/blog.services'
+import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 
 /**
  * Test endpoint to debug blog data
  */
-export default defineEventHandler(async _event => {
-  const blogService = useBlogService()
+export default defineEventHandler(async event => {
+  const rawHost =
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  const { domainLanguage } = resolveDomainLanguage(rawHost)
+  const blogService = useBlogService(domainLanguage)
 
   try {
     // Get raw data from the external API
