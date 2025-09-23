@@ -35,12 +35,17 @@
         </v-list-item-title>
       </v-list-item>
 
-      <v-list-item class="px-6 py-4" @click="handleAuthAction">
+      <v-list-item
+        v-if="isLoggedIn"
+        class="px-6 py-4"
+        data-testid="mobile-logout"
+        @click="handleLogout"
+      >
         <template #prepend>
-          <v-icon :icon="authIcon" class="me-4" />
+          <v-icon icon="mdi-logout" class="me-4" />
         </template>
         <v-list-item-title class="text-body-1">
-          {{ authLabel }}
+          Logout
         </v-list-item-title>
       </v-list-item>
     </v-list>
@@ -65,21 +70,16 @@ const emit = defineEmits<{
 const { isLoggedIn, logout } = useAuth()
 const router = useRouter()
 
-const authLabel = computed(() => (isLoggedIn.value ? 'Logout' : 'Login'))
-const authIcon = computed(() => (isLoggedIn.value ? 'mdi-logout' : 'mdi-login'))
+const handleLogout = async () => {
+  if (!isLoggedIn.value) {
+    return
+  }
 
-const handleAuthAction = async () => {
   try {
-    if (isLoggedIn.value) {
-      await logout()
-      await router.push('/')
-    } else {
-      await router.push('/auth/login')
-    }
+    await logout()
+    await router.push('/')
   } catch (error) {
-    if (isLoggedIn.value) {
-      console.error('Logout failed', error)
-    }
+    console.error('Logout failed', error)
   } finally {
     emit('close')
   }
