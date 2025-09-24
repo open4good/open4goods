@@ -10,19 +10,8 @@ public class ProductI18nElements {
 	private PrefixedAttrText url = new PrefixedAttrText();
 	@JsonMerge
 	private PrefixedAttrText h1Title = new PrefixedAttrText();
-	@JsonMerge
-	private String productMetaTitle;
-	@JsonMerge
-	private String productMetaDescription;
-	@JsonMerge
-	private String productMetaOpenGraphTitle;
-	@JsonMerge
-	private String productMetaOpenGraphDescription;
-	@JsonMerge
-	private String productMetaTwitterTitle;
-	@JsonMerge
-	private String productMetaTwitterDescription;
-	
+
+
 
 	/**
 	 * The url of the vertical home page
@@ -30,7 +19,7 @@ public class ProductI18nElements {
 	@JsonMerge
 	private String verticalHomeUrl ;
 
-	
+
 	@JsonMerge
 	private String verticalMetaTitle;
 	@JsonMerge
@@ -60,14 +49,14 @@ public class ProductI18nElements {
 	 */
 	@JsonMerge
 	private List<WikiPageConfig> wikiPages = new ArrayList<>();
-	
+
 	/**
 	 * Configuration for ai generation tool
 	 */
 	@JsonMerge
 	private AiPromptsConfig aiConfigs = new AiPromptsConfig();
 
-	
+
 	/**
 	 * Return the truncated home description
 	 * @param max
@@ -76,8 +65,8 @@ public class ProductI18nElements {
 	public String truncatedHomeDescription(int max) {
 		return verticalHomeDescription.length() > max ? verticalHomeDescription.substring(0, max)+"..." : verticalHomeDescription;
 	}
-	
-	
+
+
 	public PrefixedAttrText getUrl() {
 		return url;
 	}
@@ -94,53 +83,6 @@ public class ProductI18nElements {
 		this.h1Title = h1Title;
 	}
 
-	public String getProductMetaTitle() {
-		return productMetaTitle;
-	}
-
-	public void setProductMetaTitle(String productMetaTitle) {
-		this.productMetaTitle = productMetaTitle;
-	}
-
-	public String getProductMetaDescription() {
-		return productMetaDescription;
-	}
-
-	public void setProductMetaDescription(String productMetaDescription) {
-		this.productMetaDescription = productMetaDescription;
-	}
-
-	public String getProductMetaOpenGraphTitle() {
-		return productMetaOpenGraphTitle;
-	}
-
-	public void setProductMetaOpenGraphTitle(String productMetaOpenGraphTitle) {
-		this.productMetaOpenGraphTitle = productMetaOpenGraphTitle;
-	}
-
-	public String getProductMetaOpenGraphDescription() {
-		return productMetaOpenGraphDescription;
-	}
-
-	public void setProductMetaOpenGraphDescription(String productMetaOpenGraphDescription) {
-		this.productMetaOpenGraphDescription = productMetaOpenGraphDescription;
-	}
-
-	public String getProductMetaTwitterTitle() {
-		return productMetaTwitterTitle;
-	}
-
-	public void setProductMetaTwitterTitle(String productMetaTwitterTitle) {
-		this.productMetaTwitterTitle = productMetaTwitterTitle;
-	}
-
-	public String getProductMetaTwitterDescription() {
-		return productMetaTwitterDescription;
-	}
-
-	public void setProductMetaTwitterDescription(String productMetaTwitterDescription) {
-		this.productMetaTwitterDescription = productMetaTwitterDescription;
-	}
 
 	public String getVerticalHomeUrl() {
 		return verticalHomeUrl;
@@ -232,8 +174,8 @@ public class ProductI18nElements {
 	}
 
 
-	
-	
-	
+
+
+
 
 }

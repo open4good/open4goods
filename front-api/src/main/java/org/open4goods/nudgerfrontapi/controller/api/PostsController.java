@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
@@ -50,7 +51,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Blog", description = "Blog posts, tags and RSS feed")
 public class PostsController {
 
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final BlogService blogService;
 
@@ -99,7 +99,7 @@ public class PostsController {
         Page<BlogPostDto> body = new PageImpl<>(posts.subList(start, end), pageable, posts.size());
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
 
@@ -115,7 +115,7 @@ public class PostsController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Post found",
-                            
+
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = BlogPostDto.class))),
                     @ApiResponse(responseCode = "404", description = "Post not found")
@@ -128,7 +128,7 @@ public class PostsController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(map(post));
     }
 
@@ -143,7 +143,7 @@ public class PostsController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Tags returned",
-                            
+
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(implementation = BlogTagDto.class))))
             }
@@ -154,7 +154,7 @@ public class PostsController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
 
@@ -169,7 +169,7 @@ public class PostsController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Feed returned",
-                            
+
                             content = @Content(mediaType = "application/rss+xml"))
             }
     )

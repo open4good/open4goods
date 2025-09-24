@@ -22,12 +22,6 @@ public record VerticalConfigDto(
         @Schema(description = "Primary image for the vertical hero section. TODO(front-api): populate when media assets are defined.",
                 nullable = true)
         String image,
-        @Schema(description = "Localised singular label for the vertical. TODO(front-api): populate when naming strategy is available.",
-                nullable = true)
-        String singularName,
-        @Schema(description = "Localised plural label for the vertical. TODO(front-api): populate when naming strategy is available.",
-                nullable = true)
-        String pluralName,
         @Schema(description = "Localised home title for the vertical.", example = "Téléviseurs")
         String verticalHomeTitle,
         @Schema(description = "Localised home description for the vertical.", example = "Comparez les téléviseurs responsables")

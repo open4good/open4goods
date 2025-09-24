@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.StatsService;
@@ -31,7 +32,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Stats", description = "Aggregated catalogue statistics for the frontend UI")
 public class StatsController {
 
-    private static final CacheControl FIVE_MINUTES_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofMinutes(5)).cachePublic();
 
     private final StatsService statsService;
 
@@ -61,7 +61,7 @@ public class StatsController {
     public ResponseEntity<CategoriesStatsDto> categories(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         CategoriesStatsDto body = statsService.categories(domainLanguage);
         return ResponseEntity.ok()
-                .cacheControl(FIVE_MINUTES_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .body(body);
     }
 }

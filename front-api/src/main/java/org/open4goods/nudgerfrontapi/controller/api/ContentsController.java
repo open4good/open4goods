@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Locale;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.xwiki.model.FullPage;
@@ -40,8 +41,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ContentsController {
 
 
-    // TODO : mutualize constant
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final XWikiHtmlService xwikiHtmlService;
     private final XwikiFacadeService xwikiFacadeService;
@@ -86,7 +85,7 @@ public class ContentsController {
         XwikiContentBlocDto body = new XwikiContentBlocDto(convertedBlocId, htmlContent, editLink);
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
 
@@ -140,7 +139,7 @@ public class ContentsController {
         String normalized = translatePageId(xwikiPageId.replace(":", "/"));
         FullPage page = xwikiFacadeService.getFullPage(normalized, domainLanguage.languageTag());
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(page);
     }
 

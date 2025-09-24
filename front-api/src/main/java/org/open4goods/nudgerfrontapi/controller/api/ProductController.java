@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
@@ -60,9 +61,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductController {
 
-	// TODO : mutualize constant
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
-
     private final ProductMappingService service;
     private final ObjectMapper objectMapper;
 
@@ -85,7 +83,7 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Components returned",
-                            
+
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
@@ -111,7 +109,7 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-                            
+
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
@@ -137,7 +135,7 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-                            
+
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
@@ -257,7 +255,7 @@ public class ProductController {
 
 
 
-		return ResponseEntity.ok().cacheControl(ONE_HOUR_PUBLIC_CACHE).body(body);
+		return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
 	}
 
     /**
@@ -319,7 +317,7 @@ public class ProductController {
 
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
 //

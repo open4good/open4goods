@@ -61,8 +61,6 @@ public class CategoryMappingService {
                 verticalConfig.getOrder(),
                 null, // TODO(front-api): populate thumbnail from media catalog once available.
                 null, // TODO(front-api): populate hero image from media catalog once available.
-                null, // TODO(front-api): expose singular label when configuration is extended.
-                null, // TODO(front-api): expose plural label when configuration is extended.
                 i18n == null ? null : i18n.getVerticalHomeTitle(),
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
                 i18n == null ? null : i18n.getVerticalHomeUrl());
@@ -90,19 +88,9 @@ public class CategoryMappingService {
                 verticalConfig.getOrder(),
                 null, // TODO(front-api): populate thumbnail from media catalog once available.
                 null, // TODO(front-api): populate hero image from media catalog once available.
-                null, // TODO(front-api): expose singular label when configuration is extended.
-                null, // TODO(front-api): expose plural label when configuration is extended.
                 i18n == null ? null : i18n.getVerticalHomeTitle(),
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
                 i18n == null ? null : i18n.getVerticalHomeUrl(),
-                i18n == null ? null : i18n.getUrl(),
-                i18n == null ? null : i18n.getH1Title(),
-                i18n == null ? null : i18n.getProductMetaTitle(),
-                i18n == null ? null : i18n.getProductMetaDescription(),
-                i18n == null ? null : i18n.getProductMetaOpenGraphTitle(),
-                i18n == null ? null : i18n.getProductMetaOpenGraphDescription(),
-                i18n == null ? null : i18n.getProductMetaTwitterTitle(),
-                i18n == null ? null : i18n.getProductMetaTwitterDescription(),
                 i18n == null ? null : i18n.getVerticalMetaTitle(),
                 i18n == null ? null : i18n.getVerticalMetaDescription(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphTitle(),

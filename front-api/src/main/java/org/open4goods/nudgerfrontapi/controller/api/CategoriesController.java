@@ -1,17 +1,16 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,7 +39,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Categories", description = "Retrieve vertical configurations displayed in the catalog navigation.")
 public class CategoriesController {
 
-    private static final CacheControl FIFTEEN_MINUTES_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofMinutes(15)).cachePublic();
 
     private final VerticalsConfigService verticalsConfigService;
     private final CategoryMappingService categoryMappingService;
@@ -81,7 +78,7 @@ public class CategoriesController {
                 .toList();
 
         return ResponseEntity.ok()
-                .cacheControl(FIFTEEN_MINUTES_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);
     }
 
@@ -115,7 +112,7 @@ public class CategoriesController {
 
         VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config, domainLanguage);
         return ResponseEntity.ok()
-                .cacheControl(FIFTEEN_MINUTES_PUBLIC_CACHE)
+                .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);
     }
 }
