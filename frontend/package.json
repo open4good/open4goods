@@ -41,7 +41,7 @@
     "nuxt-mcp": "^0.2.4",
     "pinia": "^3.0.3",
     "unhead": "^2.0.14",
-    "vue": "3.5.18",
+    "vue": "3.5.21",
     "vuetify-nuxt-module": "^0.18.7"
   },
   "devDependencies": {
@@ -93,7 +93,7 @@
   },
   "pnpm": {
     "overrides": {
-      "vue": "3.5.18"
+      "vue": "3.5.21"
     },
     "onlyBuiltDependencies": [
       "@nestjs/core",
@@ -105,7 +105,7 @@
     ]
   },
   "resolutions": {
-    "vue": "3.5.18"
+    "vue": "3.5.21"
   },
   "overrides": {
     "glob": "^11.0.0"
