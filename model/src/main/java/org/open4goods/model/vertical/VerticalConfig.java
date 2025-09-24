@@ -45,31 +45,36 @@ public class VerticalConfig{
 	private String id;
 
 	/**
-	 * The corresponding google taxonomy ID 
+	 * The corresponding google taxonomy ID
 	 */
 	private Integer googleTaxonomyId;
 
 	/**
-	 * The corresponding icecat taxonomy ID 
+	 * The corresponding icecat taxonomy ID
 	 */
 	private Integer icecatTaxonomyId;
-	
-	
+
+
 	/** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
 	private boolean enabled = false;
-	
-	
-	
-	
+
+
+	/**
+	 * Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
+	 */
+	@JsonMerge
+	private String verticalImage ;
+
+
 	/**
 	 * The product url, metas title, description, ....
 	 */
 	@JsonMerge
 	private Map<String,ProductI18nElements> i18n = new HashMap<>();
-	
+
 //	@JsonMerge
 //	private GenAiConfig genAiConfig = new GenAiConfig();
-	
+
 	/**
 	 * The list of filters to be added to the ecological filters group
 	 */
@@ -80,27 +85,27 @@ public class VerticalConfig{
 	 */
 	private List<String> technicalFilters = new ArrayList<>();
 
-	
+
 	/**
-	 * The list of global technicals filters (weight, ..) 
+	 * The list of global technicals filters (weight, ..)
 	 */
 	private List<String> globalTechnicalFilters = new ArrayList<>();
 
-	
-	
+
+
 	/**
 	 * The categories that MUST BE PRESENT to associate to this vertical. Prefixed by datasource on which it applies, using "all" for all datasources
 	 */
 
 	private Map<String,Set<String>> matchingCategories = new HashMap<>();
-	
-	
+
+
 	/**
 	 * A list a words that will exclude the item from the category if encountered
 	 */
 	@JsonMerge
-	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();	
-	
+	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();
+
 	/**
 	 * The set of datasourcenames that will be excluded in generation of categories matching
 	 */
@@ -110,12 +115,12 @@ public class VerticalConfig{
 	/**
 	 * The set of attributes names  that will be excluded in generation of attributes suggestion
 	 */
-	
+
 	@JsonMerge
 	private  Set<String> generationExcludedFromAttributesMatching = new HashSet<String>();
-	 
-	
-	
+
+
+
 	/**
 	 * The categories that MUST NOT BE PRESENT to associate to this vertical
 	 */
@@ -126,30 +131,30 @@ public class VerticalConfig{
 	 */
 	@JsonMerge
 	private Set<String> requiredAttributes = new HashSet<String>();
-	
+
 	/**
 	 * if true, will override generated url name, even if already generated
 	 */
 	private boolean forceNameGeneration = false;
-	
-		
+
+
 	@JsonMerge
 	/**
 	 * Brand alias mappings (eg : LG ELECTRONICS : LG)
 	 */
 	private Map<String, String> brandsAlias = new HashMap<>();
-	
+
 	/**
 	 * The brands that must be removes (eg. NON COMMUNIQUE)
 	 */
 	private Set<String> brandsExclusion = new HashSet<String>();
-	
+
 	/**
-	 * The order of this vertical, for restitution 
+	 * The order of this vertical, for restitution
 	 */
-	
+
 	private Integer order = Integer.MAX_VALUE;
-	
+
 	/**
 	 * The I18n URL Mappings. Think SEO !
 	 */
@@ -168,37 +173,37 @@ public class VerticalConfig{
 	@JsonMerge
 	private AttributesConfig attributesConfig = new AttributesConfig();
 
-	
+
 	/**
 	 * The scores that are eligible to participate to the impact score construction
 	 */
 	@JsonMerge
 	private Map<String, ImpactScoreCriteria> availableImpactScoreCriterias = new HashMap<>();
-	
+
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName -> Ponderation (0.1 = 10%)
 	 * NOTE : No json merge, since default score has to be fully described if overrided
-	 */ 
+	 */
 	private ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 
 
-	
+
 	////////////////////
 	// The subsets for this vertical
 	////////////////////
-	
+
 	/**
 	 * The vertical custom subsets
 	 */
 	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
-	
+
 	/**
 	 * The subset dedicated to brands; Technical, no yaml def needed
 	 * TODO(p2, design) : move outside
 	 */
 	private VerticalSubset brandsSubset = new VerticalSubset();
-	
-//	
+
+//
 //	/**
 //	 * Configuration relativ to ratings aggregation
 //	 */
@@ -233,7 +238,7 @@ public class VerticalConfig{
 	 */
 	private List<FeatureGroup> featureGroups = new ArrayList<>();
 
-	
+
 	// A local cache for token names
 	private Set<String> cacheTokenNames;
 
@@ -241,15 +246,15 @@ public class VerticalConfig{
 	 * If an item has a score is the last "worseLimit", then it will be bagged in product.worsesScores
 	 */
 	private Integer worseLimit = 3;
-	
-	
+
+
 	/**
 	 * If an item has a score is the top "bettersLimit", then it will be bagged in product.bestsScores
 	 */
 	private Integer bettersLimit = 3;
-	
-	
-	
+
+
+
 
 	@Override
 	public String toString() {
@@ -260,17 +265,17 @@ public class VerticalConfig{
 	public int hashCode() {
 		return id.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return id.equals(((VerticalConfig)obj).id);
 	}
-	
-	public ProductI18nElements i18n(String lang) {		
-		return i18n.getOrDefault(lang, i18n.get("default"));		
+
+	public ProductI18nElements i18n(String lang) {
+		return i18n.getOrDefault(lang, i18n.get("default"));
 	}
-	
-	
+
+
 
     /**
      * Groups VerticalSubset objects into a LinkedHashMap, where the key is the group name
@@ -292,7 +297,7 @@ public class VerticalConfig{
 
 	/**
 	 * Compute the token names, used to do a product.offernames matching categories
-	 * 
+	 *
 	 * @param additionalNames
 	 * @return
 	 */
@@ -327,7 +332,7 @@ public class VerticalConfig{
 				derivativs.add(derivativ);
 
 			});
-			
+
 			verticalNames.addAll(derivativs);
 			cacheTokenNames = verticalNames;
 		}
@@ -339,7 +344,7 @@ public class VerticalConfig{
 	 * @return
 	 */
 	public Integer ecoscorePercentOf(String scoreName) {
-		
+
 		Double ponderation = impactScoreConfig.getCriteriasPonderation().get(scoreName);
 		if (null == ponderation) {
 			return -1;
@@ -347,48 +352,25 @@ public class VerticalConfig{
 			return (int) Math.round(ponderation * 100);
 		}
 	}
-	
+
 	/**
 	 * Return the participation in points of  the score
 	 * @param scoreName
 	 * @return
 	 */
 	public Double ecoscoreParticipationPointsOf20(String scoreName, Double relValue) {
-		
+
 		return  ecoscoreParticipationMaxPointsOf20(scoreName) * relValue  / StandardiserService.DEFAULT_MAX_RATING;
 	}
-	
+
 	/**
-	 * Return the max participation  points of the score 
+	 * Return the max participation  points of the score
 	 * @param scoreName
 	 * @return
 	 */
 	public Double ecoscoreParticipationMaxPointsOf20(String scoreName) {
 		return Double.valueOf(ecoscorePercentOf(scoreName)) / 5;
 	}
-	
-	
-//	/**
-//	 *
-//	 * @return the list of AttributeConfig that have to appear in search results,
-//	 *         ordered by their display position
-//	 */
-//	public List<AttributeConfig> statsAttributes() {
-//		final List<AttributeConfig> ret = new ArrayList<>();
-//		for (final AttributeConfig a : attributesConfig.getConfigs()) {
-//			if (null != a.getStatsOrder()) {
-//				try {
-//					ret.add(a.getStatsOrder(), a);
-//				} catch (final IndexOutOfBoundsException e) {
-//					LOGGER.warn("statsOrder {} is invalid for attribute {}. Will place last", a.getStatsOrder(),
-//							a.getName());
-//					ret.add(a);
-//				}
-//			}
-//		}
-//		return ret;
-//	}
-//
 
 
 	/**
@@ -396,10 +378,10 @@ public class VerticalConfig{
 	 * @return the specific attributes config for this vertical
 	 */
 	public List<AttributeConfig> verticalFilters() {
-	
-		
+
+
 		return getVerticalFilters().stream()
-				
+
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
@@ -408,22 +390,22 @@ public class VerticalConfig{
 
 
 	/**
-	 * 
+	 *
 	 * @return all attributes filters (eco & technical)
 	 */
 	public List<String> getVerticalFilters() {
 		List<String> filters = new ArrayList<String>();
-		
+
 		if (null != ecoFilters) {
 			filters.addAll(ecoFilters);
 		}
 
 		if (null != technicalFilters) {
-			filters.addAll(technicalFilters);		
+			filters.addAll(technicalFilters);
 		}
 		filters.addAll(globalTechnicalFilters);
 		return filters;
-	
+
 	}
 
 	/**
@@ -438,7 +420,7 @@ public class VerticalConfig{
 
 
 	/**
-	 * 
+	 *
 	 * @return the sum of the coefficient applyed to this ecoscore
 	 */
 	public Double getEcoscoreCriteriasSum() {
@@ -502,7 +484,7 @@ public class VerticalConfig{
 	public String indexName() {
 		return "vertical-" + IdHelper.azCharAndDigits(id, "-").toLowerCase();
 	}
-	
+
 	public String getSiteLocaleAsStringOrDefault(final HttpServletRequest request) {
 		return getLanguageByServerName(request.getServerName());
 	}
@@ -546,9 +528,9 @@ public class VerticalConfig{
 	 * @return
 	 */
 	public List<Score> ecoScoreDetails(Collection<Score> existing) {
-		
+
 		List<Score> ret = new ArrayList<Score>();
-		
+
 		impactScoreConfig.getCriteriasPonderation().keySet().forEach(ecoConfig-> {
 			existing.forEach(exisiting -> {
 				if (exisiting.getName().equals(ecoConfig)) {
@@ -569,11 +551,11 @@ public class VerticalConfig{
 		return indexName()  + "-resources";
 	}
 
-	
+
 	// TODO : Perf, could use a cached map
 	public FeatureGroup getOrCreateByIceCatCategoryFeatureGroup(int categoryFeatureGroupId) {
-		
-		
+
+
 		Optional<FeatureGroup> existing = featureGroups.stream().filter(e -> e.getIcecatCategoryFeatureGroupId() == categoryFeatureGroupId).findFirst();
 		if (existing.isPresent()) {
 			return existing.get();
@@ -582,12 +564,12 @@ public class VerticalConfig{
 			featureGroups.add(fg);
 			return fg;
 		}
-//		
-//		
+//
+//
 //		return .orElse(new FeatureGroup(categoryFeatureGroupId));
 	}
-	
-	
+
+
 
 	//////////////////////////////////////
 	// Getters / Setters
@@ -765,7 +747,7 @@ public class VerticalConfig{
 	}
 
 
-	
+
 	public List<String> getEcoFilters() {
 		return ecoFilters;
 	}
@@ -894,11 +876,19 @@ public class VerticalConfig{
 		this.order = order;
 	}
 
+	public String getVerticalImage() {
+		return verticalImage;
+	}
 
-	
+	public void setVerticalImage(String verticalImage) {
+		this.verticalImage = verticalImage;
+	}
 
-	
-	
-	
-	
+
+
+
+
+
+
+
 }

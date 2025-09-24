@@ -22,6 +22,9 @@ googleTaxonomyId: 404
 
 icecatTaxonomyId: 1584
 
+# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). 
+# Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
+verticalImage: https://nudger.fr/images/verticals/tv.jpg
 
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: true
@@ -121,6 +124,47 @@ i18n:
           verticalUrl: "oled-qled-lcd-que-choisir"
           title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
           faIcon: "fa-star"
+
+  en:
+   # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+   url: 
+     # We can add a custom prefix (with our conditional templating language if we want)
+     prefix: "|| tv | television ||"
+     # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+     attrs:
+       - TV_TYPE
+       - BRAND
+       - MODEL
+       - YEAR
+   ##################################
+   # Product page meta and h1 title 
+   ##################################
+   # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+   h1Title:  
+     prefix: "|| TV | Television ||"
+     attrs:
+       - TV_TYPE
+       - BRAND
+       - MODEL
+       - YEAR
+     
+
+
+   ##################################
+   # Vertical page elements 
+   ##################################
+   
+   # url for vertical (appened to baseUrl). No templating here 
+   verticalHomeUrl: "tvs"
+   # Text displaid as title for the vertical
+   # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+   verticalHomeTitle: "Tv's"
+   # Text displaid as title for the vertical
+   verticalHomeDescription: "Welcome in our TV's'."  
+   # The image used as a logo
+
+
+
 
  
           

@@ -19,6 +19,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
+import org.open4goods.nudgerfrontapi.config.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
@@ -29,7 +30,9 @@ import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * Mapping utilities converting {@link VerticalConfig} domain objects into transport DTOs.
@@ -37,8 +40,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CategoryMappingService {
 
+	private static final String IMAGE_PREFIX ="/images/verticals/";
     private static final String DEFAULT_LANGUAGE_KEY = "default";
 
+    @Autowired ApiProperties apiProperties;
     /**
      * Convert a {@link VerticalConfig} into its summary DTO representation.
      *
@@ -59,14 +64,17 @@ public class CategoryMappingService {
                 verticalConfig.getGoogleTaxonomyId(),
                 verticalConfig.getIcecatTaxonomyId(),
                 verticalConfig.getOrder(),
-                null, // TODO(front-api): populate thumbnail from media catalog once available.
-                null, // TODO(front-api): populate hero image from media catalog once available.
+                mapVerticalImageSmall(verticalConfig),
+                mapVerticalImageMedium(verticalConfig),
+                mapVerticalImageLarge(verticalConfig),
                 i18n == null ? null : i18n.getVerticalHomeTitle(),
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
                 i18n == null ? null : i18n.getVerticalHomeUrl());
     }
 
-    /**
+
+
+	/**
      * Convert a {@link VerticalConfig} into its detailed DTO representation.
      *
      * @param verticalConfig domain object loaded from the configuration service
@@ -86,8 +94,9 @@ public class CategoryMappingService {
                 verticalConfig.getGoogleTaxonomyId(),
                 verticalConfig.getIcecatTaxonomyId(),
                 verticalConfig.getOrder(),
-                null, // TODO(front-api): populate thumbnail from media catalog once available.
-                null, // TODO(front-api): populate hero image from media catalog once available.
+                mapVerticalImageSmall(verticalConfig),
+                mapVerticalImageMedium(verticalConfig),
+                mapVerticalImageLarge(verticalConfig),
                 i18n == null ? null : i18n.getVerticalHomeTitle(),
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
                 i18n == null ? null : i18n.getVerticalHomeUrl(),
@@ -95,8 +104,6 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalMetaDescription(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphTitle(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphDescription(),
-                i18n == null ? null : i18n.getVerticalMetaTwitterTitle(),
-                i18n == null ? null : i18n.getVerticalMetaTwitterDescription(),
                 defaultList(i18n == null ? null : i18n.getWikiPages()),
                 i18n == null ? null : i18n.getAiConfigs(),
                 defaultList(verticalConfig.getEcoFilters()),
@@ -288,4 +295,40 @@ public class CategoryMappingService {
         keys.add(DEFAULT_LANGUAGE_KEY);
         return keys;
     }
+
+
+	/**
+	 * Return the medium image size, from derivating ResourceControler (ui/static project) mapping ("/images/verticals/{verticalId}.jpg")
+	 * Using webp, live conversion filters will translate.
+	 * The suffix "-SIZE" must be allowed in static resource app config (allowedImagesSizeSuffixes)
+	 * @param verticalConfig
+	 * @return
+	 */
+    private String mapVerticalImageMedium(VerticalConfig verticalConfig) {
+		return apiProperties.getResourceProviderRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
+	}
+
+	/**
+	 * Return the medium image size, from derivating ResourceControler (ui/static project) mapping ("/images/verticals/{verticalId}.jpg")
+	 * Using webp, live conversion filters will translate
+     * The suffix "-SIZE" must be allowed in static resource app config (allowedImagesSizeSuffixes)
+	 * @param verticalConfig
+	 * @return
+	 */
+
+	private String mapVerticalImageSmall(VerticalConfig verticalConfig) {
+		return apiProperties.getResourceProviderRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
+	}
+
+	/**
+	 * Return the medium image size, from derivating ResourceControler (ui/static project) mapping ("/images/verticals/{verticalId}.jpg")
+	 * Using webp, live conversion filters will translate
+	 * The suffix "-SIZE" must be allowed in static resource app config (allowedImagesSizeSuffixes)
+	 * @param verticalConfig
+	 * @return
+	 */
+
+	private String mapVerticalImageLarge(VerticalConfig verticalConfig) {
+		return apiProperties.getResourceProviderRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
+	}
 }

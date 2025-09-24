@@ -16,12 +16,12 @@ public record VerticalConfigDto(
         Integer icecatTaxonomyId,
         @Schema(description = "Display order used to render the category list.", example = "1")
         Integer order,
-        @Schema(description = "Thumbnail image representing the vertical. TODO(front-api): populate when media assets are defined.",
-                nullable = true)
-        String imageThumbnail,
-        @Schema(description = "Primary image for the vertical hero section. TODO(front-api): populate when media assets are defined.",
-                nullable = true)
-        String image,
+        @Schema(description = "Thumbnail image representing the vertical.")
+        String imageSmall,
+        @Schema(description = "Medium image for the vertical ")
+        String imageMedium,
+        @Schema(description = "Large image for the vertical ")
+        String imageLarge,
         @Schema(description = "Localised home title for the vertical.", example = "Téléviseurs")
         String verticalHomeTitle,
         @Schema(description = "Localised home description for the vertical.", example = "Comparez les téléviseurs responsables")

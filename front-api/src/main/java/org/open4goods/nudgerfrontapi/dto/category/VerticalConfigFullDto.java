@@ -30,9 +30,11 @@ public record VerticalConfigFullDto(
         @Schema(description = "Display order used to render the category list.", example = "1")
         Integer order,
         @Schema(description = "Thumbnail image representing the vertical.")
-        String imageThumbnail,
-        @Schema(description = "Primary image for the vertical hero section.")
-        String image,
+        String imageSmall,
+        @Schema(description = "Medium image for the vertical ")
+        String imageMedium,
+        @Schema(description = "Large image for the vertical ")
+        String imageLarge,
         @Schema(description = "Localised home title for the vertical.", example = "Téléviseurs")
         String verticalHomeTitle,
         @Schema(description = "Localised home description for the vertical.", example = "Comparez les téléviseurs responsables")
@@ -47,10 +49,6 @@ public record VerticalConfigFullDto(
         String verticalMetaOpenGraphTitle,
         @Schema(description = "Localised Open Graph description for the vertical landing page.")
         String verticalMetaOpenGraphDescription,
-        @Schema(description = "Localised Twitter title for the vertical landing page.")
-        String verticalMetaTwitterTitle,
-        @Schema(description = "Localised Twitter description for the vertical landing page.")
-        String verticalMetaTwitterDescription,
         @Schema(description = "Localised wiki pages associated with the vertical.")
         List<WikiPageConfig> wikiPages,
         @Schema(description = "Localised AI generation configuration for the vertical.")

@@ -20,6 +20,8 @@ public class ProductI18nElements {
 	private String verticalHomeUrl ;
 
 
+
+
 	@JsonMerge
 	private String verticalMetaTitle;
 	@JsonMerge
@@ -28,10 +30,7 @@ public class ProductI18nElements {
 	private String verticalMetaOpenGraphTitle;
 	@JsonMerge
 	private String verticalMetaOpenGraphDescription;
-	@JsonMerge
-	private String verticalMetaTwitterTitle;
-	@JsonMerge
-	private String verticalMetaTwitterDescription;
+
 	/**
 	 * The title on the vertical home page
 	 */
@@ -124,21 +123,6 @@ public class ProductI18nElements {
 		this.verticalMetaOpenGraphDescription = verticalMetaOpenGraphDescription;
 	}
 
-	public String getVerticalMetaTwitterTitle() {
-		return verticalMetaTwitterTitle;
-	}
-
-	public void setVerticalMetaTwitterTitle(String verticalMetaTwitterTitle) {
-		this.verticalMetaTwitterTitle = verticalMetaTwitterTitle;
-	}
-
-	public String getVerticalMetaTwitterDescription() {
-		return verticalMetaTwitterDescription;
-	}
-
-	public void setVerticalMetaTwitterDescription(String verticalMetaTwitterDescription) {
-		this.verticalMetaTwitterDescription = verticalMetaTwitterDescription;
-	}
 
 	public String getVerticalHomeTitle() {
 		return verticalHomeTitle;
@@ -172,10 +156,4 @@ public class ProductI18nElements {
 	public void setAiConfigs(AiPromptsConfig aiConfigs) {
 		this.aiConfigs = aiConfigs;
 	}
-
-
-
-
-
-
 }
