@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { createPinia, setActivePinia } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import * as localizedRoutes from '~~/shared/utils/localized-routes'
@@ -8,7 +8,7 @@ import TheArticles from './TheArticles.vue'
 
 const resolveLocalizedRoutePathSpy = vi.spyOn(localizedRoutes, 'resolveLocalizedRoutePath')
 
-// Mock du composable useBlog
+// Mock the useBlog composable
 const mockArticles = [
   {
     id: '1',
@@ -30,14 +30,31 @@ const mockArticles = [
   },
 ]
 
+const articlesRef = ref(mockArticles)
+const paginatedArticlesRef = ref(mockArticles)
+const loadingRef = ref(false)
+const errorRef = ref<string | null>(null)
+const paginationRef = ref({
+  page: 1,
+  size: 12,
+  totalElements: mockArticles.length,
+  totalPages: 1,
+})
+
+const fetchArticlesMock = vi.fn()
+const changePageMock = vi.fn()
+
 const mockUseBlog = {
-  articles: mockArticles,
-  loading: false,
-  error: null,
-  fetchArticles: vi.fn(),
+  articles: articlesRef,
+  paginatedArticles: computed(() => paginatedArticlesRef.value),
+  loading: loadingRef,
+  error: errorRef,
+  pagination: paginationRef,
+  fetchArticles: fetchArticlesMock,
+  changePage: changePageMock,
 }
 
-// Mock du composable useBlog
+// Mock the useBlog composable
 vi.mock('~/composables/blog/useBlog', () => ({
   useBlog: () => mockUseBlog,
 }))
@@ -68,12 +85,25 @@ describe('TheArticles Component', () => {
     setActivePinia(createPinia())
     localeRef.value = 'fr-FR'
     resolveLocalizedRoutePathSpy.mockClear()
+    articlesRef.value = mockArticles
+    paginatedArticlesRef.value = mockArticles
+    loadingRef.value = false
+    errorRef.value = null
+    paginationRef.value = {
+      page: 1,
+      size: 12,
+      totalElements: mockArticles.length,
+      totalPages: 1,
+    }
+    fetchArticlesMock.mockReset()
+    changePageMock.mockReset()
   })
 
   test('should render loading state', async () => {
     // Override loading state
-    mockUseBlog.loading = true
-    mockUseBlog.articles = []
+    loadingRef.value = true
+    articlesRef.value = []
+    paginatedArticlesRef.value = []
 
     const wrapper = await mountSuspended(TheArticles)
 
@@ -84,9 +114,10 @@ describe('TheArticles Component', () => {
 
   test('should render articles in cards', async () => {
     // Override normal state
-    mockUseBlog.loading = false
-    mockUseBlog.error = null
-    mockUseBlog.articles = mockArticles
+    loadingRef.value = false
+    errorRef.value = null
+    articlesRef.value = mockArticles
+    paginatedArticlesRef.value = mockArticles
 
     const wrapper = await mountSuspended(TheArticles)
 
@@ -107,13 +138,14 @@ describe('TheArticles Component', () => {
   })
 
   test('should handle articles without images', async () => {
-    mockUseBlog.loading = false
-    mockUseBlog.error = null
+    loadingRef.value = false
+    errorRef.value = null
     const imagelessArticle = mockArticles.find((article) => !article.image)
     if (!imagelessArticle) {
       throw new Error('Expected at least one article without an image')
     }
-    mockUseBlog.articles = [imagelessArticle]
+    articlesRef.value = [imagelessArticle]
+    paginatedArticlesRef.value = [imagelessArticle]
 
     const wrapper = await mountSuspended(TheArticles)
 
@@ -125,9 +157,10 @@ describe('TheArticles Component', () => {
   })
 
   test('should format date correctly', async () => {
-    mockUseBlog.loading = false
-    mockUseBlog.error = null
-    mockUseBlog.articles = mockArticles
+    loadingRef.value = false
+    errorRef.value = null
+    articlesRef.value = mockArticles
+    paginatedArticlesRef.value = mockArticles
 
     const wrapper = await mountSuspended(TheArticles)
 
@@ -138,9 +171,10 @@ describe('TheArticles Component', () => {
   })
 
   test('should toggle debug mode', async () => {
-    mockUseBlog.loading = false
-    mockUseBlog.error = null
-    mockUseBlog.articles = mockArticles
+    loadingRef.value = false
+    errorRef.value = null
+    articlesRef.value = mockArticles
+    paginatedArticlesRef.value = mockArticles
 
     const wrapper = await mountSuspended(TheArticles)
 
@@ -161,13 +195,14 @@ describe('TheArticles Component', () => {
   test('should call fetchArticles on mount', async () => {
     await mountSuspended(TheArticles)
 
-    expect(mockUseBlog.fetchArticles).toHaveBeenCalledTimes(1)
+    expect(fetchArticlesMock).toHaveBeenCalledTimes(1)
   })
 
   test('should handle empty articles array', async () => {
-    mockUseBlog.loading = false
-    mockUseBlog.error = null
-    mockUseBlog.articles = []
+    loadingRef.value = false
+    errorRef.value = null
+    articlesRef.value = []
+    paginatedArticlesRef.value = []
 
     const wrapper = await mountSuspended(TheArticles)
 
@@ -177,9 +212,9 @@ describe('TheArticles Component', () => {
   })
 
   test('computes localized article path when clicking read more', async () => {
-    mockUseBlog.loading = false
-    mockUseBlog.error = null
-    mockUseBlog.articles = mockArticles
+    loadingRef.value = false
+    errorRef.value = null
+    articlesRef.value = mockArticles
     localeRef.value = 'en-US'
 
     const wrapper = await mountSuspended(TheArticles)
@@ -192,5 +227,37 @@ describe('TheArticles Component', () => {
     expect(resolveLocalizedRoutePathSpy).toHaveBeenCalledWith('blog-slug', 'en-US', {
       slug: 'test-article-1',
     })
+  })
+
+  test('should display pagination controls when multiple pages exist', async () => {
+    paginationRef.value = {
+      page: 1,
+      size: 12,
+      totalElements: 24,
+      totalPages: 2,
+    }
+
+    const wrapper = await mountSuspended(TheArticles)
+
+    expect(wrapper.find('.pagination-container').exists()).toBe(true)
+  })
+
+  test('should request page change through composable', async () => {
+    paginationRef.value = {
+      page: 1,
+      size: 12,
+      totalElements: 24,
+      totalPages: 3,
+    }
+
+    const wrapper = await mountSuspended(TheArticles)
+
+    const instance = wrapper.vm as unknown as {
+      handlePageChange: (page: number) => Promise<void>
+    }
+
+    await instance.handlePageChange(2)
+
+    expect(changePageMock).toHaveBeenCalledWith(2)
   })
 })
