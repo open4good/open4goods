@@ -85,8 +85,7 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Components returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
@@ -112,8 +111,7 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }
@@ -139,8 +137,7 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(type = "string"))))
             }

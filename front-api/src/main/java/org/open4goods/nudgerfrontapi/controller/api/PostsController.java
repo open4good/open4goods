@@ -115,8 +115,7 @@ public class PostsController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Post found",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = BlogPostDto.class))),
                     @ApiResponse(responseCode = "404", description = "Post not found")
@@ -144,8 +143,7 @@ public class PostsController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Tags returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(implementation = BlogTagDto.class))))
             }
@@ -171,8 +169,7 @@ public class PostsController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Feed returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            
                             content = @Content(mediaType = "application/rss+xml"))
             }
     )

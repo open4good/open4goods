@@ -66,8 +66,7 @@ public class CategoriesController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Categories returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(implementation = VerticalConfigDto.class)))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -100,8 +99,7 @@ public class CategoriesController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Category returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
+
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = VerticalConfigFullDto.class))),
                     @ApiResponse(responseCode = "404", description = "Category not found"),
