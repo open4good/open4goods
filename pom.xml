@@ -473,4 +473,64 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+    <profiles>
+      <profile>
+        <id>warmup-offline</id>
+        <build>
+          <plugins>
+            <!-- 1) Tirer explicitement le BOM Spring Boot -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <version>3.8.1</version>
+              <executions>
+                <execution>
+                  <id>prefetch-bom</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>get</goal>
+                  </goals>
+                  <configuration>
+                    <artifact>
+                      org.springframework.boot:spring-boot-dependencies:${springboot.version}:pom
+                    </artifact>
+                  </configuration>
+                </execution>
+
+                <!-- 2) Ensuite, warmup offline + plugins -->
+                <execution>
+                  <id>warmup-offline</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>go-offline</goal>
+                    <goal>resolve-plugins</goal>
+                  </goals>
+                  <configuration>
+                    <includeScope>test</includeScope>
+                    <excludeReactor>false</excludeReactor>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+
+            <!-- (Optionnel mais robuste) le plugin QAware gère mieux certains cas -->
+            <plugin>
+              <groupId>de.qaware.maven</groupId>
+              <artifactId>go-offline-maven-plugin</artifactId>
+              <version>1.2.8</version>
+              <executions>
+                <execution>
+                  <id>qaware-offline</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>resolve-dependencies</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
 </project>
