@@ -4,6 +4,9 @@ import { DEFAULT_NUXT_LOCALE } from './domain-language'
 export type LocalizedRouteName =
   | 'blog'
   | 'blog-slug'
+  | 'contact'
+  | 'ecoscore'
+  | 'impact-score'
   | 'produits'
   | 'team'
 
@@ -18,6 +21,18 @@ export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
   'blog-slug': {
     'fr-FR': '/notre-blog/[slug]',
     'en-US': '/our-blog/[slug]',
+  },
+  contact: {
+    'fr-FR': '/contact',
+    'en-US': '/contact',
+  },
+  ecoscore: {
+    'fr-FR': '/ecoscore',
+    'en-US': '/ecoscore',
+  },
+  'impact-score': {
+    'fr-FR': '/impact-score',
+    'en-US': '/impact-score',
   },
   produits: {
     'fr-FR': '/produits',

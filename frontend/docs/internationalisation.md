@@ -1,7 +1,7 @@
 # Frontend internationalisation
 
 ## Overview
-The Nuxt 3 frontend determines the active language on every request by inspecting the incoming hostname. This logic is centralised in [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) so that both client and server share the same mapping between hostnames, domain language codes (`'en' | 'fr'`), and Nuxt locales (`'en-US' | 'fr-FR'`).
+The Nuxt 3 frontend determines the active language on every request by inspecting the incoming hostname. This logic is centralised in [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) so that both client and server share the same mapping between hostnames, domain language codes (`'en' | 'fr'`), and Nuxt locales (`'en-US' | 'fr-FR'`). The helper now also exposes `buildI18nLocaleDomains()`, allowing [`nuxt.config.ts`](../nuxt.config.ts) to hydrate each locale definition with its canonical domain plus any alternates (e.g. `localhost`) without duplicating configuration. With `differentDomains: true` enabled, the i18n module can reuse the same mapping for host-based locale detection while our plugin keeps SSR and CSR aligned.
 
 The helper is consumed by:
 
@@ -16,7 +16,7 @@ Top-level routes now expose translated slugs per locale through [`shared/utils/l
 
 - Navigation components (`The-hero-menu.vue`, `The-mobile-menu.vue`, etc.) can render the correct links for the active host.
 - Programmatic navigations (for instance, blog article cards) reuse the same mapping to avoid hard-coded `/blog/...` URLs.
-- `nuxt.config.ts` derives the `@nuxtjs/i18n` `pages` configuration from the shared table, ensuring that `/notre-blog` resolves to the blog index on the French hostname while `/our-blog` serves the English version.
+- `nuxt.config.ts` derives the `@nuxtjs/i18n` `pages` configuration from the shared table, ensuring that `/notre-blog` resolves to the blog index on the French hostname while `/our-blog` serves the English version. Because the module runs with `customRoutes: 'config'`, those slugs are now registered as real route aliases so visiting the translated path no longer results in a 404.
 
 When adding a new page that requires translated slugs, declare its route name inside `LOCALIZED_ROUTE_PATHS` and rely on `resolveLocalizedRoutePath()` to compute URLs instead of concatenating strings.
 
