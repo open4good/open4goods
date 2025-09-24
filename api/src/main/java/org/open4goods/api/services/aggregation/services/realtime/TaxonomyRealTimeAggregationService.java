@@ -39,11 +39,14 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 
 		
 		String category = input.getCategory();
-		if (!StringUtils.isEmpty(category)) {
-			
-			// TODO : If return null
-			output.getCategoriesByDatasources().put(input.getDatasourceConfigName(), category);
-		}
+                if (!StringUtils.isEmpty(category)) {
+                        Map<String, String> categoriesByDatasources = output.getCategoriesByDatasources();
+                        if (categoriesByDatasources == null) {
+                                categoriesByDatasources = new HashMap<>();
+                                output.setCategoriesByDatasources(categoriesByDatasources);
+                        }
+                        categoriesByDatasources.put(input.getDatasourceConfigName(), category);
+                }
 		
 		onProduct(output, vConf);
 		
