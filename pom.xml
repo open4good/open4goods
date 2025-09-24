@@ -29,6 +29,14 @@
 		<exclude.tests>nothing-to-exclude</exclude.tests>
 	</properties>
 
+    <repositories>
+        <repository>
+            <id>in-project</id>
+            <name>In Project Repo</name>
+            <url>file://${maven.multiModuleProjectDirectory}/libs</url>
+        </repository>
+    </repositories>
+
 	<modules>
 		<module>admin</module>
         <module>model</module>
@@ -81,13 +89,6 @@
 	</scm>
 
 
-	<repositories>
-		<repository>
-			<id>central</id>
-			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-
-	</repositories>
 
 
 	<distributionManagement>
@@ -358,11 +359,18 @@
 			</plugin>
 
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.4</version>
-			</plugin>
+            <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-surefire-plugin</artifactId>
+                  <version>3.5.4</version>
+                  <dependencies>
+                    <dependency>
+                      <groupId>org.apache.maven.surefire</groupId>
+                      <artifactId>surefire-junit-platform</artifactId>
+                      <version>3.5.4</version>
+                    </dependency>
+                  </dependencies>
+                </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -381,28 +389,7 @@
 				<version>3.9.0</version>
 			</plugin>
 
-                 <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-dependency-plugin</artifactId>
-                  <version>3.8.1</version>
-                  <executions>
-                    <execution>
-                      <id>warmup-offline</id>
-                      <phase>validate</phase>
-                      <goals>
-                        <goal>go-offline</goal>
-                        <goal>resolve-plugins</goal>
-                      </goals>
-                      <!-- paramètres utiles (tous optionnels) -->
-                      <configuration>
-                        <!-- couvre compile+runtime+test -->
-                        <includeScope>test</includeScope>
-                        <!-- par défaut true: ne résout pas les plugins du reactor -->
-                        <excludeReactor>true</excludeReactor>
-                      </configuration>
-                    </execution>
-                  </executions>
-                </plugin>
+
 		</plugins>
 
 		<pluginManagement>
@@ -441,7 +428,7 @@
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>3.5.4</version>
                   </plugin>
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -519,6 +506,26 @@
               <groupId>de.qaware.maven</groupId>
               <artifactId>go-offline-maven-plugin</artifactId>
               <version>1.2.8</version>
+              <configuration>
+              <dynamicDependencies>
+                 <DynamicDependency>
+                   <groupId>org.apache.maven.surefire</groupId>
+                    <artifactId>surefire-junit-platform</artifactId>
+                    <version>3.5.4</version>
+                    <repositoryType>PLUGIN</repositoryType>
+                </DynamicDependency>
+                 <DynamicDependency>
+                   <groupId>org.junit.platform</groupId>
+                    <artifactId>junit-platform-launcher</artifactId>
+                    <version>1.12.2</version>
+                    <repositoryType>PLUGIN</repositoryType>
+                </DynamicDependency>
+
+
+
+                </dynamicDependencies>
+
+              </configuration>
               <executions>
                 <execution>
                   <id>qaware-offline</id>

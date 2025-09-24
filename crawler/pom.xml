@@ -5,15 +5,7 @@
 	<artifactId>crawler</artifactId>
 	<name>crawler</name>
 
-	<repositories>
-		<repository>
-		    <id>in-project</id>
-		    <name>In Project Repo</name>
-		    <url>file://${project.basedir}/libs</url>
-		</repository>
 
-
-	</repositories>
 
 	<parent>
 		<groupId>org.open4goods</groupId>
