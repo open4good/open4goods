@@ -173,6 +173,34 @@ project/
 - `api-specs/openapitools.json` – OpenAPI generator CLI configuration
 - `.husky/` – Git hooks executed on commit
 
+## Route internationalisation
+
+The application keeps translated slugs in a single place so every layer can share
+them consistently. `shared/utils/localized-routes.ts` exposes:
+
+- `LOCALIZED_ROUTE_PATHS` – a record that maps each named route to the slug that
+  should be served per Nuxt locale.
+- `resolveLocalizedRoutePath(routeName, locale, params?)` – returns the
+  translated path for navigation components and programmatic redirects. Provide
+  any dynamic parameters (e.g. `{ slug: article.slug }`) and the helper injects
+  them into the template.
+- `buildI18nPagesConfig()` – used by `nuxt.config.ts` to generate the
+  `@nuxtjs/i18n` `pages` configuration so visiting translated slugs never yields
+  a 404.
+
+When you add a page that needs a translated slug:
+
+1. Register the page with a stable route name (for example `team`).
+2. Extend `LOCALIZED_ROUTE_PATHS` with the locale-to-path mapping, using Nuxt
+   locales such as `fr-FR` and `en-US`.
+3. Replace hard-coded strings in menus or components with
+   `resolveLocalizedRoutePath('team', locale)` so SSR and CSR generate the same
+   URL.
+
+Call `normalizeLocale(locale)` if you receive user input that may not already be
+a supported Nuxt locale. The helper falls back to the default locale to avoid
+runtime errors.
+
 ## Vue 3 & Nuxt 3 Conventions
 - Use `<script setup lang="ts">` in all components
 - Write components in TypeScript

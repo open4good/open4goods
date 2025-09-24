@@ -18,7 +18,16 @@ Top-level routes now expose translated slugs per locale through [`shared/utils/l
 - Programmatic navigations (for instance, blog article cards) reuse the same mapping to avoid hard-coded `/blog/...` URLs.
 - `nuxt.config.ts` derives the `@nuxtjs/i18n` `pages` configuration from the shared table, ensuring that `/notre-blog` resolves to the blog index on the French hostname while `/our-blog` serves the English version. Because the module runs with `customRoutes: 'config'`, those slugs are now registered as real route aliases so visiting the translated path no longer results in a 404.
 
-When adding a new page that requires translated slugs, declare its route name inside `LOCALIZED_ROUTE_PATHS` and rely on `resolveLocalizedRoutePath()` to compute URLs instead of concatenating strings.
+### Defining new localized routes
+
+1. Pick a stable route name for the page (e.g. the `team` page). Nuxt will use the file-based name (`pages/team.vue` → `team`).
+2. Update `LOCALIZED_ROUTE_PATHS` so each locale maps to the desired slug. Slugs must start with `/` and may include dynamic parameters using the Nuxt syntax (`/blog/[slug]`).
+3. Consume `resolveLocalizedRoutePath(routeName, locale, params?)` wherever a link is generated. The helper accepts optional params for dynamic segments—`resolveLocalizedRoutePath('blog-slug', 'fr-FR', { slug })` renders `/blog/${slug}` with URL encoding applied automatically.
+4. Import `normalizeLocale(locale)` when dealing with untrusted input. It coerces unknown locales back to the default (`DEFAULT_NUXT_LOCALE`) so navigation never breaks.
+
+### Sharing the configuration with Nuxt i18n
+
+`buildI18nPagesConfig()` exports the same mapping as a structure that Nuxt i18n understands. `nuxt.config.ts` feeds this output to the `pages` option, ensuring the module registers translated aliases and generates `<link rel="alternate">` tags for SEO. Keeping the data in one place guarantees SSR, CSR, and server routes all agree on which slug belongs to which locale.
 
 ## Current hostname mapping
 | Hostname        | Domain language | Nuxt locale | Notes                                     |
