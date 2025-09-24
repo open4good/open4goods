@@ -4,18 +4,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.AiPromptsConfig;
 import org.open4goods.model.vertical.BarcodeAggregationProperties;
 import org.open4goods.model.vertical.DescriptionsAggregationConfig;
-import org.open4goods.model.vertical.FeatureGroup;
-import org.open4goods.model.vertical.ImpactScoreConfig;
-import org.open4goods.model.vertical.ImpactScoreCriteria;
-import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.RecommandationsConfig;
 import org.open4goods.model.vertical.ResourcesAggregationConfig;
 import org.open4goods.model.vertical.ScoringAggregationConfig;
-import org.open4goods.model.vertical.SiteNaming;
-import org.open4goods.model.vertical.VerticalSubset;
+import org.open4goods.model.vertical.WikiPageConfig;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -45,10 +41,44 @@ public record VerticalConfigFullDto(
         @Schema(description = "Localised plural label for the vertical. TODO(front-api): populate when naming strategy is available.",
                 nullable = true)
         String pluralName,
-        @Schema(description = "Localised summary texts keyed by IETF BCP 47 language tag.")
-        Map<String, VerticalConfigI18nDto> i18n,
-        @Schema(description = "Full set of i18n elements as defined in the YAML configuration.")
-        Map<String, ProductI18nElements> rawI18n,
+        @Schema(description = "Localised home title for the vertical.", example = "Téléviseurs")
+        String verticalHomeTitle,
+        @Schema(description = "Localised home description for the vertical.", example = "Comparez les téléviseurs responsables")
+        String verticalHomeDescription,
+        @Schema(description = "Localised home URL slug for the vertical.", example = "televiseurs")
+        String verticalHomeUrl,
+        @Schema(description = "Localised URL configuration used to generate product pages.")
+        PrefixedAttrText url,
+        @Schema(description = "Localised H1 title configuration for product pages.")
+        PrefixedAttrText h1Title,
+        @Schema(description = "Localised product meta title displayed in the HTML head.")
+        String productMetaTitle,
+        @Schema(description = "Localised product meta description displayed in the HTML head.")
+        String productMetaDescription,
+        @Schema(description = "Localised Open Graph title for product meta tags.")
+        String productMetaOpenGraphTitle,
+        @Schema(description = "Localised Open Graph description for product meta tags.")
+        String productMetaOpenGraphDescription,
+        @Schema(description = "Localised Twitter title for product meta tags.")
+        String productMetaTwitterTitle,
+        @Schema(description = "Localised Twitter description for product meta tags.")
+        String productMetaTwitterDescription,
+        @Schema(description = "Localised meta title for the vertical landing page.")
+        String verticalMetaTitle,
+        @Schema(description = "Localised meta description for the vertical landing page.")
+        String verticalMetaDescription,
+        @Schema(description = "Localised Open Graph title for the vertical landing page.")
+        String verticalMetaOpenGraphTitle,
+        @Schema(description = "Localised Open Graph description for the vertical landing page.")
+        String verticalMetaOpenGraphDescription,
+        @Schema(description = "Localised Twitter title for the vertical landing page.")
+        String verticalMetaTwitterTitle,
+        @Schema(description = "Localised Twitter description for the vertical landing page.")
+        String verticalMetaTwitterDescription,
+        @Schema(description = "Localised wiki pages associated with the vertical.")
+        List<WikiPageConfig> wikiPages,
+        @Schema(description = "Localised AI generation configuration for the vertical.")
+        AiPromptsConfig aiConfigs,
         @Schema(description = "Eco filters enabled for this vertical.")
         List<String> ecoFilters,
         @Schema(description = "Technical filters enabled for this vertical.")
@@ -71,20 +101,20 @@ public record VerticalConfigFullDto(
         Map<String, String> brandsAlias,
         @Schema(description = "Brands excluded from this vertical.")
         Set<String> brandsExclusion,
-        @Schema(description = "Site naming configuration inherited by the UI.")
-        SiteNaming namings,
+        @Schema(description = "Localised site naming configuration inherited by the UI.")
+        SiteNamingDto namings,
         @Schema(description = "Configuration for media aggregation.")
         ResourcesAggregationConfig resourcesConfig,
         @Schema(description = "Configuration for attribute aggregation and filters.")
-        AttributesConfig attributesConfig,
-        @Schema(description = "Impact score criteria available for this vertical.")
-        Map<String, ImpactScoreCriteria> availableImpactScoreCriterias,
-        @Schema(description = "Impact score configuration balancing each criterion.")
-        ImpactScoreConfig impactScoreConfig,
-        @Schema(description = "Custom subsets defined for this vertical.")
-        List<VerticalSubset> subsets,
-        @Schema(description = "Subset dedicated to brand exploration.")
-        VerticalSubset brandsSubset,
+        AttributesConfigDto attributesConfig,
+        @Schema(description = "Impact score criteria available for this vertical with localised metadata.")
+        Map<String, ImpactScoreCriteriaDto> availableImpactScoreCriterias,
+        @Schema(description = "Impact score configuration balancing each criterion, with localised texts.")
+        ImpactScoreConfigDto impactScoreConfig,
+        @Schema(description = "Custom subsets defined for this vertical with localised labels.")
+        List<VerticalSubsetDto> subsets,
+        @Schema(description = "Subset dedicated to brand exploration with localised labels.")
+        VerticalSubsetDto brandsSubset,
         @Schema(description = "Barcode aggregation configuration.")
         BarcodeAggregationProperties barcodeConfig,
         @Schema(description = "Recommendation engine configuration.")
@@ -93,8 +123,8 @@ public record VerticalConfigFullDto(
         DescriptionsAggregationConfig descriptionsAggregationConfig,
         @Schema(description = "Scoring aggregation configuration.")
         ScoringAggregationConfig scoringAggregationConfig,
-        @Schema(description = "Feature groups ordering attributes for UI rendering.")
-        List<FeatureGroup> featureGroups,
+        @Schema(description = "Feature groups ordering attributes for UI rendering with localised labels.")
+        List<FeatureGroupDto> featureGroups,
         @Schema(description = "Threshold defining how many low scores are considered worsts.")
         Integer worseLimit,
         @Schema(description = "Threshold defining how many high scores are considered bests.")
