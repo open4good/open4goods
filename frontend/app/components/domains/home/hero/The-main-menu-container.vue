@@ -1,9 +1,11 @@
 <script lang="ts" setup>
-
+defineEmits<{
+  'toggle-drawer': []
+}>()
 </script>
 
 <template>
-    <v-container fluid class="main-menu-container position-fixed">
+    <v-container fluid class="main-menu-container position-sticky">
       <v-row>
         <v-col cols="3">
           <the-main-logo />
@@ -18,7 +20,6 @@
 <style lang="sass" scoped>
 .main-menu-container
   top: 0
-  left: 0
   z-index: 100
   background-color: white
 </style>
