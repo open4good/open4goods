@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { useI18n } from 'vue-i18n'
 
+import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
 type FooterLink = {
   label: string
   href: string
@@ -8,14 +10,16 @@ type FooterLink = {
   rel?: string
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const currentLocale = computed(() => normalizeLocale(locale.value))
+const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
 
 const currentYear = computed(() => new Date().getFullYear())
 
 const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
-    href: '/ecoscore',
+    href: resolveLocalizedRoutePath('ecoscore', currentLocale.value),
   }
 ])
 
@@ -41,7 +45,7 @@ const comparatorLinks = computed<FooterLink[]>(() => [
 const communityLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.community.links.team'),
-    href: '/equipe',
+    href: resolveLocalizedRoutePath('team', currentLocale.value),
   },
   {
     label: t('siteIdentity.footer.community.links.partners'),
@@ -60,7 +64,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   },
   {
     label: t('siteIdentity.footer.feedback.links.contact'),
-    href: '/contact',
+    href: resolveLocalizedRoutePath('contact', currentLocale.value),
   },
   {
     label: t('siteIdentity.footer.feedback.links.linkedin'),
@@ -85,7 +89,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         </p>
 
         <v-btn
-          :href="'/blog'"
+          :href="blogPath"
           variant="text"
           append-icon="mdi-arrow-right"
           class="footer-link-btn text-white px-0"

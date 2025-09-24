@@ -55,13 +55,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
-interface MenuItem {
-  title: string
-  to: string
-  icon: string
-}
+const { t, locale } = useI18n()
+const currentLocale = computed(() => normalizeLocale(locale.value))
 
 const emit = defineEmits<{
   close: []
@@ -69,6 +66,17 @@ const emit = defineEmits<{
 
 const { isLoggedIn, logout } = useAuth()
 const router = useRouter()
+
+interface MenuItemDefinition {
+  titleKey: string
+  routeName: string
+  icon: string
+}
+
+interface MenuItem extends MenuItemDefinition {
+  title: string
+  to: string
+}
 
 const handleLogout = async () => {
   if (!isLoggedIn.value) {
@@ -85,28 +93,36 @@ const handleLogout = async () => {
   }
 }
 
-const menuItems: MenuItem[] = [
+const baseMenuItems: MenuItemDefinition[] = [
   {
-    title: t('siteIdentity.menu.items.impactScore'),
-    to: '/impact-score',
-    icon: 'mdi-chart-line'
+    titleKey: 'siteIdentity.menu.items.impactScore',
+    routeName: 'impact-score',
+    icon: 'mdi-chart-line',
   },
   {
-    title: t('siteIdentity.menu.items.products'),
-    to: '/produits',
-    icon: 'mdi-package-variant'
+    titleKey: 'siteIdentity.menu.items.products',
+    routeName: 'produits',
+    icon: 'mdi-package-variant',
   },
   {
-    title: t('siteIdentity.menu.items.blog'),
-    to: '/blog',
-    icon: 'mdi-post'
+    titleKey: 'siteIdentity.menu.items.blog',
+    routeName: 'blog',
+    icon: 'mdi-post',
   },
   {
-    title: t('siteIdentity.menu.items.contact'),
-    to: '/contact',
-    icon: 'mdi-email'
-  }
+    titleKey: 'siteIdentity.menu.items.contact',
+    routeName: 'contact',
+    icon: 'mdi-email',
+  },
 ]
+
+const menuItems = computed<MenuItem[]>(() =>
+  baseMenuItems.map((item) => ({
+    ...item,
+    title: t(item.titleKey),
+    to: resolveLocalizedRoutePath(item.routeName, currentLocale.value),
+  })),
+)
 </script>
 
 <style scoped lang="sass">

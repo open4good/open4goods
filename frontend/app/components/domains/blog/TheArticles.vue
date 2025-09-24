@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
 import { useBlog } from '~/composables/blog/useBlog'
 const { articles, loading, error, fetchArticles } = useBlog()
 
@@ -9,6 +13,18 @@ const formatDate = (timestamp: number) => {
 
 // Debug mode - use environment variable or default to false
 const debugMode = ref(false)
+const { locale } = useI18n()
+const currentLocale = computed(() => normalizeLocale(locale.value))
+
+const navigateToArticle = (slug: string | null | undefined) => {
+  if (!slug) {
+    return
+  }
+
+  const path = resolveLocalizedRoutePath('blog-slug', currentLocale.value, { slug })
+
+  navigateTo(path)
+}
 
 // Fetch articles on component mount
 onMounted(() => {
@@ -115,7 +131,7 @@ onMounted(() => {
                 variant="outlined"
                 size="small"
                 color="primary"
-                @click="() => navigateTo(`/blog/${article.url}`)"
+                @click="() => navigateToArticle(article.url)"
               >
                 Lire plus
               </v-btn>

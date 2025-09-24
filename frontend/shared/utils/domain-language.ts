@@ -1,14 +1,19 @@
 export type DomainLanguage = 'en' | 'fr'
 export type NuxtLocale = 'en-US' | 'fr-FR'
 
-const DEFAULT_DOMAIN_LANGUAGE: DomainLanguage = 'en'
-const DEFAULT_NUXT_LOCALE: NuxtLocale = 'en-US'
+export const DEFAULT_DOMAIN_LANGUAGE: DomainLanguage = 'en'
+export const DEFAULT_NUXT_LOCALE: NuxtLocale = 'en-US'
 
-const HOST_DOMAIN_LANGUAGE_MAP: Record<string, DomainLanguage> = {
+export const HOST_DOMAIN_LANGUAGE_MAP: Record<string, DomainLanguage> = {
   'nudger.com': 'en',
   'nudger.fr': 'fr',
   localhost: 'fr',
   '127.0.0.1': 'en',
+}
+
+export interface NuxtI18nLocaleDomains {
+  domain: string
+  domains?: string[]
 }
 
 const DOMAIN_LANGUAGE_TO_LOCALE_MAP: Record<DomainLanguage, NuxtLocale> = {
@@ -103,6 +108,36 @@ export const resolveDomainLanguage = (
 export const getNuxtLocaleForDomainLanguage = (
   domainLanguage: DomainLanguage
 ): NuxtLocale => DOMAIN_LANGUAGE_TO_LOCALE_MAP[domainLanguage]
+
+export const buildI18nLocaleDomains = (): Record<NuxtLocale, NuxtI18nLocaleDomains> => {
+  const localeHostMap = new Map<NuxtLocale, string[]>()
+
+  Object.entries(HOST_DOMAIN_LANGUAGE_MAP).forEach(([hostname, domainLanguage]) => {
+    const locale = getNuxtLocaleForDomainLanguage(domainLanguage)
+    const hostsForLocale = localeHostMap.get(locale)
+
+    if (hostsForLocale) {
+      hostsForLocale.push(hostname)
+      return
+    }
+
+    localeHostMap.set(locale, [hostname])
+  })
+
+  return Object.fromEntries(
+    Array.from(localeHostMap.entries()).map(([locale, hostnames]) => {
+      const [primaryDomain, ...alternateDomains] = hostnames
+
+      return [
+        locale,
+        {
+          domain: primaryDomain ?? '',
+          ...(alternateDomains.length > 0 ? { domains: alternateDomains } : {}),
+        } satisfies NuxtI18nLocaleDomains,
+      ]
+    }),
+  ) as Record<NuxtLocale, NuxtI18nLocaleDomains>
+}
 
 export const getDomainLanguageFromHostname = (
   hostname: string | null

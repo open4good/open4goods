@@ -1,6 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
+import { buildI18nLocaleDomains } from './shared/utils/domain-language'
+import { buildI18nPagesConfig } from './shared/utils/localized-routes'
+
+const localeDomains = buildI18nLocaleDomains()
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -68,11 +72,14 @@ export default defineNuxtConfig({
     defaultLocale: 'en-US',
     langDir: '../i18n/locales',
     locales: [
-      { code: 'fr-FR', name: 'Français', file: 'fr-FR.json' },
-      { code: 'en-US', name: 'English', file: 'en-US.json' },
+      { code: 'fr-FR', name: 'Français', file: 'fr-FR.json', ...(localeDomains['fr-FR'] ?? {}) },
+      { code: 'en-US', name: 'English', file: 'en-US.json', ...(localeDomains['en-US'] ?? {}) },
     ],
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
+    customRoutes: 'config',
+    differentDomains: true,
+    pages: buildI18nPagesConfig(),
   },
   css: [
     '~/assets/sass/main.sass', // Keep only the main SASS file

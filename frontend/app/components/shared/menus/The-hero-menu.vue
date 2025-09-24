@@ -36,49 +36,72 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute();
-const router = useRouter();
-const { isLoggedIn, logout } = useAuth();
+import { useI18n } from 'vue-i18n'
+import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
+const route = useRoute()
+const router = useRouter()
+const { isLoggedIn, logout } = useAuth()
+const { t, locale } = useI18n()
+const currentLocale = computed(() => normalizeLocale(locale.value))
 
 const handleLogout = async () => {
   if (!isLoggedIn.value) {
-    return;
+    return
   }
 
   try {
-    await logout();
-    await router.push('/');
+    await logout()
+    await router.push('/')
   } catch (error) {
-    console.error('Logout failed', error);
+    console.error('Logout failed', error)
   }
-};
-
-defineEmits<{
-  "toggle-drawer": [];
-}>();
-
-interface MenuItem {
-  label: string;
-  path: string;
 }
 
-const menuItems: MenuItem[] = [
-  { label: 'Impact-score', path: '/impact-score' },
-  { label: 'Les produits', path: '/produits' },
-  { label: 'Blog', path: '/blog' },
-  { label: 'Contact', path: '/contact' }
-];
+defineEmits<{
+  'toggle-drawer': []
+}>()
+
+interface MenuItemDefinition {
+  labelKey: string
+  routeName: string
+}
+
+interface MenuItem extends MenuItemDefinition {
+  label: string
+  path: string
+}
+
+const baseMenuItems: MenuItemDefinition[] = [
+  { labelKey: 'siteIdentity.menu.items.impactScore', routeName: 'impact-score' },
+  { labelKey: 'siteIdentity.menu.items.products', routeName: 'produits' },
+  { labelKey: 'siteIdentity.menu.items.blog', routeName: 'blog' },
+  { labelKey: 'siteIdentity.menu.items.contact', routeName: 'contact' },
+]
+
+const menuItems = computed<MenuItem[]>(() =>
+  baseMenuItems.map((item) => ({
+    ...item,
+    label: t(item.labelKey),
+    path: resolveLocalizedRoutePath(item.routeName, currentLocale.value),
+  })),
+)
 
 const isActiveRoute = (path: string): boolean => {
-  if (path === '/') {
-    return route.path === '/';
+  if (!path) {
+    return false
   }
-  return route.path.startsWith(path);
-};
+
+  if (path === '/') {
+    return route.path === path
+  }
+
+  return route.path.startsWith(path)
+}
 
 const navigateToPage = (path: string): void => {
-  router.push(path);
-};
+  router.push(path)
+}
 </script>
 
 <style scoped lang="sass">
