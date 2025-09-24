@@ -2,42 +2,13 @@ import type { NuxtLocale } from './domain-language'
 import { DEFAULT_NUXT_LOCALE } from './domain-language'
 
 export type LocalizedRouteName =
-  | 'blog'
-  | 'blog-slug'
-  | 'contact'
-  | 'ecoscore'
-  | 'impact-score'
-  | 'produits'
   | 'team'
 
 export type LocalizedRoutePath = `/${string}`
 export type LocalizedRoutePaths = Record<LocalizedRouteName, Record<NuxtLocale, LocalizedRoutePath>>
 
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
-  blog: {
-    'fr-FR': '/notre-blog',
-    'en-US': '/our-blog',
-  },
-  'blog-slug': {
-    'fr-FR': '/notre-blog/[slug]',
-    'en-US': '/our-blog/[slug]',
-  },
-  contact: {
-    'fr-FR': '/contact',
-    'en-US': '/contact',
-  },
-  ecoscore: {
-    'fr-FR': '/ecoscore',
-    'en-US': '/ecoscore',
-  },
-  'impact-score': {
-    'fr-FR': '/impact-score',
-    'en-US': '/impact-score',
-  },
-  produits: {
-    'fr-FR': '/produits',
-    'en-US': '/products',
-  },
+
   team: {
     'fr-FR': '/equipe',
     'en-US': '/team',
