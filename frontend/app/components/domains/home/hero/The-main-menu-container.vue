@@ -5,6 +5,7 @@ defineEmits<{
 </script>
 
 <template>
+  <header class="main-menu-header">
     <v-container fluid class="main-menu-container position-sticky">
       <v-row>
         <v-col cols="3">
@@ -15,9 +16,13 @@ defineEmits<{
         </v-col>
       </v-row>
     </v-container>
+  </header>
 </template>
 
 <style lang="sass" scoped>
+.main-menu-header
+  width: 100%
+
 .main-menu-container
   top: 0
   z-index: 100
