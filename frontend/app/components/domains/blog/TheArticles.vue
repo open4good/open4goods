@@ -4,7 +4,15 @@ import { useI18n } from 'vue-i18n'
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 import { useBlog } from '~/composables/blog/useBlog'
-const { articles, loading, error, fetchArticles } = useBlog()
+const {
+  articles: allArticles,
+  paginatedArticles,
+  loading,
+  error,
+  pagination,
+  fetchArticles,
+  changePage,
+} = useBlog()
 
 // Format date helper
 const formatDate = (timestamp: number) => {
@@ -15,6 +23,20 @@ const formatDate = (timestamp: number) => {
 const debugMode = ref(false)
 const { locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
+const currentPage = ref(1)
+
+watch(
+  () => pagination.value.page,
+  (page) => {
+    currentPage.value = page || 1
+  },
+  { immediate: true }
+)
+
+const totalPages = computed(() => pagination.value.totalPages || 0)
+const totalElements = computed(() => pagination.value.totalElements || 0)
+const displayedArticlesCount = computed(() => paginatedArticles.value.length)
+const shouldDisplayPagination = computed(() => totalPages.value > 1)
 
 const navigateToArticle = (slug: string | null | undefined) => {
   if (!slug) {
@@ -30,6 +52,10 @@ const navigateToArticle = (slug: string | null | undefined) => {
 onMounted(() => {
   fetchArticles()
 })
+
+const handlePageChange = async (page: number) => {
+  await changePage(page)
+}
 </script>
 
 <template>
@@ -44,9 +70,10 @@ onMounted(() => {
     <!-- Debug information -->
     <div v-if="debugMode" class="debug-info">
       <h4>Debug Information:</h4>
-      <p>Articles count: {{ articles.length }}</p>
+      <p>Total loaded articles: {{ allArticles.length }}</p>
+      <p>Articles on current page: {{ displayedArticlesCount }}</p>
       <div
-        v-for="(article, index) in articles"
+        v-for="(article, index) in paginatedArticles"
         :key="index"
         class="debug-article"
       >
@@ -70,7 +97,7 @@ onMounted(() => {
     <div v-else class="articles">
       <v-row>
         <v-col
-          v-for="article in articles"
+          v-for="article in paginatedArticles"
           :key="article.url"
           cols="12"
           sm="6"
@@ -139,6 +166,20 @@ onMounted(() => {
           </v-card>
         </v-col>
       </v-row>
+
+      <div v-if="shouldDisplayPagination" class="pagination-container">
+        <v-pagination
+          :length="totalPages"
+          :model-value="currentPage"
+          :total-visible="5"
+          @update:model-value="handlePageChange"
+        />
+
+        <p class="pagination-info">
+          Showing page {{ currentPage }} of {{ totalPages }} ({{ totalElements }}
+          articles)
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -248,6 +289,17 @@ onMounted(() => {
 
 .date-text
   color: #666
+
+.pagination-container
+  margin-top: 24px
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 8px
+
+.pagination-info
+  font-size: 0.9rem
+  color: #555
 
 // Responsive adjustments
 @media (max-width: 600px)
