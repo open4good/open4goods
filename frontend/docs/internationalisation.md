@@ -10,6 +10,16 @@ The helper is consumed by:
 
 The i18n module keeps the `no_prefix` routing strategy. Hostnames remain the single source of truth: users navigate unprefixed paths (for example `/produits`) and the helper ensures that the locale matches the expected language for the current domain on every request.
 
+## Localised route slugs
+
+Top-level routes now expose translated slugs per locale through [`shared/utils/localized-routes.ts`](../shared/utils/localized-routes.ts). The helper centralises the mapping between route names and locale-specific paths so that:
+
+- Navigation components (`The-hero-menu.vue`, `The-mobile-menu.vue`, etc.) can render the correct links for the active host.
+- Programmatic navigations (for instance, blog article cards) reuse the same mapping to avoid hard-coded `/blog/...` URLs.
+- `nuxt.config.ts` derives the `@nuxtjs/i18n` `pages` configuration from the shared table, ensuring that `/notre-blog` resolves to the blog index on the French hostname while `/our-blog` serves the English version.
+
+When adding a new page that requires translated slugs, declare its route name inside `LOCALIZED_ROUTE_PATHS` and rely on `resolveLocalizedRoutePath()` to compute URLs instead of concatenating strings.
+
 ## Current hostname mapping
 | Hostname        | Domain language | Nuxt locale | Notes                                     |
 |-----------------|-----------------|-------------|-------------------------------------------|

@@ -1,7 +1,12 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { createPinia, setActivePinia } from 'pinia'
+import { ref } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+
+import * as localizedRoutes from '~~/shared/utils/localized-routes'
 import TheArticles from './TheArticles.vue'
+
+const resolveLocalizedRoutePathSpy = vi.spyOn(localizedRoutes, 'resolveLocalizedRoutePath')
 
 // Mock du composable useBlog
 const mockArticles = [
@@ -37,19 +42,23 @@ vi.mock('~/composables/blog/useBlog', () => ({
   useBlog: () => mockUseBlog,
 }))
 
-// Mock de useRuntimeConfig
+const mockNavigateTo = vi.fn()
+const localeRef = ref('fr-FR')
+
 vi.mock('#app', () => ({
   useRuntimeConfig: () => ({
     public: {
       apiUrl: 'https://test-api.example.com',
     },
   }),
+  navigateTo: mockNavigateTo,
 }))
 
-// Mock de navigateTo
-const mockNavigateTo = vi.fn()
-vi.mock('#app', () => ({
-  navigateTo: mockNavigateTo,
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    locale: localeRef,
+    t: (key: string) => key,
+  }),
 }))
 
 describe('TheArticles Component', () => {
@@ -57,6 +66,8 @@ describe('TheArticles Component', () => {
     // Reset mocks
     vi.clearAllMocks()
     setActivePinia(createPinia())
+    localeRef.value = 'fr-FR'
+    resolveLocalizedRoutePathSpy.mockClear()
   })
 
   test('should render loading state', async () => {
@@ -163,5 +174,23 @@ describe('TheArticles Component', () => {
     // Should not render any article cards
     const articleCards = wrapper.findAll('.article-card')
     expect(articleCards).toHaveLength(0)
+  })
+
+  test('computes localized article path when clicking read more', async () => {
+    mockUseBlog.loading = false
+    mockUseBlog.error = null
+    mockUseBlog.articles = mockArticles
+    localeRef.value = 'en-US'
+
+    const wrapper = await mountSuspended(TheArticles)
+
+    const readMoreButton = wrapper.find('.article-actions button')
+    expect(readMoreButton.exists()).toBe(true)
+
+    await readMoreButton.trigger('click')
+
+    expect(resolveLocalizedRoutePathSpy).toHaveBeenCalledWith('blog-slug', 'en-US', {
+      slug: 'test-article-1',
+    })
   })
 })

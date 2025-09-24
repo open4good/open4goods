@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
+import { buildI18nPagesConfig } from './shared/utils/localized-routes'
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -73,6 +74,7 @@ export default defineNuxtConfig({
     ],
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
+    pages: buildI18nPagesConfig(),
   },
   css: [
     '~/assets/sass/main.sass', // Keep only the main SASS file

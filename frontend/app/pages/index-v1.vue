@@ -11,7 +11,7 @@
         Roles: {{ roles.join(', ') }}
       </p>
       <div class="d-flex ga-4">
-        <router-link to="/blog">
+        <router-link :to="blogPath">
           <v-btn color="primary" size="large" rounded="pill" class="elevation-2">
             <v-icon start icon="mdi-book-open" />
             Read our blog
@@ -96,8 +96,11 @@
 </template>
 
 <script setup lang="ts">
+import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
 const { hasRole, isLoggedIn, username, roles, logout } = useAuth()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const blogPath = computed(() => resolveLocalizedRoutePath('blog', normalizeLocale(locale.value)))
 
 const router = useRouter()
 
