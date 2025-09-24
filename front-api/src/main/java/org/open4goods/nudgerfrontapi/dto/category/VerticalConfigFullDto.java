@@ -77,8 +77,6 @@ public record VerticalConfigFullDto(
         Map<String, String> brandsAlias,
         @Schema(description = "Brands excluded from this vertical.")
         Set<String> brandsExclusion,
-        @Schema(description = "Localised site naming configuration inherited by the UI.")
-        SiteNamingDto namings,
         @Schema(description = "Configuration for media aggregation.")
         ResourcesAggregationConfig resourcesConfig,
         @Schema(description = "Configuration for attribute aggregation and filters.")

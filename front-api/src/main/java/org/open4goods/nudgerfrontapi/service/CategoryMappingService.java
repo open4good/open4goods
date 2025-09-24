@@ -110,7 +110,6 @@ public class CategoryMappingService {
                 verticalConfig.isForceNameGeneration(),
                 defaultMap(verticalConfig.getBrandsAlias()),
                 defaultSet(verticalConfig.getBrandsExclusion()),
-                mapSiteNaming(verticalConfig.getNamings(), domainLanguage),
                 verticalConfig.getResourcesConfig(),
                 mapAttributesConfig(verticalConfig.getAttributesConfig(), domainLanguage),
                 mapImpactScoreCriterias(verticalConfig.getAvailableImpactScoreCriterias(), domainLanguage),
@@ -194,14 +193,6 @@ public class CategoryMappingService {
                 impactScoreConfig.getAiJsonResponse());
     }
 
-    private SiteNamingDto mapSiteNaming(SiteNaming siteNaming, DomainLanguage domainLanguage) {
-        if (siteNaming == null) {
-            return null;
-        }
-        return new SiteNamingDto(
-                localise(siteNaming.getServerNames(), domainLanguage),
-                localise(siteNaming.getBaseUrls(), domainLanguage));
-    }
 
     private List<VerticalSubsetDto> mapVerticalSubsets(List<VerticalSubset> subsets, DomainLanguage domainLanguage) {
         return defaultList(subsets).stream()
