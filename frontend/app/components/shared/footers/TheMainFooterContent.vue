@@ -74,7 +74,6 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   },
 ])
 
-const logoSrc = '/images/nudger-logo-orange.svg'
 </script>
 
 <template>
@@ -175,7 +174,7 @@ const logoSrc = '/images/nudger-logo-orange.svg'
       <v-col cols="12" class="d-flex flex-column align-center ga-4">
         <NuxtLink to="/" class="footer-logo-link d-inline-flex">
           <v-img
-            :src="logoSrc"
+            src="@/assets/images/nudger-logo-orange.svg"
             :alt="t('siteIdentity.footer.logoAlt')"
             height="40"
             class="footer-logo"
