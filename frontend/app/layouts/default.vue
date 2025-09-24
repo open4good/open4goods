@@ -13,7 +13,7 @@
       <the-mobile-menu @close="drawer = false" />
     </v-navigation-drawer>
 
-    <v-main>
+    <v-main tag="main">
       <slot />
     </v-main>
 
