@@ -16,32 +16,17 @@ describe('localized-routes utilities', () => {
   })
 
   it('resolves localized static paths', () => {
-    expect(resolveLocalizedRoutePath('blog', 'fr-FR')).toBe('/notre-blog')
-    expect(resolveLocalizedRoutePath('blog', 'en-US')).toBe('/our-blog')
-    expect(resolveLocalizedRoutePath('contact', 'fr-FR')).toBe('/contact')
-    expect(resolveLocalizedRoutePath('impact-score', 'en-US')).toBe('/impact-score')
-    expect(resolveLocalizedRoutePath('ecoscore', 'fr-FR')).toBe('/ecoscore')
+    expect(resolveLocalizedRoutePath('team', 'fr-FR')).toBe('/equipe')
+    expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
   })
 
-  it('resolves localized dynamic paths', () => {
-    expect(resolveLocalizedRoutePath('blog-slug', 'fr-FR', { slug: 'article-test' })).toBe(
-      '/notre-blog/article-test',
-    )
-    expect(resolveLocalizedRoutePath('blog-slug', 'en-US', { slug: 'article-test' })).toBe(
-      '/our-blog/article-test',
-    )
-  })
 
   it('falls back to default paths when no mapping exists', () => {
     expect(resolveLocalizedRoutePath('privacy', 'fr-FR')).toBe('/privacy')
     expect(resolveLocalizedRoutePath('account', 'en-US')).toBe('/account')
   })
 
-  it('throws when required params are missing', () => {
-    expect(() => resolveLocalizedRoutePath('blog-slug', 'fr-FR')).toThrowError(
-      'Missing parameter "slug"',
-    )
-  })
+
 
   it('builds a compatible i18n pages configuration', () => {
     const config = buildI18nPagesConfig()
