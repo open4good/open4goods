@@ -7,8 +7,6 @@ Adhering to these rules keeps every sub-project consistent, maintainable, and pr
 > Each sub-module (e.g. `/api`, `/crawler`, `/services/*`) ships its own `agents.md` that may add or override rules.  
 > The standards below are **mandatory everywhere** unless a module’s guide explicitly says otherwise.
 
-
-> IMPORTANT : The docs/business folder contains documentation about processes, accounting, project magamnt, team, ..... It is functional documentation that also aim to be understood by LLM agents in order to provide RAG functionalities. It is also to be used to ensure  code / design / platform  stays coherent with the global strategy
 ---
 
 ## 1  Technology stack
@@ -87,7 +85,7 @@ No class in a lower layer may depend on a higher one.
 - **Error handling**: Custom exceptions + RFC 9457 / Problem-Detail responses.  
 - **Logging**: SLF4J parameterised messages and structured logging.  
 - **Tests**: Unit + integration tests for every feature or bug-fix.  
-- **Javadoc**: Keep class/method Javadoc up-to-date.  
+- **Javadoc**: Keep class/method Javadoc up-to-date, you must generate it when writing new class, or update it when handling existing code.  
 - **TODOs**: Resolve or raise an issue; none should remain in committed code.
 
 ---
