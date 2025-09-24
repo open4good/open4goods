@@ -76,7 +76,7 @@ public class CategoriesController {
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "onlyEnabled", defaultValue = "true") boolean onlyEnabled) {
         List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault(onlyEnabled).stream()
-                .map(categoryMappingService::toVerticalConfigDto)
+                .map(config -> categoryMappingService.toVerticalConfigDto(config, domainLanguage))
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -113,7 +113,7 @@ public class CategoriesController {
             return ResponseEntity.notFound().build();
         }
 
-        VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config);
+        VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config, domainLanguage);
         return ResponseEntity.ok()
                 .cacheControl(FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);

@@ -12,19 +12,16 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.RolesConstants;
-import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.BarcodeAggregationProperties;
 import org.open4goods.model.vertical.DescriptionsAggregationConfig;
-import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.RecommandationsConfig;
 import org.open4goods.model.vertical.ResourcesAggregationConfig;
 import org.open4goods.model.vertical.ScoringAggregationConfig;
-import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.nudgerfrontapi.controller.api.CategoriesController;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +58,11 @@ class CategoriesControllerIT {
         given(verticalsConfigService.getConfigsWithoutDefault(true)).willReturn(List.of(verticalConfig));
 
         VerticalConfigDto dto = new VerticalConfigDto("tv", true, 404, 1584, 1,
-                null, null, null, null, Map.of());
-        given(categoryMappingService.toVerticalConfigDto(verticalConfig)).willReturn(dto);
+                null, null, null, null,
+                "Titre",
+                "Description",
+                "url");
+        given(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.fr)).willReturn(dto);
 
         mockMvc.perform(get("/category")
                 .param("domainLanguage", "fr")
@@ -89,8 +89,25 @@ class CategoriesControllerIT {
                 null,
                 null,
                 null,
-                Map.of(),
-                Map.of(),
+                "Titre",
+                "Description",
+                "url",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(),
+                null,
                 List.of(),
                 List.of(),
                 List.of(),
@@ -102,21 +119,21 @@ class CategoriesControllerIT {
                 false,
                 Map.of(),
                 Set.of(),
-                new SiteNaming(),
+                null,
                 new ResourcesAggregationConfig(),
-                new AttributesConfig(),
+                null,
                 Map.of(),
-                new ImpactScoreConfig(),
+                null,
                 List.of(),
-                new VerticalSubset(),
+                null,
                 new BarcodeAggregationProperties(),
                 new RecommandationsConfig(),
                 new DescriptionsAggregationConfig(),
                 new ScoringAggregationConfig(),
                 List.of(),
-                0,
-                0);
-        given(categoryMappingService.toVerticalConfigFullDto(verticalConfig)).willReturn(fullDto);
+                null,
+                null);
+        given(categoryMappingService.toVerticalConfigFullDto(verticalConfig, DomainLanguage.fr)).willReturn(fullDto);
 
         mockMvc.perform(get("/category/tv")
                 .param("domainLanguage", "fr")

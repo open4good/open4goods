@@ -1,7 +1,5 @@
 package org.open4goods.nudgerfrontapi.dto.category;
 
-import java.util.Map;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -30,7 +28,11 @@ public record VerticalConfigDto(
         @Schema(description = "Localised plural label for the vertical. TODO(front-api): populate when naming strategy is available.",
                 nullable = true)
         String pluralName,
-        @Schema(description = "Localised summary texts keyed by IETF BCP 47 language tag.")
-        Map<String, VerticalConfigI18nDto> i18n
+        @Schema(description = "Localised home title for the vertical.", example = "Téléviseurs")
+        String verticalHomeTitle,
+        @Schema(description = "Localised home description for the vertical.", example = "Comparez les téléviseurs responsables")
+        String verticalHomeDescription,
+        @Schema(description = "Localised home URL slug for the vertical.", example = "televiseurs")
+        String verticalHomeUrl
 ) {
 }
