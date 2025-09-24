@@ -14,18 +14,16 @@ export class AuthService {
   /**
    * Hydrates the auth store from the access token cookie.
    */
-  syncAuthState() {
+  syncAuthState(tokenValue: string | null) {
     if (import.meta.client) {
       // The httpOnly cookie is not exposed to the browser, therefore we keep the state provided by SSR.
       return
     }
-    const config = useRuntimeConfig()
-    const token = useCookie<string | null>(config.tokenCookieName)
     const authStore = useAuthStore()
 
-    if (token.value) {
+    if (tokenValue) {
       try {
-        const decoded = jwtDecode<JwtPayload>(token.value)
+        const decoded = jwtDecode<JwtPayload>(tokenValue)
         authStore.$patch({
           roles: decoded.roles ?? [],
           isLoggedIn: true,
@@ -84,12 +82,6 @@ export class AuthService {
 
     const authStore = useAuthStore()
     authStore.$reset()
-
-    const config = useRuntimeConfig()
-    const tokenCookie = useCookie<string | null>(config.tokenCookieName)
-    const refreshCookie = useCookie<string | null>(config.refreshCookieName)
-    tokenCookie.value = null
-    refreshCookie.value = null
   }
 }
 
