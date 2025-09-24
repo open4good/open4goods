@@ -7,14 +7,18 @@ const runtimeConfig = {
   refreshCookieName: 'refresh_token',
 }
 
-const mockComposables = {
+vi.mock('#app', () => ({
   useRuntimeConfig: () => runtimeConfig,
   useCookie: () => ({ value: null }),
-}
-
-vi.mock('#app', () => mockComposables)
-vi.mock('#imports', () => mockComposables)
-vi.mock('nuxt/app', () => mockComposables)
+}))
+vi.mock('#imports', () => ({
+  useRuntimeConfig: () => runtimeConfig,
+  useCookie: () => ({ value: null }),
+}))
+vi.mock('nuxt/app', () => ({
+  useRuntimeConfig: () => runtimeConfig,
+  useCookie: () => ({ value: null }),
+}))
 
 const fetchMock = vi.fn()
 vi.stubGlobal('$fetch', fetchMock)
