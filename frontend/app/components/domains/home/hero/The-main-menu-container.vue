@@ -6,7 +6,7 @@ defineEmits<{
 
 <template>
   <header class="main-menu-header">
-    <v-container fluid class="main-menu-container position-sticky">
+    <v-container fluid class="main-menu-container">
       <v-row>
         <v-col cols="3">
           <the-main-logo />
@@ -21,10 +21,12 @@ defineEmits<{
 
 <style lang="sass" scoped>
 .main-menu-header
-  width: 100%
-
-.main-menu-container
+  position: sticky
   top: 0
   z-index: 100
+  width: 100%
+  background-color: white
+
+.main-menu-container
   background-color: white
 </style>
