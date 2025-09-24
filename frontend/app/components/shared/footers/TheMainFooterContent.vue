@@ -16,11 +16,7 @@ const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
     href: '/ecoscore',
-  },
-  {
-    label: t('siteIdentity.footer.highlightLinks.compensation'),
-    href: '/compensation-ecologique',
-  },
+  }
 ])
 
 const comparatorLinks = computed<FooterLink[]>(() => [
