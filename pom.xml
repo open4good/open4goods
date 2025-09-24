@@ -19,7 +19,6 @@
 		<swagger.version>2.9.2</swagger.version>
 		<swagger.core.v3.version>2.2.35</swagger.core.v3.version>
 		<jacoco.version>0.8.13</jacoco.version>
-		<xwiki.version>11.10.2</xwiki.version>
 
 		<processDependencyManagement>true</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
@@ -30,12 +29,33 @@
 	</properties>
 
     <repositories>
-        <repository>
-            <id>in-project</id>
-            <name>In Project Repo</name>
-            <url>file://${maven.multiModuleProjectDirectory}/libs</url>
-        </repository>
+      <repository>
+        <id>central</id>
+        <url>https://repo1.maven.org/maven2/</url>
+      </repository>
+      <repository>
+        <id>xwiki-releases</id>
+        <url>https://maven.xwiki.org/releases/</url>
+      </repository>
+      <repository>
+        <id>in-project</id>
+        <name>In Project Repo</name>
+        <url>file://${maven.multiModuleProjectDirectory}/libs</url>
+        <releases><enabled>true</enabled></releases>
+        <snapshots><enabled>false</enabled></snapshots>
+      </repository>
     </repositories>
+
+    <pluginRepositories>
+      <pluginRepository>
+        <id>central</id>
+        <url>https://repo1.maven.org/maven2/</url>
+      </pluginRepository>
+      <pluginRepository>
+        <id>xwiki-releases</id>
+        <url>https://maven.xwiki.org/releases/</url>
+      </pluginRepository>
+    </pluginRepositories>
 
 	<modules>
 		<module>admin</module>
@@ -433,7 +453,7 @@
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>3.5.4</version>
                   </plugin>
                   <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
