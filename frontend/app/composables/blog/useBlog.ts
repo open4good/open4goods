@@ -4,7 +4,6 @@ import type { BlogPostDto, PageDto } from '~~/shared/api-client'
  * Composable for blog-related functionality
  */
 const DEFAULT_PAGE_SIZE = 12
-const MAX_PAGINATION_PAGES = 100
 
 export const useBlog = () => {
   // Reactive state
@@ -20,7 +19,7 @@ export const useBlog = () => {
   })
 
   /**
-   * Fetch all blog articles
+   * Fetch blog articles for a specific page from the backend proxy
    */
   const fetchArticles = async (
     page: number = pagination.value.page,
@@ -30,73 +29,33 @@ export const useBlog = () => {
     error.value = null
 
     try {
-      const aggregatedArticles: BlogPostDto[] = []
-      let pageSize = Math.max(size, 1)
-      let nextPageToFetch = 0
-      let totalPagesFromMeta: number | undefined
-      let totalElementsFromMeta: number | undefined
-      let safetyCounter = 0
+      const sanitizedPage = Number.isFinite(page) ? Math.max(page, 1) : 1
+      const sanitizedSize = Number.isFinite(size) ? Math.max(size, 1) : DEFAULT_PAGE_SIZE
 
-      while (true) {
-        // Use our server API as proxy instead of calling external API directly
-        const response = await $fetch<PageDto>('/api/blog/articles', {
-          params: {
-            pageNumber: nextPageToFetch,
-            pageSize,
-          },
-        })
+      // Use our server API as proxy instead of calling external API directly
+      const response = await $fetch<PageDto>('/api/blog/articles', {
+        params: {
+          pageNumber: sanitizedPage - 1,
+          pageSize: sanitizedSize,
+        },
+      })
 
-        const pageArticles = response.data ?? []
-        aggregatedArticles.push(...pageArticles)
+      const currentPageArticles = response.data ?? []
+      articles.value = currentPageArticles
 
-        const pageMeta = response.page
-        if (pageMeta?.size) {
-          pageSize = pageMeta.size
-        }
-        if (pageMeta?.totalPages !== undefined) {
-          totalPagesFromMeta = pageMeta.totalPages
-        }
-        if (pageMeta?.totalElements !== undefined) {
-          totalElementsFromMeta = pageMeta.totalElements
-        }
-
-        const hasMorePagesFromMeta =
-          totalPagesFromMeta !== undefined && nextPageToFetch + 1 < totalPagesFromMeta
-        const hasMorePagesByCount =
-          totalPagesFromMeta === undefined &&
-          pageArticles.length > 0 &&
-          pageArticles.length >= pageSize
-
-        if (!hasMorePagesFromMeta && !hasMorePagesByCount) {
-          break
-        }
-
-        nextPageToFetch += 1
-        safetyCounter += 1
-
-        if (safetyCounter >= MAX_PAGINATION_PAGES) {
-          console.warn(
-            `Reached safety limit of ${MAX_PAGINATION_PAGES} pages when fetching blog articles. ` +
-              'Stopping to avoid an infinite loop.',
-          )
-          break
-        }
-      }
-
-      articles.value = aggregatedArticles
-
-      const resolvedTotalElements = totalElementsFromMeta ?? aggregatedArticles.length
+      const pageMeta = response.page
+      const resolvedPageSize = pageMeta?.size ?? sanitizedSize
+      const resolvedTotalElements = pageMeta?.totalElements ?? currentPageArticles.length
       const computedTotalPages =
-        totalPagesFromMeta ??
-        (pageSize > 0 ? Math.ceil(resolvedTotalElements / pageSize) : 1) ??
-        1
-      const safeTotalPages = Math.max(computedTotalPages, 1)
-      const requestedPage = Math.max(page, 1)
-      const boundedPage = Math.min(requestedPage, safeTotalPages)
+        pageMeta?.totalPages ??
+        (resolvedPageSize > 0 ? Math.ceil(resolvedTotalElements / resolvedPageSize) : 1)
+      const safeTotalPages = Math.max(computedTotalPages ?? 1, 1)
+      const zeroBasedPage = pageMeta?.number ?? sanitizedPage - 1
+      const safePage = Math.min(zeroBasedPage + 1, safeTotalPages)
 
       pagination.value = {
-        page: boundedPage,
-        size: pageSize,
+        page: safePage,
+        size: resolvedPageSize,
         totalElements: resolvedTotalElements,
         totalPages: safeTotalPages,
       }
@@ -114,24 +73,25 @@ export const useBlog = () => {
    * @param page - 1-based page number
    */
   const changePage = async (page: number) => {
-    if (page < 1 || page === pagination.value.page) {
+    if (page < 1) {
       return
     }
 
     const maxPage = pagination.value.totalPages || 1
-    pagination.value = {
-      ...pagination.value,
-      page: Math.min(page, maxPage),
+    const boundedPage = Math.min(page, maxPage)
+
+    const shouldFetchCurrentPage =
+      boundedPage !== pagination.value.page || articles.value.length === 0
+
+    if (!shouldFetchCurrentPage) {
+      return
     }
+
+    await fetchArticles(boundedPage, pagination.value.size)
   }
 
   const paginatedArticles = computed(() => {
-    const page = Math.max(pagination.value.page, 1)
-    const size = Math.max(pagination.value.size, 1)
-    const start = (page - 1) * size
-    const end = start + size
-
-    return articles.value.slice(start, end)
+    return articles.value
   })
 
   /**
