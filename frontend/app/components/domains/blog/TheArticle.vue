@@ -223,13 +223,6 @@ useHead(() => ({
           </time>
         </span>
 
-        <span v-if="updatedDate" class="article-meta__item" data-test="article-updated">
-          <v-icon icon="mdi-update" size="small" aria-hidden="true" />
-          <time :datetime="updatedDate.iso" itemprop="dateModified">
-            {{ t('blog.article.updated', { date: updatedDate.label }) }}
-          </time>
-        </span>
-
         <span v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
           {{ readingTimeLabel }}
