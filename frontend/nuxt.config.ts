@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
+import { DEFAULT_NUXT_LOCALE, LOCALE_DEFINITIONS } from './shared/config/locales'
 import { buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { buildI18nPagesConfig } from './shared/utils/localized-routes'
 
@@ -69,12 +70,14 @@ export default defineNuxtConfig({
       },
     },
   i18n: {
-    defaultLocale: 'en-US',
+    defaultLocale: DEFAULT_NUXT_LOCALE,
     langDir: '../i18n/locales',
-    locales: [
-      { code: 'fr-FR', name: 'Français', file: 'fr-FR.json', ...(localeDomains['fr-FR'] ?? {}) },
-      { code: 'en-US', name: 'English', file: 'en-US.json', ...(localeDomains['en-US'] ?? {}) },
-    ],
+    locales: LOCALE_DEFINITIONS.map((definition) => ({
+      code: definition.nuxtLocale,
+      name: definition.i18n.name,
+      file: definition.i18n.file,
+      ...(localeDomains[definition.nuxtLocale] ?? {}),
+    })),
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
     customRoutes: 'config',
