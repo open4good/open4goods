@@ -1,9 +1,13 @@
 package org.open4goods.nudgerfrontapi.controller.auth;
 
+import java.time.Duration;
+
 import org.open4goods.nudgerfrontapi.dto.auth.AuthTokensDto;
 import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.dto.auth.LogoutResponse;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +17,6 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -98,5 +101,31 @@ public class AuthController {
         } catch (Exception ex) {
             return ResponseEntity.status(401).build();
         }
+    }
+
+    @PostMapping("/logout")
+    @Operation(
+            summary = "Logout user",
+            description = "Expire the access and refresh token cookies so the session becomes invalid.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Logout successful",
+                            content = @Content(schema = @Schema(implementation = LogoutResponse.class)))
+            }
+    )
+    public ResponseEntity<LogoutResponse> logout() {
+        ResponseCookie clearAccessToken = ResponseCookie.from("access-token", "")
+                .httpOnly(true)
+                .maxAge(Duration.ZERO)
+                .path("/")
+                .build();
+        ResponseCookie clearRefreshToken = ResponseCookie.from("refresh-token", "")
+                .httpOnly(true)
+                .maxAge(Duration.ZERO)
+                .path("/")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearAccessToken.toString(), clearRefreshToken.toString())
+                .body(new LogoutResponse(true));
     }
 }

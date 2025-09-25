@@ -63,4 +63,17 @@ class AuthControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(cookie().exists("access-token"));
     }
+
+    @Test
+    void logoutClearsAuthCookies() throws Exception {
+        mockMvc.perform(post("/auth/logout")
+                        .cookie(new jakarta.servlet.http.Cookie("access-token", "access"),
+                                new jakarta.servlet.http.Cookie("refresh-token", "refresh"))
+                        .param("domainLanguage", "FR"))
+                .andExpect(status().isOk())
+                .andExpect(cookie().value("access-token", ""))
+                .andExpect(cookie().maxAge("access-token", 0))
+                .andExpect(cookie().value("refresh-token", ""))
+                .andExpect(cookie().maxAge("refresh-token", 0));
+    }
 }
