@@ -52,7 +52,7 @@ importers:
         version: 4.0.0
       npm:
         specifier: ^11.6.0
-        version: 11.6.0
+        version: 11.6.1
       nuxt:
         specifier: ^4.0.0
         version: 4.1.2(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.1)(@types/node@24.3.1)(@vue/compiler-sfc@3.5.21)(db0@0.3.2)(eslint@9.35.0(jiti@2.5.1))(ioredis@5.7.0)(magicast@0.3.5)(meow@13.2.0)(optionator@0.9.4)(rollup@4.50.1)(sass@1.92.1)(terser@5.44.0)(tsx@4.20.5)(typescript@5.9.2)(vite@7.1.5(@types/node@24.3.1)(jiti@2.5.1)(sass@1.92.1)(terser@5.44.0)(tsx@4.20.5)(yaml@2.8.1))(vue-tsc@3.0.8(typescript@5.9.2))(yaml@2.8.1)
@@ -6057,8 +6057,8 @@ packages:
       - which
       - write-file-atomic
 
-  npm@11.6.0:
-    resolution: {integrity: sha512-d/P7DbvYgYNde9Ehfeq99+13/E7E82PfZPw8uYZASr9sQ3ZhBBCA9cXSJRA1COfJ6jDLJ0K36UJnXQWhCvLXuQ==}
+  npm@11.6.1:
+    resolution: {integrity: sha512-7iDSHDoup6uMQJ37yWrhfqcbMhF0UEfGRap6Nv+aKQcrIJXlCi2cKbj75WBmiHlcwsQCy/U0zEwDZdAx6H/Vaw==}
     engines: {node: ^20.17.0 || >=22.9.0}
     hasBin: true
     bundledDependencies:
@@ -15249,7 +15249,7 @@ snapshots:
 
   npm@10.9.3: {}
 
-  npm@11.6.0: {}
+  npm@11.6.1: {}
 
   nth-check@2.1.1:
     dependencies:
