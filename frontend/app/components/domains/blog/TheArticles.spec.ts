@@ -9,7 +9,17 @@ import TheArticles from './TheArticles.vue'
 const resolveLocalizedRoutePathSpy = vi.spyOn(localizedRoutes, 'resolveLocalizedRoutePath')
 
 // Mock the useBlog composable
-const mockArticles = [
+type MockArticle = {
+  id: string
+  title: string
+  summary: string
+  author: string
+  createdMs: number
+  image: string | null
+  url: string
+}
+
+const mockArticles: MockArticle[] = [
   {
     id: '1',
     title: 'Test Article 1',
@@ -29,6 +39,11 @@ const mockArticles = [
     url: 'test-article-2',
   },
 ]
+
+const cloneArticleWithoutImage = (article: MockArticle): MockArticle => ({
+  ...article,
+  image: null,
+})
 
 const articlesRef = ref(mockArticles)
 const paginatedArticlesRef = ref(mockArticles)
@@ -179,10 +194,13 @@ describe('TheArticles Component', () => {
   test('should handle articles without images', async () => {
     loadingRef.value = false
     errorRef.value = null
-    const imagelessArticle = mockArticles.find((article) => !article.image)
-    if (!imagelessArticle) {
-      throw new Error('Expected at least one article without an image')
+    const [firstArticle] = mockArticles
+    if (!firstArticle) {
+      throw new Error('Expected at least one article to clone')
     }
+
+    const imagelessArticle = cloneArticleWithoutImage(firstArticle)
+
     articlesRef.value = [imagelessArticle]
     paginatedArticlesRef.value = [imagelessArticle]
 
