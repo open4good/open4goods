@@ -65,13 +65,13 @@ const mockRouterPush = vi.fn(
 
     Object.keys(routeQuery).forEach((key) => {
       if (!(key in nextQuery) || nextQuery[key] === undefined) {
-        delete routeQuery[key]
+        Reflect.deleteProperty(routeQuery, key)
       }
     })
 
     Object.entries(nextQuery).forEach(([key, value]) => {
       if (value === undefined) {
-        delete routeQuery[key]
+        Reflect.deleteProperty(routeQuery, key)
       } else {
         routeQuery[key] = value
       }
@@ -149,7 +149,7 @@ describe('TheArticles Component', () => {
     changePageMock.mockReset()
     mockRouterPush.mockReset()
     Object.keys(routeQuery).forEach((key) => {
-      delete routeQuery[key]
+      Reflect.deleteProperty(routeQuery, key)
     })
   })
 
