@@ -77,11 +77,17 @@ export class AuthService {
 
   async logout() {
     const authStore = useAuthStore()
-    authStore.$reset()
-
     const { tokenCookie, refreshCookie } = useAuthCookies()
-    tokenCookie.value = null
-    refreshCookie.value = null
+
+    try {
+      await $fetch('/auth/logout', {
+        method: 'POST',
+      })
+    } finally {
+      authStore.$reset()
+      tokenCookie.value = null
+      refreshCookie.value = null
+    }
   }
 }
 

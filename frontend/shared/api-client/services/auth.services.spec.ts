@@ -39,7 +39,8 @@ describe('AuthService.logout', () => {
 
     await authService.logout()
 
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith('/auth/logout', { method: 'POST' })
     expect(authStore.isLoggedIn).toBe(false)
     expect(authStore.roles).toEqual([])
     expect(authStore.username).toBeNull()
