@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, unref, type MaybeRefOrGetter } from 'vue'
 import DOMPurify from 'dompurify'
 
 // NOTE: Unsafe script-stripping regular expression removed. Always use DOMPurify for sanitizing HTML.
@@ -8,10 +8,11 @@ import DOMPurify from 'dompurify'
  * @param {string} rawHtml
  * @returns {string} sanitizedHtml
  */
-export function _sanitizeHtml(rawHtml: string) {
+export function _sanitizeHtml(rawHtml: MaybeRefOrGetter<string | null | undefined>) {
   const sanitized = computed(() => {
     try {
-      const purified = DOMPurify.sanitize(rawHtml)
+      const input = unref(rawHtml) ?? ''
+      const purified = DOMPurify.sanitize(input)
       // If DOMPurify fails or produces falsy, fallback to empty string
       return purified || ''
     } catch {

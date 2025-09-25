@@ -4,6 +4,7 @@ import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
 import { DEFAULT_LOREM_LENGTH, _generateLoremIpsum } from '~/utils/content/_loremIpsum'
+import { _sanitizeHtml } from '~/shared/utils/sanitizer'
 import '~/assets/css/text-content.css'
 
 // Props
@@ -39,6 +40,8 @@ const displayHtml = computed(() => {
   return _generateLoremIpsum(fallbackLoremLength.value)
 })
 
+const { sanitizedHtml } = _sanitizeHtml(displayHtml)
+
 // Watcher / mount
 onMounted(() => {
   fetchBloc(props.blocId)
@@ -58,7 +61,8 @@ watch(
     <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
     <!-- Encapsulated XWiki content -->
-    <div v-else class="xwiki-sandbox" v-html="displayHtml" />
+    <!-- eslint-disable-next-line vue/no-v-html -->
+    <div v-else class="xwiki-sandbox" v-html="sanitizedHtml" />
 
     <!-- Edit link -->
     <a
