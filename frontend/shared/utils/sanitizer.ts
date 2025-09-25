@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import DOMPurify from 'dompurify'
 
-const stripScripts = (html: string) => html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+// NOTE: Unsafe script-stripping regular expression removed. Always use DOMPurify for sanitizing HTML.
 
 /**
  * Sanitize HTML
@@ -12,9 +12,11 @@ export function _sanitizeHtml(rawHtml: string) {
   const sanitized = computed(() => {
     try {
       const purified = DOMPurify.sanitize(rawHtml)
-      return purified || stripScripts(rawHtml)
+      // If DOMPurify fails or produces falsy, fallback to empty string
+      return purified || ''
     } catch {
-      return stripScripts(rawHtml)
+      // If DOMPurify throws, fallback to empty string
+      return ''
     }
   })
   return {
