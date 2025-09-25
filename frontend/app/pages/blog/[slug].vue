@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, computed } from 'vue'
+import { computed } from 'vue'
+import { useAsyncData } from '#imports'
 import { useBlog } from '~/composables/blog/useBlog'
 import type { BlogPostDto } from '~~/shared/api-client'
 
@@ -12,14 +13,21 @@ const route = useRoute()
 const router = useRouter()
 const { currentArticle, loading, error, fetchArticle } = useBlog()
 
+const slug = computed(() => route.params.slug as string)
+
+await useAsyncData(
+  () => `blog-article-${slug.value}`,
+  () => fetchArticle(slug.value),
+  {
+    server: true,
+    immediate: true,
+    watch: [slug],
+  },
+)
+
 const article = computed(
   () => currentArticle.value as BlogArticle | null
 )
-
-// Fetch the article when the page loads
-onMounted(() => {
-  fetchArticle(route.params.slug as string)
-})
 </script>
 
 <template>
