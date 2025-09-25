@@ -21,8 +21,6 @@ const formatDate = (timestamp: number) => {
   return new Date(timestamp).toLocaleDateString()
 }
 
-// Debug mode - use environment variable or default to false
-const debugMode = ref(false)
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -206,28 +204,7 @@ const seoPageLinks = computed(() => {
 
 <template>
   <div class="blog-list">
-    <!-- Debug toggle -->
-    <div class="debug-toggle">
-      <v-btn size="small" variant="outlined" @click="debugMode = !debugMode">
-        {{ debugMode ? 'Hide' : 'Show' }} Debug Info
-      </v-btn>
-    </div>
 
-    <!-- Debug information -->
-    <div v-if="debugMode" class="debug-info">
-      <h4>Debug Information:</h4>
-      <p>Total articles reported by API: {{ totalElements }}</p>
-      <p>Articles loaded for current page: {{ currentPageArticles.length }}</p>
-      <p>Articles currently displayed: {{ displayedArticlesCount }}</p>
-      <div
-        v-for="(article, index) in paginatedArticles"
-        :key="index"
-        class="debug-article"
-      >
-        <h5>Article {{ index + 1 }}:</h5>
-        <pre>{{ JSON.stringify(article, null, 2) }}</pre>
-      </div>
-    </div>
 
     <section
       v-if="availableTags.length || activeTag"
@@ -441,19 +418,6 @@ const seoPageLinks = computed(() => {
   margin: 0 auto
   padding: 20px
 
-.debug-toggle
-  margin-bottom: 20px
-  text-align: center
-
-.debug-info
-  background: #f5f5f5
-  border: 1px solid #ddd
-  border-radius: 8px
-  padding: 16px
-  margin-bottom: 20px
-  font-family: monospace
-  font-size: 12px
-
 .tag-filter
   margin-bottom: 24px
   padding: 16px
@@ -501,11 +465,7 @@ const seoPageLinks = computed(() => {
     font-size: 0.875rem
     color: #1976d2
 
-.debug-article
-  margin-bottom: 16px
-  padding: 8px
-  background: white
-  border-radius: 4px
+
 
   h5
     margin: 0 0 8px 0
