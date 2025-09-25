@@ -2,11 +2,6 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '~/stores/useAuthStore'
 
-const runtimeConfig = {
-  tokenCookieName: 'access_token',
-  refreshCookieName: 'refresh_token',
-}
-
 interface MockCookie {
   value: string | null
 }
@@ -14,28 +9,8 @@ interface MockCookie {
 let tokenCookie: MockCookie = { value: null }
 let refreshCookie: MockCookie = { value: null }
 
-const useCookieMock = (name: string): MockCookie => {
-  if (name === runtimeConfig.tokenCookieName) {
-    return tokenCookie
-  }
-  if (name === runtimeConfig.refreshCookieName) {
-    return refreshCookie
-  }
-
-  throw new Error(`Unexpected cookie requested: ${name}`)
-}
-
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => runtimeConfig,
-  useCookie: useCookieMock,
-}))
-vi.mock('#imports', () => ({
-  useRuntimeConfig: () => runtimeConfig,
-  useCookie: useCookieMock,
-}))
-vi.mock('nuxt/app', () => ({
-  useRuntimeConfig: () => runtimeConfig,
-  useCookie: useCookieMock,
+vi.mock('~/utils/authCookies', () => ({
+  useAuthCookies: () => ({ tokenCookie, refreshCookie }),
 }))
 
 const fetchMock = vi.fn()
