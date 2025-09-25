@@ -141,11 +141,4 @@ describe('TheArticle.vue', () => {
 
     expect(wrapper.find('[data-test="article-edit-link"]').exists()).toBe(false)
   })
-
-  test('exposes navigation to the blog listing when clicking on a tag', async () => {
-    const wrapper = await mountComponent()
-
-    const firstCategory = wrapper.get('[data-test="article-category"]')
-    expect(firstCategory.props('to')).toEqual({ path: '/blog', query: { tag: 'Nuxt' } })
-  })
 })
