@@ -7,17 +7,35 @@ const runtimeConfig = {
   refreshCookieName: 'refresh_token',
 }
 
+interface MockCookie {
+  value: string | null
+}
+
+let tokenCookie: MockCookie = { value: null }
+let refreshCookie: MockCookie = { value: null }
+
+const useCookieMock = (name: string): MockCookie => {
+  if (name === runtimeConfig.tokenCookieName) {
+    return tokenCookie
+  }
+  if (name === runtimeConfig.refreshCookieName) {
+    return refreshCookie
+  }
+
+  throw new Error(`Unexpected cookie requested: ${name}`)
+}
+
 vi.mock('#app', () => ({
   useRuntimeConfig: () => runtimeConfig,
-  useCookie: () => ({ value: null }),
+  useCookie: useCookieMock,
 }))
 vi.mock('#imports', () => ({
   useRuntimeConfig: () => runtimeConfig,
-  useCookie: () => ({ value: null }),
+  useCookie: useCookieMock,
 }))
 vi.mock('nuxt/app', () => ({
   useRuntimeConfig: () => runtimeConfig,
-  useCookie: () => ({ value: null }),
+  useCookie: useCookieMock,
 }))
 
 const fetchMock = vi.fn()
@@ -31,6 +49,8 @@ describe('AuthService.logout', () => {
     fetchMock.mockReset()
     fetchMock.mockResolvedValue(undefined)
     vi.resetModules()
+    tokenCookie = { value: 'token' }
+    refreshCookie = { value: 'refresh' }
     ;({ authService } = await import('./auth.services'))
   })
 
@@ -44,13 +64,12 @@ describe('AuthService.logout', () => {
 
     await authService.logout()
 
-    expect(fetchMock).toHaveBeenCalledWith('/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
+    expect(fetchMock).not.toHaveBeenCalled()
     expect(authStore.isLoggedIn).toBe(false)
     expect(authStore.roles).toEqual([])
     expect(authStore.username).toBeNull()
+    expect(tokenCookie.value).toBeNull()
+    expect(refreshCookie.value).toBeNull()
   })
 })
 
