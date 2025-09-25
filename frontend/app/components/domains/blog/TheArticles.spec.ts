@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { createPinia, setActivePinia } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import * as localizedRoutes from '~~/shared/utils/localized-routes'
@@ -43,6 +43,26 @@ const paginationRef = ref({
 
 const fetchArticlesMock = vi.fn()
 const changePageMock = vi.fn()
+const routeQuery = reactive<Record<string, string | undefined>>({})
+const mockRouterPush = vi.fn(
+  async ({ query }: { query?: Record<string, string | undefined> } = {}) => {
+    const nextQuery = query ?? {}
+
+    Object.keys(routeQuery).forEach((key) => {
+      if (!(key in nextQuery) || nextQuery[key] === undefined) {
+        delete routeQuery[key]
+      }
+    })
+
+    Object.entries(nextQuery).forEach(([key, value]) => {
+      if (value === undefined) {
+        delete routeQuery[key]
+      } else {
+        routeQuery[key] = value
+      }
+    })
+  },
+)
 
 const mockUseBlog = {
   articles: articlesRef,
@@ -69,6 +89,21 @@ vi.mock('#app', () => ({
     },
   }),
   navigateTo: mockNavigateTo,
+  useRoute: () => ({
+    query: routeQuery,
+  }),
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
+}))
+
+vi.mock('#imports', () => ({
+  useRoute: () => ({
+    query: routeQuery,
+  }),
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
 }))
 
 vi.mock('vue-i18n', () => ({
@@ -97,6 +132,10 @@ describe('TheArticles Component', () => {
     }
     fetchArticlesMock.mockReset()
     changePageMock.mockReset()
+    mockRouterPush.mockReset()
+    Object.keys(routeQuery).forEach((key) => {
+      delete routeQuery[key]
+    })
   })
 
   test('should render loading state', async () => {
@@ -192,10 +231,14 @@ describe('TheArticles Component', () => {
     expect(wrapper.find('button').text()).toBe('Hide Debug Info')
   })
 
-  test('should call fetchArticles on mount', async () => {
-    await mountSuspended(TheArticles)
+  test('should request initial page on mount', async () => {
+    paginatedArticlesRef.value = []
 
-    expect(fetchArticlesMock).toHaveBeenCalledTimes(1)
+    await mountSuspended(TheArticles)
+    await nextTick()
+
+    expect(changePageMock).toHaveBeenCalledTimes(1)
+    expect(changePageMock).toHaveBeenCalledWith(1)
   })
 
   test('should handle empty articles array', async () => {
@@ -257,6 +300,7 @@ describe('TheArticles Component', () => {
     }
 
     await instance.handlePageChange(2)
+    await nextTick()
 
     expect(changePageMock).toHaveBeenCalledWith(2)
   })
