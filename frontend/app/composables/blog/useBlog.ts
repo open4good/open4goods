@@ -7,18 +7,39 @@ const DEFAULT_PAGE_SIZE = 12
 
 export const useBlog = () => {
   // Reactive state
-  const articles = ref<BlogPostDto[]>([])
-  const currentArticle = ref<BlogPostDto | null>(null)
-  const tags = ref<BlogTagDto[]>([])
-  const selectedTag = ref<string | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-  const pagination = ref({
-    page: 1,
-    size: DEFAULT_PAGE_SIZE,
-    totalElements: 0,
-    totalPages: 0,
-  })
+  const articles = useState<BlogPostDto[]>(
+    'blog-articles',
+    () => [],
+  )
+  const currentArticle = useState<BlogPostDto | null>(
+    'blog-current-article',
+    () => null,
+  )
+  const tags = useState<BlogTagDto[]>(
+    'blog-tags',
+    () => [],
+  )
+  const selectedTag = useState<string | null>(
+    'blog-selected-tag',
+    () => null,
+  )
+  const loading = useState(
+    'blog-loading',
+    () => false,
+  )
+  const error = useState<string | null>(
+    'blog-error',
+    () => null,
+  )
+  const pagination = useState(
+    'blog-pagination',
+    () => ({
+      page: 1,
+      size: DEFAULT_PAGE_SIZE,
+      totalElements: 0,
+      totalPages: 0,
+    }),
+  )
 
   /**
    * Fetch blog articles for a specific page from the backend proxy
