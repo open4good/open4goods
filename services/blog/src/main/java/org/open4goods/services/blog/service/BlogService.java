@@ -208,6 +208,17 @@ public class BlogService implements HealthIndicator {
                         String fullImage = getBlogImageUrl(
                                 URLEncoder.encode(page.getName(), StandardCharsets.UTF_8),
                                 URLEncoder.encode(image, StandardCharsets.UTF_8));
+
+
+                        // Translation to .webp format
+                        // NOTE : it will be autoamticaly cached and resized with the imageresizer interceptor
+
+                        if (fullImage.endsWith(".png") || fullImage.endsWith(".jpg") || fullImage.endsWith(".jpeg")) {
+                        	fullImage = fullImage.substring(0, fullImage.lastIndexOf('.'));
+                        	// Must be in allowedImagesSizeSuffixes of app rendering resources
+                        	fullImage += "-1000.webp";
+                        }
+
                         post.setImage(fullImage);
                     }
 
@@ -273,6 +284,13 @@ public class BlogService implements HealthIndicator {
                         basePath = basePath.substring(0, basePath.length() - 1);
                     }
                     html = html.replace("\"/bin/download/Blog", "\"" + basePath);
+
+                    // Translation to .webp format
+                    // NOTE : it will be autoamticaly cached and resized with the imageresizer interceptor
+                    html = html.replace(".png", ".webp");
+                    html = html.replace(".jpg", ".webp");
+                    html = html.replace(".jpeg", ".webp");
+
                     post.setBody(html);
 
                     // Generate a summary if not provided and the body is sufficiently long
