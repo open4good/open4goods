@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import type { BlogPostDto } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
-import RobustImage from '~/components/shared/images/RobustImage.vue'
 
 interface BlogArticle extends BlogPostDto {
   /**
