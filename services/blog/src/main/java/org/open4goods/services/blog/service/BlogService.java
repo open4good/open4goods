@@ -268,7 +268,7 @@ public class BlogService implements HealthIndicator {
                     }
 
                     // Replace blog attachment links with proxied equivalent links
-                    String basePath = '/' + config.getBlogUrl();
+                    String basePath = config.getStaticDomain()+ '/' + config.getBlogUrl();
                     if (basePath.endsWith("/")) {
                         basePath = basePath.substring(0, basePath.length() - 1);
                     }
