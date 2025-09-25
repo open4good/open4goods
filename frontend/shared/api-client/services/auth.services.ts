@@ -3,6 +3,7 @@
  */
 import { jwtDecode } from 'jwt-decode'
 import { useAuthStore } from '~/stores/useAuthStore'
+import { useAuthCookies } from '~/utils/authCookies'
 
 interface JwtPayload {
   roles?: string[]
@@ -78,9 +79,7 @@ export class AuthService {
     const authStore = useAuthStore()
     authStore.$reset()
 
-    const config = useRuntimeConfig()
-    const tokenCookie = useCookie<string | null>(config.tokenCookieName)
-    const refreshCookie = useCookie<string | null>(config.refreshCookieName)
+    const { tokenCookie, refreshCookie } = useAuthCookies()
     tokenCookie.value = null
     refreshCookie.value = null
   }
