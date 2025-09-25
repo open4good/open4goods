@@ -89,7 +89,34 @@ const buildTagLink = (tag: string) => ({
   query: { tag },
 })
 
-const headingId = computed(() => `blog-article-${article.value.url ?? 'detail'}`)
+const buildIdFragment = (value?: string | null) => {
+  if (!value) {
+    return ''
+  }
+
+  return value
+    .toString()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .toLowerCase()
+}
+
+const baseIdFragment = computed(() => {
+  const fragment =
+    buildIdFragment(article.value.url) ||
+    buildIdFragment(article.value.title) ||
+    'detail'
+
+  return fragment
+})
+
+const headingId = computed(() => `blog-article-${baseIdFragment.value}`)
+const categoriesHeadingId = computed(() => `${headingId.value}-categories`)
+const metadataHeadingId = computed(() => `${headingId.value}-metadata`)
+const bodyHeadingId = computed(() => `${headingId.value}-body`)
+const footerHeadingId = computed(() => `${headingId.value}-footer`)
 
 const metaDescription = computed(() => {
   const summary = articleSummary.value
@@ -145,6 +172,24 @@ const structuredData = computed(() => {
   return schema
 })
 
+const translateWithFallback = (key: string, fallback: string, params?: Record<string, unknown>) => {
+  const translated = params ? t(key, params) : t(key)
+  return translated === key ? fallback : translated
+}
+
+const categoriesLabel = computed(() => translateWithFallback('blog.article.categoriesLabel', 'Article categories'))
+const metadataLabel = computed(() => translateWithFallback('blog.article.metadataLabel', 'Article metadata'))
+const bodyLabel = computed(() => translateWithFallback('blog.article.bodyLabel', 'Article content'))
+const footerLabel = computed(() => translateWithFallback('blog.article.footerLabel', 'Article tools'))
+const authorLabel = computed(() => translateWithFallback('blog.article.authorLabel', 'Author'))
+const publishedLabel = computed(() => translateWithFallback('blog.article.publishedLabel', 'Published on'))
+const readingTimeHeading = computed(() =>
+  translateWithFallback('blog.article.readingTimeLabel', 'Estimated reading time'),
+)
+
+const buildCategoryLabel = (category: string) =>
+  translateWithFallback('blog.article.categoryChipLabel', category, { category })
+
 useSeoMeta({
   title: articleTitle,
   ogTitle: articleTitle,
@@ -187,9 +232,10 @@ useHead(() => ({
       <nav
         v-if="categories.length"
         class="article-categories"
-        aria-label="Article categories"
+        :aria-labelledby="categoriesHeadingId"
       >
-        <ul class="article-categories__list">
+        <h2 :id="categoriesHeadingId" class="visually-hidden">{{ categoriesLabel }}</h2>
+        <ul class="article-categories__list" role="list">
           <li
             v-for="category in categories"
             :key="category"
@@ -202,6 +248,7 @@ useHead(() => ({
               size="small"
               :to="buildTagLink(category)"
               link
+              :aria-label="buildCategoryLabel(category)"
               data-test="article-category"
             >
               {{ category }}
@@ -218,10 +265,11 @@ useHead(() => ({
         {{ articleSummary }}
       </p>
 
-      <ul class="article-meta" aria-label="Article metadata">
+      <h2 :id="metadataHeadingId" class="visually-hidden">{{ metadataLabel }}</h2>
+      <ul class="article-meta" :aria-labelledby="metadataHeadingId" role="list">
         <li v-if="article.author" class="article-meta__item" data-test="article-author">
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Author:</span>
+          <span class="visually-hidden">{{ authorLabel }}:</span>
           <span itemprop="author" itemscope itemtype="https://schema.org/Person">
             <span itemprop="name">{{ article.author }}</span>
           </span>
@@ -229,7 +277,7 @@ useHead(() => ({
 
         <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Published on:</span>
+          <span class="visually-hidden">{{ publishedLabel }}:</span>
           <time :datetime="publishedDate.iso" itemprop="datePublished">
             {{ publishedDate.label }}
           </time>
@@ -237,7 +285,7 @@ useHead(() => ({
 
         <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Estimated reading time:</span>
+          <span class="visually-hidden">{{ readingTimeHeading }}:</span>
           <span>{{ readingTimeLabel }}</span>
         </li>
       </ul>
@@ -256,22 +304,25 @@ useHead(() => ({
 
     <v-divider class="article-divider" role="presentation" />
 
-    <section
-      v-if="hasBody"
-      class="article-body"
-      itemprop="articleBody"
-      aria-label="Article content"
-      role="region"
-    >
+    <section v-if="hasBody" class="article-body" itemprop="articleBody" :aria-labelledby="bodyHeadingId">
+      <h2 :id="bodyHeadingId" class="visually-hidden">{{ bodyLabel }}</h2>
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="article-content" data-test="article-body" v-html="sanitizedBody" />
     </section>
 
-    <section v-else class="article-body article-body--empty" aria-live="polite" data-test="article-empty">
+    <section
+      v-else
+      class="article-body article-body--empty"
+      :aria-labelledby="bodyHeadingId"
+      aria-live="polite"
+      data-test="article-empty"
+    >
+      <h2 :id="bodyHeadingId" class="visually-hidden">{{ bodyLabel }}</h2>
       <v-alert type="info" variant="tonal">{{ t('blog.article.empty') }}</v-alert>
     </section>
 
-    <footer class="article-footer" aria-label="Article footer">
+    <footer class="article-footer" :aria-labelledby="footerHeadingId">
+      <h2 :id="footerHeadingId" class="visually-hidden">{{ footerLabel }}</h2>
       <v-btn
         v-if="isLoggedIn && article.editLink"
         :href="article.editLink"
