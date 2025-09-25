@@ -1,11 +1,12 @@
 # Frontend internationalisation
 
 ## Overview
-The Nuxt 3 frontend determines the active language on every request by inspecting the incoming hostname. This logic is centralised in [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) so that both client and server share the same mapping between hostnames, domain language codes (`'en' | 'fr'`), and Nuxt locales (`'en-US' | 'fr-FR'`). The helper now also exposes `buildI18nLocaleDomains()`, allowing [`nuxt.config.ts`](../nuxt.config.ts) to hydrate each locale definition with its canonical domain plus any alternates (e.g. `localhost`) without duplicating configuration. With `differentDomains: true` enabled, the i18n module can reuse the same mapping for host-based locale detection while our plugin keeps SSR and CSR aligned.
+The Nuxt 3 frontend determines the active language on every request by inspecting the incoming hostname. Locale metadata is centralised in [`shared/config/locales.ts`](../shared/config/locales.ts) so both client and server share the same mapping between hostnames, domain language codes (e.g. `'en'`, `'fr'`), Nuxt locales (e.g. `'en-US'`, `'fr-FR'`), and Vuetify's translated UI strings. [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) derives its lookups from these definitions, while [`nuxt.config.ts`](../nuxt.config.ts) consumes them to populate the `@nuxtjs/i18n` module with locale metadata and domain aliases. With `differentDomains: true` enabled, the i18n module can reuse the same mapping for host-based locale detection while our plugin keeps SSR and CSR aligned.
 
 The helper is consumed by:
 
 - [`app/plugins/i18n-hostname.ts`](../app/plugins/i18n-hostname.ts) to keep SSR and CSR aligned when switching locales.
+- [`app/plugins/vuetify-locale.ts`](../app/plugins/vuetify-locale.ts) which merges the Vuetify-provided locale bundles declared in `LOCALE_DEFINITIONS` into Vue I18n so components never warn about missing `$vuetify` keys.
 - Server API handlers (e.g. [`server/api/blog/articles.ts`](../server/api/blog/articles.ts)) to forward the resolved `domainLanguage` to backend services such as `BlogApi` and `ContentApi`.
 
 The i18n module keeps the `no_prefix` routing strategy. Hostnames remain the single source of truth: users navigate unprefixed paths (for example `/produits`) and the helper ensures that the locale matches the expected language for the current domain on every request.
@@ -47,14 +48,15 @@ Top-level routes now expose translated slugs per locale through [`shared/utils/l
 5. **Application** – the i18n plugin uses `setLocale` only when the resolved locale differs from the current one. Server routes pass the `domainLanguage` to service factories so outbound API calls carry the correct locale context.
 
 ## Updating or extending the mapping
-The mapping lives in [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) across two constants: `HOST_DOMAIN_LANGUAGE_MAP` and `DOMAIN_LANGUAGE_TO_LOCALE_MAP`. To add or change domains:
+The single source of truth is [`shared/config/locales.ts`](../shared/config/locales.ts). To add or change domains or locales:
 
-1. Update `HOST_DOMAIN_LANGUAGE_MAP` so that each hostname points to the appropriate domain language (`'en' | 'fr'`).
-2. When introducing a new language, also extend `DOMAIN_LANGUAGE_TO_LOCALE_MAP` with the Nuxt locale string.
+1. Import the appropriate Vuetify bundle from `vuetify/locale` if you are introducing a new language.
+2. Append or update an entry in `LOCALE_DEFINITIONS`, providing the domain language, Nuxt locale, i18n metadata, list of domains, and Vuetify messages.
 3. Keep hostnames lowercase and without protocol or trailing slash; ports are removed automatically during normalisation.
-4. Restart the Nuxt server if it is already running so the updated map is picked up.
+4. Add the corresponding JSON translation file under `i18n/locales/` when introducing a new locale.
+5. Restart the Nuxt server if it is already running so the updated map is picked up.
 
-When introducing a new locale, also register it in `nuxt.config.ts` under the `i18n.locales` array so translations can load correctly.
+The rest of the stack—domain detection, Nuxt configuration, and the Vuetify locale plugin—picks up the change automatically because they all read from `LOCALE_DEFINITIONS`.
 
 ## Behaviour on unknown domains
 If the application receives a hostname that is not present in `HOST_DOMAIN_LANGUAGE_MAP`, the request falls back to English (`domainLanguage: 'en'`, `locale: 'en-US'`). Server-side callers log a warning describing the unknown hostname so operators can adjust the mapping. Client-side navigation continues without additional logging to avoid noise in the browser console.

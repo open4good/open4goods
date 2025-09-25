@@ -201,6 +201,34 @@ Call `normalizeLocale(locale)` if you receive user input that may not already be
 a supported Nuxt locale. The helper falls back to the default locale to avoid
 runtime errors.
 
+## Locale configuration and Vuetify bundles
+
+The locale catalogue lives in [`shared/config/locales.ts`](./shared/config/locales.ts). Each entry in
+`LOCALE_DEFINITIONS` declares:
+
+- the domain language key (e.g. `'en'`),
+- the Nuxt locale code (e.g. `'en-US'`),
+- metadata for the `@nuxtjs/i18n` module (display name and JSON bundle file),
+- the list of domains mapped to the locale,
+- the Vuetify-provided locale messages imported from `vuetify/locale`.
+
+This single source drives:
+
+- Domain/locale detection via [`shared/utils/domain-language.ts`](./shared/utils/domain-language.ts).
+- Nuxt configuration through [`nuxt.config.ts`](./nuxt.config.ts), including the `i18n.locales` array and domain aliases.
+- The [`app/plugins/vuetify-locale.ts`](./app/plugins/vuetify-locale.ts) plugin which merges Vuetify's official translation keys
+  into Vue I18n so components such as pagination controls do not warn about missing `$vuetify` messages.
+
+### Adding a new locale
+
+1. Import the relevant Vuetify locale bundle from `vuetify/locale` inside `shared/config/locales.ts`.
+2. Append a new object to `LOCALE_DEFINITIONS` providing the domain language, Nuxt locale, i18n metadata, domain list and the
+   Vuetify bundle.
+3. Place the matching JSON translation file under `i18n/locales/`.
+4. Restart the dev server so Nuxt picks up the updated configuration.
+
+With these steps, hostname detection, translated slugs, and Vuetify UI labels all recognise the new locale automatically.
+
 ## Vue 3 & Nuxt 3 Conventions
 - Use `<script setup lang="ts">` in all components
 - Write components in TypeScript

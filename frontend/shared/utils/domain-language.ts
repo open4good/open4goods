@@ -1,25 +1,25 @@
-export type DomainLanguage = 'en' | 'fr'
-export type NuxtLocale = 'en-US' | 'fr-FR'
+import {
+  DEFAULT_DOMAIN_LANGUAGE,
+  DEFAULT_NUXT_LOCALE,
+  HOST_DOMAIN_LANGUAGE_MAP,
+  LOCALE_DEFINITIONS,
+  type DomainLanguage,
+  type NuxtLocale,
+} from '../config/locales'
 
-export const DEFAULT_DOMAIN_LANGUAGE: DomainLanguage = 'en'
-export const DEFAULT_NUXT_LOCALE: NuxtLocale = 'en-US'
-
-export const HOST_DOMAIN_LANGUAGE_MAP: Record<string, DomainLanguage> = {
-  'nudger.com': 'en',
-  'nudger.fr': 'fr',
-  localhost: 'fr',
-  '127.0.0.1': 'en',
-}
+export type { DomainLanguage, NuxtLocale } from '../config/locales'
 
 export interface NuxtI18nLocaleDomains {
   domain: string
   domains?: string[]
 }
 
-const DOMAIN_LANGUAGE_TO_LOCALE_MAP: Record<DomainLanguage, NuxtLocale> = {
-  en: 'en-US',
-  fr: 'fr-FR',
-}
+const DOMAIN_LANGUAGE_TO_LOCALE_MAP: Record<DomainLanguage, NuxtLocale> =
+  LOCALE_DEFINITIONS.reduce((accumulator, definition) => {
+    accumulator[definition.domainLanguage] = definition.nuxtLocale
+
+    return accumulator
+  }, {} as Record<DomainLanguage, NuxtLocale>)
 
 export interface ResolveDomainLanguageOptions {
   /**
