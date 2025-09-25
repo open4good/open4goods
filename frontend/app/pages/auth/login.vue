@@ -41,13 +41,39 @@ const loading = ref(false)
 const error = ref('')
 const valid = ref(true)
 const router = useRouter()
+const route = useRoute()
+
+const isSafeRedirectTarget = (target: unknown): target is string => typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')
+
+const resolveRedirectTarget = () => {
+  const redirectQuery = route.query.redirect
+
+  if (Array.isArray(redirectQuery)) {
+    const firstValidTarget = redirectQuery.find((candidate): candidate is string => isSafeRedirectTarget(candidate))
+    if (firstValidTarget) {
+      return firstValidTarget
+    }
+  }
+
+  if (isSafeRedirectTarget(redirectQuery)) {
+    return redirectQuery
+  }
+
+  const redirectedFrom = route.redirectedFrom?.fullPath
+
+  if (isSafeRedirectTarget(redirectedFrom)) {
+    return redirectedFrom
+  }
+
+  return '/'
+}
 
 const onSubmit = async () => {
   loading.value = true
   error.value = ''
   try {
     await authService.login(username.value, password.value)
-    await router.push('/')
+    await router.replace(resolveRedirectTarget())
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'
   } finally {

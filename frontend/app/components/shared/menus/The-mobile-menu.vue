@@ -66,6 +66,7 @@ const emit = defineEmits<{
 
 const { isLoggedIn, logout } = useAuth()
 const router = useRouter()
+const route = useRoute()
 
 interface MenuItemDefinition {
   titleKey: string
@@ -85,7 +86,7 @@ const handleLogout = async () => {
 
   try {
     await logout()
-    await router.push('/')
+    await router.replace(route.fullPath || '/')
   } catch (error) {
     console.error('Logout failed', error)
   } finally {
