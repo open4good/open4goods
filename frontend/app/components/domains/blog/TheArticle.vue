@@ -184,21 +184,31 @@ useHead(() => ({
     itemtype="https://schema.org/BlogPosting"
   >
     <header class="article-header">
-      <div v-if="categories.length" class="article-categories" aria-label="Article categories">
-        <v-chip
-          v-for="category in categories"
-          :key="category"
-          class="article-category"
-          color="primary"
-          variant="tonal"
-          size="small"
-          :to="buildTagLink(category)"
-          link
-          data-test="article-category"
-        >
-          {{ category }}
-        </v-chip>
-      </div>
+      <nav
+        v-if="categories.length"
+        class="article-categories"
+        aria-label="Article categories"
+      >
+        <ul class="article-categories__list">
+          <li
+            v-for="category in categories"
+            :key="category"
+            class="article-categories__item"
+          >
+            <v-chip
+              class="article-category"
+              color="primary"
+              variant="tonal"
+              size="small"
+              :to="buildTagLink(category)"
+              link
+              data-test="article-category"
+            >
+              {{ category }}
+            </v-chip>
+          </li>
+        </ul>
+      </nav>
 
       <h1 :id="headingId" class="article-title" itemprop="headline" data-test="article-title">
         {{ articleTitle }}
@@ -208,32 +218,35 @@ useHead(() => ({
         {{ articleSummary }}
       </p>
 
-      <div class="article-meta" aria-label="Article metadata">
-        <span v-if="article.author" class="article-meta__item" data-test="article-author">
+      <ul class="article-meta" aria-label="Article metadata">
+        <li v-if="article.author" class="article-meta__item" data-test="article-author">
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
+          <span class="visually-hidden">Author:</span>
           <span itemprop="author" itemscope itemtype="https://schema.org/Person">
             <span itemprop="name">{{ article.author }}</span>
           </span>
-        </span>
+        </li>
 
-        <span v-if="publishedDate" class="article-meta__item" data-test="article-published">
+        <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
+          <span class="visually-hidden">Published on:</span>
           <time :datetime="publishedDate.iso" itemprop="datePublished">
             {{ publishedDate.label }}
           </time>
-        </span>
+        </li>
 
-        <span v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
+        <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
-          {{ readingTimeLabel }}
-        </span>
-      </div>
+          <span class="visually-hidden">Estimated reading time:</span>
+          <span>{{ readingTimeLabel }}</span>
+        </li>
+      </ul>
     </header>
 
     <figure v-if="article.image" class="article-hero" itemprop="image">
       <RobustImage
         :src="article.image"
-        :alt="articleTitle"
+        :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
         width="100%"
         height="360"
         class="article-hero__image"
@@ -243,7 +256,13 @@ useHead(() => ({
 
     <v-divider class="article-divider" role="presentation" />
 
-    <section v-if="hasBody" class="article-body" itemprop="articleBody" aria-label="Article content">
+    <section
+      v-if="hasBody"
+      class="article-body"
+      itemprop="articleBody"
+      aria-label="Article content"
+      role="region"
+    >
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="article-content" data-test="article-body" v-html="sanitizedBody" />
     </section>
@@ -257,7 +276,7 @@ useHead(() => ({
         v-if="isLoggedIn && article.editLink"
         :href="article.editLink"
         target="_blank"
-        rel="noopener"
+        rel="noopener noreferrer"
         prepend-icon="mdi-open-in-new"
         variant="text"
         size="small"
@@ -285,9 +304,18 @@ useHead(() => ({
   gap: 1rem
 
 .article-categories
-  display: flex
-  flex-wrap: wrap
-  gap: 0.5rem
+  display: block
+
+  &__list
+    display: flex
+    flex-wrap: wrap
+    gap: 0.5rem
+    list-style: none
+    margin: 0
+    padding: 0
+
+  &__item
+    list-style: none
 
 .article-title
   font-size: clamp(1.75rem, 2.5vw, 2.75rem)
@@ -300,6 +328,7 @@ useHead(() => ({
   color: #3d5a80
   margin: 0
 
+
 .article-meta
   display: flex
   flex-wrap: wrap
@@ -307,6 +336,9 @@ useHead(() => ({
   align-items: center
   font-size: 0.95rem
   color: #607d8b
+  margin: 0
+  padding: 0
+  list-style: none
 
   &__item
     display: inline-flex

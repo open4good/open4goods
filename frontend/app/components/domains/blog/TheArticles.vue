@@ -5,7 +5,6 @@ import type { BlogTagDto } from '~~/shared/api-client'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
-  articles: currentPageArticles,
   paginatedArticles,
   loading,
   error,
@@ -18,7 +17,19 @@ const {
 
 // Format date helper
 const formatDate = (timestamp: number) => {
-  return new Date(timestamp).toLocaleDateString()
+  const date = new Date(timestamp)
+
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  return date.toLocaleDateString()
+}
+
+const buildDateIsoString = (timestamp: number) => {
+  const date = new Date(timestamp)
+
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString()
 }
 
 const { t } = useI18n()
@@ -26,6 +37,9 @@ const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
 const tagsLoading = ref(false)
+const articleListId = 'blog-articles-list'
+const debugPanelId = 'blog-articles-debug-panel'
+const showDebugInfo = ref(false)
 
 const parsePageQuery = (rawPage: unknown) => {
   const value = Array.isArray(rawPage) ? rawPage[0] : rawPage
@@ -56,7 +70,6 @@ watch(
 
 const totalPages = computed(() => pagination.value.totalPages || 0)
 const totalElements = computed(() => pagination.value.totalElements || 0)
-const displayedArticlesCount = computed(() => paginatedArticles.value.length)
 const shouldDisplayPagination = computed(() => totalPages.value > 1)
 const paginationInfoMessage = computed(() =>
   t('blog.pagination.info', {
@@ -68,6 +81,13 @@ const paginationInfoMessage = computed(() =>
 const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
 const pageLinkLabel = (pageNumber: number) =>
   t('blog.pagination.pageLink', { page: pageNumber })
+const buildArticleTitleId = (index: number) => `blog-article-card-title-${index}`
+const buildArticleSummaryId = (index: number) => `blog-article-card-summary-${index}`
+const buildArticleImageAlt = (title?: string | null) => {
+  const sanitized = title?.trim()
+
+  return sanitized && sanitized.length > 0 ? sanitized : 'Blog article illustration'
+}
 
 const extractArticleSlug = (rawSlug: string | null | undefined) => {
   if (!rawSlug) {
@@ -187,6 +207,16 @@ const availableTags = computed<NamedTag[]>(() =>
     .filter((tag): tag is NamedTag => Boolean(tag.name))
 )
 const activeTag = computed(() => selectedTag.value)
+const debugToggleLabel = computed(() => (showDebugInfo.value ? 'Hide Debug Info' : 'Show Debug Info'))
+const debugDetails = computed(() => ({
+  currentPage: currentPage.value,
+  totalPages: totalPages.value,
+  totalArticles: totalElements.value,
+  selectedTag: activeTag.value ?? null,
+}))
+const toggleDebugInfo = () => {
+  showDebugInfo.value = !showDebugInfo.value
+}
 const isTagActive = (tag: string | null) => {
   return (activeTag.value ?? null) === (tag ?? null)
 }
@@ -206,10 +236,54 @@ const seoPageLinks = computed(() => {
   <div class="blog-list">
 
 
+    <div class="debug-controls">
+      <button
+        type="button"
+        class="debug-toggle"
+        :aria-expanded="showDebugInfo"
+        :aria-controls="debugPanelId"
+        @click="toggleDebugInfo"
+      >
+        {{ debugToggleLabel }}
+      </button>
+
+      <div
+        v-if="showDebugInfo"
+        :id="debugPanelId"
+        class="debug-info"
+        role="region"
+        aria-live="polite"
+      >
+        <h2 class="visually-hidden">Debug information</h2>
+        <dl class="debug-info__list">
+          <div class="debug-info__item">
+            <dt>Current page</dt>
+            <dd>{{ debugDetails.currentPage }}</dd>
+          </div>
+          <div class="debug-info__item">
+            <dt>Total pages</dt>
+            <dd>{{ debugDetails.totalPages }}</dd>
+          </div>
+          <div class="debug-info__item">
+            <dt>Total articles</dt>
+            <dd>{{ debugDetails.totalArticles }}</dd>
+          </div>
+          <div class="debug-info__item">
+            <dt>Selected tag</dt>
+            <dd>{{ debugDetails.selectedTag ?? 'None' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+
     <section
       v-if="availableTags.length || activeTag"
       class="tag-filter"
       :aria-label="t('blog.list.tagsAriaLabel')"
+      role="region"
+      :aria-busy="tagsLoading"
+      :aria-controls="articleListId"
     >
       <div class="tag-filter__header">
         <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
@@ -221,6 +295,7 @@ const seoPageLinks = computed(() => {
           class="tag-filter__chip"
           :class="{ 'tag-filter__chip--active': isTagActive(null) }"
           :disabled="tagsLoading"
+          :aria-pressed="isTagActive(null)"
           @click="handleTagSelection(null)"
         >
           <v-chip
@@ -228,6 +303,7 @@ const seoPageLinks = computed(() => {
             :variant="isTagActive(null) ? 'elevated' : 'tonal'"
             size="small"
             :disabled="tagsLoading"
+            :aria-label="t('blog.list.tagsAll')"
           >
             {{ t('blog.list.tagsAll') }}
           </v-chip>
@@ -239,6 +315,7 @@ const seoPageLinks = computed(() => {
           class="tag-filter__chip"
           :class="{ 'tag-filter__chip--active': isTagActive(tag.name) }"
           :disabled="tagsLoading"
+          :aria-pressed="isTagActive(tag.name)"
           @click="handleTagSelection(tag.name)"
         >
           <v-chip
@@ -246,6 +323,7 @@ const seoPageLinks = computed(() => {
             :variant="isTagActive(tag.name) ? 'elevated' : 'tonal'"
             size="small"
             :disabled="tagsLoading"
+            :aria-label="tag.name"
           >
             <span v-if="typeof tag.count === 'number' && tag.count > 0">
               {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
@@ -256,57 +334,66 @@ const seoPageLinks = computed(() => {
           </v-chip>
         </button>
       </div>
-      <div v-if="tagsLoading" class="tag-filter__loading">
-        <v-progress-circular indeterminate size="16" width="2" color="primary" />
+      <div v-if="tagsLoading" class="tag-filter__loading" role="status" aria-live="polite">
+        <v-progress-circular indeterminate size="16" width="2" color="primary" aria-hidden="true" />
         <span>{{ t('blog.list.tagsLoading') }}</span>
       </div>
     </section>
 
-    <div v-if="loading" class="loading">
-      <v-progress-circular indeterminate />
+    <div v-if="loading" class="loading" role="status" aria-live="polite">
+      <v-progress-circular indeterminate aria-hidden="true" />
       <p>{{ t('blog.list.loading') }}</p>
     </div>
 
     <div v-else-if="error" class="error">
-      <v-alert type="error" variant="tonal">
+      <v-alert type="error" variant="tonal" role="alert">
         {{ error }}
       </v-alert>
       <v-btn class="mt-4" @click="fetchArticles"> {{ t('common.actions.retry') }} </v-btn>
     </div>
 
-    <div v-else class="articles">
-      <v-row>
+    <div v-else class="articles" role="region" aria-live="polite" :aria-busy="loading">
+      <v-row :id="articleListId" role="list">
         <v-col
-          v-for="article in paginatedArticles"
-          :key="article.url"
+          v-for="(article, index) in paginatedArticles"
+          :key="article.url ?? index"
           cols="12"
           sm="6"
           md="4"
           lg="4"
+          role="listitem"
         >
-          <v-card class="article-card" elevation="6" hover>
-            <!-- Image de l'article -->
+          <v-card
+            class="article-card"
+            elevation="6"
+            hover
+            tag="article"
+            :aria-labelledby="buildArticleTitleId(index)"
+            :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+          >
+            <!-- Article image -->
             <NuxtLink
               v-if="article.image && buildArticleLink(article.url)"
               :to="buildArticleLink(article.url)"
               class="article-image-link"
-              :aria-label="article.title || undefined"
+              :aria-labelledby="buildArticleTitleId(index)"
+              :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
               :title="article.title || undefined"
               data-test="article-image-link"
             >
               <v-img
                 :src="article.image"
-                :alt="article.title"
+                :alt="buildArticleImageAlt(article.title)"
                 height="200"
                 cover
                 class="article-image"
               >
                 <template #placeholder>
                   <div class="image-placeholder">
-                    <v-icon size="48" color="grey-lighten-1">
+                    <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
                       mdi-image-off
                     </v-icon>
-                    <p class="placeholder-text">Image non disponible</p>
+                    <p class="placeholder-text">Image not available</p>
                   </div>
                 </template>
               </v-img>
@@ -314,27 +401,31 @@ const seoPageLinks = computed(() => {
             <v-img
               v-else-if="article.image"
               :src="article.image"
-              :alt="article.title"
+              :alt="buildArticleImageAlt(article.title)"
               height="200"
               cover
               class="article-image"
             >
               <template #placeholder>
                 <div class="image-placeholder">
-                  <v-icon size="48" color="grey-lighten-1">
+                  <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
                     mdi-image-off
                   </v-icon>
-                  <p class="placeholder-text">Image non disponible</p>
+                  <p class="placeholder-text">Image not available</p>
                 </div>
               </template>
             </v-img>
 
-            <!-- Contenu de la carte -->
-            <v-card-title class="article-title">
+            <!-- Card content -->
+            <v-card-title
+              :id="buildArticleTitleId(index)"
+              class="article-title"
+            >
               <NuxtLink
                 v-if="buildArticleLink(article.url)"
                 :to="buildArticleLink(article.url)"
                 class="article-title-link"
+                :aria-labelledby="buildArticleTitleId(index)"
                 :title="article.title || undefined"
                 data-test="article-title-link"
               >
@@ -345,28 +436,39 @@ const seoPageLinks = computed(() => {
               </span>
             </v-card-title>
 
-            <v-card-text class="article-summary">
+            <v-card-text
+              :id="buildArticleSummaryId(index)"
+              class="article-summary"
+            >
               <p>{{ article.summary }}</p>
             </v-card-text>
 
-            <!-- Actions et métadonnées -->
+            <!-- Actions and metadata -->
             <v-card-actions class="article-actions">
-              <div class="article-meta">
-                <div class="author-info">
-                  <v-icon size="small" color="primary" class="mr-1">
+              <ul class="article-meta" aria-label="Article metadata">
+                <li v-if="article.author" class="article-meta__item author-info">
+                  <v-icon size="small" color="primary" class="mr-1" aria-hidden="true">
                     mdi-account
                   </v-icon>
+                  <span class="visually-hidden">Author:</span>
                   <span class="author-name">{{ article.author }}</span>
-                </div>
-                <div class="date-info">
-                  <v-icon size="small" color="grey" class="mr-1">
+                </li>
+                <li
+                  v-if="article.createdMs"
+                  class="article-meta__item date-info"
+                >
+                  <v-icon size="small" color="grey" class="mr-1" aria-hidden="true">
                     mdi-calendar
                   </v-icon>
-                  <span class="date-text">{{
-                    formatDate(article.createdMs ?? 0)
-                  }}</span>
-                </div>
-              </div>
+                  <span class="visually-hidden">Published on:</span>
+                  <time
+                    class="date-text"
+                    :datetime="buildDateIsoString(article.createdMs)"
+                  >
+                    {{ formatDate(article.createdMs) }}
+                  </time>
+                </li>
+              </ul>
 
               <v-spacer></v-spacer>
 
@@ -374,6 +476,9 @@ const seoPageLinks = computed(() => {
                 v-if="buildArticleLink(article.url)"
                 :to="buildArticleLink(article.url)"
                 class="article-read-more-link"
+                :aria-labelledby="buildArticleTitleId(index)"
+                :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+                :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
                 :title="article.title || undefined"
                 data-test="article-read-more"
               >
@@ -387,14 +492,18 @@ const seoPageLinks = computed(() => {
       </v-row>
 
       <div v-if="shouldDisplayPagination" class="pagination-container">
-        <v-pagination
-          :length="totalPages"
-          :model-value="currentPage"
-          :total-visible="5"
-          @update:model-value="handlePageChange"
-        />
+        <nav class="pagination-control" :aria-label="paginationAriaLabel">
+          <v-pagination
+            :length="totalPages"
+            :model-value="currentPage"
+            :total-visible="5"
+            :aria-label="paginationAriaLabel"
+            :aria-controls="articleListId"
+            @update:model-value="handlePageChange"
+          />
+        </nav>
 
-        <p class="pagination-info">
+        <p class="pagination-info" aria-live="polite">
           {{ paginationInfoMessage }}
         </p>
 
@@ -417,6 +526,56 @@ const seoPageLinks = computed(() => {
   max-width: 1200px
   margin: 0 auto
   padding: 20px
+
+.debug-controls
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+  margin-bottom: 1.5rem
+
+.debug-toggle
+  align-self: flex-start
+  border: 1px solid #1976d2
+  background: transparent
+  color: #1976d2
+  border-radius: 999px
+  padding: 0.35rem 1rem
+  font-weight: 600
+  cursor: pointer
+  transition: background-color 0.2s ease, color 0.2s ease
+
+  &:hover,
+  &:focus-visible
+    background-color: rgba(25, 118, 210, 0.12)
+
+  &:focus-visible
+    outline: 2px solid #1976d2
+    outline-offset: 2px
+
+.debug-info
+  border: 1px dashed rgba(25, 118, 210, 0.4)
+  border-radius: 12px
+  padding: 1rem
+  background: #f8fbff
+
+  &__list
+    margin: 0
+    padding: 0
+    display: grid
+    gap: 0.75rem
+
+.debug-info__item
+  display: grid
+  grid-template-columns: max-content 1fr
+  gap: 0.75rem
+
+  dt
+    font-weight: 600
+    color: #1976d2
+
+  dd
+    margin: 0
+    color: #455a64
 
 .tag-filter
   margin-bottom: 24px
@@ -550,6 +709,9 @@ const seoPageLinks = computed(() => {
   display: flex
   flex-direction: column
   gap: 4px
+  list-style: none
+  margin: 0
+  padding: 0
 
 .author-info,
 .date-info
