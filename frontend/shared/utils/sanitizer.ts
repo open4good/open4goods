@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import DOMPurify from 'dompurify'
+import DOMPurify from 'isomorphic-dompurify'
 
 // NOTE: Unsafe script-stripping regular expression removed. Always use DOMPurify for sanitizing HTML.
 
@@ -19,6 +19,7 @@ export function _sanitizeHtml(rawHtml: string) {
       return ''
     }
   })
+
   return {
     sanitizedHtml: sanitized,
   }
