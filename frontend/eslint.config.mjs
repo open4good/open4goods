@@ -29,17 +29,21 @@ const sharedOverrides = [
   },
 ]
 
-let config
+const config = await resolveConfig()
 
-if (nuxtConfigModule?.createConfigForNuxt) {
-  config = nuxtConfigModule
-    .createConfigForNuxt({
-      features: {
-        typescript: true,
-      },
-    })
-    .append(...sharedOverrides)
-} else {
+export default config
+
+async function resolveConfig() {
+  if (nuxtConfigModule?.createConfigForNuxt) {
+    return nuxtConfigModule
+      .createConfigForNuxt({
+        features: {
+          typescript: true,
+        },
+      })
+      .append(...sharedOverrides)
+  }
+
   console.warn(
     'Using local fallback ESLint configuration because @nuxt/eslint-config could not be resolved.'
   )
@@ -57,10 +61,8 @@ if (nuxtConfigModule?.createConfigForNuxt) {
           : entry
       )
 
-  config = [...fallback.configs, ...overrides]
+  return [...fallback.configs, ...overrides]
 }
-
-export default config
 
 async function createFallbackConfig() {
   const [jsModule, globalsModule, vueModule, tsParserModule] = await Promise.all([
