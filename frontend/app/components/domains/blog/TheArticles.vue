@@ -5,7 +5,7 @@ import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/loca
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
-  articles: allArticles,
+  articles: currentPageArticles,
   paginatedArticles,
   loading,
   error,
@@ -23,7 +23,16 @@ const formatDate = (timestamp: number) => {
 const debugMode = ref(false)
 const { locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
+const route = useRoute()
+const router = useRouter()
 const currentPage = ref(1)
+
+const parsePageQuery = (rawPage: unknown) => {
+  const value = Array.isArray(rawPage) ? rawPage[0] : rawPage
+  const parsed = Number.parseInt(String(value ?? ''), 10)
+
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
 
 watch(
   () => pagination.value.page,
@@ -48,14 +57,51 @@ const navigateToArticle = (slug: string | null | undefined) => {
   navigateTo(path)
 }
 
-// Fetch articles on component mount
-onMounted(() => {
-  fetchArticles()
-})
+watch(
+  () => route.query.page,
+  async (rawPage) => {
+    const targetPage = parsePageQuery(rawPage)
+    const shouldRequestPage =
+      pagination.value.page !== targetPage || paginatedArticles.value.length === 0
+
+    if (!shouldRequestPage) {
+      return
+    }
+
+    await changePage(targetPage)
+  },
+  { immediate: true },
+)
+
+const buildPageQuery = (pageNumber: number) => {
+  const sanitizedPage = Math.max(1, Math.trunc(pageNumber))
+  const nextQuery = { ...route.query }
+
+  if (sanitizedPage === 1) {
+    delete nextQuery.page
+  } else {
+    nextQuery.page = sanitizedPage.toString()
+  }
+
+  return nextQuery
+}
 
 const handlePageChange = async (page: number) => {
-  await changePage(page)
+  const sanitizedPage = Math.max(1, Math.trunc(page))
+  const currentQuery = buildPageQuery(sanitizedPage)
+
+  await router.push({ query: currentQuery })
 }
+
+const seoPageLinks = computed(() => {
+  const pages = totalPages.value
+
+  if (pages <= 1) {
+    return [1]
+  }
+
+  return Array.from({ length: pages }, (_, index) => index + 1)
+})
 </script>
 
 <template>
@@ -70,8 +116,9 @@ const handlePageChange = async (page: number) => {
     <!-- Debug information -->
     <div v-if="debugMode" class="debug-info">
       <h4>Debug Information:</h4>
-      <p>Total loaded articles: {{ allArticles.length }}</p>
-      <p>Articles on current page: {{ displayedArticlesCount }}</p>
+      <p>Total articles reported by API: {{ totalElements }}</p>
+      <p>Articles loaded for current page: {{ currentPageArticles.length }}</p>
+      <p>Articles currently displayed: {{ displayedArticlesCount }}</p>
       <div
         v-for="(article, index) in paginatedArticles"
         :key="index"
@@ -179,6 +226,16 @@ const handlePageChange = async (page: number) => {
           Showing page {{ currentPage }} of {{ totalPages }} ({{ totalElements }}
           articles)
         </p>
+
+        <nav class="visually-hidden" aria-label="Blog pagination links">
+          <ul>
+            <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
+              <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
+                Blog page {{ pageNumber }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </div>
@@ -300,6 +357,17 @@ const handlePageChange = async (page: number) => {
 .pagination-info
   font-size: 0.9rem
   color: #555
+
+.visually-hidden
+  position: absolute
+  width: 1px
+  height: 1px
+  padding: 0
+  margin: -1px
+  overflow: hidden
+  clip: rect(0, 0, 0, 0)
+  white-space: nowrap
+  border: 0
 
 // Responsive adjustments
 @media (max-width: 600px)
