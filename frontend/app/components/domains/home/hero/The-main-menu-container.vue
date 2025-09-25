@@ -1,12 +1,9 @@
 <script lang="ts" setup>
-defineEmits<{
-  'toggle-drawer': []
-}>()
+
 </script>
 
 <template>
-  <header class="main-menu-header">
-    <v-container fluid class="main-menu-container">
+    <v-container fluid class="main-menu-container position-fixed">
       <v-row>
         <v-col cols="3">
           <the-main-logo />
@@ -16,17 +13,12 @@ defineEmits<{
         </v-col>
       </v-row>
     </v-container>
-  </header>
 </template>
 
 <style lang="sass" scoped>
-.main-menu-header
-  position: sticky
-  top: 0
-  z-index: 100
-  width: 100%
-  background-color: white
-
 .main-menu-container
+  top: 0
+  left: 0
+  z-index: 100
   background-color: white
 </style>
