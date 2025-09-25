@@ -13,11 +13,25 @@ const route = useRoute()
 const router = useRouter()
 const { currentArticle, loading, error, fetchArticle } = useBlog()
 
-const slug = computed(() => route.params.slug as string)
+const slug = computed(() => {
+  const rawSlug = route.params.slug
+
+  if (Array.isArray(rawSlug)) {
+    return rawSlug.find((value) => typeof value === 'string' && value.trim().length > 0) ?? null
+  }
+
+  if (typeof rawSlug !== 'string') {
+    return null
+  }
+
+  const trimmed = rawSlug.trim()
+
+  return trimmed.length > 0 ? trimmed : null
+})
 
 await useAsyncData(
-  () => `blog-article-${slug.value}`,
-  () => fetchArticle(slug.value),
+  () => (slug.value ? `blog-article-${slug.value}` : 'blog-article'),
+  () => (slug.value ? fetchArticle(slug.value) : Promise.resolve(null)),
   {
     server: true,
     immediate: true,
