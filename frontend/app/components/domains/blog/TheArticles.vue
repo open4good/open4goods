@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import type { BlogTagDto } from '~~/shared/api-client'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
@@ -9,7 +10,9 @@ const {
   error,
   pagination,
   fetchArticles,
-  changePage,
+  tags,
+  selectedTag,
+  fetchTags,
 } = useBlog()
 
 // Format date helper
@@ -23,12 +26,25 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
+const tagsLoading = ref(false)
 
 const parsePageQuery = (rawPage: unknown) => {
   const value = Array.isArray(rawPage) ? rawPage[0] : rawPage
   const parsed = Number.parseInt(String(value ?? ''), 10)
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
+
+const parseTagQuery = (rawTag: unknown) => {
+  const value = Array.isArray(rawTag) ? rawTag[0] : rawTag
+
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+
+  return trimmed.length > 0 ? trimmed : null
 }
 
 watch(
@@ -82,20 +98,44 @@ const buildArticleLink = (slug: string | null | undefined): string | undefined =
   return `/blog/${normalizedSlug}`
 }
 
-watch(
-  () => route.query.page,
-  async (rawPage) => {
-    const targetPage = parsePageQuery(rawPage)
-    const shouldRequestPage =
-      pagination.value.page !== targetPage || paginatedArticles.value.length === 0
+const loadArticlesFromRoute = async () => {
+  const targetPage = parsePageQuery(route.query.page)
+  const targetTag = parseTagQuery(route.query.tag)
 
-    if (!shouldRequestPage) {
+  await fetchArticles(targetPage, pagination.value.size, targetTag)
+}
+
+const ensureTagsLoaded = async () => {
+  if (tags.value.length > 0) {
+    return
+  }
+
+  tagsLoading.value = true
+  try {
+    await fetchTags()
+  } finally {
+    tagsLoading.value = false
+  }
+}
+
+await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+
+watch(
+  () => [route.query.page, route.query.tag],
+  async (_, __, onCleanup) => {
+    let cancelled = false
+    onCleanup(() => {
+      cancelled = true
+    })
+
+    await ensureTagsLoaded()
+
+    if (cancelled) {
       return
     }
 
-    await changePage(targetPage)
+    await loadArticlesFromRoute()
   },
-  { immediate: true },
 )
 
 const buildPageQuery = (pageNumber: number) => {
@@ -116,6 +156,40 @@ const handlePageChange = async (page: number) => {
   const currentQuery = buildPageQuery(sanitizedPage)
 
   await router.push({ query: currentQuery })
+}
+
+const buildTagQuery = (tag: string | null) => {
+  const nextQuery = { ...route.query }
+
+  if (!tag) {
+    delete nextQuery.tag
+  } else {
+    nextQuery.tag = tag
+  }
+
+  delete nextQuery.page
+
+  return nextQuery
+}
+
+const handleTagSelection = async (tag: string | null) => {
+  const nextQuery = buildTagQuery(tag)
+  await router.push({ path: '/blog', query: nextQuery })
+}
+
+type NamedTag = BlogTagDto & { name: string }
+
+const availableTags = computed<NamedTag[]>(() =>
+  tags.value
+    .map((tag) => ({
+      ...tag,
+      name: (tag.name ?? '').trim(),
+    }))
+    .filter((tag): tag is NamedTag => Boolean(tag.name))
+)
+const activeTag = computed(() => selectedTag.value)
+const isTagActive = (tag: string | null) => {
+  return (activeTag.value ?? null) === (tag ?? null)
 }
 
 const seoPageLinks = computed(() => {
@@ -154,16 +228,62 @@ const seoPageLinks = computed(() => {
       </div>
     </div>
 
+    <section
+      v-if="availableTags.length || activeTag"
+      class="tag-filter"
+      :aria-label="t('blog.list.tagsAriaLabel')"
+    >
+      <div class="tag-filter__header">
+        <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
+        <span class="tag-filter__title">{{ t('blog.list.tagsTitle') }}</span>
+      </div>
+      <div class="tag-filter__chips">
+        <v-chip
+          class="tag-filter__chip"
+          color="primary"
+          :variant="isTagActive(null) ? 'elevated' : 'tonal'"
+          :class="{ 'tag-filter__chip--active': isTagActive(null) }"
+          size="small"
+          :disabled="tagsLoading"
+          @click="handleTagSelection(null)"
+        >
+          {{ t('blog.list.tagsAll') }}
+        </v-chip>
+        <v-chip
+          v-for="tag in availableTags"
+          :key="tag.name"
+          class="tag-filter__chip"
+          color="primary"
+          :variant="isTagActive(tag.name) ? 'elevated' : 'tonal'"
+          :class="{ 'tag-filter__chip--active': isTagActive(tag.name) }"
+          size="small"
+          :disabled="tagsLoading"
+          @click="handleTagSelection(tag.name)"
+        >
+          <span v-if="typeof tag.count === 'number' && tag.count > 0">
+            {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
+          </span>
+          <span v-else>
+            {{ tag.name }}
+          </span>
+        </v-chip>
+      </div>
+      <div v-if="tagsLoading" class="tag-filter__loading">
+        <v-progress-circular indeterminate size="16" width="2" color="primary" />
+        <span>{{ t('blog.list.tagsLoading') }}</span>
+      </div>
+    </section>
+
     <div v-if="loading" class="loading">
       <v-progress-circular indeterminate />
-      <p>Chargement des articles...</p>
+      <p>{{ t('blog.list.loading') }}</p>
     </div>
 
     <div v-else-if="error" class="error">
       <v-alert type="error" variant="tonal">
         {{ error }}
       </v-alert>
-      <v-btn class="mt-4" @click="fetchArticles"> Réessayer </v-btn>
+      <v-btn class="mt-4" @click="fetchArticles"> {{ t('common.actions.retry') }} </v-btn>
     </div>
 
     <div v-else class="articles">
@@ -270,7 +390,7 @@ const seoPageLinks = computed(() => {
                 data-test="article-read-more"
               >
                 <v-btn variant="outlined" size="small" color="primary">
-                  Lire plus
+                  {{ t('blog.list.readMore') }}
                 </v-btn>
               </NuxtLink>
             </v-card-actions>
@@ -322,6 +442,44 @@ const seoPageLinks = computed(() => {
   margin-bottom: 20px
   font-family: monospace
   font-size: 12px
+
+.tag-filter
+  margin-bottom: 24px
+  padding: 16px
+  border-radius: 12px
+  background: #f5f9ff
+  border: 1px solid rgba(25, 118, 210, 0.12)
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+  &__header
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    color: #1976d2
+    font-weight: 600
+
+  &__title
+    font-size: 1rem
+
+  &__chips
+    display: flex
+    flex-wrap: wrap
+    gap: 0.5rem
+
+  &__chip
+    transition: transform 0.2s ease
+
+  &__chip--active
+    transform: translateY(-2px)
+
+  &__loading
+    display: inline-flex
+    align-items: center
+    gap: 0.5rem
+    font-size: 0.875rem
+    color: #1976d2
 
 .debug-article
   margin-bottom: 16px
