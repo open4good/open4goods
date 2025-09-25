@@ -21,7 +21,7 @@ const formatDate = (timestamp: number) => {
 
 // Debug mode - use environment variable or default to false
 const debugMode = ref(false)
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
 const route = useRoute()
 const router = useRouter()
@@ -46,6 +46,16 @@ const totalPages = computed(() => pagination.value.totalPages || 0)
 const totalElements = computed(() => pagination.value.totalElements || 0)
 const displayedArticlesCount = computed(() => paginatedArticles.value.length)
 const shouldDisplayPagination = computed(() => totalPages.value > 1)
+const paginationInfoMessage = computed(() =>
+  t('blog.pagination.info', {
+    current: currentPage.value,
+    total: totalPages.value,
+    count: totalElements.value,
+  }),
+)
+const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
+const pageLinkLabel = (pageNumber: number) =>
+  t('blog.pagination.pageLink', { page: pageNumber })
 
 const navigateToArticle = (slug: string | null | undefined) => {
   if (!slug) {
@@ -223,15 +233,14 @@ const seoPageLinks = computed(() => {
         />
 
         <p class="pagination-info">
-          Showing page {{ currentPage }} of {{ totalPages }} ({{ totalElements }}
-          articles)
+          {{ paginationInfoMessage }}
         </p>
 
-        <nav class="visually-hidden" aria-label="Blog pagination links">
+        <nav class="visually-hidden" :aria-label="paginationAriaLabel">
           <ul>
             <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
               <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
-                Blog page {{ pageNumber }}
+                {{ pageLinkLabel(pageNumber) }}
               </NuxtLink>
             </li>
           </ul>

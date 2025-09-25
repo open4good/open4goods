@@ -59,5 +59,12 @@
       "defaultCtaText": "Appel à l'action"
     },
     "siteName": "Nudger"
+  },
+  "blog": {
+    "pagination": {
+      "info": "Page {current} sur {total} ({count} articles)",
+      "ariaLabel": "Liens de pagination du blog",
+      "pageLink": "Page {page} du blog"
+    }
   }
 }
