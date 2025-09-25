@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-
 import { useBlog } from '~/composables/blog/useBlog'
 const {
   articles: currentPageArticles,
@@ -21,8 +19,7 @@ const formatDate = (timestamp: number) => {
 
 // Debug mode - use environment variable or default to false
 const debugMode = ref(false)
-const { locale, t } = useI18n()
-const currentLocale = computed(() => normalizeLocale(locale.value))
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
@@ -75,18 +72,14 @@ const extractArticleSlug = (rawSlug: string | null | undefined) => {
   return segments.at(-1) ?? null
 }
 
-const navigateToArticle = (slug: string | null | undefined) => {
+const buildArticleLink = (slug: string | null | undefined): string | undefined => {
   const normalizedSlug = extractArticleSlug(slug)
 
   if (!normalizedSlug) {
-    return
+    return undefined
   }
 
-  const path = resolveLocalizedRoutePath('blog-slug', currentLocale.value, {
-    slug: normalizedSlug,
-  })
-
-  navigateTo(path)
+  return `/blog/${normalizedSlug}`
 }
 
 watch(
@@ -185,8 +178,33 @@ const seoPageLinks = computed(() => {
         >
           <v-card class="article-card" elevation="6" hover>
             <!-- Image de l'article -->
+            <NuxtLink
+              v-if="article.image && buildArticleLink(article.url)"
+              :to="buildArticleLink(article.url)"
+              class="article-image-link"
+              :aria-label="article.title || undefined"
+              :title="article.title || undefined"
+              data-test="article-image-link"
+            >
+              <v-img
+                :src="article.image"
+                :alt="article.title"
+                height="200"
+                cover
+                class="article-image"
+              >
+                <template #placeholder>
+                  <div class="image-placeholder">
+                    <v-icon size="48" color="grey-lighten-1">
+                      mdi-image-off
+                    </v-icon>
+                    <p class="placeholder-text">Image non disponible</p>
+                  </div>
+                </template>
+              </v-img>
+            </NuxtLink>
             <v-img
-              v-if="article.image"
+              v-else-if="article.image"
               :src="article.image"
               :alt="article.title"
               height="200"
@@ -205,7 +223,18 @@ const seoPageLinks = computed(() => {
 
             <!-- Contenu de la carte -->
             <v-card-title class="article-title">
-              {{ article.title }}
+              <NuxtLink
+                v-if="buildArticleLink(article.url)"
+                :to="buildArticleLink(article.url)"
+                class="article-title-link"
+                :title="article.title || undefined"
+                data-test="article-title-link"
+              >
+                {{ article.title }}
+              </NuxtLink>
+              <span v-else>
+                {{ article.title }}
+              </span>
             </v-card-title>
 
             <v-card-text class="article-summary">
@@ -233,14 +262,17 @@ const seoPageLinks = computed(() => {
 
               <v-spacer></v-spacer>
 
-              <v-btn
-                variant="outlined"
-                size="small"
-                color="primary"
-                @click="() => navigateToArticle(article.url)"
+              <NuxtLink
+                v-if="buildArticleLink(article.url)"
+                :to="buildArticleLink(article.url)"
+                class="article-read-more-link"
+                :title="article.title || undefined"
+                data-test="article-read-more"
               >
-                Lire plus
-              </v-btn>
+                <v-btn variant="outlined" size="small" color="primary">
+                  Lire plus
+                </v-btn>
+              </NuxtLink>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -323,6 +355,22 @@ const seoPageLinks = computed(() => {
 
 .article-image
   position: relative
+
+.article-image-link
+  display: block
+
+.article-title-link
+  color: inherit
+  text-decoration: none
+  display: inline-block
+  width: 100%
+
+.article-title-link:hover
+  text-decoration: underline
+
+.article-read-more-link
+  text-decoration: none
+  display: inline-block
 
 .image-placeholder
   display: flex
