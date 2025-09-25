@@ -11,6 +11,7 @@ type FooterLink = {
 }
 
 const { t, locale } = useI18n()
+const nudgerLogoOrange = useAsset('~/assets/images/nudger-logo-orange.svg')
 const currentLocale = computed(() => normalizeLocale(locale.value))
 const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
 
@@ -174,7 +175,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
       <v-col cols="12" class="d-flex flex-column align-center ga-4">
         <NuxtLink to="/" class="footer-logo-link d-inline-flex">
           <v-img
-            src="@/assets/images/nudger-logo-orange.svg"
+            :src="nudgerLogoOrange"
             :alt="t('siteIdentity.footer.logoAlt')"
             height="40"
             class="footer-logo"
