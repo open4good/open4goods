@@ -57,12 +57,34 @@ const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
 const pageLinkLabel = (pageNumber: number) =>
   t('blog.pagination.pageLink', { page: pageNumber })
 
+const extractArticleSlug = (rawSlug: string | null | undefined) => {
+  if (!rawSlug) {
+    return null
+  }
+
+  const trimmed = rawSlug.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  const withoutDomain = trimmed.replace(/^https?:\/\/[^/]+/i, '')
+  const sanitized = withoutDomain.replace(/^\/*/, '')
+  const segments = sanitized.split('/').filter(Boolean)
+
+  return segments.at(-1) ?? null
+}
+
 const navigateToArticle = (slug: string | null | undefined) => {
-  if (!slug) {
+  const normalizedSlug = extractArticleSlug(slug)
+
+  if (!normalizedSlug) {
     return
   }
 
-  const path = resolveLocalizedRoutePath('blog-slug', currentLocale.value, { slug })
+  const path = resolveLocalizedRoutePath('blog-slug', currentLocale.value, {
+    slug: normalizedSlug,
+  })
 
   navigateTo(path)
 }

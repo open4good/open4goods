@@ -275,7 +275,10 @@ describe('TheArticles Component', () => {
   test('computes localized article path when clicking read more', async () => {
     loadingRef.value = false
     errorRef.value = null
-    articlesRef.value = mockArticles
+    articlesRef.value = mockArticles.map((article, index) => ({
+      ...article,
+      url: index === 0 ? '/blog/test-article-1' : article.url,
+    }))
     localeRef.value = 'en-US'
 
     const wrapper = await mountSuspended(TheArticles)
@@ -288,6 +291,22 @@ describe('TheArticles Component', () => {
     expect(resolveLocalizedRoutePathSpy).toHaveBeenCalledWith('blog-slug', 'en-US', {
       slug: 'test-article-1',
     })
+  })
+
+  test('extractArticleSlug normalizes different url formats', async () => {
+    const wrapper = await mountSuspended(TheArticles)
+
+    const instance = wrapper.vm as unknown as {
+      extractArticleSlug: (slug: string | null | undefined) => string | null
+    }
+
+    expect(instance.extractArticleSlug('test-article-1')).toBe('test-article-1')
+    expect(instance.extractArticleSlug('/blog/test-article-2')).toBe('test-article-2')
+    expect(
+      instance.extractArticleSlug('https://example.com/blog/test-article-3'),
+    ).toBe('test-article-3')
+    expect(instance.extractArticleSlug('  ')).toBeNull()
+    expect(instance.extractArticleSlug(null)).toBeNull()
   })
 
   test('should display pagination controls when multiple pages exist', async () => {
