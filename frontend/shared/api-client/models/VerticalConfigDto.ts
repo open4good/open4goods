@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { VerticalConfigI18nDto } from './VerticalConfigI18nDto';
-import {
-    VerticalConfigI18nDtoFromJSON,
-    VerticalConfigI18nDtoFromJSONTyped,
-    VerticalConfigI18nDtoToJSON,
-    VerticalConfigI18nDtoToJSONTyped,
-} from './VerticalConfigI18nDto';
-
 /**
  * 
  * @export
@@ -58,35 +50,41 @@ export interface VerticalConfigDto {
      */
     order?: number;
     /**
-     * Thumbnail image representing the vertical. TODO(front-api): populate when media assets are defined.
+     * Thumbnail image representing the vertical.
      * @type {string}
      * @memberof VerticalConfigDto
      */
-    imageThumbnail?: string;
+    imageSmall?: string;
     /**
-     * Primary image for the vertical hero section. TODO(front-api): populate when media assets are defined.
+     * Medium image for the vertical 
      * @type {string}
      * @memberof VerticalConfigDto
      */
-    image?: string;
+    imageMedium?: string;
     /**
-     * Localised singular label for the vertical. TODO(front-api): populate when naming strategy is available.
+     * Large image for the vertical 
      * @type {string}
      * @memberof VerticalConfigDto
      */
-    singularName?: string;
+    imageLarge?: string;
     /**
-     * Localised plural label for the vertical. TODO(front-api): populate when naming strategy is available.
+     * Localised home title for the vertical.
      * @type {string}
      * @memberof VerticalConfigDto
      */
-    pluralName?: string;
+    verticalHomeTitle?: string;
     /**
-     * Localised summary texts keyed by IETF BCP 47 language tag.
-     * @type {{ [key: string]: VerticalConfigI18nDto; }}
+     * Localised home description for the vertical.
+     * @type {string}
      * @memberof VerticalConfigDto
      */
-    i18n?: { [key: string]: VerticalConfigI18nDto; };
+    verticalHomeDescription?: string;
+    /**
+     * Localised home URL slug for the vertical.
+     * @type {string}
+     * @memberof VerticalConfigDto
+     */
+    verticalHomeUrl?: string;
 }
 
 /**
@@ -111,11 +109,12 @@ export function VerticalConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
-        'imageThumbnail': json['imageThumbnail'] == null ? undefined : json['imageThumbnail'],
-        'image': json['image'] == null ? undefined : json['image'],
-        'singularName': json['singularName'] == null ? undefined : json['singularName'],
-        'pluralName': json['pluralName'] == null ? undefined : json['pluralName'],
-        'i18n': json['i18n'] == null ? undefined : (mapValues(json['i18n'], VerticalConfigI18nDtoFromJSON)),
+        'imageSmall': json['imageSmall'] == null ? undefined : json['imageSmall'],
+        'imageMedium': json['imageMedium'] == null ? undefined : json['imageMedium'],
+        'imageLarge': json['imageLarge'] == null ? undefined : json['imageLarge'],
+        'verticalHomeTitle': json['verticalHomeTitle'] == null ? undefined : json['verticalHomeTitle'],
+        'verticalHomeDescription': json['verticalHomeDescription'] == null ? undefined : json['verticalHomeDescription'],
+        'verticalHomeUrl': json['verticalHomeUrl'] == null ? undefined : json['verticalHomeUrl'],
     };
 }
 
@@ -135,11 +134,12 @@ export function VerticalConfigDtoToJSONTyped(value?: VerticalConfigDto | null, i
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
-        'imageThumbnail': value['imageThumbnail'],
-        'image': value['image'],
-        'singularName': value['singularName'],
-        'pluralName': value['pluralName'],
-        'i18n': value['i18n'] == null ? undefined : (mapValues(value['i18n'], VerticalConfigI18nDtoToJSON)),
+        'imageSmall': value['imageSmall'],
+        'imageMedium': value['imageMedium'],
+        'imageLarge': value['imageLarge'],
+        'verticalHomeTitle': value['verticalHomeTitle'],
+        'verticalHomeDescription': value['verticalHomeDescription'],
+        'verticalHomeUrl': value['verticalHomeUrl'],
     };
 }
 

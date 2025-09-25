@@ -13,69 +13,20 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ProductI18nElements } from './ProductI18nElements';
+import type { FeatureGroupDto } from './FeatureGroupDto';
 import {
-    ProductI18nElementsFromJSON,
-    ProductI18nElementsFromJSONTyped,
-    ProductI18nElementsToJSON,
-    ProductI18nElementsToJSONTyped,
-} from './ProductI18nElements';
-import type { RecommandationsConfig } from './RecommandationsConfig';
+    FeatureGroupDtoFromJSON,
+    FeatureGroupDtoFromJSONTyped,
+    FeatureGroupDtoToJSON,
+    FeatureGroupDtoToJSONTyped,
+} from './FeatureGroupDto';
+import type { ImpactScoreConfigDto } from './ImpactScoreConfigDto';
 import {
-    RecommandationsConfigFromJSON,
-    RecommandationsConfigFromJSONTyped,
-    RecommandationsConfigToJSON,
-    RecommandationsConfigToJSONTyped,
-} from './RecommandationsConfig';
-import type { BarcodeAggregationProperties } from './BarcodeAggregationProperties';
-import {
-    BarcodeAggregationPropertiesFromJSON,
-    BarcodeAggregationPropertiesFromJSONTyped,
-    BarcodeAggregationPropertiesToJSON,
-    BarcodeAggregationPropertiesToJSONTyped,
-} from './BarcodeAggregationProperties';
-import type { FeatureGroup } from './FeatureGroup';
-import {
-    FeatureGroupFromJSON,
-    FeatureGroupFromJSONTyped,
-    FeatureGroupToJSON,
-    FeatureGroupToJSONTyped,
-} from './FeatureGroup';
-import type { VerticalSubset } from './VerticalSubset';
-import {
-    VerticalSubsetFromJSON,
-    VerticalSubsetFromJSONTyped,
-    VerticalSubsetToJSON,
-    VerticalSubsetToJSONTyped,
-} from './VerticalSubset';
-import type { VerticalConfigI18nDto } from './VerticalConfigI18nDto';
-import {
-    VerticalConfigI18nDtoFromJSON,
-    VerticalConfigI18nDtoFromJSONTyped,
-    VerticalConfigI18nDtoToJSON,
-    VerticalConfigI18nDtoToJSONTyped,
-} from './VerticalConfigI18nDto';
-import type { AttributesConfig } from './AttributesConfig';
-import {
-    AttributesConfigFromJSON,
-    AttributesConfigFromJSONTyped,
-    AttributesConfigToJSON,
-    AttributesConfigToJSONTyped,
-} from './AttributesConfig';
-import type { ImpactScoreCriteria } from './ImpactScoreCriteria';
-import {
-    ImpactScoreCriteriaFromJSON,
-    ImpactScoreCriteriaFromJSONTyped,
-    ImpactScoreCriteriaToJSON,
-    ImpactScoreCriteriaToJSONTyped,
-} from './ImpactScoreCriteria';
-import type { SiteNaming } from './SiteNaming';
-import {
-    SiteNamingFromJSON,
-    SiteNamingFromJSONTyped,
-    SiteNamingToJSON,
-    SiteNamingToJSONTyped,
-} from './SiteNaming';
+    ImpactScoreConfigDtoFromJSON,
+    ImpactScoreConfigDtoFromJSONTyped,
+    ImpactScoreConfigDtoToJSON,
+    ImpactScoreConfigDtoToJSONTyped,
+} from './ImpactScoreConfigDto';
 import type { ResourcesAggregationConfig } from './ResourcesAggregationConfig';
 import {
     ResourcesAggregationConfigFromJSON,
@@ -90,13 +41,41 @@ import {
     DescriptionsAggregationConfigToJSON,
     DescriptionsAggregationConfigToJSONTyped,
 } from './DescriptionsAggregationConfig';
-import type { ImpactScoreConfig } from './ImpactScoreConfig';
+import type { RecommandationsConfig } from './RecommandationsConfig';
 import {
-    ImpactScoreConfigFromJSON,
-    ImpactScoreConfigFromJSONTyped,
-    ImpactScoreConfigToJSON,
-    ImpactScoreConfigToJSONTyped,
-} from './ImpactScoreConfig';
+    RecommandationsConfigFromJSON,
+    RecommandationsConfigFromJSONTyped,
+    RecommandationsConfigToJSON,
+    RecommandationsConfigToJSONTyped,
+} from './RecommandationsConfig';
+import type { BarcodeAggregationProperties } from './BarcodeAggregationProperties';
+import {
+    BarcodeAggregationPropertiesFromJSON,
+    BarcodeAggregationPropertiesFromJSONTyped,
+    BarcodeAggregationPropertiesToJSON,
+    BarcodeAggregationPropertiesToJSONTyped,
+} from './BarcodeAggregationProperties';
+import type { VerticalSubsetDto } from './VerticalSubsetDto';
+import {
+    VerticalSubsetDtoFromJSON,
+    VerticalSubsetDtoFromJSONTyped,
+    VerticalSubsetDtoToJSON,
+    VerticalSubsetDtoToJSONTyped,
+} from './VerticalSubsetDto';
+import type { ImpactScoreCriteriaDto } from './ImpactScoreCriteriaDto';
+import {
+    ImpactScoreCriteriaDtoFromJSON,
+    ImpactScoreCriteriaDtoFromJSONTyped,
+    ImpactScoreCriteriaDtoToJSON,
+    ImpactScoreCriteriaDtoToJSONTyped,
+} from './ImpactScoreCriteriaDto';
+import type { AiPromptsConfig } from './AiPromptsConfig';
+import {
+    AiPromptsConfigFromJSON,
+    AiPromptsConfigFromJSONTyped,
+    AiPromptsConfigToJSON,
+    AiPromptsConfigToJSONTyped,
+} from './AiPromptsConfig';
 import type { ScoringAggregationConfig } from './ScoringAggregationConfig';
 import {
     ScoringAggregationConfigFromJSON,
@@ -104,6 +83,20 @@ import {
     ScoringAggregationConfigToJSON,
     ScoringAggregationConfigToJSONTyped,
 } from './ScoringAggregationConfig';
+import type { AttributesConfigDto } from './AttributesConfigDto';
+import {
+    AttributesConfigDtoFromJSON,
+    AttributesConfigDtoFromJSONTyped,
+    AttributesConfigDtoToJSON,
+    AttributesConfigDtoToJSONTyped,
+} from './AttributesConfigDto';
+import type { WikiPageConfig } from './WikiPageConfig';
+import {
+    WikiPageConfigFromJSON,
+    WikiPageConfigFromJSONTyped,
+    WikiPageConfigToJSON,
+    WikiPageConfigToJSONTyped,
+} from './WikiPageConfig';
 
 /**
  * 
@@ -142,41 +135,77 @@ export interface VerticalConfigFullDto {
      */
     order?: number;
     /**
-     * Thumbnail image representing the vertical. TODO(front-api): populate when media assets are defined.
+     * Thumbnail image representing the vertical.
      * @type {string}
      * @memberof VerticalConfigFullDto
      */
-    imageThumbnail?: string;
+    imageSmall?: string;
     /**
-     * Primary image for the vertical hero section. TODO(front-api): populate when media assets are defined.
+     * Medium image for the vertical 
      * @type {string}
      * @memberof VerticalConfigFullDto
      */
-    image?: string;
+    imageMedium?: string;
     /**
-     * Localised singular label for the vertical. TODO(front-api): populate when naming strategy is available.
+     * Large image for the vertical 
      * @type {string}
      * @memberof VerticalConfigFullDto
      */
-    singularName?: string;
+    imageLarge?: string;
     /**
-     * Localised plural label for the vertical. TODO(front-api): populate when naming strategy is available.
+     * Localised home title for the vertical.
      * @type {string}
      * @memberof VerticalConfigFullDto
      */
-    pluralName?: string;
+    verticalHomeTitle?: string;
     /**
-     * Localised summary texts keyed by IETF BCP 47 language tag.
-     * @type {{ [key: string]: VerticalConfigI18nDto; }}
+     * Localised home description for the vertical.
+     * @type {string}
      * @memberof VerticalConfigFullDto
      */
-    i18n?: { [key: string]: VerticalConfigI18nDto; };
+    verticalHomeDescription?: string;
     /**
-     * Full set of i18n elements as defined in the YAML configuration.
-     * @type {{ [key: string]: ProductI18nElements; }}
+     * Localised home URL slug for the vertical.
+     * @type {string}
      * @memberof VerticalConfigFullDto
      */
-    rawI18n?: { [key: string]: ProductI18nElements; };
+    verticalHomeUrl?: string;
+    /**
+     * Localised meta title for the vertical landing page.
+     * @type {string}
+     * @memberof VerticalConfigFullDto
+     */
+    verticalMetaTitle?: string;
+    /**
+     * Localised meta description for the vertical landing page.
+     * @type {string}
+     * @memberof VerticalConfigFullDto
+     */
+    verticalMetaDescription?: string;
+    /**
+     * Localised Open Graph title for the vertical landing page.
+     * @type {string}
+     * @memberof VerticalConfigFullDto
+     */
+    verticalMetaOpenGraphTitle?: string;
+    /**
+     * Localised Open Graph description for the vertical landing page.
+     * @type {string}
+     * @memberof VerticalConfigFullDto
+     */
+    verticalMetaOpenGraphDescription?: string;
+    /**
+     * Localised wiki pages associated with the vertical.
+     * @type {Array<WikiPageConfig>}
+     * @memberof VerticalConfigFullDto
+     */
+    wikiPages?: Array<WikiPageConfig>;
+    /**
+     * Localised AI generation configuration for the vertical.
+     * @type {AiPromptsConfig}
+     * @memberof VerticalConfigFullDto
+     */
+    aiConfigs?: AiPromptsConfig;
     /**
      * Eco filters enabled for this vertical.
      * @type {Array<string>}
@@ -244,12 +273,6 @@ export interface VerticalConfigFullDto {
      */
     brandsExclusion?: Set<string>;
     /**
-     * Site naming configuration inherited by the UI.
-     * @type {SiteNaming}
-     * @memberof VerticalConfigFullDto
-     */
-    namings?: SiteNaming;
-    /**
      * Configuration for media aggregation.
      * @type {ResourcesAggregationConfig}
      * @memberof VerticalConfigFullDto
@@ -257,34 +280,34 @@ export interface VerticalConfigFullDto {
     resourcesConfig?: ResourcesAggregationConfig;
     /**
      * Configuration for attribute aggregation and filters.
-     * @type {AttributesConfig}
+     * @type {AttributesConfigDto}
      * @memberof VerticalConfigFullDto
      */
-    attributesConfig?: AttributesConfig;
+    attributesConfig?: AttributesConfigDto;
     /**
-     * Impact score criteria available for this vertical.
-     * @type {{ [key: string]: ImpactScoreCriteria; }}
+     * Impact score criteria available for this vertical with localised metadata.
+     * @type {{ [key: string]: ImpactScoreCriteriaDto; }}
      * @memberof VerticalConfigFullDto
      */
-    availableImpactScoreCriterias?: { [key: string]: ImpactScoreCriteria; };
+    availableImpactScoreCriterias?: { [key: string]: ImpactScoreCriteriaDto; };
     /**
-     * Impact score configuration balancing each criterion.
-     * @type {ImpactScoreConfig}
+     * Impact score configuration balancing each criterion, with localised texts.
+     * @type {ImpactScoreConfigDto}
      * @memberof VerticalConfigFullDto
      */
-    impactScoreConfig?: ImpactScoreConfig;
+    impactScoreConfig?: ImpactScoreConfigDto;
     /**
-     * Custom subsets defined for this vertical.
-     * @type {Array<VerticalSubset>}
+     * Custom subsets defined for this vertical with localised labels.
+     * @type {Array<VerticalSubsetDto>}
      * @memberof VerticalConfigFullDto
      */
-    subsets?: Array<VerticalSubset>;
+    subsets?: Array<VerticalSubsetDto>;
     /**
-     * Subset dedicated to brand exploration.
-     * @type {VerticalSubset}
+     * Subset dedicated to brand exploration with localised labels.
+     * @type {VerticalSubsetDto}
      * @memberof VerticalConfigFullDto
      */
-    brandsSubset?: VerticalSubset;
+    brandsSubset?: VerticalSubsetDto;
     /**
      * Barcode aggregation configuration.
      * @type {BarcodeAggregationProperties}
@@ -310,11 +333,11 @@ export interface VerticalConfigFullDto {
      */
     scoringAggregationConfig?: ScoringAggregationConfig;
     /**
-     * Feature groups ordering attributes for UI rendering.
-     * @type {Array<FeatureGroup>}
+     * Feature groups ordering attributes for UI rendering with localised labels.
+     * @type {Array<FeatureGroupDto>}
      * @memberof VerticalConfigFullDto
      */
-    featureGroups?: Array<FeatureGroup>;
+    featureGroups?: Array<FeatureGroupDto>;
     /**
      * Threshold defining how many low scores are considered worsts.
      * @type {number}
@@ -351,12 +374,18 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
-        'imageThumbnail': json['imageThumbnail'] == null ? undefined : json['imageThumbnail'],
-        'image': json['image'] == null ? undefined : json['image'],
-        'singularName': json['singularName'] == null ? undefined : json['singularName'],
-        'pluralName': json['pluralName'] == null ? undefined : json['pluralName'],
-        'i18n': json['i18n'] == null ? undefined : (mapValues(json['i18n'], VerticalConfigI18nDtoFromJSON)),
-        'rawI18n': json['rawI18n'] == null ? undefined : (mapValues(json['rawI18n'], ProductI18nElementsFromJSON)),
+        'imageSmall': json['imageSmall'] == null ? undefined : json['imageSmall'],
+        'imageMedium': json['imageMedium'] == null ? undefined : json['imageMedium'],
+        'imageLarge': json['imageLarge'] == null ? undefined : json['imageLarge'],
+        'verticalHomeTitle': json['verticalHomeTitle'] == null ? undefined : json['verticalHomeTitle'],
+        'verticalHomeDescription': json['verticalHomeDescription'] == null ? undefined : json['verticalHomeDescription'],
+        'verticalHomeUrl': json['verticalHomeUrl'] == null ? undefined : json['verticalHomeUrl'],
+        'verticalMetaTitle': json['verticalMetaTitle'] == null ? undefined : json['verticalMetaTitle'],
+        'verticalMetaDescription': json['verticalMetaDescription'] == null ? undefined : json['verticalMetaDescription'],
+        'verticalMetaOpenGraphTitle': json['verticalMetaOpenGraphTitle'] == null ? undefined : json['verticalMetaOpenGraphTitle'],
+        'verticalMetaOpenGraphDescription': json['verticalMetaOpenGraphDescription'] == null ? undefined : json['verticalMetaOpenGraphDescription'],
+        'wikiPages': json['wikiPages'] == null ? undefined : ((json['wikiPages'] as Array<any>).map(WikiPageConfigFromJSON)),
+        'aiConfigs': json['aiConfigs'] == null ? undefined : AiPromptsConfigFromJSON(json['aiConfigs']),
         'ecoFilters': json['ecoFilters'] == null ? undefined : json['ecoFilters'],
         'technicalFilters': json['technicalFilters'] == null ? undefined : json['technicalFilters'],
         'globalTechnicalFilters': json['globalTechnicalFilters'] == null ? undefined : json['globalTechnicalFilters'],
@@ -368,18 +397,17 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'forceNameGeneration': json['forceNameGeneration'] == null ? undefined : json['forceNameGeneration'],
         'brandsAlias': json['brandsAlias'] == null ? undefined : json['brandsAlias'],
         'brandsExclusion': json['brandsExclusion'] == null ? undefined : new Set(json['brandsExclusion']),
-        'namings': json['namings'] == null ? undefined : SiteNamingFromJSON(json['namings']),
         'resourcesConfig': json['resourcesConfig'] == null ? undefined : ResourcesAggregationConfigFromJSON(json['resourcesConfig']),
-        'attributesConfig': json['attributesConfig'] == null ? undefined : AttributesConfigFromJSON(json['attributesConfig']),
-        'availableImpactScoreCriterias': json['availableImpactScoreCriterias'] == null ? undefined : (mapValues(json['availableImpactScoreCriterias'], ImpactScoreCriteriaFromJSON)),
-        'impactScoreConfig': json['impactScoreConfig'] == null ? undefined : ImpactScoreConfigFromJSON(json['impactScoreConfig']),
-        'subsets': json['subsets'] == null ? undefined : ((json['subsets'] as Array<any>).map(VerticalSubsetFromJSON)),
-        'brandsSubset': json['brandsSubset'] == null ? undefined : VerticalSubsetFromJSON(json['brandsSubset']),
+        'attributesConfig': json['attributesConfig'] == null ? undefined : AttributesConfigDtoFromJSON(json['attributesConfig']),
+        'availableImpactScoreCriterias': json['availableImpactScoreCriterias'] == null ? undefined : (mapValues(json['availableImpactScoreCriterias'], ImpactScoreCriteriaDtoFromJSON)),
+        'impactScoreConfig': json['impactScoreConfig'] == null ? undefined : ImpactScoreConfigDtoFromJSON(json['impactScoreConfig']),
+        'subsets': json['subsets'] == null ? undefined : ((json['subsets'] as Array<any>).map(VerticalSubsetDtoFromJSON)),
+        'brandsSubset': json['brandsSubset'] == null ? undefined : VerticalSubsetDtoFromJSON(json['brandsSubset']),
         'barcodeConfig': json['barcodeConfig'] == null ? undefined : BarcodeAggregationPropertiesFromJSON(json['barcodeConfig']),
         'recommandationsConfig': json['recommandationsConfig'] == null ? undefined : RecommandationsConfigFromJSON(json['recommandationsConfig']),
         'descriptionsAggregationConfig': json['descriptionsAggregationConfig'] == null ? undefined : DescriptionsAggregationConfigFromJSON(json['descriptionsAggregationConfig']),
         'scoringAggregationConfig': json['scoringAggregationConfig'] == null ? undefined : ScoringAggregationConfigFromJSON(json['scoringAggregationConfig']),
-        'featureGroups': json['featureGroups'] == null ? undefined : ((json['featureGroups'] as Array<any>).map(FeatureGroupFromJSON)),
+        'featureGroups': json['featureGroups'] == null ? undefined : ((json['featureGroups'] as Array<any>).map(FeatureGroupDtoFromJSON)),
         'worseLimit': json['worseLimit'] == null ? undefined : json['worseLimit'],
         'bettersLimit': json['bettersLimit'] == null ? undefined : json['bettersLimit'],
     };
@@ -401,12 +429,18 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
-        'imageThumbnail': value['imageThumbnail'],
-        'image': value['image'],
-        'singularName': value['singularName'],
-        'pluralName': value['pluralName'],
-        'i18n': value['i18n'] == null ? undefined : (mapValues(value['i18n'], VerticalConfigI18nDtoToJSON)),
-        'rawI18n': value['rawI18n'] == null ? undefined : (mapValues(value['rawI18n'], ProductI18nElementsToJSON)),
+        'imageSmall': value['imageSmall'],
+        'imageMedium': value['imageMedium'],
+        'imageLarge': value['imageLarge'],
+        'verticalHomeTitle': value['verticalHomeTitle'],
+        'verticalHomeDescription': value['verticalHomeDescription'],
+        'verticalHomeUrl': value['verticalHomeUrl'],
+        'verticalMetaTitle': value['verticalMetaTitle'],
+        'verticalMetaDescription': value['verticalMetaDescription'],
+        'verticalMetaOpenGraphTitle': value['verticalMetaOpenGraphTitle'],
+        'verticalMetaOpenGraphDescription': value['verticalMetaOpenGraphDescription'],
+        'wikiPages': value['wikiPages'] == null ? undefined : ((value['wikiPages'] as Array<any>).map(WikiPageConfigToJSON)),
+        'aiConfigs': AiPromptsConfigToJSON(value['aiConfigs']),
         'ecoFilters': value['ecoFilters'],
         'technicalFilters': value['technicalFilters'],
         'globalTechnicalFilters': value['globalTechnicalFilters'],
@@ -418,18 +452,17 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'forceNameGeneration': value['forceNameGeneration'],
         'brandsAlias': value['brandsAlias'],
         'brandsExclusion': value['brandsExclusion'] == null ? undefined : Array.from(value['brandsExclusion'] as Set<any>),
-        'namings': SiteNamingToJSON(value['namings']),
         'resourcesConfig': ResourcesAggregationConfigToJSON(value['resourcesConfig']),
-        'attributesConfig': AttributesConfigToJSON(value['attributesConfig']),
-        'availableImpactScoreCriterias': value['availableImpactScoreCriterias'] == null ? undefined : (mapValues(value['availableImpactScoreCriterias'], ImpactScoreCriteriaToJSON)),
-        'impactScoreConfig': ImpactScoreConfigToJSON(value['impactScoreConfig']),
-        'subsets': value['subsets'] == null ? undefined : ((value['subsets'] as Array<any>).map(VerticalSubsetToJSON)),
-        'brandsSubset': VerticalSubsetToJSON(value['brandsSubset']),
+        'attributesConfig': AttributesConfigDtoToJSON(value['attributesConfig']),
+        'availableImpactScoreCriterias': value['availableImpactScoreCriterias'] == null ? undefined : (mapValues(value['availableImpactScoreCriterias'], ImpactScoreCriteriaDtoToJSON)),
+        'impactScoreConfig': ImpactScoreConfigDtoToJSON(value['impactScoreConfig']),
+        'subsets': value['subsets'] == null ? undefined : ((value['subsets'] as Array<any>).map(VerticalSubsetDtoToJSON)),
+        'brandsSubset': VerticalSubsetDtoToJSON(value['brandsSubset']),
         'barcodeConfig': BarcodeAggregationPropertiesToJSON(value['barcodeConfig']),
         'recommandationsConfig': RecommandationsConfigToJSON(value['recommandationsConfig']),
         'descriptionsAggregationConfig': DescriptionsAggregationConfigToJSON(value['descriptionsAggregationConfig']),
         'scoringAggregationConfig': ScoringAggregationConfigToJSON(value['scoringAggregationConfig']),
-        'featureGroups': value['featureGroups'] == null ? undefined : ((value['featureGroups'] as Array<any>).map(FeatureGroupToJSON)),
+        'featureGroups': value['featureGroups'] == null ? undefined : ((value['featureGroups'] as Array<any>).map(FeatureGroupDtoToJSON)),
         'worseLimit': value['worseLimit'],
         'bettersLimit': value['bettersLimit'],
     };

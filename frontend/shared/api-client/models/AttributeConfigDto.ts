@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { AttributeConfigUnit } from './AttributeConfigUnit';
-import {
-    AttributeConfigUnitFromJSON,
-    AttributeConfigUnitFromJSONTyped,
-    AttributeConfigUnitToJSON,
-    AttributeConfigUnitToJSONTyped,
-} from './AttributeConfigUnit';
 import type { AttributeParserConfig } from './AttributeParserConfig';
 import {
     AttributeParserConfigFromJSON,
@@ -31,91 +24,91 @@ import {
 /**
  * 
  * @export
- * @interface AttributeConfig
+ * @interface AttributeConfigDto
  */
-export interface AttributeConfig {
+export interface AttributeConfigDto {
     /**
-     * 
+     * Unique key identifying the attribute.
      * @type {string}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     key?: string;
     /**
-     * 
+     * Font Awesome icon associated with the attribute.
      * @type {string}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     faIcon?: string;
     /**
-     * 
-     * @type {AttributeConfigUnit}
-     * @memberof AttributeConfig
-     */
-    unit?: AttributeConfigUnit;
-    /**
-     * 
-     * @type {AttributeConfigUnit}
-     * @memberof AttributeConfig
-     */
-    name?: AttributeConfigUnit;
-    /**
-     * 
+     * Localised unit displayed for this attribute.
      * @type {string}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
-    filteringType?: AttributeConfigFilteringTypeEnum;
+    unit?: string;
     /**
-     * 
+     * Localised display name for this attribute.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    name?: string;
+    /**
+     * Type of filtering applied for this attribute.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    filteringType?: AttributeConfigDtoFilteringTypeEnum;
+    /**
+     * Identifiers of the Icecat features mapped to this attribute.
      * @type {Set<string>}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     icecatFeaturesIds?: Set<string>;
     /**
-     * 
+     * Indicates whether this attribute is exposed as a score.
      * @type {boolean}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     asScore?: boolean;
     /**
-     * 
+     * Indicates whether lower values should yield higher scores.
      * @type {boolean}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     reverseScore?: boolean;
     /**
-     * 
+     * Ordering applied when displaying attribute values.
      * @type {string}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
-    attributeValuesOrdering?: AttributeConfigAttributeValuesOrderingEnum;
+    attributeValuesOrdering?: AttributeConfigDtoAttributeValuesOrderingEnum;
     /**
-     * 
+     * When true, the attribute values ordering is reversed.
      * @type {boolean}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     attributeValuesReverseOrder?: boolean;
     /**
-     * 
+     * Attribute synonyms keyed by datasource name.
      * @type {{ [key: string]: Set<string>; }}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     synonyms?: { [key: string]: Set<string>; };
     /**
-     * 
+     * Custom parser configuration used to normalize attribute values.
      * @type {AttributeParserConfig}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     parser?: AttributeParserConfig;
     /**
-     * 
+     * Mapping used to convert textual values to numerics when relevant.
      * @type {{ [key: string]: number; }}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     numericMapping?: { [key: string]: number; };
     /**
-     * 
+     * Static replacements applied to attribute values.
      * @type {{ [key: string]: string; }}
-     * @memberof AttributeConfig
+     * @memberof AttributeConfigDto
      */
     mappings?: { [key: string]: string; };
 }
@@ -124,36 +117,36 @@ export interface AttributeConfig {
 /**
  * @export
  */
-export const AttributeConfigFilteringTypeEnum = {
+export const AttributeConfigDtoFilteringTypeEnum = {
     Boolean: 'BOOLEAN',
     Numeric: 'NUMERIC',
     Text: 'TEXT'
 } as const;
-export type AttributeConfigFilteringTypeEnum = typeof AttributeConfigFilteringTypeEnum[keyof typeof AttributeConfigFilteringTypeEnum];
+export type AttributeConfigDtoFilteringTypeEnum = typeof AttributeConfigDtoFilteringTypeEnum[keyof typeof AttributeConfigDtoFilteringTypeEnum];
 
 /**
  * @export
  */
-export const AttributeConfigAttributeValuesOrderingEnum = {
+export const AttributeConfigDtoAttributeValuesOrderingEnum = {
     Alpha: 'ALPHA',
     Count: 'COUNT',
     Mapped: 'MAPPED'
 } as const;
-export type AttributeConfigAttributeValuesOrderingEnum = typeof AttributeConfigAttributeValuesOrderingEnum[keyof typeof AttributeConfigAttributeValuesOrderingEnum];
+export type AttributeConfigDtoAttributeValuesOrderingEnum = typeof AttributeConfigDtoAttributeValuesOrderingEnum[keyof typeof AttributeConfigDtoAttributeValuesOrderingEnum];
 
 
 /**
- * Check if a given object implements the AttributeConfig interface.
+ * Check if a given object implements the AttributeConfigDto interface.
  */
-export function instanceOfAttributeConfig(value: object): value is AttributeConfig {
+export function instanceOfAttributeConfigDto(value: object): value is AttributeConfigDto {
     return true;
 }
 
-export function AttributeConfigFromJSON(json: any): AttributeConfig {
-    return AttributeConfigFromJSONTyped(json, false);
+export function AttributeConfigDtoFromJSON(json: any): AttributeConfigDto {
+    return AttributeConfigDtoFromJSONTyped(json, false);
 }
 
-export function AttributeConfigFromJSONTyped(json: any, ignoreDiscriminator: boolean): AttributeConfig {
+export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): AttributeConfigDto {
     if (json == null) {
         return json;
     }
@@ -161,8 +154,8 @@ export function AttributeConfigFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'key': json['key'] == null ? undefined : json['key'],
         'faIcon': json['faIcon'] == null ? undefined : json['faIcon'],
-        'unit': json['unit'] == null ? undefined : AttributeConfigUnitFromJSON(json['unit']),
-        'name': json['name'] == null ? undefined : AttributeConfigUnitFromJSON(json['name']),
+        'unit': json['unit'] == null ? undefined : json['unit'],
+        'name': json['name'] == null ? undefined : json['name'],
         'filteringType': json['filteringType'] == null ? undefined : json['filteringType'],
         'icecatFeaturesIds': json['icecatFeaturesIds'] == null ? undefined : new Set(json['icecatFeaturesIds']),
         'asScore': json['asScore'] == null ? undefined : json['asScore'],
@@ -176,11 +169,11 @@ export function AttributeConfigFromJSONTyped(json: any, ignoreDiscriminator: boo
     };
 }
 
-export function AttributeConfigToJSON(json: any): AttributeConfig {
-    return AttributeConfigToJSONTyped(json, false);
+export function AttributeConfigDtoToJSON(json: any): AttributeConfigDto {
+    return AttributeConfigDtoToJSONTyped(json, false);
 }
 
-export function AttributeConfigToJSONTyped(value?: AttributeConfig | null, ignoreDiscriminator: boolean = false): any {
+export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -189,8 +182,8 @@ export function AttributeConfigToJSONTyped(value?: AttributeConfig | null, ignor
         
         'key': value['key'],
         'faIcon': value['faIcon'],
-        'unit': AttributeConfigUnitToJSON(value['unit']),
-        'name': AttributeConfigUnitToJSON(value['name']),
+        'unit': value['unit'],
+        'name': value['name'],
         'filteringType': value['filteringType'],
         'icecatFeaturesIds': value['icecatFeaturesIds'] == null ? undefined : Array.from(value['icecatFeaturesIds'] as Set<any>),
         'asScore': value['asScore'],
