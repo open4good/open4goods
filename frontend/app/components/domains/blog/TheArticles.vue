@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRoute, useRouter } from '#app'
 import { useI18n } from 'vue-i18n'
 import type { BlogTagDto } from '~~/shared/api-client'
 
@@ -238,35 +239,45 @@ const seoPageLinks = computed(() => {
         <span class="tag-filter__title">{{ t('blog.list.tagsTitle') }}</span>
       </div>
       <div class="tag-filter__chips">
-        <v-chip
+        <button
+          type="button"
           class="tag-filter__chip"
-          color="primary"
-          :variant="isTagActive(null) ? 'elevated' : 'tonal'"
           :class="{ 'tag-filter__chip--active': isTagActive(null) }"
-          size="small"
           :disabled="tagsLoading"
           @click="handleTagSelection(null)"
         >
-          {{ t('blog.list.tagsAll') }}
-        </v-chip>
-        <v-chip
+          <v-chip
+            color="primary"
+            :variant="isTagActive(null) ? 'elevated' : 'tonal'"
+            size="small"
+            :disabled="tagsLoading"
+          >
+            {{ t('blog.list.tagsAll') }}
+          </v-chip>
+        </button>
+        <button
           v-for="tag in availableTags"
           :key="tag.name"
+          type="button"
           class="tag-filter__chip"
-          color="primary"
-          :variant="isTagActive(tag.name) ? 'elevated' : 'tonal'"
           :class="{ 'tag-filter__chip--active': isTagActive(tag.name) }"
-          size="small"
           :disabled="tagsLoading"
           @click="handleTagSelection(tag.name)"
         >
-          <span v-if="typeof tag.count === 'number' && tag.count > 0">
-            {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
-          </span>
-          <span v-else>
-            {{ tag.name }}
-          </span>
-        </v-chip>
+          <v-chip
+            color="primary"
+            :variant="isTagActive(tag.name) ? 'elevated' : 'tonal'"
+            size="small"
+            :disabled="tagsLoading"
+          >
+            <span v-if="typeof tag.count === 'number' && tag.count > 0">
+              {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
+            </span>
+            <span v-else>
+              {{ tag.name }}
+            </span>
+          </v-chip>
+        </button>
       </div>
       <div v-if="tagsLoading" class="tag-filter__loading">
         <v-progress-circular indeterminate size="16" width="2" color="primary" />
@@ -469,7 +480,16 @@ const seoPageLinks = computed(() => {
     gap: 0.5rem
 
   &__chip
+    appearance: none
+    border: none
+    background: transparent
+    padding: 0
+    display: inline-flex
     transition: transform 0.2s ease
+    cursor: pointer
+
+    &:disabled
+      cursor: not-allowed
 
   &__chip--active
     transform: translateY(-2px)
