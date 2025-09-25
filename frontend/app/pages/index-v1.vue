@@ -18,7 +18,10 @@
           </v-btn>
         </router-link>
         <!-- Display login button only when the user is not authenticated -->
-        <router-link v-if="!isLoggedIn" to="/auth/login">
+        <router-link
+          v-if="!isLoggedIn"
+          :to="{ path: '/auth/login', query: { redirect: currentRoute.fullPath } }"
+        >
           <v-btn color="secondary" size="large" rounded="pill" class="elevation-2">
             <v-icon start icon="mdi-login" />
             Login
@@ -103,11 +106,12 @@ const { t, locale } = useI18n()
 const blogPath = computed(() => resolveLocalizedRoutePath('blog', normalizeLocale(locale.value)))
 
 const router = useRouter()
+const currentRoute = useRoute()
 
 const handleLogout = async () => {
   try {
     await logout()
-    await router.push('/')
+    await router.replace(currentRoute.fullPath || '/')
   } catch (error) {
     console.error('Logout failed', error)
   }

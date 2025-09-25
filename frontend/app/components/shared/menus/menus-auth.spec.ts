@@ -6,10 +6,12 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 const isLoggedIn = ref(false)
 const logoutMock = vi.fn()
 const routerPush = vi.fn()
+const routerReplace = vi.fn()
 const routerInstance = {
   push: routerPush,
+  replace: routerReplace,
 }
-const currentRoute = reactive({ path: '/' })
+const currentRoute = reactive({ path: '/', fullPath: '/' })
 
 function useRouteMock() {
   return currentRoute
@@ -72,6 +74,7 @@ describe('Shared menu authentication controls', () => {
     isLoggedIn.value = false
     logoutMock.mockReset()
     routerPush.mockReset()
+    routerReplace.mockReset()
     logoutMock.mockResolvedValue(undefined)
   })
 

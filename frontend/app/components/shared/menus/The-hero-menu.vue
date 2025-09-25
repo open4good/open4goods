@@ -52,7 +52,7 @@ const handleLogout = async () => {
 
   try {
     await logout()
-    await router.push('/')
+    await router.replace(route.fullPath || '/')
   } catch (error) {
     console.error('Logout failed', error)
   }
