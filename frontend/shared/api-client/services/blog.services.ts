@@ -1,5 +1,5 @@
 import { BlogApi, Configuration } from '..'
-import type { BlogPostDto, PageDto } from '..'
+import type { BlogPostDto, BlogTagDto, PageDto } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 
 /**
@@ -47,5 +47,17 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  return { getArticles, getArticleBySlug }
+  /**
+   * Fetch available blog tags with post counts
+   */
+  const getTags = async (): Promise<BlogTagDto[]> => {
+    try {
+      return await api.tags({ domainLanguage })
+    } catch (error) {
+      console.error('Error fetching blog tags:', error)
+      throw error
+    }
+  }
+
+  return { getArticles, getArticleBySlug, getTags }
 }

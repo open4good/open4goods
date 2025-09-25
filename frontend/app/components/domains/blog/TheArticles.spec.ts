@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TheArticles from './TheArticles.vue'
 
-// Mock the useBlog composable
 type MockArticle = {
   id: string
   title: string
@@ -53,11 +52,36 @@ const paginationRef = ref({
   totalPages: 1,
 })
 
-const fetchArticlesMock = vi.fn()
+const tagsRef = ref([
+  { name: 'Energy', count: 3 },
+  { name: 'Kitchen', count: 1 },
+])
+const selectedTagRef = ref<string | null>(null)
+
+const fetchArticlesMock = vi.fn(
+  async (page: number = 1, size: number = 12, tag: string | null = null) => {
+    paginationRef.value = {
+      ...paginationRef.value,
+      page,
+      size,
+    }
+    selectedTagRef.value = tag ?? null
+  },
+)
+const fetchTagsMock = vi.fn(async () => {})
 const changePageMock = vi.fn()
+const selectTagMock = vi.fn(async (tag: string | null) => {
+  selectedTagRef.value = tag
+  await fetchArticlesMock(1, paginationRef.value.size, tag)
+})
 const routeQuery = reactive<Record<string, string | undefined>>({})
 const mockRouterPush = vi.fn(
-  async ({ query }: { query?: Record<string, string | undefined> } = {}) => {
+  async ({
+    query,
+  }: {
+    query?: Record<string, string | undefined>
+    path?: string
+  } = {}) => {
     const nextQuery = query ?? {}
 
     Object.keys(routeQuery).forEach((key) => {
@@ -84,6 +108,10 @@ const mockUseBlog = {
   pagination: paginationRef,
   fetchArticles: fetchArticlesMock,
   changePage: changePageMock,
+  tags: computed(() => tagsRef.value),
+  selectedTag: computed(() => selectedTagRef.value),
+  fetchTags: fetchTagsMock,
+  selectTag: selectTagMock,
 }
 
 // Mock the useBlog composable
@@ -140,8 +168,15 @@ describe('TheArticles Component', () => {
       totalPages: 1,
     }
     fetchArticlesMock.mockReset()
+    fetchTagsMock.mockReset()
     changePageMock.mockReset()
+    selectTagMock.mockReset()
     mockRouterPush.mockReset()
+    tagsRef.value = [
+      { name: 'Energy', count: 3 },
+      { name: 'Kitchen', count: 1 },
+    ]
+    selectedTagRef.value = null
     Object.keys(routeQuery).forEach((key) => {
       Reflect.deleteProperty(routeQuery, key)
     })
@@ -157,7 +192,7 @@ describe('TheArticles Component', () => {
 
     expect(wrapper.find('.loading').exists()).toBe(true)
     expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Chargement des articles')
+    expect(wrapper.text()).toContain('blog.list.loading')
   })
 
   test('should render articles in cards', async () => {
@@ -243,14 +278,14 @@ describe('TheArticles Component', () => {
     expect(wrapper.find('button').text()).toBe('Hide Debug Info')
   })
 
-  test('should request initial page on mount', async () => {
+  test('should fetch articles on mount', async () => {
     paginatedArticlesRef.value = []
 
     await mountSuspended(TheArticles)
     await nextTick()
 
-    expect(changePageMock).toHaveBeenCalledTimes(1)
-    expect(changePageMock).toHaveBeenCalledWith(1)
+    expect(fetchArticlesMock).toHaveBeenCalledTimes(1)
+    expect(fetchArticlesMock).toHaveBeenCalledWith(1, 12, null)
   })
 
   test('should handle empty articles array', async () => {
@@ -296,6 +331,62 @@ describe('TheArticles Component', () => {
     expect(imageLink.attributes('href')).toBe('/blog/test-article-1')
   })
 
+  test('pushes query parameters when selecting a tag', async () => {
+    const wrapper = await mountSuspended(TheArticles)
+    await nextTick()
+
+    const tagChips = wrapper.findAll('.tag-filter__chip')
+    expect(tagChips.length).toBeGreaterThan(1)
+
+    const energyChip = tagChips[1]
+    if (!energyChip) {
+      throw new Error('Expected a tag chip to test selection')
+    }
+
+    await energyChip.trigger('click')
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      path: '/blog',
+      query: { tag: 'Energy' },
+    })
+  })
+
+  test('fetches articles again when tag query changes', async () => {
+    await mountSuspended(TheArticles)
+    await nextTick()
+
+    fetchArticlesMock.mockClear()
+    routeQuery.tag = 'Energy'
+    await nextTick()
+    await nextTick()
+
+    expect(fetchArticlesMock).toHaveBeenCalledWith(1, 12, 'Energy')
+  })
+
+  test('loads tags from the API when none are cached', async () => {
+    tagsRef.value = []
+
+    await mountSuspended(TheArticles)
+    await nextTick()
+
+    expect(fetchTagsMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('highlights the selected tag from the route', async () => {
+    routeQuery.tag = 'Energy'
+
+    const wrapper = await mountSuspended(TheArticles)
+    await nextTick()
+
+    const tagChips = wrapper.findAll('.tag-filter__chip')
+    const energyChip = tagChips[1]
+    if (!energyChip) {
+      throw new Error('Expected Energy tag chip to exist')
+    }
+
+    expect(energyChip.classes()).toContain('tag-filter__chip--active')
+  })
+
   test('buildArticleLink normalizes different url formats', async () => {
     const wrapper = await mountSuspended(TheArticles)
 
@@ -334,7 +425,7 @@ describe('TheArticles Component', () => {
     expect(wrapper.find('.pagination-container').exists()).toBe(true)
   })
 
-  test('should request page change through composable', async () => {
+  test('should update the route when page changes', async () => {
     paginationRef.value = {
       page: 1,
       size: 12,
@@ -351,6 +442,6 @@ describe('TheArticles Component', () => {
     await instance.handlePageChange(2)
     await nextTick()
 
-    expect(changePageMock).toHaveBeenCalledWith(2)
+    expect(mockRouterPush).toHaveBeenCalledWith({ query: { page: '2' } })
   })
 })

@@ -66,6 +66,27 @@
       "info": "Showing page {current} of {total} ({count} articles)",
       "ariaLabel": "Blog pagination links",
       "pageLink": "Blog page {page}"
+    },
+    "article": {
+      "updated": "Updated {date}",
+      "readingTime": "Approx. {minutes} min read",
+      "featuredImageAlt": "Featured image for {title}",
+      "empty": "The content of this article will be available soon.",
+      "edit": "Edit this article"
+    },
+    "list": {
+      "loading": "Loading articles…",
+      "readMore": "Read more",
+      "tagsTitle": "Filter by tag",
+      "tagsAll": "All topics",
+      "tagWithCount": "{tag} ({count})",
+      "tagsLoading": "Loading tags…",
+      "tagsAriaLabel": "Filter blog posts by tag"
+    }
+  },
+  "common": {
+    "actions": {
+      "retry": "Retry"
     }
   }
 }

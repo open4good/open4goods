@@ -1,4 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { ref } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('#imports', () => {
@@ -21,9 +22,39 @@ vi.mock('~/components/shared/images/RobustImage.vue', () => ({
   },
 }))
 
+const isLoggedInRef = ref(true)
+
+vi.mock('~/composables/useAuth', () => ({
+  useAuth: () => ({
+    isLoggedIn: isLoggedInRef,
+  }),
+}))
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string, params: Record<string, unknown> = {}) => {
+      switch (key) {
+        case 'blog.article.readingTime':
+          return `Approx. ${params.minutes} min read`
+        case 'blog.article.updated':
+          return `Updated ${params.date}`
+        case 'blog.article.featuredImageAlt':
+          return `Featured image for ${params.title}`
+        case 'blog.article.empty':
+          return 'The content of this article will be available soon.'
+        case 'blog.article.edit':
+          return 'Edit this article'
+        default:
+          return key
+      }
+    },
+  }),
+}))
+
 describe('TheArticle.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    isLoggedInRef.value = true
   })
 
   const baseArticle = {
@@ -50,6 +81,7 @@ describe('TheArticle.vue', () => {
         stubs: {
           VChip: {
             template: '<span class="v-chip"><slot /></span>',
+            props: ['to', 'link', 'color', 'variant', 'size'],
           },
           VIcon: {
             template: '<span class="v-icon"><slot /></span>',
@@ -89,7 +121,9 @@ describe('TheArticle.vue', () => {
     const wrapper = await mountComponent({ body: '' })
 
     expect(wrapper.find('[data-test="article-body"]').exists()).toBe(false)
-    expect(wrapper.get('[data-test="article-empty"]').text()).toContain('content of this article')
+    expect(wrapper.get('[data-test="article-empty"]').text()).toContain(
+      'The content of this article will be available soon.',
+    )
   })
 
   test('computes reading time when enough text is provided', async () => {
@@ -97,6 +131,21 @@ describe('TheArticle.vue', () => {
     const wrapper = await mountComponent({ body: longBody })
 
     const readingTime = wrapper.get('[data-test="article-reading-time"]').text()
-    expect(readingTime).toContain('Approx.')
+    expect(readingTime).toContain('Approx. ')
+  })
+
+  test('hides the edit link when the user is not authenticated', async () => {
+    isLoggedInRef.value = false
+
+    const wrapper = await mountComponent()
+
+    expect(wrapper.find('[data-test="article-edit-link"]').exists()).toBe(false)
+  })
+
+  test('exposes navigation to the blog listing when clicking on a tag', async () => {
+    const wrapper = await mountComponent()
+
+    const firstCategory = wrapper.get('[data-test="article-category"]')
+    expect(firstCategory.props('to')).toEqual({ path: '/blog', query: { tag: 'Nuxt' } })
   })
 })

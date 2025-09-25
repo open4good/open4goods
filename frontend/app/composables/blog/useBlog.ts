@@ -1,4 +1,4 @@
-import type { BlogPostDto, PageDto } from '~~/shared/api-client'
+import type { BlogPostDto, BlogTagDto, PageDto } from '~~/shared/api-client'
 
 /**
  * Composable for blog-related functionality
@@ -9,6 +9,8 @@ export const useBlog = () => {
   // Reactive state
   const articles = ref<BlogPostDto[]>([])
   const currentArticle = ref<BlogPostDto | null>(null)
+  const tags = ref<BlogTagDto[]>([])
+  const selectedTag = ref<string | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
   const pagination = ref({
@@ -24,6 +26,7 @@ export const useBlog = () => {
   const fetchArticles = async (
     page: number = pagination.value.page,
     size: number = pagination.value.size,
+    tag: string | null = selectedTag.value,
   ) => {
     loading.value = true
     error.value = null
@@ -31,17 +34,20 @@ export const useBlog = () => {
     try {
       const sanitizedPage = Number.isFinite(page) ? Math.max(page, 1) : 1
       const sanitizedSize = Number.isFinite(size) ? Math.max(size, 1) : DEFAULT_PAGE_SIZE
+      const sanitizedTag = tag?.trim() ?? null
 
       // Use our server API as proxy instead of calling external API directly
       const response = await $fetch<PageDto>('/api/blog/articles', {
         params: {
           pageNumber: sanitizedPage - 1,
           pageSize: sanitizedSize,
+          tag: sanitizedTag || undefined,
         },
       })
 
       const currentPageArticles = response.data ?? []
       articles.value = currentPageArticles
+      selectedTag.value = sanitizedTag
 
       const pageMeta = response.page
       const resolvedPageSize = pageMeta?.size ?? sanitizedSize
@@ -87,12 +93,27 @@ export const useBlog = () => {
       return
     }
 
-    await fetchArticles(boundedPage, pagination.value.size)
+    await fetchArticles(boundedPage, pagination.value.size, selectedTag.value)
   }
 
   const paginatedArticles = computed(() => {
     return articles.value
   })
+
+  const fetchTags = async () => {
+    try {
+      const response = await $fetch<BlogTagDto[]>('/api/blog/tags')
+      tags.value = response ?? []
+    } catch (err) {
+      console.error('Error in fetchTags:', err)
+      tags.value = []
+    }
+  }
+
+  const selectTag = async (tag: string | null) => {
+    selectedTag.value = tag
+    await fetchArticles(1, pagination.value.size, tag)
+  }
 
   /**
    * Fetch a single article by slug
@@ -136,6 +157,8 @@ export const useBlog = () => {
     articles: readonly(articles),
     paginatedArticles: readonly(paginatedArticles),
     currentArticle: readonly(currentArticle),
+    tags: readonly(tags),
+    selectedTag: readonly(selectedTag),
     loading: readonly(loading),
     error: readonly(error),
     pagination: readonly(pagination),
@@ -143,6 +166,8 @@ export const useBlog = () => {
     // Actions
     fetchArticles,
     changePage,
+    fetchTags,
+    selectTag,
     fetchArticle,
     clearCurrentArticle,
     clearError,

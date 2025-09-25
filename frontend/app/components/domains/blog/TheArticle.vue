@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import type { BlogPostDto } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import RobustImage from '~/components/shared/images/RobustImage.vue'
+import { useAuth } from '~/composables/useAuth'
 
 interface BlogArticle extends BlogPostDto {
   /**
@@ -20,6 +22,8 @@ const article = computed(() => props.article)
 
 const articleTitle = computed(() => article.value.title?.trim() || 'Article')
 const articleSummary = computed(() => article.value.summary?.trim() ?? '')
+const { t } = useI18n()
+const { isLoggedIn } = useAuth()
 
 const buildDateInfo = (timestamp?: number) => {
   if (!timestamp) {
@@ -75,10 +79,15 @@ const readingTimeLabel = computed(() => {
     return ''
   }
 
-  return `Approx. ${readingTimeMinutes.value} min read`
+  return t('blog.article.readingTime', { minutes: readingTimeMinutes.value })
 })
 
 const categories = computed(() => (article.value.category ?? []).map((item) => item.trim()).filter(Boolean))
+
+const buildTagLink = (tag: string) => ({
+  path: '/blog',
+  query: { tag },
+})
 
 const headingId = computed(() => `blog-article-${article.value.url ?? 'detail'}`)
 
@@ -183,6 +192,8 @@ useHead(() => ({
           color="primary"
           variant="tonal"
           size="small"
+          :to="buildTagLink(category)"
+          link
           data-test="article-category"
         >
           {{ category }}
@@ -215,7 +226,7 @@ useHead(() => ({
         <span v-if="updatedDate" class="article-meta__item" data-test="article-updated">
           <v-icon icon="mdi-update" size="small" aria-hidden="true" />
           <time :datetime="updatedDate.iso" itemprop="dateModified">
-            Updated {{ updatedDate.label }}
+            {{ t('blog.article.updated', { date: updatedDate.label }) }}
           </time>
         </span>
 
@@ -234,7 +245,7 @@ useHead(() => ({
         height="360"
         class="article-hero__image"
       />
-      <figcaption class="visually-hidden">Featured image for {{ articleTitle }}</figcaption>
+      <figcaption class="visually-hidden">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
     </figure>
 
     <v-divider class="article-divider" role="presentation" />
@@ -245,12 +256,12 @@ useHead(() => ({
     </section>
 
     <section v-else class="article-body article-body--empty" aria-live="polite" data-test="article-empty">
-      <v-alert type="info" variant="tonal">The content of this article will be available soon.</v-alert>
+      <v-alert type="info" variant="tonal">{{ t('blog.article.empty') }}</v-alert>
     </section>
 
     <footer class="article-footer" aria-label="Article footer">
       <v-btn
-        v-if="article.editLink"
+        v-if="isLoggedIn && article.editLink"
         :href="article.editLink"
         target="_blank"
         rel="noopener"
@@ -259,7 +270,7 @@ useHead(() => ({
         size="small"
         data-test="article-edit-link"
       >
-        Edit this article
+        {{ t('blog.article.edit') }}
       </v-btn>
     </footer>
   </article>
