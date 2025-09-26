@@ -177,101 +177,108 @@ useHead(() => ({
 </script>
 
 <template>
-  <article
-    class="blog-article"
+  <v-sheet
+    tag="article"
+    class="d-flex flex-column gap-6 pa-6 pa-md-8 pa-lg-10"
+    color="surface"
+    elevation="8"
+    rounded="xl"
     :aria-labelledby="headingId"
     itemscope
     itemtype="https://schema.org/BlogPosting"
   >
-    <header class="article-header">
+    <header class="d-flex flex-column gap-4">
       <nav
         v-if="categories.length"
-        class="article-categories"
+        class="d-flex flex-wrap gap-2"
         aria-label="Article categories"
       >
-        <ul class="article-categories__list">
-          <li
-            v-for="category in categories"
-            :key="category"
-            class="article-categories__item"
-          >
-            <v-chip
-              class="article-category"
-              color="primary"
-              variant="tonal"
-              size="small"
-              :to="buildTagLink(category)"
-              link
-              data-test="article-category"
-            >
-              {{ category }}
-            </v-chip>
-          </li>
-        </ul>
+        <v-chip
+          v-for="category in categories"
+          :key="category"
+          color="primary"
+          variant="tonal"
+          size="small"
+          :to="buildTagLink(category)"
+          link
+          data-test="article-category"
+        >
+          {{ category }}
+        </v-chip>
       </nav>
 
-      <h1 :id="headingId" class="article-title" itemprop="headline" data-test="article-title">
+      <h1
+        :id="headingId"
+        class="text-h3 text-lg-h2 font-weight-bold text-high-emphasis mb-0"
+        itemprop="headline"
+        data-test="article-title"
+      >
         {{ articleTitle }}
       </h1>
 
-      <p v-if="articleSummary" class="article-summary" itemprop="description" data-test="article-summary">
+      <p
+        v-if="articleSummary"
+        class="text-subtitle-1 text-medium-emphasis mb-0"
+        itemprop="description"
+        data-test="article-summary"
+      >
         {{ articleSummary }}
       </p>
 
-      <ul class="article-meta" aria-label="Article metadata">
-        <li v-if="article.author" class="article-meta__item" data-test="article-author">
+      <div class="d-flex flex-wrap align-center gap-4 text-body-2 text-medium-emphasis" aria-label="Article metadata">
+        <div v-if="article.author" class="d-inline-flex align-center gap-2" data-test="article-author">
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Author:</span>
+          <span class="v-visually-hidden">Author:</span>
           <span itemprop="author" itemscope itemtype="https://schema.org/Person">
             <span itemprop="name">{{ article.author }}</span>
           </span>
-        </li>
+        </div>
 
-        <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
+        <div v-if="publishedDate" class="d-inline-flex align-center gap-2" data-test="article-published">
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Published on:</span>
+          <span class="v-visually-hidden">Published on:</span>
           <time :datetime="publishedDate.iso" itemprop="datePublished">
             {{ publishedDate.label }}
           </time>
-        </li>
+        </div>
 
-        <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
+        <div v-if="readingTimeLabel" class="d-inline-flex align-center gap-2" data-test="article-reading-time">
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Estimated reading time:</span>
+          <span class="v-visually-hidden">Estimated reading time:</span>
           <span>{{ readingTimeLabel }}</span>
-        </li>
-      </ul>
+        </div>
+      </div>
     </header>
 
-    <figure v-if="article.image" class="article-hero" itemprop="image">
+    <figure v-if="article.image" class="ma-0 rounded-lg overflow-hidden" itemprop="image">
       <RobustImage
         :src="article.image"
         :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
         width="100%"
         height="360"
-        class="article-hero__image"
+        class="w-100"
       />
-      <figcaption class="visually-hidden">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
+      <figcaption class="v-visually-hidden">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
     </figure>
 
-    <v-divider class="article-divider" role="presentation" />
+    <v-divider class="opacity-50" role="presentation" />
 
     <section
       v-if="hasBody"
-      class="article-body"
+      class="text-body-1 text-high-emphasis"
       itemprop="articleBody"
       aria-label="Article content"
       role="region"
     >
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="article-content" data-test="article-body" v-html="sanitizedBody" />
+      <div class="v-prose text-body-1 text-high-emphasis" data-test="article-body" v-html="sanitizedBody" />
     </section>
 
-    <section v-else class="article-body article-body--empty" aria-live="polite" data-test="article-empty">
+    <section v-else class="d-flex justify-center" aria-live="polite" data-test="article-empty">
       <v-alert type="info" variant="tonal">{{ t('blog.article.empty') }}</v-alert>
     </section>
 
-    <footer class="article-footer" aria-label="Article footer">
+    <footer class="d-flex justify-end" aria-label="Article footer">
       <v-btn
         v-if="isLoggedIn && article.editLink"
         :href="article.editLink"
@@ -285,140 +292,5 @@ useHead(() => ({
         {{ t('blog.article.edit') }}
       </v-btn>
     </footer>
-  </article>
+  </v-sheet>
 </template>
-
-<style lang="sass" scoped>
-.blog-article
-  background-color: #ffffff
-  border-radius: 20px
-  box-shadow: 0 18px 48px rgba(25, 118, 210, 0.08)
-  padding: clamp(1.5rem, 2vw, 3rem)
-  display: flex
-  flex-direction: column
-  gap: 1.5rem
-
-.article-header
-  display: flex
-  flex-direction: column
-  gap: 1rem
-
-.article-categories
-  display: block
-
-  &__list
-    display: flex
-    flex-wrap: wrap
-    gap: 0.5rem
-    list-style: none
-    margin: 0
-    padding: 0
-
-  &__item
-    list-style: none
-
-.article-title
-  font-size: clamp(1.75rem, 2.5vw, 2.75rem)
-  font-weight: 700
-  color: #0d1b2a
-  margin: 0
-
-.article-summary
-  font-size: clamp(1rem, 1.2vw, 1.25rem)
-  color: #3d5a80
-  margin: 0
-
-
-.article-meta
-  display: flex
-  flex-wrap: wrap
-  gap: 1rem
-  align-items: center
-  font-size: 0.95rem
-  color: #607d8b
-  margin: 0
-  padding: 0
-  list-style: none
-
-  &__item
-    display: inline-flex
-    align-items: center
-    gap: 0.35rem
-
-.article-hero
-  margin: 0
-  border-radius: 16px
-  overflow: hidden
-
-  &__image
-    width: 100%
-    height: auto
-
-.article-divider
-  opacity: 0.4
-
-.article-body
-  font-size: 1.05rem
-  line-height: 1.75
-  color: #1b263b
-
-  &--empty
-    display: flex
-    justify-content: center
-
-.article-content :deep(h2)
-  font-size: clamp(1.5rem, 2vw, 2rem)
-  margin-top: 1.5rem
-  margin-bottom: 0.75rem
-
-.article-content :deep(h3)
-  font-size: clamp(1.25rem, 1.5vw, 1.5rem)
-  margin-top: 1.25rem
-  margin-bottom: 0.75rem
-
-.article-content :deep(p)
-  margin-bottom: 1.25rem
-
-.article-content :deep(a)
-  color: #1976d2
-  text-decoration: underline
-  text-decoration-color: rgba(25, 118, 210, 0.4)
-  transition: color 0.2s ease
-
-.article-content :deep(a:hover)
-  color: #0d47a1
-
-.article-content :deep(img)
-  max-width: 100%
-  border-radius: 12px
-  margin: 1.5rem 0
-
-.article-footer
-  display: flex
-  justify-content: flex-end
-
-.visually-hidden
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  border: 0
-
-@media (max-width: 960px)
-  .blog-article
-    padding: 1.5rem
-
-  .article-meta
-    gap: 0.75rem
-
-@media (max-width: 600px)
-  .article-meta
-    flex-direction: column
-    align-items: flex-start
-
-  .article-footer
-    justify-content: flex-start
-</style>

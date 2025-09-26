@@ -225,6 +225,7 @@ TypeScript Usage
 UI and Styling
 - Use Vuetify UI forcomponents and styling.
 - Implement responsive Vuetify approach and mobile-firstapproach.
+- Do not introduce custom CSS or component-scoped `<style>` blocks; use Vuetify components, utility classes, and theme tokens configured via `nuxt.config.ts` for all styling requirements.
 
 Pages structure : 
 

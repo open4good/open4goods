@@ -61,14 +61,6 @@ const parseTagQuery = (rawTag: unknown) => {
   return trimmed.length > 0 ? trimmed : null
 }
 
-watch(
-  () => pagination.value.page,
-  (page) => {
-    currentPage.value = page || 1
-  },
-  { immediate: true }
-)
-
 const totalPages = computed(() => pagination.value.totalPages || 0)
 const totalElements = computed(() => pagination.value.totalElements || 0)
 const shouldDisplayPagination = computed(() => totalPages.value > 1)
@@ -137,26 +129,6 @@ const ensureTagsLoaded = async () => {
     tagsLoading.value = false
   }
 }
-
-await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
-
-watch(
-  () => [route.query.page, route.query.tag],
-  async (_, __, onCleanup) => {
-    let cancelled = false
-    onCleanup(() => {
-      cancelled = true
-    })
-
-    await ensureTagsLoaded()
-
-    if (cancelled) {
-      return
-    }
-
-    await loadArticlesFromRoute()
-  },
-)
 
 const buildPageQuery = (pageNumber: number) => {
   const sanitizedPage = Math.max(1, Math.trunc(pageNumber))
@@ -439,100 +411,140 @@ defineExpose({
   primaryArticleImage,
   structuredData,
 })
+
+await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+
+watch(
+  () => pagination.value.page,
+  (page) => {
+    currentPage.value = page || 1
+  },
+  { immediate: true },
+)
+
+watch(
+  () => [route.query.page, route.query.tag],
+  async (_, __, onCleanup) => {
+    let cancelled = false
+    onCleanup(() => {
+      cancelled = true
+    })
+
+    await ensureTagsLoaded()
+
+    if (cancelled) {
+      return
+    }
+
+    await loadArticlesFromRoute()
+  },
+)
 </script>
 
 <template>
-  <div class="blog-list">
-
-
-    <div class="debug-controls">
-      <button
-        type="button"
-        class="debug-toggle"
-        :aria-expanded="showDebugInfo"
-        :aria-controls="debugPanelId"
-        @click="toggleDebugInfo"
-      >
-        {{ debugToggleLabel }}
-      </button>
-
-      <div
-        v-if="showDebugInfo"
-        :id="debugPanelId"
-        class="debug-info"
-        role="region"
-        aria-live="polite"
-      >
-        <h2 class="visually-hidden">Debug information</h2>
-        <dl class="debug-info__list">
-          <div class="debug-info__item">
-            <dt>Current page</dt>
-            <dd>{{ debugDetails.currentPage }}</dd>
-          </div>
-          <div class="debug-info__item">
-            <dt>Total pages</dt>
-            <dd>{{ debugDetails.totalPages }}</dd>
-          </div>
-          <div class="debug-info__item">
-            <dt>Total articles</dt>
-            <dd>{{ debugDetails.totalArticles }}</dd>
-          </div>
-          <div class="debug-info__item">
-            <dt>Selected tag</dt>
-            <dd>{{ debugDetails.selectedTag ?? 'None' }}</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-
-
-    <section
-      v-if="availableTags.length || activeTag"
-      class="tag-filter"
-      :aria-label="t('blog.list.tagsAriaLabel')"
-      role="region"
-      :aria-busy="tagsLoading"
-      :aria-controls="articleListId"
-    >
-      <div class="tag-filter__header">
-        <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
-        <span class="tag-filter__title">{{ t('blog.list.tagsTitle') }}</span>
-      </div>
-      <div class="tag-filter__chips">
-        <button
-          type="button"
-          class="tag-filter__chip"
-          :class="{ 'tag-filter__chip--active': isTagActive(null) }"
-          :disabled="tagsLoading"
-          :aria-pressed="isTagActive(null)"
-          @click="handleTagSelection(null)"
+  <v-container class="py-6 py-md-8">
+    <div class="d-flex flex-column gap-6">
+      <div class="d-flex flex-column gap-4 align-start">
+        <v-btn
+          variant="outlined"
+          color="primary"
+          size="small"
+          :aria-expanded="showDebugInfo"
+          :aria-controls="debugPanelId"
+          @click="toggleDebugInfo"
         >
-          <v-chip
+          {{ debugToggleLabel }}
+        </v-btn>
+
+        <v-expand-transition>
+          <v-sheet
+            v-if="showDebugInfo"
+            :id="debugPanelId"
             color="primary"
-            :variant="isTagActive(null) ? 'elevated' : 'tonal'"
+            variant="tonal"
+            rounded="lg"
+            class="pa-4"
+            role="region"
+            aria-live="polite"
+          >
+            <h2 class="v-visually-hidden">Debug information</h2>
+            <v-list density="compact" class="pa-0">
+              <v-list-item>
+                <v-list-item-title class="text-subtitle-2 font-weight-medium text-primary">
+                  Current page
+                </v-list-item-title>
+                <v-list-item-subtitle class="text-body-2 text-high-emphasis">
+                  {{ debugDetails.currentPage }}
+                </v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title class="text-subtitle-2 font-weight-medium text-primary">
+                  Total pages
+                </v-list-item-title>
+                <v-list-item-subtitle class="text-body-2 text-high-emphasis">
+                  {{ debugDetails.totalPages }}
+                </v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title class="text-subtitle-2 font-weight-medium text-primary">
+                  Total articles
+                </v-list-item-title>
+                <v-list-item-subtitle class="text-body-2 text-high-emphasis">
+                  {{ debugDetails.totalArticles }}
+                </v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title class="text-subtitle-2 font-weight-medium text-primary">
+                  Selected tag
+                </v-list-item-title>
+                <v-list-item-subtitle class="text-body-2 text-high-emphasis">
+                  {{ debugDetails.selectedTag ?? 'None' }}
+                </v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-sheet>
+        </v-expand-transition>
+      </div>
+
+      <v-sheet
+        v-if="availableTags.length || activeTag"
+        color="primary"
+        variant="tonal"
+        rounded="lg"
+        class="d-flex flex-column gap-4 pa-4"
+        :aria-label="t('blog.list.tagsAriaLabel')"
+        role="region"
+        :aria-busy="tagsLoading"
+        :aria-controls="articleListId"
+      >
+        <div class="d-flex align-center gap-2">
+          <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
+          <span class="text-subtitle-1 font-weight-medium text-high-emphasis">
+            {{ t('blog.list.tagsTitle') }}
+          </span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <v-btn
+            color="primary"
+            :variant="isTagActive(null) ? 'flat' : 'tonal'"
+            rounded="lg"
             size="small"
             :disabled="tagsLoading"
-            :aria-label="t('blog.list.tagsAll')"
+            :aria-pressed="isTagActive(null)"
+            @click="handleTagSelection(null)"
           >
             {{ t('blog.list.tagsAll') }}
-          </v-chip>
-        </button>
-        <button
-          v-for="tag in availableTags"
-          :key="tag.name"
-          type="button"
-          class="tag-filter__chip"
-          :class="{ 'tag-filter__chip--active': isTagActive(tag.name) }"
-          :disabled="tagsLoading"
-          :aria-pressed="isTagActive(tag.name)"
-          @click="handleTagSelection(tag.name)"
-        >
-          <v-chip
+          </v-btn>
+          <v-btn
+            v-for="tag in availableTags"
+            :key="tag.name"
             color="primary"
-            :variant="isTagActive(tag.name) ? 'elevated' : 'tonal'"
+            :variant="isTagActive(tag.name) ? 'flat' : 'tonal'"
+            rounded="lg"
             size="small"
             :disabled="tagsLoading"
-            :aria-label="tag.name"
+            :aria-pressed="isTagActive(tag.name)"
+            @click="handleTagSelection(tag.name)"
           >
             <span v-if="typeof tag.count === 'number' && tag.count > 0">
               {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
@@ -540,428 +552,189 @@ defineExpose({
             <span v-else>
               {{ tag.name }}
             </span>
-          </v-chip>
-        </button>
-      </div>
-      <div v-if="tagsLoading" class="tag-filter__loading" role="status" aria-live="polite">
-        <v-progress-circular indeterminate size="16" width="2" color="primary" aria-hidden="true" />
-        <span>{{ t('blog.list.tagsLoading') }}</span>
-      </div>
-    </section>
-
-    <div v-if="loading" class="loading" role="status" aria-live="polite">
-      <v-progress-circular indeterminate aria-hidden="true" />
-      <p>{{ t('blog.list.loading') }}</p>
-    </div>
-
-    <div v-else-if="error" class="error">
-      <v-alert type="error" variant="tonal" role="alert">
-        {{ error }}
-      </v-alert>
-      <v-btn class="mt-4" @click="fetchArticles"> {{ t('common.actions.retry') }} </v-btn>
-    </div>
-
-    <div v-else class="articles" role="region" aria-live="polite" :aria-busy="loading">
-      <v-row :id="articleListId" role="list">
-        <v-col
-          v-for="(article, index) in paginatedArticles"
-          :key="article.url ?? index"
-          cols="12"
-          sm="6"
-          md="4"
-          lg="4"
-          role="listitem"
+          </v-btn>
+        </div>
+        <div
+          v-if="tagsLoading"
+          class="d-flex align-center gap-2 text-body-2 text-medium-emphasis"
+          role="status"
+          aria-live="polite"
         >
-          <v-card
-            class="article-card"
-            elevation="6"
-            hover
-            tag="article"
-            :aria-labelledby="buildArticleTitleId(index)"
-            :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+          <v-progress-circular indeterminate size="16" width="2" color="primary" aria-hidden="true" />
+          <span>{{ t('blog.list.tagsLoading') }}</span>
+        </div>
+      </v-sheet>
+
+      <div
+        v-if="loading"
+        class="d-flex flex-column align-center justify-center gap-4 py-8"
+        role="status"
+        aria-live="polite"
+      >
+        <v-progress-circular indeterminate color="primary" aria-hidden="true" />
+        <p class="text-body-2 text-medium-emphasis mb-0">{{ t('blog.list.loading') }}</p>
+      </div>
+
+      <div v-else-if="error" class="d-flex flex-column align-center gap-4 py-8 text-center">
+        <v-alert type="error" variant="tonal" role="alert" class="w-100">
+          {{ error }}
+        </v-alert>
+        <v-btn color="primary" variant="tonal" @click="fetchArticles">{{ t('common.actions.retry') }}</v-btn>
+      </div>
+
+      <div
+        v-else
+        class="d-flex flex-column gap-6"
+        role="region"
+        aria-live="polite"
+        :aria-busy="loading"
+      >
+        <v-row :id="articleListId" role="list">
+          <v-col
+            v-for="(article, index) in paginatedArticles"
+            :key="article.url ?? index"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="4"
+            role="listitem"
           >
-            <!-- Article image -->
-            <NuxtLink
-              v-if="article.image && buildArticleLink(article.url)"
-              :to="buildArticleLink(article.url)"
-              class="article-image-link"
+            <v-card
+              elevation="6"
+              hover
+              tag="article"
+              class="d-flex flex-column h-100"
               :aria-labelledby="buildArticleTitleId(index)"
               :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
-              :title="article.title || undefined"
-              data-test="article-image-link"
             >
+              <NuxtLink
+                v-if="article.image && buildArticleLink(article.url)"
+                :to="buildArticleLink(article.url)"
+                class="d-block"
+                :aria-labelledby="buildArticleTitleId(index)"
+                :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+                :title="article.title || undefined"
+                data-test="article-image-link"
+              >
+                <v-img
+                  :src="article.image"
+                  :alt="buildArticleImageAlt(article.title)"
+                  height="200"
+                  cover
+                >
+                  <template #placeholder>
+                    <div class="d-flex flex-column align-center justify-center text-medium-emphasis bg-surface-variant h-100 pa-4">
+                      <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
+                        mdi-image-off
+                      </v-icon>
+                      <p class="text-caption mb-0">Image not available</p>
+                    </div>
+                  </template>
+                </v-img>
+              </NuxtLink>
               <v-img
+                v-else-if="article.image"
                 :src="article.image"
                 :alt="buildArticleImageAlt(article.title)"
                 height="200"
                 cover
-                class="article-image"
               >
                 <template #placeholder>
-                  <div class="image-placeholder">
+                  <div class="d-flex flex-column align-center justify-center text-medium-emphasis bg-surface-variant h-100 pa-4">
                     <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
                       mdi-image-off
                     </v-icon>
-                    <p class="placeholder-text">Image not available</p>
+                    <p class="text-caption mb-0">Image not available</p>
                   </div>
                 </template>
               </v-img>
-            </NuxtLink>
-            <v-img
-              v-else-if="article.image"
-              :src="article.image"
-              :alt="buildArticleImageAlt(article.title)"
-              height="200"
-              cover
-              class="article-image"
-            >
-              <template #placeholder>
-                <div class="image-placeholder">
-                  <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
-                    mdi-image-off
-                  </v-icon>
-                  <p class="placeholder-text">Image not available</p>
-                </div>
-              </template>
-            </v-img>
 
-            <!-- Card content -->
-            <v-card-title
-              :id="buildArticleTitleId(index)"
-              class="article-title"
-            >
-              <NuxtLink
-                v-if="buildArticleLink(article.url)"
-                :to="buildArticleLink(article.url)"
-                class="article-title-link"
-                :aria-labelledby="buildArticleTitleId(index)"
-                :title="article.title || undefined"
-                data-test="article-title-link"
-              >
-                {{ article.title }}
-              </NuxtLink>
-              <span v-else>
-                {{ article.title }}
-              </span>
-            </v-card-title>
-
-            <v-card-text
-              :id="buildArticleSummaryId(index)"
-              class="article-summary"
-            >
-              <p>{{ article.summary }}</p>
-            </v-card-text>
-
-            <!-- Actions and metadata -->
-            <v-card-actions class="article-actions">
-              <ul class="article-meta" aria-label="Article metadata">
-                <li v-if="article.author" class="article-meta__item author-info">
-                  <v-icon size="small" color="primary" class="mr-1" aria-hidden="true">
-                    mdi-account
-                  </v-icon>
-                  <span class="visually-hidden">Author:</span>
-                  <span class="author-name">{{ article.author }}</span>
-                </li>
-                <li
-                  v-if="article.createdMs"
-                  class="article-meta__item date-info"
+              <v-card-title :id="buildArticleTitleId(index)" class="text-h6 font-weight-semibold text-high-emphasis">
+                <NuxtLink
+                  v-if="buildArticleLink(article.url)"
+                  :to="buildArticleLink(article.url)"
+                  class="text-high-emphasis text-decoration-none"
+                  :aria-labelledby="buildArticleTitleId(index)"
+                  :title="article.title || undefined"
+                  data-test="article-title-link"
                 >
-                  <v-icon size="small" color="grey" class="mr-1" aria-hidden="true">
-                    mdi-calendar
-                  </v-icon>
-                  <span class="visually-hidden">Published on:</span>
-                  <time
-                    class="date-text"
-                    :datetime="buildDateIsoString(article.createdMs)"
-                  >
-                    {{ formatDate(article.createdMs) }}
-                  </time>
-                </li>
-              </ul>
+                  {{ article.title }}
+                </NuxtLink>
+                <span v-else>
+                  {{ article.title }}
+                </span>
+              </v-card-title>
 
-              <v-spacer></v-spacer>
+              <v-card-text :id="buildArticleSummaryId(index)" class="text-body-2 text-medium-emphasis">
+                <p class="mb-0">
+                  {{ article.summary }}
+                </p>
+              </v-card-text>
 
-              <NuxtLink
-                v-if="buildArticleLink(article.url)"
-                :to="buildArticleLink(article.url)"
-                class="article-read-more-link"
-                :aria-labelledby="buildArticleTitleId(index)"
-                :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
-                :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
-                :title="article.title || undefined"
-                data-test="article-read-more"
-              >
-                <v-btn variant="outlined" size="small" color="primary">
+              <v-card-actions class="flex-wrap align-start gap-4">
+                <div class="d-flex flex-column gap-2 text-body-2 text-medium-emphasis" aria-label="Article metadata">
+                  <div v-if="article.author" class="d-inline-flex align-center gap-2">
+                    <v-icon size="small" color="primary" aria-hidden="true">mdi-account</v-icon>
+                    <span class="v-visually-hidden">Author:</span>
+                    <span>{{ article.author }}</span>
+                  </div>
+                  <div v-if="article.createdMs" class="d-inline-flex align-center gap-2">
+                    <v-icon size="small" color="primary" aria-hidden="true">mdi-calendar</v-icon>
+                    <span class="v-visually-hidden">Published on:</span>
+                    <time :datetime="buildDateIsoString(article.createdMs)">
+                      {{ formatDate(article.createdMs) }}
+                    </time>
+                  </div>
+                </div>
+
+                <v-spacer />
+
+                <v-btn
+                  v-if="buildArticleLink(article.url)"
+                  :to="buildArticleLink(article.url)"
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                  :aria-labelledby="buildArticleTitleId(index)"
+                  :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+                  :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
+                  :title="article.title || undefined"
+                  data-test="article-read-more"
+                >
                   {{ t('blog.list.readMore') }}
                 </v-btn>
-              </NuxtLink>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
 
-      <div v-if="shouldDisplayPagination" class="pagination-container">
-        <nav class="pagination-control" :aria-label="paginationAriaLabel">
-          <v-pagination
-            :length="totalPages"
-            :model-value="currentPage"
-            :total-visible="5"
-            :aria-label="paginationAriaLabel"
-            :aria-controls="articleListId"
-            @update:model-value="handlePageChange"
-          />
-        </nav>
+        <div v-if="shouldDisplayPagination" class="d-flex flex-column align-center gap-3 mt-8">
+          <nav :aria-label="paginationAriaLabel">
+            <v-pagination
+              :length="totalPages"
+              :model-value="currentPage"
+              :total-visible="5"
+              :aria-label="paginationAriaLabel"
+              :aria-controls="articleListId"
+              @update:model-value="handlePageChange"
+            />
+          </nav>
 
-        <p class="pagination-info" aria-live="polite">
-          {{ paginationInfoMessage }}
-        </p>
+          <p class="text-body-2 text-medium-emphasis mb-0" aria-live="polite">
+            {{ paginationInfoMessage }}
+          </p>
 
-        <nav class="visually-hidden" :aria-label="paginationAriaLabel">
-          <ul>
-            <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
-              <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
-                {{ pageLinkLabel(pageNumber) }}
-              </NuxtLink>
-            </li>
-          </ul>
-        </nav>
+          <nav class="v-visually-hidden" :aria-label="paginationAriaLabel">
+            <ul>
+              <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
+                <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
+                  {{ pageLinkLabel(pageNumber) }}
+                </NuxtLink>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
-  </div>
+  </v-container>
 </template>
-
-<style lang="sass" scoped>
-.blog-list
-  max-width: 1200px
-  margin: 0 auto
-  padding: 20px
-
-.debug-controls
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-  margin-bottom: 1.5rem
-
-.debug-toggle
-  align-self: flex-start
-  border: 1px solid #1976d2
-  background: transparent
-  color: #1976d2
-  border-radius: 999px
-  padding: 0.35rem 1rem
-  font-weight: 600
-  cursor: pointer
-  transition: background-color 0.2s ease, color 0.2s ease
-
-  &:hover,
-  &:focus-visible
-    background-color: rgba(25, 118, 210, 0.12)
-
-  &:focus-visible
-    outline: 2px solid #1976d2
-    outline-offset: 2px
-
-.debug-info
-  border: 1px dashed rgba(25, 118, 210, 0.4)
-  border-radius: 12px
-  padding: 1rem
-  background: #f8fbff
-
-  &__list
-    margin: 0
-    padding: 0
-    display: grid
-    gap: 0.75rem
-
-.debug-info__item
-  display: grid
-  grid-template-columns: max-content 1fr
-  gap: 0.75rem
-
-  dt
-    font-weight: 600
-    color: #1976d2
-
-  dd
-    margin: 0
-    color: #455a64
-
-.tag-filter
-  margin-bottom: 24px
-  padding: 16px
-  border-radius: 12px
-  background: #f5f9ff
-  border: 1px solid rgba(25, 118, 210, 0.12)
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-
-  &__header
-    display: flex
-    align-items: center
-    gap: 0.5rem
-    color: #1976d2
-    font-weight: 600
-
-  &__title
-    font-size: 1rem
-
-  &__chips
-    display: flex
-    flex-wrap: wrap
-    gap: 0.5rem
-
-  &__chip
-    appearance: none
-    border: none
-    background: transparent
-    padding: 0
-    display: inline-flex
-    transition: transform 0.2s ease
-    cursor: pointer
-
-    &:disabled
-      cursor: not-allowed
-
-  &__chip--active
-    transform: translateY(-2px)
-
-  &__loading
-    display: inline-flex
-    align-items: center
-    gap: 0.5rem
-    font-size: 0.875rem
-    color: #1976d2
-
-
-
-  h5
-    margin: 0 0 8px 0
-    color: #333
-
-  pre
-    margin: 0
-    white-space: pre-wrap
-    word-break: break-all
-
-.loading,
-.error
-  text-align: center
-  padding: 20px
-
-.article-card
-  height: 100%
-  transition: all 0.3s ease
-  border-radius: 12px
-  overflow: hidden
-
-  &:hover
-    transform: translateY(-4px)
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15)
-
-.article-image
-  position: relative
-
-.article-image-link
-  display: block
-
-.article-title-link
-  color: inherit
-  text-decoration: none
-  display: inline-block
-  width: 100%
-
-.article-title-link:hover
-  text-decoration: underline
-
-.article-read-more-link
-  text-decoration: none
-  display: inline-block
-
-.image-placeholder
-  display: flex
-  flex-direction: column
-  align-items: center
-  justify-content: center
-  height: 100%
-  background: #f5f5f5
-  color: #666
-
-.placeholder-text
-  margin-top: 8px
-  font-size: 12px
-  text-align: center
-
-.article-title
-  font-size: 1.1rem
-  font-weight: 600
-  line-height: 1.3
-  color: #333
-  padding: 16px 16px 8px 16px
-
-.article-summary
-  padding: 0 16px 16px 16px
-
-  p
-    color: #666
-    line-height: 1.5
-    margin: 0
-    overflow: hidden
-    text-overflow: ellipsis
-
-.article-actions
-  padding: 16px
-  border-top: 1px solid #f0f0f0
-  background: #fafafa
-
-.article-meta
-  display: flex
-  flex-direction: column
-  gap: 4px
-  list-style: none
-  margin: 0
-  padding: 0
-
-.author-info,
-.date-info
-  display: flex
-  align-items: center
-  font-size: 0.85rem
-
-.author-name
-  color: #1976d2
-  font-weight: 500
-
-.date-text
-  color: #666
-
-.pagination-container
-  margin-top: 24px
-  display: flex
-  flex-direction: column
-  align-items: center
-  gap: 8px
-
-.pagination-info
-  font-size: 0.9rem
-  color: #555
-
-.visually-hidden
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  white-space: nowrap
-  border: 0
-
-// Responsive adjustments
-@media (max-width: 600px)
-  .article-card
-    margin-bottom: 16px
-
-  .article-title
-    font-size: 1rem
-</style>
