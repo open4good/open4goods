@@ -83,6 +83,7 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts',
   },
   css: [
+    'vuetify/styles',
     '~/assets/sass/main.sass', // Keep only the main SASS file
   ],
 
@@ -91,7 +92,6 @@ export default defineNuxtConfig({
       'postcss-prefix-selector': {
         includeFiles: [
           /\/assets\/css\/bootstrap\.css$/i,
-          /\/assets\/css\/xwiki\.css$/i,
         ],
         ...xwikiSandboxPrefixerOptions,
       },
