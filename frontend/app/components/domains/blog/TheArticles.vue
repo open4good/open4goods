@@ -2,7 +2,6 @@
 import { useRoute, useRouter } from '#app'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useI18n } from 'vue-i18n'
-import type { ComputedRef } from 'vue'
 import type { BlogTagDto } from '~~/shared/api-client'
 
 import { useBlog } from '~/composables/blog/useBlog'
@@ -259,7 +258,7 @@ const tagSeoTitle = computed(() =>
     ? t('blog.seo.tagTitle', { tag: sanitizedTag.value })
     : baseSeoTitle.value,
 )
-const pageSeoTitleComputed = computed(() =>
+const pageSeoTitle = computed(() =>
   currentPage.value > 1
     ? t('blog.seo.pageTitle', { title: tagSeoTitle.value, page: currentPage.value })
     : tagSeoTitle.value,
@@ -284,7 +283,7 @@ const articleSummaries = computed(() =>
     .map((article) => (article.summary ?? '').trim())
     .filter((summary) => summary.length > 0),
 )
-const seoDescriptionComputed = computed(() => {
+const seoDescription = computed(() => {
   const base = tagSeoDescription.value
   const [firstSummary] = articleSummaries.value
 
@@ -295,7 +294,7 @@ const seoDescriptionComputed = computed(() => {
   return truncateToLength(`${base} ${firstSummary}`)
 })
 
-const primaryArticleImageComputed = computed(
+const primaryArticleImage = computed(
   () => visibleArticles.value.find((article) => Boolean(article.image))?.image ?? null,
 )
 
@@ -306,7 +305,7 @@ try {
   requestUrl = undefined
 }
 
-const canonicalUrlComputed = computed(() => {
+const canonicalUrl = computed(() => {
   if (!requestUrl) {
     return undefined
   }
@@ -350,7 +349,7 @@ const buildAbsoluteArticleLink = (slug: string | null | undefined) => {
   }
 }
 
-const structuredDataComputed = computed(() => {
+const structuredData = computed(() => {
   const articles = visibleArticles.value
     .map((article) => {
       const entry: Record<string, unknown> = {
@@ -390,9 +389,9 @@ const structuredDataComputed = computed(() => {
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: pageSeoTitleComputed.value,
-    description: seoDescriptionComputed.value || undefined,
-    url: canonicalUrlComputed.value,
+    name: pageSeoTitle.value,
+    description: seoDescription.value || undefined,
+    url: canonicalUrl.value,
     inLanguage: locale.value,
     isPartOf: {
       '@type': 'Blog',
@@ -412,45 +411,33 @@ const structuredDataComputed = computed(() => {
 })
 
 useSeoMeta({
-  title: pageSeoTitleComputed,
-  ogTitle: pageSeoTitleComputed,
-  description: computed(() => seoDescriptionComputed.value || undefined),
-  ogDescription: computed(() => seoDescriptionComputed.value || undefined),
+  title: pageSeoTitle,
+  ogTitle: pageSeoTitle,
+  description: computed(() => seoDescription.value || undefined),
+  ogDescription: computed(() => seoDescription.value || undefined),
   ogType: 'website',
-  ogUrl: canonicalUrlComputed,
-  ogImage: computed(() => primaryArticleImageComputed.value || undefined),
-  twitterCard: computed(() => (primaryArticleImageComputed.value ? 'summary_large_image' : 'summary')),
-  twitterImage: computed(() => primaryArticleImageComputed.value || undefined),
+  ogUrl: canonicalUrl,
+  ogImage: computed(() => primaryArticleImage.value || undefined),
+  twitterCard: computed(() => (primaryArticleImage.value ? 'summary_large_image' : 'summary')),
+  twitterImage: computed(() => primaryArticleImage.value || undefined),
 })
 
 useHead(() => ({
-  link: canonicalUrlComputed.value
+  link: canonicalUrl.value
     ? [
         {
           rel: 'canonical',
-          href: canonicalUrlComputed.value,
+          href: canonicalUrl.value,
         },
       ]
     : [],
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify(structuredDataComputed.value),
+      children: JSON.stringify(structuredData.value),
     },
   ],
 }))
-
-const createExposeBinding = <T>(source: ComputedRef<T>) => ({
-  get value(): T {
-    return source.value
-  },
-})
-
-const pageSeoTitle = createExposeBinding(pageSeoTitleComputed)
-const seoDescription = createExposeBinding(seoDescriptionComputed)
-const canonicalUrl = createExposeBinding(canonicalUrlComputed)
-const primaryArticleImage = createExposeBinding(primaryArticleImageComputed)
-const structuredData = createExposeBinding(structuredDataComputed)
 
 defineExpose({
   pageSeoTitle,
@@ -483,7 +470,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           :id="debugPanelId"
           role="region"
           aria-live="polite"
-          class="pa-4 debug-info"
+          class="pa-4"
           color="primary-lighten-5"
           rounded="lg"
           elevation="0"
@@ -542,7 +529,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           size="small"
           color="primary"
           variant="tonal"
-          :class="['me-2 mb-2 tag-filter__chip', { 'tag-filter__chip--active': tagGroupValue === allTagValue }]"
+          class="me-2 mb-2"
           :aria-label="t('blog.list.tagsAll')"
         >
           {{ t('blog.list.tagsAll') }}
@@ -554,7 +541,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           size="small"
           color="primary"
           variant="tonal"
-          :class="['me-2 mb-2 tag-filter__chip', { 'tag-filter__chip--active': tagGroupValue === tag.name }]"
+          class="me-2 mb-2"
           :aria-label="tag.name"
         >
           <span v-if="typeof tag.count === 'number' && tag.count > 0">
@@ -579,7 +566,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 
     <v-sheet
       v-if="loading"
-      class="py-10 d-flex flex-column align-center justify-center text-center gap-3 loading"
+      class="py-10 d-flex flex-column align-center justify-center text-center gap-3"
       color="transparent"
       elevation="0"
       role="status"
@@ -621,7 +608,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           role="listitem"
         >
           <v-card
-            class="h-100 d-flex flex-column article-card"
+            class="h-100 d-flex flex-column"
             elevation="6"
             hover
             rounded="lg"
@@ -643,7 +630,6 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
                 :alt="buildArticleImageAlt(article.title)"
                 height="200"
                 cover
-                class="v-card-media"
               >
                 <template #placeholder>
                   <div class="d-flex flex-column align-center justify-center h-100 bg-grey-lighten-4 text-medium-emphasis py-6">
@@ -674,7 +660,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 
             <v-card-title
               :id="buildArticleTitleId(index)"
-              class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2 article-title"
+              class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
             >
               <NuxtLink
                 v-if="buildArticleLink(article.url)"
@@ -695,7 +681,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
               :id="buildArticleSummaryId(index)"
               class="px-4 pb-4 flex-grow-1"
             >
-              <p class="text-body-2 text-medium-emphasis mb-0 article-summary">{{ article.summary }}</p>
+              <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
             </v-card-text>
 
             <v-card-actions class="px-4 py-4 align-center bg-grey-lighten-4">
@@ -705,7 +691,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
                     mdi-account
                   </v-icon>
                   <span class="v-visually-hidden">Author:</span>
-                  <span class="text-primary font-weight-medium author-name">{{ article.author }}</span>
+                  <span class="text-primary font-weight-medium">{{ article.author }}</span>
                 </div>
                 <div v-if="article.createdMs" class="d-flex align-center text-body-2">
                   <v-icon size="small" color="grey" class="me-2" aria-hidden="true">
@@ -713,7 +699,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
                   </v-icon>
                   <span class="v-visually-hidden">Published on:</span>
                   <time
-                    class="text-medium-emphasis date-text"
+                    class="text-medium-emphasis"
                     :datetime="buildDateIsoString(article.createdMs)"
                   >
                     {{ formatDate(article.createdMs) }}
@@ -744,7 +730,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 
       <v-sheet
         v-if="shouldDisplayPagination"
-        class="mt-6 d-flex flex-column align-center gap-3 pagination-container"
+        class="mt-6 d-flex flex-column align-center gap-3"
         color="transparent"
         elevation="0"
       >
