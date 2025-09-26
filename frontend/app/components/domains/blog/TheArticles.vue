@@ -79,7 +79,8 @@ const paginationInfoMessage = computed(() =>
     count: totalElements.value,
   }),
 )
-const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
+const paginationAriaLabelKey = 'blog.pagination.ariaLabel'
+const paginationAriaLabel = computed(() => t(paginationAriaLabelKey))
 const pageLinkLabel = (pageNumber: number) =>
   t('blog.pagination.pageLink', { page: pageNumber })
 const buildArticleTitleId = (index: number) => `blog-article-card-title-${index}`
@@ -739,7 +740,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
             :length="totalPages"
             :model-value="currentPage"
             :total-visible="5"
-            :aria-label="paginationAriaLabel"
+            :aria-label="paginationAriaLabelKey"
             :aria-controls="articleListId"
             @update:model-value="handlePageChange"
           />
