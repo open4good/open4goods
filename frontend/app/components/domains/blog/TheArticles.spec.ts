@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { createPinia, setActivePinia } from 'pinia'
 import { computed, nextTick, reactive, ref } from 'vue'
+import type { Component, Ref } from 'vue'
 import * as Vue from 'vue'
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -12,6 +13,46 @@ type MockArticle = {
   createdMs: number
   image: string | null
   url: string
+}
+
+type BlogPostingStructuredData = {
+  '@type': 'BlogPosting'
+  headline?: string
+  description?: string
+  image?: string[]
+  url?: string
+  datePublished?: string
+  [key: string]: unknown
+}
+
+type BlogCollectionStructuredData = {
+  '@context'?: string
+  '@type': string
+  name?: string
+  description?: string
+  url?: string
+  hasPart?: BlogPostingStructuredData[]
+  [key: string]: unknown
+}
+
+type SeoExposeBindings = {
+  pageSeoTitle?: Ref<string>
+  seoDescription?: Ref<string>
+  canonicalUrl?: Ref<string | undefined>
+  primaryArticleImage?: Ref<string | null>
+  structuredData?: Ref<BlogCollectionStructuredData | undefined>
+}
+
+const isCollectionStructuredData = (
+  value: unknown,
+): value is BlogCollectionStructuredData => {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const record = value as Record<string, unknown>
+
+  return typeof record['@type'] === 'string'
 }
 
 const mockArticles: MockArticle[] = [
@@ -103,7 +144,7 @@ const useHeadMock = vi.fn()
 const useSeoMetaMock = vi.fn()
 const mockRequestUrl = new URL('https://example.com/blog')
 
-let TheArticles: any
+let TheArticles: Component
 
 const mockUseBlog = {
   articles: articlesRef,
@@ -434,21 +475,18 @@ describe('TheArticles Component', () => {
     const wrapper = await mountSuspended(TheArticles)
     await nextTick()
 
-    const vm = wrapper.vm as Record<string, any>
-    const exposed = (vm.$?.exposed as Record<string, any> | undefined) ?? {}
+    const seoBindings = wrapper.vm as unknown as SeoExposeBindings
 
-    const pageSeoTitle = exposed.pageSeoTitle ?? vm.pageSeoTitle
-    const seoDescription = exposed.seoDescription ?? vm.seoDescription
-    const canonicalUrl = exposed.canonicalUrl ?? vm.canonicalUrl
-    const primaryArticleImage = exposed.primaryArticleImage ?? vm.primaryArticleImage
-    const structuredDataRef = exposed.structuredData ?? vm.structuredData
+    expect(seoBindings.pageSeoTitle?.value).toBe('Energy articles – Nudger Blog – Page 2')
+    expect(seoBindings.seoDescription?.value).toContain('Energy')
+    expect(seoBindings.canonicalUrl?.value).toMatch(/^https?:\/\/[^/]+\/blog\?page=2&tag=Energy$/)
+    expect(seoBindings.primaryArticleImage?.value).toBe('https://example.com/image1.jpg')
 
-    expect(pageSeoTitle?.value).toBe('Energy articles – Nudger Blog – Page 2')
-    expect(seoDescription?.value).toContain('Energy')
-    expect(canonicalUrl?.value).toMatch(/^https?:\/\/[^/]+\/blog\?page=2&tag=Energy$/)
-    expect(primaryArticleImage?.value).toBe('https://example.com/image1.jpg')
+    const structured = seoBindings.structuredData?.value
+    if (!isCollectionStructuredData(structured)) {
+      throw new Error('Expected structured data to be a collection page schema')
+    }
 
-    const structured = structuredDataRef?.value as Record<string, any>
     expect(structured['@type']).toBe('CollectionPage')
     expect(structured.name).toContain('Energy')
     expect(structured.url).toMatch(/^https?:\/\/[^/]+\/blog\?page=2&tag=Energy$/)
