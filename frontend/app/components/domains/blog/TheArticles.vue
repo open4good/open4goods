@@ -138,8 +138,6 @@ const ensureTagsLoaded = async () => {
   }
 }
 
-await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
-
 watch(
   () => [route.query.page, route.query.tag],
   async (_, __, onCleanup) => {
@@ -439,6 +437,8 @@ defineExpose({
   primaryArticleImage,
   structuredData,
 })
+
+await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 </script>
 
 <template>
