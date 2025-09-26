@@ -224,7 +224,6 @@ useHead(() => ({
       <ul class="article-meta" aria-label="Article metadata">
         <li v-if="article.author" class="article-meta__item" data-test="article-author">
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Author:</span>
           <span itemprop="author" itemscope itemtype="https://schema.org/Person">
             <span itemprop="name">{{ article.author }}</span>
           </span>
@@ -232,7 +231,6 @@ useHead(() => ({
 
         <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Published on:</span>
           <time :datetime="publishedDate.iso" itemprop="datePublished">
             {{ publishedDate.label }}
           </time>
@@ -240,7 +238,6 @@ useHead(() => ({
 
         <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
-          <span class="visually-hidden">Estimated reading time:</span>
           <span>{{ readingTimeLabel }}</span>
         </li>
       </ul>
@@ -250,11 +247,11 @@ useHead(() => ({
       <RobustImage
         :src="article.image"
         :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
-        width="100%"
+        width="70%"
         height="360"
         class="article-hero__image"
       />
-      <figcaption class="visually-hidden">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
+      <figcaption class="d-sr-only">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
     </figure>
 
     <v-divider class="article-divider" role="presentation" />
@@ -399,15 +396,6 @@ useHead(() => ({
   display: flex
   justify-content: flex-end
 
-.visually-hidden
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  border: 0
 
 @media (max-width: 960px)
   .blog-article
