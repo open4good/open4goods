@@ -177,8 +177,12 @@ useHead(() => ({
 </script>
 
 <template>
-  <article
+  <v-sheet
+    tag="article"
     class="blog-article"
+    color="surface"
+    elevation="8"
+    rounded="xl"
     :aria-labelledby="headingId"
     itemscope
     itemtype="https://schema.org/BlogPosting"
@@ -285,14 +289,11 @@ useHead(() => ({
         {{ t('blog.article.edit') }}
       </v-btn>
     </footer>
-  </article>
+  </v-sheet>
 </template>
 
 <style lang="sass" scoped>
 .blog-article
-  background-color: #ffffff
-  border-radius: 20px
-  box-shadow: 0 18px 48px rgba(25, 118, 210, 0.08)
   padding: clamp(1.5rem, 2vw, 3rem)
   display: flex
   flex-direction: column
@@ -320,13 +321,13 @@ useHead(() => ({
 .article-title
   font-size: clamp(1.75rem, 2.5vw, 2.75rem)
   font-weight: 700
-  color: #0d1b2a
   margin: 0
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
 
 .article-summary
   font-size: clamp(1rem, 1.2vw, 1.25rem)
-  color: #3d5a80
   margin: 0
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
 
 
 .article-meta
@@ -335,10 +336,10 @@ useHead(() => ({
   gap: 1rem
   align-items: center
   font-size: 0.95rem
-  color: #607d8b
   margin: 0
   padding: 0
   list-style: none
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
 
   &__item
     display: inline-flex
@@ -360,7 +361,7 @@ useHead(() => ({
 .article-body
   font-size: 1.05rem
   line-height: 1.75
-  color: #1b263b
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
 
   &--empty
     display: flex
@@ -380,13 +381,15 @@ useHead(() => ({
   margin-bottom: 1.25rem
 
 .article-content :deep(a)
-  color: #1976d2
+  color: rgb(var(--v-theme-primary))
   text-decoration: underline
-  text-decoration-color: rgba(25, 118, 210, 0.4)
-  transition: color 0.2s ease
+  text-decoration-color: rgba(var(--v-theme-primary), 0.4)
+  transition: color 0.2s ease, text-decoration-color 0.2s ease
 
-.article-content :deep(a:hover)
-  color: #0d47a1
+.article-content :deep(a:hover),
+.article-content :deep(a:focus-visible)
+  color: rgb(var(--v-theme-primary))
+  text-decoration-color: rgb(var(--v-theme-primary))
 
 .article-content :deep(img)
   max-width: 100%
