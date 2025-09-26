@@ -201,6 +201,30 @@ Call `normalizeLocale(locale)` if you receive user input that may not already be
 a supported Nuxt locale. The helper falls back to the default locale to avoid
 runtime errors.
 
+## Translation bundles and Vuetify locales
+
+Nuxt i18n now lazy-loads TypeScript wrappers located in
+`frontend/i18n/locales/*.ts`. Each wrapper imports the existing JSON bundle as
+the application source of truth and merges it with Vuetify's locale pack:
+
+```ts
+// i18n/locales/en-US.ts
+import { en as $vuetify } from 'vuetify/locale'
+import app from './en-US.json'
+
+export default { ...app, $vuetify }
+```
+
+This keeps the authoring workflow unchanged (translations remain in JSON) while
+Vuetify components automatically pick up strings such as pagination labels via
+`$vuetify`. When adding a new locale, create the JSON file first, then add a
+matching `.ts` wrapper that imports both the JSON content and the Vuetify pack
+for that language.
+
+Shared runtime options (e.g. default locale, fallback, warning behaviour) are
+defined once in `frontend/i18n.config.ts` and referenced from `nuxt.config.ts`
+through the `vueI18n` option so that server and client renderers stay aligned.
+
 ## Vue 3 & Nuxt 3 Conventions
 - Use `<script setup lang="ts">` in all components
 - Write components in TypeScript

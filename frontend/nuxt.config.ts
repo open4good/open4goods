@@ -72,14 +72,15 @@ export default defineNuxtConfig({
     defaultLocale: 'en-US',
     langDir: '../i18n/locales',
     locales: [
-      { code: 'fr-FR', name: 'Français', file: 'fr-FR.json', ...(localeDomains['fr-FR'] ?? {}) },
-      { code: 'en-US', name: 'English', file: 'en-US.json', ...(localeDomains['en-US'] ?? {}) },
+      { code: 'fr-FR', name: 'Français', file: 'fr-FR.ts', ...(localeDomains['fr-FR'] ?? {}) },
+      { code: 'en-US', name: 'English', file: 'en-US.ts', ...(localeDomains['en-US'] ?? {}) },
     ],
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
     customRoutes: 'config',
     differentDomains: true,
     pages: buildI18nPagesConfig(),
+    vueI18n: './i18n.config.ts',
   },
   css: [
     '~/assets/sass/main.sass', // Keep only the main SASS file

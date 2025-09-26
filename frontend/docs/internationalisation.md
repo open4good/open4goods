@@ -60,4 +60,22 @@ When introducing a new locale, also register it in `nuxt.config.ts` under the `i
 If the application receives a hostname that is not present in `HOST_DOMAIN_LANGUAGE_MAP`, the request falls back to English (`domainLanguage: 'en'`, `locale: 'en-US'`). Server-side callers log a warning describing the unknown hostname so operators can adjust the mapping. Client-side navigation continues without additional logging to avoid noise in the browser console.
 
 ## Relationship with content bundles
-Locale codes correspond to the translation bundles stored under `frontend/i18n/`. Each domain listed above automatically loads the matching bundle; there is no need for query parameters or path prefixes. Manual language switching widgets should respect the hostname contract—if a different behaviour is needed, adjust the shared helper first so SSR, CSR, and server-to-server calls remain aligned.
+Locale codes correspond to JSON translation bundles stored under
+`frontend/i18n/locales/*.json`. Nuxt i18n lazy-loads thin TypeScript wrappers
+(`frontend/i18n/locales/*.ts`) that re-export those JSON messages alongside the
+Vuetify locale pack for the same language. This allows the project to keep JSON
+as the authoring format while Vuetify components receive translated UI strings
+through `$vuetify`.
+
+When adding or updating a locale:
+
+1. Modify the JSON file to adjust application messages.
+2. Ensure a sibling `.ts` wrapper imports both the JSON bundle and the relevant
+   Vuetify pack from `vuetify/locale`, then spreads them into the default export.
+3. Register the locale in `nuxt.config.ts` (file points to the `.ts` wrapper) and
+   extend `i18n.config.ts` if the locale should be available at runtime.
+
+Each domain listed above automatically loads the matching bundle; there is no
+need for query parameters or path prefixes. Manual language switching widgets
+should respect the hostname contract—if a different behaviour is needed, adjust
+the shared helper first so SSR, CSR, and server-to-server calls remain aligned.
