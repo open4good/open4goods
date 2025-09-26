@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import type { BlogPostDto } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
-import RobustImage from '~/components/shared/images/RobustImage.vue'
 import { useAuth } from '~/composables/useAuth'
 
 interface BlogArticle extends BlogPostDto {
