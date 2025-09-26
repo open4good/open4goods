@@ -119,6 +119,13 @@ vi.mock('~/composables/blog/useBlog', () => ({
   useBlog: () => mockUseBlog,
 }))
 
+// Mock the useAppStore to enable debug mode by default
+vi.mock('@/stores/useAppStore', () => ({
+  useAppStore: () => ({
+    debugMode: true,
+  }),
+}))
+
 const localeRef = ref('fr-FR')
 
 vi.mock('#app', () => ({
@@ -267,15 +274,16 @@ describe('TheArticles Component', () => {
     // Debug info should not be visible initially
     expect(wrapper.find('.debug-info').exists()).toBe(false)
 
-    // Find and click debug toggle button
-    const debugButton = wrapper.find('button')
+    // Find and click debug toggle button using specific selector
+    const debugButton = wrapper.find('.debug-toggle')
+    expect(debugButton.exists()).toBe(true)
     expect(debugButton.text()).toBe('Show Debug Info')
 
     await debugButton.trigger('click')
 
     // Debug info should be visible after click
     expect(wrapper.find('.debug-info').exists()).toBe(true)
-    expect(wrapper.find('button').text()).toBe('Hide Debug Info')
+    expect(wrapper.find('.debug-toggle').text()).toBe('Hide Debug Info')
   })
 
   test('should fetch articles on mount', async () => {
