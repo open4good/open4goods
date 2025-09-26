@@ -222,6 +222,7 @@ TypeScript Usage
 - Use TypeScript throughoutpreferinterfaces over types fobetterextendability and merging.
 - Avoid enums, opting for mapforimproved type safety and flexibility.
 - Use functional componentwithTypeScript interfaces.
+- Never use the `any` type; prefer `unknown` with dedicated type guards when you need a fallback.
 UI and Styling
 - Use Vuetify UI forcomponents and styling.
 - Implement responsive Vuetify approach and mobile-firstapproach.

@@ -179,7 +179,7 @@ useHead(() => ({
 <template>
   <v-sheet
     tag="article"
-    class="d-flex flex-column gap-6 pa-6 pa-md-8 pa-lg-10"
+    class="blog-article"
     color="surface"
     elevation="8"
     rounded="xl"
