@@ -82,10 +82,14 @@ To get the project up and running locally, follow these steps:
    - `pnpm --offline lint` – run ESLint
    - `pnpm --offline format` – check formatting
    - `pnpm --offline test` – run tests with Vitest
-   - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
+   - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client (Unix/Linux/macOS)
+   - `pnpm --offline generate:api:win` – regenerate the OpenAPI fetch client (Windows)
    - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
    - `pnpm --offline preview` – serve the production build locally
    - `pnpm --offline build:ssr` – build with increased memory
+
+   **Windows Users**: Use the `:win` suffixed commands for API generation:
+   - `pnpm --offline generate:api:win` instead of `pnpm --offline generate:api`
 
 ## API environment variables
 
@@ -354,7 +358,11 @@ const cart = useCartStore();
 
 - We use `@openapitools/openapi-generator-cli` with the `typescript-fetch` generator:
   ```bash
+  # Unix/Linux/macOS
   pnpm --offline generate:api
+
+  # Windows
+  pnpm --offline generate:api:win
   ```
 - Generated files under `shared/api-client/`
 - Example usage:

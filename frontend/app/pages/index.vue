@@ -10,10 +10,9 @@ const toggleDrawer = () => {
   <div class="full-height">
     <Hero-section @toggle-drawer="toggleDrawer" />
 
-    <The-items-selector />
+    <Container-categories-menu />
 
     <Bloc3Hz />
-
   </div>
 </template>
 

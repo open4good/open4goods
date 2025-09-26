@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-
+defineEmits<{
+  'toggle-drawer': []
+}>()
 </script>
 
 <template>

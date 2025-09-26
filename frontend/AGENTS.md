@@ -31,7 +31,8 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
    - `pnpm --offline format:check`
    - `pnpm --offline format`
    - `pnpm --offline test`
-   - `pnpm --offline generate:api`
+   - `pnpm --offline generate:api` (Unix/Linux/macOS)
+   - `pnpm --offline generate:api:win` (Windows)
 ---
 
 ## Project Structure and Directories
@@ -118,7 +119,7 @@ The `shared/api-client` folder is **fully generated** from the specification exp
 Workflow:
 1. Modify controllers or DTOs in the `front-api` project to evolve the API.
 2. Build `front-api` (`mvn -pl nudger-front-api -am clean install`) to publish the new contract.
-3. In this module, run `pnpm --offline generate:api` to update `shared/api-client/`.
+3. In this module, run `pnpm --offline generate:api` (Unix/Linux/macOS) or `pnpm --offline generate:api:win` (Windows) to update `shared/api-client/`.
 4. Use the newly generated classes.
 
 Never edit the generated files manually.

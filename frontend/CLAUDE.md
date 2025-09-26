@@ -18,7 +18,8 @@ This project uses `pnpm` as the package manager. All commands should be run with
 - `pnpm format` - Run Prettier formatting
 - `pnpm format:check` - Check Prettier formatting
 - `pnpm test` - Run Vitest tests
-- `pnpm generate:api` - Regenerate OpenAPI client from remote spec
+- `pnpm generate:api` - Regenerate OpenAPI client from remote spec (Unix/Linux/macOS)
+- `pnpm generate:api:win` - Regenerate OpenAPI client from remote spec (Windows)
 - `pnpm preprocess:css` - Process Bootstrap/XWiki styles for TextContent component
 
 ### Prerequisites

@@ -30,6 +30,7 @@ export * from './ImpactScoreTexts';
 export * from './LegacyPromptConfig';
 export * from './Link';
 export * from './LoginRequest';
+export * from './LogoutResponse';
 export * from './ObjectSummary';
 export * from './Objects';
 export * from './Page';
