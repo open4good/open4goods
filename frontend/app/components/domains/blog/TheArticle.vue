@@ -376,6 +376,14 @@ useHead(() => ({
 .article-content :deep(p)
   margin-bottom: 1.25rem
 
+.article-content :deep(ul),
+.article-content :deep(ol)
+  margin: 0 0 1.25rem 1.5rem
+  padding-left: 0.5rem
+
+.article-content :deep(li)
+  margin-bottom: 0.5rem
+
 .article-content :deep(a)
   color: rgb(var(--v-theme-primary))
   text-decoration: underline
