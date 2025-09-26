@@ -17,12 +17,15 @@ import * as runtime from '../runtime';
 import type {
   AuthTokensDto,
   LoginRequest,
+  LogoutResponse,
 } from '../models/index';
 import {
     AuthTokensDtoFromJSON,
     AuthTokensDtoToJSON,
     LoginRequestFromJSON,
     LoginRequestToJSON,
+    LogoutResponseFromJSON,
+    LogoutResponseToJSON,
 } from '../models/index';
 
 export interface LoginOperationRequest {
@@ -84,6 +87,45 @@ export class AuthenticationApi extends runtime.BaseAPI {
      */
     async login(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthTokensDto> {
         const response = await this.loginRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Expire the access and refresh token cookies so the session becomes invalid.
+     * Logout user
+     */
+    async logoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LogoutResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/auth/logout`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => LogoutResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Expire the access and refresh token cookies so the session becomes invalid.
+     * Logout user
+     */
+    async logout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LogoutResponse> {
+        const response = await this.logoutRaw(initOverrides);
         return await response.value();
     }
 

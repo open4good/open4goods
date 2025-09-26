@@ -36,6 +36,7 @@ models/ImpactScoreTexts.ts
 models/LegacyPromptConfig.ts
 models/Link.ts
 models/LoginRequest.ts
+models/LogoutResponse.ts
 models/ObjectSummary.ts
 models/Objects.ts
 models/Page.ts
