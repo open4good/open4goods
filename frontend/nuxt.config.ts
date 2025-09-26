@@ -84,7 +84,7 @@ export default defineNuxtConfig({
   },
   css: [
     'vuetify/styles',
-    '~/assets/sass/main.sass', // Keep only the main SASS file
+    '~/assets/sass/main.sass',
   ],
 
   postcss: {

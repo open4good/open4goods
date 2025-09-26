@@ -39,8 +39,6 @@ const router = useRouter()
 const currentPage = ref(1)
 const tagsLoading = ref(false)
 const articleListId = 'blog-articles-list'
-const debugPanelId = 'blog-articles-debug-panel'
-const showDebugInfo = ref(false)
 
 const parsePageQuery = (rawPage: unknown) => {
   const value = Array.isArray(rawPage) ? rawPage[0] : rawPage
@@ -207,16 +205,6 @@ const availableTags = computed<NamedTag[]>(() =>
     .filter((tag): tag is NamedTag => Boolean(tag.name))
 )
 const activeTag = computed(() => selectedTag.value)
-const debugToggleLabel = computed(() => (showDebugInfo.value ? 'Hide Debug Info' : 'Show Debug Info'))
-const debugDetails = computed(() => ({
-  currentPage: currentPage.value,
-  totalPages: totalPages.value,
-  totalArticles: totalElements.value,
-  selectedTag: activeTag.value ?? null,
-}))
-const toggleDebugInfo = () => {
-  showDebugInfo.value = !showDebugInfo.value
-}
 
 const allTagValue = '__all__'
 const tagGroupValue = computed({
@@ -453,52 +441,6 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 
 <template>
   <v-container class="py-6 px-4 mx-auto" max-width="1200">
-    <v-sheet class="d-flex flex-column gap-3 mb-6" color="transparent" elevation="0">
-      <v-btn
-        variant="outlined"
-        color="primary"
-        size="small"
-        :aria-expanded="showDebugInfo"
-        :aria-controls="debugPanelId"
-        @click="toggleDebugInfo"
-      >
-        {{ debugToggleLabel }}
-      </v-btn>
-
-      <v-expand-transition>
-        <v-sheet
-          v-if="showDebugInfo"
-          :id="debugPanelId"
-          role="region"
-          aria-live="polite"
-          class="pa-4"
-          color="primary-lighten-5"
-          rounded="lg"
-          elevation="0"
-        >
-          <h2 class="v-visually-hidden">Debug information</h2>
-          <dl class="ma-0 d-flex flex-column gap-3">
-            <div class="d-flex flex-column gap-1">
-              <dt class="text-body-2 text-primary font-weight-medium">Current page</dt>
-              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.currentPage }}</dd>
-            </div>
-            <div class="d-flex flex-column gap-1">
-              <dt class="text-body-2 text-primary font-weight-medium">Total pages</dt>
-              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.totalPages }}</dd>
-            </div>
-            <div class="d-flex flex-column gap-1">
-              <dt class="text-body-2 text-primary font-weight-medium">Total articles</dt>
-              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.totalArticles }}</dd>
-            </div>
-            <div class="d-flex flex-column gap-1">
-              <dt class="text-body-2 text-primary font-weight-medium">Selected tag</dt>
-              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.selectedTag ?? 'None' }}</dd>
-            </div>
-          </dl>
-        </v-sheet>
-      </v-expand-transition>
-    </v-sheet>
-
     <v-sheet
       v-if="availableTags.length || activeTag"
       class="mb-6 d-flex flex-column gap-3 pa-4"
@@ -518,7 +460,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
       <v-chip-group
         v-model="tagGroupValue"
         class="d-flex flex-wrap"
-        :column="false"
+        :column="true"
         :filter="false"
         :multiple="false"
         :disabled="tagsLoading"
@@ -691,14 +633,12 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
                   <v-icon size="small" color="primary" class="me-2" aria-hidden="true">
                     mdi-account
                   </v-icon>
-                  <span class="v-visually-hidden">Author:</span>
                   <span class="text-primary font-weight-medium">{{ article.author }}</span>
                 </div>
                 <div v-if="article.createdMs" class="d-flex align-center text-body-2">
                   <v-icon size="small" color="grey" class="me-2" aria-hidden="true">
                     mdi-calendar
                   </v-icon>
-                  <span class="v-visually-hidden">Published on:</span>
                   <time
                     class="text-medium-emphasis"
                     :datetime="buildDateIsoString(article.createdMs)"
@@ -750,7 +690,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           {{ paginationInfoMessage }}
         </p>
 
-        <nav class="v-visually-hidden" :aria-label="paginationAriaLabel">
+        <nav class="d-sr-only" :aria-label="paginationAriaLabel">
           <ul>
             <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
               <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
