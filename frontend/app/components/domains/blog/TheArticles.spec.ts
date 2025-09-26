@@ -1,9 +1,8 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { createPinia, setActivePinia } from 'pinia'
 import { computed, nextTick, reactive, ref } from 'vue'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
-
-import TheArticles from './TheArticles.vue'
+import * as Vue from 'vue'
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 
 type MockArticle = {
   id: string
@@ -100,6 +99,12 @@ const mockRouterPush = vi.fn(
   },
 )
 
+const useHeadMock = vi.fn()
+const useSeoMetaMock = vi.fn()
+const mockRequestUrl = new URL('https://example.com/blog')
+
+let TheArticles: any
+
 const mockUseBlog = {
   articles: articlesRef,
   paginatedArticles: computed(() => paginatedArticlesRef.value),
@@ -133,25 +138,74 @@ vi.mock('#app', () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
+  useHead: (input: unknown) => {
+    useHeadMock(input)
+  },
+  useSeoMeta: (input: unknown) => {
+    useSeoMetaMock(input)
+  },
+  useRequestURL: () => mockRequestUrl,
 }))
 
 vi.mock('#imports', () => ({
+  ...Vue,
   useRoute: () => ({
     query: routeQuery,
   }),
   useRouter: () => ({
     push: mockRouterPush,
   }),
+  useHead: (input: unknown) => {
+    useHeadMock(input)
+  },
+  useSeoMeta: (input: unknown) => {
+    useSeoMetaMock(input)
+  },
+  useRequestURL: () => mockRequestUrl,
 }))
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     locale: localeRef,
-    t: (key: string) => key,
+    t: (key: string, params: Record<string, unknown> = {}) => {
+      const templates: Record<string, string> = {
+        'blog.seo.baseTitle': 'Nudger Blog – Impact Score insights',
+        'blog.seo.tagTitle': '{tag} articles – Nudger Blog',
+        'blog.seo.pageTitle': '{title} – Page {page}',
+        'blog.seo.description':
+          "Explore the latest guides on sustainable appliances and energy-efficient choices from Nudger.",
+        'blog.seo.tagDescription':
+          "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
+        'blog.pagination.info': 'Showing page {current} of {total} ({count} articles)',
+        'blog.pagination.ariaLabel': 'Blog pagination links',
+        'blog.pagination.pageLink': 'Blog page {page}',
+        'blog.list.readMore': 'Read more',
+        'blog.list.tagsAll': 'All topics',
+        'blog.list.tagsTitle': 'Filter by tag',
+        'blog.list.tagsLoading': 'Loading tags…',
+        'blog.list.tagWithCount': '{tag} ({count})',
+        'blog.list.tagsAriaLabel': 'Filter blog posts by tag',
+        'blog.list.loading': 'Loading articles…',
+      }
+
+      const template = templates[key]
+      if (!template) {
+        return key
+      }
+
+      return template.replace(/\{(\w+)\}/g, (_, token) => {
+        const value = params[token]
+        return value !== undefined ? String(value) : ''
+      })
+    },
   }),
 }))
 
 describe('TheArticles Component', () => {
+  beforeAll(async () => {
+    TheArticles = (await import('./TheArticles.vue')).default
+  })
+
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks()
@@ -172,6 +226,8 @@ describe('TheArticles Component', () => {
     changePageMock.mockReset()
     selectTagMock.mockReset()
     mockRouterPush.mockReset()
+    useHeadMock.mockReset()
+    useSeoMetaMock.mockReset()
     tagsRef.value = [
       { name: 'Energy', count: 3 },
       { name: 'Kitchen', count: 1 },
@@ -192,7 +248,7 @@ describe('TheArticles Component', () => {
 
     expect(wrapper.find('.loading').exists()).toBe(true)
     expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-    expect(wrapper.text()).toContain('blog.list.loading')
+    expect(wrapper.text()).toContain('Loading articles…')
   })
 
   test('should render articles in cards', async () => {
@@ -361,6 +417,44 @@ describe('TheArticles Component', () => {
     await nextTick()
 
     expect(fetchArticlesMock).toHaveBeenCalledWith(1, 12, 'Energy')
+  })
+
+  test('computes SEO metadata for the blog listing', async () => {
+    routeQuery.page = '2'
+    routeQuery.tag = 'Energy'
+    paginationRef.value = {
+      page: 2,
+      size: 12,
+      totalElements: mockArticles.length,
+      totalPages: 3,
+    }
+    selectedTagRef.value = 'Energy'
+    paginatedArticlesRef.value = mockArticles
+
+    const wrapper = await mountSuspended(TheArticles)
+    await nextTick()
+
+    const vm = wrapper.vm as Record<string, any>
+    const exposed = (vm.$?.exposed as Record<string, any> | undefined) ?? {}
+
+    const pageSeoTitle = exposed.pageSeoTitle ?? vm.pageSeoTitle
+    const seoDescription = exposed.seoDescription ?? vm.seoDescription
+    const canonicalUrl = exposed.canonicalUrl ?? vm.canonicalUrl
+    const primaryArticleImage = exposed.primaryArticleImage ?? vm.primaryArticleImage
+    const structuredDataRef = exposed.structuredData ?? vm.structuredData
+
+    expect(pageSeoTitle?.value).toBe('Energy articles – Nudger Blog – Page 2')
+    expect(seoDescription?.value).toContain('Energy')
+    expect(canonicalUrl?.value).toMatch(/^https?:\/\/[^/]+\/blog\?page=2&tag=Energy$/)
+    expect(primaryArticleImage?.value).toBe('https://example.com/image1.jpg')
+
+    const structured = structuredDataRef?.value as Record<string, any>
+    expect(structured['@type']).toBe('CollectionPage')
+    expect(structured.name).toContain('Energy')
+    expect(structured.url).toMatch(/^https?:\/\/[^/]+\/blog\?page=2&tag=Energy$/)
+    const hasPart = Array.isArray(structured.hasPart) ? structured.hasPart : []
+    expect(hasPart.length).toBeGreaterThan(0)
+    expect(hasPart[0]['@type']).toBe('BlogPosting')
   })
 
   test('loads tags from the API when none are cached', async () => {

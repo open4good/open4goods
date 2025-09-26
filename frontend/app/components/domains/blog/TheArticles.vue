@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from '#app'
+import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useI18n } from 'vue-i18n'
 import type { BlogTagDto } from '~~/shared/api-client'
 
@@ -32,7 +33,7 @@ const buildDateIsoString = (timestamp: number) => {
   return Number.isNaN(date.getTime()) ? '' : date.toISOString()
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
@@ -229,6 +230,214 @@ const seoPageLinks = computed(() => {
   }
 
   return Array.from({ length: pages }, (_, index) => index + 1)
+})
+
+const visibleArticles = computed(() => paginatedArticles.value ?? [])
+const sanitizedTag = computed(() => {
+  const tag = activeTag.value
+
+  if (!tag) {
+    return null
+  }
+
+  const trimmed = tag.trim()
+
+  return trimmed.length > 0 ? trimmed : null
+})
+
+const baseSeoTitle = computed(() => t('blog.seo.baseTitle'))
+const tagSeoTitle = computed(() =>
+  sanitizedTag.value
+    ? t('blog.seo.tagTitle', { tag: sanitizedTag.value })
+    : baseSeoTitle.value,
+)
+const pageSeoTitle = computed(() =>
+  currentPage.value > 1
+    ? t('blog.seo.pageTitle', { title: tagSeoTitle.value, page: currentPage.value })
+    : tagSeoTitle.value,
+)
+
+const truncateToLength = (value: string, maxLength = 160) => {
+  if (value.length <= maxLength) {
+    return value
+  }
+
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`
+}
+
+const baseSeoDescription = computed(() => t('blog.seo.description'))
+const tagSeoDescription = computed(() =>
+  sanitizedTag.value
+    ? t('blog.seo.tagDescription', { tag: sanitizedTag.value })
+    : baseSeoDescription.value,
+)
+const articleSummaries = computed(() =>
+  visibleArticles.value
+    .map((article) => (article.summary ?? '').trim())
+    .filter((summary) => summary.length > 0),
+)
+const seoDescription = computed(() => {
+  const base = tagSeoDescription.value
+  const [firstSummary] = articleSummaries.value
+
+  if (!firstSummary) {
+    return truncateToLength(base)
+  }
+
+  return truncateToLength(`${base} ${firstSummary}`)
+})
+
+const primaryArticleImage = computed(
+  () => visibleArticles.value.find((article) => Boolean(article.image))?.image ?? null,
+)
+
+let requestUrl: URL | undefined
+try {
+  requestUrl = useRequestURL()
+} catch {
+  requestUrl = undefined
+}
+
+const canonicalUrl = computed(() => {
+  if (!requestUrl) {
+    return undefined
+  }
+
+  const origin = requestUrl.origin || undefined
+  const base = origin ? new URL('/blog', origin) : new URL('/blog', requestUrl)
+  const params = new URLSearchParams()
+
+  if (sanitizedTag.value) {
+    params.set('tag', sanitizedTag.value)
+  }
+
+  if (currentPage.value > 1) {
+    params.set('page', currentPage.value.toString())
+  }
+
+  params.sort()
+  const query = params.toString()
+  base.search = query
+  base.hash = ''
+
+  return base.toString()
+})
+
+const buildAbsoluteArticleLink = (slug: string | null | undefined) => {
+  const relative = buildArticleLink(slug)
+
+  if (!relative) {
+    return undefined
+  }
+
+  if (!requestUrl) {
+    return relative
+  }
+
+  try {
+    const origin = requestUrl.origin || requestUrl.toString()
+    return new URL(relative, origin).toString()
+  } catch {
+    return relative
+  }
+}
+
+const structuredData = computed(() => {
+  const articles = visibleArticles.value
+    .map((article) => {
+      const entry: Record<string, unknown> = {
+        '@type': 'BlogPosting',
+      }
+
+      const headline = article.title?.trim()
+      if (headline) {
+        entry.headline = headline
+      }
+
+      const description = article.summary?.trim()
+      if (description) {
+        entry.description = description
+      }
+
+      if (article.image) {
+        entry.image = [article.image]
+      }
+
+      const url = buildAbsoluteArticleLink(article.url)
+      if (url) {
+        entry.url = url
+      }
+
+      if (article.createdMs) {
+        const published = buildDateIsoString(article.createdMs)
+        if (published) {
+          entry.datePublished = published
+        }
+      }
+
+      return entry
+    })
+    .filter((entry) => Object.keys(entry).length > 1)
+
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: pageSeoTitle.value,
+    description: seoDescription.value || undefined,
+    url: canonicalUrl.value,
+    inLanguage: locale.value,
+    isPartOf: {
+      '@type': 'Blog',
+      name: baseSeoTitle.value,
+    },
+  }
+
+  if (sanitizedTag.value) {
+    schema.about = sanitizedTag.value
+  }
+
+  if (articles.length > 0) {
+    schema.hasPart = articles
+  }
+
+  return schema
+})
+
+useSeoMeta({
+  title: pageSeoTitle,
+  ogTitle: pageSeoTitle,
+  description: computed(() => seoDescription.value || undefined),
+  ogDescription: computed(() => seoDescription.value || undefined),
+  ogType: 'website',
+  ogUrl: canonicalUrl,
+  ogImage: computed(() => primaryArticleImage.value || undefined),
+  twitterCard: computed(() => (primaryArticleImage.value ? 'summary_large_image' : 'summary')),
+  twitterImage: computed(() => primaryArticleImage.value || undefined),
+})
+
+useHead(() => ({
+  link: canonicalUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalUrl.value,
+        },
+      ]
+    : [],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify(structuredData.value),
+    },
+  ],
+}))
+
+defineExpose({
+  pageSeoTitle,
+  seoDescription,
+  canonicalUrl,
+  primaryArticleImage,
+  structuredData,
 })
 </script>
 

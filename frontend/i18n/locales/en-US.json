@@ -62,6 +62,13 @@
     "siteName": "Nudger"
   },
   "blog": {
+    "seo": {
+      "baseTitle": "Nudger Blog – Impact Score insights",
+      "tagTitle": "{tag} articles – Nudger Blog",
+      "pageTitle": "{title} – Page {page}",
+      "description": "Explore the latest guides on sustainable appliances and energy-efficient choices from Nudger.",
+      "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice."
+    },
     "pagination": {
       "info": "Showing page {current} of {total} ({count} articles)",
       "ariaLabel": "Blog pagination links",
