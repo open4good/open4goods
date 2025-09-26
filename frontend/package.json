@@ -41,7 +41,7 @@
     "nuxt-mcp": "^0.2.4",
     "pinia": "^3.0.3",
     "unhead": "^2.0.14",
-    "vue": "3.5.21",
+    "vue": "3.5.22",
     "vuetify-nuxt-module": "^0.18.7"
   },
   "devDependencies": {
@@ -66,7 +66,7 @@
     "@types/jsdom": "^21.1.7",
     "@typescript-eslint/parser": "^8.43.0",
     "@vite-pwa/nuxt": "^1.0.4",
-    "@vue/compiler-dom": "3.5.21",
+    "@vue/compiler-dom": "3.5.22",
     "@vue/test-utils": "^2.4.6",
     "@vueuse/nuxt": "^13.3.0",
     "cssnano": "^7.1.1",
@@ -94,7 +94,7 @@
   },
   "pnpm": {
     "overrides": {
-      "vue": "3.5.21"
+      "vue": "3.5.22"
     },
     "onlyBuiltDependencies": [
       "@nestjs/core",
@@ -106,7 +106,7 @@
     ]
   },
   "resolutions": {
-    "vue": "3.5.21"
+    "vue": "3.5.22"
   },
   "overrides": {
     "glob": "^11.0.0"
