@@ -4,6 +4,9 @@ import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer
 import { buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { buildI18nPagesConfig } from './shared/utils/localized-routes'
 
+const appEnv = process.env.NUXT_PUBLIC_APP_ENV || 'development'
+const shouldBlockIndexing = appEnv !== 'production'
+
 const localeDomains = buildI18nLocaleDomains()
 
 export default defineNuxtConfig({
@@ -35,6 +38,15 @@ export default defineNuxtConfig({
     //'/articles/**': { static: true },
     // Admin area rendered on the client side
     '/admin/**': { ssr: false },
+    ...(shouldBlockIndexing
+      ? {
+          '/**': {
+            headers: {
+              'X-Robots-Tag': 'noindex, nofollow, noarchive',
+            },
+          },
+        }
+      : {}),
   },
   modules: [
     "vuetify-nuxt-module",
@@ -143,6 +155,8 @@ export default defineNuxtConfig({
       // Base URL of the backend API
       // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
-    }
+      appEnv,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    },
   },
 })
