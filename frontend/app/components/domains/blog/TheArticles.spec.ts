@@ -492,7 +492,12 @@ describe('TheArticles Component', () => {
     expect(structured.url).toMatch(/^https?:\/\/[^/]+\/blog\?page=2&tag=Energy$/)
     const hasPart = Array.isArray(structured.hasPart) ? structured.hasPart : []
     expect(hasPart.length).toBeGreaterThan(0)
-    expect(hasPart[0]['@type']).toBe('BlogPosting')
+    const firstHasPart = hasPart[0]
+    if (!firstHasPart) {
+      throw new Error('Expected the structured data to contain at least one blog posting entry')
+    }
+
+    expect(firstHasPart['@type']).toBe('BlogPosting')
   })
 
   test('loads tags from the API when none are cached', async () => {
