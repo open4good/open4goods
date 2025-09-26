@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from '#app'
-import { useI18n } from 'vue-i18n'
-import type { BlogTagDto } from '~~/shared/api-client'
+import { useRoute, useRouter } from "#app";
+import { useI18n } from "vue-i18n";
+import type { BlogTagDto } from "~~/shared/api-client";
+import { useAppStore } from "@/stores/useAppStore";
 
-import { useBlog } from '~/composables/blog/useBlog'
+import { useBlog } from "~/composables/blog/useBlog";
 const {
   paginatedArticles,
   loading,
@@ -13,231 +14,234 @@ const {
   tags,
   selectedTag,
   fetchTags,
-} = useBlog()
+} = useBlog();
+
+const appStore = useAppStore();
 
 // Format date helper
 const formatDate = (timestamp: number) => {
-  const date = new Date(timestamp)
+  const date = new Date(timestamp);
 
   if (Number.isNaN(date.getTime())) {
-    return ''
+    return "";
   }
 
-  return date.toLocaleDateString()
-}
+  return date.toLocaleDateString();
+};
 
 const buildDateIsoString = (timestamp: number) => {
-  const date = new Date(timestamp)
+  const date = new Date(timestamp);
 
-  return Number.isNaN(date.getTime()) ? '' : date.toISOString()
-}
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+};
 
-const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
-const currentPage = ref(1)
-const tagsLoading = ref(false)
-const articleListId = 'blog-articles-list'
-const debugPanelId = 'blog-articles-debug-panel'
-const showDebugInfo = ref(false)
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
+const currentPage = ref(1);
+const tagsLoading = ref(false);
+const articleListId = "blog-articles-list";
+const debugPanelId = "blog-articles-debug-panel";
+const showDebugInfo = ref(false);
 
 const parsePageQuery = (rawPage: unknown) => {
-  const value = Array.isArray(rawPage) ? rawPage[0] : rawPage
-  const parsed = Number.parseInt(String(value ?? ''), 10)
+  const value = Array.isArray(rawPage) ? rawPage[0] : rawPage;
+  const parsed = Number.parseInt(String(value ?? ""), 10);
 
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
-}
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+};
 
 const parseTagQuery = (rawTag: unknown) => {
-  const value = Array.isArray(rawTag) ? rawTag[0] : rawTag
+  const value = Array.isArray(rawTag) ? rawTag[0] : rawTag;
 
-  if (typeof value !== 'string') {
-    return null
+  if (typeof value !== "string") {
+    return null;
   }
 
-  const trimmed = value.trim()
+  const trimmed = value.trim();
 
-  return trimmed.length > 0 ? trimmed : null
-}
+  return trimmed.length > 0 ? trimmed : null;
+};
 
 watch(
   () => pagination.value.page,
   (page) => {
-    currentPage.value = page || 1
+    currentPage.value = page || 1;
   },
   { immediate: true }
-)
+);
 
-const totalPages = computed(() => pagination.value.totalPages || 0)
-const totalElements = computed(() => pagination.value.totalElements || 0)
-const shouldDisplayPagination = computed(() => totalPages.value > 1)
+const totalPages = computed(() => pagination.value.totalPages || 0);
+const totalElements = computed(() => pagination.value.totalElements || 0);
+const shouldDisplayPagination = computed(() => totalPages.value > 1);
 const paginationInfoMessage = computed(() =>
-  t('blog.pagination.info', {
+  t("blog.pagination.info", {
     current: currentPage.value,
     total: totalPages.value,
     count: totalElements.value,
-  }),
-)
-const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
+  })
+);
+const paginationAriaLabel = computed(() => t("blog.pagination.ariaLabel"));
 const pageLinkLabel = (pageNumber: number) =>
-  t('blog.pagination.pageLink', { page: pageNumber })
-const buildArticleTitleId = (index: number) => `blog-article-card-title-${index}`
-const buildArticleSummaryId = (index: number) => `blog-article-card-summary-${index}`
+  t("blog.pagination.pageLink", { page: pageNumber });
+const buildArticleTitleId = (index: number) => `blog-article-card-title-${index}`;
+const buildArticleSummaryId = (index: number) => `blog-article-card-summary-${index}`;
 const buildArticleImageAlt = (title?: string | null) => {
-  const sanitized = title?.trim()
+  const sanitized = title?.trim();
 
-  return sanitized && sanitized.length > 0 ? sanitized : 'Blog article illustration'
-}
+  return sanitized && sanitized.length > 0 ? sanitized : "Blog article illustration";
+};
 
 const extractArticleSlug = (rawSlug: string | null | undefined) => {
   if (!rawSlug) {
-    return null
+    return null;
   }
 
-  const trimmed = rawSlug.trim()
+  const trimmed = rawSlug.trim();
 
   if (!trimmed) {
-    return null
+    return null;
   }
 
-  const withoutDomain = trimmed.replace(/^https?:\/\/[^/]+/i, '')
-  const sanitized = withoutDomain.replace(/^\/*/, '')
-  const segments = sanitized.split('/').filter(Boolean)
+  const withoutDomain = trimmed.replace(/^https?:\/\/[^/]+/i, "");
+  const sanitized = withoutDomain.replace(/^\/*/, "");
+  const segments = sanitized.split("/").filter(Boolean);
 
-  return segments.at(-1) ?? null
-}
+  return segments.at(-1) ?? null;
+};
 
 const buildArticleLink = (slug: string | null | undefined): string | undefined => {
-  const normalizedSlug = extractArticleSlug(slug)
+  const normalizedSlug = extractArticleSlug(slug);
 
   if (!normalizedSlug) {
-    return undefined
+    return undefined;
   }
 
-  return `/blog/${normalizedSlug}`
-}
+  return `/blog/${normalizedSlug}`;
+};
 
 const loadArticlesFromRoute = async () => {
-  const targetPage = parsePageQuery(route.query.page)
-  const targetTag = parseTagQuery(route.query.tag)
+  const targetPage = parsePageQuery(route.query.page);
+  const targetTag = parseTagQuery(route.query.tag);
 
-  await fetchArticles(targetPage, pagination.value.size, targetTag)
-}
+  await fetchArticles(targetPage, pagination.value.size, targetTag);
+};
 
 const ensureTagsLoaded = async () => {
   if (tags.value.length > 0) {
-    return
+    return;
   }
 
-  tagsLoading.value = true
+  tagsLoading.value = true;
   try {
-    await fetchTags()
+    await fetchTags();
   } finally {
-    tagsLoading.value = false
+    tagsLoading.value = false;
   }
-}
+};
 
-await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()]);
 
 watch(
   () => [route.query.page, route.query.tag],
   async (_, __, onCleanup) => {
-    let cancelled = false
+    let cancelled = false;
     onCleanup(() => {
-      cancelled = true
-    })
+      cancelled = true;
+    });
 
-    await ensureTagsLoaded()
+    await ensureTagsLoaded();
 
     if (cancelled) {
-      return
+      return;
     }
 
-    await loadArticlesFromRoute()
-  },
-)
+    await loadArticlesFromRoute();
+  }
+);
 
 const buildPageQuery = (pageNumber: number) => {
-  const sanitizedPage = Math.max(1, Math.trunc(pageNumber))
-  const nextQuery = { ...route.query }
+  const sanitizedPage = Math.max(1, Math.trunc(pageNumber));
+  const nextQuery = { ...route.query };
 
   if (sanitizedPage === 1) {
-    delete nextQuery.page
+    delete nextQuery.page;
   } else {
-    nextQuery.page = sanitizedPage.toString()
+    nextQuery.page = sanitizedPage.toString();
   }
 
-  return nextQuery
-}
+  return nextQuery;
+};
 
 const handlePageChange = async (page: number) => {
-  const sanitizedPage = Math.max(1, Math.trunc(page))
-  const currentQuery = buildPageQuery(sanitizedPage)
+  const sanitizedPage = Math.max(1, Math.trunc(page));
+  const currentQuery = buildPageQuery(sanitizedPage);
 
-  await router.push({ query: currentQuery })
-}
+  await router.push({ query: currentQuery });
+};
 
 const buildTagQuery = (tag: string | null) => {
-  const nextQuery = { ...route.query }
+  const nextQuery = { ...route.query };
 
   if (!tag) {
-    delete nextQuery.tag
+    delete nextQuery.tag;
   } else {
-    nextQuery.tag = tag
+    nextQuery.tag = tag;
   }
 
-  delete nextQuery.page
+  delete nextQuery.page;
 
-  return nextQuery
-}
+  return nextQuery;
+};
 
 const handleTagSelection = async (tag: string | null) => {
-  const nextQuery = buildTagQuery(tag)
-  await router.push({ path: '/blog', query: nextQuery })
-}
+  const nextQuery = buildTagQuery(tag);
+  await router.push({ path: "/blog", query: nextQuery });
+};
 
-type NamedTag = BlogTagDto & { name: string }
+type NamedTag = BlogTagDto & { name: string };
 
 const availableTags = computed<NamedTag[]>(() =>
   tags.value
     .map((tag) => ({
       ...tag,
-      name: (tag.name ?? '').trim(),
+      name: (tag.name ?? "").trim(),
     }))
     .filter((tag): tag is NamedTag => Boolean(tag.name))
-)
-const activeTag = computed(() => selectedTag.value)
-const debugToggleLabel = computed(() => (showDebugInfo.value ? 'Hide Debug Info' : 'Show Debug Info'))
+);
+const activeTag = computed(() => selectedTag.value);
+const debugToggleLabel = computed(() =>
+  showDebugInfo.value ? "Hide Debug Info" : "Show Debug Info"
+);
 const debugDetails = computed(() => ({
   currentPage: currentPage.value,
   totalPages: totalPages.value,
   totalArticles: totalElements.value,
   selectedTag: activeTag.value ?? null,
-}))
+}));
 const toggleDebugInfo = () => {
-  showDebugInfo.value = !showDebugInfo.value
-}
+  showDebugInfo.value = !showDebugInfo.value;
+};
 const isTagActive = (tag: string | null) => {
-  return (activeTag.value ?? null) === (tag ?? null)
-}
+  return (activeTag.value ?? null) === (tag ?? null);
+};
 
 const seoPageLinks = computed(() => {
-  const pages = totalPages.value
+  const pages = totalPages.value;
 
   if (pages <= 1) {
-    return [1]
+    return [1];
   }
 
-  return Array.from({ length: pages }, (_, index) => index + 1)
-})
+  return Array.from({ length: pages }, (_, index) => index + 1);
+});
 </script>
 
 <template>
   <div class="blog-list">
-
-
     <div class="debug-controls">
       <button
+        v-if="appStore.debugMode"
         type="button"
         class="debug-toggle"
         :aria-expanded="showDebugInfo"
@@ -270,12 +274,11 @@ const seoPageLinks = computed(() => {
           </div>
           <div class="debug-info__item">
             <dt>Selected tag</dt>
-            <dd>{{ debugDetails.selectedTag ?? 'None' }}</dd>
+            <dd>{{ debugDetails.selectedTag ?? "None" }}</dd>
           </div>
         </dl>
       </div>
     </div>
-
 
     <section
       v-if="availableTags.length || activeTag"
@@ -287,7 +290,7 @@ const seoPageLinks = computed(() => {
     >
       <div class="tag-filter__header">
         <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
-        <span class="tag-filter__title">{{ t('blog.list.tagsTitle') }}</span>
+        <span class="tag-filter__title">{{ t("blog.list.tagsTitle") }}</span>
       </div>
       <div class="tag-filter__chips">
         <button
@@ -305,7 +308,7 @@ const seoPageLinks = computed(() => {
             :disabled="tagsLoading"
             :aria-label="t('blog.list.tagsAll')"
           >
-            {{ t('blog.list.tagsAll') }}
+            {{ t("blog.list.tagsAll") }}
           </v-chip>
         </button>
         <button
@@ -326,7 +329,7 @@ const seoPageLinks = computed(() => {
             :aria-label="tag.name"
           >
             <span v-if="typeof tag.count === 'number' && tag.count > 0">
-              {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
+              {{ t("blog.list.tagWithCount", { tag: tag.name, count: tag.count }) }}
             </span>
             <span v-else>
               {{ tag.name }}
@@ -334,22 +337,33 @@ const seoPageLinks = computed(() => {
           </v-chip>
         </button>
       </div>
-      <div v-if="tagsLoading" class="tag-filter__loading" role="status" aria-live="polite">
-        <v-progress-circular indeterminate size="16" width="2" color="primary" aria-hidden="true" />
-        <span>{{ t('blog.list.tagsLoading') }}</span>
+      <div
+        v-if="tagsLoading"
+        class="tag-filter__loading"
+        role="status"
+        aria-live="polite"
+      >
+        <v-progress-circular
+          indeterminate
+          size="16"
+          width="2"
+          color="primary"
+          aria-hidden="true"
+        />
+        <span>{{ t("blog.list.tagsLoading") }}</span>
       </div>
     </section>
 
     <div v-if="loading" class="loading" role="status" aria-live="polite">
       <v-progress-circular indeterminate aria-hidden="true" />
-      <p>{{ t('blog.list.loading') }}</p>
+      <p>{{ t("blog.list.loading") }}</p>
     </div>
 
     <div v-else-if="error" class="error">
       <v-alert type="error" variant="tonal" role="alert">
         {{ error }}
       </v-alert>
-      <v-btn class="mt-4" @click="fetchArticles"> {{ t('common.actions.retry') }} </v-btn>
+      <v-btn class="mt-4" @click="fetchArticles"> {{ t("common.actions.retry") }} </v-btn>
     </div>
 
     <div v-else class="articles" role="region" aria-live="polite" :aria-busy="loading">
@@ -377,7 +391,9 @@ const seoPageLinks = computed(() => {
               :to="buildArticleLink(article.url)"
               class="article-image-link"
               :aria-labelledby="buildArticleTitleId(index)"
-              :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+              :aria-describedby="
+                article.summary ? buildArticleSummaryId(index) : undefined
+              "
               :title="article.title || undefined"
               data-test="article-image-link"
             >
@@ -417,10 +433,7 @@ const seoPageLinks = computed(() => {
             </v-img>
 
             <!-- Card content -->
-            <v-card-title
-              :id="buildArticleTitleId(index)"
-              class="article-title"
-            >
+            <v-card-title :id="buildArticleTitleId(index)" class="article-title">
               <NuxtLink
                 v-if="buildArticleLink(article.url)"
                 :to="buildArticleLink(article.url)"
@@ -436,10 +449,7 @@ const seoPageLinks = computed(() => {
               </span>
             </v-card-title>
 
-            <v-card-text
-              :id="buildArticleSummaryId(index)"
-              class="article-summary"
-            >
+            <v-card-text :id="buildArticleSummaryId(index)" class="article-summary">
               <p>{{ article.summary }}</p>
             </v-card-text>
 
@@ -453,10 +463,7 @@ const seoPageLinks = computed(() => {
                   <span class="visually-hidden">Author:</span>
                   <span class="author-name">{{ article.author }}</span>
                 </li>
-                <li
-                  v-if="article.createdMs"
-                  class="article-meta__item date-info"
-                >
+                <li v-if="article.createdMs" class="article-meta__item date-info">
                   <v-icon size="small" color="grey" class="mr-1" aria-hidden="true">
                     mdi-calendar
                   </v-icon>
@@ -477,13 +484,17 @@ const seoPageLinks = computed(() => {
                 :to="buildArticleLink(article.url)"
                 class="article-read-more-link"
                 :aria-labelledby="buildArticleTitleId(index)"
-                :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
-                :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
+                :aria-describedby="
+                  article.summary ? buildArticleSummaryId(index) : undefined
+                "
+                :aria-label="`${t('blog.list.readMore')} - ${
+                  article.title || t('blog.list.readMore')
+                }`"
                 :title="article.title || undefined"
                 data-test="article-read-more"
               >
                 <v-btn variant="outlined" size="small" color="primary">
-                  {{ t('blog.list.readMore') }}
+                  {{ t("blog.list.readMore") }}
                 </v-btn>
               </NuxtLink>
             </v-card-actions>
