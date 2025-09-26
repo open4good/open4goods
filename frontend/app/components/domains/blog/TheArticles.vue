@@ -218,9 +218,18 @@ const debugDetails = computed(() => ({
 const toggleDebugInfo = () => {
   showDebugInfo.value = !showDebugInfo.value
 }
-const isTagActive = (tag: string | null) => {
-  return (activeTag.value ?? null) === (tag ?? null)
-}
+
+const allTagValue = '__all__'
+const tagGroupValue = computed({
+  get: () => activeTag.value ?? allTagValue,
+  set: (value) => {
+    if (typeof value !== 'string') {
+      return
+    }
+
+    handleTagSelection(value === allTagValue ? null : value)
+  },
+})
 
 const seoPageLinks = computed(() => {
   const pages = totalPages.value
@@ -442,126 +451,153 @@ defineExpose({
 </script>
 
 <template>
-  <div class="blog-list">
-
-
-    <div class="debug-controls">
-      <button
-        type="button"
-        class="debug-toggle"
+  <v-container class="py-6 px-4 mx-auto" max-width="1200">
+    <v-sheet class="d-flex flex-column gap-3 mb-6" color="transparent" elevation="0">
+      <v-btn
+        variant="outlined"
+        color="primary"
+        size="small"
         :aria-expanded="showDebugInfo"
         :aria-controls="debugPanelId"
         @click="toggleDebugInfo"
       >
         {{ debugToggleLabel }}
-      </button>
+      </v-btn>
 
-      <div
-        v-if="showDebugInfo"
-        :id="debugPanelId"
-        class="debug-info"
-        role="region"
-        aria-live="polite"
-      >
-        <h2 class="visually-hidden">Debug information</h2>
-        <dl class="debug-info__list">
-          <div class="debug-info__item">
-            <dt>Current page</dt>
-            <dd>{{ debugDetails.currentPage }}</dd>
-          </div>
-          <div class="debug-info__item">
-            <dt>Total pages</dt>
-            <dd>{{ debugDetails.totalPages }}</dd>
-          </div>
-          <div class="debug-info__item">
-            <dt>Total articles</dt>
-            <dd>{{ debugDetails.totalArticles }}</dd>
-          </div>
-          <div class="debug-info__item">
-            <dt>Selected tag</dt>
-            <dd>{{ debugDetails.selectedTag ?? 'None' }}</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
+      <v-expand-transition>
+        <v-sheet
+          v-if="showDebugInfo"
+          :id="debugPanelId"
+          role="region"
+          aria-live="polite"
+          class="pa-4"
+          color="primary-lighten-5"
+          rounded="lg"
+          elevation="0"
+        >
+          <h2 class="v-visually-hidden">Debug information</h2>
+          <dl class="ma-0 d-flex flex-column gap-3">
+            <div class="d-flex flex-column gap-1">
+              <dt class="text-body-2 text-primary font-weight-medium">Current page</dt>
+              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.currentPage }}</dd>
+            </div>
+            <div class="d-flex flex-column gap-1">
+              <dt class="text-body-2 text-primary font-weight-medium">Total pages</dt>
+              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.totalPages }}</dd>
+            </div>
+            <div class="d-flex flex-column gap-1">
+              <dt class="text-body-2 text-primary font-weight-medium">Total articles</dt>
+              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.totalArticles }}</dd>
+            </div>
+            <div class="d-flex flex-column gap-1">
+              <dt class="text-body-2 text-primary font-weight-medium">Selected tag</dt>
+              <dd class="ma-0 text-body-2 text-medium-emphasis">{{ debugDetails.selectedTag ?? 'None' }}</dd>
+            </div>
+          </dl>
+        </v-sheet>
+      </v-expand-transition>
+    </v-sheet>
 
-
-    <section
+    <v-sheet
       v-if="availableTags.length || activeTag"
-      class="tag-filter"
+      class="mb-6 d-flex flex-column gap-3 pa-4"
+      color="primary-lighten-5"
+      rounded="lg"
+      elevation="0"
       :aria-label="t('blog.list.tagsAriaLabel')"
       role="region"
       :aria-busy="tagsLoading"
       :aria-controls="articleListId"
     >
-      <div class="tag-filter__header">
+      <div class="d-flex align-center gap-2 text-primary font-weight-medium">
         <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
-        <span class="tag-filter__title">{{ t('blog.list.tagsTitle') }}</span>
+        <span class="text-subtitle-1">{{ t('blog.list.tagsTitle') }}</span>
       </div>
-      <div class="tag-filter__chips">
-        <button
-          type="button"
-          class="tag-filter__chip"
-          :class="{ 'tag-filter__chip--active': isTagActive(null) }"
-          :disabled="tagsLoading"
-          :aria-pressed="isTagActive(null)"
-          @click="handleTagSelection(null)"
+
+      <v-chip-group
+        v-model="tagGroupValue"
+        class="d-flex flex-wrap"
+        :column="false"
+        :filter="false"
+        :multiple="false"
+        :disabled="tagsLoading"
+        :aria-label="t('blog.list.tagsAriaLabel')"
+        :aria-controls="articleListId"
+      >
+        <v-chip
+          :value="allTagValue"
+          size="small"
+          color="primary"
+          variant="tonal"
+          class="me-2 mb-2"
+          :aria-label="t('blog.list.tagsAll')"
         >
-          <v-chip
-            color="primary"
-            :variant="isTagActive(null) ? 'elevated' : 'tonal'"
-            size="small"
-            :disabled="tagsLoading"
-            :aria-label="t('blog.list.tagsAll')"
-          >
-            {{ t('blog.list.tagsAll') }}
-          </v-chip>
-        </button>
-        <button
+          {{ t('blog.list.tagsAll') }}
+        </v-chip>
+        <v-chip
           v-for="tag in availableTags"
           :key="tag.name"
-          type="button"
-          class="tag-filter__chip"
-          :class="{ 'tag-filter__chip--active': isTagActive(tag.name) }"
-          :disabled="tagsLoading"
-          :aria-pressed="isTagActive(tag.name)"
-          @click="handleTagSelection(tag.name)"
+          :value="tag.name"
+          size="small"
+          color="primary"
+          variant="tonal"
+          class="me-2 mb-2"
+          :aria-label="tag.name"
         >
-          <v-chip
-            color="primary"
-            :variant="isTagActive(tag.name) ? 'elevated' : 'tonal'"
-            size="small"
-            :disabled="tagsLoading"
-            :aria-label="tag.name"
-          >
-            <span v-if="typeof tag.count === 'number' && tag.count > 0">
-              {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
-            </span>
-            <span v-else>
-              {{ tag.name }}
-            </span>
-          </v-chip>
-        </button>
-      </div>
-      <div v-if="tagsLoading" class="tag-filter__loading" role="status" aria-live="polite">
+          <span v-if="typeof tag.count === 'number' && tag.count > 0">
+            {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
+          </span>
+          <span v-else>
+            {{ tag.name }}
+          </span>
+        </v-chip>
+      </v-chip-group>
+
+      <div
+        v-if="tagsLoading"
+        class="d-inline-flex align-center"
+        role="status"
+        aria-live="polite"
+      >
         <v-progress-circular indeterminate size="16" width="2" color="primary" aria-hidden="true" />
-        <span>{{ t('blog.list.tagsLoading') }}</span>
+        <span class="ms-2 text-body-2 text-primary">{{ t('blog.list.tagsLoading') }}</span>
       </div>
-    </section>
+    </v-sheet>
 
-    <div v-if="loading" class="loading" role="status" aria-live="polite">
+    <v-sheet
+      v-if="loading"
+      class="py-10 d-flex flex-column align-center justify-center text-center gap-3"
+      color="transparent"
+      elevation="0"
+      role="status"
+      aria-live="polite"
+    >
       <v-progress-circular indeterminate aria-hidden="true" />
-      <p>{{ t('blog.list.loading') }}</p>
-    </div>
+      <p class="text-body-1 text-medium-emphasis">{{ t('blog.list.loading') }}</p>
+    </v-sheet>
 
-    <div v-else-if="error" class="error">
+    <v-sheet
+      v-else-if="error"
+      class="py-6 d-flex flex-column align-center text-center gap-3"
+      color="transparent"
+      elevation="0"
+    >
       <v-alert type="error" variant="tonal" role="alert">
         {{ error }}
       </v-alert>
-      <v-btn class="mt-4" @click="fetchArticles"> {{ t('common.actions.retry') }} </v-btn>
-    </div>
+      <v-btn color="primary" variant="tonal" @click="fetchArticles">
+        {{ t('common.actions.retry') }}
+      </v-btn>
+    </v-sheet>
 
-    <div v-else class="articles" role="region" aria-live="polite" :aria-busy="loading">
+    <v-sheet
+      v-else
+      color="transparent"
+      elevation="0"
+      role="region"
+      aria-live="polite"
+      :aria-busy="loading"
+    >
       <v-row :id="articleListId" role="list">
         <v-col
           v-for="(article, index) in paginatedArticles"
@@ -569,22 +605,21 @@ defineExpose({
           cols="12"
           sm="6"
           md="4"
-          lg="4"
           role="listitem"
         >
           <v-card
-            class="article-card"
+            class="h-100 d-flex flex-column"
             elevation="6"
             hover
+            rounded="lg"
             tag="article"
             :aria-labelledby="buildArticleTitleId(index)"
             :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
           >
-            <!-- Article image -->
             <NuxtLink
               v-if="article.image && buildArticleLink(article.url)"
               :to="buildArticleLink(article.url)"
-              class="article-image-link"
+              class="d-block"
               :aria-labelledby="buildArticleTitleId(index)"
               :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
               :title="article.title || undefined"
@@ -595,14 +630,13 @@ defineExpose({
                 :alt="buildArticleImageAlt(article.title)"
                 height="200"
                 cover
-                class="article-image"
               >
                 <template #placeholder>
-                  <div class="image-placeholder">
+                  <div class="d-flex flex-column align-center justify-center h-100 bg-grey-lighten-4 text-medium-emphasis py-6">
                     <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
                       mdi-image-off
                     </v-icon>
-                    <p class="placeholder-text">Image not available</p>
+                    <p class="text-caption text-center mt-2 mb-0">Image not available</p>
                   </div>
                 </template>
               </v-img>
@@ -613,27 +647,25 @@ defineExpose({
               :alt="buildArticleImageAlt(article.title)"
               height="200"
               cover
-              class="article-image"
             >
               <template #placeholder>
-                <div class="image-placeholder">
+                <div class="d-flex flex-column align-center justify-center h-100 bg-grey-lighten-4 text-medium-emphasis py-6">
                   <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
                     mdi-image-off
                   </v-icon>
-                  <p class="placeholder-text">Image not available</p>
+                  <p class="text-caption text-center mt-2 mb-0">Image not available</p>
                 </div>
               </template>
             </v-img>
 
-            <!-- Card content -->
             <v-card-title
               :id="buildArticleTitleId(index)"
-              class="article-title"
+              class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
             >
               <NuxtLink
                 v-if="buildArticleLink(article.url)"
                 :to="buildArticleLink(article.url)"
-                class="article-title-link"
+                class="text-high-emphasis text-decoration-none"
                 :aria-labelledby="buildArticleTitleId(index)"
                 :title="article.title || undefined"
                 data-test="article-title-link"
@@ -647,44 +679,40 @@ defineExpose({
 
             <v-card-text
               :id="buildArticleSummaryId(index)"
-              class="article-summary"
+              class="px-4 pb-4 flex-grow-1"
             >
-              <p>{{ article.summary }}</p>
+              <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
             </v-card-text>
 
-            <!-- Actions and metadata -->
-            <v-card-actions class="article-actions">
-              <ul class="article-meta" aria-label="Article metadata">
-                <li v-if="article.author" class="article-meta__item author-info">
-                  <v-icon size="small" color="primary" class="mr-1" aria-hidden="true">
+            <v-card-actions class="px-4 py-4 align-center bg-grey-lighten-4">
+              <div class="d-flex flex-column gap-2" aria-label="Article metadata">
+                <div v-if="article.author" class="d-flex align-center text-body-2">
+                  <v-icon size="small" color="primary" class="me-2" aria-hidden="true">
                     mdi-account
                   </v-icon>
-                  <span class="visually-hidden">Author:</span>
-                  <span class="author-name">{{ article.author }}</span>
-                </li>
-                <li
-                  v-if="article.createdMs"
-                  class="article-meta__item date-info"
-                >
-                  <v-icon size="small" color="grey" class="mr-1" aria-hidden="true">
+                  <span class="v-visually-hidden">Author:</span>
+                  <span class="text-primary font-weight-medium">{{ article.author }}</span>
+                </div>
+                <div v-if="article.createdMs" class="d-flex align-center text-body-2">
+                  <v-icon size="small" color="grey" class="me-2" aria-hidden="true">
                     mdi-calendar
                   </v-icon>
-                  <span class="visually-hidden">Published on:</span>
+                  <span class="v-visually-hidden">Published on:</span>
                   <time
-                    class="date-text"
+                    class="text-medium-emphasis"
                     :datetime="buildDateIsoString(article.createdMs)"
                   >
                     {{ formatDate(article.createdMs) }}
                   </time>
-                </li>
-              </ul>
+                </div>
+              </div>
 
               <v-spacer></v-spacer>
 
               <NuxtLink
                 v-if="buildArticleLink(article.url)"
                 :to="buildArticleLink(article.url)"
-                class="article-read-more-link"
+                class="text-decoration-none"
                 :aria-labelledby="buildArticleTitleId(index)"
                 :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
                 :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
@@ -700,8 +728,13 @@ defineExpose({
         </v-col>
       </v-row>
 
-      <div v-if="shouldDisplayPagination" class="pagination-container">
-        <nav class="pagination-control" :aria-label="paginationAriaLabel">
+      <v-sheet
+        v-if="shouldDisplayPagination"
+        class="mt-6 d-flex flex-column align-center gap-3"
+        color="transparent"
+        elevation="0"
+      >
+        <nav :aria-label="paginationAriaLabel">
           <v-pagination
             :length="totalPages"
             :model-value="currentPage"
@@ -712,11 +745,11 @@ defineExpose({
           />
         </nav>
 
-        <p class="pagination-info" aria-live="polite">
+        <p class="text-body-2 text-medium-emphasis text-center" aria-live="polite">
           {{ paginationInfoMessage }}
         </p>
 
-        <nav class="visually-hidden" :aria-label="paginationAriaLabel">
+        <nav class="v-visually-hidden" :aria-label="paginationAriaLabel">
           <ul>
             <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
               <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
@@ -725,243 +758,7 @@ defineExpose({
             </li>
           </ul>
         </nav>
-      </div>
-    </div>
-  </div>
+      </v-sheet>
+    </v-sheet>
+  </v-container>
 </template>
-
-<style lang="sass" scoped>
-.blog-list
-  max-width: 1200px
-  margin: 0 auto
-  padding: 20px
-
-.debug-controls
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-  margin-bottom: 1.5rem
-
-.debug-toggle
-  align-self: flex-start
-  border: 1px solid #1976d2
-  background: transparent
-  color: #1976d2
-  border-radius: 999px
-  padding: 0.35rem 1rem
-  font-weight: 600
-  cursor: pointer
-  transition: background-color 0.2s ease, color 0.2s ease
-
-  &:hover,
-  &:focus-visible
-    background-color: rgba(25, 118, 210, 0.12)
-
-  &:focus-visible
-    outline: 2px solid #1976d2
-    outline-offset: 2px
-
-.debug-info
-  border: 1px dashed rgba(25, 118, 210, 0.4)
-  border-radius: 12px
-  padding: 1rem
-  background: #f8fbff
-
-  &__list
-    margin: 0
-    padding: 0
-    display: grid
-    gap: 0.75rem
-
-.debug-info__item
-  display: grid
-  grid-template-columns: max-content 1fr
-  gap: 0.75rem
-
-  dt
-    font-weight: 600
-    color: #1976d2
-
-  dd
-    margin: 0
-    color: #455a64
-
-.tag-filter
-  margin-bottom: 24px
-  padding: 16px
-  border-radius: 12px
-  background: #f5f9ff
-  border: 1px solid rgba(25, 118, 210, 0.12)
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-
-  &__header
-    display: flex
-    align-items: center
-    gap: 0.5rem
-    color: #1976d2
-    font-weight: 600
-
-  &__title
-    font-size: 1rem
-
-  &__chips
-    display: flex
-    flex-wrap: wrap
-    gap: 0.5rem
-
-  &__chip
-    appearance: none
-    border: none
-    background: transparent
-    padding: 0
-    display: inline-flex
-    transition: transform 0.2s ease
-    cursor: pointer
-
-    &:disabled
-      cursor: not-allowed
-
-  &__chip--active
-    transform: translateY(-2px)
-
-  &__loading
-    display: inline-flex
-    align-items: center
-    gap: 0.5rem
-    font-size: 0.875rem
-    color: #1976d2
-
-
-
-  h5
-    margin: 0 0 8px 0
-    color: #333
-
-  pre
-    margin: 0
-    white-space: pre-wrap
-    word-break: break-all
-
-.loading,
-.error
-  text-align: center
-  padding: 20px
-
-.article-card
-  height: 100%
-  transition: all 0.3s ease
-  border-radius: 12px
-  overflow: hidden
-
-  &:hover
-    transform: translateY(-4px)
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15)
-
-.article-image
-  position: relative
-
-.article-image-link
-  display: block
-
-.article-title-link
-  color: inherit
-  text-decoration: none
-  display: inline-block
-  width: 100%
-
-.article-title-link:hover
-  text-decoration: underline
-
-.article-read-more-link
-  text-decoration: none
-  display: inline-block
-
-.image-placeholder
-  display: flex
-  flex-direction: column
-  align-items: center
-  justify-content: center
-  height: 100%
-  background: #f5f5f5
-  color: #666
-
-.placeholder-text
-  margin-top: 8px
-  font-size: 12px
-  text-align: center
-
-.article-title
-  font-size: 1.1rem
-  font-weight: 600
-  line-height: 1.3
-  color: #333
-  padding: 16px 16px 8px 16px
-
-.article-summary
-  padding: 0 16px 16px 16px
-
-  p
-    color: #666
-    line-height: 1.5
-    margin: 0
-    overflow: hidden
-    text-overflow: ellipsis
-
-.article-actions
-  padding: 16px
-  border-top: 1px solid #f0f0f0
-  background: #fafafa
-
-.article-meta
-  display: flex
-  flex-direction: column
-  gap: 4px
-  list-style: none
-  margin: 0
-  padding: 0
-
-.author-info,
-.date-info
-  display: flex
-  align-items: center
-  font-size: 0.85rem
-
-.author-name
-  color: #1976d2
-  font-weight: 500
-
-.date-text
-  color: #666
-
-.pagination-container
-  margin-top: 24px
-  display: flex
-  flex-direction: column
-  align-items: center
-  gap: 8px
-
-.pagination-info
-  font-size: 0.9rem
-  color: #555
-
-.visually-hidden
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  white-space: nowrap
-  border: 0
-
-// Responsive adjustments
-@media (max-width: 600px)
-  .article-card
-    margin-bottom: 16px
-
-  .article-title
-    font-size: 1rem
-</style>
