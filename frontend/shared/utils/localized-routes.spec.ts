@@ -18,6 +18,8 @@ describe('localized-routes utilities', () => {
   it('resolves localized static paths', () => {
     expect(resolveLocalizedRoutePath('team', 'fr-FR')).toBe('/equipe')
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
+    expect(resolveLocalizedRoutePath('impact-score', 'fr-FR')).toBe('/ecoscore')
+    expect(resolveLocalizedRoutePath('impact-score', 'en-US')).toBe('/impact-score')
   })
 
 

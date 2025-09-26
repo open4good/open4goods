@@ -3,12 +3,25 @@ import { useI18n } from 'vue-i18n'
 
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
-type FooterLink = {
+type InternalFooterLink = {
+  label: string
+  to: string
+}
+
+type ExternalFooterLink = {
   label: string
   href: string
   target?: string
   rel?: string
 }
+
+type FooterLink = InternalFooterLink | ExternalFooterLink
+
+const isInternalLink = (link: FooterLink): link is InternalFooterLink => 'to' in link
+
+const getNavigationProps = (link: FooterLink) => (isInternalLink(link) ? { to: link.to } : { href: link.href })
+
+const getFooterLinkKey = (link: FooterLink) => (isInternalLink(link) ? link.to : link.href)
 
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
@@ -19,52 +32,52 @@ const currentYear = computed(() => new Date().getFullYear())
 const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
-    href: resolveLocalizedRoutePath('ecoscore', currentLocale.value),
-  }
+    to: resolveLocalizedRoutePath('impact-score', currentLocale.value),
+  },
 ])
 
 const comparatorLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.comparator.links.openData'),
-    href: '/opendata',
+    to: '/opendata',
   },
   {
     label: t('siteIdentity.footer.comparator.links.openSource'),
-    href: '/opensource',
+    to: '/opensource',
   },
   {
     label: t('siteIdentity.footer.comparator.links.privacy'),
-    href: '/politique-confidentialite',
+    to: '/politique-confidentialite',
   },
   {
     label: t('siteIdentity.footer.comparator.links.legal'),
-    href: '/mentions-legales',
+    to: '/mentions-legales',
   },
 ])
 
 const communityLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.community.links.team'),
-    href: resolveLocalizedRoutePath('team', currentLocale.value),
+    to: resolveLocalizedRoutePath('team', currentLocale.value),
   },
   {
     label: t('siteIdentity.footer.community.links.partners'),
-    href: '/partenaires',
+    to: '/partenaires',
   },
 ])
 
 const feedbackLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.feedback.links.idea'),
-    href: '/feedback/idea',
+    to: '/feedback/idea',
   },
   {
     label: t('siteIdentity.footer.feedback.links.issue'),
-    href: '/feedback/issue',
+    to: '/feedback/issue',
   },
   {
     label: t('siteIdentity.footer.feedback.links.contact'),
-    href: resolveLocalizedRoutePath('contact', currentLocale.value),
+    to: resolveLocalizedRoutePath('contact', currentLocale.value),
   },
   {
     label: t('siteIdentity.footer.feedback.links.linkedin'),
@@ -89,7 +102,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         </p>
 
         <v-btn
-          :href="blogPath"
+          :to="blogPath"
           variant="text"
           append-icon="mdi-arrow-right"
           class="footer-link-btn text-white px-0"
@@ -102,11 +115,13 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         <div class="d-flex flex-column ga-2">
           <v-btn
             v-for="link in highlightLinks"
-            :key="link.href"
-            :href="link.href"
+            :key="getFooterLinkKey(link)"
+            v-bind="getNavigationProps(link)"
             variant="text"
             append-icon="mdi-arrow-right"
             class="footer-link-btn text-white px-0"
+            :target="link.target"
+            :rel="link.rel"
           >
             {{ link.label }}
           </v-btn>
@@ -118,9 +133,11 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
           <v-list-item
             v-for="link in comparatorLinks"
-            :key="link.href"
-            :href="link.href"
+            :key="getFooterLinkKey(link)"
+            v-bind="getNavigationProps(link)"
             class="footer-list-item px-0"
+            :target="link.target"
+            :rel="link.rel"
           >
             <template #title>
               <span class="text-body-2">{{ link.label }}</span>
@@ -137,9 +154,11 @@ const feedbackLinks = computed<FooterLink[]>(() => [
           <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
             <v-list-item
               v-for="link in communityLinks"
-              :key="link.href"
-              :href="link.href"
+              :key="getFooterLinkKey(link)"
+              v-bind="getNavigationProps(link)"
               class="footer-list-item px-0"
+              :target="link.target"
+              :rel="link.rel"
             >
               <template #title>
                 <span class="text-body-2">{{ link.label }}</span>
@@ -154,8 +173,8 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
           <v-list-item
             v-for="link in feedbackLinks"
-            :key="link.href"
-            :href="link.href"
+            :key="getFooterLinkKey(link)"
+            v-bind="getNavigationProps(link)"
             class="footer-list-item px-0"
             :target="link.target"
             :rel="link.rel"
