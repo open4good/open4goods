@@ -31,12 +31,63 @@ front:
     
 xwiki:
     username: nudger
-    password: nudger 
+    password: nudger
     baseUrl: https://wiki.nudger.fr
-        
+
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics
+
+team-config:
+  cores:
+    - name: Goulven Furet
+      linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/
+      imageUrl: /assets/img/team/Goulven.jpeg
+
+    - name: Bérangère Leven
+      linkedInUrl: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
+      imageUrl: /assets/img/team/Berangere.jpeg
+
+    - name: Thomas Vandewalle
+      linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
+      imageUrl: /assets/img/team/Thomas.jpeg
+
+    - name: Candide Chérel
+      linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
+      imageUrl: /assets/img/team/Candide.jpeg
+
+    - name: Yann Mingant
+      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
+      imageUrl: /assets/img/team/Yann.jpeg
+
+    - name: Louis-Marie Toudoire
+      linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
+      imageUrl: /assets/img/team/Louis-Marie.jpeg
+
+    - name: Laurent Blondel
+      linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
+      imageUrl: /assets/img/team/Laurent.jpeg
+
+    - name: Max Ziliani
+      linkedInUrl: https://www.linkedin.com/in/maxziliani/
+      imageUrl: /assets/img/team/Max.jpeg
+
+  contributors:
+    - name: Loïc Gourmelon
+      linkedInUrl: https://www.linkedin.com/in/gourmelonloic/
+      imageUrl: /assets/img/team/Loic.jpeg
+
+    - name: Thierry Ledan
+      linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
+      imageUrl: /assets/img/team/Thierry.jpeg
+
+    - name: Nicolas Bonamy
+      linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
+      imageUrl: /assets/img/team/Nicolas.jpeg
+
+    - name: Stephane Castrec
+      linkedInUrl: https://www.linkedin.com/in/scastrec/
+      imageUrl: /assets/img/team/Stephane.jpeg
