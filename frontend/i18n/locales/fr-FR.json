@@ -94,5 +94,49 @@
     "actions": {
       "retry": "Réessayer"
     }
+  },
+  "team": {
+    "seo": {
+      "title": "Découvrez l'équipe Nudger",
+      "description": "Rencontrez les entrepreneuses, ingénieurs et bénévoles qui construisent l'assistant d'achat responsable Nudger."
+    },
+    "hero": {
+      "eyebrow": "Notre collectif",
+      "title": "Les femmes et les hommes derrière Nudger",
+      "subtitle": "Une équipe engagée qui mêle tech, environnement et impact social."
+    },
+    "loading": "Chargement des membres…",
+    "errors": {
+      "loadFailed": "Impossible de charger la liste de l'équipe. Merci de réessayer."
+    },
+    "sections": {
+      "empty": "Les profils seront bientôt disponibles.",
+      "core": {
+        "title": "La core-team",
+        "eyebrow": "Pilotage"
+      },
+      "contributors": {
+        "title": "Les contributeurs",
+        "eyebrow": "Communauté"
+      }
+    },
+    "cards": {
+      "portraitAlt": "Portrait de {name}",
+      "linkedIn": "Ouvrir le profil LinkedIn de {name}",
+      "connect": "Voir sur LinkedIn",
+      "unknownName": "un membre de l'équipe"
+    },
+    "callouts": {
+      "partners": {
+        "title": "Nos partenaires",
+        "cta": "Découvrir les partenaires",
+        "link": "/partenaires"
+      },
+      "contact": {
+        "title": "Envie d'échanger ?",
+        "description": "Vous souhaitez en savoir plus sur le projet ou rejoindre l'aventure ? Parlons-en.",
+        "cta": "Nous contacter"
+      }
+    }
   }
 }

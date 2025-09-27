@@ -95,5 +95,49 @@
     "actions": {
       "retry": "Retry"
     }
+  },
+  "team": {
+    "seo": {
+      "title": "Meet the Nudger team",
+      "description": "Discover the collective of entrepreneurs, engineers and volunteers building the sustainable shopping assistant Nudger."
+    },
+    "hero": {
+      "eyebrow": "Our collective",
+      "title": "The people behind Nudger",
+      "subtitle": "A passionate crew blending tech, sustainability and social impact."
+    },
+    "loading": "Loading team members…",
+    "errors": {
+      "loadFailed": "We could not load the team roster. Please try again."
+    },
+    "sections": {
+      "empty": "The team roster will be published soon.",
+      "core": {
+        "title": "Core team",
+        "eyebrow": "Leadership"
+      },
+      "contributors": {
+        "title": "Contributors",
+        "eyebrow": "Community"
+      }
+    },
+    "cards": {
+      "portraitAlt": "Portrait of {name}",
+      "linkedIn": "Open {name}'s LinkedIn profile",
+      "connect": "Connect on LinkedIn",
+      "unknownName": "a team member"
+    },
+    "callouts": {
+      "partners": {
+        "title": "Our partners",
+        "cta": "Discover our partners",
+        "link": "/partners"
+      },
+      "contact": {
+        "title": "Curious to chat?",
+        "description": "Want to co-create the future of responsible shopping or ask us something specific? We would love to talk.",
+        "cta": "Contact us"
+      }
+    }
   }
 }
