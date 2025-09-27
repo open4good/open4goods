@@ -2,3 +2,4 @@
 export { useBlogService } from './blog.services'
 export { useContentService } from './content.services'
 export { authService } from './auth.services'
+export { useTeamService } from './team.services'
