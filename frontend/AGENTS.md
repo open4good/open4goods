@@ -223,6 +223,8 @@ TypeScript Usage
 - Avoid enums, opting for mapforimproved type safety and flexibility.
 - Use functional componentwithTypeScript interfaces.
 - Never use the `any` type; prefer `unknown` with dedicated type guards when you need a fallback.
+- Do not rely on the `delete` operator for removing reactive properties; rebuild objects with spread syntax or helpers instead t
+  o satisfy linting rules.
 UI and Styling
 - Use Vuetify UI forcomponents and styling.
 - Implement responsive Vuetify approach and mobile-firstapproach.

@@ -31,7 +31,7 @@ const localeRef = ref('en')
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: (key: string, params: Record<string, any> = {}) => {
+    t: (key: string, params: Record<string, string | number | boolean | undefined> = {}) => {
       switch (key) {
         case 'blog.pagination.info':
           return `Page ${params.current} of ${params.total} (${params.count} articles)`
@@ -122,6 +122,14 @@ const NuxtLinkStub = defineComponent({
   },
 })
 
+const serializeDataAttribute = (value: unknown): string => {
+  if (value === undefined || value === null) {
+    return ''
+  }
+
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
+
 const stubWithSlot = (name: string) =>
   defineComponent({
     name: `${name}Stub`,
@@ -159,9 +167,9 @@ const stubWithSlot = (name: string) =>
           'div',
           {
             class: `${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}-stub`,
-            'data-model-value': props.modelValue as any,
-            'data-value': props.value as any,
-            'data-length': props.length as any,
+            'data-model-value': serializeDataAttribute(props.modelValue),
+            'data-value': serializeDataAttribute(props.value),
+            'data-length': serializeDataAttribute(props.length),
             'data-alt': props.alt,
             'data-src': props.src,
             onClick,
@@ -193,10 +201,7 @@ const stubs = {
 }
 
 const resetRouteQuery = (query: Record<string, unknown> = {}) => {
-  Object.keys(route.query).forEach((key) => {
-    delete (route.query as Record<string, unknown>)[key]
-  })
-  Object.assign(route.query, query)
+  route.query = { ...query }
 }
 
 const mountComponent = async () => {
