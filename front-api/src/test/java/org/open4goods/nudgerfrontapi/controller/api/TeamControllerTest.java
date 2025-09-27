@@ -26,11 +26,13 @@ class TeamControllerTest {
 
         TeamProperties.Member core = new TeamProperties.Member();
         core.setName("Jane Doe");
+        core.setBlocId("pages:team:jane-doe:");
         core.setLinkedInUrl("https://www.linkedin.com/in/janedoe/");
         core.setImageUrl("/img/jane.jpeg");
 
         TeamProperties.Member contributor = new TeamProperties.Member();
         contributor.setName("John Roe");
+        contributor.setBlocId("pages:team:john-roe:");
         contributor.setLinkedInUrl("https://www.linkedin.com/in/johnroe/");
         contributor.setImageUrl("/img/john.jpeg");
 
@@ -47,6 +49,7 @@ class TeamControllerTest {
         mockMvc.perform(get("/team").param("domainLanguage", "fr"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cores[0].name").value("Jane Doe"))
+                .andExpect(jsonPath("$.cores[0].blocId").value("pages:team:jane-doe:"))
                 .andExpect(jsonPath("$.contributors[0].imageUrl").value("/img/john.jpeg"));
     }
 }

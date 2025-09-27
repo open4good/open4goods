@@ -56,12 +56,24 @@ public class TeamProperties {
                 example = "/assets/img/team/Goulven.jpeg")
         private String imageUrl;
 
+        @Schema(description = "XWiki bloc identifier providing the member biography.",
+                example = "pages:team:goulven-furet:")
+        private String blocId;
+
         public String getName() {
             return name;
         }
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getBlocId() {
+            return blocId;
+        }
+
+        public void setBlocId(String blocId) {
+            this.blocId = blocId;
         }
 
         public String getLinkedInUrl() {

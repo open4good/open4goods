@@ -2,6 +2,7 @@
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Member } from '~~/shared/api-client'
+import { _slugify } from '~~/shared/utils/_slugify'
 
 interface Props {
   member: Member
@@ -20,12 +21,27 @@ const descriptionId = useId()
 const displayName = computed(() => props.member.name?.trim() || t('team.cards.unknownName'))
 
 const baseBlocId = computed(() => {
-  const rawName = props.member.name?.trim() ?? ''
-  const path = `pages:team:${rawName}`
-  return path
+  const explicit = props.member.blocId?.trim()
+  if (explicit) {
+    return explicit
+  }
+
+  const slug = _slugify(props.member.name ?? '')
+  if (!slug) {
+    return ''
+  }
+
+  return `pages:team:${slug}:`
 })
 
-const titleBlocId = computed(() => `${baseBlocId.value}-title`)
+const titleBlocId = computed(() => {
+  const base = baseBlocId.value
+  if (!base) {
+    return ''
+  }
+
+  return base.endsWith(':') ? `${base.slice(0, -1)}-title:` : `${base}-title`
+})
 
 const portraitAlt = computed(() => t('team.cards.portraitAlt', { name: displayName.value }))
 
@@ -94,7 +110,7 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
   background: white
   height: 100%
   position: relative
-  overflow: hidden
+  overflow: visible
 
   &__avatar
     position: absolute
