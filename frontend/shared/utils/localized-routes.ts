@@ -21,6 +21,48 @@ type RouteParams = Record<string, string | number | undefined>
 
 const ROUTE_PARAM_PATTERN = /\[([^\]/]+)\]/g
 
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const normalizeTemplate = (template: string): string => {
+  if (!template || template === '/') {
+    return '/'
+  }
+
+  return template.replace(/\/+$/u, '')
+}
+
+const PATH_MATCHER_CACHE = new Map<string, RegExp>()
+
+const createPathMatcher = (template: string): RegExp => {
+  const normalizedTemplate = normalizeTemplate(template)
+  const cacheKey = normalizedTemplate
+  const cachedMatcher = PATH_MATCHER_CACHE.get(cacheKey)
+
+  if (cachedMatcher) {
+    return cachedMatcher
+  }
+
+  let pattern = ''
+  let lastIndex = 0
+
+  for (const match of normalizedTemplate.matchAll(ROUTE_PARAM_PATTERN)) {
+    const [segment] = match
+    const matchIndex = match.index ?? 0
+
+    pattern += escapeRegex(normalizedTemplate.slice(lastIndex, matchIndex))
+    pattern += '[^/]+'
+    lastIndex = matchIndex + segment.length
+  }
+
+  pattern += escapeRegex(normalizedTemplate.slice(lastIndex))
+
+  const matcher = new RegExp(`^${pattern}(?:/)?$`, 'u')
+
+  PATH_MATCHER_CACHE.set(cacheKey, matcher)
+
+  return matcher
+}
+
 const injectParamsIntoPath = (
   template: string,
   params: RouteParams,
@@ -67,3 +109,41 @@ export const buildI18nPagesConfig = (): Record<string, Partial<Record<NuxtLocale
       ([routeName, locales]) => [routeName, locales],
     ),
   )
+
+const normalizePath = (path: string): string => {
+  if (!path) {
+    return '/'
+  }
+
+  const prefixedPath = path.startsWith('/') ? path : `/${path}`
+
+  if (prefixedPath === '/') {
+    return prefixedPath
+  }
+
+  return prefixedPath.replace(/\/+$/u, '')
+}
+
+export interface MatchedLocalizedRoute {
+  routeName: LocalizedRouteName
+  locale: NuxtLocale
+}
+
+export const matchLocalizedRouteByPath = (path: string): MatchedLocalizedRoute | null => {
+  const normalizedPath = normalizePath(path)
+
+  for (const [routeName, locales] of Object.entries(LOCALIZED_ROUTE_PATHS) as [
+    LocalizedRouteName,
+    Record<NuxtLocale, LocalizedRoutePath>,
+  ][]) {
+    for (const [locale, template] of Object.entries(locales) as [NuxtLocale, LocalizedRoutePath][]) {
+      const matcher = createPathMatcher(template)
+
+      if (matcher.test(normalizedPath)) {
+        return { routeName, locale }
+      }
+    }
+  }
+
+  return null
+}

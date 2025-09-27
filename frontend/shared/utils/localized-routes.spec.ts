@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   LOCALIZED_ROUTE_PATHS,
   buildI18nPagesConfig,
+  matchLocalizedRouteByPath,
   normalizeLocale,
   resolveLocalizedRoutePath,
 } from './localized-routes'
@@ -20,14 +21,17 @@ describe('localized-routes utilities', () => {
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
   })
 
+  it('matches paths back to their localized routes', () => {
+    expect(matchLocalizedRouteByPath('/equipe')).toEqual({ routeName: 'team', locale: 'fr-FR' })
+    expect(matchLocalizedRouteByPath('/team')).toEqual({ routeName: 'team', locale: 'en-US' })
+    expect(matchLocalizedRouteByPath('/unknown')).toBeNull()
+  })
+
 
   it('falls back to default paths when no mapping exists', () => {
     expect(resolveLocalizedRoutePath('privacy', 'fr-FR')).toBe('/privacy')
     expect(resolveLocalizedRoutePath('account', 'en-US')).toBe('/account')
   })
-
-
-
   it('builds a compatible i18n pages configuration', () => {
     const config = buildI18nPagesConfig()
 
