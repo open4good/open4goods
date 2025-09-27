@@ -43,7 +43,6 @@ import io.jsonwebtoken.security.Keys;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-// Security configuration adapted for the Nuxt frontend application.
 public class WebSecurityConfig {
 
     private final SecurityProperties securityProperties;
