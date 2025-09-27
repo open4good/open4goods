@@ -30,7 +30,7 @@
                 <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
                 <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
                 <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
-                <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+                <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
                 <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
                 <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
                 <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
