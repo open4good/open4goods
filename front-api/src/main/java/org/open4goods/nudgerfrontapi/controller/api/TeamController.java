@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/team")
 @Validated
 @PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
-@Tag(name = "Team", description = "Eco-nudger team roster exposed to the frontend")
+@Tag(name = "Team", description = "Nudger team exposed to the frontend")
 public class TeamController {
 
     private final TeamProperties teamProperties;

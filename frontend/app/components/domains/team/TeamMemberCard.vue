@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
-import TextContent from '~/components/domains/content/TextContent.vue'
 import type { Member } from '~~/shared/api-client'
 
 interface Props {
