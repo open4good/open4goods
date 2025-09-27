@@ -71,10 +71,11 @@ Document any intentionally skipped check in your summary/PR.
 - Keep comments in English; translate legacy ones as you touch the file.
 
 ## Front API authentication checklist
-- All Nuxt server routes must call `front-api` through the shared configuration helper in `~/app/plugins/api-token.server.ts`. Always use the generated OpenAPI services so that helper can always inject the `X-Shared-Token` header.
+- Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent—never call `new Configuration()` directly.
+- Only create backend API instances during SSR/Vitest execution (e.g. inside Nuxt event handlers). Services such as `useBlogService`, `useContentService`, and `useTeamService` must lazily obtain their API via the helper to keep the shared token out of browser bundles.
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
 - Before modifying authentication-sensitive code:
-  1. Confirm the shared helper still wraps every outbound call to `config.apiUrl`.
+  1. Confirm every outbound call that targets `config.apiUrl` uses the helper-backed configuration or the `api-token.server` plugin so headers are injected server-side only.
   2. Re-validate the `MACHINE_TOKEN`/`front.security.shared-token` pairing in local and deployment secrets.
   3. Exercise the affected flows (login, refresh, logout, and generated client calls) to prove headers and cookies remain intact.
 
