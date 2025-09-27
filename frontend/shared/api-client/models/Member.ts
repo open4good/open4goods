@@ -26,6 +26,12 @@ export interface Member {
      */
     name?: string;
     /**
+     * XWiki bloc identifier containing the member biography.
+     * @type {string}
+     * @memberof Member
+     */
+    blocId?: string;
+    /**
      * LinkedIn profile URL of the member.
      * @type {string}
      * @memberof Member
@@ -55,8 +61,9 @@ export function MemberFromJSONTyped(json: any, ignoreDiscriminator: boolean): Me
         return json;
     }
     return {
-        
+
         'name': json['name'] == null ? undefined : json['name'],
+        'blocId': json['blocId'] == null ? undefined : json['blocId'],
         'linkedInUrl': json['linkedInUrl'] == null ? undefined : json['linkedInUrl'],
         'imageUrl': json['imageUrl'] == null ? undefined : json['imageUrl'],
     };
@@ -72,8 +79,9 @@ export function MemberToJSONTyped(value?: Member | null, ignoreDiscriminator: bo
     }
 
     return {
-        
+
         'name': value['name'],
+        'blocId': value['blocId'],
         'linkedInUrl': value['linkedInUrl'],
         'imageUrl': value['imageUrl'],
     };
