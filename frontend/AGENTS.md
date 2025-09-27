@@ -71,7 +71,7 @@ Document any intentionally skipped check in your summary/PR.
 - Keep comments in English; translate legacy ones as you touch the file.
 
 ## Front API authentication checklist
-- All Nuxt server routes must call `front-api` through the shared configuration helper in `~/app/plugins/api-token.server.ts`. Use the generated OpenAPI services or `$fetch` so that helper can always inject the `X-Shared-Token` header.
+- All Nuxt server routes must call `front-api` through the shared configuration helper in `~/app/plugins/api-token.server.ts`. Always use the generated OpenAPI services so that helper can always inject the `X-Shared-Token` header.
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
 - Before modifying authentication-sensitive code:
   1. Confirm the shared helper still wraps every outbound call to `config.apiUrl`.
