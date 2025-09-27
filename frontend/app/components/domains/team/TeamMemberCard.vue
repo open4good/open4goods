@@ -21,8 +21,8 @@ const displayName = computed(() => props.member.name?.trim() || t('team.cards.un
 
 const baseBlocId = computed(() => {
   const rawName = props.member.name?.trim() ?? ''
-  const path = `pages/team/${rawName}`
-  return path.replaceAll('/', ':')
+  const path = `pages:team:${rawName}`
+  return path
 })
 
 const titleBlocId = computed(() => `${baseBlocId.value}-title`)
