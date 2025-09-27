@@ -110,7 +110,7 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
   background: white
   height: 100%
   position: relative
-  overflow: hidden
+  overflow: visible
 
   &__avatar
     position: absolute
