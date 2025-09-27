@@ -26,12 +26,6 @@ export interface Member {
      */
     name?: string;
     /**
-     * XWiki bloc identifier containing the member biography.
-     * @type {string}
-     * @memberof Member
-     */
-    blocId?: string;
-    /**
      * LinkedIn profile URL of the member.
      * @type {string}
      * @memberof Member
@@ -43,6 +37,12 @@ export interface Member {
      * @memberof Member
      */
     imageUrl?: string;
+    /**
+     * XWiki bloc identifier providing the member biography.
+     * @type {string}
+     * @memberof Member
+     */
+    blocId?: string;
 }
 
 /**
@@ -61,11 +61,11 @@ export function MemberFromJSONTyped(json: any, ignoreDiscriminator: boolean): Me
         return json;
     }
     return {
-
+        
         'name': json['name'] == null ? undefined : json['name'],
-        'blocId': json['blocId'] == null ? undefined : json['blocId'],
         'linkedInUrl': json['linkedInUrl'] == null ? undefined : json['linkedInUrl'],
         'imageUrl': json['imageUrl'] == null ? undefined : json['imageUrl'],
+        'blocId': json['blocId'] == null ? undefined : json['blocId'],
     };
 }
 
@@ -79,11 +79,11 @@ export function MemberToJSONTyped(value?: Member | null, ignoreDiscriminator: bo
     }
 
     return {
-
+        
         'name': value['name'],
-        'blocId': value['blocId'],
         'linkedInUrl': value['linkedInUrl'],
         'imageUrl': value['imageUrl'],
+        'blocId': value['blocId'],
     };
 }
 
