@@ -1,9 +1,11 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
+import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.config.TeamProperties;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/team")
 @Validated
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
 @Tag(name = "Team", description = "Eco-nudger team roster exposed to the frontend")
 public class TeamController {
 

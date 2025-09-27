@@ -191,48 +191,46 @@ Before issueing a PR, systematically validate and check global non regession usi
 
 # Best practices for Nuxt3 project
 
-You have extensive expertise in Vue3 Nuxt 3, TypeScript, Node.js,  Pinia, VueUse, Nuxt and Vuetify. You possess deepknowledge of best practiceandperformance optimizatiotechniquesacross these technologies.
+You have extensive expertise in Vue3 Nuxt 3, TypeScript, Node.js,  Pinia, VueUse, Nuxt and Vuetify. You possess deep knowledge of best practice and performance optimization techniques across these technologies.
 Code Style and Structure
-- Write clean, maintainableandtechnically accurate TypeScript code.
-- Prioritize functional andeclarativeprogramming patterns; avoiusingclasses.
-- Emphasize iteration andmodularizatioto follow DRY principlesand minimize codduplication.
-- Use Composition API <scripsetup lang="ts">style.
-- Use Composables to encapsulate andsharreusable client-side logic orstate acrosmultiple components inyour Nuxapplication.
+- Write clean, maintainable and technically accurate TypeScript code.
+- Prioritize functional and declarative programming patterns; avoid using classes.
+- Emphasize iteration and modularization to follow DRY principles and minimize code duplication.
+- Use Composition API <script setup lang="ts"> style.
+- Use Composables to encapsulate and share reusable client-side logic or state across multiple components.
+
 Nuxt 3 Specifics
-- Nuxt 3 provides auto imports, sothereno need to manually import'ref''useState', or 'useRouter'.
-- Take advantage of VueUse functiontoenhance reactivity and performan(except for color mode management).
-- Use the Server API (within thserverapi directory) to handlserver-sideoperations like databasinteractions,authentication, oprocessing sensitivedata that must remaiconfidential.
-- use useRuntimeConfig to accesandmanage runtime configuratiovariablesthat differ between environmentandare needed both on the serveandclient sides.
+
+- Nuxt 3 provides auto imports, so there is no need to manually import 'ref' 'useState', or 'useRouter'.
+- Take advantage of VueUse function to enhance reactivity and performance (except for color mode management).
+- Use the Server API (within the server api directory) to handle server-side operations like database interactions, authentication
+- use useRuntimeConfig to access and manage runtime configuration variables that differ between environments and are needed both on the server and client sides.
 - The plugin `plugins/fetch-logger.ts` wraps `fetch` on the server to log each backend request to `API_URL`.
 - For SEO use useHead and useSeoMeta.
-- For images use <NuxtImageor<NuxtPicture> component and foIconsuse Nuxt Icons module.
+- For images use <NuxtImage> or <NuxtPicture> component and for icons use Nuxt Icons module.
 
-Fetching Data
-1. Use useFetch for standard datafetchinin components that benefitfrom SSRcaching, and reactivelyupdating based oURL changes.
-2. Use $fetch for client-sidrequestswithin event handlers or wheSSRoptimization is not needed.
-3. Use useAsyncData wheimplementingcomplex data fetching logilikecombining multiple API calls ocustomcaching and error handling.
-4. Set server: false in useFetcoruseAsyncData options to fetch datonlyon the client side, bypassing SSR.
-5. Set lazy: true in useFetcoruseAsyncData options tdefernon-critical data fetching untiafterthe initial render.
 
 Naming Conventions
 - Utilize composables, naming it use[COMPOSABLE_NAME] (eg. useBlog)
-- Use **PascalCase** for componenfilenames (e.g., componentMyComponentvue).
-- Favor named exports for functiontomaintain consistency and readability.
+- Use **PascalCase** for component filenames (e.g., componentMyComponentvue).
+- Favor named exports for function to maintain consistency and readability.
 TypeScript Usage
 - Use TypeScript throughoutpreferinterfaces over types fobetterextendability and merging.
 - Avoid enums, opting for mapforimproved type safety and flexibility.
-- Use functional componentwithTypeScript interfaces.
+- Use functional component with TypeScript interfaces.
 - Never use the `any` type; prefer `unknown` with dedicated type guards when you need a fallback.
 UI and Styling
-- Use Vuetify UI forcomponents and styling.
-- Implement responsive Vuetify approach and mobile-firstapproach.
+- Use Vuetify UI for components and styling.
+- Implement responsive Vuetify approach and mobile-first approach.
 - Do not introduce custom CSS or component-scoped `<style>` blocks; use Vuetify components, utility classes, and theme tokens configured via `nuxt.config.ts` for all styling requirements.
+
+
 Pages structure : 
 
 Pages naming will respect kebab-case.
 
 To respect components loading and initialisation, be aware :
-- Pages (located under /pages/*) must contains ONLY components
+- Pages (located under app/pages/*) must contains ONLY components
 - Direct use of Html code, or vuetify components is stricly prohibited
 - When needed, you will always create intermediary components (under /components folder)
 

@@ -79,6 +79,11 @@ Rate limiting is configured via `front.rate-limit.*` mapped by
 | `@SecurityRequirement` | auth or captcha                     |
 | `@Tag`                 | group controllers                   |
 
+Every controller MUST declare at the class level :
+```
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
+```
+
 > **Rule**: add `schema = @Schema(...)` for every `@Parameter` to specify the type.
 > Missing schemas lead to `UNKNOWN_PARAMETER_NAME` fields in the generated Nuxt client.
 >
