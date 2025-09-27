@@ -11,7 +11,6 @@ interface Props {
   descriptionBlocId?: string
   variant?: 'light' | 'muted'
   id?: string
-  eyebrow?: string
   memberVariant?: 'core' | 'contributor'
 }
 
@@ -20,7 +19,6 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'light',
   id: undefined,
   descriptionBlocId: undefined,
-  eyebrow: undefined,
   memberVariant: 'core',
 })
 
@@ -42,16 +40,6 @@ const { t } = useI18n()
   >
     <v-container class="py-12">
       <div class="team-members-section__header">
-        <v-chip
-          v-if="props.eyebrow"
-          class="team-members-section__eyebrow"
-          color="primary"
-          size="small"
-          label
-          variant="tonal"
-        >
-          {{ props.eyebrow }}
-        </v-chip>
 
         <h2 :id="headingId" class="team-members-section__title">
           {{ props.title }}
@@ -62,7 +50,7 @@ const { t } = useI18n()
         </div>
       </div>
 
-      <v-row v-if="hasMembers" class="team-members-section__grid" align="stretch" justify="center">
+      <v-row v-if="hasMembers" class="team-members-section__grid mt-2" align="stretch" justify="center">
         <v-col
           v-for="member in props.members"
           :key="member.name"
@@ -108,10 +96,7 @@ const { t } = useI18n()
     flex-direction: column
     gap: 1rem
 
-  &__eyebrow
-    align-self: center
-    letter-spacing: 0.08em
-    text-transform: uppercase
+
 
   &__title
     font-size: clamp(1.8rem, 3vw, 2.5rem)

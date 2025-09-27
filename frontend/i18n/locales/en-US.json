@@ -113,12 +113,10 @@
     "sections": {
       "empty": "The team roster will be published soon.",
       "core": {
-        "title": "Core team",
-        "eyebrow": "Leadership"
+        "title": "Core team"
       },
       "contributors": {
-        "title": "Contributors",
-        "eyebrow": "Community"
+        "title": "Contributors"
       }
     },
     "cards": {
