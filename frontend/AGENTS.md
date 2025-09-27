@@ -70,6 +70,14 @@ Document any intentionally skipped check in your summary/PR.
 - Update or extend README, AGENTS.md, architectural notes, and comments when behaviour changes.
 - Keep comments in English; translate legacy ones as you touch the file.
 
+## Front API authentication checklist
+- All Nuxt server routes must call `front-api` through the shared configuration helper in `~/app/plugins/api-token.server.ts`. Use the generated OpenAPI services or `$fetch` so that helper can always inject the `X-Shared-Token` header.
+- Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
+- Before modifying authentication-sensitive code:
+  1. Confirm the shared helper still wraps every outbound call to `config.apiUrl`.
+  2. Re-validate the `MACHINE_TOKEN`/`front.security.shared-token` pairing in local and deployment secrets.
+  3. Exercise the affected flows (login, refresh, logout, and generated client calls) to prove headers and cookies remain intact.
+
 ## MCP & Developer Tooling
 - Ensure the Nuxt MCP server is running on port 3000 when working with Claude Code / Vuetify MCP features (`nuxt dev` already exposes it).
 - Claude-specific shortcuts (e.g., `/css-class-validator`) remain available; keep instructions compatible with Claude’s CLAUDE.md expectations.
