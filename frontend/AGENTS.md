@@ -1,244 +1,79 @@
-# Warnings:
-- Only develop what is explicitly requested, or ask a question if you want to suggest an improvement.
-- If you understand that the code produces a regression, ask questions.
-- Translate all code comments in english curent language.
-- Never delete code comments without ask to user.
-- Always explain your choices (at least briefly)
-- Composables must call server API routes for backend communication; do not reimplement service logic or talk to backend services directly.
-- When the proper layer is unclear, ask for clarification before coding.
+# Nudger Frontend – Agent Guide (Nuxt 4 / Vue 3 / Vuetify)
 
-# Global context
-Nudger is a search engine for electronics and household appliances, aggregating energy data from different sources to create an "Impact Score." This allows users to make the best choice of appliance before purchasing.
+## Guardrails
+- Only implement what is explicitly requested; ask for clarification before expanding scope.
+- If you spot a regression risk, pause and ask a question instead of guessing.
+- Keep or translate comments to English rather than deleting them.
+- Briefly explain the reasoning behind non-trivial changes in your summary/PR.
+- Frontend code must respect the existing layering: composables talk to Nuxt server routes, and those routes rely on generated OpenAPI services. Never call downstream services directly from the browser.
 
-# Nuxt 3 Frontend Development Guide (Nudger Project)
-[Doc Nuxt3](https://nuxt.com/docs/getting-started/introduction)
-This guide is a comprehensive overview of the Nudger UI project. It covers the Nuxt 3 / vue 3  application structure, coding conventions and tooling. It is written for new contributors and AI code-generation agents alike, aiming to ensure consistency and clarity in development.
+## Stack & Tooling
+- **Framework**: Nuxt 4 with Vue 3 `<script setup lang="ts">`.
+- **UI**: Vuetify 3 (via `vuetify-nuxt-module`) plus Nuxt modules for i18n, image, fonts, icons, Pinia, VueUse, MCP, etc.
+- **Node**: >= 20.x, **Package manager**: `pnpm@10.12.1`.
+- Generated OpenAPI client lives under `shared/api-client/` and must stay in sync with `front-api`.
 
----
+## Everyday Commands (no `--offline` flag by default)
+- `pnpm install`
+- `pnpm dev` – Run the dev server (http://localhost:3000)
+- `pnpm build` / `pnpm build:ssr`
+- `pnpm preview`
+- `pnpm generate`
+- `pnpm lint`, `pnpm lint:fix`
+- `pnpm format`, `pnpm format:check`
+- `pnpm test`
+- `pnpm generate:api` – Regenerate OpenAPI client when backend contracts change
+- `pnpm preprocess:css` – Refresh XWiki/Bootstrap derived styles
 
-## Getting Started: Installation & Setup
+Offline mode is optional troubleshooting; use it only when network access is deliberately disabled.
 
-1. **Prerequisites**: Node.js 20+, `pnpm@10.12.1` (`npm install -g pnpm@10.12.1`)
-2. **Clone the Repository**: `git clone https://github.com/your-org/nudger-nuxt-front.git`
-3. **Install Dependencies**: `pnpm install --offline`
-4. **Environment Variables**:
-   - `API_URL` – base URL of the backend API (defaults to `http://localhost:8082`).
-5. **Run Dev Server**: `pnpm --offline dev` → http://localhost:3000
-6. **Production Build**: `pnpm --offline build` then `pnpm --offline preview`
-7. **Static Generation**: `pnpm --offline generate`
-8. **Helper Scripts**:
-   - `pnpm --offline lint`
-   - `pnpm --offline format:check`
-   - `pnpm --offline format`
-   - `pnpm --offline test`
-   - `pnpm --offline generate:api`
----
+## Project Structure Highlights
+- `app/pages/` – File-based routing (kebab-case filenames). Pages may include lightweight structural wrappers (`<div>`, `<v-container>`, `<v-row>`, etc.) but complex UI should live in components under `app/components/`.
+- `app/components/` – Reusable UI building blocks. Prefer PascalCase filenames, but existing `The-hero-*` components remain until refactored; do not rename them casually.
+- `app/composables/` – Reusable logic (`useFoo`). Keep them SSR-safe and free of DOM-specific code.
+- `app/layouts/`, `app/stores/`, `app/plugins/`, `app/assets/`, `app/utils/` – Follow Nuxt conventions.
+- `server/` – Nuxt server routes and middleware that wrap OpenAPI clients.
+- `shared/` – Code shared between client and server (generated clients, utils, constants).
 
-## Project Structure and Directories
+## Coding Conventions
+- Use Composition API with `<script setup lang="ts">`; avoid class-style components.
+- Prefer `ref`, `computed`, `watch`, `useState`, `useFetch`, `useAsyncData`, etc. via Nuxt auto-imports.
+- Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
+- Keep code SSR-friendly (guard against `window`/`document`).
+- Utility helpers in `app/utils` or `shared/utils` should start with `_` (e.g., `_sanitizeHtml`).
+- Keep composables thin; delegate heavy logic to server routes or shared utilities.
 
-- `app/pages/` → file-based routing
-- `app/components/` → reusable components
-- `app/layouts/` → page layouts
-- `app/composables/` → reusable logic (e.g. `useFeature.ts`)
-- `app/stores/` → Pinia stores
-- `app/assets/` → static assets & global CSS
-- `app/plugins/` → Nuxt plugins
-- `app/utils/` → client-side helpers
-- `shared/api-client/` → OpenAPI generated client & API helpers
-- `shared/utils/` → utilities shared between client and server
-- `server/` → API routes for server-side logic
-- `tests/` or `*.spec.ts` → colocated or standalone test files
+## Vuetify & Styling Guidance
+- Default to Vuetify props, layout grid (`v-container`, `v-row`, `v-col`), and theme tokens.
+- Scoped SASS/CSS is allowed when Vuetify tokens alone cannot express the design (hero layouts, animations, etc.). Use BEM-style class names and keep selectors minimal.
+- Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.
+- When integrating CMS/XWiki content, ensure the preprocess step (`pnpm preprocess:css`) stays current.
 
----
+## Naming & Organization
+- Components: prefer PascalCase filenames (`HeroSection.vue`). Existing hyphenated names such as `The-hero-video.vue` are kept as-is; document any rename.
+- Composables: `useFeature`, `useBlog`, etc.
+- Stores: `useXStore` created via `defineStore`.
+- Tests: colocate `*.spec.ts` files near the code under test (or in `tests/`).
 
-## Vue 3 & Nuxt 3 Coding Conventions
+## Testing & Quality Gates
+Before opening a PR run, at minimum:
+- `pnpm lint`
+- `pnpm test`
+- `pnpm build`
+- `pnpm generate` (for static output regressions)
+- `pnpm preprocess:css` (if CMS styling changed)
+- `pnpm generate:api` whenever backend contracts affecting the generated client changed
 
-- Use `<script setup lang="ts">`
-- Use `defineProps`, `ref`, `computed`, etc.
-- Prefer TypeScript everywhere
-- SSR-safe code: guard `window`, `document`, etc.
-- Auto-imports: `useRouter`, `useHead`, etc.
-- Use `@/` or `~/` aliases
-- Component structure: separate logic/UI
-- Nuxt page features: `definePageMeta`, `useFetch`, `useAsyncData`
-- Utility function names should start with an underscore: for example `_sanitizeHtml`.
+Document any intentionally skipped check in your summary/PR.
 
----
+## Documentation Expectations
+- Update or extend README, AGENTS.md, architectural notes, and comments when behaviour changes.
+- Keep comments in English; translate legacy ones as you touch the file.
 
-## Vuetify v3.9.0
-- (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
-- (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
+## MCP & Developer Tooling
+- Ensure the Nuxt MCP server is running on port 3000 when working with Claude Code / Vuetify MCP features (`nuxt dev` already exposes it).
+- Claude-specific shortcuts (e.g., `/css-class-validator`) remain available; keep instructions compatible with Claude’s CLAUDE.md expectations.
 
-## Example Button Component
-```vue
-<template>
-  <v-btn>
-   Button
-  </v-btn>
-</template>
-```
-
-Example:
-```vue
-<template>
-  <button class="px-4 py-2 bg-primary text-white font-semibold rounded hover:bg-primary-dark disabled:opacity-50">
-    {{ label }}
-  </button>
-</template>
-```
-
----
-
-## State Management with Pinia
-
-- Define store with `defineStore`
-- State as a function
-- Use getters and actions
-- Example:
-```ts
-export const useCartStore = defineStore('cart', {
-  state: () => ({ items: [] }),
-  getters: {
-    itemCount: (state) => state.items.length,
-    totalPrice: (state) => state.items.reduce((sum, item) => sum + item.price, 0),
-  },
-  actions: {
-    addItem(product) { this.items.push(product); },
-    removeItem(id) { this.items = this.items.filter(i => i.id !== id); },
-  }
-});
-```
-
----
-
-## OpenAPI Client Generation & Integration
-
-The `shared/api-client` folder is **fully generated** from the specification exposed by `front-api` (`/v3/api-docs/front`).
-
-Workflow:
-1. Modify controllers or DTOs in the `front-api` project to evolve the API.
-2. Build `front-api` (`mvn -pl nudger-front-api -am clean install`) to publish the new contract.
-3. In this module, run `pnpm --offline generate:api` to update `shared/api-client/`.
-4. Use the newly generated classes.
-
-Never edit the generated files manually.
-
----
-
-## Content from Strapi CMS
-
-- Env vars: `STRAPI_URL`, `STRAPI_TOKEN`
-- Fetch using `useFetch`
-```ts
-const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
-  headers: { Authorization: `Bearer ${config.strapiToken}` },
-});
-```
-- Handle nested `data[].attributes`
-- Consider `useStrapiContent()` composable abstraction
-
----
-
-## Testing with Vitest
-
-- Colocate test files (`.spec.ts`)
-- Run tests: `pnpm --offline test` or `--watch`
-- Use `@vue/test-utils`
-- Test stores with `setActivePinia`
-- Use snapshots carefully
-
----
-
-
-
-
-## Documentation
-- Always document produced code
-- Always update existing documentation (for example README.md, AGENTS.md) with features update, architecturals changes or considerations.
-- Dependency updates are handled by Renovate using the configs `renovate.json` at
-  the repository root and `frontend/renovate.json`. Updates run nightly.
-
-
-## Linting and Formatting
-
-- ESLint with Nuxt/Vue recommended rules
-- Prettier integrated via ESLint
-- Run: `pnpm --offline lint`, `pnpm --offline lint --fix`
-- Run: `pnpm --offline format` to check formatting
-- Husky hooks enforce checks on commits
-
-
-
-## Architecture & SSR Best Practices
-
-- Split UI and logic (composables, container/presentational components)
-- SSR-safe: avoid global state leakage
-- Lazy hydrate non-critical components (e.g., `vue-lazy-hydration`)
-- Code-splitting with dynamic imports
-- Use `useHead` for SEO
-
-
-## Pull request
-- Use Conventional commits (e.g., `feat:`, `fix:`)
-- Generate a clear and complete PR description (**why** and **what**).
-- Add a footer indicating this PR is generatEd by AI agent, and the estimatated time an average developper would have spent on this task
-
-Before issueing a PR, you MUST systematically validate and check global non regression using
-- pnpm --offline lint
-- pnpm --offline test run
-- pnpm --offline generate
-- pnpm --offline build
-
-# Best practices for Nuxt3 project
-
-You have extensive expertise in Vue3 Nuxt 3, TypeScript, Node.js,  Pinia, VueUse, Nuxt and Vuetify. You possess deep knowledge of best practice and performance optimization techniques across these technologies.
-Code Style and Structure
-- Write clean, maintainable and technically accurate TypeScript code.
-- Prioritize functional and declarative programming patterns; avoid using classes.
-- Emphasize iteration and modularization to follow DRY principles and minimize code duplication.
-- Use Composition API <script setup lang="ts"> style.
-- Use Composables to encapsulate and share reusable client-side logic or state across multiple components.
-
-Nuxt 3 Specifics
-
-- Nuxt 3 provides auto imports, so there is no need to manually import 'ref' 'useState', or 'useRouter'.
-- Take advantage of VueUse function to enhance reactivity and performance (except for color mode management).
-- Use the Server API (within the server api directory) to handle server-side operations like database interactions, authentication
-- use useRuntimeConfig to access and manage runtime configuration variables that differ between environments and are needed both on the server and client sides.
-- The plugin `plugins/fetch-logger.ts` wraps `fetch` on the server to log each backend request to `API_URL`.
-- For SEO use useHead and useSeoMeta.
-- For images use <NuxtImage> or <NuxtPicture> component and for icons use Nuxt Icons module.
-
-
-Naming Conventions
-- Utilize composables, naming it use[COMPOSABLE_NAME] (eg. useBlog)
-- Use **PascalCase** for component filenames (e.g., componentMyComponentvue).
-- Favor named exports for function to maintain consistency and readability.
-TypeScript Usage
-- Use TypeScript throughoutpreferinterfaces over types fobetterextendability and merging.
-- Avoid enums, opting for mapforimproved type safety and flexibility.
-- Use functional component with TypeScript interfaces.
-- Never use the `any` type; prefer `unknown` with dedicated type guards when you need a fallback.
-UI and Styling
-- Use Vuetify UI for components and styling.
-- Implement responsive Vuetify approach and mobile-first approach.
-- Do not introduce custom CSS or component-scoped `<style>` blocks; use Vuetify components, utility classes, and theme tokens configured via `nuxt.config.ts` for all styling requirements.
-
-
-Pages structure : 
-
-Pages naming will respect kebab-case.
-
-To respect components loading and initialisation, be aware :
-- Pages (located under app/pages/*) must contains ONLY components
-- Direct use of Html code, or vuetify components is stricly prohibited
-- When needed, you will always create intermediary components (under /components folder)
-
-
-
-# Model error journal
-## Here are listed all recurring errors of the model.
-
-# Mcp servers 
-- Check that the Nuxt mcp server is running and if not, launch it on port 3000.
-- Always use the nuxt mcp server to better understand the structure and best practices of Nuxt js
+## When Unsure
+- Ask for clarification before introducing new patterns or deviating from these guardrails.
+- Prefer incremental changes aligned with existing code style and project architecture.
