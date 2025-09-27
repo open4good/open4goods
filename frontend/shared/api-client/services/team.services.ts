@@ -1,14 +1,27 @@
-import { TeamApi, Configuration, TeamDomainLanguageEnum } from '..'
+import { TeamApi, TeamDomainLanguageEnum } from '..'
 import type { TeamProperties } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
+import { createBackendApiConfig } from './createBackendApiConfig'
 
 /**
  * Team service responsible for fetching team roster data from the backend API.
  */
 export const useTeamService = (domainLanguage: DomainLanguage) => {
-  const config = useRuntimeConfig()
-  const apiConfig = new Configuration({ basePath: config.apiUrl })
-  const api = new TeamApi(apiConfig)
+  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isServerRuntime = import.meta.server || isVitest
+  let api: TeamApi | undefined
+
+  const resolveApi = () => {
+    if (!isServerRuntime) {
+      throw new Error('useTeamService() is only available on the server runtime.')
+    }
+
+    if (!api) {
+      api = new TeamApi(createBackendApiConfig())
+    }
+
+    return api
+  }
 
   const fetchTeam = async (): Promise<TeamProperties> => {
     const language =
@@ -17,7 +30,7 @@ export const useTeamService = (domainLanguage: DomainLanguage) => {
         : TeamDomainLanguageEnum.En
 
     try {
-      return await api.team({ domainLanguage: language })
+      return await resolveApi().team({ domainLanguage: language })
     } catch (error) {
       console.error('Error fetching team roster:', error)
       throw error
