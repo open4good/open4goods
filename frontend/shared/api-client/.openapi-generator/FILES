@@ -4,6 +4,7 @@ apis/CategoriesApi.ts
 apis/ContentApi.ts
 apis/ProductApi.ts
 apis/StatsApi.ts
+apis/TeamApi.ts
 apis/index.ts
 index.ts
 models/Agg.ts
@@ -36,6 +37,8 @@ models/ImpactScoreTexts.ts
 models/LegacyPromptConfig.ts
 models/Link.ts
 models/LoginRequest.ts
+models/LogoutResponse.ts
+models/Member.ts
 models/ObjectSummary.ts
 models/Objects.ts
 models/Page.ts
@@ -57,6 +60,7 @@ models/ResourcesAggregationConfig.ts
 models/ScoringAggregationConfig.ts
 models/SortObject.ts
 models/SubsetCriteria.ts
+models/TeamProperties.ts
 models/Translation.ts
 models/Translations.ts
 models/VerticalConfigDto.ts
