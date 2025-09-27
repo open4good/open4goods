@@ -120,6 +120,8 @@ public ResponseEntity<List<OfferDto>> getOffers(@PathVariable String gtin) { …
   `@ApiResponse` entries.
 - Pass the `DomainLanguage` argument through to the service layer even if it is
   not used yet.
+- Public endpoints (such as `/team`) still honour this contract and **must not**
+  add security guards.
 
 ### 6.2 DTO annotations  
 *Every field* must have `@Schema`.
