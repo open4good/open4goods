@@ -18,7 +18,7 @@ public enum DomainLanguage {
     fr("fr"),
 
     /** English content (language tag {@code en-US}). */
-    en("en-US");
+    en("en");
 
     private final String languageTag;
 
