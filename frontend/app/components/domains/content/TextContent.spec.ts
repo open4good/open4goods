@@ -3,23 +3,24 @@ import { ref, isRef } from 'vue'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import TextContent from './TextContent.vue'
 
-const useContentBlocMock = vi.fn()
-const generateLoremMock = vi.fn(() => 'generated-lorem')
+const useContentBlocMock = vi.hoisted(() => vi.fn())
+const generateLoremMock = vi.hoisted(() => vi.fn<(length?: number) => string>(() => 'generated-lorem'))
+const hasRoleMock = vi.fn<(role: string) => boolean>(() => false)
 
 const authState = {
   isLoggedIn: ref(false),
   roles: ref<string[]>([]),
   username: ref<string | null>(null),
-  hasRole: vi.fn(() => false),
+  hasRole: hasRoleMock,
   logout: vi.fn(),
 }
 
 let runtimeConfig: { public: { editRoles: string[] } }
 
-vi.mock('~/assets/css/text-content.css', () => ({}), { virtual: true })
+vi.mock('~/assets/css/text-content.css', () => ({}))
 
 vi.mock('~/composables/content/useContentBloc', () => ({
-  useContentBloc: (...args: unknown[]) => useContentBlocMock(...args),
+  useContentBloc: useContentBlocMock,
 }))
 
 vi.mock('~/composables/useAuth', () => ({
@@ -32,7 +33,7 @@ vi.mock('#app', () => ({
 
 vi.mock('~/utils/content/_loremIpsum', () => ({
   DEFAULT_LOREM_LENGTH: 480,
-  _generateLoremIpsum: (...args: unknown[]) => generateLoremMock(...args),
+  _generateLoremIpsum: generateLoremMock,
 }))
 
 const defaultStubs = {
@@ -73,8 +74,8 @@ beforeEach(() => {
   runtimeConfig = { public: { editRoles: [] } }
   authState.isLoggedIn.value = false
   authState.roles.value = []
-  authState.hasRole.mockReset()
-  authState.hasRole.mockReturnValue(false)
+  hasRoleMock.mockReset()
+  hasRoleMock.mockReturnValue(false)
   generateLoremMock.mockReset()
   generateLoremMock.mockReturnValue('generated-lorem')
   useContentBlocMock.mockReset()
@@ -157,7 +158,7 @@ describe('TextContent', () => {
   it('renders an edit link when the user has the required role', async () => {
     runtimeConfig.public.editRoles = ['content-editor', 'admin']
     authState.isLoggedIn.value = true
-    authState.hasRole.mockImplementation((role: string) => role === 'content-editor')
+    hasRoleMock.mockImplementation((role: string) => role === 'content-editor')
 
     const blocResponse = createBlocResponse({
       htmlContent: '<p>Editable</p>',
@@ -171,13 +172,13 @@ describe('TextContent', () => {
     expect(editLink.attributes('href')).toBe('https://xwiki.example.com/edit/Main.WebHome')
     expect(editLink.attributes('target')).toBe('_blank')
     expect(editLink.attributes('rel')).toBe('noopener')
-    expect(authState.hasRole).toHaveBeenCalledWith('content-editor')
+    expect(hasRoleMock).toHaveBeenCalledWith('content-editor')
   })
 
   it('hides the edit link when the user lacks the required role', async () => {
     runtimeConfig.public.editRoles = ['content-editor']
     authState.isLoggedIn.value = true
-    authState.hasRole.mockReturnValue(false)
+    hasRoleMock.mockReturnValue(false)
 
     const blocResponse = createBlocResponse({
       htmlContent: '<p>Content</p>',

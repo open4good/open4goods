@@ -66,6 +66,8 @@ Before opening a PR run, at minimum:
 
 Document any intentionally skipped check in your summary/PR.
 
+> **Test updates**: Whenever you author or modify spec/test files, run `pnpm generate` and `pnpm build` in addition to `pnpm test` to catch type and generation regressions early.
+
 ## Documentation Expectations
 - Update or extend README, AGENTS.md, architectural notes, and comments when behaviour changes.
 - Keep comments in English; translate legacy ones as you touch the file.
