@@ -15,7 +15,7 @@
       role="progressbar"
     />
 
-    <v-container v-if="error" class="py-6">
+    <v-container v-if="error" class="py-6 px-4 mx-auto" max-width="xl">
       <v-alert
         type="error"
         variant="tonal"
