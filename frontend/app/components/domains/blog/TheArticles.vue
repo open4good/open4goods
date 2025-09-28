@@ -440,7 +440,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 </script>
 
 <template>
-  <v-container class="py-6 px-4 mx-auto" max-width="1200">
+  <v-container class="py-6 px-4 mx-auto" max-width="xl">
     <v-sheet
       v-if="availableTags.length || activeTag"
       class="mb-6 d-flex flex-column gap-3 pa-4"

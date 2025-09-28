@@ -38,7 +38,7 @@ const { t } = useI18n()
     role="region"
     :aria-labelledby="regionLabelledBy"
   >
-    <v-container class="py-12">
+    <v-container class="py-12 px-4 mx-auto" max-width="xl">
       <div class="team-members-section__header">
 
         <h2 :id="headingId" class="team-members-section__title">
@@ -80,7 +80,6 @@ const { t } = useI18n()
 <style scoped lang="sass">
 .team-members-section
   position: relative
-  padding-inline: clamp(1rem, 4vw, 4rem)
 
   &--light
     background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(245, 250, 255, 0.8) 100%)
@@ -90,7 +89,6 @@ const { t } = useI18n()
 
   &__header
     text-align: center
-    max-width: 720px
     margin: 0 auto 3rem
     display: flex
     flex-direction: column

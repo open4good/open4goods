@@ -17,7 +17,7 @@ const props = defineProps<Props>()
 
 <template>
   <section class="team-callouts" role="region" aria-labelledby="team-callouts-title">
-    <v-container class="py-12">
+    <v-container class="py-12 px-4 mx-auto" max-width="xl">
       <v-row class="g-6" align="stretch">
         <v-col cols="12" lg="8">
           <v-card class="team-callouts__card" elevation="6" rounded="xl">
@@ -72,7 +72,6 @@ const props = defineProps<Props>()
 <style scoped lang="sass">
 .team-callouts
   background: linear-gradient(135deg, rgba(236, 248, 239, 0.7), rgba(227, 242, 253, 0.75))
-  padding-inline: clamp(1rem, 4vw, 4rem)
 
   &__card
     height: 100%

@@ -21,7 +21,7 @@ const headingId = useId()
     role="region"
     :aria-labelledby="headingId"
   >
-    <v-container class="py-12 text-center">
+    <v-container class="py-12 px-4 text-center mx-auto" max-width="xl">
       <div class="team-hero__wrapper">
 
         <h1 :id="headingId" class="team-hero__title text-white">{{ props.title }}</h1>
@@ -43,7 +43,6 @@ const headingId = useId()
   color: white
 
   &__wrapper
-    max-width: 720px
     margin: 0 auto
     display: flex
     flex-direction: column

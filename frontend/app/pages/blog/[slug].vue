@@ -45,9 +45,9 @@ const article = computed(
 </script>
 
 <template>
-  <v-container class="py-10">
-    <v-row justify="center">
-      <v-col cols="12" md="10" lg="8">
+  <v-container class="py-10 px-4 mx-auto" max-width="xl">
+    <v-row>
+      <v-col cols="12">
         <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">
           Retour
         </v-btn>
