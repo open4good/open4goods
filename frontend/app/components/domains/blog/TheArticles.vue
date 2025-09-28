@@ -452,9 +452,9 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
       :aria-busy="tagsLoading"
       :aria-controls="articleListId"
     >
-      <div class="d-flex align-center gap-2 text-primary font-weight-medium">
+      <div class="d-flex align-center gap-2 font-weight-medium">
         <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
-        <span class="text-subtitle-1">{{ t('blog.list.tagsTitle') }}</span>
+        <span class="text-subtitle-1 text-high-emphasis">{{ t('blog.list.tagsTitle') }}</span>
       </div>
 
       <v-chip-group
