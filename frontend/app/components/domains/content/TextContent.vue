@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, computed, unref } from 'vue'
+import { computed, unref, toRef } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
@@ -17,7 +17,8 @@ const props = withDefaults(
 )
 
 // Composables
-const { htmlContent, editLink, loading, error, fetchBloc } = useContentBloc()
+const blocId = toRef(props, 'blocId')
+const { htmlContent, editLink, pending, error } = await useContentBloc(blocId)
 const { isLoggedIn, hasRole } = useAuth()
 const config = useRuntimeConfig()
 
@@ -39,22 +40,11 @@ const displayHtml = computed(() => {
   return _generateLoremIpsum(fallbackLoremLength.value)
 })
 
-// Watcher / mount
-onMounted(() => {
-  fetchBloc(props.blocId)
-})
-
-watch(
-  () => props.blocId,
-  newId => {
-    if (newId) fetchBloc(newId)
-  }
-)
 </script>
 
 <template>
   <div class="text-content" :class="{ editable: canEdit }">
-    <v-progress-circular v-if="loading" indeterminate />
+    <v-progress-circular v-if="pending" indeterminate />
     <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
     <!-- Encapsulated XWiki content -->

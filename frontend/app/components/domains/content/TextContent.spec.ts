@@ -10,19 +10,18 @@ const mockBloc = {
 
 const htmlContent = ref(mockBloc.htmlContent)
 const editLink = ref(mockBloc.editLink)
-const loading = ref(false)
+const pending = ref(false)
 const error = ref<string | null>(null)
 
-const mockUseContentBloc = {
+const mockUseContentBloc = vi.fn(async () => ({
   htmlContent,
   editLink,
-  loading,
+  pending,
   error,
-  fetchBloc: vi.fn(),
-}
+}))
 
 vi.mock('~/composables/content/useContentBloc', () => ({
-  useContentBloc: () => mockUseContentBloc,
+  useContentBloc: mockUseContentBloc,
 }))
 
 // Mock authentication composable
@@ -54,16 +53,18 @@ describe('TextContent', () => {
     vi.clearAllMocks()
     htmlContent.value = mockBloc.htmlContent
     editLink.value = mockBloc.editLink
-    loading.value = false
+    pending.value = false
     error.value = null
     mockUseAuth.hasRole.mockReturnValue(true)
   })
 
-  test('renders bloc content and calls fetch on mount', async () => {
+  test('renders bloc content and requests SSR data for the bloc id', async () => {
     const wrapper = await mountSuspended(TextContent, {
       props: { blocId: 'Main.WebHome' },
     })
-    expect(mockUseContentBloc.fetchBloc).toHaveBeenCalledWith('Main.WebHome')
+    expect(mockUseContentBloc).toHaveBeenCalledTimes(1)
+    const blocArg = mockUseContentBloc.mock.calls[0]?.[0]
+    expect(blocArg && 'value' in blocArg ? blocArg.value : undefined).toBe('Main.WebHome')
     expect(wrapper.html()).toContain(mockBloc.htmlContent)
     expect(wrapper.find('a.edit-link').exists()).toBe(true)
   })
@@ -87,13 +88,13 @@ describe('TextContent', () => {
     expect(wrapper2.find('.text-content').classes()).not.toContain('editable')
   })
 
-  test('shows loader when loading', async () => {
-    loading.value = true
+  test('shows loader when pending', async () => {
+    pending.value = true
     const wrapper = await mountSuspended(TextContent, {
       props: { blocId: 'id' },
     })
     expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-    loading.value = false
+    pending.value = false
   })
 
   test('renders lorem ipsum fallback when bloc content is empty', async () => {
