@@ -2,7 +2,7 @@
 import { useRoute, useRouter } from '#app'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useI18n } from 'vue-i18n'
-import type { BlogTagDto } from '~~/shared/api-client'
+import type { BlogPostDto, BlogTagDto } from '~~/shared/api-client'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
@@ -117,6 +117,18 @@ const buildArticleLink = (slug: string | null | undefined): string | undefined =
   return `/blog/${normalizedSlug}`
 }
 
+const getArticleLink = (slug: string | null | undefined) => buildArticleLink(slug)
+
+const navigateToArticle = (slug: string | null | undefined) => {
+  const link = getArticleLink(slug)
+
+  if (!link) {
+    return
+  }
+
+  router.push(link)
+}
+
 const loadArticlesFromRoute = async () => {
   const targetPage = parsePageQuery(route.query.page)
   const targetTag = parseTagQuery(route.query.tag)
@@ -228,7 +240,7 @@ const seoPageLinks = computed(() => {
   return Array.from({ length: pages }, (_, index) => index + 1)
 })
 
-const visibleArticles = computed(() => paginatedArticles.value ?? [])
+const visibleArticles = computed<BlogPostDto[]>(() => paginatedArticles.value ?? [])
 const sanitizedTag = computed(() => {
   const tag = activeTag.value
 
@@ -542,41 +554,64 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
     >
       <v-row :id="articleListId" role="list">
         <v-col
-          v-for="(article, index) in paginatedArticles"
+          v-for="(article, index) in visibleArticles"
           :key="article.url ?? index"
           cols="12"
           sm="6"
           md="4"
           role="listitem"
         >
-
-        <v-card
-          class="h-100 d-flex flex-column"
-          elevation="6"
-          hover
-          rounded="lg"
-          tag="article"
-          link
-          :to="buildArticleLink(article.url)"
-          :aria-labelledby="buildArticleTitleId(index)"
-          :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
-        >
-          <v-img
-            v-if="article.image"
-            :src="article.image"
-            :alt="buildArticleImageAlt(article.title)"
-            height="200"
-            cover
+          <v-card
+            class="h-100 d-flex flex-column"
+            elevation="6"
+            hover
+            rounded="lg"
+            tag="article"
+            :link="Boolean(getArticleLink(article.url))"
+            :to="getArticleLink(article.url) || undefined"
+            :aria-labelledby="buildArticleTitleId(index)"
+            :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
           >
-            <template #placeholder>…</template>
-          </v-img>
+            <NuxtLink
+              v-if="article.image && getArticleLink(article.url)"
+              :to="getArticleLink(article.url)"
+              class="d-block"
+              data-test="article-image-link"
+            >
+              <v-img
+                :src="article.image"
+                :alt="buildArticleImageAlt(article.title)"
+                height="200"
+                cover
+              >
+                <template #placeholder>…</template>
+              </v-img>
+            </NuxtLink>
+            <div v-else-if="article.image" data-test="article-image-link">
+              <v-img
+                :src="article.image"
+                :alt="buildArticleImageAlt(article.title)"
+                height="200"
+                cover
+              >
+                <template #placeholder>…</template>
+              </v-img>
+            </div>
 
-          <v-card-title
-            :id="buildArticleTitleId(index)"
-            class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
-          >
-            {{ article.title }}
-          </v-card-title>
+            <v-card-title
+              :id="buildArticleTitleId(index)"
+              class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
+            >
+              <NuxtLink
+                v-if="getArticleLink(article.url)"
+                :to="getArticleLink(article.url)"
+                class="text-high-emphasis"
+                data-test="article-title-link"
+              >
+                {{ article.title }}
+              </NuxtLink>
+              <span v-else data-test="article-title-link">{{ article.title }}</span>
+            </v-card-title>
 
           <v-card-text :id="buildArticleSummaryId(index)" class="px-4 pb-4 flex-grow-1">
             <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
@@ -598,13 +633,14 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 
             <v-spacer></v-spacer>
 
-            <!-- Optionnel : bouton qui navigue (sans <a> imbriqué) -->
             <v-btn
               variant="outlined"
               size="small"
               color="primary"
               type="button"
-              @click.stop="router.push(buildArticleLink(article.url)!)"
+              :disabled="!getArticleLink(article.url)"
+              data-test="article-read-more"
+              @click.stop="navigateToArticle(article.url)"
               :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
             >
               {{ t('blog.list.readMore') }}
