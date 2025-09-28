@@ -71,7 +71,7 @@ const props = defineProps<Props>()
 
 <style scoped lang="sass">
 .team-callouts
-  background: linear-gradient(135deg, rgba(236, 248, 239, 0.7), rgba(227, 242, 253, 0.75))
+  background: linear-gradient(135deg, rgba(var(--v-theme-team-callout-surface-start), 0.7), rgba(var(--v-theme-team-callout-surface-end), 0.75))
 
   &__card
     height: 100%
@@ -82,8 +82,8 @@ const props = defineProps<Props>()
     gap: 1.5rem
 
   &__card--accent
-    background: linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.2))
-    color: rgb(21, 46, 73)
+    background: linear-gradient(135deg, rgba(var(--v-theme-team-callout-accent), 0.1), rgba(var(--v-theme-team-callout-accent), 0.2))
+    color: rgb(var(--v-theme-team-callout-accent-text))
 
   &__title
     font-size: clamp(1.6rem, 2.3vw, 2rem)

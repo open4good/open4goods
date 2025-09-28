@@ -107,7 +107,7 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
   align-items: center
   text-align: center
   padding-top: 2.5rem
-  background: white
+  background: rgb(var(--v-theme-surface))
   height: 100%
   position: relative
   overflow: visible
@@ -120,9 +120,9 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
     width: 112px
     height: 112px
     border-radius: 50%
-    border: 6px solid white
-    box-shadow: 0 12px 28px rgba(33, 150, 243, 0.25)
-    background: linear-gradient(135deg, rgba(33, 150, 243, 0.15), rgba(76, 175, 80, 0.15))
+    border: 6px solid rgb(var(--v-theme-surface))
+    box-shadow: 0 12px 28px rgba(var(--v-theme-team-card-highlight), 0.25)
+    background: linear-gradient(135deg, rgba(var(--v-theme-team-card-highlight), 0.15), rgba(var(--v-theme-team-card-accent), 0.15))
     display: flex
     align-items: center
     justify-content: center
@@ -141,7 +141,7 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
   &__title :deep(.text-content)
     padding: 0
     margin-top: 0.25rem
-    color: rgba(0, 0, 0, 0.6)
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
 
   &__title :deep(.xwiki-sandbox)
     font-size: 0.95rem
