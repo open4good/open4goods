@@ -80,4 +80,45 @@ describe('GET /api/team Nitro endpoint', () => {
 
     expect(headers['X-Shared-Token']).toBe('test-token-123')
   })
+
+  it('normalizes relative member image URLs against the backend base URL', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          cores: [
+            {
+              name: 'Relative Image',
+              imageUrl: '/images/team/relative.jpeg',
+            },
+          ],
+          contributors: [
+            {
+              name: 'Absolute Image',
+              imageUrl: 'https://cdn.example.test/avatar.png',
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    )
+
+    const event = {
+      node: {
+        req: {
+          headers: {
+            host: 'nudger.fr',
+          },
+        },
+        res: {},
+      },
+    } as unknown as Parameters<typeof handler>[0]
+
+    const result = await handler(event)
+
+    expect(result.cores[0]?.imageUrl).toBe('https://backend.example.test/images/team/relative.jpeg')
+    expect(result.contributors[0]?.imageUrl).toBe('https://cdn.example.test/avatar.png')
+  })
 })
