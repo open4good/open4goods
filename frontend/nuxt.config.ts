@@ -109,6 +109,7 @@ export default defineNuxtConfig({
     }
   },
   image: {
+    dir: 'public',
     // The screen sizes predefined by `@nuxt/image`:
     screens: {
       'xs': 320,
