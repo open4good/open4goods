@@ -3,7 +3,6 @@
     <TeamHero
       :title="t('team.hero.title')"
       :subtitle="t('team.hero.subtitle')"
-      :eyebrow="t('team.hero.eyebrow')"
       :description-bloc-id="HERO_CORE_BLOC_ID"
     />
 
@@ -35,7 +34,6 @@
     <TeamMembersSection
       id="core-team"
       :title="t('team.sections.core.title')"
-      :eyebrow="t('team.sections.core.eyebrow')"
       :description-bloc-id="HERO_CORE_BLOC_ID"
       :members="coreMembers"
       member-variant="core"
@@ -45,7 +43,6 @@
     <TeamMembersSection
       id="contributors"
       :title="t('team.sections.contributors.title')"
-      :eyebrow="t('team.sections.contributors.eyebrow')"
       :description-bloc-id="CONTRIBUTORS_HERO_BLOC_ID"
       :members="contributors"
       member-variant="contributor"

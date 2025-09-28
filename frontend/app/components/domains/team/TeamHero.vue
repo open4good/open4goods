@@ -6,7 +6,6 @@ interface Props {
   title: string
   subtitle: string
   descriptionBlocId: string
-  eyebrow?: string
 }
 
 const props = defineProps<Props>()
@@ -24,16 +23,6 @@ const headingId = useId()
   >
     <v-container class="py-12 text-center">
       <div class="team-hero__wrapper">
-        <v-chip
-          v-if="props.eyebrow"
-          color="white"
-          variant="tonal"
-          size="small"
-          class="team-hero__eyebrow"
-          label
-        >
-          {{ props.eyebrow }}
-        </v-chip>
 
         <h1 :id="headingId" class="team-hero__title text-white">{{ props.title }}</h1>
         <p class="team-hero__subtitle text-white">{{ props.subtitle }}</p>
@@ -60,11 +49,6 @@ const headingId = useId()
     flex-direction: column
     gap: 1rem
 
-  &__eyebrow
-    align-self: center
-    font-weight: 600
-    letter-spacing: 0.08em
-    text-transform: uppercase
 
   &__title
     font-size: clamp(2.1rem, 5vw, 3rem)
