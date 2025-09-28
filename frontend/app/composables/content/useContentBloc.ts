@@ -1,33 +1,42 @@
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import type { XwikiContentBlocDto } from '~~/shared/api-client'
 
 /**
- * Composable to retrieve dynamic content blocs
+ * Composable to retrieve dynamic content blocs with SSR-aware caching.
  */
-export const useContentBloc = () => {
-  const htmlContent = ref<string>('')
-  const editLink = ref<string | undefined>(undefined)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+export const useContentBloc = async (
+  blocId: MaybeRefOrGetter<string | null | undefined>
+) => {
+  const key = computed(() => {
+    const id = toValue(blocId)
+    return id ? `content-bloc:${id}` : 'content-bloc:empty'
+  })
 
-  const fetchBloc = async (blocId: string) => {
-    loading.value = true
-    error.value = null
-    try {
-      const bloc = await $fetch<XwikiContentBlocDto>(`/api/blocs/${blocId}`)
-      htmlContent.value = bloc.htmlContent ?? ''
-      editLink.value = bloc.editLink
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch content'
-    } finally {
-      loading.value = false
+  const asyncState = await useAsyncData<XwikiContentBlocDto | null>(
+    () => key.value,
+    async () => {
+      const id = toValue(blocId)
+      if (!id) {
+        return null
+      }
+
+      return $fetch<XwikiContentBlocDto>(`/api/blocs/${id}`)
+    },
+    {
+      server: true,
+      watch: [() => toValue(blocId)],
+      default: () => null,
     }
-  }
+  )
+
+  const htmlContent = computed(() => asyncState.data.value?.htmlContent ?? '')
+  const editLink = computed(() => asyncState.data.value?.editLink)
 
   return {
-    htmlContent: readonly(htmlContent),
-    editLink: readonly(editLink),
-    loading: readonly(loading),
-    error: readonly(error),
-    fetchBloc,
+    htmlContent,
+    editLink,
+    pending: asyncState.pending,
+    error: asyncState.error,
+    refresh: asyncState.refresh,
   }
 }
