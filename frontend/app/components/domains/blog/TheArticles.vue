@@ -550,122 +550,69 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           md="4"
           role="listitem"
         >
-          <v-card
-            class="h-100 d-flex flex-column"
-            elevation="6"
-            hover
-            rounded="lg"
-            tag="article"
-            :aria-labelledby="buildArticleTitleId(index)"
-            :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+
+        <v-card
+          class="h-100 d-flex flex-column"
+          elevation="6"
+          hover
+          rounded="lg"
+          tag="article"
+          link
+          :to="buildArticleLink(article.url)"
+          :aria-labelledby="buildArticleTitleId(index)"
+          :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+        >
+          <v-img
+            v-if="article.image"
+            :src="article.image"
+            :alt="buildArticleImageAlt(article.title)"
+            height="200"
+            cover
           >
-            <NuxtLink
-              v-if="article.image && buildArticleLink(article.url)"
-              :to="buildArticleLink(article.url)"
-              class="d-block"
-              :aria-labelledby="buildArticleTitleId(index)"
-              :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
-              :title="article.title || undefined"
-              data-test="article-image-link"
-            >
-              <v-img
-                :src="article.image"
-                :alt="buildArticleImageAlt(article.title)"
-                height="200"
-                cover
-              >
-                <template #placeholder>
-                  <div class="d-flex flex-column align-center justify-center h-100 bg-grey-lighten-4 text-medium-emphasis py-6">
-                    <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
-                      mdi-image-off
-                    </v-icon>
-                    <p class="text-caption text-center mt-2 mb-0">Image not available</p>
-                  </div>
-                </template>
-              </v-img>
-            </NuxtLink>
-            <v-img
-              v-else-if="article.image"
-              :src="article.image"
-              :alt="buildArticleImageAlt(article.title)"
-              height="200"
-              cover
-            >
-              <template #placeholder>
-                <div class="d-flex flex-column align-center justify-center h-100 bg-grey-lighten-4 text-medium-emphasis py-6">
-                  <v-icon size="48" color="grey-lighten-1" aria-hidden="true">
-                    mdi-image-off
-                  </v-icon>
-                  <p class="text-caption text-center mt-2 mb-0">Image not available</p>
-                </div>
-              </template>
-            </v-img>
+            <template #placeholder>…</template>
+          </v-img>
 
-            <v-card-title
-              :id="buildArticleTitleId(index)"
-              class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
-            >
-              <NuxtLink
-                v-if="buildArticleLink(article.url)"
-                :to="buildArticleLink(article.url)"
-                class="text-high-emphasis text-decoration-none"
-                :aria-labelledby="buildArticleTitleId(index)"
-                :title="article.title || undefined"
-                data-test="article-title-link"
-              >
-                {{ article.title }}
-              </NuxtLink>
-              <span v-else>
-                {{ article.title }}
-              </span>
-            </v-card-title>
+          <v-card-title
+            :id="buildArticleTitleId(index)"
+            class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
+          >
+            {{ article.title }}
+          </v-card-title>
 
-            <v-card-text
-              :id="buildArticleSummaryId(index)"
-              class="px-4 pb-4 flex-grow-1"
-            >
-              <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
-            </v-card-text>
+          <v-card-text :id="buildArticleSummaryId(index)" class="px-4 pb-4 flex-grow-1">
+            <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
+          </v-card-text>
 
-            <v-card-actions class="px-4 py-4 align-center bg-grey-lighten-4">
-              <div class="d-flex flex-column gap-2" aria-label="Article metadata">
-                <div v-if="article.author" class="d-flex align-center text-body-2">
-                  <v-icon size="small" color="primary" class="me-2" aria-hidden="true">
-                    mdi-account
-                  </v-icon>
-                  <span class="text-primary font-weight-medium">{{ article.author }}</span>
-                </div>
-                <div v-if="article.createdMs" class="d-flex align-center text-body-2">
-                  <v-icon size="small" color="grey" class="me-2" aria-hidden="true">
-                    mdi-calendar
-                  </v-icon>
-                  <time
-                    class="text-medium-emphasis"
-                    :datetime="buildDateIsoString(article.createdMs)"
-                  >
-                    {{ formatDate(article.createdMs) }}
-                  </time>
-                </div>
+          <v-card-actions class="px-4 py-4 align-center bg-grey-lighten-4">
+            <div class="d-flex flex-column gap-2" aria-label="Article metadata">
+              <div v-if="article.author" class="d-flex align-center text-body-2">
+                <v-icon size="small" color="primary" class="me-2" aria-hidden="true">mdi-account</v-icon>
+                <span class="text-primary font-weight-medium">{{ article.author }}</span>
               </div>
+              <div v-if="article.createdMs" class="d-flex align-center text-body-2">
+                <v-icon size="small" color="grey" class="me-2" aria-hidden="true">mdi-calendar</v-icon>
+                <time class="text-medium-emphasis" :datetime="buildDateIsoString(article.createdMs)">
+                  {{ formatDate(article.createdMs) }}
+                </time>
+              </div>
+            </div>
 
-              <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
 
-              <NuxtLink
-                v-if="buildArticleLink(article.url)"
-                :to="buildArticleLink(article.url)"
-                class="text-decoration-none"
-                :aria-labelledby="buildArticleTitleId(index)"
-                :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
-                :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
-                :title="article.title || undefined"
-                data-test="article-read-more"
-              >
-                <v-btn variant="outlined" size="small" color="primary">
-                  {{ t('blog.list.readMore') }}
-                </v-btn>
-              </NuxtLink>
-            </v-card-actions>
-          </v-card>
+            <!-- Optionnel : bouton qui navigue (sans <a> imbriqué) -->
+            <v-btn
+              variant="outlined"
+              size="small"
+              color="primary"
+              type="button"
+              @click.stop="router.push(buildArticleLink(article.url)!)"
+              :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
+            >
+              {{ t('blog.list.readMore') }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+
         </v-col>
       </v-row>
 
