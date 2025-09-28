@@ -1,5 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
+import { fileURLToPath } from 'node:url'
+
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { buildI18nPagesConfig } from './shared/utils/localized-routes'
@@ -109,7 +111,7 @@ export default defineNuxtConfig({
     }
   },
   image: {
-    dir: 'public',
+    dir: fileURLToPath(new URL('./app/public', import.meta.url)),
     // The screen sizes predefined by `@nuxt/image`:
     screens: {
       'xs': 320,
