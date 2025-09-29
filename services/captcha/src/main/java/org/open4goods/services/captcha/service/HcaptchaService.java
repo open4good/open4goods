@@ -79,7 +79,7 @@ public class HcaptchaService{
             final String errorMessage = errorCodes.stream()
                     .map(HcaptchaUtil.RECAPTCHA_ERROR_CODE::get)
                     .collect(Collectors.joining(", "));
-            logger.warn("Captcha verification failed: {}", errorMessage);
+            logger.warn("Captcha verification failed: {}", errorMessage == null ? errorCodes : errorMessage);
             throw new SecurityException(errorMessage);
         }
 
