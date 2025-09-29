@@ -210,7 +210,7 @@
         },
         "email": {
           "label": "Votre e-mail",
-          "placeholder": "vous@@exemple.org"
+          "placeholder": "vous{'@'}exemple.org"
         },
         "message": {
           "label": "Votre message",

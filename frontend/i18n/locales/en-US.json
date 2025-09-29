@@ -209,7 +209,7 @@
         },
         "email": {
           "label": "Email address",
-          "placeholder": "you@@example.org"
+          "placeholder": "you{'@'}example.org"
         },
         "message": {
           "label": "Message",
