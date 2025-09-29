@@ -260,3 +260,4 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
 
     &__card-title
       font-size: 1.5rem
+</style>

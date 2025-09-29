@@ -178,3 +178,4 @@ withDefaults(
 
     &__links
       justify-content: center
+</style>
