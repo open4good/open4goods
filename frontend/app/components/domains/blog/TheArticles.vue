@@ -617,7 +617,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
             <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
           </v-card-text>
 
-          <v-card-actions class="px-4 py-4 align-center bg-grey-lighten-4">
+          <v-card-actions class="px-4 py-4 align-center blog-articles__meta">
             <div class="d-flex flex-column gap-2" aria-label="Article metadata">
               <div v-if="article.author" class="d-flex align-center text-body-2">
                 <v-icon size="small" color="primary" class="me-2" aria-hidden="true">mdi-account</v-icon>
@@ -640,8 +640,8 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
               type="button"
               :disabled="!getArticleLink(article.url)"
               data-test="article-read-more"
-              @click.stop="navigateToArticle(article.url)"
               :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
+              @click.stop="navigateToArticle(article.url)"
             >
               {{ t('blog.list.readMore') }}
             </v-btn>
@@ -685,3 +685,9 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
     </v-sheet>
   </v-container>
 </template>
+
+<style scoped lang="sass">
+.blog-articles__meta
+  background-color: rgb(var(--v-theme-surface-muted-contrast))
+  transition: background-color 0.2s ease
+</style>

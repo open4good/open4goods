@@ -307,12 +307,12 @@ watch(
 
 <style scoped lang="sass">
 .contact-form
-  background: linear-gradient(180deg, rgba(238, 244, 250, 0.35) 0%, #ffffff 100%)
+  background: linear-gradient(180deg, rgba(var(--v-theme-surface-ice-050), 0.35) 0%, rgb(var(--v-theme-surface-default)) 100%)
 
   &__card
     padding: clamp(2rem, 5vw, 3rem)
-    border: 1px solid rgba(25, 118, 210, 0.08)
-    background: rgba(255, 255, 255, 0.96)
+    border: 1px solid rgb(var(--v-theme-surface-primary-080))
+    background: rgb(var(--v-theme-surface-glass-strong))
     backdrop-filter: blur(10px)
 
   &__header
@@ -326,7 +326,7 @@ watch(
     align-self: center
     padding: 0.35rem 1rem
     border-radius: 999px
-    background: rgba(25, 118, 210, 0.12)
+    background: rgb(var(--v-theme-surface-primary-120))
     color: rgb(var(--v-theme-primary))
     letter-spacing: 0.08em
     text-transform: uppercase
@@ -340,7 +340,7 @@ watch(
 
   &__subtitle
     font-size: 1.05rem
-    color: rgba(71, 84, 103, 0.9)
+    color: rgb(var(--v-theme-text-neutral-secondary))
     margin: 0
 
   &__form
@@ -359,8 +359,8 @@ watch(
     width: 100%
     min-height: 100px
     border-radius: 12px
-    border: 1px dashed rgba(25, 118, 210, 0.25)
-    background: rgba(25, 118, 210, 0.05)
+    border: 1px dashed rgb(var(--v-theme-border-primary-strong))
+    background: rgb(var(--v-theme-surface-primary-050))
 
   &__captcha-error
     color: rgb(var(--v-theme-error))
@@ -378,7 +378,7 @@ watch(
   &__privacy
     text-align: center
     font-size: 0.9rem
-    color: rgba(16, 24, 40, 0.6)
+    color: rgba(var(--v-theme-text-neutral-strong), 0.6)
     margin: 0
 
 @media (max-width: 599px)

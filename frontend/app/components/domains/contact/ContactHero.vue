@@ -120,7 +120,7 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
 <style scoped lang="sass">
 .contact-hero
   position: relative
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgba(25, 118, 210, 0.92) 55%, rgb(var(--v-theme-team-hero-gradient-end)) 100%)
+  background: linear-gradient(135deg, rgb(var(--v-theme-hero-gradient-start)) 0%, rgba(var(--v-theme-hero-gradient-mid), 0.92) 55%, rgb(var(--v-theme-hero-gradient-end)) 100%)
   color: rgb(255, 255, 255)
   overflow: hidden
 
@@ -128,7 +128,7 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
     content: ''
     position: absolute
     inset: 0
-    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.18), transparent 55%)
+    background: radial-gradient(circle at 20% 20%, rgba(var(--v-theme-hero-overlay-strong), 0.18), transparent 55%)
     pointer-events: none
 
   &__content
@@ -140,7 +140,7 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
     align-items: center
     padding: 0.375rem 0.75rem
     border-radius: 999px
-    background-color: rgba(255, 255, 255, 0.16)
+    background-color: rgba(var(--v-theme-hero-pill-on-dark), 0.16)
     font-weight: 600
     letter-spacing: 0.08em
     text-transform: uppercase
@@ -191,7 +191,7 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
   &__card-overlay
     position: absolute
     inset: 0
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%)
+    background: linear-gradient(180deg, rgba(var(--v-theme-hero-overlay-soft), 0.08) 0%, rgba(var(--v-theme-hero-overlay-soft), 0.02) 100%)
     pointer-events: none
 
   &__card-inner
@@ -208,7 +208,7 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
     border-radius: 50%
     align-items: center
     justify-content: center
-    background: rgba(255, 255, 255, 0.18)
+    background: rgba(var(--v-theme-hero-overlay-strong), 0.18)
     color: white
 
   &__card-title
@@ -232,7 +232,7 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
     transition: background-color 0.2s ease
 
     &:hover
-      background-color: rgba(255, 255, 255, 0.08)
+      background-color: rgba(var(--v-theme-hero-overlay-soft), 0.08)
 
 @media (max-width: 959px)
   .contact-hero
