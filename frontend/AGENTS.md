@@ -49,6 +49,40 @@ Offline mode is optional troubleshooting; use it only when network access is del
 - Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.
 - When integrating CMS/XWiki content, ensure the preprocess step (`pnpm preprocess:css`) stays current.
 
+### Design token glossary
+The theme palette exposes the following generic tokens. Use `rgb(var(--v-theme-<token>))` for solid fills and `rgba(var(--v-theme-<token>), <alpha>)` when translucency is needed.
+
+| Token | Intent | Light | Dark |
+| --- | --- | --- | --- |
+| `hero-gradient-start` | Primary hero gradient leading stop | `#1976D2` | `#1E3A8A` |
+| `hero-gradient-mid` | Mid hero stop for translucent overlays | `#1976D2` | `#1D4ED8` |
+| `hero-gradient-end` | Accent hero gradient stop | `#43A047` | `#166534` |
+| `hero-overlay-strong` | Intense hero highlight overlays | `#FFFFFF` | `#FFFFFF` |
+| `hero-overlay-soft` | Soft hero glassmorphism overlay | `#FFFFFF` | `#FFFFFF` |
+| `hero-pill-on-dark` | Eyebrow/label tint on dark surfaces | `#FFFFFF` | `#FFFFFF` |
+| `surface-default` | Default surface/background | `#FFFFFF` | `#0F172A` |
+| `surface-muted` | Muted section backgrounds | `#F8FAFC` | `#111827` |
+| `surface-alt` | Alternate neutral surface | `#EEF4FA` | `#1E293B` |
+| `surface-glass` | Translucent cards / tiles | `#F4F7FA` | `#1E293B` |
+| `surface-glass-strong` | Elevated glass cards (forms) | `#FBFCFD` | `#111827` |
+| `surface-primary-050` | Primary wash for empty states | `#F4F8FD` | `#0B1220` |
+| `surface-primary-080` | Subtle primary border/background | `#EDF4FB` | `#13213B` |
+| `surface-primary-100` | Stronger primary-tinted fill | `#E8F1FB` | `#1B2A44` |
+| `surface-primary-120` | Icon/avatar tint | `#E3EFFA` | `#22304C` |
+| `surface-ice-050` | Light ice wash for long sections | `#EEF4FA` | `#152238` |
+| `surface-ice-100` | Stronger ice gradient stop | `#F5FAFF` | `#0F172A` |
+| `surface-muted-contrast` | Neutral footer/metadata surface | `#F5F5F5` | `#1F2937` |
+| `border-primary-strong` | Brand-accented outlines | `#C6DDF4` | `#1E40AF` |
+| `shadow-primary-600` | Brand-tinted drop shadow | `#1976D2` | `#3B82F6` |
+| `text-neutral-strong` | Primary body text | `#101828` | `#F8FAFC` |
+| `text-neutral-secondary` | Supporting body text | `#475467` | `#CBD5F5` |
+| `text-neutral-soft` | Quiet helper text | `#667085` | `#94A3B8` |
+| `text-on-accent` | Text atop accent surfaces | `#152E49` | `#E2E8F0` |
+| `accent-primary-highlight` | Brand highlight strokes/glows | `#2196F3` | `#38BDF8` |
+| `accent-supporting` | Secondary accent/CTA highlight | `#4CAF50` | `#22C55E` |
+
+Legacy `team-*` tokens remain for backwards compatibility; prefer the generic names above for new work so contact, blog, and future pages can share a single palette.
+
 ## Naming & Organization
 - Components: prefer PascalCase filenames (`HeroSection.vue`). Existing hyphenated names such as `The-hero-video.vue` are kept as-is; document any rename.
 - Composables: `useFeature`, `useBlog`, etc.

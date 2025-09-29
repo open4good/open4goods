@@ -114,7 +114,7 @@ const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
 
 <style scoped lang="sass">
 .contact-details
-  background: linear-gradient(180deg, #ffffff 0%, rgba(245, 250, 255, 0.95) 100%)
+  background: linear-gradient(180deg, rgb(var(--v-theme-surface-default)) 0%, rgba(var(--v-theme-surface-ice-100), 0.95) 100%)
 
   &__header
     text-align: center
@@ -129,7 +129,7 @@ const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
     align-self: center
     padding: 0.4rem 1rem
     border-radius: 999px
-    background: rgba(25, 118, 210, 0.1)
+    background: rgb(var(--v-theme-surface-primary-100))
     color: rgb(var(--v-theme-primary))
     font-weight: 600
     letter-spacing: 0.08em
@@ -143,7 +143,7 @@ const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
 
   &__subtitle
     font-size: 1.05rem
-    color: rgba(16, 24, 40, 0.7)
+    color: rgb(var(--v-theme-text-neutral-secondary))
     margin: 0
 
   &__cards
@@ -154,21 +154,21 @@ const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
     flex-direction: column
     gap: 1rem
     padding: 2rem
-    background-color: rgba(255, 255, 255, 0.92)
+    background-color: rgb(var(--v-theme-surface-glass))
     backdrop-filter: blur(6px)
-    border: 1px solid rgba(25, 118, 210, 0.1)
+    border: 1px solid rgb(var(--v-theme-surface-primary-080))
     transition: transform 0.2s ease, box-shadow 0.2s ease
 
     &:hover
       transform: translateY(-6px)
-      box-shadow: 0 18px 40px -24px rgba(25, 118, 210, 0.6)
+      box-shadow: 0 18px 40px -24px rgba(var(--v-theme-shadow-primary-600), 0.6)
 
   &__icon-wrapper
     display: flex
     justify-content: flex-start
 
   &__icon
-    background-color: rgba(25, 118, 210, 0.12)
+    background-color: rgb(var(--v-theme-surface-primary-120))
 
   &__content
     display: flex
@@ -181,7 +181,7 @@ const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
     margin: 0
 
   &__card-description
-    color: rgba(16, 24, 40, 0.75)
+    color: rgba(var(--v-theme-text-neutral-strong), 0.75)
     font-size: 1rem
     line-height: 1.6
     margin: 0
