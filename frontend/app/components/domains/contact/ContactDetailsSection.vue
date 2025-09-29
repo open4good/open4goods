@@ -45,11 +45,12 @@
                   :href="link.href"
                   :title="link.label"
                   :aria-label="link.ariaLabel || link.label"
-                  target="_blank"
-                  rel="noopener"
                   variant="tonal"
                   color="primary"
                   prepend-icon="mdi-open-in-new"
+                  :target="isExternalLink(link.href) ? '_blank' : undefined"
+                  :rel="isExternalLink(link.href) ? 'noopener' : undefined"
+                  @click="handleLinkClick(link, $event)"
                 >
                   {{ link.label }}
                 </v-btn>
@@ -87,6 +88,28 @@ withDefaults(
     eyebrow: undefined,
   },
 )
+
+const isExternalLink = (href: string) => /^(?:https?:)?\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
+
+const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
+  if (!link.href) {
+    event.preventDefault()
+    return
+  }
+
+  if (link.href.startsWith('#')) {
+    event.preventDefault()
+
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const targetId = link.href.slice(1)
+    const element = document.getElementById(targetId)
+
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 </script>
 
 <style scoped lang="sass">

@@ -52,6 +52,8 @@ const submitting = ref(false)
 const success = ref(false)
 const formError = ref<string | null>(null)
 
+const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
+
 const heroHighlights = computed<HeroHighlight[]>(() => [
   { icon: 'mdi-account-heart-outline', text: String(t('contact.hero.highlights.commitment')) },
   { icon: 'mdi-lightbulb-on-outline', text: String(t('contact.hero.highlights.expertise')) },
@@ -108,7 +110,7 @@ const contactDetailItems = computed<ContactDetailItem[]>(() => [
     links: [
       {
         label: String(t('contact.details.cards.community.cta')),
-        href: 'https://www.linkedin.com/company/nudger/',
+        href: linkedinUrl.value,
         ariaLabel: String(t('contact.details.cards.community.ctaAria')),
       },
     ],
