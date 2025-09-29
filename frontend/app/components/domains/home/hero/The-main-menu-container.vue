@@ -20,5 +20,6 @@
   top: 0
   left: 0
   z-index: 100
-  background-color: white
+  background-color: rgb(var(--v-theme-surface-default))
+  color: rgb(var(--v-theme-text-neutral-strong))
 </style>
