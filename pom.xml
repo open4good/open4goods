@@ -399,16 +399,16 @@
                         </plugins>
                 </pluginManagement>
 	</build>
-
-    <profiles>
-      <profile>
-        <id>site</id>
-        <distributionManagement>
+    <distributionManagement>
           <site>
             <id>maven</id>
             <url>https://nudger.fr</url>
           </site>
-        </distributionManagement>
+    </distributionManagement>
+    <profiles>
+      <profile>
+        <id>site</id>
+
         <reporting>
           <plugins>
             <plugin>
