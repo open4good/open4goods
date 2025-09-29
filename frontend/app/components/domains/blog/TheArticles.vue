@@ -2,7 +2,7 @@
 import { useRoute, useRouter } from '#app'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useI18n } from 'vue-i18n'
-import type { BlogPostDto, BlogTagDto } from '~~/shared/api-client'
+import type { BlogTagDto } from '~~/shared/api-client'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
