@@ -15,6 +15,7 @@ const currentLocale = computed(() => normalizeLocale(locale.value))
 const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
 
 const currentYear = computed(() => new Date().getFullYear())
+const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
 
 const highlightLinks = computed<FooterLink[]>(() => [
   {
@@ -68,7 +69,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   },
   {
     label: t('siteIdentity.footer.feedback.links.linkedin'),
-    href: 'https://www.linkedin.com/company/comparateur-nudger/',
+    href: linkedinUrl.value,
     target: '_blank',
     rel: 'nofollow noopener',
   },

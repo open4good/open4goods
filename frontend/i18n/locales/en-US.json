@@ -15,6 +15,9 @@
         "contact": "Contact"
       }
     },
+    "links": {
+      "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
+    },
     "footer": {
       "rightsReserved": "All Rights Reserved",
       "accessibleTitle": "Footer information",
@@ -206,7 +209,7 @@
         },
         "email": {
           "label": "Email address",
-          "placeholder": "you@example.org"
+          "placeholder": "you@@example.org"
         },
         "message": {
           "label": "Message",
