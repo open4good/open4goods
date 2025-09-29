@@ -7,9 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 public record ContactResponseDto(
         @Schema(description = "Indicates whether the submission has been processed successfully.", example = "true")
-        boolean success,
-
-        @Schema(description = "Informational message returned to the caller.",
-                example = "Votre message a bien été envoyé !")
-        String message) {
+        boolean success
+      ) {
 }

@@ -5,11 +5,6 @@ spring:
   mail:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:25}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret-key: ${front.security.jwt-secret}
 
 springdoc:
   api-docs:
@@ -23,7 +18,7 @@ front:
   cache:
     path: ./cache
   contact:
-    email: ${FRONT_CONTACT_EMAIL:contact@nudger.fr}
+    email: ${FRONT_CONTACT_EMAIL}
   security:
     enabled: true
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
@@ -34,10 +29,7 @@ front:
     anonymous: 100
     authenticated: 1000
     
-xwiki:
-    username: nudger
-    password: nudger
-    baseUrl: https://wiki.nudger.fr
+
 
 
 management:
