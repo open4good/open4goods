@@ -31,7 +31,11 @@ front:
     
 
 
-
+xwiki:
+    username: user
+    password: pwd 
+    baseUrl: https://dummy.fr
+    
 management:
   endpoints:
     web:
