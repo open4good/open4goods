@@ -42,7 +42,11 @@ import type {
 } from '~/components/domains/contact/ContactHero.vue'
 import type { ContactDetailItem } from '~/components/domains/contact/ContactDetailsSection.vue'
 
-const { t, locale } = useI18n()
+definePageMeta({
+  ssr: true,
+})
+
+const { t, locale, availableLocales } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
@@ -121,7 +125,20 @@ const canonicalUrl = computed(() =>
   new URL(resolveLocalizedRoutePath('contact', locale.value), requestURL.origin).toString(),
 )
 
+const siteName = computed(() => String(t('siteIdentity.siteName')))
+const ogLocale = computed(() => locale.value.replace('-', '_'))
 const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageAlt = computed(() => String(t('contact.seo.imageAlt')))
+const twitterSite = computed(() => String(t('contact.seo.twitterSite')))
+const twitterImageAlt = computed(() => String(t('contact.seo.twitterImageAlt')))
+
+const alternateLinks = computed(() =>
+  availableLocales.map((availableLocale) => ({
+    rel: 'alternate' as const,
+    hreflang: availableLocale,
+    href: new URL(resolveLocalizedRoutePath('contact', availableLocale), requestURL.origin).toString(),
+  })),
+)
 
 const fallbackErrorMessage = computed(() => String(t('contact.form.feedback.genericError')))
 
@@ -192,15 +209,21 @@ useSeoMeta({
   ogUrl: () => canonicalUrl.value,
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
+  ogSiteName: () => siteName.value,
+  ogLocale: () => ogLocale.value,
+  ogImageAlt: () => ogImageAlt.value,
   twitterCard: () => 'summary_large_image',
   twitterTitle: () => String(t('contact.seo.title')),
   twitterDescription: () => String(t('contact.seo.description')),
   twitterImage: () => ogImageUrl.value,
+  twitterSite: () => twitterSite.value,
+  twitterImageAlt: () => twitterImageAlt.value,
 })
 
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
+    ...alternateLinks.value,
   ],
 }))
 </script>

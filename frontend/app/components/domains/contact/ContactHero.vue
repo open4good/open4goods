@@ -45,7 +45,7 @@
             color="primary"
             theme="dark"
             aria-labelledby="contact-hero-card-heading"
-            role="presentation"
+            role="region"
           >
             <div class="contact-hero__card-overlay" aria-hidden="true" />
             <div class="contact-hero__card-inner">

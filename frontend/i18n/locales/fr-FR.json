@@ -145,7 +145,10 @@
   "contact": {
     "seo": {
       "title": "Nous contacter | Nudger",
-      "description": "Prenez contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact."
+      "description": "Prenez contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
+      "imageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact",
+      "twitterImageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact",
+      "twitterSite": "@nudger_app"
     },
     "hero": {
       "eyebrow": "Entrons en contact",
