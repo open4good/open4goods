@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.config;
 
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
 import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.services.productrepository.services.ProductRepository;

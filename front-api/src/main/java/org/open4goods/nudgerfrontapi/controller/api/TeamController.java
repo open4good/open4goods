@@ -1,7 +1,7 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
 import org.open4goods.model.RolesConstants;
-import org.open4goods.nudgerfrontapi.config.TeamProperties;
+import org.open4goods.nudgerfrontapi.config.properties.TeamProperties;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.springframework.http.ResponseEntity;
