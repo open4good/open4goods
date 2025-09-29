@@ -8,6 +8,13 @@
     "menu": {
       "title": "Menu",
       "closeLabel": "Fermer le menu",
+      "themeToggle": "Changer de thème",
+      "theme": {
+        "lightTooltip": "Passer au thème clair",
+        "darkTooltip": "Passer au thème sombre",
+        "lightAriaLabel": "Activer le thème clair",
+        "darkAriaLabel": "Activer le thème sombre"
+      },
       "items": {
         "impactScore": "Impact-score",
         "products": "Les produits",

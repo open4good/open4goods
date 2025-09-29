@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { usePreferredDark, useStorage } from '@vueuse/core'
 import { computed, toRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 
 type ThemeName = 'light' | 'dark'
@@ -62,6 +63,7 @@ const props = withDefaults(
   },
 )
 
+const { t } = useI18n()
 const theme = useTheme()
 const preferredDark = usePreferredDark()
 const storedPreference = useStorage<ThemeName>('open4goods-preferred-theme', preferredDark.value ? 'dark' : 'light')
@@ -90,10 +92,10 @@ const selectedTheme = computed<ThemeName>({
   set: (value) => applyTheme(value),
 })
 
-const lightTooltip = computed(() => 'Switch to light theme')
-const darkTooltip = computed(() => 'Switch to dark theme')
-const lightAriaLabel = computed(() => 'Activate light theme')
-const darkAriaLabel = computed(() => 'Activate dark theme')
+const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
+const darkTooltip = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
+const lightAriaLabel = computed(() => t('siteIdentity.menu.theme.lightAriaLabel'))
+const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
 
 const density = toRef(props, 'density')
 const size = toRef(props, 'size')
