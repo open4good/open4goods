@@ -16,7 +16,6 @@ const headingId = useId()
 <template>
   <v-sheet
     class="team-hero"
-    color="primary"
     data-test="team-hero"
     role="region"
     :aria-labelledby="headingId"
@@ -24,10 +23,10 @@ const headingId = useId()
     <v-container class="py-12 px-4 text-center mx-auto" max-width="xl">
       <div class="team-hero__wrapper">
 
-        <h1 :id="headingId" class="team-hero__title text-white">{{ props.title }}</h1>
-        <p class="team-hero__subtitle text-white">{{ props.subtitle }}</p>
+        <h1 :id="headingId" class="team-hero__title">{{ props.title }}</h1>
+        <p class="team-hero__subtitle">{{ props.subtitle }}</p>
 
-        <div class="team-hero__content text-white text-body-1">
+        <div class="team-hero__content text-body-1">
           <TextContent :bloc-id="props.descriptionBlocId" :ipsum-length="180" />
         </div>
       </div>
@@ -39,8 +38,8 @@ const headingId = useId()
 .team-hero
   position: relative
   overflow: hidden
-  background: linear-gradient(135deg, rgba(25, 118, 210, 0.95), rgba(67, 160, 71, 0.9))
-  color: white
+  background: linear-gradient(135deg, rgba(var(--v-theme-team-hero-gradient-start), 0.95), rgba(var(--v-theme-team-hero-gradient-end), 0.9))
+  color: rgb(var(--v-theme-on-primary))
 
   &__wrapper
     margin: 0 auto
