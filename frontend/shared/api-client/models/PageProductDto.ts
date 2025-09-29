@@ -46,13 +46,13 @@ export interface PageProductDto {
      * @type {number}
      * @memberof PageProductDto
      */
-    totalPages?: number;
+    totalElements?: number;
     /**
      * 
      * @type {number}
      * @memberof PageProductDto
      */
-    totalElements?: number;
+    totalPages?: number;
     /**
      * 
      * @type {number}
@@ -126,8 +126,8 @@ export function PageProductDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'totalPages': json['totalPages'] == null ? undefined : json['totalPages'],
         'totalElements': json['totalElements'] == null ? undefined : json['totalElements'],
+        'totalPages': json['totalPages'] == null ? undefined : json['totalPages'],
         'size': json['size'] == null ? undefined : json['size'],
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ProductDtoFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
@@ -151,8 +151,8 @@ export function PageProductDtoToJSONTyped(value?: PageProductDto | null, ignoreD
 
     return {
         
-        'totalPages': value['totalPages'],
         'totalElements': value['totalElements'],
+        'totalPages': value['totalPages'],
         'size': value['size'],
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ProductDtoToJSON)),
         'number': value['number'],
