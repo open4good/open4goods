@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { defineComponent, h, nextTick, reactive, ref } from 'vue'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { type ComponentPublicInstance, defineComponent, h, nextTick, reactive, ref } from 'vue'
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
+import TheArticles from './TheArticles.vue'
 
 type BlogArticle = {
   url?: string | null
@@ -73,6 +74,19 @@ type MockBlogConfig = {
   ) => FetchArticlesResult | Promise<FetchArticlesResult>
 }
 
+type TheArticlesPublicInstance = ComponentPublicInstance<
+  Record<string, never>,
+  {
+    handlePageChange: (page: number) => Promise<void>
+    handleTagSelection: (tag: string | null) => Promise<void>
+    pageSeoTitle: string
+    seoDescription: string
+    canonicalUrl: string
+    primaryArticleImage: string | null | undefined
+    structuredData: Record<string, unknown>
+  }
+>
+
 const useHeadMock = vi.fn()
 const useSeoMetaMock = vi.fn()
 let requestUrl = new URL('https://example.com/blog')
@@ -143,26 +157,15 @@ const createReactiveRoute = (query: Record<string, unknown> = {}) => {
 }
 
 let route = createReactiveRoute()
-let routerPush: vi.Mock
+let routerPush: Mock
 
 const updateRouteQuery = (nextQuery: Record<string, unknown> | undefined) => {
-  const target = route.query as Record<string, unknown>
-  const normalized = nextQuery ?? {}
-  const keys = new Set([...Object.keys(target), ...Object.keys(normalized)])
+  const sanitizedEntries = Object.entries(nextQuery ?? {}).filter(([, value]) =>
+    value !== undefined && value !== null,
+  )
+  const sanitizedQuery = Object.fromEntries(sanitizedEntries)
 
-  keys.forEach((key) => {
-    if (Object.prototype.hasOwnProperty.call(normalized, key)) {
-      const value = normalized[key]
-
-      if (value === undefined || value === null) {
-        delete target[key]
-      } else {
-        target[key] = value
-      }
-    } else {
-      delete target[key]
-    }
-  })
+  route.query = reactive(sanitizedQuery) as typeof route.query
 }
 
 vi.mock('#app', () => ({
@@ -470,9 +473,6 @@ const mountComponent = async (options: MountOptions = {}) => {
 
   blogComposable = createMockBlogComposable(options.blogConfig)
 
-  const componentModule = await import('./TheArticles.vue')
-  const TheArticles = componentModule.default
-
   const wrapper = await mountSuspended(TheArticles, {
     global: {
       stubs: globalStubs,
@@ -514,10 +514,13 @@ describe('TheArticles.vue', () => {
 
     const tagButtons = wrapper.find('.v-chip-group-stub').findAll('.v-chip-stub')
     expect(tagButtons).toHaveLength(3)
-    expect(tagButtons[1].text()).toBe('Nuxt (3)')
-    expect(tagButtons[2].text()).toBe('Vue (5)')
+    const [, nuxtChip, vueChip] = tagButtons
+    expect(nuxtChip).toBeDefined()
+    expect(vueChip).toBeDefined()
+    expect(nuxtChip!.text()).toBe('Nuxt (3)')
+    expect(vueChip!.text()).toBe('Vue (5)')
 
-    const exposed = wrapper.vm as Record<string, any>
+    const exposed = wrapper.vm as TheArticlesPublicInstance
     expect(exposed.canonicalUrl).toContain('/blog?page=2&tag=Nuxt')
   })
 
@@ -535,24 +538,36 @@ describe('TheArticles.vue', () => {
 
     const cards = wrapper.findAll('[data-test="article-card"]')
     expect(cards).toHaveLength(defaultArticles.length)
-    expect(cards[0].attributes('data-to')).toBe('/blog/hello-world')
-    expect(cards[1].attributes('data-to')).toBe('/blog/vue-insights')
+    const [firstCard, secondCard] = cards
+    expect(firstCard).toBeDefined()
+    expect(secondCard).toBeDefined()
+    expect(firstCard!.attributes('data-to')).toBe('/blog/hello-world')
+    expect(secondCard!.attributes('data-to')).toBe('/blog/vue-insights')
 
     const titles = wrapper.findAll('.v-card-title-stub')
-    expect(titles[0].text()).toContain('Hello Nuxt World')
-    expect(titles[1].text().trim()).toBe('')
+    const [firstTitle, secondTitle] = titles
+    expect(firstTitle).toBeDefined()
+    expect(secondTitle).toBeDefined()
+    expect(firstTitle!.text()).toContain('Hello Nuxt World')
+    expect(secondTitle!.text().trim()).toBe('')
 
     const summaries = wrapper.findAll('.v-card-text-stub')
-    expect(summaries[0].text()).toContain('A welcome post for the blog.')
+    const [firstSummary] = summaries
+    expect(firstSummary).toBeDefined()
+    expect(firstSummary!.text()).toContain('A welcome post for the blog.')
 
     const timeElement = wrapper.find('time')
+    const firstArticle = defaultArticles[0]!
     expect(timeElement.attributes('datetime')).toBe(
-      new Date(defaultArticles[0].createdMs ?? 0).toISOString(),
+      new Date(firstArticle.createdMs ?? 0).toISOString(),
     )
 
     const images = wrapper.findAll('[data-test="article-image"]')
-    expect(images[0].attributes('alt')).toBe('Hello Nuxt World')
-    expect(images[1].attributes('alt')).toBe('Blog article illustration')
+    const [firstImage, secondImage] = images
+    expect(firstImage).toBeDefined()
+    expect(secondImage).toBeDefined()
+    expect(firstImage!.attributes('alt')).toBe('Hello Nuxt World')
+    expect(secondImage!.attributes('alt')).toBe('Blog article illustration')
 
     expect(wrapper.find('.v-pagination-stub').exists()).toBe(true)
     expect(wrapper.text()).toContain('Page 2 of 3 (12)')
@@ -603,7 +618,7 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as Record<string, any>).handlePageChange(3)
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(3)
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({ query: { page: '3', tag: 'Nuxt' } })
@@ -622,7 +637,7 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as Record<string, any>).handlePageChange(1)
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(1)
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({ query: {} })
@@ -642,7 +657,7 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as Record<string, any>).handleTagSelection('Vue')
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handleTagSelection('Vue')
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({ path: '/blog', query: { tag: 'Vue' } })
@@ -664,7 +679,7 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as Record<string, any>).handleTagSelection(null)
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handleTagSelection(null)
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({ path: '/blog', query: {} })
@@ -687,7 +702,7 @@ describe('TheArticles.vue', () => {
       requestUrlOverride: new URL('https://example.com/blog?page=2&tag=Nuxt'),
     })
 
-    const vm = wrapper.vm as Record<string, any>
+    const vm = wrapper.vm as TheArticlesPublicInstance
 
     expect(vm.pageSeoTitle).toBe('Open4Goods blog – Nuxt – Page 2')
     expect(vm.seoDescription).toBe('Articles about Nuxt. A welcome post for the blog.')
