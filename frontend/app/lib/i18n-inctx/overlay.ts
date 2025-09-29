@@ -26,7 +26,7 @@ let highlightStyleElement: HTMLStyleElement | null = null
 let editListener: ((event: CustomEvent<InContextEditDetail>) => void) | null = null
 let editorCleanup: EditorCleanup
 let editorModuleLoaded = false
-const attachedElements = new WeakSet<HTMLElement>()
+let attachedElements: WeakSet<HTMLElement> = new WeakSet()
 
 const isClient = typeof window !== 'undefined' && typeof document !== 'undefined'
 
@@ -241,7 +241,7 @@ export function teardown() {
   cleanupHighlights()
   cleanupEditListener()
   cleanupStyle()
-  attachedElements.clear()
+  attachedElements = new WeakSet()
 
   if (editorCleanup) {
     const cleanup = editorCleanup
