@@ -419,8 +419,6 @@ useSeoMeta({
   ogType: 'website',
   ogUrl: canonicalUrl,
   ogImage: computed(() => primaryArticleImage.value || undefined),
-  twitterCard: computed(() => (primaryArticleImage.value ? 'summary_large_image' : 'summary')),
-  twitterImage: computed(() => primaryArticleImage.value || undefined),
 })
 
 useHead(() => ({

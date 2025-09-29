@@ -129,9 +129,6 @@ const siteName = computed(() => String(t('siteIdentity.siteName')))
 const ogLocale = computed(() => locale.value.replace('-', '_'))
 const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
 const ogImageAlt = computed(() => String(t('contact.seo.imageAlt')))
-const twitterSite = computed(() => String(t('contact.seo.twitterSite')))
-const twitterImageAlt = computed(() => String(t('contact.seo.twitterImageAlt')))
-
 const alternateLinks = computed(() =>
   availableLocales.map((availableLocale) => ({
     rel: 'alternate' as const,
@@ -212,12 +209,6 @@ useSeoMeta({
   ogSiteName: () => siteName.value,
   ogLocale: () => ogLocale.value,
   ogImageAlt: () => ogImageAlt.value,
-  twitterCard: () => 'summary_large_image',
-  twitterTitle: () => String(t('contact.seo.title')),
-  twitterDescription: () => String(t('contact.seo.description')),
-  twitterImage: () => ogImageUrl.value,
-  twitterSite: () => twitterSite.value,
-  twitterImageAlt: () => twitterImageAlt.value,
 })
 
 useHead(() => ({

@@ -106,6 +106,10 @@ Document any intentionally skipped check in your summary/PR.
 - Update or extend README, AGENTS.md, architectural notes, and comments when behaviour changes.
 - Keep comments in English; translate legacy ones as you touch the file.
 
+## SEO metadata policy
+- Only include Open Graph meta tags when defining SEO metadata. Twitter-specific tags are not allowed.
+- Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources.
+
 ## Backend API authentication guidelines
 - Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent—never call `new Configuration()` directly.
 - Only create backend API instances during SSR/Vitest execution (e.g. inside Nuxt event handlers). Services such as `useBlogService`, `useContentService`, and `useTeamService` must lazily obtain their API via the helper to keep the shared token out of browser bundles.
