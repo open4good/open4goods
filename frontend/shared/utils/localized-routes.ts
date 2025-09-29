@@ -2,17 +2,12 @@ import type { NuxtLocale } from './domain-language'
 import { DEFAULT_NUXT_LOCALE } from './domain-language'
 
 export type LocalizedRouteName =
-  | 'contact'
   | 'team'
 
 export type LocalizedRoutePath = `/${string}`
 export type LocalizedRoutePaths = Record<LocalizedRouteName, Record<NuxtLocale, LocalizedRoutePath>>
 
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
-  contact: {
-    'fr-FR': '/contact',
-    'en-US': '/contact',
-  },
   team: {
     'fr-FR': '/equipe',
     'en-US': '/team',
