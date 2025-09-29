@@ -32,8 +32,7 @@ public class ContactService {
      * @throws Exception when captcha verification or email dispatch fails
      */
     public void submit(ContactRequestDto request, String clientIp) throws Exception {
-    	// TODO : put back
-      //  hcaptchaService.verifyRecaptcha(clientIp, request.captchaResponse());
+        hcaptchaService.verifyRecaptcha(clientIp, request.captchaResponse());
         contactMailService.send(contactProperties.getEmail(), request.message(), SUBJECT_PREFIX + request.name(),
                 request.email());
     }
