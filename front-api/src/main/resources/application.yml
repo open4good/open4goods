@@ -2,6 +2,9 @@ server:
   port: 8082
   forward-headers-strategy: framework
 spring:
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:25}
   security:
     oauth2:
       resourceserver:
@@ -19,6 +22,8 @@ front:
   resourceProviderRootPath: "https://nudger.fr"
   cache:
     path: ./cache
+  contact:
+    email: ${FRONT_CONTACT_EMAIL:contact@nudger.fr}
   security:
     enabled: true
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
