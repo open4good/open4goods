@@ -4,16 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.open4goods.services.captcha.HcaptchaUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -76,11 +72,9 @@ public class HcaptchaService{
 
         if (!recaptchaSuccess) {
             final List<String> errorCodes = (List) responseBody.get("error-codes");
-            final String errorMessage = errorCodes.stream()
-                    .map(HcaptchaUtil.RECAPTCHA_ERROR_CODE::get)
-                    .collect(Collectors.joining(", "));
-            logger.warn("Captcha verification failed: {}", errorMessage == null ? errorCodes : errorMessage);
-            throw new SecurityException(errorMessage);
+
+            logger.warn("Captcha verification failed: {}", StringUtils.join(errorCodes));
+            throw new SecurityException(StringUtils.join(errorCodes));
         }
 
         // On successful captcha verification, assign the configured spring role to the user
