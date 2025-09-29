@@ -38,29 +38,6 @@ public class AppConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(JavaMailSender.class)
-    JavaMailSender javaMailSender(
-            @Value("${spring.mail.host:localhost}") String host,
-            @Value("${spring.mail.port:25}") int port,
-            @Value("${spring.mail.username:}") String username,
-            @Value("${spring.mail.password:}") String password,
-            @Value("${spring.mail.protocol:}") String protocol) {
-        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-        sender.setHost(host);
-        sender.setPort(port);
-        if (!username.isBlank()) {
-            sender.setUsername(username);
-        }
-        if (!password.isBlank()) {
-            sender.setPassword(password);
-        }
-        if (!protocol.isBlank()) {
-            sender.setProtocol(protocol);
-        }
-        return sender;
-    }
-
-    @Bean
     BlogService blogService(@Autowired XwikiFacadeService xwikiFacadeService, @Autowired BlogConfiguration blogConfig) {
         // TODO : the null maps the I18n localisable, used for RSS articles gen
         return new BlogService(xwikiFacadeService, blogConfig, null);

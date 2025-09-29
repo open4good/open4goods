@@ -5,7 +5,9 @@ spring:
   mail:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:25}
-
+    properties:
+        mail.smtp.auth: true
+        mail.smtp.starttls.enable: true    
 springdoc:
   api-docs:
     path: /v3/api-docs
