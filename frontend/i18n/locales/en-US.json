@@ -137,5 +137,109 @@
         "cta": "Contact us"
       }
     }
+  },
+  "contact": {
+    "seo": {
+      "title": "Contact Nudger",
+      "description": "Get in touch with the Nudger collective for partnerships, product questions or impact insights."
+    },
+    "hero": {
+      "eyebrow": "Let's talk",
+      "title": "We would love to hear from you",
+      "subtitle": "Partnerships, product questions or impact insights? Our team is ready.",
+      "description": "Tell us more about your project, your organisation or the way you use Nudger so we can connect you with the right people.",
+      "highlights": {
+        "commitment": "Replies within two working days for most requests.",
+        "expertise": "Product, data and impact experts dedicated to responsible commerce.",
+        "impact": "Every message helps us build a fairer, more sustainable marketplace."
+      },
+      "channels": {
+        "title": "How we can help",
+        "subtitle": "Pick the topic that suits you best—every request reaches the same caring team.",
+        "support": {
+          "label": "Product & user support",
+          "description": "Questions about the comparator or trouble signing in? We will guide you step by step."
+        },
+        "partnerships": {
+          "label": "Partnerships & ecosystem",
+          "description": "Looking to collaborate, integrate Nudger data or co-create initiatives? Let's explore it together."
+        },
+        "trust": {
+          "label": "Press & civic impact",
+          "description": "Media, institutions or researchers can reach us for interviews, testimonies and key figures."
+        }
+      }
+    },
+    "details": {
+      "eyebrow": "Stay connected",
+      "title": "Different ways to collaborate",
+      "subtitle": "Our collective unites citizens, entrepreneurs and institutions around responsible consumption.",
+      "cards": {
+        "support": {
+          "title": "Need help with the platform?",
+          "description": "Describe your question in the form and share as much context as possible so we can provide an actionable answer.",
+          "cta": "Write to us",
+          "ctaAria": "Scroll to the contact form to write to the Nudger team"
+        },
+        "partnerships": {
+          "title": "Co-create impactful projects",
+          "description": "From retailers to NGOs and local authorities, we build bridges to accelerate ecological transition.",
+          "cta": "Meet the team",
+          "ctaAria": "Discover the Nudger team page"
+        },
+        "community": {
+          "title": "Join the conversation",
+          "description": "Follow our updates, product releases and community calls on LinkedIn.",
+          "cta": "Follow us on LinkedIn",
+          "ctaAria": "Open Nudger's LinkedIn page in a new tab"
+        }
+      }
+    },
+    "form": {
+      "eyebrow": "Contact form",
+      "title": "Tell us more about you",
+      "subtitle": "Fill in the information below and we will get back to you as soon as possible.",
+      "fields": {
+        "name": {
+          "label": "Your name",
+          "placeholder": "e.g. Alex Martin"
+        },
+        "email": {
+          "label": "Email address",
+          "placeholder": "you@example.org"
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "How can we help?"
+        }
+      },
+      "actions": {
+        "submit": "Send message",
+        "reset": "Clear form"
+      },
+      "feedback": {
+        "success": "Thank you! Your message has been sent. We will contact you shortly.",
+        "genericError": "We were unable to send your message. Please try again or contact us later.",
+        "missingSiteKey": "Captcha is not configured yet. Please try again later."
+      },
+      "errors": {
+        "name": {
+          "required": "Please enter your name.",
+          "length": "Your name must contain at least 2 characters."
+        },
+        "email": {
+          "required": "Please enter your email address.",
+          "invalid": "Please enter a valid email address."
+        },
+        "message": {
+          "required": "Please describe your request.",
+          "length": "Your message must be at least 10 characters long."
+        },
+        "captchaExpired": "Captcha expired, please try again.",
+        "captchaFailed": "Captcha verification failed. Please refresh and try again.",
+        "missingCaptcha": "Please complete the captcha before sending."
+      },
+      "privacy": "We only use your contact details to answer your request and never share them with third parties."
+    }
   }
 }
