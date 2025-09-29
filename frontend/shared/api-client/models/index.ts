@@ -18,6 +18,8 @@ export * from './BlogPostDto';
 export * from './BlogTagDto';
 export * from './CategoriesStatsDto';
 export * from './Class';
+export * from './ContactRequestDto';
+export * from './ContactResponseDto';
 export * from './DescriptionsAggregationConfig';
 export * from './ExternalIds';
 export * from './FeatureGroupDto';

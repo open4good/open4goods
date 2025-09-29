@@ -1,6 +1,7 @@
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/CategoriesApi.ts
+apis/ContactApi.ts
 apis/ContentApi.ts
 apis/ProductApi.ts
 apis/StatsApi.ts
@@ -25,6 +26,8 @@ models/BlogPostDto.ts
 models/BlogTagDto.ts
 models/CategoriesStatsDto.ts
 models/Class.ts
+models/ContactRequestDto.ts
+models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
 models/ExternalIds.ts
 models/FeatureGroupDto.ts
