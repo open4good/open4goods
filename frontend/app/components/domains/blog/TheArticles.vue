@@ -240,7 +240,7 @@ const seoPageLinks = computed(() => {
   return Array.from({ length: pages }, (_, index) => index + 1)
 })
 
-const visibleArticles = computed<BlogPostDto[]>(() => paginatedArticles.value ?? [])
+const visibleArticles = paginatedArticles
 const sanitizedTag = computed(() => {
   const tag = activeTag.value
 
