@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.open4goods.nudgerfrontapi.config.ContactProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ContactProperties;
 import org.open4goods.nudgerfrontapi.dto.contact.ContactRequestDto;
 import org.open4goods.services.captcha.service.HcaptchaService;
 

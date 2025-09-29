@@ -1,12 +1,10 @@
-package org.open4goods.nudgerfrontapi.config;
+package org.open4goods.nudgerfrontapi.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for request rate limiting.
  */
-@Component
 @ConfigurationProperties(prefix = "front.rate-limit")
 public class RateLimitProperties {
 

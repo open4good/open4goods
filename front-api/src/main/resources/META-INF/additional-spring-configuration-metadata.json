@@ -2,18 +2,18 @@
   "groups": [
     {
       "name": "front.security",
-      "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
-      "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
+      "type": "org.open4goods.nudgerfrontapi.config.properties.SecurityProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.SecurityProperties"
     },
     {
       "name": "front.cache",
-      "type": "org.open4goods.nudgerfrontapi.config.CacheProperties",
-      "sourceType": "org.open4goods.nudgerfrontapi.config.CacheProperties"
+      "type": "org.open4goods.nudgerfrontapi.config.properties.CacheProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CacheProperties"
     },
     {
       "name": "front.rate-limit",
-      "type": "org.open4goods.nudgerfrontapi.config.RateLimitProperties",
-      "sourceType": "org.open4goods.nudgerfrontapi.config.RateLimitProperties"
+      "type": "org.open4goods.nudgerfrontapi.config.properties.RateLimitProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.RateLimitProperties"
     }
   ],
   "properties": [

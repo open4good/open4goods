@@ -1,14 +1,12 @@
-package org.open4goods.nudgerfrontapi.config;
+package org.open4goods.nudgerfrontapi.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Configuration properties backing the public contact form.
  */
-@Component
 @ConfigurationProperties(prefix = "front.contact")
 public class ContactProperties {
 

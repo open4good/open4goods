@@ -1,6 +1,6 @@
 package org.open4goods.nudgerfrontapi.service;
 
-import org.open4goods.nudgerfrontapi.config.ContactProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ContactProperties;
 import org.open4goods.nudgerfrontapi.dto.contact.ContactRequestDto;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.springframework.stereotype.Service;

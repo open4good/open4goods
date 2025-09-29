@@ -19,7 +19,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
-import org.open4goods.nudgerfrontapi.config.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;

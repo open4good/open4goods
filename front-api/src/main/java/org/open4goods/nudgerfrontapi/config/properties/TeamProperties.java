@@ -1,17 +1,15 @@
-package org.open4goods.nudgerfrontapi.config;
+package org.open4goods.nudgerfrontapi.config.properties;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Configuration properties describing the eco-nudger team roster.
  */
-@Component
 @ConfigurationProperties(prefix = "team-config")
 public class TeamProperties {
 
