@@ -26,8 +26,17 @@ export default defineNuxtPlugin((nuxtApp) => {
   let overlayInstance: I18nInContextOverlay | null = null
   let loadToken = 0
 
+  const stopOverlay = () => {
+    scope.stop()
+
+    if (overlayInstance) {
+      overlayInstance.teardown()
+      overlayInstance = null
+    }
+  }
+
   scope.run(() => {
-    const eligibleRoles = computed(() => normalizeRoles(runtimeConfig.public.editRoles as string[] | undefined))
+    const eligibleRoles = normalizeRoles(runtimeConfig.public.editRoles as string[] | undefined)
 
     const canEditInContext = computed(() => {
       if (!isLoggedIn.value) {
@@ -36,11 +45,11 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       const userRoles = normalizeRoles(roles.value)
 
-      if (userRoles.length === 0 || eligibleRoles.value.length === 0) {
+      if (userRoles.length === 0 || eligibleRoles.length === 0) {
         return false
       }
 
-      return userRoles.some((role) => eligibleRoles.value.includes(role))
+      return userRoles.some((role) => eligibleRoles.includes(role))
     })
 
     watch(
@@ -72,12 +81,9 @@ export default defineNuxtPlugin((nuxtApp) => {
     )
   })
 
-  nuxtApp.hook('app:beforeUnmount', () => {
-    scope.stop()
-
-    if (overlayInstance) {
-      overlayInstance.teardown()
-      overlayInstance = null
-    }
-  })
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+      stopOverlay()
+    })
+  }
 })

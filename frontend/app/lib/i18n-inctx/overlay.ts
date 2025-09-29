@@ -1,5 +1,5 @@
-import type { NuxtApp } from '#app'
 import type { ComponentInternalInstance } from 'vue'
+import { getCurrentInstance } from 'vue'
 import type { Composer } from 'vue-i18n'
 
 interface TranslationContext {
@@ -149,7 +149,7 @@ const createEventHandlers = (highlightState: HighlightState) => {
       return
     }
 
-    const target = (event.target as Element | null)?.closest(`[${DATA_KEY}]`)
+    const target = ((event.target as Element | null)?.closest(`[${DATA_KEY}]`)) ?? null
     highlight(target)
   }
 
@@ -186,8 +186,12 @@ export interface I18nInContextOverlay {
   teardown: () => void
 }
 
-export const install = (nuxtApp: NuxtApp): I18nInContextOverlay => {
-  const i18nInstance = nuxtApp.$i18n as { global?: Composer } | Composer | undefined
+type NuxtLikeApp = {
+  $i18n?: Composer | { global?: Composer }
+}
+
+export const install = (nuxtApp: Record<string, unknown>): I18nInContextOverlay => {
+  const i18nInstance = (nuxtApp as NuxtLikeApp).$i18n as { global?: Composer } | Composer | undefined
 
   if (!i18nInstance) {
     console.warn('[i18n-inctx] vue-i18n instance not found on Nuxt app. Overlay will not be installed.')
@@ -210,21 +214,25 @@ export const install = (nuxtApp: NuxtApp): I18nInContextOverlay => {
   window.addEventListener('pointermove', handlers.handlePointerMove)
   window.addEventListener('click', handlers.handleClick, true)
 
-  const originalPostTranslation = composer.postTranslation
+  const originalTranslate = composer.t
+  const callOriginalTranslate = originalTranslate.bind(composer)
 
-  composer.postTranslation = (translation, key, context) => {
-    const resolved = originalPostTranslation ? originalPostTranslation(translation, key, context) : translation
+  composer.t = ((...args) => {
+    const [key] = args
+    const instance = getCurrentInstance()
+    const translation = callOriginalTranslate(...(args as Parameters<typeof callOriginalTranslate>))
 
-    if (typeof window !== 'undefined') {
-      queueMicrotask(() => annotateTranslation(context as TranslationContext | undefined, key, resolved))
+    if (typeof window !== 'undefined' && typeof key === 'string' && typeof translation === 'string') {
+      const context: TranslationContext = { instance: instance ?? null }
+      queueMicrotask(() => annotateTranslation(context, key, translation))
     }
 
-    return resolved
-  }
+    return translation
+  }) as typeof composer.t
 
   return {
     teardown: () => {
-      composer.postTranslation = originalPostTranslation ?? null
+      composer.t = originalTranslate
 
       handlers.removeHighlight()
       window.removeEventListener('keydown', handlers.handleKeyDown)
