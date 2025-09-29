@@ -151,7 +151,6 @@ useSeoMeta({
   ogDescription: computed(() => metaDescription.value || undefined),
   ogType: 'article',
   ogImage: computed(() => article.value.image || undefined),
-  twitterCard: computed(() => (article.value.image ? 'summary_large_image' : 'summary')),
   articlePublishedTime: computed(() => publishedDate.value?.iso),
   articleModifiedTime: computed(() => updatedDate.value?.iso ?? publishedDate.value?.iso),
   ogUrl: canonicalUrl,

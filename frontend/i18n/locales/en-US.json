@@ -152,9 +152,7 @@
     "seo": {
       "title": "Contact Nudger",
       "description": "Get in touch with the Nudger collective for partnerships, product questions or impact insights.",
-      "imageAlt": "Nudger logomark used for the contact page preview",
-      "twitterImageAlt": "Nudger logomark used for the contact page preview",
-      "twitterSite": "@nudger_app"
+      "imageAlt": "Nudger logomark used for the contact page preview"
     },
     "hero": {
       "eyebrow": "Let's talk",

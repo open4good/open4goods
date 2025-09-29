@@ -111,10 +111,6 @@ useSeoMeta({
   ogUrl: () => canonicalUrl.value,
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
-  twitterCard: () => 'summary_large_image',
-  twitterTitle: () => String(t('team.seo.title')),
-  twitterDescription: () => String(t('team.seo.description')),
-  twitterImage: () => ogImageUrl.value,
 })
 
 useHead(() => ({
