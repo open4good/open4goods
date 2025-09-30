@@ -17,10 +17,10 @@
 
 ### **What it brings concretely:**
 
-✅ **Intelligent AI assistance** to generate Vuetify components with the right props  
-✅ **Advanced autocomplete** for Vuetify APIs in your IDE  
-✅ **Layout creation** following Vuetify best practices  
-✅ **Integrated documentation** without leaving your development environment  
+✅ **Intelligent AI assistance** to generate Vuetify components with the right props
+✅ **Advanced autocomplete** for Vuetify APIs in your IDE
+✅ **Layout creation** following Vuetify best practices
+✅ **Integrated documentation** without leaving your development environment
 
 Basically, it allows Claude (and other AIs) to better understand and work with your Vuetify components, having access to all documentation and APIs in real-time.
 -->
@@ -34,4 +34,3 @@ Basically, it allows Claude (and other AIs) to better understand and work with y
 ✅ **Le serveur MCP Vuetify est maintenant configuré et fonctionne en arrière-plan !**
 
 Vous pouvez maintenant bénéficier de l'assistance intelligente pour vos composants Vuetify avec un accès complet à la documentation et aux APIs en temps réel.
-

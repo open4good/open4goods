@@ -3,13 +3,20 @@ import { onMounted, watch, computed, unref } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
-import { DEFAULT_LOREM_LENGTH, _generateLoremIpsum } from '~/utils/content/_loremIpsum'
+import {
+  DEFAULT_LOREM_LENGTH,
+  _generateLoremIpsum,
+} from '~/utils/content/_loremIpsum'
 import '~/assets/css/text-content.css'
 
 // Props
 
 const props = withDefaults(
-  defineProps<{ blocId: string; defaultLength?: number; ipsumLength?: number }>(),
+  defineProps<{
+    blocId: string
+    defaultLength?: number
+    ipsumLength?: number
+  }>(),
   {
     defaultLength: DEFAULT_LOREM_LENGTH,
     ipsumLength: undefined,
@@ -28,7 +35,9 @@ const canEdit = computed(() => {
   return isLoggedIn.value && !!link && roles.some(role => hasRole(role))
 })
 
-const fallbackLoremLength = computed(() => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH)
+const fallbackLoremLength = computed(
+  () => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH
+)
 
 const displayHtml = computed(() => {
   const rawContent = (unref(htmlContent) ?? '').trim()
@@ -55,7 +64,9 @@ watch(
 <template>
   <div class="text-content" :class="{ editable: canEdit }">
     <v-progress-circular v-if="loading" indeterminate />
-    <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+    <v-alert v-else-if="error" type="error" variant="tonal">{{
+      error
+    }}</v-alert>
 
     <!-- Encapsulated XWiki content -->
     <!-- eslint-disable-next-line vue/no-v-html -->

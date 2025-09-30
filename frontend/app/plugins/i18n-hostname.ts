@@ -6,10 +6,11 @@ type NuxtI18nInstance = {
   setLocale: (locale: string) => Promise<void>
 }
 
-export default defineNuxtPlugin(async (nuxtApp) => {
+export default defineNuxtPlugin(async nuxtApp => {
   const serverContext = nuxtApp.ssrContext
   const rawServerHost =
-    serverContext?.event.node.req.headers['x-forwarded-host'] ?? serverContext?.event.node.req.headers.host
+    serverContext?.event.node.req.headers['x-forwarded-host'] ??
+    serverContext?.event.node.req.headers.host
   const rawClientHost = import.meta.client ? window.location.host : null
 
   const rawHost = import.meta.server ? rawServerHost : rawClientHost

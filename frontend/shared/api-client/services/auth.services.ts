@@ -40,11 +40,14 @@ export class AuthService {
   }
 
   async login(username: string, password: string) {
-    const tokens = await $fetch<{ accessToken: string; refreshToken: string }>('/auth/login', {
-      method: 'POST',
-      body: { username, password },
-      credentials: 'include',
-    })
+    const tokens = await $fetch<{ accessToken: string; refreshToken: string }>(
+      '/auth/login',
+      {
+        method: 'POST',
+        body: { username, password },
+        credentials: 'include',
+      }
+    )
     // Decode the access token and update the store reactively
     const decoded = jwtDecode<JwtPayload>(tokens.accessToken)
     const authStore = useAuthStore()
@@ -60,10 +63,13 @@ export class AuthService {
    * Request a new access token using the refresh token cookie.
    */
   async refresh() {
-    const tokens = await $fetch<{ accessToken: string; refreshToken: string }>('/auth/refresh', {
-      method: 'POST',
-      credentials: 'include',
-    })
+    const tokens = await $fetch<{ accessToken: string; refreshToken: string }>(
+      '/auth/refresh',
+      {
+        method: 'POST',
+        credentials: 'include',
+      }
+    )
     // Decode the refreshed access token and patch the auth store
     const decoded = jwtDecode<JwtPayload>(tokens.accessToken)
     const authStore = useAuthStore()

@@ -5,20 +5,29 @@ import { FetchError } from 'ofetch'
 /**
  * Proxy endpoint to renew access and refresh tokens using the backend API.
  */
-interface RefreshResponse { accessToken: string; refreshToken: string }
+interface RefreshResponse {
+  accessToken: string
+  refreshToken: string
+}
 
 export default defineEventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig()
   const refreshToken = getCookie(event, config.refreshCookieName)
   if (!refreshToken) {
-    throw createError({ statusCode: 401, statusMessage: 'Missing refresh token' })
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Missing refresh token',
+    })
   }
 
   try {
-    const tokens = await $fetch<RefreshResponse>(`${config.apiUrl}/auth/refresh`, {
-      method: 'POST',
-      headers: { cookie: `${config.refreshCookieName}=${refreshToken}` },
-    })
+    const tokens = await $fetch<RefreshResponse>(
+      `${config.apiUrl}/auth/refresh`,
+      {
+        method: 'POST',
+        headers: { cookie: `${config.refreshCookieName}=${refreshToken}` },
+      }
+    )
 
     const secure = process.env.NODE_ENV === 'production'
     const sameSite: 'lax' | 'none' = secure ? 'none' : 'lax'
@@ -29,7 +38,12 @@ export default defineEventHandler(async (event: H3Event) => {
       path: '/',
     }
     setCookie(event, config.tokenCookieName, tokens.accessToken, cookieOptions)
-    setCookie(event, config.refreshCookieName, tokens.refreshToken, cookieOptions)
+    setCookie(
+      event,
+      config.refreshCookieName,
+      tokens.refreshToken,
+      cookieOptions
+    )
     // Return tokens to allow the client to update the auth store reactively
     return tokens
   } catch (err) {
@@ -64,6 +78,10 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     console.error('Refresh error', err)
-    throw createError({ statusCode: 401, statusMessage: 'Refresh failed', cause: err })
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Refresh failed',
+      cause: err,
+    })
   }
 })

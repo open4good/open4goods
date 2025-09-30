@@ -1,9 +1,11 @@
 # PROMPT : Gestion des Webhooks Stripe
 
 ## Contexte
+
 Implémenter la gestion robuste des webhooks Stripe pour synchroniser en temps réel les événements de paiement avec la logique métier Upiik (tokens, abonnements, notifications).
 
 ## Prérequis
+
 ✅ Configuration Stripe (`01-config-initiale.md`)
 ✅ Architecture domaine (`02-architecture-domaine.md`)
 ✅ Modèles de données (`03-models-donnees.md`)
@@ -16,6 +18,7 @@ Implémenter la gestion robuste des webhooks Stripe pour synchroniser en temps r
 **Fichier :** `src/domains/payments/services/webhookService.js`
 
 **Fonctionnalités principales :**
+
 ```javascript
 class WebhookService {
   // Validation et parsing des événements
@@ -74,29 +77,31 @@ class WebhookService {
 ### 2. Gestion de l'idempotence
 
 **Système anti-doublons :**
+
 ```javascript
 // Table/Collection pour tracking événements traités
 const WebhookEvent = {
-  stripeEventId: String,    // evt_xyz unique
-  eventType: String,        // type d'événement
-  processedAt: Date,        // Date de traitement
-  status: String,           // 'processed' | 'failed' | 'retrying'
-  attempts: Number,         // Nombre de tentatives
-  lastError: String,        // Dernière erreur si échec
-  metadata: Object          // Données additionnelles
-};
+  stripeEventId: String, // evt_xyz unique
+  eventType: String, // type d'événement
+  processedAt: Date, // Date de traitement
+  status: String, // 'processed' | 'failed' | 'retrying'
+  attempts: Number, // Nombre de tentatives
+  lastError: String, // Dernière erreur si échec
+  metadata: Object, // Données additionnelles
+}
 
 // Dans validateAndParseEvent :
-const existingEvent = await WebhookEvent.findOne({ stripeEventId: event.id });
+const existingEvent = await WebhookEvent.findOne({ stripeEventId: event.id })
 if (existingEvent && existingEvent.status === 'processed') {
   // Événement déjà traité, ignorer
-  return { alreadyProcessed: true };
+  return { alreadyProcessed: true }
 }
 ```
 
 ### 3. Intégration avec le système de tokens Upiik
 
 **Logique d'activation des abonnements :**
+
 ```javascript
 async handleSubscriptionActivation(stripeSubscription) {
   // 1. Identifier l'utilisateur
@@ -148,6 +153,7 @@ async handleSubscriptionActivation(stripeSubscription) {
 **Fichier :** `src/domains/payments/events/paymentEvents.js`
 
 **Événements à déclencher :**
+
 ```javascript
 // Événements pour le système Upiik
 const paymentEvents = {
@@ -155,8 +161,8 @@ const paymentEvents = {
   SUBSCRIPTION_CANCELLED: 'subscription.cancelled',
   PAYMENT_SUCCEEDED: 'payment.succeeded',
   PAYMENT_FAILED: 'payment.failed',
-  TOKENS_RENEWED: 'tokens.renewed'
-};
+  TOKENS_RENEWED: 'tokens.renewed',
+}
 
 // Handlers dans src/events/subscribers/
 class SubscriptionSubscriber {
@@ -183,6 +189,7 @@ class SubscriptionSubscriber {
 ### 5. Gestion des notifications utilisateur
 
 **Intégration avec Nodemailer existant :**
+
 ```javascript
 // Utiliser le système email d'Upiik
 const { sendEmail } = require('../../../utils/emailService'); // Adapter chemin
@@ -218,14 +225,15 @@ async sendPaymentFailedNotification(userId) {
 ### 6. Système de retry et gestion d'erreurs
 
 **Retry automatique pour échecs temporaires :**
+
 ```javascript
 class WebhookRetryService {
   async processWithRetry(event, maxRetries = 3) {
-    let lastError;
+    let lastError
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        await this.processEvent(event);
+        await this.processEvent(event)
 
         // Succès : marquer comme traité
         await WebhookEvent.updateOne(
@@ -233,25 +241,24 @@ class WebhookRetryService {
           {
             status: 'processed',
             processedAt: new Date(),
-            attempts: attempt
+            attempts: attempt,
           }
-        );
+        )
 
-        return { success: true };
-
+        return { success: true }
       } catch (error) {
-        lastError = error;
+        lastError = error
 
         // Logger la tentative échouée
         webhookLogger.warn(`Webhook retry ${attempt}/${maxRetries}`, {
           eventId: event.id,
           eventType: event.type,
-          error: error.message
-        });
+          error: error.message,
+        })
 
         // Attendre avant retry (backoff exponentiel)
         if (attempt < maxRetries) {
-          await this.delay(Math.pow(2, attempt) * 1000); // 2s, 4s, 8s
+          await this.delay(Math.pow(2, attempt) * 1000) // 2s, 4s, 8s
         }
       }
     }
@@ -262,16 +269,16 @@ class WebhookRetryService {
       {
         status: 'failed',
         attempts: maxRetries,
-        lastError: lastError.message
+        lastError: lastError.message,
       }
-    );
+    )
 
     // Alerter les développeurs
     webhookLogger.error('Webhook processing failed permanently', {
       eventId: event.id,
       eventType: event.type,
-      error: lastError.message
-    });
+      error: lastError.message,
+    })
   }
 }
 ```
@@ -279,6 +286,7 @@ class WebhookRetryService {
 ### 7. Monitoring et alerting
 
 **Métriques importantes à tracker :**
+
 ```javascript
 // Dashboard metrics
 const webhookMetrics = {
@@ -287,61 +295,66 @@ const webhookMetrics = {
   totalEventsFailed: Number,
   averageProcessingTime: Number,
   lastEventReceivedAt: Date,
-  failureRate: Number
-};
+  failureRate: Number,
+}
 
 // Health check endpoint
 exports.getWebhookHealth = async (req, res) => {
-  const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
   const stats = await WebhookEvent.aggregate([
     { $match: { processedAt: { $gte: last24h } } },
     {
       $group: {
         _id: '$status',
-        count: { $sum: 1 }
-      }
-    }
-  ]);
+        count: { $sum: 1 },
+      },
+    },
+  ])
 
   res.json({
     status: 'healthy', // ou 'degraded' si taux échec > 5%
     last24h: stats,
-    lastEventAt: await WebhookEvent.findOne().sort({ processedAt: -1 })?.processedAt
-  });
-};
+    lastEventAt: await WebhookEvent.findOne().sort({ processedAt: -1 })
+      ?.processedAt,
+  })
+}
 ```
 
 ## Sécurité et bonnes pratiques
 
 ### Validation stricte
+
 ```javascript
 // Validation signature webhook Stripe
 const validateWebhookSignature = (rawBody, signature, secret) => {
   const expectedSig = crypto
     .createHmac('sha256', secret)
     .update(rawBody, 'utf8')
-    .digest('hex');
+    .digest('hex')
 
   return crypto.timingSafeEqual(
     Buffer.from(signature, 'hex'),
     Buffer.from(expectedSig, 'hex')
-  );
-};
+  )
+}
 ```
 
 ### Protection contre replay attacks
+
 ```javascript
 // Vérifier timestamp de l'événement (max 5 minutes)
-const eventTimestamp = event.created;
-const currentTimestamp = Math.floor(Date.now() / 1000);
+const eventTimestamp = event.created
+const currentTimestamp = Math.floor(Date.now() / 1000)
 
-if (currentTimestamp - eventTimestamp > 300) { // 5 minutes
-  throw new Error('Event too old, possible replay attack');
+if (currentTimestamp - eventTimestamp > 300) {
+  // 5 minutes
+  throw new Error('Event too old, possible replay attack')
 }
 ```
 
 ## Critères de réussite
+
 ✅ Service webhook complet avec tous les handlers
 ✅ Système d'idempotence fonctionnel
 ✅ Intégration avec tokens Upiik
@@ -352,6 +365,7 @@ if (currentTimestamp - eventTimestamp > 300) { // 5 minutes
 ✅ Sécurité webhook validée
 
 ## Instructions d'exécution
+
 1. **Examiner** le système d'événements existant `src/events/`
 2. **Implémenter** le service webhook complet
 3. **Configurer** les handlers pour chaque type d'événement

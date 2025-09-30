@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 vi.mock('#imports', () => {
   const useHeadMock = vi.fn()
   const useSeoMetaMock = vi.fn()
-  const useRequestURLMock = () => new URL('https://example.com/blog/test-article')
+  const useRequestURLMock = () =>
+    new URL('https://example.com/blog/test-article')
 
   return {
     useHead: useHeadMock,
@@ -105,9 +106,15 @@ describe('TheArticle.vue', () => {
   test('renders title, metadata and body content', async () => {
     const wrapper = await mountComponent()
 
-    expect(wrapper.get('[data-test="article-title"]').text()).toBe(baseArticle.title)
-    expect(wrapper.get('[data-test="article-summary"]').text()).toBe(baseArticle.summary)
-    expect(wrapper.get('[data-test="article-author"]').text()).toContain(baseArticle.author)
+    expect(wrapper.get('[data-test="article-title"]').text()).toBe(
+      baseArticle.title
+    )
+    expect(wrapper.get('[data-test="article-summary"]').text()).toBe(
+      baseArticle.summary
+    )
+    expect(wrapper.get('[data-test="article-author"]').text()).toContain(
+      baseArticle.author
+    )
 
     const contentHtml = wrapper.get('[data-test="article-body"]').html()
     expect(contentHtml).toContain('<p>Hello <strong>world</strong>!</p>')
@@ -122,7 +129,7 @@ describe('TheArticle.vue', () => {
 
     expect(wrapper.find('[data-test="article-body"]').exists()).toBe(false)
     expect(wrapper.get('[data-test="article-empty"]').text()).toContain(
-      'The content of this article will be available soon.',
+      'The content of this article will be available soon.'
     )
   })
 

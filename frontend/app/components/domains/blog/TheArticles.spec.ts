@@ -66,7 +66,7 @@ const fetchArticlesMock = vi.fn(
       size,
     }
     selectedTagRef.value = tag ?? null
-  },
+  }
 )
 const fetchTagsMock = vi.fn(async () => {})
 const changePageMock = vi.fn()
@@ -84,7 +84,7 @@ const mockRouterPush = vi.fn(
   } = {}) => {
     const nextQuery = query ?? {}
 
-    Object.keys(routeQuery).forEach((key) => {
+    Object.keys(routeQuery).forEach(key => {
       if (!(key in nextQuery) || nextQuery[key] === undefined) {
         Reflect.deleteProperty(routeQuery, key)
       }
@@ -97,7 +97,7 @@ const mockRouterPush = vi.fn(
         routeQuery[key] = value
       }
     })
-  },
+  }
 )
 
 const mockUseBlog = {
@@ -184,7 +184,7 @@ describe('TheArticles Component', () => {
       { name: 'Kitchen', count: 1 },
     ]
     selectedTagRef.value = null
-    Object.keys(routeQuery).forEach((key) => {
+    Object.keys(routeQuery).forEach(key => {
       Reflect.deleteProperty(routeQuery, key)
     })
   })
@@ -404,18 +404,24 @@ describe('TheArticles Component', () => {
     }
 
     expect(instance.extractArticleSlug('test-article-1')).toBe('test-article-1')
-    expect(instance.extractArticleSlug('/blog/test-article-2')).toBe('test-article-2')
+    expect(instance.extractArticleSlug('/blog/test-article-2')).toBe(
+      'test-article-2'
+    )
     expect(
-      instance.extractArticleSlug('https://example.com/blog/test-article-3'),
+      instance.extractArticleSlug('https://example.com/blog/test-article-3')
     ).toBe('test-article-3')
     expect(instance.extractArticleSlug('  ')).toBeNull()
     expect(instance.extractArticleSlug(null)).toBeNull()
 
-    expect(instance.buildArticleLink('test-article-1')).toBe('/blog/test-article-1')
-    expect(instance.buildArticleLink('/blog/test-article-2')).toBe('/blog/test-article-2')
-    expect(instance.buildArticleLink('https://example.com/blog/test-article-3')).toBe(
-      '/blog/test-article-3',
+    expect(instance.buildArticleLink('test-article-1')).toBe(
+      '/blog/test-article-1'
     )
+    expect(instance.buildArticleLink('/blog/test-article-2')).toBe(
+      '/blog/test-article-2'
+    )
+    expect(
+      instance.buildArticleLink('https://example.com/blog/test-article-3')
+    ).toBe('/blog/test-article-3')
     expect(instance.buildArticleLink('  ')).toBeUndefined()
     expect(instance.buildArticleLink(null)).toBeUndefined()
   })

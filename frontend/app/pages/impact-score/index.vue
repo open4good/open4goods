@@ -4,7 +4,8 @@
     <v-sheet color="primary" class="py-12">
       <v-container class="text-center">
         <h1 class="text-h4 text-md-h3 text-white font-weight-bold">
-          L’Impact Score : évaluation de l'impact environnemental de vos produits
+          L’Impact Score : évaluation de l'impact environnemental de vos
+          produits
         </h1>
         <!-- Remplace le wiki ECOSCORE/1/ -->
         <div class="mt-4 text-white text-body-1">
@@ -20,11 +21,16 @@
           <v-card elevation="2" class="pa-6">
             <!-- Qu’est-ce que l’Impact Score ? -->
             <v-card-title class="px-0">
-              <h2 class="text-h6 text-md-h5">Qu’est-ce que l’Impact Score&nbsp;?</h2>
+              <h2 class="text-h6 text-md-h5">
+                Qu’est-ce que l’Impact Score&nbsp;?
+              </h2>
             </v-card-title>
 
             <v-card-text class="px-0">
-              <div class="d-flex justify-center my-4" aria-label="Évaluation globale">
+              <div
+                class="d-flex justify-center my-4"
+                aria-label="Évaluation globale"
+              >
                 <v-rating
                   v-model="localRating"
                   half-increments
@@ -47,7 +53,10 @@
               </v-responsive>
 
               <!-- Notre écoscore -->
-              <h2 id="ecoscore-transparent-innovant" class="text-h6 text-md-h5 my-6">
+              <h2
+                id="ecoscore-transparent-innovant"
+                class="text-h6 text-md-h5 my-6"
+              >
                 Notre ecoscore&nbsp;: transparent, innovant et performant
               </h2>
 
@@ -68,8 +77,10 @@
                 Comment est calculé l'Impact Score&nbsp;?
               </h2>
               <p class="mb-4">
-                Les règles de calcul de l’ecoscore sont détaillées sur chaque produit (section «&nbsp;bilan écologique&nbsp;»).
-                Chaque catégorie de produit a ses propres critères et pondérations. Voici les catégories couvertes :
+                Les règles de calcul de l’ecoscore sont détaillées sur chaque
+                produit (section «&nbsp;bilan écologique&nbsp;»). Chaque
+                catégorie de produit a ses propres critères et pondérations.
+                Voici les catégories couvertes :
               </p>
 
               <!-- Liste de verticales (liens absolus) -->
@@ -113,7 +124,9 @@
                 <tfoot>
                   <tr>
                     <th>Total</th>
-                    <td><strong>{{ formatCoeff(total) }}</strong></td>
+                    <td>
+                      <strong>{{ formatCoeff(total) }}</strong>
+                    </td>
                   </tr>
                 </tfoot>
               </v-table>
@@ -155,13 +168,25 @@
               <v-divider class="my-6" />
               <v-row>
                 <v-col cols="12" class="d-flex flex-wrap ga-2">
-                  <v-chip size="small" variant="tonal" @click="scrollTo('#ecoscore-transparent-innovant')">
+                  <v-chip
+                    size="small"
+                    variant="tonal"
+                    @click="scrollTo('#ecoscore-transparent-innovant')"
+                  >
                     Transparence & innovation
                   </v-chip>
-                  <v-chip size="small" variant="tonal" @click="scrollTo('#calcule-impact-score')">
+                  <v-chip
+                    size="small"
+                    variant="tonal"
+                    @click="scrollTo('#calcule-impact-score')"
+                  >
                     Calcul
                   </v-chip>
-                  <v-chip size="small" variant="tonal" @click="scrollTo('body')">
+                  <v-chip
+                    size="small"
+                    variant="tonal"
+                    @click="scrollTo('body')"
+                  >
                     Haut de page
                   </v-chip>
                 </v-col>

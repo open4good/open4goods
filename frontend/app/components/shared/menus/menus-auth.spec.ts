@@ -61,8 +61,8 @@ vi.mock('vue-router', () => ({
   useRouter: useRouterMock,
 }))
 
-let TheHeroMenu: typeof import('./The-hero-menu.vue')['default']
-let TheMobileMenu: typeof import('./The-mobile-menu.vue')['default']
+let TheHeroMenu: (typeof import('./The-hero-menu.vue'))['default']
+let TheMobileMenu: (typeof import('./The-mobile-menu.vue'))['default']
 
 beforeAll(async () => {
   TheHeroMenu = (await import('./The-hero-menu.vue')).default
@@ -83,7 +83,9 @@ describe('Shared menu authentication controls', () => {
     const mobileWrapper = await mountSuspended(TheMobileMenu)
 
     expect(heroWrapper.find('[data-testid="hero-logout"]').exists()).toBe(false)
-    expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(false)
+    expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(
+      false
+    )
   })
 
   it('logs out and redirects from the hero menu when clicked', async () => {

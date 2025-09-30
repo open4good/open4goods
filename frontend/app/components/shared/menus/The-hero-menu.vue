@@ -1,13 +1,13 @@
 <template>
   <menu id="container-main-menu" class="d-none d-md-block">
-  <!-- Desktop menu -->
+    <!-- Desktop menu -->
     <div class="d-flex justify-end align-center ga-4">
       <v-list class="d-flex justify-end font-weight-bold">
         <v-list-item
           v-for="item in menuItems"
           :key="item.path"
           class="main-menu-items"
-          :class="{ 'active': isActiveRoute(item.path) }"
+          :class="{ active: isActiveRoute(item.path) }"
           @click="navigateToPage(item.path)"
         >
           <v-list-item-title>{{ item.label }}</v-list-item-title>
@@ -37,7 +37,10 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 
 const route = useRoute()
 const router = useRouter()
@@ -73,18 +76,21 @@ interface MenuItem extends MenuItemDefinition {
 }
 
 const baseMenuItems: MenuItemDefinition[] = [
-  { labelKey: 'siteIdentity.menu.items.impactScore', routeName: 'impact-score' },
+  {
+    labelKey: 'siteIdentity.menu.items.impactScore',
+    routeName: 'impact-score',
+  },
   { labelKey: 'siteIdentity.menu.items.products', routeName: 'produits' },
   { labelKey: 'siteIdentity.menu.items.blog', routeName: 'blog' },
   { labelKey: 'siteIdentity.menu.items.contact', routeName: 'contact' },
 ]
 
 const menuItems = computed<MenuItem[]>(() =>
-  baseMenuItems.map((item) => ({
+  baseMenuItems.map(item => ({
     ...item,
     label: t(item.labelKey),
     path: resolveLocalizedRoutePath(item.routeName, currentLocale.value),
-  })),
+  }))
 )
 
 const isActiveRoute = (path: string): boolean => {

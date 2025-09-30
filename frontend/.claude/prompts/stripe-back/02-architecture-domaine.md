@@ -1,14 +1,17 @@
 # PROMPT : Architecture du domaine Payments
 
 ## Contexte
+
 Créer la structure du domaine `payments` en suivant l'architecture DDD d'Upiik existante. Le domaine doit s'intégrer naturellement avec `user/`, `products/`, `chats/`, etc.
 
 ## Prérequis
+
 ✅ Configuration Stripe terminée (`01-config-initiale.md`)
 
 ## Tâche : Créer l'architecture du domaine payments
 
 ### 1. Structure des dossiers à créer
+
 ```
 src/domains/payments/
 ├── controllers/
@@ -45,6 +48,7 @@ src/domains/payments/
 ### 2. Intégration avec l'architecture existante
 
 **Examiner ces fichiers pour comprendre les patterns :**
+
 - `src/domains/user/` - Structure de référence
 - `src/domains/products/` - Pattern controllers/services
 - `src/events/` - Système d'événements global
@@ -53,13 +57,15 @@ src/domains/payments/
 ### 3. Points d'intégration critiques
 
 **Routes principales :**
+
 ```javascript
 // À intégrer dans src/routes/index.js
-app.use('/api/payments', paymentsRoutes);
-app.use('/api/webhooks/stripe', webhooksRoutes);
+app.use('/api/payments', paymentsRoutes)
+app.use('/api/webhooks/stripe', webhooksRoutes)
 ```
 
 **Événements à connecter :**
+
 ```javascript
 // Intégrer avec src/events/
 - payment.succeeded → Notification user
@@ -68,6 +74,7 @@ app.use('/api/webhooks/stripe', webhooksRoutes);
 ```
 
 **Base de données :**
+
 ```javascript
 // Utiliser les connexions existantes
 - Clients DB → Customers et Subscriptions
@@ -77,12 +84,14 @@ app.use('/api/webhooks/stripe', webhooksRoutes);
 ### 4. Middlewares de sécurité
 
 **Réutiliser l'existant :**
+
 - JWT auth pour endpoints protégés
 - Rate limiting (express-rate-limit configuré)
 - Validation Joi (patterns existants)
 - Helmet + CORS (déjà actifs)
 
 **Ajouter spécifique Stripe :**
+
 - Validation signatures webhooks
 - Validation montants/devises
 - Auth spécifique abonnements
@@ -90,19 +99,22 @@ app.use('/api/webhooks/stripe', webhooksRoutes);
 ### 5. Système de logs
 
 **Intégrer avec Winston existant :**
+
 ```javascript
 // Loggers spécialisés
-const stripeLogger = logger.child({ domain: 'payments', service: 'stripe' });
-const paymentLogger = logger.child({ domain: 'payments', service: 'payments' });
+const stripeLogger = logger.child({ domain: 'payments', service: 'stripe' })
+const paymentLogger = logger.child({ domain: 'payments', service: 'payments' })
 ```
 
 ## Contraintes techniques
+
 - **Node.js 16.20.2** : Compatible
 - **Architecture DDD** : Suit les patterns Upiik
 - **Multi-DB** : Compatible avec l'architecture existante
 - **Événements** : Intégré au système global
 
 ## Critères de réussite
+
 ✅ Structure `src/domains/payments/` créée
 ✅ Fichiers squelettes avec exports corrects
 ✅ Intégration routes dans `src/routes/index.js`
@@ -111,6 +123,7 @@ const paymentLogger = logger.child({ domain: 'payments', service: 'payments' });
 ✅ Logs Winston configurés pour le domaine
 
 ## Instructions d'exécution
+
 1. **Examiner** `src/domains/user/` pour comprendre la structure
 2. **Créer** la structure complète du domaine payments
 3. **Configurer** les exports et imports de base

@@ -1,5 +1,3 @@
 <template>
-  <div>
-    ...contact
-  </div>
+  <div>...contact</div>
 </template>

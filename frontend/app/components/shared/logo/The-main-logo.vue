@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <NuxtLink id="main-logo-link" to="/" class="logo-link">
@@ -10,7 +9,6 @@
     />
   </NuxtLink>
 </template>
-
 
 <style scoped lang="sass">
 .logo-link

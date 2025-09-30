@@ -17,7 +17,8 @@ export const useContentBloc = () => {
       htmlContent.value = bloc.htmlContent ?? ''
       editLink.value = bloc.editLink
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch content'
+      error.value =
+        err instanceof Error ? err.message : 'Failed to fetch content'
     } finally {
       loading.value = false
     }

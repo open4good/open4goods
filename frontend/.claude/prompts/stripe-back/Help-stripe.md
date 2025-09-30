@@ -1,20 +1,23 @@
 # Prompt : Implémentation Stripe dans une API REST Node.js
 
 ## Contexte
+
 ```
 Stack technique :
 - Backend : Node.js + Express.js
-- Base de données : MongoDB + Mongoose + MongoDB Atlas  
+- Base de données : MongoDB + Mongoose + MongoDB Atlas
 - Langages : JavaScript/TypeScript
 - Niveau : Développeur full-stack expérimenté
 ```
 
 ## Objectif
+
 Implémenter une solution de paiement Stripe complète dans mon API REST en suivant les **meilleures pratiques 2025**.
 
 ## Étapes d'implémentation requises
 
 ### 1. Configuration et sécurité
+
 ```
 - Installation des dépendances (stripe, dotenv, helmet, etc.)
 - Configuration sécurisée des clés API Stripe (dev/prod)
@@ -24,6 +27,7 @@ Implémenter une solution de paiement Stripe complète dans mon API REST en suiv
 ```
 
 ### 2. Architecture du projet
+
 ```
 Structure des dossiers :
 ├── controllers/payments/
@@ -43,9 +47,10 @@ Patterns à implémenter :
 ```
 
 ### 3. Endpoints principaux
+
 ```
 POST   /api/payments/create-intent     # Création PaymentIntent
-POST   /api/payments/confirm           # Confirmation paiement  
+POST   /api/payments/confirm           # Confirmation paiement
 GET    /api/payments/:id/status        # Status d'un paiement
 POST   /api/webhooks/stripe           # Webhooks Stripe
 POST   /api/customers                 # Gestion customers
@@ -54,6 +59,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### 4. Fonctionnalités avancées
+
 ```
 - Paiements récurrents/abonnements
 - Support multi-devises (EUR, USD, etc.)
@@ -64,9 +70,10 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### 5. Sécurité et validation
+
 ```
 - Validation signatures webhooks Stripe
-- Sanitisation des inputs utilisateur  
+- Sanitisation des inputs utilisateur
 - Gestion des idempotency keys
 - Logs sécurisés (pas de données sensibles)
 - Rate limiting sur les endpoints
@@ -74,6 +81,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### 6. Gestion d'erreurs et monitoring
+
 ```
 - Gestion centralisée des erreurs Stripe
 - Retry logic avec backoff exponentiel
@@ -84,6 +92,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### 7. Synchronisation et cohérence
+
 ```
 - Synchronisation Stripe ↔ MongoDB
 - Gestion des états incohérents
@@ -95,6 +104,7 @@ POST   /api/payments/refund           # Remboursements
 ## Livrables attendus
 
 ### Code source
+
 ```
 - Controllers avec gestion d'erreurs complète
 - Services Stripe modulaires et testables
@@ -104,6 +114,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Configuration
+
 ```
 - Variables d'environnement (.env.example)
 - Configuration MongoDB avec indexes
@@ -112,6 +123,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Documentation
+
 ```
 - Documentation des endpoints (format OpenAPI)
 - Exemples de requêtes cURL/Postman
@@ -120,6 +132,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Tests
+
 ```
 - Tests unitaires (Jest/Mocha)
 - Tests d'intégration avec Stripe Test API
@@ -130,6 +143,7 @@ POST   /api/payments/refund           # Remboursements
 ## Contraintes techniques
 
 ### Code quality
+
 ```
 - ES6+ avec async/await exclusivement
 - TypeScript avec types stricts si possible
@@ -139,6 +153,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Performance
+
 ```
 - Gestion optimisée des connexions DB
 - Cache Redis pour les données fréquentes
@@ -147,6 +162,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Versions et packages
+
 ```
 - Node.js >= 18 LTS
 - Stripe API version 2024-12-18
@@ -157,6 +173,7 @@ POST   /api/payments/refund           # Remboursements
 ## Cas d'usage à couvrir
 
 ### E-commerce standard
+
 ```
 1. Création d'une commande
 2. Paiement par carte bancaire
@@ -166,6 +183,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Abonnements
+
 ```
 1. Création d'un plan d'abonnement
 2. Souscription utilisateur
@@ -174,6 +192,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 
 ### Marketplace
+
 ```
 1. Paiements avec commission
 2. Transferts vers vendeurs
@@ -198,7 +217,7 @@ POST   /api/payments/refund           # Remboursements
 ```
 Pour chaque composant :
 - Code complet avec commentaires détaillés
-- Explication des choix d'architecture  
+- Explication des choix d'architecture
 - Exemples d'utilisation concrets
 - Gestion des cas d'erreur
 - Tests associés

@@ -1,4 +1,5 @@
 # Warnings:
+
 - Only develop what is explicitly requested, or ask a question if you want to suggest an improvement.
 - If you understand that the code produces a regression, ask questions.
 - Translate all code comments in english curent language.
@@ -8,11 +9,13 @@
 - When the proper layer is unclear, ask for clarification before coding.
 
 # Global context
+
 Nudger is a search engine for electronics and household appliances, aggregating energy data from different sources to create an "Impact Score." This allows users to make the best choice of appliance before purchasing.
 
 # Nuxt 3 Frontend Development Guide (Nudger Project)
+
 [Doc Nuxt3](https://nuxt.com/docs/getting-started/introduction)
-This guide is a comprehensive overview of the Nudger UI project. It covers the Nuxt 3 / vue 3  application structure, coding conventions and tooling. It is written for new contributors and AI code-generation agents alike, aiming to ensure consistency and clarity in development.
+This guide is a comprehensive overview of the Nudger UI project. It covers the Nuxt 3 / vue 3 application structure, coding conventions and tooling. It is written for new contributors and AI code-generation agents alike, aiming to ensure consistency and clarity in development.
 
 ---
 
@@ -33,6 +36,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
    - `pnpm --offline test`
    - `pnpm --offline generate:api` (Unix/Linux/macOS)
    - `pnpm --offline generate:api:win` (Windows)
+
 ---
 
 ## Project Structure and Directories
@@ -67,22 +71,25 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 ---
 
 ## Vuetify v3.9.0
+
 - (DOC)[https://vuetifyjs.com/en/getting-started/release-notes/?version=v3.9.0]
 - (Tools: vscode)[https://marketplace.visualstudio.com/items?itemName=vuetifyjs.vuetify-vscode]
 
 ## Example Button Component
+
 ```vue
 <template>
-  <v-btn>
-   Button
-  </v-btn>
+  <v-btn> Button </v-btn>
 </template>
 ```
 
 Example:
+
 ```vue
 <template>
-  <button class="px-4 py-2 bg-primary text-white font-semibold rounded hover:bg-primary-dark disabled:opacity-50">
+  <button
+    class="px-4 py-2 bg-primary text-white font-semibold rounded hover:bg-primary-dark disabled:opacity-50"
+  >
     {{ label }}
   </button>
 </template>
@@ -96,18 +103,23 @@ Example:
 - State as a function
 - Use getters and actions
 - Example:
+
 ```ts
 export const useCartStore = defineStore('cart', {
   state: () => ({ items: [] }),
   getters: {
-    itemCount: (state) => state.items.length,
-    totalPrice: (state) => state.items.reduce((sum, item) => sum + item.price, 0),
+    itemCount: state => state.items.length,
+    totalPrice: state => state.items.reduce((sum, item) => sum + item.price, 0),
   },
   actions: {
-    addItem(product) { this.items.push(product); },
-    removeItem(id) { this.items = this.items.filter(i => i.id !== id); },
-  }
-});
+    addItem(product) {
+      this.items.push(product)
+    },
+    removeItem(id) {
+      this.items = this.items.filter(i => i.id !== id)
+    },
+  },
+})
 ```
 
 ---
@@ -117,6 +129,7 @@ export const useCartStore = defineStore('cart', {
 The `shared/api-client` folder is **fully generated** from the specification exposed by `front-api` (`/v3/api-docs/front`).
 
 Workflow:
+
 1. Modify controllers or DTOs in the `front-api` project to evolve the API.
 2. Build `front-api` (`mvn -pl nudger-front-api -am clean install`) to publish the new contract.
 3. In this module, run `pnpm --offline generate:api` (Unix/Linux/macOS) or `pnpm --offline generate:api:win` (Windows) to update `shared/api-client/`.
@@ -130,11 +143,13 @@ Never edit the generated files manually.
 
 - Env vars: `STRAPI_URL`, `STRAPI_TOKEN`
 - Fetch using `useFetch`
+
 ```ts
 const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
   headers: { Authorization: `Bearer ${config.strapiToken}` },
-});
+})
 ```
+
 - Handle nested `data[].attributes`
 - Consider `useStrapiContent()` composable abstraction
 
@@ -150,15 +165,12 @@ const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
 
 ---
 
-
-
-
 ## Documentation
+
 - Always document produced code
 - Always update existing documentation (for example README.md, AGENTS.md) with features update, architecturals changes or considerations.
 - Dependency updates are handled by Renovate using the configs `renovate.json` at
   the repository root and `frontend/renovate.json`. Updates run nightly.
-
 
 ## Linting and Formatting
 
@@ -168,8 +180,6 @@ const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
 - Run: `pnpm --offline format` to check formatting
 - Husky hooks enforce checks on commits
 
-
-
 ## Architecture & SSR Best Practices
 
 - Split UI and logic (composables, container/presentational components)
@@ -178,13 +188,14 @@ const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
 - Code-splitting with dynamic imports
 - Use `useHead` for SEO
 
-
 ## Pull request
+
 - Use Conventional commits (e.g., `feat:`, `fix:`)
 - Generate a clear and complete PR description (**why** and **what**).
 - Add a footer indicating this PR is generatEd by AI agent, and the estimatated time an average developper would have spent on this task
 
 Before issueing a PR, systematically validate and check global non regession using
+
 - pnpm --offline lint
 - pnpm --offline test run
 - pnpm --offline generate
@@ -192,14 +203,15 @@ Before issueing a PR, systematically validate and check global non regession usi
 
 # Best practices for Nuxt3 project
 
-You have extensive expertise in Vue3 Nuxt 3, TypeScript, Node.js,  Pinia, VueUse, Nuxt and Vuetify. You possess deepknowledge of best practiceandperformance optimizatiotechniquesacross these technologies.
+You have extensive expertise in Vue3 Nuxt 3, TypeScript, Node.js, Pinia, VueUse, Nuxt and Vuetify. You possess deepknowledge of best practiceandperformance optimizatiotechniquesacross these technologies.
 Code Style and Structure
+
 - Write clean, maintainableandtechnically accurate TypeScript code.
 - Prioritize functional andeclarativeprogramming patterns; avoiusingclasses.
 - Emphasize iteration andmodularizatioto follow DRY principlesand minimize codduplication.
 - Use Composition API <scripsetup lang="ts">style.
 - Use Composables to encapsulate andsharreusable client-side logic orstate acrosmultiple components inyour Nuxapplication.
-Nuxt 3 Specifics
+  Nuxt 3 Specifics
 - Nuxt 3 provides auto imports, sothereno need to manually import'ref''useState', or 'useRouter'.
 - Take advantage of VueUse functiontoenhance reactivity and performan(except for color mode management).
 - Use the Server API (within thserverapi directory) to handlserver-sideoperations like databasinteractions,authentication, oprocessing sensitivedata that must remaiconfidential.
@@ -209,6 +221,7 @@ Nuxt 3 Specifics
 - For images use <NuxtImageor<NuxtPicture> component and foIconsuse Nuxt Icons module.
 
 Fetching Data
+
 1. Use useFetch for standard datafetchinin components that benefitfrom SSRcaching, and reactivelyupdating based oURL changes.
 2. Use $fetch for client-sidrequestswithin event handlers or wheSSRoptimization is not needed.
 3. Use useAsyncData wheimplementingcomplex data fetching logilikecombining multiple API calls ocustomcaching and error handling.
@@ -216,31 +229,33 @@ Fetching Data
 5. Set lazy: true in useFetcoruseAsyncData options tdefernon-critical data fetching untiafterthe initial render.
 
 Naming Conventions
+
 - Utilize composables, naming it use[COMPOSABLE_NAME] (eg. useBlog)
 - Use **PascalCase** for componenfilenames (e.g., componentMyComponentvue).
 - Favor named exports for functiontomaintain consistency and readability.
-TypeScript Usage
+  TypeScript Usage
 - Use TypeScript throughoutpreferinterfaces over types fobetterextendability and merging.
 - Avoid enums, opting for mapforimproved type safety and flexibility.
 - Use functional componentwithTypeScript interfaces.
-UI and Styling
+  UI and Styling
 - Use Vuetify UI forcomponents and styling.
 - Implement responsive Vuetify approach and mobile-firstapproach.
 
-Pages structure : 
+Pages structure :
 
 Pages naming will respect kebab-case.
 
 To respect components loading and initialisation, be aware :
-- Pages (located under /pages/*) must contains ONLY components
+
+- Pages (located under /pages/\*) must contains ONLY components
 - Direct use of Html code, or vuetify components is stricly prohibited
 - When needed, you will always create intermediary components (under /components folder)
 
-
-
 # Model error journal
+
 ## Here are listed all recurring errors of the model.
 
-# Mcp servers 
+# Mcp servers
+
 - Check that the Nuxt mcp server is running and if not, launch it on port 3000.
 - Always use the nuxt mcp server to better understand the structure and best practices of Nuxt js

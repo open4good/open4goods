@@ -1,29 +1,55 @@
-import { useBlogService } from '~~/shared/api-client/services/blog.services'
-import type { BlogTagDto } from '~~/shared/api-client'
-import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
+import { detectLanguage } from '../../presentation/middleware/languageDetector'
+import {
+  applyCacheHeaders,
+  CacheStrategies,
+} from '../../presentation/middleware/cacheHeaders'
+import {
+  handleDomainError,
+  handleUnknownError,
+} from '../../presentation/middleware/errorHandler'
+import {
+  registerProviders,
+  SERVICE_KEYS,
+  getHandler,
+} from '../../shared/di/providers'
+import { isSuccess } from '../../shared/types/Result'
+import type { GetTagsHandler } from '../../application/blog/handlers/GetTagsHandler'
+import type { Tag } from '../../domain/blog/entities/Tag'
+import { DomainError } from '../../shared/errors'
 
-import { extractBackendErrorDetails } from '../../utils/log-backend-error'
-
-export default defineEventHandler(async (event): Promise<BlogTagDto[]> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
-
-  const rawHost =
-    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
-
-  const blogService = useBlogService(domainLanguage)
-
+/**
+ * Blog tags API endpoint (Clean Architecture)
+ */
+export default defineEventHandler(async (event): Promise<Tag[]> => {
   try {
-    return await blogService.getTags()
+    // 1. Detect language
+    const domainLanguage = detectLanguage(event)
+
+    // 2. Register dependencies
+    registerProviders(domainLanguage)
+
+    // 3. Apply cache headers
+    applyCacheHeaders(event, CacheStrategies.ONE_HOUR)
+
+    // 4. Get handler from DI container
+    const handler = getHandler<GetTagsHandler>(SERVICE_KEYS.GET_TAGS_HANDLER)
+
+    // 5. Execute use case
+    const result = await handler.handle({})
+
+    // 6. Handle result
+    if (isSuccess(result)) {
+      return result.value
+    }
+
+    // Error case
+    handleDomainError(result.error, event)
   } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-
-    console.error('Error fetching blog tags:', backendError.logMessage, backendError)
-
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
-    })
+    if (error instanceof DomainError) {
+      handleDomainError(error, event)
+    }
+    handleUnknownError(error, event)
   }
+
+  throw createError({ statusCode: 500, statusMessage: 'Unexpected error' })
 })

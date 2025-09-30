@@ -1,9 +1,11 @@
 # Vuetify-First Styling Approach
 
 ## Purpose
+
 Apply styling to the Vue component using Vuetify utilities as priority, with minimal custom SASS as fallback.
 
 ## Prerequisites
+
 - Vue component structure created
 - Figma design requirements documented
 - Component template implemented
@@ -13,21 +15,25 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ### 1. PRIORITY: Vuetify Built-in Classes
 
 **Colors** (Use Vuetify color system first):
+
 - Primary colors: `color="primary"`, `text-primary`, `bg-secondary`
 - Semantic colors: `error`, `info`, `success`, `warning`
 - Surface colors: `surface`, `surface-variant`
 
 **Spacing** (Replace custom margins/padding):
+
 - Margins: `ma-{0-16}`, `mx-4`, `my-2`
 - Padding: `pa-{0-16}`, `px-4`, `py-2`
 - Responsive spacing: `ma-lg-8`, `pa-sm-4`
 
 **Typography** (Use Vuetify text classes):
+
 - Headers: `text-h1` to `text-h6`
 - Body text: `text-body-1`, `text-body-2`
 - Display: `text-caption`, `text-overline`
 
 **Layout** (Grid and flex utilities):
+
 - Grid: `v-container`, `v-row`, `v-col` with breakpoint props
 - Flex: `d-flex`, `flex-column`, `justify-center`, `align-center`
 - Responsive display: `d-sm-none`, `d-lg-block`
@@ -35,6 +41,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ### 2. Vuetify Component Selection
 
 **Replace custom elements with Vuetify components:**
+
 - Buttons: `v-btn` with `color`, `size`, `variant` props
 - Cards: `v-card`, `v-sheet` for containers
 - Form elements: `v-text-field`, `v-select`, `v-checkbox`
@@ -42,6 +49,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 - Data display: `v-table`, `v-list`, `v-chip`
 
 **Component props vs custom styles:**
+
 ```vue
 <!-- ✅ PREFERRED: Use component props -->
 <v-btn color="primary" size="large" variant="elevated">
@@ -59,6 +67,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 **CRITICAL**: Use Vuetify responsive system, NOT custom mixins:
 
 **Breakpoint Display:**
+
 ```vue
 <!-- Show/hide elements by breakpoint -->
 <div class="d-none d-lg-block">Desktop only</div>
@@ -66,6 +75,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ```
 
 **Responsive Props:**
+
 ```vue
 <!-- Responsive component sizing -->
 <v-btn :size="$vuetify.display.smAndDown ? 'small' : 'default'">
@@ -74,17 +84,21 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ```
 
 **Dynamic Classes:**
+
 ```vue
 <!-- Conditional classes based on breakpoint -->
-<div :class="{
-  'ga-4': $vuetify.display.mdAndUp,
-  'ga-2': $vuetify.display.smAndDown
-}">
+<div
+  :class="{
+    'ga-4': $vuetify.display.mdAndUp,
+    'ga-2': $vuetify.display.smAndDown,
+  }"
+>
   Responsive grid gap
 </div>
 ```
 
 **Grid Responsiveness:**
+
 ```vue
 <v-row>
   <v-col cols="12" sm="6" md="4" lg="3">
@@ -98,12 +112,14 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 **ONLY create custom SASS when Vuetify utilities are insufficient:**
 
 **Identify elements that CANNOT be achieved with Vuetify:**
+
 - Unique color combinations not in theme
 - Complex pseudo-element styles
 - Specific hover effects shown in Figma
 - Pixel-perfect spacing not available in Vuetify scale
 
 **Minimal Custom SASS Structure:**
+
 ```sass
 @use '@/assets/sass/base/variables' as *
 @use '@/assets/sass/base/mixins' as *
@@ -122,22 +138,26 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ### 5. SASS Fallback Resources
 
 **Existing Variables** (`assets/sass/base/_variables.sass`):
+
 - `$primary`, `$secondary`, `$accent` (should match Vuetify theme)
 - `$body-font-family: 'Poppins'`
 - `$border-radius-root: 8px`
 
 **Available Mixins** (`assets/sass/base/_mixins.sass`):
+
 - ❌ **FORBIDDEN**: `@include mobile`, `@include tablet`, `@include desktop`
 - ✅ **Allowed**: `@include transition($property, $duration, $easing)`
 - ✅ **Allowed**: `@include box-shadow($level)` (prefer Vuetify elevation)
 
 **Existing Component Classes** (`assets/sass/components/`):
+
 - Check for reusable patterns: `_buttons.sass`, `_cards.sass`, `_menus.sass`
 - Reuse existing classes instead of creating duplicates
 
 ### 6. Styling Priority Checklist
 
 **Before writing custom CSS:**
+
 - [ ] Can this be achieved with Vuetify component props?
 - [ ] Can this be achieved with Vuetify utility classes?
 - [ ] Can this be achieved with Vuetify responsive classes?
@@ -145,6 +165,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 - [ ] Is this style exactly as shown in Figma design?
 
 **Custom SASS is acceptable only when:**
+
 - [ ] Figma design requires exact colors not in Vuetify theme
 - [ ] Specific spacing not available in Vuetify scale (0-16)
 - [ ] Unique hover/focus effects shown in Figma
@@ -153,6 +174,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ### 7. Forbidden Styling Practices
 
 **❌ NEVER DO:**
+
 - Use custom responsive mixins (@include mobile, @include tablet)
 - Add hover effects not shown in Figma
 - Create variant props without Figma variants
@@ -161,6 +183,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 - Use !important declarations
 
 **✅ ALWAYS DO:**
+
 - Try Vuetify solution first
 - Use existing project variables/mixins
 - Match Figma design exactly
@@ -170,6 +193,7 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 ### 8. Testing Responsive Design
 
 **Vuetify Breakpoint Testing:**
+
 - xs (0-600px): Mobile phones
 - sm (600-960px): Tablets
 - md (960-1264px): Small laptops
@@ -177,10 +201,12 @@ Apply styling to the Vue component using Vuetify utilities as priority, with min
 - xl (1904px+): Large monitors
 
 **Use browser DevTools or $vuetify.display:**
+
 ```javascript
 // In component for debugging
 console.log('Current breakpoint:', $vuetify.display)
 ```
 
 ## Next Steps
+
 After styling completion, proceed with integration testing and commit using the finalization prompt.

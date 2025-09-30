@@ -44,9 +44,7 @@
         <template #prepend>
           <v-icon icon="mdi-logout" class="me-4" />
         </template>
-        <v-list-item-title class="text-body-1">
-          Logout
-        </v-list-item-title>
+        <v-list-item-title class="text-body-1"> Logout </v-list-item-title>
       </v-list-item>
     </v-list>
   </div>
@@ -55,7 +53,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
@@ -118,11 +119,11 @@ const baseMenuItems: MenuItemDefinition[] = [
 ]
 
 const menuItems = computed<MenuItem[]>(() =>
-  baseMenuItems.map((item) => ({
+  baseMenuItems.map(item => ({
     ...item,
     title: t(item.titleKey),
     to: resolveLocalizedRoutePath(item.routeName, currentLocale.value),
-  })),
+  }))
 )
 </script>
 

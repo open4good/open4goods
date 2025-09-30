@@ -9,11 +9,11 @@ vi.mock('vue-i18n', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'siteIdentity.hero.mainTitle': 'Test Main Title',
-        'siteIdentity.hero.mainSubtitle': 'Test Main Subtitle'
+        'siteIdentity.hero.mainSubtitle': 'Test Main Subtitle',
       }
       return translations[key] || key
-    }
-  })
+    },
+  }),
 }))
 
 // Mock IntersectionObserver
@@ -225,7 +225,10 @@ describe('TheHeroVideo', () => {
       const video = wrapper.find('video')
       const videoElement = video.element as HTMLVideoElement
 
-      const removeEventListenerSpy = vi.spyOn(videoElement, 'removeEventListener')
+      const removeEventListenerSpy = vi.spyOn(
+        videoElement,
+        'removeEventListener'
+      )
 
       wrapper.unmount()
 

@@ -44,7 +44,7 @@ vi.mock('#app', () => ({
 }))
 
 // Dynamically import the component to apply mocks before evaluation
-let TextContent: typeof import('./TextContent.vue')['default']
+let TextContent: (typeof import('./TextContent.vue'))['default']
 beforeAll(async () => {
   TextContent = (await import('./TextContent.vue')).default
 })

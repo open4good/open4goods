@@ -1,32 +1,64 @@
-import { useContentService } from '~~/shared/api-client/services/content.services'
-import type { XwikiContentBlocDto } from '~~/shared/api-client'
-import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
+import { detectLanguage } from '../../presentation/middleware/languageDetector'
+import {
+  applyCacheHeaders,
+  CacheStrategies,
+} from '../../presentation/middleware/cacheHeaders'
+import {
+  handleDomainError,
+  handleUnknownError,
+} from '../../presentation/middleware/errorHandler'
+import {
+  registerProviders,
+  SERVICE_KEYS,
+  getHandler,
+} from '../../shared/di/providers'
+import { isSuccess } from '../../shared/types/Result'
+import type { GetBlocHandler } from '../../application/content/handlers/GetBlocHandler'
+import type { ContentBloc } from '../../domain/content/entities/ContentBloc'
+import { DomainError } from '../../shared/errors'
 
-import { extractBackendErrorDetails } from '../../utils/log-backend-error'
-
-export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> => {
-  const blocId = getRouterParam(event, 'blocId')
-  if (!blocId) {
-    throw createError({ statusCode: 400, statusMessage: 'Bloc id is required' })
-  }
-
-  // Cache content for 1 hour
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
-  const rawHost =
-    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
-
-  const contentService = useContentService(domainLanguage)
+/**
+ * Content bloc API endpoint (Clean Architecture)
+ */
+export default defineEventHandler(async (event): Promise<ContentBloc> => {
   try {
-    return await contentService.getBloc(blocId)
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching bloc', backendError.logMessage, backendError)
+    // 1. Detect language
+    const domainLanguage = detectLanguage(event)
 
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
-    })
+    // 2. Register dependencies
+    registerProviders(domainLanguage)
+
+    // 3. Apply cache headers
+    applyCacheHeaders(event, CacheStrategies.ONE_HOUR)
+
+    // 4. Get blocId from route params
+    const blocId = getRouterParam(event, 'blocId')
+    if (!blocId) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Bloc ID is required',
+      })
+    }
+
+    // 5. Get handler from DI container
+    const handler = getHandler<GetBlocHandler>(SERVICE_KEYS.GET_BLOC_HANDLER)
+
+    // 6. Execute use case
+    const result = await handler.handle({ blocId })
+
+    // 7. Handle result
+    if (isSuccess(result)) {
+      return result.value
+    }
+
+    // Error case
+    handleDomainError(result.error, event)
+  } catch (error) {
+    if (error instanceof DomainError) {
+      handleDomainError(error, event)
+    }
+    handleUnknownError(error, event)
   }
+
+  throw createError({ statusCode: 500, statusMessage: 'Unexpected error' })
 })

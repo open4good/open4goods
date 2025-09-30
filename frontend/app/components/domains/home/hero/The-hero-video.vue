@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
 const props = defineProps({
   videoSrc: {
@@ -10,94 +10,94 @@ const props = defineProps({
     type: String,
     default: '',
   },
-});
+})
 
-const isVideoLoaded = ref(false);
-const showPlaceholder = ref(true);
-const heroVideoRef = ref<HTMLVideoElement | null>(null);
-const intersectionObserver = ref<IntersectionObserver | null>(null);
-const isLoadingError = ref(false);
+const isVideoLoaded = ref(false)
+const showPlaceholder = ref(true)
+const heroVideoRef = ref<HTMLVideoElement | null>(null)
+const intersectionObserver = ref<IntersectionObserver | null>(null)
+const isLoadingError = ref(false)
 
 const videoClasses = computed(() => ({
   'hero-video': true,
   loaded: isVideoLoaded.value,
-}));
+}))
 
 const loadingClasses = computed(() => ({
   'loading-indicator': true,
   hidden: isVideoLoaded.value,
-}));
+}))
 
 // Handles video loading and transitions
 const onVideoLoaded = () => {
-  isVideoLoaded.value = true;
-  showPlaceholder.value = false;
-};
+  isVideoLoaded.value = true
+  showPlaceholder.value = false
+}
 
 // Handles loading errors
 const onVideoError = () => {
-  isLoadingError.value = true;
-  showPlaceholder.value = true;
-};
+  isLoadingError.value = true
+  showPlaceholder.value = true
+}
 
 // Attempts to start autoplay
 const attemptAutoplay = () => {
-  if (!heroVideoRef.value) return;
-  heroVideoRef.value.play().catch(() => {});
-};
+  if (!heroVideoRef.value) return
+  heroVideoRef.value.play().catch(() => {})
+}
 
 onMounted(() => {
-  const videoElement = heroVideoRef.value;
+  const videoElement = heroVideoRef.value
   if (!videoElement) {
-    showPlaceholder.value = true;
-    return;
+    showPlaceholder.value = true
+    return
   }
 
   // Check if video is already loaded (cache case)
   if (videoElement.readyState >= 3) {
-    onVideoLoaded();
-    attemptAutoplay();
+    onVideoLoaded()
+    attemptAutoplay()
   }
 
   // Events to handle loading - using loadstart for faster response
-  videoElement.addEventListener('loadstart', onVideoLoaded);
-  videoElement.addEventListener('canplay', attemptAutoplay);
-  videoElement.addEventListener('error', onVideoError);
+  videoElement.addEventListener('loadstart', onVideoLoaded)
+  videoElement.addEventListener('canplay', attemptAutoplay)
+  videoElement.addEventListener('error', onVideoError)
 
   // Intersection Observer to optimize playback
   if ('IntersectionObserver' in window) {
     intersectionObserver.value = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             if (videoElement.paused) {
-              videoElement.play().catch(() => {});
+              videoElement.play().catch(() => {})
             }
           } else {
             if (!videoElement.paused) {
-              videoElement.pause();
+              videoElement.pause()
             }
           }
-        });
+        })
       },
       { threshold: 0.5 }
-    );
-    intersectionObserver.value.observe(videoElement);
+    )
+    intersectionObserver.value.observe(videoElement)
   }
-});
+})
 
 onBeforeUnmount(() => {
   // Cleanup events and observer
-  const videoElement = heroVideoRef.value;
+  const videoElement = heroVideoRef.value
   if (videoElement) {
-    videoElement.removeEventListener('loadstart', onVideoLoaded);
-    videoElement.removeEventListener('canplay', attemptAutoplay);
-    videoElement.removeEventListener('error', onVideoError);
+    videoElement.removeEventListener('loadstart', onVideoLoaded)
+    videoElement.removeEventListener('canplay', attemptAutoplay)
+    videoElement.removeEventListener('error', onVideoError)
   }
   if (intersectionObserver.value) {
-    intersectionObserver.value.disconnect();
+    intersectionObserver.value.disconnect()
   }
-});
+})
 
 // Expose properties and methods for testing
 defineExpose({
@@ -106,7 +106,7 @@ defineExpose({
   isLoadingError,
   onVideoLoaded,
   attemptAutoplay,
-});
+})
 </script>
 
 <template>
@@ -116,7 +116,10 @@ defineExpose({
       <div class="spinner"></div>
     </div>
 
-    <div v-if="showPlaceholder || isLoadingError" class="video-placeholder"></div>
+    <div
+      v-if="showPlaceholder || isLoadingError"
+      class="video-placeholder"
+    ></div>
 
     <video
       v-if="!isLoadingError"
@@ -130,7 +133,10 @@ defineExpose({
       :poster="props.posterUrl"
     >
       <source :src="props.videoSrc" type="video/mp4" />
-      <p>Your browser does not support HTML5 video playback. Consider updating for a modern experience.</p>
+      <p>
+        Your browser does not support HTML5 video playback. Consider updating
+        for a modern experience.
+      </p>
     </video>
 
     <div class="hero-overlay"></div>

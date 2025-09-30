@@ -1,53 +1,50 @@
 # Creating a Vue Component from Figma
 
-
 You will create a Vue.js component from a Figma design following a structured methodology and respecting project conventions.
 
-
 ## Project Context
+
 - **Frontend Stack**: Vue.js 3 + Vuetify
 - **Styling**: SASS with BEM methodology
 - **Structure**: Modular architecture with shared components
 
-
 ## Git Branch Setup
-
 
 **FIRST STEP - Branch Creation:**
 Ask the user: "What name would you like for the new Git branch for this component?"
+
 - Use format: `feature/component-[component-name]` or `feat/[component-name]` as suggestions
 - Create and switch to the new branch before starting development
-
 
 ## Workflow Overview
 
 **PREREQUISITES (already done by user):**
+
 - Figma component is already selected
 - Component name will be taken from Figma component name
 - Component will be created in `components/shared/[category]/[FigmaComponentName].vue`
 
 **ONLY ASK if needed:**
+
 - Which category folder? (cards, ui, form, navigation, layout, media, other...)
 - Are there specific integration requirements?
 
 **NO NEED TO ASK:**
+
 - ❌ Component name (use Figma component name)
 - ❌ Node ID (component already selected in Figma)
 - ❌ Props (determined from Figma design analysis)
 - ❌ Responsive behavior (follow Figma breakpoints if any)
 - ❌ Icons (use Figma icon names directly)
 
-
 ## Session Configuration
-
 
 **IMPORTANT**: When prompted by Claude Code for edit permissions, always respond with "Yes" to streamline the development process.
 
-
 ## Workflow to Follow
 
-
 ### 0. Git Branch Setup
+
 ```
 STEP 0: Branch Creation
 - Ask for branch name (suggest: feature/component-[name] or feat/[name])
@@ -55,8 +52,8 @@ STEP 0: Branch Creation
 - Verify branch switch successful
 ```
 
-
 ### 1. Automatic Figma Design Analysis
+
 ```
 STEP 1: Direct Design Extraction (NO questions needed)
 - Use mcp__figma__get_code to generate code from selected design
@@ -71,8 +68,8 @@ STEP 1: Direct Design Extraction (NO questions needed)
 - Check existing SASS structure for reusable variables/classes
 ```
 
-
 ### 2. Vue Component Creation - EXACT FIGMA REPRODUCTION ONLY
+
 ```
 STEP 2: Conversion and Adaptation - STRICT FIGMA ADHERENCE
 - Create .vue file in: components/shared/[category]/ComponentName.vue
@@ -113,8 +110,8 @@ STEP 2: Conversion and Adaptation - STRICT FIGMA ADHERENCE
   * Breakpoints: xs (0-600px), sm (600-960px), md (960-1264px), lg (1264-1904px), xl (1904px+)
 ```
 
-
 ### 3. Vuetify-First Styling Approach
+
 ```
 STEP 3: Vuetify Utilities Before Custom Styles
 - PRIORITY: Use Vuetify built-in classes and components:
@@ -141,8 +138,8 @@ STEP 3: Vuetify Utilities Before Custom Styles
   * Instead of custom grid → use v-container, v-row, v-col
 ```
 
-
 ### 4. Integration and Validation
+
 ```
 STEP 4: Ecosystem Integration
 - Import component in parent page/component
@@ -157,64 +154,64 @@ STEP 4: Ecosystem Integration
   * Use browser DevTools or $vuetify.display for breakpoint testing
 ```
 
-
 ## Vuetify Resources & SASS Fallback
 
-
 ### PRIORITY: Vuetify Built-in Classes
-- **Colors**: Use Vuetify color system (primary, secondary, accent, error, info, success, warning)
-  * Apply via props: `color="primary"` or classes: `text-primary`, `bg-secondary`
-- **Spacing**: Use Vuetify spacing utilities instead of custom CSS
-  * Margins: `ma-{0-16}`, `mx-4`, `my-2`, responsive: `ma-lg-8`
-  * Padding: `pa-{0-16}`, `px-4`, `py-2`, responsive: `pa-sm-4`
-- **Typography**: Use Vuetify text classes
-  * `text-h1` to `text-h6`, `text-body-1`, `text-body-2`, `text-caption`
-- **Layout**: Use Vuetify grid and flex utilities
-  * Grid: `v-container`, `v-row`, `v-col` with breakpoint props
-  * Flex: `d-flex`, `flex-column`, `justify-center`, `align-center`
-  * Responsive display: `d-sm-none`, `d-lg-block`
 
+- **Colors**: Use Vuetify color system (primary, secondary, accent, error, info, success, warning)
+  - Apply via props: `color="primary"` or classes: `text-primary`, `bg-secondary`
+- **Spacing**: Use Vuetify spacing utilities instead of custom CSS
+  - Margins: `ma-{0-16}`, `mx-4`, `my-2`, responsive: `ma-lg-8`
+  - Padding: `pa-{0-16}`, `px-4`, `py-2`, responsive: `pa-sm-4`
+- **Typography**: Use Vuetify text classes
+  - `text-h1` to `text-h6`, `text-body-1`, `text-body-2`, `text-caption`
+- **Layout**: Use Vuetify grid and flex utilities
+  - Grid: `v-container`, `v-row`, `v-col` with breakpoint props
+  - Flex: `d-flex`, `flex-column`, `justify-center`, `align-center`
+  - Responsive display: `d-sm-none`, `d-lg-block`
 
 ### SASS Fallback (Only when Vuetify insufficient)
 
-**Existing Variables (assets/sass/base/_variables.sass)**
+**Existing Variables (assets/sass/base/\_variables.sass)**
+
 - Colors: `$primary`, `$secondary`, `$accent` (should match Vuetify theme)
 - Typography: `$body-font-family: 'Poppins'`
 - Layout: `$border-radius-root: 8px`, `$font-size-root: 16px`
 
-**Available Mixins (assets/sass/base/_mixins.sass)**
+**Available Mixins (assets/sass/base/\_mixins.sass)**
+
 - ❌ **NEVER USE**: `@include mobile`, `@include tablet`, `@include desktop` - Use Vuetify responsive system instead
 - Transitions: `@include transition($property, $duration, $easing)` (prefer Vuetify component transitions)
 - Shadows: `@include box-shadow($level)` (prefer Vuetify elevation classes)
 - Buttons: `@include button-style($bg-color, $text-color)` (prefer v-btn)
 
 **Existing Component Classes (assets/sass/components/)**
+
 - Menu components: `.menu-item-base`, `.btn-nudge-tools`, `.main-menu-container`
 - Check other component files: `_buttons.sass`, `_cards.sass`, `_menus.sass`
 
+**IMPORTANT**:
 
-**IMPORTANT**: 
 1. FIRST try to achieve the design with Vuetify classes
 2. Only create custom SASS when Vuetify utilities cannot achieve the desired result
 3. Always reuse existing classes and variables instead of creating duplicates
 
-
 ### Icons Implementation
+
 - Figma icon names match the icon library directly
 - Use them as-is in `<v-icon icon="figma-icon-name" />`
 - No need to ask for icon mapping - implement directly from Figma
 
-
 ## Conventions to Follow
 
-
 ### File Naming
+
 - Components: `PascalCase.vue` (e.g., `ButtonNudgeTools.vue`)
 - SASS Styles: `_kebab-case.sass` (e.g., `_button-variants.sass`)
 - Suggested categories: ui, form, navigation, layout, media
 
-
 ### Vue Component Structure
+
 ```vue
 <template>
   <!-- Use Vuetify components and utility classes -->
@@ -229,23 +226,19 @@ STEP 4: Ecosystem Integration
   </v-card>
 </template>
 
-
 <script setup lang="ts">
 interface Props {
   // Props with TypeScript types
 }
 
-
 const props = withDefaults(defineProps<Props>(), {
   // Default values
-});
-
+})
 
 const emit = defineEmits<{
   // Emitted events
-}>();
+}>()
 </script>
-
 
 <!-- ONLY styles that exactly match Figma design - prefer Vuetify classes in template -->
 <style lang="sass" scoped>
@@ -260,26 +253,26 @@ const emit = defineEmits<{
   // ❌ FORBIDDEN unless explicitly in Figma:
   // hover effects, transitions, animations, shadows, borders
   // variant styles, responsive breakpoints not shown in design
-  
+
   // ❌ NEVER USE custom responsive mixins - use Vuetify responsive system instead:
   // @include mobile - FORBIDDEN, use $vuetify.display.smAndDown in template
-  // @include tablet - FORBIDDEN, use $vuetify.display.md in template  
+  // @include tablet - FORBIDDEN, use $vuetify.display.md in template
   // @include desktop - FORBIDDEN, use $vuetify.display.lgAndUp in template
-  
+
   // ✅ Only add custom CSS for:
   // Exact colors, fonts, spacing, layout that match Figma pixel-perfect
   // Use standard media queries as last resort, but prefer Vuetify classes
 </style>
 ```
 
-
 ### BEM Methodology
+
 - Block: `.button`
 - Element: `.button__icon`, `.button__text`
 - Modifier: `.button--primary`, `.button--disabled`
 
-
 ## Final Checklist - EXACT FIGMA REPRODUCTION
+
 - [ ] Figma design correctly analyzed and reproduced EXACTLY
 - [ ] Vue component created with proper structure
 - [ ] **PRIORITY**: Vuetify responsive classes used instead of custom CSS where possible
@@ -296,6 +289,7 @@ const emit = defineEmits<{
 - [ ] **CRITICAL**: NO variant props unless multiple variants exist in Figma
 
 ## 5. Commit Changes
+
 ```
 STEP 5: Create Git Commit
 - After successful component creation and validation
@@ -305,12 +299,10 @@ STEP 5: Create Git Commit
 - Include component details in commit body if needed
 ```
 
-
 ## Dynamic Arguments
+
 $ARGUMENTS
 
-
 ---
-
 
 **IMPORTANT**: Start by analyzing the selected Figma design directly (component name and selection are already done). EXACT design reproduction is the ONLY priority - do not add features, flexibility, or enhancements not explicitly shown in Figma.

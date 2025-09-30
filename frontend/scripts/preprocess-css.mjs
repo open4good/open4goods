@@ -13,9 +13,7 @@ const assetsDir = path.join(projectRoot, 'app', 'assets', 'css')
 const bootstrapCssPath = path.join(assetsDir, 'bootstrap.css')
 const outputPath = path.join(assetsDir, 'text-content.css')
 
-const [bootstrapCss] = await Promise.all([
-  readFile(bootstrapCssPath, 'utf8'),
-])
+const [bootstrapCss] = await Promise.all([readFile(bootstrapCssPath, 'utf8')])
 
 const combinedCss = `${bootstrapCss}`
 
@@ -26,7 +24,7 @@ const prefixedCss = await postcss([
       'default',
       {
         discardComments: {
-          preserve: (comment) => /@preserve|@license|^!/i.test(comment),
+          preserve: comment => /@preserve|@license|^!/i.test(comment),
         },
       },
     ],

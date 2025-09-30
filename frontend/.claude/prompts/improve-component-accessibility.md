@@ -11,6 +11,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 ### 1. Analyse du composant existant
 
 **ÉTAPE 1 : Audit d'accessibilité**
+
 - Lire le composant sélectionné et analyser sa structure
 - Identifier les éléments interactifs (boutons, liens, formulaires)
 - Vérifier la hiérarchie des titres (h1, h2, etc.)
@@ -21,6 +22,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 ### 2. Points de contrôle WCAG 2.1
 
 **Niveau A (Critique)**
+
 - [ ] **Contenu non-textuel** : Alt text pour les images
 - [ ] **Média temporel** : Sous-titres, transcriptions
 - [ ] **Adaptable** : Structure sémantique correcte
@@ -31,6 +33,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 - [ ] **Compatible** : Markup valide, noms accessibles
 
 **Niveau AA (Recommandé)**
+
 - [ ] **Distinguable** : Contraste amélioré 7:1 (4.5:1 pour texte large)
 - [ ] **Navigable** : Titres de page, ordre de focus logique
 - [ ] **Saisie** : Labels et instructions clairs
@@ -39,13 +42,10 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 ### 3. Implémentation Vuetify a11y
 
 **Composants Vuetify avec accessibilité intégrée**
+
 ```vue
 <!-- Boutons -->
-<v-btn 
-  :aria-label="buttonLabel"
-  :disabled="isDisabled"
-  @click="handleClick"
->
+<v-btn :aria-label="buttonLabel" :disabled="isDisabled" @click="handleClick">
   <v-icon 
     :icon="iconName" 
     :aria-hidden="hasText"
@@ -87,7 +87,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 </v-form>
 
 <!-- Images -->
-<v-img 
+<v-img
   :src="imageSrc"
   :alt="imageAlt"
   :aria-describedby="hasCaption ? 'img-caption' : undefined"
@@ -97,7 +97,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 </p>
 
 <!-- Alertes et statuts -->
-<v-alert 
+<v-alert
   :type="alertType"
   :aria-live="isImportant ? 'assertive' : 'polite'"
   role="alert"
@@ -109,12 +109,14 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 ### 4. Attributs ARIA essentiels
 
 **Navigation et structure**
+
 - `role`: Définit le rôle sémantique (`button`, `navigation`, `main`, etc.)
 - `aria-label`: Nom accessible quand le texte visible n'est pas suffisant
 - `aria-labelledby`: Référence à un élément qui labellise
 - `aria-describedby`: Référence à une description supplémentaire
 
 **États et propriétés**
+
 - `aria-current`: Page/étape actuelle (`page`, `step`, `true`)
 - `aria-expanded`: État d'un élément collapsible
 - `aria-hidden`: Cache aux technologies d'assistance
@@ -122,6 +124,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 - `aria-pressed`: État d'un bouton toggle
 
 **Formulaires**
+
 - `aria-required`: Champ obligatoire
 - `aria-invalid`: Champ en erreur
 - `aria-describedby`: Description d'aide ou d'erreur
@@ -129,6 +132,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 ### 5. Navigation au clavier
 
 **Support des raccourcis standards**
+
 - `Tab` / `Shift+Tab` : Navigation séquentielle
 - `Enter` / `Space` : Activation des boutons
 - `Escape` : Fermeture des modales/menus
@@ -136,7 +140,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 
 ```vue
 <template>
-  <div 
+  <div
     @keydown.enter="handleActivation"
     @keydown.space.prevent="handleActivation"
     @keydown.escape="handleClose"
@@ -150,6 +154,7 @@ Rendre le composant accessible à tous les utilisateurs, notamment ceux utilisan
 ### 6. Gestion du focus
 
 **Focus management**
+
 ```vue
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
@@ -183,11 +188,13 @@ const handleModalClose = () => {
 ### 7. Couleurs et contrastes
 
 **Vérification des contrastes**
+
 - Texte normal : ratio minimum 4.5:1
 - Texte large (18pt+ ou 14pt+ gras) : ratio minimum 3:1
 - Éléments d'interface : ratio minimum 3:1
 
 **Ne pas utiliser uniquement la couleur**
+
 ```vue
 <!-- ❌ Mauvais : seule la couleur indique l'état -->
 <span :class="{ 'text-red': hasError }">{{ message }}</span>
@@ -209,6 +216,7 @@ const handleModalClose = () => {
 ### 8. Responsive et zoom
 
 **Support du zoom jusqu'à 200%**
+
 ```vue
 <template>
   <!-- Utiliser les unités relatives et les classes Vuetify -->
@@ -233,11 +241,12 @@ const handleModalClose = () => {
 ### 9. Internationalisation (i18n)
 
 **Attributs de langue**
+
 ```vue
 <template>
   <div :lang="$i18n.locale">
     <h1>{{ $t('page.title') }}</h1>
-    
+
     <!-- Texte dans une autre langue -->
     <blockquote lang="en">
       "The only way to do great work is to love what you do."
@@ -249,6 +258,7 @@ const handleModalClose = () => {
 ### 10. Tests d'accessibilité
 
 **Outils de test recommandés**
+
 - **axe-core** : Intégration avec Vitest
 - **Lighthouse** : Audit automatique
 - **NVDA/JAWS** : Test avec lecteurs d'écran
@@ -274,39 +284,46 @@ describe('Accessibility tests', () => {
 ## Checklist finale
 
 **Structure et sémantique**
+
 - [ ] Hiérarchie des titres correcte (h1 > h2 > h3...)
 - [ ] Landmarks ARIA (`main`, `nav`, `aside`, etc.)
 - [ ] Listes structurées avec `ul`/`ol`/`li`
 - [ ] Texte alternatif pour toutes les images informatives
 
 **Navigation et interaction**
+
 - [ ] Tous les éléments interactifs accessibles au clavier
 - [ ] Ordre de tabulation logique
 - [ ] Focus visible sur tous les éléments
 - [ ] Pas de piège à clavier
 
 **Formulaires**
+
 - [ ] Labels associés à tous les champs
 - [ ] Messages d'erreur descriptifs et liés
 - [ ] Instructions claires
 - [ ] Validation accessible
 
 **Couleurs et contraste**
+
 - [ ] Contraste suffisant (4.5:1 minimum)
 - [ ] Information pas uniquement transmise par la couleur
 - [ ] Support du mode sombre/clair
 
 **Contenu dynamique**
+
 - [ ] Changements d'état annoncés (`aria-live`)
 - [ ] Messages d'erreur/succès accessibles
 - [ ] Modales et overlays correctement gérés
 
 **Mobile et responsive**
+
 - [ ] Taille minimale tactile 44x44px
 - [ ] Support du zoom 200%
 - [ ] Navigation tactile accessible
 
 ## Dynamic Arguments
+
 $ARGUMENTS
 
 ---

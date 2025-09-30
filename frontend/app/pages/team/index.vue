@@ -1,5 +1,3 @@
 <template>
-  <div>
-    ...team
-  </div>
+  <div>...team</div>
 </template>

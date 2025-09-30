@@ -1,53 +1,66 @@
-import { useBlogService } from '~~/shared/api-client/services/blog.services'
-import type { BlogPostDto } from '~~/shared/api-client'
-import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
-
-import { extractBackendErrorDetails } from '../../../utils/log-backend-error'
+import { detectLanguage } from '../../../presentation/middleware/languageDetector'
+import {
+  applyCacheHeaders,
+  CacheStrategies,
+} from '../../../presentation/middleware/cacheHeaders'
+import {
+  handleDomainError,
+  handleUnknownError,
+} from '../../../presentation/middleware/errorHandler'
+import {
+  registerProviders,
+  SERVICE_KEYS,
+  getHandler,
+} from '../../../shared/di/providers'
+import { isSuccess } from '../../../shared/types/Result'
+import type { GetArticleBySlugHandler } from '../../../application/blog/handlers/GetArticleBySlugHandler'
+import type { Article } from '../../../domain/blog/entities/Article'
+import { DomainError } from '../../../shared/errors'
 
 /**
- * Blog article by slug API endpoint
- * Handles GET requests for a single blog article
+ * Blog article by slug API endpoint (Clean Architecture)
  */
-export default defineEventHandler(async (event): Promise<BlogPostDto> => {
-  // Cache the article for one hour
-  setResponseHeader(
-    event,
-    'Cache-Control',
-    'public, max-age=3600, s-maxage=3600'
-  )
-
-  const slug = getRouterParam(event, 'slug')
-
-  if (!slug) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Article slug is required',
-    })
-  }
-
-  const rawHost =
-    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
-
-  const blogService = useBlogService(domainLanguage)
-
+export default defineEventHandler(async (event): Promise<Article> => {
   try {
-    // Use the service to fetch the article
-    const response = await blogService.getArticleBySlug(slug)
-    return response
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    console.error(
-      'Error fetching blog article:',
-      backendError.logMessage,
-      backendError
+    // 1. Detect language
+    const domainLanguage = detectLanguage(event)
+
+    // 2. Register dependencies
+    registerProviders(domainLanguage)
+
+    // 3. Apply cache headers
+    applyCacheHeaders(event, CacheStrategies.ONE_HOUR)
+
+    // 4. Get slug from route params
+    const slug = getRouterParam(event, 'slug')
+    if (!slug) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Article slug is required',
+      })
+    }
+
+    // 5. Get handler from DI container
+    const handler = getHandler<GetArticleBySlugHandler>(
+      SERVICE_KEYS.GET_ARTICLE_BY_SLUG_HANDLER
     )
 
-    // Forward backend status code and message when available
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
-    })
+    // 6. Execute use case
+    const result = await handler.handle({ slug })
+
+    // 7. Handle result
+    if (isSuccess(result)) {
+      return result.value
+    }
+
+    // Error case
+    handleDomainError(result.error, event)
+  } catch (error) {
+    if (error instanceof DomainError) {
+      handleDomainError(error, event)
+    }
+    handleUnknownError(error, event)
   }
+
+  throw createError({ statusCode: 500, statusMessage: 'Unexpected error' })
 })

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-const drawerStore = useState("mobileDrawer", () => false);
+const drawerStore = useState('mobileDrawer', () => false)
 
 const toggleDrawer = () => {
-  drawerStore.value = !drawerStore.value;
-};
+  drawerStore.value = !drawerStore.value
+}
 </script>
 
 <template>

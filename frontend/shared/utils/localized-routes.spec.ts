@@ -20,13 +20,10 @@ describe('localized-routes utilities', () => {
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
   })
 
-
   it('falls back to default paths when no mapping exists', () => {
     expect(resolveLocalizedRoutePath('privacy', 'fr-FR')).toBe('/privacy')
     expect(resolveLocalizedRoutePath('account', 'en-US')).toBe('/account')
   })
-
-
 
   it('builds a compatible i18n pages configuration', () => {
     const config = buildI18nPagesConfig()

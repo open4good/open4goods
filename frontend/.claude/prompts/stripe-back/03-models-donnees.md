@@ -1,9 +1,11 @@
 # PROMPT : Modèles de données Stripe + Upiik
 
 ## Contexte
+
 Créer les modèles Mongoose pour l'intégration Stripe, en liaison avec les modèles User existants. Architecture multi-DB d'Upiik à respecter.
 
 ## Prérequis
+
 ✅ Configuration Stripe (`01-config-initiale.md`)
 ✅ Architecture domaine (`02-architecture-domaine.md`)
 
@@ -14,6 +16,7 @@ Créer les modèles Mongoose pour l'intégration Stripe, en liaison avec les mod
 **Fichier :** `src/domains/payments/models/StripeCustomer.js`
 
 **Spécifications :**
+
 ```javascript
 // Liaison 1:1 avec User existant
 {
@@ -43,6 +46,7 @@ Créer les modèles Mongoose pour l'intégration Stripe, en liaison avec les mod
 **Fichier :** `src/domains/payments/models/Subscription.js`
 
 **Spécifications :**
+
 ```javascript
 // Abonnements Upiik (€4/mois, €30/an)
 {
@@ -75,6 +79,7 @@ Créer les modèles Mongoose pour l'intégration Stripe, en liaison avec les mod
 **Fichier :** `src/domains/payments/models/Payment.js`
 
 **Spécifications :**
+
 ```javascript
 // Historique de tous les paiements
 {
@@ -136,14 +141,16 @@ Créer les modèles Mongoose pour l'intégration Stripe, en liaison avec les mod
 ### 5. Indexes et relations
 
 **Pour chaque modèle, ajouter :**
+
 ```javascript
 // Indexes pour performances
-StripeCustomer: userId (unique), stripeCustomerId (unique)
-Subscription: userId, stripeSubscriptionId (unique), status
-Payment: userId, stripePaymentIntentId (unique), createdAt
+StripeCustomer: (userId(unique), stripeCustomerId(unique))
+Subscription: (userId, stripeSubscriptionId(unique), status)
+Payment: (userId, stripePaymentIntentId(unique), createdAt)
 ```
 
 **Relations à configurer :**
+
 ```javascript
 // Références croisées
 User.stripeCustomerId → StripeCustomer.stripeCustomerId
@@ -156,6 +163,7 @@ Payment.relatedSubscription → Subscription._id
 ### 6. Base de données multi-DB
 
 **Connexions à utiliser :**
+
 ```javascript
 // Examiner src/config/database.js pour les connexions
 - Clients DB → StripeCustomer, Subscription
@@ -166,18 +174,21 @@ Payment.relatedSubscription → Subscription._id
 ### 7. Validation Mongoose + Joi
 
 **Chaque modèle doit avoir :**
+
 - Validation Mongoose (types, required, enum)
 - Schémas Joi pour validation API
 - Méthodes d'instance utiles
 - Hooks pre/post save si nécessaire
 
 ## Contraintes spéciales Upiik
+
 - **Multi-villes** : Metadata city importante
 - **Système tokens** : Intégration avec logique existante
 - **RGPD** : Champs sensibles chiffrés si nécessaire
 - **Performances** : Indexes optimisés pour requêtes fréquentes
 
 ## Critères de réussite
+
 ✅ Modèles StripeCustomer, Subscription, Payment créés
 ✅ Modèle User étendu avec champs Stripe
 ✅ Indexes configurés pour performances
@@ -186,6 +197,7 @@ Payment.relatedSubscription → Subscription._id
 ✅ Compatible avec l'architecture multi-DB
 
 ## Instructions d'exécution
+
 1. **Examiner** les modèles existants dans `src/domains/user/models/`
 2. **Identifier** le modèle User actuel à étendre
 3. **Créer** les 3 nouveaux modèles Stripe

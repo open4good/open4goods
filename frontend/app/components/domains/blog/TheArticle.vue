@@ -37,7 +37,9 @@ const buildDateInfo = (timestamp?: number) => {
 
   return {
     iso: date.toISOString(),
-    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(date),
+    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(
+      date
+    ),
   }
 }
 
@@ -50,8 +52,15 @@ const updatedDate = computed(() => {
   return info
 })
 
-const rawBody = computed(() => article.value.body ?? article.value.content ?? '')
-const plainBody = computed(() => rawBody.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim())
+const rawBody = computed(
+  () => article.value.body ?? article.value.content ?? ''
+)
+const plainBody = computed(() =>
+  rawBody.value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+)
 
 const sanitizedBody = computed(() => {
   const { sanitizedHtml } = _sanitizeHtml(rawBody.value)
@@ -82,7 +91,9 @@ const readingTimeLabel = computed(() => {
   return t('blog.article.readingTime', { minutes: readingTimeMinutes.value })
 })
 
-const categories = computed(() => (article.value.category ?? []).map((item) => item.trim()).filter(Boolean))
+const categories = computed(() =>
+  (article.value.category ?? []).map(item => item.trim()).filter(Boolean)
+)
 
 const buildTagLink = (tag: string) => ({
   path: '/blog',
@@ -129,7 +140,9 @@ const metaDescription = computed(() => {
   }
 
   const truncated = plainBody.value.slice(0, 160)
-  return truncated.length < plainBody.value.length ? `${truncated.trimEnd()}...` : truncated
+  return truncated.length < plainBody.value.length
+    ? `${truncated.trimEnd()}...`
+    : truncated
 })
 
 let requestUrl: URL | undefined
@@ -172,23 +185,44 @@ const structuredData = computed(() => {
   return schema
 })
 
-const translateWithFallback = (key: string, fallback: string, params?: Record<string, unknown>) => {
+const translateWithFallback = (
+  key: string,
+  fallback: string,
+  params?: Record<string, unknown>
+) => {
   const translated = params ? t(key, params) : t(key)
   return translated === key ? fallback : translated
 }
 
-const categoriesLabel = computed(() => translateWithFallback('blog.article.categoriesLabel', 'Article categories'))
-const metadataLabel = computed(() => translateWithFallback('blog.article.metadataLabel', 'Article metadata'))
-const bodyLabel = computed(() => translateWithFallback('blog.article.bodyLabel', 'Article content'))
-const footerLabel = computed(() => translateWithFallback('blog.article.footerLabel', 'Article tools'))
-const authorLabel = computed(() => translateWithFallback('blog.article.authorLabel', 'Author'))
-const publishedLabel = computed(() => translateWithFallback('blog.article.publishedLabel', 'Published on'))
+const categoriesLabel = computed(() =>
+  translateWithFallback('blog.article.categoriesLabel', 'Article categories')
+)
+const metadataLabel = computed(() =>
+  translateWithFallback('blog.article.metadataLabel', 'Article metadata')
+)
+const bodyLabel = computed(() =>
+  translateWithFallback('blog.article.bodyLabel', 'Article content')
+)
+const footerLabel = computed(() =>
+  translateWithFallback('blog.article.footerLabel', 'Article tools')
+)
+const authorLabel = computed(() =>
+  translateWithFallback('blog.article.authorLabel', 'Author')
+)
+const publishedLabel = computed(() =>
+  translateWithFallback('blog.article.publishedLabel', 'Published on')
+)
 const readingTimeHeading = computed(() =>
-  translateWithFallback('blog.article.readingTimeLabel', 'Estimated reading time'),
+  translateWithFallback(
+    'blog.article.readingTimeLabel',
+    'Estimated reading time'
+  )
 )
 
 const buildCategoryLabel = (category: string) =>
-  translateWithFallback('blog.article.categoryChipLabel', category, { category })
+  translateWithFallback('blog.article.categoryChipLabel', category, {
+    category,
+  })
 
 useSeoMeta({
   title: articleTitle,
@@ -197,9 +231,13 @@ useSeoMeta({
   ogDescription: computed(() => metaDescription.value || undefined),
   ogType: 'article',
   ogImage: computed(() => article.value.image || undefined),
-  twitterCard: computed(() => (article.value.image ? 'summary_large_image' : 'summary')),
+  twitterCard: computed(() =>
+    article.value.image ? 'summary_large_image' : 'summary'
+  ),
   articlePublishedTime: computed(() => publishedDate.value?.iso),
-  articleModifiedTime: computed(() => updatedDate.value?.iso ?? publishedDate.value?.iso),
+  articleModifiedTime: computed(
+    () => updatedDate.value?.iso ?? publishedDate.value?.iso
+  ),
   ogUrl: canonicalUrl,
 })
 
@@ -234,7 +272,9 @@ useHead(() => ({
         class="article-categories"
         :aria-labelledby="categoriesHeadingId"
       >
-        <h2 :id="categoriesHeadingId" class="visually-hidden">{{ categoriesLabel }}</h2>
+        <h2 :id="categoriesHeadingId" class="visually-hidden">
+          {{ categoriesLabel }}
+        </h2>
         <ul class="article-categories__list" role="list">
           <li
             v-for="category in categories"
@@ -257,25 +297,49 @@ useHead(() => ({
         </ul>
       </nav>
 
-      <h1 :id="headingId" class="article-title" itemprop="headline" data-test="article-title">
+      <h1
+        :id="headingId"
+        class="article-title"
+        itemprop="headline"
+        data-test="article-title"
+      >
         {{ articleTitle }}
       </h1>
 
-      <p v-if="articleSummary" class="article-summary" itemprop="description" data-test="article-summary">
+      <p
+        v-if="articleSummary"
+        class="article-summary"
+        itemprop="description"
+        data-test="article-summary"
+      >
         {{ articleSummary }}
       </p>
 
-      <h2 :id="metadataHeadingId" class="visually-hidden">{{ metadataLabel }}</h2>
+      <h2 :id="metadataHeadingId" class="visually-hidden">
+        {{ metadataLabel }}
+      </h2>
       <ul class="article-meta" :aria-labelledby="metadataHeadingId" role="list">
-        <li v-if="article.author" class="article-meta__item" data-test="article-author">
+        <li
+          v-if="article.author"
+          class="article-meta__item"
+          data-test="article-author"
+        >
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
           <span class="visually-hidden">{{ authorLabel }}:</span>
-          <span itemprop="author" itemscope itemtype="https://schema.org/Person">
+          <span
+            itemprop="author"
+            itemscope
+            itemtype="https://schema.org/Person"
+          >
             <span itemprop="name">{{ article.author }}</span>
           </span>
         </li>
 
-        <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
+        <li
+          v-if="publishedDate"
+          class="article-meta__item"
+          data-test="article-published"
+        >
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
           <span class="visually-hidden">{{ publishedLabel }}:</span>
           <time :datetime="publishedDate.iso" itemprop="datePublished">
@@ -283,7 +347,11 @@ useHead(() => ({
           </time>
         </li>
 
-        <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
+        <li
+          v-if="readingTimeLabel"
+          class="article-meta__item"
+          data-test="article-reading-time"
+        >
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
           <span class="visually-hidden">{{ readingTimeHeading }}:</span>
           <span>{{ readingTimeLabel }}</span>
@@ -299,15 +367,26 @@ useHead(() => ({
         height="360"
         class="article-hero__image"
       />
-      <figcaption class="visually-hidden">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
+      <figcaption class="visually-hidden">
+        {{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}
+      </figcaption>
     </figure>
 
     <v-divider class="article-divider" role="presentation" />
 
-    <section v-if="hasBody" class="article-body" itemprop="articleBody" :aria-labelledby="bodyHeadingId">
+    <section
+      v-if="hasBody"
+      class="article-body"
+      itemprop="articleBody"
+      :aria-labelledby="bodyHeadingId"
+    >
       <h2 :id="bodyHeadingId" class="visually-hidden">{{ bodyLabel }}</h2>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="article-content" data-test="article-body" v-html="sanitizedBody" />
+      <div
+        class="article-content"
+        data-test="article-body"
+        v-html="sanitizedBody"
+      />
     </section>
 
     <section
@@ -318,7 +397,9 @@ useHead(() => ({
       data-test="article-empty"
     >
       <h2 :id="bodyHeadingId" class="visually-hidden">{{ bodyLabel }}</h2>
-      <v-alert type="info" variant="tonal">{{ t('blog.article.empty') }}</v-alert>
+      <v-alert type="info" variant="tonal">{{
+        t('blog.article.empty')
+      }}</v-alert>
     </section>
 
     <footer class="article-footer" :aria-labelledby="footerHeadingId">

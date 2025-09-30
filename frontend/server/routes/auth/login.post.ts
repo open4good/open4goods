@@ -2,8 +2,14 @@ import type { H3Event } from 'h3'
 import type { CookieSerializeOptions } from 'cookie-es'
 import { FetchError } from 'ofetch'
 
-interface LoginResponse { accessToken: string; refreshToken: string }
-interface LoginBody { username: string; password: string }
+interface LoginResponse {
+  accessToken: string
+  refreshToken: string
+}
+interface LoginBody {
+  username: string
+  password: string
+}
 
 export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody<LoginBody>(event)
@@ -26,7 +32,12 @@ export default defineEventHandler(async (event: H3Event) => {
       path: '/',
     }
     setCookie(event, config.tokenCookieName, tokens.accessToken, cookieOptions)
-    setCookie(event, config.refreshCookieName, tokens.refreshToken, cookieOptions)
+    setCookie(
+      event,
+      config.refreshCookieName,
+      tokens.refreshToken,
+      cookieOptions
+    )
     // Return tokens so the client can decode and update its state immediately
     return tokens
   } catch (err) {
@@ -61,6 +72,10 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     console.error('Login error', err)
-    throw createError({ statusCode: 401, statusMessage: 'Invalid credentials', cause: err })
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Invalid credentials',
+      cause: err,
+    })
   }
 })

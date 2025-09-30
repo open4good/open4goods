@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref } from 'vue'
 
-const search = ref("");
+const search = ref('')
 </script>
 
 <template>

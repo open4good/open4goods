@@ -1,62 +1,83 @@
 import { getQuery } from 'h3'
-
-import { useBlogService } from '~~/shared/api-client/services/blog.services'
-import type { PageDto } from '~~/shared/api-client'
-import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
-
-import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import { detectLanguage } from '../../presentation/middleware/languageDetector'
+import {
+  applyCacheHeaders,
+  CacheStrategies,
+} from '../../presentation/middleware/cacheHeaders'
+import {
+  handleDomainError,
+  handleUnknownError,
+} from '../../presentation/middleware/errorHandler'
+import {
+  registerProviders,
+  SERVICE_KEYS,
+  getHandler,
+} from '../../shared/di/providers'
+import { isSuccess } from '../../shared/types/Result'
+import type { GetArticlesHandler } from '../../application/blog/handlers/GetArticlesHandler'
+import type { Page } from '../../domain/blog/entities/Page'
+import type { Article } from '../../domain/blog/entities/Article'
+import { DomainError } from '../../shared/errors'
 
 /**
- * Blog articles API endpoint
- * Handles GET requests for blog articles with caching
+ * Blog articles API endpoint (Clean Architecture)
+ * Orchestrates the use case execution
  */
-export default defineEventHandler(async (event): Promise<PageDto> => {
-  // Set cache headers for 1 hour
-  setResponseHeader(
-    event,
-    'Cache-Control',
-    'public, max-age=3600, s-maxage=3600'
-  )
-
-  const rawHost =
-    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
-
-  const blogService = useBlogService(domainLanguage)
-  const query = getQuery(event)
-  const pageNumberParam = Array.isArray(query.pageNumber)
-    ? query.pageNumber[0]
-    : query.pageNumber
-  const pageSizeParam = Array.isArray(query.pageSize)
-    ? query.pageSize[0]
-    : query.pageSize
-  const tagParam = Array.isArray(query.tag) ? query.tag[0] : query.tag
-
-  const pageNumber = pageNumberParam ? Number.parseInt(pageNumberParam, 10) : undefined
-  const pageSize = pageSizeParam ? Number.parseInt(pageSizeParam, 10) : undefined
-
+export default defineEventHandler(async (event): Promise<Page<Article>> => {
   try {
-    // Use the service to fetch articles
-    const response = await blogService.getArticles({
-      pageNumber: Number.isNaN(pageNumber) ? undefined : pageNumber,
-      pageSize: Number.isNaN(pageSize) ? undefined : pageSize,
-      tag: typeof tagParam === 'string' ? tagParam : undefined,
-    })
-    return response
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    // Log the error for debugging
-    console.error(
-      'Error fetching blog articles:',
-      backendError.logMessage,
-      backendError
+    // 1. Detect language from request
+    const domainLanguage = detectLanguage(event)
+
+    // 2. Register dependencies
+    registerProviders(domainLanguage)
+
+    // 3. Apply cache headers
+    applyCacheHeaders(event, CacheStrategies.ONE_HOUR)
+
+    // 4. Parse query parameters
+    const query = getQuery(event)
+    const pageNumberParam = Array.isArray(query.pageNumber)
+      ? query.pageNumber[0]
+      : query.pageNumber
+    const pageSizeParam = Array.isArray(query.pageSize)
+      ? query.pageSize[0]
+      : query.pageSize
+    const tagParam = Array.isArray(query.tag) ? query.tag[0] : query.tag
+
+    const pageNumber = pageNumberParam
+      ? Number.parseInt(pageNumberParam, 10)
+      : undefined
+    const pageSize = pageSizeParam
+      ? Number.parseInt(pageSizeParam, 10)
+      : undefined
+    const tag = typeof tagParam === 'string' ? tagParam : undefined
+
+    // 5. Get handler from DI container
+    const handler = getHandler<GetArticlesHandler>(
+      SERVICE_KEYS.GET_ARTICLES_HANDLER
     )
 
-    // Forward backend status code and message when available
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
+    // 6. Execute use case
+    const result = await handler.handle({
+      pageNumber,
+      pageSize,
+      tag,
     })
+
+    // 7. Handle result
+    if (isSuccess(result)) {
+      return result.value
+    }
+
+    // Error case
+    handleDomainError(result.error, event)
+  } catch (error) {
+    if (error instanceof DomainError) {
+      handleDomainError(error, event)
+    }
+    handleUnknownError(error, event)
   }
+
+  // TypeScript requires a return, but handleDomainError/handleUnknownError throw
+  throw createError({ statusCode: 500, statusMessage: 'Unexpected error' })
 })

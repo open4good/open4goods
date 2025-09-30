@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { useI18n } from 'vue-i18n'
 
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 
 type FooterLink = {
   label: string
@@ -12,7 +15,9 @@ type FooterLink = {
 
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
-const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
+const blogPath = computed(() =>
+  resolveLocalizedRoutePath('blog', currentLocale.value)
+)
 
 const currentYear = computed(() => new Date().getFullYear())
 
@@ -20,7 +25,7 @@ const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
     href: resolveLocalizedRoutePath('ecoscore', currentLocale.value),
-  }
+  },
 ])
 
 const comparatorLinks = computed<FooterLink[]>(() => [
@@ -73,7 +78,6 @@ const feedbackLinks = computed<FooterLink[]>(() => [
     rel: 'nofollow noopener',
   },
 ])
-
 </script>
 
 <template>
@@ -115,7 +119,11 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         <div class="text-subtitle-1 font-weight-medium mt-6">
           {{ t('siteIdentity.footer.comparator.title') }}
         </div>
-        <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+        <v-list
+          density="compact"
+          bg-color="transparent"
+          class="footer-list pa-0 mt-2"
+        >
           <v-list-item
             v-for="link in comparatorLinks"
             :key="link.href"
@@ -134,7 +142,11 @@ const feedbackLinks = computed<FooterLink[]>(() => [
           <div class="text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.community.title') }}
           </div>
-          <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+          <v-list
+            density="compact"
+            bg-color="transparent"
+            class="footer-list pa-0 mt-2"
+          >
             <v-list-item
               v-for="link in communityLinks"
               :key="link.href"
@@ -151,7 +163,11 @@ const feedbackLinks = computed<FooterLink[]>(() => [
         <div class="text-subtitle-1 font-weight-medium mt-6">
           {{ t('siteIdentity.footer.feedback.title') }}
         </div>
-        <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+        <v-list
+          density="compact"
+          bg-color="transparent"
+          class="footer-list pa-0 mt-2"
+        >
           <v-list-item
             v-for="link in feedbackLinks"
             :key="link.href"
