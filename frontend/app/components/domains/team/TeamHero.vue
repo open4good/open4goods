@@ -38,7 +38,7 @@ const headingId = useId()
 .team-hero
   position: relative
   overflow: hidden
-  background: linear-gradient(135deg, rgba(var(--v-theme-team-hero-gradient-start), 0.95), rgba(var(--v-theme-team-hero-gradient-end), 0.9))
+  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.95), rgba(var(--v-theme-hero-gradient-end), 0.9))
   color: rgb(var(--v-theme-on-primary))
 
   &__wrapper

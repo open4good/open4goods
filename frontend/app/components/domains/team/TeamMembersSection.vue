@@ -82,10 +82,10 @@ const { t } = useI18n()
   position: relative
 
   &--light
-    background: linear-gradient(180deg, rgba(var(--v-theme-team-section-light-start), 1) 0%, rgba(var(--v-theme-team-section-light-end), 0.8) 100%)
+    background: linear-gradient(180deg, rgba(var(--v-theme-surface-alt), 1) 0%, rgba(var(--v-theme-surface-default), 0.9) 100%)
 
   &--muted
-    background: linear-gradient(180deg, rgba(var(--v-theme-team-section-muted-start), 0.95) 0%, rgba(var(--v-theme-team-section-muted-end), 0.95) 100%)
+    background: linear-gradient(180deg, rgba(var(--v-theme-surface-muted), 0.95) 0%, rgba(var(--v-theme-surface-primary-050), 0.95) 100%)
 
   &__header
     text-align: center
