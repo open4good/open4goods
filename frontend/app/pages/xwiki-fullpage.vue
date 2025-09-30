@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import '~/assets/css/text-content.css'
 import { useFullPage } from '~/composables/cms/useFullPage'
 import { useAuth } from '~/composables/useAuth'
@@ -32,17 +32,43 @@ const {
   data,
 } = fullPageState
 
-const htmlContent = computed(() => {
-  const normalise = (value?: string | null) => {
-    if (typeof value !== 'string') {
-      return undefined
-    }
-
-    return value.trim() === '' ? undefined : value
+const normaliseHtmlContent = (value?: string | null) => {
+  if (typeof value !== 'string') {
+    return undefined
   }
 
-  return normalise(data.value?.htmlContent) ?? normalise(page.value?.htmlContent)
+  return value.trim() === '' ? undefined : value
+}
+
+const htmlContentStateKey = `cms-full-page:html:${pageId.value ?? 'empty'}`
+
+const htmlContentState = useState<string | undefined>(
+  htmlContentStateKey,
+  () =>
+    normaliseHtmlContent(data.value?.htmlContent) ??
+    normaliseHtmlContent(page.value?.htmlContent),
+)
+
+watchEffect(() => {
+  const fromData = normaliseHtmlContent(data.value?.htmlContent)
+  const fallback = normaliseHtmlContent(page.value?.htmlContent)
+
+  if (fromData !== undefined) {
+    htmlContentState.value = fromData
+    return
+  }
+
+  if (fallback !== undefined) {
+    htmlContentState.value = fallback
+    return
+  }
+
+  if (!pending.value) {
+    htmlContentState.value = undefined
+  }
 })
+
+const htmlContent = computed(() => htmlContentState.value)
 
 const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])

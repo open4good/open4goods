@@ -1,4 +1,4 @@
-import { computed, shallowRef, toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
+import { computed, toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
 import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
 
 const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-semi-fluid'])
@@ -37,18 +37,19 @@ export const useFullPage = async (
     },
   )
 
-  const lastResolvedPage = shallowRef<CmsFullPage | null>(asyncState.data.value ?? null)
-
-  if (asyncState.data.value) {
-    lastResolvedPage.value = asyncState.data.value
-  }
+  const lastResolvedPageKey = `cms-full-page:last-resolved:${key.value}`
+  const lastResolvedPage = useState<CmsFullPage | null>(
+    lastResolvedPageKey,
+    () => asyncState.data.value ?? null,
+  )
 
   watchEffect(() => {
     const resolvedPage = asyncState.data.value
-
-    if (resolvedPage) {
-      lastResolvedPage.value = resolvedPage
+    if (asyncState.pending.value && resolvedPage === null) {
+      return
     }
+
+    lastResolvedPage.value = resolvedPage
   })
 
   const page = computed(() => asyncState.data.value ?? lastResolvedPage.value)
