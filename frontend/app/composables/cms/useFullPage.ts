@@ -1,14 +1,11 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
 
-const SUPPORTED_LAYOUTS = new Set(['layout1'])
 const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-semi-fluid'])
 
-type SupportedLayout = 'layout1'
 type SupportedWidth = 'container' | 'container-fluid' | 'container-semi-fluid'
 
 interface PageProperties {
-  layout?: string
   width?: string
   pageTitle?: string
   metaTitle?: string
@@ -43,12 +40,6 @@ export const useFullPage = async (
   const page = computed(() => asyncState.data.value)
   const properties = computed<PageProperties>(() => ({ ...(page.value?.properties ?? {}) }))
 
-  const requestedLayout = computed(() => (properties.value.layout ?? 'layout1').toLowerCase())
-  const layout = computed<SupportedLayout>(() => {
-    const normalized = requestedLayout.value
-    return (SUPPORTED_LAYOUTS.has(normalized) ? normalized : 'layout1') as SupportedLayout
-  })
-
   const width = computed<SupportedWidth>(() => {
     const rawWidth = properties.value.width ?? 'container'
     return (SUPPORTED_WIDTHS.has(rawWidth) ? rawWidth : 'container') as SupportedWidth
@@ -63,8 +54,6 @@ export const useFullPage = async (
   return {
     page,
     properties,
-    layout,
-    requestedLayout,
     width,
     pageTitle,
     metaTitle,

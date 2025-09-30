@@ -18,8 +18,6 @@ if (!matchedRoute.value) {
 const pageId = computed(() => matchedRoute.value?.pageId ?? null)
 
 const {
-  layout,
-  requestedLayout,
   width,
   pageTitle,
   metaTitle,
@@ -65,7 +63,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="cms-page" :data-layout="layout" :data-requested-layout="requestedLayout">
+  <div class="cms-page">
     <section class="cms-page__hero" role="banner">
       <v-container class="cms-page__hero-container" fluid>
         <div class="cms-page__hero-content">
