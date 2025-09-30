@@ -25,17 +25,17 @@
           <div v-else>
             <h2 class="text-h5 mb-4">Debug des articles</h2>
 
-            <div v-for="article in articles" :key="article.url" class="mb-6">
+            <div v-for="article in articles" :key="article.slug" class="mb-6">
               <h3 class="text-h6 mb-2">{{ article.title }}</h3>
 
               <!-- Debug de l'article complet -->
               <ImageTest :data="article" :title="`Article: ${article.title}`" />
 
               <!-- Debug spécifique de l'image si elle existe -->
-              <div v-if="article.image" class="mt-4">
+              <div v-if="article.imageUrl" class="mt-4">
                 <ImageTest
                   :data="{
-                    imageUrl: article.image,
+                    imageUrl: article.imageUrl,
                     title: article.title,
                     alt: article.title,
                   }"

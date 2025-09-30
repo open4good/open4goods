@@ -35,17 +35,21 @@ export class HttpBlogRepository implements IBlogRepository {
       // Transform DTOs to domain entities
       const articles = (response.data ?? []).map(dto =>
         createArticle({
-          id: dto.id ?? '',
-          slug: dto.slug ?? '',
+          id: dto.url ?? '',
+          slug: dto.url ?? '',
           title: dto.title ?? '',
-          excerpt: dto.excerpt ?? '',
-          content: dto.content ?? '',
+          excerpt: dto.summary ?? '',
+          content: dto.body ?? '',
           author: dto.author ?? 'Unknown',
-          publishedAt: dto.publishedAt ?? new Date().toISOString(),
-          updatedAt: dto.updatedAt ?? new Date().toISOString(),
-          tags: dto.tags ?? [],
-          imageUrl: dto.imageUrl,
-          readTime: dto.readTime,
+          publishedAt: dto.createdMs
+            ? new Date(dto.createdMs).toISOString()
+            : new Date().toISOString(),
+          updatedAt: dto.modifiedMs
+            ? new Date(dto.modifiedMs).toISOString()
+            : new Date().toISOString(),
+          tags: dto.category ?? [],
+          imageUrl: dto.image,
+          readTime: undefined,
         })
       )
 

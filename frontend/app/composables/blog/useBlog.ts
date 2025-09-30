@@ -1,4 +1,6 @@
-import type { BlogPostDto, BlogTagDto, PageDto } from '~~/shared/api-client'
+import type { Article } from '~~/server/domain/blog/entities/Article'
+import type { Page } from '~~/server/domain/blog/entities/Page'
+import type { Tag } from '~~/server/domain/blog/entities/Tag'
 
 /**
  * Composable for blog-related functionality
@@ -7,12 +9,12 @@ const DEFAULT_PAGE_SIZE = 12
 
 export const useBlog = () => {
   // Reactive state
-  const articles = useState<BlogPostDto[]>('blog-articles', () => [])
-  const currentArticle = useState<BlogPostDto | null>(
+  const articles = useState<Article[]>('blog-articles', () => [])
+  const currentArticle = useState<Article | null>(
     'blog-current-article',
     () => null
   )
-  const tags = useState<BlogTagDto[]>('blog-tags', () => [])
+  const tags = useState<Tag[]>('blog-tags', () => [])
   const selectedTag = useState<string | null>('blog-selected-tag', () => null)
   const loading = useState('blog-loading', () => false)
   const error = useState<string | null>('blog-error', () => null)
@@ -42,7 +44,7 @@ export const useBlog = () => {
       const sanitizedTag = tag?.trim() ?? null
 
       // Use our server API as proxy instead of calling external API directly
-      const response = await $fetch<PageDto>('/api/blog/articles', {
+      const response = await $fetch<Page<Article>>('/api/blog/articles', {
         params: {
           pageNumber: sanitizedPage - 1,
           pageSize: sanitizedSize,
@@ -55,16 +57,16 @@ export const useBlog = () => {
       selectedTag.value = sanitizedTag
 
       const pageMeta = response.page
-      const resolvedPageSize = pageMeta?.size ?? sanitizedSize
+      const resolvedPageSize = pageMeta.size ?? sanitizedSize
       const resolvedTotalElements =
-        pageMeta?.totalElements ?? currentPageArticles.length
+        pageMeta.totalElements ?? currentPageArticles.length
       const computedTotalPages =
-        pageMeta?.totalPages ??
+        pageMeta.totalPages ??
         (resolvedPageSize > 0
           ? Math.ceil(resolvedTotalElements / resolvedPageSize)
           : 1)
       const safeTotalPages = Math.max(computedTotalPages ?? 1, 1)
-      const zeroBasedPage = pageMeta?.number ?? sanitizedPage - 1
+      const zeroBasedPage = pageMeta.number ?? sanitizedPage - 1
       const safePage = Math.min(zeroBasedPage + 1, safeTotalPages)
 
       pagination.value = {
@@ -110,7 +112,7 @@ export const useBlog = () => {
 
   const fetchTags = async () => {
     try {
-      const response = await $fetch<BlogTagDto[]>('/api/blog/tags')
+      const response = await $fetch<Tag[]>('/api/blog/tags')
       tags.value = response ?? []
     } catch (err) {
       console.error('Error in fetchTags:', err)
@@ -133,7 +135,7 @@ export const useBlog = () => {
     error.value = null
 
     try {
-      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${slug}`)
+      const article = await $fetch<Article>(`/api/blog/articles/${slug}`)
       currentArticle.value = article
       return article
     } catch (err) {

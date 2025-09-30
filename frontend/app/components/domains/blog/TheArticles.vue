@@ -19,20 +19,20 @@ const {
 const appStore = useAppStore()
 
 // Format date helper
-const formatDate = (timestamp: number) => {
-  const date = new Date(timestamp)
+const formatDate = (date: Date | string | number) => {
+  const dateObj = date instanceof Date ? date : new Date(date)
 
-  if (Number.isNaN(date.getTime())) {
+  if (Number.isNaN(dateObj.getTime())) {
     return ''
   }
 
-  return date.toLocaleDateString()
+  return dateObj.toLocaleDateString()
 }
 
-const buildDateIsoString = (timestamp: number) => {
-  const date = new Date(timestamp)
+const buildDateIsoString = (date: Date | string | number) => {
+  const dateObj = date instanceof Date ? date : new Date(date)
 
-  return Number.isNaN(date.getTime()) ? '' : date.toISOString()
+  return Number.isNaN(dateObj.getTime()) ? '' : dateObj.toISOString()
 }
 
 const { t } = useI18n()
@@ -209,15 +209,8 @@ const handleTagSelection = async (tag: string | null): Promise<void> => {
   await router.push({ path: '/blog', query: nextQuery })
 }
 
-type NamedTag = BlogTagDto & { name: string }
-
-const availableTags = computed<NamedTag[]>(() =>
-  tags.value
-    .map(tag => ({
-      ...tag,
-      name: (tag.name ?? '').trim(),
-    }))
-    .filter((tag): tag is NamedTag => Boolean(tag.name))
+const availableTags = computed(() =>
+  tags.value.filter(tag => Boolean(tag.name))
 )
 const activeTag = computed(() => selectedTag.value)
 const debugToggleLabel = computed(() =>
@@ -395,7 +388,7 @@ const seoPageLinks = computed(() => {
       <v-row :id="articleListId" role="list">
         <v-col
           v-for="(article, index) in paginatedArticles"
-          :key="article.url ?? index"
+          :key="article.slug ?? index"
           cols="12"
           sm="6"
           md="4"
@@ -409,23 +402,23 @@ const seoPageLinks = computed(() => {
             tag="article"
             :aria-labelledby="buildArticleTitleId(index)"
             :aria-describedby="
-              article.summary ? buildArticleSummaryId(index) : undefined
+              article.excerpt ? buildArticleSummaryId(index) : undefined
             "
           >
             <!-- Article image -->
             <NuxtLink
-              v-if="article.image && buildArticleLink(article.url)"
-              :to="buildArticleLink(article.url)"
+              v-if="article.imageUrl && buildArticleLink(article.slug)"
+              :to="buildArticleLink(article.slug)"
               class="article-image-link"
               :aria-labelledby="buildArticleTitleId(index)"
               :aria-describedby="
-                article.summary ? buildArticleSummaryId(index) : undefined
+                article.excerpt ? buildArticleSummaryId(index) : undefined
               "
               :title="article.title || undefined"
               data-test="article-image-link"
             >
               <v-img
-                :src="article.image"
+                :src="article.imageUrl"
                 :alt="buildArticleImageAlt(article.title)"
                 height="200"
                 cover
@@ -442,8 +435,8 @@ const seoPageLinks = computed(() => {
               </v-img>
             </NuxtLink>
             <v-img
-              v-else-if="article.image"
-              :src="article.image"
+              v-else-if="article.imageUrl"
+              :src="article.imageUrl"
               :alt="buildArticleImageAlt(article.title)"
               height="200"
               cover
@@ -465,8 +458,8 @@ const seoPageLinks = computed(() => {
               class="article-title"
             >
               <NuxtLink
-                v-if="buildArticleLink(article.url)"
-                :to="buildArticleLink(article.url)"
+                v-if="buildArticleLink(article.slug)"
+                :to="buildArticleLink(article.slug)"
                 class="article-title-link"
                 :aria-labelledby="buildArticleTitleId(index)"
                 :title="article.title || undefined"
@@ -483,7 +476,7 @@ const seoPageLinks = computed(() => {
               :id="buildArticleSummaryId(index)"
               class="article-summary"
             >
-              <p>{{ article.summary }}</p>
+              <p>{{ article.excerpt }}</p>
             </v-card-text>
 
             <!-- Actions and metadata -->
@@ -505,7 +498,7 @@ const seoPageLinks = computed(() => {
                   <span class="author-name">{{ article.author }}</span>
                 </li>
                 <li
-                  v-if="article.createdMs"
+                  v-if="article.publishedAt"
                   class="article-meta__item date-info"
                 >
                   <v-icon
@@ -519,9 +512,9 @@ const seoPageLinks = computed(() => {
                   <span class="visually-hidden">Published on:</span>
                   <time
                     class="date-text"
-                    :datetime="buildDateIsoString(article.createdMs)"
+                    :datetime="buildDateIsoString(article.publishedAt)"
                   >
-                    {{ formatDate(article.createdMs) }}
+                    {{ formatDate(article.publishedAt) }}
                   </time>
                 </li>
               </ul>
@@ -529,12 +522,12 @@ const seoPageLinks = computed(() => {
               <v-spacer></v-spacer>
 
               <NuxtLink
-                v-if="buildArticleLink(article.url)"
-                :to="buildArticleLink(article.url)"
+                v-if="buildArticleLink(article.slug)"
+                :to="buildArticleLink(article.slug)"
                 class="article-read-more-link"
                 :aria-labelledby="buildArticleTitleId(index)"
                 :aria-describedby="
-                  article.summary ? buildArticleSummaryId(index) : undefined
+                  article.excerpt ? buildArticleSummaryId(index) : undefined
                 "
                 :aria-label="`${t('blog.list.readMore')} - ${
                   article.title || t('blog.list.readMore')
