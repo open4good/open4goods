@@ -18,16 +18,19 @@ if (!matchedRoute.value) {
 const pageId = computed(() => matchedRoute.value?.pageId ?? null)
 
 const {
+  data,
+  page,
   width,
   pageTitle,
   metaTitle,
   metaDescription,
-  htmlContent,
   editLink,
   pending,
   error,
   refresh,
 } = await useFullPage(pageId)
+
+const htmlContent = computed(() => page.value?.htmlContent ?? data.value?.htmlContent ?? '')
 
 const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])

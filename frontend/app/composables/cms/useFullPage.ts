@@ -1,4 +1,4 @@
-import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import { computed, shallowRef, toValue, watch, type MaybeRefOrGetter } from 'vue'
 import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
 
 const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-semi-fluid'])
@@ -15,17 +15,31 @@ interface PageProperties {
 export const useFullPage = async (
   pageId: MaybeRefOrGetter<string | null | undefined>,
 ) => {
-  const key = computed(() => {
-    const id = toValue(pageId)
-    return id ? `full-page:${id}` : 'full-page:empty'
+  const normalizedId = computed(() => {
+    const rawId = toValue(pageId)
+    if (!rawId) {
+      return ''
+    }
+
+    return String(rawId).trim()
   })
 
-  const asyncState = await useAsyncData<CmsFullPage | null>(
-    () => key.value,
+  if (!normalizedId.value) {
+    throw createError({ statusCode: 404, statusMessage: 'CMS page not found' })
+  }
+
+  const fallbackPage: CmsFullPage = {
+    htmlContent: '',
+    properties: {},
+    editLink: null,
+  }
+
+  const asyncState = await useAsyncData<CmsFullPage>(
+    () => `fullpage:${normalizedId.value}`,
     async () => {
-      const id = toValue(pageId)
+      const id = normalizedId.value
       if (!id) {
-        return null
+        throw createError({ statusCode: 404, statusMessage: 'CMS page not found' })
       }
 
       const encodedId = encodeURIComponent(id)
@@ -33,11 +47,32 @@ export const useFullPage = async (
     },
     {
       server: true,
-      default: () => null,
+      lazy: false,
+      watch: [normalizedId],
+      default: () => ({ ...fallbackPage }),
     },
   )
 
-  const page = computed(() => asyncState.data.value)
+  const lastResolvedPage = shallowRef(asyncState.data.value ?? fallbackPage)
+
+  watch(
+    () => [asyncState.pending.value, asyncState.error.value, asyncState.data.value] as const,
+    ([isPending, currentError, currentData]) => {
+      if (!isPending && !currentError && currentData) {
+        lastResolvedPage.value = currentData
+      }
+    },
+    { immediate: true },
+  )
+
+  const page = computed(() => {
+    if (asyncState.pending.value) {
+      return lastResolvedPage.value
+    }
+
+    return asyncState.data.value ?? lastResolvedPage.value ?? fallbackPage
+  })
+
   const properties = computed<PageProperties>(() => ({ ...(page.value?.properties ?? {}) }))
 
   const width = computed<SupportedWidth>(() => {
@@ -48,20 +83,16 @@ export const useFullPage = async (
   const pageTitle = computed(() => properties.value.pageTitle ?? page.value?.wikiPage?.title ?? '')
   const metaTitle = computed(() => properties.value.metaTitle ?? pageTitle.value)
   const metaDescription = computed(() => properties.value.metaDescription ?? '')
-  const htmlContent = computed(() => page.value?.htmlContent ?? '')
   const editLink = computed(() => page.value?.editLink ?? null)
 
   return {
+    ...asyncState,
     page,
     properties,
     width,
     pageTitle,
     metaTitle,
     metaDescription,
-    htmlContent,
     editLink,
-    pending: asyncState.pending,
-    error: asyncState.error,
-    refresh: asyncState.refresh,
   }
 }
