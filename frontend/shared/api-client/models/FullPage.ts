@@ -58,6 +58,12 @@ export interface FullPage {
      * @memberof FullPage
      */
     properties?: { [key: string]: string; };
+    /**
+     * 
+     * @type {string}
+     * @memberof FullPage
+     */
+    editLink?: string;
 }
 
 /**
@@ -81,6 +87,7 @@ export function FullPageFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'wikiPage': json['wikiPage'] == null ? undefined : PageFromJSON(json['wikiPage']),
         'objects': json['objects'] == null ? undefined : ObjectsFromJSON(json['objects']),
         'properties': json['properties'] == null ? undefined : json['properties'],
+        'editLink': json['editLink'] == null ? undefined : json['editLink'],
     };
 }
 
@@ -99,6 +106,7 @@ export function FullPageToJSONTyped(value?: FullPage | null, ignoreDiscriminator
         'wikiPage': PageToJSON(value['wikiPage']),
         'objects': ObjectsToJSON(value['objects']),
         'properties': value['properties'],
+        'editLink': value['editLink'],
     };
 }
 

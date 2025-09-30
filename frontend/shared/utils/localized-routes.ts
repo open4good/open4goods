@@ -1,7 +1,11 @@
 import type { NuxtLocale } from './domain-language'
 import { DEFAULT_NUXT_LOCALE } from './domain-language'
 
-export type LocalizedRouteName = 'team' | LocalizedWikiRouteName
+const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
+
+export type LocalizedRouteName =
+   'team'
+   | LocalizedWikiRouteName
 
 export type LocalizedRoutePath = `/${string}`
 export type LocalizedRoutePaths = Record<LocalizedRouteName, Record<NuxtLocale, LocalizedRoutePath>>
@@ -50,7 +54,6 @@ export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
   ...LOCALIZED_WIKI_ROUTE_PATHS,
 } satisfies LocalizedRoutePaths
 
-const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
 
 type RouteParams = Record<string, string | number | undefined>
 
