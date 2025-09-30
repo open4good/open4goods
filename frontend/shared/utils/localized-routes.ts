@@ -1,17 +1,53 @@
 import type { NuxtLocale } from './domain-language'
 import { DEFAULT_NUXT_LOCALE } from './domain-language'
 
-export type LocalizedRouteName =
-  | 'team'
+export type LocalizedRouteName = 'team' | LocalizedWikiRouteName
 
 export type LocalizedRoutePath = `/${string}`
 export type LocalizedRoutePaths = Record<LocalizedRouteName, Record<NuxtLocale, LocalizedRoutePath>>
+
+export interface LocalizedWikiRouteConfig {
+  path: LocalizedRoutePath
+  pageId: string
+}
+
+export type LocalizedWikiPaths = Record<string, Record<NuxtLocale, LocalizedWikiRouteConfig>>
+
+export const LOCALIZED_WIKI_PATHS = {
+  'legal-notice': {
+    'fr-FR': {
+      path: '/mentions-legales',
+      pageId: 'webpages:default:legal-notice:WebHome',
+    },
+    'en-US': {
+      path: '/legal-notice',
+      pageId: 'webpages:default:legal-notice:en',
+    },
+  },
+} satisfies LocalizedWikiPaths
+
+export type LocalizedWikiRouteName = keyof typeof LOCALIZED_WIKI_PATHS
+
+const mapWikiRoutesToLocalizedPaths = <T extends Record<string, Record<NuxtLocale, LocalizedWikiRouteConfig>>>(
+  wikiRoutes: T,
+): { [K in keyof T]: { [L in keyof T[K]]: LocalizedRoutePath } } =>
+  Object.fromEntries(
+    Object.entries(wikiRoutes).map(([routeName, locales]) => [
+      routeName,
+      Object.fromEntries(
+        Object.entries(locales).map(([locale, config]) => [locale, config.path]),
+      ),
+    ]),
+  ) as { [K in keyof T]: { [L in keyof T[K]]: LocalizedRoutePath } }
+
+const LOCALIZED_WIKI_ROUTE_PATHS = mapWikiRoutesToLocalizedPaths(LOCALIZED_WIKI_PATHS)
 
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
   team: {
     'fr-FR': '/equipe',
     'en-US': '/team',
   },
+  ...LOCALIZED_WIKI_ROUTE_PATHS,
 } satisfies LocalizedRoutePaths
 
 const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
@@ -145,4 +181,31 @@ export const matchLocalizedRouteByPath = (path: string): MatchedLocalizedRoute |
   }
 
   return null
+}
+
+export interface MatchedLocalizedWikiRoute extends MatchedLocalizedRoute {
+  pageId: string
+}
+
+export const matchLocalizedWikiRouteByPath = (path: string): MatchedLocalizedWikiRoute | null => {
+  const baseMatch = matchLocalizedRouteByPath(path)
+  if (!baseMatch) {
+    return null
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(LOCALIZED_WIKI_PATHS, baseMatch.routeName)) {
+    return null
+  }
+
+  const wikiLocales = LOCALIZED_WIKI_PATHS[baseMatch.routeName as LocalizedWikiRouteName]
+  const match = wikiLocales?.[baseMatch.locale]
+
+  if (!match) {
+    return null
+  }
+
+  return {
+    ...baseMatch,
+    pageId: match.pageId,
+  }
 }
