@@ -1,11 +1,46 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
 
-const SUPPORTED_LAYOUTS = new Set(['layout1'])
-const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-semi-fluid'])
+const DEFAULT_LAYOUT = 'layout1'
 
-type SupportedLayout = 'layout1'
-type SupportedWidth = 'container' | 'container-fluid' | 'container-semi-fluid'
+const SUPPORTED_LAYOUT_VALUES = [
+  'layout1',
+  'layout2',
+  'layout3',
+  'layout4',
+  'layout5',
+  'layout6',
+  'layout7',
+  'layout8',
+  'layout9',
+  'layout10',
+  'layout11',
+  'layout12',
+] as const
+
+const SUPPORTED_WIDTH_VALUES = ['container', 'container-fluid', 'container-semi-fluid'] as const
+
+export type SupportedLayout = (typeof SUPPORTED_LAYOUT_VALUES)[number]
+type SupportedWidth = (typeof SUPPORTED_WIDTH_VALUES)[number]
+
+export const SUPPORTED_LAYOUTS = new Set<SupportedLayout>(SUPPORTED_LAYOUT_VALUES)
+const SUPPORTED_WIDTHS = new Set<SupportedWidth>(SUPPORTED_WIDTH_VALUES)
+
+const isSupportedLayout = (layout: string): layout is SupportedLayout =>
+  SUPPORTED_LAYOUTS.has(layout as SupportedLayout)
+
+const isSupportedWidth = (width: string): width is SupportedWidth =>
+  SUPPORTED_WIDTHS.has(width as SupportedWidth)
+
+export const normalizeLayout = (layout: string | null | undefined): SupportedLayout => {
+  const normalized = (layout ?? DEFAULT_LAYOUT).toLowerCase()
+  return isSupportedLayout(normalized) ? normalized : DEFAULT_LAYOUT
+}
+
+const normalizeWidth = (width: string | null | undefined): SupportedWidth => {
+  const normalized = (width ?? 'container').toLowerCase()
+  return isSupportedWidth(normalized) ? normalized : 'container'
+}
 
 interface PageProperties {
   layout?: string
@@ -43,16 +78,10 @@ export const useFullPage = async (
   const page = computed(() => asyncState.data.value)
   const properties = computed<PageProperties>(() => ({ ...(page.value?.properties ?? {}) }))
 
-  const requestedLayout = computed(() => (properties.value.layout ?? 'layout1').toLowerCase())
-  const layout = computed<SupportedLayout>(() => {
-    const normalized = requestedLayout.value
-    return (SUPPORTED_LAYOUTS.has(normalized) ? normalized : 'layout1') as SupportedLayout
-  })
+  const requestedLayout = computed(() => (properties.value.layout ?? DEFAULT_LAYOUT).toLowerCase())
+  const layout = computed<SupportedLayout>(() => normalizeLayout(requestedLayout.value))
 
-  const width = computed<SupportedWidth>(() => {
-    const rawWidth = properties.value.width ?? 'container'
-    return (SUPPORTED_WIDTHS.has(rawWidth) ? rawWidth : 'container') as SupportedWidth
-  })
+  const width = computed<SupportedWidth>(() => normalizeWidth(properties.value.width))
 
   const pageTitle = computed(() => properties.value.pageTitle ?? page.value?.wikiPage?.title ?? '')
   const metaTitle = computed(() => properties.value.metaTitle ?? pageTitle.value)

@@ -41,9 +41,14 @@ const canEdit = computed(() => {
 const containerClass = computed(() => [
   'cms-page__container',
   `cms-page__container--${width.value}`,
+  `cms-page__container--${layout.value}`,
 ])
 
 const containerMaxWidth = computed(() => {
+  if (layout.value === 'layout3') {
+    return undefined
+  }
+
   switch (width.value) {
     case 'container':
       return 'lg'
@@ -54,7 +59,35 @@ const containerMaxWidth = computed(() => {
   }
 })
 
-const isFluidContainer = computed(() => width.value === 'container-fluid')
+const isFluidContainer = computed(() => layout.value === 'layout3' || width.value === 'container-fluid')
+
+const showHero = computed(() => layout.value === 'layout1')
+const usesCardContent = computed(() => layout.value === 'layout1')
+
+const rootClasses = computed(() => [
+  'cms-page',
+  `cms-page--${layout.value}`,
+])
+
+const contentWrapper = computed(() => {
+  if (usesCardContent.value) {
+    return {
+      component: 'v-sheet',
+      props: {
+        class: ['cms-page__content', 'cms-page__content--card'],
+        elevation: 0,
+        rounded: 'xl',
+      } as const,
+    }
+  }
+
+  return {
+    component: 'div',
+    props: {
+      class: ['cms-page__content', 'cms-page__content--flat'],
+    } as const,
+  }
+})
 
 useSeoMeta({
   title: () => metaTitle.value || pageTitle.value,
@@ -65,8 +98,8 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="cms-page" :data-layout="layout" :data-requested-layout="requestedLayout">
-    <section class="cms-page__hero" role="banner">
+  <div :class="rootClasses" :data-layout="layout" :data-requested-layout="requestedLayout">
+    <section v-if="showHero" class="cms-page__hero" role="banner">
       <v-container class="cms-page__hero-container" fluid>
         <div class="cms-page__hero-content">
           <p class="cms-page__hero-eyebrow">
@@ -109,7 +142,7 @@ useSeoMeta({
       :max-width="containerMaxWidth"
       :fluid="isFluidContainer"
     >
-      <v-sheet class="cms-page__content" elevation="0" rounded="xl">
+      <component :is="contentWrapper.component" v-bind="contentWrapper.props">
         <div v-if="error" class="cms-page__error" role="alert">
           <v-alert type="error" variant="tonal" border="start" prominent>
             {{ t('cms.page.error') }}
@@ -123,7 +156,7 @@ useSeoMeta({
           <!-- eslint-disable-next-line vue/no-v-html -->
           <div class="xwiki-sandbox" v-html="htmlContent" />
         </div>
-      </v-sheet>
+      </component>
     </v-container>
   </div>
 </template>
@@ -209,12 +242,32 @@ useSeoMeta({
 .cms-page__container--container-semi-fluid
   max-width: min(1100px, 92vw) !important
 
+.cms-page__container--layout3
+  padding-block: clamp(1.5rem, 3vw, 3rem)
+
+.cms-page--layout3
+  gap: clamp(1.5rem, 3vw, 3rem)
+
+.cms-page--layout3 .cms-page__html
+  font-size: 1rem
+
 .cms-page__content
+  display: flex
+  flex-direction: column
+  gap: clamp(1.25rem, 2.5vw, 2rem)
+
+.cms-page__content--card
   padding: clamp(1.75rem, 3vw, 3rem)
   border-radius: 24px
   background: rgb(var(--v-theme-surface-default))
   box-shadow: 0 24px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+
+.cms-page__content--flat
+  padding: 0
+  background: transparent
+  box-shadow: none
+  border: none
 
 .cms-page__error
   display: flex
@@ -254,6 +307,9 @@ useSeoMeta({
     padding-block: 2.5rem
 
   .cms-page__content
+    gap: clamp(1rem, 3vw, 1.5rem)
+
+  .cms-page__content--card
     padding: clamp(1.5rem, 4vw, 2rem)
 
   .cms-page__html
