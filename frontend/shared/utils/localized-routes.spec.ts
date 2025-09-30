@@ -21,19 +21,19 @@ describe('localized-routes utilities', () => {
   it('resolves localized static paths', () => {
     expect(resolveLocalizedRoutePath('team', 'fr-FR')).toBe('/equipe')
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
-    expect(resolveLocalizedRoutePath('legal-notice', 'fr-FR')).toBe('/mentions-legales')
-    expect(resolveLocalizedRoutePath('legal-notice', 'en-US')).toBe('/legal-notice')
+    expect(resolveLocalizedRoutePath('xwiki-fullpage', 'fr-FR')).toBe('/mentions-legales')
+    expect(resolveLocalizedRoutePath('xwiki-fullpage', 'en-US')).toBe('/legal-notice')
   })
 
   it('matches paths back to their localized routes', () => {
     expect(matchLocalizedRouteByPath('/equipe')).toEqual({ routeName: 'team', locale: 'fr-FR' })
     expect(matchLocalizedRouteByPath('/team')).toEqual({ routeName: 'team', locale: 'en-US' })
     expect(matchLocalizedRouteByPath('/mentions-legales')).toEqual({
-      routeName: 'legal-notice',
+      routeName: 'xwiki-fullpage',
       locale: 'fr-FR',
     })
     expect(matchLocalizedRouteByPath('/legal-notice')).toEqual({
-      routeName: 'legal-notice',
+      routeName: 'xwiki-fullpage',
       locale: 'en-US',
     })
     expect(matchLocalizedRouteByPath('/unknown')).toBeNull()
@@ -41,14 +41,14 @@ describe('localized-routes utilities', () => {
 
   it('exposes wiki page identifiers for localized CMS routes', () => {
     expect(matchLocalizedWikiRouteByPath('/mentions-legales')).toEqual({
-      routeName: 'legal-notice',
+      routeName: 'xwiki-fullpage',
       locale: 'fr-FR',
-      pageId: LOCALIZED_WIKI_PATHS['legal-notice']['fr-FR'].pageId,
+      pageId: LOCALIZED_WIKI_PATHS['xwiki-fullpage']['fr-FR'].pageId,
     })
     expect(matchLocalizedWikiRouteByPath('/legal-notice')).toEqual({
-      routeName: 'legal-notice',
+      routeName: 'xwiki-fullpage',
       locale: 'en-US',
-      pageId: LOCALIZED_WIKI_PATHS['legal-notice']['en-US'].pageId,
+      pageId: LOCALIZED_WIKI_PATHS['xwiki-fullpage']['en-US'].pageId,
     })
     expect(matchLocalizedWikiRouteByPath('/team')).toBeNull()
   })
