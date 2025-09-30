@@ -16,7 +16,7 @@ export class NotFoundError extends DomainError {
   public readonly resource: string
   public readonly identifier: string
 
-  toJSON() {
+  override toJSON() {
     return {
       ...super.toJSON(),
       resource: this.resource,

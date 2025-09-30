@@ -67,17 +67,21 @@ export class HttpBlogRepository implements IBlogRepository {
       const dto = await this.blogService.getArticleBySlug(slug)
 
       const article = createArticle({
-        id: dto.id ?? '',
-        slug: dto.slug ?? slug,
+        id: dto.url ?? slug,
+        slug: dto.url ?? slug,
         title: dto.title ?? '',
-        excerpt: dto.excerpt ?? '',
-        content: dto.content ?? '',
+        excerpt: dto.summary ?? '',
+        content: dto.body ?? '',
         author: dto.author ?? 'Unknown',
-        publishedAt: dto.publishedAt ?? new Date().toISOString(),
-        updatedAt: dto.updatedAt ?? new Date().toISOString(),
-        tags: dto.tags ?? [],
-        imageUrl: dto.imageUrl,
-        readTime: dto.readTime,
+        publishedAt: dto.createdMs
+          ? new Date(dto.createdMs).toISOString()
+          : new Date().toISOString(),
+        updatedAt: dto.modifiedMs
+          ? new Date(dto.modifiedMs).toISOString()
+          : new Date().toISOString(),
+        tags: dto.category ?? [],
+        imageUrl: dto.image,
+        readTime: undefined,
       })
 
       return success(article)
@@ -93,7 +97,7 @@ export class HttpBlogRepository implements IBlogRepository {
       const tags = dtos.map(dto =>
         createTag({
           name: dto.name ?? '',
-          slug: dto.slug ?? '',
+          slug: dto.name ?? '',
           count: dto.count ?? 0,
         })
       )

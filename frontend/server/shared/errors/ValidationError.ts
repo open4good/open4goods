@@ -15,7 +15,7 @@ export class ValidationError extends DomainError {
     super(message, cause)
   }
 
-  toJSON() {
+  override toJSON() {
     return {
       ...super.toJSON(),
       fields: this.fields,

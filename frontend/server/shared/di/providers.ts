@@ -42,21 +42,27 @@ export const registerProviders = (domainLanguage: DomainLanguage) => {
   // Register Blog Handlers
   if (!container.has(SERVICE_KEYS.GET_ARTICLES_HANDLER)) {
     container.register(SERVICE_KEYS.GET_ARTICLES_HANDLER, () => {
-      const repository = container.get(SERVICE_KEYS.BLOG_REPOSITORY)
+      const repository = container.get<HttpBlogRepository>(
+        SERVICE_KEYS.BLOG_REPOSITORY
+      )
       return new GetArticlesHandler(repository)
     })
   }
 
   if (!container.has(SERVICE_KEYS.GET_ARTICLE_BY_SLUG_HANDLER)) {
     container.register(SERVICE_KEYS.GET_ARTICLE_BY_SLUG_HANDLER, () => {
-      const repository = container.get(SERVICE_KEYS.BLOG_REPOSITORY)
+      const repository = container.get<HttpBlogRepository>(
+        SERVICE_KEYS.BLOG_REPOSITORY
+      )
       return new GetArticleBySlugHandler(repository)
     })
   }
 
   if (!container.has(SERVICE_KEYS.GET_TAGS_HANDLER)) {
     container.register(SERVICE_KEYS.GET_TAGS_HANDLER, () => {
-      const repository = container.get(SERVICE_KEYS.BLOG_REPOSITORY)
+      const repository = container.get<HttpBlogRepository>(
+        SERVICE_KEYS.BLOG_REPOSITORY
+      )
       return new GetTagsHandler(repository)
     })
   }
@@ -72,7 +78,9 @@ export const registerProviders = (domainLanguage: DomainLanguage) => {
   // Register Content Handlers
   if (!container.has(SERVICE_KEYS.GET_BLOC_HANDLER)) {
     container.register(SERVICE_KEYS.GET_BLOC_HANDLER, () => {
-      const repository = container.get(SERVICE_KEYS.CONTENT_REPOSITORY)
+      const repository = container.get<HttpContentRepository>(
+        SERVICE_KEYS.CONTENT_REPOSITORY
+      )
       return new GetBlocHandler(repository)
     })
   }

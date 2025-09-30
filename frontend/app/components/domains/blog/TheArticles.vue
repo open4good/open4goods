@@ -171,9 +171,7 @@ watch(
   }
 )
 
-const buildPageQuery = (
-  pageNumber: number
-): Record<string, string | string[]> => {
+const buildPageQuery = (pageNumber: number) => {
   const sanitizedPage = Math.max(1, Math.trunc(pageNumber))
   const nextQuery = { ...route.query }
 
@@ -193,9 +191,7 @@ const handlePageChange = async (page: number): Promise<void> => {
   await router.push({ query: currentQuery })
 }
 
-const buildTagQuery = (
-  tag: string | null
-): Record<string, string | string[]> => {
+const buildTagQuery = (tag: string | null) => {
   const nextQuery = { ...route.query }
 
   if (!tag) {

@@ -14,8 +14,10 @@ import { ResponseError } from '~~/shared/api-client'
  */
 export class HttpContentRepository implements IContentRepository {
   private readonly contentService: ReturnType<typeof useContentService>
+  private readonly domainLanguage: DomainLanguage
 
   constructor(domainLanguage: DomainLanguage) {
+    this.domainLanguage = domainLanguage
     this.contentService = useContentService(domainLanguage)
   }
 
@@ -25,9 +27,9 @@ export class HttpContentRepository implements IContentRepository {
 
       const contentBloc = createContentBloc({
         id: dto.blocId ?? blocId,
-        content: dto.content ?? '',
-        language: dto.language,
-        lastModified: dto.lastModified,
+        content: dto.htmlContent ?? '',
+        language: this.domainLanguage,
+        lastModified: undefined,
       })
 
       return success(contentBloc)
