@@ -8,6 +8,12 @@ import { buildI18nPagesConfig } from './shared/utils/localized-routes'
 
 const localeDomains = buildI18nLocaleDomains()
 
+const DEFAULT_TOKEN_COOKIE_NAME = 'access_token'
+const DEFAULT_REFRESH_COOKIE_NAME = 'refresh_token'
+
+const TOKEN_COOKIE_NAME = process.env.TOKEN_COOKIE_NAME || DEFAULT_TOKEN_COOKIE_NAME
+const REFRESH_COOKIE_NAME = process.env.REFRESH_COOKIE_NAME || DEFAULT_REFRESH_COOKIE_NAME
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   srcDir: 'app',
@@ -223,9 +229,9 @@ export default defineNuxtConfig({
   // These can be overridden via a .env file
   runtimeConfig: {
     // Name of the cookie storing the JWT
-    tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
+    tokenCookieName: TOKEN_COOKIE_NAME,
     // Name of the cookie storing the refresh token
-    refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
+    refreshCookieName: REFRESH_COOKIE_NAME,
     // Shared token for server-to-server authentication (server-only)
     machineToken: process.env.MACHINE_TOKEN || '',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
@@ -236,6 +242,9 @@ export default defineNuxtConfig({
       // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
       hcaptchaSiteKey: process.env.HCAPTCHA_SITE_KEY || '',
+      tokenCookieName: TOKEN_COOKIE_NAME,
+      refreshCookieName: REFRESH_COOKIE_NAME,
     }
   },
 })
+
