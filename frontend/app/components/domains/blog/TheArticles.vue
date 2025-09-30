@@ -73,7 +73,6 @@ const paginationInfoMessage = computed(() =>
     count: totalElements.value,
   })
 )
-const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
 const pageLinkLabel = (pageNumber: number): string =>
   t('blog.pagination.pageLink', { page: pageNumber })
 const buildArticleTitleId = (index: number): string =>
@@ -553,12 +552,15 @@ const seoPageLinks = computed(() => {
       </v-row>
 
       <div v-if="shouldDisplayPagination" class="pagination-container">
-        <nav class="pagination-control" :aria-label="paginationAriaLabel">
+        <nav
+          class="pagination-control"
+          :aria-label="t('blog.pagination.ariaLabel')"
+        >
           <v-pagination
             :length="totalPages"
             :model-value="currentPage"
             :total-visible="5"
-            :aria-label="paginationAriaLabel"
+            :aria-label="t('blog.pagination.ariaLabel')"
             :aria-controls="articleListId"
             @update:model-value="handlePageChange"
           />
@@ -568,7 +570,10 @@ const seoPageLinks = computed(() => {
           {{ paginationInfoMessage }}
         </p>
 
-        <nav class="visually-hidden" :aria-label="paginationAriaLabel">
+        <nav
+          class="visually-hidden"
+          :aria-label="t('blog.pagination.ariaLabel')"
+        >
           <ul>
             <li v-for="pageNumber in seoPageLinks" :key="pageNumber">
               <NuxtLink :to="{ query: buildPageQuery(pageNumber) }">
