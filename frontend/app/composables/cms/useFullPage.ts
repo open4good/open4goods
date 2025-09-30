@@ -1,4 +1,4 @@
-import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import { computed, toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
 import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
 
 const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-semi-fluid'])
@@ -20,6 +20,11 @@ export const useFullPage = async (
     return id ? `full-page:${id}` : 'full-page:empty'
   })
 
+  const pageCache = useState<Record<string, CmsFullPage | null>>(
+    'cms-fullpage-cache',
+    () => ({}),
+  )
+
   const asyncState = await useAsyncData<CmsFullPage | null>(
     () => key.value,
     async () => {
@@ -38,7 +43,28 @@ export const useFullPage = async (
     },
   )
 
-  const page = computed(() => asyncState.data.value)
+  watchEffect(() => {
+    const cacheKey = key.value
+    const pageValue = asyncState.data.value
+
+    if (!cacheKey || cacheKey === 'full-page:empty' || !pageValue) {
+      return
+    }
+
+    pageCache.value[cacheKey] = pageValue
+  })
+
+  const cachedPage = computed(() => {
+    const cacheKey = key.value
+
+    if (!cacheKey || cacheKey === 'full-page:empty') {
+      return null
+    }
+
+    return pageCache.value[cacheKey] ?? null
+  })
+
+  const page = computed(() => asyncState.data.value ?? cachedPage.value)
   const properties = computed<PageProperties>(() => ({ ...(page.value?.properties ?? {}) }))
 
   const width = computed<SupportedWidth>(() => {
