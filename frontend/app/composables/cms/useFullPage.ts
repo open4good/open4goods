@@ -30,8 +30,8 @@ export const useFullPage = async (
 
   const fallbackPage: CmsFullPage = {
     htmlContent: '',
-    properties: {},
-    editLink: null,
+    properties: {} as Record<string, string>,
+    editLink: undefined,
   }
 
   const asyncState = await useAsyncData<CmsFullPage>(
