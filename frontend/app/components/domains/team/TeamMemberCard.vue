@@ -121,8 +121,8 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
     height: 112px
     border-radius: 50%
     border: 6px solid rgb(var(--v-theme-surface))
-    box-shadow: 0 12px 28px rgba(var(--v-theme-team-card-highlight), 0.25)
-    background: linear-gradient(135deg, rgba(var(--v-theme-team-card-highlight), 0.15), rgba(var(--v-theme-team-card-accent), 0.15))
+    box-shadow: 0 12px 28px rgba(var(--v-theme-accent-primary-highlight), 0.25)
+    background: linear-gradient(135deg, rgba(var(--v-theme-accent-primary-highlight), 0.15), rgba(var(--v-theme-accent-supporting), 0.15))
     display: flex
     align-items: center
     justify-content: center
