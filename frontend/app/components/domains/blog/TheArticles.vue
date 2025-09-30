@@ -38,20 +38,19 @@ const buildDateIsoString = (timestamp: number) => {
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const currentPage = ref(1)
 const tagsLoading = ref(false)
 const articleListId = 'blog-articles-list'
 const debugPanelId = 'blog-articles-debug-panel'
 const showDebugInfo = ref(false)
 
-const parsePageQuery = (rawPage: unknown) => {
+const parsePageQuery = (rawPage: unknown): number => {
   const value = Array.isArray(rawPage) ? rawPage[0] : rawPage
   const parsed = Number.parseInt(String(value ?? ''), 10)
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
-const parseTagQuery = (rawTag: unknown) => {
+const parseTagQuery = (rawTag: unknown): string | null => {
   const value = Array.isArray(rawTag) ? rawTag[0] : rawTag
 
   if (typeof value !== 'string') {
@@ -63,14 +62,7 @@ const parseTagQuery = (rawTag: unknown) => {
   return trimmed.length > 0 ? trimmed : null
 }
 
-watch(
-  () => pagination.value.page,
-  page => {
-    currentPage.value = page || 1
-  },
-  { immediate: true }
-)
-
+const currentPage = computed(() => pagination.value.page || 1)
 const totalPages = computed(() => pagination.value.totalPages || 0)
 const totalElements = computed(() => pagination.value.totalElements || 0)
 const shouldDisplayPagination = computed(() => totalPages.value > 1)
@@ -82,13 +74,13 @@ const paginationInfoMessage = computed(() =>
   })
 )
 const paginationAriaLabel = computed(() => t('blog.pagination.ariaLabel'))
-const pageLinkLabel = (pageNumber: number) =>
+const pageLinkLabel = (pageNumber: number): string =>
   t('blog.pagination.pageLink', { page: pageNumber })
-const buildArticleTitleId = (index: number) =>
+const buildArticleTitleId = (index: number): string =>
   `blog-article-card-title-${index}`
-const buildArticleSummaryId = (index: number) =>
+const buildArticleSummaryId = (index: number): string =>
   `blog-article-card-summary-${index}`
-const buildArticleImageAlt = (title?: string | null) => {
+const buildArticleImageAlt = (title?: string | null): string => {
   const sanitized = title?.trim()
 
   return sanitized && sanitized.length > 0
@@ -96,7 +88,9 @@ const buildArticleImageAlt = (title?: string | null) => {
     : 'Blog article illustration'
 }
 
-const extractArticleSlug = (rawSlug: string | null | undefined) => {
+const extractArticleSlug = (
+  rawSlug: string | null | undefined
+): string | null => {
   if (!rawSlug) {
     return null
   }
@@ -126,14 +120,14 @@ const buildArticleLink = (
   return `/blog/${normalizedSlug}`
 }
 
-const loadArticlesFromRoute = async () => {
+const loadArticlesFromRoute = async (): Promise<void> => {
   const targetPage = parsePageQuery(route.query.page)
   const targetTag = parseTagQuery(route.query.tag)
 
   await fetchArticles(targetPage, pagination.value.size, targetTag)
 }
 
-const ensureTagsLoaded = async () => {
+const ensureTagsLoaded = async (): Promise<void> => {
   if (tags.value.length > 0) {
     return
   }
@@ -146,7 +140,18 @@ const ensureTagsLoaded = async () => {
   }
 }
 
-await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+// Use useAsyncData for SSR-friendly data loading
+await useAsyncData(
+  'blog-articles-initial',
+  async () => {
+    await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+    return true
+  },
+  {
+    server: true,
+    lazy: false,
+  }
+)
 
 watch(
   () => [route.query.page, route.query.tag],
@@ -166,7 +171,9 @@ watch(
   }
 )
 
-const buildPageQuery = (pageNumber: number) => {
+const buildPageQuery = (
+  pageNumber: number
+): Record<string, string | string[]> => {
   const sanitizedPage = Math.max(1, Math.trunc(pageNumber))
   const nextQuery = { ...route.query }
 
@@ -179,14 +186,16 @@ const buildPageQuery = (pageNumber: number) => {
   return nextQuery
 }
 
-const handlePageChange = async (page: number) => {
+const handlePageChange = async (page: number): Promise<void> => {
   const sanitizedPage = Math.max(1, Math.trunc(page))
   const currentQuery = buildPageQuery(sanitizedPage)
 
   await router.push({ query: currentQuery })
 }
 
-const buildTagQuery = (tag: string | null) => {
+const buildTagQuery = (
+  tag: string | null
+): Record<string, string | string[]> => {
   const nextQuery = { ...route.query }
 
   if (!tag) {
@@ -200,7 +209,7 @@ const buildTagQuery = (tag: string | null) => {
   return nextQuery
 }
 
-const handleTagSelection = async (tag: string | null) => {
+const handleTagSelection = async (tag: string | null): Promise<void> => {
   const nextQuery = buildTagQuery(tag)
   await router.push({ path: '/blog', query: nextQuery })
 }
@@ -225,10 +234,10 @@ const debugDetails = computed(() => ({
   totalArticles: totalElements.value,
   selectedTag: activeTag.value ?? null,
 }))
-const toggleDebugInfo = () => {
+const toggleDebugInfo = (): void => {
   showDebugInfo.value = !showDebugInfo.value
 }
-const isTagActive = (tag: string | null) => {
+const isTagActive = (tag: string | null): boolean => {
   return (activeTag.value ?? null) === (tag ?? null)
 }
 
