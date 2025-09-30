@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 📚 Documentation
+
+For detailed guides and architecture documentation, see:
+
+- **[Frontend API Integration Guide (FR)](./FRONTEND-API-GUIDE.md)** - Guide complet d'intégration des API pour les développeurs frontend
+- **[Frontend API Integration Guide (EN)](./FRONTEND-API-GUIDE.en.md)** - Complete API integration guide for frontend developers
+- **[Server Architecture (Clean Architecture/DDD)](./server/DOC.md)** - Server-side architecture documentation
+
 ## Development Commands
 
 ### Package Manager

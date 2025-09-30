@@ -1,6 +1,5 @@
 # Nudger Frontend Project
 
-
 ## Nudger UI in action
 
 Experience Nudger frontend online:
@@ -12,6 +11,36 @@ The default home page now features a Vuetify-based landing page.
 **Welcome** to the Nudger front-end project. This guide is a comprehensive overview of the Nudger UI application structure, coding conventions, and tooling.
 
 The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from  Pinia, to Vitest – to maintain a robust, scalable codebase.
+
+## 📚 Documentation
+
+### Developer Guides
+
+- **[Frontend API Integration Guide (FR)](./FRONTEND-API-GUIDE.md)** - Guide complet d'intégration des API pour les développeurs frontend
+  - Utilisation des composables (`useBlog`, `useAuth`, `useContentBloc`)
+  - Appels API directs avec `$fetch`
+  - Gestion SSR avec `useAsyncData`
+  - Exemples pratiques par module
+  - Bonnes pratiques et anti-patterns
+
+- **[Frontend API Integration Guide (EN)](./FRONTEND-API-GUIDE.en.md)** - Complete API integration guide for frontend developers
+  - Using composables (`useBlog`, `useAuth`, `useContentBloc`)
+  - Direct API calls with `$fetch`
+  - SSR management with `useAsyncData`
+  - Practical examples by module
+  - Best practices and anti-patterns
+
+### Architecture Documentation
+
+- **[Server Architecture (Clean Architecture/DDD)](./server/DOC.md)** - Server-side architecture documentation
+  - Clean Architecture layers (Domain, Application, Infrastructure, Presentation)
+  - CQRS pattern implementation
+  - Repository pattern and dependency injection
+  - Adding new features guide
+
+- **[Internationalization Guide](./docs/internationalisation.md)** - Multi-language implementation guide
+
+### Quick Start
 
 Use this document as the bible for:
 

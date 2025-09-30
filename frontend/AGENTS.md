@@ -12,6 +12,15 @@
 
 Nudger is a search engine for electronics and household appliances, aggregating energy data from different sources to create an "Impact Score." This allows users to make the best choice of appliance before purchasing.
 
+## 📚 Essential Documentation
+
+Before starting development, consult these guides:
+
+- **[Frontend API Integration Guide (FR)](./FRONTEND-API-GUIDE.md)** - Guide complet pour intégrer les API dans les composants Vue
+- **[Frontend API Integration Guide (EN)](./FRONTEND-API-GUIDE.en.md)** - Complete guide for integrating APIs in Vue components
+- **[Server Architecture (Clean Architecture/DDD)](./server/DOC.md)** - Server-side Clean Architecture documentation
+- **[Internationalization Guide](./docs/internationalisation.md)** - Multi-language implementation guide
+
 # Nuxt 3 Frontend Development Guide (Nudger Project)
 
 [Doc Nuxt3](https://nuxt.com/docs/getting-started/introduction)
