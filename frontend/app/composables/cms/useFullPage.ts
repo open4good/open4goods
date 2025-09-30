@@ -36,7 +36,6 @@ export const useFullPage = async (
     },
     {
       server: true,
-      watch: [() => toValue(pageId)],
       default: () => null,
     },
   )
