@@ -20,6 +20,17 @@ export const useFullPage = async (
     return id ? `full-page:${id}` : 'full-page:empty'
   })
 
+  const lastResolvedPages = useState<Record<string, CmsFullPage | null>>(
+    'cms-full-page:last-resolved',
+    () => ({}),
+  )
+  const lastResolvedPage = computed<CmsFullPage | null>({
+    get: () => lastResolvedPages.value[key.value] ?? null,
+    set: value => {
+      lastResolvedPages.value[key.value] = value
+    },
+  })
+
   const asyncState = await useAsyncData<CmsFullPage | null>(
     () => key.value,
     async () => {
@@ -37,11 +48,9 @@ export const useFullPage = async (
     },
   )
 
-  const lastResolvedPageKey = `cms-full-page:last-resolved:${key.value}`
-  const lastResolvedPage = useState<CmsFullPage | null>(
-    lastResolvedPageKey,
-    () => asyncState.data.value ?? null,
-  )
+  if (asyncState.data.value !== null) {
+    lastResolvedPage.value = asyncState.data.value
+  }
 
   watchEffect(() => {
     const resolvedPage = asyncState.data.value
