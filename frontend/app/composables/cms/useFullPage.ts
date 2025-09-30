@@ -1,4 +1,4 @@
-import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import { computed, shallowRef, toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
 import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
 
 const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-semi-fluid'])
@@ -37,7 +37,21 @@ export const useFullPage = async (
     },
   )
 
-  const page = computed(() => asyncState.data.value)
+  const lastResolvedPage = shallowRef<CmsFullPage | null>(asyncState.data.value ?? null)
+
+  if (asyncState.data.value) {
+    lastResolvedPage.value = asyncState.data.value
+  }
+
+  watchEffect(() => {
+    const resolvedPage = asyncState.data.value
+
+    if (resolvedPage) {
+      lastResolvedPage.value = resolvedPage
+    }
+  })
+
+  const page = computed(() => asyncState.data.value ?? lastResolvedPage.value)
   const properties = computed<PageProperties>(() => ({ ...(page.value?.properties ?? {}) }))
 
   const width = computed<SupportedWidth>(() => {
@@ -48,10 +62,19 @@ export const useFullPage = async (
   const pageTitle = computed(() => properties.value.pageTitle ?? page.value?.wikiPage?.title ?? '')
   const metaTitle = computed(() => properties.value.metaTitle ?? pageTitle.value)
   const metaDescription = computed(() => properties.value.metaDescription ?? '')
-  const htmlContent = computed(() => page.value?.htmlContent ?? '')
+  const htmlContent = computed(() => {
+    const content = page.value?.htmlContent
+
+    if (typeof content !== 'string') {
+      return undefined
+    }
+
+    return content.trim() === '' ? undefined : content
+  })
   const editLink = computed(() => page.value?.editLink ?? null)
 
   return {
+    data: asyncState.data,
     page,
     properties,
     width,

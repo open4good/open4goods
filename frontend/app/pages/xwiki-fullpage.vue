@@ -17,17 +17,32 @@ if (!matchedRoute.value) {
 
 const pageId = computed(() => matchedRoute.value?.pageId ?? null)
 
+const fullPageState = await useFullPage(pageId)
+
 const {
   width,
   pageTitle,
   metaTitle,
   metaDescription,
-  htmlContent,
   editLink,
   pending,
   error,
   refresh,
-} = await useFullPage(pageId)
+  page,
+  data,
+} = fullPageState
+
+const htmlContent = computed(() => {
+  const normalise = (value?: string | null) => {
+    if (typeof value !== 'string') {
+      return undefined
+    }
+
+    return value.trim() === '' ? undefined : value
+  }
+
+  return normalise(data.value?.htmlContent) ?? normalise(page.value?.htmlContent)
+})
 
 const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])
