@@ -58,7 +58,8 @@ public class XwikiFacadeService {
 	public FullPage getFullPage (String restPath, String language) {
 		FullPage ret = new FullPage();
 
-		String htmlContent = xWikiHtmlService.html(restPath.replaceAll("\\.|:","/"), language);
+                String normalizedPath = restPath.replaceAll("\\.|:", "/");
+                String htmlContent = xWikiHtmlService.html(normalizedPath, language);
 		// TODO : When xwiki jakarta compliant
 //		String htmlContent = xWikiHtmlService.renderXWiki20SyntaxAsXHTML(wikiPage.getContent());
 
@@ -70,7 +71,8 @@ public class XwikiFacadeService {
 		ret.setHtmlContent(htmlContent);
 		ret.setWikiPage(wikiPage);
 //		ret.setObjects(objects);
-		ret.setProperties(properties);
+                ret.setProperties(properties);
+                ret.setEditLink(pathHelper.getEditpath(normalizedPath));
 
 
 		return ret;

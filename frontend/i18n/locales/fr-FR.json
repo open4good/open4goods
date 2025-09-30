@@ -253,5 +253,13 @@
       },
       "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées."
     }
+  },
+  "cms": {
+    "page": {
+      "heroEyebrow": "Ressources Nudger",
+      "loading": "Chargement de la page…",
+      "error": "Nous n'avons pas pu charger cette page. Veuillez réessayer plus tard.",
+      "edit": "Modifier cette page"
+    }
   }
 }

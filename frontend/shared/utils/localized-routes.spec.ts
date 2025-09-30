@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   LOCALIZED_ROUTE_PATHS,
+  LOCALIZED_WIKI_PATHS,
   buildI18nPagesConfig,
   matchLocalizedRouteByPath,
+  matchLocalizedWikiRouteByPath,
   normalizeLocale,
   resolveLocalizedRoutePath,
 } from './localized-routes'
@@ -19,12 +21,36 @@ describe('localized-routes utilities', () => {
   it('resolves localized static paths', () => {
     expect(resolveLocalizedRoutePath('team', 'fr-FR')).toBe('/equipe')
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
+    expect(resolveLocalizedRoutePath('legal-notice', 'fr-FR')).toBe('/mentions-legales')
+    expect(resolveLocalizedRoutePath('legal-notice', 'en-US')).toBe('/legal-notice')
   })
 
   it('matches paths back to their localized routes', () => {
     expect(matchLocalizedRouteByPath('/equipe')).toEqual({ routeName: 'team', locale: 'fr-FR' })
     expect(matchLocalizedRouteByPath('/team')).toEqual({ routeName: 'team', locale: 'en-US' })
+    expect(matchLocalizedRouteByPath('/mentions-legales')).toEqual({
+      routeName: 'legal-notice',
+      locale: 'fr-FR',
+    })
+    expect(matchLocalizedRouteByPath('/legal-notice')).toEqual({
+      routeName: 'legal-notice',
+      locale: 'en-US',
+    })
     expect(matchLocalizedRouteByPath('/unknown')).toBeNull()
+  })
+
+  it('exposes wiki page identifiers for localized CMS routes', () => {
+    expect(matchLocalizedWikiRouteByPath('/mentions-legales')).toEqual({
+      routeName: 'legal-notice',
+      locale: 'fr-FR',
+      pageId: LOCALIZED_WIKI_PATHS['legal-notice']['fr-FR'].pageId,
+    })
+    expect(matchLocalizedWikiRouteByPath('/legal-notice')).toEqual({
+      routeName: 'legal-notice',
+      locale: 'en-US',
+      pageId: LOCALIZED_WIKI_PATHS['legal-notice']['en-US'].pageId,
+    })
+    expect(matchLocalizedWikiRouteByPath('/team')).toBeNull()
   })
 
 

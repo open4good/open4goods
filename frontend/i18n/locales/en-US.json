@@ -252,5 +252,13 @@
       },
       "privacy": "We only use your contact details to answer your request and never share them with third parties."
     }
+  },
+  "cms": {
+    "page": {
+      "heroEyebrow": "Nudger resources",
+      "loading": "Loading page…",
+      "error": "We could not load this page. Please try again later.",
+      "edit": "Edit this page"
+    }
   }
 }
