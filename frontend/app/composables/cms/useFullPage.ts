@@ -5,13 +5,6 @@ const SUPPORTED_WIDTHS = new Set(['container', 'container-fluid', 'container-sem
 
 type SupportedWidth = 'container' | 'container-fluid' | 'container-semi-fluid'
 
-interface PageProperties {
-  width?: string
-  pageTitle?: string
-  metaTitle?: string
-  metaDescription?: string
-}
-
 export const useFullPage = async (
   pageId: MaybeRefOrGetter<string | null | undefined>,
 ) => {
@@ -38,22 +31,20 @@ export const useFullPage = async (
   )
 
   const page = computed(() => asyncState.data.value)
-  const properties = computed<PageProperties>(() => ({ ...(page.value?.properties ?? {}) }))
 
   const width = computed<SupportedWidth>(() => {
-    const rawWidth = properties.value.width ?? 'container'
+    const rawWidth = page.value?.width ?? 'container'
     return (SUPPORTED_WIDTHS.has(rawWidth) ? rawWidth : 'container') as SupportedWidth
   })
 
-  const pageTitle = computed(() => properties.value.pageTitle ?? page.value?.wikiPage?.title ?? '')
-  const metaTitle = computed(() => properties.value.metaTitle ?? pageTitle.value)
-  const metaDescription = computed(() => properties.value.metaDescription ?? '')
+  const pageTitle = computed(() => page.value?.pageTitle ?? page.value?.title ?? '')
+  const metaTitle = computed(() => page.value?.metaTitle ?? pageTitle.value)
+  const metaDescription = computed(() => page.value?.metaDescription ?? '')
   const htmlContent = computed(() => page.value?.htmlContent ?? '')
   const editLink = computed(() => page.value?.editLink ?? null)
 
   return {
     page,
-    properties,
     width,
     pageTitle,
     metaTitle,
