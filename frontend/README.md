@@ -387,6 +387,10 @@ const cart = useCartStore();
   const api = new DefaultApi()
   const response = await api.listVersionsv2()
   ```
+- Service wrappers keep those generated clients SSR-only, inject the shared
+  token, and expose domain-language aware helpers for server routes. Follow the
+  [backend services guide](./docs/backend-services.md) for the full pattern,
+  including caching, error translation, and parameter validation.
 
 ## Fetching Content from blog
 
