@@ -91,7 +91,7 @@ public class ContentsController {
             summary = "Get XWiki page",
             description = "Return the rendered XWiki page along with metadata.",
             parameters = {
-                    @Parameter(name = "xwikiPageId", description = "XWiki page path", example = "Main.WebHome", in = ParameterIn.PATH, required = true),
+                    @Parameter(name = "xwikiPageId", description = "XWiki page path", example = "webpages:default:legal-notice:WebHome", in = ParameterIn.PATH, required = true),
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class))
