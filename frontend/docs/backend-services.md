@@ -14,102 +14,90 @@ wrapped in a thin service that:
 4. Guards against accidental client-side usage to keep secrets such as
    `MACHINE_TOKEN` out of the browser bundle.
 
-The pattern keeps the generated code untouched while providing a stable surface
-for server routes, composables, and tests.
+The blog feature provides a good end-to-end example of the pattern: the
+[`useBlogService`](../shared/api-client/services/blog.services.ts) wrapper feeds
+Nuxt server routes, those routes are consumed by the
+[`useBlog`](../app/composables/blog/useBlog.ts) composable, and components such
+as [`TheArticle.vue`](../app/components/domains/blog/TheArticle.vue) display the
+resulting data. The sections below break that flow down.
 
-## Creating a service wrapper
-Suppose you need to expose operations from the generated
-[`CategoriesApi`](../shared/api-client/apis/CategoriesApi.ts). The service lives
-next to the other wrappers in `shared/api-client/services/`:
+## 1. Create a service wrapper (server only)
+Service wrappers live next to the generated APIs. They enforce authentication,
+domain language propagation, and lazy client instantiation. The blog service is
+representative:
 
 ```ts
-// shared/api-client/services/categories.services.ts
-import { CategoriesApi } from '..'
+// shared/api-client/services/blog.services.ts
+import { BlogApi } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
-export const useCategoriesService = (domainLanguage: DomainLanguage) => {
+export const useBlogService = (domainLanguage: DomainLanguage) => {
   const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
-  let api: CategoriesApi | undefined
+  let api: BlogApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useCategoriesService() is only available on the server runtime.')
+      throw new Error('useBlogService() is only available on the server runtime.')
     }
 
     if (!api) {
-      api = new CategoriesApi(createBackendApiConfig())
+      api = new BlogApi(createBackendApiConfig())
     }
 
     return api
   }
 
-  const list = async (onlyEnabled?: boolean) => {
-    return await resolveApi().categories1({ domainLanguage, onlyEnabled })
+  const getArticleBySlug = async (slug: string) => {
+    return await resolveApi().post({ slug, domainLanguage })
   }
 
-  const findById = async (categoryId: string) => {
-    return await resolveApi().category({ categoryId, domainLanguage })
+  const getArticles = async (params?: { tag?: string; pageNumber?: number; pageSize?: number }) => {
+    return await resolveApi().posts({ ...params, domainLanguage })
   }
 
-  return { list, findById }
+  const getTags = async () => {
+    return await resolveApi().tags({ domainLanguage })
+  }
+
+  return { getArticleBySlug, getArticles, getTags }
 }
 ```
 
-Key points:
+Key points to preserve in every service wrapper:
 
-- **Configuration** – `createBackendApiConfig()` builds a `Configuration` seeded
-  with `config.apiUrl` and `config.machineToken`. Never instantiate the generated
-  API with `new Configuration()` directly; the helper ensures authentication is
-  consistent and only available on the server.
-- **Domain language** – services receive the resolved domain language and pass it
-  to each OpenAPI call. This keeps backend responses aligned with the current
-  hostname and mirrors how [`useContentService`](../shared/api-client/services/content.services.ts)
-  behaves.
-- **Lazy instantiation** – `resolveApi()` creates the generated client only once,
-  caching it inside the closure so subsequent calls reuse the same instance.
-- **Server-only guards** – the `import.meta.server`/`process.env.VITEST` checks
-  prevent browser bundles from importing backend clients and allow Vitest suites
-  to use them during SSR-style tests.
+- **Configuration** – always use `createBackendApiConfig()` so authentication and
+  base URLs stay aligned with runtime configuration.
+- **Domain language** – accept the language from callers and pass it to every
+  OpenAPI call so backend responses match the current hostname.
+- **Lazy instantiation** – keep the generated client in a closure and reuse it.
+- **Server-only guards** – block browser execution paths; only SSR and Vitest
+  may talk to the backend directly.
 
-## Wiring the service into a Nuxt server route
-Nuxt server routes act as the integration layer between browser requests and the
-backend. [`server/api/blocs/[blocId].ts`](../server/api/blocs/%5BblocId%5D.ts)
-shows the full lifecycle:
-
-1. **Validate parameters** – read dynamic params with `getRouterParam()` and
-   return a 400 error early when required values are missing.
-2. **Set caching headers** – use `setResponseHeader()` to define shared cache
-   behaviour (`public, max-age=3600` in the bloc example).
-3. **Resolve the domain language** – feed the incoming `host`/`x-forwarded-host`
-   header to `resolveDomainLanguage()` so backend calls receive the correct
-   locale context.
-4. **Call the service** – instantiate your wrapper (`useCategoriesService`,
-   `useContentService`, etc.) with the domain language and execute the desired
-   method.
-5. **Translate backend errors** – wrap the call in a `try/catch`, feed failures
-   to [`extractBackendErrorDetails()`](../server/utils/log-backend-error.ts), log
-   the `logMessage`, and rethrow with `createError({ statusCode, statusMessage })`
-   so Nuxt responds with meaningful HTTP codes.
+## 2. Expose the service through a Nuxt server route
+Nuxt server routes translate incoming HTTP requests into service calls. The blog
+article endpoint mirrors the recommended structure:
 
 ```ts
+// server/api/blog/articles/[slug].ts
 export default defineEventHandler(async (event) => {
-  const categoryId = getRouterParam(event, 'categoryId')
-  if (!categoryId) {
-    throw createError({ statusCode: 400, statusMessage: 'Category id is required' })
+  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+
+  const slug = getRouterParam(event, 'slug')
+  if (!slug) {
+    throw createError({ statusCode: 400, statusMessage: 'Article slug is required' })
   }
 
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=300, s-maxage=300')
   const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
-  const categoriesService = useCategoriesService(domainLanguage)
+  const blogService = useBlogService(domainLanguage)
 
   try {
-    return await categoriesService.findById(categoryId)
+    return await blogService.getArticleBySlug(slug)
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching category', backendError.logMessage, backendError)
+    console.error('Error fetching blog article:', backendError.logMessage, backendError)
 
     throw createError({
       statusCode: backendError.statusCode,
@@ -120,7 +108,77 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-Reusing the same pattern across handlers keeps error logging consistent and
-ensures downstream services always receive authenticated, locale-aware requests.
-When adding query parameters or headers, extend the service wrapper so the
-handler remains focused on request validation and response shaping.
+This keeps request validation, caching, localisation, and error translation close
+to the network boundary while delegating the backend call to the wrapper.
+
+## 3. Consume the server route from a composable
+Composables hide the transport details from components and pages. They call the
+Nuxt server routes with `$fetch`, manage loading/error state, and expose a typed
+API. The blog composable demonstrates the pattern:
+
+```ts
+// app/composables/blog/useBlog.ts
+export const useBlog = () => {
+  const currentArticle = useState('blog-current-article', () => null)
+  const loading = useState('blog-loading', () => false)
+  const error = useState('blog-error', () => null)
+
+  const fetchArticle = async (slug: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const article = await $fetch(`/api/blog/articles/${slug}`)
+      currentArticle.value = article
+      return article
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to fetch article'
+      console.error('Error in fetchArticle:', err)
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { currentArticle: readonly(currentArticle), loading: readonly(loading), error: readonly(error), fetchArticle }
+}
+```
+
+When a feature needs pagination, filters, or reset helpers, expose them from the
+composable so the UI remains declarative.
+
+## 4. Render data in a page or component
+With the composable in place, pages and components can focus on presentation.
+The blog article page fetches data in `setup()` and passes the resolved article
+to [`TheArticle.vue`](../app/components/domains/blog/TheArticle.vue):
+
+```vue
+<!-- app/pages/blog/[slug].vue -->
+<script setup lang="ts">
+const { currentArticle, loading, error, fetchArticle } = useBlog()
+const slug = computed(() => /* derive slug from the route */)
+
+await useAsyncData(
+  () => (slug.value ? `blog-article-${slug.value}` : 'blog-article'),
+  () => (slug.value ? fetchArticle(slug.value) : Promise.resolve(null)),
+  { server: true, immediate: true, watch: [slug] },
+)
+
+const article = computed(() => currentArticle.value)
+</script>
+
+<template>
+  <TheArticle v-if="article" :article="article" />
+  <v-skeleton-loader v-else-if="loading" type="heading, image, paragraph, paragraph" />
+  <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+</template>
+```
+
+`TheArticle.vue` itself focuses purely on rendering: it receives the DTO, builds
+computed properties (title, dates, SEO metadata), sanitises HTML, and exposes the
+final markup without concerning itself with backend access.
+
+Following this workflow—service wrapper → Nuxt route → composable → component—
+keeps backend integrations testable, SSR-safe, and easy to reason about. When
+adding a new feature, mirror the blog example so the team can recognise the
+control flow instantly.
