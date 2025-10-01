@@ -15,31 +15,31 @@
 
 import * as runtime from '../runtime';
 import type {
-  CategoriesStatsDto,
+  TeamProperties,
 } from '../models/index';
 import {
-    CategoriesStatsDtoFromJSON,
-    CategoriesStatsDtoToJSON,
+    TeamPropertiesFromJSON,
+    TeamPropertiesToJSON,
 } from '../models/index';
 
-export interface CategoriesRequest {
-    domainLanguage: CategoriesDomainLanguageEnum;
+export interface TeamRequest {
+    domainLanguage: TeamDomainLanguageEnum;
 }
 
 /**
  * 
  */
-export class StatsApi extends runtime.BaseAPI {
+export class TeamApi extends runtime.BaseAPI {
 
     /**
-     * Return aggregated statistics about vertical category mappings.
-     * Get categories statistics
+     * Return the configured list of core team members and contributors.
+     * Get eco-nudger team roster
      */
-    async categoriesRaw(requestParameters: CategoriesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesStatsDto>> {
+    async teamRaw(requestParameters: TeamRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TeamProperties>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling categories().'
+                'Required parameter "domainLanguage" was null or undefined when calling team().'
             );
         }
 
@@ -60,7 +60,7 @@ export class StatsApi extends runtime.BaseAPI {
             }
         }
 
-        let urlPath = `/stats/categories`;
+        let urlPath = `/team`;
 
         const response = await this.request({
             path: urlPath,
@@ -69,15 +69,15 @@ export class StatsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => CategoriesStatsDtoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => TeamPropertiesFromJSON(jsonValue));
     }
 
     /**
-     * Return aggregated statistics about vertical category mappings.
-     * Get categories statistics
+     * Return the configured list of core team members and contributors.
+     * Get eco-nudger team roster
      */
-    async categories(requestParameters: CategoriesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesStatsDto> {
-        const response = await this.categoriesRaw(requestParameters, initOverrides);
+    async team(requestParameters: TeamRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TeamProperties> {
+        const response = await this.teamRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -86,8 +86,8 @@ export class StatsApi extends runtime.BaseAPI {
 /**
  * @export
  */
-export const CategoriesDomainLanguageEnum = {
+export const TeamDomainLanguageEnum = {
     Fr: 'fr',
     En: 'en'
 } as const;
-export type CategoriesDomainLanguageEnum = typeof CategoriesDomainLanguageEnum[keyof typeof CategoriesDomainLanguageEnum];
+export type TeamDomainLanguageEnum = typeof TeamDomainLanguageEnum[keyof typeof TeamDomainLanguageEnum];
