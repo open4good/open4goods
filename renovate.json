@@ -3,23 +3,34 @@
   "extends": ["config:recommended"],
   "schedule": ["after 10pm and before 5am"],
   "ignorePaths": ["ui/**"],
-  "github-actions": { "enabled": true },
+  "automerge": true,
+  "automergeType": "pr",
   "dependencyDashboard": true,
+
+  "github-actions": { "enabled": true },
+
   "packageRules": [
     {
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+
+    {
       "matchManagers": ["maven"],
-      "automerge": false,
       "labels": ["squad:backend"]
     },
+
     {
       "matchPaths": ["frontend/**"],
       "matchManagers": ["npm", "pnpm", "yarn"],
       "labels": ["squad:ux"]
     },
+
     {
       "matchManagers": ["github-actions"],
       "labels": ["squad:platform"]
     },
+
     {
       "matchManagers": ["dockerfile", "docker-compose"],
       "labels": ["squad:platform"]
