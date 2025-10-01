@@ -86,30 +86,6 @@ public class ContentsController {
                 .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
-
-    @GetMapping("/pages")
-    @Operation(
-            summary = "List XWiki pages",
-            description = "List of pages available for rendering",
-            parameters = {
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "501", description = "Not implemented",
-                            headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
-                                    description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")))
-            }
-    )
-    public ResponseEntity<Void> pages(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        // TODO: implement listing of pages
-
-
-        return ResponseEntity.status(501).build();
-    }
-
     @GetMapping("/pages/{xwikiPageId}")
     @Operation(
             summary = "Get XWiki page",
@@ -134,7 +110,7 @@ public class ContentsController {
                                             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                             Locale locale) {
 
-        String normalized = translatePageId(xwikiPageId.replace(":", "/"));
+        String normalized = translatePageId(xwikiPageId);
         FullPageDto page = xwikiFullPageService.getFullPage(normalized, domainLanguage.languageTag());
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)

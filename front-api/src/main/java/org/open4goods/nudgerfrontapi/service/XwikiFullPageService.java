@@ -46,8 +46,9 @@ public class XwikiFullPageService {
             properties = Collections.emptyMap();
         }
 
+        String htmlContent = xwikiFacadeService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
         return new FullPageDto(
-                fullPage.getHtmlContent(),
+        		htmlContent,
                 wikiPage != null ? wikiPage.getId() : null,
                 wikiPage != null ? wikiPage.getFullName() : null,
                 wikiPage != null ? wikiPage.getWiki() : null,
