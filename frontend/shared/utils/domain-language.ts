@@ -8,6 +8,7 @@ export const HOST_DOMAIN_LANGUAGE_MAP: Record<string, DomainLanguage> = {
   'nudger.com': 'en',
   'nudger.fr': 'fr',
   localhost: 'fr',
+  'beta2.nudger.fr': 'fr',
   '127.0.0.1': 'en',
 }
 

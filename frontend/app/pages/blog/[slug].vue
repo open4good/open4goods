@@ -17,11 +17,7 @@ const slug = computed(() => {
   const rawSlug = route.params.slug
 
   if (Array.isArray(rawSlug)) {
-    return (
-      rawSlug.find(
-        value => typeof value === 'string' && value.trim().length > 0
-      ) ?? null
-    )
+    return rawSlug.find((value) => typeof value === 'string' && value.trim().length > 0) ?? null
   }
 
   if (typeof rawSlug !== 'string') {
@@ -40,21 +36,19 @@ await useAsyncData(
     server: true,
     immediate: true,
     watch: [slug],
-  }
+  },
 )
 
-const article = computed(() => currentArticle.value as BlogArticle | null)
+const article = computed(
+  () => currentArticle.value as BlogArticle | null
+)
 </script>
 
 <template>
-  <v-container class="py-10">
-    <v-row justify="center">
-      <v-col cols="12" md="10" lg="8">
-        <v-btn
-          variant="text"
-          prepend-icon="mdi-arrow-left"
-          @click="router.back()"
-        >
+  <v-container class="py-10 px-4 mx-auto" max-width="xl">
+    <v-row>
+      <v-col cols="12">
+        <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.back()">
           Retour
         </v-btn>
 

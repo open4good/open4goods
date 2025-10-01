@@ -13,6 +13,7 @@
           <v-list-item-title>{{ item.label }}</v-list-item-title>
         </v-list-item>
       </v-list>
+      <ThemeToggle test-id="hero-theme-toggle" />
       <v-btn
         v-if="isLoggedIn"
         color="secondary"
@@ -36,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from 'vue-i18n'
 import {
   normalizeLocale,
@@ -112,14 +114,14 @@ const navigateToPage = (path: string): void => {
 
 <style scoped lang="sass">
 .main-menu-items
-  color: black
+  color: rgb(var(--v-theme-text-neutral-strong))
   font-size: 1rem
   cursor: pointer
   font-weight: bolder
   transition: color 0.3s ease
   &:hover
-    color: green
+    color: rgb(var(--v-theme-accent-supporting))
   &.active
-    color: green
+    color: rgb(var(--v-theme-accent-supporting))
     font-weight: 900
 </style>

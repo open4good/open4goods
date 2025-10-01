@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class ContactController implements SitemapExposedController{
 
 	public static final String DEFAULT_PATH="/contact";
-		
+
 	private final MailService mailService;
 	private @Autowired UiService uiService;
 	private final UiConfig uiConfig;
@@ -32,13 +32,13 @@ public class ContactController implements SitemapExposedController{
 		this.captchaService = captchaService;
 	}
 
-	
+
 	public SitemapEntry getExposedUrls() {
 		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.1, ChangeFreq.YEARLY);
 	}
 
-	
-	
+
+
 	@GetMapping("/contact")
 	public ModelAndView index(final HttpServletRequest request) {
 		ModelAndView model = uiService.defaultModelAndView("contact", request);

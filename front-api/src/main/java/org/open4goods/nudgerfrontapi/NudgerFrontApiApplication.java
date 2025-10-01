@@ -2,18 +2,11 @@ package org.open4goods.nudgerfrontapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.servers.Server;
-
 @SpringBootApplication(scanBasePackages = "org.open4goods")
-@OpenAPIDefinition(
-        servers = {
-            @Server(url = "http://localhost:8082", description = "Local development API"),
-            @Server(url = "https://beta.front-api.nudger.fr", description = "Public beta HTTPS API")
-        }
-)
+@ConfigurationPropertiesScan("org.open4goods.nudgerfrontapi.config.properties")
 @EnableCaching
 /**
  * Spring Boot application entry point for the frontend API.

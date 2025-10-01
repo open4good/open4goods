@@ -8,6 +8,13 @@
     "menu": {
       "title": "Menu",
       "closeLabel": "Fermer le menu",
+      "themeToggle": "Changer de thème",
+      "theme": {
+        "lightTooltip": "Passer au thème clair",
+        "darkTooltip": "Passer au thème sombre",
+        "lightAriaLabel": "Activer le thème clair",
+        "darkAriaLabel": "Activer le thème sombre"
+      },
       "items": {
         "impactScore": "Impact-score",
         "products": "Les produits",
@@ -15,10 +22,13 @@
         "contact": "Contact"
       }
     },
+    "links": {
+      "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
+    },
     "footer": {
       "rightsReserved": "Tous droits réservés",
       "accessibleTitle": "Informations du pied de page",
-      "mission": "nudger.fr est une approche ouverte pour évaluer écologiquement les biens de consommation et compenser partiellement l'impact de vos achats en ligne.",
+      "mission": "nudger.fr est une approche ouverte pour évaluer écologiquement les biens de consommation.",
       "blogLink": "Notre blog",
       "highlightLinks": {
         "ecoscore": "Évaluation environnementale"
@@ -61,6 +71,13 @@
     "siteName": "Nudger"
   },
   "blog": {
+    "seo": {
+      "baseTitle": "Blog Nudger",
+      "tagTitle": "Articles {tag} – Blog Nudger",
+      "pageTitle": "{title} – Page {page}",
+      "description": "Découvrez les guides et actualités de Nudger.",
+      "tagDescription": "Parcourez les articles {tag} du blog Nudger pour."
+    },
     "pagination": {
       "info": "Page {current} sur {total} ({count} articles)",
       "ariaLabel": "Liens de pagination du blog",
@@ -86,6 +103,163 @@
   "common": {
     "actions": {
       "retry": "Réessayer"
+    }
+  },
+  "team": {
+    "seo": {
+      "title": "Découvrez l'équipe Nudger",
+      "description": "Rencontrez les entrepreneuses, ingénieurs et bénévoles qui construisent l'assistant d'achat responsable Nudger."
+    },
+    "hero": {
+      "eyebrow": "Notre collectif",
+      "title": "Les femmes et les hommes derrière Nudger",
+      "subtitle": "Une équipe engagée qui mêle tech, environnement et impact social."
+    },
+    "loading": "Chargement des membres…",
+    "errors": {
+      "loadFailed": "Impossible de charger la liste de l'équipe. Merci de réessayer."
+    },
+    "sections": {
+      "empty": "Les profils seront bientôt disponibles.",
+      "core": {
+        "title": "La core-team",
+        "eyebrow": "Pilotage"
+      },
+      "contributors": {
+        "title": "Les contributeurs",
+        "eyebrow": "Communauté"
+      }
+    },
+    "cards": {
+      "portraitAlt": "Portrait de {name}",
+      "linkedIn": "Ouvrir le profil LinkedIn de {name}",
+      "connect": "Voir sur LinkedIn",
+      "unknownName": "un membre de l'équipe"
+    },
+    "callouts": {
+      "partners": {
+        "title": "Nos partenaires",
+        "cta": "Découvrir les partenaires",
+        "link": "/partenaires"
+      },
+      "contact": {
+        "title": "Envie d'échanger ?",
+        "description": "Vous souhaitez en savoir plus sur le projet ou rejoindre l'aventure ? Parlons-en.",
+        "cta": "Nous contacter"
+      }
+    }
+  },
+  "contact": {
+    "seo": {
+      "title": "Nous contacter | Nudger",
+      "description": "Prenez contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
+      "imageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact"
+    },
+    "hero": {
+      "eyebrow": "Entrons en contact",
+      "title": "Échangeons ensemble",
+      "subtitle": "Partenariat, question produit ou retour d'expérience ?",
+      "description": "Parlez-nous de votre projet, de votre organisation ou de votre usage de Nudger afin que nous vous orientions vers la bonne personne.",
+      "highlights": {
+        "commitment": "Une réponse sous deux jours ouvrés pour la plupart des demandes.",
+        "expertise": "Des expertes et experts produit, data et impact engagés pour un commerce responsable.",
+        "impact": "Chaque message nous aide à construire un marché plus juste et durable."
+      },
+      "channels": {
+        "title": "Comment pouvons-nous vous aider ?",
+        "subtitle": "Choisissez le sujet qui vous ressemble : toute demande arrive à la même équipe bienveillante.",
+        "support": {
+          "label": "Support produit & utilisateurs",
+          "description": "Questions sur le comparateur, difficulté de connexion ? On vous accompagne pas à pas."
+        },
+        "partnerships": {
+          "label": "Partenariats & écosystème",
+          "description": "Envie de collaborer, d'intégrer les données Nudger ou de co-construire un dispositif ? Parlons-en."
+        },
+        "trust": {
+          "label": "Presse & impact citoyen",
+          "description": "Journalistes, institutions ou chercheurs : contactez-nous pour interviews, témoignages et chiffres clés."
+        }
+      }
+    },
+    "details": {
+      "eyebrow": "Rester en lien",
+      "title": "Des passerelles pour collaborer",
+      "subtitle": "Le collectif rassemble citoyennes, entreprises et territoires autour de la consommation responsable.",
+      "cards": {
+        "support": {
+          "title": "Besoin d'un coup de pouce ?",
+          "description": "Décrivez votre question dans le formulaire et donnez un maximum de contexte pour que nous puissions vous répondre concrètement.",
+          "cta": "Nous écrire",
+          "ctaAria": "Aller au formulaire de contact pour écrire à l'équipe Nudger"
+        },
+        "partnerships": {
+          "title": "Co-construire des projets à impact",
+          "description": "De la distribution aux ONG et collectivités, nous créons des passerelles pour accélérer la transition écologique.",
+          "cta": "Rencontrer l'équipe",
+          "ctaAria": "Ouvrir la page équipe de Nudger"
+        },
+        "community": {
+          "title": "Rejoindre la communauté",
+          "description": "Suivez nos actualités, sorties produit et appels à contribution sur LinkedIn.",
+          "cta": "Nous suivre sur LinkedIn",
+          "ctaAria": "Ouvrir la page LinkedIn de Nudger dans un nouvel onglet"
+        }
+      }
+    },
+    "form": {
+      "eyebrow": "Formulaire",
+      "title": "Parlez-nous de vous",
+      "subtitle": "Remplissez les informations ci-dessous, nous reviendrons vers vous rapidement.",
+      "fields": {
+        "name": {
+          "label": "Votre nom",
+          "placeholder": "ex. Alex Martin"
+        },
+        "email": {
+          "label": "Votre e-mail",
+          "placeholder": "vous{'@'}exemple.org"
+        },
+        "message": {
+          "label": "Votre message",
+          "placeholder": "Comment pouvons-nous vous aider ?"
+        }
+      },
+      "actions": {
+        "submit": "Envoyer le message",
+        "reset": "Effacer le formulaire"
+      },
+      "feedback": {
+        "success": "Merci ! Votre message a bien été envoyé. Nous revenons vers vous très vite.",
+        "genericError": "Impossible d'envoyer votre message. Merci de réessayer ou de nous contacter plus tard.",
+        "missingSiteKey": "Le captcha n'est pas encore configuré. Merci de réessayer ultérieurement."
+      },
+      "errors": {
+        "name": {
+          "required": "Merci d'indiquer votre nom.",
+          "length": "Votre nom doit contenir au moins 2 caractères."
+        },
+        "email": {
+          "required": "Merci d'indiquer une adresse e-mail.",
+          "invalid": "Merci de saisir une adresse e-mail valide."
+        },
+        "message": {
+          "required": "Merci de détailler votre demande.",
+          "length": "Votre message doit contenir au moins 10 caractères."
+        },
+        "captchaExpired": "Le captcha a expiré, merci de recommencer.",
+        "captchaFailed": "La vérification du captcha a échoué. Merci de réessayer.",
+        "missingCaptcha": "Merci de compléter le captcha avant d'envoyer."
+      },
+      "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées."
+    }
+  },
+  "cms": {
+    "page": {
+      "heroEyebrow": "Ressources Nudger",
+      "loading": "Chargement de la page…",
+      "error": "Nous n'avons pas pu charger cette page. Veuillez réessayer plus tard.",
+      "edit": "Modifier cette page"
     }
   }
 }

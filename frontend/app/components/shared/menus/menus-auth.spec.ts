@@ -1,5 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
+import type { Ref } from 'vue'
 import { reactive, ref } from 'vue'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -12,6 +13,20 @@ const routerInstance = {
   replace: routerReplace,
 }
 const currentRoute = reactive({ path: '/', fullPath: '/' })
+
+type ThemeName = 'light' | 'dark'
+
+const themeName = ref<ThemeName>('light')
+const storedThemePreference = ref<ThemeName | undefined>()
+const preferredDarkMock = ref(false)
+
+const useStorageMock = vi.fn((_: string, defaultValue: ThemeName) => {
+  if (!storedThemePreference.value) {
+    storedThemePreference.value = defaultValue
+  }
+
+  return storedThemePreference as Ref<ThemeName>
+})
 
 function useRouteMock() {
   return currentRoute
@@ -32,6 +47,19 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
   }),
+}))
+
+vi.mock('vuetify', () => ({
+  useTheme: () => ({
+    global: {
+      name: themeName,
+    },
+  }),
+}))
+
+vi.mock('@vueuse/core', () => ({
+  usePreferredDark: () => preferredDarkMock,
+  useStorage: useStorageMock,
 }))
 
 type NuxtImports = typeof import('#imports')
@@ -76,6 +104,10 @@ describe('Shared menu authentication controls', () => {
     routerPush.mockReset()
     routerReplace.mockReset()
     logoutMock.mockResolvedValue(undefined)
+    themeName.value = 'light'
+    storedThemePreference.value = undefined
+    preferredDarkMock.value = false
+    useStorageMock.mockClear()
   })
 
   it('does not render logout controls when logged out', async () => {
@@ -111,5 +143,31 @@ describe('Shared menu authentication controls', () => {
 
     expect(logoutMock).toHaveBeenCalledTimes(1)
     expect(wrapper.emitted('close')).toBeTruthy()
+  })
+
+  it('renders theme toggles and synchronises the stored preference', async () => {
+    const heroWrapper = await mountSuspended(TheHeroMenu)
+
+    expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(true)
+
+    const darkToggle = heroWrapper.get('[data-testid="hero-theme-toggle-dark"]')
+
+    await darkToggle.trigger('click')
+    await flushPromises()
+
+    expect(themeName.value).toBe('dark')
+    expect(storedThemePreference.value).toBe('dark')
+
+    const mobileWrapper = await mountSuspended(TheMobileMenu)
+
+    expect(mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()).toBe(true)
+
+    const lightToggle = mobileWrapper.get('[data-testid="mobile-theme-toggle-light"]')
+
+    await lightToggle.trigger('click')
+    await flushPromises()
+
+    expect(themeName.value).toBe('light')
+    expect(storedThemePreference.value).toBe('light')
   })
 })

@@ -79,6 +79,6 @@ public class HcaptchaServiceTest {
 
         SecurityException exception = assertThrows(SecurityException.class,
                 () -> hcaptchaService.verifyRecaptcha("127.0.0.1", "dummyResponse"));
-        assertTrue(exception.getMessage().contains("The response parameter is missing"));
+        assertTrue(exception.getMessage().contains("missing-input-response"));
     }
 }

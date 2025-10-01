@@ -1,473 +1,753 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { createPinia, setActivePinia } from 'pinia'
-import { computed, nextTick, reactive, ref } from 'vue'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { flushPromises } from '@vue/test-utils'
-
-import type { Article } from '~~/server/domain/blog/entities/Article'
-import type { Tag } from '~~/server/domain/blog/entities/Tag'
+import { type ComponentPublicInstance, defineComponent, h, nextTick, reactive, ref } from 'vue'
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 import TheArticles from './TheArticles.vue'
 
-const mockArticles: Article[] = [
+type BlogArticle = {
+  url?: string | null
+  title?: string | null
+  summary?: string | null
+  author?: string | null
+  image?: string | null
+  createdMs?: number | null
+}
+
+type BlogTag = {
+  name?: string | null
+  count?: number | null
+}
+
+const defaultArticles: BlogArticle[] = [
   {
-    id: '1',
-    slug: 'test-article-1',
-    title: 'Test Article 1',
-    excerpt: 'This is a test summary for article 1',
-    content: 'Full content of article 1',
-    author: 'Test Author',
-    publishedAt: new Date('2022-01-01'),
-    updatedAt: new Date('2022-01-01'),
-    tags: ['Energy'],
-    imageUrl: 'https://example.com/image1.jpg',
-    readTime: 5,
+    url: 'https://blog.example.com/articles/hello-world',
+    title: 'Hello Nuxt World',
+    summary: 'A welcome post for the blog.',
+    author: 'Alice',
+    image: 'https://cdn.example.com/images/hello.jpg',
+    createdMs: Date.UTC(2024, 0, 15),
   },
   {
-    id: '2',
-    slug: 'test-article-2',
-    title: 'Test Article 2',
-    excerpt: 'This is a test summary for article 2',
-    content: 'Full content of article 2',
-    author: 'Test Author 2',
-    publishedAt: new Date('2022-01-02'),
-    updatedAt: new Date('2022-01-02'),
-    tags: ['Kitchen'],
-    imageUrl: undefined,
-    readTime: 3,
+    url: '/articles/vue-insights',
+    title: '  ',
+    summary: 'Deep dive into Vue best practices.',
+    author: 'Bob',
+    image: 'https://cdn.example.com/images/vue-insights.jpg',
+    createdMs: Date.UTC(2024, 2, 2),
   },
 ]
 
-const cloneArticleWithoutImage = (article: Article): Article => ({
-  ...article,
-  imageUrl: undefined,
-})
+const defaultTags: BlogTag[] = [
+  { name: '  Nuxt  ', count: 3 },
+  { name: 'Vue', count: 5 },
+  { name: '  ', count: 1 },
+]
 
-const articlesRef = ref(mockArticles)
-const paginatedArticlesRef = ref(mockArticles)
-const loadingRef = ref(false)
-const errorRef = ref<string | null>(null)
-const paginationRef = ref({
-  page: 1,
-  size: 12,
-  totalElements: mockArticles.length,
-  totalPages: 1,
-})
-
-const tagsRef = ref<Tag[]>([
-  { name: 'Energy', slug: 'energy', count: 3 },
-  { name: 'Kitchen', slug: 'kitchen', count: 1 },
-])
-const selectedTagRef = ref<string | null>(null)
-
-const fetchArticlesMock = vi.fn(
-  async (page: number = 1, size: number = 12, tag: string | null = null) => {
-    paginationRef.value = {
-      ...paginationRef.value,
-      page,
-      size,
-    }
-    selectedTagRef.value = tag ?? null
-  }
-)
-const fetchTagsMock = vi.fn(async () => {})
-const changePageMock = vi.fn()
-const selectTagMock = vi.fn(async (tag: string | null) => {
-  selectedTagRef.value = tag
-  await fetchArticlesMock(1, paginationRef.value.size, tag)
-})
-const routeQuery = reactive<Record<string, string | undefined>>({})
-const mockRouterPush = vi.fn(
-  async ({
-    query,
-  }: {
-    query?: Record<string, string | undefined>
-    path?: string
-  } = {}) => {
-    const nextQuery = query ?? {}
-
-    Object.keys(routeQuery).forEach(key => {
-      if (!(key in nextQuery) || nextQuery[key] === undefined) {
-        Reflect.deleteProperty(routeQuery, key)
-      }
-    })
-
-    Object.entries(nextQuery).forEach(([key, value]) => {
-      if (value === undefined) {
-        Reflect.deleteProperty(routeQuery, key)
-      } else {
-        routeQuery[key] = value
-      }
-    })
-  }
-)
-
-const mockUseBlog = {
-  articles: articlesRef,
-  paginatedArticles: computed(() => paginatedArticlesRef.value),
-  loading: loadingRef,
-  error: errorRef,
-  pagination: paginationRef,
-  fetchArticles: fetchArticlesMock,
-  changePage: changePageMock,
-  tags: computed(() => tagsRef.value),
-  selectedTag: computed(() => selectedTagRef.value),
-  fetchTags: fetchTagsMock,
-  selectTag: selectTagMock,
+type FetchArticlesPayload = {
+  page: number
+  size: number
+  tag: string | null
 }
 
-// Mock the useBlog composable
-vi.mock('~/composables/blog/useBlog', () => ({
-  useBlog: () => mockUseBlog,
-}))
+type FetchArticlesResult = {
+  articles?: BlogArticle[]
+  pagination?: Partial<{
+    totalPages: number
+    totalElements: number
+  }>
+}
 
-// Mock the useAppStore to enable debug mode by default
-vi.mock('@/stores/useAppStore', () => ({
-  useAppStore: () => ({
-    debugMode: true,
-  }),
-}))
+type MockBlogConfig = {
+  articles?: BlogArticle[]
+  initialTags?: BlogTag[]
+  resolveTags?: () => BlogTag[] | Promise<BlogTag[]>
+  pagination?: Partial<{
+    page: number
+    size: number
+    totalElements: number
+    totalPages: number
+  }>
+  selectedTag?: string | null
+  loading?: boolean
+  error?: string | null
+  onFetchArticles?: (
+    payload: FetchArticlesPayload,
+  ) => FetchArticlesResult | Promise<FetchArticlesResult>
+}
 
-const localeRef = ref('fr-FR')
-
-// Mock useAsyncData to execute the callback and resolve immediately
-vi.mock('#app', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('#app')>()
-  return {
-    ...actual,
-    useAsyncData: async (_key: string, callback: () => Promise<unknown>) => {
-      // Execute callback immediately and await it
-      await callback().catch(() => {})
-      return {
-        data: ref(null),
-        pending: ref(false),
-        error: ref(null),
-        refresh: vi.fn()
-      }
-    },
-    useRuntimeConfig: () => ({
-      public: {
-        apiUrl: 'https://test-api.example.com',
-      },
-    }),
-    useRoute: () => ({
-      query: routeQuery,
-    }),
-    useRouter: () => ({
-      push: mockRouterPush,
-    }),
+type TheArticlesPublicInstance = ComponentPublicInstance<
+  Record<string, never>,
+  {
+    handlePageChange: (page: number) => Promise<void>
+    handleTagSelection: (tag: string | null) => Promise<void>
+    pageSeoTitle: string
+    seoDescription: string
+    canonicalUrl: string
+    primaryArticleImage: string | null | undefined
+    structuredData: Record<string, unknown>
   }
-})
+>
+
+const useHeadMock = vi.fn()
+const useSeoMetaMock = vi.fn()
+let requestUrl = new URL('https://example.com/blog')
 
 vi.mock('#imports', () => ({
-  useRoute: () => ({
-    query: routeQuery,
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
+  useHead: (...args: unknown[]) => useHeadMock(...args),
+  useSeoMeta: (...args: unknown[]) => useSeoMetaMock(...args),
+  useRequestURL: () => requestUrl,
 }))
+
+const translations: Record<string, string | ((params: Record<string, unknown>) => string)> = {
+  'blog.list.tagsTitle': 'Browse by tag',
+  'blog.list.tagsAriaLabel': 'Blog tags',
+  'blog.list.tagsAll': 'All articles',
+  'blog.list.tagsLoading': 'Loading tags…',
+  'blog.list.loading': 'Loading articles…',
+  'blog.list.readMore': 'Read more',
+  'blog.list.tagWithCount': ({ tag, count }) => `${tag} (${count})`,
+  'blog.pagination.info': ({ current, total, count }) => `Page ${current} of ${total} (${count})`,
+  'blog.pagination.pageLink': ({ page }) => `Go to page ${page}`,
+  'blog.seo.baseTitle': 'Open4Goods blog',
+  'blog.seo.tagTitle': ({ tag }) => `Open4Goods blog – ${tag}`,
+  'blog.seo.pageTitle': ({ title, page }) => `${title} – Page ${page}`,
+  'blog.seo.description': 'Latest insights and company updates.',
+  'blog.seo.tagDescription': ({ tag }) => `Articles about ${tag}.`,
+  'common.actions.retry': 'Retry',
+}
+
+type TranslateParams = Record<string, unknown>
+
+const translate = (key: string, params: TranslateParams = {}) => {
+  const value = translations[key]
+
+  if (typeof value === 'function') {
+    return value(params)
+  }
+
+  if (typeof value === 'string') {
+    return value
+  }
+
+  if (Object.keys(params).length > 0) {
+    return `${key} ${JSON.stringify(params)}`
+  }
+
+  return key
+}
+
+const localeRef = ref('en')
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
+    t: (key: string, params: TranslateParams = {}) => translate(key, params),
     locale: localeRef,
-    t: (key: string) => key,
   }),
 }))
 
-describe('TheArticles Component', () => {
+const createReactiveRoute = (query: Record<string, unknown> = {}) => {
+  const baseQuery: Record<string, unknown> = { ...query }
+
+  return reactive({
+    path: '/blog',
+    name: 'blog-index',
+    fullPath: '/blog',
+    params: {},
+    query: reactive(baseQuery),
+  })
+}
+
+let route = createReactiveRoute()
+let routerPush: Mock
+
+const updateRouteQuery = (nextQuery: Record<string, unknown> | undefined) => {
+  const sanitizedEntries = Object.entries(nextQuery ?? {}).filter(([, value]) =>
+    value !== undefined && value !== null,
+  )
+  const sanitizedQuery = Object.fromEntries(sanitizedEntries)
+
+  route.query = reactive(sanitizedQuery) as typeof route.query
+}
+
+vi.mock('#app', () => ({
+  useRoute: () => route,
+  useRouter: () => ({
+    push: (to: unknown) => routerPush(to),
+  }),
+}))
+
+type MockBlogComposable = ReturnType<typeof createMockBlogComposable>
+let blogComposable: MockBlogComposable
+
+vi.mock('~/composables/blog/useBlog', () => ({
+  useBlog: () => blogComposable,
+}))
+
+const createMockBlogComposable = (config: MockBlogConfig = {}) => {
+  const paginatedArticles = ref<BlogArticle[]>([...(config.articles ?? defaultArticles)])
+  const tags = ref<BlogTag[]>([...(config.initialTags ?? [])])
+  const loading = ref(config.loading ?? false)
+  const error = ref<string | null>(config.error ?? null)
+  const pagination = ref({
+    page: config.pagination?.page ?? 1,
+    size: config.pagination?.size ?? 6,
+    totalElements:
+      config.pagination?.totalElements ?? paginatedArticles.value.length,
+    totalPages: config.pagination?.totalPages ?? 3,
+  })
+  const selectedTag = ref<string | null>(config.selectedTag ?? null)
+
+  const fetchArticles = vi.fn(
+    async (
+      page: number = pagination.value.page,
+      size: number = pagination.value.size,
+      tag: string | null = selectedTag.value,
+    ) => {
+      const sanitizedTag = tag ?? null
+
+      pagination.value = {
+        ...pagination.value,
+        page,
+        size,
+        totalElements:
+          config.pagination?.totalElements ?? pagination.value.totalElements,
+        totalPages:
+          config.pagination?.totalPages ?? pagination.value.totalPages,
+      }
+
+      selectedTag.value = sanitizedTag
+
+      if (config.onFetchArticles) {
+        const result = await config.onFetchArticles({ page, size, tag: sanitizedTag })
+
+        if (result?.articles) {
+          paginatedArticles.value = [...result.articles]
+        }
+
+        if (result?.pagination) {
+          pagination.value = {
+            ...pagination.value,
+            ...result.pagination,
+          }
+        }
+      }
+    },
+  )
+
+  const fetchTags = vi.fn(async () => {
+    const resolved = config.resolveTags
+      ? await config.resolveTags()
+      : config.initialTags ?? defaultTags
+
+    tags.value = resolved.map((tag) => ({ ...tag }))
+  })
+
+  return {
+    paginatedArticles,
+    loading,
+    error,
+    pagination,
+    fetchArticles,
+    tags,
+    selectedTag,
+    fetchTags,
+  }
+}
+
+const flushPromises = async () => {
+  await nextTick()
+  await new Promise((resolve) => setTimeout(resolve, 0))
+}
+
+const createStub = (tag: string, className: string) =>
+  defineComponent({
+    name: `${className}Stub`,
+    setup(_, { slots, attrs }) {
+      return () => {
+        const data: Record<string, unknown> = { ...attrs }
+        const classes: string[] = [className]
+
+        if (typeof data.class === 'string') {
+          classes.push(data.class)
+        } else if (Array.isArray(data.class)) {
+          classes.push(...data.class.map(String))
+        }
+
+        data.class = classes.join(' ')
+
+        return h(tag, data, slots.default?.())
+      }
+    },
+  })
+
+const VContainerStub = createStub('div', 'v-container-stub')
+const VSheetStub = createStub('section', 'v-sheet-stub')
+const VRowStub = createStub('div', 'v-row-stub')
+const VColStub = createStub('div', 'v-col-stub')
+const VCardTitleStub = createStub('h2', 'v-card-title-stub')
+const VCardTextStub = createStub('div', 'v-card-text-stub')
+const VCardActionsStub = createStub('div', 'v-card-actions-stub')
+const VProgressCircularStub = createStub('div', 'v-progress-circular')
+const VAlertStub = createStub('div', 'v-alert-stub')
+const VSpacerStub = createStub('div', 'v-spacer-stub')
+const VPaginationStub = createStub('nav', 'v-pagination-stub')
+
+const VIconStub = defineComponent({
+  name: 'VIconStub',
+  props: { icon: { type: String, default: '' } },
+  setup(props, { slots, attrs }) {
+    return () =>
+      h(
+        'span',
+        {
+          ...attrs,
+          class: 'v-icon-stub',
+          'data-icon': props.icon,
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const VChipGroupStub = createStub('div', 'v-chip-group-stub')
+
+const VChipStub = defineComponent({
+  name: 'VChipStub',
+  props: {
+    value: { type: [String, Number, Boolean], default: undefined },
+  },
+  setup(props, { slots, attrs }) {
+    return () =>
+      h(
+        'button',
+        {
+          ...attrs,
+          class: 'v-chip-stub',
+          type: 'button',
+          'data-value': props.value,
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const VBtnStub = defineComponent({
+  name: 'VBtnStub',
+  emits: ['click'],
+  props: {
+    type: { type: String, default: 'button' },
+  },
+  setup(props, { slots, emit, attrs }) {
+    return () =>
+      h(
+        'button',
+        {
+          ...attrs,
+          class: 'v-btn-stub',
+          type: props.type ?? 'button',
+          onClick: (event: MouseEvent) => emit('click', event),
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const VCardStub = defineComponent({
+  name: 'VCardStub',
+  props: {
+    tag: { type: String, default: 'div' },
+    to: { type: [String, Object], default: undefined },
+  },
+  setup(props, { slots, attrs }) {
+    return () =>
+      h(
+        props.tag || 'div',
+        {
+          ...attrs,
+          class: 'v-card-stub',
+          'data-test': 'article-card',
+          'data-to':
+            typeof props.to === 'string'
+              ? props.to
+              : props.to
+                ? JSON.stringify(props.to)
+                : undefined,
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const VImgStub = defineComponent({
+  name: 'VImgStub',
+  props: {
+    src: { type: String, default: '' },
+    alt: { type: String, default: '' },
+  },
+  setup(props, { slots, attrs }) {
+    return () =>
+      h(
+        'figure',
+        { ...attrs, class: 'v-img-stub' },
+        [
+          h('img', {
+            src: props.src,
+            alt: props.alt,
+            'data-test': 'article-image',
+          }),
+          slots.placeholder?.(),
+        ],
+      )
+  },
+})
+
+const NuxtLinkStub = defineComponent({
+  name: 'NuxtLinkStub',
+  props: {
+    to: { type: [String, Object], default: undefined },
+  },
+  setup(props, { slots, attrs }) {
+    return () =>
+      h(
+        'a',
+        {
+          ...attrs,
+          class: 'nuxt-link-stub',
+          'data-to':
+            typeof props.to === 'string'
+              ? props.to
+              : props.to
+                ? JSON.stringify(props.to)
+                : undefined,
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const globalStubs = {
+  VContainer: VContainerStub,
+  VSheet: VSheetStub,
+  VIcon: VIconStub,
+  VChipGroup: VChipGroupStub,
+  VChip: VChipStub,
+  VProgressCircular: VProgressCircularStub,
+  VAlert: VAlertStub,
+  VBtn: VBtnStub,
+  VRow: VRowStub,
+  VCol: VColStub,
+  VCard: VCardStub,
+  VCardTitle: VCardTitleStub,
+  VCardText: VCardTextStub,
+  VCardActions: VCardActionsStub,
+  VImg: VImgStub,
+  VSpacer: VSpacerStub,
+  VPagination: VPaginationStub,
+  NuxtLink: NuxtLinkStub,
+}
+
+type MountOptions = {
+  routeQuery?: Record<string, unknown>
+  blogConfig?: MockBlogConfig
+  requestUrlOverride?: URL
+}
+
+const mountComponent = async (options: MountOptions = {}) => {
+  route = createReactiveRoute(options.routeQuery)
+  routerPush = vi.fn(async (to: unknown) => {
+    if (typeof to === 'string') {
+      return
+    }
+
+    const location = to as { query?: Record<string, unknown>; path?: string }
+
+    if (location?.query) {
+      updateRouteQuery(location.query)
+    }
+
+    if (location?.path) {
+      ;(route as Record<string, unknown>).path = location.path
+    }
+  })
+
+  requestUrl = options.requestUrlOverride ?? new URL('https://example.com/blog')
+
+  blogComposable = createMockBlogComposable(options.blogConfig)
+
+  const wrapper = await mountSuspended(TheArticles, {
+    global: {
+      stubs: globalStubs,
+    },
+  })
+
+  await flushPromises()
+
+  return { wrapper }
+}
+
+describe('TheArticles.vue', () => {
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks()
-    setActivePinia(createPinia())
-    localeRef.value = 'fr-FR'
-    articlesRef.value = mockArticles
-    paginatedArticlesRef.value = mockArticles
-    loadingRef.value = false
-    errorRef.value = null
-    paginationRef.value = {
-      page: 1,
-      size: 12,
-      totalElements: mockArticles.length,
-      totalPages: 1,
-    }
-    fetchArticlesMock.mockReset()
-    fetchTagsMock.mockReset()
-    changePageMock.mockReset()
-    selectTagMock.mockReset()
-    mockRouterPush.mockReset()
-    tagsRef.value = [
-      { name: 'Energy', slug: 'energy', count: 3 },
-      { name: 'Kitchen', slug: 'kitchen', count: 1 },
-    ]
-    selectedTagRef.value = null
-    Object.keys(routeQuery).forEach(key => {
-      Reflect.deleteProperty(routeQuery, key)
-    })
+    localeRef.value = 'en'
+    route = createReactiveRoute()
+    routerPush = vi.fn(async () => {})
+    requestUrl = new URL('https://example.com/blog')
+    blogComposable = createMockBlogComposable()
   })
 
-  test('should render loading state', async () => {
-    // Override loading state
-    loadingRef.value = true
-    articlesRef.value = []
-    paginatedArticlesRef.value = []
+  it('initializes from the current route and loads tags and articles', async () => {
+    const { wrapper } = await mountComponent({
+      routeQuery: { page: '2', tag: ' Nuxt ' },
+      blogConfig: {
+        initialTags: [],
+        resolveTags: () => defaultTags,
+        pagination: { page: 1, size: 6, totalPages: 4, totalElements: 24 },
+      },
+      requestUrlOverride: new URL('https://example.com/blog?page=2&tag=Nuxt'),
+    })
 
-    const wrapper = await mountSuspended(TheArticles)
+    expect(blogComposable.fetchTags).toHaveBeenCalledTimes(1)
+    expect(blogComposable.fetchArticles).toHaveBeenCalledWith(2, 6, 'Nuxt')
 
-    expect(wrapper.find('.loading').exists()).toBe(true)
+    expect(blogComposable.pagination.value.page).toBe(2)
+    expect(blogComposable.pagination.value.totalPages).toBe(4)
+    expect(blogComposable.selectedTag.value).toBe('Nuxt')
+
+    const tagButtons = wrapper.find('.v-chip-group-stub').findAll('.v-chip-stub')
+    expect(tagButtons).toHaveLength(3)
+    const [, nuxtChip, vueChip] = tagButtons
+    expect(nuxtChip).toBeDefined()
+    expect(vueChip).toBeDefined()
+    expect(nuxtChip!.text()).toBe('Nuxt (3)')
+    expect(vueChip!.text()).toBe('Vue (5)')
+
+    const exposed = wrapper.vm as TheArticlesPublicInstance
+    expect(exposed.canonicalUrl).toContain('/blog?page=2&tag=Nuxt')
+  })
+
+  it('renders article cards with metadata and accessible attributes', async () => {
+    const { wrapper } = await mountComponent({
+      routeQuery: { page: '2', tag: 'Nuxt' },
+      blogConfig: {
+        articles: defaultArticles,
+        initialTags: defaultTags,
+        pagination: { page: 2, size: 6, totalPages: 3, totalElements: 12 },
+        selectedTag: 'Nuxt',
+      },
+      requestUrlOverride: new URL('https://example.com/blog?page=2&tag=Nuxt'),
+    })
+
+    const cards = wrapper.findAll('[data-test="article-card"]')
+    expect(cards).toHaveLength(defaultArticles.length)
+    const [firstCard, secondCard] = cards
+    expect(firstCard).toBeDefined()
+    expect(secondCard).toBeDefined()
+    expect(firstCard!.attributes('data-to')).toBe('/blog/hello-world')
+    expect(secondCard!.attributes('data-to')).toBe('/blog/vue-insights')
+
+    const titles = wrapper.findAll('.v-card-title-stub')
+    const [firstTitle, secondTitle] = titles
+    expect(firstTitle).toBeDefined()
+    expect(secondTitle).toBeDefined()
+    expect(firstTitle!.text()).toContain('Hello Nuxt World')
+    expect(secondTitle!.text().trim()).toBe('')
+
+    const summaries = wrapper.findAll('.v-card-text-stub')
+    const [firstSummary] = summaries
+    expect(firstSummary).toBeDefined()
+    expect(firstSummary!.text()).toContain('A welcome post for the blog.')
+
+    const timeElement = wrapper.find('time')
+    const firstArticle = defaultArticles[0]!
+    expect(timeElement.attributes('datetime')).toBe(
+      new Date(firstArticle.createdMs ?? 0).toISOString(),
+    )
+
+    const images = wrapper.findAll('[data-test="article-image"]')
+    const [firstImage, secondImage] = images
+    expect(firstImage).toBeDefined()
+    expect(secondImage).toBeDefined()
+    expect(firstImage!.attributes('alt')).toBe('Hello Nuxt World')
+    expect(secondImage!.attributes('alt')).toBe('Blog article illustration')
+
+    expect(wrapper.find('.v-pagination-stub').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Page 2 of 3 (12)')
+  })
+
+  it('shows a loading indicator while articles are being fetched', async () => {
+    const { wrapper } = await mountComponent({
+      blogConfig: {
+        loading: true,
+        articles: [],
+        pagination: { page: 1, size: 6, totalPages: 1, totalElements: 0 },
+      },
+    })
+
     expect(wrapper.find('.v-progress-circular').exists()).toBe(true)
-    expect(wrapper.text()).toContain('blog.list.loading')
+    expect(wrapper.text()).toContain('Loading articles…')
   })
 
-  test('should render articles in cards', async () => {
-    // Override normal state
-    loadingRef.value = false
-    errorRef.value = null
-    articlesRef.value = mockArticles
-    paginatedArticlesRef.value = mockArticles
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    // Check if articles are rendered
-    const articleCards = wrapper.findAll('.article-card')
-    expect(articleCards).toHaveLength(2)
-
-    // Check first article content
-    const firstCard = articleCards[0]
-    if (!firstCard) {
-      throw new Error('Expected at least one article card')
-    }
-    expect(firstCard.find('.article-title').text()).toBe('Test Article 1')
-    expect(firstCard.find('.article-summary').text()).toContain(
-      'This is a test summary for article 1'
-    )
-    expect(firstCard.find('.author-name').text()).toBe('Test Author')
-  })
-
-  test('should handle articles without images', async () => {
-    loadingRef.value = false
-    errorRef.value = null
-    const [firstArticle] = mockArticles
-    if (!firstArticle) {
-      throw new Error('Expected at least one article to clone')
-    }
-
-    const imagelessArticle = cloneArticleWithoutImage(firstArticle)
-
-    articlesRef.value = [imagelessArticle]
-    paginatedArticlesRef.value = [imagelessArticle]
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    const articleCard = wrapper.find('.article-card')
-    expect(articleCard.exists()).toBe(true)
-
-    // Should not have v-card-media when no image
-    expect(articleCard.find('.v-card-media').exists()).toBe(false)
-  })
-
-  test('should format date correctly', async () => {
-    loadingRef.value = false
-    errorRef.value = null
-    articlesRef.value = mockArticles
-    paginatedArticlesRef.value = mockArticles
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    const dateText = wrapper.find('.date-text')
-    expect(dateText.exists()).toBe(true)
-    // The date should be formatted (exact format depends on locale)
-    expect(dateText.text()).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/)
-  })
-
-  test('should toggle debug mode', async () => {
-    loadingRef.value = false
-    errorRef.value = null
-    articlesRef.value = mockArticles
-    paginatedArticlesRef.value = mockArticles
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    // Debug info should not be visible initially
-    expect(wrapper.find('.debug-info').exists()).toBe(false)
-
-    // Find and click debug toggle button using specific selector
-    const debugButton = wrapper.find('.debug-toggle')
-    expect(debugButton.exists()).toBe(true)
-    expect(debugButton.text()).toBe('Show Debug Info')
-
-    await debugButton.trigger('click')
-
-    // Debug info should be visible after click
-    expect(wrapper.find('.debug-info').exists()).toBe(true)
-    expect(wrapper.find('.debug-toggle').text()).toBe('Hide Debug Info')
-  })
-
-  test('should handle empty articles array', async () => {
-    loadingRef.value = false
-    errorRef.value = null
-    articlesRef.value = []
-    paginatedArticlesRef.value = []
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    // Should not render any article cards
-    const articleCards = wrapper.findAll('.article-card')
-    expect(articleCards).toHaveLength(0)
-  })
-
-  test('read more button links to canonical blog route', async () => {
-    loadingRef.value = false
-    errorRef.value = null
-    articlesRef.value = mockArticles.map((article, index) => ({
-      ...article,
-      slug: index === 0 ? '/blog/test-article-1' : article.slug,
-    }))
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    const readMoreButton = wrapper.find('[data-test="article-read-more"]')
-    expect(readMoreButton.exists()).toBe(true)
-    const readMoreHref =
-      readMoreButton.attributes('href') ?? readMoreButton.attributes('to') ?? ''
-    expect(readMoreHref).toBe('/blog/test-article-1')
-  })
-
-  test('image links to canonical blog route when available', async () => {
-    loadingRef.value = false
-    errorRef.value = null
-    articlesRef.value = mockArticles
-    paginatedArticlesRef.value = mockArticles
-
-    const wrapper = await mountSuspended(TheArticles)
-
-    const imageLink = wrapper.find('[data-test="article-image-link"]')
-    expect(imageLink.exists()).toBe(true)
-    expect(imageLink.attributes('href')).toBe('/blog/test-article-1')
-  })
-
-  test('pushes query parameters when selecting a tag', async () => {
-    const wrapper = await mountSuspended(TheArticles)
-    await nextTick()
-
-    const tagChips = wrapper.findAll('.tag-filter__chip')
-    expect(tagChips.length).toBeGreaterThan(1)
-
-    const energyChip = tagChips[1]
-    if (!energyChip) {
-      throw new Error('Expected a tag chip to test selection')
-    }
-
-    await energyChip.trigger('click')
-
-    expect(mockRouterPush).toHaveBeenCalledWith({
-      path: '/blog',
-      query: { tag: 'Energy' },
+  it('displays an error state and retries fetching when requested', async () => {
+    const { wrapper } = await mountComponent({
+      blogConfig: {
+        error: 'Network error',
+        loading: false,
+        articles: [],
+        pagination: { page: 1, size: 6, totalPages: 1, totalElements: 0 },
+      },
     })
+
+    expect(wrapper.find('.v-alert-stub').text()).toContain('Network error')
+
+    blogComposable.fetchArticles.mockClear()
+
+    await wrapper.find('.v-btn-stub').trigger('click')
+    await flushPromises()
+
+    expect(blogComposable.fetchArticles).toHaveBeenCalledTimes(1)
   })
 
-  test('fetches articles again when tag query changes', async () => {
-    await mountSuspended(TheArticles)
-    await nextTick()
+  it('updates the router and refetches when changing page', async () => {
+    const { wrapper } = await mountComponent({
+      routeQuery: { page: '2', tag: 'Nuxt' },
+      blogConfig: {
+        pagination: { page: 2, size: 6, totalPages: 4, totalElements: 24 },
+        selectedTag: 'Nuxt',
+      },
+    })
 
-    fetchArticlesMock.mockClear()
-    routeQuery.tag = 'Energy'
-    await nextTick()
-    await nextTick()
+    routerPush.mockClear()
+    blogComposable.fetchArticles.mockClear()
 
-    expect(fetchArticlesMock).toHaveBeenCalledWith(1, 12, 'Energy')
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(3)
+    await flushPromises()
+
+    expect(routerPush).toHaveBeenCalledWith({ query: { page: '3', tag: 'Nuxt' } })
+    expect(blogComposable.fetchArticles).toHaveBeenCalledWith(3, 6, 'Nuxt')
+    expect(blogComposable.pagination.value.page).toBe(3)
   })
 
-  test('renders correctly when tags are available', async () => {
-    tagsRef.value = [
-      { name: 'Energy', slug: 'energy', count: 3 },
-      { name: 'Kitchen', slug: 'kitchen', count: 1 },
-    ]
+  it('removes the page query when navigating back to the first page', async () => {
+    const { wrapper } = await mountComponent({
+      routeQuery: { page: '2' },
+      blogConfig: {
+        pagination: { page: 2, size: 6, totalPages: 4, totalElements: 24 },
+      },
+    })
 
-    const wrapper = await mountSuspended(TheArticles)
+    routerPush.mockClear()
+    blogComposable.fetchArticles.mockClear()
 
-    // Verify tags are rendered
-    const tagChips = wrapper.findAll('.tag-filter__chip')
-    // Should have "All" chip plus the two tags
-    expect(tagChips.length).toBeGreaterThan(0)
-    expect(wrapper.exists()).toBe(true)
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(1)
+    await flushPromises()
+
+    expect(routerPush).toHaveBeenCalledWith({ query: {} })
+    expect(blogComposable.fetchArticles).toHaveBeenCalledWith(1, 6, null)
+    expect(blogComposable.pagination.value.page).toBe(1)
+    expect((route.query as Record<string, unknown>).page).toBeUndefined()
   })
 
-  test('highlights the selected tag from the route', async () => {
-    routeQuery.tag = 'Energy'
+  it('navigates and refetches when selecting a specific tag', async () => {
+    const { wrapper } = await mountComponent({
+      blogConfig: {
+        initialTags: defaultTags,
+        pagination: { page: 1, size: 6, totalPages: 3, totalElements: 18 },
+      },
+    })
 
-    const wrapper = await mountSuspended(TheArticles)
-    await nextTick()
+    routerPush.mockClear()
+    blogComposable.fetchArticles.mockClear()
 
-    const tagChips = wrapper.findAll('.tag-filter__chip')
-    const energyChip = tagChips[1]
-    if (!energyChip) {
-      throw new Error('Expected Energy tag chip to exist')
-    }
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handleTagSelection('Vue')
+    await flushPromises()
 
-    expect(energyChip.classes()).toContain('tag-filter__chip--active')
+    expect(routerPush).toHaveBeenCalledWith({ path: '/blog', query: { tag: 'Vue' } })
+    expect(blogComposable.fetchArticles).toHaveBeenCalledWith(1, 6, 'Vue')
+    expect(blogComposable.pagination.value.page).toBe(1)
+    expect(blogComposable.selectedTag.value).toBe('Vue')
   })
 
-  test('buildArticleLink normalizes different url formats', async () => {
-    const wrapper = await mountSuspended(TheArticles)
+  it('clears filters and resets pagination when selecting the "all" option', async () => {
+    const { wrapper } = await mountComponent({
+      routeQuery: { page: '3', tag: 'Nuxt' },
+      blogConfig: {
+        initialTags: defaultTags,
+        pagination: { page: 3, size: 6, totalPages: 5, totalElements: 42 },
+        selectedTag: 'Nuxt',
+      },
+    })
 
-    const instance = wrapper.vm as unknown as {
-      extractArticleSlug: (slug: string | null | undefined) => string | null
-      buildArticleLink: (slug: string | null | undefined) => string | undefined
-    }
+    routerPush.mockClear()
+    blogComposable.fetchArticles.mockClear()
 
-    expect(instance.extractArticleSlug('test-article-1')).toBe('test-article-1')
-    expect(instance.extractArticleSlug('/blog/test-article-2')).toBe(
-      'test-article-2'
-    )
-    expect(
-      instance.extractArticleSlug('https://example.com/blog/test-article-3')
-    ).toBe('test-article-3')
-    expect(instance.extractArticleSlug('  ')).toBeNull()
-    expect(instance.extractArticleSlug(null)).toBeNull()
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handleTagSelection(null)
+    await flushPromises()
 
-    expect(instance.buildArticleLink('test-article-1')).toBe(
-      '/blog/test-article-1'
-    )
-    expect(instance.buildArticleLink('/blog/test-article-2')).toBe(
-      '/blog/test-article-2'
-    )
-    expect(
-      instance.buildArticleLink('https://example.com/blog/test-article-3')
-    ).toBe('/blog/test-article-3')
-    expect(instance.buildArticleLink('  ')).toBeUndefined()
-    expect(instance.buildArticleLink(null)).toBeUndefined()
+    expect(routerPush).toHaveBeenCalledWith({ path: '/blog', query: {} })
+    expect(blogComposable.fetchArticles).toHaveBeenCalledWith(1, 6, null)
+    expect(blogComposable.pagination.value.page).toBe(1)
+    expect(blogComposable.selectedTag.value).toBeNull()
+    expect((route.query as Record<string, unknown>).tag).toBeUndefined()
+    expect((route.query as Record<string, unknown>).page).toBeUndefined()
   })
 
-  test('should display pagination controls when multiple pages exist', async () => {
-    paginationRef.value = {
-      page: 1,
-      size: 12,
-      totalElements: 24,
-      totalPages: 2,
-    }
+  it('computes consistent SEO metadata and structured data', async () => {
+    const { wrapper } = await mountComponent({
+      routeQuery: { page: '2', tag: 'Nuxt' },
+      blogConfig: {
+        articles: defaultArticles,
+        initialTags: defaultTags,
+        pagination: { page: 2, size: 6, totalPages: 4, totalElements: 24 },
+        selectedTag: 'Nuxt',
+      },
+      requestUrlOverride: new URL('https://example.com/blog?page=2&tag=Nuxt'),
+    })
 
-    const wrapper = await mountSuspended(TheArticles)
+    const vm = wrapper.vm as TheArticlesPublicInstance
 
-    expect(wrapper.find('.pagination-container').exists()).toBe(true)
+    expect(vm.pageSeoTitle).toBe('Open4Goods blog – Nuxt – Page 2')
+    expect(vm.seoDescription).toBe('Articles about Nuxt. A welcome post for the blog.')
+    expect(vm.primaryArticleImage).toBe('https://cdn.example.com/images/hello.jpg')
+    expect(vm.canonicalUrl).toContain('/blog?page=2&tag=Nuxt')
+
+    const schema = vm.structuredData as Record<string, unknown>
+    expect(schema).toMatchObject({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Open4Goods blog – Nuxt – Page 2',
+      description: 'Articles about Nuxt. A welcome post for the blog.',
+      url: expect.stringContaining('/blog?page=2&tag=Nuxt'),
+      inLanguage: 'en',
+      isPartOf: { '@type': 'Blog', name: 'Open4Goods blog' },
+      about: 'Nuxt',
+    })
+
+    const hasPart = (schema.hasPart ?? []) as Array<Record<string, unknown>>
+    expect(hasPart).toHaveLength(defaultArticles.length)
+    expect(hasPart[0]).toMatchObject({
+      '@type': 'BlogPosting',
+      headline: 'Hello Nuxt World',
+      description: 'A welcome post for the blog.',
+      url: expect.stringContaining('/blog/hello-world'),
+    })
+
   })
 
-  test('should update the route when page changes', async () => {
-    paginationRef.value = {
-      page: 1,
-      size: 12,
-      totalElements: 24,
-      totalPages: 3,
-    }
+  it('reacts to route query updates triggered outside the component', async () => {
+    await mountComponent({
+      routeQuery: { page: '1', tag: 'Nuxt' },
+      blogConfig: {
+        initialTags: defaultTags,
+        pagination: { page: 1, size: 6, totalPages: 5, totalElements: 42 },
+        selectedTag: 'Nuxt',
+      },
+    })
 
-    const wrapper = await mountSuspended(TheArticles)
+    blogComposable.fetchArticles.mockClear()
 
-    const instance = wrapper.vm as unknown as {
-      handlePageChange: (page: number) => Promise<void>
-    }
+    ;(route.query as Record<string, unknown>).page = '4'
+    ;(route.query as Record<string, unknown>).tag = 'Vue'
+    await flushPromises()
 
-    await instance.handlePageChange(2)
-    await nextTick()
-
-    expect(mockRouterPush).toHaveBeenCalledWith({ query: { page: '2' } })
+    expect(blogComposable.fetchArticles).toHaveBeenCalledWith(4, 6, 'Vue')
   })
 })

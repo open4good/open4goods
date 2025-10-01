@@ -2,7 +2,7 @@ package org.open4goods.nudgerfrontapi.service.auth;
 
 import java.time.Instant;
 
-import org.open4goods.nudgerfrontapi.config.SecurityProperties;
+import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

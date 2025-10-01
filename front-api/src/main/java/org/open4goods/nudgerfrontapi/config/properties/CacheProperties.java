@@ -1,12 +1,10 @@
-package org.open4goods.nudgerfrontapi.config;
+package org.open4goods.nudgerfrontapi.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for front cache settings.
  */
-@Component
 @ConfigurationProperties(prefix = "front.cache")
 public class CacheProperties {
 

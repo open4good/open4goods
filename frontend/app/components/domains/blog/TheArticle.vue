@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import type { BlogPostDto } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
-import RobustImage from '~/components/shared/images/RobustImage.vue'
 import { useAuth } from '~/composables/useAuth'
 
 interface BlogArticle extends BlogPostDto {
@@ -37,9 +36,7 @@ const buildDateInfo = (timestamp?: number) => {
 
   return {
     iso: date.toISOString(),
-    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(
-      date
-    ),
+    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(date),
   }
 }
 
@@ -52,15 +49,8 @@ const updatedDate = computed(() => {
   return info
 })
 
-const rawBody = computed(
-  () => article.value.body ?? article.value.content ?? ''
-)
-const plainBody = computed(() =>
-  rawBody.value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-)
+const rawBody = computed(() => article.value.body ?? article.value.content ?? '')
+const plainBody = computed(() => rawBody.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim())
 
 const sanitizedBody = computed(() => {
   const { sanitizedHtml } = _sanitizeHtml(rawBody.value)
@@ -91,43 +81,14 @@ const readingTimeLabel = computed(() => {
   return t('blog.article.readingTime', { minutes: readingTimeMinutes.value })
 })
 
-const categories = computed(() =>
-  (article.value.category ?? []).map(item => item.trim()).filter(Boolean)
-)
+const categories = computed(() => (article.value.category ?? []).map((item) => item.trim()).filter(Boolean))
 
 const buildTagLink = (tag: string) => ({
   path: '/blog',
   query: { tag },
 })
 
-const buildIdFragment = (value?: string | null) => {
-  if (!value) {
-    return ''
-  }
-
-  return value
-    .toString()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .toLowerCase()
-}
-
-const baseIdFragment = computed(() => {
-  const fragment =
-    buildIdFragment(article.value.url) ||
-    buildIdFragment(article.value.title) ||
-    'detail'
-
-  return fragment
-})
-
-const headingId = computed(() => `blog-article-${baseIdFragment.value}`)
-const categoriesHeadingId = computed(() => `${headingId.value}-categories`)
-const metadataHeadingId = computed(() => `${headingId.value}-metadata`)
-const bodyHeadingId = computed(() => `${headingId.value}-body`)
-const footerHeadingId = computed(() => `${headingId.value}-footer`)
+const headingId = computed(() => `blog-article-${article.value.url ?? 'detail'}`)
 
 const metaDescription = computed(() => {
   const summary = articleSummary.value
@@ -140,9 +101,7 @@ const metaDescription = computed(() => {
   }
 
   const truncated = plainBody.value.slice(0, 160)
-  return truncated.length < plainBody.value.length
-    ? `${truncated.trimEnd()}...`
-    : truncated
+  return truncated.length < plainBody.value.length ? `${truncated.trimEnd()}...` : truncated
 })
 
 let requestUrl: URL | undefined
@@ -185,45 +144,6 @@ const structuredData = computed(() => {
   return schema
 })
 
-const translateWithFallback = (
-  key: string,
-  fallback: string,
-  params?: Record<string, unknown>
-) => {
-  const translated = params ? t(key, params) : t(key)
-  return translated === key ? fallback : translated
-}
-
-const categoriesLabel = computed(() =>
-  translateWithFallback('blog.article.categoriesLabel', 'Article categories')
-)
-const metadataLabel = computed(() =>
-  translateWithFallback('blog.article.metadataLabel', 'Article metadata')
-)
-const bodyLabel = computed(() =>
-  translateWithFallback('blog.article.bodyLabel', 'Article content')
-)
-const footerLabel = computed(() =>
-  translateWithFallback('blog.article.footerLabel', 'Article tools')
-)
-const authorLabel = computed(() =>
-  translateWithFallback('blog.article.authorLabel', 'Author')
-)
-const publishedLabel = computed(() =>
-  translateWithFallback('blog.article.publishedLabel', 'Published on')
-)
-const readingTimeHeading = computed(() =>
-  translateWithFallback(
-    'blog.article.readingTimeLabel',
-    'Estimated reading time'
-  )
-)
-
-const buildCategoryLabel = (category: string) =>
-  translateWithFallback('blog.article.categoryChipLabel', category, {
-    category,
-  })
-
 useSeoMeta({
   title: articleTitle,
   ogTitle: articleTitle,
@@ -231,13 +151,8 @@ useSeoMeta({
   ogDescription: computed(() => metaDescription.value || undefined),
   ogType: 'article',
   ogImage: computed(() => article.value.image || undefined),
-  twitterCard: computed(() =>
-    article.value.image ? 'summary_large_image' : 'summary'
-  ),
   articlePublishedTime: computed(() => publishedDate.value?.iso),
-  articleModifiedTime: computed(
-    () => updatedDate.value?.iso ?? publishedDate.value?.iso
-  ),
+  articleModifiedTime: computed(() => updatedDate.value?.iso ?? publishedDate.value?.iso),
   ogUrl: canonicalUrl,
 })
 
@@ -260,8 +175,12 @@ useHead(() => ({
 </script>
 
 <template>
-  <article
+  <v-sheet
+    tag="article"
     class="blog-article"
+    color="surface"
+    elevation="8"
+    rounded="xl"
     :aria-labelledby="headingId"
     itemscope
     itemtype="https://schema.org/BlogPosting"
@@ -270,12 +189,9 @@ useHead(() => ({
       <nav
         v-if="categories.length"
         class="article-categories"
-        :aria-labelledby="categoriesHeadingId"
+        aria-label="Article categories"
       >
-        <h2 :id="categoriesHeadingId" class="visually-hidden">
-          {{ categoriesLabel }}
-        </h2>
-        <ul class="article-categories__list" role="list">
+        <ul class="article-categories__list">
           <li
             v-for="category in categories"
             :key="category"
@@ -288,7 +204,6 @@ useHead(() => ({
               size="small"
               :to="buildTagLink(category)"
               link
-              :aria-label="buildCategoryLabel(category)"
               data-test="article-category"
             >
               {{ category }}
@@ -297,63 +212,31 @@ useHead(() => ({
         </ul>
       </nav>
 
-      <h1
-        :id="headingId"
-        class="article-title"
-        itemprop="headline"
-        data-test="article-title"
-      >
+      <h1 :id="headingId" class="article-title" itemprop="headline" data-test="article-title">
         {{ articleTitle }}
       </h1>
 
-      <p
-        v-if="articleSummary"
-        class="article-summary"
-        itemprop="description"
-        data-test="article-summary"
-      >
+      <p v-if="articleSummary" class="article-summary" itemprop="description" data-test="article-summary">
         {{ articleSummary }}
       </p>
 
-      <h2 :id="metadataHeadingId" class="visually-hidden">
-        {{ metadataLabel }}
-      </h2>
-      <ul class="article-meta" :aria-labelledby="metadataHeadingId" role="list">
-        <li
-          v-if="article.author"
-          class="article-meta__item"
-          data-test="article-author"
-        >
+      <ul class="article-meta" aria-label="Article metadata">
+        <li v-if="article.author" class="article-meta__item" data-test="article-author">
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
-          <span class="visually-hidden">{{ authorLabel }}:</span>
-          <span
-            itemprop="author"
-            itemscope
-            itemtype="https://schema.org/Person"
-          >
+          <span itemprop="author" itemscope itemtype="https://schema.org/Person">
             <span itemprop="name">{{ article.author }}</span>
           </span>
         </li>
 
-        <li
-          v-if="publishedDate"
-          class="article-meta__item"
-          data-test="article-published"
-        >
+        <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
-          <span class="visually-hidden">{{ publishedLabel }}:</span>
           <time :datetime="publishedDate.iso" itemprop="datePublished">
             {{ publishedDate.label }}
           </time>
         </li>
 
-        <li
-          v-if="readingTimeLabel"
-          class="article-meta__item"
-          data-test="article-reading-time"
-        >
+        <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
-          <span class="visually-hidden">{{ readingTimeHeading }}:</span>
           <span>{{ readingTimeLabel }}</span>
         </li>
       </ul>
@@ -363,13 +246,11 @@ useHead(() => ({
       <RobustImage
         :src="article.image"
         :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
-        width="100%"
+        width="70%"
         height="360"
         class="article-hero__image"
       />
-      <figcaption class="visually-hidden">
-        {{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}
-      </figcaption>
+      <figcaption class="d-sr-only">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
     </figure>
 
     <v-divider class="article-divider" role="presentation" />
@@ -378,32 +259,18 @@ useHead(() => ({
       v-if="hasBody"
       class="article-body"
       itemprop="articleBody"
-      :aria-labelledby="bodyHeadingId"
+      aria-label="Article content"
+      role="region"
     >
-      <h2 :id="bodyHeadingId" class="visually-hidden">{{ bodyLabel }}</h2>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div
-        class="article-content"
-        data-test="article-body"
-        v-html="sanitizedBody"
-      />
+      <div class="article-content" data-test="article-body" v-html="sanitizedBody" />
     </section>
 
-    <section
-      v-else
-      class="article-body article-body--empty"
-      :aria-labelledby="bodyHeadingId"
-      aria-live="polite"
-      data-test="article-empty"
-    >
-      <h2 :id="bodyHeadingId" class="visually-hidden">{{ bodyLabel }}</h2>
-      <v-alert type="info" variant="tonal">{{
-        t('blog.article.empty')
-      }}</v-alert>
+    <section v-else class="article-body article-body--empty" aria-live="polite" data-test="article-empty">
+      <v-alert type="info" variant="tonal">{{ t('blog.article.empty') }}</v-alert>
     </section>
 
-    <footer class="article-footer" :aria-labelledby="footerHeadingId">
-      <h2 :id="footerHeadingId" class="visually-hidden">{{ footerLabel }}</h2>
+    <footer class="article-footer" aria-label="Article footer">
       <v-btn
         v-if="isLoggedIn && article.editLink"
         :href="article.editLink"
@@ -417,14 +284,11 @@ useHead(() => ({
         {{ t('blog.article.edit') }}
       </v-btn>
     </footer>
-  </article>
+  </v-sheet>
 </template>
 
 <style lang="sass" scoped>
 .blog-article
-  background-color: #ffffff
-  border-radius: 20px
-  box-shadow: 0 18px 48px rgba(25, 118, 210, 0.08)
   padding: clamp(1.5rem, 2vw, 3rem)
   display: flex
   flex-direction: column
@@ -452,13 +316,13 @@ useHead(() => ({
 .article-title
   font-size: clamp(1.75rem, 2.5vw, 2.75rem)
   font-weight: 700
-  color: #0d1b2a
   margin: 0
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
 
 .article-summary
   font-size: clamp(1rem, 1.2vw, 1.25rem)
-  color: #3d5a80
   margin: 0
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
 
 
 .article-meta
@@ -467,10 +331,10 @@ useHead(() => ({
   gap: 1rem
   align-items: center
   font-size: 0.95rem
-  color: #607d8b
   margin: 0
   padding: 0
   list-style: none
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
 
   &__item
     display: inline-flex
@@ -492,7 +356,7 @@ useHead(() => ({
 .article-body
   font-size: 1.05rem
   line-height: 1.75
-  color: #1b263b
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
 
   &--empty
     display: flex
@@ -511,14 +375,24 @@ useHead(() => ({
 .article-content :deep(p)
   margin-bottom: 1.25rem
 
-.article-content :deep(a)
-  color: #1976d2
-  text-decoration: underline
-  text-decoration-color: rgba(25, 118, 210, 0.4)
-  transition: color 0.2s ease
+.article-content :deep(ul),
+.article-content :deep(ol)
+  margin: 0 0 1.25rem 1.5rem
+  padding-left: 0.5rem
 
-.article-content :deep(a:hover)
-  color: #0d47a1
+.article-content :deep(li)
+  margin-bottom: 0.5rem
+
+.article-content :deep(a)
+  color: rgb(var(--v-theme-primary))
+  text-decoration: underline
+  text-decoration-color: rgba(var(--v-theme-primary), 0.4)
+  transition: color 0.2s ease, text-decoration-color 0.2s ease
+
+.article-content :deep(a:hover),
+.article-content :deep(a:focus-visible)
+  color: rgb(var(--v-theme-primary))
+  text-decoration-color: rgb(var(--v-theme-primary))
 
 .article-content :deep(img)
   max-width: 100%
@@ -529,15 +403,6 @@ useHead(() => ({
   display: flex
   justify-content: flex-end
 
-.visually-hidden
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  border: 0
 
 @media (max-width: 960px)
   .blog-article

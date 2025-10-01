@@ -1,16 +1,27 @@
-import { BlogApi, Configuration } from '..'
+import { BlogApi } from '..'
 import type { BlogPostDto, BlogTagDto, PageDto } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
+import { createBackendApiConfig } from './createBackendApiConfig'
 
 /**
  * Blog service for handling blog-related API calls
  */
 export const useBlogService = (domainLanguage: DomainLanguage) => {
-  const config = useRuntimeConfig()
-  const apiConfig = new Configuration({ basePath: config.apiUrl })
-  console.log('[ContentService] baseUrl =', config.apiUrl)
+  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isServerRuntime = import.meta.server || isVitest
+  let api: BlogApi | undefined
 
-  const api = new BlogApi(apiConfig)
+  const resolveApi = () => {
+    if (!isServerRuntime) {
+      throw new Error('useBlogService() is only available on the server runtime.')
+    }
+
+    if (!api) {
+      api = new BlogApi(createBackendApiConfig())
+    }
+
+    return api
+  }
 
   /**
    * Fetch paginated blog articles
@@ -24,7 +35,7 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
     } = {}
   ): Promise<PageDto> => {
     try {
-      return await api.posts({ ...params, domainLanguage })
+      return await resolveApi().posts({ ...params, domainLanguage })
     } catch (error) {
       console.error('Error fetching blog articles:', error)
       // Rethrow original error so callers can access status and message
@@ -39,7 +50,7 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
    */
   const getArticleBySlug = async (slug: string): Promise<BlogPostDto> => {
     try {
-      return await api.post({ slug, domainLanguage })
+      return await resolveApi().post({ slug, domainLanguage })
     } catch (error) {
       console.error(`Error fetching blog article ${slug}:`, error)
       // Preserve original error details for upstream handlers
@@ -52,7 +63,7 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
    */
   const getTags = async (): Promise<BlogTagDto[]> => {
     try {
-      return await api.tags({ domainLanguage })
+      return await resolveApi().tags({ domainLanguage })
     } catch (error) {
       console.error('Error fetching blog tags:', error)
       throw error

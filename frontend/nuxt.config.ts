@@ -1,5 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
+import { fileURLToPath } from 'node:url'
+
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { buildI18nPagesConfig } from './shared/utils/localized-routes'
@@ -62,6 +64,77 @@ export default defineNuxtConfig({
                 warning: '#FFC107',
                 red: '#F44336',
                 green: '#4CAF50',
+                'hero-gradient-start': '#1976D2',
+                'hero-gradient-mid': '#1976D2',
+                'hero-gradient-end': '#43A047',
+                'hero-overlay-strong': '#FFFFFF',
+                'hero-overlay-soft': '#FFFFFF',
+                'hero-pill-on-dark': '#FFFFFF',
+                'surface-default': '#FFFFFF',
+                'surface-muted': '#F8FAFC',
+                'surface-alt': '#EEF4FA',
+                'surface-glass': '#F4F7FA',
+                'surface-glass-strong': '#FBFCFD',
+                'surface-primary-050': '#F4F8FD',
+                'surface-primary-080': '#EDF4FB',
+                'surface-primary-100': '#E8F1FB',
+                'surface-primary-120': '#E3EFFA',
+                'surface-ice-050': '#EEF4FA',
+                'surface-ice-100': '#F5FAFF',
+                'surface-muted-contrast': '#F5F5F5',
+                'border-primary-strong': '#C6DDF4',
+                'shadow-primary-600': '#1976D2',
+                'text-neutral-strong': '#101828',
+                'text-neutral-secondary': '#475467',
+                'text-neutral-soft': '#667085',
+                'text-on-accent': '#152E49',
+                'accent-primary-highlight': '#2196F3',
+                'accent-supporting': '#4CAF50',
+                'surface-callout-start': '#ECF8EF',
+                'surface-callout-end': '#E3F2FD',
+                'accent-callout': '#1976D2',
+              },
+            },
+            dark: {
+              colors: {
+                primary: '#90CAF9',
+                secondary: '#EEEEEE',
+                accent: '#82B1FF',
+                error: '#FF867C',
+                info: '#64B5F6',
+                success: '#81C784',
+                warning: '#FFD54F',
+                red: '#EF9A9A',
+                green: '#81C784',
+                'hero-gradient-start': '#1E3A8A',
+                'hero-gradient-mid': '#1D4ED8',
+                'hero-gradient-end': '#166534',
+                'hero-overlay-strong': '#FFFFFF',
+                'hero-overlay-soft': '#FFFFFF',
+                'hero-pill-on-dark': '#FFFFFF',
+                'surface-default': '#0F172A',
+                'surface-muted': '#111827',
+                'surface-alt': '#1E293B',
+                'surface-glass': '#1E293B',
+                'surface-glass-strong': '#111827',
+                'surface-primary-050': '#0B1220',
+                'surface-primary-080': '#13213B',
+                'surface-primary-100': '#1B2A44',
+                'surface-primary-120': '#22304C',
+                'surface-ice-050': '#152238',
+                'surface-ice-100': '#0F172A',
+                'surface-muted-contrast': '#1F2937',
+                'border-primary-strong': '#1E40AF',
+                'shadow-primary-600': '#3B82F6',
+                'text-neutral-strong': '#F8FAFC',
+                'text-neutral-secondary': '#CBD5F5',
+                'text-neutral-soft': '#94A3B8',
+                'text-on-accent': '#E2E8F0',
+                'accent-primary-highlight': '#38BDF8',
+                'accent-supporting': '#22C55E',
+                'surface-callout-start': '#1E293B',
+                'surface-callout-end': '#0F172A',
+                'accent-callout': '#2563EB',
               },
             },
           },
@@ -72,17 +145,19 @@ export default defineNuxtConfig({
     defaultLocale: 'en-US',
     langDir: '../i18n/locales',
     locales: [
-      { code: 'fr-FR', name: 'Français', file: 'fr-FR.json', ...(localeDomains['fr-FR'] ?? {}) },
-      { code: 'en-US', name: 'English', file: 'en-US.json', ...(localeDomains['en-US'] ?? {}) },
+      { code: 'fr-FR', name: 'Français', file: 'fr-FR.ts', ...(localeDomains['fr-FR'] ?? {}) },
+      { code: 'en-US', name: 'English', file: 'en-US.ts', ...(localeDomains['en-US'] ?? {}) },
     ],
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
     customRoutes: 'config',
     differentDomains: true,
     pages: buildI18nPagesConfig(),
+    vueI18n: './i18n.config.ts',
   },
   css: [
-    '~/assets/sass/main.sass', // Keep only the main SASS file
+    'vuetify/styles',
+    '~/assets/sass/main.sass',
   ],
 
   postcss: {
@@ -90,7 +165,6 @@ export default defineNuxtConfig({
       'postcss-prefix-selector': {
         includeFiles: [
           /\/assets\/css\/bootstrap\.css$/i,
-          /\/assets\/css\/xwiki\.css$/i,
         ],
         ...xwikiSandboxPrefixerOptions,
       },
@@ -108,6 +182,7 @@ export default defineNuxtConfig({
     }
   },
   image: {
+    dir: fileURLToPath(new URL('./app/public', import.meta.url)),
     // The screen sizes predefined by `@nuxt/image`:
     screens: {
       'xs': 320,
@@ -142,6 +217,7 @@ export default defineNuxtConfig({
       // Base URL of the backend API
       // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
+      hcaptchaSiteKey: process.env.HCAPTCHA_SITE_KEY || '',
     }
   },
 })

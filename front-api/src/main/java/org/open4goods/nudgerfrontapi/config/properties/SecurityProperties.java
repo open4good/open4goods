@@ -1,9 +1,8 @@
-package org.open4goods.nudgerfrontapi.config;
+package org.open4goods.nudgerfrontapi.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
  * Configuration properties to enable or disable Spring Security for the
  * frontend API.
  */
-@Component
 @Validated
 @ConfigurationProperties(prefix = "front.security")
 public class SecurityProperties {

@@ -236,7 +236,8 @@ public class BlogService implements HealthIndicator {
 
                     // Process category: remove "Blog." prefix and split by '|'
                     String category = fullPage.getProperties().get("category");
-                    if (category != null) {
+                    // TODO : Ugly fix to discard article tagged webhome. Should wear a list of exclusions patterns in configuration.
+                    if (category != null && !category.toLowerCase().contains("webhome")) {
                         List<String> categories = Arrays.stream(category.replace("Blog.", "").split("\\|"))
                                 .filter(StringUtils::isNotEmpty)
                                 .collect(Collectors.toList());

@@ -17,7 +17,7 @@
                 <maven.compiler.target>21</maven.compiler.target>
                 <global.version>0.0.1-SNAPSHOT</global.version>
                 <swagger.version>2.9.2</swagger.version>
-                <swagger.core.v3.version>2.2.37</swagger.core.v3.version>
+                <swagger.core.v3.version>2.2.38</swagger.core.v3.version>
                 <jacoco.version>0.8.13</jacoco.version>
                 <barcode4j.version>2.1</barcode4j.version>
                 <sleepycat-je.version>18.3.12</sleepycat-je.version>
@@ -30,13 +30,13 @@
                 <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
                 <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
                 <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
-                <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+                <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
                 <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
                 <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
                 <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
                 <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
                 <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-                <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+                <versions-maven-plugin.version>2.19.1</versions-maven-plugin.version>
                 <taglist-maven-plugin.version>3.2.1</taglist-maven-plugin.version>
 
                 <processDependencyManagement>true</processDependencyManagement>
@@ -399,16 +399,16 @@
                         </plugins>
                 </pluginManagement>
 	</build>
-
-    <profiles>
-      <profile>
-        <id>site</id>
-        <distributionManagement>
+    <distributionManagement>
           <site>
             <id>maven</id>
             <url>https://nudger.fr</url>
           </site>
-        </distributionManagement>
+    </distributionManagement>
+    <profiles>
+      <profile>
+        <id>site</id>
+
         <reporting>
           <plugins>
             <plugin>
@@ -515,7 +515,7 @@
                  <DynamicDependency>
                    <groupId>org.junit.platform</groupId>
                     <artifactId>junit-platform-launcher</artifactId>
-                    <version>1.12.2</version>
+                    <version>1.14.0</version>
                     <repositoryType>PLUGIN</repositoryType>
                 </DynamicDependency>
 

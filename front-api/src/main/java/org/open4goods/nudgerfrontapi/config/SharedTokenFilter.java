@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
