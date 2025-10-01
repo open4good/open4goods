@@ -47,6 +47,7 @@ Your core responsibilities:
    - Verify that no functionality is broken after the changes
 
 When working with this Nuxt 3 project:
+
 - Respect the existing project structure and conventions from CLAUDE.md
 - Use the established i18n configuration (French/English with prefix_except_default strategy)
 - Maintain TypeScript type safety throughout the process
