@@ -1,16 +1,14 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
 import java.util.Locale;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
+import org.open4goods.nudgerfrontapi.dto.xwiki.FullPageDto;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XWikiHtmlService;
-import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.http.CacheControl;
+import org.open4goods.nudgerfrontapi.service.XwikiFullPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,12 +41,12 @@ public class ContentsController {
 
 
     private final XWikiHtmlService xwikiHtmlService;
-    private final XwikiFacadeService xwikiFacadeService;
+    private final XwikiFullPageService xwikiFullPageService;
 
     public ContentsController(XWikiHtmlService xwikiHtmlService,
-                              XwikiFacadeService xwikiFacadeService) {
+                              XwikiFullPageService xwikiFullPageService) {
         this.xwikiHtmlService = xwikiHtmlService;
-        this.xwikiFacadeService = xwikiFacadeService;
+        this.xwikiFullPageService = xwikiFullPageService;
     }
 
 
@@ -127,17 +125,17 @@ public class ContentsController {
                             headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
                                     description = "Resolved locale for textual payloads.",
                                     schema = @Schema(type = "string", example = "fr-FR")),
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = FullPage.class))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = FullPageDto.class))),
                     @ApiResponse(responseCode = "404", description = "Page not found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<FullPage> page(@PathVariable String xwikiPageId,
-                                         @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-                                         Locale locale) {
+    public ResponseEntity<FullPageDto> page(@PathVariable String xwikiPageId,
+                                            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                                            Locale locale) {
 
         String normalized = translatePageId(xwikiPageId.replace(":", "/"));
-        FullPage page = xwikiFacadeService.getFullPage(normalized, domainLanguage.languageTag());
+        FullPageDto page = xwikiFullPageService.getFullPage(normalized, domainLanguage.languageTag());
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(page);
