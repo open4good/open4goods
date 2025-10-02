@@ -188,6 +188,7 @@ useSeoMeta({
   width: min(900px, 90vw)
 
 .cms-page__container
+  padding-block: clamp(1rem, 1vw, 1rem)
 
 .cms-page__container--container
   max-width: min(960px, 100%) !important
