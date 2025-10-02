@@ -155,16 +155,11 @@
       "imageAlt": "Nudger logomark representing the open source programme"
     },
     "hero": {
-      "eyebrow": "Open source by design",
       "title": "We build a commons for responsible shopping",
       "subtitle": "Code, data and governance are transparent so anyone can audit and improve Nudger.",
       "primaryCta": {
         "label": "Explore the repositories",
         "ariaLabel": "Open the Nudger GitHub organization in a new tab"
-      },
-      "secondaryCta": {
-        "label": "Read the contribution guide",
-        "ariaLabel": "Open the Nudger contribution guide on GitHub in a new tab"
       },
       "stats": {
         "open": {

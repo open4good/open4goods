@@ -156,16 +156,11 @@
       "imageAlt": "Logotype Nudger représentant le programme open source"
     },
     "hero": {
-      "eyebrow": "Ouvert par nature",
       "title": "Construire ensemble un bien commun numérique",
       "subtitle": "Code, données et gouvernance sont transparents pour que chacun·e puisse auditer et améliorer Nudger.",
       "primaryCta": {
         "label": "Explorer les dépôts",
         "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet"
-      },
-      "secondaryCta": {
-        "label": "Lire le guide de contribution",
-        "ariaLabel": "Ouvrir le guide de contribution Nudger sur GitHub dans un nouvel onglet"
       },
       "stats": {
         "open": {

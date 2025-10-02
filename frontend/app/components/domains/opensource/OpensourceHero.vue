@@ -19,7 +19,6 @@ interface HeroCta {
 
 withDefaults(
   defineProps<{
-    eyebrow: string
     title: string
     subtitle: string
     descriptionBlocId: string
@@ -39,16 +38,6 @@ withDefaults(
       <v-container class="py-16 position-relative">
         <v-row class="align-center" :no-gutters="false" justify="space-between">
           <v-col cols="12" md="7" class="d-flex flex-column gap-4">
-            <v-chip
-              v-if="eyebrow"
-              label
-              color="accent-supporting"
-              class="hero-chip"
-              variant="flat"
-              size="small"
-            >
-              {{ eyebrow }}
-            </v-chip>
 
             <div class="hero-headline">
               <h1 id="opensource-hero-title" class="hero-title">

@@ -128,17 +128,7 @@ const heroCtas = computed<HeroCtaDisplay[]>(() => [
     variant: 'flat',
     target: '_blank',
     rel: 'noopener',
-  },
-  {
-    label: String(t('opensource.hero.secondaryCta.label')),
-    ariaLabel: String(t('opensource.hero.secondaryCta.ariaLabel')),
-    href: 'https://github.com/open4good/open4goods#readme',
-    icon: 'mdi-file-document-outline',
-    variant: 'outlined',
-    color: 'accent-supporting',
-    target: '_blank',
-    rel: 'noopener',
-  },
+  }
 ])
 
 const pillarCards = computed<PillarCardDisplay[]>(() => [
