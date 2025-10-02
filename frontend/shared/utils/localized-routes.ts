@@ -5,6 +5,7 @@ const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
 
 export type LocalizedRouteName =
    'team'
+   | 'opensource'
    | LocalizedWikiRouteName
 
 export type LocalizedRoutePath = `/${string}`
@@ -57,6 +58,10 @@ const mapWikiRoutesToLocalizedPaths = <T extends Record<string, Record<NuxtLocal
 const LOCALIZED_WIKI_ROUTE_PATHS = mapWikiRoutesToLocalizedPaths(LOCALIZED_WIKI_PATHS)
 
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
+  opensource: {
+    'fr-FR': '/opensource',
+    'en-US': '/opensource',
+  },
   team: {
     'fr-FR': '/equipe',
     'en-US': '/team',

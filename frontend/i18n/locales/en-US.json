@@ -148,6 +148,101 @@
       }
     }
   },
+  "opensource": {
+    "seo": {
+      "title": "Open source at Nudger",
+      "description": "Discover how Nudger shares its code, data and governance to build a responsible shopping commons together.",
+      "imageAlt": "Nudger logomark representing the open source programme"
+    },
+    "hero": {
+      "eyebrow": "Open source by design",
+      "title": "We build a commons for responsible shopping",
+      "subtitle": "Code, data and governance are transparent so anyone can audit and improve Nudger.",
+      "primaryCta": {
+        "label": "Explore the repositories",
+        "ariaLabel": "Open the Nudger GitHub organization in a new tab"
+      },
+      "secondaryCta": {
+        "label": "Read the contribution guide",
+        "ariaLabel": "Open the Nudger contribution guide on GitHub in a new tab"
+      },
+      "stats": {
+        "open": {
+          "value": "100%",
+          "label": "of our code is published under open licences"
+        },
+        "ssr": {
+          "value": "SSR",
+          "label": "Universal rendering ensures performance and accessibility"
+        },
+        "community": {
+          "value": "Community",
+          "label": "Collective roadmap shaped with contributors and partners"
+        }
+      }
+    },
+    "pillars": {
+      "eyebrow": "Our commitments",
+      "title": "An open ecosystem you can trust",
+      "cards": {
+        "transparency": {
+          "title": "Transparent architecture",
+          "cta": "Browse the source code",
+          "ariaLabel": "Open the Nudger GitHub repository in a new tab"
+        },
+        "methodology": {
+          "title": "Documented methodology",
+          "cta": "Understand the Impact Score",
+          "ariaLabel": "Navigate to the Impact Score page"
+        },
+        "community": {
+          "title": "Inclusive community",
+          "cta": "Meet the team",
+          "ariaLabel": "Navigate to the Nudger team page"
+        }
+      }
+    },
+    "contribution": {
+      "eyebrow": "Contribute",
+      "title": "Join the collective in a few steps",
+      "steps": {
+        "setup": {
+          "title": "Set up the project locally"
+        },
+        "issues": {
+          "title": "Pick an issue that inspires you"
+        },
+        "share": {
+          "title": "Share, review and celebrate"
+        }
+      }
+    },
+    "resources": {
+      "eyebrow": "Resources",
+      "title": "Everything you need to get started",
+      "links": {
+        "guide": {
+          "title": "Contribution guide",
+          "ariaLabel": "Open the Nudger contribution guide on GitHub in a new tab"
+        },
+        "issues": {
+          "title": "Issue tracker",
+          "ariaLabel": "Open the Nudger GitHub issues board in a new tab"
+        },
+        "updates": {
+          "title": "Community updates",
+          "ariaLabel": "Open the Nudger blog"
+        }
+      },
+      "contact": {
+        "title": "Need a human sparring partner?",
+        "cta": {
+          "label": "Contact the team",
+          "ariaLabel": "Navigate to the contact page"
+        }
+      }
+    }
+  },
   "contact": {
     "seo": {
       "title": "Contact Nudger",
