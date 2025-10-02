@@ -7,7 +7,6 @@
 
 
 An open source online comparator  that operates ecological scoring, following a common good mindset.
-* financially contributing to the environmental cause, [through a repayment of 20%](https://raw.githubusercontent.com/open4good/open4goods/main/LICENSE) of the company incomes.
 * provide products datasets in [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
 * 
   This project is for now deployed on  the frenchy [nudger.fr](https://nudger.fr)
