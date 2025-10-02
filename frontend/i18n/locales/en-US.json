@@ -161,18 +161,32 @@
         "label": "Explore the repositories",
         "ariaLabel": "Open the Nudger GitHub organization in a new tab"
       },
+      "ctaGroupLabel": "Primary hero actions",
       "stats": {
         "open": {
-          "value": "100%",
-          "label": "of our code is published under open licences"
+          "value": "OpenSource",
+          "label": "Open code you can inspect"
         },
         "ssr": {
-          "value": "SSR",
-          "label": "Universal rendering ensures performance and accessibility"
+          "value": "OpenData",
+          "labelRich": {
+            "before": "Product insights",
+            "linkText": "available for free",
+            "after": ""
+          }
         },
         "community": {
           "value": "Community",
           "label": "Collective roadmap shaped with contributors and partners"
+        }
+      },
+      "infoCard": {
+        "highlight": "Open4goods",
+        "description": "grows with everyone. Every pull request, issue or piece of feedback makes the platform more transparent.",
+        "items": {
+          "openLicenses": "Code and data published under open licences",
+          "collaborativeReviews": "Collaborative reviews of contributions",
+          "sharedGovernance": "Shared governance and living documentation"
         }
       }
     },
@@ -234,6 +248,19 @@
         "cta": {
           "label": "Contact the team",
           "ariaLabel": "Navigate to the contact page"
+        }
+      },
+      "feedback": {
+        "title": "Share feedback and ideas",
+        "description": "Report bugs, submit feature ideas and help us prioritise what matters next.",
+        "points": {
+          "bugs": "Log a bug in just a few clicks",
+          "features": "Suggest new features and improvements",
+          "votes": "Vote on the topics that matter to you"
+        },
+        "cta": {
+          "label": "Open the feedback board",
+          "ariaLabel": "Navigate to the user feedback page"
         }
       }
     }

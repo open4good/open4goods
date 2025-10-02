@@ -19,13 +19,28 @@ interface ContactCta {
   ctaAriaLabel: string
 }
 
-defineProps<{
-  eyebrow: string
+interface FeedbackCallout {
   title: string
-  descriptionBlocId: string
-  resources: ResourceLink[]
-  contact: ContactCta
-}>()
+  description: string
+  points: string[]
+  ctaLabel: string
+  ctaHref: string
+  ctaAriaLabel: string
+}
+
+withDefaults(
+  defineProps<{
+    eyebrow: string
+    title: string
+    descriptionBlocId: string
+    resources: ResourceLink[]
+    contact: ContactCta
+    feedbackCallout?: FeedbackCallout
+  }>(),
+  {
+    feedbackCallout: undefined,
+  },
+)
 </script>
 
 <template>
@@ -86,6 +101,38 @@ defineProps<{
             append-icon="mdi-arrow-right"
           >
             {{ contact.ctaLabel }}
+          </v-btn>
+        </div>
+      </v-card>
+
+      <v-card
+        v-if="feedbackCallout"
+        class="feedback-card"
+        rounded="xl"
+        elevation="6"
+        role="region"
+        :aria-label="feedbackCallout.title"
+      >
+        <div class="feedback-content">
+          <div class="feedback-text">
+            <h3 class="feedback-title">{{ feedbackCallout.title }}</h3>
+            <p class="feedback-description">{{ feedbackCallout.description }}</p>
+            <ul class="feedback-points">
+              <li v-for="(point, index) in feedbackCallout.points" :key="index">
+                <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
+                <span>{{ point }}</span>
+              </li>
+            </ul>
+          </div>
+          <v-btn
+            :href="feedbackCallout.ctaHref"
+            color="primary"
+            variant="flat"
+            size="large"
+            :aria-label="feedbackCallout.ctaAriaLabel"
+            append-icon="mdi-arrow-right"
+          >
+            {{ feedbackCallout.ctaLabel }}
           </v-btn>
         </div>
       </v-card>
@@ -163,4 +210,49 @@ defineProps<{
   font-size: 1.8rem
   margin: 0 0 0.5rem 0
   color: rgba(var(--v-theme-text-neutral-strong), 1)
+
+.feedback-card
+  margin-top: 2rem
+  padding: clamp(1.75rem, 3.5vw, 2.5rem)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.95)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+
+.feedback-content
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+
+@media (min-width: 960px)
+  .feedback-content
+    flex-direction: row
+    align-items: center
+    justify-content: space-between
+
+.feedback-text
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.feedback-title
+  font-size: 1.6rem
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
+
+.feedback-description
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-secondary), 1)
+
+.feedback-points
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+  padding: 0
+  margin: 0
+  list-style: none
+
+.feedback-points li
+  display: flex
+  align-items: center
+  gap: 0.5rem
+  color: rgba(var(--v-theme-text-neutral-strong), 0.9)
 </style>
