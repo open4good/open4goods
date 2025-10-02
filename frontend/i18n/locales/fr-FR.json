@@ -162,18 +162,32 @@
         "label": "Explorer les dépôts",
         "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet"
       },
+      "ctaGroupLabel": "Appels à l'action principaux",
       "stats": {
         "open": {
-          "value": "100%",
-          "label": "du code publié sous licences libres"
+          "value": "OpenSource",
+          "label": "Code ouvert et disponible"
         },
         "ssr": {
-          "value": "SSR",
-          "label": "Rendu universel pour des performances accessibles"
+          "value": "OpenData",
+          "labelRich": {
+            "before": "Les informations produits",
+            "linkText": "disponibles gratuitement",
+            "after": ""
+          }
         },
         "community": {
           "value": "Collectif",
           "label": "Feuille de route co-construite avec les contributrices et contributeurs"
+        }
+      },
+      "infoCard": {
+        "highlight": "Open4goods",
+        "description": "est construit en commun. Chaque pull request, issue ou retour utilisateur façonne une plateforme plus transparente.",
+        "items": {
+          "openLicenses": "Code et données publiés sous licences ouvertes",
+          "collaborativeReviews": "Revue collaborative des contributions",
+          "sharedGovernance": "Gouvernance partagée et documentation vivante"
         }
       }
     },
@@ -235,6 +249,19 @@
         "cta": {
           "label": "Contacter l'équipe",
           "ariaLabel": "Aller vers la page contact"
+        }
+      },
+      "feedback": {
+        "title": "Partagez vos idées et retours",
+        "description": "Soumettez les bugs rencontrés, vos envies de fonctionnalités et aidez-nous à prioriser le produit.",
+        "points": {
+          "bugs": "Signalez un bug en quelques clics",
+          "features": "Proposez des idées de fonctionnalités",
+          "votes": "Votez pour les évolutions qui comptent pour vous"
+        },
+        "cta": {
+          "label": "Accéder au tableau de feedback",
+          "ariaLabel": "Aller vers la page des retours utilisateurs"
         }
       }
     }
