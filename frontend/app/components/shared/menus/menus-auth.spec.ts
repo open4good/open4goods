@@ -17,16 +17,10 @@ const currentRoute = reactive({ path: '/', fullPath: '/' })
 type ThemeName = 'light' | 'dark'
 
 const themeName = ref<ThemeName>('light')
-const storedThemePreference = ref<ThemeName | undefined>()
+const storedThemePreference = ref<ThemeName | null>(null)
 const preferredDarkMock = ref(false)
 
-const useStorageMock = vi.fn((_: string, defaultValue: ThemeName) => {
-  if (!storedThemePreference.value) {
-    storedThemePreference.value = defaultValue
-  }
-
-  return storedThemePreference as Ref<ThemeName>
-})
+const useCookieMock = vi.fn(() => storedThemePreference as Ref<ThemeName | null>)
 
 function useRouteMock() {
   return currentRoute
@@ -59,7 +53,6 @@ vi.mock('vuetify', () => ({
 
 vi.mock('@vueuse/core', () => ({
   usePreferredDark: () => preferredDarkMock,
-  useStorage: useStorageMock,
 }))
 
 type NuxtImports = typeof import('#imports')
@@ -69,19 +62,26 @@ vi.mock('#imports', async () => {
 
   return {
     ...actual,
+    useCookie: useCookieMock,
     useRoute: useRouteMock,
     useRouter: useRouterMock,
   }
 })
 
 vi.mock('#app', () => ({
+  useCookie: useCookieMock,
   useRoute: useRouteMock,
   useRouter: useRouterMock,
 }))
 
 vi.mock('nuxt/app', () => ({
+  useCookie: useCookieMock,
   useRoute: useRouteMock,
   useRouter: useRouterMock,
+}))
+
+vi.mock('#app/composables/cookie', () => ({
+  useCookie: useCookieMock,
 }))
 
 vi.mock('vue-router', () => ({
@@ -105,9 +105,9 @@ describe('Shared menu authentication controls', () => {
     routerReplace.mockReset()
     logoutMock.mockResolvedValue(undefined)
     themeName.value = 'light'
-    storedThemePreference.value = undefined
+    storedThemePreference.value = null
     preferredDarkMock.value = false
-    useStorageMock.mockClear()
+    useCookieMock.mockClear()
   })
 
   it('does not render logout controls when logged out', async () => {
@@ -147,6 +147,7 @@ describe('Shared menu authentication controls', () => {
     const heroWrapper = await mountSuspended(TheHeroMenu)
 
     expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(true)
+    expect(useCookieMock).toHaveBeenCalled()
 
     const darkToggle = heroWrapper.get('[data-testid="hero-theme-toggle-dark"]')
 
