@@ -21,10 +21,12 @@ const article = computed(() => props.article)
 
 const articleTitle = computed(() => article.value.title?.trim() || 'Article')
 const articleSummary = computed(() => article.value.summary?.trim() ?? '')
-const { t, locale } = useI18n()
+const i18n = useI18n()
+const { t } = i18n
+const resolvedLocale = computed(() => i18n.locale?.value ?? 'en-US')
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value, {
+    new Intl.DateTimeFormat(resolvedLocale.value, {
       dateStyle: 'long',
       timeZone: 'UTC',
     }),
