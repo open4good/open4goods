@@ -400,6 +400,13 @@ const VImgStub = defineComponent({
   },
 })
 
+const ClientOnlyStub = defineComponent({
+  name: 'ClientOnlyStub',
+  setup(_, { slots }) {
+    return () => slots.default?.()
+  },
+})
+
 const NuxtLinkStub = defineComponent({
   name: 'NuxtLinkStub',
   props: {
@@ -442,6 +449,7 @@ const globalStubs = {
   VImg: VImgStub,
   VSpacer: VSpacerStub,
   VPagination: VPaginationStub,
+  ClientOnly: ClientOnlyStub,
   NuxtLink: NuxtLinkStub,
 }
 
