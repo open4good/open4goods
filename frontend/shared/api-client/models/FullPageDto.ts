@@ -13,285 +13,248 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Hierarchy } from './Hierarchy';
-import {
-    HierarchyFromJSON,
-    HierarchyFromJSONTyped,
-    HierarchyToJSON,
-    HierarchyToJSONTyped,
-} from './Hierarchy';
-import type { Objects } from './Objects';
-import {
-    ObjectsFromJSON,
-    ObjectsFromJSONTyped,
-    ObjectsToJSON,
-    ObjectsToJSONTyped,
-} from './Objects';
-import type { Class } from './Class';
-import {
-    ClassFromJSON,
-    ClassFromJSONTyped,
-    ClassToJSON,
-    ClassToJSONTyped,
-} from './Class';
-import type { Attachments } from './Attachments';
-import {
-    AttachmentsFromJSON,
-    AttachmentsFromJSONTyped,
-    AttachmentsToJSON,
-    AttachmentsToJSONTyped,
-} from './Attachments';
-import type { Translations } from './Translations';
-import {
-    TranslationsFromJSON,
-    TranslationsFromJSONTyped,
-    TranslationsToJSON,
-    TranslationsToJSONTyped,
-} from './Translations';
-import type { Link } from './Link';
-import {
-    LinkFromJSON,
-    LinkFromJSONTyped,
-    LinkToJSON,
-    LinkToJSONTyped,
-} from './Link';
-
 /**
  * 
  * @export
- * @interface Page
+ * @interface FullPageDto
  */
-export interface Page {
+export interface FullPageDto {
     /**
-     * 
-     * @type {Array<Link>}
-     * @memberof Page
-     */
-    links?: Array<Link>;
-    /**
-     * 
+     * Rendered HTML content of the page.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
+     */
+    htmlContent?: string;
+    /**
+     * Technical identifier of the XWiki document.
+     * @type {string}
+     * @memberof FullPageDto
      */
     id?: string;
     /**
-     * 
+     * Fully qualified document name.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     fullName?: string;
     /**
-     * 
+     * Wiki identifier hosting the page.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     wiki?: string;
     /**
-     * 
+     * Hierarchical space containing the document.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     space?: string;
     /**
-     * 
+     * Document local name.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     name?: string;
     /**
-     * 
+     * Current display title of the page.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     title?: string;
     /**
-     * 
+     * Raw title before localisation or processing.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     rawTitle?: string;
     /**
-     * 
+     * Identifier of the parent document.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     parent?: string;
     /**
-     * 
+     * Identifier of the parent document without wiki prefix.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     parentId?: string;
     /**
-     * 
+     * Human readable version string.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     version?: string;
     /**
-     * 
+     * Technical author reference.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     author?: string;
     /**
-     * 
+     * Display name of the author.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     authorName?: string;
     /**
-     * 
+     * Relative URL to the page rendered by XWiki.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     xwikiRelativeUrl?: string;
     /**
-     * 
+     * Absolute URL to the page rendered by XWiki.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     xwikiAbsoluteUrl?: string;
     /**
-     * 
-     * @type {Translations}
-     * @memberof Page
-     */
-    translations?: Translations;
-    /**
-     * 
+     * Syntax used to author the page content.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     syntax?: string;
     /**
-     * 
+     * Current language of the document.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     language?: string;
     /**
-     * 
+     * Major version number.
      * @type {number}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     majorVersion?: number;
     /**
-     * 
+     * Minor version number.
      * @type {number}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     minorVersion?: number;
     /**
-     * 
+     * Whether the page is hidden from listings.
      * @type {boolean}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     hidden?: boolean;
     /**
-     * 
+     * ISO timestamp representing document creation date.
      * @type {Date}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     created?: Date;
     /**
-     * 
+     * Technical reference of the page creator.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     creator?: string;
     /**
-     * 
+     * Display name of the page creator.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     creatorName?: string;
     /**
-     * 
+     * ISO timestamp representing the last modification date.
      * @type {Date}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     modified?: Date;
     /**
-     * 
+     * Technical reference of the last modifier.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     modifier?: string;
     /**
-     * 
+     * Display name of the last modifier.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     modifierName?: string;
     /**
-     * 
+     * Technical reference that provided the original metadata.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     originalMetadataAuthor?: string;
     /**
-     * 
+     * Display name for the original metadata author.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
     originalMetadataAuthorName?: string;
     /**
-     * 
+     * CMS specific layout identifier.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
-    comment?: string;
+    layout?: string;
     /**
-     * 
+     * Preferred title to display on the frontend.
      * @type {string}
-     * @memberof Page
+     * @memberof FullPageDto
      */
-    content?: string;
+    pageTitle?: string;
     /**
-     * 
-     * @type {Class}
-     * @memberof Page
+     * SEO meta title.
+     * @type {string}
+     * @memberof FullPageDto
      */
-    clazz?: Class;
+    metaTitle?: string;
     /**
-     * 
-     * @type {Objects}
-     * @memberof Page
+     * Layout width directive.
+     * @type {string}
+     * @memberof FullPageDto
      */
-    objects?: Objects;
+    width?: FullPageDtoWidthEnum;
     /**
-     * 
-     * @type {Attachments}
-     * @memberof Page
+     * SEO meta description.
+     * @type {string}
+     * @memberof FullPageDto
      */
-    attachments?: Attachments;
+    metaDescription?: string;
     /**
-     * 
-     * @type {Hierarchy}
-     * @memberof Page
+     * Direct edit link for the page in XWiki.
+     * @type {string}
+     * @memberof FullPageDto
      */
-    hierarchy?: Hierarchy;
+    editLink?: string;
 }
 
+
 /**
- * Check if a given object implements the Page interface.
+ * @export
  */
-export function instanceOfPage(value: object): value is Page {
+export const FullPageDtoWidthEnum = {
+    Container: 'container',
+    ContainerFluid: 'container-fluid',
+    ContainerSemiFluid: 'container-semi-fluid'
+} as const;
+export type FullPageDtoWidthEnum = typeof FullPageDtoWidthEnum[keyof typeof FullPageDtoWidthEnum];
+
+
+/**
+ * Check if a given object implements the FullPageDto interface.
+ */
+export function instanceOfFullPageDto(value: object): value is FullPageDto {
     return true;
 }
 
-export function PageFromJSON(json: any): Page {
-    return PageFromJSONTyped(json, false);
+export function FullPageDtoFromJSON(json: any): FullPageDto {
+    return FullPageDtoFromJSONTyped(json, false);
 }
 
-export function PageFromJSONTyped(json: any, ignoreDiscriminator: boolean): Page {
+export function FullPageDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): FullPageDto {
     if (json == null) {
         return json;
     }
     return {
         
-        'links': json['links'] == null ? undefined : ((json['links'] as Array<any>).map(LinkFromJSON)),
+        'htmlContent': json['htmlContent'] == null ? undefined : json['htmlContent'],
         'id': json['id'] == null ? undefined : json['id'],
         'fullName': json['fullName'] == null ? undefined : json['fullName'],
         'wiki': json['wiki'] == null ? undefined : json['wiki'],
@@ -306,7 +269,6 @@ export function PageFromJSONTyped(json: any, ignoreDiscriminator: boolean): Page
         'authorName': json['authorName'] == null ? undefined : json['authorName'],
         'xwikiRelativeUrl': json['xwikiRelativeUrl'] == null ? undefined : json['xwikiRelativeUrl'],
         'xwikiAbsoluteUrl': json['xwikiAbsoluteUrl'] == null ? undefined : json['xwikiAbsoluteUrl'],
-        'translations': json['translations'] == null ? undefined : TranslationsFromJSON(json['translations']),
         'syntax': json['syntax'] == null ? undefined : json['syntax'],
         'language': json['language'] == null ? undefined : json['language'],
         'majorVersion': json['majorVersion'] == null ? undefined : json['majorVersion'],
@@ -320,27 +282,27 @@ export function PageFromJSONTyped(json: any, ignoreDiscriminator: boolean): Page
         'modifierName': json['modifierName'] == null ? undefined : json['modifierName'],
         'originalMetadataAuthor': json['originalMetadataAuthor'] == null ? undefined : json['originalMetadataAuthor'],
         'originalMetadataAuthorName': json['originalMetadataAuthorName'] == null ? undefined : json['originalMetadataAuthorName'],
-        'comment': json['comment'] == null ? undefined : json['comment'],
-        'content': json['content'] == null ? undefined : json['content'],
-        'clazz': json['clazz'] == null ? undefined : ClassFromJSON(json['clazz']),
-        'objects': json['objects'] == null ? undefined : ObjectsFromJSON(json['objects']),
-        'attachments': json['attachments'] == null ? undefined : AttachmentsFromJSON(json['attachments']),
-        'hierarchy': json['hierarchy'] == null ? undefined : HierarchyFromJSON(json['hierarchy']),
+        'layout': json['layout'] == null ? undefined : json['layout'],
+        'pageTitle': json['pageTitle'] == null ? undefined : json['pageTitle'],
+        'metaTitle': json['metaTitle'] == null ? undefined : json['metaTitle'],
+        'width': json['width'] == null ? undefined : json['width'],
+        'metaDescription': json['metaDescription'] == null ? undefined : json['metaDescription'],
+        'editLink': json['editLink'] == null ? undefined : json['editLink'],
     };
 }
 
-export function PageToJSON(json: any): Page {
-    return PageToJSONTyped(json, false);
+export function FullPageDtoToJSON(json: any): FullPageDto {
+    return FullPageDtoToJSONTyped(json, false);
 }
 
-export function PageToJSONTyped(value?: Page | null, ignoreDiscriminator: boolean = false): any {
+export function FullPageDtoToJSONTyped(value?: FullPageDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'links': value['links'] == null ? undefined : ((value['links'] as Array<any>).map(LinkToJSON)),
+        'htmlContent': value['htmlContent'],
         'id': value['id'],
         'fullName': value['fullName'],
         'wiki': value['wiki'],
@@ -355,7 +317,6 @@ export function PageToJSONTyped(value?: Page | null, ignoreDiscriminator: boolea
         'authorName': value['authorName'],
         'xwikiRelativeUrl': value['xwikiRelativeUrl'],
         'xwikiAbsoluteUrl': value['xwikiAbsoluteUrl'],
-        'translations': TranslationsToJSON(value['translations']),
         'syntax': value['syntax'],
         'language': value['language'],
         'majorVersion': value['majorVersion'],
@@ -369,12 +330,12 @@ export function PageToJSONTyped(value?: Page | null, ignoreDiscriminator: boolea
         'modifierName': value['modifierName'],
         'originalMetadataAuthor': value['originalMetadataAuthor'],
         'originalMetadataAuthorName': value['originalMetadataAuthorName'],
-        'comment': value['comment'],
-        'content': value['content'],
-        'clazz': ClassToJSON(value['clazz']),
-        'objects': ObjectsToJSON(value['objects']),
-        'attachments': AttachmentsToJSON(value['attachments']),
-        'hierarchy': HierarchyToJSON(value['hierarchy']),
+        'layout': value['layout'],
+        'pageTitle': value['pageTitle'],
+        'metaTitle': value['metaTitle'],
+        'width': value['width'],
+        'metaDescription': value['metaDescription'],
+        'editLink': value['editLink'],
     };
 }
 

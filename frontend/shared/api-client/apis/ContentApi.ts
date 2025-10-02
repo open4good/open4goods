@@ -15,12 +15,12 @@
 
 import * as runtime from '../runtime';
 import type {
-  FullPage,
+  FullPageDto,
   XwikiContentBlocDto,
 } from '../models/index';
 import {
-    FullPageFromJSON,
-    FullPageToJSON,
+    FullPageDtoFromJSON,
+    FullPageDtoToJSON,
     XwikiContentBlocDtoFromJSON,
     XwikiContentBlocDtoToJSON,
 } from '../models/index';
@@ -33,10 +33,6 @@ export interface ContentBlocRequest {
 export interface PageRequest {
     xwikiPageId: string;
     domainLanguage: PageDomainLanguageEnum;
-}
-
-export interface PagesRequest {
-    domainLanguage: PagesDomainLanguageEnum;
 }
 
 /**
@@ -106,7 +102,7 @@ export class ContentApi extends runtime.BaseAPI {
      * Return the rendered XWiki page along with metadata.
      * Get XWiki page
      */
-    async pageRaw(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullPage>> {
+    async pageRaw(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullPageDto>> {
         if (requestParameters['xwikiPageId'] == null) {
             throw new runtime.RequiredError(
                 'xwikiPageId',
@@ -148,65 +144,16 @@ export class ContentApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FullPageFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => FullPageDtoFromJSON(jsonValue));
     }
 
     /**
      * Return the rendered XWiki page along with metadata.
      * Get XWiki page
      */
-    async page(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullPage> {
+    async page(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullPageDto> {
         const response = await this.pageRaw(requestParameters, initOverrides);
         return await response.value();
-    }
-
-    /**
-     * List of pages available for rendering
-     * List XWiki pages
-     */
-    async pagesRaw(requestParameters: PagesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling pages().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (this.configuration && this.configuration.accessToken) {
-            const token = this.configuration.accessToken;
-            const tokenString = await token("bearerAuth", []);
-
-            if (tokenString) {
-                headerParameters["Authorization"] = `Bearer ${tokenString}`;
-            }
-        }
-
-        let urlPath = `/pages`;
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.VoidApiResponse(response);
-    }
-
-    /**
-     * List of pages available for rendering
-     * List XWiki pages
-     */
-    async pages(requestParameters: PagesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.pagesRaw(requestParameters, initOverrides);
     }
 
 }
@@ -227,11 +174,3 @@ export const PageDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type PageDomainLanguageEnum = typeof PageDomainLanguageEnum[keyof typeof PageDomainLanguageEnum];
-/**
- * @export
- */
-export const PagesDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type PagesDomainLanguageEnum = typeof PagesDomainLanguageEnum[keyof typeof PagesDomainLanguageEnum];
