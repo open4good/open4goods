@@ -149,6 +149,96 @@
       }
     }
   },
+  "opensource": {
+    "seo": {
+      "title": "Open source chez Nudger",
+      "description": "Découvrez comment Nudger partage son code, ses données et sa gouvernance pour construire ensemble un bien commun de l'achat responsable.",
+      "imageAlt": "Logotype Nudger représentant le programme open source"
+    },
+    "hero": {
+      "title": "Construire ensemble un bien commun numérique",
+      "subtitle": "Code, données et gouvernance sont transparents pour que chacun·e puisse auditer et améliorer Nudger.",
+      "primaryCta": {
+        "label": "Explorer les dépôts",
+        "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet"
+      },
+      "stats": {
+        "open": {
+          "value": "100%",
+          "label": "du code publié sous licences libres"
+        },
+        "ssr": {
+          "value": "SSR",
+          "label": "Rendu universel pour des performances accessibles"
+        },
+        "community": {
+          "value": "Collectif",
+          "label": "Feuille de route co-construite avec les contributrices et contributeurs"
+        }
+      }
+    },
+    "pillars": {
+      "eyebrow": "Nos engagements",
+      "title": "Un écosystème ouvert et fiable",
+      "cards": {
+        "transparency": {
+          "title": "Architecture transparente",
+          "cta": "Voir le code source",
+          "ariaLabel": "Ouvrir le dépôt GitHub de Nudger dans un nouvel onglet"
+        },
+        "methodology": {
+          "title": "Méthodologie documentée",
+          "cta": "Comprendre l'Impact-score",
+          "ariaLabel": "Aller vers la page Impact-score"
+        },
+        "community": {
+          "title": "Communauté inclusive",
+          "cta": "Rencontrer l'équipe",
+          "ariaLabel": "Aller vers la page équipe Nudger"
+        }
+      }
+    },
+    "contribution": {
+      "eyebrow": "Contribuer",
+      "title": "Rejoignez le collectif en quelques étapes",
+      "steps": {
+        "setup": {
+          "title": "Installer le projet en local"
+        },
+        "issues": {
+          "title": "Choisir une issue qui vous inspire"
+        },
+        "share": {
+          "title": "Partager, relire et célébrer"
+        }
+      }
+    },
+    "resources": {
+      "eyebrow": "Ressources",
+      "title": "Tout pour bien démarrer",
+      "links": {
+        "guide": {
+          "title": "Guide de contribution",
+          "ariaLabel": "Ouvrir le guide de contribution Nudger sur GitHub dans un nouvel onglet"
+        },
+        "issues": {
+          "title": "Tableau des issues",
+          "ariaLabel": "Ouvrir le tableau des issues GitHub de Nudger dans un nouvel onglet"
+        },
+        "updates": {
+          "title": "Actualités de la communauté",
+          "ariaLabel": "Ouvrir le blog Nudger"
+        }
+      },
+      "contact": {
+        "title": "Envie d'un échange humain ?",
+        "cta": {
+          "label": "Contacter l'équipe",
+          "ariaLabel": "Aller vers la page contact"
+        }
+      }
+    }
+  },
   "contact": {
     "seo": {
       "title": "Nous contacter | Nudger",
