@@ -390,6 +390,15 @@ function createOverlayManager(nuxtApp: NuxtApp) {
     })
   }
 
+  function disconnectObserver() {
+    if (!observer) {
+      return
+    }
+
+    observer.disconnect()
+    observer = null
+  }
+
   function attachViewportListeners() {
     if (resizeListenerAttached) {
       return
@@ -441,12 +450,10 @@ function createOverlayManager(nuxtApp: NuxtApp) {
     } else {
       document.documentElement.classList.remove(ROOT_CLASS)
       detachViewportListeners()
+      disconnectObserver()
       deactivateAll()
     }
   }
-
-  ensureObserver()
-  scan()
 
   if (localeRef) {
     watch(localeRef, () => {
@@ -463,22 +470,26 @@ function createOverlayManager(nuxtApp: NuxtApp) {
 }
 
 export default defineNuxtPlugin((nuxtApp) => {
+  if (import.meta.server) {
+    return
+  }
+
   const composer = nuxtApp.$i18n as NuxtI18nComposer | undefined
 
   const existingPostTranslation = composer?.getPostTranslationHandler?.()
+  const basePostTranslation = existingPostTranslation ?? ((message: string) => message)
+
+  let editingEnabled = false
+
   composer?.setPostTranslationHandler?.((message: string, key: string) => {
-    const base = existingPostTranslation ? existingPostTranslation(message, key) : message
-    if (typeof base !== 'string') {
+    const base = basePostTranslation(message, key)
+    if (!editingEnabled || typeof base !== 'string') {
       return base
     }
     return withMarker(base, key)
   })
 
-  if (import.meta.server) {
-    return
-  }
-
-  const overlayManager = createOverlayManager(nuxtApp)
+  const overlayManager = createOverlayManager(nuxtApp as unknown as NuxtApp)
 
   nuxtApp.hook('app:mounted', () => {
     nuxtApp.runWithContext(() => {
@@ -489,6 +500,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       const canEdit = computed(() => isLoggedIn.value && roles.value.some(role => hasRole(role)))
 
       watch(canEdit, (value) => {
+        editingEnabled = value
         overlayManager.toggle(value)
       }, { immediate: true })
     })
