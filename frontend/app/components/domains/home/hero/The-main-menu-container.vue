@@ -1,25 +1,35 @@
 <script lang="ts" setup>
+const emit = defineEmits<{
+  (event: 'toggle-drawer'): void
+}>()
 
+const handleToggleDrawer = () => emit('toggle-drawer')
 </script>
 
 <template>
-    <v-container fluid class="main-menu-container position-fixed">
-      <v-row>
-        <v-col cols="3">
+  <v-app-bar
+    app
+    flat
+    color="surface-default"
+    class="main-menu-app-bar"
+  >
+    <v-container fluid class="py-0">
+      <div class="d-flex align-center w-100">
+        <v-app-bar-title class="d-flex align-center">
           <the-main-logo />
-        </v-col>
-        <v-col cols="9">
-          <the-hero-menu @toggle-drawer="$emit('toggle-drawer')" />
-        </v-col>
-      </v-row>
+        </v-app-bar-title>
+        <v-spacer />
+        <the-hero-menu @toggle-drawer="handleToggleDrawer" />
+      </div>
     </v-container>
+  </v-app-bar>
 </template>
 
 <style lang="sass" scoped>
-.main-menu-container
-  top: 0
-  left: 0
-  z-index: 100
-  background-color: rgb(var(--v-theme-surface-default))
+.main-menu-app-bar
   color: rgb(var(--v-theme-text-neutral-strong))
+
+@media (max-width: 959px)
+  .main-menu-app-bar
+    padding-inline: 8px
 </style>

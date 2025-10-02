@@ -40,5 +40,5 @@ defineEmits<{
 
 <style scoped lang="sass">
 .container-video
-  margin-top: 14vh
+  margin-top: 0
 </style>
