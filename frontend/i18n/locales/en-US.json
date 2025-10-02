@@ -255,7 +255,6 @@
   },
   "cms": {
     "page": {
-      "heroEyebrow": "Nudger resources",
       "loading": "Loading page…",
       "error": "We could not load this page. Please try again later.",
       "edit": "Edit this page"

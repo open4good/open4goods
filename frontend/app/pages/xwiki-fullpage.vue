@@ -66,10 +66,7 @@ useSeoMeta({
   <div class="cms-page">
     <section class="cms-page__hero" role="banner">
       <v-container class="cms-page__hero-container" fluid>
-        <div class="cms-page__hero-content">
-          <p class="cms-page__hero-eyebrow">
-            {{ t('cms.page.heroEyebrow') }}
-          </p>
+        <div class="text-center cms-page__hero-content">
           <h1 class="cms-page__hero-title">{{ pageTitle }}</h1>
           <p v-if="metaDescription" class="cms-page__hero-description">
             {{ metaDescription }}
@@ -136,7 +133,7 @@ useSeoMeta({
 .cms-page__hero
   position: relative
   overflow: hidden
-  padding-block: clamp(3rem, 6vw, 5.5rem)
+  padding-block: clamp(3rem, 6vw, 3.5rem)
   background: linear-gradient(
     135deg,
     rgba(var(--v-theme-hero-gradient-start), 0.92) 0%,
@@ -164,14 +161,6 @@ useSeoMeta({
   display: flex
   flex-direction: column
   gap: 1rem
-  max-width: min(72ch, 100%)
-
-.cms-page__hero-eyebrow
-  font-size: 0.875rem
-  letter-spacing: 0.08em
-  text-transform: uppercase
-  margin: 0
-  color: rgba(var(--v-theme-hero-overlay-soft), 0.9)
 
 .cms-page__hero-title
   margin: 0
@@ -199,7 +188,6 @@ useSeoMeta({
   width: min(900px, 90vw)
 
 .cms-page__container
-  padding-block: clamp(2rem, 4vw, 4rem)
 
 .cms-page__container--container
   max-width: min(960px, 100%) !important
