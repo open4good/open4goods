@@ -22,7 +22,7 @@ function resolveLocale(detail: InContextEditDetail): string {
   return 'en-US'
 }
 
-function buildEditUrl(locale: string, key: string): string {
+export function buildGithubEditUrl(locale: string, key: string): string {
   const normalizedLocale = locale.trim().replace(/\s+/g, '')
   const fileName = normalizedLocale.endsWith('.json') ? normalizedLocale : `${normalizedLocale}.json`
   const encodedFile = encodeURIComponent(fileName)
@@ -64,7 +64,7 @@ export async function openEditor(detail: InContextEditDetail) {
   }
 
   const locale = resolveLocale(detail)
-  const url = buildEditUrl(locale, detail.key)
+  const url = buildGithubEditUrl(locale, detail.key)
 
   await Promise.allSettled([copyKeyToClipboard(detail.key), focusEditorWindow(url)])
 
