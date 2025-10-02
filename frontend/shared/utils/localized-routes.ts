@@ -18,7 +18,7 @@ export interface LocalizedWikiRouteConfig {
 export type LocalizedWikiPaths = Record<string, Record<NuxtLocale, LocalizedWikiRouteConfig>>
 
 export const LOCALIZED_WIKI_PATHS = {
-  'xwiki-fullpage': {
+  'legal-notice': {
     'fr-FR': {
       path: '/mentions-legales',
       pageId: 'webpages:default:legal-notice:WebHome',
@@ -26,6 +26,16 @@ export const LOCALIZED_WIKI_PATHS = {
     'en-US': {
       path: '/legal-notice',
       pageId: 'webpages:default:legal-notice:en',
+    },
+  },
+  'data-privacy': {
+    'fr-FR': {
+      path: '/politique-confidentialite',
+      pageId: 'webpages:default:data-privacy:WebHome',
+    },
+    'en-US': {
+      path: '/data-privacy',
+      pageId: 'webpages:default:data-privacy:WebHome',
     },
   },
 } satisfies LocalizedWikiPaths
