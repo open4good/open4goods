@@ -21,7 +21,14 @@ const article = computed(() => props.article)
 
 const articleTitle = computed(() => article.value.title?.trim() || 'Article')
 const articleSummary = computed(() => article.value.summary?.trim() ?? '')
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const dateFormatter = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'long',
+      timeZone: 'UTC',
+    }),
+)
 const { isLoggedIn } = useAuth()
 
 const buildDateInfo = (timestamp?: number) => {
@@ -36,7 +43,7 @@ const buildDateInfo = (timestamp?: number) => {
 
   return {
     iso: date.toISOString(),
-    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(date),
+    label: dateFormatter.value.format(date),
   }
 }
 
