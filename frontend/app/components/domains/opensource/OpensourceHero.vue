@@ -3,7 +3,13 @@ import TextContent from '~/components/domains/content/TextContent.vue'
 
 interface HeroStat {
   value: string
-  label: string
+  label?: string
+  labelRich?: {
+    before?: string
+    linkText: string
+    href: string
+    after?: string
+  }
 }
 
 interface HeroCta {
@@ -17,6 +23,18 @@ interface HeroCta {
   rel?: string
 }
 
+interface HeroInfoCardItem {
+  icon?: string
+  text: string
+}
+
+interface HeroInfoCard {
+  icon: string
+  highlight?: string
+  description?: string
+  items: HeroInfoCardItem[]
+}
+
 withDefaults(
   defineProps<{
     title: string
@@ -24,10 +42,14 @@ withDefaults(
     descriptionBlocId: string
     stats?: HeroStat[]
     ctas?: HeroCta[]
+    ctaGroupLabel?: string
+    infoCard?: HeroInfoCard
   }>(),
   {
     stats: () => [],
     ctas: () => [],
+    ctaGroupLabel: undefined,
+    infoCard: undefined,
   },
 )
 </script>
@@ -48,7 +70,7 @@ withDefaults(
 
             <TextContent :bloc-id="descriptionBlocId" :ipsum-length="220" />
 
-            <div class="hero-ctas" role="group" aria-label="Hero call to actions">
+            <div class="hero-ctas" role="group" :aria-label="ctaGroupLabel">
               <v-btn
                 v-for="cta in ctas"
                 :key="cta.href"
@@ -72,34 +94,40 @@ withDefaults(
             <v-divider v-if="stats.length" class="my-4" color="accent-supporting" />
 
             <div v-if="stats.length" class="hero-stats" role="list">
-              <div v-for="stat in stats" :key="stat.label" class="hero-stat" role="listitem">
+              <div
+                v-for="stat in stats"
+                :key="stat.label ?? stat.labelRich?.linkText ?? stat.value"
+                class="hero-stat"
+                role="listitem"
+              >
                 <span class="hero-stat-value">{{ stat.value }}</span>
-                <span class="hero-stat-label">{{ stat.label }}</span>
+                <span class="hero-stat-label">
+                  <template v-if="stat.labelRich">
+                    <span v-if="stat.labelRich.before">{{ stat.labelRich.before }} </span>
+                    <NuxtLink :to="stat.labelRich.href" class="hero-stat-link">
+                      {{ stat.labelRich.linkText }}
+                    </NuxtLink>
+                    <span v-if="stat.labelRich.after"> {{ stat.labelRich.after }}</span>
+                  </template>
+                  <template v-else>{{ stat.label }}</template>
+                </span>
               </div>
             </div>
           </v-col>
 
           <v-col cols="12" md="5" class="mt-10 mt-md-0">
-            <v-card class="hero-card" elevation="12" rounded="xl" aria-hidden="true">
+            <v-card v-if="infoCard" class="hero-card" elevation="12" rounded="xl" aria-hidden="true">
               <div class="hero-card-content">
-                <v-icon icon="mdi-source-branch" class="hero-card-icon" size="64" />
+                <v-icon :icon="infoCard.icon" class="hero-card-icon" size="64" />
                 <p class="hero-card-text">
-                  <span class="fw-medium">Open4goods</span> est construit en commun. Chaque pull request, issue ou retour
-                  utilisateur façonne une plateforme plus transparente.
+                  <span v-if="infoCard.highlight" class="fw-medium">{{ infoCard.highlight }}</span>
+                  <span v-if="infoCard.description">{{ infoCard.description }}</span>
                 </p>
                 <v-divider class="my-4" />
                 <ul class="hero-card-list">
-                  <li>
-                    <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
-                    <span>Code et données publiés sous licences ouvertes</span>
-                  </li>
-                  <li>
-                    <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
-                    <span>Revue collaborative des contributions</span>
-                  </li>
-                  <li>
-                    <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
-                    <span>Gouvernance partagée et documentation vivante</span>
+                  <li v-for="(item, index) in infoCard.items" :key="index">
+                    <v-icon v-if="item.icon" :icon="item.icon" size="small" />
+                    <span>{{ item.text }}</span>
                   </li>
                 </ul>
               </div>
@@ -177,6 +205,12 @@ withDefaults(
   font-size: 0.95rem
   opacity: 0.85
 
+.hero-stat-link
+  color: inherit
+  text-decoration: underline
+  text-decoration-thickness: 2px
+  text-underline-offset: 4px
+
 .hero-card
   background: rgba(var(--v-theme-surface-glass), 0.9)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
@@ -197,6 +231,9 @@ withDefaults(
   font-size: 1rem
   margin: 0
 
+.hero-card-text .fw-medium
+  margin-right: 0.25rem
+  
 .hero-card-list
   list-style: none
   padding: 0

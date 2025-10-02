@@ -7,6 +7,8 @@
       description-bloc-id="webpages:opensource:hero-description"
       :stats="heroStats"
       :ctas="heroCtas"
+      :cta-group-label="heroCtaGroupLabel"
+      :info-card="heroInfoCard"
     />
 
     <OpensourcePillarsSection
@@ -29,6 +31,7 @@
       description-bloc-id="webpages:opensource:resources-intro"
       :resources="resourceLinks"
       :contact="contactCta"
+      :feedback-callout="feedbackCallout"
     />
   </div>
 </template>
@@ -44,7 +47,13 @@ import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 interface HeroStatDisplay {
   value: string
-  label: string
+  label?: string
+  labelRich?: {
+    before?: string
+    linkText: string
+    href: string
+    after?: string
+  }
 }
 
 interface HeroCtaDisplay {
@@ -95,6 +104,22 @@ interface ContactCtaDisplay {
   ctaAriaLabel: string
 }
 
+interface HeroInfoCardDisplay {
+  icon: string
+  highlight?: string
+  description?: string
+  items: { icon?: string; text: string }[]
+}
+
+interface FeedbackCalloutDisplay {
+  title: string
+  description: string
+  points: string[]
+  ctaLabel: string
+  ctaHref: string
+  ctaAriaLabel: string
+}
+
 definePageMeta({
   ssr: true,
 })
@@ -103,20 +128,29 @@ const { t, locale, availableLocales } = useI18n()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
 
-const heroStats = computed<HeroStatDisplay[]>(() => [
-  {
-    value: String(t('opensource.hero.stats.open.value')),
-    label: String(t('opensource.hero.stats.open.label')),
-  },
-  {
-    value: String(t('opensource.hero.stats.ssr.value')),
-    label: String(t('opensource.hero.stats.ssr.label')),
-  },
-  {
-    value: String(t('opensource.hero.stats.community.value')),
-    label: String(t('opensource.hero.stats.community.label')),
-  },
-])
+const heroStats = computed<HeroStatDisplay[]>(() => {
+  const openDataAfter = String(t('opensource.hero.stats.ssr.labelRich.after'))
+
+  return [
+    {
+      value: String(t('opensource.hero.stats.open.value')),
+      label: String(t('opensource.hero.stats.open.label')),
+    },
+    {
+      value: String(t('opensource.hero.stats.ssr.value')),
+      labelRich: {
+        before: String(t('opensource.hero.stats.ssr.labelRich.before')),
+        linkText: String(t('opensource.hero.stats.ssr.labelRich.linkText')),
+        href: localePath('opendata'),
+        after: openDataAfter.trim().length ? openDataAfter : undefined,
+      },
+    },
+    {
+      value: String(t('opensource.hero.stats.community.value')),
+      label: String(t('opensource.hero.stats.community.label')),
+    },
+  ]
+})
 
 const heroCtas = computed<HeroCtaDisplay[]>(() => [
   {
@@ -130,6 +164,28 @@ const heroCtas = computed<HeroCtaDisplay[]>(() => [
     rel: 'noopener',
   }
 ])
+
+const heroCtaGroupLabel = computed(() => String(t('opensource.hero.ctaGroupLabel')))
+
+const heroInfoCard = computed<HeroInfoCardDisplay>(() => ({
+  icon: 'mdi-source-branch',
+  highlight: String(t('opensource.hero.infoCard.highlight')),
+  description: String(t('opensource.hero.infoCard.description')),
+  items: [
+    {
+      icon: 'mdi-checkbox-marked-circle-outline',
+      text: String(t('opensource.hero.infoCard.items.openLicenses')),
+    },
+    {
+      icon: 'mdi-checkbox-marked-circle-outline',
+      text: String(t('opensource.hero.infoCard.items.collaborativeReviews')),
+    },
+    {
+      icon: 'mdi-checkbox-marked-circle-outline',
+      text: String(t('opensource.hero.infoCard.items.sharedGovernance')),
+    },
+  ],
+}))
 
 const pillarCards = computed<PillarCardDisplay[]>(() => [
   {
@@ -218,6 +274,19 @@ const contactCta = computed<ContactCtaDisplay>(() => ({
   ctaLabel: String(t('opensource.resources.contact.cta.label')),
   ctaHref: localePath('contact'),
   ctaAriaLabel: String(t('opensource.resources.contact.cta.ariaLabel')),
+}))
+
+const feedbackCallout = computed<FeedbackCalloutDisplay>(() => ({
+  title: String(t('opensource.resources.feedback.title')),
+  description: String(t('opensource.resources.feedback.description')),
+  points: [
+    String(t('opensource.resources.feedback.points.bugs')),
+    String(t('opensource.resources.feedback.points.features')),
+    String(t('opensource.resources.feedback.points.votes')),
+  ],
+  ctaLabel: String(t('opensource.resources.feedback.cta.label')),
+  ctaHref: localePath('feedback'),
+  ctaAriaLabel: String(t('opensource.resources.feedback.cta.ariaLabel')),
 }))
 
 const canonicalUrl = computed(() =>
