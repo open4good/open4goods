@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "full": "pnpm install && pnpm generate:api && pnpm build && pnpm generate && pnpm lint && pnpm test --run",
     "dev": "nuxt dev",
     "build": "nuxt build",
     "preview": "nuxt preview",
