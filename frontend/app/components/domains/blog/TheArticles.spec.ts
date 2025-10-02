@@ -569,6 +569,11 @@ describe('TheArticles.vue', () => {
     expect(timeElement.attributes('datetime')).toBe(
       new Date(firstArticle.createdMs ?? 0).toISOString(),
     )
+    expect(timeElement.text().trim()).toBe(
+      new Intl.DateTimeFormat(localeRef.value, { timeZone: 'UTC' }).format(
+        new Date(firstArticle.createdMs ?? 0),
+      ),
+    )
 
     const images = wrapper.findAll('[data-test="article-image"]')
     const [firstImage, secondImage] = images

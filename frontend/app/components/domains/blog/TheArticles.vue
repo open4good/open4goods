@@ -16,6 +16,12 @@ const {
   fetchTags,
 } = useBlog()
 
+const { t, locale } = useI18n()
+
+const dateFormatter = computed(
+  () => new Intl.DateTimeFormat(locale.value || undefined, { timeZone: 'UTC' }),
+)
+
 // Format date helper
 const formatDate = (timestamp: number) => {
   const date = new Date(timestamp)
@@ -24,7 +30,7 @@ const formatDate = (timestamp: number) => {
     return ''
   }
 
-  return date.toLocaleDateString()
+  return dateFormatter.value.format(date)
 }
 
 const buildDateIsoString = (timestamp: number) => {
@@ -32,8 +38,6 @@ const buildDateIsoString = (timestamp: number) => {
 
   return Number.isNaN(date.getTime()) ? '' : date.toISOString()
 }
-
-const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
