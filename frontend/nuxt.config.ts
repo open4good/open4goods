@@ -3,7 +3,7 @@
 import { fileURLToPath } from 'node:url'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
-import { buildI18nLocaleDomains } from './shared/utils/domain-language'
+import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
 
 const localeDomains = buildI18nLocaleDomains()
@@ -228,19 +228,25 @@ export default defineNuxtConfig({
         return
       }
 
-      Object.keys(LOCALIZED_WIKI_PATHS).forEach(routeName => {
-        if (routeName === wikiSourcePage.name) {
-          return
-        }
-
-        if (pages.some(page => page.name === routeName)) {
+      Object.entries(LOCALIZED_WIKI_PATHS).forEach(([routeName, locales]) => {
+        if (routeName === wikiSourcePage.name || pages.some(page => page.name === routeName)) {
           return
         }
 
         const clonedPage = structuredClone(wikiSourcePage)
+        const defaultLocalePath = locales[DEFAULT_NUXT_LOCALE]?.path ?? `/${routeName}`
+        const existingAliases = Array.isArray(wikiSourcePage.alias)
+          ? wikiSourcePage.alias
+          : wikiSourcePage.alias
+            ? [wikiSourcePage.alias]
+            : []
+        const localizedAliases = Object.values(locales)
+          .map(config => config.path)
+          .filter(path => path && path !== defaultLocalePath)
 
         clonedPage.name = routeName
-        clonedPage.path = `/${routeName}`
+        clonedPage.path = defaultLocalePath
+        clonedPage.alias = Array.from(new Set([...existingAliases, ...localizedAliases]))
 
         pages.push(clonedPage)
       })
