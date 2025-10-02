@@ -43,8 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import { usePreferredDark, useStorage } from '@vueuse/core'
-import { computed, toRef, watch } from 'vue'
+import { usePreferredDark } from '@vueuse/core'
+import { computed, onMounted, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 
@@ -65,31 +65,35 @@ const props = withDefaults(
 
 const { t } = useI18n()
 const theme = useTheme()
-const preferredDark = usePreferredDark()
-const storedPreference = useStorage<ThemeName>('open4goods-preferred-theme', preferredDark.value ? 'dark' : 'light')
+const themePreference = useCookie<ThemeName | null>('open4goods-preferred-theme', { sameSite: 'lax' })
 
 const applyTheme = (value: ThemeName) => {
   if (theme.global.name.value !== value) {
     theme.global.name.value = value
   }
-
-  if (storedPreference.value !== value) {
-    storedPreference.value = value
-  }
 }
 
-watch(
-  [storedPreference, preferredDark],
-  ([stored, prefersDark]) => {
-    const nextTheme = stored ?? (prefersDark ? 'dark' : 'light')
-    applyTheme(nextTheme)
-  },
-  { immediate: true },
-)
+applyTheme(themePreference.value ?? 'light')
+
+onMounted(() => {
+  const preferredDark = usePreferredDark()
+
+  watch(
+    [themePreference, () => preferredDark.value],
+    ([stored, prefersDark]) => {
+      const nextTheme: ThemeName = stored ?? (prefersDark ? 'dark' : 'light')
+      applyTheme(nextTheme)
+    },
+    { immediate: true },
+  )
+})
 
 const selectedTheme = computed<ThemeName>({
   get: () => (theme.global.name.value === 'dark' ? 'dark' : 'light'),
-  set: (value) => applyTheme(value),
+  set: (value) => {
+    themePreference.value = value
+    applyTheme(value)
+  },
 })
 
 const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
