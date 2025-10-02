@@ -90,7 +90,7 @@
     "vue-tsc": "^3.0.6",
     "vuetify": "^3.9.7"
   },
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">=20.x"
   },
