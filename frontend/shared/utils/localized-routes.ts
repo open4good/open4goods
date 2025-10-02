@@ -25,7 +25,7 @@ export const LOCALIZED_WIKI_PATHS = {
     },
     'en-US': {
       path: '/legal-notice',
-      pageId: 'webpages:default:legal-notice:en',
+      pageId: 'webpages:default:legal-notice:WebHome',
     },
   },
   'data-privacy': {

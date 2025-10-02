@@ -35,11 +35,11 @@ const comparatorLinks = computed<FooterLink[]>(() => [
   },
   {
     label: t('siteIdentity.footer.comparator.links.privacy'),
-    href: '/politique-confidentialite',
+    href: resolveLocalizedRoutePath('data-privacy', currentLocale.value),
   },
   {
     label: t('siteIdentity.footer.comparator.links.legal'),
-    href: '/mentions-legales',
+    href: resolveLocalizedRoutePath('legal-notice', currentLocale.value),
   },
 ])
 
