@@ -655,16 +655,18 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
         color="transparent"
         elevation="0"
       >
-        <nav :aria-label="paginationAriaLabel">
-          <v-pagination
-            :length="totalPages"
-            :model-value="currentPage"
-            :total-visible="5"
-            :aria-label="paginationAriaLabelKey"
-            :aria-controls="articleListId"
-            @update:model-value="handlePageChange"
-          />
-        </nav>
+        <ClientOnly>
+          <nav :aria-label="paginationAriaLabel">
+            <v-pagination
+              :length="totalPages"
+              :model-value="currentPage"
+              :total-visible="5"
+              :aria-label="paginationAriaLabelKey"
+              :aria-controls="articleListId"
+              @update:model-value="handlePageChange"
+            />
+          </nav>
+        </ClientOnly>
 
         <p class="text-body-2 text-medium-emphasis text-center" aria-live="polite">
           {{ paginationInfoMessage }}
