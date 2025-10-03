@@ -3,15 +3,17 @@
     <The-main-menu-container @toggle-drawer="toggleDrawer" />
 
     <!-- Mobile menu -->
-    <v-navigation-drawer
-      v-model="drawer"
-      location="start"
-      temporary
-      width="300"
-      class="mobile-menu-drawer"
-    >
-      <the-mobile-menu @close="drawer = false" />
-    </v-navigation-drawer>
+    <ClientOnly>
+      <v-navigation-drawer
+        v-model="drawer"
+        location="start"
+        temporary
+        width="300"
+        class="mobile-menu-drawer"
+      >
+        <the-mobile-menu @close="drawer = false" />
+      </v-navigation-drawer>
+    </ClientOnly>
 
     <v-main>
       <slot />
