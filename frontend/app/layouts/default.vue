@@ -15,6 +15,12 @@
       </v-navigation-drawer>
     </ClientOnly>
 
+    <ClientOnly>
+      <template #fallback>
+        <div class="pre-hydration-app-bar-spacer" aria-hidden="true" />
+      </template>
+    </ClientOnly>
+
     <v-main>
       <slot />
     </v-main>
@@ -35,4 +41,12 @@ const toggleDrawer = () => {
   drawerStore.value = !drawerStore.value;
 };
 </script>
+
+<style scoped lang="sass">
+.pre-hydration-app-bar-spacer
+  height: 64px
+
+  @media (max-width: 959px)
+    height: 56px
+</style>
 
