@@ -1,23 +1,18 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useDisplay } from 'vuetify'
 
 const props = withDefaults(defineProps<{
   appBarHeight?: number
 }>(), {
-  appBarHeight: undefined,
+  appBarHeight: 64,
 })
 
 const emit = defineEmits<{
   (event: 'toggle-drawer'): void
 }>()
 
-const { mdAndUp } = useDisplay()
-
-const fallbackHeight = computed(() => (mdAndUp.value ? 64 : 56))
-const resolvedAppBarHeight = computed(() => props.appBarHeight ?? fallbackHeight.value)
 const appBarCssVariables = computed(() => ({
-  '--app-bar-height': `${resolvedAppBarHeight.value}px`,
+  '--app-bar-height': `${props.appBarHeight}px`,
 }))
 
 const handleToggleDrawer = () => emit('toggle-drawer')
@@ -28,7 +23,7 @@ const handleToggleDrawer = () => emit('toggle-drawer')
     <v-app-bar
       app
       flat
-      :height="resolvedAppBarHeight"
+      :height="props.appBarHeight"
       color="surface-default"
       class="main-menu-app-bar"
     >

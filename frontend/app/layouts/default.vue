@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :style="appBarCssVariables">
     <The-main-menu-container
       :app-bar-height="appBarHeight"
       @toggle-drawer="toggleDrawer"
@@ -29,18 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useDisplay } from 'vuetify'
-
 const drawer = useState('mobileDrawer', () => false)
 const drawerStore = useState('mobileDrawer', () => false)
 
-const { mdAndUp } = useDisplay()
-
-const appBarHeight = computed(() => (mdAndUp.value ? 64 : 56))
-const appBarCssVariables = computed(() => ({
-  '--app-bar-height': `${appBarHeight.value}px`,
-}))
+const { appBarHeight, appBarCssVariables } = useAppBarHeight()
 
 const toggleDrawer = () => {
   drawerStore.value = !drawerStore.value
