@@ -193,8 +193,10 @@ $subtitle-max-width: 600px
 .hero-section
   position: relative
   width: 100%
-  height: 100vh
   min-height: $hero-min-height
+  min-height: clamp(#{$hero-min-height}, calc(100dvh - var(--app-bar-height, 64px)), 100dvh)
+  padding-top: var(--app-bar-height, 64px)
+  box-sizing: border-box
   overflow: hidden
   display: flex
   align-items: center
@@ -301,14 +303,9 @@ $subtitle-max-width: 600px
   animation: spin 1s linear infinite
 
 // RESPONSIVE DESIGN
-@media (max-width: 1024px)
-  .hero-section
-    height: 80vh
-
-@media (max-width: 768px)
-  .hero-section
-    height: 70vh
-    min-height: 500px
+  @media (max-width: 768px)
+    .hero-section
+      min-height: clamp(500px, calc(100dvh - var(--app-bar-height, 56px)), 100dvh)
 
   .hero-content
     padding: 0 1rem
