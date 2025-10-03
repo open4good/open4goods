@@ -118,6 +118,7 @@ const buildArticleLink = (slug: string | null | undefined): string | undefined =
 }
 
 const getArticleLink = (slug: string | null | undefined) => buildArticleLink(slug)
+const hasArticleLink = (slug: string | null | undefined) => Boolean(getArticleLink(slug))
 
 const navigateToArticle = (slug: string | null | undefined) => {
   const link = getArticleLink(slug)
@@ -570,22 +571,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
             :aria-labelledby="buildArticleTitleId(index)"
             :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
           >
-            <NuxtLink
-              v-if="article.image && getArticleLink(article.url)"
-              :to="getArticleLink(article.url)"
-              class="d-block"
-              data-test="article-image-link"
-            >
-              <v-img
-                :src="article.image"
-                :alt="buildArticleImageAlt(article.title)"
-                height="200"
-                cover
-              >
-                <template #placeholder>…</template>
-              </v-img>
-            </NuxtLink>
-            <div v-else-if="article.image" data-test="article-image-link">
+            <div v-if="article.image" class="d-block" data-test="article-image-link">
               <v-img
                 :src="article.image"
                 :alt="buildArticleImageAlt(article.title)"
@@ -600,15 +586,9 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
               :id="buildArticleTitleId(index)"
               class="text-h6 font-weight-semibold text-high-emphasis px-4 pt-4 pb-2"
             >
-              <NuxtLink
-                v-if="getArticleLink(article.url)"
-                :to="getArticleLink(article.url)"
-                class="text-high-emphasis"
-                data-test="article-title-link"
-              >
+              <span class="text-high-emphasis" data-test="article-title-link">
                 {{ article.title }}
-              </NuxtLink>
-              <span v-else data-test="article-title-link">{{ article.title }}</span>
+              </span>
             </v-card-title>
 
           <v-card-text :id="buildArticleSummaryId(index)" class="px-4 pb-4 flex-grow-1">
@@ -636,7 +616,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
               size="small"
               color="primary"
               type="button"
-              :disabled="!getArticleLink(article.url)"
+              :disabled="!hasArticleLink(article.url)"
               data-test="article-read-more"
               :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
               @click.stop="navigateToArticle(article.url)"
