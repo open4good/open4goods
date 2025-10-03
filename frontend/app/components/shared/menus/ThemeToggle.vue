@@ -48,7 +48,7 @@ import { computed, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 
-type ThemeName = 'light' | 'dark'
+import { THEME_PREFERENCE_KEY, resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
 const props = withDefaults(
   defineProps<{
@@ -66,7 +66,15 @@ const props = withDefaults(
 const { t } = useI18n()
 const theme = useTheme()
 const preferredDark = usePreferredDark()
-const storedPreference = useStorage<ThemeName>('open4goods-preferred-theme', preferredDark.value ? 'dark' : 'light')
+const themeCookie = useCookie<ThemeName | null>(THEME_PREFERENCE_KEY, {
+  sameSite: 'lax',
+  path: '/',
+  watch: false,
+})
+const storedPreference = useStorage<ThemeName>(
+  THEME_PREFERENCE_KEY,
+  resolveThemeName(themeCookie.value, preferredDark.value ? 'dark' : 'light'),
+)
 
 const applyTheme = (value: ThemeName) => {
   if (theme.global.name.value !== value) {
@@ -76,12 +84,19 @@ const applyTheme = (value: ThemeName) => {
   if (storedPreference.value !== value) {
     storedPreference.value = value
   }
+
+  const isClient = typeof window !== 'undefined'
+  const shouldPersistCookie = isClient || value === 'dark' || themeCookie.value != null
+
+  if (shouldPersistCookie && themeCookie.value !== value) {
+    themeCookie.value = value
+  }
 }
 
 watch(
   [storedPreference, preferredDark],
   ([stored, prefersDark]) => {
-    const nextTheme = stored ?? (prefersDark ? 'dark' : 'light')
+    const nextTheme = resolveThemeName(stored, prefersDark ? 'dark' : 'light')
     applyTheme(nextTheme)
   },
   { immediate: true },

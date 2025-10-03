@@ -48,6 +48,10 @@ export default defineNuxtConfig({
     'nuxt-mcp'
   ],
 
+  vueuse: {
+    ssrHandlers: true,
+  },
+
   vuetify: {
       vuetifyOptions: {
         theme: {
