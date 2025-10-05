@@ -163,24 +163,6 @@
         "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet"
       },
       "ctaGroupLabel": "Appels à action principaux",
-      "stats": {
-        "open": {
-          "value": "Open Source",
-          "label": "Code ouvert et disponible"
-        },
-        "ssr": {
-          "value": "Open Data",
-          "labelRich": {
-            "before": "Les informations produits",
-            "linkText": "disponibles gratuitement",
-            "after": ""
-          }
-        },
-        "community": {
-          "value": "Collectif",
-          "label": "Feuille de route co-construite avec les contributrices et contributeurs"
-        }
-      },
       "infoCard": {
         "highlight": "Open4goods",
         "description": "est construit en commun. Chaque pull request, issue ou retour utilisateur façonne une plateforme plus transparente.",
@@ -242,6 +224,14 @@
         "updates": {
           "title": "Actualités de la communauté",
           "ariaLabel": "Ouvrir le blog Nudger"
+        }
+      },
+      "opendata": {
+        "title": "Des données ouvertes pour vos analyses",
+        "description": "Les jeux de données Nudger sont publiés pour que vous puissiez auditer nos scores, explorer les empreintes produits et créer vos propres projets.",
+        "cta": {
+          "label": "Découvrir l'espace open data",
+          "ariaLabel": "Aller vers la page open data"
         }
       },
       "contact": {

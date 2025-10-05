@@ -19,10 +19,9 @@ interface ContactCta {
   ctaAriaLabel: string
 }
 
-interface FeedbackCallout {
+interface OpendataCallout {
   title: string
   description: string
-  points: string[]
   ctaLabel: string
   ctaHref: string
   ctaAriaLabel: string
@@ -35,10 +34,10 @@ withDefaults(
     descriptionBlocId: string
     resources: ResourceLink[]
     contact: ContactCta
-    feedbackCallout?: FeedbackCallout
+    opendataCallout?: OpendataCallout
   }>(),
   {
-    feedbackCallout: undefined,
+    opendataCallout: undefined,
   },
 )
 </script>
@@ -86,6 +85,32 @@ withDefaults(
         </v-col>
       </v-row>
 
+      <v-card
+        v-if="opendataCallout"
+        class="opendata-card"
+        rounded="xl"
+        elevation="8"
+        role="region"
+        :aria-label="opendataCallout.title"
+      >
+        <div class="opendata-content">
+          <div class="opendata-text">
+            <h3 class="opendata-title">{{ opendataCallout.title }}</h3>
+            <p class="opendata-description">{{ opendataCallout.description }}</p>
+          </div>
+          <v-btn
+            :href="opendataCallout.ctaHref"
+            color="primary"
+            variant="flat"
+            size="large"
+            :aria-label="opendataCallout.ctaAriaLabel"
+            append-icon="mdi-arrow-right"
+          >
+            {{ opendataCallout.ctaLabel }}
+          </v-btn>
+        </div>
+      </v-card>
+
       <v-card class="contact-card" rounded="xl" elevation="8">
         <div class="contact-content">
           <div class="contact-text">
@@ -105,37 +130,6 @@ withDefaults(
         </div>
       </v-card>
 
-      <v-card
-        v-if="feedbackCallout"
-        class="feedback-card"
-        rounded="xl"
-        elevation="6"
-        role="region"
-        :aria-label="feedbackCallout.title"
-      >
-        <div class="feedback-content">
-          <div class="feedback-text">
-            <h3 class="feedback-title">{{ feedbackCallout.title }}</h3>
-            <p class="feedback-description">{{ feedbackCallout.description }}</p>
-            <ul class="feedback-points">
-              <li v-for="(point, index) in feedbackCallout.points" :key="index">
-                <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
-                <span>{{ point }}</span>
-              </li>
-            </ul>
-          </div>
-          <v-btn
-            :href="feedbackCallout.ctaHref"
-            color="primary"
-            variant="flat"
-            size="large"
-            :aria-label="feedbackCallout.ctaAriaLabel"
-            append-icon="mdi-arrow-right"
-          >
-            {{ feedbackCallout.ctaLabel }}
-          </v-btn>
-        </div>
-      </v-card>
     </v-container>
   </section>
 </template>
@@ -189,6 +183,37 @@ withDefaults(
   margin: 0
   color: rgba(var(--v-theme-text-neutral-strong), 1)
 
+.opendata-card
+  margin-top: 3.5rem
+  padding: clamp(1.75rem, 3vw, 2.5rem)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.96)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+
+.opendata-content
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+
+@media (min-width: 960px)
+  .opendata-content
+    flex-direction: row
+    align-items: center
+    justify-content: space-between
+
+.opendata-text
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.opendata-title
+  font-size: 1.6rem
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
+
+.opendata-description
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-secondary), 1)
+
 .contact-card
   margin-top: 4rem
   padding: clamp(2rem, 4vw, 3rem)
@@ -210,49 +235,4 @@ withDefaults(
   font-size: 1.8rem
   margin: 0 0 0.5rem 0
   color: rgba(var(--v-theme-text-neutral-strong), 1)
-
-.feedback-card
-  margin-top: 2rem
-  padding: clamp(1.75rem, 3.5vw, 2.5rem)
-  background: rgba(var(--v-theme-surface-glass-strong), 0.95)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
-
-.feedback-content
-  display: flex
-  flex-direction: column
-  gap: 1.5rem
-
-@media (min-width: 960px)
-  .feedback-content
-    flex-direction: row
-    align-items: center
-    justify-content: space-between
-
-.feedback-text
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-
-.feedback-title
-  font-size: 1.6rem
-  margin: 0
-  color: rgba(var(--v-theme-text-neutral-strong), 1)
-
-.feedback-description
-  margin: 0
-  color: rgba(var(--v-theme-text-neutral-secondary), 1)
-
-.feedback-points
-  display: flex
-  flex-direction: column
-  gap: 0.5rem
-  padding: 0
-  margin: 0
-  list-style: none
-
-.feedback-points li
-  display: flex
-  align-items: center
-  gap: 0.5rem
-  color: rgba(var(--v-theme-text-neutral-strong), 0.9)
 </style>

@@ -1,17 +1,6 @@
 <script setup lang="ts">
 import TextContent from '~/components/domains/content/TextContent.vue'
 
-interface HeroStat {
-  value: string
-  label?: string
-  labelRich?: {
-    before?: string
-    linkText: string
-    href: string
-    after?: string
-  }
-}
-
 interface HeroCta {
   label: string
   href: string
@@ -40,13 +29,11 @@ withDefaults(
     title: string
     subtitle: string
     descriptionBlocId: string
-    stats?: HeroStat[]
     ctas?: HeroCta[]
     ctaGroupLabel?: string
     infoCard?: HeroInfoCard
   }>(),
   {
-    stats: () => [],
     ctas: () => [],
     ctaGroupLabel: undefined,
     infoCard: undefined,
@@ -89,29 +76,6 @@ withDefaults(
                 </template>
                 {{ cta.label }}
               </v-btn>
-            </div>
-
-            <v-divider v-if="stats.length" class="my-4" color="accent-supporting" />
-
-            <div v-if="stats.length" class="hero-stats" role="list">
-              <div
-                v-for="stat in stats"
-                :key="stat.label ?? stat.labelRich?.linkText ?? stat.value"
-                class="hero-stat"
-                role="listitem"
-              >
-                <span class="hero-stat-value">{{ stat.value }}</span>
-                <span class="hero-stat-label">
-                  <template v-if="stat.labelRich">
-                    <span v-if="stat.labelRich.before">{{ stat.labelRich.before }} </span>
-                    <NuxtLink :to="stat.labelRich.href" class="hero-stat-link">
-                      {{ stat.labelRich.linkText }}
-                    </NuxtLink>
-                    <span v-if="stat.labelRich.after"> {{ stat.labelRich.after }}</span>
-                  </template>
-                  <template v-else>{{ stat.label }}</template>
-                </span>
-              </div>
             </div>
           </v-col>
 
@@ -186,30 +150,6 @@ withDefaults(
   display: flex
   flex-wrap: wrap
   gap: 0.75rem
-
-.hero-stats
-  display: grid
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
-  gap: 1.5rem
-
-.hero-stat
-  display: flex
-  flex-direction: column
-  gap: 0.25rem
-
-.hero-stat-value
-  font-size: 1.75rem
-  font-weight: 700
-
-.hero-stat-label
-  font-size: 0.95rem
-  opacity: 0.85
-
-.hero-stat-link
-  color: inherit
-  text-decoration: underline
-  text-decoration-thickness: 2px
-  text-underline-offset: 4px
 
 .hero-card
   background: rgba(var(--v-theme-surface-glass), 0.9)
