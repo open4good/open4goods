@@ -4,7 +4,6 @@
       :title="t('opensource.hero.title')"
       :subtitle="t('opensource.hero.subtitle')"
       description-bloc-id="webpages:opensource:hero-description"
-      :stats="heroStats"
       :ctas="heroCtas"
       :cta-group-label="heroCtaGroupLabel"
       :info-card="heroInfoCard"
@@ -15,6 +14,7 @@
       :title="t('opensource.pillars.title')"
       description-bloc-id="webpages:opensource:pillars-intro"
       :cards="pillarCards"
+      :feedback-callout="feedbackCallout"
     />
 
     <OpensourceContributionSection
@@ -30,7 +30,7 @@
       description-bloc-id="webpages:opensource:resources-intro"
       :resources="resourceLinks"
       :contact="contactCta"
-      :feedback-callout="feedbackCallout"
+      :opendata-callout="opendataCallout"
     />
   </div>
 </template>
@@ -43,17 +43,6 @@ import OpensourcePillarsSection from '~/components/domains/opensource/Opensource
 import OpensourceContributionSection from '~/components/domains/opensource/OpensourceContributionSection.vue'
 import OpensourceResourcesSection from '~/components/domains/opensource/OpensourceResourcesSection.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-
-interface HeroStatDisplay {
-  value: string
-  label?: string
-  labelRich?: {
-    before?: string
-    linkText: string
-    href: string
-    after?: string
-  }
-}
 
 interface HeroCtaDisplay {
   label: string
@@ -119,6 +108,14 @@ interface FeedbackCalloutDisplay {
   ctaAriaLabel: string
 }
 
+interface OpendataCalloutDisplay {
+  title: string
+  description: string
+  ctaLabel: string
+  ctaHref: string
+  ctaAriaLabel: string
+}
+
 definePageMeta({
   ssr: true,
 })
@@ -126,30 +123,6 @@ definePageMeta({
 const { t, locale, availableLocales } = useI18n()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
-
-const heroStats = computed<HeroStatDisplay[]>(() => {
-  const openDataAfter = String(t('opensource.hero.stats.ssr.labelRich.after'))
-
-  return [
-    {
-      value: String(t('opensource.hero.stats.open.value')),
-      label: String(t('opensource.hero.stats.open.label')),
-    },
-    {
-      value: String(t('opensource.hero.stats.ssr.value')),
-      labelRich: {
-        before: String(t('opensource.hero.stats.ssr.labelRich.before')),
-        linkText: String(t('opensource.hero.stats.ssr.labelRich.linkText')),
-        href: localePath('opendata'),
-        after: openDataAfter.trim().length ? openDataAfter : undefined,
-      },
-    },
-    {
-      value: String(t('opensource.hero.stats.community.value')),
-      label: String(t('opensource.hero.stats.community.label')),
-    },
-  ]
-})
 
 const heroCtas = computed<HeroCtaDisplay[]>(() => [
   {
@@ -286,6 +259,14 @@ const feedbackCallout = computed<FeedbackCalloutDisplay>(() => ({
   ctaLabel: String(t('opensource.resources.feedback.cta.label')),
   ctaHref: localePath('feedback'),
   ctaAriaLabel: String(t('opensource.resources.feedback.cta.ariaLabel')),
+}))
+
+const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
+  title: String(t('opensource.resources.opendata.title')),
+  description: String(t('opensource.resources.opendata.description')),
+  ctaLabel: String(t('opensource.resources.opendata.cta.label')),
+  ctaHref: localePath('opendata'),
+  ctaAriaLabel: String(t('opensource.resources.opendata.cta.ariaLabel')),
 }))
 
 const canonicalUrl = computed(() =>

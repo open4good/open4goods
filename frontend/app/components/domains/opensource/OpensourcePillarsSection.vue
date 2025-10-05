@@ -16,11 +16,21 @@ interface PillarCard {
   action?: PillarCardAction
 }
 
+interface FeedbackCallout {
+  title: string
+  description: string
+  points: string[]
+  ctaLabel: string
+  ctaHref: string
+  ctaAriaLabel: string
+}
+
 defineProps<{
   eyebrow: string
   title: string
   descriptionBlocId: string
   cards: PillarCard[]
+  feedbackCallout?: FeedbackCallout
 }>()
 </script>
 
@@ -68,6 +78,38 @@ defineProps<{
           </v-card>
         </v-col>
       </v-row>
+
+      <v-card
+        v-if="feedbackCallout"
+        class="feedback-card"
+        rounded="xl"
+        elevation="6"
+        role="region"
+        :aria-label="feedbackCallout.title"
+      >
+        <div class="feedback-content">
+          <div class="feedback-text">
+            <h3 class="feedback-title">{{ feedbackCallout.title }}</h3>
+            <p class="feedback-description">{{ feedbackCallout.description }}</p>
+            <ul class="feedback-points">
+              <li v-for="(point, index) in feedbackCallout.points" :key="index">
+                <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
+                <span>{{ point }}</span>
+              </li>
+            </ul>
+          </div>
+          <v-btn
+            :href="feedbackCallout.ctaHref"
+            color="primary"
+            variant="flat"
+            size="large"
+            :aria-label="feedbackCallout.ctaAriaLabel"
+            append-icon="mdi-arrow-right"
+          >
+            {{ feedbackCallout.ctaLabel }}
+          </v-btn>
+        </div>
+      </v-card>
     </v-container>
   </section>
 </template>
@@ -125,4 +167,53 @@ defineProps<{
 
 .pillar-action
   margin-top: auto
+
+.feedback-card
+  margin-top: 3rem
+  padding: clamp(1.75rem, 3.5vw, 2.5rem)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.95)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+
+.feedback-content
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+
+@media (min-width: 960px)
+  .feedback-content
+    flex-direction: row
+    align-items: center
+    justify-content: space-between
+
+.feedback-text
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.feedback-title
+  font-size: 1.6rem
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
+
+.feedback-description
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-secondary), 1)
+
+.feedback-points
+  list-style: none
+  padding: 0
+  margin: 0
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.feedback-points li
+  display: flex
+  gap: 0.5rem
+  align-items: center
+  font-size: 0.95rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 1)
+
+.feedback-points .v-icon
+  color: rgba(var(--v-theme-accent-supporting), 1)
 </style>
