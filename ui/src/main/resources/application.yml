@@ -259,6 +259,7 @@ tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml
 openDataConfig:
   downloadSpeedKb: 256
   concurrentDownloads: 4
+  generationEnabled: true
 
 
 feedbackConfig:      

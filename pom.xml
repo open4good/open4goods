@@ -92,6 +92,7 @@
         <module>services/prompt</module>
         <module>services/review-generation</module>
         <module>services/product-repository</module>
+        <module>services/opendata</module>
         <module>services/captcha</module>
         <module>services/remotefilecaching</module>
         <module>services/favicon</module>

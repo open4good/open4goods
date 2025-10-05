@@ -46,7 +46,6 @@ import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.services.ContributionService;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.services.gtinservice.service.GtinService;
-import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
@@ -262,12 +261,6 @@ public class AppConfig {
                 // TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
                 return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), featureLoader, categoryLoader);
         }
-
-
-	@Bean
-	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props, @Autowired OpenDataConfig openDataConfig) {
-		return new OpenDataService(aggregatedDataRepository, props, openDataConfig);
-	}
 
 
 	// TODO(note) : DISABLING SITE MAP GENERATION

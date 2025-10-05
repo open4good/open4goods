@@ -253,26 +253,6 @@ public class UiConfig {
 		return new File(rootFolder + File.separator + "sitemap"+ File.separator);
 	}
 
-	public File openDataFile() {
-		return new File(rootFolder + File.separator+"opendata"+File.separator+"full.zip");
-	}
-
-	public File isbnZipFile() {
-		return new File(rootFolder + File.separator + "opendata" + File.separator + "isbn.zip");
-	}
-
-	public File tmpIsbnZipFile() {
-		return new File(rootFolder + File.separator + "opendata" + File.separator + "isbn-tmp.zip");
-	}
-
-	public File gtinZipFile() {
-		return new File(rootFolder + File.separator + "opendata" + File.separator + "gtin.zip");
-	}
-
-	public File tmpGtinZipFile() {
-		return new File(rootFolder + File.separator + "opendata" + File.separator + "gtin-tmp.zip");
-	}
-
 	public String getRootFolder() {
 		return rootFolder;
 	}

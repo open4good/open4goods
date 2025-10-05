@@ -9,9 +9,9 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.model.RolesConstants;
-import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
-import org.open4goods.ui.services.OpenDataService;
+import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.service.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +36,15 @@ public class OpenDataController  implements SitemapExposedController{
 	public static final String DEFAULT_PATH="/opendata";
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
-	private final OpenDataService openDataService;
-	private @Autowired UiService uiService;
-	private final UiConfig uiConfig;
+    private final OpenDataService openDataService;
+    private @Autowired UiService uiService;
+    private final OpenDataConfig openDataConfig;
 
-	@Autowired
-	public OpenDataController(OpenDataService openDataService, UiConfig uiConfig) {
-		this.openDataService = openDataService;
-		this.uiConfig = uiConfig;
-	}
+    @Autowired
+    public OpenDataController(OpenDataService openDataService, OpenDataConfig openDataConfig) {
+        this.openDataService = openDataService;
+        this.openDataConfig = openDataConfig;
+    }
 
 	@Override
 	public SitemapEntry getExposedUrls() {
@@ -96,12 +96,12 @@ public class OpenDataController  implements SitemapExposedController{
 
 	@GetMapping(path = "/opendata/gtin-open-data.zip")
 	public void downloadGtinData(final HttpServletResponse response) throws IOException {
-		downloadData(response, "gtin-open-data.zip", uiConfig.gtinZipFile());
+        downloadData(response, "gtin-open-data.zip", openDataConfig.gtinZipFile());
 	}
 
 	@GetMapping(path = "/opendata/isbn-open-data.zip")
 	public void downloadIsbnData(final HttpServletResponse response) throws IOException {
-		downloadData(response, "isbn-open-data.zip", uiConfig.isbnZipFile());
+        downloadData(response, "isbn-open-data.zip", openDataConfig.isbnZipFile());
 	}
 
 	private void downloadData(final HttpServletResponse response, String fileName, File zipFile) throws IOException {
