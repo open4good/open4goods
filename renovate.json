@@ -33,6 +33,7 @@
 
     {
       "matchManagers": ["dockerfile", "docker-compose"],
+      "automerge": false,
       "labels": ["squad:platform"]
     }
   ]
