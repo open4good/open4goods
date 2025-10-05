@@ -156,20 +156,20 @@
       "imageAlt": "Logotype Nudger représentant le programme open source"
     },
     "hero": {
-      "title": "Construire ensemble un bien commun numérique",
+      "title": "Construire ensemble nos communs numériques",
       "subtitle": "Code, données et gouvernance sont transparents pour que chacun·e puisse auditer et améliorer Nudger.",
       "primaryCta": {
         "label": "Explorer les dépôts",
         "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet"
       },
-      "ctaGroupLabel": "Appels à l'action principaux",
+      "ctaGroupLabel": "Appels à action principaux",
       "stats": {
         "open": {
-          "value": "OpenSource",
+          "value": "Open Source",
           "label": "Code ouvert et disponible"
         },
         "ssr": {
-          "value": "OpenData",
+          "value": "Open Data",
           "labelRich": {
             "before": "Les informations produits",
             "linkText": "disponibles gratuitement",
@@ -208,7 +208,7 @@
         "community": {
           "title": "Communauté inclusive",
           "cta": "Rencontrer l'équipe",
-          "ariaLabel": "Aller vers la page équipe Nudger"
+          "ariaLabel": "Aller vers la page de l'équipe Nudger"
         }
       }
     },
