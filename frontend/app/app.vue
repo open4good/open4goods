@@ -1,5 +1,8 @@
 <template>
   <NuxtLayout>
-      <NuxtPage />
+    <NuxtPage />
   </NuxtLayout>
+  <ClientOnly>
+    <I18nInctxModalHost />
+  </ClientOnly>
 </template>

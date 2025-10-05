@@ -1,11 +1,13 @@
+import { useNuxtApp } from '#app'
+
+import { useI18nInContextEditorState } from '~/composables/i18n-inctx/useI18nInContextEditorState'
+
 import type { InContextEditDetail } from './types'
 
 const REPO_OWNER = 'open4good'
 const REPO_NAME = 'open4goods'
 const DEFAULT_BRANCH = 'main'
 const LOCALES_DIRECTORY = 'frontend/i18n/locales'
-
-let activeEditorWindow: Window | null = null
 
 function resolveLocale(detail: InContextEditDetail): string {
   if (detail.locale) {
@@ -31,31 +33,52 @@ function buildEditUrl(locale: string, key: string): string {
   return `${base}#${anchor}`
 }
 
-async function focusEditorWindow(url: string) {
-  if (!activeEditorWindow || activeEditorWindow.closed) {
-    activeEditorWindow = window.open(url, '_blank', 'noopener')
-    return
-  }
-
-  try {
-    activeEditorWindow.focus()
-    activeEditorWindow.location.href = url
-  } catch (error) {
-    console.warn('[i18n-inctx]', 'Unable to reuse existing editor window', error)
-    activeEditorWindow = window.open(url, '_blank', 'noopener')
-  }
-}
-
-async function copyKeyToClipboard(key: string) {
+export async function copyTranslationKey(key: string): Promise<boolean> {
   if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-    return
+    return false
   }
 
   try {
     await navigator.clipboard.writeText(key)
+    return true
   } catch (error) {
     console.warn('[i18n-inctx]', 'Failed to copy translation key to clipboard', error)
+    return false
   }
+}
+
+function resolveTranslation(detail: InContextEditDetail, locale: string): string {
+  try {
+    const nuxtApp = useNuxtApp()
+    const composer = nuxtApp.$i18n as { t: (key: string) => string; getLocaleMessage?: (locale: string) => Record<string, unknown>; locale?: { value: string } } | undefined
+
+    if (composer?.getLocaleMessage && typeof composer.getLocaleMessage === 'function' && locale) {
+      const messages = composer.getLocaleMessage(locale)
+      const segments = detail.key.split('.')
+      let current: unknown = messages
+
+      for (const segment of segments) {
+        if (current && typeof current === 'object' && segment in (current as Record<string, unknown>)) {
+          current = (current as Record<string, unknown>)[segment]
+        } else {
+          current = undefined
+          break
+        }
+      }
+
+      if (typeof current === 'string') {
+        return current
+      }
+    }
+
+    if (composer?.t) {
+      return String(composer.t(detail.key))
+    }
+  } catch (error) {
+    console.warn('[i18n-inctx]', 'Unable to resolve translation value', error)
+  }
+
+  return detail.element.textContent?.trim() ?? ''
 }
 
 export async function openEditor(detail: InContextEditDetail) {
@@ -65,24 +88,30 @@ export async function openEditor(detail: InContextEditDetail) {
 
   const locale = resolveLocale(detail)
   const url = buildEditUrl(locale, detail.key)
+  const translation = resolveTranslation(detail, locale)
 
-  await Promise.allSettled([copyKeyToClipboard(detail.key), focusEditorWindow(url)])
+  const { open, close, setCopyStatus } = useI18nInContextEditorState()
+
+  open({
+    key: detail.key,
+    locale,
+    translation,
+    githubUrl: url,
+    element: detail.element,
+  })
+
+  const copied = await copyTranslationKey(detail.key)
+  setCopyStatus(copied ? 'copied' : 'error')
 
   return {
     close() {
-      if (activeEditorWindow && !activeEditorWindow.closed) {
-        activeEditorWindow.close()
-      }
-
-      activeEditorWindow = null
+      close()
     },
   }
 }
 
 export async function shutdownEditor() {
-  if (activeEditorWindow && !activeEditorWindow.closed) {
-    activeEditorWindow.close()
-  }
-
-  activeEditorWindow = null
+  const { close, reset } = useI18nInContextEditorState()
+  close()
+  reset()
 }

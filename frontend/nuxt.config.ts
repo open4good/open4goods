@@ -3,6 +3,7 @@
 import { fileURLToPath } from 'node:url'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
+import { createI18nInContextVitePlugin } from './build/i18n-inctx-vite-plugin'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
 
@@ -173,6 +174,10 @@ export default defineNuxtConfig({
         ...xwikiSandboxPrefixerOptions,
       },
     },
+  },
+
+  vite: {
+    plugins: [createI18nInContextVitePlugin()],
   },
 
   build: {
