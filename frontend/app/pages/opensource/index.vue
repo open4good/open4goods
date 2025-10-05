@@ -1,7 +1,6 @@
 <template>
   <div class="opensource-page">
     <OpensourceHero
-      :eyebrow="t('opensource.hero.eyebrow')"
       :title="t('opensource.hero.title')"
       :subtitle="t('opensource.hero.subtitle')"
       description-bloc-id="webpages:opensource:hero-description"
@@ -251,7 +250,7 @@ const resourceLinks = computed<ResourceLinkDisplay[]>(() => [
     rel: 'noopener',
   },
   {
-    icon: 'mdi-view-kanban',
+    icon: 'mdi-table-check',
     title: String(t('opensource.resources.links.issues.title')),
     descriptionBlocId: 'webpages:opensource:resources-issues',
     href: 'https://github.com/open4good/open4goods/issues',
