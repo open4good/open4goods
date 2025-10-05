@@ -4,6 +4,8 @@ import type { Ref } from 'vue'
 import { reactive, ref } from 'vue'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { ThemeName } from '~~/shared/constants/theme'
+
 const isLoggedIn = ref(false)
 const logoutMock = vi.fn()
 const routerPush = vi.fn()
@@ -14,10 +16,9 @@ const routerInstance = {
 }
 const currentRoute = reactive({ path: '/', fullPath: '/' })
 
-type ThemeName = 'light' | 'dark'
-
 const themeName = ref<ThemeName>('light')
-const storedThemePreference = ref<ThemeName | undefined>()
+const storedThemePreference = ref<ThemeName>('light')
+const themeCookiePreference = ref<ThemeName | null>(null)
 const preferredDarkMock = ref(false)
 
 const useStorageMock = vi.fn((_: string, defaultValue: ThemeName) => {
@@ -27,6 +28,8 @@ const useStorageMock = vi.fn((_: string, defaultValue: ThemeName) => {
 
   return storedThemePreference as Ref<ThemeName>
 })
+
+const useCookieMock = vi.fn((_: string) => themeCookiePreference as Ref<ThemeName | null>)
 
 function useRouteMock() {
   return currentRoute
@@ -71,17 +74,20 @@ vi.mock('#imports', async () => {
     ...actual,
     useRoute: useRouteMock,
     useRouter: useRouterMock,
+    useCookie: useCookieMock,
   }
 })
 
 vi.mock('#app', () => ({
   useRoute: useRouteMock,
   useRouter: useRouterMock,
+  useCookie: useCookieMock,
 }))
 
 vi.mock('nuxt/app', () => ({
   useRoute: useRouteMock,
   useRouter: useRouterMock,
+  useCookie: useCookieMock,
 }))
 
 vi.mock('vue-router', () => ({
@@ -105,9 +111,11 @@ describe('Shared menu authentication controls', () => {
     routerReplace.mockReset()
     logoutMock.mockResolvedValue(undefined)
     themeName.value = 'light'
-    storedThemePreference.value = undefined
+    storedThemePreference.value = 'light'
+    themeCookiePreference.value = null
     preferredDarkMock.value = false
     useStorageMock.mockClear()
+    useCookieMock.mockClear()
   })
 
   it('does not render logout controls when logged out', async () => {
@@ -153,8 +161,8 @@ describe('Shared menu authentication controls', () => {
     await darkToggle.trigger('click')
     await flushPromises()
 
-    expect(themeName.value).toBe('dark')
     expect(storedThemePreference.value).toBe('dark')
+    expect(themeName.value).toBe('dark')
 
     const mobileWrapper = await mountSuspended(TheMobileMenu)
 
