@@ -173,7 +173,7 @@ const pillarCards = computed<PillarCardDisplay[]>(() => [
     },
   },
   {
-    icon: 'mdi-earth-check',
+    icon: 'mdi-earth-arrow-right',
     title: String(t('opensource.pillars.cards.methodology.title')),
     descriptionBlocId: 'webpages:opensource:pillars-methodology',
     action: {
