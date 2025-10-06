@@ -15,25 +15,30 @@
       {{ errorMessage }}
     </v-alert>
 
-    <v-skeleton-loader
-      v-if="loading && !errorMessage"
-      type="list-item-three-line"
-      class="mb-4"
-      :elevation="2"
-    />
-
-    <div v-if="!loading && !errorMessage && issues.length === 0" class="feedback-issue-list__empty" role="status">
-      <v-icon icon="mdi-emoticon-thought" size="36" color="primary" class="mb-2" />
-      <p class="mb-0">{{ emptyStateLabel }}</p>
-    </div>
-
-    <v-list
-      v-else
-      class="feedback-issue-list__items"
-      bg-color="transparent"
-      role="list"
-      density="comfortable"
+    <div
+      class="feedback-issue-list__content"
+      :aria-busy="loading && !errorMessage"
+      aria-live="polite"
     >
+      <div v-if="loading && !errorMessage" class="feedback-issue-list__loading" role="status">
+        <v-skeleton-loader
+          type="heading, text@2, list-item-three-line@3"
+          class="feedback-issue-list__loading-skeleton"
+        />
+      </div>
+
+      <div v-else-if="issues.length === 0" class="feedback-issue-list__empty" role="status">
+        <v-icon icon="mdi-emoticon-thought" size="36" color="primary" class="mb-2" />
+        <p class="mb-0">{{ emptyStateLabel }}</p>
+      </div>
+
+      <v-list
+        v-else
+        class="feedback-issue-list__items"
+        bg-color="transparent"
+        role="list"
+        density="comfortable"
+      >
       <v-list-item
         v-for="issue in issues"
         :key="issueKey(issue)"
@@ -107,7 +112,8 @@
           </v-btn>
         </template>
       </v-list-item>
-    </v-list>
+      </v-list>
+    </div>
   </section>
 </template>
 
@@ -234,6 +240,21 @@ const handleVote = (issueId: string | undefined) => {
     background-color: rgba(var(--v-theme-surface-glass), 0.6);
     text-align: center;
     color: rgb(var(--v-theme-text-neutral-secondary));
+  }
+
+  &__content {
+    position: relative;
+    min-height: 12rem;
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__loading-skeleton {
+    border-radius: 1.5rem;
   }
 
   &__items {
