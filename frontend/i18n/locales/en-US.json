@@ -376,9 +376,18 @@
         "ariaLabel": "Open Nudger's GitHub issues in a new tab"
       },
       "highlights": {
-        "community": "Open collaboration with fellow Nudger contributors.",
-        "trust": "Transparent decisions shared with the whole community.",
-        "roadmap": "Iterative roadmap shaped by your priorities."
+        "community": {
+          "title": "Co-create with the community",
+          "description": "Share your ideas, vote on priorities and collaborate with fellow Nudger contributors."
+        },
+        "trust": {
+          "title": "Transparency you can rely on",
+          "description": "Follow every discussion and decision to understand how your feedback shapes Nudger."
+        },
+        "roadmap": {
+          "title": "Impact-driven roadmap",
+          "description": "We focus each iteration on the improvements that gather the most support."
+        }
       },
       "stats": {
         "eyebrow": "How it works",
