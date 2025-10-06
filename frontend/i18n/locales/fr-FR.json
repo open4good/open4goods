@@ -377,9 +377,18 @@
         "ariaLabel": "Ouvrir les issues GitHub de Nudger dans un nouvel onglet"
       },
       "highlights": {
-        "community": "Collaboration ouverte avec une communauté engagée.",
-        "trust": "Décisions transparentes partagées avec tous.",
-        "roadmap": "Feuille de route vivante façonnée par vos idées."
+        "community": {
+          "title": "Co-construire avec la communauté",
+          "description": "Proposez vos idées, votez pour les priorités et échangez avec les autres contributrices et contributeurs Nudger."
+        },
+        "trust": {
+          "title": "Une transparence totale",
+          "description": "Suivez chaque échange et chaque décision pour voir comment vos retours transforment Nudger."
+        },
+        "roadmap": {
+          "title": "Une feuille de route guidée par l'impact",
+          "description": "Chaque itération se concentre sur les améliorations qui recueillent le plus de soutien."
+        }
       },
       "stats": {
         "eyebrow": "En pratique",
