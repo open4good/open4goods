@@ -33,6 +33,17 @@ front:
     
 
 
+feedback:
+  github:
+    access-token: ${FEEDBACK_GITHUB_ACCESS_TOKEN:dummy-token}
+    organization: ${FEEDBACK_GITHUB_ORGANIZATION:open4good}
+    repo: ${FEEDBACK_GITHUB_REPO:open4goods}
+    user: ${FEEDBACK_GITHUB_USER:nudger-bot}
+  voting:
+    max-votes-per-ip-per-day: ${FEEDBACK_VOTING_MAX_PER_IP_PER_DAY:5}
+    required-label: ${FEEDBACK_VOTING_REQUIRED_LABEL:votable}
+    default-votable: ${FEEDBACK_VOTING_DEFAULT_VOTABLE:true}
+
 xwiki:
     username: user
     password: pwd 
