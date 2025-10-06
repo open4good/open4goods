@@ -67,6 +67,7 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 
 #### API Integration
 - OpenAPI-generated client in `shared/api-client/` (regenerate with `pnpm generate:api`)
+    - Doc: [docs/backend-services.md](Doc-services-usage)
 - Server-side auth headers injected via `MACHINE_TOKEN`
 - Runtime config for API URLs and tokens
 

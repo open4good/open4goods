@@ -375,6 +375,7 @@ const cart = useCartStore();
 ```
 
 ## OpenAPI Integration
+- Doc: [docs/backend-services.md](Doc-services-usage)
 
 - We use `@openapitools/openapi-generator-cli` with the `typescript-fetch` generator:
   ```bash
