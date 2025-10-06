@@ -5,7 +5,7 @@ import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDatasetDto;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataOverviewDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.open4goods.nudgerfrontapi.service.OpenDataFrontService;
+import org.open4goods.nudgerfrontapi.service.OpenDataMappingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -33,9 +33,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "OpenData", description = "Metadata describing the public GTIN and ISBN datasets.")
 public class OpenDataController {
 
-    private final OpenDataFrontService openDataFrontService;
+    private final OpenDataMappingService openDataFrontService;
 
-    public OpenDataController(OpenDataFrontService openDataFrontService) {
+    public OpenDataController(OpenDataMappingService openDataFrontService) {
         this.openDataFrontService = openDataFrontService;
     }
 

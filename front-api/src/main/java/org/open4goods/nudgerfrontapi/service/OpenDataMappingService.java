@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * Service assembling OpenData DTOs for the frontend REST API.
  */
 @Service
-public class OpenDataFrontService {
+public class OpenDataMappingService {
 
     private static final String[] SIZE_UNITS = {"B", "kB", "MB", "GB", "TB", "PB", "EB"};
 
@@ -32,7 +32,7 @@ public class OpenDataFrontService {
     private final OpenDataConfig openDataConfig;
     private final ApiProperties apiProperties;
 
-    public OpenDataFrontService(OpenDataService openDataService,
+    public OpenDataMappingService(OpenDataService openDataService,
                                 OpenDataConfig openDataConfig,
                                 ApiProperties apiProperties) {
         this.openDataService = openDataService;
