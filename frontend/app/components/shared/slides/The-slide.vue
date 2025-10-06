@@ -25,13 +25,14 @@
   </v-slide-group>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
 const selectedImage = ref(null)
 
-const props = defineProps({
-  // Define any props if needed
-  items: Array,
-}) 
+withDefaults(defineProps<{
+  items?: string[]
+}>(), {
+  items: () => [],
+})
 </script>

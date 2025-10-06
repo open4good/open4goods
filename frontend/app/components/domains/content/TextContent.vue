@@ -48,6 +48,7 @@ const displayHtml = computed(() => {
     <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 
     <!-- Encapsulated XWiki content -->
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-else class="xwiki-sandbox" v-html="displayHtml" />
 
     <!-- Edit link -->
