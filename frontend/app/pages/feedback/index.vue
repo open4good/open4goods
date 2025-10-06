@@ -4,7 +4,7 @@
       :eyebrow="t('feedback.hero.eyebrow')"
       :title="t('feedback.hero.title')"
       :subtitle="t('feedback.hero.subtitle')"
-      description-bloc-id="webpages:feedback:hero-description"
+      :description="t('feedback.hero.description')"
       :primary-cta="heroPrimaryCta"
       :secondary-cta="heroSecondaryCta"
       :cta-group-label="t('feedback.hero.ctaGroupLabel')"
@@ -19,11 +19,9 @@
           <h2 id="feedback-tabs-heading" class="feedback-tabs__title">
             {{ t('feedback.tabs.title') }}
           </h2>
-          <TextContent
-            bloc-id="webpages:feedback:tabs-intro"
-            :ipsum-length="200"
-            class="feedback-tabs__description"
-          />
+          <p class="feedback-tabs__description">
+            {{ t('feedback.tabs.description') }}
+          </p>
         </header>
 
         <v-tabs
@@ -54,7 +52,7 @@
                 <FeedbackIssueList
                   :heading-id="`${tab.value.toLowerCase()}-issues-heading`"
                   :title="tab.issueTitle"
-                  :description-bloc-id="tab.descriptionBlocId"
+                  :description="tab.description"
                   :issues="issuesByType[tab.value]"
                   :loading="issueLoadingStates[tab.value]"
                   :error-message="issueErrorMessages[tab.value]"
@@ -79,7 +77,7 @@
                   :eyebrow="tab.formEyebrow"
                   :title="tab.formTitle"
                   :subtitle="tab.formSubtitle"
-                  :intro-bloc-id="tab.formDescriptionBlocId"
+                  :intro="tab.formIntro"
                   :category-icon="tab.icon"
                   :category-type="tab.value"
                   :submitting="submissionState.submitting"
@@ -118,7 +116,7 @@
     <FeedbackOpenSourceSection
       :eyebrow="t('feedback.openSource.eyebrow')"
       :title="t('feedback.openSource.title')"
-      intro-bloc-id="webpages:feedback:open-source-intro"
+      :description="t('feedback.openSource.description')"
       :cards="openSourceCards"
     />
   </div>
@@ -136,7 +134,6 @@ import FeedbackSubmissionForm, {
   type FeedbackFormSubmitPayload,
 } from '~/components/domains/feedback/FeedbackSubmissionForm.vue'
 import FeedbackOpenSourceSection from '~/components/domains/feedback/FeedbackOpenSourceSection.vue'
-import TextContent from '~/components/domains/content/TextContent.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
   FeedbackIssueDto,
@@ -164,12 +161,12 @@ const tabs = computed(() => [
     caption: String(t('feedback.tabs.idea.caption')),
     icon: 'mdi-lightbulb-on-outline',
     issueTitle: String(t('feedback.tabs.idea.issueTitle')),
-    descriptionBlocId: 'webpages:feedback:ideas-guidelines',
+    description: String(t('feedback.tabs.idea.description')),
     emptyMessage: String(t('feedback.issues.empty.idea')),
     formEyebrow: String(t('feedback.form.sections.idea.eyebrow')),
     formTitle: String(t('feedback.form.sections.idea.title')),
     formSubtitle: String(t('feedback.form.sections.idea.subtitle')),
-    formDescriptionBlocId: 'webpages:feedback:idea-form-intro',
+    formIntro: String(t('feedback.form.sections.idea.intro')),
     formTitlePlaceholder: String(t('feedback.form.sections.idea.titlePlaceholder')),
     formMessagePlaceholder: String(t('feedback.form.sections.idea.messagePlaceholder')),
   },
@@ -179,12 +176,12 @@ const tabs = computed(() => [
     caption: String(t('feedback.tabs.bug.caption')),
     icon: 'mdi-bug-check-outline',
     issueTitle: String(t('feedback.tabs.bug.issueTitle')),
-    descriptionBlocId: 'webpages:feedback:bugs-guidelines',
+    description: String(t('feedback.tabs.bug.description')),
     emptyMessage: String(t('feedback.issues.empty.bug')),
     formEyebrow: String(t('feedback.form.sections.bug.eyebrow')),
     formTitle: String(t('feedback.form.sections.bug.title')),
     formSubtitle: String(t('feedback.form.sections.bug.subtitle')),
-    formDescriptionBlocId: 'webpages:feedback:bug-form-intro',
+    formIntro: String(t('feedback.form.sections.bug.intro')),
     formTitlePlaceholder: String(t('feedback.form.sections.bug.titlePlaceholder')),
     formMessagePlaceholder: String(t('feedback.form.sections.bug.messagePlaceholder')),
   },
@@ -470,7 +467,7 @@ const openSourceCards = computed(() => [
   {
     icon: 'mdi-github',
     title: String(t('feedback.openSource.cards.opensource.title')),
-    descriptionBlocId: 'webpages:feedback:open-source-card',
+    description: String(t('feedback.openSource.cards.opensource.description')),
     cta: {
       label: String(t('feedback.openSource.cards.opensource.cta')),
       ariaLabel: String(t('feedback.openSource.cards.opensource.ariaLabel')),
@@ -480,7 +477,7 @@ const openSourceCards = computed(() => [
   {
     icon: 'mdi-database-search',
     title: String(t('feedback.openSource.cards.opendata.title')),
-    descriptionBlocId: 'webpages:feedback:open-data-card',
+    description: String(t('feedback.openSource.cards.opendata.description')),
     cta: {
       label: String(t('feedback.openSource.cards.opendata.cta')),
       ariaLabel: String(t('feedback.openSource.cards.opendata.ariaLabel')),

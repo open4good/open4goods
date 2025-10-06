@@ -2,7 +2,9 @@
   <section :aria-labelledby="headingId" class="feedback-issue-list">
     <header class="feedback-issue-list__header">
       <h3 :id="headingId" class="feedback-issue-list__title">{{ title }}</h3>
-      <TextContent :bloc-id="descriptionBlocId" :ipsum-length="160" class="feedback-issue-list__description" />
+      <p class="feedback-issue-list__description">
+        {{ description }}
+      </p>
     </header>
 
     <v-alert v-if="statusMessage" type="info" variant="tonal" border="start" class="mb-4" role="status">
@@ -111,7 +113,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import TextContent from '~/components/domains/content/TextContent.vue'
 
 export interface FeedbackIssueDisplay {
   id?: string
@@ -130,7 +131,7 @@ type IssueIcon = string
 const props = defineProps<{
   headingId: string
   title: string
-  descriptionBlocId: string
+  description: string
   issues: FeedbackIssueDisplay[]
   loading: boolean
   errorMessage: string | null
