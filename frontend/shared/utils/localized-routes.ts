@@ -5,6 +5,9 @@ const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
 
 export type LocalizedRouteName =
    'team'
+   | 'opendata'
+   | 'opendata-gtin'
+   | 'opendata-isbn'
    | LocalizedWikiRouteName
 
 export type LocalizedRoutePath = `/${string}`
@@ -60,6 +63,18 @@ export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
   team: {
     'fr-FR': '/equipe',
     'en-US': '/team',
+  },
+  opendata: {
+    'fr-FR': '/opendata',
+    'en-US': '/opendata',
+  },
+  'opendata-gtin': {
+    'fr-FR': '/opendata/gtin',
+    'en-US': '/opendata/gtin',
+  },
+  'opendata-isbn': {
+    'fr-FR': '/opendata/isbn',
+    'en-US': '/opendata/isbn',
   },
   ...LOCALIZED_WIKI_ROUTE_PATHS,
 } satisfies LocalizedRoutePaths

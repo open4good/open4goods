@@ -1,0 +1,398 @@
+<template>
+  <div class="dataset-page">
+    <nav class="dataset-page__breadcrumb" aria-label="Breadcrumb">
+      <ol>
+        <li>
+          <NuxtLink :to="localePath('opendata')">
+            {{ t('opendata.datasets.gtin.breadcrumb.root') }}
+          </NuxtLink>
+        </li>
+        <li aria-current="page">
+          {{ t('opendata.datasets.gtin.breadcrumb.current') }}
+        </li>
+      </ol>
+    </nav>
+
+    <OpendataDatasetHero
+      :eyebrow="t('opendata.datasets.gtin.hero.eyebrow')"
+      :title="t('opendata.datasets.gtin.hero.title')"
+      description-bloc-id="webpages:opendata:gtin-hero-overview"
+      :stats="heroStats"
+    />
+
+    <v-progress-linear
+      v-if="pending"
+      indeterminate
+      color="primary"
+      class="dataset-page__loader"
+      :aria-label="t('opendata.loading')"
+      role="progressbar"
+    />
+
+    <v-container v-if="error" class="py-6" max-width="lg">
+      <v-alert
+        type="error"
+        variant="tonal"
+        border="start"
+        prominent
+        class="mb-4"
+        role="alert"
+      >
+        {{ t('opendata.errors.datasetFailed') }}
+      </v-alert>
+      <v-btn color="primary" variant="tonal" @click="refresh">{{ t('common.actions.retry') }}</v-btn>
+    </v-container>
+
+    <OpendataDatasetSummary
+      :title="t('opendata.datasets.gtin.summary.title')"
+      :items="summaryItems"
+    />
+
+    <OpendataDownloadComparison
+      :title="t('opendata.datasets.gtin.download.title')"
+      :subtitle="t('opendata.datasets.gtin.download.subtitle')"
+      :options="downloadOptions"
+    />
+
+    <section class="dataset-format" aria-labelledby="dataset-format-heading">
+      <v-container max-width="lg">
+        <div class="dataset-format__card">
+          <div class="dataset-format__header">
+            <h2 id="dataset-format-heading">{{ t('opendata.datasets.gtin.format.title') }}</h2>
+            <p>{{ t('opendata.datasets.gtin.format.description') }}</p>
+          </div>
+          <ul class="dataset-format__list">
+            <li v-for="item in formatBullets" :key="item">
+              <v-icon icon="mdi-check-circle-outline" size="small" />
+              <span>{{ item }}</span>
+            </li>
+          </ul>
+        </div>
+      </v-container>
+    </section>
+
+    <section class="dataset-columns" aria-labelledby="dataset-columns-heading">
+      <v-container max-width="lg">
+        <div class="dataset-columns__header">
+          <h2 id="dataset-columns-heading">{{ t('opendata.datasets.gtin.columnsTitle') }}</h2>
+          <p>{{ t('opendata.datasets.gtin.columnsSubtitle') }}</p>
+        </div>
+        <v-table class="dataset-columns__table" density="comfortable">
+          <thead>
+            <tr>
+              <th scope="col">{{ t('opendata.datasets.common.columnName') }}</th>
+              <th scope="col">{{ t('opendata.datasets.common.columnDescription') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="column in columnDefinitions" :key="column.key">
+              <th scope="row">{{ column.label }}</th>
+              <td>{{ column.description }}</td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-container>
+    </section>
+
+    <OpendataFaqSection
+      :title="t('opendata.datasets.gtin.faq.title')"
+      :subtitle="t('opendata.datasets.gtin.faq.subtitle')"
+      :items="faqItems"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type { OpenDataDatasetDto, OpenDataOverviewDto } from '~~/shared/api-client'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
+import OpendataDatasetHero from '~/components/domains/opendata/OpendataDatasetHero.vue'
+import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
+import OpendataDownloadComparison from '~/components/domains/opendata/OpendataDownloadComparison.vue'
+import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
+
+definePageMeta({
+  ssr: true,
+})
+
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
+const requestURL = useRequestURL()
+
+interface DatasetPayload {
+  dataset: OpenDataDatasetDto
+  overview: OpenDataOverviewDto
+}
+
+const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>('opendata-gtin', async () => {
+  const [dataset, overview] = await Promise.all([
+    $fetch<OpenDataDatasetDto>('/api/opendata/gtin'),
+    $fetch<OpenDataOverviewDto>('/api/opendata'),
+  ])
+
+  return { dataset, overview }
+})
+
+const dataset = computed(() => data.value?.dataset)
+const overview = computed(() => data.value?.overview)
+
+const placeholder = computed(() => String(t('opendata.datasets.common.placeholder')))
+
+const heroStats = computed(() => [
+  {
+    label: String(t('opendata.datasets.gtin.hero.stats.records')),
+    value: dataset.value?.recordCount ?? placeholder.value,
+    icon: 'mdi-format-list-numbered',
+  },
+  {
+    label: String(t('opendata.datasets.gtin.hero.stats.updated')),
+    value: dataset.value?.lastUpdated ?? placeholder.value,
+    icon: 'mdi-update',
+  },
+  {
+    label: String(t('opendata.datasets.gtin.hero.stats.size')),
+    value: dataset.value?.fileSize ?? placeholder.value,
+    icon: 'mdi-archive-outline',
+  },
+])
+
+const summaryItems = computed(() => [
+  {
+    label: String(t('opendata.datasets.common.summary.records')),
+    value: dataset.value?.recordCount ?? placeholder.value,
+    icon: 'mdi-database-outline',
+  },
+  {
+    label: String(t('opendata.datasets.common.summary.updated')),
+    value: dataset.value?.lastUpdated ?? placeholder.value,
+    icon: 'mdi-calendar-clock',
+  },
+  {
+    label: String(t('opendata.datasets.common.summary.size')),
+    value: dataset.value?.fileSize ?? placeholder.value,
+    icon: 'mdi-file-archive-outline',
+  },
+])
+
+const formatBullets = computed(() => [
+  String(t('opendata.datasets.gtin.format.bullets.type')),
+  String(t('opendata.datasets.gtin.format.bullets.separator')),
+  String(t('opendata.datasets.gtin.format.bullets.quote')),
+])
+
+const downloadOptions = computed(() => {
+  const directUrl = dataset.value?.downloadUrl
+  const limits = overview.value?.downloadLimits
+
+  return [
+    {
+      id: 'datagouv',
+      title: String(t('opendata.datasets.common.download.fast.title')),
+      description: String(t('opendata.datasets.common.download.fast.description')),
+      badge: String(t('opendata.datasets.common.download.fast.badge')),
+      highlights: [
+        { icon: 'mdi-lightning-bolt-outline', text: String(t('opendata.datasets.common.download.fast.speed')) },
+        { icon: 'mdi-shield-check-outline', text: String(t('opendata.datasets.gtin.download.fast.highlight')) },
+      ],
+      cta: {
+        label: String(t('opendata.datasets.common.download.fast.cta.label')),
+        ariaLabel: String(t('opendata.datasets.common.download.fast.cta.ariaLabel')),
+        href: String(t('opendata.datasets.common.download.fast.cta.href')),
+        target: '_blank',
+        rel: 'noopener',
+      },
+    },
+    {
+      id: 'direct',
+      title: String(t('opendata.datasets.common.download.direct.title')),
+      description: String(t('opendata.datasets.common.download.direct.description')),
+      highlights: [
+        {
+          icon: 'mdi-account-multiple-outline',
+          text: String(
+            limits?.concurrentDownloads
+              ? t('opendata.datasets.common.download.direct.concurrent', {
+                  value: limits.concurrentDownloads,
+                })
+              : t('opendata.datasets.common.download.direct.concurrentUnknown'),
+          ),
+        },
+        {
+          icon: 'mdi-speedometer',
+          text: String(
+            limits?.downloadSpeed
+              ? t('opendata.datasets.common.download.direct.speed', {
+                  value: limits.downloadSpeed,
+                })
+              : t('opendata.datasets.common.download.direct.speedUnknown'),
+          ),
+        },
+      ],
+      cta: {
+        label: String(t('opendata.datasets.common.download.direct.cta.label')),
+        ariaLabel: String(t('opendata.datasets.common.download.direct.cta.ariaLabel')),
+        href: directUrl ?? '#',
+        disabled: !directUrl,
+      },
+    },
+  ]
+})
+
+const columnDefinitions = computed(() => {
+  const headers = dataset.value?.headers ?? []
+
+  return headers.map(header => ({
+    key: header,
+    label: String(t(`opendata.datasets.gtin.columns.${header}.label` as const)),
+    description: String(t(`opendata.datasets.gtin.columns.${header}.description` as const)),
+  }))
+})
+
+const faqItems = computed(() => [
+  {
+    id: 'what-is-gtin',
+    question: String(t('opendata.datasets.gtin.faq.items.whatIs.question')),
+    blocId: 'webpages:opendata:gtin-faq-what-is',
+  },
+  {
+    id: 'structure',
+    question: String(t('opendata.datasets.gtin.faq.items.structure.question')),
+    blocId: 'webpages:opendata:gtin-faq-structure',
+  },
+  {
+    id: 'use-cases',
+    question: String(t('opendata.datasets.gtin.faq.items.uses.question')),
+    blocId: 'webpages:opendata:gtin-faq-uses',
+  },
+  {
+    id: 'contribute',
+    question: String(t('opendata.datasets.gtin.faq.items.contribute.question')),
+    blocId: 'webpages:opendata:gtin-faq-contribute',
+  },
+])
+
+const canonicalUrl = computed(
+  () => new URL(resolveLocalizedRoutePath('opendata-gtin', locale.value), requestURL.origin).toString(),
+)
+const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+
+useSeoMeta({
+  title: () => String(t('opendata.datasets.gtin.seo.title')),
+  description: () => String(t('opendata.datasets.gtin.seo.description')),
+  ogTitle: () => String(t('opendata.datasets.gtin.seo.title')),
+  ogDescription: () => String(t('opendata.datasets.gtin.seo.description')),
+  ogUrl: () => canonicalUrl.value,
+  ogType: () => 'website',
+  ogImage: () => ogImageUrl.value,
+})
+
+useHead(() => ({
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
+  ],
+}))
+</script>
+
+<style scoped lang="sass">
+.dataset-page
+  display: flex
+  flex-direction: column
+  gap: 0
+
+.dataset-page__breadcrumb
+  padding: 1.5rem 1rem 0
+
+.dataset-page__breadcrumb ol
+  display: flex
+  flex-wrap: wrap
+  gap: 0.5rem
+  list-style: none
+  margin: 0
+  padding: 0
+  font-size: 0.95rem
+
+.dataset-page__breadcrumb a
+  color: rgba(var(--v-theme-primary), 1)
+  text-decoration: none
+
+.dataset-page__breadcrumb li[aria-current='page']
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+
+.dataset-page__loader
+  margin: 0
+
+.dataset-format
+  padding: clamp(2.5rem, 5vw, 4rem) 0
+  background: rgba(var(--v-theme-surface-muted), 1)
+
+.dataset-format__card
+  border-radius: 24px
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
+  background: rgba(var(--v-theme-surface-default), 0.95)
+  padding: clamp(1.75rem, 4vw, 2.75rem)
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+
+.dataset-format__header h2
+  margin: 0
+  font-size: clamp(1.75rem, 3vw, 2.25rem)
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
+
+.dataset-format__header p
+  margin: 0.5rem 0 0
+  font-size: 1rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.dataset-format__list
+  list-style: none
+  margin: 0
+  padding: 0
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.dataset-format__list li
+  display: flex
+  gap: 0.75rem
+  align-items: center
+  font-size: 0.95rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.dataset-columns
+  padding: clamp(3rem, 6vw, 4.5rem) 0
+  background: rgba(var(--v-theme-surface-default), 1)
+
+.dataset-columns__header
+  max-width: 720px
+  margin: 0 auto 2rem
+  text-align: center
+
+.dataset-columns__header h2
+  margin: 0
+  font-size: clamp(1.9rem, 3vw, 2.4rem)
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
+
+.dataset-columns__header p
+  margin: 1rem 0 0
+  font-size: 1rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.dataset-columns__table
+  border-radius: 20px
+  overflow: hidden
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+
+.dataset-columns__table thead
+  background: rgba(var(--v-theme-surface-primary-080), 0.9)
+
+.dataset-columns__table th,
+.dataset-columns__table td
+  font-size: 0.95rem
+
+.dataset-columns__table tbody tr:nth-child(even)
+  background: rgba(var(--v-theme-surface-primary-050), 0.6)
+</style>
+
