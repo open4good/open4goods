@@ -376,32 +376,32 @@ public class OpenDataService implements HealthIndicator {
         concurrentDownloadsCounter.decrementAndGet();
     }
 
-    @Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public String isbnFileSize() {
         return humanReadableByteCountBin(openDataConfig.isbnZipFile().length());
     }
 
-    @Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public String gtinFileSize() {
         return humanReadableByteCountBin(openDataConfig.gtinZipFile().length());
     }
 
-    @Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public Date isbnLastUpdate() {
         return Date.from(Instant.ofEpochMilli(openDataConfig.isbnZipFile().lastModified()));
     }
 
-    @Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public Date gtinLastUpdate() {
         return Date.from(Instant.ofEpochMilli(openDataConfig.gtinZipFile().lastModified()));
     }
 
-    @Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public long totalItemsISBN() {
         return aggregatedDataRepository.countItemsByBarcodeType(BarcodeType.ISBN_13);
     }
 
-    @Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public long totalItemsGTIN() {
         return aggregatedDataRepository.countItemsByBarcodeType(
                 BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
@@ -412,7 +412,7 @@ public class OpenDataService implements HealthIndicator {
      *
      * @return The total number of items.
      */
-    @Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public long totalItems() {
         return aggregatedDataRepository.countMainIndex();
     }

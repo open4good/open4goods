@@ -3,8 +3,8 @@ package org.open4goods.ui;
 
 import java.io.IOException;
 
-import org.open4goods.commons.config.CacheKeyGenerator;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.model.CacheKeyGenerator;
 import org.open4goods.services.productrepository.repository.ElasticProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
