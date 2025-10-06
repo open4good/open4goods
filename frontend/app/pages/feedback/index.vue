@@ -41,7 +41,6 @@
             :aria-controls="`${tab.value.toLowerCase()}-panel`"
           >
             <span class="feedback-tabs__tab-label">{{ tab.label }}</span>
-            <span class="feedback-tabs__tab-caption">{{ tab.caption }}</span>
           </v-tab>
         </v-tabs>
 
@@ -158,7 +157,6 @@ const tabs = computed(() => [
   {
     value: 'IDEA' as const,
     label: String(t('feedback.tabs.idea.label')),
-    caption: String(t('feedback.tabs.idea.caption')),
     icon: 'mdi-lightbulb-on-outline',
     issueTitle: String(t('feedback.tabs.idea.issueTitle')),
     description: String(t('feedback.tabs.idea.description')),
@@ -173,7 +171,6 @@ const tabs = computed(() => [
   {
     value: 'BUG' as const,
     label: String(t('feedback.tabs.bug.label')),
-    caption: String(t('feedback.tabs.bug.caption')),
     icon: 'mdi-bug-check-outline',
     issueTitle: String(t('feedback.tabs.bug.issueTitle')),
     description: String(t('feedback.tabs.bug.description')),

@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -34,7 +33,7 @@ public class PartenairesController  implements SitemapExposedController{
 
 	public static final String DEFAULT_PATH="/partners";
 	public static final String FR_PATH="/partenaires";
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(PartenairesController.class);
 
 	// The siteConfig
@@ -76,7 +75,7 @@ public class PartenairesController  implements SitemapExposedController{
 
 
 
-	
+
 	@Override
 	public SitemapEntry getExposedUrls() {
 		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY)
@@ -86,8 +85,8 @@ public class PartenairesController  implements SitemapExposedController{
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
-	
-	@GetMapping(value = {DEFAULT_PATH, FR_PATH})	
+
+	@GetMapping(value = {DEFAULT_PATH, FR_PATH})
 	public ModelAndView partenaires(final HttpServletRequest request) {
 		ModelAndView ret = uiService.defaultModelAndView(("partenaires"), request);
 		ret.addObject("page","compensation écologique");

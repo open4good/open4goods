@@ -364,7 +364,7 @@
   "feedback": {
     "hero": {
       "eyebrow": "Retours utilisateurs",
-      "title": "Co-construisons Nudger avec vos idées",
+      "title": "Construisons Nudger avec vos idées",
       "subtitle": "Signalez les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
       "description": "Vos retours orientent notre feuille de route. Découvrez les demandes déjà déposées, soutenez celles qui vous parlent et proposez les vôtres.",
       "ctaGroupLabel": "Actions de feedback",
@@ -375,20 +375,6 @@
       "secondaryCta": {
         "label": "Ouvrir les issues GitHub",
         "ariaLabel": "Ouvrir les issues GitHub de Nudger dans un nouvel onglet"
-      },
-      "highlights": {
-        "community": {
-          "title": "Co-construire avec la communauté",
-          "description": "Proposez vos idées, votez pour les priorités et échangez avec les autres contributrices et contributeurs Nudger."
-        },
-        "trust": {
-          "title": "Une transparence totale",
-          "description": "Suivez chaque échange et chaque décision pour voir comment vos retours transforment Nudger."
-        },
-        "roadmap": {
-          "title": "Une feuille de route guidée par l'impact",
-          "description": "Chaque itération se concentre sur les améliorations qui recueillent le plus de soutien."
-        }
       },
       "stats": {
         "eyebrow": "En pratique",
@@ -408,13 +394,11 @@
       "ariaLabel": "Catégories de feedback",
       "idea": {
         "label": "Idées",
-        "caption": "Fonctionnalités & améliorations",
         "issueTitle": "Idées de la communauté",
         "description": "Proposez des améliorations qui rendraient Nudger plus utile pour vous ou votre organisation. Nous passons chaque idée en revue chaque semaine."
       },
       "bug": {
         "label": "Bugs",
-        "caption": "Anomalies de l'expérience",
         "issueTitle": "Bugs signalés",
         "description": "Décrivez toute anomalie ou comportement inattendu observé. Des signalements précis nous aident à corriger plus vite."
       }

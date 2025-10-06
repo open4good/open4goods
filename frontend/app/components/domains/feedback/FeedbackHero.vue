@@ -49,19 +49,7 @@
               </v-btn>
             </div>
 
-            <ul v-if="highlights.length > 0" class="feedback-hero__highlights" role="list">
-              <li v-for="highlight in highlights" :key="highlight.title" class="feedback-hero__highlight-item">
-                <v-avatar size="44" class="feedback-hero__highlight-icon" color="surface-primary-120">
-                  <v-icon :icon="highlight.icon" size="26" color="primary" />
-                </v-avatar>
-                <div class="feedback-hero__highlight-text">
-                  <p class="feedback-hero__highlight-title">{{ highlight.title }}</p>
-                  <p v-if="highlight.description" class="feedback-hero__highlight-description">
-                    {{ highlight.description }}
-                  </p>
-                </div>
-              </li>
-            </ul>
+
           </div>
         </v-col>
 

@@ -79,18 +79,6 @@ export interface PageProductDto {
     sort?: SortObject;
     /**
      * 
-     * @type {boolean}
-     * @memberof PageProductDto
-     */
-    first?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof PageProductDto
-     */
-    last?: boolean;
-    /**
-     * 
      * @type {number}
      * @memberof PageProductDto
      */
@@ -101,6 +89,18 @@ export interface PageProductDto {
      * @memberof PageProductDto
      */
     pageable?: PageableObject;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PageProductDto
+     */
+    first?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PageProductDto
+     */
+    last?: boolean;
     /**
      * 
      * @type {boolean}
@@ -132,10 +132,10 @@ export function PageProductDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
         'content': json['content'] == null ? undefined : ((json['content'] as Array<any>).map(ProductDtoFromJSON)),
         'number': json['number'] == null ? undefined : json['number'],
         'sort': json['sort'] == null ? undefined : SortObjectFromJSON(json['sort']),
-        'first': json['first'] == null ? undefined : json['first'],
-        'last': json['last'] == null ? undefined : json['last'],
         'numberOfElements': json['numberOfElements'] == null ? undefined : json['numberOfElements'],
         'pageable': json['pageable'] == null ? undefined : PageableObjectFromJSON(json['pageable']),
+        'first': json['first'] == null ? undefined : json['first'],
+        'last': json['last'] == null ? undefined : json['last'],
         'empty': json['empty'] == null ? undefined : json['empty'],
     };
 }
@@ -157,10 +157,10 @@ export function PageProductDtoToJSONTyped(value?: PageProductDto | null, ignoreD
         'content': value['content'] == null ? undefined : ((value['content'] as Array<any>).map(ProductDtoToJSON)),
         'number': value['number'],
         'sort': SortObjectToJSON(value['sort']),
-        'first': value['first'],
-        'last': value['last'],
         'numberOfElements': value['numberOfElements'],
         'pageable': PageableObjectToJSON(value['pageable']),
+        'first': value['first'],
+        'last': value['last'],
         'empty': value['empty'],
     };
 }

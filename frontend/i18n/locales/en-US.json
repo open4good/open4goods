@@ -375,20 +375,6 @@
         "label": "Open GitHub issues",
         "ariaLabel": "Open Nudger's GitHub issues in a new tab"
       },
-      "highlights": {
-        "community": {
-          "title": "Co-create with the community",
-          "description": "Share your ideas, vote on priorities and collaborate with fellow Nudger contributors."
-        },
-        "trust": {
-          "title": "Transparency you can rely on",
-          "description": "Follow every discussion and decision to understand how your feedback shapes Nudger."
-        },
-        "roadmap": {
-          "title": "Impact-driven roadmap",
-          "description": "We focus each iteration on the improvements that gather the most support."
-        }
-      },
       "stats": {
         "eyebrow": "How it works",
         "title": "A living roadmap",
@@ -407,13 +393,11 @@
       "ariaLabel": "Feedback categories",
       "idea": {
         "label": "Ideas",
-        "caption": "Product improvements & new features",
         "issueTitle": "Community ideas",
         "description": "Suggest enhancements that would make Nudger more helpful for you or your organisation. We review every idea weekly."
       },
       "bug": {
         "label": "Bugs",
-        "caption": "Issues affecting the experience",
         "issueTitle": "Reported bugs",
         "description": "Describe any malfunction or inaccurate behaviour you spotted. Precise reports help us fix issues faster."
       }
