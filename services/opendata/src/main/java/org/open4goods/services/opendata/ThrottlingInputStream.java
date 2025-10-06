@@ -1,4 +1,4 @@
-package org.open4goods.commons.helper;
+package org.open4goods.services.opendata;
 
 import java.io.IOException;
 import java.io.InputStream;

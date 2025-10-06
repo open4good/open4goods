@@ -29,11 +29,7 @@
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>commons</artifactId>
-      <version>${global.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>org.open4goods</groupId>
       <artifactId>model</artifactId>
