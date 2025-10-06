@@ -3,6 +3,7 @@ apis/BlogApi.ts
 apis/CategoriesApi.ts
 apis/ContactApi.ts
 apis/ContentApi.ts
+apis/FeedbackApi.ts
 apis/ProductApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
@@ -27,6 +28,13 @@ models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
 models/ExternalIds.ts
 models/FeatureGroupDto.ts
+models/FeedbackErrorResponseDto.ts
+models/FeedbackIssueDto.ts
+models/FeedbackRemainingVotesDto.ts
+models/FeedbackSubmissionRequestDto.ts
+models/FeedbackSubmissionResponseDto.ts
+models/FeedbackVoteEligibilityDto.ts
+models/FeedbackVoteResponseDto.ts
 models/FullPageDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreCriteriaDto.ts
