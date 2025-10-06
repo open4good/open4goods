@@ -38,20 +38,17 @@ public class FeedbackController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
 
     private final UiService uiService;
-    private final UiConfig uiConfig;
     private final IssueService issueService;
     private final VoteService voteService;
     private final HcaptchaService hcaptchaService;
     private final HcaptchaProperties hcaptchaProperties;
 
     public FeedbackController(UiService uiService,
-                              UiConfig uiConfig,
                               IssueService issueService,
                               VoteService voteService,
                               HcaptchaService hcaptchaService,
                               HcaptchaProperties hcaptchaProperties) {
         this.uiService   = uiService;
-        this.uiConfig    = uiConfig;
         this.issueService = issueService;
         this.voteService = voteService;
         this.hcaptchaService = hcaptchaService;
