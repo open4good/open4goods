@@ -1,6 +1,6 @@
 <template>
   <section :id="sectionId" class="feedback-form" :aria-labelledby="`${sectionId}-heading`">
-    <v-card class="feedback-form__card" elevation="8" rounded="xl">
+    <v-card class="feedback-form__card" elevation="0" rounded="xl">
       <div class="feedback-form__header">
         <v-avatar size="42" class="feedback-form__header-icon" color="surface-primary-120">
           <v-icon :icon="categoryIcon" size="26" color="primary" />
@@ -313,6 +313,7 @@ const resetForm = () => {
     padding: clamp(1.5rem, 3vw, 2.25rem);
     background: rgb(var(--v-theme-surface-glass-strong));
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+    box-shadow: none;
   }
 
   &__header {
