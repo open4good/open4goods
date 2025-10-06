@@ -57,7 +57,7 @@ public class OpenDataService implements HealthIndicator {
     private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
     private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
-    private static final String[] GTIN_HEADER = {
+    public static final String[] GTIN_HEADER = {
             "gtin",
             "brand",
             "model",
@@ -73,7 +73,7 @@ public class OpenDataService implements HealthIndicator {
             "url"
     };
 
-    private static final String[] ISBN_HEADER = {
+    public static final String[] ISBN_HEADER = {
             "isbn",
             "title",
             "last_updated",
