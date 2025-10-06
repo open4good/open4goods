@@ -15,6 +15,7 @@ type FooterLink = {
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
 const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
+const feedbackPath = computed(() => resolveLocalizedRoutePath('feedback', currentLocale.value))
 
 const currentYear = computed(() => new Date().getFullYear())
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
@@ -58,14 +59,6 @@ const communityLinks = computed<FooterLink[]>(() => [
 
 const feedbackLinks = computed<FooterLink[]>(() => [
   {
-    label: t('siteIdentity.footer.feedback.links.idea'),
-    to: '/feedback/idea',
-  },
-  {
-    label: t('siteIdentity.footer.feedback.links.issue'),
-    to: '/feedback/issue',
-  },
-  {
     label: t('siteIdentity.footer.feedback.links.contact'),
     to: resolveLocalizedRoutePath('contact', currentLocale.value),
   },
@@ -73,7 +66,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
     label: t('siteIdentity.footer.feedback.links.linkedin'),
     href: linkedinUrl.value,
     target: '_blank',
-    rel: 'nofollow noopener',
+    rel: 'noopener nofollow',
   },
 ])
 
@@ -154,9 +147,9 @@ const feedbackLinks = computed<FooterLink[]>(() => [
           </v-list>
         </div>
 
-        <div class="text-subtitle-1 font-weight-medium mt-6">
+        <NuxtLink :to="feedbackPath" class="footer-section-link text-subtitle-1 font-weight-medium mt-6">
           {{ t('siteIdentity.footer.feedback.title') }}
-        </div>
+        </NuxtLink>
         <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
           <v-list-item
             v-for="link in feedbackLinks"
@@ -229,6 +222,19 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 
 .footer-logo-link:hover {
   opacity: 0.85;
+}
+
+.footer-section-link {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.footer-section-link:hover {
+  opacity: 0.85;
+  text-decoration: underline;
 }
 
 .sr-only {
