@@ -360,6 +360,142 @@
       "privacy": "We only use your contact details to answer your request and never share them with third parties."
     }
   },
+  "feedback": {
+    "hero": {
+      "eyebrow": "Product feedback",
+      "title": "Shape Nudger with your ideas",
+      "subtitle": "Report bugs, suggest features and vote on the improvements you need next.",
+      "ctaGroupLabel": "Feedback actions",
+      "primaryCta": {
+        "label": "Browse the feedback board",
+        "ariaLabel": "Scroll to the Nudger feedback board"
+      },
+      "secondaryCta": {
+        "label": "Open GitHub issues",
+        "ariaLabel": "Open Nudger's GitHub issues in a new tab"
+      },
+      "highlights": {
+        "community": "Open collaboration with fellow Nudger contributors.",
+        "trust": "Transparent decisions shared with the whole community.",
+        "roadmap": "Iterative roadmap shaped by your priorities."
+      },
+      "stats": {
+        "eyebrow": "How it works",
+        "title": "A living roadmap",
+        "description": "Help us focus on improvements that matter most.",
+        "items": {
+          "iterations": "Weekly iterations on the most upvoted ideas.",
+          "votes": "Three votes per person to highlight key needs.",
+          "transparency": "Public updates for every discussion and decision."
+        }
+      }
+    },
+    "tabs": {
+      "eyebrow": "Community board",
+      "title": "Help us prioritise the roadmap",
+      "ariaLabel": "Feedback categories",
+      "idea": {
+        "label": "Ideas",
+        "caption": "Product improvements & new features",
+        "issueTitle": "Community ideas"
+      },
+      "bug": {
+        "label": "Bugs",
+        "caption": "Issues affecting the experience",
+        "issueTitle": "Reported bugs"
+      }
+    },
+    "issues": {
+      "empty": {
+        "idea": "No ideas yet. Be the first to share yours!",
+        "bug": "No bugs reported here right now. Thanks for keeping an eye out."
+      },
+      "loadError": "We couldn't load the feedback board. Please try again."
+    },
+    "voting": {
+      "voteButton": "Vote",
+      "voteButtonAria": "Vote for",
+      "openIssue": "Open discussion",
+      "noVotes": "You have no votes left right now.",
+      "limitReached": "You reached your voting limit for now.",
+      "remaining": "You have {count} votes remaining."
+    },
+    "form": {
+      "sections": {
+        "idea": {
+          "eyebrow": "Share an idea",
+          "title": "Imagine the next improvement",
+          "subtitle": "Explain how Nudger could better help you or your organisation.",
+          "titlePlaceholder": "e.g. Compare the carbon footprint of fridges",
+          "messagePlaceholder": "Describe your idea, the context and the impact you expect."
+        },
+        "bug": {
+          "eyebrow": "Report a bug",
+          "title": "Tell us what went wrong",
+          "subtitle": "The more details you share, the faster we can investigate and fix it.",
+          "titlePlaceholder": "e.g. Error 500 on the product page",
+          "messagePlaceholder": "List the steps to reproduce, what you expected and what happened."
+        }
+      },
+      "fields": {
+        "author": {
+          "label": "Display name",
+          "placeholder": "How should we credit you?",
+          "default": "Nudger community member"
+        },
+        "title": {
+          "label": "Title"
+        },
+        "message": {
+          "label": "Message"
+        }
+      },
+      "actions": {
+        "submit": "Send feedback",
+        "reset": "Clear form"
+      },
+      "feedback": {
+        "success": "Thank you! Your contribution has been recorded and will appear on the board soon.",
+        "missingSiteKey": "Captcha is not configured yet. Feedback submissions are temporarily disabled."
+      },
+      "errors": {
+        "missingCaptcha": "Please complete the captcha before sending your feedback.",
+        "captchaExpired": "Captcha expired, please try again.",
+        "captchaFailed": "Captcha verification failed. Please retry.",
+        "title": {
+          "length": "The title must contain at least 4 characters."
+        },
+        "message": {
+          "length": "The message must contain at least 20 characters."
+        }
+      },
+      "privacy": "Feedback is public—please avoid sharing personal or sensitive data."
+    },
+    "common": {
+      "genericError": "Something went wrong. Please try again."
+    },
+    "openSource": {
+      "eyebrow": "Open collaboration",
+      "title": "Explore our open source and open data",
+      "cards": {
+        "opensource": {
+          "title": "Contribute on GitHub",
+          "cta": "Visit the open source page",
+          "ariaLabel": "Go to the Nudger open source page"
+        },
+        "opendata": {
+          "title": "Analyse our open data",
+          "cta": "Visit the open data page",
+          "ariaLabel": "Go to the Nudger open data page"
+        }
+      }
+    },
+    "seo": {
+      "title": "Feedback & roadmap – Nudger community board",
+      "description": "Share ideas, report bugs and vote on Nudger's public roadmap for responsible shopping.",
+      "imageAlt": "Illustration of the Nudger community feedback board."
+    }
+  },
   "cms": {
     "page": {
       "loading": "Loading page…",

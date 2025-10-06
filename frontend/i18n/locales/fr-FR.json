@@ -361,6 +361,142 @@
       "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées."
     }
   },
+  "feedback": {
+    "hero": {
+      "eyebrow": "Retours utilisateurs",
+      "title": "Co-construisons Nudger avec vos idées",
+      "subtitle": "Signalez les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
+      "ctaGroupLabel": "Actions de feedback",
+      "primaryCta": {
+        "label": "Découvrir le tableau de feedback",
+        "ariaLabel": "Faire défiler jusqu'au tableau de feedback Nudger"
+      },
+      "secondaryCta": {
+        "label": "Ouvrir les issues GitHub",
+        "ariaLabel": "Ouvrir les issues GitHub de Nudger dans un nouvel onglet"
+      },
+      "highlights": {
+        "community": "Collaboration ouverte avec une communauté engagée.",
+        "trust": "Décisions transparentes partagées avec tous.",
+        "roadmap": "Feuille de route vivante façonnée par vos idées."
+      },
+      "stats": {
+        "eyebrow": "En pratique",
+        "title": "Un backlog collaboratif",
+        "description": "Aidez-nous à concentrer l'équipe sur les améliorations utiles.",
+        "items": {
+          "iterations": "Itérations hebdomadaires sur les sujets les plus soutenus.",
+          "votes": "Votes limités pour mettre en avant les priorités clés.",
+          "transparency": "Suivi public et transparent de chaque proposition."
+        }
+      }
+    },
+    "tabs": {
+      "eyebrow": "Tableau communautaire",
+      "title": "Aidez-nous à prioriser la feuille de route",
+      "ariaLabel": "Catégories de feedback",
+      "idea": {
+        "label": "Idées",
+        "caption": "Fonctionnalités & améliorations",
+        "issueTitle": "Idées de la communauté"
+      },
+      "bug": {
+        "label": "Bugs",
+        "caption": "Anomalies de l'expérience",
+        "issueTitle": "Bugs signalés"
+      }
+    },
+    "issues": {
+      "empty": {
+        "idea": "Aucune idée pour le moment. Partagez la vôtre !",
+        "bug": "Aucun bug recensé ici pour l'instant. Merci de nous prévenir si vous en trouvez."
+      },
+      "loadError": "Impossible de charger le tableau de feedback. Merci de réessayer."
+    },
+    "voting": {
+      "voteButton": "Voter",
+      "voteButtonAria": "Voter pour",
+      "openIssue": "Ouvrir la discussion",
+      "noVotes": "Vous n'avez plus de vote disponible.",
+      "limitReached": "Vous avez atteint votre limite de votes pour le moment.",
+      "remaining": "Il vous reste {count} vote(s)."
+    },
+    "form": {
+      "sections": {
+        "idea": {
+          "eyebrow": "Proposer une idée",
+          "title": "Imaginez la prochaine évolution",
+          "subtitle": "Expliquez comment Nudger pourrait mieux vous aider.",
+          "titlePlaceholder": "Ex. Comparer l'empreinte carbone des frigos",
+          "messagePlaceholder": "Décrivez votre idée, le contexte et les bénéfices attendus."
+        },
+        "bug": {
+          "eyebrow": "Signaler un bug",
+          "title": "Décrivez le problème rencontré",
+          "subtitle": "Plus vous donnez de détails, plus nous pourrons corriger rapidement.",
+          "titlePlaceholder": "Ex. Erreur 500 sur la fiche produit",
+          "messagePlaceholder": "Précisez les étapes, le comportement attendu et ce qui s'est produit."
+        }
+      },
+      "fields": {
+        "author": {
+          "label": "Nom affiché",
+          "placeholder": "Sous quel nom souhaitez-vous apparaître ?",
+          "default": "Membre de la communauté Nudger"
+        },
+        "title": {
+          "label": "Titre"
+        },
+        "message": {
+          "label": "Message"
+        }
+      },
+      "actions": {
+        "submit": "Envoyer le feedback",
+        "reset": "Réinitialiser le formulaire"
+      },
+      "feedback": {
+        "success": "Merci ! Votre contribution est enregistrée et apparaîtra bientôt sur le tableau.",
+        "missingSiteKey": "Le captcha n'est pas encore configuré : l'envoi de feedback est temporairement indisponible."
+      },
+      "errors": {
+        "missingCaptcha": "Merci de compléter le captcha avant d'envoyer.",
+        "captchaExpired": "Le captcha a expiré, merci de recommencer.",
+        "captchaFailed": "La vérification du captcha a échoué. Merci de réessayer.",
+        "title": {
+          "length": "Le titre doit contenir au moins 4 caractères."
+        },
+        "message": {
+          "length": "Le message doit contenir au moins 20 caractères."
+        }
+      },
+      "privacy": "Les retours sont publics : n'indiquez pas de données personnelles sensibles."
+    },
+    "common": {
+      "genericError": "Une erreur inattendue est survenue. Merci de réessayer."
+    },
+    "openSource": {
+      "eyebrow": "Collaboration ouverte",
+      "title": "Explorez nos communs open source et open data",
+      "cards": {
+        "opensource": {
+          "title": "Contribuer sur GitHub",
+          "cta": "Voir la page open source",
+          "ariaLabel": "Aller vers la page open source de Nudger"
+        },
+        "opendata": {
+          "title": "Analyser nos données ouvertes",
+          "cta": "Voir la page open data",
+          "ariaLabel": "Aller vers la page open data de Nudger"
+        }
+      }
+    },
+    "seo": {
+      "title": "Feedback & roadmap – Communauté Nudger",
+      "description": "Partagez vos idées, signalez les bugs et votez pour les prochaines évolutions de Nudger.",
+      "imageAlt": "Illustration du tableau de feedback de la communauté Nudger."
+    }
+  },
   "cms": {
     "page": {
       "loading": "Chargement de la page…",
