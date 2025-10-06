@@ -6,6 +6,7 @@ export * from './CategoriesApi';
 export * from './ContactApi';
 export * from './ContentApi';
 export * from './FeedbackApi';
+export * from './OpenDataApi';
 export * from './ProductApi';
 export * from './StatsApi';
 export * from './TeamApi';
