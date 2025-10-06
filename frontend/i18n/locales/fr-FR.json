@@ -254,6 +254,380 @@
       }
     }
   },
+  "opendata": {
+    "seo": {
+      "title": "Portail open data Nudger",
+      "description": "Découvrez les jeux de données GTIN et ISBN mis à disposition par Nudger, leurs mises à jour hebdomadaires et les modalités de téléchargement."
+    },
+    "loading": "Chargement des informations open data…",
+    "errors": {
+      "overviewFailed": "Impossible de charger la vue d'ensemble open data. Merci de réessayer.",
+      "datasetFailed": "Impossible de charger les détails du jeu de données. Merci de réessayer."
+    },
+    "hero": {
+      "eyebrow": "Open data",
+      "title": "Des données produits transparentes pour un commerce responsable",
+      "subtitle": "Téléchargez les jeux de données GTIN et ISBN maintenus par Nudger pour vos analyses, vos services et vos recherches.",
+      "primaryCta": {
+        "label": "Découvrir les jeux de données",
+        "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data"
+      },
+      "secondaryCta": {
+        "label": "Voir le dataset GTIN",
+        "ariaLabel": "Aller vers la page open data GTIN"
+      }
+    },
+    "stats": {
+      "accessibilityTitle": "Indicateurs clés de l'open data",
+      "placeholder": "—",
+      "totalProducts": {
+        "label": "Produits couverts",
+        "description": "Produits uniques recensés dans l'ensemble des exports."
+      },
+      "datasets": {
+        "label": "Jeux de données publiés",
+        "description": "Paquets de données actuellement disponibles."
+      },
+      "totalSize": {
+        "label": "Taille cumulée",
+        "description": "Volume compressé total des exports hebdomadaires."
+      },
+      "downloadSpeed": {
+        "label": "Politique de téléchargement",
+        "description": "Téléchargements directs limités à {concurrent} sessions simultanées."
+      }
+    },
+    "datasets": {
+      "title": "Deux jeux de données complémentaires",
+      "subtitle": "Choisissez l'extraction adaptée à votre besoin. Les deux exports sont mis à jour chaque semaine et publiés sous licence ODbL.",
+      "cards": {
+        "gtin": {
+          "title": "Catalogue GTIN",
+          "description": "Tous les produits indexés par Nudger avec marque, modèle, prix et catégories.",
+          "features": {
+            "refresh": "Instantané mis à jour chaque semaine",
+            "coverage": "Inclut les métadonnées EAN13, UPC et préfixes GS1",
+            "uses": "Idéal pour la veille prix, l'analyse d'assortiment et le suivi catégoriel"
+          },
+          "cta": {
+            "label": "Voir le dataset GTIN",
+            "ariaLabel": "Ouvrir la page open data GTIN"
+          }
+        },
+        "isbn": {
+          "title": "Bibliothèque ISBN",
+          "description": "Export dédié aux livres avec informations de prix, disponibilité et classifications.",
+          "features": {
+            "refresh": "Instantané mis à jour chaque semaine",
+            "catalogue": "Inclut éditeur, format et classifications Decitre",
+            "research": "Parfait pour l'enrichissement de catalogue, la recherche et les analyses culturelles"
+          },
+          "cta": {
+            "label": "Voir le dataset ISBN",
+            "ariaLabel": "Ouvrir la page open data ISBN"
+          }
+        }
+      },
+      "common": {
+        "placeholder": "—",
+        "summary": {
+          "records": "Nombre total d'enregistrements",
+          "updated": "Dernière mise à jour",
+          "size": "Taille compressée"
+        },
+        "columnName": "Colonne",
+        "columnDescription": "Description",
+        "download": {
+          "fast": {
+            "title": "Miroir rapide (data.gouv.fr)",
+            "description": "Téléchargement via le portail open data officiel de l'État français.",
+            "badge": "Recommandé",
+            "speed": "Infrastructure haut débit",
+            "cta": {
+              "label": "Télécharger sur data.gouv.fr",
+              "ariaLabel": "Ouvrir le dataset sur data.gouv.fr dans un nouvel onglet",
+              "href": "https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/"
+            }
+          },
+          "direct": {
+            "title": "Téléchargement direct depuis Nudger",
+            "description": "Récupérez le fichier ZIP directement sur l'infrastructure Nudger.",
+            "concurrent": "Jusqu'à {value} téléchargements simultanés",
+            "concurrentUnknown": "Limite de téléchargements simultanés",
+            "speed": "Débit limité à {value} par client",
+            "speedUnknown": "Débit limité par client",
+            "cta": {
+              "label": "Télécharger depuis nudger.fr",
+              "ariaLabel": "Lancer le téléchargement direct depuis Nudger"
+            }
+          }
+        }
+      },
+      "gtin": {
+        "breadcrumb": {
+          "root": "Open data",
+          "current": "Dataset GTIN"
+        },
+        "hero": {
+          "eyebrow": "Export GTIN",
+          "title": "Données codes-barres pour les biens de consommation",
+          "stats": {
+            "records": "Produits",
+            "updated": "Dernière mise à jour",
+            "size": "Taille du ZIP"
+          }
+        },
+        "summary": {
+          "title": "Vue d'ensemble du dataset GTIN"
+        },
+        "download": {
+          "title": "Options de téléchargement",
+          "subtitle": "Choisissez le miroir adapté à votre bande passante et à vos automatisations.",
+          "fast": {
+            "highlight": "Pensé pour la distribution, l'économie circulaire et les usages grand public"
+          }
+        },
+        "format": {
+          "title": "Format du fichier",
+          "description": "Les données sont fournies dans une archive CSV compressée prête à l'emploi.",
+          "bullets": {
+            "type": "Fichier CSV compressé au format ZIP",
+            "separator": "Séparateur de champs : virgule (,)",
+            "quote": "Délimiteur de texte : guillemet (\")"
+          }
+        },
+        "columnsTitle": "Colonnes présentes dans le dataset GTIN",
+        "columnsSubtitle": "Chaque ligne correspond à un identifiant produit enrichi par Nudger.",
+        "columns": {
+          "gtin": {
+            "label": "gtin",
+            "description": "Identifiant GTIN (EAN13/UPC)."
+          },
+          "brand": {
+            "label": "brand",
+            "description": "Marque déclarée ou déduite pour le produit."
+          },
+          "model": {
+            "label": "model",
+            "description": "Modèle fabricant ou référence SKU lorsque disponible."
+          },
+          "name": {
+            "label": "name",
+            "description": "Nom marketing ou intitulé du produit."
+          },
+          "last_updated": {
+            "label": "last_updated",
+            "description": "Horodatage (ms) de la dernière mise à jour de l'article."
+          },
+          "gs1_country": {
+            "label": "gs1_country",
+            "description": "Code pays issu du préfixe GS1."
+          },
+          "gtinType": {
+            "label": "gtinType",
+            "description": "Type de code-barres détecté (EAN13, UPC, etc.)."
+          },
+          "offers_count": {
+            "label": "offers_count",
+            "description": "Nombre d'offres commerciales suivies pour le produit."
+          },
+          "min_price": {
+            "label": "min_price",
+            "description": "Prix le plus bas observé parmi les offres."
+          },
+          "min_price_compensation": {
+            "label": "min_price_compensation",
+            "description": "Contribution carbone associée au prix le plus bas."
+          },
+          "currency": {
+            "label": "currency",
+            "description": "Devise du prix le plus bas."
+          },
+          "categories": {
+            "label": "categories",
+            "description": "Catégories agrégées par Nudger (séparées par |)."
+          },
+          "url": {
+            "label": "url",
+            "description": "URL de fiche produit lorsque des offres sont disponibles."
+          }
+        },
+        "faq": {
+          "title": "Questions fréquentes",
+          "subtitle": "Tout savoir sur l'exploitation du dataset GTIN.",
+          "items": {
+            "whatIs": {
+              "question": "Qu'est-ce qu'un GTIN et à quoi sert-il ?"
+            },
+            "structure": {
+              "question": "Quelles informations fournissez-vous pour chaque GTIN ?"
+            },
+            "uses": {
+              "question": "Comment les organisations peuvent-elles exploiter ce dataset ?"
+            },
+            "contribute": {
+              "question": "Comment signaler une erreur ou proposer une correction ?"
+            }
+          }
+        }
+      },
+      "isbn": {
+        "breadcrumb": {
+          "root": "Open data",
+          "current": "Dataset ISBN"
+        },
+        "hero": {
+          "eyebrow": "Export ISBN",
+          "title": "Métadonnées complètes pour les livres",
+          "stats": {
+            "records": "Publications",
+            "updated": "Dernière mise à jour",
+            "size": "Taille du ZIP"
+          }
+        },
+        "summary": {
+          "title": "Vue d'ensemble du dataset ISBN"
+        },
+        "download": {
+          "title": "Options de téléchargement",
+          "subtitle": "Sélectionnez le miroir adapté à votre flux et à votre trafic.",
+          "fast": {
+            "highlight": "Miroir pensé pour les usages culturels, bibliothèques et acteurs du livre"
+          }
+        },
+        "format": {
+          "title": "Format du fichier",
+          "description": "Les données sont fournies dans une archive CSV compressée prête à l'emploi.",
+          "bullets": {
+            "type": "Fichier CSV compressé au format ZIP",
+            "separator": "Séparateur de champs : virgule (,)",
+            "quote": "Délimiteur de texte : guillemet (\")"
+          }
+        },
+        "columnsTitle": "Colonnes présentes dans le dataset ISBN",
+        "columnsSubtitle": "Chaque ligne correspond à un livre identifié par son ISBN.",
+        "columns": {
+          "isbn": {
+            "label": "isbn",
+            "description": "Numéro international normalisé du livre (ISBN)."
+          },
+          "title": {
+            "label": "title",
+            "description": "Titre de l'ouvrage tel que fourni par les sources."
+          },
+          "last_updated": {
+            "label": "last_updated",
+            "description": "Horodatage (ms) de la dernière mise à jour."
+          },
+          "offers_count": {
+            "label": "offers_count",
+            "description": "Nombre d'offres commerciales suivies pour le livre."
+          },
+          "min_price": {
+            "label": "min_price",
+            "description": "Prix de vente le plus bas observé."
+          },
+          "min_price_compensation": {
+            "label": "min_price_compensation",
+            "description": "Contribution carbone associée au prix le plus bas."
+          },
+          "currency": {
+            "label": "currency",
+            "description": "Devise du prix le plus bas."
+          },
+          "url": {
+            "label": "url",
+            "description": "URL de fiche produit lorsque disponible."
+          },
+          "editeur": {
+            "label": "editeur",
+            "description": "Nom de l'éditeur."
+          },
+          "format": {
+            "label": "format",
+            "description": "Format de l'ouvrage (broché, numérique, etc.)."
+          },
+          "nb_page": {
+            "label": "nb_page",
+            "description": "Nombre de pages."
+          },
+          "classification_decitre_1": {
+            "label": "classification_decitre_1",
+            "description": "Classification Decitre – niveau 1."
+          },
+          "classification_decitre_2": {
+            "label": "classification_decitre_2",
+            "description": "Classification Decitre – niveau 2."
+          },
+          "classification_decitre_3": {
+            "label": "classification_decitre_3",
+            "description": "Classification Decitre – niveau 3."
+          },
+          "souscategorie": {
+            "label": "souscategorie",
+            "description": "Sous-catégorie principale attribuée au livre."
+          },
+          "souscategorie2": {
+            "label": "souscategorie2",
+            "description": "Seconde sous-catégorie attribuée au livre."
+          }
+        },
+        "faq": {
+          "title": "Questions fréquentes",
+          "subtitle": "Les notions essentielles autour de l'export ISBN.",
+          "items": {
+            "whatIs": {
+              "question": "Qu'est-ce qu'un ISBN ?"
+            },
+            "assignment": {
+              "question": "Qui attribue les codes ISBN ?"
+            },
+            "formats": {
+              "question": "Quels formats figurent dans le dataset ?"
+            },
+            "importance": {
+              "question": "Pourquoi les données ISBN sont-elles précieuses pour la filière du livre ?"
+            }
+          }
+        }
+      }
+    },
+    "license": {
+      "title": "Licence Open Database (ODbL)",
+      "description": "Vous pouvez utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
+      "cta": {
+        "label": "Consulter la licence ODbL",
+        "ariaLabel": "Ouvrir la licence Open Database dans un nouvel onglet",
+        "href": "https://spdx.org/licenses/ODbL-1.0.html#licenseText"
+      }
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "subtitle": "Comprendre notre approche de l'open data.",
+      "items": {
+        "sources": {
+          "question": "D'où proviennent les jeux de données ?"
+        },
+        "definition": {
+          "question": "Que signifie pour nous « open data » ?"
+        },
+        "importance": {
+          "question": "Pourquoi l'open data est-il important pour le commerce ?"
+        },
+        "contributors": {
+          "question": "Comment contribuer à l'amélioration des jeux de données ?"
+        }
+      }
+    },
+    "opensource": {
+      "title": "Nudger est aussi open source",
+      "description": "Envie de découvrir le code derrière ces datasets ? Explorez les services, la gouvernance et la communauté Nudger.",
+      "cta": {
+        "label": "Visiter la page open source",
+        "ariaLabel": "Aller vers la page open source"
+      }
+    }
+  },
   "contact": {
     "seo": {
       "title": "Nous contacter | Nudger",
