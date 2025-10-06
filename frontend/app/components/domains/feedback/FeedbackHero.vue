@@ -29,6 +29,7 @@
                 :target="primaryCta.target"
                 :rel="primaryCta.rel"
                 :append-icon="primaryCta.icon"
+                @click="primaryCta.onClick?.($event)"
               >
                 {{ primaryCta.label }}
               </v-btn>
@@ -44,6 +45,7 @@
                 :target="secondaryCta.target"
                 :rel="secondaryCta.rel"
                 :append-icon="secondaryCta.icon"
+                @click="secondaryCta.onClick?.($event)"
               >
                 {{ secondaryCta.label }}
               </v-btn>
@@ -97,6 +99,7 @@ type HeroLink = {
   target?: string
   rel?: string
   icon?: string
+  onClick?: (event: MouseEvent) => void
 }
 
 type HeroHighlight = {

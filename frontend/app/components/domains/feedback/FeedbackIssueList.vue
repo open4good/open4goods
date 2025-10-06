@@ -63,7 +63,7 @@
               v-if="issue.url"
               :href="issue.url"
               target="_blank"
-              rel="noopener"
+              rel="noopener nofollow"
               variant="text"
               size="small"
               :aria-label="`${openIssueLabel} ${issue.number ?? ''}`"
@@ -83,11 +83,11 @@
                   variant="flat"
                   size="small"
                   :aria-label="`${voteButtonAriaLabel} ${issue.title}`"
-                  :disabled="isVoteDisabled"
+                  :disabled="isVoteDisabled || !issue.id || hasIssueBeenVoted(issue.id)"
                   :loading="votePendingId === issue.id"
                   @click="handleVote(issue.id)"
                 >
-                  {{ voteButtonLabel }}
+                  {{ hasIssueBeenVoted(issue.id) ? voteCompletedLabel : voteButtonLabel }}
                 </v-btn>
               </span>
             </template>
@@ -99,11 +99,11 @@
             variant="flat"
             size="small"
             :aria-label="`${voteButtonAriaLabel} ${issue.title}`"
-            :disabled="isVoteDisabled"
+            :disabled="isVoteDisabled || !issue.id || hasIssueBeenVoted(issue.id)"
             :loading="votePendingId === issue.id"
             @click="handleVote(issue.id)"
           >
-            {{ voteButtonLabel }}
+            {{ hasIssueBeenVoted(issue.id) ? voteCompletedLabel : voteButtonLabel }}
           </v-btn>
         </template>
       </v-list-item>
@@ -146,6 +146,8 @@ const props = defineProps<{
   voteDisabledWhenNoVotesMessage: string
   voteDisabledWhenBlockedMessage: string
   issueIcon: IssueIcon
+  voteCompletedLabel: string
+  votedIssueIds: readonly string[]
 }>()
 
 const voteDisabledMessage = computed(() => {
@@ -164,6 +166,16 @@ const isVoteDisabled = computed(
   () => !props.canVote || (props.remainingVotes !== null && props.remainingVotes <= 0),
 )
 
+const votedIssueIdsSet = computed(() => new Set(props.votedIssueIds))
+
+const hasIssueBeenVoted = (issueId: string | undefined): boolean => {
+  if (!issueId) {
+    return false
+  }
+
+  return votedIssueIdsSet.value.has(issueId)
+}
+
 const issueKey = (issue: FeedbackIssueDisplay) => {
   if (issue.id) {
     return issue.id
@@ -181,7 +193,7 @@ const issueKey = (issue: FeedbackIssueDisplay) => {
 }
 
 const handleVote = (issueId: string | undefined) => {
-  if (!issueId || isVoteDisabled.value) {
+  if (!issueId || isVoteDisabled.value || hasIssueBeenVoted(issueId)) {
     return
   }
 
@@ -233,6 +245,17 @@ const handleVote = (issueId: string | undefined) => {
   &__item {
     border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.15);
     padding-block: 1.25rem;
+    align-items: flex-start;
+
+    :deep(.v-list-item__content) {
+      min-width: 0;
+    }
+
+    :deep(.v-list-item__append) {
+      align-self: flex-start;
+      margin-left: 1rem;
+      margin-top: 0.35rem;
+    }
 
     &:last-of-type {
       border-bottom: none;
@@ -246,13 +269,16 @@ const handleVote = (issueId: string | undefined) => {
 
   &__issue-header {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: 0.75rem;
+    row-gap: 0.35rem;
   }
 
   &__issue-number {
     font-weight: 600;
     color: rgb(var(--v-theme-primary));
+    flex: 0 0 auto;
   }
 
   &__issue-title {
@@ -260,6 +286,9 @@ const handleVote = (issueId: string | undefined) => {
     font-size: 1.1rem;
     margin: 0;
     color: rgb(var(--v-theme-text-neutral-strong));
+    white-space: normal;
+    word-break: break-word;
+    flex: 1 1 100%;
   }
 
   &__issue-meta {

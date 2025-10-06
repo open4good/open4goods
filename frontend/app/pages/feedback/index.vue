@@ -67,6 +67,8 @@
                   :vote-disabled-when-no-votes-message="t('feedback.voting.noVotes')"
                   :vote-disabled-when-blocked-message="t('feedback.voting.limitReached')"
                   :issue-icon="tab.icon"
+                  :vote-completed-label="t('feedback.voting.voteCompleted')"
+                  :voted-issue-ids="votedIssueIds"
                   @vote="(issueId) => handleVote(issueId, tab.value)"
                 />
               </v-col>
@@ -139,6 +141,7 @@ import type {
   FeedbackIssueDto,
   FeedbackRemainingVotesDto,
   FeedbackVoteEligibilityDto,
+  FeedbackSubmissionResponseDto,
 } from '~~/shared/api-client'
 
 definePageMeta({
@@ -284,6 +287,7 @@ const voteStatusMessage = computed(() => {
 })
 
 const votingIssueId = ref<string | null>(null)
+const votedIssueIds = ref<string[]>([])
 
 const submissionState = reactive({
   submitting: false,
@@ -344,6 +348,10 @@ const handleVote = async (issueId: string | undefined, category: FeedbackCategor
       body: { issueId },
     })
 
+    if (!votedIssueIds.value.includes(issueId)) {
+      votedIssueIds.value = [...votedIssueIds.value, issueId]
+    }
+
     if (category === 'IDEA') {
       await ideaIssuesData.refresh()
     } else {
@@ -388,20 +396,20 @@ const handleSubmitFeedback = async (payload: FeedbackFormSubmitPayload) => {
   submittedCategory.value = payload.type as FeedbackCategory
 
   try {
-    await $fetch('/api/feedback', {
+    const response = await $fetch<FeedbackSubmissionResponseDto>('/api/feedback', {
       method: 'POST',
       body: payload,
     })
 
-    submissionState.success = true
-
-    if (payload.type === 'IDEA') {
-      await ideaIssuesData.refresh()
-    } else {
-      await bugIssuesData.refresh()
+    if (!response.success) {
+      submissionState.success = false
+      submissionState.errorMessage = response.message ?? String(t('feedback.common.genericError'))
+      return
     }
 
-    await refreshVotesState()
+    submissionState.success = true
+
+    appendSubmittedIssue(payload.type as FeedbackCategory, payload, response)
   } catch (error) {
     console.error('Failed to submit feedback', error)
     submissionState.success = false
@@ -423,6 +431,7 @@ const heroPrimaryCta = computed(() => ({
   ariaLabel: String(t('feedback.hero.primaryCta.ariaLabel')),
   href: '#feedback-tabs',
   icon: 'mdi-arrow-down-bold',
+  onClick: handleHeroPrimaryCtaClick,
 }))
 
 const heroSecondaryCta = computed(() => ({
@@ -430,7 +439,7 @@ const heroSecondaryCta = computed(() => ({
   ariaLabel: String(t('feedback.hero.secondaryCta.ariaLabel')),
   href: 'https://github.com/open4good/open4goods/issues',
   target: '_blank',
-  rel: 'noopener',
+  rel: 'noopener nofollow',
   icon: 'mdi-open-in-new',
 }))
 
@@ -489,6 +498,56 @@ const openSourceCards = computed(() => [
 const canonicalUrl = computed(() =>
   new URL(resolveLocalizedRoutePath('feedback', locale.value), requestURL.origin).toString(),
 )
+
+const appendSubmittedIssue = (
+  category: FeedbackCategory,
+  payload: FeedbackFormSubmitPayload,
+  response: FeedbackSubmissionResponseDto,
+) => {
+  const issuesRef = category === 'IDEA' ? ideaIssuesData.data : bugIssuesData.data
+  const existingIssues = issuesRef.value ?? []
+  const trimmedTitle = payload.title.trim()
+
+  const newIssue: FeedbackIssueDisplay = {
+    number: response.issueNumber ?? undefined,
+    title: trimmedTitle,
+    url: response.issueUrl ?? undefined,
+    votes: 0,
+  }
+
+  const deduplicatedIssues = existingIssues.filter((issue) => {
+    if (response.issueNumber && issue.number === response.issueNumber) {
+      return false
+    }
+
+    if (response.issueUrl && issue.url === response.issueUrl) {
+      return false
+    }
+
+    if (!response.issueNumber && issue.title?.trim().toLowerCase() === trimmedTitle.toLowerCase()) {
+      return false
+    }
+
+    return true
+  })
+
+  issuesRef.value = [newIssue, ...deduplicatedIssues] as FeedbackIssueDto[]
+}
+
+const handleHeroPrimaryCtaClick = (event: MouseEvent) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const target = document.getElementById('feedback-tabs')
+
+  if (!target) {
+    return
+  }
+
+  event.preventDefault()
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 const ogLocale = computed(() => locale.value.replace('-', '_'))

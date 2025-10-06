@@ -55,7 +55,7 @@
 
       <v-form ref="formRef" class="feedback-form__form" @submit.prevent="onSubmit">
         <v-row dense>
-          <v-col cols="12" md="6">
+          <v-col cols="12">
             <v-text-field
               v-model="author"
               :label="authorLabel"
@@ -67,7 +67,7 @@
             />
           </v-col>
 
-          <v-col cols="12" md="6">
+          <v-col cols="12">
             <v-text-field
               v-model="titleInput"
               :label="titleLabel"
@@ -313,7 +313,6 @@ const resetForm = () => {
     padding: clamp(1.5rem, 3vw, 2.25rem);
     background: rgb(var(--v-theme-surface-glass-strong));
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
-    box-shadow: 0 16px 48px rgba(var(--v-theme-shadow-primary-600), 0.16);
   }
 
   &__header {
@@ -325,7 +324,6 @@ const resetForm = () => {
 
   &__header-icon {
     backdrop-filter: blur(8px);
-    box-shadow: 0 12px 32px rgba(var(--v-theme-shadow-primary-600), 0.12);
   }
 
   &__eyebrow {

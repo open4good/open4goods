@@ -53,8 +53,6 @@
       "feedback": {
         "title": "Feedback",
         "links": {
-          "idea": "Have an idea?",
-          "issue": "Found a bug?",
           "contact": "Contact us",
           "linkedin": "Follow us"
         }
@@ -431,7 +429,8 @@
       "openIssue": "Open discussion",
       "noVotes": "You have no votes left right now.",
       "limitReached": "You reached your voting limit for now.",
-      "remaining": "You have {count} votes remaining."
+      "remaining": "You have {count} votes remaining.",
+      "voteCompleted": "Done"
     },
     "form": {
       "sections": {
