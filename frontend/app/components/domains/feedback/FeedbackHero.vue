@@ -13,11 +13,9 @@
             <p class="feedback-hero__subtitle">
               {{ subtitle }}
             </p>
-            <TextContent
-              :bloc-id="descriptionBlocId"
-              :ipsum-length="220"
-              class="feedback-hero__description"
-            />
+            <p class="feedback-hero__description">
+              {{ description }}
+            </p>
 
             <div class="feedback-hero__actions" role="group" :aria-label="ctaGroupLabel">
               <v-btn
@@ -90,7 +88,6 @@
 </template>
 
 <script setup lang="ts">
-import TextContent from '~/components/domains/content/TextContent.vue'
 
 type HeroLink = {
   label: string
@@ -124,7 +121,7 @@ defineProps<{
   eyebrow: string
   title: string
   subtitle: string
-  descriptionBlocId: string
+  description: string
   primaryCta?: HeroLink
   secondaryCta?: HeroLink
   ctaGroupLabel: string

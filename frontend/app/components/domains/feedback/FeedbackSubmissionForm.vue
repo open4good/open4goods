@@ -14,7 +14,9 @@
         </div>
       </div>
 
-      <TextContent :bloc-id="introBlocId" :ipsum-length="170" class="feedback-form__intro" />
+      <p class="feedback-form__intro">
+        {{ intro }}
+      </p>
 
       <v-alert
         v-if="success"
@@ -150,7 +152,6 @@ import { computed, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { VForm } from 'vuetify/components'
 import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
-import TextContent from '~/components/domains/content/TextContent.vue'
 
 export interface FeedbackFormSubmitPayload {
   type: string
@@ -166,7 +167,7 @@ const props = defineProps<{
   eyebrow: string
   title: string
   subtitle: string
-  introBlocId: string
+  intro: string
   categoryIcon: string
   categoryType: string
   submitting: boolean

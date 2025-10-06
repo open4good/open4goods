@@ -366,6 +366,7 @@
       "eyebrow": "Retours utilisateurs",
       "title": "Co-construisons Nudger avec vos idées",
       "subtitle": "Signalez les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
+      "description": "Vos retours orientent notre feuille de route. Découvrez les demandes déjà déposées, soutenez celles qui vous parlent et proposez les vôtres.",
       "ctaGroupLabel": "Actions de feedback",
       "primaryCta": {
         "label": "Découvrir le tableau de feedback",
@@ -394,16 +395,19 @@
     "tabs": {
       "eyebrow": "Tableau communautaire",
       "title": "Aidez-nous à prioriser la feuille de route",
+      "description": "Choisissez une catégorie pour explorer les discussions en cours, voter pour les sujets qui vous concernent ou en ouvrir une nouvelle.",
       "ariaLabel": "Catégories de feedback",
       "idea": {
         "label": "Idées",
         "caption": "Fonctionnalités & améliorations",
-        "issueTitle": "Idées de la communauté"
+        "issueTitle": "Idées de la communauté",
+        "description": "Proposez des améliorations qui rendraient Nudger plus utile pour vous ou votre organisation. Nous passons chaque idée en revue chaque semaine."
       },
       "bug": {
         "label": "Bugs",
         "caption": "Anomalies de l'expérience",
-        "issueTitle": "Bugs signalés"
+        "issueTitle": "Bugs signalés",
+        "description": "Décrivez toute anomalie ou comportement inattendu observé. Des signalements précis nous aident à corriger plus vite."
       }
     },
     "issues": {
@@ -427,6 +431,7 @@
           "eyebrow": "Proposer une idée",
           "title": "Imaginez la prochaine évolution",
           "subtitle": "Expliquez comment Nudger pourrait mieux vous aider.",
+          "intro": "Présentez le contexte de votre idée, son importance et la manière dont elle améliorerait Nudger pour toutes et tous.",
           "titlePlaceholder": "Ex. Comparer l'empreinte carbone des frigos",
           "messagePlaceholder": "Décrivez votre idée, le contexte et les bénéfices attendus."
         },
@@ -434,6 +439,7 @@
           "eyebrow": "Signaler un bug",
           "title": "Décrivez le problème rencontré",
           "subtitle": "Plus vous donnez de détails, plus nous pourrons corriger rapidement.",
+          "intro": "Partagez les étapes pour reproduire le bug, ce que vous attendiez et ce qui s'est réellement produit afin que nous puissions enquêter rapidement.",
           "titlePlaceholder": "Ex. Erreur 500 sur la fiche produit",
           "messagePlaceholder": "Précisez les étapes, le comportement attendu et ce qui s'est produit."
         }
@@ -478,14 +484,17 @@
     "openSource": {
       "eyebrow": "Collaboration ouverte",
       "title": "Explorez nos communs open source et open data",
+      "description": "Nous publions notre feuille de route, notre code et nos jeux de données pour que chacun puisse auditer, réutiliser ou contribuer à Nudger.",
       "cards": {
         "opensource": {
           "title": "Contribuer sur GitHub",
+          "description": "Parcourez nos dépôts, suivez les pull requests en cours et soumettez vos propres contributions.",
           "cta": "Voir la page open source",
           "ariaLabel": "Aller vers la page open source de Nudger"
         },
         "opendata": {
           "title": "Analyser nos données ouvertes",
+          "description": "Téléchargez les jeux de données qui alimentent Nudger et réutilisez-les dans vos recherches ou projets.",
           "cta": "Voir la page open data",
           "ariaLabel": "Aller vers la page open data de Nudger"
         }

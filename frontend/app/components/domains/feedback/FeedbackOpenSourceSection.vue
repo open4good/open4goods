@@ -6,7 +6,9 @@
         <h2 id="feedback-open-source-heading" class="feedback-open-source__title">
           {{ title }}
         </h2>
-        <TextContent :bloc-id="introBlocId" :ipsum-length="180" class="feedback-open-source__description" />
+        <p class="feedback-open-source__description">
+          {{ description }}
+        </p>
       </div>
 
       <v-row class="g-6 mt-6">
@@ -18,7 +20,9 @@
               </v-avatar>
               <h3 class="feedback-open-source__card-title">{{ card.title }}</h3>
             </div>
-            <TextContent :bloc-id="card.descriptionBlocId" :ipsum-length="150" class="feedback-open-source__card-text" />
+            <p class="feedback-open-source__card-text">
+              {{ card.description }}
+            </p>
             <v-btn
               :href="card.cta.href"
               :to="card.cta.to"
@@ -39,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import TextContent from '~/components/domains/content/TextContent.vue'
 
 type FeedbackCardCta = {
   label: string
@@ -53,14 +56,14 @@ type FeedbackCardCta = {
 type FeedbackCard = {
   icon: string
   title: string
-  descriptionBlocId: string
+  description: string
   cta: FeedbackCardCta
 }
 
 defineProps<{
   eyebrow: string
   title: string
-  introBlocId: string
+  description: string
   cards: FeedbackCard[]
 }>()
 </script>

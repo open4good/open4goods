@@ -365,6 +365,7 @@
       "eyebrow": "Product feedback",
       "title": "Shape Nudger with your ideas",
       "subtitle": "Report bugs, suggest features and vote on the improvements you need next.",
+      "description": "Your feedback steers our roadmap. Discover what others requested, upvote the most useful ideas and submit your own improvements.",
       "ctaGroupLabel": "Feedback actions",
       "primaryCta": {
         "label": "Browse the feedback board",
@@ -393,16 +394,19 @@
     "tabs": {
       "eyebrow": "Community board",
       "title": "Help us prioritise the roadmap",
+      "description": "Pick a category to explore ongoing discussions, vote for the topics that resonate with you, or open a new one.",
       "ariaLabel": "Feedback categories",
       "idea": {
         "label": "Ideas",
         "caption": "Product improvements & new features",
-        "issueTitle": "Community ideas"
+        "issueTitle": "Community ideas",
+        "description": "Suggest enhancements that would make Nudger more helpful for you or your organisation. We review every idea weekly."
       },
       "bug": {
         "label": "Bugs",
         "caption": "Issues affecting the experience",
-        "issueTitle": "Reported bugs"
+        "issueTitle": "Reported bugs",
+        "description": "Describe any malfunction or inaccurate behaviour you spotted. Precise reports help us fix issues faster."
       }
     },
     "issues": {
@@ -426,6 +430,7 @@
           "eyebrow": "Share an idea",
           "title": "Imagine the next improvement",
           "subtitle": "Explain how Nudger could better help you or your organisation.",
+          "intro": "Explain the context of your idea, why it matters and how it would improve Nudger for everyone.",
           "titlePlaceholder": "e.g. Compare the carbon footprint of fridges",
           "messagePlaceholder": "Describe your idea, the context and the impact you expect."
         },
@@ -433,6 +438,7 @@
           "eyebrow": "Report a bug",
           "title": "Tell us what went wrong",
           "subtitle": "The more details you share, the faster we can investigate and fix it.",
+          "intro": "Share the steps to reproduce the bug, what you expected and what actually happened so we can investigate quickly.",
           "titlePlaceholder": "e.g. Error 500 on the product page",
           "messagePlaceholder": "List the steps to reproduce, what you expected and what happened."
         }
@@ -477,14 +483,17 @@
     "openSource": {
       "eyebrow": "Open collaboration",
       "title": "Explore our open source and open data",
+      "description": "We publish our roadmap, code and datasets so anyone can audit, reuse or contribute to Nudger.",
       "cards": {
         "opensource": {
           "title": "Contribute on GitHub",
+          "description": "Browse our repositories, follow ongoing pull requests and submit your own contributions.",
           "cta": "Visit the open source page",
           "ariaLabel": "Go to the Nudger open source page"
         },
         "opendata": {
           "title": "Analyse our open data",
+          "description": "Download the datasets powering Nudger and reuse them in your research or projects.",
           "cta": "Visit the open data page",
           "ariaLabel": "Go to the Nudger open data page"
         }
