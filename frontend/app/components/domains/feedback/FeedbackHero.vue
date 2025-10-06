@@ -90,12 +90,6 @@ type HeroLink = {
   onClick?: (event: MouseEvent) => void
 }
 
-type HeroHighlight = {
-  icon: string
-  title: string
-  description?: string
-}
-
 type HeroStatItem = {
   icon: string
   label: string
@@ -116,7 +110,6 @@ defineProps<{
   primaryCta?: HeroLink
   secondaryCta?: HeroLink
   ctaGroupLabel: string
-  highlights: HeroHighlight[]
   stats: HeroStats
 }>()
 </script>
@@ -184,35 +177,6 @@ defineProps<{
 
   &__cta {
     font-weight: 600;
-  }
-
-  &__highlights {
-    list-style: none;
-    padding: 0;
-    margin: 2rem 0 0;
-    display: grid;
-    gap: 1rem;
-  }
-
-  &__highlight-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  &__highlight-icon {
-    backdrop-filter: blur(8px);
-    box-shadow: 0 10px 30px rgba(var(--v-theme-shadow-primary-600), 0.18);
-  }
-
-  &__highlight-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-
-  &__highlight-description {
-    margin: 0;
-    color: rgba(var(--v-theme-hero-pill-on-dark), 0.72);
   }
 
   &__card {

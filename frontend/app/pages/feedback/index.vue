@@ -8,7 +8,6 @@
       :primary-cta="heroPrimaryCta"
       :secondary-cta="heroSecondaryCta"
       :cta-group-label="t('feedback.hero.ctaGroupLabel')"
-      :highlights="heroHighlights"
       :stats="heroStats"
     />
 
@@ -439,24 +438,6 @@ const heroSecondaryCta = computed(() => ({
   rel: 'noopener nofollow',
   icon: 'mdi-open-in-new',
 }))
-
-const heroHighlights = computed(() => [
-  {
-    icon: 'mdi-account-group-outline',
-    title: String(t('feedback.hero.highlights.community.title')),
-    description: String(t('feedback.hero.highlights.community.description')),
-  },
-  {
-    icon: 'mdi-shield-check-outline',
-    title: String(t('feedback.hero.highlights.trust.title')),
-    description: String(t('feedback.hero.highlights.trust.description')),
-  },
-  {
-    icon: 'mdi-rocket-launch-outline',
-    title: String(t('feedback.hero.highlights.roadmap.title')),
-    description: String(t('feedback.hero.highlights.roadmap.description')),
-  },
-])
 
 const heroStats = computed(() => ({
   eyebrow: String(t('feedback.hero.stats.eyebrow')),
