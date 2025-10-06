@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.opendata.service.OpenDataService;
@@ -95,17 +96,17 @@ public class OpenDataController  implements SitemapExposedController{
 	}
 
 	@GetMapping(path = "/opendata/gtin-open-data.zip")
-	public void downloadGtinData(final HttpServletResponse response) throws IOException {
+	public void downloadGtinData(final HttpServletResponse response) throws IOException, TechnicalException {
         downloadData(response, "gtin-open-data.zip", openDataConfig.gtinZipFile());
 	}
 
 	@GetMapping(path = "/opendata/isbn-open-data.zip")
-	public void downloadIsbnData(final HttpServletResponse response) throws IOException {
+	public void downloadIsbnData(final HttpServletResponse response) throws IOException, TechnicalException {
         downloadData(response, "isbn-open-data.zip", openDataConfig.isbnZipFile());
 	}
 
-	private void downloadData(final HttpServletResponse response, String fileName, File zipFile) throws IOException {
-		try (InputStream str = new FileInputStream(zipFile)) {
+	private void downloadData(final HttpServletResponse response, String fileName, File zipFile) throws IOException, TechnicalException {
+		try (InputStream str = openDataService.limitedRateStream(zipFile.getAbsolutePath())) {
 			response.setHeader("Content-type", "application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 			IOUtils.copy(str, response.getOutputStream());
@@ -114,8 +115,8 @@ public class OpenDataController  implements SitemapExposedController{
 			openDataService.decrementDownloadCounter();
 		}
 	}
-	
-	
+
+
 	@GetMapping(path = "/opendata/generate")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void generate(final HttpServletResponse response) throws IOException {

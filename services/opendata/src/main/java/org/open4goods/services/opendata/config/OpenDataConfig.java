@@ -17,8 +17,7 @@ import jakarta.validation.constraints.NotNull;
  * Configuration properties for the OpenData service.
  */
 @Configuration
-@ConfigurationProperties(prefix = "openDataConfig")
-@Validated
+@ConfigurationProperties(prefix = "open-data-config")
 public class OpenDataConfig {
 
     /**
@@ -34,8 +33,7 @@ public class OpenDataConfig {
     /**
      * Flag indicating whether scheduled generation is allowed.
      */
-    @NotNull
-    private Boolean generationEnabled;
+    private Boolean generationEnabled = false;
 
     /**
      * Root folder where OpenData assets are stored.
@@ -53,7 +51,11 @@ public class OpenDataConfig {
     private String gtinFilename = "gtin.zip";
     private String tmpGtinFilename = "gtin-tmp.zip";
 
-    /**
+    public OpenDataConfig() {
+		super();
+	}
+
+	/**
      * Base URLs used to build product links in the export.
      */
     private Localisable<String, String> baseUrls = new Localisable<>();
@@ -74,15 +76,17 @@ public class OpenDataConfig {
         this.concurrentDownloads = concurrentDownloads;
     }
 
+
+
     public Boolean getGenerationEnabled() {
-        return generationEnabled;
-    }
+		return generationEnabled;
+	}
 
-    public void setGenerationEnabled(Boolean generationEnabled) {
-        this.generationEnabled = generationEnabled;
-    }
+	public void setGenerationEnabled(Boolean generationEnabled) {
+		this.generationEnabled = generationEnabled;
+	}
 
-    public boolean isGenerationEnabled() {
+	public boolean isGenerationEnabled() {
         return Boolean.TRUE.equals(generationEnabled);
     }
 

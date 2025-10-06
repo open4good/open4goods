@@ -29,7 +29,6 @@ import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.opendata.config.OpenDataConfig;
-import org.open4goods.services.opendata.url.OpenDataUrlResolver;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,23 +94,19 @@ public class OpenDataService implements HealthIndicator {
 
     private final ProductRepository aggregatedDataRepository;
     private final OpenDataConfig openDataConfig;
-    private final OpenDataUrlResolver openDataUrlResolver;
     private final boolean generationEnabled;
 
     private final AtomicBoolean exportRunning = new AtomicBoolean(false);
     private final AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
 
     public OpenDataService(ProductRepository aggregatedDataRepository,
-                           OpenDataConfig openDataConfig,
-                           OpenDataUrlResolver openDataUrlResolver) {
+                           OpenDataConfig openDataConfig) {
         Assert.notNull(aggregatedDataRepository, "aggregatedDataRepository must not be null");
         Assert.notNull(openDataConfig, "openDataConfig must not be null");
         Assert.notNull(openDataConfig.getGenerationEnabled(), "openDataConfig.generationEnabled must be configured");
-        Assert.notNull(openDataUrlResolver, "openDataUrlResolver must not be null");
 
         this.aggregatedDataRepository = aggregatedDataRepository;
         this.openDataConfig = openDataConfig;
-        this.openDataUrlResolver = openDataUrlResolver;
         this.generationEnabled = openDataConfig.isGenerationEnabled();
 
         LOGGER.info("OpenDataService scheduled generation is {}", generationEnabled ? "enabled" : "disabled");
@@ -136,7 +131,7 @@ public class OpenDataService implements HealthIndicator {
      * Provides a limited bandwidth stream for downloading the opendata file.
      * Enforces a limit on the number of concurrent downloads.
      */
-    public InputStream limitedRateStream() throws TechnicalException, FileNotFoundException {
+    public InputStream limitedRateStream(String file) throws TechnicalException, FileNotFoundException {
 
         RateLimiter rateLimiter = RateLimiter.create(openDataConfig.getDownloadSpeedKb() * FileUtils.ONE_KB);
 
@@ -148,7 +143,7 @@ public class OpenDataService implements HealthIndicator {
 
         try {
             LOGGER.info("Starting opendata dataset download");
-            return new ThrottlingInputStream(new BufferedInputStream(new FileInputStream(openDataConfig.openDataFile())),
+            return new ThrottlingInputStream(new BufferedInputStream(new FileInputStream(file)),
                     rateLimiter) {
                 @Override
                 public void close() throws IOException {
@@ -308,7 +303,8 @@ public class OpenDataService implements HealthIndicator {
         line[11] = StringUtils.join(data.getDatasourceCategories(), " ; ");
 
         try {
-            String url = openDataUrlResolver.resolve(data, Locale.FRANCE);
+        	// TODO : Point to international website + internationalized URL
+            String url = "https://nudger.fr/"+data.gtin();
             line[12] = url;
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for GTIN {}", data.getId(), e);
@@ -334,7 +330,8 @@ public class OpenDataService implements HealthIndicator {
             line[6] = data.bestPrice().getCurrency().toString();
         }
         try {
-            String url = openDataUrlResolver.resolve(data, Locale.FRANCE);
+        	// TODO : Point to international website + internationalized URL
+            String url = "https://nudger.fr/"+data.gtin();
             line[7] = url;
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for ISBN {}", data.getId(), e);
