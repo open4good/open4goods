@@ -9,6 +9,59 @@ export interface BackendErrorDetails {
   logMessage: string
 }
 
+const GLOBAL_STATE_KEY = Symbol.for('open4goods.backendErrorLogger')
+
+interface BackendErrorLoggerState {
+  lastLoggedAt: Map<string, number>
+}
+
+const getLoggerState = (): BackendErrorLoggerState => {
+  const globalScope = globalThis as typeof globalThis & {
+    [GLOBAL_STATE_KEY]?: BackendErrorLoggerState
+  }
+
+  if (!globalScope[GLOBAL_STATE_KEY]) {
+    globalScope[GLOBAL_STATE_KEY] = {
+      lastLoggedAt: new Map<string, number>(),
+    }
+  }
+
+  return globalScope[GLOBAL_STATE_KEY] as BackendErrorLoggerState
+}
+
+interface LogBackendErrorOptions {
+  /**
+   * Unique identifier for the call site.
+   * When combined with the backend error log message it helps throttling duplicates.
+   */
+  namespace: string
+  details: BackendErrorDetails
+  /**
+   * Minimum delay (in milliseconds) between two identical logs.
+   * Defaults to 60 seconds which keeps local dev consoles readable
+   * while still surfacing persistent outages.
+   */
+  throttleMs?: number
+}
+
+export const logBackendError = ({
+  namespace,
+  details,
+  throttleMs = 60_000,
+}: LogBackendErrorOptions) => {
+  const { lastLoggedAt } = getLoggerState()
+  const cacheKey = `${namespace}:${details.logMessage}`
+  const now = Date.now()
+  const lastLogTime = lastLoggedAt.get(cacheKey) ?? 0
+
+  if (now - lastLogTime < throttleMs) {
+    return
+  }
+
+  lastLoggedAt.set(cacheKey, now)
+  console.error(namespace, details.logMessage, details)
+}
+
 function buildLogMessage({
   statusCode,
   statusText,
