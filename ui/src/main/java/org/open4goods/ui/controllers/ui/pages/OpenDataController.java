@@ -41,7 +41,6 @@ public class OpenDataController  implements SitemapExposedController{
     private @Autowired UiService uiService;
     private final OpenDataConfig openDataConfig;
 
-    @Autowired
     public OpenDataController(OpenDataService openDataService, OpenDataConfig openDataConfig) {
         this.openDataService = openDataService;
         this.openDataConfig = openDataConfig;
