@@ -367,7 +367,7 @@
       "description": "Vos retours orientent notre feuille de route. Découvrez les demandes déjà déposées, soutenez celles qui vous parlent et proposez les vôtres.",
       "ctaGroupLabel": "Actions de feedback",
       "primaryCta": {
-        "label": "Découvrir le tableau de feedback",
+        "label": "Outil de feedback",
         "ariaLabel": "Faire défiler jusqu'au tableau de feedback Nudger"
       },
       "secondaryCta": {
