@@ -47,28 +47,38 @@
           <v-window-item v-for="tab in tabs" :key="tab.value" :value="tab.value">
             <v-row class="g-8 mt-8" align="stretch">
               <v-col cols="12" md="6">
-                <FeedbackIssueList
-                  :heading-id="`${tab.value.toLowerCase()}-issues-heading`"
-                  :title="tab.issueTitle"
-                  :description="tab.description"
-                  :issues="issuesByType[tab.value]"
-                  :loading="issueLoadingStates[tab.value]"
-                  :error-message="issueErrorMessages[tab.value]"
-                  :empty-state-label="tab.emptyMessage"
-                  :vote-button-label="t('feedback.voting.voteButton')"
-                  :vote-button-aria-label="t('feedback.voting.voteButtonAria')"
-                  :open-issue-label="t('feedback.voting.openIssue')"
-                  :status-message="voteStatusMessage"
-                  :remaining-votes="remainingVotes"
-                  :can-vote="canVote"
-                  :vote-pending-id="votingIssueId"
-                  :vote-disabled-when-no-votes-message="t('feedback.voting.noVotes')"
-                  :vote-disabled-when-blocked-message="t('feedback.voting.limitReached')"
-                  :issue-icon="tab.icon"
-                  :vote-completed-label="t('feedback.voting.voteCompleted')"
-                  :voted-issue-ids="votedIssueIds"
-                  @vote="(issueId) => handleVote(issueId, tab.value)"
-                />
+                <ClientOnly>
+                  <FeedbackIssueList
+                    :heading-id="`${tab.value.toLowerCase()}-issues-heading`"
+                    :title="tab.issueTitle"
+                    :description="tab.description"
+                    :issues="issuesByType[tab.value]"
+                    :loading="issueLoadingStates[tab.value]"
+                    :error-message="issueErrorMessages[tab.value]"
+                    :empty-state-label="tab.emptyMessage"
+                    :vote-button-label="t('feedback.voting.voteButton')"
+                    :vote-button-aria-label="t('feedback.voting.voteButtonAria')"
+                    :open-issue-label="t('feedback.voting.openIssue')"
+                    :status-message="voteStatusMessage"
+                    :remaining-votes="remainingVotes"
+                    :can-vote="canVote"
+                    :vote-pending-id="votingIssueId"
+                    :vote-disabled-when-no-votes-message="t('feedback.voting.noVotes')"
+                    :vote-disabled-when-blocked-message="t('feedback.voting.limitReached')"
+                    :issue-icon="tab.icon"
+                    :vote-completed-label="t('feedback.voting.voteCompleted')"
+                    :voted-issue-ids="votedIssueIds"
+                    @vote="(issueId) => handleVote(issueId, tab.value)"
+                  />
+
+                  <template #fallback>
+                    <v-skeleton-loader
+                      class="feedback-tabs__issues-fallback"
+                      max-width="420"
+                      type="heading, paragraph, list-item-two-line@3"
+                    />
+                  </template>
+                </ClientOnly>
               </v-col>
 
               <v-col cols="12" md="6">
@@ -222,11 +232,13 @@ const fetchIssues = async (category: FeedbackCategory) => {
 const ideaIssuesData = await useAsyncData<FeedbackIssueDto[]>(
   'feedback-issues-idea',
   () => fetchIssues('IDEA'),
+  { server: false, lazy: true },
 )
 
 const bugIssuesData = await useAsyncData<FeedbackIssueDto[]>(
   'feedback-issues-bug',
   () => fetchIssues('BUG'),
+  { server: false, lazy: true },
 )
 
 const remainingVotesData = await useAsyncData<FeedbackRemainingVotesDto>(
@@ -239,6 +251,7 @@ const remainingVotesData = await useAsyncData<FeedbackRemainingVotesDto>(
       return {}
     }
   },
+  { server: false, lazy: true },
 )
 
 const canVoteData = await useAsyncData<FeedbackVoteEligibilityDto>(
@@ -251,6 +264,7 @@ const canVoteData = await useAsyncData<FeedbackVoteEligibilityDto>(
       return { canVote: true }
     }
   },
+  { server: false, lazy: true },
 )
 
 const issuesByType = computed<Record<FeedbackCategory, FeedbackIssueDisplay[]>>(() => ({
@@ -346,6 +360,32 @@ const handleVote = async (issueId: string | undefined, category: FeedbackCategor
 
     if (!votedIssueIds.value.includes(issueId)) {
       votedIssueIds.value = [...votedIssueIds.value, issueId]
+    }
+
+    const currentRemainingVotes = remainingVotesData.data.value?.remainingVotes
+
+    if (typeof currentRemainingVotes === 'number') {
+      const nextRemainingVotes = Math.max(currentRemainingVotes - 1, 0)
+
+      if (!remainingVotesData.data.value) {
+        remainingVotesData.data.value = { remainingVotes: nextRemainingVotes }
+      } else {
+        remainingVotesData.data.value = {
+          ...remainingVotesData.data.value,
+          remainingVotes: nextRemainingVotes,
+        }
+      }
+
+      if (nextRemainingVotes <= 0) {
+        if (!canVoteData.data.value) {
+          canVoteData.data.value = { canVote: false }
+        } else {
+          canVoteData.data.value = {
+            ...canVoteData.data.value,
+            canVote: false,
+          }
+        }
+      }
     }
 
     if (category === 'IDEA') {
@@ -620,6 +660,11 @@ useHead(() => ({
 
   &__window {
     margin-top: 2.5rem;
+  }
+
+  &__issues-fallback {
+    width: 100%;
+    border-radius: 1rem;
   }
 }
 </style>
