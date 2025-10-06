@@ -4,6 +4,8 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
 import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.services.blog.service.BlogService;
+import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.service.OpenDataService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -37,6 +39,7 @@ public class AppConfig {
     ProductRepository productRepository() {
         return new ProductRepository();
     }
+
 
     @Bean
     BlogService blogService(@Autowired XwikiFacadeService xwikiFacadeService, @Autowired BlogConfiguration blogConfig) {

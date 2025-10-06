@@ -17,6 +17,7 @@ springdoc:
 
 front:
   resourceProviderRootPath: "https://nudger.fr"
+  resourceRootPath: "https://nudger.fr"
   cache:
     path: ./cache
   contact:
@@ -54,6 +55,9 @@ management:
     web:
       exposure:
         include: health,info,metrics
+
+open-data-config:
+  generation-enabled: false
 
 team-config:
   cores:
