@@ -229,42 +229,52 @@ const fetchIssues = async (category: FeedbackCategory) => {
   }
 }
 
+const votesRequestNonce = ref(0)
+
+const buildVotesQuery = () => (votesRequestNonce.value > 0 ? { cacheBuster: String(votesRequestNonce.value) } : undefined)
+
 const ideaIssuesData = await useAsyncData<FeedbackIssueDto[]>(
   'feedback-issues-idea',
   () => fetchIssues('IDEA'),
-  { server: false, lazy: true },
+  { server: false },
 )
 
 const bugIssuesData = await useAsyncData<FeedbackIssueDto[]>(
   'feedback-issues-bug',
   () => fetchIssues('BUG'),
-  { server: false, lazy: true },
+  { server: false },
 )
 
 const remainingVotesData = await useAsyncData<FeedbackRemainingVotesDto>(
   'feedback-remaining-votes',
   async () => {
     try {
-      return await $fetch('/api/feedback/votes/remaining')
+      return await $fetch('/api/feedback/votes/remaining', {
+        query: buildVotesQuery(),
+        headers: { 'cache-control': 'no-cache' },
+      })
     } catch (error) {
       console.warn('Unable to load remaining votes, falling back to unknown state', error)
       return {}
     }
   },
-  { server: false, lazy: true },
+  { server: false },
 )
 
 const canVoteData = await useAsyncData<FeedbackVoteEligibilityDto>(
   'feedback-can-vote',
   async () => {
     try {
-      return await $fetch('/api/feedback/votes/can')
+      return await $fetch('/api/feedback/votes/can', {
+        query: buildVotesQuery(),
+        headers: { 'cache-control': 'no-cache' },
+      })
     } catch (error) {
       console.warn('Unable to determine vote eligibility, assuming voting is allowed', error)
       return { canVote: true }
     }
   },
-  { server: false, lazy: true },
+  { server: false },
 )
 
 const issuesByType = computed<Record<FeedbackCategory, FeedbackIssueDisplay[]>>(() => ({
@@ -341,6 +351,7 @@ const extractErrorMessage = (error: unknown): string => {
 }
 
 const refreshVotesState = async () => {
+  votesRequestNonce.value = Date.now()
   await Promise.allSettled([remainingVotesData.refresh(), canVoteData.refresh()])
 }
 
