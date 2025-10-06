@@ -1,25 +1,27 @@
 <template>
-  <The-slide :items="items" />
+  <v-container>
+    <The-slide :items="categoryImages" />
+  </v-container>
 </template>
 
-<script setup>
- 
-// Mock images
-const items = ref([
-  'https://picsum.photos/150/150?random=1',
-  'https://picsum.photos/150/150?random=2',
-  'https://picsum.photos/150/150?random=3',
-  'https://picsum.photos/150/150?random=1',
-  'https://picsum.photos/150/150?random=2',
-  'https://picsum.photos/150/150?random=3',
-  'https://picsum.photos/150/150?random=1',
-  'https://picsum.photos/150/150?random=2',
-  'https://picsum.photos/150/150?random=3',
-  'https://picsum.photos/150/150?random=1',
-  'https://picsum.photos/150/150?random=2',
-  'https://picsum.photos/150/150?random=3',
-  'https://picsum.photos/150/150?random=1',
-  'https://picsum.photos/150/150?random=2',
-  'https://picsum.photos/150/150?random=3',
-])
+<script setup lang="ts">
+import { useCategories } from '~/composables/categories/useCategories'
+import type { VerticalConfigDto } from '~~/shared/api-client'
+
+const { categories, fetchCategories } = useCategories()
+
+await useAsyncData(
+  'home-categories-slide',
+  () => fetchCategories(true), // Only enabled categories
+  { server: true, immediate: true }
+)
+
+// Transform categories to image URLs for The-slide component
+const categoryImages = computed(() => {
+  return categories.value
+    .filter((category: VerticalConfigDto): category is VerticalConfigDto & { imageSmall: string } =>
+      Boolean(category.imageSmall)
+    )
+    .map((category: VerticalConfigDto & { imageSmall: string }) => category.imageSmall)
+})
 </script>
