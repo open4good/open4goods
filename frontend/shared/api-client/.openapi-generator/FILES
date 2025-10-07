@@ -4,6 +4,7 @@ apis/CategoriesApi.ts
 apis/ContactApi.ts
 apis/ContentApi.ts
 apis/FeedbackApi.ts
+apis/OpenDataApi.ts
 apis/ProductApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
@@ -43,6 +44,9 @@ models/LegacyPromptConfig.ts
 models/LoginRequest.ts
 models/LogoutResponse.ts
 models/Member.ts
+models/OpenDataDatasetDto.ts
+models/OpenDataDownloadLimitsDto.ts
+models/OpenDataOverviewDto.ts
 models/PageDto.ts
 models/PageMetaDto.ts
 models/PageProductDto.ts
