@@ -74,7 +74,7 @@
       "tagTitle": "Articles {tag} – Blog Nudger",
       "pageTitle": "{title} – Page {page}",
       "description": "Découvrez les guides et actualités de Nudger.",
-      "tagDescription": "Parcourez les articles {tag} du blog Nudger pour."
+      "tagDescription": "Parcourez les articles {tag} du blog Nudger."
     },
     "pagination": {
       "info": "Page {current} sur {total} ({count} articles)",
@@ -90,8 +90,8 @@
     },
     "hero": {
       "eyebrow": "Blog Nudger",
-      "title": "Des idées pour acheter plus responsable",
-      "subtitle": "Des articles courts sur les appareils durables, les nudges et les coulisses de Nudger."
+      "title": "L'actualité",
+      "subtitle": "Des articles courts sur la consommation responsable et les coulisses de Nudger."
     },
     "list": {
       "loading": "Chargement des articles…",
