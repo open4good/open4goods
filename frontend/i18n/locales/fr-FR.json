@@ -604,16 +604,16 @@
       "subtitle": "Comprendre notre approche de l'open data.",
       "items": {
         "sources": {
-          "question": "D'où proviennent les jeux de données ?"
+          "question": "D'où proviennent les données ?"
         },
         "definition": {
-          "question": "Que signifie pour nous « open data » ?"
+          "question": "Que signifie « open data » ?"
         },
         "importance": {
-          "question": "Pourquoi l'open data est-il important pour le commerce ?"
+          "question": "Pourquoi l'open data est-il important ?"
         },
         "contributors": {
-          "question": "Comment contribuer à l'amélioration des jeux de données ?"
+          "question": "Qui produit et met à disposition les données ouvertes ?"
         }
       }
     },

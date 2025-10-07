@@ -15,7 +15,6 @@ const props = withDefaults(
     eyebrow?: string
     title: string
     subtitle: string
-    descriptionBlocId: string
     primaryCta?: HeroCta
   }>(),
   {
@@ -52,9 +51,8 @@ const handlePrimaryClick = (event: MouseEvent) => {
               <p class="opendata-hero__subtitle">{{ subtitle }}</p>
             </div>
 
-            <TextContent :bloc-id="descriptionBlocId" :ipsum-length="260" />
 
-            <div class="opendata-hero__actions" role="group">
+            <div class="mt-4 opendata-hero__actions" role="group">
               <v-btn
                 v-if="primaryCta"
                 :href="primaryCta.href"
