@@ -200,7 +200,7 @@ const downloadOptions = computed(() => {
         ariaLabel: String(t('opendata.datasets.common.download.fast.cta.ariaLabel')),
         href: String(t('opendata.datasets.common.download.fast.cta.href')),
         target: '_blank',
-        rel: 'noopener',
+        rel: 'noopener nofollow',
       },
     },
     {

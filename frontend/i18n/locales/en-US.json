@@ -270,10 +270,6 @@
       "primaryCta": {
         "label": "Explore the datasets",
         "ariaLabel": "Scroll to the open data datasets section"
-      },
-      "secondaryCta": {
-        "label": "View GTIN dataset",
-        "ariaLabel": "Navigate to the GTIN open data dataset page"
       }
     },
     "stats": {
@@ -281,7 +277,8 @@
       "placeholder": "—",
       "totalProducts": {
         "label": "Products covered",
-        "description": "Unique products referenced across all exports."
+        "description": "Unique products referenced across all exports.",
+        "millions": "+{value} million"
       },
       "datasets": {
         "label": "Published datasets",
@@ -290,10 +287,6 @@
       "totalSize": {
         "label": "Combined size",
         "description": "Total compressed footprint of weekly exports."
-      },
-      "downloadSpeed": {
-        "label": "Download policy",
-        "description": "Direct downloads limited to {concurrent} concurrent sessions."
       }
     },
     "datasets": {

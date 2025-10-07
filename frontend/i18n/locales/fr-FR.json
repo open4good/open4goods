@@ -271,10 +271,6 @@
       "primaryCta": {
         "label": "Découvrir les jeux de données",
         "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data"
-      },
-      "secondaryCta": {
-        "label": "Voir le dataset GTIN",
-        "ariaLabel": "Aller vers la page open data GTIN"
       }
     },
     "stats": {
@@ -282,7 +278,8 @@
       "placeholder": "—",
       "totalProducts": {
         "label": "Produits couverts",
-        "description": "Produits uniques recensés dans l'ensemble des exports."
+        "description": "Produits uniques recensés dans l'ensemble des exports.",
+        "millions": "+{value} millions"
       },
       "datasets": {
         "label": "Jeux de données publiés",
@@ -291,10 +288,6 @@
       "totalSize": {
         "label": "Taille cumulée",
         "description": "Volume compressé total des exports hebdomadaires."
-      },
-      "downloadSpeed": {
-        "label": "Politique de téléchargement",
-        "description": "Téléchargements directs limités à {concurrent} sessions simultanées."
       }
     },
     "datasets": {
