@@ -75,20 +75,31 @@
 										<th>#</th>
 									</tr>
 								</thead>
-								<tbody>
-									<tr>
-										<th class="align-middle">Dataset GTIN</th>
-										<td class="align-middle" th:text="${#dates.format(gtinLastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
-										<td class="align-middle" th:text="${gtinFileSize}"></td>
-										<td class="align-middle" th:text="${#numbers.formatDecimal(countGTIN, 0, 'COMMA', 0, 'POINT')}"></td>
-										<td class="align-middle text-center">
-											<a href="/opendata/gtin" class="btn btn-primary">
-												Voir les détails et télécharger
-											</a>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+                                                                <tbody>
+                                                                        <tr>
+                                                                                <th class="align-middle">Dataset GTIN</th>
+                                                                                <td class="align-middle" th:text="${#dates.format(gtinLastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
+                                                                                <td class="align-middle" th:text="${gtinFileSize}"></td>
+                                                                                <td class="align-middle" th:text="${#numbers.formatDecimal(countGTIN, 0, 'COMMA', 0, 'POINT')}"></td>
+                                                                                <td class="align-middle text-center">
+                                                                                        <a href="/opendata/gtin" class="btn btn-primary">
+                                                                                                Voir les détails et télécharger
+                                                                                        </a>
+                                                                                </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                                <th class="align-middle">Dataset ISBN</th>
+                                                                                <td class="align-middle" th:text="${#dates.format(isbnLastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
+                                                                                <td class="align-middle" th:text="${isbnFileSize}"></td>
+                                                                                <td class="align-middle" th:text="${#numbers.formatDecimal(countISBN, 0, 'COMMA', 0, 'POINT')}"></td>
+                                                                                <td class="align-middle text-center">
+                                                                                        <a href="/opendata/isbn" class="btn btn-primary">
+                                                                                                Voir les détails et télécharger
+                                                                                        </a>
+                                                                                </td>
+                                                                        </tr>
+                                                                </tbody>
+                                                        </table>
 
 							<h2 class="h3 my-4">Conditions d'utilisation</h2>
 							<div class="accordion" id="accordionExample1">
