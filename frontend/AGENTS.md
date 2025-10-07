@@ -12,6 +12,7 @@
 - **UI**: Vuetify 3 (via `vuetify-nuxt-module`) plus Nuxt modules for i18n, image, fonts, icons, Pinia, VueUse, MCP, etc.
 - **Node**: >= 20.x, **Package manager**: `pnpm@10.12.1`.
 - Generated OpenAPI client lives under `shared/api-client/` and must stay in sync with `front-api`.
+  - Doc: [docs/backend-services.md](Doc-services-usage)
 
 ## Everyday Commands (no `--offline` flag by default)
 - `pnpm install`

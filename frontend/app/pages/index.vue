@@ -10,7 +10,7 @@ const toggleDrawer = () => {
   <div class="full-height">
     <Hero-section @toggle-drawer="toggleDrawer" />
 
-    <The-items-selector />
+    <The-section-items-slide />
 
     <Bloc3Hz />
 

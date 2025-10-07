@@ -23,7 +23,7 @@ const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
 const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
-    to: resolveLocalizedRoutePath('ecoscore', currentLocale.value),
+    to: resolveLocalizedRoutePath('/impact-score', currentLocale.value),
   }
 ])
 
