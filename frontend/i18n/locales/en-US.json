@@ -89,6 +89,11 @@
       "empty": "The content of this article will be available soon.",
       "edit": "Edit this article"
     },
+    "hero": {
+      "eyebrow": "Nudger blog",
+      "title": "Fresh insights on responsible shopping",
+      "subtitle": "Short reads on sustainable appliances, nudges and the lessons we learn while building Nudger."
+    },
     "list": {
       "loading": "Loading articles…",
       "readMore": "Read more",
