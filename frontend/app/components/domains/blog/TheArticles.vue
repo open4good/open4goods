@@ -25,7 +25,7 @@ const buildDateIsoString = (timestamp: number) => {
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const currentPage = ref(1)
+const currentPage = computed(() => pagination.value.page || 1)
 const tagsLoading = ref(false)
 const articleListId = 'blog-articles-list'
 
@@ -47,14 +47,6 @@ const parseTagQuery = (rawTag: unknown) => {
 
   return trimmed.length > 0 ? trimmed : null
 }
-
-watch(
-  () => pagination.value.page,
-  (page) => {
-    currentPage.value = page || 1
-  },
-  { immediate: true }
-)
 
 const totalPages = computed(() => pagination.value.totalPages || 0)
 const totalElements = computed(() => pagination.value.totalElements || 0)
