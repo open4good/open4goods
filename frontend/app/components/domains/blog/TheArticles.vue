@@ -451,6 +451,18 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 </script>
 
 <template>
+  <section class="blog-hero" aria-labelledby="blog-hero-heading">
+    <v-container class="py-0 px-4 mx-auto blog-hero__container" max-width="xl">
+      <div class="blog-hero__content">
+        <p class="blog-hero__eyebrow">{{ t('blog.hero.eyebrow') }}</p>
+        <div class="blog-hero__copy">
+          <h1 id="blog-hero-heading" class="blog-hero__title">{{ t('blog.hero.title') }}</h1>
+          <p class="blog-hero__subtitle">{{ t('blog.hero.subtitle') }}</p>
+        </div>
+      </div>
+    </v-container>
+  </section>
+
   <v-container class="py-6 px-4 mx-auto" max-width="xl">
     <v-sheet
       v-if="availableTags.length || activeTag"
@@ -667,6 +679,69 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 </template>
 
 <style scoped lang="sass">
+.blog-hero
+  position: relative
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-hero-gradient-start), 0.22) 0%,
+    rgba(var(--v-theme-hero-gradient-mid), 0.18) 55%,
+    rgba(var(--v-theme-hero-gradient-end), 0.24) 100%
+  )
+  color: rgb(255, 255, 255)
+  padding-block: clamp(1.75rem, 4vw, 2.75rem)
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem)
+  overflow: hidden
+  border-radius: 0 0 32px 32px
+  box-shadow: 0 18px 40px -24px rgba(var(--v-theme-shadow-primary-600), 0.45)
+
+  &::after
+    content: ''
+    position: absolute
+    inset: 0
+    background: radial-gradient(circle at 20% 20%, rgba(var(--v-theme-hero-overlay-strong), 0.18), transparent 55%)
+    pointer-events: none
+
+  &__container
+    position: relative
+    z-index: 1
+
+  &__content
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+    max-width: min(48rem, 100%)
+    padding-block: clamp(0.5rem, 2vw, 0.75rem)
+
+  &__eyebrow
+    display: inline-flex
+    align-items: center
+    align-self: flex-start
+    padding: 0.35rem 0.9rem
+    border-radius: 999px
+    background-color: rgba(var(--v-theme-hero-pill-on-dark), 0.16)
+    font-weight: 600
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    font-size: 0.75rem
+    line-height: 1.1
+
+  &__copy
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+
+  &__title
+    font-weight: 700
+    font-size: clamp(1.9rem, 4vw, 2.5rem)
+    line-height: 1.2
+    margin: 0
+
+  &__subtitle
+    margin: 0
+    font-size: clamp(1rem, 2.4vw, 1.2rem)
+    line-height: 1.6
+    color: rgba(var(--v-theme-hero-overlay-soft), 0.92)
+
 .blog-articles__meta
   background-color: rgb(var(--v-theme-surface-muted-contrast))
   transition: background-color 0.2s ease
