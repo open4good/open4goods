@@ -16,6 +16,7 @@ describe('TheSlide', () => {
     return await mountSuspended(TheSlide, {
       props: {
         items: mockItems,
+        height: 150,
         ...props,
       },
     })

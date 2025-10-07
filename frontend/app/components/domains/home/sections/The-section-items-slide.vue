@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <The-slide :items="categoryImages" />
+    <The-slide :items="categoryImages" :height="80" />
   </v-container>
 </template>
 
