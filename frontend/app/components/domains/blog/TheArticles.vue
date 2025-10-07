@@ -681,17 +681,17 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 <style scoped lang="sass">
 .blog-hero
   position: relative
+  width: 100%
   background: linear-gradient(
     135deg,
-    rgba(var(--v-theme-hero-gradient-start), 0.22) 0%,
-    rgba(var(--v-theme-hero-gradient-mid), 0.18) 55%,
-    rgba(var(--v-theme-hero-gradient-end), 0.24) 100%
+    rgb(var(--v-theme-hero-gradient-start)) 0%,
+    rgba(var(--v-theme-hero-gradient-mid), 0.92) 55%,
+    rgb(var(--v-theme-hero-gradient-end)) 100%
   )
   color: rgb(255, 255, 255)
-  padding-block: clamp(1.75rem, 4vw, 2.75rem)
+  padding-block: clamp(1.5rem, 3.5vw, 2.5rem)
   margin-bottom: clamp(1.5rem, 4vw, 2.5rem)
   overflow: hidden
-  border-radius: 0 0 32px 32px
   box-shadow: 0 18px 40px -24px rgba(var(--v-theme-shadow-primary-600), 0.45)
 
   &::after
@@ -704,13 +704,13 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
   &__container
     position: relative
     z-index: 1
+    padding-block: clamp(1rem, 3vw, 1.75rem)
 
   &__content
     display: flex
     flex-direction: column
-    gap: 0.5rem
+    gap: 0.45rem
     max-width: min(48rem, 100%)
-    padding-block: clamp(0.5rem, 2vw, 0.75rem)
 
   &__eyebrow
     display: inline-flex
@@ -732,15 +732,15 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
 
   &__title
     font-weight: 700
-    font-size: clamp(1.9rem, 4vw, 2.5rem)
+    font-size: clamp(1.85rem, 4vw, 2.45rem)
     line-height: 1.2
     margin: 0
 
   &__subtitle
     margin: 0
-    font-size: clamp(1rem, 2.4vw, 1.2rem)
-    line-height: 1.6
-    color: rgba(var(--v-theme-hero-overlay-soft), 0.92)
+    font-size: clamp(1rem, 2.2vw, 1.15rem)
+    line-height: 1.55
+    color: rgba(var(--v-theme-hero-overlay-soft), 0.84)
 
 .blog-articles__meta
   background-color: rgb(var(--v-theme-surface-muted-contrast))
