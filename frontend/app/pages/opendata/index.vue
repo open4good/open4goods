@@ -6,7 +6,6 @@
       :subtitle="t('opendata.hero.subtitle')"
       description-bloc-id="webpages:opendata:hero-overview"
       :primary-cta="heroPrimaryCta"
-      :secondary-cta="heroSecondaryCta"
     />
 
     <OpendataStatsStrip :stats="stats" />
@@ -90,6 +89,31 @@ const { data, pending, error, refresh } = await useAsyncData<OpenDataOverviewDto
   $fetch<OpenDataOverviewDto>('/api/opendata'),
 )
 
+const totalProductValue = computed(() => {
+  const count = data.value?.totalProductCount
+
+  if (count === null || count === undefined) {
+    return String(t('opendata.stats.placeholder'))
+  }
+
+  const numericCount = typeof count === 'number' ? count : Number.parseInt(String(count), 10)
+
+  if (!Number.isFinite(numericCount)) {
+    return String(count)
+  }
+
+  if (numericCount >= 1_000_000) {
+    const millions = Math.floor(numericCount / 1_000_000)
+    return String(
+      t('opendata.stats.totalProducts.approxMillions', {
+        value: new Intl.NumberFormat(locale.value).format(millions),
+      }),
+    )
+  }
+
+  return new Intl.NumberFormat(locale.value).format(numericCount)
+})
+
 const stats = computed(() => {
   const overview = data.value
 
@@ -97,7 +121,7 @@ const stats = computed(() => {
     {
       icon: 'mdi-database-outline',
       label: String(t('opendata.stats.totalProducts.label')),
-      value: overview?.totalProductCount ?? t('opendata.stats.placeholder'),
+      value: totalProductValue.value,
       description: String(t('opendata.stats.totalProducts.description')),
     },
     {
@@ -111,16 +135,6 @@ const stats = computed(() => {
       label: String(t('opendata.stats.totalSize.label')),
       value: overview?.totalDatasetSize ?? t('opendata.stats.placeholder'),
       description: String(t('opendata.stats.totalSize.description')),
-    },
-    {
-      icon: 'mdi-speedometer',
-      label: String(t('opendata.stats.downloadSpeed.label')),
-      value: overview?.downloadLimits?.downloadSpeed ?? t('opendata.stats.placeholder'),
-      description: overview?.downloadLimits?.concurrentDownloads
-        ? t('opendata.stats.downloadSpeed.description', {
-            concurrent: overview.downloadLimits.concurrentDownloads,
-          })
-        : String(t('opendata.stats.downloadSpeed.description', { concurrent: '—' })),
     },
   ]
 })
@@ -178,38 +192,50 @@ const faqItems = computed(() => [
   {
     id: 'sources',
     question: String(t('opendata.faq.items.sources.question')),
-    blocId: 'webpages:opendata:faq-sources',
+    answer: String(t('opendata.faq.items.sources.answer')),
   },
   {
     id: 'definition',
     question: String(t('opendata.faq.items.definition.question')),
-    blocId: 'webpages:opendata:faq-definition',
+    answer: String(t('opendata.faq.items.definition.answer')),
   },
   {
     id: 'importance',
     question: String(t('opendata.faq.items.importance.question')),
-    blocId: 'webpages:opendata:faq-importance',
+    answer: String(t('opendata.faq.items.importance.answer')),
   },
   {
     id: 'contributors',
     question: String(t('opendata.faq.items.contributors.question')),
-    blocId: 'webpages:opendata:faq-contributors',
+    answer: String(t('opendata.faq.items.contributors.answer')),
   },
 ])
+
+const handleHeroPrimaryCtaClick = (event: MouseEvent) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const targetSection = document.getElementById('datasets')
+
+  if (!targetSection) {
+    return
+  }
+
+  event.preventDefault()
+  targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+  if (window.history.replaceState) {
+    window.history.replaceState(null, '', '#datasets')
+  }
+}
 
 const heroPrimaryCta = computed(() => ({
   label: String(t('opendata.hero.primaryCta.label')),
   ariaLabel: String(t('opendata.hero.primaryCta.ariaLabel')),
   href: '#datasets',
   appendIcon: 'mdi-arrow-down',
-}))
-
-const heroSecondaryCta = computed(() => ({
-  label: String(t('opendata.hero.secondaryCta.label')),
-  ariaLabel: String(t('opendata.hero.secondaryCta.ariaLabel')),
-  href: localePath('opendata-gtin'),
-  variant: 'tonal' as const,
-  appendIcon: 'mdi-arrow-right',
+  onClick: handleHeroPrimaryCtaClick,
 }))
 
 const canonicalUrl = computed(

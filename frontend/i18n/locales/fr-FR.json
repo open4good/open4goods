@@ -271,10 +271,6 @@
       "primaryCta": {
         "label": "Découvrir les jeux de données",
         "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data"
-      },
-      "secondaryCta": {
-        "label": "Voir le dataset GTIN",
-        "ariaLabel": "Aller vers la page open data GTIN"
       }
     },
     "stats": {
@@ -282,7 +278,8 @@
       "placeholder": "—",
       "totalProducts": {
         "label": "Produits couverts",
-        "description": "Produits uniques recensés dans l'ensemble des exports."
+        "description": "Produits uniques recensés dans l'ensemble des exports.",
+        "approxMillions": "+ {value} Millions"
       },
       "datasets": {
         "label": "Jeux de données publiés",
@@ -291,10 +288,6 @@
       "totalSize": {
         "label": "Taille cumulée",
         "description": "Volume compressé total des exports hebdomadaires."
-      },
-      "downloadSpeed": {
-        "label": "Politique de téléchargement",
-        "description": "Téléchargements directs limités à {concurrent} sessions simultanées."
       }
     },
     "datasets": {
@@ -457,16 +450,20 @@
           "subtitle": "Tout savoir sur l'exploitation du dataset GTIN.",
           "items": {
             "whatIs": {
-              "question": "Qu'est-ce qu'un GTIN et à quoi sert-il ?"
+              "question": "Qu'est-ce qu'un GTIN et à quoi sert-il ?",
+              "answer": "<p><b>Le GTIN (Global Trade Item Number)</b> est un identifiant unique utilisé mondialement pour suivre les biens et services. Il facilite la gestion des stocks, la logistique et les transactions commerciales dans toutes les chaînes d’approvisionnement.</p>"
             },
             "structure": {
-              "question": "Quelles informations fournissez-vous pour chaque GTIN ?"
+              "question": "Quelles informations fournissez-vous pour chaque GTIN ?",
+              "answer": "<p>Le fichier est livré en CSV compressé (ZIP). Les principales colonnes incluent&nbsp;:</p><ul><li>gtin, brand, model, name, last_updated, gs1_country, gtinType</li><li>offers_count, min_price, min_price_compensation, currency</li><li>categories et url</li></ul>"
             },
             "uses": {
-              "question": "Comment les organisations peuvent-elles exploiter ce dataset ?"
+              "question": "Comment les organisations peuvent-elles exploiter ce dataset ?",
+              "answer": "<p>Les équipes e-commerce, data et recherche utilisent ce dataset pour enrichir leurs référentiels, détecter les écarts de prix, cartographier les catégories et nourrir leurs algorithmes de correspondance produit.</p>"
             },
             "contribute": {
-              "question": "Comment signaler une erreur ou proposer une correction ?"
+              "question": "Comment signaler une erreur ou proposer une correction ?",
+              "answer": "<p>Vous avez des données GTIN à partager&nbsp;? Contactez-nous pour proposer vos enrichissements ou signaler une correction. Ensemble, nous améliorons la qualité de l’information disponible en open data.</p>"
             }
           }
         }
@@ -577,16 +574,20 @@
           "subtitle": "Les notions essentielles autour de l'export ISBN.",
           "items": {
             "whatIs": {
-              "question": "Qu'est-ce qu'un ISBN ?"
+              "question": "Qu'est-ce qu'un ISBN ?",
+              "answer": "<p><b>L’ISBN (International Standard Book Number)</b> identifie de manière unique chaque édition de livre ou ressource assimilée. Il simplifie la distribution, le référencement bibliographique et le suivi des ventes.</p>"
             },
             "assignment": {
-              "question": "Qui attribue les codes ISBN ?"
+              "question": "Qui attribue les codes ISBN ?",
+              "answer": "<p>Les ISBN sont attribués par des agences nationales mandatées par l’International ISBN Agency. Les éditeurs déposent une demande pour chaque nouvelle publication ou format.</p>"
             },
             "formats": {
-              "question": "Quels formats figurent dans le dataset ?"
+              "question": "Quels formats figurent dans le dataset ?",
+              "answer": "<p>Un même ouvrage peut disposer de plusieurs ISBN&nbsp;: broché, relié, livre audio ou numérique. Notre base regroupe ces versions pour faciliter les rapprochements entre canaux de vente.</p>"
             },
             "importance": {
-              "question": "Pourquoi les données ISBN sont-elles précieuses pour la filière du livre ?"
+              "question": "Pourquoi les données ISBN sont-elles précieuses pour la filière du livre ?",
+              "answer": "<p>Fournir un dataset ISBN ouvert aide les libraires, bibliothèques, chercheurs et acteurs culturels à suivre l’offre éditoriale, mesurer la disponibilité et renforcer la visibilité des ouvrages.</p>"
             }
           }
         }
@@ -606,16 +607,20 @@
       "subtitle": "Comprendre notre approche de l'open data.",
       "items": {
         "sources": {
-          "question": "D'où proviennent les jeux de données ?"
+          "question": "D'où proviennent les jeux de données ?",
+          "answer": "<p>Les extractions fournies par Nudger sont issues de nos travaux d’agrégation de données produits. Nous réunissons les contributions publiques, les catalogues marchands et les enrichissements communautaires pour proposer une vision la plus complète possible du marché.</p>"
         },
         "definition": {
-          "question": "Que signifie pour nous « open data » ?"
+          "question": "Que signifie pour nous « open data » ?",
+          "answer": "<p>L’open data désigne des données rendues accessibles à toutes et tous, sans restriction d’accès, dans des formats librement exploitables. Elles peuvent être réutilisées, modifiées et redistribuées par n’importe qui, favorisant transparence, innovation et efficacité.</p>"
         },
         "importance": {
-          "question": "Pourquoi l'open data est-il important pour le commerce ?"
+          "question": "Pourquoi l'open data est-il important pour le commerce ?",
+          "answer": "<p>Partager les données contribue à la transparence démocratique, stimule l’innovation économique et améliore la prise de décision publique. Citoyens, chercheurs, développeurs et collectivités peuvent travailler ensemble pour résoudre des problèmes communs en s’appuyant sur ces informations.</p>"
         },
         "contributors": {
-          "question": "Comment contribuer à l'amélioration des jeux de données ?"
+          "question": "Comment contribuer à l'amélioration des jeux de données ?",
+          "answer": "<p>Les producteurs de données ouvertes sont variés&nbsp;: administrations publiques, organisations internationales, entreprises privées et communautés engagées. Chaque contribution renforce la qualité globale du dataset et bénéficie à l’ensemble des acteurs de la consommation responsable.</p>"
         }
       }
     },

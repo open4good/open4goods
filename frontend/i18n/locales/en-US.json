@@ -270,10 +270,6 @@
       "primaryCta": {
         "label": "Explore the datasets",
         "ariaLabel": "Scroll to the open data datasets section"
-      },
-      "secondaryCta": {
-        "label": "View GTIN dataset",
-        "ariaLabel": "Navigate to the GTIN open data dataset page"
       }
     },
     "stats": {
@@ -281,7 +277,8 @@
       "placeholder": "—",
       "totalProducts": {
         "label": "Products covered",
-        "description": "Unique products referenced across all exports."
+        "description": "Unique products referenced across all exports.",
+        "approxMillions": "+ {value} Million"
       },
       "datasets": {
         "label": "Published datasets",
@@ -290,10 +287,6 @@
       "totalSize": {
         "label": "Combined size",
         "description": "Total compressed footprint of weekly exports."
-      },
-      "downloadSpeed": {
-        "label": "Download policy",
-        "description": "Direct downloads limited to {concurrent} concurrent sessions."
       }
     },
     "datasets": {
@@ -456,16 +449,20 @@
           "subtitle": "Understand how to work with the GTIN dataset.",
           "items": {
             "whatIs": {
-              "question": "What is a GTIN and why does it matter?"
+              "question": "What is a GTIN and why does it matter?",
+              "answer": "<p><b>The GTIN (Global Trade Item Number)</b> is the worldwide identifier used to track goods and services. It streamlines inventory management, logistics and commercial transactions across supply chains.</p>"
             },
             "structure": {
-              "question": "What information do you expose for each GTIN?"
+              "question": "What information do you expose for each GTIN?",
+              "answer": "<p>The dataset ships as a zipped CSV file. Key columns include:</p><ul><li>gtin, brand, model, name, last_updated, gs1_country, gtinType</li><li>offers_count, min_price, min_price_compensation, currency</li><li>categories and url</li></ul>"
             },
             "uses": {
-              "question": "How can organisations use this dataset?"
+              "question": "How can organisations use this dataset?",
+              "answer": "<p>E-commerce, data and research teams rely on this dataset to enrich catalogues, detect price gaps, map category taxonomies and feed product matching algorithms.</p>"
             },
             "contribute": {
-              "question": "How can I report an issue or contribute corrections?"
+              "question": "How can I report an issue or contribute corrections?",
+              "answer": "<p>Have GTIN data to share? Reach out to contribute your enrichments or flag corrections so we can keep the open dataset accurate together.</p>"
             }
           }
         }
@@ -576,16 +573,20 @@
           "subtitle": "Key concepts about the ISBN export.",
           "items": {
             "whatIs": {
-              "question": "What is an ISBN?"
+              "question": "What is an ISBN?",
+              "answer": "<p><b>The ISBN (International Standard Book Number)</b> uniquely identifies each edition of a book or related resource. It streamlines distribution, cataloguing and sales tracking.</p>"
             },
             "assignment": {
-              "question": "Who assigns ISBN codes?"
+              "question": "Who assigns ISBN codes?",
+              "answer": "<p>ISBNs are issued by national agencies mandated by the International ISBN Agency. Publishers request one for every new publication or format.</p>"
             },
             "formats": {
-              "question": "What formats are covered in the dataset?"
+              "question": "What formats are covered in the dataset?",
+              "answer": "<p>A single work can carry multiple ISBNs—paperback, hardcover, audiobook or digital. Our dataset links these variants to simplify cross-channel reconciliation.</p>"
             },
             "importance": {
-              "question": "Why is ISBN data valuable for the book industry?"
+              "question": "Why is ISBN data valuable for the book industry?",
+              "answer": "<p>Publishing an open ISBN dataset helps booksellers, libraries, researchers and cultural institutions track catalogues, monitor availability and increase title visibility.</p>"
             }
           }
         }
@@ -605,16 +606,20 @@
       "subtitle": "Understand our approach to open data.",
       "items": {
         "sources": {
-          "question": "Where do the datasets come from?"
+          "question": "Where do the datasets come from?",
+          "answer": "<p>The extracts provided by Nudger come from our product data aggregation work. We combine public sources, merchant catalogues and community contributions to offer the most complete snapshot of the market we can.</p>"
         },
         "definition": {
-          "question": "What do we mean by open data?"
+          "question": "What do we mean by open data?",
+          "answer": "<p>Open data refers to datasets that are accessible to everyone without restrictive licences and published in machine-readable formats. Anyone can reuse, remix and redistribute them, which fosters transparency, innovation and better decision making.</p>"
         },
         "importance": {
-          "question": "Why is open data important for commerce?"
+          "question": "Why is open data important for commerce?",
+          "answer": "<p>Sharing data boosts democratic transparency, sparks new products and services, and improves public decision making. Citizens, researchers, developers and institutions can work together to solve shared challenges by building on these insights.</p>"
         },
         "contributors": {
-          "question": "How can contributors help improve the datasets?"
+          "question": "How can contributors help improve the datasets?",
+          "answer": "<p>Open data comes from many actors: public administrations, international organisations, private companies and engaged communities. Every contribution strengthens the dataset and benefits everyone working toward more responsible consumption.</p>"
         }
       }
     },

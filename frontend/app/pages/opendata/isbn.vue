@@ -200,7 +200,7 @@ const downloadOptions = computed(() => {
         ariaLabel: String(t('opendata.datasets.common.download.fast.cta.ariaLabel')),
         href: String(t('opendata.datasets.common.download.fast.cta.href')),
         target: '_blank',
-        rel: 'noopener',
+        rel: 'noopener nofollow',
       },
     },
     {
@@ -253,22 +253,22 @@ const faqItems = computed(() => [
   {
     id: 'what-is-isbn',
     question: String(t('opendata.datasets.isbn.faq.items.whatIs.question')),
-    blocId: 'webpages:opendata:isbn-faq-what-is',
+    answer: String(t('opendata.datasets.isbn.faq.items.whatIs.answer')),
   },
   {
     id: 'assignment',
     question: String(t('opendata.datasets.isbn.faq.items.assignment.question')),
-    blocId: 'webpages:opendata:isbn-faq-assignment',
+    answer: String(t('opendata.datasets.isbn.faq.items.assignment.answer')),
   },
   {
     id: 'formats',
     question: String(t('opendata.datasets.isbn.faq.items.formats.question')),
-    blocId: 'webpages:opendata:isbn-faq-formats',
+    answer: String(t('opendata.datasets.isbn.faq.items.formats.answer')),
   },
   {
     id: 'importance',
     question: String(t('opendata.datasets.isbn.faq.items.importance.question')),
-    blocId: 'webpages:opendata:isbn-faq-importance',
+    answer: String(t('opendata.datasets.isbn.faq.items.importance.answer')),
   },
 ])
 

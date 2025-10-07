@@ -8,6 +8,7 @@ interface HeroCta {
   variant?: 'flat' | 'outlined' | 'tonal' | 'text' | 'plain'
   color?: string
   appendIcon?: string
+  onClick?: (event: MouseEvent) => void
 }
 
 withDefaults(
@@ -51,6 +52,7 @@ withDefaults(
                 size="large"
                 class="opendata-hero__cta"
                 :append-icon="primaryCta.appendIcon ?? 'mdi-arrow-right'"
+                @click="primaryCta.onClick?.($event)"
               >
                 {{ primaryCta.label }}
               </v-btn>
@@ -64,6 +66,7 @@ withDefaults(
                 size="large"
                 class="opendata-hero__cta"
                 :append-icon="secondaryCta.appendIcon ?? 'mdi-arrow-right'"
+                @click="secondaryCta.onClick?.($event)"
               >
                 {{ secondaryCta.label }}
               </v-btn>

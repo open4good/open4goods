@@ -201,7 +201,7 @@ const downloadOptions = computed(() => {
         ariaLabel: String(t('opendata.datasets.common.download.fast.cta.ariaLabel')),
         href: String(t('opendata.datasets.common.download.fast.cta.href')),
         target: '_blank',
-        rel: 'noopener',
+        rel: 'noopener nofollow',
       },
     },
     {
@@ -254,22 +254,22 @@ const faqItems = computed(() => [
   {
     id: 'what-is-gtin',
     question: String(t('opendata.datasets.gtin.faq.items.whatIs.question')),
-    blocId: 'webpages:opendata:gtin-faq-what-is',
+    answer: String(t('opendata.datasets.gtin.faq.items.whatIs.answer')),
   },
   {
     id: 'structure',
     question: String(t('opendata.datasets.gtin.faq.items.structure.question')),
-    blocId: 'webpages:opendata:gtin-faq-structure',
+    answer: String(t('opendata.datasets.gtin.faq.items.structure.answer')),
   },
   {
     id: 'use-cases',
     question: String(t('opendata.datasets.gtin.faq.items.uses.question')),
-    blocId: 'webpages:opendata:gtin-faq-uses',
+    answer: String(t('opendata.datasets.gtin.faq.items.uses.answer')),
   },
   {
     id: 'contribute',
     question: String(t('opendata.datasets.gtin.faq.items.contribute.question')),
-    blocId: 'webpages:opendata:gtin-faq-contribute',
+    answer: String(t('opendata.datasets.gtin.faq.items.contribute.answer')),
   },
 ])
 
