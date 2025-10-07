@@ -6,7 +6,6 @@
       :subtitle="t('opendata.hero.subtitle')"
       description-bloc-id="webpages:opendata:hero-overview"
       :primary-cta="heroPrimaryCta"
-      :secondary-cta="heroSecondaryCta"
     />
 
     <OpendataStatsStrip :stats="stats" />
@@ -90,6 +89,26 @@ const { data, pending, error, refresh } = await useAsyncData<OpenDataOverviewDto
   $fetch<OpenDataOverviewDto>('/api/opendata'),
 )
 
+const formatProductCount = (count?: string | number | null) => {
+  if (count == null || count === '') {
+    return String(t('opendata.stats.placeholder'))
+  }
+
+  const numericValue =
+    typeof count === 'number' ? count : Number(String(count).replace(/[^\d]/g, ''))
+
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return String(t('opendata.stats.placeholder'))
+  }
+
+  if (numericValue >= 1_000_000) {
+    const millions = Math.round(numericValue / 1_000_000)
+    return String(t('opendata.stats.totalProducts.millions', { value: millions }))
+  }
+
+  return new Intl.NumberFormat(locale.value).format(numericValue)
+}
+
 const stats = computed(() => {
   const overview = data.value
 
@@ -97,7 +116,7 @@ const stats = computed(() => {
     {
       icon: 'mdi-database-outline',
       label: String(t('opendata.stats.totalProducts.label')),
-      value: overview?.totalProductCount ?? t('opendata.stats.placeholder'),
+      value: formatProductCount(overview?.totalProductCount),
       description: String(t('opendata.stats.totalProducts.description')),
     },
     {
@@ -111,16 +130,6 @@ const stats = computed(() => {
       label: String(t('opendata.stats.totalSize.label')),
       value: overview?.totalDatasetSize ?? t('opendata.stats.placeholder'),
       description: String(t('opendata.stats.totalSize.description')),
-    },
-    {
-      icon: 'mdi-speedometer',
-      label: String(t('opendata.stats.downloadSpeed.label')),
-      value: overview?.downloadLimits?.downloadSpeed ?? t('opendata.stats.placeholder'),
-      description: overview?.downloadLimits?.concurrentDownloads
-        ? t('opendata.stats.downloadSpeed.description', {
-            concurrent: overview.downloadLimits.concurrentDownloads,
-          })
-        : String(t('opendata.stats.downloadSpeed.description', { concurrent: '—' })),
     },
   ]
 })
@@ -202,14 +211,6 @@ const heroPrimaryCta = computed(() => ({
   ariaLabel: String(t('opendata.hero.primaryCta.ariaLabel')),
   href: '#datasets',
   appendIcon: 'mdi-arrow-down',
-}))
-
-const heroSecondaryCta = computed(() => ({
-  label: String(t('opendata.hero.secondaryCta.label')),
-  ariaLabel: String(t('opendata.hero.secondaryCta.ariaLabel')),
-  href: localePath('opendata-gtin'),
-  variant: 'tonal' as const,
-  appendIcon: 'mdi-arrow-right',
 }))
 
 const canonicalUrl = computed(

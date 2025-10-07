@@ -22,7 +22,7 @@ defineProps<{
               :href="licenseUrl"
               :aria-label="licenseAriaLabel"
               target="_blank"
-              rel="noopener"
+              rel="noopener nofollow"
               color="primary"
               variant="tonal"
               size="large"

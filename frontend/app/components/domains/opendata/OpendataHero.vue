@@ -10,21 +10,34 @@ interface HeroCta {
   appendIcon?: string
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     eyebrow?: string
     title: string
     subtitle: string
     descriptionBlocId: string
     primaryCta?: HeroCta
-    secondaryCta?: HeroCta
   }>(),
   {
     eyebrow: undefined,
     primaryCta: undefined,
-    secondaryCta: undefined,
   },
 )
+
+const handlePrimaryClick = (event: MouseEvent) => {
+  const href = props.primaryCta?.href
+  if (!href || !href.startsWith('#')) {
+    return
+  }
+
+  if (import.meta.client) {
+    event.preventDefault()
+    const target = document.querySelector(href)
+    if (target instanceof HTMLElement) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+}
 </script>
 
 <template>
@@ -51,21 +64,9 @@ withDefaults(
                 size="large"
                 class="opendata-hero__cta"
                 :append-icon="primaryCta.appendIcon ?? 'mdi-arrow-right'"
+                @click="handlePrimaryClick"
               >
                 {{ primaryCta.label }}
-              </v-btn>
-
-              <v-btn
-                v-if="secondaryCta"
-                :href="secondaryCta.href"
-                :aria-label="secondaryCta.ariaLabel"
-                :variant="secondaryCta.variant ?? 'tonal'"
-                :color="secondaryCta.color ?? 'primary'"
-                size="large"
-                class="opendata-hero__cta"
-                :append-icon="secondaryCta.appendIcon ?? 'mdi-arrow-right'"
-              >
-                {{ secondaryCta.label }}
               </v-btn>
             </div>
           </v-col>
