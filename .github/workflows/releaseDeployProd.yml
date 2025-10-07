@@ -220,7 +220,7 @@ jobs:
         run: cp -r target/staging/* src/main/site/maven/
                         
       - name: Upload Custom Site to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: './src/main/site/'
 
