@@ -16,17 +16,6 @@ const {
   fetchTags,
 } = useBlog()
 
-// Format date helper
-const formatDate = (timestamp: number) => {
-  const date = new Date(timestamp)
-
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  return date.toLocaleDateString()
-}
-
 const buildDateIsoString = (timestamp: number) => {
   const date = new Date(timestamp)
 
@@ -331,6 +320,25 @@ const canonicalUrl = computed(() => {
 
   return base.toString()
 })
+
+const dateFormatter = computed(() =>
+  new Intl.DateTimeFormat(locale.value || 'en', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }),
+)
+
+const formatDate = (timestamp: number) => {
+  const date = new Date(timestamp)
+
+  if (Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  return dateFormatter.value.format(date)
+}
 
 const buildAbsoluteArticleLink = (slug: string | null | undefined) => {
   const relative = buildArticleLink(slug)
