@@ -23,7 +23,7 @@ jobs:
       end_date: ${{ steps.dates.outputs.END_DATE }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -95,7 +95,7 @@ jobs:
       end_date: ${{ needs.fetch_kpi.outputs.end_date }}
     steps:
       - name: Checkout report branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: weekly-report-${{ needs.fetch_kpi.outputs.end_date }}
           fetch-depth: 0
@@ -134,7 +134,7 @@ jobs:
     if: ${{ github.event.inputs.create_PR == 'true' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: weekly-report-${{ needs.generate_report.outputs.end_date }}
           fetch-depth: 0
