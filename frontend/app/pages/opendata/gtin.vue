@@ -80,6 +80,14 @@
       </v-container>
     </section>
 
+    <OpendataLicenseSection
+      :title="t('opendata.license.title')"
+      :description="t('opendata.license.description')"
+      :license-label="t('opendata.license.cta.label')"
+      :license-aria-label="t('opendata.license.cta.ariaLabel')"
+      :license-url="t('opendata.license.cta.href')"
+    />
+
     <OpendataFaqSection
       :title="t('opendata.datasets.gtin.faq.title')"
       :subtitle="t('opendata.datasets.gtin.faq.subtitle')"
@@ -98,6 +106,7 @@ import OpendataDatasetHero from '~/components/domains/opendata/OpendataDatasetHe
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
 import OpendataDownloadComparison from '~/components/domains/opendata/OpendataDownloadComparison.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
+import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
 
 definePageMeta({
   ssr: true,

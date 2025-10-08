@@ -31,7 +31,7 @@ defineProps<{
 .dataset-hero__surface
   display: flex
   flex-direction: column
-  align-items: center
+  align-items: stretch
   gap: clamp(1.5rem, 3vw, 2.5rem)
 
 .dataset-hero__text
@@ -39,7 +39,6 @@ defineProps<{
   flex-direction: column
   gap: 1rem
   width: 100%
-  max-width: 760px
 
 .dataset-hero__eyebrow
   display: inline-flex
