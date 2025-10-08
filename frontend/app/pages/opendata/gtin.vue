@@ -1,23 +1,9 @@
 <template>
   <div class="dataset-page">
-    <nav class="dataset-page__breadcrumb" aria-label="Breadcrumb">
-      <ol>
-        <li>
-          <NuxtLink :to="localePath('opendata')">
-            {{ t('opendata.datasets.gtin.breadcrumb.root') }}
-          </NuxtLink>
-        </li>
-        <li aria-current="page">
-          {{ t('opendata.datasets.gtin.breadcrumb.current') }}
-        </li>
-      </ol>
-    </nav>
-
     <OpendataDatasetHero
       :eyebrow="t('opendata.datasets.gtin.hero.eyebrow')"
       :title="t('opendata.datasets.gtin.hero.title')"
       description-bloc-id="webpages:opendata:gtin-hero-overview"
-      :stats="heroStats"
     />
 
     <v-progress-linear
@@ -118,7 +104,6 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
-const localePath = useLocalePath()
 const requestURL = useRequestURL()
 
 interface DatasetPayload {
@@ -139,24 +124,6 @@ const dataset = computed(() => data.value?.dataset)
 const overview = computed(() => data.value?.overview)
 
 const placeholder = computed(() => String(t('opendata.datasets.common.placeholder')))
-
-const heroStats = computed(() => [
-  {
-    label: String(t('opendata.datasets.gtin.hero.stats.records')),
-    value: dataset.value?.recordCount ?? placeholder.value,
-    icon: 'mdi-format-list-numbered',
-  },
-  {
-    label: String(t('opendata.datasets.gtin.hero.stats.updated')),
-    value: dataset.value?.lastUpdated ?? placeholder.value,
-    icon: 'mdi-update',
-  },
-  {
-    label: String(t('opendata.datasets.gtin.hero.stats.size')),
-    value: dataset.value?.fileSize ?? placeholder.value,
-    icon: 'mdi-archive-outline',
-  },
-])
 
 const summaryItems = computed(() => [
   {
@@ -300,25 +267,6 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 0
-
-.dataset-page__breadcrumb
-  padding: 1.5rem 1rem 0
-
-.dataset-page__breadcrumb ol
-  display: flex
-  flex-wrap: wrap
-  gap: 0.5rem
-  list-style: none
-  margin: 0
-  padding: 0
-  font-size: 0.95rem
-
-.dataset-page__breadcrumb a
-  color: rgba(var(--v-theme-primary), 1)
-  text-decoration: none
-
-.dataset-page__breadcrumb li[aria-current='page']
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
 .dataset-page__loader
   margin: 0

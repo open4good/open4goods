@@ -30,13 +30,13 @@ defineProps<{
         <p v-if="subtitle" class="opendata-datasets__subtitle">{{ subtitle }}</p>
       </div>
 
-      <v-row class="g-6" align="stretch">
+      <v-row class="g-6" align="stretch" justify="center">
         <v-col
           v-for="card in cards"
           :key="card.id"
           cols="12"
           md="6"
-          class="d-flex"
+          class="d-flex justify-center"
         >
           <v-card class="opendata-dataset-card" rounded="xl" elevation="6">
             <div class="opendata-dataset-card__icon" aria-hidden="true">
@@ -99,6 +99,7 @@ defineProps<{
   padding: clamp(1.75rem, 4vw, 2.5rem)
   background: linear-gradient(160deg, rgba(var(--v-theme-surface-primary-080), 0.8), rgba(var(--v-theme-surface-default), 1))
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
+  width: 100%
 
 .opendata-dataset-card__icon
   display: inline-flex

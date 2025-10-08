@@ -362,9 +362,9 @@
         }
       },
       "gtin": {
-        "breadcrumb": {
-          "root": "Open data",
-          "current": "Dataset GTIN"
+        "seo": {
+          "title": "Données ouvertes GTIN – télécharger le catalogue de codes-barres",
+          "description": "Accédez à la base GTIN de Nudger, mise à jour chaque semaine, avec les options de téléchargement et le schéma détaillé pour vos projets data sur les codes-barres."
         },
         "hero": {
           "eyebrow": "Export GTIN",
@@ -470,9 +470,9 @@
         }
       },
       "isbn": {
-        "breadcrumb": {
-          "root": "Open data",
-          "current": "Dataset ISBN"
+        "seo": {
+          "title": "Données ouvertes ISBN – télécharger l'export de métadonnées livres",
+          "description": "Téléchargez la base ISBN de Nudger, actualisée chaque semaine, avec les miroirs de téléchargement et le schéma détaillé pour vos analyses du secteur du livre."
         },
         "hero": {
           "eyebrow": "Export ISBN",

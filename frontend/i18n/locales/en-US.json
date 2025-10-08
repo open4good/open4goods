@@ -361,9 +361,9 @@
         }
       },
       "gtin": {
-        "breadcrumb": {
-          "root": "Open data",
-          "current": "GTIN dataset"
+        "seo": {
+          "title": "GTIN open data – download the barcode catalogue",
+          "description": "Access Nudger's GTIN dataset with weekly updates, download options and schema details for your barcode data projects."
         },
         "hero": {
           "eyebrow": "GTIN export",
@@ -469,9 +469,9 @@
         }
       },
       "isbn": {
-        "breadcrumb": {
-          "root": "Open data",
-          "current": "ISBN dataset"
+        "seo": {
+          "title": "ISBN open data – download the book metadata export",
+          "description": "Retrieve Nudger's ISBN dataset with weekly refreshes, download mirrors and schema information for publishing analytics."
         },
         "hero": {
           "eyebrow": "ISBN export",
