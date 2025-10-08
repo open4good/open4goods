@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
@@ -97,20 +98,24 @@ public class DatasourceImageService {
 
     /**
      * Cached method that fetches the image content from logo, icon or favicon.
-     * @throws InvalidParameterException 
+     * @throws InvalidParameterException
      */
     @Cacheable(value = CacheConstants.FOREVER_LOCAL_CACHE_NAME, key = "#datasourceName + '-' + #allowFaviconFallback")
     public ImageResult loadDatasourceImage(String datasourceName, boolean allowFaviconFallback) throws IOException, InvalidParameterException {
         DataSourceProperties ds = datasourceConfigService.getDatasourceConfig(datasourceName);
-        String imageUrl = (ds != null) ? (allowFaviconFallback ? ds.getFavico() : ds.getLogo()) : null;
+        String imageUrl = (ds != null) ? ds.getLogo() : null;
 
         if (imageUrl == null) {
-            ds = feedService.getFeedsUrl().stream()
-                    .filter(e -> datasourceName.equalsIgnoreCase(cleanName(e.getDatasourceConfigName())) || datasourceName.equalsIgnoreCase(cleanName(e.getName())))
+            AffiliationPartner partner = feedService.getPartners().stream()
+                    .filter(e -> datasourceName.equalsIgnoreCase(cleanName(e.getName())) || datasourceName.equalsIgnoreCase(cleanName(e.getName())))
                     .findAny().orElse(null);
 
-            if (ds != null) {
-                imageUrl = allowFaviconFallback ? ds.getFavico() : ds.getLogo();
+            if (partner != null) {
+            	imageUrl = partner.getLogoUrl();
+            }
+            if (imageUrl == null && allowFaviconFallback && ds != null) {
+
+            	imageUrl = ds.getFavico();
             }
         }
 
