@@ -58,7 +58,7 @@ public class FeedService {
         	p.setId(ds.getName());
         	p.setName(ds.getName());
         	p.setLogoUrl(ds.getLogo());
-        	p.setAffiliationLink(ds.getPortalUrl());
+        	p.setAffiliationLink(ds.getAffiliatedPortalUrl());
         	partners.add(p);
         }
     }
