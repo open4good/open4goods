@@ -26,9 +26,7 @@ const headingId = useId()
         <h1 :id="headingId" class="team-hero__title">{{ props.title }}</h1>
         <p class="team-hero__subtitle">{{ props.subtitle }}</p>
 
-        <div class="team-hero__content text-body-1">
-          <TextContent :bloc-id="props.descriptionBlocId" :ipsum-length="180" />
-        </div>
+
       </div>
     </v-container>
   </v-sheet>
