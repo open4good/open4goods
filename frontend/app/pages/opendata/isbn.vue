@@ -4,6 +4,11 @@
       :eyebrow="t('opendata.datasets.isbn.hero.eyebrow')"
       :title="t('opendata.datasets.isbn.hero.title')"
       description-bloc-id="webpages:opendata:isbn-hero-overview"
+      :breadcrumb="{
+        label: String(t('opendata.datasets.common.breadcrumb.label')),
+        ariaLabel: String(t('opendata.datasets.common.breadcrumb.ariaLabel')),
+        href: localePath('opendata'),
+      }"
     />
 
     <v-progress-linear
@@ -114,6 +119,7 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const requestURL = useRequestURL()
 
 interface DatasetPayload {
@@ -230,22 +236,37 @@ const faqItems = computed(() => [
   {
     id: 'what-is-isbn',
     question: String(t('opendata.datasets.isbn.faq.items.whatIs.question')),
-    blocId: 'webpages:opendata:isbn-faq-what-is',
+    answer: String(t('opendata.datasets.isbn.faq.items.whatIs.answer')),
+  },
+  {
+    id: 'meaning',
+    question: String(t('opendata.datasets.isbn.faq.items.meaning.question')),
+    answer: String(t('opendata.datasets.isbn.faq.items.meaning.answer')),
+  },
+  {
+    id: 'structure',
+    question: String(t('opendata.datasets.isbn.faq.items.structure.question')),
+    answer: String(t('opendata.datasets.isbn.faq.items.structure.answer')),
+  },
+  {
+    id: 'difference',
+    question: String(t('opendata.datasets.isbn.faq.items.difference.question')),
+    answer: String(t('opendata.datasets.isbn.faq.items.difference.answer')),
   },
   {
     id: 'assignment',
     question: String(t('opendata.datasets.isbn.faq.items.assignment.question')),
-    blocId: 'webpages:opendata:isbn-faq-assignment',
-  },
-  {
-    id: 'formats',
-    question: String(t('opendata.datasets.isbn.faq.items.formats.question')),
-    blocId: 'webpages:opendata:isbn-faq-formats',
+    answer: String(t('opendata.datasets.isbn.faq.items.assignment.answer')),
   },
   {
     id: 'importance',
     question: String(t('opendata.datasets.isbn.faq.items.importance.question')),
-    blocId: 'webpages:opendata:isbn-faq-importance',
+    answer: String(t('opendata.datasets.isbn.faq.items.importance.answer')),
+  },
+  {
+    id: 'non-book',
+    question: String(t('opendata.datasets.isbn.faq.items.nonBook.question')),
+    answer: String(t('opendata.datasets.isbn.faq.items.nonBook.answer')),
   },
 ])
 

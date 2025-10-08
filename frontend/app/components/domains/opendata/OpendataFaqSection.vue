@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import TextContent from '~/components/domains/content/TextContent.vue'
-
 interface FaqItem {
   id: string
   question: string
-  blocId: string
+  answer: string
 }
 
 defineProps<{
@@ -28,7 +26,8 @@ defineProps<{
             <span class="opendata-faq__question">{{ item.question }}</span>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
-            <TextContent :bloc-id="item.blocId" :ipsum-length="240" />
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div class="opendata-faq__answer" v-html="item.answer" />
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -67,6 +66,27 @@ defineProps<{
   font-size: 1.05rem
   font-weight: 600
   color: rgba(var(--v-theme-text-neutral-strong), 0.95)
+
+.opendata-faq__answer :deep(p)
+  margin: 0 0 1rem
+  font-size: 0.95rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.opendata-faq__answer :deep(p:last-child)
+  margin-bottom: 0
+
+.opendata-faq__answer :deep(ul)
+  margin: 0 0 1rem 1.25rem
+  padding: 0
+  list-style: disc
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.opendata-faq__answer :deep(li)
+  margin-bottom: 0.5rem
+  font-size: 0.95rem
+
+.opendata-faq__answer :deep(li:last-child)
+  margin-bottom: 0
 
 .v-expansion-panel-text
   background: rgba(var(--v-theme-surface-default), 1)

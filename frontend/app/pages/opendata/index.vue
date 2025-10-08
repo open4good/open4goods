@@ -187,22 +187,22 @@ const faqItems = computed(() => [
   {
     id: 'sources',
     question: String(t('opendata.faq.items.sources.question')),
-    blocId: 'webpages:opendata:faq-sources',
+    answer: String(t('opendata.faq.items.sources.answer')),
   },
   {
     id: 'definition',
     question: String(t('opendata.faq.items.definition.question')),
-    blocId: 'webpages:opendata:faq-definition',
+    answer: String(t('opendata.faq.items.definition.answer')),
   },
   {
     id: 'importance',
     question: String(t('opendata.faq.items.importance.question')),
-    blocId: 'webpages:opendata:faq-importance',
+    answer: String(t('opendata.faq.items.importance.answer')),
   },
   {
     id: 'contributors',
     question: String(t('opendata.faq.items.contributors.question')),
-    blocId: 'webpages:opendata:faq-contributors',
+    answer: String(t('opendata.faq.items.contributors.answer')),
   },
 ])
 
