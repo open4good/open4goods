@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import TextContent from '~/components/domains/content/TextContent.vue'
-
 interface HeroCta {
   label: string
   href: string
