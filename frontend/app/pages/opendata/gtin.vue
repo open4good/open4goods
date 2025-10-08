@@ -155,7 +155,7 @@ const summaryItems = computed(() => [
   {
     label: String(t('opendata.datasets.common.summary.size')),
     value: dataset.value?.fileSize ?? placeholder.value,
-    icon: 'mdi-file-archive-outline',
+    icon: 'mdi-package-down',
   },
 ])
 
