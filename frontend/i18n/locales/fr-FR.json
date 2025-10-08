@@ -368,7 +368,7 @@
         },
         "hero": {
           "eyebrow": "Export GTIN",
-          "title": "Données codes-barres pour les biens de consommation",
+          "title": "Base de données de codes-barres",
           "stats": {
             "records": "Produits",
             "updated": "Dernière mise à jour",
@@ -476,7 +476,7 @@
         },
         "hero": {
           "eyebrow": "Export ISBN",
-          "title": "Métadonnées complètes pour les livres",
+          "title": "Base de données livres (ISBN)",
           "stats": {
             "records": "Publications",
             "updated": "Dernière mise à jour",
