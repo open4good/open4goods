@@ -1,12 +1,14 @@
 import type { H3Event } from 'h3'
 import { FetchError } from 'ofetch'
+import { buildAuthCookieOptions } from '~~/server/utils/auth-cookie-options'
 
 const clearAuthCookies = (
   event: H3Event,
   config: { tokenCookieName: string; refreshCookieName: string }
 ) => {
-  deleteCookie(event, config.tokenCookieName, { path: '/' })
-  deleteCookie(event, config.refreshCookieName, { path: '/' })
+  const cookieOptions = buildAuthCookieOptions(event)
+  deleteCookie(event, config.tokenCookieName, cookieOptions)
+  deleteCookie(event, config.refreshCookieName, cookieOptions)
 }
 
 export default defineEventHandler(async (event: H3Event) => {

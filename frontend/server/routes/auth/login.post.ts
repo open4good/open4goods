@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
-import type { CookieSerializeOptions } from 'cookie-es'
 import { FetchError } from 'ofetch'
+import { buildAuthCookieOptions } from '~~/server/utils/auth-cookie-options'
 
 interface LoginResponse { accessToken: string; refreshToken: string }
 interface LoginBody { username: string; password: string }
@@ -17,14 +17,7 @@ export default defineEventHandler(async (event: H3Event) => {
       method: 'POST',
       body,
     })
-    const secure = process.env.NODE_ENV === 'production'
-    const sameSite: 'lax' | 'none' = secure ? 'none' : 'lax'
-    const cookieOptions: CookieSerializeOptions = {
-      httpOnly: true,
-      sameSite,
-      secure,
-      path: '/',
-    }
+    const cookieOptions = buildAuthCookieOptions(event)
     setCookie(event, config.tokenCookieName, tokens.accessToken, cookieOptions)
     setCookie(event, config.refreshCookieName, tokens.refreshToken, cookieOptions)
     // Return tokens so the client can decode and update its state immediately
