@@ -39,13 +39,13 @@ defineProps<{
         <p v-if="subtitle" class="dataset-download__subtitle">{{ subtitle }}</p>
       </div>
 
-      <v-row class="g-6" align="stretch">
+      <v-row class="g-6" align="stretch" justify="center">
         <v-col
           v-for="option in options"
           :key="option.id"
           cols="12"
           md="6"
-          class="d-flex"
+          class="d-flex justify-center"
         >
           <v-card class="dataset-download__card" rounded="xl" elevation="4">
             <div v-if="option.badge" class="dataset-download__badge">{{ option.badge }}</div>
@@ -110,6 +110,7 @@ defineProps<{
   padding: clamp(1.75rem, 4vw, 2.75rem)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
   background: rgba(var(--v-theme-surface-primary-050), 0.9)
+  width: 100%
 
 .dataset-download__badge
   align-self: flex-start
