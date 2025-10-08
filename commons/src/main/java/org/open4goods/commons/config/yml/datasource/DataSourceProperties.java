@@ -63,12 +63,12 @@ public class DataSourceProperties {
 	 * The eventual feedKey, if a match from catalog (feedservice)
 	 */
 	private String feedKey;
-	
+
 	/**
 	 * Hot time populated
 	 */
 	private String datasourceConfigName;
-	
+
 	@NotBlank
 	private String favico;
 
@@ -76,6 +76,8 @@ public class DataSourceProperties {
 
 
 	private String portalUrl;
+
+	private String affiliatedPortalUrl;
 
 
 	/**
@@ -88,9 +90,9 @@ public class DataSourceProperties {
 	 * (used to "reverse" a score. eg. a score presenting a risk, we want to get the associated performance)
 	 */
 	private Double invertScaleBase;
-	
-	
-	
+
+
+
 	/**
 	 * Scheduling of this datasource Can be TimeConstants.CRON_DAY
 	 * |TimeConstants.CRON_WEEK | TimeConstants.CRON_MONTH or a spring cronexp
@@ -124,9 +126,16 @@ public class DataSourceProperties {
 
 	@NotBlank
 	/**
-	 * The datasource language. 
+	 * The datasource language.
 	 */
 	private String language = "FR";
+
+
+
+	/**
+	 * The datasource description
+	 */
+	private String description;
 
 	/**
 	 * The default currency to use. Default value used if currency is not set from
@@ -275,10 +284,10 @@ public class DataSourceProperties {
 		internalCron = c;
 		return internalCron;
 	}
-	
-	
 
-	
+
+
+
 	/**
 	 * Extracts and returns the capitalized domain name from the portal URL.
 	 * <p>
@@ -602,6 +611,22 @@ public class DataSourceProperties {
 
 	public void setInvertScaleBase(Double invertScaleBase) {
 		this.invertScaleBase = invertScaleBase;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getAffiliatedPortalUrl() {
+		return affiliatedPortalUrl;
+	}
+
+	public void setAffiliatedPortalUrl(String affiliatedPortalUrl) {
+		this.affiliatedPortalUrl = affiliatedPortalUrl;
 	}
 
 

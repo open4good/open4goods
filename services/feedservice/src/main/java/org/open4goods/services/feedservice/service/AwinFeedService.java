@@ -143,7 +143,10 @@ public class AwinFeedService extends AbstractFeedService {
 
                 ds.setLogo(merchant.getLogoUrl());
                 ds.setPortalUrl(merchant.getDisplayUrl());
+                ds.setAffiliatedPortalUrl(merchant.getClickThroughUrl());
                 ds.setName(extractNameAndTld(ds.getPortalUrl()));
+                ds.setLanguage(merchant.getPrimaryRegion().getCountryCode().substring(0,2).toLowerCase());
+                ds.setDescription(merchant.getDescription());
 
                 }
             } else {

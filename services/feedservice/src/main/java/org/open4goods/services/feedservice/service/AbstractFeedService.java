@@ -23,6 +23,7 @@ public abstract class AbstractFeedService {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     // Cached datasource properties loaded from the external feed.
+    // TODO (P2, design) : No scheduled reloading of feeds url
     protected Set<DataSourceProperties> datasourceCache;
 
     // Feed configuration (catalog URL, CSV mapping, filters, etc.)
