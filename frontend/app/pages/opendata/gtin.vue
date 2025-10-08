@@ -34,12 +34,6 @@
       :items="summaryItems"
     />
 
-    <OpendataDownloadComparison
-      :title="t('opendata.datasets.gtin.download.title')"
-      :subtitle="t('opendata.datasets.gtin.download.subtitle')"
-      :options="downloadOptions"
-    />
-
     <section class="dataset-format" aria-labelledby="dataset-format-heading">
       <v-container max-width="lg">
         <div class="dataset-format__card">
@@ -79,6 +73,13 @@
         </v-table>
       </v-container>
     </section>
+
+
+    <OpendataDownloadComparison
+      :title="t('opendata.datasets.gtin.download.title')"
+      :subtitle="t('opendata.datasets.gtin.download.subtitle')"
+      :options="downloadOptions"
+    />
 
     <OpendataLicenseSection
       :title="t('opendata.license.title')"

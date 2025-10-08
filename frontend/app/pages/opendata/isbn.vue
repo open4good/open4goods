@@ -34,11 +34,6 @@
       :items="summaryItems"
     />
 
-    <OpendataDownloadComparison
-      :title="t('opendata.datasets.isbn.download.title')"
-      :subtitle="t('opendata.datasets.isbn.download.subtitle')"
-      :options="downloadOptions"
-    />
 
     <section class="dataset-format" aria-labelledby="dataset-format-heading">
       <v-container max-width="lg">
@@ -79,6 +74,12 @@
         </v-table>
       </v-container>
     </section>
+
+    <OpendataDownloadComparison
+      :title="t('opendata.datasets.isbn.download.title')"
+      :subtitle="t('opendata.datasets.isbn.download.subtitle')"
+      :options="downloadOptions"
+    />
 
     <OpendataLicenseSection
       :title="t('opendata.license.title')"
