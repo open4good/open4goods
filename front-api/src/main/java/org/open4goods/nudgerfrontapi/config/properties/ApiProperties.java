@@ -8,19 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "front")
 public class ApiProperties {
 
-    /** The resource provider root path (where static resources will be hosted). */
-    private String resourceProviderRootPath;
-
-    /** Absolute root path used to expose downloadable assets. */
+    /** Absolute root path used to expose downloadable assets. (where static resources will be hosted) */
     private String resourceRootPath;
-
-    public String getResourceProviderRootPath() {
-        return resourceProviderRootPath;
-    }
-
-    public void setResourceProviderRootPath(String resourceProviderRootPath) {
-        this.resourceProviderRootPath = resourceProviderRootPath;
-    }
 
     public String getResourceRootPath() {
         return resourceRootPath;

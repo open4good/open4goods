@@ -16,7 +16,6 @@ springdoc:
     use-root-path: true
 
 front:
-  resourceProviderRootPath: "https://nudger.fr"
   resourceRootPath: "https://nudger.fr"
   cache:
     path: ./cache

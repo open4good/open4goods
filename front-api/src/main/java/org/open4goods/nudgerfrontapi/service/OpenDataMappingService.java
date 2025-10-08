@@ -194,9 +194,7 @@ public class OpenDataMappingService {
 
     private String buildDownloadUrl(String relativePath) {
         String root = apiProperties.getResourceRootPath();
-        if (!StringUtils.hasText(root)) {
-            root = apiProperties.getResourceProviderRootPath();
-        }
+
         if (!StringUtils.hasText(root)) {
             return relativePath;
         }

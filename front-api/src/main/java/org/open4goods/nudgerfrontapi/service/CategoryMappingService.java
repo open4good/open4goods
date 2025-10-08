@@ -305,7 +305,7 @@ public class CategoryMappingService {
 	 * @return
 	 */
     private String mapVerticalImageMedium(VerticalConfig verticalConfig) {
-		return apiProperties.getResourceProviderRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
+		return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class CategoryMappingService {
 	 */
 
 	private String mapVerticalImageSmall(VerticalConfig verticalConfig) {
-		return apiProperties.getResourceProviderRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
+		return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
 	}
 
 	/**
@@ -329,6 +329,6 @@ public class CategoryMappingService {
 	 */
 
 	private String mapVerticalImageLarge(VerticalConfig verticalConfig) {
-		return apiProperties.getResourceProviderRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
+		return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
 	}
 }
