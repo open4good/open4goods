@@ -13,8 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.dto.partner.AffiliationPartnerDto;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
@@ -33,9 +36,12 @@ class AffiliationPartnerServiceTest {
         properties.setApiKey("secret");
         properties.setPartnersPath(PARTNERS_PATH);
 
+        ApiProperties apiProperties = new ApiProperties();
+        apiProperties.setResourceRootPath("https://cdn.example/assets");
+
         RestClient.Builder builder = RestClient.builder();
         mockServer = MockRestServiceServer.bindTo(builder).build();
-        service = new AffiliationPartnerService(builder, properties);
+        service = new AffiliationPartnerService(builder, properties, apiProperties);
     }
 
     @Test
@@ -58,11 +64,14 @@ class AffiliationPartnerServiceTest {
 
         service.refreshPartners();
 
-        List<AffiliationPartner> partners = service.getPartners();
+        List<AffiliationPartnerDto> partners = service.getPartnerDtos();
         assertThat(partners).hasSize(1);
-        AffiliationPartner partner = partners.getFirst();
-        assertThat(partner.getId()).isEqualTo("p1");
-        assertThat(partner.getName()).isEqualTo("Partner 1");
+        AffiliationPartnerDto partner = partners.getFirst();
+        assertThat(partner.id()).isEqualTo("p1");
+        assertThat(partner.name()).isEqualTo("Partner 1");
+        assertThat(partner.logoUrl()).isEqualTo("https://cdn.example/assets/logo/Partner 1");
+        assertThat(partner.faviconUrl()).isEqualTo("https://cdn.example/assets/favicon?url=Partner 1");
+        assertThat(partner.countryCodes()).containsExactly("DE", "FR");
         mockServer.verify();
     }
 
@@ -91,5 +100,34 @@ class AffiliationPartnerServiceTest {
 
         assertThat(service.getPartners()).isSameAs(initialPartners);
         mockServer.verify();
+    }
+
+    @Test
+    void assetUrlsAreNullWhenNameMissingOrResourceRootBlank() {
+        ApiProperties apiProperties = new ApiProperties();
+        apiProperties.setResourceRootPath(" ");
+        AffiliationPartnersProperties properties = new AffiliationPartnersProperties();
+        properties.setApiBaseUrl(BASE_URL);
+        properties.setApiKey("secret");
+        properties.setPartnersPath(PARTNERS_PATH);
+
+        RestClient.Builder builder = RestClient.builder();
+        AffiliationPartnerService localService = new AffiliationPartnerService(builder, properties, apiProperties);
+
+        AffiliationPartner partner = new AffiliationPartner();
+        partner.setId("p3");
+        partner.setName(null);
+
+        @SuppressWarnings("unchecked")
+        var partnersReference = (java.util.concurrent.atomic.AtomicReference<List<AffiliationPartner>>) ReflectionTestUtils
+                .getField(localService, "partners");
+        partnersReference.set(List.of(partner));
+
+        List<AffiliationPartnerDto> dtos = localService.getPartnerDtos();
+        assertThat(dtos).singleElement()
+                .satisfies(dto -> {
+                    assertThat(dto.logoUrl()).isNull();
+                    assertThat(dto.faviconUrl()).isNull();
+                });
     }
 }
