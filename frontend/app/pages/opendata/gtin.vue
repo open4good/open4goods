@@ -4,6 +4,11 @@
       :eyebrow="t('opendata.datasets.gtin.hero.eyebrow')"
       :title="t('opendata.datasets.gtin.hero.title')"
       description-bloc-id="webpages:opendata:gtin-hero-overview"
+      :breadcrumb="{
+        label: String(t('opendata.datasets.common.breadcrumb.label')),
+        ariaLabel: String(t('opendata.datasets.common.breadcrumb.ariaLabel')),
+        href: localePath('opendata'),
+      }"
     />
 
     <v-progress-linear
@@ -114,6 +119,7 @@ definePageMeta({
 })
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const requestURL = useRequestURL()
 
 interface DatasetPayload {
@@ -231,22 +237,32 @@ const faqItems = computed(() => [
   {
     id: 'what-is-gtin',
     question: String(t('opendata.datasets.gtin.faq.items.whatIs.question')),
-    blocId: 'webpages:opendata:gtin-faq-what-is',
+    answer: String(t('opendata.datasets.gtin.faq.items.whatIs.answer')),
   },
   {
-    id: 'structure',
-    question: String(t('opendata.datasets.gtin.faq.items.structure.question')),
-    blocId: 'webpages:opendata:gtin-faq-structure',
+    id: 'difference-ean',
+    question: String(t('opendata.datasets.gtin.faq.items.differenceEan.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.differenceEan.answer')),
   },
   {
-    id: 'use-cases',
-    question: String(t('opendata.datasets.gtin.faq.items.uses.question')),
-    blocId: 'webpages:opendata:gtin-faq-uses',
+    id: 'formats',
+    question: String(t('opendata.datasets.gtin.faq.items.formats.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.formats.answer')),
   },
   {
-    id: 'contribute',
-    question: String(t('opendata.datasets.gtin.faq.items.contribute.question')),
-    blocId: 'webpages:opendata:gtin-faq-contribute',
+    id: 'difference-upc',
+    question: String(t('opendata.datasets.gtin.faq.items.differenceUpc.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.differenceUpc.answer')),
+  },
+  {
+    id: 'ean-13',
+    question: String(t('opendata.datasets.gtin.faq.items.ean13.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.ean13.answer')),
+  },
+  {
+    id: 'logistics',
+    question: String(t('opendata.datasets.gtin.faq.items.logistics.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.logistics.answer')),
   },
 ])
 

@@ -5,6 +5,11 @@ defineProps<{
   eyebrow: string
   title: string
   descriptionBlocId: string
+  breadcrumb?: {
+    label: string
+    href: string
+    ariaLabel?: string
+  }
 }>()
 </script>
 
@@ -13,7 +18,17 @@ defineProps<{
     <v-container max-width="lg" class="py-12">
       <div class="dataset-hero__surface">
         <div class="dataset-hero__text">
-          <span class="dataset-hero__eyebrow">{{ eyebrow }}</span>
+          <div class="dataset-hero__meta-row">
+            <NuxtLink
+              v-if="breadcrumb"
+              :to="breadcrumb.href"
+              :aria-label="breadcrumb.ariaLabel ?? breadcrumb.label"
+              class="dataset-hero__breadcrumb"
+            >
+              {{ breadcrumb.label }}
+            </NuxtLink>
+            <span class="dataset-hero__eyebrow">{{ eyebrow }}</span>
+          </div>
           <h1 id="dataset-hero-heading" class="dataset-hero__title">{{ title }}</h1>
           <TextContent :bloc-id="descriptionBlocId" :ipsum-length="220" />
         </div>
@@ -39,6 +54,30 @@ defineProps<{
   flex-direction: column
   gap: 1rem
   width: 100%
+
+.dataset-hero__meta-row
+  display: flex
+  gap: 0.5rem
+  align-items: center
+  flex-wrap: wrap
+
+.dataset-hero__breadcrumb
+  display: inline-flex
+  align-items: center
+  padding: 0.35rem 0.9rem
+  border-radius: 999px
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.32)
+  font-size: 0.85rem
+  letter-spacing: 0.08em
+  text-transform: uppercase
+  color: rgba(var(--v-theme-hero-pill-on-dark), 1)
+  text-decoration: none
+  transition: background-color 0.2s ease, color 0.2s ease
+
+.dataset-hero__breadcrumb:hover,
+.dataset-hero__breadcrumb:focus-visible
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.48)
+  color: rgba(var(--v-theme-hero-pill-on-dark), 1)
 
 .dataset-hero__eyebrow
   display: inline-flex
