@@ -1,6 +1,7 @@
 package org.open4goods.services.contribution.service;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,6 +65,18 @@ public class ContributionService implements HealthIndicator {
         // Means there a user cannot vote more than once an hour
         this.cache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
     }
+
+
+	public String affiliationToken(String datasource, String url) {
+		try {
+			ContributionVote token = new ContributionVote(datasource, url);
+			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
+			return serToken;
+		} catch (Exception e) {
+			logger.error("Error while generating affiliation token for {} : {}", url, e.getMessage());
+			return url;
+		}
+	}
 
     /**
      * Store the user contribution vote,

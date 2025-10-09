@@ -29,7 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * REST controller exposing affiliation partners consumed by the eco-nudger frontend.
+ * REST controller exposing affiliation partners consumed by the nudger frontend.
  */
 @RestController
 @RequestMapping("/partners")

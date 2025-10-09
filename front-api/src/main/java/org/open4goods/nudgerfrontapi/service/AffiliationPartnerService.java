@@ -9,6 +9,8 @@ import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.partner.AffiliationPartnerDto;
+import org.open4goods.services.contribution.model.ContributionVote;
+import org.open4goods.services.contribution.service.ContributionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,11 +33,13 @@ public class AffiliationPartnerService {
     private final AffiliationPartnersProperties properties;
     private final ApiProperties apiProperties;
     private final AtomicReference<List<AffiliationPartner>> partners = new AtomicReference<>(List.of());
+    private final AffiliationService affiliationService;
 
     public AffiliationPartnerService(RestClient.Builder restClientBuilder, AffiliationPartnersProperties properties,
-            ApiProperties apiProperties) {
+            ApiProperties apiProperties, AffiliationService affiliationService) {
         this.properties = properties;
         this.apiProperties = apiProperties;
+        this.affiliationService = affiliationService;
         this.restClient = restClientBuilder.baseUrl(properties.getApiBaseUrl())
                 .defaultHeader(UrlConstants.APIKEY_PARAMETER, properties.getApiKey())
                 .build();
@@ -93,10 +97,13 @@ public class AffiliationPartnerService {
                 : partner.getCountryCodes().stream()
                         .sorted(Comparator.naturalOrder())
                         .toList();
+
+
+
         return new AffiliationPartnerDto(
                 partner.getId(),
                 partner.getName(),
-                partner.getAffiliationLink(),
+                affiliationService.encryptAffiliationLink(partner.getName(), partner.getAffiliationLink()),
                 partner.getPortalUrl(),
                 logoUrl,
                 faviconUrl,
