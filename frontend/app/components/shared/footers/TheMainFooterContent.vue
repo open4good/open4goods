@@ -70,6 +70,8 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   },
 ])
 
+const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', import.meta.url).href
+
 </script>
 
 <template>
@@ -78,110 +80,116 @@ const feedbackLinks = computed<FooterLink[]>(() => [
       {{ t('siteIdentity.footer.accessibleTitle') }}
     </h2>
 
-    <v-row class="g-8">
-      <v-col cols="12" md="4" class="d-flex flex-column ga-4">
-        <p class="footer-mission text-body-1 mb-0">
-          {{ t('siteIdentity.footer.mission') }}
-        </p>
-
-        <v-btn
-          :to="blogPath"
-          variant="text"
-          append-icon="mdi-arrow-right"
-          class="footer-link-btn text-white px-0"
-        >
-          {{ t('siteIdentity.footer.blogLink') }}
-        </v-btn>
-      </v-col>
-
+    <v-row class="g-8 footer-upper">
       <v-col cols="12" md="4">
-        <div class="d-flex flex-column ga-2">
-        <v-btn
-          v-for="link in highlightLinks"
-          :key="String(link.to ?? link.href ?? link.label)"
-          :to="link.to"
-          :href="link.href"
-          variant="text"
-          append-icon="mdi-arrow-right"
-          class="footer-link-btn text-white px-0"
-        >
-            {{ link.label }}
+        <div class="footer-panel d-flex flex-column ga-4">
+          <p class="footer-mission text-body-1 mb-0">
+            {{ t('siteIdentity.footer.mission') }}
+          </p>
+
+          <v-btn
+            :to="blogPath"
+            variant="text"
+            append-icon="mdi-arrow-right"
+            color="accent-supporting"
+            class="footer-link-btn px-0"
+          >
+            {{ t('siteIdentity.footer.blogLink') }}
           </v-btn>
         </div>
-
-        <div class="text-subtitle-1 font-weight-medium mt-6">
-          {{ t('siteIdentity.footer.comparator.title') }}
-        </div>
-        <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
-          <v-list-item
-            v-for="link in comparatorLinks"
-            :key="String(link.to ?? link.href ?? link.label)"
-            :to="link.to"
-            :href="link.href"
-            class="footer-list-item px-0"
-          >
-            <template #title>
-              <span class="text-body-2">{{ link.label }}</span>
-            </template>
-          </v-list-item>
-        </v-list>
       </v-col>
 
       <v-col cols="12" md="4">
-        <div>
-          <div class="text-subtitle-1 font-weight-medium">
-            {{ t('siteIdentity.footer.community.title') }}
+        <div class="footer-panel">
+          <div class="d-flex flex-column ga-2">
+            <v-btn
+              v-for="link in highlightLinks"
+              :key="String(link.to ?? link.href ?? link.label)"
+              :to="link.to"
+              :href="link.href"
+              variant="text"
+              append-icon="mdi-arrow-right"
+              color="hero-overlay-strong"
+              class="footer-link-btn px-0"
+            >
+              {{ link.label }}
+            </v-btn>
+          </div>
+
+          <div class="footer-section-title text-subtitle-1 font-weight-medium mt-6">
+            {{ t('siteIdentity.footer.comparator.title') }}
           </div>
           <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
-          <v-list-item
-            v-for="link in communityLinks"
-            :key="String(link.to ?? link.href ?? link.label)"
-            :to="link.to"
-            :href="link.href"
-            class="footer-list-item px-0"
-          >
-            <template #title>
-              <span class="text-body-2">{{ link.label }}</span>
-            </template>
+            <v-list-item
+              v-for="link in comparatorLinks"
+              :key="String(link.to ?? link.href ?? link.label)"
+              :to="link.to"
+              :href="link.href"
+              class="footer-list-item px-0"
+            >
+              <template #title>
+                <span class="text-body-2">{{ link.label }}</span>
+              </template>
             </v-list-item>
           </v-list>
         </div>
+      </v-col>
 
-        <NuxtLink :to="feedbackPath" class="footer-section-link text-subtitle-1 font-weight-medium mt-6">
-          {{ t('siteIdentity.footer.feedback.title') }}
-        </NuxtLink>
-        <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
-          <v-list-item
-            v-for="link in feedbackLinks"
-            :key="String(link.to ?? link.href ?? link.label)"
-            :to="link.to"
-            :href="link.href"
-            class="footer-list-item px-0"
-            :target="link.target"
-            :rel="link.rel"
-          >
-            <template #title>
-              <span class="text-body-2">{{ link.label }}</span>
-            </template>
-          </v-list-item>
-        </v-list>
+      <v-col cols="12" md="4">
+        <div class="footer-panel">
+          <div class="footer-section-title text-subtitle-1 font-weight-medium">
+            {{ t('siteIdentity.footer.community.title') }}
+          </div>
+          <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+            <v-list-item
+              v-for="link in communityLinks"
+              :key="String(link.to ?? link.href ?? link.label)"
+              :to="link.to"
+              :href="link.href"
+              class="footer-list-item px-0"
+            >
+              <template #title>
+                <span class="text-body-2">{{ link.label }}</span>
+              </template>
+            </v-list-item>
+          </v-list>
+
+          <NuxtLink :to="feedbackPath" class="footer-section-link text-subtitle-1 font-weight-medium mt-6">
+            {{ t('siteIdentity.footer.feedback.title') }}
+          </NuxtLink>
+          <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+            <v-list-item
+              v-for="link in feedbackLinks"
+              :key="String(link.to ?? link.href ?? link.label)"
+              :to="link.to"
+              :href="link.href"
+              class="footer-list-item px-0"
+              :target="link.target"
+              :rel="link.rel"
+            >
+              <template #title>
+                <span class="text-body-2">{{ link.label }}</span>
+              </template>
+            </v-list-item>
+          </v-list>
+        </div>
       </v-col>
     </v-row>
 
-    <v-divider class="my-8" opacity="0.2" color="white" />
+    <v-divider class="my-8 footer-divider" color="hero-overlay-strong" />
 
-    <v-row class="justify-center text-center">
+    <v-row class="justify-center text-center footer-bottom">
       <v-col cols="12" class="d-flex flex-column align-center ga-4">
         <NuxtLink to="/" class="footer-logo-link d-inline-flex">
           <v-img
-            src="@/assets/images/nudger-logo-orange.svg"
+            :src="footerLogo"
             :alt="t('siteIdentity.footer.logoAlt')"
             height="40"
             class="footer-logo"
             cover
           />
         </NuxtLink>
-        <p class="mb-0 text-body-2">
+        <p class="footer-meta mb-0 text-body-2">
           {{ t('siteIdentity.footer.copyright', { year: currentYear }) }}
         </p>
       </v-col>
@@ -192,28 +200,86 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 <style lang="postcss" scoped>
 .footer-container {
   max-width: 1200px;
+  color: rgb(var(--v-theme-hero-overlay-strong));
+}
+
+.footer-upper {
+  position: relative;
+  z-index: 1;
+}
+
+.footer-panel {
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.08);
+  border: 1px solid rgba(var(--v-theme-hero-overlay-soft), 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 18px 42px -24px rgba(var(--v-theme-shadow-primary-600), 0.35);
+  height: 100%;
 }
 
 .footer-mission {
   line-height: 1.6;
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.96);
 }
 
 .footer-link-btn {
   justify-content: flex-start;
   text-transform: none;
   font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.footer-link-btn :deep(.v-btn__append) {
+  opacity: 0.9;
+}
+
+.footer-section-title {
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .footer-list :deep(.v-list-item-title) {
-  color: inherit;
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.82);
 }
 
 .footer-list-item {
   min-height: 32px;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.footer-list-item:hover {
+  background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
+}
+
+.footer-section-link {
+  display: inline-flex;
+  align-items: center;
+  color: rgb(var(--v-theme-accent-primary-highlight));
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.footer-section-link:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.footer-divider {
+  opacity: 0.24 !important;
+}
+
+.footer-bottom {
+  position: relative;
+  z-index: 1;
 }
 
 .footer-logo {
   max-width: 160px;
+  filter: drop-shadow(0 8px 18px rgba(var(--v-theme-shadow-primary-600), 0.45));
 }
 
 .footer-logo-link {
@@ -224,17 +290,8 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   opacity: 0.85;
 }
 
-.footer-section-link {
-  display: inline-flex;
-  align-items: center;
-  color: inherit;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.footer-section-link:hover {
-  opacity: 0.85;
-  text-decoration: underline;
+.footer-meta {
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
 }
 
 .sr-only {
