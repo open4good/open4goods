@@ -106,7 +106,29 @@
   },
   "common": {
     "actions": {
-      "retry": "Retry"
+      "retry": "Retry",
+      "goHome": "Back to homepage"
+    }
+  },
+  "contrib": {
+    "seo": {
+      "title": "Redirecting you to our partner",
+      "description": "We are validating your secure contribution link before redirecting you to Nudger's partner."
+    },
+    "loading": {
+      "title": "Preparing your redirect…",
+      "message": "Please wait while we validate your contribution link."
+    },
+    "success": {
+      "title": "Ready to redirect",
+      "message": "You will be redirected shortly. If nothing happens, use the button below.",
+      "cta": "Continue to partner site"
+    },
+    "error": {
+      "title": "We could not validate this link",
+      "description": "The contribution link may have expired or is invalid. You can return to the homepage and try again.",
+      "detailsPrefix": "Details:",
+      "cta": "Back to homepage"
     }
   },
   "team": {

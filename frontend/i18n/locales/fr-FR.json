@@ -105,7 +105,29 @@
   },
   "common": {
     "actions": {
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "goHome": "Retour à l'accueil"
+    }
+  },
+  "contrib": {
+    "seo": {
+      "title": "Redirection vers notre partenaire",
+      "description": "Nous vérifions votre lien de contribution sécurisé avant de vous rediriger vers le partenaire de Nudger."
+    },
+    "loading": {
+      "title": "Préparation de votre redirection…",
+      "message": "Veuillez patienter pendant la validation de votre lien de contribution."
+    },
+    "success": {
+      "title": "Prêt pour la redirection",
+      "message": "Vous serez redirigé dans quelques instants. Si rien ne se passe, utilisez le bouton ci-dessous.",
+      "cta": "Continuer vers le site partenaire"
+    },
+    "error": {
+      "title": "Impossible de valider ce lien",
+      "description": "Le lien de contribution a peut-être expiré ou est invalide. Vous pouvez retourner à l'accueil et réessayer.",
+      "detailsPrefix": "Détails :",
+      "cta": "Retour à l'accueil"
     }
   },
   "team": {
