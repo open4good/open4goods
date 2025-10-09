@@ -103,6 +103,7 @@
         <module>services/blog</module>
         <module>services/gtinservice</module>
         <module>services/feedservice</module>
+        <module>services/contribution</module>
 
 
 

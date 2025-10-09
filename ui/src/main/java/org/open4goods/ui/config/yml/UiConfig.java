@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.open4goods.services.contribution.config.yml.ReversementConfig;
 import org.open4goods.services.feedservice.config.AffiliationConfig;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.commons.config.yml.BanCheckerConfig;
