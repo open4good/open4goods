@@ -34,7 +34,7 @@
         "ecoscore": "Évaluation environnementale"
       },
       "comparator": {
-        "title": "Comparateur de bien commun",
+        "title": "Ressources",
         "links": {
           "openData": "Open data",
           "openSource": "Open source",
@@ -43,17 +43,18 @@
         }
       },
       "community": {
-        "title": "Vous n'êtes pas seuls",
+        "title": "Communauté",
         "links": {
           "team": "Notre équipe",
           "partners": "Nos partenaires"
         }
       },
       "feedback": {
-        "title": "Feedback",
+        "title": "Nous aider",
+        "cta": "Donnez votre avis",
         "links": {
           "contact": "Nous contacter",
-          "linkedin": "Nous suivre"
+          "linkedin": "Nous suivre sur LinkedIn"
         }
       },
       "logoAlt": "Icône Nudger orange",
