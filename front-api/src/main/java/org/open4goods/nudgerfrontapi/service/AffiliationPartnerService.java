@@ -28,6 +28,7 @@ public class AffiliationPartnerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AffiliationPartnerService.class);
     private static final ParameterizedTypeReference<List<AffiliationPartner>> PARTNERS_TYPE =
             new ParameterizedTypeReference<>() { };
+	private static final String CONTRIB_ENDPOINT = "/contrib/";
 
     private final RestClient restClient;
     private final AffiliationPartnersProperties properties;
@@ -103,7 +104,7 @@ public class AffiliationPartnerService {
         return new AffiliationPartnerDto(
                 partner.getId(),
                 partner.getName(),
-                affiliationService.encryptAffiliationLink(partner.getName(), partner.getAffiliationLink()),
+                CONTRIB_ENDPOINT +  affiliationService.encryptAffiliationLink(partner.getName(), partner.getAffiliationLink()),
                 partner.getPortalUrl(),
                 logoUrl,
                 faviconUrl,
