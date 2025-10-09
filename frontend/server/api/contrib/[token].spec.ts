@@ -127,6 +127,35 @@ describe('server/api/contrib/[token]', () => {
     expect(response).toEqual({ statusCode: 301, location: 'https://example.test/post' })
   })
 
+  it('propagates the Location header from manual redirect responses', async () => {
+    resolveRedirectMock.mockResolvedValue({
+      statusCode: 301,
+      location: 'https://example.test/manual',
+    })
+
+    const event = {
+      node: {
+        req: {
+          method: 'GET',
+          headers: {
+            host: 'nudger.example',
+          },
+        },
+      },
+      context: { params: { token: 'token-manual' } },
+    } as unknown as Parameters<ContribRouteHandler>[0]
+
+    const response = await handler(event)
+
+    expect(resolveRedirectMock).toHaveBeenCalledWith({
+      token: 'token-manual',
+      method: 'GET',
+      userAgent: undefined,
+    })
+    expect(response.statusCode).toBe(301)
+    expect(response.location).toBe('https://example.test/manual')
+  })
+
   it('throws a 405 error when using an unsupported HTTP method', async () => {
     const event = {
       node: {
