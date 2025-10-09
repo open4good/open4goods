@@ -35,7 +35,7 @@
         "compensation": "Ecological contribution"
       },
       "comparator": {
-        "title": "Common good comparator",
+        "title": "Resources",
         "links": {
           "openData": "Open data",
           "openSource": "Open source",
@@ -44,17 +44,18 @@
         }
       },
       "community": {
-        "title": "You are not alone",
+        "title": "Community",
         "links": {
           "team": "Our team",
           "partners": "Our partners"
         }
       },
       "feedback": {
-        "title": "Feedback",
+        "title": "Get involved",
+        "cta": "Share your feedback",
         "links": {
           "contact": "Contact us",
-          "linkedin": "Follow us"
+          "linkedin": "Follow us on LinkedIn"
         }
       },
       "logoAlt": "Nudger orange logo icon",

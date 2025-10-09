@@ -10,6 +10,7 @@ type FooterLink = {
   href?: string
   target?: string
   rel?: string
+  icon?: string
 }
 
 const { t, locale } = useI18n()
@@ -27,7 +28,7 @@ const highlightLinks = computed<FooterLink[]>(() => [
   }
 ])
 
-const comparatorLinks = computed<FooterLink[]>(() => [
+const resourceLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.comparator.links.openData'),
     to: '/opendata',
@@ -61,12 +62,14 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.feedback.links.contact'),
     to: resolveLocalizedRoutePath('contact', currentLocale.value),
+    icon: 'mdi-email-outline',
   },
   {
     label: t('siteIdentity.footer.feedback.links.linkedin'),
     href: linkedinUrl.value,
     target: '_blank',
     rel: 'noopener nofollow',
+    icon: 'mdi-linkedin',
   },
 ])
 
@@ -83,24 +86,43 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
     <v-row class="g-8 footer-upper">
       <v-col cols="12" md="4">
         <div class="footer-panel d-flex flex-column ga-4">
-          <p class="footer-mission text-body-1 mb-0">
-            {{ t('siteIdentity.footer.mission') }}
-          </p>
+          <div class="footer-section-title text-subtitle-1 font-weight-medium">
+            {{ t('siteIdentity.footer.feedback.title') }}
+          </div>
 
           <v-btn
-            :to="blogPath"
+            :to="feedbackPath"
             variant="text"
             append-icon="mdi-arrow-right"
-            color="accent-supporting"
+            color="hero-overlay-strong"
             class="footer-link-btn px-0"
           >
-            {{ t('siteIdentity.footer.blogLink') }}
+            {{ t('siteIdentity.footer.feedback.cta') }}
           </v-btn>
+
+          <v-list density="compact" bg-color="transparent" class="footer-list pa-0">
+            <v-list-item
+              v-for="link in feedbackLinks"
+              :key="String(link.to ?? link.href ?? link.label)"
+              :to="link.to"
+              :href="link.href"
+              class="footer-list-item px-0"
+              :target="link.target"
+              :rel="link.rel"
+            >
+              <template #prepend>
+                <v-icon v-if="link.icon" :icon="link.icon" size="18" class="me-2" />
+              </template>
+              <template #title>
+                <span class="text-body-2">{{ link.label }}</span>
+              </template>
+            </v-list-item>
+          </v-list>
         </div>
       </v-col>
 
       <v-col cols="12" md="4">
-        <div class="footer-panel">
+        <div class="footer-panel d-flex flex-column ga-4">
           <div class="d-flex flex-column ga-2">
             <v-btn
               v-for="link in highlightLinks"
@@ -116,12 +138,12 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
             </v-btn>
           </div>
 
-          <div class="footer-section-title text-subtitle-1 font-weight-medium mt-6">
+          <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.comparator.title') }}
           </div>
           <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
             <v-list-item
-              v-for="link in comparatorLinks"
+              v-for="link in resourceLinks"
               :key="String(link.to ?? link.href ?? link.label)"
               :to="link.to"
               :href="link.href"
@@ -136,7 +158,21 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
       </v-col>
 
       <v-col cols="12" md="4">
-        <div class="footer-panel">
+        <div class="footer-panel d-flex flex-column ga-4">
+          <p class="footer-mission text-body-1 mb-0">
+            {{ t('siteIdentity.footer.mission') }}
+          </p>
+
+          <v-btn
+            :to="blogPath"
+            variant="text"
+            append-icon="mdi-arrow-right"
+            color="hero-overlay-strong"
+            class="footer-link-btn px-0"
+          >
+            {{ t('siteIdentity.footer.blogLink') }}
+          </v-btn>
+
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.community.title') }}
           </div>
@@ -147,25 +183,6 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
               :to="link.to"
               :href="link.href"
               class="footer-list-item px-0"
-            >
-              <template #title>
-                <span class="text-body-2">{{ link.label }}</span>
-              </template>
-            </v-list-item>
-          </v-list>
-
-          <NuxtLink :to="feedbackPath" class="footer-section-link text-subtitle-1 font-weight-medium mt-6">
-            {{ t('siteIdentity.footer.feedback.title') }}
-          </NuxtLink>
-          <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
-            <v-list-item
-              v-for="link in feedbackLinks"
-              :key="String(link.to ?? link.href ?? link.label)"
-              :to="link.to"
-              :href="link.href"
-              class="footer-list-item px-0"
-              :target="link.target"
-              :rel="link.rel"
             >
               <template #title>
                 <span class="text-body-2">{{ link.label }}</span>
@@ -199,7 +216,9 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
 
 <style lang="postcss" scoped>
 .footer-container {
-  max-width: 1200px;
+  max-width: none;
+  width: 100%;
+  padding-inline: clamp(24px, 6vw, 96px);
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
 
@@ -253,19 +272,6 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
 
 .footer-list-item:hover {
   background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
-}
-
-.footer-section-link {
-  display: inline-flex;
-  align-items: center;
-  color: rgb(var(--v-theme-accent-primary-highlight));
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.footer-section-link:hover {
-  opacity: 0.85;
-  text-decoration: underline;
 }
 
 .footer-divider {
