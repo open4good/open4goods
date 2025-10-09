@@ -62,9 +62,21 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
 
     try {
       if (method === 'POST') {
-        await apiInstance.redirectPostRaw({ token, domainLanguage: language, userAgent })
+        await apiInstance.redirectPostRaw(
+          { token, domainLanguage: language, userAgent },
+          async (requestContext) => ({
+            ...requestContext.init,
+            redirect: 'manual',
+          }),
+        )
       } else {
-        await apiInstance.redirectGetRaw({ token, domainLanguage: language, userAgent })
+        await apiInstance.redirectGetRaw(
+          { token, domainLanguage: language, userAgent },
+          async (requestContext) => ({
+            ...requestContext.init,
+            redirect: 'manual',
+          }),
+        )
       }
 
       throw new Error('Expected a redirect response from the affiliation endpoint.')
