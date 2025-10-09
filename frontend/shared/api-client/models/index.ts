@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './AffiliationPartnerDto';
 export * from './Agg';
 export * from './AggregationRequestDto';
 export * from './AiAttribute';
@@ -41,6 +42,7 @@ export * from './PageDto';
 export * from './PageMetaDto';
 export * from './PageProductDto';
 export * from './PageableObject';
+export * from './ProblemDetail';
 export * from './ProductAiReviewDto';
 export * from './ProductAiTextsDto';
 export * from './ProductBaseDto';
@@ -53,6 +55,7 @@ export * from './RecommandationsConfig';
 export * from './ResourcesAggregationConfig';
 export * from './ScoringAggregationConfig';
 export * from './SortObject';
+export * from './StaticPartnerDto';
 export * from './SubsetCriteria';
 export * from './TeamProperties';
 export * from './VerticalConfigDto';

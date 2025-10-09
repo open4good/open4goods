@@ -1,3 +1,4 @@
+apis/AffiliationApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/CategoriesApi.ts
@@ -5,11 +6,13 @@ apis/ContactApi.ts
 apis/ContentApi.ts
 apis/FeedbackApi.ts
 apis/OpenDataApi.ts
+apis/PartnerApi.ts
 apis/ProductApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
 apis/index.ts
 index.ts
+models/AffiliationPartnerDto.ts
 models/Agg.ts
 models/AggregationRequestDto.ts
 models/AiAttribute.ts
@@ -51,6 +54,7 @@ models/PageDto.ts
 models/PageMetaDto.ts
 models/PageProductDto.ts
 models/PageableObject.ts
+models/ProblemDetail.ts
 models/ProductAiReviewDto.ts
 models/ProductAiTextsDto.ts
 models/ProductBaseDto.ts
@@ -63,6 +67,7 @@ models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
 models/ScoringAggregationConfig.ts
 models/SortObject.ts
+models/StaticPartnerDto.ts
 models/SubsetCriteria.ts
 models/TeamProperties.ts
 models/VerticalConfigDto.ts
