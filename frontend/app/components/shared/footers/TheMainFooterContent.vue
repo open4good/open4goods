@@ -53,7 +53,7 @@ const communityLinks = computed<FooterLink[]>(() => [
   },
   {
     label: t('siteIdentity.footer.community.links.partners'),
-    to: '/partenaires',
+    to: resolveLocalizedRoutePath('partners', currentLocale.value),
   },
 ])
 

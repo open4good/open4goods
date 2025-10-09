@@ -174,6 +174,58 @@
       }
     }
   },
+  "partners": {
+    "seo": {
+      "title": "Nos partenaires et mentors",
+      "description": "Découvrez les organisations, marketplaces et mentors qui aident Nudger à accélérer le commerce responsable."
+    },
+    "hero": {
+      "eyebrow": "Impact collectif",
+      "title": "Des partenaires qui amplifient Nudger",
+      "subtitle": "Un réseau de commerçants, d'acteurs de l'écosystème et de mentors engagés pour des achats plus justes.",
+      "description": "Parcourez les partenaires affiliés que vous pouvez soutenir, découvrez l'écosystème qui accompagne Nudger et les mentors qui guident notre mission."
+    },
+    "loading": "Chargement des partenaires…",
+    "errors": {
+      "loadFailed": "Impossible de charger les partenaires. Merci de réessayer."
+    },
+    "affiliation": {
+      "eyebrow": "Nos partenaires",
+      "title": "Ils nous font confiance",
+      "subtitle": "Découvrez les marchands qui collaborent avec nous via l'affiliation et explorez leurs offres.",
+      "search": {
+        "label": "Rechercher un partenaire",
+        "placeholder": "Rechercher par nom"
+      },
+      "empty": "Aucun partenaire ne correspond à votre recherche pour l'instant. Essayez un autre terme.",
+      "carouselAriaLabel": "Carrousel des partenaires affiliés",
+      "linkLabel": "Visiter ce partenaire"
+    },
+    "ecosystem": {
+      "eyebrow": "Écosystème",
+      "title": "Nudger s'inscrit dans un écosystème dynamique",
+      "subtitle": "Ces organisations co-construisent avec nous des services numériques d'intérêt général.",
+      "empty": "Les partenaires de l'écosystème seront bientôt listés ici.",
+      "carouselAriaLabel": "Carrousel des partenaires écosystème",
+      "linkLabel": "Découvrir l'initiative",
+      "fallbackDescription": "Le contenu de ce partenaire sera publié prochainement."
+    },
+    "mentors": {
+      "eyebrow": "Mentors",
+      "title": "Ils nous aident",
+      "subtitle": "Entreprendre n'est jamais simple. Ces mentors partagent leur expérience avec bienveillance.",
+      "empty": "Les profils mentors seront ajoutés prochainement.",
+      "carouselAriaLabel": "Carrousel des mentors",
+      "linkLabel": "En savoir plus",
+      "fallbackDescription": "Plus d'informations sur ce mentor arrivent bientôt."
+    },
+    "cta": {
+      "eyebrow": "Rejoignez l'aventure",
+      "title": "Envie de devenir partenaire ?",
+      "description": "Nous recherchons des alliés qui souhaitent bâtir avec nous l'achat responsable.",
+      "ctaLabel": "Contacter l'équipe"
+    }
+  },
   "opensource": {
     "seo": {
       "title": "Open source chez Nudger",
