@@ -64,12 +64,18 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
       if (method === 'POST') {
         await apiInstance.redirectPostRaw(
           { token, domainLanguage: language, userAgent },
-          (requestContext) => ({ ...requestContext.init, redirect: 'manual' }),
+          async (requestContext) => ({
+            ...requestContext.init,
+            redirect: 'manual',
+          }),
         )
       } else {
         await apiInstance.redirectGetRaw(
           { token, domainLanguage: language, userAgent },
-          (requestContext) => ({ ...requestContext.init, redirect: 'manual' }),
+          async (requestContext) => ({
+            ...requestContext.init,
+            redirect: 'manual',
+          }),
         )
       }
 
