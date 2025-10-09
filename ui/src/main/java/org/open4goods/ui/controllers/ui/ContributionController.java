@@ -5,11 +5,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.helper.IpHelper;
-import org.open4goods.ui.config.yml.ReversementConfig;
+import org.open4goods.services.contribution.config.yml.ReversementConfig;
+import org.open4goods.services.contribution.service.ContributionService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
 import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;
-import org.open4goods.ui.services.ContributionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

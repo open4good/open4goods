@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.model.data.ContributionVote;
+import org.open4goods.services.contribution.model.ContributionVote;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;

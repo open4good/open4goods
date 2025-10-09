@@ -9,7 +9,7 @@ import org.open4goods.services.productrepository.repository.ElasticProductReposi
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.ui.repository.CheckedUrlRepository;
-import org.open4goods.ui.repository.ContributionVoteRepository;
+import org.open4goods.services.contribution.repository.ContributionVoteRepository;
 import org.open4goods.ui.repository.UserSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
