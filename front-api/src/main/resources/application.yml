@@ -34,6 +34,37 @@ front:
   rate-limit:
     anonymous: 100
     authenticated: 1000
+
+  partners:
+    ecosystem:
+      partners:
+        - name: French Tech Ouest
+          blocId: 'pages:ecosystem:french-tech'
+          url: https://www.ft-brestbretagneouest.bzh/
+          imageUrl: /images/ecosystem/frenchTech.jpeg
+        - name: Village by CA Finistère
+          blocId: 'pages:ecosystem:village-ca-finistere'
+          url: https://levillagebycafinistere.com/
+          imageUrl: /images/ecosystem/village-ca-finistere.jpeg
+        - name: IRT B<>Com
+          blocId: 'pages:ecosystem:irt-b-com'
+          url: https://b-com.com/
+          imageUrl: /images/ecosystem/irt-b-com.jpeg
+
+    mentors:
+      partners:
+        - name: Moovance
+          blocId: 'pages:partners:moovance'
+          url: https://www.moovance.fr/
+          imageUrl: /images/mentors/moovance.jpeg
+        - name: France Mobilités
+          blocId: 'pages:partners:france-mobilites'
+          url: https://www.francemobilites.fr/
+          imageUrl: /images/mentors/france-mobilites.jpeg
+        - name: Région Bretagne
+          blocId: 'pages:partners:region-bretagne'
+          url: https://www.bretagne.bzh/
+          imageUrl: /images/mentors/region-bretagne.jpeg
     
 
 
