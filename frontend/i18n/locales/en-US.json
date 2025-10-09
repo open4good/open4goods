@@ -173,6 +173,58 @@
       }
     }
   },
+  "partners": {
+    "seo": {
+      "title": "Our partners and mentors",
+      "description": "Meet the organisations, marketplaces and mentors helping Nudger accelerate responsible commerce."
+    },
+    "hero": {
+      "eyebrow": "Collective impact",
+      "title": "Partners who amplify Nudger",
+      "subtitle": "A trusted network of retailers, ecosystem builders and mentors committed to fairer shopping.",
+      "description": "Browse affiliation partners you can support, discover the ecosystem backing Nudger and the mentors guiding our mission."
+    },
+    "loading": "Loading partners…",
+    "errors": {
+      "loadFailed": "We could not load partner data. Please try again."
+    },
+    "affiliation": {
+      "eyebrow": "Our partners",
+      "title": "They trust Nudger",
+      "subtitle": "Explore the merchants who work with us through affiliation and discover their offers.",
+      "search": {
+        "label": "Search partners",
+        "placeholder": "Search by partner name"
+      },
+      "empty": "No partners match your search yet. Try another term.",
+      "carouselAriaLabel": "Affiliation partners carousel",
+      "linkLabel": "Visit this partner"
+    },
+    "ecosystem": {
+      "eyebrow": "Ecosystem",
+      "title": "Nudger grows within a dynamic ecosystem",
+      "subtitle": "These organisations collaborate with us to build public-interest digital services.",
+      "empty": "Our ecosystem partners will appear here soon.",
+      "carouselAriaLabel": "Ecosystem partners carousel",
+      "linkLabel": "Discover the initiative",
+      "fallbackDescription": "Content about this partner will be published soon."
+    },
+    "mentors": {
+      "eyebrow": "Mentors",
+      "title": "They support us",
+      "subtitle": "Entrepreneurship is never simple. These mentors share their experience with kindness.",
+      "empty": "Mentor profiles will arrive shortly.",
+      "carouselAriaLabel": "Mentor carousel",
+      "linkLabel": "Learn more",
+      "fallbackDescription": "More information about this mentor is coming soon."
+    },
+    "cta": {
+      "eyebrow": "Join the movement",
+      "title": "Want to become a partner?",
+      "description": "We are always looking for new allies who want to build responsible shopping with us.",
+      "ctaLabel": "Contact the team"
+    }
+  },
   "opensource": {
     "seo": {
       "title": "Open source at Nudger",
