@@ -34,13 +34,14 @@
               >
                 <v-card class="partners-static__card-surface" elevation="0" rounded="xl">
                   <div v-if="partner.imageUrl" class="partners-static__card-media">
-                    <v-img
-                      :src="partner.imageUrl"
-                      :alt="imageAlt(partner)"
-                      height="140"
-                      cover
-                      class="partners-static__image"
-                    />
+                    <div class="partners-static__logo-frame">
+                      <v-img
+                        :src="partner.imageUrl"
+                        :alt="imageAlt(partner)"
+                        contain
+                        class="partners-static__image"
+                      />
+                    </div>
                   </div>
                   <div class="partners-static__card-body">
                     <h3 class="text-h6 font-weight-semibold mb-3">
@@ -212,10 +213,30 @@ const imageAlt = (partner: StaticPartnerDto) =>
 
   &__card-media {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 1.5rem;
+    background: rgba(var(--v-theme-surface-muted), 0.75);
+    border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+  }
+
+  &__logo-frame {
+    width: 100%;
+    aspect-ratio: 3 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__image {
-    border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+    width: 100%;
+    height: 100%;
+
+    :deep(.v-img__img) {
+      object-fit: contain;
+      object-position: center;
+    }
   }
 
   &__card-body {
