@@ -41,7 +41,7 @@ const headingId = useId()
   position: relative
   overflow: hidden
   background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.95), rgba(var(--v-theme-hero-gradient-end), 0.9))
-  color: rgb(var(--v-theme-on-primary))
+  color: rgb(var(--v-theme-hero-pill-on-dark))
 
   &__wrapper
     margin: 0 auto
@@ -62,6 +62,10 @@ const headingId = useId()
 
   &__content :deep(.text-content)
     padding: 0
+
+  &__content :deep(.text-content),
+  &__content :deep(.xwiki-sandbox)
+    color: rgb(var(--v-theme-hero-pill-on-dark))
 
   &__content :deep(.xwiki-sandbox)
     font-size: clamp(1rem, 1.6vw, 1.15rem)
