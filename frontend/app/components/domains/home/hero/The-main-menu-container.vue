@@ -27,6 +27,7 @@ const handleToggleDrawer = () => emit('toggle-drawer')
 
 <style lang="sass" scoped>
 .main-menu-app-bar
+  background-color: rgb(var(--v-theme-surface-default)) !important
   color: rgb(var(--v-theme-text-neutral-strong))
 
 @media (max-width: 959px)
