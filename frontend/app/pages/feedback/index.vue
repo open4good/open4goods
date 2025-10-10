@@ -133,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FetchError } from 'ofetch'
 import FeedbackHero from '~/components/domains/feedback/FeedbackHero.vue'
@@ -233,62 +233,76 @@ const votesRequestNonce = ref(0)
 
 const buildVotesQuery = () => (votesRequestNonce.value > 0 ? { cacheBuster: String(votesRequestNonce.value) } : undefined)
 
-const ideaIssuesData = await useAsyncData<FeedbackIssueDto[]>(
-  'feedback-issues-idea',
-  () => fetchIssues('IDEA'),
-  { server: false },
-)
+const ideaIssues = ref<FeedbackIssueDisplay[]>([])
+const bugIssues = ref<FeedbackIssueDisplay[]>([])
+const ideaIssuesLoading = ref(true)
+const bugIssuesLoading = ref(true)
 
-const bugIssuesData = await useAsyncData<FeedbackIssueDto[]>(
-  'feedback-issues-bug',
-  () => fetchIssues('BUG'),
-  { server: false },
-)
+const loadIssuesForCategory = async (category: FeedbackCategory) => {
+  if (!import.meta.client) {
+    return
+  }
 
-const remainingVotesData = await useAsyncData<FeedbackRemainingVotesDto>(
-  'feedback-remaining-votes',
-  async () => {
-    try {
-      return await $fetch('/api/feedback/votes/remaining', {
-        query: buildVotesQuery(),
-        headers: { 'cache-control': 'no-cache' },
-      })
-    } catch (error) {
-      console.warn('Unable to load remaining votes, falling back to unknown state', error)
-      return {}
-    }
-  },
-  { server: false },
-)
+  const targetIssuesRef = category === 'IDEA' ? ideaIssues : bugIssues
+  const loadingRef = category === 'IDEA' ? ideaIssuesLoading : bugIssuesLoading
 
-const canVoteData = await useAsyncData<FeedbackVoteEligibilityDto>(
-  'feedback-can-vote',
-  async () => {
-    try {
-      return await $fetch('/api/feedback/votes/can', {
-        query: buildVotesQuery(),
-        headers: { 'cache-control': 'no-cache' },
-      })
-    } catch (error) {
-      console.warn('Unable to determine vote eligibility, assuming voting is allowed', error)
-      return { canVote: true }
-    }
-  },
-  { server: false },
-)
+  loadingRef.value = true
+
+  try {
+    const response = await fetchIssues(category)
+    targetIssuesRef.value = response as FeedbackIssueDisplay[]
+  } finally {
+    loadingRef.value = false
+  }
+}
+
+const remainingVotesState = ref<FeedbackRemainingVotesDto | null>(null)
+const canVoteState = ref<FeedbackVoteEligibilityDto | null>(null)
+
+const loadRemainingVotes = async () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  try {
+    remainingVotesState.value = await $fetch('/api/feedback/votes/remaining', {
+      query: buildVotesQuery(),
+      headers: { 'cache-control': 'no-cache' },
+    })
+  } catch (error) {
+    console.warn('Unable to load remaining votes, falling back to unknown state', error)
+    remainingVotesState.value = {}
+  }
+}
+
+const loadVoteEligibility = async () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  try {
+    canVoteState.value = await $fetch('/api/feedback/votes/can', {
+      query: buildVotesQuery(),
+      headers: { 'cache-control': 'no-cache' },
+    })
+  } catch (error) {
+    console.warn('Unable to determine vote eligibility, assuming voting is allowed', error)
+    canVoteState.value = { canVote: true }
+  }
+}
 
 const issuesByType = computed<Record<FeedbackCategory, FeedbackIssueDisplay[]>>(() => ({
-  IDEA: (ideaIssuesData.data.value ?? []) as FeedbackIssueDisplay[],
-  BUG: (bugIssuesData.data.value ?? []) as FeedbackIssueDisplay[],
+  IDEA: ideaIssues.value,
+  BUG: bugIssues.value,
 }))
 
 const issueLoadingStates = computed<Record<FeedbackCategory, boolean>>(() => ({
-  IDEA: ideaIssuesData.pending.value,
-  BUG: bugIssuesData.pending.value,
+  IDEA: ideaIssuesLoading.value,
+  BUG: bugIssuesLoading.value,
 }))
 
-const remainingVotes = computed(() => remainingVotesData.data.value?.remainingVotes ?? null)
-const canVote = computed(() => canVoteData.data.value?.canVote ?? true)
+const remainingVotes = computed(() => remainingVotesState.value?.remainingVotes ?? null)
+const canVote = computed(() => canVoteState.value?.canVote ?? true)
 
 const voteStatusMessage = computed(() => {
   if (!canVote.value) {
@@ -352,7 +366,7 @@ const extractErrorMessage = (error: unknown): string => {
 
 const refreshVotesState = async () => {
   votesRequestNonce.value = Date.now()
-  await Promise.allSettled([remainingVotesData.refresh(), canVoteData.refresh()])
+  await Promise.allSettled([loadRemainingVotes(), loadVoteEligibility()])
 }
 
 const handleVote = async (issueId: string | undefined, category: FeedbackCategory) => {
@@ -373,37 +387,33 @@ const handleVote = async (issueId: string | undefined, category: FeedbackCategor
       votedIssueIds.value = [...votedIssueIds.value, issueId]
     }
 
-    const currentRemainingVotes = remainingVotesData.data.value?.remainingVotes
+    const currentRemainingVotes = remainingVotesState.value?.remainingVotes
 
     if (typeof currentRemainingVotes === 'number') {
       const nextRemainingVotes = Math.max(currentRemainingVotes - 1, 0)
 
-      if (!remainingVotesData.data.value) {
-        remainingVotesData.data.value = { remainingVotes: nextRemainingVotes }
+      if (!remainingVotesState.value) {
+        remainingVotesState.value = { remainingVotes: nextRemainingVotes }
       } else {
-        remainingVotesData.data.value = {
-          ...remainingVotesData.data.value,
+        remainingVotesState.value = {
+          ...remainingVotesState.value,
           remainingVotes: nextRemainingVotes,
         }
       }
 
       if (nextRemainingVotes <= 0) {
-        if (!canVoteData.data.value) {
-          canVoteData.data.value = { canVote: false }
+        if (!canVoteState.value) {
+          canVoteState.value = { canVote: false }
         } else {
-          canVoteData.data.value = {
-            ...canVoteData.data.value,
+          canVoteState.value = {
+            ...canVoteState.value,
             canVote: false,
           }
         }
       }
     }
 
-    if (category === 'IDEA') {
-      await ideaIssuesData.refresh()
-    } else {
-      await bugIssuesData.refresh()
-    }
+    await loadIssuesForCategory(category)
 
     await refreshVotesState()
   } catch (error) {
@@ -533,7 +543,7 @@ const appendSubmittedIssue = (
   payload: FeedbackFormSubmitPayload,
   response: FeedbackSubmissionResponseDto,
 ) => {
-  const issuesRef = category === 'IDEA' ? ideaIssuesData.data : bugIssuesData.data
+  const issuesRef = category === 'IDEA' ? ideaIssues : bugIssues
   const existingIssues = issuesRef.value ?? []
   const trimmedTitle = payload.title.trim()
 
@@ -560,7 +570,7 @@ const appendSubmittedIssue = (
     return true
   })
 
-  issuesRef.value = [newIssue, ...deduplicatedIssues] as FeedbackIssueDto[]
+  issuesRef.value = [newIssue, ...deduplicatedIssues]
 }
 
 const handleHeroPrimaryCtaClick = (event: MouseEvent) => {
@@ -610,6 +620,19 @@ useHead(() => ({
     ...alternateLinks.value,
   ],
 }))
+
+onMounted(async () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  await Promise.allSettled([
+    loadIssuesForCategory('IDEA'),
+    loadIssuesForCategory('BUG'),
+    loadRemainingVotes(),
+    loadVoteEligibility(),
+  ])
+})
 </script>
 
 <style scoped lang="scss">
