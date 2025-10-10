@@ -2,13 +2,15 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import PartnersStaticCarouselSection from './PartnersStaticCarouselSection.vue'
 
+const displayMock = {
+  xlAndUp: { value: false },
+  lgAndUp: { value: false },
+  mdAndUp: { value: false },
+  smAndUp: { value: false },
+}
+
 vi.mock('vuetify', () => ({
-  useDisplay: () => ({
-    xlAndUp: { value: false },
-    lgAndUp: { value: false },
-    mdAndUp: { value: true },
-    smAndUp: { value: true },
-  }),
+  useDisplay: () => displayMock,
 }))
 
 describe('PartnersStaticCarouselSection', () => {
@@ -38,6 +40,11 @@ describe('PartnersStaticCarouselSection', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+
+    displayMock.xlAndUp.value = false
+    displayMock.lgAndUp.value = false
+    displayMock.mdAndUp.value = false
+    displayMock.smAndUp.value = false
   })
 
   const mountComponent = async (props = {}) =>
@@ -57,6 +64,8 @@ describe('PartnersStaticCarouselSection', () => {
     })
 
   it('renders static partner cards with titles', async () => {
+    displayMock.smAndUp.value = true
+
     const wrapper = await mountComponent()
 
     const titles = wrapper.findAll('.partners-static__card h3').map((node) => node.text())
@@ -86,6 +95,48 @@ describe('PartnersStaticCarouselSection', () => {
     const alert = wrapper.find('.v-alert')
     expect(alert.exists()).toBe(true)
     expect(alert.text()).toContain(baseProps.emptyStateLabel)
+
+    await wrapper.unmount()
+  })
+
+  it('disables carousel controls when all partners fit a single slide', async () => {
+    displayMock.mdAndUp.value = true
+    displayMock.smAndUp.value = true
+
+    const partners = [
+      { name: 'Collectif A' },
+      { name: 'Fondation B' },
+      { name: 'Coopérative C' },
+    ]
+
+    const wrapper = await mountComponent({ partners })
+
+    const carousel = wrapper.findComponent({ name: 'VCarousel' })
+    expect(carousel.props('showArrows')).toBe(false)
+    expect(carousel.props('cycle')).toBe(false)
+
+    const cards = wrapper.findAll('.partners-static__card')
+    expect(cards).toHaveLength(3)
+
+    await wrapper.unmount()
+  })
+
+  it('enables carousel controls when multiple slides are required', async () => {
+    displayMock.mdAndUp.value = true
+    displayMock.smAndUp.value = true
+
+    const partners = [
+      { name: 'Collectif A' },
+      { name: 'Fondation B' },
+      { name: 'Coopérative C' },
+      { name: 'Association D' },
+    ]
+
+    const wrapper = await mountComponent({ partners })
+
+    const carousel = wrapper.findComponent({ name: 'VCarousel' })
+    expect(carousel.props('showArrows')).toBe(true)
+    expect(carousel.props('cycle')).toBe(true)
 
     await wrapper.unmount()
   })

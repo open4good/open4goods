@@ -119,11 +119,11 @@ const activeSlide = ref(0)
 const normalizedPartners = computed(() => props.partners ?? [])
 
 const itemsPerSlide = computed(() => {
-  if (display.xlAndUp.value) {
+  if (display.mdAndUp.value) {
     return 3
   }
 
-  if (display.mdAndUp.value) {
+  if (display.smAndUp.value) {
     return 2
   }
 
@@ -148,9 +148,7 @@ watch(slides, () => {
 
 const toneClass = computed(() => props.tone)
 
-const shouldShowControls = computed(
-  () => normalizedPartners.value.length > itemsPerSlide.value,
-)
+const shouldShowControls = computed(() => slides.value.length > 1)
 
 const imageAlt = (partner: StaticPartnerDto) =>
   partner.name ? `${partner.name} visual` : ''
