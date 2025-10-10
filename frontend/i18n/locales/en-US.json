@@ -190,7 +190,6 @@
       "loadFailed": "We could not load partner data. Please try again."
     },
     "affiliation": {
-      "eyebrow": "Our partners",
       "title": "They trust Nudger",
       "subtitle": "Explore the merchants who work with us through affiliation and discover their offers.",
       "search": {
@@ -202,7 +201,6 @@
       "linkLabel": "Visit this partner"
     },
     "ecosystem": {
-      "eyebrow": "Ecosystem",
       "title": "Nudger grows within a dynamic ecosystem",
       "subtitle": "These organisations collaborate with us to build public-interest digital services.",
       "empty": "Our ecosystem partners will appear here soon.",
@@ -211,7 +209,6 @@
       "fallbackDescription": "Content about this partner will be published soon."
     },
     "mentors": {
-      "eyebrow": "Mentors",
       "title": "They support us",
       "subtitle": "Entrepreneurship is never simple. These mentors share their experience with kindness.",
       "empty": "Mentor profiles will arrive shortly.",

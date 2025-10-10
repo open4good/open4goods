@@ -2,9 +2,6 @@
   <section :class="['partners-static', `partners-static--${toneClass}`]" :aria-labelledby="headingId">
     <v-container class="py-12 px-4" max-width="xl">
       <header class="partners-static__header">
-        <p class="text-overline text-uppercase mb-2 text-neutral-soft">
-          {{ eyebrow }}
-        </p>
         <h2 :id="headingId" class="text-h4 text-wrap font-weight-bold mb-3">
           {{ title }}
         </h2>
@@ -16,11 +13,12 @@
       <div v-if="slides.length > 0" class="partners-static__carousel">
         <v-carousel
           v-model="activeSlide"
-          :cycle="slides.length > 1"
-          :interval="6500"
+          :cycle="shouldShowControls"
+          :interval="shouldShowControls ? 6500 : undefined"
           :pause-on-hover="true"
+          :hide-delimiters="true"
           :hide-delimiter-background="true"
-          :show-arrows="slides.length > 1"
+          :show-arrows="shouldShowControls"
           :aria-label="carouselAriaLabel"
           :height="display.mdAndUp.value ? 420 : 460"
         >
@@ -34,7 +32,7 @@
                 :key="partner.name ?? partner.blocId ?? slideIndex"
                 class="partners-static__card"
               >
-                <v-card class="partners-static__card-surface" elevation="4" rounded="xl">
+                <v-card class="partners-static__card-surface" elevation="0" rounded="xl">
                   <div v-if="partner.imageUrl" class="partners-static__card-media">
                     <v-img
                       :src="partner.imageUrl"
@@ -102,7 +100,6 @@ const props = withDefaults(
   defineProps<{
     title: string
     subtitle: string
-    eyebrow: string
     partners: StaticPartnerDto[]
     carouselAriaLabel: string
     emptyStateLabel: string
@@ -150,6 +147,10 @@ watch(slides, () => {
 })
 
 const toneClass = computed(() => props.tone)
+
+const shouldShowControls = computed(
+  () => normalizedPartners.value.length > itemsPerSlide.value,
+)
 
 const imageAlt = (partner: StaticPartnerDto) =>
   partner.name ? `${partner.name} visual` : ''

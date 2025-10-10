@@ -47,7 +47,6 @@
     <PartnersAffiliationSection
       :title="t('partners.affiliation.title')"
       :subtitle="t('partners.affiliation.subtitle')"
-      :eyebrow="t('partners.affiliation.eyebrow')"
       :partners="affiliationPartners"
       :search-label="t('partners.affiliation.search.label')"
       :search-placeholder="t('partners.affiliation.search.placeholder')"
@@ -59,7 +58,6 @@
     <PartnersStaticCarouselSection
       :title="t('partners.ecosystem.title')"
       :subtitle="t('partners.ecosystem.subtitle')"
-      :eyebrow="t('partners.ecosystem.eyebrow')"
       :partners="ecosystemPartners"
       :carousel-aria-label="t('partners.ecosystem.carouselAriaLabel')"
       :empty-state-label="t('partners.ecosystem.empty')"
@@ -71,7 +69,6 @@
       tone="muted"
       :title="t('partners.mentors.title')"
       :subtitle="t('partners.mentors.subtitle')"
-      :eyebrow="t('partners.mentors.eyebrow')"
       :partners="mentorPartners"
       :carousel-aria-label="t('partners.mentors.carouselAriaLabel')"
       :empty-state-label="t('partners.mentors.empty')"
