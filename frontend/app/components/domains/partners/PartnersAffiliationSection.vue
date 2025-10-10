@@ -28,7 +28,7 @@
           density="comfortable"
           hide-details
           prepend-inner-icon="mdi-magnify"
-          class="partners-affiliation__search"
+          class="mt-6 partners-affiliation__search"
           :aria-label="searchLabel"
         />
       </header>

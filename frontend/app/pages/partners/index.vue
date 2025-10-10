@@ -2,7 +2,7 @@
   <div class="partners-page">
     <section class="partners-hero" :aria-labelledby="heroHeadingId">
       <v-container class="py-16 px-4" max-width="xl">
-        <div class="partners-hero__content">
+        <div >
           <p class="text-overline text-uppercase mb-2 text-neutral-soft">
             {{ t('partners.hero.eyebrow') }}
           </p>

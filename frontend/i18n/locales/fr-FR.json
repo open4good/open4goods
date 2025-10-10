@@ -182,8 +182,8 @@
     },
     "hero": {
       "eyebrow": "Impact collectif",
-      "title": "Des partenaires qui amplifient Nudger",
-      "subtitle": "Un réseau de commerçants, d'acteurs de l'écosystème et de mentors engagés pour des achats plus justes.",
+      "title": "Les partenaires de Nudger",
+      "subtitle": "Un réseau de commerçants et un écosystème engagés pour des achats plus justes.",
       "description": "Parcourez les partenaires affiliés que vous pouvez soutenir, découvrez l'écosystème qui accompagne Nudger et les mentors qui guident notre mission."
     },
     "loading": "Chargement des partenaires…",
@@ -193,19 +193,19 @@
     "affiliation": {
       "eyebrow": "Nos partenaires",
       "title": "Ils nous font confiance",
-      "subtitle": "Découvrez les marchands qui collaborent avec nous via l'affiliation et explorez leurs offres.",
+      "subtitle": "Découvrez les marchands qui collaborent avec nous et explorez leurs offres.",
       "search": {
         "label": "Rechercher un partenaire",
         "placeholder": "Rechercher par nom"
       },
-      "empty": "Aucun partenaire ne correspond à votre recherche pour l'instant. Essayez un autre terme.",
+      "empty": "Aucun partenaire ne correspond à votre recherche.",
       "carouselAriaLabel": "Carrousel des partenaires affiliés",
       "linkLabel": "Visiter ce partenaire"
     },
     "ecosystem": {
       "eyebrow": "Écosystème",
       "title": "Nudger s'inscrit dans un écosystème dynamique",
-      "subtitle": "Ces organisations co-construisent avec nous des services numériques d'intérêt général.",
+      "subtitle": "Au travers d'échanges ou de partenartiats directs, ils contribuent à la trajectoire de Nudger",
       "empty": "Les partenaires de l'écosystème seront bientôt listés ici.",
       "carouselAriaLabel": "Carrousel des partenaires écosystème",
       "linkLabel": "Découvrir l'initiative",
