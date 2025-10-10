@@ -9,7 +9,7 @@
           <h1 :id="heroHeadingId" class="text-h3 text-sm-h2 font-weight-bold mb-4">
             {{ t('partners.hero.title') }}
           </h1>
-          <p class="text-body-1 text-lg-h6 partners-hero__lead">
+          <p class="text-body-1 text-lg-h6">
             {{ t('partners.hero.subtitle') }}
           </p>
           <p class="text-body-2 text-neutral-secondary mb-0">
@@ -190,8 +190,5 @@ useHead(() => ({
     gap: 1rem;
   }
 
-  &__lead {
-    max-width: 640px;
-  }
 }
 </style>
