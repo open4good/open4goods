@@ -60,7 +60,7 @@ front:
         - name: Polaria
           blocId: 'pages:partners:polaria'
           url: https://www.polaria.ai
-          imageUrl: /images/mentors/polaria.webp
+          imageUrl: /images/mentors/polaria.jpeg
         - name: Ecotree
           blocId: 'pages:partners:ecotree'
           url: https://ecotree.green
