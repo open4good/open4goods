@@ -127,7 +127,7 @@ export default defineNuxtConfig({
                 'hero-overlay-strong': '#FFFFFF',
                 'hero-overlay-soft': '#FFFFFF',
                 'hero-pill-on-dark': '#FFFFFF',
-                'surface-default': '#0F172A',
+                'surface-default': '#000000',
                 'surface-muted': '#111827',
                 'surface-alt': '#1E293B',
                 'surface-glass': '#1E293B',
