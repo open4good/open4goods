@@ -191,7 +191,6 @@
       "loadFailed": "Impossible de charger les partenaires. Merci de réessayer."
     },
     "affiliation": {
-      "eyebrow": "Nos partenaires",
       "title": "Ils nous font confiance",
       "subtitle": "Découvrez les marchands qui collaborent avec nous et explorez leurs offres.",
       "search": {
@@ -203,7 +202,6 @@
       "linkLabel": "Visiter ce partenaire"
     },
     "ecosystem": {
-      "eyebrow": "Écosystème",
       "title": "Nudger s'inscrit dans un écosystème dynamique",
       "subtitle": "Au travers d'échanges ou de partenartiats directs, ils contribuent à la trajectoire de Nudger",
       "empty": "Les partenaires de l'écosystème seront bientôt listés ici.",
@@ -212,7 +210,6 @@
       "fallbackDescription": "Le contenu de ce partenaire sera publié prochainement."
     },
     "mentors": {
-      "eyebrow": "Mentors",
       "title": "Ils nous aident",
       "subtitle": "Entreprendre n'est jamais simple. Ces mentors partagent leur expérience avec bienveillance.",
       "empty": "Les profils mentors seront ajoutés prochainement.",
