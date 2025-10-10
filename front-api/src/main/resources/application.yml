@@ -55,7 +55,7 @@ front:
           imageUrl: /images/mentors/moovance.png
         - name: Les imparfaits
           blocId: 'pages:partners:les-imparfaits'
-          url: https://les-imparfaits.commandes.io
+          url: https://www.les-imparfaits.com/
           imageUrl: /images/mentors/les-imparfaits.png
         - name: Polaria
           blocId: 'pages:partners:polaria'
