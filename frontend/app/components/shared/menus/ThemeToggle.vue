@@ -78,7 +78,7 @@ const storedPreference = useStorage<ThemeName>(
 
 const applyTheme = (value: ThemeName) => {
   if (theme.global.name.value !== value) {
-    theme.global.name.value = value
+    theme.change(value)
   }
 
   if (storedPreference.value !== value) {
