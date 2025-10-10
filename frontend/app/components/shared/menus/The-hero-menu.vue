@@ -1,6 +1,6 @@
 <template>
   <menu id="container-main-menu" class="d-none d-md-block">
-  <!-- Desktop menu -->
+    <!-- Desktop menu -->
     <div class="d-flex justify-end align-center ga-4">
       <v-list class="d-flex justify-end font-weight-bold">
         <v-list-item
@@ -107,6 +107,9 @@ const navigateToPage = (path: string): void => {
 </script>
 
 <style scoped lang="sass">
+#container-main-menu
+  background-color: rgb(var(--v-theme-surface-default))
+
 .main-menu-items
   color: rgb(var(--v-theme-text-neutral-strong))
   font-size: 1rem
