@@ -76,7 +76,7 @@ class ProductControllerIT {
     void includeParameterFiltersFields() throws Exception {
         long gtin = 321L;
         given(service.getProduct(anyLong(), any(Locale.class), anySet(), any(DomainLanguage.class)))
-                .willReturn(new ProductDto(0L, null, null, null, null, null, null));
+                .willReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null));
 
         mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("include", "gtin")
@@ -103,7 +103,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointReturnsPage() throws Exception {
-        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
+        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
         given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class))).willReturn(page);
 
         mockMvc.perform(get("/products")
@@ -118,7 +118,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointAcceptsAggregationParameter() throws Exception {
-        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
+        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
         given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class))).willReturn(page);
 
         mockMvc.perform(get("/products")
