@@ -65,6 +65,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
@@ -74,6 +75,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import com.ibm.icu.util.ULocale;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -89,9 +93,11 @@ public class ProductMappingService {
     private static final String DEFAULT_LANGUAGE_KEY = "default";
 
     private final ProductRepository repository;
+    private final ApiProperties apiProperties;
 
-    public ProductMappingService(ProductRepository repository) {
+    public ProductMappingService(ProductRepository repository, ApiProperties apiProperties) {
         this.repository = repository;
+        this.apiProperties = apiProperties;
     }
 
     /**
@@ -106,7 +112,7 @@ public class ProductMappingService {
     private ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage) {
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
-        ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product) : null;
+        ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale) : null;
         ProductIdentityDto identity = components.contains(ProductDtoComponent.identity) ? mapIdentity(product) : null;
         ProductNamesDto names = components.contains(ProductDtoComponent.names) ? mapNames(product, domainLanguage, locale) : null;
         ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes) ? mapAttributes(product) : null;
@@ -157,7 +163,7 @@ public class ProductMappingService {
         return resolved.isEmpty() ? EnumSet.allOf(ProductDtoComponent.class) : resolved;
     }
 
-    private ProductBaseDto mapBase(Product product) {
+    private ProductBaseDto mapBase(Product product, DomainLanguage domainLanguage, Locale locale) {
         return new ProductBaseDto(
                 product.getId(),
                 product.getCreationDate(),
@@ -167,8 +173,8 @@ public class ProductMappingService {
                 product.getGoogleTaxonomyId(),
                 product.isExcluded(),
                 product.getExcludedCauses() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getExcludedCauses()),
-                mapGtinInfo(product.getGtinInfos()),
-                product.getCoverImagePath());
+                mapGtinInfo(product.getGtinInfos(), domainLanguage, locale),
+                resolveCoverImageUrl(product.getCoverImagePath()));
     }
 
     private ProductIdentityDto mapIdentity(Product product) {
@@ -409,11 +415,41 @@ public class ProductMappingService {
                 externalIds.getSku() == null ? Collections.emptySet() : new LinkedHashSet<>(externalIds.getSku()));
     }
 
-    private ProductGtinInfoDto mapGtinInfo(GtinInfo gtinInfo) {
+    private ProductGtinInfoDto mapGtinInfo(GtinInfo gtinInfo, DomainLanguage domainLanguage, Locale locale) {
         if (gtinInfo == null) {
             return null;
         }
-        return new ProductGtinInfoDto(gtinInfo.getUpcType(), gtinInfo.getCountry());
+        String countryCode = gtinInfo.getCountry();
+        if (!StringUtils.hasText(countryCode)) {
+            return new ProductGtinInfoDto(gtinInfo.getUpcType(), null, null, null);
+        }
+
+        ULocale displayLocale = resolveDisplayLocale(domainLanguage, locale);
+        String countryName = new ULocale("", countryCode).getDisplayCountry(displayLocale);
+        String countryFlagUrl = "/images/flags/" + countryCode.toLowerCase(Locale.ROOT) + ".png";
+
+        return new ProductGtinInfoDto(gtinInfo.getUpcType(), countryCode, countryName, countryFlagUrl);
+    }
+
+    private ULocale resolveDisplayLocale(DomainLanguage domainLanguage, Locale locale) {
+        if (domainLanguage != null && StringUtils.hasText(domainLanguage.languageTag())) {
+            return ULocale.forLanguageTag(domainLanguage.languageTag());
+        }
+        if (locale != null) {
+            return ULocale.forLocale(locale);
+        }
+        return ULocale.getDefault();
+    }
+
+    private String resolveCoverImageUrl(String coverImagePath) {
+        if (!StringUtils.hasText(coverImagePath)) {
+            return null;
+        }
+        String resourceRoot = apiProperties.getResourceRootPath();
+        if (!StringUtils.hasText(resourceRoot)) {
+            return coverImagePath;
+        }
+        return resourceRoot + coverImagePath;
     }
 
     private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute) {

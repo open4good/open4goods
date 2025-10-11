@@ -10,7 +10,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ProductGtinInfoDto(
         @Schema(description = "UPC type derived from the GTIN")
         BarcodeType upcType,
-        @Schema(description = "Manufacturer country inferred from the GTIN prefix", example = "FR")
-        String country
+        @Schema(description = "Manufacturer country code inferred from the GTIN prefix", example = "FR")
+        String countryCode,
+        @Schema(description = "Manufacturer country name localised with the requested domainLanguage", example = "France")
+        String countryName,
+        @Schema(description = "URL of the country flag icon matching the manufacturer country", example = "/images/flags/fr.png")
+        String countryFlagUrl
 ) {
 }
