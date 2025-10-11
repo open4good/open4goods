@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ProductDto(
         @Schema(description = "Product GTIN, it is the unique identifier", example = "7612345678901")
         long gtin,
+        @Schema(description = "Canonical product URL previously exposed as names.url", example = "https://example.org/products/123")
+        String slug,
         @Schema(description = "Basic product metadata")
         ProductBaseDto base,
         @Schema(description = "Identity facet exposing brand, model and alternate identifiers")
