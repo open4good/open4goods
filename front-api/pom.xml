@@ -74,6 +74,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>77.1</version>
+    </dependency>
+
+    <dependency>
         <groupId>org.open4goods</groupId>
         <artifactId>xwiki-spring-boot-starter</artifactId>
         <version>${global.version}</version>
