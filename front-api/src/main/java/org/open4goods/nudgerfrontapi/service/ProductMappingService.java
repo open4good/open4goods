@@ -118,8 +118,14 @@ public class ProductMappingService {
         ProductAiReviewDto aiReview = components.contains(ProductDtoComponent.aiReview) ? mapAiReview(product, domainLanguage, locale) : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
 
+        String slug = null;
+        if (product.getNames() != null) {
+            slug = resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
+        }
+
         return new ProductDto(
                 product.getId(),
+                slug,
                 base,
                 identity,
                 names,
@@ -182,32 +188,23 @@ public class ProductMappingService {
                 product.bestName(),
                 safeCall(product::randomModel),
                 safeCall(product::shortestModel),
-                product.hasAlternateIds(),
-                product.alternateIdsAsText(),
                 akaModels,
                 akaBrandsByDatasource,
-                akaBrands,
-                product.gtin());
+                akaBrands);
     }
 
     private ProductNamesDto mapNames(Product product, DomainLanguage domainLanguage, Locale locale) {
         if (product.getNames() == null) {
             return null;
         }
-        List<String> namesWithoutShortest = safeCall(product::namesAndDescriptionsWithoutShortestName);
-
         return new ProductNamesDto(
-                resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getH1Title(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getProductMetaTwitterTitle(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getProductMetaTwitterDescription(), domainLanguage, locale),
                 product.getOfferNames() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getOfferNames()),
                 safeCall(product::longestOfferName),
-                safeCall(product::shortestOfferName),
-                namesWithoutShortest == null ? Collections.emptyList() : namesWithoutShortest);
+                safeCall(product::shortestOfferName));
     }
 
     private ProductAttributesDto mapAttributes(Product product) {
@@ -241,18 +238,9 @@ public class ProductMappingService {
     }
 
     private ProductResourcesDto mapResources(Product product) {
-        List<ProductResourceDto> resources = product.getResources() == null
-                ? Collections.emptyList()
-                : product.getResources().stream().map(this::mapResource).toList();
         List<ProductResourceDto> images = product.images() == null
                 ? Collections.emptyList()
                 : product.images().stream().map(this::mapResource).toList();
-        List<ProductResourceDto> unprocessedImages = product.unprocessedimages() == null
-                ? Collections.emptyList()
-                : product.unprocessedimages().stream().map(this::mapResource).toList();
-        List<String> unprocessedImagesUrl = product.unprocessedImagesUrl() == null
-                ? Collections.emptyList()
-                : product.unprocessedImagesUrl();
         List<ProductResourceDto> videos = product.videos() == null
                 ? Collections.emptyList()
                 : product.videos().stream().map(this::mapResource).toList();
@@ -260,25 +248,15 @@ public class ProductMappingService {
                 ? Collections.emptyList()
                 : product.pdfs().stream().map(this::mapResource).toList();
 
-        return new ProductResourcesDto(resources, images, unprocessedImages, unprocessedImagesUrl, videos, pdfs, product.externalCover());
+        return new ProductResourcesDto(images, videos, pdfs, product.externalCover());
     }
 
     private ProductDatasourcesDto mapDatasources(Product product) {
         Map<String, Long> datasourceCodes = product.getDatasourceCodes() == null
                 ? Collections.emptyMap()
                 : new LinkedHashMap<>(product.getDatasourceCodes());
-        Map<String, String> categoriesByDatasource = product.getCategoriesByDatasources() == null
-                ? Collections.emptyMap()
-                : new LinkedHashMap<>(product.getCategoriesByDatasources());
-        Set<String> datasourceCategories = product.getDatasourceCategories() == null
-                ? Collections.emptySet()
-                : new LinkedHashSet<>(product.getDatasourceCategories());
-        List<String> categoriesWithoutShortest = safeCall(product::datasourceCategoriesWithoutShortest);
-        Set<String> datasourceCategoriesWithoutShortest = categoriesWithoutShortest == null
-                ? Collections.emptySet()
-                : new LinkedHashSet<>(categoriesWithoutShortest);
 
-        return new ProductDatasourcesDto(datasourceCodes, categoriesByDatasource, datasourceCategories, datasourceCategoriesWithoutShortest);
+        return new ProductDatasourcesDto(datasourceCodes);
     }
 
     private ProductScoresDto mapScores(Product product) {
@@ -363,7 +341,6 @@ public class ProductMappingService {
         ProductPriceHistoryDto newHistory = null;
         ProductPriceHistoryDto occasionHistory = null;
         Map<ProductCondition, Integer> trends = Collections.emptyMap();
-        Set<ProductCondition> conditions = Collections.emptySet();
         Double historyPriceGap = null;
 
         if (aggregatedPrices != null) {
@@ -382,11 +359,6 @@ public class ProductMappingService {
             trends = aggregatedPrices.getTrends() == null
                     ? Collections.emptyMap()
                     : new EnumMap<>(aggregatedPrices.getTrends());
-            conditions = aggregatedPrices.getConditions() == null
-                    ? EnumSet.noneOf(ProductCondition.class)
-                    : aggregatedPrices.getConditions().isEmpty()
-                            ? EnumSet.noneOf(ProductCondition.class)
-                            : EnumSet.copyOf(aggregatedPrices.getConditions());
             historyPriceGap = aggregatedPrices.historyPriceGap();
         }
 
@@ -400,7 +372,6 @@ public class ProductMappingService {
                 newHistory,
                 occasionHistory,
                 trends,
-                conditions,
                 historyPriceGap);
     }
 

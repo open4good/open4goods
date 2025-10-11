@@ -20,17 +20,11 @@ public record ProductIdentityDto(
         String randomModel,
         @Schema(description = "Shortest known model value", example = "XM5")
         String shortestModel,
-        @Schema(description = "Whether alternate identifiers are available")
-        boolean hasAlternateIds,
-        @Schema(description = "Human readable list of alternate identifiers", example = "WH1000XM5, XM5")
-        String alternateIdsText,
         @Schema(description = "Set of alternative model identifiers discovered across datasources")
         Set<String> akaModels,
         @Schema(description = "Alternative brand values keyed by datasource")
         Map<String, String> akaBrandsByDatasource,
         @Schema(description = "Distinct set of alternative brand values")
-        Set<String> akaBrands,
-        @Schema(description = "GTIN rendered as string to preserve leading zeros", example = "07612345678901")
-        String gtinAsString
+        Set<String> akaBrands
 ) {
 }
