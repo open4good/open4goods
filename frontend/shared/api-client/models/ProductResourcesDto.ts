@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProductResourceDto } from './ProductResourceDto';
+import {
+    ProductResourceDtoFromJSON,
+    ProductResourceDtoFromJSONTyped,
+    ProductResourceDtoToJSON,
+    ProductResourceDtoToJSONTyped,
+} from './ProductResourceDto';
+
 /**
  * 
  * @export
@@ -20,29 +28,29 @@ import { mapValues } from '../runtime';
  */
 export interface ProductResourcesDto {
     /**
-     * Image URLs
-     * @type {Array<string>}
+     * Images grouped and ranked by relevance
+     * @type {Array<ProductResourceDto>}
      * @memberof ProductResourcesDto
      */
-    images?: Array<string>;
+    images?: Array<ProductResourceDto>;
     /**
-     * Video URLs
-     * @type {Array<string>}
+     * Video resources extracted from datasources
+     * @type {Array<ProductResourceDto>}
      * @memberof ProductResourcesDto
      */
-    videos?: Array<string>;
+    videos?: Array<ProductResourceDto>;
     /**
-     * PDF URLs
-     * @type {Array<string>}
+     * PDF resources extracted from datasources
+     * @type {Array<ProductResourceDto>}
      * @memberof ProductResourcesDto
      */
-    pdfs?: Array<string>;
+    pdfs?: Array<ProductResourceDto>;
     /**
-     * Cover image URL
+     * External cover automatically computed from resources
      * @type {string}
      * @memberof ProductResourcesDto
      */
-    coverPath?: string;
+    externalCover?: string;
 }
 
 /**
@@ -62,10 +70,10 @@ export function ProductResourcesDtoFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'images': json['images'] == null ? undefined : json['images'],
-        'videos': json['videos'] == null ? undefined : json['videos'],
-        'pdfs': json['pdfs'] == null ? undefined : json['pdfs'],
-        'coverPath': json['coverPath'] == null ? undefined : json['coverPath'],
+        'images': json['images'] == null ? undefined : ((json['images'] as Array<any>).map(ProductResourceDtoFromJSON)),
+        'videos': json['videos'] == null ? undefined : ((json['videos'] as Array<any>).map(ProductResourceDtoFromJSON)),
+        'pdfs': json['pdfs'] == null ? undefined : ((json['pdfs'] as Array<any>).map(ProductResourceDtoFromJSON)),
+        'externalCover': json['externalCover'] == null ? undefined : json['externalCover'],
     };
 }
 
@@ -80,10 +88,10 @@ export function ProductResourcesDtoToJSONTyped(value?: ProductResourcesDto | nul
 
     return {
         
-        'images': value['images'],
-        'videos': value['videos'],
-        'pdfs': value['pdfs'],
-        'coverPath': value['coverPath'],
+        'images': value['images'] == null ? undefined : ((value['images'] as Array<any>).map(ProductResourceDtoToJSON)),
+        'videos': value['videos'] == null ? undefined : ((value['videos'] as Array<any>).map(ProductResourceDtoToJSON)),
+        'pdfs': value['pdfs'] == null ? undefined : ((value['pdfs'] as Array<any>).map(ProductResourceDtoToJSON)),
+        'externalCover': value['externalCover'],
     };
 }
 

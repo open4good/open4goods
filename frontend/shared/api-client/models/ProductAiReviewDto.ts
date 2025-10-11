@@ -28,7 +28,13 @@ import {
  */
 export interface ProductAiReviewDto {
     /**
-     * AI-generated review that will be aligned with the requested domainLanguage once localisation is active.
+     * Language key used to resolve the AI review
+     * @type {string}
+     * @memberof ProductAiReviewDto
+     */
+    language?: string;
+    /**
+     * AI-generated review content
      * @type {AiReview}
      * @memberof ProductAiReviewDto
      */
@@ -76,6 +82,7 @@ export function ProductAiReviewDtoFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
+        'language': json['language'] == null ? undefined : json['language'],
         'review': json['review'] == null ? undefined : AiReviewFromJSON(json['review']),
         'sources': json['sources'] == null ? undefined : json['sources'],
         'enoughData': json['enoughData'] == null ? undefined : json['enoughData'],
@@ -95,6 +102,7 @@ export function ProductAiReviewDtoToJSONTyped(value?: ProductAiReviewDto | null,
 
     return {
         
+        'language': value['language'],
         'review': AiReviewToJSON(value['review']),
         'sources': value['sources'],
         'enoughData': value['enoughData'],

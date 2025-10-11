@@ -27,6 +27,13 @@ import {
     ProductNamesDtoToJSON,
     ProductNamesDtoToJSONTyped,
 } from './ProductNamesDto';
+import type { ProductAttributesDto } from './ProductAttributesDto';
+import {
+    ProductAttributesDtoFromJSON,
+    ProductAttributesDtoFromJSONTyped,
+    ProductAttributesDtoToJSON,
+    ProductAttributesDtoToJSONTyped,
+} from './ProductAttributesDto';
 import type { ProductBaseDto } from './ProductBaseDto';
 import {
     ProductBaseDtoFromJSON,
@@ -34,6 +41,34 @@ import {
     ProductBaseDtoToJSON,
     ProductBaseDtoToJSONTyped,
 } from './ProductBaseDto';
+import type { ProductDatasourcesDto } from './ProductDatasourcesDto';
+import {
+    ProductDatasourcesDtoFromJSON,
+    ProductDatasourcesDtoFromJSONTyped,
+    ProductDatasourcesDtoToJSON,
+    ProductDatasourcesDtoToJSONTyped,
+} from './ProductDatasourcesDto';
+import type { ProductIdentityDto } from './ProductIdentityDto';
+import {
+    ProductIdentityDtoFromJSON,
+    ProductIdentityDtoFromJSONTyped,
+    ProductIdentityDtoToJSON,
+    ProductIdentityDtoToJSONTyped,
+} from './ProductIdentityDto';
+import type { ProductRankingDto } from './ProductRankingDto';
+import {
+    ProductRankingDtoFromJSON,
+    ProductRankingDtoFromJSONTyped,
+    ProductRankingDtoToJSON,
+    ProductRankingDtoToJSONTyped,
+} from './ProductRankingDto';
+import type { ProductOffersDto } from './ProductOffersDto';
+import {
+    ProductOffersDtoFromJSON,
+    ProductOffersDtoFromJSONTyped,
+    ProductOffersDtoToJSON,
+    ProductOffersDtoToJSONTyped,
+} from './ProductOffersDto';
 import type { ProductResourcesDto } from './ProductResourcesDto';
 import {
     ProductResourcesDtoFromJSON,
@@ -48,6 +83,13 @@ import {
     ProductAiReviewDtoToJSON,
     ProductAiReviewDtoToJSONTyped,
 } from './ProductAiReviewDto';
+import type { ProductScoresDto } from './ProductScoresDto';
+import {
+    ProductScoresDtoFromJSON,
+    ProductScoresDtoFromJSONTyped,
+    ProductScoresDtoToJSON,
+    ProductScoresDtoToJSONTyped,
+} from './ProductScoresDto';
 
 /**
  * 
@@ -62,11 +104,23 @@ export interface ProductDto {
      */
     gtin?: number;
     /**
+     * Canonical product URL previously exposed as names.url
+     * @type {string}
+     * @memberof ProductDto
+     */
+    slug?: string;
+    /**
      * Basic product metadata
      * @type {ProductBaseDto}
      * @memberof ProductDto
      */
     base?: ProductBaseDto;
+    /**
+     * Identity facet exposing brand, model and alternate identifiers
+     * @type {ProductIdentityDto}
+     * @memberof ProductDto
+     */
+    identity?: ProductIdentityDto;
     /**
      * Localised textual information resolved using the domainLanguage query parameter when available.
      * @type {ProductNamesDto}
@@ -74,11 +128,35 @@ export interface ProductDto {
      */
     names?: ProductNamesDto;
     /**
+     * Structured attributes aggregated from all datasources
+     * @type {ProductAttributesDto}
+     * @memberof ProductDto
+     */
+    attributes?: ProductAttributesDto;
+    /**
      * Associated media resources
      * @type {ProductResourcesDto}
      * @memberof ProductDto
      */
     resources?: ProductResourcesDto;
+    /**
+     * Datasource related information
+     * @type {ProductDatasourcesDto}
+     * @memberof ProductDto
+     */
+    datasources?: ProductDatasourcesDto;
+    /**
+     * Score and ranking related information
+     * @type {ProductScoresDto}
+     * @memberof ProductDto
+     */
+    scores?: ProductScoresDto;
+    /**
+     * Ecoscore derived rankings
+     * @type {ProductRankingDto}
+     * @memberof ProductDto
+     */
+    ranking?: ProductRankingDto;
     /**
      * AI generated texts localised according to the requested domainLanguage when implemented.
      * @type {ProductAiTextsDto}
@@ -92,11 +170,11 @@ export interface ProductDto {
      */
     aiReview?: ProductAiReviewDto;
     /**
-     * 
-     * @type {any}
+     * Product offers and pricing information
+     * @type {ProductOffersDto}
      * @memberof ProductDto
      */
-    offers?: any | null;
+    offers?: ProductOffersDto;
 }
 
 /**
@@ -117,12 +195,18 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     return {
         
         'gtin': json['gtin'] == null ? undefined : json['gtin'],
+        'slug': json['slug'] == null ? undefined : json['slug'],
         'base': json['base'] == null ? undefined : ProductBaseDtoFromJSON(json['base']),
+        'identity': json['identity'] == null ? undefined : ProductIdentityDtoFromJSON(json['identity']),
         'names': json['names'] == null ? undefined : ProductNamesDtoFromJSON(json['names']),
+        'attributes': json['attributes'] == null ? undefined : ProductAttributesDtoFromJSON(json['attributes']),
         'resources': json['resources'] == null ? undefined : ProductResourcesDtoFromJSON(json['resources']),
+        'datasources': json['datasources'] == null ? undefined : ProductDatasourcesDtoFromJSON(json['datasources']),
+        'scores': json['scores'] == null ? undefined : ProductScoresDtoFromJSON(json['scores']),
+        'ranking': json['ranking'] == null ? undefined : ProductRankingDtoFromJSON(json['ranking']),
         'aiTexts': json['aiTexts'] == null ? undefined : ProductAiTextsDtoFromJSON(json['aiTexts']),
         'aiReview': json['aiReview'] == null ? undefined : ProductAiReviewDtoFromJSON(json['aiReview']),
-        'offers': json['offers'] == null ? undefined : json['offers'],
+        'offers': json['offers'] == null ? undefined : ProductOffersDtoFromJSON(json['offers']),
     };
 }
 
@@ -138,12 +222,18 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
     return {
         
         'gtin': value['gtin'],
+        'slug': value['slug'],
         'base': ProductBaseDtoToJSON(value['base']),
+        'identity': ProductIdentityDtoToJSON(value['identity']),
         'names': ProductNamesDtoToJSON(value['names']),
+        'attributes': ProductAttributesDtoToJSON(value['attributes']),
         'resources': ProductResourcesDtoToJSON(value['resources']),
+        'datasources': ProductDatasourcesDtoToJSON(value['datasources']),
+        'scores': ProductScoresDtoToJSON(value['scores']),
+        'ranking': ProductRankingDtoToJSON(value['ranking']),
         'aiTexts': ProductAiTextsDtoToJSON(value['aiTexts']),
         'aiReview': ProductAiReviewDtoToJSON(value['aiReview']),
-        'offers': value['offers'],
+        'offers': ProductOffersDtoToJSON(value['offers']),
     };
 }
 

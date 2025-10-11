@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProductAiDescriptionDto } from './ProductAiDescriptionDto';
+import {
+    ProductAiDescriptionDtoFromJSON,
+    ProductAiDescriptionDtoFromJSONTyped,
+    ProductAiDescriptionDtoToJSON,
+    ProductAiDescriptionDtoToJSONTyped,
+} from './ProductAiDescriptionDto';
+
 /**
  * 
  * @export
@@ -20,11 +28,17 @@ import { mapValues } from '../runtime';
  */
 export interface ProductAiTextsDto {
     /**
-     * AI description aligned with the requested domainLanguage once localisation is available.
+     * Language key used to resolve the AI descriptions
      * @type {string}
      * @memberof ProductAiTextsDto
      */
-    description?: string;
+    language?: string;
+    /**
+     * AI generated descriptions keyed by prompt identifier
+     * @type {{ [key: string]: ProductAiDescriptionDto; }}
+     * @memberof ProductAiTextsDto
+     */
+    descriptions?: { [key: string]: ProductAiDescriptionDto; };
 }
 
 /**
@@ -44,7 +58,8 @@ export function ProductAiTextsDtoFromJSONTyped(json: any, ignoreDiscriminator: b
     }
     return {
         
-        'description': json['description'] == null ? undefined : json['description'],
+        'language': json['language'] == null ? undefined : json['language'],
+        'descriptions': json['descriptions'] == null ? undefined : (mapValues(json['descriptions'], ProductAiDescriptionDtoFromJSON)),
     };
 }
 
@@ -59,7 +74,8 @@ export function ProductAiTextsDtoToJSONTyped(value?: ProductAiTextsDto | null, i
 
     return {
         
-        'description': value['description'],
+        'language': value['language'],
+        'descriptions': value['descriptions'] == null ? undefined : (mapValues(value['descriptions'], ProductAiDescriptionDtoToJSON)),
     };
 }
 

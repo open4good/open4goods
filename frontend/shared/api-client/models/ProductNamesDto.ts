@@ -20,41 +20,47 @@ import { mapValues } from '../runtime';
  */
 export interface ProductNamesDto {
     /**
-     * H1 title expected to align with the requested domainLanguage when localisation is available.
+     * H1 title for the requested language
      * @type {string}
      * @memberof ProductNamesDto
      */
     h1Title?: string;
     /**
-     * Meta description aligned to the requested domainLanguage once localisation is wired.
+     * Meta description aligned with the requested language
      * @type {string}
      * @memberof ProductNamesDto
      */
     metaDescription?: string;
     /**
-     * OpenGraph title prepared for domainLanguage-driven localisation.
+     * OpenGraph title for social sharing
      * @type {string}
      * @memberof ProductNamesDto
      */
     ogTitle?: string;
     /**
-     * OpenGraph description prepared for domainLanguage-driven localisation.
+     * OpenGraph description for social sharing
      * @type {string}
      * @memberof ProductNamesDto
      */
     ogDescription?: string;
     /**
-     * Twitter title mirroring the requested domainLanguage in the future.
-     * @type {string}
+     * Offer names aggregated across datasources
+     * @type {Set<string>}
      * @memberof ProductNamesDto
      */
-    twitterTitle?: string;
+    offerNames?: Set<string>;
     /**
-     * Twitter description mirroring the requested domainLanguage in the future.
+     * Longest detected offer name
      * @type {string}
      * @memberof ProductNamesDto
      */
-    twitterDescription?: string;
+    longestOfferName?: string;
+    /**
+     * Shortest detected offer name
+     * @type {string}
+     * @memberof ProductNamesDto
+     */
+    shortestOfferName?: string;
 }
 
 /**
@@ -78,8 +84,9 @@ export function ProductNamesDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'metaDescription': json['metaDescription'] == null ? undefined : json['metaDescription'],
         'ogTitle': json['ogTitle'] == null ? undefined : json['ogTitle'],
         'ogDescription': json['ogDescription'] == null ? undefined : json['ogDescription'],
-        'twitterTitle': json['twitterTitle'] == null ? undefined : json['twitterTitle'],
-        'twitterDescription': json['twitterDescription'] == null ? undefined : json['twitterDescription'],
+        'offerNames': json['offerNames'] == null ? undefined : new Set(json['offerNames']),
+        'longestOfferName': json['longestOfferName'] == null ? undefined : json['longestOfferName'],
+        'shortestOfferName': json['shortestOfferName'] == null ? undefined : json['shortestOfferName'],
     };
 }
 
@@ -98,8 +105,9 @@ export function ProductNamesDtoToJSONTyped(value?: ProductNamesDto | null, ignor
         'metaDescription': value['metaDescription'],
         'ogTitle': value['ogTitle'],
         'ogDescription': value['ogDescription'],
-        'twitterTitle': value['twitterTitle'],
-        'twitterDescription': value['twitterDescription'],
+        'offerNames': value['offerNames'] == null ? undefined : Array.from(value['offerNames'] as Set<any>),
+        'longestOfferName': value['longestOfferName'],
+        'shortestOfferName': value['shortestOfferName'],
     };
 }
 

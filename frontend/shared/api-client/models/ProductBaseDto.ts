@@ -13,13 +13,20 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ExternalIds } from './ExternalIds';
+import type { ProductExternalIdsDto } from './ProductExternalIdsDto';
 import {
-    ExternalIdsFromJSON,
-    ExternalIdsFromJSONTyped,
-    ExternalIdsToJSON,
-    ExternalIdsToJSONTyped,
-} from './ExternalIds';
+    ProductExternalIdsDtoFromJSON,
+    ProductExternalIdsDtoFromJSONTyped,
+    ProductExternalIdsDtoToJSON,
+    ProductExternalIdsDtoToJSONTyped,
+} from './ProductExternalIdsDto';
+import type { ProductGtinInfoDto } from './ProductGtinInfoDto';
+import {
+    ProductGtinInfoDtoFromJSON,
+    ProductGtinInfoDtoFromJSONTyped,
+    ProductGtinInfoDtoToJSON,
+    ProductGtinInfoDtoToJSONTyped,
+} from './ProductGtinInfoDto';
 
 /**
  * 
@@ -28,41 +35,65 @@ import {
  */
 export interface ProductBaseDto {
     /**
-     * Product GTIN
+     * Product GTIN as stored in the catalogue
      * @type {number}
      * @memberof ProductBaseDto
      */
     gtin?: number;
     /**
-     * Creation timestamp
+     * Creation timestamp expressed in epoch milliseconds
      * @type {number}
      * @memberof ProductBaseDto
      */
     creationDate?: number;
     /**
-     * Last change timestamp
+     * Last modification timestamp expressed in epoch milliseconds
      * @type {number}
      * @memberof ProductBaseDto
      */
     lastChange?: number;
     /**
-     * Associated vertical
+     * Associated vertical identifier
      * @type {string}
      * @memberof ProductBaseDto
      */
     vertical?: string;
     /**
-     * External identifiers
-     * @type {ExternalIds}
+     * External identifiers assigned to the product
+     * @type {ProductExternalIdsDto}
      * @memberof ProductBaseDto
      */
-    externalIds?: ExternalIds;
+    externalIds?: ProductExternalIdsDto;
     /**
      * Google taxonomy identifier
      * @type {number}
      * @memberof ProductBaseDto
      */
     googleTaxonomyId?: number;
+    /**
+     * Whether the product is excluded from vertical representation
+     * @type {boolean}
+     * @memberof ProductBaseDto
+     */
+    excluded?: boolean;
+    /**
+     * Reasons explaining why the product is excluded
+     * @type {Set<string>}
+     * @memberof ProductBaseDto
+     */
+    excludedCauses?: Set<string>;
+    /**
+     * Information inferred from the GTIN itself
+     * @type {ProductGtinInfoDto}
+     * @memberof ProductBaseDto
+     */
+    gtinInfo?: ProductGtinInfoDto;
+    /**
+     * Absolute URL of the preferred cover image if available
+     * @type {string}
+     * @memberof ProductBaseDto
+     */
+    coverImagePath?: string;
 }
 
 /**
@@ -86,8 +117,12 @@ export function ProductBaseDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
         'creationDate': json['creationDate'] == null ? undefined : json['creationDate'],
         'lastChange': json['lastChange'] == null ? undefined : json['lastChange'],
         'vertical': json['vertical'] == null ? undefined : json['vertical'],
-        'externalIds': json['externalIds'] == null ? undefined : ExternalIdsFromJSON(json['externalIds']),
+        'externalIds': json['externalIds'] == null ? undefined : ProductExternalIdsDtoFromJSON(json['externalIds']),
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
+        'excluded': json['excluded'] == null ? undefined : json['excluded'],
+        'excludedCauses': json['excludedCauses'] == null ? undefined : new Set(json['excludedCauses']),
+        'gtinInfo': json['gtinInfo'] == null ? undefined : ProductGtinInfoDtoFromJSON(json['gtinInfo']),
+        'coverImagePath': json['coverImagePath'] == null ? undefined : json['coverImagePath'],
     };
 }
 
@@ -106,8 +141,12 @@ export function ProductBaseDtoToJSONTyped(value?: ProductBaseDto | null, ignoreD
         'creationDate': value['creationDate'],
         'lastChange': value['lastChange'],
         'vertical': value['vertical'],
-        'externalIds': ExternalIdsToJSON(value['externalIds']),
+        'externalIds': ProductExternalIdsDtoToJSON(value['externalIds']),
         'googleTaxonomyId': value['googleTaxonomyId'],
+        'excluded': value['excluded'],
+        'excludedCauses': value['excludedCauses'] == null ? undefined : Array.from(value['excludedCauses'] as Set<any>),
+        'gtinInfo': ProductGtinInfoDtoToJSON(value['gtinInfo']),
+        'coverImagePath': value['coverImagePath'],
     };
 }
 

@@ -376,8 +376,14 @@ export type ProductDomainLanguageEnum = typeof ProductDomainLanguageEnum[keyof t
  */
 export const ProductIncludeEnum = {
     Base: 'base',
+    Identity: 'identity',
     Names: 'names',
+    Attributes: 'attributes',
     Resources: 'resources',
+    Datasources: 'datasources',
+    Scores: 'scores',
+    Ranking: 'ranking',
+    AiTexts: 'aiTexts',
     AiReview: 'aiReview',
     Offers: 'offers'
 } as const;
@@ -395,8 +401,14 @@ export type ProductsDomainLanguageEnum = typeof ProductsDomainLanguageEnum[keyof
  */
 export const ProductsIncludeEnum = {
     Base: 'base',
+    Identity: 'identity',
     Names: 'names',
+    Attributes: 'attributes',
     Resources: 'resources',
+    Datasources: 'datasources',
+    Scores: 'scores',
+    Ranking: 'ranking',
+    AiTexts: 'aiTexts',
     AiReview: 'aiReview',
     Offers: 'offers'
 } as const;

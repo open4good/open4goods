@@ -426,7 +426,7 @@ public class ProductMappingService {
 
         ULocale displayLocale = resolveDisplayLocale(domainLanguage, locale);
         String countryName = new ULocale("", countryCode).getDisplayCountry(displayLocale);
-        String countryFlagUrl = "/images/flags/" + countryCode.toLowerCase(Locale.ROOT) + ".png";
+        String countryFlagUrl = "/images/flags/" + countryCode.toLowerCase(Locale.ROOT) + ".webp";
 
         return new ProductGtinInfoDto(gtinInfo.getUpcType(), countryCode, countryName, countryFlagUrl);
     }
