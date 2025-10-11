@@ -1,5 +1,6 @@
 package org.open4goods.nudgerfrontapi.service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,16 +11,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.open4goods.model.Localisable;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
+import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryBreadcrumbDto;
+import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
+import org.open4goods.nudgerfrontapi.dto.category.GoogleCategorySummaryDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
@@ -73,6 +79,100 @@ public class CategoryMappingService {
     }
 
 
+
+    /**
+     * Convert a taxonomy category into its DTO representation enriched with navigation data.
+     *
+     * @param category       taxonomy node to convert
+     * @param domainLanguage requested localisation context
+     * @return fully populated {@link GoogleCategoryDto} or {@code null} if the source is {@code null}
+     */
+    public GoogleCategoryDto toGoogleCategoryDto(ProductCategory category, DomainLanguage domainLanguage) {
+        if (category == null) {
+            return null;
+        }
+
+        String languageKey = domainLanguage.name();
+        List<GoogleCategorySummaryDto> children = toGoogleCategoryChildren(category, domainLanguage);
+        List<GoogleCategorySummaryDto> descendantVerticals = toGoogleCategoryDescendantVerticals(category, domainLanguage);
+        List<GoogleCategoryBreadcrumbDto> breadcrumbs = category.hierarchy().stream()
+                .map(node -> toGoogleCategoryBreadcrumbDto(node, domainLanguage))
+                .filter(Objects::nonNull)
+                .toList();
+
+        String name = localisedName(category, languageKey);
+        Map<String, String> names = copyLocalisable(category.getGoogleNames());
+        String slug = slugFor(category, languageKey);
+        String path = computePath(category, languageKey);
+        List<String> segments = splitPath(path);
+        boolean hasChildren = !children.isEmpty();
+        boolean leaf = category.isLeaf();
+        boolean hasVertical = category.getVertical() != null;
+        boolean hasVerticals = category.isHasVerticals();
+        VerticalConfigDto vertical = toVerticalConfigDto(category.getVertical(), domainLanguage);
+
+        return new GoogleCategoryDto(
+                category.getGoogleCategoryId(),
+                name,
+                names,
+                slug,
+                path,
+                segments,
+                hasChildren,
+                leaf,
+                hasVertical,
+                hasVerticals,
+                vertical,
+                breadcrumbs,
+                children,
+                descendantVerticals);
+    }
+
+    /**
+     * Map the immediate children of the provided taxonomy category to DTO summaries.
+     *
+     * @param category       taxonomy category acting as parent
+     * @param domainLanguage requested localisation context
+     * @return immutable list of child summaries filtered to nodes exposing verticals
+     */
+    public List<GoogleCategorySummaryDto> toGoogleCategoryChildren(ProductCategory category,
+                                                                   DomainLanguage domainLanguage) {
+        if (category == null) {
+            return List.of();
+        }
+        return category.children(true).stream()
+                .map(child -> toGoogleCategorySummaryDto(child, domainLanguage))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Map descendant categories exposing a vertical configuration (excluding direct children).
+     *
+     * @param category       taxonomy category used as the root of the search
+     * @param domainLanguage requested localisation context
+     * @return immutable list of descendant categories exposing a vertical configuration
+     */
+    public List<GoogleCategorySummaryDto> toGoogleCategoryDescendantVerticals(ProductCategory category,
+                                                                              DomainLanguage domainLanguage) {
+        if (category == null) {
+            return List.of();
+        }
+
+        List<ProductCategory> children = category.children(true);
+        Set<Integer> directChildIds = children.stream()
+                .map(ProductCategory::getGoogleCategoryId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return category.verticals().stream()
+                .filter(node -> node.getVertical() != null)
+                .filter(node -> node.getGoogleCategoryId() != null)
+                .filter(node -> !directChildIds.contains(node.getGoogleCategoryId()))
+                .map(node -> toGoogleCategorySummaryDto(node, domainLanguage))
+                .filter(Objects::nonNull)
+                .toList();
+    }
 
 	/**
      * Convert a {@link VerticalConfig} into its detailed DTO representation.
@@ -130,6 +230,103 @@ public class CategoryMappingService {
                 mapFeatureGroups(verticalConfig.getFeatureGroups(), domainLanguage),
                 verticalConfig.getWorseLimit(),
                 verticalConfig.getBettersLimit());
+    }
+
+    private GoogleCategorySummaryDto toGoogleCategorySummaryDto(ProductCategory category,
+                                                                DomainLanguage domainLanguage) {
+        if (category == null) {
+            return null;
+        }
+        String languageKey = domainLanguage.name();
+        String name = localisedName(category, languageKey);
+        Map<String, String> names = copyLocalisable(category.getGoogleNames());
+        String slug = slugFor(category, languageKey);
+        String path = computePath(category, languageKey);
+        List<String> segments = splitPath(path);
+        boolean hasChildren = !category.children(true).isEmpty();
+        boolean leaf = category.isLeaf();
+        boolean hasVertical = category.getVertical() != null;
+        boolean hasVerticals = category.isHasVerticals();
+        VerticalConfigDto vertical = toVerticalConfigDto(category.getVertical(), domainLanguage);
+
+        return new GoogleCategorySummaryDto(
+                category.getGoogleCategoryId(),
+                name,
+                names,
+                slug,
+                path,
+                segments,
+                hasChildren,
+                leaf,
+                hasVertical,
+                hasVerticals,
+                vertical);
+    }
+
+    private GoogleCategoryBreadcrumbDto toGoogleCategoryBreadcrumbDto(ProductCategory category,
+                                                                      DomainLanguage domainLanguage) {
+        if (category == null) {
+            return null;
+        }
+        String languageKey = domainLanguage.name();
+        return new GoogleCategoryBreadcrumbDto(
+                category.getGoogleCategoryId(),
+                localisedName(category, languageKey),
+                slugFor(category, languageKey),
+                computePath(category, languageKey));
+    }
+
+    private Map<String, String> copyLocalisable(Localisable<String, String> localisable) {
+        if (localisable == null || localisable.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> copy = new LinkedHashMap<>();
+        localisable.entrySet().stream()
+                .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                .forEach(entry -> copy.put(entry.getKey(), entry.getValue()));
+        return Collections.unmodifiableMap(copy);
+    }
+
+    private String localisedName(ProductCategory category, String languageKey) {
+        if (category == null || category.getGoogleNames() == null) {
+            return null;
+        }
+        return category.getGoogleNames().i18n(languageKey);
+    }
+
+    private String slugFor(ProductCategory category, String languageKey) {
+        if (category == null || category.getUrls() == null) {
+            return null;
+        }
+        if (isVirtualRoot(category)) {
+            return "";
+        }
+        return category.getUrls().i18n(languageKey);
+    }
+
+    private String computePath(ProductCategory category, String languageKey) {
+        if (category == null || isVirtualRoot(category)) {
+            return "";
+        }
+        return category.hierarchy().stream()
+                .filter(node -> !isVirtualRoot(node))
+                .map(node -> slugFor(node, languageKey))
+                .filter(Objects::nonNull)
+                .filter(segment -> !segment.isBlank())
+                .collect(Collectors.joining("/"));
+    }
+
+    private List<String> splitPath(String path) {
+        if (path == null || path.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(path.split("/"))
+                .filter(segment -> !segment.isBlank())
+                .toList();
+    }
+
+    private boolean isVirtualRoot(ProductCategory category) {
+        return category != null && Integer.valueOf(0).equals(category.getGoogleCategoryId());
     }
 
     private AttributesConfigDto mapAttributesConfig(AttributesConfig attributesConfig, DomainLanguage domainLanguage) {
