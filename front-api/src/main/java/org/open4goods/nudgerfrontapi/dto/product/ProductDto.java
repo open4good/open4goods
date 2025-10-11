@@ -8,62 +8,78 @@ import java.util.stream.Collectors;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * DTO representing a product view returned by the API.
+ * DTO representing a comprehensive product view returned by the API.
  */
 public record ProductDto(
         @Schema(description = "Product GTIN, it is the unique identifier", example = "7612345678901")
         long gtin,
         @Schema(description = "Basic product metadata")
         ProductBaseDto base,
+        @Schema(description = "Identity facet exposing brand, model and alternate identifiers")
+        ProductIdentityDto identity,
         @Schema(description = "Localised textual information resolved using the domainLanguage query parameter when available.")
         ProductNamesDto names,
+        @Schema(description = "Structured attributes aggregated from all datasources")
+        ProductAttributesDto attributes,
         @Schema(description = "Associated media resources")
         ProductResourcesDto resources,
+        @Schema(description = "Datasource related information")
+        ProductDatasourcesDto datasources,
+        @Schema(description = "Score and ranking related information")
+        ProductScoresDto scores,
+        @Schema(description = "Ecoscore derived rankings")
+        ProductRankingDto ranking,
         @Schema(description = "AI generated texts localised according to the requested domainLanguage when implemented.")
         ProductAiTextsDto aiTexts,
         @Schema(description = "AI-generated review matching the requested domainLanguage when localisation is enabled.")
         ProductAiReviewDto aiReview,
-        @Schema(description = "Product offers with textual content meant to align with the requested domainLanguage in the future.")
+        @Schema(description = "Product offers and pricing information")
         ProductOffersDto offers
 ) {
 
-	/**
-	 * Available facets on ProductsDto
-	 */
+        /**
+         * Available facets on ProductsDto.
+         */
         public enum ProductDtoComponent {
                 base,
+                identity,
                 names,
+                attributes,
                 resources,
+                datasources,
+                scores,
+                ranking,
+                aiTexts,
                 aiReview,
                 offers
         }
 
-	/**
-	 * Allowed sort values on Products. (must exactly match elastic mapping)
-	 */
+        /**
+         * Allowed sort values on Products. (must exactly match elastic mapping)
+         */
         public enum ProductDtoSortableFields {
                 price("price.minPrice.price"),
                 offersCount("offersCount");
 
-		private final String text;
+                private final String text;
 
-		ProductDtoSortableFields(String text) {
-			this.text = text;
-		}
+                ProductDtoSortableFields(String text) {
+                        this.text = text;
+                }
 
-		public String getText() {
-			return text;
-		}
+                public String getText() {
+                        return text;
+                }
 
-		@Override
-		public String toString() {
-			return text;
-		}
+                @Override
+                public String toString() {
+                        return text;
+                }
 
-		/**
-		 * Optional: parse from the text value.
-		 */
-		private static final Map<String, ProductDtoSortableFields> LOOKUP = Arrays.stream(values()).collect(Collectors.toMap(ProductDtoSortableFields::getText, e -> e));
+                /**
+                 * Optional: parse from the text value.
+                 */
+                private static final Map<String, ProductDtoSortableFields> LOOKUP = Arrays.stream(values()).collect(Collectors.toMap(ProductDtoSortableFields::getText, e -> e));
 
                 public static Optional<ProductDtoSortableFields> fromText(String text) {
                         return Optional.ofNullable(LOOKUP.get(text));
