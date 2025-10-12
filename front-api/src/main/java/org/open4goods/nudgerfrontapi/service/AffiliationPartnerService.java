@@ -28,7 +28,7 @@ public class AffiliationPartnerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AffiliationPartnerService.class);
     private static final ParameterizedTypeReference<List<AffiliationPartner>> PARTNERS_TYPE =
             new ParameterizedTypeReference<>() { };
-	private static final String CONTRIB_ENDPOINT = "/contrib/";
+    public static final String CONTRIB_ENDPOINT = "/contrib/";
 
     private final RestClient restClient;
     private final AffiliationPartnersProperties properties;

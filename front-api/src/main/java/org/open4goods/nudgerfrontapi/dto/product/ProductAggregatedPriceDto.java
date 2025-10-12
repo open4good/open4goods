@@ -17,8 +17,8 @@ public record ProductAggregatedPriceDto(
         String url,
         @Schema(description = "Compensation paid when the offer is converted", example = "0.5")
         Double compensation,
-        @Schema(description = "State of the product for this offer")
-        ProductCondition productState,
+        @Schema(description = "Condition of the product for this offer")
+        ProductCondition condition,
         @Schema(description = "Affiliation token when available")
         String affiliationToken,
         @Schema(description = "Price value")

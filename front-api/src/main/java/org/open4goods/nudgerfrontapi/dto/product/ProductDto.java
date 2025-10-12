@@ -15,6 +15,8 @@ public record ProductDto(
         long gtin,
         @Schema(description = "Canonical product URL previously exposed as names.url", example = "https://example.org/products/123")
         String slug,
+        @Schema(description = "Fully qualified slug composed of the vertical home URL and the product slug", example = "/telephones-reconditionnes/fairphone-4")
+        String fullSlug,
         @Schema(description = "Basic product metadata")
         ProductBaseDto base,
         @Schema(description = "Identity facet exposing brand, model and alternate identifiers")
