@@ -22,6 +22,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * Service assembling OpenData DTOs for the frontend REST API.
+ * <p>
+ * The service translates raw data statistics into localised DTOs so controllers can remain thin and deterministic.
+ * </p>
  */
 @Service
 public class OpenDataMappingService {
@@ -121,6 +124,17 @@ public class OpenDataMappingService {
         return resolveLocale(domainLanguage).toLanguageTag();
     }
 
+    /**
+     * Build a dataset description for the specified OpenData export.
+     *
+     * @param domainLanguage caller requested language
+     * @param type human readable dataset name
+     * @param recordCount number of records advertised by the export
+     * @param file physical file reference used to determine size and timestamp
+     * @param relativeDownloadPath path exposed by the static assets application
+     * @param headers CSV headers used to describe the export format
+     * @return assembled dataset DTO
+     */
     private OpenDataDatasetDto dataset(DomainLanguage domainLanguage,
                                        String type,
                                        long recordCount,
@@ -138,6 +152,12 @@ public class OpenDataMappingService {
         );
     }
 
+    /**
+     * Return the file size while gracefully handling missing files.
+     *
+     * @param file target file
+     * @return file size in bytes, {@code 0} when the file is missing
+     */
     private long safeLength(File file) {
         if (file == null || !file.exists()) {
             return 0L;
@@ -145,11 +165,25 @@ public class OpenDataMappingService {
         return file.length();
     }
 
+    /**
+     * Format an integer according to the requested locale.
+     *
+     * @param value   number to format
+     * @param locale  locale used for formatting
+     * @return localised representation
+     */
     private String formatInteger(long value, Locale locale) {
         NumberFormat numberFormat = NumberFormat.getIntegerInstance(locale);
         return numberFormat.format(value);
     }
 
+    /**
+     * Format a raw byte size using SI units.
+     *
+     * @param bytes  raw size in bytes
+     * @param locale locale used for formatting
+     * @return localised human readable size
+     */
     private String formatDataSize(long bytes, Locale locale) {
         if (bytes <= 0) {
             return NumberFormat.getIntegerInstance(locale).format(0) + " " + SIZE_UNITS[0];
@@ -175,6 +209,13 @@ public class OpenDataMappingService {
         return numberFormat.format(value) + " " + SIZE_UNITS[unitIndex];
     }
 
+    /**
+     * Format the last modification timestamp of a dataset.
+     *
+     * @param file   dataset file
+     * @param locale locale used for formatting
+     * @return formatted timestamp or {@code null} when the file is missing
+     */
     private String formatTimestamp(File file, Locale locale) {
         if (file == null || !file.exists()) {
             return null;
@@ -186,12 +227,25 @@ public class OpenDataMappingService {
         return formatter.format(dateTime);
     }
 
+    /**
+     * Format the download speed limit defined in the configuration.
+     *
+     * @param downloadSpeedKb speed expressed in kilobytes per second
+     * @param locale          locale used for formatting
+     * @return human readable download speed
+     */
     private String formatDownloadSpeed(int downloadSpeedKb, Locale locale) {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
         numberFormat.setMaximumFractionDigits(0);
         return numberFormat.format(downloadSpeedKb) + " kB/s";
     }
 
+    /**
+     * Construct an absolute download URL by combining the configured static asset root and the provided path.
+     *
+     * @param relativePath path exposed by the static assets application
+     * @return absolute URL accessible by the frontend
+     */
     private String buildDownloadUrl(String relativePath) {
         String root = apiProperties.getResourceRootPath();
 

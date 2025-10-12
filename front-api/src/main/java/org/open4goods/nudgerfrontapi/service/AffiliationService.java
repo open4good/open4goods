@@ -111,6 +111,12 @@ public class AffiliationService {
         }
     }
 
+    /**
+     * Trim and normalise the user agent while preventing Elasticsearch field explosion.
+     *
+     * @param userAgent raw header value provided by the client
+     * @return sanitised user agent or {@code null} when blank
+     */
     private String sanitiseUserAgent(String userAgent) {
         if (!StringUtils.hasText(userAgent)) {
             return null;

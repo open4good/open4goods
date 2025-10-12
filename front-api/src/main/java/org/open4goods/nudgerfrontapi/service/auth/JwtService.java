@@ -15,6 +15,10 @@ import org.springframework.stereotype.Service;
 
 /**
  * Utility service to issue and validate JWT tokens for the frontend API.
+ * <p>
+ * The service wraps Spring Security's encoder/decoder beans and centralises claim construction so controllers
+ * and filters keep a single source of truth for token lifetimes and payloads.
+ * </p>
  */
 @Service
 public class JwtService {
@@ -29,12 +33,18 @@ public class JwtService {
         this.properties = properties;
     }
 
+    /**
+     * Expose the current security properties (mainly used for configuration endpoints).
+     */
     public SecurityProperties getProperties() {
         return properties;
     }
 
     /**
      * Generate an access token for the given authentication.
+     *
+     * @param auth authenticated principal
+     * @return signed JWT containing the principal username and authorities
      */
     public String generateAccessToken(Authentication auth) {
         Instant now = Instant.now();
@@ -52,6 +62,9 @@ public class JwtService {
 
     /**
      * Generate a refresh token for the given authentication.
+     *
+     * @param auth authenticated principal
+     * @return signed JWT usable to request a new access token
      */
     public String generateRefreshToken(Authentication auth) {
         Instant now = Instant.now();
@@ -67,6 +80,9 @@ public class JwtService {
 
     /**
      * Validate a token and return the authentication subject.
+     *
+     * @param token refresh token value
+     * @return subject embedded in the token after successful validation
      */
     public String validateRefreshToken(String token) {
         return decoder.decode(token).getSubject();

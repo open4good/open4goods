@@ -30,20 +30,27 @@ import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.util.StringUtils;
 
 /**
  * Mapping utilities converting {@link VerticalConfig} domain objects into transport DTOs.
+ * <p>
+ * The service centralises every projection required by the category endpoints: localisation of texts,
+ * fallback rules for optional data and construction of image URLs relying on {@link ApiProperties}.
+ * </p>
  */
 @Service
 public class CategoryMappingService {
 
-	private static final String IMAGE_PREFIX ="/images/verticals/";
+    private static final String IMAGE_PREFIX = "/images/verticals/";
     private static final String DEFAULT_LANGUAGE_KEY = "default";
 
-    @Autowired ApiProperties apiProperties;
+    private final ApiProperties apiProperties;
+
+    public CategoryMappingService(ApiProperties apiProperties) {
+        this.apiProperties = apiProperties;
+    }
     /**
      * Convert a {@link VerticalConfig} into its summary DTO representation.
      *
@@ -132,6 +139,9 @@ public class CategoryMappingService {
                 verticalConfig.getBettersLimit());
     }
 
+    /**
+     * Map the attributes configuration block for a vertical.
+     */
     private AttributesConfigDto mapAttributesConfig(AttributesConfig attributesConfig, DomainLanguage domainLanguage) {
         if (attributesConfig == null) {
             return null;
@@ -145,6 +155,9 @@ public class CategoryMappingService {
                 defaultSet(attributesConfig.getExclusions()));
     }
 
+    /**
+     * Map a single attribute configuration entry.
+     */
     private AttributeConfigDto mapAttributeConfig(AttributeConfig attributeConfig, DomainLanguage domainLanguage) {
         if (attributeConfig == null) {
             return null;
@@ -166,6 +179,9 @@ public class CategoryMappingService {
                 defaultMap(attributeConfig.getMappings()));
     }
 
+    /**
+     * Map impact score criteria definitions keyed by their identifier.
+     */
     private Map<String, ImpactScoreCriteriaDto> mapImpactScoreCriterias(Map<String, ImpactScoreCriteria> criterias,
                                                                          DomainLanguage domainLanguage) {
         if (criterias == null || criterias.isEmpty()) {
@@ -179,6 +195,9 @@ public class CategoryMappingService {
                         LinkedHashMap::new));
     }
 
+    /**
+     * Map a single impact score criterion.
+     */
     private ImpactScoreCriteriaDto mapImpactScoreCriteria(ImpactScoreCriteria criteria, DomainLanguage domainLanguage) {
         if (criteria == null) {
             return null;
@@ -189,6 +208,9 @@ public class CategoryMappingService {
                 localise(criteria.getDescription(), domainLanguage));
     }
 
+    /**
+     * Map the impact score configuration (weights and prompts).
+     */
     private ImpactScoreConfigDto mapImpactScoreConfig(ImpactScoreConfig impactScoreConfig, DomainLanguage domainLanguage) {
         if (impactScoreConfig == null) {
             return null;
@@ -201,6 +223,9 @@ public class CategoryMappingService {
     }
 
 
+    /**
+     * Map configured vertical subsets (curated selections) to DTOs.
+     */
     private List<VerticalSubsetDto> mapVerticalSubsets(List<VerticalSubset> subsets, DomainLanguage domainLanguage) {
         return defaultList(subsets).stream()
                 .map(subset -> mapVerticalSubset(subset, domainLanguage))
@@ -208,6 +233,9 @@ public class CategoryMappingService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Map an individual vertical subset entry.
+     */
     private VerticalSubsetDto mapVerticalSubset(VerticalSubset subset, DomainLanguage domainLanguage) {
         if (subset == null) {
             return null;
@@ -223,6 +251,9 @@ public class CategoryMappingService {
                 localise(subset.getDescription(), domainLanguage));
     }
 
+    /**
+     * Map feature group definitions used to organise characteristics in the UI.
+     */
     private List<FeatureGroupDto> mapFeatureGroups(List<FeatureGroup> featureGroups, DomainLanguage domainLanguage) {
         return defaultList(featureGroups).stream()
                 .map(featureGroup -> mapFeatureGroup(featureGroup, domainLanguage))
@@ -230,6 +261,9 @@ public class CategoryMappingService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Map a single feature group entry.
+     */
     private FeatureGroupDto mapFeatureGroup(FeatureGroup featureGroup, DomainLanguage domainLanguage) {
         if (featureGroup == null) {
             return null;
@@ -240,18 +274,30 @@ public class CategoryMappingService {
                 defaultList(featureGroup.getFeaturesId()));
     }
 
+    /**
+     * Defensive helper returning an empty map when the source is {@code null}.
+     */
     private <K, V> Map<K, V> defaultMap(Map<K, V> map) {
         return map == null ? Collections.emptyMap() : map;
     }
 
+    /**
+     * Defensive helper returning an empty list when the source is {@code null}.
+     */
     private <T> List<T> defaultList(List<T> list) {
         return list == null ? Collections.emptyList() : list;
     }
 
+    /**
+     * Defensive helper returning an empty set when the source is {@code null}.
+     */
     private <T> Set<T> defaultSet(Set<T> set) {
         return set == null ? Collections.emptySet() : set;
     }
 
+    /**
+     * Resolve the best matching value for the requested language.
+     */
     private <T> T localise(Map<String, T> values, DomainLanguage domainLanguage) {
         if (values == null || values.isEmpty()) {
             return null;
@@ -270,6 +316,9 @@ public class CategoryMappingService {
                 .orElse(null);
     }
 
+    /**
+     * Build a deterministic list of language keys tested when localising values.
+     */
     private Set<String> candidateLanguageKeys(DomainLanguage domainLanguage) {
         LinkedHashSet<String> keys = new LinkedHashSet<>();
         String iso = domainLanguage.name();
@@ -295,40 +344,33 @@ public class CategoryMappingService {
         keys.add(DEFAULT_LANGUAGE_KEY);
         return keys;
     }
-
-
-	/**
-	 * Return the medium image size, from derivating ResourceControler (ui/static project) mapping ("/images/verticals/{verticalId}.jpg")
-	 * Using webp, live conversion filters will translate.
-	 * The suffix "-SIZE" must be allowed in static resource app config (allowedImagesSizeSuffixes)
-	 * @param verticalConfig
-	 * @return
-	 */
+    /**
+     * Build the URL to the medium sized vertical illustration.
+     */
     private String mapVerticalImageMedium(VerticalConfig verticalConfig) {
-		return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
-	}
+        if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
+            return null;
+        }
+        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
+    }
 
-	/**
-	 * Return the medium image size, from derivating ResourceControler (ui/static project) mapping ("/images/verticals/{verticalId}.jpg")
-	 * Using webp, live conversion filters will translate
-     * The suffix "-SIZE" must be allowed in static resource app config (allowedImagesSizeSuffixes)
-	 * @param verticalConfig
-	 * @return
-	 */
+    /**
+     * Build the URL to the small sized vertical illustration.
+     */
+    private String mapVerticalImageSmall(VerticalConfig verticalConfig) {
+        if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
+            return null;
+        }
+        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
+    }
 
-	private String mapVerticalImageSmall(VerticalConfig verticalConfig) {
-		return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
-	}
-
-	/**
-	 * Return the medium image size, from derivating ResourceControler (ui/static project) mapping ("/images/verticals/{verticalId}.jpg")
-	 * Using webp, live conversion filters will translate
-	 * The suffix "-SIZE" must be allowed in static resource app config (allowedImagesSizeSuffixes)
-	 * @param verticalConfig
-	 * @return
-	 */
-
-	private String mapVerticalImageLarge(VerticalConfig verticalConfig) {
-		return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
-	}
+    /**
+     * Build the URL to the large vertical illustration used on landing pages.
+     */
+    private String mapVerticalImageLarge(VerticalConfig verticalConfig) {
+        if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
+            return null;
+        }
+        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
+    }
 }

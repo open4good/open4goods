@@ -5,6 +5,12 @@ package org.open4goods.nudgerfrontapi.service.exception;
  */
 public class AffiliationTrackingException extends RuntimeException {
 
+    /**
+     * Create an exception describing why affiliation tracking failed.
+     *
+     * @param message human readable explanation of the failure
+     * @param cause   root cause thrown by the persistence or serialisation layer
+     */
     public AffiliationTrackingException(String message, Throwable cause) {
         super(message, cause);
     }
