@@ -44,11 +44,11 @@ export interface ProductAggregatedPriceDto {
      */
     compensation?: number;
     /**
-     * State of the product for this offer
+     * Condition of the product for this offer
      * @type {string}
      * @memberof ProductAggregatedPriceDto
      */
-    productState?: ProductAggregatedPriceDtoProductStateEnum;
+    condition?: ProductAggregatedPriceDtoConditionEnum;
     /**
      * Affiliation token when available
      * @type {string}
@@ -85,11 +85,11 @@ export interface ProductAggregatedPriceDto {
 /**
  * @export
  */
-export const ProductAggregatedPriceDtoProductStateEnum = {
+export const ProductAggregatedPriceDtoConditionEnum = {
     Occasion: 'OCCASION',
     New: 'NEW'
 } as const;
-export type ProductAggregatedPriceDtoProductStateEnum = typeof ProductAggregatedPriceDtoProductStateEnum[keyof typeof ProductAggregatedPriceDtoProductStateEnum];
+export type ProductAggregatedPriceDtoConditionEnum = typeof ProductAggregatedPriceDtoConditionEnum[keyof typeof ProductAggregatedPriceDtoConditionEnum];
 
 /**
  * @export
@@ -123,7 +123,7 @@ export function ProductAggregatedPriceDtoFromJSONTyped(json: any, ignoreDiscrimi
         'offerName': json['offerName'] == null ? undefined : json['offerName'],
         'url': json['url'] == null ? undefined : json['url'],
         'compensation': json['compensation'] == null ? undefined : json['compensation'],
-        'productState': json['productState'] == null ? undefined : json['productState'],
+        'condition': json['condition'] == null ? undefined : json['condition'],
         'affiliationToken': json['affiliationToken'] == null ? undefined : json['affiliationToken'],
         'price': json['price'] == null ? undefined : json['price'],
         'currency': json['currency'] == null ? undefined : json['currency'],
@@ -147,7 +147,7 @@ export function ProductAggregatedPriceDtoToJSONTyped(value?: ProductAggregatedPr
         'offerName': value['offerName'],
         'url': value['url'],
         'compensation': value['compensation'],
-        'productState': value['productState'],
+        'condition': value['condition'],
         'affiliationToken': value['affiliationToken'],
         'price': value['price'],
         'currency': value['currency'],

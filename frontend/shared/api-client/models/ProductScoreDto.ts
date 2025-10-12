@@ -28,11 +28,23 @@ import {
  */
 export interface ProductScoreDto {
     /**
+     * Score id
+     * @type {string}
+     * @memberof ProductScoreDto
+     */
+    id?: string;
+    /**
      * Score name
      * @type {string}
      * @memberof ProductScoreDto
      */
     name?: string;
+    /**
+     * Score description
+     * @type {string}
+     * @memberof ProductScoreDto
+     */
+    description?: string;
     /**
      * Whether the score is virtual
      * @type {boolean}
@@ -130,7 +142,9 @@ export function ProductScoreDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
+        'id': json['id'] == null ? undefined : json['id'],
         'name': json['name'] == null ? undefined : json['name'],
+        'description': json['description'] == null ? undefined : json['description'],
         'virtual': json['virtual'] == null ? undefined : json['virtual'],
         'value': json['value'] == null ? undefined : json['value'],
         'absolute': json['absolute'] == null ? undefined : ProductCardinalityDtoFromJSON(json['absolute']),
@@ -158,7 +172,9 @@ export function ProductScoreDtoToJSONTyped(value?: ProductScoreDto | null, ignor
 
     return {
         
+        'id': value['id'],
         'name': value['name'],
+        'description': value['description'],
         'virtual': value['virtual'],
         'value': value['value'],
         'absolute': ProductCardinalityDtoToJSON(value['absolute']),

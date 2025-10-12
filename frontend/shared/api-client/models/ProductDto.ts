@@ -110,6 +110,12 @@ export interface ProductDto {
      */
     slug?: string;
     /**
+     * Fully qualified slug composed of the vertical home URL and the product slug
+     * @type {string}
+     * @memberof ProductDto
+     */
+    fullSlug?: string;
+    /**
      * Basic product metadata
      * @type {ProductBaseDto}
      * @memberof ProductDto
@@ -196,6 +202,7 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         
         'gtin': json['gtin'] == null ? undefined : json['gtin'],
         'slug': json['slug'] == null ? undefined : json['slug'],
+        'fullSlug': json['fullSlug'] == null ? undefined : json['fullSlug'],
         'base': json['base'] == null ? undefined : ProductBaseDtoFromJSON(json['base']),
         'identity': json['identity'] == null ? undefined : ProductIdentityDtoFromJSON(json['identity']),
         'names': json['names'] == null ? undefined : ProductNamesDtoFromJSON(json['names']),
@@ -223,6 +230,7 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
         
         'gtin': value['gtin'],
         'slug': value['slug'],
+        'fullSlug': value['fullSlug'],
         'base': ProductBaseDtoToJSON(value['base']),
         'identity': ProductIdentityDtoToJSON(value['identity']),
         'names': ProductNamesDtoToJSON(value['names']),

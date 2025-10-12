@@ -40,12 +40,6 @@ export interface ProductAttributeDto {
      */
     value?: string;
     /**
-     * Numeric interpretation when available
-     * @type {number}
-     * @memberof ProductAttributeDto
-     */
-    numericValue?: number;
-    /**
      * Icecat taxonomy identifiers associated to the attribute
      * @type {Set<number>}
      * @memberof ProductAttributeDto
@@ -78,7 +72,6 @@ export function ProductAttributeDtoFromJSONTyped(json: any, ignoreDiscriminator:
         
         'name': json['name'] == null ? undefined : json['name'],
         'value': json['value'] == null ? undefined : json['value'],
-        'numericValue': json['numericValue'] == null ? undefined : json['numericValue'],
         'icecatTaxonomyIds': json['icecatTaxonomyIds'] == null ? undefined : new Set(json['icecatTaxonomyIds']),
         'sources': json['sources'] == null ? undefined : (new Set((json['sources'] as Array<any>).map(ProductSourcedAttributeDtoFromJSON))),
     };
@@ -97,7 +90,6 @@ export function ProductAttributeDtoToJSONTyped(value?: ProductAttributeDto | nul
         
         'name': value['name'],
         'value': value['value'],
-        'numericValue': value['numericValue'],
         'icecatTaxonomyIds': value['icecatTaxonomyIds'] == null ? undefined : Array.from(value['icecatTaxonomyIds'] as Set<any>),
         'sources': value['sources'] == null ? undefined : (Array.from(value['sources'] as Set<any>).map(ProductSourcedAttributeDtoToJSON)),
     };

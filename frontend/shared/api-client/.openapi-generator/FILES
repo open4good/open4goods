@@ -62,6 +62,7 @@ models/ProductAttributeDto.ts
 models/ProductAttributesDto.ts
 models/ProductBaseDto.ts
 models/ProductCardinalityDto.ts
+models/ProductClassifiedAttributeGroupDto.ts
 models/ProductDatasourcesDto.ts
 models/ProductDto.ts
 models/ProductExternalIdsDto.ts

@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ProductAttributeDto } from './ProductAttributeDto';
+import type { ProductClassifiedAttributeGroupDto } from './ProductClassifiedAttributeGroupDto';
 import {
-    ProductAttributeDtoFromJSON,
-    ProductAttributeDtoFromJSONTyped,
-    ProductAttributeDtoToJSON,
-    ProductAttributeDtoToJSONTyped,
-} from './ProductAttributeDto';
+    ProductClassifiedAttributeGroupDtoFromJSON,
+    ProductClassifiedAttributeGroupDtoFromJSONTyped,
+    ProductClassifiedAttributeGroupDtoToJSON,
+    ProductClassifiedAttributeGroupDtoToJSONTyped,
+} from './ProductClassifiedAttributeGroupDto';
 import type { ProductIndexedAttributeDto } from './ProductIndexedAttributeDto';
 import {
     ProductIndexedAttributeDtoFromJSON,
@@ -47,17 +47,11 @@ export interface ProductAttributesDto {
      */
     indexedAttributes?: { [key: string]: ProductIndexedAttributeDto; };
     /**
-     * All attributes keyed by their identifier
-     * @type {{ [key: string]: ProductAttributeDto; }}
+     * Attributes classified using Icecat feature groups hierarchy
+     * @type {Array<ProductClassifiedAttributeGroupDto>}
      * @memberof ProductAttributesDto
      */
-    allAttributes?: { [key: string]: ProductAttributeDto; };
-    /**
-     * Concatenated human readable characteristics
-     * @type {string}
-     * @memberof ProductAttributesDto
-     */
-    characteristics?: string;
+    classifiedAttributes?: Array<ProductClassifiedAttributeGroupDto>;
 }
 
 /**
@@ -79,8 +73,7 @@ export function ProductAttributesDtoFromJSONTyped(json: any, ignoreDiscriminator
         
         'referentialAttributes': json['referentialAttributes'] == null ? undefined : json['referentialAttributes'],
         'indexedAttributes': json['indexedAttributes'] == null ? undefined : (mapValues(json['indexedAttributes'], ProductIndexedAttributeDtoFromJSON)),
-        'allAttributes': json['allAttributes'] == null ? undefined : (mapValues(json['allAttributes'], ProductAttributeDtoFromJSON)),
-        'characteristics': json['characteristics'] == null ? undefined : json['characteristics'],
+        'classifiedAttributes': json['classifiedAttributes'] == null ? undefined : ((json['classifiedAttributes'] as Array<any>).map(ProductClassifiedAttributeGroupDtoFromJSON)),
     };
 }
 
@@ -97,8 +90,7 @@ export function ProductAttributesDtoToJSONTyped(value?: ProductAttributesDto | n
         
         'referentialAttributes': value['referentialAttributes'],
         'indexedAttributes': value['indexedAttributes'] == null ? undefined : (mapValues(value['indexedAttributes'], ProductIndexedAttributeDtoToJSON)),
-        'allAttributes': value['allAttributes'] == null ? undefined : (mapValues(value['allAttributes'], ProductAttributeDtoToJSON)),
-        'characteristics': value['characteristics'],
+        'classifiedAttributes': value['classifiedAttributes'] == null ? undefined : ((value['classifiedAttributes'] as Array<any>).map(ProductClassifiedAttributeGroupDtoToJSON)),
     };
 }
 

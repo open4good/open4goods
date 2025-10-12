@@ -50,6 +50,7 @@ export * from './ProductAttributeDto';
 export * from './ProductAttributesDto';
 export * from './ProductBaseDto';
 export * from './ProductCardinalityDto';
+export * from './ProductClassifiedAttributeGroupDto';
 export * from './ProductDatasourcesDto';
 export * from './ProductDto';
 export * from './ProductExternalIdsDto';
