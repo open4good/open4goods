@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * DTO describing a group of Icecat classified attributes.
  */
 public record ProductClassifiedAttributeGroupDto(
-        @Schema(description = "Icecat feature group metadata associated with the attributes")
-        ProductFeatureGroupDto featureGroup,
         @Schema(description = "Localized display name of the feature group", example = "General")
         String name,
         @Schema(description = "All attributes associated with the feature group")

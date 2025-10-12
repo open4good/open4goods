@@ -15,68 +15,66 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.open4goods.icecat.model.AttributesFeatureGroups;
+import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.ai.AiDescriptions;
+import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.ProductAttributes;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.product.AiReviewHolder;
+import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
-import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.Score;
-import org.open4goods.model.product.EcoScoreRanking;
-import org.open4goods.model.vertical.FeatureGroup;
-import org.open4goods.model.vertical.ImpactScoreCriteria;
-import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
-import org.open4goods.model.attribute.IndexedAttribute;
-import org.open4goods.model.attribute.ProductAttribute;
-import org.open4goods.model.attribute.SourcedAttribute;
-import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.ImpactScoreCriteria;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiDescriptionDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
-import org.open4goods.icecat.model.AttributesFeatureGroups;
-import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductClassifiedAttributeGroupDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductCardinalityDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductClassifiedAttributeGroupDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDatasourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductFeatureGroupDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryEntryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductRankingDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourceImageInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcePdfInfoDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
-import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -111,6 +109,7 @@ public class ProductMappingService {
     private final VerticalsConfigService verticalsConfigService;
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
+
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -321,7 +320,6 @@ public class ProductMappingService {
         }
         return groups.stream()
                 .map(group -> new ProductClassifiedAttributeGroupDto(
-                        mapFeatureGroup(group.getFeatureGroup()),
                         group.getName(),
                         mapAttributeList(group.getAttributes()),
                         mapAttributeList(group.features()),
@@ -333,12 +331,6 @@ public class ProductMappingService {
         return domainLanguage == null ? DomainLanguage.en.languageTag() : domainLanguage.languageTag();
     }
 
-    private ProductFeatureGroupDto mapFeatureGroup(FeatureGroup featureGroup) {
-        if (featureGroup == null) {
-            return null;
-        }
-        return new ProductFeatureGroupDto(featureGroup.getIcecatCategoryFeatureGroupId());
-    }
 
     private List<ProductAttributeDto> mapAttributeList(List<ProductAttribute> attributes) {
         if (attributes == null || attributes.isEmpty()) {
