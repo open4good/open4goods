@@ -44,7 +44,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  *   It also provides endpoints to access icecat features, languages, and so on....
  * TODO : all Long to Integer
  */
-@Service
 public class IcecatService {
 
                 private static final Logger LOGGER = LoggerFactory.getLogger(IcecatService.class);

@@ -1,12 +1,14 @@
 package org.open4goods.nudgerfrontapi.config;
 
+import org.open4goods.commons.services.BrandService;
+import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.loader.CategoryLoader;
+import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
 import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.services.blog.service.BlogService;
-import org.open4goods.services.contribution.service.ContributionService;
-import org.open4goods.services.opendata.config.OpenDataConfig;
-import org.open4goods.services.opendata.service.OpenDataService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -15,13 +17,11 @@ import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 @Configuration
 /**
@@ -39,6 +39,25 @@ public class AppConfig {
     @Bean
     ProductRepository productRepository() {
         return new ProductRepository();
+    }
+
+
+
+	@Bean
+	FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
+                return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(), brandService);
+        }
+
+	@Bean
+	CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
+                return new CategoryLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(), verticalConfigService, featureLoader);
+        }
+
+    @Bean
+    IcecatService icecatFeatureService(@Autowired RemoteFileCachingService fileCachingService, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired FeatureLoader featureLoader, @Autowired CategoryLoader categoryLoader, @Autowired CacheProperties cacheProperties) {
+        // NOTE : xmlMapper not injected because corruct the springdoc used one. Could
+        // use a @Primary derivation
+        return new IcecatService(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(), featureLoader, categoryLoader);
     }
 
     @Bean
