@@ -1,5 +1,8 @@
 package org.open4goods.icecat.config.yml;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "icecat-feature-config")
 public class IcecatConfiguration {
 
 	private String featuresListFileUri;
@@ -8,10 +11,10 @@ public class IcecatConfiguration {
 	private String brandsListFileUri;
 	private String categoriesListFileUri;
 	private String featureGroupsFileUri;
-	
+
 	private String user;
 	private String password;
-	
+
 	public String getFeaturesListFileUri() {
 		return featuresListFileUri;
 	}
@@ -77,6 +80,6 @@ public class IcecatConfiguration {
 	}
 
 
-	
-	
+
+
 }

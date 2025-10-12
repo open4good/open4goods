@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -38,6 +39,7 @@ class ProductMappingServiceTest {
     private CategoryMappingService categoryMappingService;
     private VerticalsConfigService verticalsConfigService;
     private AffiliationService affiliationService;
+    private IcecatService icecatService;
 
     @BeforeEach
     void setUp() {
@@ -47,8 +49,9 @@ class ProductMappingServiceTest {
         categoryMappingService = mock(CategoryMappingService.class);
         verticalsConfigService = mock(VerticalsConfigService.class);
         affiliationService = mock(AffiliationService.class);
+        icecatService = mock(IcecatService.class);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
-                verticalsConfigService, affiliationService);
+                verticalsConfigService, affiliationService, icecatService);
     }
 
     @Test

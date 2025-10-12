@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = "org.open4goods")
-@ConfigurationPropertiesScan("org.open4goods.nudgerfrontapi.config.properties")
+@ConfigurationPropertiesScan("org.open4goods")
 @EnableCaching
 @EnableScheduling
 /**

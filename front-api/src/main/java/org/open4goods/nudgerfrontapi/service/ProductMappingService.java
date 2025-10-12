@@ -29,6 +29,7 @@ import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.product.EcoScoreRanking;
+import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.resource.ImageInfo;
@@ -43,8 +44,11 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductAiDescriptionDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
+import org.open4goods.icecat.model.AttributesFeatureGroups;
+import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductClassifiedAttributeGroupDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductCardinalityDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDatasourcesDto;
@@ -53,6 +57,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductFeatureGroupDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
@@ -105,17 +110,20 @@ public class ProductMappingService {
     private final CategoryMappingService categoryMappingService;
     private final VerticalsConfigService verticalsConfigService;
     private final AffiliationService affiliationService;
+    private final IcecatService icecatService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
             CategoryMappingService categoryMappingService,
             VerticalsConfigService verticalsConfigService,
-            AffiliationService affiliationService) {
+            AffiliationService affiliationService,
+            IcecatService icecatService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
         this.verticalsConfigService = verticalsConfigService;
         this.affiliationService = affiliationService;
+        this.icecatService = icecatService;
     }
 
     /**
@@ -281,8 +289,9 @@ public class ProductMappingService {
      */
     private ProductAttributesDto mapAttributes(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage) {
         ProductAttributes attributes = product.getAttributes();
+        List<ProductClassifiedAttributeGroupDto> classifiedAttributes = mapClassifiedAttributes(product, vConfig, domainLanguage);
         if (attributes == null) {
-            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), product.caracteristics());
+            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), product.caracteristics(), classifiedAttributes);
         }
         Map<String, ProductIndexedAttributeDto> indexed;
         if (attributes.getIndexed() == null) {
@@ -290,13 +299,6 @@ public class ProductMappingService {
         } else {
             indexed = new LinkedHashMap<>();
             attributes.getIndexed().forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage)));
-        }
-        Map<String, ProductAttributeDto> all;
-        if (attributes.getAll() == null) {
-            all = Collections.emptyMap();
-        } else {
-            all = new LinkedHashMap<>();
-            attributes.getAll().forEach((key, value) -> all.put(key, mapProductAttribute(value)));
         }
         Map<String, String> referential;
         if (attributes.getReferentielAttributes() == null) {
@@ -306,7 +308,48 @@ public class ProductMappingService {
             attributes.getReferentielAttributes().forEach((key, value) -> referential.put(key.toString(), value));
         }
 
-        return new ProductAttributesDto(referential, indexed, all, product.caracteristics());
+        return new ProductAttributesDto(referential, indexed, product.caracteristics(), classifiedAttributes);
+    }
+
+    private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage) {
+        if (product == null || product.getAttributes() == null || vConfig == null) {
+            return Collections.emptyList();
+        }
+        List<AttributesFeatureGroups> groups = icecatService.features(vConfig, resolveIcecatLanguage(domainLanguage), product);
+        if (groups == null || groups.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return groups.stream()
+                .map(group -> new ProductClassifiedAttributeGroupDto(
+                        mapFeatureGroup(group.getFeatureGroup()),
+                        group.getName(),
+                        mapAttributeList(group.getAttributes()),
+                        mapAttributeList(group.features()),
+                        mapAttributeList(group.unFeatures())))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private String resolveIcecatLanguage(DomainLanguage domainLanguage) {
+        return domainLanguage == null ? DomainLanguage.en.languageTag() : domainLanguage.languageTag();
+    }
+
+    private ProductFeatureGroupDto mapFeatureGroup(FeatureGroup featureGroup) {
+        if (featureGroup == null) {
+            return null;
+        }
+        List<Integer> featuresId = featureGroup.getFeaturesId() == null
+                ? Collections.emptyList()
+                : new ArrayList<>(featureGroup.getFeaturesId());
+        return new ProductFeatureGroupDto(featureGroup.getIcecatCategoryFeatureGroupId(), featuresId);
+    }
+
+    private List<ProductAttributeDto> mapAttributeList(List<ProductAttribute> attributes) {
+        if (attributes == null || attributes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return attributes.stream()
+                .map(this::mapProductAttribute)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
