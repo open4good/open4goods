@@ -9,10 +9,10 @@ import org.open4goods.model.resource.ResourceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * DTO mirroring {@link org.open4goods.model.resource.Resource} content for API consumption.
+ * DTO describing a product image resource exposed to the frontend.
  */
-public record ProductResourceDto(
-        @Schema(description = "Resource URL", example = "https://cdn.example.org/images/1.jpg")
+public record ProductImageDto(
+        @Schema(description = "Resource URL", example = "https://cdn.example.org/images/product_abc.jpg")
         String url,
         @Schema(description = "Detected MIME type", example = "image/jpeg")
         String mimeType,
@@ -28,7 +28,7 @@ public record ProductResourceDto(
         ResourceStatus status,
         @Schema(description = "Size in bytes when known", example = "102400")
         Long fileSize,
-        @Schema(description = "File name extracted from the URL", example = "image.jpg")
+        @Schema(description = "File name extracted from the URL", example = "product")
         String fileName,
         @Schema(description = "File extension", example = "jpg")
         String extension,
@@ -36,10 +36,10 @@ public record ProductResourceDto(
         String md5,
         @Schema(description = "Resource type")
         ResourceType resourceType,
-        @Schema(description = "Additional image metadata", nullable = true)
-        ProductResourceImageInfoDto imageInfo,
-        @Schema(description = "Additional PDF metadata", nullable = true)
-        ProductResourcePdfInfoDto pdfInfo,
+        @Schema(description = "Image height in pixels", example = "1080")
+        Integer height,
+        @Schema(description = "Image width in pixels", example = "1920")
+        Integer width,
         @Schema(description = "Group identifier used to cluster similar images", nullable = true)
         Integer group,
         @Schema(description = "Datasource providing the resource", example = "amazon.fr")

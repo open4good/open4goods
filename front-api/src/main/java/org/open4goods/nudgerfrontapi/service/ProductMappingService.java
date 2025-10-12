@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -27,7 +28,6 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
-import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
@@ -44,7 +44,6 @@ import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiDescriptionDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
@@ -56,21 +55,21 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryEntryDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductPdfDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductRankingDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductResourceDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductResourceImageInfoDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductResourcePdfInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductVideoDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -102,6 +101,9 @@ public class ProductMappingService {
     private static final Logger logger = LoggerFactory.getLogger(ProductMappingService.class);
     private static final String IMAGE_PREFIX = "/images/verticals/";
     private static final String DEFAULT_LANGUAGE_KEY = "default";
+    private static final String IMAGES_PATH = "/images/";
+    private static final String PDFS_PATH = "/pdfs/";
+    private static final String VIDEOS_PATH = "/videos/";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -165,9 +167,7 @@ public class ProductMappingService {
         ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product) : null;
         ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources) ? mapDatasources(product) : null;
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores) ? mapScores(product, domainLanguage, vConfig) : null;
-        ProductRankingDto ranking = components.contains(ProductDtoComponent.ranking) ? mapRanking(product) : null;
         ProductAiTextsDto aiTexts = components.contains(ProductDtoComponent.aiTexts) ? mapAiTexts(product, domainLanguage, locale) : null;
-        ProductAiReviewDto aiReview = components.contains(ProductDtoComponent.aiReview) ? mapAiReview(product, domainLanguage, locale) : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
 
         String slug = null;
@@ -194,9 +194,7 @@ public class ProductMappingService {
                 resources,
                 datasources,
                 scores,
-                ranking,
                 aiTexts,
-                aiReview,
                 offers);
     }
 
@@ -237,8 +235,7 @@ public class ProductMappingService {
                 product.getGoogleTaxonomyId(),
                 product.isExcluded(),
                 product.getExcludedCauses() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getExcludedCauses()),
-                mapGtinInfo(product.getGtinInfos(), domainLanguage, locale),
-                resolveCoverImageUrl(product.getCoverImagePath()));
+                mapGtinInfo(product.getGtinInfos(), domainLanguage, locale));
     }
 
     /**
@@ -345,17 +342,27 @@ public class ProductMappingService {
      * Map images, videos and documents attached to the product.
      */
     private ProductResourcesDto mapResources(Product product) {
-        List<ProductResourceDto> images = product.images() == null
+        List<ProductImageDto> images = product.images() == null
                 ? Collections.emptyList()
-                : product.images().stream().map(this::mapResource).toList();
-        List<ProductResourceDto> videos = product.videos() == null
+                : product.images().stream()
+                        .map(this::mapImage)
+                        .filter(Objects::nonNull)
+                        .toList();
+        List<ProductVideoDto> videos = product.videos() == null
                 ? Collections.emptyList()
-                : product.videos().stream().map(this::mapResource).toList();
-        List<ProductResourceDto> pdfs = product.pdfs() == null
+                : product.videos().stream()
+                        .map(this::mapVideo)
+                        .filter(Objects::nonNull)
+                        .toList();
+        List<ProductPdfDto> pdfs = product.pdfs() == null
                 ? Collections.emptyList()
-                : product.pdfs().stream().map(this::mapResource).toList();
+                : product.pdfs().stream()
+                        .map(this::mapPdf)
+                        .filter(Objects::nonNull)
+                        .toList();
 
-        return new ProductResourcesDto(images, videos, pdfs, product.externalCover());
+        return new ProductResourcesDto(images, videos, pdfs, resolveCoverImageUrl(product.getCoverImagePath()),
+                product.externalCover());
     }
 
     /**
@@ -393,8 +400,9 @@ public class ProductMappingService {
         Set<String> bestScores = product.getBestsScores() == null
                 ? Collections.emptySet()
                 : new LinkedHashSet<>(product.getBestsScores());
+        ProductRankingDto ranking = mapRanking(product);
 
-        return new ProductScoresDto(scores, realScores, virtualScores, ecoscore, worstScores, bestScores);
+        return new ProductScoresDto(scores, realScores, virtualScores, ecoscore, worstScores, bestScores, ranking);
     }
 
     /**
@@ -433,24 +441,6 @@ public class ProductMappingService {
                         (left, right) -> right,
                         LinkedHashMap::new));
         return new ProductAiTextsDto(resolved.key(), descriptions);
-    }
-
-    /**
-     * Map AI generated review summaries.
-     */
-    private ProductAiReviewDto mapAiReview(Product product, DomainLanguage domainLanguage, Locale locale) {
-        ResolvedLocalisedValue<AiReviewHolder> resolved = resolveLocalised(product.getReviews(), domainLanguage, locale);
-        if (resolved.value() == null) {
-            return null;
-        }
-        AiReviewHolder holder = resolved.value();
-        return new ProductAiReviewDto(
-                resolved.key(),
-                holder.getReview(),
-                holder.getSources(),
-                holder.isEnoughData(),
-                holder.getTotalTokens(),
-                holder.getCreatedMs());
     }
 
     /**
@@ -617,6 +607,24 @@ public class ProductMappingService {
     }
 
     /**
+     * Build the public URL of a resource using the configured root path and cache key information.
+     */
+    private String buildResourceUrl(Resource resource, String pathSegment) {
+        if (resource == null) {
+            return null;
+        }
+        String resourceRoot = apiProperties.getResourceRootPath();
+        if (!StringUtils.hasText(resourceRoot)
+                || !StringUtils.hasText(pathSegment)
+                || !StringUtils.hasText(resource.getFileName())
+                || !StringUtils.hasText(resource.getCacheKey())
+                || !StringUtils.hasText(resource.getExtension())) {
+            return resource.getUrl();
+        }
+        return resourceRoot + pathSegment + resource.getFileName() + "_" + resource.getCacheKey() + "." + resource.getExtension();
+    }
+
+    /**
      * Map indexed attributes which include localisation hints and scoring flags.
      */
     private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute, VerticalConfig vConfig, DomainLanguage domainLanguage) {
@@ -671,14 +679,15 @@ public class ProductMappingService {
     }
 
     /**
-     * Map a resource (image, video, pdf) to a DTO.
+     * Map an image resource to the dedicated DTO.
      */
-    private ProductResourceDto mapResource(Resource resource) {
+    private ProductImageDto mapImage(Resource resource) {
         if (resource == null) {
             return null;
         }
-        return new ProductResourceDto(
-                resource.getUrl(),
+        ImageInfo imageInfo = resource.getImageInfo();
+        return new ProductImageDto(
+                buildResourceUrl(resource, IMAGES_PATH),
                 resource.getMimeType(),
                 resource.getTimeStamp(),
                 resource.getCacheKey(),
@@ -690,8 +699,8 @@ public class ProductMappingService {
                 resource.getExtension(),
                 resource.getMd5(),
                 resource.getResourceType(),
-                mapImageInfo(resource.getImageInfo()),
-                mapPdfInfo(resource.getPdfInfo()),
+                imageInfo == null ? null : imageInfo.getHeight(),
+                imageInfo == null ? null : imageInfo.getWidth(),
                 resource.getGroup(),
                 resource.getDatasourceName(),
                 resource.getTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getTags()),
@@ -699,38 +708,67 @@ public class ProductMappingService {
     }
 
     /**
-     * Map additional metadata for image resources.
+     * Map a video resource to the dedicated DTO.
      */
-    private ProductResourceImageInfoDto mapImageInfo(ImageInfo imageInfo) {
-        if (imageInfo == null) {
+    private ProductVideoDto mapVideo(Resource resource) {
+        if (resource == null) {
             return null;
         }
-        return new ProductResourceImageInfoDto(
-                imageInfo.getHeight(),
-                imageInfo.getWidth(),
-                imageInfo.getpHashValue(),
-                imageInfo.getpHashLength());
+        return new ProductVideoDto(
+                buildResourceUrl(resource, VIDEOS_PATH),
+                resource.getMimeType(),
+                resource.getTimeStamp(),
+                resource.getCacheKey(),
+                resource.isEvicted(),
+                resource.isProcessed(),
+                resource.getStatus(),
+                resource.getFileSize(),
+                resource.getFileName(),
+                resource.getExtension(),
+                resource.getMd5(),
+                resource.getResourceType(),
+                resource.getGroup(),
+                resource.getDatasourceName(),
+                resource.getTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getTags()),
+                resource.getHardTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getHardTags()));
     }
 
     /**
-     * Map additional metadata for PDF resources.
+     * Map a PDF resource to the dedicated DTO.
      */
-    private ProductResourcePdfInfoDto mapPdfInfo(PdfInfo pdfInfo) {
-        if (pdfInfo == null) {
+    private ProductPdfDto mapPdf(Resource resource) {
+        if (resource == null) {
             return null;
         }
-        return new ProductResourcePdfInfoDto(
-                pdfInfo.getMetadataTitle(),
-                pdfInfo.getExtractedTitle(),
-                pdfInfo.getNumberOfPages(),
-                pdfInfo.getAuthor(),
-                pdfInfo.getSubject(),
-                pdfInfo.getKeywords(),
-                pdfInfo.getCreationDate(),
-                pdfInfo.getModificationDate(),
-                pdfInfo.getProducer(),
-                pdfInfo.getLanguage(),
-                pdfInfo.getLanguageConfidence());
+        PdfInfo pdfInfo = resource.getPdfInfo();
+        return new ProductPdfDto(
+                buildResourceUrl(resource, PDFS_PATH),
+                resource.getMimeType(),
+                resource.getTimeStamp(),
+                resource.getCacheKey(),
+                resource.isEvicted(),
+                resource.isProcessed(),
+                resource.getStatus(),
+                resource.getFileSize(),
+                resource.getFileName(),
+                resource.getExtension(),
+                resource.getMd5(),
+                resource.getResourceType(),
+                resource.getGroup(),
+                resource.getDatasourceName(),
+                resource.getTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getTags()),
+                resource.getHardTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getHardTags()),
+                pdfInfo == null ? null : pdfInfo.getMetadataTitle(),
+                pdfInfo == null ? null : pdfInfo.getExtractedTitle(),
+                pdfInfo == null ? null : pdfInfo.getNumberOfPages(),
+                pdfInfo == null ? null : pdfInfo.getAuthor(),
+                pdfInfo == null ? null : pdfInfo.getSubject(),
+                pdfInfo == null ? null : pdfInfo.getKeywords(),
+                pdfInfo == null ? null : pdfInfo.getCreationDate(),
+                pdfInfo == null ? null : pdfInfo.getModificationDate(),
+                pdfInfo == null ? null : pdfInfo.getProducer(),
+                pdfInfo == null ? null : pdfInfo.getLanguage(),
+                pdfInfo == null ? null : pdfInfo.getLanguageConfidence());
     }
 
     /**

@@ -31,12 +31,8 @@ public record ProductDto(
         ProductDatasourcesDto datasources,
         @Schema(description = "Score and ranking related information")
         ProductScoresDto scores,
-        @Schema(description = "Ecoscore derived rankings")
-        ProductRankingDto ranking,
         @Schema(description = "AI generated texts localised according to the requested domainLanguage when implemented.")
         ProductAiTextsDto aiTexts,
-        @Schema(description = "AI-generated review matching the requested domainLanguage when localisation is enabled.")
-        ProductAiReviewDto aiReview,
         @Schema(description = "Product offers and pricing information")
         ProductOffersDto offers
 ) {
@@ -52,9 +48,7 @@ public record ProductDto(
                 resources,
                 datasources,
                 scores,
-                ranking,
                 aiTexts,
-                aiReview,
                 offers
         }
 

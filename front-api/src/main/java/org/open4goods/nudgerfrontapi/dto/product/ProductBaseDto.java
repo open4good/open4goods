@@ -26,8 +26,6 @@ public record ProductBaseDto(
         @Schema(description = "Reasons explaining why the product is excluded")
         Set<String> excludedCauses,
         @Schema(description = "Information inferred from the GTIN itself")
-        ProductGtinInfoDto gtinInfo,
-        @Schema(description = "Absolute URL of the preferred cover image if available")
-        String coverImagePath
+        ProductGtinInfoDto gtinInfo
 ) {
 }
