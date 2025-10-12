@@ -183,13 +183,13 @@ public record OfferDto(
 ## 9. Documentation
 
 Follow java / spring documentation best practices :
-* Use javadoc at class and at level field
+* Use javadoc at class, field and method level
 * Use inline code comments to leverage human
 * Keep README.md and AGENTS.md up to date
 
-### 9.1 Front service documentation baseline
+### 9.1 documentation baseline
 
-* Every service class under `src/main/java/org/open4goods/nudgerfrontapi/service/**` MUST expose detailed Javadoc at class level
+* Every class MUST expose detailed Javadoc at class level
   and for each public or private method. Mention parameters, return values and error handling when relevant.
 * Add light inline comments when business rules are non obvious. Prefer short, focused comments over redundant prose.
 
