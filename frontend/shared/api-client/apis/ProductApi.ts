@@ -382,9 +382,7 @@ export const ProductIncludeEnum = {
     Resources: 'resources',
     Datasources: 'datasources',
     Scores: 'scores',
-    Ranking: 'ranking',
     AiTexts: 'aiTexts',
-    AiReview: 'aiReview',
     Offers: 'offers'
 } as const;
 export type ProductIncludeEnum = typeof ProductIncludeEnum[keyof typeof ProductIncludeEnum];
@@ -407,9 +405,7 @@ export const ProductsIncludeEnum = {
     Resources: 'resources',
     Datasources: 'datasources',
     Scores: 'scores',
-    Ranking: 'ranking',
     AiTexts: 'aiTexts',
-    AiReview: 'aiReview',
     Offers: 'offers'
 } as const;
 export type ProductsIncludeEnum = typeof ProductsIncludeEnum[keyof typeof ProductsIncludeEnum];

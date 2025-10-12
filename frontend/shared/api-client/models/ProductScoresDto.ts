@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProductRankingDto } from './ProductRankingDto';
+import {
+    ProductRankingDtoFromJSON,
+    ProductRankingDtoFromJSONTyped,
+    ProductRankingDtoToJSON,
+    ProductRankingDtoToJSONTyped,
+} from './ProductRankingDto';
 import type { ProductScoreDto } from './ProductScoreDto';
 import {
     ProductScoreDtoFromJSON,
@@ -63,6 +70,12 @@ export interface ProductScoresDto {
      * @memberof ProductScoresDto
      */
     bestScores?: Set<string>;
+    /**
+     * Ecoscore derived rankings
+     * @type {ProductRankingDto}
+     * @memberof ProductScoresDto
+     */
+    ranking?: ProductRankingDto;
 }
 
 /**
@@ -88,6 +101,7 @@ export function ProductScoresDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'ecoscore': json['ecoscore'] == null ? undefined : ProductScoreDtoFromJSON(json['ecoscore']),
         'worstScores': json['worstScores'] == null ? undefined : new Set(json['worstScores']),
         'bestScores': json['bestScores'] == null ? undefined : new Set(json['bestScores']),
+        'ranking': json['ranking'] == null ? undefined : ProductRankingDtoFromJSON(json['ranking']),
     };
 }
 
@@ -108,6 +122,7 @@ export function ProductScoresDtoToJSONTyped(value?: ProductScoresDto | null, ign
         'ecoscore': ProductScoreDtoToJSON(value['ecoscore']),
         'worstScores': value['worstScores'] == null ? undefined : Array.from(value['worstScores'] as Set<any>),
         'bestScores': value['bestScores'] == null ? undefined : Array.from(value['bestScores'] as Set<any>),
+        'ranking': ProductRankingDtoToJSON(value['ranking']),
     };
 }
 

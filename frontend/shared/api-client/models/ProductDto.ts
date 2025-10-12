@@ -55,13 +55,6 @@ import {
     ProductIdentityDtoToJSON,
     ProductIdentityDtoToJSONTyped,
 } from './ProductIdentityDto';
-import type { ProductRankingDto } from './ProductRankingDto';
-import {
-    ProductRankingDtoFromJSON,
-    ProductRankingDtoFromJSONTyped,
-    ProductRankingDtoToJSON,
-    ProductRankingDtoToJSONTyped,
-} from './ProductRankingDto';
 import type { ProductOffersDto } from './ProductOffersDto';
 import {
     ProductOffersDtoFromJSON,
@@ -76,13 +69,6 @@ import {
     ProductResourcesDtoToJSON,
     ProductResourcesDtoToJSONTyped,
 } from './ProductResourcesDto';
-import type { ProductAiReviewDto } from './ProductAiReviewDto';
-import {
-    ProductAiReviewDtoFromJSON,
-    ProductAiReviewDtoFromJSONTyped,
-    ProductAiReviewDtoToJSON,
-    ProductAiReviewDtoToJSONTyped,
-} from './ProductAiReviewDto';
 import type { ProductScoresDto } from './ProductScoresDto';
 import {
     ProductScoresDtoFromJSON,
@@ -158,23 +144,11 @@ export interface ProductDto {
      */
     scores?: ProductScoresDto;
     /**
-     * Ecoscore derived rankings
-     * @type {ProductRankingDto}
-     * @memberof ProductDto
-     */
-    ranking?: ProductRankingDto;
-    /**
      * AI generated texts localised according to the requested domainLanguage when implemented.
      * @type {ProductAiTextsDto}
      * @memberof ProductDto
      */
     aiTexts?: ProductAiTextsDto;
-    /**
-     * AI-generated review matching the requested domainLanguage when localisation is enabled.
-     * @type {ProductAiReviewDto}
-     * @memberof ProductDto
-     */
-    aiReview?: ProductAiReviewDto;
     /**
      * Product offers and pricing information
      * @type {ProductOffersDto}
@@ -210,9 +184,7 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         'resources': json['resources'] == null ? undefined : ProductResourcesDtoFromJSON(json['resources']),
         'datasources': json['datasources'] == null ? undefined : ProductDatasourcesDtoFromJSON(json['datasources']),
         'scores': json['scores'] == null ? undefined : ProductScoresDtoFromJSON(json['scores']),
-        'ranking': json['ranking'] == null ? undefined : ProductRankingDtoFromJSON(json['ranking']),
         'aiTexts': json['aiTexts'] == null ? undefined : ProductAiTextsDtoFromJSON(json['aiTexts']),
-        'aiReview': json['aiReview'] == null ? undefined : ProductAiReviewDtoFromJSON(json['aiReview']),
         'offers': json['offers'] == null ? undefined : ProductOffersDtoFromJSON(json['offers']),
     };
 }
@@ -238,9 +210,7 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
         'resources': ProductResourcesDtoToJSON(value['resources']),
         'datasources': ProductDatasourcesDtoToJSON(value['datasources']),
         'scores': ProductScoresDtoToJSON(value['scores']),
-        'ranking': ProductRankingDtoToJSON(value['ranking']),
         'aiTexts': ProductAiTextsDtoToJSON(value['aiTexts']),
-        'aiReview': ProductAiReviewDtoToJSON(value['aiReview']),
         'offers': ProductOffersDtoToJSON(value['offers']),
     };
 }

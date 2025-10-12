@@ -13,13 +13,27 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ProductResourceDto } from './ProductResourceDto';
+import type { ProductVideoDto } from './ProductVideoDto';
 import {
-    ProductResourceDtoFromJSON,
-    ProductResourceDtoFromJSONTyped,
-    ProductResourceDtoToJSON,
-    ProductResourceDtoToJSONTyped,
-} from './ProductResourceDto';
+    ProductVideoDtoFromJSON,
+    ProductVideoDtoFromJSONTyped,
+    ProductVideoDtoToJSON,
+    ProductVideoDtoToJSONTyped,
+} from './ProductVideoDto';
+import type { ProductPdfDto } from './ProductPdfDto';
+import {
+    ProductPdfDtoFromJSON,
+    ProductPdfDtoFromJSONTyped,
+    ProductPdfDtoToJSON,
+    ProductPdfDtoToJSONTyped,
+} from './ProductPdfDto';
+import type { ProductImageDto } from './ProductImageDto';
+import {
+    ProductImageDtoFromJSON,
+    ProductImageDtoFromJSONTyped,
+    ProductImageDtoToJSON,
+    ProductImageDtoToJSONTyped,
+} from './ProductImageDto';
 
 /**
  * 
@@ -29,22 +43,28 @@ import {
 export interface ProductResourcesDto {
     /**
      * Images grouped and ranked by relevance
-     * @type {Array<ProductResourceDto>}
+     * @type {Array<ProductImageDto>}
      * @memberof ProductResourcesDto
      */
-    images?: Array<ProductResourceDto>;
+    images?: Array<ProductImageDto>;
     /**
      * Video resources extracted from datasources
-     * @type {Array<ProductResourceDto>}
+     * @type {Array<ProductVideoDto>}
      * @memberof ProductResourcesDto
      */
-    videos?: Array<ProductResourceDto>;
+    videos?: Array<ProductVideoDto>;
     /**
      * PDF resources extracted from datasources
-     * @type {Array<ProductResourceDto>}
+     * @type {Array<ProductPdfDto>}
      * @memberof ProductResourcesDto
      */
-    pdfs?: Array<ProductResourceDto>;
+    pdfs?: Array<ProductPdfDto>;
+    /**
+     * Absolute URL of the preferred cover image when available
+     * @type {string}
+     * @memberof ProductResourcesDto
+     */
+    coverImagePath?: string;
     /**
      * External cover automatically computed from resources
      * @type {string}
@@ -70,9 +90,10 @@ export function ProductResourcesDtoFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
-        'images': json['images'] == null ? undefined : ((json['images'] as Array<any>).map(ProductResourceDtoFromJSON)),
-        'videos': json['videos'] == null ? undefined : ((json['videos'] as Array<any>).map(ProductResourceDtoFromJSON)),
-        'pdfs': json['pdfs'] == null ? undefined : ((json['pdfs'] as Array<any>).map(ProductResourceDtoFromJSON)),
+        'images': json['images'] == null ? undefined : ((json['images'] as Array<any>).map(ProductImageDtoFromJSON)),
+        'videos': json['videos'] == null ? undefined : ((json['videos'] as Array<any>).map(ProductVideoDtoFromJSON)),
+        'pdfs': json['pdfs'] == null ? undefined : ((json['pdfs'] as Array<any>).map(ProductPdfDtoFromJSON)),
+        'coverImagePath': json['coverImagePath'] == null ? undefined : json['coverImagePath'],
         'externalCover': json['externalCover'] == null ? undefined : json['externalCover'],
     };
 }
@@ -88,9 +109,10 @@ export function ProductResourcesDtoToJSONTyped(value?: ProductResourcesDto | nul
 
     return {
         
-        'images': value['images'] == null ? undefined : ((value['images'] as Array<any>).map(ProductResourceDtoToJSON)),
-        'videos': value['videos'] == null ? undefined : ((value['videos'] as Array<any>).map(ProductResourceDtoToJSON)),
-        'pdfs': value['pdfs'] == null ? undefined : ((value['pdfs'] as Array<any>).map(ProductResourceDtoToJSON)),
+        'images': value['images'] == null ? undefined : ((value['images'] as Array<any>).map(ProductImageDtoToJSON)),
+        'videos': value['videos'] == null ? undefined : ((value['videos'] as Array<any>).map(ProductVideoDtoToJSON)),
+        'pdfs': value['pdfs'] == null ? undefined : ((value['pdfs'] as Array<any>).map(ProductPdfDtoToJSON)),
+        'coverImagePath': value['coverImagePath'],
         'externalCover': value['externalCover'],
     };
 }

@@ -120,6 +120,19 @@ Document any intentionally skipped check in your summary/PR.
   2. Re-validate the `MACHINE_TOKEN`/`front.security.shared-token` pairing in local and deployment secrets.
   3. Exercise the affected flows (login, refresh, logout, and generated client calls) to prove headers and cookies remain intact.
 
+## DomainLanguage injection
+Every downstream call should be wrapped in a thin service that:
+
+1. Injects the runtime configuration with `createBackendApiConfig()` so the
+   `X-Shared-Token` header is always present.
+2. Accepts the caller's domain language (`'en' | 'fr'`) and forwards it to the
+   backend.
+3. Lazily instantiates the generated API so the client only exists on the
+   server (or in Vitest) and can be reused across calls.
+4. Guards against accidental client-side usage to keep secrets such as
+   `MACHINE_TOKEN` out of the browser bundle.
+
+
 ## MCP & Developer Tooling
 - Ensure the Nuxt MCP server is running on port 3000 when working with Claude Code / Vuetify MCP features (`nuxt dev` already exposes it).
 - Claude-specific shortcuts (e.g., `/css-class-validator`) remain available; keep instructions compatible with Claude’s CLAUDE.md expectations.
