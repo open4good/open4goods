@@ -29,8 +29,13 @@ export const useProductsService = (domainLanguage: DomainLanguage) => {
    */
   const getProductByGtin = async (gtin: string): Promise<ProductDto> => {
     try {
-      const normalizedGtin = Number.parseInt(gtin, 10)
-      return await resolveApi().product({ gtin: normalizedGtin, domainLanguage })
+      return await resolveApi().product({
+        // The generated client expects a number type but GTIN codes often include
+        // significant leading zeroes. Passing the original string preserves the
+        // exact identifier while still satisfying the runtime requirements.
+        gtin: gtin as unknown as number,
+        domainLanguage,
+      })
     } catch (error) {
       console.error(`Error fetching product with GTIN ${gtin}:`, error)
       throw error
