@@ -1,6 +1,11 @@
 {
   "groups": [
     {
+      "name": "front",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.ApiProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ApiProperties"
+    },
+    {
       "name": "front.security",
       "type": "org.open4goods.nudgerfrontapi.config.properties.SecurityProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.SecurityProperties"
@@ -14,9 +19,39 @@
       "name": "front.rate-limit",
       "type": "org.open4goods.nudgerfrontapi.config.properties.RateLimitProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.RateLimitProperties"
+    },
+    {
+      "name": "front.affiliation-partners",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties"
+    },
+    {
+      "name": "front.contact",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.ContactProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ContactProperties"
+    },
+    {
+      "name": "front.partners.ecosystem",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.EcosystemPartnersProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.EcosystemPartnersProperties"
+    },
+    {
+      "name": "front.partners.mentors",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.MentorPartnersProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.MentorPartnersProperties"
+    },
+    {
+      "name": "team-config",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.TeamProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.TeamProperties"
     }
   ],
   "properties": [
+    {
+      "name": "front.resource-root-path",
+      "type": "java.lang.String",
+      "description": "Base URL used by the frontend to fetch generated assets (images, documents, ...)."
+    },
     {
       "name": "front.security.enabled",
       "type": "java.lang.Boolean",
@@ -25,21 +60,18 @@
     },
     {
       "name": "front.security.cors-allowed-hosts",
-      "type": "java.lang.String",
-      "description": "Comma-separated list of origins allowed for CORS requests.",
-      "defaultValue": "http://localhost:8082"
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of origins allowed for CORS requests."
     },
     {
       "name": "front.security.jwt-secret",
       "type": "java.lang.String",
-      "description": "Secret key used to sign JWT tokens.",
-      "defaultValue": "changeMe"
+      "description": "Secret key used to sign JWT tokens."
     },
     {
       "name": "front.security.shared-token",
       "type": "java.lang.String",
-      "description": "Shared secret expected in the X-Shared-Token header for authenticated requests.",
-      "defaultValue": "changeMeSharedToken"
+      "description": "Shared secret expected in the X-Shared-Token header for authenticated requests."
     },
     {
       "name": "front.security.access-token-expiry",
@@ -70,6 +102,127 @@
       "type": "java.lang.Integer",
       "description": "Maximum requests per minute for authenticated users.",
       "defaultValue": 1000
+    },
+    {
+      "name": "front.affiliation-partners.api-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the affiliation partner back-office API."
+    },
+    {
+      "name": "front.affiliation-partners.partners-path",
+      "type": "java.lang.String",
+      "description": "Path appended to the base URL to retrieve the partners collection.",
+      "defaultValue": "/partners"
+    },
+    {
+      "name": "front.affiliation-partners.api-key",
+      "type": "java.lang.String",
+      "description": "API key forwarded when calling the affiliation partner backend."
+    },
+    {
+      "name": "front.contact.email",
+      "type": "java.lang.String",
+      "description": "Recipient email address for contact form submissions."
+    },
+    {
+      "name": "front.partners.ecosystem.partners",
+      "type": "java.util.List",
+      "description": "Configured ecosystem partners displayed on the public site."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].name",
+      "type": "java.lang.String",
+      "description": "Display name of the ecosystem partner."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier linked to the partner content."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].url",
+      "type": "java.lang.String",
+      "description": "Public website URL of the partner."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative image URL rendered for the partner logo."
+    },
+    {
+      "name": "front.partners.mentors.partners",
+      "type": "java.util.List",
+      "description": "Configured mentor partners displayed on the public site."
+    },
+    {
+      "name": "front.partners.mentors.partners[].name",
+      "type": "java.lang.String",
+      "description": "Display name of the mentor partner."
+    },
+    {
+      "name": "front.partners.mentors.partners[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier linked to the mentor content."
+    },
+    {
+      "name": "front.partners.mentors.partners[].url",
+      "type": "java.lang.String",
+      "description": "Public website URL of the mentor partner."
+    },
+    {
+      "name": "front.partners.mentors.partners[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative image URL rendered for the mentor partner logo."
+    },
+    {
+      "name": "team-config.cores",
+      "type": "java.util.List",
+      "description": "Core eco-nudger team members."
+    },
+    {
+      "name": "team-config.cores[].name",
+      "type": "java.lang.String",
+      "description": "Full name of the core team member."
+    },
+    {
+      "name": "team-config.cores[].linked-in-url",
+      "type": "java.lang.String",
+      "description": "LinkedIn profile URL of the core team member."
+    },
+    {
+      "name": "team-config.cores[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative URL for the core team member portrait."
+    },
+    {
+      "name": "team-config.cores[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier providing the member biography."
+    },
+    {
+      "name": "team-config.contributors",
+      "type": "java.util.List",
+      "description": "Extended contributors supporting the core team."
+    },
+    {
+      "name": "team-config.contributors[].name",
+      "type": "java.lang.String",
+      "description": "Full name of the contributor."
+    },
+    {
+      "name": "team-config.contributors[].linked-in-url",
+      "type": "java.lang.String",
+      "description": "LinkedIn profile URL of the contributor."
+    },
+    {
+      "name": "team-config.contributors[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative URL for the contributor portrait."
+    },
+    {
+      "name": "team-config.contributors[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier providing the contributor biography."
     }
   ]
 }

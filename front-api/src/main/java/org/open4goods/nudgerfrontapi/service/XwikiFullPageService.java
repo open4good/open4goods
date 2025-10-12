@@ -17,6 +17,10 @@ import org.xwiki.rest.model.jaxb.Page;
 
 /**
  * Service responsible for retrieving XWiki {@link FullPage} instances and mapping them to {@link FullPageDto}.
+ * <p>
+ * The service centralises DTO conversions so the rest of the application can work with a
+ * simplified representation that hides XWiki specific dependencies.
+ * </p>
  */
 @Service
 public class XwikiFullPageService {
@@ -39,6 +43,12 @@ public class XwikiFullPageService {
         return mapToDto(fullPage);
     }
 
+    /**
+     * Convert the XWiki {@link FullPage} aggregate to its DTO counterpart.
+     *
+     * @param fullPage entity returned by the XWiki facade
+     * @return flattened DTO compatible with the REST contract
+     */
     private FullPageDto mapToDto(FullPage fullPage) {
         Page wikiPage = fullPage.getWikiPage();
         Map<String, String> properties = fullPage.getProperties();
@@ -46,6 +56,7 @@ public class XwikiFullPageService {
             properties = Collections.emptyMap();
         }
 
+        // Fetch HTML content separately because the REST descriptor only exposes metadata.
         String htmlContent = xwikiFacadeService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
         return new FullPageDto(
         		htmlContent,
@@ -85,6 +96,12 @@ public class XwikiFullPageService {
         );
     }
 
+    /**
+     * Convert an {@link Calendar} instance into an ISO 8601 string while gracefully handling non Gregorian calendars.
+     *
+     * @param calendar source calendar
+     * @return ISO representation or {@code null} when the source is null
+     */
     private String toIsoString(Calendar calendar) {
         if (calendar == null) {
             return null;

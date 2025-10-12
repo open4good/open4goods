@@ -184,8 +184,21 @@ public record OfferDto(
 
 Follow java / spring documentation best practices :
 * Use javadoc at class and at level field
-* Use inline code comments to leverage human 
+* Use inline code comments to leverage human
 * Keep README.md and AGENTS.md up to date
+
+### 9.1 Front service documentation baseline
+
+* Every service class under `src/main/java/org/open4goods/nudgerfrontapi/service/**` MUST expose detailed Javadoc at class level
+  and for each public or private method. Mention parameters, return values and error handling when relevant.
+* Add light inline comments when business rules are non obvious. Prefer short, focused comments over redundant prose.
+
+### 9.2 Spring configuration metadata
+
+* Whenever a `@ConfigurationProperties` class is created or updated, mirror its structure in
+  `src/main/resources/META-INF/additional-spring-configuration-metadata.json` so IDE auto-completion stays accurate.
+* Nested collections should use the `[].property` notation (e.g. `front.partners.mentors.partners[].name`). Include
+  defaults and descriptions when available.
 
 ---
 

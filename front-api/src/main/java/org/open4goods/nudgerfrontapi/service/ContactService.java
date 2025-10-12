@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service orchestrating contact form submissions: captcha verification and email dispatching.
+ * <p>
+ * Splitting responsibilities between captcha validation and email rendering allows unit tests to
+ * cover error scenarios without hitting external infrastructure.
+ * </p>
  */
 @Service
 public class ContactService {
@@ -33,6 +37,7 @@ public class ContactService {
      */
     public void submit(ContactRequestDto request, String clientIp) throws Exception {
         hcaptchaService.verifyRecaptcha(clientIp, request.captchaResponse());
+        // Prefix the subject to keep a consistent format in the shared inbox.
         contactMailService.send(contactProperties.getEmail(), request.message(), SUBJECT_PREFIX + request.name(),
                 request.email());
     }

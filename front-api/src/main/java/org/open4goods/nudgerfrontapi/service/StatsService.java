@@ -18,6 +18,10 @@ import com.fasterxml.jackson.databind.ObjectReader;
 
 /**
  * Service exposing aggregated statistics for the frontend API.
+ * <p>
+ * Statistics are computed from the vertical YAML files shipped with the distribution. The service keeps
+ * the resource handling and defensive checks centralised so controllers simply forward the domain language.
+ * </p>
  */
 @Service
 public class StatsService {
@@ -38,6 +42,7 @@ public class StatsService {
     /**
      * Compute statistics about categories mappings.
      *
+     * @param domainLanguage currently unused but retained for future localisation of statistics labels
      * @return DTO describing the category statistics used by the frontend.
      */
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
@@ -46,6 +51,7 @@ public class StatsService {
 
         long enabledCount = Arrays.stream(resources)
                 .filter(resource -> !Objects.equals(resource.getFilename(), DEFAULT_CONFIG_FILENAME))
+                // Copy the default config before merging custom values to keep defaults intact.
                 .map(resource -> loadVerticalConfig(resource, defaultConfig))
                 .filter(Objects::nonNull)
                 .filter(VerticalConfig::isEnabled)
@@ -54,6 +60,11 @@ public class StatsService {
         return new CategoriesStatsDto(Math.toIntExact(enabledCount));
     }
 
+    /**
+     * Load the default vertical configuration which acts as the base for every other vertical.
+     *
+     * @return parsed {@link VerticalConfig}
+     */
     private VerticalConfig loadDefaultConfig() {
         Resource resource = resourceResolver.getResource(DEFAULT_CONFIG_RESOURCE);
         try (InputStream inputStream = resource.getInputStream()) {
@@ -63,6 +74,11 @@ public class StatsService {
         }
     }
 
+    /**
+     * List all vertical configuration resources available on the classpath.
+     *
+     * @return resources matching the vertical glob pattern
+     */
     private Resource[] loadVerticalResources() {
         try {
             return resourceResolver.getResources(CLASSPATH_VERTICALS);
@@ -71,6 +87,13 @@ public class StatsService {
         }
     }
 
+    /**
+     * Load a single vertical configuration by applying overrides on top of the default configuration.
+     *
+     * @param resource      YAML resource describing a vertical
+     * @param defaultConfig base configuration used as a template
+     * @return fully merged configuration
+     */
     private VerticalConfig loadVerticalConfig(Resource resource, VerticalConfig defaultConfig) {
         try (InputStream inputStream = resource.getInputStream()) {
             VerticalConfig base = cloneDefault(defaultConfig);
@@ -81,6 +104,13 @@ public class StatsService {
         }
     }
 
+    /**
+     * Create a deep copy of the default configuration so per-vertical overrides do not mutate the shared instance.
+     *
+     * @param defaultConfig reference configuration loaded from {@code _default.yml}
+     * @return cloned configuration
+     * @throws SerialisationException when the YAML serialisation round trip fails
+     */
     private VerticalConfig cloneDefault(VerticalConfig defaultConfig) throws SerialisationException {
         String yaml = serialisationService.toYaml(defaultConfig);
         return serialisationService.fromYaml(yaml, VerticalConfig.class);

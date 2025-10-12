@@ -23,7 +23,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Domain service orchestrating captcha verification, GitHub issue creation and voting.
+ * Domain service orchestrating captcha verification, GitHub issue creation and voting flows.
+ * <p>
+ * Every entry point centralises the interaction between the public REST API and the
+ * underlying GitHub-backed feedback system. Keeping the orchestration in a dedicated
+ * service makes controller code predictable and simplifies future migrations away from
+ * GitHub issues.
+ * </p>
  */
 @Service
 public class FeedbackService {
@@ -59,6 +65,7 @@ public class FeedbackService {
         hcaptchaService.verifyRecaptcha(clientIp, request.captchaResponse());
 
         Set<String> labels = new HashSet<>(DEFAULT_LABELS);
+        // Ensure the type specific label is always present so triaging stays reliable.
         GHIssue created = switch (request.type()) {
             case BUG -> issueService.createBug(request.title(), request.message(), request.url(), request.author(), labels);
             case IDEA -> issueService.createIdea(request.title(), request.message(), request.url(), request.author(), labels);
@@ -94,6 +101,8 @@ public class FeedbackService {
     }
 
     /**
+     * Cast a vote on the requested GitHub issue and expose the new totals.
+     *
      * @param issueId GitHub issue identifier (number)
      * @param clientIp originating IP address
      * @return vote summary after casting the vote
@@ -104,6 +113,8 @@ public class FeedbackService {
     }
 
     /**
+     * Retrieve how many votes remain for the current IP address.
+     *
      * @param clientIp originating IP address
      * @return remaining votes for the day
      */
@@ -112,6 +123,8 @@ public class FeedbackService {
     }
 
     /**
+     * Determine if the current IP address can still cast votes today.
+     *
      * @param clientIp originating IP address
      * @return whether the user can still vote today
      */
@@ -119,6 +132,12 @@ public class FeedbackService {
         return new FeedbackVoteEligibilityDto(voteService.userCanVote(clientIp));
     }
 
+    /**
+     * Map the GitHub issue returned by the backend to the DTO expected by the frontend.
+     *
+     * @param issue GitHub issue fetched through the REST API
+     * @return immutable DTO exposing the public information about the issue
+     */
     private FeedbackIssueDto mapIssue(GHIssue issue) {
         String issueId = String.valueOf(issue.getNumber());
         String url = issue.getHtmlUrl() == null ? null : issue.getHtmlUrl().toString();

@@ -10,6 +10,10 @@ import jakarta.mail.internet.MimeMessage;
 
 /**
  * Thin wrapper around {@link JavaMailSender} dedicated to contact form emails.
+ * <p>
+ * Keeping the SMTP interaction encapsulated simplifies mocking in tests and
+ * keeps controller/service logic focused on validation rules.
+ * </p>
  */
 @Service
 public class ContactMailService {
@@ -34,6 +38,7 @@ public class ContactMailService {
     public void send(String to, String body, String subject, String from) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
+        // Keep the helper configuration local to avoid leaking message state across calls.
         helper.setTo(to);
         helper.setText(body);
         helper.setSubject(subject);

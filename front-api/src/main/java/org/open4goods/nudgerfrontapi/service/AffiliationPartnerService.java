@@ -21,6 +21,10 @@ import org.springframework.web.client.RestClient;
 
 /**
  * Service responsible for retrieving affiliation partners from the back-office API and caching them in memory.
+ * <p>
+ * The refresh cycle keeps the list of partners available even when the back-office experiences transient errors
+ * by never exposing a partially loaded state.
+ * </p>
  */
 @Service
 public class AffiliationPartnerService {
@@ -66,6 +70,9 @@ public class AffiliationPartnerService {
                 .toList();
     }
 
+    /**
+     * Trigger an initial refresh once the Spring context is ready so the cache is primed before the first request.
+     */
     @PostConstruct
     public void preloadPartners() {
         refreshPartners();
@@ -90,6 +97,12 @@ public class AffiliationPartnerService {
         }
     }
 
+    /**
+     * Map a domain partner to its REST DTO representation while enriching it with asset URLs.
+     *
+     * @param partner partner as returned by the back-office API
+     * @return immutable DTO ready to be serialised
+     */
     private AffiliationPartnerDto mapToDto(AffiliationPartner partner) {
         String logoUrl = buildAssetUrl("/logo/", partner.getName());
         String faviconUrl = buildAssetUrl("/favicon?url=", partner.getName());
@@ -112,6 +125,13 @@ public class AffiliationPartnerService {
         );
     }
 
+    /**
+     * Build an asset URL relative to the configured static resource root.
+     *
+     * @param pathSuffix suffix prepended with a slash (e.g. {@code /logo/})
+     * @param partnerName partner name used as key in the asset storage
+     * @return fully qualified asset URL or {@code null} when data is missing
+     */
     private String buildAssetUrl(String pathSuffix, String partnerName) {
         if (!StringUtils.hasText(pathSuffix) || !StringUtils.hasText(partnerName)
                 || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
@@ -121,6 +141,7 @@ public class AffiliationPartnerService {
         if (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
         }
+        // No URL encoding is applied because partner names are constrained upstream.
         return base + pathSuffix + partnerName;
     }
 }
