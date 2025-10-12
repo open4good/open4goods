@@ -21,6 +21,8 @@ public record ProductScoresDto(
         @Schema(description = "Score identifiers where the product ranks amongst the worst")
         Set<String> worstScores,
         @Schema(description = "Score identifiers where the product ranks amongst the best")
-        Set<String> bestScores
+        Set<String> bestScores,
+        @Schema(description = "Ecoscore derived rankings", nullable = true)
+        ProductRankingDto ranking
 ) {
 }
