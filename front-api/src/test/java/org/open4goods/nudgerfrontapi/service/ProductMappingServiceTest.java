@@ -79,7 +79,7 @@ class ProductMappingServiceTest {
         assertThat(dto.base().gtinInfo()).isNotNull();
         assertThat(dto.base().gtinInfo().countryCode()).isEqualTo("FR");
         assertThat(dto.base().gtinInfo().countryName()).isEqualTo("France");
-        assertThat(dto.base().gtinInfo().countryFlagUrl()).isEqualTo("/images/flags/fr.png");
+        assertThat(dto.base().gtinInfo().countryFlagUrl()).isEqualTo("/images/flags/fr.webp");
     }
 
 
