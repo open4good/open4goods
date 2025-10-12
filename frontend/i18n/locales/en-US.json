@@ -132,6 +132,19 @@
       "cta": "Back to homepage"
     }
   },
+  "productPage": {
+    "heading": "Product details for {name}",
+    "description": "Raw product data for GTIN {gtin}.",
+    "preview": {
+      "title": "Product payload",
+      "caption": "This section exposes the JSON payload returned by the front API.",
+      "empty": "No product data available."
+    },
+    "seo": {
+      "title": "{name} – Product details",
+      "description": "Explore consolidated information for {name} fetched through the Nudger front API."
+    }
+  },
   "team": {
     "seo": {
       "title": "Meet the Nudger team",

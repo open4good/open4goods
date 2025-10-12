@@ -131,6 +131,19 @@
       "cta": "Retour à l'accueil"
     }
   },
+  "productPage": {
+    "heading": "Fiche produit pour {name}",
+    "description": "Données brutes pour le GTIN {gtin}.",
+    "preview": {
+      "title": "Données produit",
+      "caption": "Cette section affiche la réponse JSON renvoyée par le front API.",
+      "empty": "Aucune donnée produit disponible."
+    },
+    "seo": {
+      "title": "{name} – Fiche produit",
+      "description": "Consultez les informations consolidées pour {name} fournies par le front API de Nudger."
+    }
+  },
   "team": {
     "seo": {
       "title": "Découvrez l'équipe Nudger",
