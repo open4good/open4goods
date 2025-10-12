@@ -9,13 +9,14 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.open4goods.commons.config.yml.IcecatConfiguration;
-import org.open4goods.commons.services.loader.CategoryLoader;
-import org.open4goods.commons.services.loader.FeatureLoader;
+import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.icecat.model.IcecatFeature;
+import org.open4goods.icecat.model.IcecatName;
+import org.open4goods.icecat.model.IcecatNames;
+import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.loader.CategoryLoader;
+import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.helper.IdHelper;
-import org.open4goods.model.icecat.IcecatFeature;
-import org.open4goods.model.icecat.IcecatName;
-import org.open4goods.model.icecat.IcecatNames;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.verticals.VerticalsConfigService;
 

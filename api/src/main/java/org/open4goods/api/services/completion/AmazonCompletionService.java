@@ -12,10 +12,10 @@
 //import org.open4goods.api.services.AbstractCompletionService;
 //import org.open4goods.api.services.AggregationFacadeService;
 //import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
-//import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-//import org.open4goods.commons.exceptions.AggregationSkipException;
-//import org.open4goods.commons.services.DataSourceConfigService;
-//import org.open4goods.commons.services.VerticalsConfigService;
+//import org.open4goods.icecat.config.yml.datasource.DataSourceProperties;
+//import org.open4goods.icecat.exceptions.AggregationSkipException;
+//import org.open4goods.icecat.services.DataSourceConfigService;
+//import org.open4goods.icecat.services.VerticalsConfigService;
 //import org.open4goods.model.attribute.ReferentielKey;
 //import org.open4goods.model.datafragment.DataFragment;
 //import org.open4goods.model.exceptions.TechnicalException;

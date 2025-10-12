@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.BrandService;
-import org.open4goods.commons.services.IcecatService;
+import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;

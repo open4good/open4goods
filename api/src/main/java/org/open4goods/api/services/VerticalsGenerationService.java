@@ -22,7 +22,7 @@ import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
-import org.open4goods.commons.services.IcecatService;
+import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ImpactScoreConfig;
