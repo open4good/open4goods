@@ -9,8 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 public record ProductFeatureGroupDto(
         @Schema(description = "Identifier of the Icecat category feature group", example = "1234")
-        Integer icecatCategoryFeatureGroupId,
-        @Schema(description = "Identifiers of the Icecat features associated with the group")
-        List<Integer> featuresId
+        Integer icecatCategoryFeatureGroupId
 ) {
 }

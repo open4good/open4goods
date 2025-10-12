@@ -291,7 +291,7 @@ public class ProductMappingService {
         ProductAttributes attributes = product.getAttributes();
         List<ProductClassifiedAttributeGroupDto> classifiedAttributes = mapClassifiedAttributes(product, vConfig, domainLanguage);
         if (attributes == null) {
-            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), product.caracteristics(), classifiedAttributes);
+            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(),  classifiedAttributes);
         }
         Map<String, ProductIndexedAttributeDto> indexed;
         if (attributes.getIndexed() == null) {
@@ -308,7 +308,7 @@ public class ProductMappingService {
             attributes.getReferentielAttributes().forEach((key, value) -> referential.put(key.toString(), value));
         }
 
-        return new ProductAttributesDto(referential, indexed, product.caracteristics(), classifiedAttributes);
+        return new ProductAttributesDto(referential, indexed, classifiedAttributes);
     }
 
     private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage) {
@@ -337,10 +337,7 @@ public class ProductMappingService {
         if (featureGroup == null) {
             return null;
         }
-        List<Integer> featuresId = featureGroup.getFeaturesId() == null
-                ? Collections.emptyList()
-                : new ArrayList<>(featureGroup.getFeaturesId());
-        return new ProductFeatureGroupDto(featureGroup.getIcecatCategoryFeatureGroupId(), featuresId);
+        return new ProductFeatureGroupDto(featureGroup.getIcecatCategoryFeatureGroupId());
     }
 
     private List<ProductAttributeDto> mapAttributeList(List<ProductAttribute> attributes) {
@@ -662,7 +659,6 @@ public class ProductMappingService {
         return new ProductAttributeDto(
                 attribute.getName(),
                 attribute.getValue(),
-                attribute.getNumericValue(),
                 attribute.getIcecatTaxonomyIds() == null ? Collections.emptySet() : new LinkedHashSet<>(attribute.getIcecatTaxonomyIds()),
                 sources);
     }

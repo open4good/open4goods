@@ -132,7 +132,6 @@ public class IcecatService {
 		 try {
 
                         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
-                        xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
                         xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", false);
                         xmlReader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
                         xmlReader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);

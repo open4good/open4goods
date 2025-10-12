@@ -1,18 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>org.open4goods</groupId>
     <artifactId>org.open4goods</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../..</relativePath>    
+    <relativePath>../..</relativePath>
   </parent>
-  
+
   <artifactId>icecat</artifactId>
-  
+
   <dependencies>
     <!-- Spring Boot Actuator for health checks and metrics -->
     <dependency>
@@ -26,7 +26,7 @@
     </dependency>
     <dependency>
       <groupId>org.open4goods</groupId>
-      <artifactId>commons</artifactId>
+      <artifactId>verticals</artifactId>
       <version>${global.version}</version>
     </dependency>
     <dependency>
@@ -45,7 +45,7 @@
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
-    
+
     <!-- Dependency on commons services (for RemoteFileCachingService) -->
 
     <dependency>
@@ -60,7 +60,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>

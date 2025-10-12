@@ -13,8 +13,6 @@ public record ProductAttributesDto(
         Map<String, String> referentialAttributes,
         @Schema(description = "Indexed attributes keyed by their identifier")
         Map<String, ProductIndexedAttributeDto> indexedAttributes,
-        @Schema(description = "Concatenated human readable characteristics")
-        String characteristics,
         @Schema(description = "Attributes classified using Icecat feature groups hierarchy")
         List<ProductClassifiedAttributeGroupDto> classifiedAttributes
 ) {

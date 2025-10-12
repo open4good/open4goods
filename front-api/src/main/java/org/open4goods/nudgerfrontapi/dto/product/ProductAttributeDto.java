@@ -12,8 +12,6 @@ public record ProductAttributeDto(
         String name,
         @Schema(description = "Attribute value", example = "55")
         String value,
-        @Schema(description = "Numeric interpretation when available", nullable = true)
-        Double numericValue,
         @Schema(description = "Icecat taxonomy identifiers associated to the attribute")
         Set<Integer> icecatTaxonomyIds,
         @Schema(description = "Attributes values contributed by datasources")
