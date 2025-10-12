@@ -305,7 +305,7 @@ public class ProductController  {
 			List<String> globalDescriptionParagraphs = null;
 			List<String> ecologicalDescriptionParagraphs = null;
 
-			AiDescriptions aiDescriptions = data.getGenaiTexts().i18n(request);
+			AiDescriptions aiDescriptions = data.getGenaiTexts().i18n(request.getLocale().getLanguage());
 			if (null != aiDescriptions) {
 
 				AiDescription ps = aiDescriptions.getDescriptions().get("pros");
@@ -313,17 +313,17 @@ public class ProductController  {
 					pros = (Arrays.asList(ps.getContent().split("\n|<br/>|;")));
 				}
 
-				AiDescription cs = data.getGenaiTexts().i18n(request).getDescriptions().get("cons");
+				AiDescription cs = data.getGenaiTexts().i18n(request.getLocale().getLanguage()).getDescriptions().get("cons");
 				if (null != cs) {
 					cons = (Arrays.asList(cs.getContent().split("\n|<br/>|;")));
 				}
 
-				AiDescription gd = data.getGenaiTexts().i18n(request).getDescriptions().get("global-description");
+				AiDescription gd = data.getGenaiTexts().i18n(request.getLocale().getLanguage()).getDescriptions().get("global-description");
 				if (gd != null) {
 					globalDescriptionParagraphs = Arrays.asList(gd.getContent().split(";"));
 				}
 
-				AiDescription ed = data.getGenaiTexts().i18n(request).getDescriptions().get("ecological-description");
+				AiDescription ed = data.getGenaiTexts().i18n(request.getLocale().getLanguage()).getDescriptions().get("ecological-description");
 				if (ed != null) {
 					ecologicalDescriptionParagraphs = Arrays.asList(ed.getContent().split(";"));
 				}
