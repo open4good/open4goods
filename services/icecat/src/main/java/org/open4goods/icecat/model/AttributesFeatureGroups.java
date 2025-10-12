@@ -1,4 +1,4 @@
-package org.open4goods.commons.model.dto;
+package org.open4goods.icecat.model;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -29,6 +29,7 @@ import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.product.EcoScoreRanking;
+import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
@@ -123,15 +124,21 @@ public class ProductMappingService {
     }
 
     private ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage) {
+
+        VerticalConfig vConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
+        if (vConfig == null) {
+            return null;
+        }
+
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
         ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale) : null;
         ProductIdentityDto identity = components.contains(ProductDtoComponent.identity) ? mapIdentity(product) : null;
         ProductNamesDto names = components.contains(ProductDtoComponent.names) ? mapNames(product, domainLanguage, locale) : null;
-        ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes) ? mapAttributes(product) : null;
+        ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes) ? mapAttributes(product, vConfig, domainLanguage) : null;
         ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product) : null;
         ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources) ? mapDatasources(product) : null;
-        ProductScoresDto scores = components.contains(ProductDtoComponent.scores) ? mapScores(product) : null;
+        ProductScoresDto scores = components.contains(ProductDtoComponent.scores) ? mapScores(product,domainLanguage, vConfig) : null;
         ProductRankingDto ranking = components.contains(ProductDtoComponent.ranking) ? mapRanking(product) : null;
         ProductAiTextsDto aiTexts = components.contains(ProductDtoComponent.aiTexts) ? mapAiTexts(product, domainLanguage, locale) : null;
         ProductAiReviewDto aiReview = components.contains(ProductDtoComponent.aiReview) ? mapAiReview(product, domainLanguage, locale) : null;
@@ -143,7 +150,7 @@ public class ProductMappingService {
         }
         String fullSlug = null;
         if (StringUtils.hasText(slug)) {
-            String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage);
+            String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage, vConfig);
             if (StringUtils.hasText(verticalHomeUrl)) {
                 fullSlug = "/" + verticalHomeUrl + "/" + slug;
             }
@@ -234,7 +241,7 @@ public class ProductMappingService {
                 safeCall(product::shortestOfferName));
     }
 
-    private ProductAttributesDto mapAttributes(Product product) {
+    private ProductAttributesDto mapAttributes(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage) {
         ProductAttributes attributes = product.getAttributes();
         if (attributes == null) {
             return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), product.caracteristics());
@@ -244,7 +251,7 @@ public class ProductMappingService {
             indexed = Collections.emptyMap();
         } else {
             indexed = new LinkedHashMap<>();
-            attributes.getIndexed().forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value)));
+            attributes.getIndexed().forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage)));
         }
         Map<String, ProductAttributeDto> all;
         if (attributes.getAll() == null) {
@@ -286,21 +293,21 @@ public class ProductMappingService {
         return new ProductDatasourcesDto(datasourceCodes);
     }
 
-    private ProductScoresDto mapScores(Product product) {
+    private ProductScoresDto mapScores(Product product, DomainLanguage domainLanguage, VerticalConfig vConf) {
         Map<String, ProductScoreDto> scores = product.getScores() == null
                 ? Collections.emptyMap()
                 : product.getScores().entrySet().stream()
                         .collect(Collectors.toMap(Entry::getKey,
-                                entry -> mapScore(entry.getValue()),
+                                entry -> mapScore(entry.getValue(), domainLanguage, vConf),
                                 (left, right) -> right,
                                 LinkedHashMap::new));
         List<ProductScoreDto> realScores = product.realScores() == null
                 ? Collections.emptyList()
-                : product.realScores().stream().map(this::mapScore).toList();
+                : product.realScores().stream().map(e -> mapScore(e,domainLanguage, vConf)).toList();
         List<ProductScoreDto> virtualScores = product.virtualScores() == null
                 ? Collections.emptyList()
-                : product.virtualScores().stream().map(this::mapScore).toList();
-        ProductScoreDto ecoscore = product.ecoscore() == null ? null : mapScore(product.ecoscore());
+                : product.virtualScores().stream().map(e -> mapScore(e,domainLanguage, vConf)).toList();
+        ProductScoreDto ecoscore = product.ecoscore() == null ? null : mapScore(product.ecoscore(),domainLanguage, vConf);
         Set<String> worstScores = product.getWorsesScores() == null
                 ? Collections.emptySet()
                 : new LinkedHashSet<>(product.getWorsesScores());
@@ -462,14 +469,11 @@ public class ProductMappingService {
         return ULocale.getDefault();
     }
 
-    private String resolveVerticalHomeUrl(String verticalId, DomainLanguage domainLanguage) {
+    private String resolveVerticalHomeUrl(String verticalId, DomainLanguage domainLanguage, VerticalConfig config) {
         if (!StringUtils.hasText(verticalId)) {
             return null;
         }
-        VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
-        if (config == null) {
-            return null;
-        }
+
         VerticalConfigDto dto = categoryMappingService.toVerticalConfigDto(config, domainLanguage);
         if (dto == null || !StringUtils.hasText(dto.verticalHomeUrl())) {
             return null;
@@ -488,12 +492,12 @@ public class ProductMappingService {
         return resourceRoot + coverImagePath;
     }
 
-    private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute) {
+    private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute, VerticalConfig vConfig, DomainLanguage domainLanguage) {
         if (attribute == null) {
             return null;
         }
         return new ProductIndexedAttributeDto(
-                attribute.getName(),
+                vConfig.getAttributesConfig().getAttributeConfigByKey(attribute.getName()).getName().get(domainLanguage.languageTag()),
                 attribute.getValue(),
                 attribute.getNumericValue(),
                 attribute.getBoolValue());
@@ -631,12 +635,28 @@ public class ProductMappingService {
         return new ProductPriceHistoryEntryDto(entry.timestamp(), entry.price());
     }
 
-    private ProductScoreDto mapScore(Score score) {
+    private ProductScoreDto mapScore(Score score, DomainLanguage domainLanguage, VerticalConfig vConf) {
         if (score == null) {
             return null;
         }
+
+        ImpactScoreCriteria criteria =  vConf.getAvailableImpactScoreCriterias().get(score.getName());
+
+        String description = null, title = null;
+        if (null == criteria) {
+        	logger.error("No ImpactScoreCriteria found for {}", score.getName());
+        	title = score.getName();
+        } else {
+        	title = criteria.getTitle().i18n(domainLanguage.languageTag());
+        	description= criteria.getDescription().i18n(domainLanguage.languageTag());
+
+        }
+
+
         return new ProductScoreDto(
-                score.getName(),
+        		score.getName(),
+                title,
+                description,
                 score.getVirtual(),
                 score.getValue(),
                 mapCardinality(score.getAbsolute()),

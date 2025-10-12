@@ -8,8 +8,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Detailed representation of a score attached to the product.
  */
 public record ProductScoreDto(
-        @Schema(description = "Score name", example = "ENERGY")
+        @Schema(description = "Score id", example = "ENERGY")
+        String id,
+        @Schema(description = "Score name", example = "Classe energetique")
         String name,
+        @Schema(description = "Score description", example = "La classe énergetique de l'objet")
+        String description,
         @Schema(description = "Whether the score is virtual")
         Boolean virtual,
         @Schema(description = "Raw score value", nullable = true)

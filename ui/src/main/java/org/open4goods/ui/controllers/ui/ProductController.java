@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.services.contribution.model.ContributionVote;
-import org.open4goods.commons.model.dto.AttributesFeatureGroups;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.SearchService;
+import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.ai.AiDescription;
 import org.open4goods.model.ai.AiDescriptions;

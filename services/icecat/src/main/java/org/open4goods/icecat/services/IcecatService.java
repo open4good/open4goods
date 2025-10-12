@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.open4goods.commons.model.dto.AttributesFeatureGroups;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.model.IcecatCategory;
 import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatLanguageHandler;
