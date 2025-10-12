@@ -29,6 +29,7 @@ import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.product.EcoScoreRanking;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
@@ -36,6 +37,7 @@ import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiDescriptionDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
@@ -67,6 +69,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,10 +97,20 @@ public class ProductMappingService {
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
+    private final CategoryMappingService categoryMappingService;
+    private final VerticalsConfigService verticalsConfigService;
+    private final AffiliationService affiliationService;
 
-    public ProductMappingService(ProductRepository repository, ApiProperties apiProperties) {
+    public ProductMappingService(ProductRepository repository,
+            ApiProperties apiProperties,
+            CategoryMappingService categoryMappingService,
+            VerticalsConfigService verticalsConfigService,
+            AffiliationService affiliationService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
+        this.categoryMappingService = categoryMappingService;
+        this.verticalsConfigService = verticalsConfigService;
+        this.affiliationService = affiliationService;
     }
 
     /**
@@ -128,10 +141,18 @@ public class ProductMappingService {
         if (product.getNames() != null) {
             slug = resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
         }
+        String fullSlug = null;
+        if (StringUtils.hasText(slug)) {
+            String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage);
+            if (StringUtils.hasText(verticalHomeUrl)) {
+                fullSlug = "/" + verticalHomeUrl + "/" + slug;
+            }
+        }
 
         return new ProductDto(
                 product.getId(),
                 slug,
+                fullSlug,
                 base,
                 identity,
                 names,
@@ -441,6 +462,21 @@ public class ProductMappingService {
         return ULocale.getDefault();
     }
 
+    private String resolveVerticalHomeUrl(String verticalId, DomainLanguage domainLanguage) {
+        if (!StringUtils.hasText(verticalId)) {
+            return null;
+        }
+        VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+        if (config == null) {
+            return null;
+        }
+        VerticalConfigDto dto = categoryMappingService.toVerticalConfigDto(config, domainLanguage);
+        if (dto == null || !StringUtils.hasText(dto.verticalHomeUrl())) {
+            return null;
+        }
+        return dto.verticalHomeUrl();
+    }
+
     private String resolveCoverImageUrl(String coverImagePath) {
         if (!StringUtils.hasText(coverImagePath)) {
             return null;
@@ -550,10 +586,15 @@ public class ProductMappingService {
         if (price == null) {
             return null;
         }
+        String url = price.getUrl();
+        if (StringUtils.hasText(price.getDatasourceName()) && StringUtils.hasText(price.getUrl())) {
+            url = AffiliationPartnerService.CONTRIB_ENDPOINT
+                    + affiliationService.encryptAffiliationLink(price.getDatasourceName(), price.getUrl());
+        }
         return new ProductAggregatedPriceDto(
                 price.getDatasourceName(),
                 price.getOfferName(),
-                price.getUrl(),
+                url,
                 price.getCompensation(),
                 price.getProductState(),
                 price.getAffiliationToken(),
