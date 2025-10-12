@@ -18,7 +18,7 @@ import org.open4goods.services.contribution.model.ContributionVote;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.exceptions.InvalidParameterException;

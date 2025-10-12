@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.model.data.Brand;
-import org.open4goods.commons.model.data.BrandScore;
-import org.open4goods.commons.services.BrandScoreService;
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.model.Brand;
+import org.open4goods.brand.model.BrandScore;
+import org.open4goods.brand.service.BrandScoreService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;

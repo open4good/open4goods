@@ -3,7 +3,7 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
-import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.model.CacheKeyGenerator;

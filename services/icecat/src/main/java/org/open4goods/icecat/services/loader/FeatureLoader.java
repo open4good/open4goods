@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.open4goods.commons.model.data.Brand;
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.model.Brand;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureGroup;

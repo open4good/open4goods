@@ -22,15 +22,15 @@ import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.BrandScoreService;
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.repository.BrandScoresRepository;
+import org.open4goods.brand.service.BrandScoreService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.textgen.BlablaService;
-import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
@@ -248,16 +248,16 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandRepository,@Autowired  SerialisationService serialisationService) throws Exception {
-		return new BrandService(rfc, properties.logsFolder(), serialisationService );
-	}
+        BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired SerialisationService serialisationService) throws Exception {
+                return new BrandService(rfc, serialisationService);
+        }
 
 
 
-	@Bean
-	BrandScoreService brandScoreService( @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandScoreRepository) throws Exception {
-		return new BrandScoreService(brandScoreRepository, properties.logsFolder());
-	}
+        @Bean
+        BrandScoreService brandScoreService(@Autowired BrandScoresRepository brandScoreRepository) {
+                return new BrandScoreService(brandScoreRepository);
+        }
 
 
 

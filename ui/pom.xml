@@ -165,6 +165,12 @@
 
         <dependency>
             <groupId>org.open4goods</groupId>
+            <artifactId>brand</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
             <artifactId>contribution</artifactId>
             <version>${global.version}</version>
         </dependency>
