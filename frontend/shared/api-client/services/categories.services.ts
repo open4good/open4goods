@@ -1,5 +1,5 @@
 import { CategoriesApi } from '..'
-import type { VerticalConfigDto } from '..'
+import type { VerticalConfigDto, VerticalConfigFullDto } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
@@ -37,5 +37,21 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  return { getCategories }
+  /**
+   * Fetch a category detail by id
+   * @param categoryId - Identifier of the category to fetch
+   * @returns Promise<VerticalConfigFullDto>
+   */
+  const getCategoryById = async (
+    categoryId: string,
+  ): Promise<VerticalConfigFullDto> => {
+    try {
+      return await resolveApi().category({ categoryId, domainLanguage })
+    } catch (error) {
+      console.error('Error fetching category detail:', error)
+      throw error
+    }
+  }
+
+  return { getCategories, getCategoryById }
 }
