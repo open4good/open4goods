@@ -52,9 +52,9 @@
         </v-card-text>
       </v-card>
 
-      <v-row v-if="category.verticalSubsets?.length" class="category-page__subsets">
+      <v-row v-if="category.subsets?.length" class="category-page__subsets">
         <v-col
-          v-for="subset in category.verticalSubsets"
+          v-for="subset in category.subsets"
           :key="subset.id ?? subset.title ?? subset.caption"
           cols="12"
           md="6"
@@ -168,18 +168,18 @@ const ogImage = computed(() => {
 })
 const ogLocale = computed(() => locale.value.replace('-', '_'))
 
-useSeoMeta(() => ({
-  title: seoTitle.value,
-  description: seoDescription.value,
-  ogTitle: ogTitle.value,
-  ogDescription: ogDescription.value,
-  ogUrl: canonicalUrl.value,
+useSeoMeta({
+  title: () => seoTitle.value,
+  description: () => seoDescription.value,
+  ogTitle: () => ogTitle.value,
+  ogDescription: () => ogDescription.value,
+  ogUrl: () => canonicalUrl.value,
   ogType: 'website',
-  ogImage: ogImage.value,
-  ogSiteName: siteName.value,
-  ogLocale: ogLocale.value,
-  ogImageAlt: category.value?.verticalHomeTitle ?? siteName.value,
-}))
+  ogImage: () => ogImage.value,
+  ogSiteName: () => siteName.value,
+  ogLocale: () => ogLocale.value,
+  ogImageAlt: () => category.value?.verticalHomeTitle ?? siteName.value,
+})
 
 useHead(() => ({
   link: [
