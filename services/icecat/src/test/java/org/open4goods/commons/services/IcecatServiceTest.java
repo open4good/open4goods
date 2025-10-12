@@ -17,6 +17,7 @@ import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.verticals.VerticalsConfigService;
 

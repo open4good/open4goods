@@ -1,6 +1,6 @@
 package org.open4goods.nudgerfrontapi.config;
 
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
@@ -43,8 +43,13 @@ public class AppConfig {
 
 
 
-	@Bean
-	FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
+        @Bean
+        BrandService brandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService) throws Exception {
+                return new BrandService(remoteFileCachingService, serialisationService);
+        }
+
+        @Bean
+        FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
                 return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(), brandService);
         }
 

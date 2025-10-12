@@ -10,8 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.services.BrandScoreService;
-import org.open4goods.commons.services.BrandService;
+import org.open4goods.brand.service.BrandScoreService;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
@@ -129,7 +128,7 @@ public class DataFragmentCompletionService {
 			Attribute score = o.getAttributes().stream().filter(e-> e.getName().equals("SCORE")).findFirst().orElse(null);
 			if (null != score) {
 				LOGGER.info("Found a brand score for brand {} : {}",o.brand(),score.getRawValue());
-				brandService.addBrandScore(o.brand(), datasourceProperties, score.getRawValue(), o.affiliatedUrlIfPossible());								
+                                brandService.addBrandScore(o.brand(), datasourceProperties.getName(), datasourceProperties.getInvertScaleBase(), score.getRawValue(), o.affiliatedUrlIfPossible());
 			} else {
 				LOGGER.warn("Empty brand score found for brand {} ",o.brand());
 			}

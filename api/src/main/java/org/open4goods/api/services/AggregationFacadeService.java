@@ -22,9 +22,9 @@ import org.open4goods.api.services.aggregation.services.realtime.PriceAggregatio
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
+import org.open4goods.brand.service.BrandScoreService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.BrandScoreService;
-import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;

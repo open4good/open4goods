@@ -12,14 +12,13 @@ import org.open4goods.services.feedservice.service.AwinFeedService;
 import org.open4goods.services.feedservice.service.EffiliationFeedService;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.feedservice.service.FeedService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -242,9 +241,9 @@ public class AppConfig {
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository, SerialisationService serialisationService) throws Exception {
-		return new BrandService( rfc,properties.logsFolder(), serialisationService);
-	}
+        BrandService brandService(@Autowired RemoteFileCachingService rfc, SerialisationService serialisationService) throws Exception {
+                return new BrandService(rfc, serialisationService);
+        }
 
 	@Bean
     FeatureLoader featureLoader(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService) {
