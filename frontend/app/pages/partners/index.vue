@@ -110,14 +110,21 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const heroHeadingId = useId()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const { data, pending, error, refresh } = await useAsyncData<PartnersPageData>(
   'partners-data',
   async () => {
     const [affiliation, ecosystem, mentors] = await Promise.all([
-      $fetch<AffiliationPartnerDto[]>('/api/partners/affiliation'),
-      $fetch<StaticPartnerDto[]>('/api/partners/ecosystem'),
-      $fetch<StaticPartnerDto[]>('/api/partners/mentors'),
+      $fetch<AffiliationPartnerDto[]>('/api/partners/affiliation', {
+        headers: requestHeaders,
+      }),
+      $fetch<StaticPartnerDto[]>('/api/partners/ecosystem', {
+        headers: requestHeaders,
+      }),
+      $fetch<StaticPartnerDto[]>('/api/partners/mentors', {
+        headers: requestHeaders,
+      }),
     ])
 
     return {

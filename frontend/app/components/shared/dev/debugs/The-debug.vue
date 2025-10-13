@@ -25,11 +25,14 @@ interface DebugResponse {
 
 const loading = ref(false)
 const debugData = ref<DebugResponse | null>(null)
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const fetchDebugData = async () => {
   loading.value = true
   try {
-    const response = await $fetch<DebugResponse>('/api/blog/test')
+    const response = await $fetch<DebugResponse>('/api/blog/test', {
+      headers: requestHeaders,
+    })
     debugData.value = response
   } catch (error) {
     console.error('Error fetching debug data:', error)

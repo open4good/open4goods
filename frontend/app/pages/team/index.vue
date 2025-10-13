@@ -75,9 +75,12 @@ const PARTNERS_BLOC_ID = 'pages:team:partenaires:'
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const { data, pending, error, refresh } = await useAsyncData<TeamProperties>('team-roster', () =>
-  $fetch<TeamProperties>('/api/team')
+  $fetch<TeamProperties>('/api/team', {
+    headers: requestHeaders,
+  })
 )
 
 const coreMembers = computed(() => data.value?.cores ?? [])

@@ -22,7 +22,12 @@ export const useFullPage = async (
       }
 
       const encodedId = encodeURIComponent(id)
-      return await $fetch<CmsFullPage>(`/api/pages/${encodedId}`)
+      const headers = useRequestHeaders(['host', 'x-forwarded-host'])
+      return await $fetch<CmsFullPage>(`/api/pages/${encodedId}`,
+        {
+          headers,
+        },
+      )
     },
     {
       server: true,

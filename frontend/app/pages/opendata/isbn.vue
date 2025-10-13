@@ -121,6 +121,7 @@ definePageMeta({
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 interface DatasetPayload {
   dataset: OpenDataDatasetDto
@@ -129,8 +130,12 @@ interface DatasetPayload {
 
 const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>('opendata-isbn', async () => {
   const [dataset, overview] = await Promise.all([
-    $fetch<OpenDataDatasetDto>('/api/opendata/isbn'),
-    $fetch<OpenDataOverviewDto>('/api/opendata'),
+    $fetch<OpenDataDatasetDto>('/api/opendata/isbn', {
+      headers: requestHeaders,
+    }),
+    $fetch<OpenDataOverviewDto>('/api/opendata', {
+      headers: requestHeaders,
+    }),
   ])
 
   return { dataset, overview }

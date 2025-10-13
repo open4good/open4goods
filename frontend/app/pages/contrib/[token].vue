@@ -83,6 +83,7 @@ const route = useRoute()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
 const { t } = useI18n()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const token = computed(() => {
   const param = route.params.token
@@ -102,7 +103,11 @@ const fetchRedirect = async () => {
   }
 
   const encodedToken = encodeURIComponent(token.value)
-  return $fetch<AffiliationRedirectResponse>(`/api/contrib/${encodedToken}`)
+  return $fetch<AffiliationRedirectResponse>(`/api/contrib/${encodedToken}`,
+    {
+      headers: requestHeaders,
+    },
+  )
 }
 
 const { data, pending, error } = await useAsyncData<AffiliationRedirectResponse>(

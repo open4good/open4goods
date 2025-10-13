@@ -11,6 +11,7 @@ export const useBlog = () => {
     'blog-articles',
     () => [],
   )
+  const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
   const currentArticle = useState<BlogPostDto | null>(
     'blog-current-article',
     () => null,
@@ -59,6 +60,7 @@ export const useBlog = () => {
 
       // Use our server API as proxy instead of calling external API directly
       const response = await $fetch<PageDto>('/api/blog/articles', {
+        headers: requestHeaders,
         params: {
           pageNumber: sanitizedPage - 1,
           pageSize: sanitizedSize,
@@ -123,7 +125,9 @@ export const useBlog = () => {
 
   const fetchTags = async () => {
     try {
-      const response = await $fetch<BlogTagDto[]>('/api/blog/tags')
+      const response = await $fetch<BlogTagDto[]>('/api/blog/tags', {
+        headers: requestHeaders,
+      })
       tags.value = response ?? []
     } catch (err) {
       console.error('Error in fetchTags:', err)
@@ -146,7 +150,11 @@ export const useBlog = () => {
     error.value = null
 
     try {
-      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${slug}`)
+      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${slug}`,
+        {
+          headers: requestHeaders,
+        },
+      )
       currentArticle.value = article
       return article
     } catch (err) {

@@ -84,9 +84,12 @@ definePageMeta({
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const { data, pending, error, refresh } = await useAsyncData<OpenDataOverviewDto>('opendata-overview', () =>
-  $fetch<OpenDataOverviewDto>('/api/opendata'),
+  $fetch<OpenDataOverviewDto>('/api/opendata', {
+    headers: requestHeaders,
+  }),
 )
 
 const formatProductCount = (count?: string | number | null) => {
