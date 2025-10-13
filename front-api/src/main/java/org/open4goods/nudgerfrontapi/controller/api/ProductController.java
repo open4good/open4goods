@@ -177,7 +177,7 @@ public class ProductController {
                     @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
                             schema = @Schema(implementation = ProductDtoSortableFields.class)
                     )),
-                    @Parameter(name = "aggregation", in = ParameterIn.QUERY,
+                    @Parameter(name = "aggs", in = ParameterIn.QUERY,
                             description = "Aggregations definition as JSON",
                             schema = @Schema(implementation = AggregationRequestDto.class)),
                     @Parameter(name = "verticalId", in = ParameterIn.QUERY,
@@ -206,10 +206,10 @@ public class ProductController {
     public ResponseEntity<ProductSearchResponseDto> products(
                 @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
                 @RequestParam(required=false) Set<String> include,
-                @RequestParam(required=false, name = "aggregation") String aggregation,
+                @RequestParam(required=false) String aggs,
                 @RequestParam(required = false) String verticalId,
                 @RequestParam(required = false) String query,
-                @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                @RequestParam() DomainLanguage domainLanguage,
                   Locale locale) {
 
 
@@ -251,9 +251,9 @@ public class ProductController {
                 ///////////////////////
 
                 AggregationRequestDto aggDto = null;
-                if (aggregation != null) {
+                if (aggs != null) {
                         try {
-                                aggDto = objectMapper.readValue(aggregation, AggregationRequestDto.class);
+                                aggDto = objectMapper.readValue(aggs, AggregationRequestDto.class);
                         } catch (JsonProcessingException e) {
                                 ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
                                 pd.setTitle("Invalid aggregation parameter");
