@@ -41,6 +41,8 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
+import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiDescriptionDto;
@@ -71,6 +73,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductVideoDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -79,6 +82,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -109,6 +113,7 @@ public class ProductMappingService {
     private final ApiProperties apiProperties;
     private final CategoryMappingService categoryMappingService;
     private final VerticalsConfigService verticalsConfigService;
+    private final SearchService searchService;
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
 
@@ -117,12 +122,14 @@ public class ProductMappingService {
             ApiProperties apiProperties,
             CategoryMappingService categoryMappingService,
             VerticalsConfigService verticalsConfigService,
+            SearchService searchService,
             AffiliationService affiliationService,
             IcecatService icecatService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
         this.verticalsConfigService = verticalsConfigService;
+        this.searchService = searchService;
         this.affiliationService = affiliationService;
         this.icecatService = icecatService;
     }
@@ -500,16 +507,34 @@ public class ProductMappingService {
      * @param domainLanguage  domain language requested by the caller
      * @return page of mapped products
      */
-    public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes,
-                                        AggregationRequestDto aggregation, DomainLanguage domainLanguage) {
+    /**
+     * Execute a paginated search on products and convert the results to DTOs alongside aggregation metadata.
+     *
+     * @param pageable         pagination information requested by the caller
+     * @param locale           locale resolved for the request
+     * @param includes         requested DTO components
+     * @param aggregation      optional aggregation definition
+     * @param domainLanguage   requested domain language
+     * @param verticalId       optional vertical identifier
+     * @param query            optional free text query
+     * @return response payload containing paginated products and aggregations
+     */
+    public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
+            AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query) {
 
-        SearchHits<Product> response = repository.get(pageable);
-        List<ProductDto> items = response
-                .map(hit -> hit.getContent())
+        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation);
+        SearchHits<Product> hits = result.hits();
+
+        List<ProductDto> items = hits.getSearchHits().stream()
+                .map(SearchHit::getContent)
                 .map(product -> mapProduct(product, locale, includes, domainLanguage))
                 .toList();
 
-        return new PageImpl<>(items, pageable, response.getTotalHits());
+        Page<ProductDto> page = new PageImpl<>(items, pageable, hits.getTotalHits());
+        PageMetaDto meta = new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        PageDto<ProductDto> pageDto = new PageDto<>(meta, items);
+
+        return new ProductSearchResponseDto(pageDto, result.aggregations());
     }
 
     /**

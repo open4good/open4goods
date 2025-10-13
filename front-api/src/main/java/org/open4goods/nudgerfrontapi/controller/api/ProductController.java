@@ -9,15 +9,14 @@ import java.util.Set;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
-import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.CacheControl;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -180,6 +180,12 @@ public class ProductController {
                     @Parameter(name = "aggregation", in = ParameterIn.QUERY,
                             description = "Aggregations definition as JSON",
                             schema = @Schema(implementation = AggregationRequestDto.class)),
+                    @Parameter(name = "verticalId", in = ParameterIn.QUERY,
+                            description = "Optional vertical identifier used to scope the search.",
+                            schema = @Schema(type = "string")),
+                    @Parameter(name = "query", in = ParameterIn.QUERY,
+                            description = "Optional free text search applied on offer names.",
+                            schema = @Schema(type = "string")),
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class))
@@ -191,16 +197,18 @@ public class ProductController {
                                     @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
                                             schema = @Schema(type = "string", example = "fr-FR"))
                             },
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageDto.class))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductSearchResponseDto.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<Page<ProductDto>> products(
+    public ResponseEntity<ProductSearchResponseDto> products(
                 @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
                 @RequestParam(required=false) Set<String> include,
                 @RequestParam(required=false, name = "aggregation") String aggregation,
+                @RequestParam(required = false) String verticalId,
+                @RequestParam(required = false) String query,
                 @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                   Locale locale) {
 
@@ -216,7 +224,7 @@ public class ProductController {
                                 pd.setTitle("Invalid sort parameter");
                                 pd.setDetail("Unknown sort field: " + order.getProperty());
                                 @SuppressWarnings({"unchecked", "rawtypes"})
-                                ResponseEntity<Page<ProductDto>> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
                                 return response;
                         }
                 }
@@ -231,32 +239,41 @@ public class ProductController {
                                         pd.setTitle("Invalid include parameter");
                                         pd.setDetail("Unknown component: " + i);
                                         @SuppressWarnings({"unchecked", "rawtypes"})
-                                        ResponseEntity<Page<ProductDto>> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
                                         return response;
                                 }
                         }
                 }
 
 
-		////////////////////////
-		// Transforming product to DTO
-		///////////////////////
+                ////////////////////////
+                // Transforming product to DTO
+                ///////////////////////
 
                 AggregationRequestDto aggDto = null;
                 if (aggregation != null) {
                         try {
                                 aggDto = objectMapper.readValue(aggregation, AggregationRequestDto.class);
-                        } catch (Exception e) {
-                                // TODO: handle invalid aggregation parameter
+                        } catch (JsonProcessingException e) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid aggregation parameter");
+                                pd.setDetail("Unable to parse aggregation query: " + e.getMessage());
+                                @SuppressWarnings({"unchecked", "rawtypes"})
+                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                return response;
                         }
                 }
 
-                Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include, aggDto, domainLanguage);
+                String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
+                String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+
+                Set<String> requestedComponents = include == null ? Set.of() : include;
+                ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery);
 
 
 
-		return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
-	}
+                return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+        }
 
     /**
      * Return high level information for a product.

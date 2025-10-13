@@ -33,6 +33,7 @@ import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 
+
 class ProductMappingServiceTest {
 
     private ProductRepository repository;
@@ -42,6 +43,7 @@ class ProductMappingServiceTest {
     private VerticalsConfigService verticalsConfigService;
     private AffiliationService affiliationService;
     private IcecatService icecatService;
+    private SearchService searchService;
 
     @BeforeEach
     void setUp() {
@@ -52,8 +54,9 @@ class ProductMappingServiceTest {
         verticalsConfigService = mock(VerticalsConfigService.class);
         affiliationService = mock(AffiliationService.class);
         icecatService = mock(IcecatService.class);
+        searchService = mock(SearchService.class);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
-                verticalsConfigService, affiliationService, icecatService);
+                verticalsConfigService, searchService, affiliationService, icecatService);
     }
 
     @Test
