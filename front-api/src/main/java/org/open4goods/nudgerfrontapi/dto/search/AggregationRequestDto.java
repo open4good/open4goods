@@ -21,8 +21,6 @@ public record AggregationRequestDto(
             ProductDtoAggregatableFields field,
             @Schema(description = "Aggregation type", implementation = AggType.class)
             AggType type,
-            @Schema(description = "Sub aggregation")
-            Agg subAgg,
             @Schema(description = "Minimum value for range aggregations")
             Double min,
             @Schema(description = "Maximum value for range aggregations")
