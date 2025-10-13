@@ -2,6 +2,7 @@ import { usePagesService, type CmsFullPage } from '~~/shared/api-client/services
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<CmsFullPage> => {
   const param = getRouterParam(event, 'pageId')
@@ -10,7 +11,10 @@ export default defineEventHandler(async (event): Promise<CmsFullPage> => {
   }
 
   const pageId = decodeURIComponent(param)
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=3600, s-maxage=3600'
+  )
 
   const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)

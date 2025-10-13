@@ -3,9 +3,13 @@ import { useOpenDataService } from '~~/shared/api-client/services/opendata.servi
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails, logBackendError } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<OpenDataDatasetDto> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=300, s-maxage=300')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=300, s-maxage=300'
+  )
 
   const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)

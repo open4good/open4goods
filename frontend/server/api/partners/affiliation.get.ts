@@ -3,9 +3,13 @@ import { usePartnerService } from '~~/shared/api-client/services/partners.servic
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails, logBackendError } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<AffiliationPartnerDto[]> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=900, s-maxage=900')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=900, s-maxage=900'
+  )
 
   const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)

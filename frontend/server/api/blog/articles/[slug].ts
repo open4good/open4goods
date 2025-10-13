@@ -3,6 +3,7 @@ import type { BlogPostDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../../utils/cache-headers'
 
 /**
  * Blog article by slug API endpoint
@@ -10,9 +11,8 @@ import { extractBackendErrorDetails } from '../../../utils/log-backend-error'
  */
 export default defineEventHandler(async (event): Promise<BlogPostDto> => {
   // Cache the article for one hour
-  setResponseHeader(
+  setDomainLanguageCacheHeaders(
     event,
-    'Cache-Control',
     'public, max-age=3600, s-maxage=3600'
   )
 

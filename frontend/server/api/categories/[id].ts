@@ -3,9 +3,13 @@ import type { VerticalConfigFullDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<VerticalConfigFullDto> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=3600, s-maxage=3600'
+  )
 
   const categoryIdParam = getRouterParam(event, 'id')
   if (!categoryIdParam) {

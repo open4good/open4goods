@@ -5,6 +5,7 @@ import type { PageDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 /**
  * Blog articles API endpoint
@@ -12,9 +13,8 @@ import { extractBackendErrorDetails } from '../../utils/log-backend-error'
  */
 export default defineEventHandler(async (event): Promise<PageDto> => {
   // Set cache headers for 1 hour
-  setResponseHeader(
+  setDomainLanguageCacheHeaders(
     event,
-    'Cache-Control',
     'public, max-age=3600, s-maxage=3600'
   )
 

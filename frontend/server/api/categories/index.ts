@@ -3,6 +3,7 @@ import { useCategoriesService } from '~~/shared/api-client/services/categories.s
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 /**
  * Categories API endpoint
@@ -10,9 +11,8 @@ import { extractBackendErrorDetails } from '../../utils/log-backend-error'
  */
 export default defineEventHandler(async (event): Promise<VerticalConfigDto[]> => {
   // Set cache headers for 1 hour
-  setResponseHeader(
+  setDomainLanguageCacheHeaders(
     event,
-    'Cache-Control',
     'public, max-age=3600, s-maxage=3600'
   )
 

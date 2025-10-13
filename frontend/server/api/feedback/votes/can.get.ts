@@ -3,9 +3,13 @@ import { useFeedbackService } from '~~/shared/api-client/services/feedback.servi
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails, logBackendError } from '../../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<FeedbackVoteEligibilityDto> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=60, s-maxage=60')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=60, s-maxage=60'
+  )
 
   const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
