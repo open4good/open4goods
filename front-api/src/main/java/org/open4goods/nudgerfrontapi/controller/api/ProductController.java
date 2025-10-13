@@ -57,7 +57,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/products")
 @Validated
-@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductController {
 
