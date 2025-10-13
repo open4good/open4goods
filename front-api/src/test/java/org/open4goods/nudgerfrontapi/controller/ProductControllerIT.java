@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,8 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
+import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
@@ -103,8 +110,11 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointReturnsPage() throws Exception {
-        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
-        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class))).willReturn(page);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class), nullable(String.class), nullable(String.class)))
+                .willReturn(responseDto);
 
         mockMvc.perform(get("/products")
                         .param("domainLanguage", "FR")
@@ -112,21 +122,27 @@ class ProductControllerIT {
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", "public, max-age=3600"))
-                .andExpect(jsonPath("$.page.number").value(0));
+                .andExpect(jsonPath("$.products.page.number").value(0));
 
     }
 
     @Test
     void productsEndpointAcceptsAggregationParameter() throws Exception {
-        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
-        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class))).willReturn(page);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        AggregationResponseDto aggregation = new AggregationResponseDto("offers", ProductDtoAggregatableFields.offersCount,
+                AggregationRequestDto.AggType.terms, List.of(), null, null);
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of(aggregation));
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class), nullable(String.class), nullable(String.class)))
+                .willReturn(responseDto);
 
         mockMvc.perform(get("/products")
                         .param("aggregation", "{\"aggs\":[{\"name\":\"brands\",\"field\":\"offersCount\",\"type\":\"terms\"}]}")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aggregations").isArray());
     }
 
     @Test

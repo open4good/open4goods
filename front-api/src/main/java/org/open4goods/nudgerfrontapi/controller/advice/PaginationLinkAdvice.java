@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
+import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
@@ -38,16 +39,27 @@ public class PaginationLinkAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
             Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
             ServerHttpResponse response) {
+        if (body instanceof ProductSearchResponseDto searchResponse) {
+            addPaginationHeaders(searchResponse.products().page(), request, response);
+            return body;
+        }
+
         if (!(body instanceof Page<?> page)) {
             return body;
         }
 
+        PageMetaDto meta = new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        addPaginationHeaders(meta, request, response);
+        return new PageDto<>(meta, page.getContent());
+    }
+
+    private void addPaginationHeaders(PageMetaDto meta, ServerHttpRequest request, ServerHttpResponse response) {
         HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
         UriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequest(servletRequest);
 
-        int pageNumber = page.getNumber();
-        int pageSize = page.getSize();
-        long totalPages = page.getTotalPages();
+        int pageNumber = meta.number();
+        int pageSize = meta.size();
+        long totalPages = meta.totalPages();
 
         List<String> links = new ArrayList<>();
         links.add(buildLink(builder, 0, pageSize, "first"));
@@ -63,9 +75,6 @@ public class PaginationLinkAdvice implements ResponseBodyAdvice<Object> {
         if (!links.isEmpty()) {
             response.getHeaders().add(HttpHeaders.LINK, String.join(", ", links));
         }
-
-        PageMetaDto meta = new PageMetaDto(pageNumber, pageSize, page.getTotalElements(), totalPages);
-        return new PageDto<>(meta, page.getContent());
     }
 
     private String buildLink(UriComponentsBuilder builder, long number, int size, String rel) {

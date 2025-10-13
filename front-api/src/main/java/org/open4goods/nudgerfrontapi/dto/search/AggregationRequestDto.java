@@ -26,7 +26,9 @@ public record AggregationRequestDto(
             @Schema(description = "Minimum value for range aggregations")
             Double min,
             @Schema(description = "Maximum value for range aggregations")
-            Double max) {
+            Double max,
+            @Schema(description = "Maximum number of buckets to return. For range aggregations this represents the desired bucket count.")
+            Integer buckets) {
     }
 
     /** Supported aggregation types. */
