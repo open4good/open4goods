@@ -9,6 +9,11 @@ const runtimeConfig = vi.hoisted(() => ({
 
 const setResponseHeaderMock = vi.hoisted(() => vi.fn())
 
+vi.mock('h3', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('h3')>()),
+  setResponseHeader: setResponseHeaderMock,
+}))
+
 vi.mock('#imports', () => ({
   defineEventHandler: (fn: TeamRouteHandler) => fn,
   setResponseHeader: setResponseHeaderMock,
@@ -48,7 +53,6 @@ describe('GET /api/team Nitro endpoint', () => {
     runtimeConfig.apiUrl = 'https://backend.example.test'
     runtimeConfig.machineToken = 'test-token-123'
     setResponseHeaderMock.mockReset()
-    vi.stubGlobal('setResponseHeader', setResponseHeaderMock)
     process.env.API_URL = 'https://backend.example.test'
     process.env.MACHINE_TOKEN = 'test-token-123'
 
@@ -79,5 +83,15 @@ describe('GET /api/team Nitro endpoint', () => {
     const headers = (init?.headers ?? {}) as Record<string, string>
 
     expect(headers['X-Shared-Token']).toBe('test-token-123')
+    expect(setResponseHeaderMock).toHaveBeenCalledWith(
+      expect.anything(),
+      'Cache-Control',
+      'public, max-age=1800, s-maxage=1800'
+    )
+    expect(setResponseHeaderMock).toHaveBeenCalledWith(
+      expect.anything(),
+      'Vary',
+      'Host, X-Forwarded-Host'
+    )
   })
 })

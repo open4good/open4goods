@@ -3,6 +3,7 @@ import type { XwikiContentBlocDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> => {
   const blocId = getRouterParam(event, 'blocId')
@@ -11,7 +12,10 @@ export default defineEventHandler(async (event): Promise<XwikiContentBlocDto> =>
   }
 
   // Cache content for 1 hour
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=3600, s-maxage=3600'
+  )
   const rawHost =
     event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)

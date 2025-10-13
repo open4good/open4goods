@@ -3,6 +3,7 @@ import { useFeedbackService } from '~~/shared/api-client/services/feedback.servi
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails, logBackendError } from '../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 type SupportedIssueType = `${ListIssuesTypeEnum}`
 
@@ -26,7 +27,10 @@ const normalizeIssueType = (value: unknown): ListIssuesTypeEnum | undefined => {
 }
 
 export default defineEventHandler(async (event): Promise<FeedbackIssueDto[]> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=120, s-maxage=120')
+  setDomainLanguageCacheHeaders(
+    event,
+    'public, max-age=120, s-maxage=120'
+  )
 
   const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
