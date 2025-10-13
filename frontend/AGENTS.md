@@ -111,10 +111,11 @@ Document any intentionally skipped check in your summary/PR.
 - Only include Open Graph meta tags when defining SEO metadata. Twitter-specific tags are not allowed.
 - Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources.
 
-## Backend API authentication guidelines
+## Backend API authentication and caching guidelines
 - Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent—never call `new Configuration()` directly.
 - Only create backend API instances during SSR/Vitest execution (e.g. inside Nuxt event handlers). Services such as `useBlogService`, `useContentService`, and `useTeamService` must lazily obtain their API via the helper to keep the shared token out of browser bundles.
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
+- Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
 - Before modifying authentication-sensitive code:
   1. Confirm every outbound call that targets `config.apiUrl` uses the helper-backed configuration or the `api-token.server` plugin so headers are injected server-side only.
   2. Re-validate the `MACHINE_TOKEN`/`front.security.shared-token` pairing in local and deployment secrets.
