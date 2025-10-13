@@ -237,6 +237,16 @@ export default defineNuxtConfig({
   },
   hooks: {
     'pages:extend'(pages) {
+      const normalizePath = (file?: string) => file?.split('\\').join('/')
+
+      const gtinRedirectPage = pages.find((page) =>
+        normalizePath(page.file)?.endsWith('/app/pages/[gtin].vue')
+      )
+
+      if (gtinRedirectPage) {
+        gtinRedirectPage.path = '/:gtin(\\d{6,})'
+      }
+
       const wikiSourcePage = pages.find(page => page.file?.includes('/app/pages/xwiki-fullpage.vue'))
 
       if (!wikiSourcePage) {
