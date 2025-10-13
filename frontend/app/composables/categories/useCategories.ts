@@ -10,6 +10,30 @@ export const useCategories = () => {
     () => [],
   )
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+
+  const buildRequestHeaders = () => {
+    if (!requestHeaders) {
+      return undefined
+    }
+
+    const normalizedEntries = Object.entries(requestHeaders).reduce(
+      (accumulator, [key, value]) => {
+        if (typeof value === 'string' && value.length > 0) {
+          accumulator[key] = value
+          return accumulator
+        }
+
+        if (Array.isArray(value) && value[0]) {
+          accumulator[key] = value[0]
+        }
+
+        return accumulator
+      },
+      {} as Record<string, string>,
+    )
+
+    return Object.keys(normalizedEntries).length ? normalizedEntries : undefined
+  }
   const loading = useState(
     'categories-loading',
     () => false,
@@ -38,8 +62,9 @@ export const useCategories = () => {
     error.value = null
 
     try {
+      const headers = buildRequestHeaders()
       const response = await $fetch<VerticalConfigDto[]>('/api/categories', {
-        headers: requestHeaders,
+        ...(headers ? { headers } : {}),
         params: { onlyEnabled },
       })
 
@@ -68,11 +93,18 @@ export const useCategories = () => {
       await fetchCategories(true)
 
       if (!categories.value.length) {
-        const fetchErrorMessage =
-          error.value ?? 'No categories available to resolve the provided slug'
-        const fetchError = new Error(fetchErrorMessage)
-        fetchError.name = 'CategoryResolutionError'
-        throw fetchError
+        if (error.value) {
+          const fetchError = new Error(error.value)
+          fetchError.name = 'CategoryResolutionError'
+          throw fetchError
+        }
+
+        const notFoundError = new Error('Category not found')
+        notFoundError.name = 'CategoryNotFoundError'
+        error.value = notFoundError.message
+        activeCategoryId.value = null
+        currentCategory.value = null
+        throw notFoundError
       }
     }
 
@@ -94,11 +126,10 @@ export const useCategories = () => {
 
       activeCategoryId.value = matchingCategory.id
 
+      const detailHeaders = buildRequestHeaders()
       const detail = await $fetch<VerticalConfigFullDto>(
         `/api/categories/${encodeURIComponent(matchingCategory.id)}`,
-        {
-          headers: requestHeaders,
-        },
+        detailHeaders ? { headers: detailHeaders } : undefined,
       )
 
       currentCategory.value = detail
