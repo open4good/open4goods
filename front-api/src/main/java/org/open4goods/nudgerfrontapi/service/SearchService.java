@@ -16,6 +16,7 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
@@ -23,6 +24,7 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
@@ -105,7 +107,13 @@ public class SearchService {
             }
         }
 
-        SearchHits<Product> hits = repository.search(nativeQueryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
+        SearchHits<Product> hits;
+		try {
+			hits = repository.search(nativeQueryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			throw e;
+		}
         List<AggregationResponseDto> aggregations = extractAggregationResults(hits, descriptors);
         return new SearchResult(hits, List.copyOf(aggregations));
     }
@@ -260,4 +268,16 @@ public class SearchService {
             return new AggregationDescriptor(request, request.type(), interval, histogramName, missingName, statsName);
         }
     }
+
+
+	private void elasticLog(Exception e)  {
+		if (e instanceof UncategorizedElasticsearchException) {
+		    Throwable cause = e.getCause();
+		    if (cause instanceof ElasticsearchException ee) {
+		        LOGGER.error("Elasticsearch error: " + ee.response());
+		    } else {
+		    	LOGGER.error("Error : ",e );
+		    }
+		}
+	}
 }

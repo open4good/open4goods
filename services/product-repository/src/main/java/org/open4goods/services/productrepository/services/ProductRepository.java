@@ -408,8 +408,6 @@ public class ProductRepository {
 		    	logger.error("Error : ",e );
 		    }
 		}
-
-
 	}
 
 

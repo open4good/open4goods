@@ -14,7 +14,7 @@ public record AggregationRequestDto(
 
     /** Aggregation definition. */
     public record Agg(
-            @Schema(description = "Aggregation name", example = "byBrand")
+            @Schema(description = "Aggregation name", example = "aggName")
             String name,
             @Schema(description = "Field to aggregate",
                     implementation = ProductDtoAggregatableFields.class)
@@ -25,7 +25,7 @@ public record AggregationRequestDto(
             Double min,
             @Schema(description = "Maximum value for range aggregations")
             Double max,
-            @Schema(description = "Maximum number of buckets to return. For range aggregations this represents the desired bucket count.")
+            @Schema(description = "Maximum number of buckets to return. For range aggregations this represents the desired bucket count.", defaultValue = "10")
             Integer buckets) {
     }
 
