@@ -160,6 +160,7 @@ const { t, locale, availableLocales } = useI18n()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const localePath = useLocalePath()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
 const currentUrl = computed(() => requestURL.href)
@@ -215,6 +216,7 @@ const issueLoadFailed = reactive<Record<FeedbackCategory, boolean>>({
 const fetchIssues = async (category: FeedbackCategory) => {
   try {
     const response = await $fetch<FeedbackIssueDto[]>('/api/feedback/issues', {
+      headers: requestHeaders,
       query: { type: category },
     })
 
@@ -267,7 +269,10 @@ const loadRemainingVotes = async () => {
   try {
     remainingVotesState.value = await $fetch('/api/feedback/votes/remaining', {
       query: buildVotesQuery(),
-      headers: { 'cache-control': 'no-cache' },
+      headers: {
+        ...requestHeaders,
+        'cache-control': 'no-cache',
+      },
     })
   } catch (error) {
     console.warn('Unable to load remaining votes, falling back to unknown state', error)
@@ -283,7 +288,10 @@ const loadVoteEligibility = async () => {
   try {
     canVoteState.value = await $fetch('/api/feedback/votes/can', {
       query: buildVotesQuery(),
-      headers: { 'cache-control': 'no-cache' },
+      headers: {
+        ...requestHeaders,
+        'cache-control': 'no-cache',
+      },
     })
   } catch (error) {
     console.warn('Unable to determine vote eligibility, assuming voting is allowed', error)
@@ -380,6 +388,7 @@ const handleVote = async (issueId: string | undefined, category: FeedbackCategor
   try {
     await $fetch('/api/feedback/vote', {
       method: 'POST',
+      headers: requestHeaders,
       body: { issueId },
     })
 
@@ -455,6 +464,7 @@ const handleSubmitFeedback = async (payload: FeedbackFormSubmitPayload) => {
   try {
     const response = await $fetch<FeedbackSubmissionResponseDto>('/api/feedback', {
       method: 'POST',
+      headers: requestHeaders,
       body: payload,
     })
 

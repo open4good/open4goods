@@ -50,6 +50,7 @@ const { t, locale, availableLocales } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
 const submitting = ref(false)
@@ -180,6 +181,10 @@ const handleFormSubmit = async (payload: ContactFormPayload) => {
   try {
     const response = await $fetch<ContactResponseDto>('/api/contact', {
       method: 'POST',
+      headers: {
+        ...requestHeaders,
+        'content-type': 'application/json',
+      },
       body: payload,
     })
 

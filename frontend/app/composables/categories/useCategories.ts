@@ -9,6 +9,7 @@ export const useCategories = () => {
     'categories-list',
     () => [],
   )
+  const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
   const loading = useState(
     'categories-loading',
     () => false,
@@ -38,6 +39,7 @@ export const useCategories = () => {
 
     try {
       const response = await $fetch<VerticalConfigDto[]>('/api/categories', {
+        headers: requestHeaders,
         params: { onlyEnabled },
       })
 
@@ -94,6 +96,9 @@ export const useCategories = () => {
 
       const detail = await $fetch<VerticalConfigFullDto>(
         `/api/categories/${encodeURIComponent(matchingCategory.id)}`,
+        {
+          headers: requestHeaders,
+        },
       )
 
       currentCategory.value = detail
