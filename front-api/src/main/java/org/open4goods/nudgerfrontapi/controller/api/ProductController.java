@@ -14,6 +14,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatab
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
@@ -180,6 +181,10 @@ public class ProductController {
                     @Parameter(name = "aggs", in = ParameterIn.QUERY,
                             description = "Aggregations definition as JSON",
                             schema = @Schema(implementation = AggregationRequestDto.class)),
+                    @Parameter(name = "filters", in = ParameterIn.QUERY,
+                            description = "Filters definition as JSON. The payload must follow the FilterRequestDto schema.",
+                            schema = @Schema(implementation = FilterRequestDto.class),
+                            example = "{\"filters\":[{\"field\":\"condition\",\"operator\":\"term\",\"terms\":[\"NEW\"]}]}"),
                     @Parameter(name = "verticalId", in = ParameterIn.QUERY,
                             description = "Optional vertical identifier used to scope the search.",
                             schema = @Schema(type = "string")),
@@ -207,6 +212,7 @@ public class ProductController {
                 @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
                 @RequestParam(required=false) Set<String> include,
                 @RequestParam(required=false) String aggs,
+                @RequestParam(required = false) String filters,
                 @RequestParam(required = false) String verticalId,
                 @RequestParam(required = false) String query,
                 @RequestParam() DomainLanguage domainLanguage,
@@ -264,11 +270,25 @@ public class ProductController {
                         }
                 }
 
+                FilterRequestDto filterDto = null;
+                if (filters != null) {
+                        try {
+                                filterDto = objectMapper.readValue(filters, FilterRequestDto.class);
+                        } catch (JsonProcessingException e) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid filters parameter");
+                                pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
+                                @SuppressWarnings({"unchecked", "rawtypes"})
+                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                return response;
+                        }
+                }
+
                 String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
                 String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
 
                 Set<String> requestedComponents = include == null ? Set.of() : include;
-                ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery);
+                ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
 
 

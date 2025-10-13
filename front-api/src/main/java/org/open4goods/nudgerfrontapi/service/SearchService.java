@@ -1,9 +1,12 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
@@ -11,6 +14,11 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -67,9 +75,11 @@ public class SearchService {
      * @param verticalId       optional vertical identifier used to scope the search
      * @param query            optional free text query applied on offer names
      * @param aggregationQuery optional aggregation definition mirroring the Nuxt contract
+     * @param filters          optional structured filters applied on the search query
      * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation metadata
      */
-    public SearchResult search(Pageable pageable, String verticalId, String query, AggregationRequestDto aggregationQuery) {
+    public SearchResult search(Pageable pageable, String verticalId, String query, AggregationRequestDto aggregationQuery,
+            FilterRequestDto filters) {
         Criteria criteria = repository.getRecentPriceQuery();
 
         if (StringUtils.hasText(verticalId) && verticalsConfigService.getConfigById(verticalId) != null) {
@@ -83,6 +93,8 @@ public class SearchService {
         if (StringUtils.hasText(sanitizedQuery)) {
             criteria = criteria.and(new Criteria("offerNames").matches(sanitizedQuery));
         }
+
+        criteria = applyFilters(criteria, filters);
 
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
         criteriaQuery.setPageable(pageable);
@@ -112,6 +124,95 @@ public class SearchService {
 
     private boolean isValidAggregation(Agg agg) {
         return agg != null && StringUtils.hasText(agg.name()) && agg.field() != null && agg.type() != null;
+    }
+
+    private Criteria applyFilters(Criteria criteria, FilterRequestDto filters) {
+        if (filters == null || filters.filters() == null || filters.filters().isEmpty()) {
+            return criteria;
+        }
+
+        Criteria combined = criteria;
+        for (Filter filter : filters.filters()) {
+            Criteria clause = buildFilterCriteria(filter);
+            if (clause != null) {
+                combined = combined.and(clause);
+            }
+        }
+        return combined;
+    }
+
+    private Criteria buildFilterCriteria(Filter filter) {
+        if (filter == null || filter.field() == null || filter.operator() == null) {
+            return null;
+        }
+        FilterField field = filter.field();
+        FilterOperator operator = filter.operator();
+
+        if (!field.supports(operator)) {
+            LOGGER.warn("Ignoring filter on field {} with unsupported operator {}", field, operator);
+            return null;
+        }
+
+        return switch (operator) {
+        case term -> buildTermCriteria(field, filter.terms());
+        case range -> buildRangeCriteria(field, filter.min(), filter.max());
+        };
+    }
+
+    private Criteria buildTermCriteria(FilterField field, List<String> terms) {
+        if (terms == null || terms.isEmpty()) {
+            return null;
+        }
+
+        if (field.valueType() == FilterValueType.numeric) {
+            Collection<Double> numericTerms = parseNumericTerms(field, terms);
+            if (numericTerms.isEmpty()) {
+                return null;
+            }
+            return new Criteria(field.fieldPath()).in(numericTerms);
+        }
+
+        Set<String> sanitized = terms.stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .collect(Collectors.toSet());
+        if (sanitized.isEmpty()) {
+            return null;
+        }
+        return new Criteria(field.fieldPath()).in(sanitized);
+    }
+
+    private Collection<Double> parseNumericTerms(FilterField field, List<String> terms) {
+        List<Double> values = new ArrayList<>();
+        for (String term : terms) {
+            if (!StringUtils.hasText(term)) {
+                continue;
+            }
+            try {
+                values.add(Double.valueOf(term.trim()));
+            } catch (NumberFormatException ex) {
+                LOGGER.warn("Ignoring filter term '{}' for field {} due to invalid number format", term, field, ex);
+                return Collections.emptyList();
+            }
+        }
+        return values;
+    }
+
+    private Criteria buildRangeCriteria(FilterField field, Double min, Double max) {
+        if (field.valueType() != FilterValueType.numeric) {
+            return null;
+        }
+        Criteria clause = new Criteria(field.fieldPath());
+        boolean hasBound = false;
+        if (min != null) {
+            clause = clause.greaterThanEqual(min);
+            hasBound = true;
+        }
+        if (max != null) {
+            clause = clause.lessThanEqual(max);
+            hasBound = true;
+        }
+        return hasBound ? clause : null;
     }
 
     private AggregationDescriptor configureTermsAggregation(org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder,
