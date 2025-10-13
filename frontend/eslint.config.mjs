@@ -27,6 +27,29 @@ const sharedOverrides = [
   {
     ignores: ['shared/api-client/**', 'src/api/**'],
   },
+  {
+    files: [
+      'app/**/*.{ts,vue}',
+      'app.config.ts',
+      'i18n.config.ts',
+      'nuxt.config.ts',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^~~/shared/api-client/services/(?!auth\\.services(?:$|/))',
+              allowTypeImports: true,
+              message:
+                'Use the Nuxt server route + composable pattern instead of importing generated backend services directly into client code.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]
 
 const config = await resolveConfig()
