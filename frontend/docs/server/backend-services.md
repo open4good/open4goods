@@ -13,6 +13,8 @@ wrapped in a thin service that:
    server (or in Vitest) and can be reused across calls.
 4. Guards against accidental client-side usage to keep secrets such as
    `MACHINE_TOKEN` out of the browser bundle.
+5. Treats every response as domain-sensitive and reuses the shared helper for
+   cache headers so CDNs keep hostname-specific variants.
 
 The blog feature provides a good end-to-end example of the pattern: the
 [`useBlogService`](../shared/api-client/services/blog.services.ts) wrapper feeds
@@ -81,8 +83,10 @@ article endpoint mirrors the recommended structure:
 
 ```ts
 // server/api/blog/articles/[slug].ts
+import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
+
 export default defineEventHandler(async (event) => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+  setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
   const slug = getRouterParam(event, 'slug')
   if (!slug) {
@@ -109,7 +113,11 @@ export default defineEventHandler(async (event) => {
 ```
 
 This keeps request validation, caching, localisation, and error translation close
-to the network boundary while delegating the backend call to the wrapper.
+to the network boundary while delegating the backend call to the wrapper. Use
+`setDomainLanguageCacheHeaders()` in every server route that surfaces backend
+data so the response carries both `Cache-Control` and the host-aware `Vary`
+header—mixing manual header calls risks dropping one of them and breaking
+multi-domain caching.
 
 ## 3. Consume the server route from a composable
 Composables hide the transport details from components and pages. They call the
