@@ -4,7 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,6 +43,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.ArgumentCaptor;
 
 @SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
         "front.security.enabled=true",
@@ -136,13 +139,52 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class), nullable(String.class), nullable(String.class)))
                 .willReturn(responseDto);
 
+        AggregationRequestDto.Agg expectedAgg = new AggregationRequestDto.Agg("brands",
+                ProductDtoAggregatableFields.offersCount, AggregationRequestDto.AggType.terms, null, null, null);
+        String aggregationJson = """
+                {"aggs":[{"name":"brands","field":"offersCount","type":"terms"}]}
+                """;
+
         mockMvc.perform(get("/products")
-                        .param("aggregation", "{\"aggs\":[{\"name\":\"brands\",\"field\":\"offersCount\",\"type\":\"terms\"}]}")
+                        .param("aggs", aggregationJson)
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.aggregations").isArray());
+
+        ArgumentCaptor<AggregationRequestDto> aggregationCaptor = ArgumentCaptor.forClass(AggregationRequestDto.class);
+        then(service).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), aggregationCaptor.capture(),
+                any(DomainLanguage.class), nullable(String.class), nullable(String.class));
+        assertThat(aggregationCaptor.getValue().aggs()).containsExactly(expectedAgg);
+    }
+
+    @Test
+    void productsEndpointAcceptsAggregationArrayParameter() throws Exception {
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(DomainLanguage.class), nullable(String.class), nullable(String.class)))
+                .willReturn(responseDto);
+
+        AggregationRequestDto.Agg expectedAgg = new AggregationRequestDto.Agg("brands",
+                ProductDtoAggregatableFields.offersCount, AggregationRequestDto.AggType.terms, null, null, null);
+        String aggregationJson = """
+                [{"name":"brands","field":"offersCount","type":"terms"}]
+                """;
+
+        mockMvc.perform(get("/products")
+                        .param("aggs", aggregationJson)
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aggregations").isArray());
+
+        ArgumentCaptor<AggregationRequestDto> aggregationCaptor = ArgumentCaptor.forClass(AggregationRequestDto.class);
+        then(service).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), aggregationCaptor.capture(),
+                any(DomainLanguage.class), nullable(String.class), nullable(String.class));
+        assertThat(aggregationCaptor.getValue().aggs()).containsExactly(expectedAgg);
     }
 
     @Test
