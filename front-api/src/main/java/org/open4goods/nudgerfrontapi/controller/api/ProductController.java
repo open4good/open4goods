@@ -252,8 +252,16 @@ public class ProductController {
 
                 AggregationRequestDto aggDto = null;
                 if (aggs != null) {
+                        String trimmedAggs = aggs.trim();
                         try {
-                                aggDto = objectMapper.readValue(aggs, AggregationRequestDto.class);
+                                if (trimmedAggs.startsWith("[")) {
+                                        List<AggregationRequestDto.Agg> parsedAggs = objectMapper
+                                                        .readerForListOf(AggregationRequestDto.Agg.class)
+                                                        .readValue(trimmedAggs);
+                                        aggDto = new AggregationRequestDto(parsedAggs);
+                                } else {
+                                        aggDto = objectMapper.readValue(trimmedAggs, AggregationRequestDto.class);
+                                }
                         } catch (JsonProcessingException e) {
                                 ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
                                 pd.setTitle("Invalid aggregation parameter");
