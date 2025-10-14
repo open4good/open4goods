@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { FieldMetadataDto } from './FieldMetadataDto';
-import {
-    FieldMetadataDtoFromJSON,
-    FieldMetadataDtoFromJSONTyped,
-    FieldMetadataDtoToJSON,
-    FieldMetadataDtoToJSONTyped,
-} from './FieldMetadataDto';
-
 /**
  * 
  * @export
@@ -28,23 +20,23 @@ import {
  */
 export interface ProductFieldOptionsResponse {
     /**
-     * Fields that are always available regardless of the vertical.
-     * @type {FieldMetadataDto}
+     * 
+     * @type {any}
      * @memberof ProductFieldOptionsResponse
      */
-    global?: FieldMetadataDto;
+    global?: any | null;
     /**
-     * Fields relating to ecological impact scores only.
-     * @type {FieldMetadataDto}
+     * 
+     * @type {any}
      * @memberof ProductFieldOptionsResponse
      */
-    impact?: FieldMetadataDto;
+    impact?: any | null;
     /**
-     * Fields exposing technical attributes available for the vertical.
-     * @type {FieldMetadataDto}
+     * 
+     * @type {any}
      * @memberof ProductFieldOptionsResponse
      */
-    technical?: FieldMetadataDto;
+    technical?: any | null;
 }
 
 /**
@@ -64,9 +56,9 @@ export function ProductFieldOptionsResponseFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
-        'global': json['global'] == null ? undefined : FieldMetadataDtoFromJSON(json['global']),
-        'impact': json['impact'] == null ? undefined : FieldMetadataDtoFromJSON(json['impact']),
-        'technical': json['technical'] == null ? undefined : FieldMetadataDtoFromJSON(json['technical']),
+        'global': json['global'] == null ? undefined : json['global'],
+        'impact': json['impact'] == null ? undefined : json['impact'],
+        'technical': json['technical'] == null ? undefined : json['technical'],
     };
 }
 
@@ -81,9 +73,9 @@ export function ProductFieldOptionsResponseToJSONTyped(value?: ProductFieldOptio
 
     return {
         
-        'global': FieldMetadataDtoToJSON(value['global']),
-        'impact': FieldMetadataDtoToJSON(value['impact']),
-        'technical': FieldMetadataDtoToJSON(value['technical']),
+        'global': value['global'],
+        'impact': value['impact'],
+        'technical': value['technical'],
     };
 }
 

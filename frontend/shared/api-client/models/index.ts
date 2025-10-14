@@ -25,7 +25,6 @@ export * from './FeedbackSubmissionRequestDto';
 export * from './FeedbackSubmissionResponseDto';
 export * from './FeedbackVoteEligibilityDto';
 export * from './FeedbackVoteResponseDto';
-export * from './FieldMetadataDto';
 export * from './Filter';
 export * from './FilterRequestDto';
 export * from './FullPageDto';

@@ -37,7 +37,6 @@ models/FeedbackSubmissionRequestDto.ts
 models/FeedbackSubmissionResponseDto.ts
 models/FeedbackVoteEligibilityDto.ts
 models/FeedbackVoteResponseDto.ts
-models/FieldMetadataDto.ts
 models/Filter.ts
 models/FilterRequestDto.ts
 models/FullPageDto.ts
