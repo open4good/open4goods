@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 
 /**
  * DTO representing a comprehensive product view returned by the API.
@@ -114,5 +115,43 @@ public record ProductDto(
                         return Optional.ofNullable(LOOKUP.get(text));
                 }
 
+        }
+
+        /**
+         * Allowed filter fields on Products. (must match elastic mapping)
+         */
+        public enum ProductDtoFilterFields {
+                price(FilterField.price),
+                offersCount(FilterField.offersCount),
+                condition(FilterField.condition),
+                brand(FilterField.brand),
+                country(FilterField.country),
+                datasource(FilterField.datasource);
+
+                private final FilterField delegate;
+
+                ProductDtoFilterFields(FilterField delegate) {
+                        this.delegate = delegate;
+                }
+
+                public String getText() {
+                        return delegate.fieldPath();
+                }
+
+                public FilterField getDelegate() {
+                        return delegate;
+                }
+
+                @Override
+                public String toString() {
+                        return delegate.fieldPath();
+                }
+
+                private static final Map<String, ProductDtoFilterFields> LOOKUP = Arrays.stream(values())
+                                .collect(Collectors.toMap(ProductDtoFilterFields::getText, e -> e));
+
+                public static Optional<ProductDtoFilterFields> fromText(String text) {
+                        return Optional.ofNullable(LOOKUP.get(text));
+                }
         }
 }
