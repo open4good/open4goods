@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -17,6 +18,8 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatab
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoFilterFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
+import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
@@ -131,12 +134,12 @@ public class ProductController {
     }
 
     /**
-     * List product fields that can be used for sorting for a specific vertical.
+     * List product field metadata that can be used for sorting for a specific vertical.
      */
     @GetMapping("/fields/sortable/{verticalId}")
     @Operation(
             summary = "Get sortable fields for a vertical",
-            description = "Return the list of fields accepted by the sort parameter supplemented with the vertical specific filters.",
+            description = "Return the field metadata accepted by the sort parameter, grouped by scope and enriched with vertical specific filters.",
             parameters = {
                     @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
                             description = "Identifier of the vertical whose sortable fields are requested.",
@@ -147,19 +150,18 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-
                             content = @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(type = "string")))),
+                                    schema = @Schema(implementation = ProductFieldOptionsResponse.class))),
                     @ApiResponse(responseCode = "404", description = "Vertical not found")
             }
     )
-    public ResponseEntity<List<String>> sortableFieldsForVertical(
+    public ResponseEntity<ProductFieldOptionsResponse> sortableFieldsForVertical(
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        List<String> fields = new ArrayList<>(Arrays.stream(ProductDtoSortableFields.values())
-                .map(ProductDtoSortableFields::getText)
-                .toList());
-        return buildVerticalFieldsResponse(verticalId, fields);
+        List<FieldMetadataDto> global = Arrays.stream(ProductDtoSortableFields.values())
+                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                .toList();
+        return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
 
     /**
@@ -189,12 +191,12 @@ public class ProductController {
     }
 
     /**
-     * List product fields that support aggregation queries for a specific vertical.
+     * List product field metadata that support aggregation queries for a specific vertical.
      */
     @GetMapping("/fields/aggregatable/{verticalId}")
     @Operation(
             summary = "Get aggregatable fields for a vertical",
-            description = "Return the list of fields available for aggregation supplemented with the vertical specific filters.",
+            description = "Return the field metadata available for aggregation, grouped by scope and enriched with vertical specific filters.",
             parameters = {
                     @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
                             description = "Identifier of the vertical whose aggregatable fields are requested.",
@@ -205,19 +207,18 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-
                             content = @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(type = "string")))),
+                                    schema = @Schema(implementation = ProductFieldOptionsResponse.class))),
                     @ApiResponse(responseCode = "404", description = "Vertical not found")
             }
     )
-    public ResponseEntity<List<String>> aggregatableFieldsForVertical(
+    public ResponseEntity<ProductFieldOptionsResponse> aggregatableFieldsForVertical(
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        List<String> fields = new ArrayList<>(Arrays.stream(ProductDtoAggregatableFields.values())
-                .map(ProductDtoAggregatableFields::getText)
-                .toList());
-        return buildVerticalFieldsResponse(verticalId, fields);
+        List<FieldMetadataDto> global = Arrays.stream(ProductDtoAggregatableFields.values())
+                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                .toList();
+        return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
 
     /**
@@ -248,12 +249,12 @@ public class ProductController {
     }
 
     /**
-     * List product fields that can be used for filtering for a specific vertical.
+     * List product field metadata that can be used for filtering for a specific vertical.
      */
     @GetMapping("/fields/filters/{verticalId}")
     @Operation(
             summary = "Get filterable fields for a vertical",
-            description = "Return the list of fields accepted by the filters parameter supplemented with the vertical specific filters.",
+            description = "Return the field metadata accepted by the filters parameter, grouped by scope and enriched with vertical specific filters.",
             parameters = {
                     @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
                             description = "Identifier of the vertical whose filterable fields are requested.",
@@ -264,19 +265,18 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Fields returned",
-
                             content = @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(type = "string")))),
+                                    schema = @Schema(implementation = ProductFieldOptionsResponse.class))),
                     @ApiResponse(responseCode = "404", description = "Vertical not found")
             }
     )
-    public ResponseEntity<List<String>> filterableFieldsForVertical(
+    public ResponseEntity<ProductFieldOptionsResponse> filterableFieldsForVertical(
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        List<String> fields = new ArrayList<>(Arrays.stream(ProductDtoFilterFields.values())
-                .map(ProductDtoFilterFields::getText)
-                .toList());
-        return buildVerticalFieldsResponse(verticalId, fields);
+        List<FieldMetadataDto> global = Arrays.stream(ProductDtoFilterFields.values())
+                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                .toList();
+        return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
 
 
@@ -450,9 +450,10 @@ public class ProductController {
      * @param fields     base list of field names already allowed globally
      * @return {@link ResponseEntity} wrapping the augmented list or {@code 404} if the vertical is unknown
      */
-    private ResponseEntity<List<String>> buildVerticalFieldsResponse(String verticalId, List<String> fields) {
+    private ResponseEntity<ProductFieldOptionsResponse> buildVerticalFieldsResponse(String verticalId,
+            DomainLanguage domainLanguage, List<FieldMetadataDto> globalFields) {
         if (!StringUtils.hasText(verticalId)) {
-            return ResponseEntity.ok(List.copyOf(fields));
+            return ResponseEntity.ok(new ProductFieldOptionsResponse(List.copyOf(globalFields), List.of(), List.of()));
         }
 
         VerticalConfig vConfig = verticalsConfigService.getConfigById(verticalId);
@@ -460,41 +461,17 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
 
-        appendVerticalFilters(fields, vConfig);
-        return ResponseEntity.ok(List.copyOf(fields));
-    }
+        List<FieldMetadataDto> impactFields = new ArrayList<>();
+        impactFields.addAll(mapVerticalAttributeFilters(vConfig.getEcoFilters(), vConfig, domainLanguage));
+        impactFields.addAll(mapImpactScores(vConfig, domainLanguage));
 
-    /**
-     * Append all filters defined on the vertical configuration to the provided target list.
-     *
-     * @param target list collecting the resulting field names
-     * @param config vertical configuration supplying eco and technical filters
-     */
-    private void appendVerticalFilters(List<String> target, VerticalConfig config) {
-        appendConvertedFilters(target, config.getEcoFilters(), config);
-        appendConvertedFilters(target, config.getTechnicalFilters(), config);
-        appendConvertedFilters(target, config.getGlobalTechnicalFilters(), config);
-    }
+        List<FieldMetadataDto> technicalFields = new ArrayList<>();
+        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getGlobalTechnicalFilters(), vConfig, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getTechnicalFilters(), vConfig, domainLanguage));
 
-    /**
-     * Convert the provided filter identifiers to indexed attribute paths and append them to the target list.
-     *
-     * @param target  list collecting the resulting field names
-     * @param filters filters to convert (may be {@code null})
-     * @param config  vertical configuration used to resolve attribute metadata
-     */
-    private void appendConvertedFilters(List<String> target, List<String> filters, VerticalConfig config) {
-        if (filters == null) {
-            return;
-        }
-
-        for (String filterName : filters) {
-            if (!StringUtils.hasText(filterName)) {
-                continue;
-            }
-            String normalizedName = filterName.trim();
-            target.add(toIndexedAttribute(normalizedName, config));
-        }
+        ProductFieldOptionsResponse body = new ProductFieldOptionsResponse(List.copyOf(globalFields),
+                List.copyOf(impactFields), List.copyOf(technicalFields));
+        return ResponseEntity.ok(body);
     }
 
     /**
@@ -514,6 +491,89 @@ public class ProductController {
             return baseField + ".numericValue";
         }
         return baseField;
+    }
+
+    /**
+     * Convert the configured attribute filters into field metadata enriched with localisation.
+     *
+     * @param filters        filter identifiers defined in the vertical configuration
+     * @param config         vertical configuration used to resolve attribute metadata
+     * @param domainLanguage requested domain language driving localisation
+     * @return immutable list of {@link FieldMetadataDto} describing the filters
+     */
+    private List<FieldMetadataDto> mapVerticalAttributeFilters(List<String> filters, VerticalConfig config,
+            DomainLanguage domainLanguage) {
+        if (filters == null || filters.isEmpty()) {
+            return List.of();
+        }
+
+        List<FieldMetadataDto> results = new ArrayList<>();
+        for (String filterName : filters) {
+            if (!StringUtils.hasText(filterName)) {
+                continue;
+            }
+            String normalizedName = filterName.trim();
+            String mapping = toIndexedAttribute(normalizedName, config);
+            String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
+            results.add(new FieldMetadataDto(normalizedName, mapping, title, null));
+        }
+        return List.copyOf(results);
+    }
+
+    /**
+     * Resolve the localised attribute title for the provided key.
+     *
+     * @param config         vertical configuration supplying attribute metadata
+     * @param attributeKey   identifier of the attribute
+     * @param domainLanguage requested domain language driving localisation
+     * @return localised title or {@code null} when no localisation is available
+     */
+    private String resolveAttributeTitle(VerticalConfig config, String attributeKey, DomainLanguage domainLanguage) {
+        if (config.getAttributesConfig() == null) {
+            return null;
+        }
+        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(attributeKey);
+        if (attributeConfig == null || attributeConfig.getName() == null) {
+            return null;
+        }
+        return localise(attributeConfig.getName(), domainLanguage);
+    }
+
+    /**
+     * Build metadata entries for the impact scores configured on the vertical.
+     *
+     * @param config         vertical configuration supplying impact scores
+     * @param domainLanguage requested domain language driving localisation
+     * @return immutable list of {@link FieldMetadataDto} representing the scores
+     */
+    private List<FieldMetadataDto> mapImpactScores(VerticalConfig config, DomainLanguage domainLanguage) {
+        if (config.getAvailableImpactScoreCriterias() == null || config.getAvailableImpactScoreCriterias().isEmpty()) {
+            return List.of();
+        }
+
+        List<FieldMetadataDto> results = new ArrayList<>();
+        config.getAvailableImpactScoreCriterias().forEach((key, criteria) -> {
+            String mapping = "scores." + key + ".value";
+            String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
+            String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
+            results.add(new FieldMetadataDto(key, mapping, title, description));
+        });
+        return List.copyOf(results);
+    }
+
+    /**
+     * Localise the provided {@link Localisable} using the requested domain language.
+     *
+     * @param localisable    localisable value to translate
+     * @param domainLanguage requested domain language
+     * @return translated value or {@code null} when none is defined
+     */
+    private String localise(Localisable<String, String> localisable, DomainLanguage domainLanguage) {
+        if (localisable == null) {
+            return null;
+        }
+        String language = domainLanguage != null ? domainLanguage.languageTag() : null;
+        return localisable.i18n(language);
     }
 
     /**
