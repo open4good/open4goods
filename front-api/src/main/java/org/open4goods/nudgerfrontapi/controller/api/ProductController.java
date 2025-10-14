@@ -267,6 +267,9 @@ public class ProductController {
 			}
 		}
 
+		// Validating requested filters
+
+
 		FilterRequestDto filterDto = null;
 		if (filters != null) {
 			try {
