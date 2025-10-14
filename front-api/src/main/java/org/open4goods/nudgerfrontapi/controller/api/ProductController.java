@@ -2,14 +2,10 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.function.Function;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.Localisable;
@@ -18,7 +14,6 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
-import org.open4goods.nudgerfrontapi.dto.product.AggregationFieldDefinitionDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
@@ -28,11 +23,8 @@ import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
@@ -173,7 +165,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoSortableFields.values())
-                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null, null))
+                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -229,19 +221,16 @@ public class ProductController {
     public ResponseEntity<ProductFieldOptionsResponse> aggregatableFieldsForVertical(
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        List<FieldDefinitionContext> definitionContexts = new ArrayList<>();
         List<FieldMetadataDto> global = new ArrayList<>();
         for (ProductDtoAggregatableFields field : ProductDtoAggregatableFields.values()) {
-            FieldMetadataDto dto = new FieldMetadataDto(field.name(), field.getText(), null, null, null);
+            FieldMetadataDto dto = new FieldMetadataDto(field.name(), field.getText(), null, null);
             global.add(dto);
-            definitionContexts.add(new FieldDefinitionContext(dto, field.defaultAggregationType(), field));
         }
-        ProductFieldOptionsResponse response = resolveVerticalFields(verticalId, domainLanguage, global, definitionContexts);
+        ProductFieldOptionsResponse response = resolveVerticalFields(verticalId, domainLanguage, global);
         if (response == null) {
             return ResponseEntity.notFound().build();
         }
-        ProductFieldOptionsResponse enriched = enrichWithDefinitions(verticalId, response, definitionContexts);
-        return ResponseEntity.ok(enriched);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -297,7 +286,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null, null))
+                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -475,7 +464,7 @@ public class ProductController {
      */
     private ResponseEntity<ProductFieldOptionsResponse> buildVerticalFieldsResponse(String verticalId,
             DomainLanguage domainLanguage, List<FieldMetadataDto> globalFields) {
-        ProductFieldOptionsResponse body = resolveVerticalFields(verticalId, domainLanguage, globalFields, null);
+        ProductFieldOptionsResponse body = resolveVerticalFields(verticalId, domainLanguage, globalFields);
         if (body == null) {
             return ResponseEntity.notFound().build();
         }
@@ -483,7 +472,7 @@ public class ProductController {
     }
 
     private ProductFieldOptionsResponse resolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
-            List<FieldMetadataDto> globalFields, List<FieldDefinitionContext> definitionContexts) {
+            List<FieldMetadataDto> globalFields) {
         List<FieldMetadataDto> immutableGlobal = List.copyOf(globalFields);
         if (!StringUtils.hasText(verticalId)) {
             return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
@@ -502,92 +491,11 @@ public class ProductController {
                 .forEach(impactFields::add);
 
         List<FieldMetadataDto> technicalFields = new ArrayList<>();
-        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getEcoFilters(), vConfig, domainLanguage,
-                definitionContexts));
-        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getGlobalTechnicalFilters(), vConfig, domainLanguage,
-                definitionContexts));
-        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getTechnicalFilters(), vConfig, domainLanguage,
-                definitionContexts));
+        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getEcoFilters(), vConfig, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getGlobalTechnicalFilters(), vConfig, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getTechnicalFilters(), vConfig, domainLanguage));
 
         return new ProductFieldOptionsResponse(immutableGlobal, List.copyOf(impactFields), List.copyOf(technicalFields));
-    }
-
-    private ProductFieldOptionsResponse enrichWithDefinitions(String verticalId, ProductFieldOptionsResponse response,
-            List<FieldDefinitionContext> definitionContexts) {
-        Map<String, AggregationFieldDefinitionDto> definitions = computeDefinitions(verticalId, definitionContexts);
-        List<FieldMetadataDto> global = response.global().stream()
-                .map(field -> field.withDefinition(definitions.get(field.id())))
-                .toList();
-        List<FieldMetadataDto> impact = response.impact().stream()
-                .map(field -> field.withDefinition(definitions.get(field.id())))
-                .toList();
-        List<FieldMetadataDto> technical = response.technical().stream()
-                .map(field -> field.withDefinition(definitions.get(field.id())))
-                .toList();
-        return new ProductFieldOptionsResponse(global, impact, technical);
-    }
-
-    private Map<String, AggregationFieldDefinitionDto> computeDefinitions(String verticalId,
-            List<FieldDefinitionContext> definitionContexts) {
-        if (definitionContexts == null || definitionContexts.isEmpty()) {
-            return Map.of();
-        }
-
-        List<Agg> aggregations = definitionContexts.stream()
-                .filter(context -> context.aggregatableField() != null)
-                .map(context -> new Agg(context.field().id(), context.aggregatableField(), context.type(), null, null, null))
-                .toList();
-        if (aggregations.isEmpty()) {
-            return Map.of();
-        }
-
-        AggregationRequestDto aggregationRequest = new AggregationRequestDto(aggregations);
-        SearchService.SearchResult searchResult = searchService.search(Pageable.unpaged(), verticalId, null,
-                aggregationRequest, null);
-        List<AggregationResponseDto> responses = searchResult != null && searchResult.aggregations() != null
-                ? searchResult.aggregations()
-                : List.of();
-
-        Map<String, AggregationResponseDto> responseByName = responses.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(AggregationResponseDto::name, Function.identity(), (left, right) -> left,
-                        HashMap::new));
-
-        Map<String, AggregationFieldDefinitionDto> definitions = new HashMap<>();
-        for (FieldDefinitionContext context : definitionContexts) {
-            if (context.aggregatableField() == null) {
-                continue;
-            }
-            AggregationResponseDto aggregation = responseByName.get(context.field().id());
-            AggregationFieldDefinitionDto definition = buildDefinition(context, aggregation);
-            if (definition != null) {
-                definitions.put(context.field().id(), definition);
-            }
-        }
-        return definitions;
-    }
-
-    private AggregationFieldDefinitionDto buildDefinition(FieldDefinitionContext context,
-            AggregationResponseDto aggregation) {
-        Double min = context.type() == AggType.range && aggregation != null ? aggregation.min() : null;
-        Double max = context.type() == AggType.range && aggregation != null ? aggregation.max() : null;
-        Double interval = context.type() == AggType.range ? 1d : null;
-        List<AggregationBucketDto> buckets = null;
-        if (aggregation != null && aggregation.buckets() != null && !aggregation.buckets().isEmpty()) {
-            buckets = List.copyOf(aggregation.buckets());
-        } else if (context.type() == AggType.terms) {
-            buckets = List.of();
-        }
-        boolean includeMissing = context.type() != null;
-        if (aggregation != null && aggregation.buckets() != null && aggregation.buckets().stream()
-                .anyMatch(AggregationBucketDto::missing)) {
-            includeMissing = true;
-        }
-        return new AggregationFieldDefinitionDto(min, max, interval, includeMissing, buckets);
-    }
-
-    private record FieldDefinitionContext(FieldMetadataDto field, AggType type,
-            ProductDtoAggregatableFields aggregatableField) {
     }
 
     /**
@@ -615,11 +523,10 @@ public class ProductController {
      * @param filters        filter identifiers defined in the vertical configuration
      * @param config         vertical configuration used to resolve attribute metadata
      * @param domainLanguage requested domain language driving localisation
-     * @param definitionContexts optional collector receiving aggregation metadata for each field
      * @return immutable list of {@link FieldMetadataDto} describing the filters
      */
     private List<FieldMetadataDto> mapVerticalAttributeFilters(List<String> filters, VerticalConfig config,
-            DomainLanguage domainLanguage, List<FieldDefinitionContext> definitionContexts) {
+            DomainLanguage domainLanguage) {
         if (filters == null || filters.isEmpty()) {
             return List.of();
         }
@@ -632,28 +539,14 @@ public class ProductController {
             String normalizedName = filterName.trim();
             String mapping = toIndexedAttribute(normalizedName, config);
             String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
-            FieldMetadataDto dto = new FieldMetadataDto(normalizedName, mapping, title, null, null);
+            FieldMetadataDto dto = new FieldMetadataDto(normalizedName, mapping, title, null);
             results.add(dto);
-            if (definitionContexts != null) {
-                AttributeConfig attributeConfig = config.getAttributesConfig() != null
-                        ? config.getAttributesConfig().getAttributeConfigByKey(normalizedName)
-                        : null;
-                AggType aggType = attributeConfig != null
-                        && attributeConfig.getFilteringType() == AttributeType.NUMERIC ? AggType.range : AggType.terms;
-                ProductDtoAggregatableFields aggregatableField = null;
-                try {
-                    aggregatableField = ProductDtoAggregatableFields.valueOf(normalizedName);
-                } catch (IllegalArgumentException ignored) {
-                    // Not part of the global aggregation enum; still expose metadata without definition.
-                }
-                definitionContexts.add(new FieldDefinitionContext(dto, aggType, aggregatableField));
-            }
         }
         return List.copyOf(results);
     }
 
     private FieldMetadataDto buildEcoscoreField() {
-        return new FieldMetadataDto("ecoscore", "scores.ECOSCORE.value", "impactscore", null, null);
+        return new FieldMetadataDto("ecoscore", "scores.ECOSCORE.value", "impactscore", null);
     }
 
     /**
@@ -692,7 +585,7 @@ public class ProductController {
             String mapping = "scores." + key + ".value";
             String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
             String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
-            results.add(new FieldMetadataDto(key, mapping, title, description, null));
+            results.add(new FieldMetadataDto(key, mapping, title, description));
         });
         return List.copyOf(results);
     }
