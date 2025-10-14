@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ProductFieldOptionsResponse(
         @Schema(description = "Fields that are always available regardless of the vertical.", implementation = FieldMetadataDto.class)
         List<FieldMetadataDto> global,
-        @Schema(description = "Fields relating to ecological impact, including scores and eco filters.", implementation = FieldMetadataDto.class)
+        @Schema(description = "Fields relating to ecological impact scores only.", implementation = FieldMetadataDto.class)
         List<FieldMetadataDto> impact,
         @Schema(description = "Fields exposing technical attributes available for the vertical.", implementation = FieldMetadataDto.class)
         List<FieldMetadataDto> technical

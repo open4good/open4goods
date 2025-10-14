@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
@@ -23,6 +24,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -80,6 +82,7 @@ public class SearchService {
      * @param filters          optional structured filters applied on the search query
      * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation metadata
      */
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public SearchResult search(Pageable pageable, String verticalId, String query, AggregationRequestDto aggregationQuery,
             FilterRequestDto filters) {
         Criteria criteria = repository.getRecentPriceQuery();
