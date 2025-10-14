@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 
 /**
  * DTO representing a comprehensive product view returned by the API.
@@ -90,17 +91,27 @@ public record ProductDto(
          * Allowed aggregation fields on Products. (must match elastic mapping)
          */
         public enum ProductDtoAggregatableFields {
-                price("price.minPrice.price"),
-                offersCount("offersCount");
+                price("price.minPrice.price", AggType.range),
+                offersCount("offersCount", AggType.range),
+                condition(FilterField.condition.fieldPath(), AggType.terms),
+                brand(FilterField.brand.fieldPath(), AggType.terms),
+                country(FilterField.country.fieldPath(), AggType.terms),
+                datasource(FilterField.datasource.fieldPath(), AggType.terms);
 
                 private final String text;
+                private final AggType defaultAggregationType;
 
-                ProductDtoAggregatableFields(String text) {
+                ProductDtoAggregatableFields(String text, AggType defaultAggregationType) {
                         this.text = text;
+                        this.defaultAggregationType = defaultAggregationType;
                 }
 
                 public String getText() {
                         return text;
+                }
+
+                public AggType defaultAggregationType() {
+                        return defaultAggregationType;
                 }
 
                 @Override

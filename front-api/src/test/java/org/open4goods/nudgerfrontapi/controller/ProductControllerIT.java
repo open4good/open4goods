@@ -32,6 +32,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatab
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
@@ -41,7 +42,10 @@ import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -64,6 +68,12 @@ class ProductControllerIT {
 
     @MockBean
     private ProductMappingService service;
+
+    @MockBean
+    private SearchService searchService;
+
+    @MockBean
+    private VerticalsConfigService verticalsConfigService;
 
     @Autowired
     private HealthEndpoint healthEndpoint;
@@ -182,6 +192,40 @@ class ProductControllerIT {
         AggregationRequestDto.Agg agg = aggregationRequestDto.aggs().get(0);
         assertThat(agg.name()).isEqualTo("per_price");
         assertThat(agg.field()).isEqualTo(ProductDtoAggregatableFields.price);
+    }
+
+    @Test
+    void aggregatableFieldsExposeDefinitions() throws Exception {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("electronics");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        AggregationResponseDto priceAggregation = new AggregationResponseDto("price",
+                ProductDtoAggregatableFields.price, AggType.range,
+                List.of(new AggregationBucketDto("10.0", 11.0, 4L, false)), 10d, 100d);
+        List<AggregationBucketDto> conditionBuckets = List.of(
+                new AggregationBucketDto("NEW", null, 5L, false),
+                new AggregationBucketDto("ES-UNKNOWN", null, 1L, true));
+        AggregationResponseDto conditionAggregation = new AggregationResponseDto("condition",
+                ProductDtoAggregatableFields.condition, AggType.terms, conditionBuckets, null, null);
+        SearchService.SearchResult aggregations = new SearchService.SearchResult(null,
+                List.of(priceAggregation, conditionAggregation));
+        given(searchService.search(any(Pageable.class), any(), nullable(String.class), any(AggregationRequestDto.class),
+                nullable(FilterRequestDto.class))).willReturn(aggregations);
+
+        mockMvc.perform(get("/products/fields/aggregatable/{verticalId}", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.impact[0].id").value("ecoscore"))
+                .andExpect(jsonPath("$.global[0].id").value("price"))
+                .andExpect(jsonPath("$.global[0].definition.min").value(10.0))
+                .andExpect(jsonPath("$.global[0].definition.max").value(100.0))
+                .andExpect(jsonPath("$.global[0].definition.interval").value(1.0))
+                .andExpect(jsonPath("$.global[2].id").value("condition"))
+                .andExpect(jsonPath("$.global[2].definition.buckets[0].key").value("NEW"))
+                .andExpect(jsonPath("$.global[2].definition.buckets[1].missing").value(true));
     }
 
 
