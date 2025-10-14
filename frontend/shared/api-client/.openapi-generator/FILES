@@ -14,7 +14,9 @@ apis/index.ts
 index.ts
 models/AffiliationPartnerDto.ts
 models/Agg.ts
+models/AggregationBucketDto.ts
 models/AggregationRequestDto.ts
+models/AggregationResponseDto.ts
 models/AiPromptsConfig.ts
 models/AttributeConfigDto.ts
 models/AttributeParserConfig.ts
@@ -35,6 +37,9 @@ models/FeedbackSubmissionRequestDto.ts
 models/FeedbackSubmissionResponseDto.ts
 models/FeedbackVoteEligibilityDto.ts
 models/FeedbackVoteResponseDto.ts
+models/FieldMetadataDto.ts
+models/Filter.ts
+models/FilterRequestDto.ts
 models/FullPageDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreCriteriaDto.ts
@@ -47,9 +52,8 @@ models/OpenDataDatasetDto.ts
 models/OpenDataDownloadLimitsDto.ts
 models/OpenDataOverviewDto.ts
 models/PageDto.ts
+models/PageDtoProductDto.ts
 models/PageMetaDto.ts
-models/PageProductDto.ts
-models/PageableObject.ts
 models/ProblemDetail.ts
 models/ProductAggregatedPriceDto.ts
 models/ProductAiDescriptionDto.ts
@@ -62,6 +66,7 @@ models/ProductClassifiedAttributeGroupDto.ts
 models/ProductDatasourcesDto.ts
 models/ProductDto.ts
 models/ProductExternalIdsDto.ts
+models/ProductFieldOptionsResponse.ts
 models/ProductGtinInfoDto.ts
 models/ProductIdentityDto.ts
 models/ProductImageDto.ts
@@ -75,6 +80,7 @@ models/ProductRankingDto.ts
 models/ProductResourcesDto.ts
 models/ProductScoreDto.ts
 models/ProductScoresDto.ts
+models/ProductSearchResponseDto.ts
 models/ProductSourcedAttributeDto.ts
 models/ProductVideoDto.ts
 models/RecommandationChoice.ts
@@ -82,7 +88,6 @@ models/RecommandationCriteria.ts
 models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
 models/ScoringAggregationConfig.ts
-models/SortObject.ts
 models/StaticPartnerDto.ts
 models/SubsetCriteria.ts
 models/TeamProperties.ts

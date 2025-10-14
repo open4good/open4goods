@@ -38,12 +38,6 @@ export interface Agg {
      */
     type?: AggTypeEnum;
     /**
-     * 
-     * @type {any}
-     * @memberof Agg
-     */
-    subAgg?: any | null;
-    /**
      * Minimum value for range aggregations
      * @type {number}
      * @memberof Agg
@@ -55,6 +49,12 @@ export interface Agg {
      * @memberof Agg
      */
     max?: number;
+    /**
+     * Maximum number of buckets to return. For range aggregations this represents the desired bucket count.
+     * @type {number}
+     * @memberof Agg
+     */
+    buckets?: number;
 }
 
 
@@ -63,7 +63,11 @@ export interface Agg {
  */
 export const AggFieldEnum = {
     PriceMinPricePrice: 'price.minPrice.price',
-    OffersCount: 'offersCount'
+    OffersCount: 'offersCount',
+    PriceConditions: 'price.conditions',
+    AttributesReferentielAttributesBrand: 'attributes.referentielAttributes.BRAND',
+    GtinInfosCountry: 'gtinInfos.country',
+    DatasourceCodes: 'datasourceCodes'
 } as const;
 export type AggFieldEnum = typeof AggFieldEnum[keyof typeof AggFieldEnum];
 
@@ -97,9 +101,9 @@ export function AggFromJSONTyped(json: any, ignoreDiscriminator: boolean): Agg {
         'name': json['name'] == null ? undefined : json['name'],
         'field': json['field'] == null ? undefined : json['field'],
         'type': json['type'] == null ? undefined : json['type'],
-        'subAgg': json['subAgg'] == null ? undefined : json['subAgg'],
         'min': json['min'] == null ? undefined : json['min'],
         'max': json['max'] == null ? undefined : json['max'],
+        'buckets': json['buckets'] == null ? undefined : json['buckets'],
     };
 }
 
@@ -117,9 +121,9 @@ export function AggToJSONTyped(value?: Agg | null, ignoreDiscriminator: boolean 
         'name': value['name'],
         'field': value['field'],
         'type': value['type'],
-        'subAgg': value['subAgg'],
         'min': value['min'],
         'max': value['max'],
+        'buckets': value['buckets'],
     };
 }
 

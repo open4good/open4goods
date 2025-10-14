@@ -16,27 +16,47 @@
 import * as runtime from '../runtime';
 import type {
   AggregationRequestDto,
-  PageDto,
-  PageProductDto,
+  FilterRequestDto,
+  ProblemDetail,
   ProductDto,
+  ProductFieldOptionsResponse,
+  ProductSearchResponseDto,
 } from '../models/index';
 import {
     AggregationRequestDtoFromJSON,
     AggregationRequestDtoToJSON,
-    PageDtoFromJSON,
-    PageDtoToJSON,
-    PageProductDtoFromJSON,
-    PageProductDtoToJSON,
+    FilterRequestDtoFromJSON,
+    FilterRequestDtoToJSON,
+    ProblemDetailFromJSON,
+    ProblemDetailToJSON,
     ProductDtoFromJSON,
     ProductDtoToJSON,
+    ProductFieldOptionsResponseFromJSON,
+    ProductFieldOptionsResponseToJSON,
+    ProductSearchResponseDtoFromJSON,
+    ProductSearchResponseDtoToJSON,
 } from '../models/index';
 
 export interface AggregatableFieldsRequest {
     domainLanguage: AggregatableFieldsDomainLanguageEnum;
 }
 
+export interface AggregatableFieldsForVerticalRequest {
+    verticalId: string;
+    domainLanguage: AggregatableFieldsForVerticalDomainLanguageEnum;
+}
+
 export interface ComponentsRequest {
     domainLanguage: ComponentsDomainLanguageEnum;
+}
+
+export interface FilterableFieldsRequest {
+    domainLanguage: FilterableFieldsDomainLanguageEnum;
+}
+
+export interface FilterableFieldsForVerticalRequest {
+    verticalId: string;
+    domainLanguage: FilterableFieldsForVerticalDomainLanguageEnum;
 }
 
 export interface ProductRequest {
@@ -51,11 +71,19 @@ export interface ProductsRequest {
     pageNumber?: number;
     pageSize?: number;
     sort?: Array<ProductsSortEnum>;
-    aggregation?: AggregationRequestDto;
+    aggs?: AggregationRequestDto;
+    filters?: FilterRequestDto;
+    verticalId?: string;
+    query?: string;
 }
 
 export interface SortableFieldsRequest {
     domainLanguage: SortableFieldsDomainLanguageEnum;
+}
+
+export interface SortableFieldsForVerticalRequest {
+    verticalId: string;
+    domainLanguage: SortableFieldsForVerticalDomainLanguageEnum;
 }
 
 /**
@@ -114,6 +142,64 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
+     * Return the field metadata available for aggregation, grouped by scope and enriched with vertical specific filters.
+     * Get aggregatable fields for a vertical
+     */
+    async aggregatableFieldsForVerticalRaw(requestParameters: AggregatableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling aggregatableFieldsForVertical().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling aggregatableFieldsForVertical().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/products/fields/aggregatable/{verticalId}`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ProductFieldOptionsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Return the field metadata available for aggregation, grouped by scope and enriched with vertical specific filters.
+     * Get aggregatable fields for a vertical
+     */
+    async aggregatableFieldsForVertical(requestParameters: AggregatableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
+        const response = await this.aggregatableFieldsForVerticalRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Return the list of components that can be included in product responses.
      * Get available components
      */
@@ -160,6 +246,114 @@ export class ProductApi extends runtime.BaseAPI {
      */
     async components(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
         const response = await this.componentsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return the list of fields accepted by the filters parameter.
+     * Get filterable fields
+     */
+    async filterableFieldsRaw(requestParameters: FilterableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling filterableFields().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/products/fields/filters`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     * Return the list of fields accepted by the filters parameter.
+     * Get filterable fields
+     */
+    async filterableFields(requestParameters: FilterableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.filterableFieldsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return the field metadata accepted by the filters parameter, grouped by scope and enriched with vertical specific filters.
+     * Get filterable fields for a vertical
+     */
+    async filterableFieldsForVerticalRaw(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling filterableFieldsForVertical().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling filterableFieldsForVertical().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/products/fields/filters/{verticalId}`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ProductFieldOptionsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Return the field metadata accepted by the filters parameter, grouped by scope and enriched with vertical specific filters.
+     * Get filterable fields for a vertical
+     */
+    async filterableFieldsForVertical(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
+        const response = await this.filterableFieldsForVerticalRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -229,7 +423,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return paginated products.
      * List products
      */
-    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDto>> {
+    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductSearchResponseDto>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -255,8 +449,20 @@ export class ProductApi extends runtime.BaseAPI {
             queryParameters['sort'] = requestParameters['sort'];
         }
 
-        if (requestParameters['aggregation'] != null) {
-            queryParameters['aggregation'] = requestParameters['aggregation'];
+        if (requestParameters['aggs'] != null) {
+            queryParameters['aggs'] = requestParameters['aggs'];
+        }
+
+        if (requestParameters['filters'] != null) {
+            queryParameters['filters'] = requestParameters['filters'];
+        }
+
+        if (requestParameters['verticalId'] != null) {
+            queryParameters['verticalId'] = requestParameters['verticalId'];
+        }
+
+        if (requestParameters['query'] != null) {
+            queryParameters['query'] = requestParameters['query'];
         }
 
         if (requestParameters['domainLanguage'] != null) {
@@ -283,14 +489,14 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PageDtoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ProductSearchResponseDtoFromJSON(jsonValue));
     }
 
     /**
      * Return paginated products.
      * List products
      */
-    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
+    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductSearchResponseDto> {
         const response = await this.productsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -345,6 +551,64 @@ export class ProductApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Return the field metadata accepted by the sort parameter, grouped by scope and enriched with vertical specific filters.
+     * Get sortable fields for a vertical
+     */
+    async sortableFieldsForVerticalRaw(requestParameters: SortableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling sortableFieldsForVertical().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling sortableFieldsForVertical().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/products/fields/sortable/{verticalId}`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ProductFieldOptionsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Return the field metadata accepted by the sort parameter, grouped by scope and enriched with vertical specific filters.
+     * Get sortable fields for a vertical
+     */
+    async sortableFieldsForVertical(requestParameters: SortableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
+        const response = await this.sortableFieldsForVerticalRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -358,11 +622,35 @@ export type AggregatableFieldsDomainLanguageEnum = typeof AggregatableFieldsDoma
 /**
  * @export
  */
+export const AggregatableFieldsForVerticalDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type AggregatableFieldsForVerticalDomainLanguageEnum = typeof AggregatableFieldsForVerticalDomainLanguageEnum[keyof typeof AggregatableFieldsForVerticalDomainLanguageEnum];
+/**
+ * @export
+ */
 export const ComponentsDomainLanguageEnum = {
     Fr: 'fr',
     En: 'en'
 } as const;
 export type ComponentsDomainLanguageEnum = typeof ComponentsDomainLanguageEnum[keyof typeof ComponentsDomainLanguageEnum];
+/**
+ * @export
+ */
+export const FilterableFieldsDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type FilterableFieldsDomainLanguageEnum = typeof FilterableFieldsDomainLanguageEnum[keyof typeof FilterableFieldsDomainLanguageEnum];
+/**
+ * @export
+ */
+export const FilterableFieldsForVerticalDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type FilterableFieldsForVerticalDomainLanguageEnum = typeof FilterableFieldsForVerticalDomainLanguageEnum[keyof typeof FilterableFieldsForVerticalDomainLanguageEnum];
 /**
  * @export
  */
@@ -425,3 +713,11 @@ export const SortableFieldsDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type SortableFieldsDomainLanguageEnum = typeof SortableFieldsDomainLanguageEnum[keyof typeof SortableFieldsDomainLanguageEnum];
+/**
+ * @export
+ */
+export const SortableFieldsForVerticalDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type SortableFieldsForVerticalDomainLanguageEnum = typeof SortableFieldsForVerticalDomainLanguageEnum[keyof typeof SortableFieldsForVerticalDomainLanguageEnum];
