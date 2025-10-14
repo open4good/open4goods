@@ -73,6 +73,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductVideoDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -517,12 +518,14 @@ public class ProductMappingService {
      * @param domainLanguage   requested domain language
      * @param verticalId       optional vertical identifier
      * @param query            optional free text query
+     * @param filters         optional search filters applied on the Elasticsearch query
      * @return response payload containing paginated products and aggregations
      */
     public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
-            AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query) {
+            AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
+            FilterRequestDto filters) {
 
-        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation);
+        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters);
         SearchHits<Product> hits = result.hits();
 
         List<ProductDto> items = hits.getSearchHits().stream()
