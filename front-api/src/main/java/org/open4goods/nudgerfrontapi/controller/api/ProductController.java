@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -365,21 +366,29 @@ public class ProductController {
                 Locale locale) {
 
 
-		/////////////////////
-		/// Surface control
-		/////////////////////
+                /////////////////////
+                /// Surface control
+                /////////////////////
 
-		// Validating sort field
-		for (var order : page.getSort()) {
-			if (ProductDtoSortableFields.fromText(order.getProperty()).isEmpty()) {
-				ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-				pd.setTitle("Invalid sort parameter");
-				pd.setDetail("Unknown sort field: " + order.getProperty());
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-				return response;
-			}
-		}
+                String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
+
+                List<FieldMetadataDto> sortableGlobal = Arrays.stream(ProductDtoSortableFields.values())
+                        .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                        .toList();
+                ProductFieldOptionsResponse sortableOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage, sortableGlobal);
+                Set<String> allowedSortFields = collectAllowedFieldIdentifiers(sortableOptions);
+
+                // Validating sort field
+                for (var order : page.getSort()) {
+                        if (!allowedSortFields.contains(order.getProperty())) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid sort parameter");
+                                pd.setDetail("Unknown sort field: " + order.getProperty());
+                                @SuppressWarnings({ "unchecked", "rawtypes" })
+                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                return response;
+                        }
+                }
 		// Validating requested components
 
 		if (include != null) {
@@ -421,6 +430,35 @@ public class ProductController {
                         }
                 }
 
+                if (aggDto != null && normalizedVerticalId != null && aggDto.aggs() != null) {
+                        List<FieldMetadataDto> aggregatableGlobal = new ArrayList<>();
+                        for (ProductDtoAggregatableFields field : ProductDtoAggregatableFields.values()) {
+                                aggregatableGlobal.add(new FieldMetadataDto(field.name(), field.getText(), null, null));
+                        }
+                        ProductFieldOptionsResponse aggregationOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage, aggregatableGlobal);
+                        Set<String> allowedAggregationFields = collectAllowedFieldIdentifiers(aggregationOptions);
+                        for (Agg aggregation : aggDto.aggs()) {
+                                if (aggregation.field() == null) {
+                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                        pd.setTitle("Invalid aggregation parameter");
+                                        pd.setDetail("Aggregation field is mandatory");
+                                        @SuppressWarnings({ "unchecked", "rawtypes" })
+                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        return response;
+                                }
+                                String enumName = aggregation.field().name();
+                                String mapping = aggregation.field().getText();
+                                if (!allowedAggregationFields.contains(enumName) && !allowedAggregationFields.contains(mapping)) {
+                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                        pd.setTitle("Invalid aggregation parameter");
+                                        pd.setDetail("Aggregation not permitted for field: " + aggregation.field());
+                                        @SuppressWarnings({ "unchecked", "rawtypes" })
+                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        return response;
+                                }
+                        }
+                }
+
                 // Validating requested filters
 
 
@@ -442,15 +480,42 @@ public class ProductController {
                                 pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
                                 @SuppressWarnings({ "unchecked", "rawtypes" })
                                 ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-				return response;
-			}
-		}
+                                return response;
+                        }
+                }
 
-		String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
-		String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+                if (filterDto != null && normalizedVerticalId != null && filterDto.filters() != null) {
+                        List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
+                                        .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                                        .toList();
+                        ProductFieldOptionsResponse filterOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage, filterableGlobal);
+                        Set<String> allowedFilterFields = collectAllowedFieldIdentifiers(filterOptions);
+                        for (FilterRequestDto.Filter filter : filterDto.filters()) {
+                                if (filter.field() == null) {
+                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                        pd.setTitle("Invalid filters parameter");
+                                        pd.setDetail("Filter field is mandatory");
+                                        @SuppressWarnings({ "unchecked", "rawtypes" })
+                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        return response;
+                                }
+                                String enumName = filter.field().name();
+                                String mapping = filter.field().fieldPath();
+                                if (!allowedFilterFields.contains(enumName) && !allowedFilterFields.contains(mapping)) {
+                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                        pd.setTitle("Invalid filters parameter");
+                                        pd.setDetail("Filter not permitted for field: " + filter.field());
+                                        @SuppressWarnings({ "unchecked", "rawtypes" })
+                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                        return response;
+                                }
+                        }
+                }
 
-		Set<String> requestedComponents = include == null ? Set.of() : include;
-		ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
+                String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+
+                Set<String> requestedComponents = include == null ? Set.of() : include;
+                ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
     }
@@ -496,6 +561,43 @@ public class ProductController {
         technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getTechnicalFilters(), vConfig, domainLanguage));
 
         return new ProductFieldOptionsResponse(immutableGlobal, List.copyOf(impactFields), List.copyOf(technicalFields));
+    }
+
+    private ProductFieldOptionsResponse safeResolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
+            List<FieldMetadataDto> globalFields) {
+        ProductFieldOptionsResponse resolved = resolveVerticalFields(verticalId, domainLanguage, globalFields);
+        if (resolved == null) {
+            return new ProductFieldOptionsResponse(List.copyOf(globalFields), List.of(), List.of());
+        }
+        return resolved;
+    }
+
+    private Set<String> collectAllowedFieldIdentifiers(ProductFieldOptionsResponse fieldOptions) {
+        Set<String> allowed = new HashSet<>();
+        if (fieldOptions == null) {
+            return allowed;
+        }
+        addFieldIdentifiers(allowed, fieldOptions.global());
+        addFieldIdentifiers(allowed, fieldOptions.impact());
+        addFieldIdentifiers(allowed, fieldOptions.technical());
+        return allowed;
+    }
+
+    private void addFieldIdentifiers(Set<String> target, List<FieldMetadataDto> fields) {
+        if (fields == null) {
+            return;
+        }
+        for (FieldMetadataDto field : fields) {
+            if (field == null) {
+                continue;
+            }
+            if (StringUtils.hasText(field.id())) {
+                target.add(field.id());
+            }
+            if (StringUtils.hasText(field.mapping())) {
+                target.add(field.mapping());
+            }
+        }
     }
 
     /**
