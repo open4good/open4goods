@@ -1,17 +1,21 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoFilterFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
@@ -20,7 +24,6 @@ import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +49,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.open4goods.verticals.VerticalsConfigService;
 
 /**
  * REST controller exposing read‑only information about a product as well as the ability to
@@ -64,10 +69,13 @@ public class ProductController {
 
     private final ProductMappingService service;
     private final ObjectMapper objectMapper;
+    private final VerticalsConfigService verticalsConfigService;
 
-    public ProductController(ProductMappingService service, ObjectMapper objectMapper) {
+    public ProductController(ProductMappingService service, ObjectMapper objectMapper,
+                             VerticalsConfigService verticalsConfigService) {
         this.service = service;
         this.objectMapper = objectMapper;
+        this.verticalsConfigService = verticalsConfigService;
     }
 
     /**
@@ -123,6 +131,38 @@ public class ProductController {
     }
 
     /**
+     * List product fields that can be used for sorting for a specific vertical.
+     */
+    @GetMapping("/fields/sortable/{verticalId}")
+    @Operation(
+            summary = "Get sortable fields for a vertical",
+            description = "Return the list of fields accepted by the sort parameter supplemented with the vertical specific filters.",
+            parameters = {
+                    @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
+                            description = "Identifier of the vertical whose sortable fields are requested.",
+                            schema = @Schema(type = "string", example = "tv")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise field labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Fields returned",
+
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string")))),
+                    @ApiResponse(responseCode = "404", description = "Vertical not found")
+            }
+    )
+    public ResponseEntity<List<String>> sortableFieldsForVertical(
+            @PathVariable("verticalId") String verticalId,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        List<String> fields = new ArrayList<>(Arrays.stream(ProductDtoSortableFields.values())
+                .map(ProductDtoSortableFields::getText)
+                .toList());
+        return buildVerticalFieldsResponse(verticalId, fields);
+    }
+
+    /**
      * List product fields that support aggregation queries.
      */
     @GetMapping("/fields/aggregatable")
@@ -146,6 +186,97 @@ public class ProductController {
                 .map(ProductDtoAggregatableFields::getText)
                 .toList();
         return ResponseEntity.ok(body);
+    }
+
+    /**
+     * List product fields that support aggregation queries for a specific vertical.
+     */
+    @GetMapping("/fields/aggregatable/{verticalId}")
+    @Operation(
+            summary = "Get aggregatable fields for a vertical",
+            description = "Return the list of fields available for aggregation supplemented with the vertical specific filters.",
+            parameters = {
+                    @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
+                            description = "Identifier of the vertical whose aggregatable fields are requested.",
+                            schema = @Schema(type = "string", example = "tv")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise aggregation labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Fields returned",
+
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string")))),
+                    @ApiResponse(responseCode = "404", description = "Vertical not found")
+            }
+    )
+    public ResponseEntity<List<String>> aggregatableFieldsForVertical(
+            @PathVariable("verticalId") String verticalId,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        List<String> fields = new ArrayList<>(Arrays.stream(ProductDtoAggregatableFields.values())
+                .map(ProductDtoAggregatableFields::getText)
+                .toList());
+        return buildVerticalFieldsResponse(verticalId, fields);
+    }
+
+    /**
+     * List product fields that can be used for filtering.
+     */
+    @GetMapping("/fields/filters")
+    @Operation(
+            summary = "Get filterable fields",
+            description = "Return the list of fields accepted by the filters parameter.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise field labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Fields returned",
+
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string"))))
+            }
+    )
+    public ResponseEntity<List<String>> filterableFields(
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        List<String> body = Arrays.stream(ProductDtoFilterFields.values())
+                .map(ProductDtoFilterFields::getText)
+                .toList();
+        return ResponseEntity.ok(body);
+    }
+
+    /**
+     * List product fields that can be used for filtering for a specific vertical.
+     */
+    @GetMapping("/fields/filters/{verticalId}")
+    @Operation(
+            summary = "Get filterable fields for a vertical",
+            description = "Return the list of fields accepted by the filters parameter supplemented with the vertical specific filters.",
+            parameters = {
+                    @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
+                            description = "Identifier of the vertical whose filterable fields are requested.",
+                            schema = @Schema(type = "string", example = "tv")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language used to localise field labels in future responses.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Fields returned",
+
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string")))),
+                    @ApiResponse(responseCode = "404", description = "Vertical not found")
+            }
+    )
+    public ResponseEntity<List<String>> filterableFieldsForVertical(
+            @PathVariable("verticalId") String verticalId,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        List<String> fields = new ArrayList<>(Arrays.stream(ProductDtoFilterFields.values())
+                .map(ProductDtoFilterFields::getText)
+                .toList());
+        return buildVerticalFieldsResponse(verticalId, fields);
     }
 
 
@@ -306,7 +437,80 @@ public class ProductController {
 		Set<String> requestedComponents = include == null ? Set.of() : include;
 		ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
-		return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+        return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+    }
+
+    /**
+     * Combine the base field list with the filters configured on the specified vertical.
+     *
+     * @param verticalId identifier of the vertical to resolve
+     * @param fields     base list of field names already allowed globally
+     * @return {@link ResponseEntity} wrapping the augmented list or {@code 404} if the vertical is unknown
+     */
+    private ResponseEntity<List<String>> buildVerticalFieldsResponse(String verticalId, List<String> fields) {
+        if (!StringUtils.hasText(verticalId)) {
+            return ResponseEntity.ok(List.copyOf(fields));
+        }
+
+        VerticalConfig vConfig = verticalsConfigService.getConfigById(verticalId);
+        if (vConfig == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        appendVerticalFilters(fields, vConfig);
+        return ResponseEntity.ok(List.copyOf(fields));
+    }
+
+    /**
+     * Append all filters defined on the vertical configuration to the provided target list.
+     *
+     * @param target list collecting the resulting field names
+     * @param config vertical configuration supplying eco and technical filters
+     */
+    private void appendVerticalFilters(List<String> target, VerticalConfig config) {
+        appendConvertedFilters(target, config.getEcoFilters(), config);
+        appendConvertedFilters(target, config.getTechnicalFilters(), config);
+        appendConvertedFilters(target, config.getGlobalTechnicalFilters(), config);
+    }
+
+    /**
+     * Convert the provided filter identifiers to indexed attribute paths and append them to the target list.
+     *
+     * @param target  list collecting the resulting field names
+     * @param filters filters to convert (may be {@code null})
+     * @param config  vertical configuration used to resolve attribute metadata
+     */
+    private void appendConvertedFilters(List<String> target, List<String> filters, VerticalConfig config) {
+        if (filters == null) {
+            return;
+        }
+
+        for (String filterName : filters) {
+            if (!StringUtils.hasText(filterName)) {
+                continue;
+            }
+            String normalizedName = filterName.trim();
+            target.add(toIndexedAttribute(normalizedName, config));
+        }
+    }
+
+    /**
+     * Translate a vertical filter key to the indexed attribute path used by Elasticsearch.
+     *
+     * @param filterName filter identifier as defined in the vertical configuration
+     * @param config     vertical configuration used to resolve attribute metadata
+     * @return fully qualified field path pointing to the indexed attribute value
+     */
+    private String toIndexedAttribute(String filterName, VerticalConfig config) {
+        String baseField = "attributes.indexed." + filterName;
+        AttributeConfig attributeConfig = null;
+        if (config.getAttributesConfig() != null) {
+            attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(filterName);
+        }
+        if (attributeConfig != null && attributeConfig.getFilteringType() == AttributeType.NUMERIC) {
+            return baseField + ".numericValue";
+        }
+        return baseField;
     }
 
     /**
