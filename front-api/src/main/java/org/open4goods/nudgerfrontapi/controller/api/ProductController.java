@@ -253,33 +253,49 @@ public class ProductController {
 
 		// Validating requested aggregations
 
-		AggregationRequestDto aggDto = null;
-		if (aggs != null) {
-			try {
-				aggDto = objectMapper.readValue(aggs, AggregationRequestDto.class);
-			} catch (JsonProcessingException e) {
-				ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-				pd.setTitle("Invalid aggregation parameter");
-				pd.setDetail("Unable to parse aggregation query: " + e.getMessage());
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-				return response;
-			}
-		}
+                AggregationRequestDto aggDto = null;
+                if (aggs != null) {
+                        try {
+                                String trimmedAggs = aggs.trim();
+                                if (!trimmedAggs.isEmpty() && trimmedAggs.charAt(0) == '[') {
+                                        List<AggregationRequestDto.Agg> aggregations = objectMapper
+                                                        .readerForListOf(AggregationRequestDto.Agg.class)
+                                                        .readValue(trimmedAggs);
+                                        aggDto = new AggregationRequestDto(aggregations);
+                                } else {
+                                        aggDto = objectMapper.readValue(trimmedAggs, AggregationRequestDto.class);
+                                }
+                        } catch (JsonProcessingException e) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid aggregation parameter");
+                                pd.setDetail("Unable to parse aggregation query: " + e.getMessage());
+                                @SuppressWarnings({ "unchecked", "rawtypes" })
+                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                                return response;
+                        }
+                }
 
-		// Validating requested filters
+                // Validating requested filters
 
 
-		FilterRequestDto filterDto = null;
-		if (filters != null) {
-			try {
-				filterDto = objectMapper.readValue(filters, FilterRequestDto.class);
-			} catch (JsonProcessingException e) {
-				ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-				pd.setTitle("Invalid filters parameter");
-				pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+                FilterRequestDto filterDto = null;
+                if (filters != null) {
+                        try {
+                                String trimmedFilters = filters.trim();
+                                if (!trimmedFilters.isEmpty() && trimmedFilters.charAt(0) == '[') {
+                                        List<FilterRequestDto.Filter> clauses = objectMapper
+                                                        .readerForListOf(FilterRequestDto.Filter.class)
+                                                        .readValue(trimmedFilters);
+                                        filterDto = new FilterRequestDto(clauses);
+                                } else {
+                                        filterDto = objectMapper.readValue(trimmedFilters, FilterRequestDto.class);
+                                }
+                        } catch (JsonProcessingException e) {
+                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+                                pd.setTitle("Invalid filters parameter");
+                                pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
+                                @SuppressWarnings({ "unchecked", "rawtypes" })
+                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
 				return response;
 			}
 		}
