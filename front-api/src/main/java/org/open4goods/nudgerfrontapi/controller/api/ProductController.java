@@ -216,7 +216,7 @@ public class ProductController {
                 @RequestParam(required = false) String verticalId,
                 @RequestParam(required = false) String query,
                 @RequestParam() DomainLanguage domainLanguage,
-                  Locale locale) {
+                Locale locale) {
 
 
 		/////////////////////
@@ -224,84 +224,71 @@ public class ProductController {
 		/////////////////////
 
 		// Validating sort field
-                for (var order : page.getSort()) {
-                        if (ProductDtoSortableFields.fromText(order.getProperty()).isEmpty()) {
-                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                pd.setTitle("Invalid sort parameter");
-                                pd.setDetail("Unknown sort field: " + order.getProperty());
-                                @SuppressWarnings({"unchecked", "rawtypes"})
-                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                return response;
-                        }
-                }
-                // Validating requested components
+		for (var order : page.getSort()) {
+			if (ProductDtoSortableFields.fromText(order.getProperty()).isEmpty()) {
+				ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+				pd.setTitle("Invalid sort parameter");
+				pd.setDetail("Unknown sort field: " + order.getProperty());
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+				return response;
+			}
+		}
+		// Validating requested components
 
-                if (include != null) {
-                        for (String i : include) {
-                                try {
-                                        ProductDtoComponent.valueOf(i);
-                                } catch (IllegalArgumentException ex) {
-                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                        pd.setTitle("Invalid include parameter");
-                                        pd.setDetail("Unknown component: " + i);
-                                        @SuppressWarnings({"unchecked", "rawtypes"})
-                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                        return response;
-                                }
-                        }
-                }
+		if (include != null) {
+			for (String i : include) {
+				try {
+					ProductDtoComponent.valueOf(i);
+				} catch (IllegalArgumentException ex) {
+					ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+					pd.setTitle("Invalid include parameter");
+					pd.setDetail("Unknown component: " + i);
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+					return response;
+				}
+			}
+		}
 
+		// Validating requested aggregations
 
-                ////////////////////////
-                // Transforming product to DTO
-                ///////////////////////
+		AggregationRequestDto aggDto = null;
+		if (aggs != null) {
+			try {
+				aggDto = objectMapper.readValue(aggs, AggregationRequestDto.class);
+			} catch (JsonProcessingException e) {
+				ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+				pd.setTitle("Invalid aggregation parameter");
+				pd.setDetail("Unable to parse aggregation query: " + e.getMessage());
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+				return response;
+			}
+		}
 
-                AggregationRequestDto aggDto = null;
-                if (aggs != null) {
-                        String trimmedAggs = aggs.trim();
-                        try {
-                                if (trimmedAggs.startsWith("[")) {
-                                        List<AggregationRequestDto.Agg> parsedAggs = objectMapper
-                                                        .readerForListOf(AggregationRequestDto.Agg.class)
-                                                        .readValue(trimmedAggs);
-                                        aggDto = new AggregationRequestDto(parsedAggs);
-                                } else {
-                                        aggDto = objectMapper.readValue(trimmedAggs, AggregationRequestDto.class);
-                                }
-                        } catch (JsonProcessingException e) {
-                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                pd.setTitle("Invalid aggregation parameter");
-                                pd.setDetail("Unable to parse aggregation query: " + e.getMessage());
-                                @SuppressWarnings({"unchecked", "rawtypes"})
-                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                return response;
-                        }
-                }
+		FilterRequestDto filterDto = null;
+		if (filters != null) {
+			try {
+				filterDto = objectMapper.readValue(filters, FilterRequestDto.class);
+			} catch (JsonProcessingException e) {
+				ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+				pd.setTitle("Invalid filters parameter");
+				pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+				return response;
+			}
+		}
 
-                FilterRequestDto filterDto = null;
-                if (filters != null) {
-                        try {
-                                filterDto = objectMapper.readValue(filters, FilterRequestDto.class);
-                        } catch (JsonProcessingException e) {
-                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                pd.setTitle("Invalid filters parameter");
-                                pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
-                                @SuppressWarnings({"unchecked", "rawtypes"})
-                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                return response;
-                        }
-                }
+		String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
+		String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
 
-                String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
-                String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+		Set<String> requestedComponents = include == null ? Set.of() : include;
+		ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
-                Set<String> requestedComponents = include == null ? Set.of() : include;
-                ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
-
-
-
-                return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
-        }
+		return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+    }
 
     /**
      * Return high level information for a product.
@@ -350,12 +337,11 @@ public class ProductController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<ProductDto> product(@PathVariable
-                                                       Long gtin,
-                                                       @RequestParam(required = false)
-                                                       Set<String> include,
-                                                       @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-                                                       Locale locale) throws ResourceNotFoundException {
+    public ResponseEntity<ProductDto> product(@PathVariable Long gtin,
+	                                           @RequestParam(required = false)
+	                                           Set<String> include,
+	                                           @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+	                                           Locale locale) throws ResourceNotFoundException {
 
         ProductDto body = service.getProduct(gtin, locale, include, domainLanguage);
 
@@ -365,97 +351,5 @@ public class ProductController {
                 .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
-//
-//
-//    //////////////////////////////////
-//    /// AI review endpoints
-//    //////////////////////////////////
-//
-//    /**
-//     * List customer or AI reviews for a product.
-//     *
-//     * <p>Error codes:</p>
-//     * <ul>
-//     *   <li><b>INVALID_GTIN</b> – 400</li>
-//     *   <li><b>UNAUTHORIZED</b> – 401</li>
-//     *   <li><b>FORBIDDEN</b> – 403</li>
-//     *   <li><b>NOT_FOUND</b> – 404</li>
-//     *   <li><b>INTERNAL_ERROR</b> – 500</li>
-//     * </ul>
-//     */
-//    @GetMapping("/{gtin}/reviews")
-//    @Operation(
-//            summary = "Get product reviews",
-//            description = "Return customer or AI‑generated reviews for a product.",
-//            security = @SecurityRequirement(name = "bearer-jwt"),
-//            parameters = {
-//                    @Parameter(name = "gtin", description = "Global Trade Item Number (8–14 digit numeric code)", example = "00012345600012", required = true),
-//
-//                    @Parameter(name = "pageNumber", in = ParameterIn.QUERY, description = "Zero-based page index"),
-//                    @Parameter(name = "pageSize", in = ParameterIn.QUERY, description = "Page size")
-//
-//            },
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Reviews returned",
-//                            headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
-//                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductReviewDto.class, type = "array"))),
-//                    @ApiResponse(responseCode = "400", description = "Invalid GTIN"),
-//                    @ApiResponse(responseCode = "401", description = "Authentication required"),
-//                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
-//                    @ApiResponse(responseCode = "404", description = "Product not found"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<Page<ProductReviewDto>> reviews(
-//            @PathVariable @Pattern(regexp = "\\d{8,14}") String gtin,
-//            @PageableDefault(size = 20) Pageable pageable) throws Exception {
-//
-//
-//        Page<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin), pageable);
-//        return ResponseEntity.ok()
-//                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
-//                .body(body);
-//    }
-//
-//    /**
-//     * Enqueue an AI review generation.
-//     *
-//     * <p>Error codes:</p>
-//     * <ul>
-//     *   <li><b>INVALID_GTIN</b> – 400</li>
-//     *   <li><b>UNAUTHORIZED</b> – 401</li>
-//     *   <li><b>FORBIDDEN</b> – 403</li>
-//     *   <li><b>TOO_MANY_REQUESTS</b> – 429</li>
-//     *   <li><b>INTERNAL_ERROR</b> – 500</li>
-//     * </ul>
-//     */
-//    @PostMapping("/{gtin}/reviews")
-//    @Operation(
-//            summary = "Generate AI review",
-//            description = "Trigger the generation of an AI‑written review.  Returns 202 to indicate that processing has started.",
-//            parameters = {
-//                    @Parameter(name = "gtin", description = "Global Trade Item Number", example = "00012345600012", required = true),
-//                    @Parameter(name = "hcaptchaResponse", required = true,
-//                               description = "Token returned by hCaptcha widget for bot mitigation.")
-//            },
-//            security = {
-//                    @SecurityRequirement(name = "bearer-jwt"),
-//                    @SecurityRequirement(name = "hCaptcha")
-//            },
-//            responses = {
-//                    @ApiResponse(responseCode = "202", description = "Accepted – review generation enqueued"),
-//                    @ApiResponse(responseCode = "400", description = "Invalid GTIN or hCaptcha token"),
-//                    @ApiResponse(responseCode = "401", description = "Authentication required"),
-//                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
-//                    @ApiResponse(responseCode = "429", description = "Too many concurrent generations"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<Void> generateReview(@PathVariable @Pattern(regexp = "\\d{8,14}") String gtin,
-//                                               @RequestParam("hcaptchaResponse") String captcha,
-//                                               HttpServletRequest request) throws Exception {
-//        service.createReview(Long.parseLong(gtin), captcha, request);
-//        return ResponseEntity.accepted().build();
-//    }
 
 }
