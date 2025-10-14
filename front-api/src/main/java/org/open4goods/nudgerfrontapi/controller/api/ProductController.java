@@ -334,6 +334,9 @@ public class ProductController {
                                             schema = @Schema(type = "string", example = "fr-FR"))
                             },
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductSearchResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")

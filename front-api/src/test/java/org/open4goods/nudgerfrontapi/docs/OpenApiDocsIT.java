@@ -42,6 +42,7 @@ class OpenApiDocsIT {
                 .with(httpBasic("user", "pass"))
                 .header("X-Shared-Token", SHARED_TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.openapi").exists());
+                .andExpect(jsonPath("$.openapi").exists())
+                .andExpect(jsonPath("$.paths['/products'].get.responses['400']").exists());
     }
 }
