@@ -43,7 +43,10 @@ import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -260,6 +263,108 @@ class ProductControllerIT {
     }
 
     @Test
+    void productsEndpointAllowsVerticalAttributeSort() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
+                .willReturn(responseDto);
+
+        mockMvc.perform(get("/products")
+                        .param("sort", "attributes.indexed.battery_life.numericValue,asc")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void productsEndpointRejectsSortOutsideVerticalMetadata() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        mockMvc.perform(get("/products")
+                        .param("sort", "attributes.indexed.weight.numericValue,desc")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void productsEndpointAllowsVerticalAggregation() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
+                .willReturn(responseDto);
+
+        mockMvc.perform(get("/products")
+                        .param("aggs", "{\"aggs\":[{\"name\":\"by_battery\",\"field\":\"attributes.indexed.battery_life.numericValue\",\"type\":\"range\"}]}")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void productsEndpointRejectsAggregationOutsideVerticalMetadata() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        mockMvc.perform(get("/products")
+                        .param("aggs", "{\"aggs\":[{\"name\":\"by_weight\",\"field\":\"attributes.indexed.weight.numericValue\",\"type\":\"range\"}]}")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void productsEndpointAllowsVerticalAttributeFilter() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class)))
+                .willReturn(responseDto);
+
+        mockMvc.perform(get("/products")
+                        .param("filters", "{\"filters\":[{\"field\":\"attributes.indexed.battery_life.numericValue\",\"operator\":\"range\",\"min\":10,\"max\":50}]}")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void productsEndpointRejectsFilterOutsideVerticalMetadata() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        mockMvc.perform(get("/products")
+                        .param("filters", "{\"filters\":[{\"field\":\"attributes.indexed.weight.numericValue\",\"operator\":\"range\",\"min\":10,\"max\":50}]}")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void sortableFieldsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/sortable")
                         .param("domainLanguage", "FR")
@@ -352,5 +457,18 @@ class ProductControllerIT {
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isAccepted());
+    }
+
+    private VerticalConfig verticalConfigWithNumericAttribute(String attributeKey) {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("electronics");
+        config.setTechnicalFilters(List.of(attributeKey));
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey(attributeKey);
+        attributeConfig.setFilteringType(AttributeType.NUMERIC);
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(List.of(attributeConfig));
+        config.setAttributesConfig(attributesConfig);
+        return config;
     }
 }
