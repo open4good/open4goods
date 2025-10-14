@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 
 interface SlideItem {
   imageSmall: string;
   verticalHomeTitle: string;
+  href: string;
 }
 
-const router = useRouter();
 const selectedImage = ref(null);
 
 withDefaults(
@@ -23,10 +22,6 @@ withDefaults(
 
 const loadedImages = ref<Set<number>>(new Set());
 
-const handleClick = (verticalHomeTitle: string) => {
-  router.push(`/produits?category=${verticalHomeTitle}`);
-};
-
 const onImageLoad = (index: number) => {
   loadedImages.value.add(index);
 };
@@ -38,20 +33,19 @@ const onImageLoad = (index: number) => {
       v-for="(item, index) in items"
       :key="index"
     >
-    <div>
-      <v-img
-        :src="item.imageSmall"
-        :height="height"
-        :width="width"
-        cover
-        class="cursor-pointer"
-        @click.stop="() => handleClick(item.verticalHomeTitle)"
-        @load="() => onImageLoad(index)"
-      />
-      <div v-if="loadedImages.has(index)" class="text-center pa-2 text-caption">
-        {{ item.verticalHomeTitle }}
-      </div>
-    </div>
+      <NuxtLink :to="item.href" class="d-inline-flex flex-column align-center text-decoration-none">
+        <v-img
+          :src="item.imageSmall"
+          :height="height"
+          :width="width"
+          cover
+          class="cursor-pointer"
+          @load="() => onImageLoad(index)"
+        />
+        <div v-if="loadedImages.has(index)" class="text-center pa-2 text-caption text-high-emphasis">
+          {{ item.verticalHomeTitle }}
+        </div>
+      </NuxtLink>
     </v-slide-group-item>
   </v-slide-group>
 </template>
