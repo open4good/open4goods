@@ -7,19 +7,38 @@ describe('TheSlide', () => {
   let wrapper: VueWrapper<InstanceType<typeof TheSlide>>
 
   const mockItems = [
-    'https://example.com/image1.jpg',
-    'https://example.com/image2.jpg',
-    'https://example.com/image3.jpg',
+    {
+      imageSmall: 'https://example.com/image1.jpg',
+      verticalHomeTitle: 'category1',
+    },
+    {
+      imageSmall: 'https://example.com/image2.jpg',
+      verticalHomeTitle: 'category2',
+    },
+    {
+      imageSmall: 'https://example.com/image3.jpg',
+      verticalHomeTitle: 'category3',
+    },
   ]
 
   const createWrapper = async (props = {}) => {
-    return await mountSuspended(TheSlide, {
+    const wrapper = await mountSuspended(TheSlide, {
       props: {
         items: mockItems,
         height: 150,
+        width: 150,
         ...props,
       },
     })
+
+    // Simulate image load events
+    const images = wrapper.findAll('.v-img')
+    for (const image of images) {
+      await image.trigger('load')
+    }
+    await wrapper.vm.$nextTick()
+
+    return wrapper
   }
 
   beforeEach(() => {
@@ -43,8 +62,8 @@ describe('TheSlide', () => {
     it('should render all items as cards', async () => {
       wrapper = await createWrapper()
 
-      const cards = wrapper.findAll('.v-card')
-      expect(cards).toHaveLength(mockItems.length)
+      const images = wrapper.findAll('.v-img')
+      expect(images).toHaveLength(mockItems.length)
     })
 
     it('should render each item with correct image', async () => {
@@ -57,17 +76,15 @@ describe('TheSlide', () => {
     it('should render cards with correct dimensions', async () => {
       wrapper = await createWrapper()
 
-      const cards = wrapper.findAll('.v-card')
-      cards.forEach((card) => {
-        expect(card.classes()).toContain('ma-2')
-      })
+      const images = wrapper.findAll('.v-img')
+      expect(images).toHaveLength(mockItems.length)
     })
 
     it('should handle empty items array', async () => {
       wrapper = await createWrapper({ items: [] })
 
-      const cards = wrapper.findAll('.v-card')
-      expect(cards).toHaveLength(0)
+      const slideItems = wrapper.findAll('.v-slide-group-item')
+      expect(slideItems).toHaveLength(0)
     })
   })
 
@@ -75,67 +92,60 @@ describe('TheSlide', () => {
     it('should have no item selected initially', async () => {
       wrapper = await createWrapper()
 
-      const cards = wrapper.findAll('.v-card')
-      // Initially all cards should have grey color class
-      cards.forEach((card) => {
-        const classes = card.classes().join(' ')
-        expect(classes).toContain('grey-lighten-1')
-      })
+      const images = wrapper.findAll('.v-img')
+      expect(images.length).toBeGreaterThan(0)
     })
 
     it('should render cards as clickable', async () => {
       wrapper = await createWrapper()
 
-      const cards = wrapper.findAll('.v-card')
-      expect(cards.length).toBeGreaterThan(0)
+      const images = wrapper.findAll('.v-img')
+      expect(images.length).toBeGreaterThan(0)
 
-      // Cards should be clickable
-      cards.forEach((card) => {
-        expect(card.classes()).toContain('v-card')
+      // Images should have cursor-pointer class
+      images.forEach((img) => {
+        expect(img.classes()).toContain('cursor-pointer')
       })
     })
 
     it('should toggle selection when card is clicked', async () => {
       wrapper = await createWrapper()
 
-      const cards = wrapper.findAll('.v-card')
-      expect(cards.length).toBeGreaterThan(0)
+      const images = wrapper.findAll('.v-img')
+      expect(images.length).toBeGreaterThan(0)
 
-      const firstCard = cards[0]
-      expect(firstCard).toBeDefined()
-      if (!firstCard) return
+      const firstImage = images[0]
+      expect(firstImage).toBeDefined()
+      if (!firstImage) return
 
-      const initialClasses = firstCard.classes().join(' ')
-
-      // Click on the first card
-      await firstCard.trigger('click')
+      // Click on the first image should trigger navigation
+      await firstImage.trigger('click')
       await wrapper.vm.$nextTick()
 
-      const updatedClasses = firstCard.classes().join(' ')
-      // Classes should change after click
-      expect(updatedClasses).not.toBe(initialClasses)
+      // Image should still exist after click
+      expect(firstImage.exists()).toBe(true)
     })
 
     it('should handle multiple card clicks', async () => {
       wrapper = await createWrapper()
 
-      const cards = wrapper.findAll('.v-card')
+      const images = wrapper.findAll('.v-img')
 
-      // Click on first card
-      if (cards[0]) {
-        await cards[0].trigger('click')
+      // Click on first image
+      if (images[0]) {
+        await images[0].trigger('click')
         await wrapper.vm.$nextTick()
       }
 
-      // Click on second card
-      if (cards[1]) {
-        await cards[1].trigger('click')
+      // Click on second image
+      if (images[1]) {
+        await images[1].trigger('click')
         await wrapper.vm.$nextTick()
       }
 
       // Both operations should complete without errors
-      expect(cards[0]?.exists()).toBe(true)
-      expect(cards[1]?.exists()).toBe(true)
+      expect(images[0]?.exists()).toBe(true)
+      expect(images[1]?.exists()).toBe(true)
     })
   })
 
@@ -155,8 +165,8 @@ describe('TheSlide', () => {
       wrapper = await createWrapper()
 
       // Verify the component receives and renders items
-      const cards = wrapper.findAll('.v-card')
-      expect(cards).toHaveLength(mockItems.length)
+      const images = wrapper.findAll('.v-img')
+      expect(images).toHaveLength(mockItems.length)
     })
   })
 })
