@@ -10,14 +10,17 @@ describe('TheSlide', () => {
     {
       imageSmall: 'https://example.com/image1.jpg',
       verticalHomeTitle: 'category1',
+      href: '/category1',
     },
     {
       imageSmall: 'https://example.com/image2.jpg',
       verticalHomeTitle: 'category2',
+      href: '/category2',
     },
     {
       imageSmall: 'https://example.com/image3.jpg',
       verticalHomeTitle: 'category3',
+      href: '/category3',
     },
   ]
 
@@ -28,6 +31,14 @@ describe('TheSlide', () => {
         height: 150,
         width: 150,
         ...props,
+      },
+      global: {
+        stubs: {
+          NuxtLink: {
+            template: `<a :href="typeof to === 'string' ? to : to?.path"><slot /></a>`,
+            props: ['to'],
+          },
+        },
       },
     })
 
@@ -96,7 +107,7 @@ describe('TheSlide', () => {
       expect(images.length).toBeGreaterThan(0)
     })
 
-    it('should render cards as clickable', async () => {
+    it('should render cards as clickable images', async () => {
       wrapper = await createWrapper()
 
       const images = wrapper.findAll('.v-img')
@@ -108,44 +119,21 @@ describe('TheSlide', () => {
       })
     })
 
-    it('should toggle selection when card is clicked', async () => {
+    it('should expose SSR-friendly links for each card', async () => {
       wrapper = await createWrapper()
 
-      const images = wrapper.findAll('.v-img')
-      expect(images.length).toBeGreaterThan(0)
-
-      const firstImage = images[0]
-      expect(firstImage).toBeDefined()
-      if (!firstImage) return
-
-      // Click on the first image should trigger navigation
-      await firstImage.trigger('click')
-      await wrapper.vm.$nextTick()
-
-      // Image should still exist after click
-      expect(firstImage.exists()).toBe(true)
+      const anchors = wrapper.findAll('a')
+      expect(anchors).toHaveLength(mockItems.length)
+      expect(anchors[0]?.attributes('href')).toBe(mockItems[0]?.href)
     })
 
-    it('should handle multiple card clicks', async () => {
+    it('should render correct href for each card', async () => {
       wrapper = await createWrapper()
 
-      const images = wrapper.findAll('.v-img')
-
-      // Click on first image
-      if (images[0]) {
-        await images[0].trigger('click')
-        await wrapper.vm.$nextTick()
-      }
-
-      // Click on second image
-      if (images[1]) {
-        await images[1].trigger('click')
-        await wrapper.vm.$nextTick()
-      }
-
-      // Both operations should complete without errors
-      expect(images[0]?.exists()).toBe(true)
-      expect(images[1]?.exists()).toBe(true)
+      const anchors = wrapper.findAll('a')
+      anchors.forEach((anchor, index) => {
+        expect(anchor.attributes('href')).toBe(mockItems[index]?.href)
+      })
     })
   })
 

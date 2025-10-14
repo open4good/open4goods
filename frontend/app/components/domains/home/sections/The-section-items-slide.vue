@@ -32,12 +32,27 @@ const categoryImages = computed(() => {
     .filter((category: VerticalConfigDto): category is VerticalConfigDto & {
       imageSmall: string;
       verticalHomeTitle: string;
-    } => Boolean(category.imageSmall) && Boolean(category.verticalHomeTitle))
-    .map((category: VerticalConfigDto & { imageSmall: string; verticalHomeTitle: string }) => {
-      return {
-        imageSmall: category.imageSmall,
-        verticalHomeTitle: category.verticalHomeTitle
-      };
-    });
+      verticalHomeUrl: string;
+    } =>
+      Boolean(category.imageSmall) &&
+      Boolean(category.verticalHomeTitle) &&
+      Boolean(category.verticalHomeUrl))
+    .map(
+      (
+        category: VerticalConfigDto & {
+          imageSmall: string;
+          verticalHomeTitle: string;
+          verticalHomeUrl: string;
+        }
+      ) => {
+        const sanitizedSlug = category.verticalHomeUrl.replace(/^\/+/, "");
+
+        return {
+          imageSmall: category.imageSmall,
+          verticalHomeTitle: category.verticalHomeTitle,
+          href: `/${sanitizedSlug}`
+        };
+      }
+    );
 });
 </script>
