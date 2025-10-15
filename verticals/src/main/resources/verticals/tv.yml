@@ -313,6 +313,39 @@ subsets:
 
 
 
+
+aggregationConfiguration:
+  ECOSCORE:
+    interval: 5
+    buckets: 20
+  REPAIRABILITY_INDEX:
+    interval: 1
+    buckets: 10
+  POWER_CONSUMPTION_TYPICAL:
+    interval: 25
+    buckets: 12
+  POWER_CONSUMPTION_OFF:
+    interval: 0.1
+    buckets: 10
+  WEIGHT:
+    interval: 2
+    buckets: 12
+  BRAND_SUSTAINABILITY:
+    interval: 5
+    buckets: 20
+  DATA_QUALITY:
+    interval: 5
+    buckets: 20
+  ENERGY_CONSUMPTION_1000_HOURS:
+    interval: 20
+    buckets: 12
+  DIAGONALE_POUCES:
+    interval: 5
+    buckets: 12
+  HDMI_PORTS_QUANTITY:
+    interval: 1
+    buckets: 6
+
 ecoFilters:
     - "REPAIRABILITY_INDEX" 
     - "CLASSE_ENERGY"   

@@ -167,11 +167,17 @@ public class VerticalConfig{
 	@JsonMerge
 	private ResourcesAggregationConfig resourcesConfig = new ResourcesAggregationConfig();
 
-	/**
-	 * Configuration relativ to attributes aggregation
-	 */
-	@JsonMerge
-	private AttributesConfig attributesConfig = new AttributesConfig();
+        /**
+         * Configuration relativ to attributes aggregation
+         */
+        @JsonMerge
+        private AttributesConfig attributesConfig = new AttributesConfig();
+
+        /**
+         * Preferred aggregation parameters for attributes and impact scores.
+         */
+        @JsonMerge
+        private Map<String, AggregationConfiguration> aggregationConfiguration = new HashMap<>();
 
 
 	/**
@@ -607,9 +613,24 @@ public class VerticalConfig{
 	}
 
 
-	public void setAttributesConfig(AttributesConfig attributesConfig) {
-		this.attributesConfig = attributesConfig;
-	}
+        public void setAttributesConfig(AttributesConfig attributesConfig) {
+                this.attributesConfig = attributesConfig;
+        }
+
+        public Map<String, AggregationConfiguration> getAggregationConfiguration() {
+                return aggregationConfiguration;
+        }
+
+        public void setAggregationConfiguration(Map<String, AggregationConfiguration> aggregationConfiguration) {
+                this.aggregationConfiguration = aggregationConfiguration;
+        }
+
+        public AggregationConfiguration getAggregationConfigurationFor(String key) {
+                if (aggregationConfiguration == null) {
+                        return null;
+                }
+                return aggregationConfiguration.get(key);
+        }
 
 //
 //	public RatingsConfig getRatingsConfig() {
