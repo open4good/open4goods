@@ -47,7 +47,8 @@
     "pinia": "^3.0.3",
     "unhead": "^2.0.14",
     "vue": "3.5.22",
-    "vuetify-nuxt-module": "^0.18.7"
+    "vuetify-nuxt-module": "^0.18.7",
+    "lz-string": "^1.5.0"
   },
   "devDependencies": {
     "@iconify-json/bxl": "^1.2.2",

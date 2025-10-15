@@ -1,5 +1,14 @@
 import { ProductApi } from '..'
-import type { ProductDto } from '..'
+import type {
+  ProductDto,
+  ProductFieldOptionsResponse,
+  ProductSearchResponseDto,
+} from '..'
+import type {
+  FilterableFieldsForVerticalRequest,
+  ProductsRequest,
+  SortableFieldsForVerticalRequest,
+} from '../apis/ProductApi'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
@@ -38,5 +47,66 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  return { getProductByGtin }
+  const getFilterableFieldsForVertical = async (
+    verticalId: string,
+  ): Promise<ProductFieldOptionsResponse> => {
+    if (!verticalId) {
+      throw new TypeError('verticalId is required to resolve filterable fields.')
+    }
+
+    const request: FilterableFieldsForVerticalRequest = {
+      verticalId,
+      domainLanguage,
+    }
+
+    try {
+      return await resolveApi().filterableFieldsForVertical(request)
+    } catch (error) {
+      console.error('Error fetching filterable fields for vertical:', verticalId, error)
+      throw error
+    }
+  }
+
+  const getSortableFieldsForVertical = async (
+    verticalId: string,
+  ): Promise<ProductFieldOptionsResponse> => {
+    if (!verticalId) {
+      throw new TypeError('verticalId is required to resolve sortable fields.')
+    }
+
+    const request: SortableFieldsForVerticalRequest = {
+      verticalId,
+      domainLanguage,
+    }
+
+    try {
+      return await resolveApi().sortableFieldsForVertical(request)
+    } catch (error) {
+      console.error('Error fetching sortable fields for vertical:', verticalId, error)
+      throw error
+    }
+  }
+
+  const searchProducts = async (
+    parameters: Omit<ProductsRequest, 'domainLanguage'>,
+  ): Promise<ProductSearchResponseDto> => {
+    const request: ProductsRequest = {
+      domainLanguage,
+      ...parameters,
+    }
+
+    try {
+      return await resolveApi().products(request)
+    } catch (error) {
+      console.error('Error searching products with parameters:', request, error)
+      throw error
+    }
+  }
+
+  return {
+    getProductByGtin,
+    getFilterableFieldsForVertical,
+    getSortableFieldsForVertical,
+    searchProducts,
+  }
 }
