@@ -25,6 +25,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -81,6 +82,9 @@ public class ProductController {
     private final ObjectMapper objectMapper;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
+
+    private static final String VALUE_TYPE_NUMERIC = "numeric";
+    private static final String VALUE_TYPE_TEXT = "text";
 
     public ProductController(ProductMappingService service, ObjectMapper objectMapper,
                              VerticalsConfigService verticalsConfigService,
@@ -169,7 +173,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoSortableFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineSortableValueType(field)))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -227,7 +231,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field)))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -309,7 +313,7 @@ public class ProductController {
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
         List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field)))
                 .toList();
         ProductFieldOptionsResponse filterOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage,
                 filterableGlobal);
@@ -613,14 +617,15 @@ public class ProductController {
             String normalizedName = filterName.trim();
             String mapping = toIndexedAttribute(normalizedName, config);
             String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
-            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null);
+            String valueType = resolveAttributeValueType(config, normalizedName);
+            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null, valueType);
             results.add(dto);
         }
         return List.copyOf(results);
     }
 
     private FieldMetadataDto buildEcoscoreField() {
-        return new FieldMetadataDto("scores.ECOSCORE.value", "impactscore", null);
+        return new FieldMetadataDto("scores.ECOSCORE.value", "impactscore", null, VALUE_TYPE_NUMERIC);
     }
 
     /**
@@ -659,9 +664,34 @@ public class ProductController {
             String mapping = "scores." + key + ".value";
             String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
             String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
-            results.add(new FieldMetadataDto(mapping, title, description));
+            results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC));
         });
         return List.copyOf(results);
+    }
+
+    private String resolveAttributeValueType(VerticalConfig config, String attributeKey) {
+        if (config.getAttributesConfig() == null) {
+            return VALUE_TYPE_TEXT;
+        }
+        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(attributeKey);
+        if (attributeConfig == null || attributeConfig.getFilteringType() == null) {
+            return VALUE_TYPE_TEXT;
+        }
+        return switch (attributeConfig.getFilteringType()) {
+        case NUMERIC -> VALUE_TYPE_NUMERIC;
+        case BOOLEAN, TEXT -> VALUE_TYPE_TEXT;
+        };
+    }
+
+    private String determineSortableValueType(ProductDtoSortableFields field) {
+        return switch (field) {
+        case price, offersCount -> VALUE_TYPE_NUMERIC;
+        };
+    }
+
+    private String determineFilterValueType(ProductDtoFilterFields field) {
+        FilterValueType delegateType = field.getDelegate().valueType();
+        return delegateType == FilterValueType.numeric ? VALUE_TYPE_NUMERIC : VALUE_TYPE_TEXT;
     }
 
     /**

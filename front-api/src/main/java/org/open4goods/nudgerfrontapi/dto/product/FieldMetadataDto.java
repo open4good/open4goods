@@ -11,6 +11,8 @@ public record FieldMetadataDto(
         @Schema(description = "Localised display name for the field when available.", example = "Prix minimum", nullable = true)
         String title,
         @Schema(description = "Localised description for the field when available.", example = "Prix minimum observé pour le produit", nullable = true)
-        String description
+        String description,
+        @Schema(description = "Type of values accepted by the field.", example = "numeric", allowableValues = {"text", "numeric"})
+        String valueType
 ) {
 }
