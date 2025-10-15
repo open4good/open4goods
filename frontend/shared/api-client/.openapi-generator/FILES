@@ -28,6 +28,8 @@ models/BlogPostDto.ts
 models/BlogTagDto.ts
 models/CategoriesStatsDto.ts
 models/CategoryBreadcrumbItemDto.ts
+models/CategoryNavigationDto.ts
+models/CategoryNavigationDtoChildCategoriesInner.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
@@ -43,6 +45,7 @@ models/FieldMetadataDto.ts
 models/Filter.ts
 models/FilterRequestDto.ts
 models/FullPageDto.ts
+models/GoogleCategoryDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreCriteriaDto.ts
 models/ImpactScoreTexts.ts

@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  CategoryNavigationDto,
   VerticalConfigDto,
   VerticalConfigFullDto,
 } from '../models/index';
 import {
+    CategoryNavigationDtoFromJSON,
+    CategoryNavigationDtoToJSON,
     VerticalConfigDtoFromJSON,
     VerticalConfigDtoToJSON,
     VerticalConfigFullDtoFromJSON,
@@ -33,6 +36,12 @@ export interface Categories1Request {
 export interface CategoryRequest {
     categoryId: string;
     domainLanguage: CategoryDomainLanguageEnum;
+}
+
+export interface NavigationRequest {
+    domainLanguage: NavigationDomainLanguageEnum;
+    googleCategoryId?: number;
+    path?: string;
 }
 
 /**
@@ -152,6 +161,64 @@ export class CategoriesApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Return the Google taxonomy navigation data required to display deep category navigation.
+     * Get category navigation
+     */
+    async navigationRaw(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoryNavigationDto>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling navigation().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        if (requestParameters['googleCategoryId'] != null) {
+            queryParameters['googleCategoryId'] = requestParameters['googleCategoryId'];
+        }
+
+        if (requestParameters['path'] != null) {
+            queryParameters['path'] = requestParameters['path'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/category/navigation`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CategoryNavigationDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return the Google taxonomy navigation data required to display deep category navigation.
+     * Get category navigation
+     */
+    async navigation(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoryNavigationDto> {
+        const response = await this.navigationRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -170,3 +237,11 @@ export const CategoryDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type CategoryDomainLanguageEnum = typeof CategoryDomainLanguageEnum[keyof typeof CategoryDomainLanguageEnum];
+/**
+ * @export
+ */
+export const NavigationDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type NavigationDomainLanguageEnum = typeof NavigationDomainLanguageEnum[keyof typeof NavigationDomainLanguageEnum];
