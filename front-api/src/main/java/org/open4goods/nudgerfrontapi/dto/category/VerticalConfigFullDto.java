@@ -50,6 +50,8 @@ public record VerticalConfigFullDto(
         String verticalMetaOpenGraphTitle,
         @Schema(description = "Localised Open Graph description for the vertical landing page.")
         String verticalMetaOpenGraphDescription,
+        @Schema(description = "Breadcrumb derived from the Google taxonomy hierarchy for this vertical.")
+        List<CategoryBreadcrumbItemDto> breadCrumb,
         @Schema(description = "Most recent blog posts tagged with the vertical identifier.")
         List<BlogPostDto> relatedPosts,
         @Schema(description = "Localised wiki pages associated with the vertical.")
