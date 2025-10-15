@@ -174,7 +174,9 @@ public class VerticalConfig{
         private AttributesConfig attributesConfig = new AttributesConfig();
 
         /**
-         * Preferred aggregation parameters for attributes and impact scores.
+         * Preferred aggregation parameters for attributes and impact scores. The map is indexed by the
+         * document mapping (e.g. {@code attributes.indexed.WEIGHT}) used by Elasticsearch so the same
+         * configuration can be reused across attributes and scores exposed by the API.
          */
         @JsonMerge
         private Map<String, AggregationConfiguration> aggregationConfiguration = new HashMap<>();
@@ -626,10 +628,26 @@ public class VerticalConfig{
         }
 
         public AggregationConfiguration getAggregationConfigurationFor(String key) {
-                if (aggregationConfiguration == null) {
+                if (aggregationConfiguration == null || aggregationConfiguration.isEmpty() || key == null) {
                         return null;
                 }
-                return aggregationConfiguration.get(key);
+                String normalizedKey = key.trim();
+                if (normalizedKey.isEmpty()) {
+                        return null;
+                }
+                AggregationConfiguration directMatch = aggregationConfiguration.get(normalizedKey);
+                if (directMatch != null) {
+                        return directMatch;
+                }
+                for (Entry<String, AggregationConfiguration> entry : aggregationConfiguration.entrySet()) {
+                        if (entry.getKey() == null) {
+                                continue;
+                        }
+                        if (normalizedKey.equals(entry.getKey().trim())) {
+                                return entry.getValue();
+                        }
+                }
+                return null;
         }
 
 //
