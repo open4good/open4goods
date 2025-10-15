@@ -130,6 +130,48 @@
       "postsTitle": "Related articles"
     }
   },
+  "categories": {
+    "navigation": {
+      "loading": "Loading category navigation",
+      "error": {
+        "loadFailed": "We couldn’t load the category navigation. Please try again."
+      },
+      "hero": {
+        "eyebrow": "Browse by topic",
+        "childEyebrow": "Deep dive",
+        "title": "All product categories",
+        "description": "Discover every product family we analyse and jump directly to the most relevant section.",
+        "childDescription": "Explore the subcategories and curated selections inside {category}.",
+        "rootBreadcrumb": "All categories",
+        "searchLabel": "Search categories",
+        "searchPlaceholder": "Search for a category",
+        "breadcrumbAriaLabel": "Category navigation breadcrumb trail",
+        "resultsSummary": "{count, plural, one {# category visible} other {# categories visible}}"
+      },
+      "grid": {
+        "title": "Continue exploring",
+        "subtitle": "Select a family to reveal its subcategories or discover our curated guides.",
+        "emptyTitle": "No matching categories",
+        "emptySubtitle": "Try adjusting your search to find relevant categories.",
+        "verticalLabel": "Curated guide",
+        "leafLabel": "Leaf node",
+        "openSubcategory": "Open {category} subcategories",
+        "openSubcategoryCta": "View subcategories",
+        "viewVertical": "Open the {category} guide",
+        "viewVerticalCta": "View guide",
+        "cardAriaLabel": "Category card for {category}"
+      },
+      "verticals": {
+        "eyebrow": "Highlighted guides",
+        "title": "Featured selections",
+        "subtitle": "Hand-picked guides to jump straight into popular product families.",
+        "openVertical": "Open the {category} guide",
+        "openVerticalCta": "Discover the guide",
+        "viewPath": "Open the {category} taxonomy path",
+        "viewPathCta": "Browse taxonomy"
+      }
+    }
+  },
   "blog": {
     "seo": {
       "baseTitle": "Nudger Blog – Impact Score insights",

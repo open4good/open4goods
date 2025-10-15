@@ -1,5 +1,9 @@
 import { CategoriesApi } from '..'
-import type { VerticalConfigDto, VerticalConfigFullDto } from '..'
+import type {
+  CategoryNavigationDto,
+  VerticalConfigDto,
+  VerticalConfigFullDto,
+} from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
@@ -53,5 +57,29 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  return { getCategories, getCategoryById }
+  /**
+   * Fetch the navigation tree for the provided Google taxonomy node.
+   * @param params - Optional parameters to identify the taxonomy node.
+   * @returns Promise<CategoryNavigationDto>
+   */
+  const getNavigation = async ({
+    googleCategoryId,
+    path,
+  }: {
+    googleCategoryId?: number
+    path?: string
+  } = {}): Promise<CategoryNavigationDto> => {
+    try {
+      return await resolveApi().navigation({
+        domainLanguage,
+        googleCategoryId,
+        path,
+      })
+    } catch (error) {
+      console.error('Error fetching category navigation:', error)
+      throw error
+    }
+  }
+
+  return { getCategories, getCategoryById, getNavigation }
 }
