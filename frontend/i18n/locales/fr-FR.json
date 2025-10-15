@@ -135,6 +135,48 @@
       "postsTitle": "Articles associés"
     }
   },
+  "categories": {
+    "navigation": {
+      "loading": "Chargement de la navigation des catégories",
+      "error": {
+        "loadFailed": "Impossible de charger la navigation des catégories. Veuillez réessayer."
+      },
+      "hero": {
+        "eyebrow": "Parcourir par thème",
+        "childEyebrow": "Approfondir",
+        "title": "Toutes les catégories de produits",
+        "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
+        "childDescription": "Explorez les sous-catégories et les sélections associées à {category}.",
+        "rootBreadcrumb": "Toutes les catégories",
+        "searchLabel": "Rechercher une catégorie",
+        "searchPlaceholder": "Tapez le nom d'une catégorie",
+        "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
+        "resultsSummary": "{count, plural, one {# catégorie affichée} other {# catégories affichées}}"
+      },
+      "grid": {
+        "title": "Poursuivre l'exploration",
+        "subtitle": "Choisissez une famille pour afficher ses sous-catégories ou découvrir nos guides.",
+        "emptyTitle": "Aucune catégorie trouvée",
+        "emptySubtitle": "Modifiez votre recherche pour afficher des catégories pertinentes.",
+        "verticalLabel": "Guide sélectionné",
+        "leafLabel": "Feuille",
+        "openSubcategory": "Ouvrir les sous-catégories de {category}",
+        "openSubcategoryCta": "Voir les sous-catégories",
+        "viewVertical": "Ouvrir le guide {category}",
+        "viewVerticalCta": "Voir le guide",
+        "cardAriaLabel": "Carte de catégorie {category}"
+      },
+      "verticals": {
+        "eyebrow": "Guides mis en avant",
+        "title": "Sélections à découvrir",
+        "subtitle": "Des guides choisis pour rejoindre rapidement les familles les plus recherchées.",
+        "openVertical": "Ouvrir le guide {category}",
+        "openVerticalCta": "Découvrir le guide",
+        "viewPath": "Ouvrir le chemin taxonomique {category}",
+        "viewPathCta": "Parcourir la taxonomie"
+      }
+    }
+  },
   "blog": {
     "seo": {
       "baseTitle": "Blog Nudger",
