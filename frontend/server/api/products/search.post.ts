@@ -1,11 +1,12 @@
 import type {
   AggregationRequestDto,
   FilterRequestDto,
-  ProductSearchRequestDto,
   ProductSearchResponseDto,
   SortRequestDto,
   ProductsIncludeEnum,
 } from '~~/shared/api-client'
+import type { Agg } from '~~/shared/api-client/models/Agg'
+import type { Filter } from '~~/shared/api-client/models/Filter'
 import { useProductService } from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
@@ -38,31 +39,9 @@ export default defineEventHandler(
 
     const productService = useProductService(domainLanguage)
 
-    const buildSearchBody = (
-      input: ProductsSearchPayload,
-    ): ProductSearchRequestDto | undefined => {
-      const body: ProductSearchRequestDto = {}
-      let hasContent = false
-
-      if (input.sort) {
-        body.sort = input.sort
-        hasContent = true
-      }
-
-      if (input.aggs) {
-        body.aggs = input.aggs
-        hasContent = true
-      }
-
-      if (input.filters) {
-        body.filters = input.filters
-        hasContent = true
-      }
-
-      return hasContent ? body : undefined
-    }
-
-    const searchBody = buildSearchBody(payload)
+    const sanitizedSort = sanitizeSortRequest(payload.sort)
+    const sanitizedAggregations = sanitizeAggregationRequest(payload.aggs)
+    const sanitizedFilters = sanitizeFilterRequest(payload.filters)
 
     try {
       return await productService.searchProducts({
@@ -71,7 +50,9 @@ export default defineEventHandler(
         pageSize: payload.pageSize,
         query: payload.query,
         include: payload.include,
-        ...(searchBody ? { body: searchBody } : {}),
+        ...(sanitizedSort ? { sort: sanitizedSort } : {}),
+        ...(sanitizedAggregations ? { aggs: sanitizedAggregations } : {}),
+        ...(sanitizedFilters ? { filters: sanitizedFilters } : {}),
       })
     } catch (error) {
       const backendError = await extractBackendErrorDetails(error)
@@ -85,3 +66,131 @@ export default defineEventHandler(
     }
   },
 )
+
+const sanitizeSortRequest = (sort?: SortRequestDto): SortRequestDto | undefined => {
+  const entries = sort?.sorts
+    ?.map((option) => {
+      if (!option?.field) {
+        return null
+      }
+
+      const sanitizedOption: NonNullable<SortRequestDto['sorts']>[number] = {
+        field: option.field,
+      }
+
+      if (option.order) {
+        sanitizedOption.order = option.order
+      }
+
+      return sanitizedOption
+    })
+    .filter(
+      (value): value is NonNullable<SortRequestDto['sorts']>[number] => value !== null,
+    )
+
+  if (!entries?.length) {
+    return undefined
+  }
+
+  return { sorts: entries }
+}
+
+const sanitizeAggregationRequest = (
+  aggregations?: AggregationRequestDto,
+): AggregationRequestDto | undefined => {
+  const entries = aggregations?.aggs
+    ?.map((agg) => {
+      if (!agg?.field || !agg?.type) {
+        return null
+      }
+
+      const sanitizedAgg: Agg = {
+        field: agg.field,
+        type: agg.type,
+      }
+
+      if (agg.name) {
+        sanitizedAgg.name = agg.name
+      }
+
+      if (Number.isFinite(agg.min)) {
+        sanitizedAgg.min = agg.min as number
+      }
+
+      if (Number.isFinite(agg.max)) {
+        sanitizedAgg.max = agg.max as number
+      }
+
+      if (Number.isFinite(agg.buckets)) {
+        sanitizedAgg.buckets = agg.buckets as number
+      }
+
+      if (Number.isFinite(agg.step)) {
+        sanitizedAgg.step = agg.step as number
+      }
+
+      return sanitizedAgg
+    })
+    .filter((value): value is Agg => value !== null)
+
+  if (!entries?.length) {
+    return undefined
+  }
+
+  return { aggs: entries }
+}
+
+const sanitizeFilterRequest = (filters?: FilterRequestDto): FilterRequestDto | undefined => {
+  const entries = filters?.filters
+    ?.map((filter) => {
+      if (!filter?.field || !filter?.operator) {
+        return null
+      }
+
+      if (filter.operator === 'term') {
+        if (!filter.terms?.length) {
+          return null
+        }
+
+        const sanitized: Filter = {
+          field: filter.field,
+          operator: filter.operator,
+          terms: [...filter.terms],
+        }
+
+        return sanitized
+      }
+
+      if (filter.operator === 'range') {
+        const hasBounds = filter.min != null || filter.max != null
+
+        if (!hasBounds) {
+          return null
+        }
+
+        const sanitized: Filter = {
+          field: filter.field,
+          operator: filter.operator,
+        }
+
+        if (filter.min != null) {
+          sanitized.min = filter.min
+        }
+
+        if (filter.max != null) {
+          sanitized.max = filter.max
+        }
+
+        return sanitized
+      }
+
+      return null
+    })
+    .filter((value): value is Filter => value !== null)
+
+  if (!entries?.length) {
+    return undefined
+  }
+
+  return { filters: entries }
+}
