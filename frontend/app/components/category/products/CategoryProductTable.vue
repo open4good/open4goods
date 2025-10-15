@@ -8,35 +8,35 @@
     :fixed-header="true"
     height="600"
   >
-    <template #item.brand="{ value }">
+    <template #[`item.brand`]="{ value }">
       <span class="category-product-table__brand">{{ value ?? $t('category.products.unknownBrand') }}</span>
     </template>
 
-    <template #item.model="{ value, item }">
+    <template #[`item.model`]="{ value, item }">
       <div class="category-product-table__model">
         <div class="category-product-table__model-name">
-          {{ value ?? item.identity?.bestName ?? '#' + (item.gtin ?? '') }}
+          {{ value ?? item.product.identity?.bestName ?? '#' + (item.product.gtin ?? '') }}
         </div>
         <div class="category-product-table__model-meta">
           <v-icon icon="mdi-cash" size="16" class="me-1" />
-          {{ bestPriceLabel(item) }}
+          {{ bestPriceLabel(item.product) }}
         </div>
       </div>
     </template>
 
-    <template #item.ecoscore="{ value }">
+    <template #[`item.ecoscore`]="{ value }">
       <v-chip v-if="value" size="small" color="success" variant="flat">
         {{ value }}
       </v-chip>
       <span v-else>{{ $t('category.products.notRated') }}</span>
     </template>
 
-    <template #item.bestPrice="{ value }">
+    <template #[`item.bestPrice`]="{ value }">
       {{ value ?? $t('category.products.priceUnavailable') }}
     </template>
 
-    <template #item.offersCount="{ value }">
-      {{ $t('category.products.offerCount', value ?? 0, { count: value ?? 0 }) }}
+    <template #[`item.offersCount`]="{ value }">
+      {{ $t('category.products.offerCount', { count: value ?? 0 }) }}
     </template>
 
   </v-data-table>
@@ -44,6 +44,15 @@
 
 <script setup lang="ts">
 import type { FieldMetadataDto, ProductDto } from '~~/shared/api-client'
+
+interface CategoryProductTableRow extends Record<string, unknown> {
+  product: ProductDto
+  brand: string | null | undefined
+  model: string | null | undefined
+  ecoscore: string | null
+  bestPrice: string | null
+  offersCount: number
+}
 
 const props = defineProps<{
   products: ProductDto[]
@@ -67,10 +76,11 @@ const dynamicHeaders = computed(() => {
   return props.fields
     .filter((field) => field.mapping && !seen.has(field.mapping))
     .map((field) => {
-      seen.add(field.mapping as string)
+      const mapping = field.mapping as string
+      seen.add(mapping)
       return {
-        key: field.mapping,
-        title: field.title ?? field.mapping,
+        key: mapping,
+        title: field.title ?? mapping,
         sortable: false,
       }
     })
@@ -83,17 +93,19 @@ const getValueByPath = (product: ProductDto, path: string | undefined) => {
     return undefined
   }
 
-  return path.split('.').reduce<any>((accumulator, segment) => {
-    if (accumulator == null) {
+  return path.split('.').reduce<unknown>((accumulator, segment) => {
+    if (accumulator == null || typeof accumulator !== 'object' || Array.isArray(accumulator)) {
       return undefined
     }
 
-    if (segment in accumulator) {
-      return accumulator[segment as keyof typeof accumulator]
+    const record = accumulator as Record<string, unknown>
+
+    if (!(segment in record)) {
+      return undefined
     }
 
-    return undefined
-  }, product)
+    return record[segment]
+  }, product as unknown)
 }
 
 const ecoscoreLabel = (product: ProductDto) => {
@@ -123,10 +135,10 @@ const bestPriceLabel = (product: ProductDto) => {
   )
 }
 
-const rows = computed(() => {
+const rows = computed<CategoryProductTableRow[]>(() => {
   return props.products.map((product) => {
-    const row: Record<string, unknown> = {
-      ...product,
+    const row: CategoryProductTableRow = {
+      product,
       brand: product.identity?.brand,
       model: product.identity?.model ?? product.identity?.bestName ?? product.identity?.brand,
       ecoscore: ecoscoreLabel(product),

@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import type { ProductDto } from '~~/shared/api-client'
 
-const props = defineProps<{ products: ProductDto[] }>()
+defineProps<{ products: ProductDto[] }>()
 
 const { t } = useI18n()
 
@@ -82,7 +82,7 @@ const bestPriceLabel = (product: ProductDto) => {
 
 const offersCountLabel = (product: ProductDto) => {
   const count = product.offers?.offersCount ?? 0
-  return t('category.products.offerCount', count, { count })
+  return t('category.products.offerCount', { count })
 }
 </script>
 

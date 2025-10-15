@@ -74,8 +74,9 @@ const bounds = computed(() => {
 const sliderStep = computed(() => {
   const buckets = props.aggregation?.buckets ?? []
   if (buckets.length > 1) {
-    const first = Number(buckets[0].key ?? 0)
-    const second = Number(buckets[1].key ?? 0)
+    const [firstBucket, secondBucket] = buckets
+    const first = Number(firstBucket?.key ?? 0)
+    const second = Number(secondBucket?.key ?? 0)
     const diff = Math.abs(second - first)
     return Number.isFinite(diff) && diff > 0 ? diff : undefined
   }

@@ -28,12 +28,12 @@
       <v-list density="comfortable">
         <v-list-item
           v-for="post in relatedPosts"
-          :key="post.slug ?? post.title"
-          :to="resolvePostUrl(post)"
+          :key="post.url ?? post.title"
+          :href="resolvePostUrl(post)"
         >
           <v-list-item-title>{{ post.title }}</v-list-item-title>
-          <v-list-item-subtitle v-if="post.excerpt">
-            {{ post.excerpt }}
+          <v-list-item-subtitle v-if="post.summary">
+            {{ post.summary }}
           </v-list-item-subtitle>
         </v-list-item>
       </v-list>
@@ -66,7 +66,7 @@ const resolveWikiUrl = (page: WikiPageConfig) => {
 }
 
 const resolvePostUrl = (post: BlogPostDto) => {
-  return `/blog/${post.slug ?? ''}`
+  return post.url ?? '#'
 }
 </script>
 

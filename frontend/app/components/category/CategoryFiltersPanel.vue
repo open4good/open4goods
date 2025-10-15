@@ -1,6 +1,6 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
-    <div class="category-filters__active" v-if="activeFilterChips.length">
+    <div v-if="activeFilterChips.length" class="category-filters__active">
       <v-chip-group column>
         <v-chip
           v-for="chip in activeFilterChips"
@@ -22,7 +22,7 @@
         <template #text>
           <div class="category-filters__section">
             <CategoryFilterList
-              :fields="filterOptions.global ?? []"
+              :fields="filterOptions?.global ?? []"
               :aggregations="aggregationMap"
               :active-filters="activeFilters"
               @update-range="updateRangeFilter"
@@ -39,8 +39,8 @@
       >
         <template #text>
           <div class="category-filters__section">
-            <CategoryFilterList
-              :fields="impactPrimary"
+              <CategoryFilterList
+                :fields="impactPrimary"
               :aggregations="aggregationMap"
               :active-filters="activeFilters"
               @update-range="updateRangeFilter"

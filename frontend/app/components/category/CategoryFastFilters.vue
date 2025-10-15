@@ -64,8 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Filter } from '~~/shared/api-client'
-import type { VerticalSubsetDto } from '~~/shared/api-client'
+import type { Filter, VerticalSubsetDto } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
 
 import { convertSubsetCriteriaToFilters } from '~/utils/_subset-to-filters'
@@ -120,7 +119,7 @@ const resolveSubsetLabel = (subset: VerticalSubsetDto): string => {
   return subset.title ?? subset.caption ?? subset.id ?? subset.group ?? 'subset'
 }
 
-const buildClauseLabel = (subsetId: string, filter: Filter, index: number): string => {
+const buildClauseLabel = (subsetId: string, filter: Filter): string => {
   const field = filter.field ?? 'field'
 
   if (filter.operator === 'term') {
@@ -158,7 +157,7 @@ const activeClauses = computed<ClauseSummary[]>(() => {
       subsetId,
       filter,
       index,
-      label: buildClauseLabel(subsetId, filter, index),
+      label: buildClauseLabel(subsetId, filter),
     }))
   })
 })

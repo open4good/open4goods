@@ -14,8 +14,10 @@ export interface CategoryHashState {
   technicalExpanded?: boolean
 }
 
-const removeUndefined = <T extends Record<string, unknown>>(value: T): Partial<T> => {
-  return Object.entries(value).reduce<Partial<T>>((accumulator, [key, entryValue]) => {
+const removeUndefined = <T extends object>(value: T): Partial<T> => {
+  return (Object.keys(value) as Array<keyof T>).reduce<Partial<T>>((accumulator, key) => {
+    const entryValue = value[key]
+
     if (entryValue === undefined) {
       return accumulator
     }
@@ -24,7 +26,16 @@ const removeUndefined = <T extends Record<string, unknown>>(value: T): Partial<T
       return accumulator
     }
 
-    accumulator[key as keyof T] = entryValue as T[keyof T]
+    if (
+      entryValue &&
+      typeof entryValue === 'object' &&
+      !Array.isArray(entryValue) &&
+      Object.keys(entryValue as Record<string, unknown>).length === 0
+    ) {
+      return accumulator
+    }
+
+    ;(accumulator as Record<keyof T, T[keyof T]>)[key] = entryValue
     return accumulator
   }, {})
 }

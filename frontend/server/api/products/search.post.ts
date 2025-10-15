@@ -3,6 +3,7 @@ import type {
   FilterRequestDto,
   ProductSearchResponseDto,
   SortRequestDto,
+  ProductsIncludeEnum,
 } from '~~/shared/api-client'
 import { useProductService } from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
@@ -18,7 +19,7 @@ interface ProductsSearchPayload {
   aggs?: AggregationRequestDto
   filters?: FilterRequestDto
   query?: string
-  include?: string[]
+  include?: ProductsIncludeEnum[]
 }
 
 export default defineEventHandler(

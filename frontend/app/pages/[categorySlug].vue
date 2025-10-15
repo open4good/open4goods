@@ -125,25 +125,25 @@
           </v-alert>
 
           <template v-if="loadingProducts">
-            <v-skeleton-loader
-              v-if="viewMode === 'cards'"
-              type="image, article"
-              class="mb-4"
-              v-for="index in 3"
-              :key="`card-skeleton-${index}`"
-            />
-            <v-skeleton-loader
-              v-else-if="viewMode === 'list'"
-              type="list-item-two-line"
-              class="mb-2"
-              v-for="index in 5"
-              :key="`list-skeleton-${index}`"
-            />
-            <v-skeleton-loader
-              v-else
-              type="table"
-              class="mb-4"
-            />
+            <template v-if="viewMode === 'cards'">
+              <v-skeleton-loader
+                v-for="index in 3"
+                :key="`card-skeleton-${index}`"
+                type="image, article"
+                class="mb-4"
+              />
+            </template>
+            <template v-else-if="viewMode === 'list'">
+              <v-skeleton-loader
+                v-for="index in 5"
+                :key="`list-skeleton-${index}`"
+                type="list-item-two-line"
+                class="mb-2"
+              />
+            </template>
+            <template v-else>
+              <v-skeleton-loader type="table" class="mb-4" />
+            </template>
           </template>
 
           <template v-else>
@@ -198,20 +198,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, toRaw, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import type {
   AggregationRequestDto,
   AggregationResponseDto,
   Agg,
-  BlogPostDto,
   FilterRequestDto,
   ProductFieldOptionsResponse,
   ProductSearchResponseDto,
   SortRequestDto,
   VerticalConfigFullDto,
-  WikiPageConfig,
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client'
 
@@ -245,7 +243,7 @@ if (!slugPattern.test(slug)) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
 }
 
-const { currentCategory, loading, error: categoriesError, selectCategoryBySlug } = useCategories()
+const { currentCategory, error: categoriesError, selectCategoryBySlug } = useCategories()
 
 const { data: categoryData } = await useAsyncData(
   `category-detail-${slug}`,
@@ -263,10 +261,14 @@ const { data: categoryData } = await useAsyncData(
   { server: true, immediate: true },
 )
 
-const category = computed<VerticalConfigFullDto | null>(
-  () => categoryData.value ?? currentCategory.value ?? null,
-)
-const pageLoading = computed(() => loading.value && !category.value)
+const category = computed<VerticalConfigFullDto | null>(() => {
+  if (categoryData.value) {
+    return categoryData.value
+  }
+
+  const fallback = currentCategory.value
+  return fallback ? (toRaw(fallback) as VerticalConfigFullDto) : null
+})
 const errorMessage = computed(() => categoriesError.value)
 
 const heroImage = computed(() => {
@@ -495,7 +497,7 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
 const resultsCount = computed(() => productsData.value?.products?.page?.totalElements ?? 0)
 const resultsCountLabel = computed(() =>
-  t('category.products.resultsCount', resultsCount.value, { count: resultsCount.value }),
+  t('category.products.resultsCount', { count: resultsCount.value }),
 )
 const pageCount = computed(() => productsData.value?.products?.page?.totalPages ?? 1)
 const currentAggregations = computed<AggregationResponseDto[]>(
@@ -724,10 +726,10 @@ onMounted(async () => {
       searchTerm.value = hashPayload.search
     }
 
-    if (hashPayload.sort?.sorts?.length) {
-      const sort = hashPayload.sort.sorts[0]
-      sortField.value = sort.field ?? null
-      sortOrder.value = sort.order ?? 'asc'
+    const sortEntry = hashPayload.sort?.sorts?.[0]
+    if (sortEntry) {
+      sortField.value = sortEntry.field ?? null
+      sortOrder.value = sortEntry.order ?? 'asc'
     }
 
     if (hashPayload.filters?.filters?.length) {

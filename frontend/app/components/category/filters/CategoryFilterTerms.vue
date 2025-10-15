@@ -75,7 +75,7 @@ const filteredOptions = computed(() => {
   return options.value.filter((option) => option.key?.toLowerCase().includes(query))
 })
 
-const onCheckboxChange = (term: string | undefined, selected: boolean) => {
+const onCheckboxChange = (term: string | undefined, selected: boolean | null) => {
   if (!term) {
     return
   }

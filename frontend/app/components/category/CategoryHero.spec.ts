@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
+import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -14,8 +15,16 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
+interface MountProps {
+  title: string
+  description?: string | null
+  image?: string | null
+  breadcrumbs?: CategoryBreadcrumbItemDto[]
+  eyebrow?: string | null
+}
+
 describe('CategoryHero', () => {
-  const mountComponent = async (props: Record<string, unknown>) => {
+  const mountComponent = async (props: MountProps) => {
     const module = await import('./CategoryHero.vue')
     const CategoryHero = module.default
 
@@ -52,7 +61,8 @@ describe('CategoryHero', () => {
 
     const breadcrumbItems = wrapper.findAll('.v-breadcrumbs-item')
     expect(breadcrumbItems).toHaveLength(2)
-    expect(breadcrumbItems[0].text()).toBe('Home')
+    const firstBreadcrumb = breadcrumbItems.at(0)
+    expect(firstBreadcrumb?.text()).toBe('Home')
 
     const section = wrapper.get('section')
     expect(section.attributes('aria-labelledby')).toBeTruthy()

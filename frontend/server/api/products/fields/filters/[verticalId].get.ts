@@ -2,8 +2,8 @@ import type { ProductFieldOptionsResponse } from '~~/shared/api-client'
 import { useProductService } from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
-import { extractBackendErrorDetails } from '../../../../../utils/log-backend-error'
-import { setDomainLanguageCacheHeaders } from '../../../../../utils/cache-headers'
+import { extractBackendErrorDetails } from '../../../../utils/log-backend-error'
+import { setDomainLanguageCacheHeaders } from '../../../../utils/cache-headers'
 
 export default defineEventHandler(
   async (event): Promise<ProductFieldOptionsResponse> => {

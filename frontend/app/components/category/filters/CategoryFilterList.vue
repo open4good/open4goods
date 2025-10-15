@@ -1,9 +1,9 @@
 <template>
   <div class="category-filter-list">
     <component
+      :is="resolveComponent(field)"
       v-for="field in fields"
       :key="field.mapping ?? field.title"
-      :is="resolveComponent(field)"
       :field="field"
       :aggregation="aggregations[field.mapping ?? '']"
       :model-value="findActiveFilter(field.mapping)"
