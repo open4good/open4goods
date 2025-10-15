@@ -79,12 +79,12 @@ class SearchServiceTest {
                 List.of(searchHit), aggregations, null, null);
         when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(searchHits);
 
-        Filter priceFilter = new Filter(FilterField.price, FilterOperator.range, null, 100.0, 400.0);
-        Filter conditionFilter = new Filter(FilterField.condition, FilterOperator.term, List.of("NEW"), null, null);
+        Filter priceFilter = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 100.0, 400.0);
+        Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term, List.of("NEW"), null, null);
         FilterRequestDto filters = new FilterRequestDto(List.of(priceFilter, conditionFilter));
 
-        Agg aggregation = new Agg("byOffers", org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields.offersCount,
-                AggType.terms, null, null, 5);
+        Agg aggregation = new Agg("byOffers", FilterField.offersCount.fieldPath(),
+                AggType.terms, null, null, 5, null);
         AggregationRequestDto aggregationRequest = new AggregationRequestDto(List.of(aggregation));
 
         SearchService.SearchResult result = searchService.search(pageable, "electronics", "eco", aggregationRequest, filters);
