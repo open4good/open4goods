@@ -20,6 +20,7 @@ import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
@@ -79,16 +80,17 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalHomeUrl());
     }
 
-
-
-	/**
+    /**
      * Convert a {@link VerticalConfig} into its detailed DTO representation.
      *
      * @param verticalConfig domain object loaded from the configuration service
      * @param domainLanguage language requested by the caller
+     * @param relatedPosts most recent blog posts referencing the vertical identifier
      * @return DTO exposing the full vertical configuration or {@code null} when the source is {@code null}
      */
-    public VerticalConfigFullDto toVerticalConfigFullDto(VerticalConfig verticalConfig, DomainLanguage domainLanguage) {
+    public VerticalConfigFullDto toVerticalConfigFullDto(VerticalConfig verticalConfig,
+                                                        DomainLanguage domainLanguage,
+                                                        List<BlogPostDto> relatedPosts) {
         if (verticalConfig == null) {
             return null;
         }
@@ -111,6 +113,7 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalMetaDescription(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphTitle(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphDescription(),
+                defaultList(relatedPosts),
                 defaultList(i18n == null ? null : i18n.getWikiPages()),
                 i18n == null ? null : i18n.getAiConfigs(),
                 defaultList(verticalConfig.getEcoFilters()),

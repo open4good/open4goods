@@ -12,6 +12,7 @@ import org.open4goods.model.vertical.RecommandationsConfig;
 import org.open4goods.model.vertical.ResourcesAggregationConfig;
 import org.open4goods.model.vertical.ScoringAggregationConfig;
 import org.open4goods.model.vertical.WikiPageConfig;
+import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -49,6 +50,8 @@ public record VerticalConfigFullDto(
         String verticalMetaOpenGraphTitle,
         @Schema(description = "Localised Open Graph description for the vertical landing page.")
         String verticalMetaOpenGraphDescription,
+        @Schema(description = "Most recent blog posts tagged with the vertical identifier.")
+        List<BlogPostDto> relatedPosts,
         @Schema(description = "Localised wiki pages associated with the vertical.")
         List<WikiPageConfig> wikiPages,
         @Schema(description = "Localised AI generation configuration for the vertical.")
