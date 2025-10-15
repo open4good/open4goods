@@ -233,6 +233,7 @@ import { buildFilterRequestFromSubsets } from '~/utils/_subset-to-filters'
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 const requestURL = useRequestURL()
 
 const rawParam = route.params.categorySlug
@@ -497,7 +498,7 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
 const resultsCount = computed(() => productsData.value?.products?.page?.totalElements ?? 0)
 const resultsCountLabel = computed(() =>
-  t('category.products.resultsCount', { count: resultsCount.value }),
+  translatePlural('category.products.resultsCount', resultsCount.value),
 )
 const pageCount = computed(() => productsData.value?.products?.page?.totalPages ?? 1)
 const currentAggregations = computed<AggregationResponseDto[]>(

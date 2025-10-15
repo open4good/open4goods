@@ -65,6 +65,7 @@ import type { ProductDto } from '~~/shared/api-client'
 defineProps<{ products: ProductDto[] }>()
 
 const { t } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -95,7 +96,7 @@ const bestPriceLabel = (product: ProductDto) => {
 
 const offersCountLabel = (product: ProductDto) => {
   const count = product.offers?.offersCount ?? 0
-  return t('category.products.offerCount', { count })
+  return translatePlural('category.products.offerCount', count)
 }
 </script>
 

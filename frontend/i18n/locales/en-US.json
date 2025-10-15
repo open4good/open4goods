@@ -104,7 +104,10 @@
       "unknownBrand": "Unknown brand",
       "ecoscoreLabel": "Eco score {letter}",
       "priceUnavailable": "Price unavailable",
-      "offerCount": "{count, plural, one {# offer} other {# offers}}",
+      "offerCount": {
+        "one": "{count} offer",
+        "other": "{count} offers"
+      },
       "notRated": "Not rated",
       "fetchError": "Unable to load products. Please try again.",
       "headers": {
@@ -114,7 +117,10 @@
         "bestPrice": "Best price",
         "offers": "Offers"
       },
-      "resultsCount": "{count, plural, one {# product} other {# products}}",
+      "resultsCount": {
+        "one": "{count} product",
+        "other": "{count} products"
+      },
       "searchPlaceholder": "Search products",
       "sortLabel": "Sort by",
       "sortOrderAsc": "Ascending order",
