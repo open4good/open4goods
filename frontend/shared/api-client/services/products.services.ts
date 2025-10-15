@@ -92,22 +92,24 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const searchProducts = async (
-    parameters: Omit<ProductsRequest, 'domainLanguage' | 'body'> & {
+    parameters: Omit<ProductsRequest, 'domainLanguage'> & {
       aggs?: AggregationRequestDto
       sort?: SortRequestDto
       filters?: FilterRequestDto
+      body?: ProductSearchRequestDto
     },
   ): Promise<ProductSearchResponseDto> => {
-    const { aggs, sort, filters, ...rest } = parameters
+    const { aggs, sort, filters, body: explicitBody, ...rest } = parameters
 
     const body: ProductSearchRequestDto | undefined =
-      sort || aggs || filters
+      explicitBody ??
+      (sort || aggs || filters
         ? {
             ...(sort ? { sort } : {}),
             ...(aggs ? { aggs } : {}),
             ...(filters ? { filters } : {}),
           }
-        : undefined
+        : undefined)
 
     const request: ProductsRequest = {
       domainLanguage,

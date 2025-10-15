@@ -1,6 +1,7 @@
 import type {
   AggregationRequestDto,
   FilterRequestDto,
+  ProductSearchRequestDto,
   ProductSearchResponseDto,
   SortRequestDto,
   ProductsIncludeEnum,
@@ -37,16 +38,40 @@ export default defineEventHandler(
 
     const productService = useProductService(domainLanguage)
 
+    const buildSearchBody = (
+      input: ProductsSearchPayload,
+    ): ProductSearchRequestDto | undefined => {
+      const body: ProductSearchRequestDto = {}
+      let hasContent = false
+
+      if (input.sort) {
+        body.sort = input.sort
+        hasContent = true
+      }
+
+      if (input.aggs) {
+        body.aggs = input.aggs
+        hasContent = true
+      }
+
+      if (input.filters) {
+        body.filters = input.filters
+        hasContent = true
+      }
+
+      return hasContent ? body : undefined
+    }
+
+    const searchBody = buildSearchBody(payload)
+
     try {
       return await productService.searchProducts({
         verticalId: payload.verticalId,
         pageNumber: payload.pageNumber,
         pageSize: payload.pageSize,
-        sort: payload.sort,
-        aggs: payload.aggs,
-        filters: payload.filters,
         query: payload.query,
         include: payload.include,
+        ...(searchBody ? { body: searchBody } : {}),
       })
     } catch (error) {
       const backendError = await extractBackendErrorDetails(error)
