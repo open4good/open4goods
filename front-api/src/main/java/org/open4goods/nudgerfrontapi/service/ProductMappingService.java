@@ -85,6 +85,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -104,11 +105,11 @@ import jakarta.servlet.http.HttpServletRequest;
 public class ProductMappingService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductMappingService.class);
-    private static final String IMAGE_PREFIX = "/images/verticals/";
     private static final String DEFAULT_LANGUAGE_KEY = "default";
     private static final String IMAGES_PATH = "/images/";
     private static final String PDFS_PATH = "/pdfs/";
     private static final String VIDEOS_PATH = "/videos/";
+	private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -653,6 +654,28 @@ public class ProductMappingService {
     }
 
     /**
+     * Convert a resource URL to its optimised WebP variant by replacing the extension.
+     */
+    private String toWebpUrl(String originalUrl) {
+        if (!StringUtils.hasText(originalUrl)) {
+            return originalUrl;
+        }
+        int querySeparatorIndex = originalUrl.indexOf('?');
+        String basePath = querySeparatorIndex >= 0 ? originalUrl.substring(0, querySeparatorIndex) : originalUrl;
+        String query = querySeparatorIndex >= 0 ? originalUrl.substring(querySeparatorIndex) : "";
+
+        int lastSlashIndex = basePath.lastIndexOf('/');
+        int extensionIndex = basePath.lastIndexOf('.');
+        if (extensionIndex > lastSlashIndex) {
+            basePath = basePath.substring(0, extensionIndex + 1) + "webp";
+        }
+        else {
+            basePath = basePath + ".webp";
+        }
+        return basePath + query;
+    }
+
+    /**
      * Map indexed attributes which include localisation hints and scoring flags.
      */
     private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute, VerticalConfig vConfig, DomainLanguage domainLanguage) {
@@ -714,8 +737,11 @@ public class ProductMappingService {
             return null;
         }
         ImageInfo imageInfo = resource.getImageInfo();
+        String originalUrl = buildResourceUrl(resource, IMAGES_PATH);
         return new ProductImageDto(
-                buildResourceUrl(resource, IMAGES_PATH),
+                toWebpUrl(originalUrl),
+                IMAGE_WEBP_MEDIATYPE,
+                originalUrl,
                 resource.getMimeType(),
                 resource.getTimeStamp(),
                 resource.getCacheKey(),
