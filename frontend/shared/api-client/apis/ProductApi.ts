@@ -15,29 +15,22 @@
 
 import * as runtime from '../runtime';
 import type {
-  AggregationRequestDto,
-  FilterRequestDto,
   ProblemDetail,
   ProductDto,
   ProductFieldOptionsResponse,
+  ProductSearchRequestDto,
   ProductSearchResponseDto,
-  SortRequestDto,
 } from '../models/index';
 import {
-    AggregationRequestDtoFromJSON,
-    AggregationRequestDtoToJSON,
-    FilterRequestDtoFromJSON,
-    FilterRequestDtoToJSON,
     ProblemDetailFromJSON,
     ProblemDetailToJSON,
     ProductDtoFromJSON,
     ProductDtoToJSON,
     ProductFieldOptionsResponseFromJSON,
     ProductFieldOptionsResponseToJSON,
+    ProductSearchRequestDtoToJSON,
     ProductSearchResponseDtoFromJSON,
     ProductSearchResponseDtoToJSON,
-    SortRequestDtoFromJSON,
-    SortRequestDtoToJSON,
 } from '../models/index';
 
 export interface ComponentsRequest {
@@ -64,11 +57,9 @@ export interface ProductsRequest {
     include?: Array<ProductsIncludeEnum>;
     pageNumber?: number;
     pageSize?: number;
-    sort?: SortRequestDto;
-    aggs?: AggregationRequestDto;
-    filters?: FilterRequestDto;
     verticalId?: string;
     query?: string;
+    body?: ProductSearchRequestDto;
 }
 
 export interface SortableFieldsRequest {
@@ -331,18 +322,6 @@ export class ProductApi extends runtime.BaseAPI {
             queryParameters['pageSize'] = requestParameters['pageSize'];
         }
 
-        if (requestParameters['sort'] != null) {
-            queryParameters['sort'] = requestParameters['sort'];
-        }
-
-        if (requestParameters['aggs'] != null) {
-            queryParameters['aggs'] = requestParameters['aggs'];
-        }
-
-        if (requestParameters['filters'] != null) {
-            queryParameters['filters'] = requestParameters['filters'];
-        }
-
         if (requestParameters['verticalId'] != null) {
             queryParameters['verticalId'] = requestParameters['verticalId'];
         }
@@ -357,6 +336,16 @@ export class ProductApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        const consumes: Array<string> = [
+            'application/json',
+        ];
+
+        const requestBody = requestParameters['body'] == null ? undefined : ProductSearchRequestDtoToJSON(requestParameters['body']);
+
+        if (requestBody != null) {
+            headerParameters['Content-Type'] = consumes[0];
+        }
+
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
             const tokenString = await token("bearerAuth", []);
@@ -370,9 +359,10 @@ export class ProductApi extends runtime.BaseAPI {
 
         const response = await this.request({
             path: urlPath,
-            method: 'GET',
+            method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: requestBody,
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ProductSearchResponseDtoFromJSON(jsonValue));
