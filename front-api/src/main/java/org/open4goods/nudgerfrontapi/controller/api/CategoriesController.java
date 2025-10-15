@@ -133,7 +133,7 @@ public class CategoriesController {
                 post.getTitle(),
                 post.getAuthor(),
                 post.getSummary(),
-                post.getBody(),
+                null,
                 post.getCategory(),
                 post.getImage(),
                 post.getEditLink(),
