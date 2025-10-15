@@ -152,7 +152,10 @@
         "searchLabel": "Search categories",
         "searchPlaceholder": "Search for a category",
         "breadcrumbAriaLabel": "Category navigation breadcrumb trail",
-        "resultsSummary": "{count, plural, one {# category visible} other {# categories visible}}"
+        "resultsSummary": {
+          "one": "{count} category visible",
+          "other": "{count} categories visible"
+        }
       },
       "grid": {
         "title": "Continue exploring",

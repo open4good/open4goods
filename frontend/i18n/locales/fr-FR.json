@@ -151,7 +151,10 @@
         "searchLabel": "Rechercher une catégorie",
         "searchPlaceholder": "Tapez le nom d'une catégorie",
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
-        "resultsSummary": "{count, plural, one {# catégorie affichée} other {# catégories affichées}}"
+        "resultsSummary": {
+          "one": "{count} catégorie affichée",
+          "other": "{count} catégories affichées"
+        }
       },
       "grid": {
         "title": "Poursuivre l'exploration",

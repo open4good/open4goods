@@ -56,6 +56,7 @@ import CategoryNavigationHero from '~/components/category/navigation/CategoryNav
 import CategoryNavigationVerticalHighlights from '~/components/category/navigation/CategoryNavigationVerticalHighlights.vue'
 
 const { t } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 const route = useRoute()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
@@ -154,9 +155,10 @@ const filteredCategories = computed(() => {
 const highlightedVerticals = computed(() => navigationData.value?.descendantVerticals ?? [])
 
 const resultSummary = computed(() =>
-  t('categories.navigation.hero.resultsSummary', {
-    count: filteredCategories.value.length,
-  }),
+  translatePlural(
+    'categories.navigation.hero.resultsSummary',
+    filteredCategories.value.length,
+  ),
 )
 
 const canonicalUrl = computed(() => new URL(route.fullPath, requestURL.origin).toString())
