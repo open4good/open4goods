@@ -12,10 +12,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * DTO describing a product image resource exposed to the frontend.
  */
 public record ProductImageDto(
-        @Schema(description = "Resource URL", example = "https://cdn.example.org/images/product_abc.jpg")
+        @Schema(description = "Optimised resource URL", example = "https://cdn.example.org/images/product_abc.webp")
         String url,
-        @Schema(description = "Detected MIME type", example = "image/jpeg")
+        @Schema(description = "Optimised MIME type", example = "image/webp")
         String mimeType,
+        @Schema(description = "original resource URL", example = "https://cdn.example.org/images/product_abc.jpg")
+        String originalUrl,
+        @Schema(description = "original MIME type", example = "image/jpeg")
+        String originalMimeType,
         @Schema(description = "Last update timestamp in epoch milliseconds")
         Long timeStamp,
         @Schema(description = "Cache key used by the media pipeline")
