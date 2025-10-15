@@ -26,6 +26,7 @@ models/BarcodeAggregationProperties.ts
 models/BlogPostDto.ts
 models/BlogTagDto.ts
 models/CategoriesStatsDto.ts
+models/CategoryBreadcrumbItemDto.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
@@ -87,6 +88,8 @@ models/RecommandationCriteria.ts
 models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
 models/ScoringAggregationConfig.ts
+models/SortOption.ts
+models/SortRequestDto.ts
 models/StaticPartnerDto.ts
 models/SubsetCriteria.ts
 models/TeamProperties.ts

@@ -26,11 +26,11 @@ export interface Agg {
      */
     name?: string;
     /**
-     * Field to aggregate
+     * Field mapping to aggregate
      * @type {string}
      * @memberof Agg
      */
-    field?: AggFieldEnum;
+    field?: string;
     /**
      * Aggregation type
      * @type {string}
@@ -55,21 +55,14 @@ export interface Agg {
      * @memberof Agg
      */
     buckets?: number;
+    /**
+     * Interval size for range aggregations. When provided it overrides the automatic bucket interval computation.
+     * @type {number}
+     * @memberof Agg
+     */
+    step?: number;
 }
 
-
-/**
- * @export
- */
-export const AggFieldEnum = {
-    PriceMinPricePrice: 'price.minPrice.price',
-    OffersCount: 'offersCount',
-    PriceConditions: 'price.conditions',
-    AttributesReferentielAttributesBrand: 'attributes.referentielAttributes.BRAND',
-    GtinInfosCountry: 'gtinInfos.country',
-    DatasourceCodes: 'datasourceCodes'
-} as const;
-export type AggFieldEnum = typeof AggFieldEnum[keyof typeof AggFieldEnum];
 
 /**
  * @export
@@ -104,6 +97,7 @@ export function AggFromJSONTyped(json: any, ignoreDiscriminator: boolean): Agg {
         'min': json['min'] == null ? undefined : json['min'],
         'max': json['max'] == null ? undefined : json['max'],
         'buckets': json['buckets'] == null ? undefined : json['buckets'],
+        'step': json['step'] == null ? undefined : json['step'],
     };
 }
 
@@ -124,6 +118,7 @@ export function AggToJSONTyped(value?: Agg | null, ignoreDiscriminator: boolean 
         'min': value['min'],
         'max': value['max'],
         'buckets': value['buckets'],
+        'step': value['step'],
     };
 }
 

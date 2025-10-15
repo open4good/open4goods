@@ -13,34 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { FeatureGroupDto } from './FeatureGroupDto';
+import type { BlogPostDto } from './BlogPostDto';
 import {
-    FeatureGroupDtoFromJSON,
-    FeatureGroupDtoFromJSONTyped,
-    FeatureGroupDtoToJSON,
-    FeatureGroupDtoToJSONTyped,
-} from './FeatureGroupDto';
-import type { ImpactScoreConfigDto } from './ImpactScoreConfigDto';
-import {
-    ImpactScoreConfigDtoFromJSON,
-    ImpactScoreConfigDtoFromJSONTyped,
-    ImpactScoreConfigDtoToJSON,
-    ImpactScoreConfigDtoToJSONTyped,
-} from './ImpactScoreConfigDto';
-import type { ResourcesAggregationConfig } from './ResourcesAggregationConfig';
-import {
-    ResourcesAggregationConfigFromJSON,
-    ResourcesAggregationConfigFromJSONTyped,
-    ResourcesAggregationConfigToJSON,
-    ResourcesAggregationConfigToJSONTyped,
-} from './ResourcesAggregationConfig';
-import type { DescriptionsAggregationConfig } from './DescriptionsAggregationConfig';
-import {
-    DescriptionsAggregationConfigFromJSON,
-    DescriptionsAggregationConfigFromJSONTyped,
-    DescriptionsAggregationConfigToJSON,
-    DescriptionsAggregationConfigToJSONTyped,
-} from './DescriptionsAggregationConfig';
+    BlogPostDtoFromJSON,
+    BlogPostDtoFromJSONTyped,
+    BlogPostDtoToJSON,
+    BlogPostDtoToJSONTyped,
+} from './BlogPostDto';
 import type { RecommandationsConfig } from './RecommandationsConfig';
 import {
     RecommandationsConfigFromJSON,
@@ -69,6 +48,41 @@ import {
     ImpactScoreCriteriaDtoToJSON,
     ImpactScoreCriteriaDtoToJSONTyped,
 } from './ImpactScoreCriteriaDto';
+import type { AttributesConfigDto } from './AttributesConfigDto';
+import {
+    AttributesConfigDtoFromJSON,
+    AttributesConfigDtoFromJSONTyped,
+    AttributesConfigDtoToJSON,
+    AttributesConfigDtoToJSONTyped,
+} from './AttributesConfigDto';
+import type { FeatureGroupDto } from './FeatureGroupDto';
+import {
+    FeatureGroupDtoFromJSON,
+    FeatureGroupDtoFromJSONTyped,
+    FeatureGroupDtoToJSON,
+    FeatureGroupDtoToJSONTyped,
+} from './FeatureGroupDto';
+import type { ImpactScoreConfigDto } from './ImpactScoreConfigDto';
+import {
+    ImpactScoreConfigDtoFromJSON,
+    ImpactScoreConfigDtoFromJSONTyped,
+    ImpactScoreConfigDtoToJSON,
+    ImpactScoreConfigDtoToJSONTyped,
+} from './ImpactScoreConfigDto';
+import type { ResourcesAggregationConfig } from './ResourcesAggregationConfig';
+import {
+    ResourcesAggregationConfigFromJSON,
+    ResourcesAggregationConfigFromJSONTyped,
+    ResourcesAggregationConfigToJSON,
+    ResourcesAggregationConfigToJSONTyped,
+} from './ResourcesAggregationConfig';
+import type { DescriptionsAggregationConfig } from './DescriptionsAggregationConfig';
+import {
+    DescriptionsAggregationConfigFromJSON,
+    DescriptionsAggregationConfigFromJSONTyped,
+    DescriptionsAggregationConfigToJSON,
+    DescriptionsAggregationConfigToJSONTyped,
+} from './DescriptionsAggregationConfig';
 import type { AiPromptsConfig } from './AiPromptsConfig';
 import {
     AiPromptsConfigFromJSON,
@@ -83,13 +97,13 @@ import {
     ScoringAggregationConfigToJSON,
     ScoringAggregationConfigToJSONTyped,
 } from './ScoringAggregationConfig';
-import type { AttributesConfigDto } from './AttributesConfigDto';
+import type { CategoryBreadcrumbItemDto } from './CategoryBreadcrumbItemDto';
 import {
-    AttributesConfigDtoFromJSON,
-    AttributesConfigDtoFromJSONTyped,
-    AttributesConfigDtoToJSON,
-    AttributesConfigDtoToJSONTyped,
-} from './AttributesConfigDto';
+    CategoryBreadcrumbItemDtoFromJSON,
+    CategoryBreadcrumbItemDtoFromJSONTyped,
+    CategoryBreadcrumbItemDtoToJSON,
+    CategoryBreadcrumbItemDtoToJSONTyped,
+} from './CategoryBreadcrumbItemDto';
 import type { WikiPageConfig } from './WikiPageConfig';
 import {
     WikiPageConfigFromJSON,
@@ -194,6 +208,18 @@ export interface VerticalConfigFullDto {
      * @memberof VerticalConfigFullDto
      */
     verticalMetaOpenGraphDescription?: string;
+    /**
+     * Breadcrumb derived from the Google taxonomy hierarchy for this vertical.
+     * @type {Array<CategoryBreadcrumbItemDto>}
+     * @memberof VerticalConfigFullDto
+     */
+    breadCrumb?: Array<CategoryBreadcrumbItemDto>;
+    /**
+     * Most recent blog posts tagged with the vertical identifier.
+     * @type {Array<BlogPostDto>}
+     * @memberof VerticalConfigFullDto
+     */
+    relatedPosts?: Array<BlogPostDto>;
     /**
      * Localised wiki pages associated with the vertical.
      * @type {Array<WikiPageConfig>}
@@ -384,6 +410,8 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'verticalMetaDescription': json['verticalMetaDescription'] == null ? undefined : json['verticalMetaDescription'],
         'verticalMetaOpenGraphTitle': json['verticalMetaOpenGraphTitle'] == null ? undefined : json['verticalMetaOpenGraphTitle'],
         'verticalMetaOpenGraphDescription': json['verticalMetaOpenGraphDescription'] == null ? undefined : json['verticalMetaOpenGraphDescription'],
+        'breadCrumb': json['breadCrumb'] == null ? undefined : ((json['breadCrumb'] as Array<any>).map(CategoryBreadcrumbItemDtoFromJSON)),
+        'relatedPosts': json['relatedPosts'] == null ? undefined : ((json['relatedPosts'] as Array<any>).map(BlogPostDtoFromJSON)),
         'wikiPages': json['wikiPages'] == null ? undefined : ((json['wikiPages'] as Array<any>).map(WikiPageConfigFromJSON)),
         'aiConfigs': json['aiConfigs'] == null ? undefined : AiPromptsConfigFromJSON(json['aiConfigs']),
         'ecoFilters': json['ecoFilters'] == null ? undefined : json['ecoFilters'],
@@ -439,6 +467,8 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'verticalMetaDescription': value['verticalMetaDescription'],
         'verticalMetaOpenGraphTitle': value['verticalMetaOpenGraphTitle'],
         'verticalMetaOpenGraphDescription': value['verticalMetaOpenGraphDescription'],
+        'breadCrumb': value['breadCrumb'] == null ? undefined : ((value['breadCrumb'] as Array<any>).map(CategoryBreadcrumbItemDtoToJSON)),
+        'relatedPosts': value['relatedPosts'] == null ? undefined : ((value['relatedPosts'] as Array<any>).map(BlogPostDtoToJSON)),
         'wikiPages': value['wikiPages'] == null ? undefined : ((value['wikiPages'] as Array<any>).map(WikiPageConfigToJSON)),
         'aiConfigs': AiPromptsConfigToJSON(value['aiConfigs']),
         'ecoFilters': value['ecoFilters'],

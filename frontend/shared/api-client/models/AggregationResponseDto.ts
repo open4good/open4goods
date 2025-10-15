@@ -38,7 +38,7 @@ export interface AggregationResponseDto {
      * @type {string}
      * @memberof AggregationResponseDto
      */
-    field?: AggregationResponseDtoFieldEnum;
+    field?: string;
     /**
      * Aggregation type
      * @type {string}
@@ -65,19 +65,6 @@ export interface AggregationResponseDto {
     max?: number;
 }
 
-
-/**
- * @export
- */
-export const AggregationResponseDtoFieldEnum = {
-    PriceMinPricePrice: 'price.minPrice.price',
-    OffersCount: 'offersCount',
-    PriceConditions: 'price.conditions',
-    AttributesReferentielAttributesBrand: 'attributes.referentielAttributes.BRAND',
-    GtinInfosCountry: 'gtinInfos.country',
-    DatasourceCodes: 'datasourceCodes'
-} as const;
-export type AggregationResponseDtoFieldEnum = typeof AggregationResponseDtoFieldEnum[keyof typeof AggregationResponseDtoFieldEnum];
 
 /**
  * @export

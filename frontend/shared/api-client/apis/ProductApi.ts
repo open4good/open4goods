@@ -21,6 +21,7 @@ import type {
   ProductDto,
   ProductFieldOptionsResponse,
   ProductSearchResponseDto,
+  SortRequestDto,
 } from '../models/index';
 import {
     AggregationRequestDtoFromJSON,
@@ -35,16 +36,9 @@ import {
     ProductFieldOptionsResponseToJSON,
     ProductSearchResponseDtoFromJSON,
     ProductSearchResponseDtoToJSON,
+    SortRequestDtoFromJSON,
+    SortRequestDtoToJSON,
 } from '../models/index';
-
-export interface AggregatableFieldsRequest {
-    domainLanguage: AggregatableFieldsDomainLanguageEnum;
-}
-
-export interface AggregatableFieldsForVerticalRequest {
-    verticalId: string;
-    domainLanguage: AggregatableFieldsForVerticalDomainLanguageEnum;
-}
 
 export interface ComponentsRequest {
     domainLanguage: ComponentsDomainLanguageEnum;
@@ -70,7 +64,7 @@ export interface ProductsRequest {
     include?: Array<ProductsIncludeEnum>;
     pageNumber?: number;
     pageSize?: number;
-    sort?: Array<ProductsSortEnum>;
+    sort?: SortRequestDto;
     aggs?: AggregationRequestDto;
     filters?: FilterRequestDto;
     verticalId?: string;
@@ -90,114 +84,6 @@ export interface SortableFieldsForVerticalRequest {
  * 
  */
 export class ProductApi extends runtime.BaseAPI {
-
-    /**
-     * Return the list of fields available for aggregation.
-     * Get aggregatable fields
-     */
-    async aggregatableFieldsRaw(requestParameters: AggregatableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling aggregatableFields().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (this.configuration && this.configuration.accessToken) {
-            const token = this.configuration.accessToken;
-            const tokenString = await token("bearerAuth", []);
-
-            if (tokenString) {
-                headerParameters["Authorization"] = `Bearer ${tokenString}`;
-            }
-        }
-
-        let urlPath = `/products/fields/aggregatable`;
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse<any>(response);
-    }
-
-    /**
-     * Return the list of fields available for aggregation.
-     * Get aggregatable fields
-     */
-    async aggregatableFields(requestParameters: AggregatableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
-        const response = await this.aggregatableFieldsRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Return the field metadata available for aggregation, grouped by scope and enriched with vertical specific filters.
-     * Get aggregatable fields for a vertical
-     */
-    async aggregatableFieldsForVerticalRaw(requestParameters: AggregatableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
-        if (requestParameters['verticalId'] == null) {
-            throw new runtime.RequiredError(
-                'verticalId',
-                'Required parameter "verticalId" was null or undefined when calling aggregatableFieldsForVertical().'
-            );
-        }
-
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling aggregatableFieldsForVertical().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (this.configuration && this.configuration.accessToken) {
-            const token = this.configuration.accessToken;
-            const tokenString = await token("bearerAuth", []);
-
-            if (tokenString) {
-                headerParameters["Authorization"] = `Bearer ${tokenString}`;
-            }
-        }
-
-        let urlPath = `/products/fields/aggregatable/{verticalId}`;
-        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductFieldOptionsResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Return the field metadata available for aggregation, grouped by scope and enriched with vertical specific filters.
-     * Get aggregatable fields for a vertical
-     */
-    async aggregatableFieldsForVertical(requestParameters: AggregatableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
-        const response = await this.aggregatableFieldsForVerticalRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
 
     /**
      * Return the list of components that can be included in product responses.
@@ -614,22 +500,6 @@ export class ProductApi extends runtime.BaseAPI {
 /**
  * @export
  */
-export const AggregatableFieldsDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type AggregatableFieldsDomainLanguageEnum = typeof AggregatableFieldsDomainLanguageEnum[keyof typeof AggregatableFieldsDomainLanguageEnum];
-/**
- * @export
- */
-export const AggregatableFieldsForVerticalDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type AggregatableFieldsForVerticalDomainLanguageEnum = typeof AggregatableFieldsForVerticalDomainLanguageEnum[keyof typeof AggregatableFieldsForVerticalDomainLanguageEnum];
-/**
- * @export
- */
 export const ComponentsDomainLanguageEnum = {
     Fr: 'fr',
     En: 'en'
@@ -697,14 +567,6 @@ export const ProductsIncludeEnum = {
     Offers: 'offers'
 } as const;
 export type ProductsIncludeEnum = typeof ProductsIncludeEnum[keyof typeof ProductsIncludeEnum];
-/**
- * @export
- */
-export const ProductsSortEnum = {
-    PriceMinPricePrice: 'price.minPrice.price',
-    OffersCount: 'offersCount'
-} as const;
-export type ProductsSortEnum = typeof ProductsSortEnum[keyof typeof ProductsSortEnum];
 /**
  * @export
  */

@@ -20,11 +20,11 @@ import { mapValues } from '../runtime';
  */
 export interface Filter {
     /**
-     * Field targeted by the filter.
+     * Field mapping targeted by the filter.
      * @type {string}
      * @memberof Filter
      */
-    field?: FilterFieldEnum;
+    field?: string;
     /**
      * Filtering strategy to apply.
      * @type {string}
@@ -51,19 +51,6 @@ export interface Filter {
     max?: number;
 }
 
-
-/**
- * @export
- */
-export const FilterFieldEnum = {
-    Price: 'price',
-    OffersCount: 'offersCount',
-    Condition: 'condition',
-    Brand: 'brand',
-    Country: 'country',
-    Datasource: 'datasource'
-} as const;
-export type FilterFieldEnum = typeof FilterFieldEnum[keyof typeof FilterFieldEnum];
 
 /**
  * @export
