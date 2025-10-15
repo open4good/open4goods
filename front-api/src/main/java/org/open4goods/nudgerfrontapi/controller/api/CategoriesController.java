@@ -6,10 +6,13 @@ import java.util.Objects;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
+import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
+import org.open4goods.services.blog.model.BlogPost;
+import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,11 +45,14 @@ public class CategoriesController {
 
     private final VerticalsConfigService verticalsConfigService;
     private final CategoryMappingService categoryMappingService;
+    private final BlogService blogService;
 
     public CategoriesController(VerticalsConfigService verticalsConfigService,
-                                CategoryMappingService categoryMappingService) {
+                                CategoryMappingService categoryMappingService,
+                                BlogService blogService) {
         this.verticalsConfigService = verticalsConfigService;
         this.categoryMappingService = categoryMappingService;
+        this.blogService = blogService;
     }
 
     @GetMapping
@@ -110,9 +116,29 @@ public class CategoriesController {
             return ResponseEntity.notFound().build();
         }
 
-        VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config, domainLanguage);
+        List<BlogPostDto> relatedPosts = blogService.getPosts(categoryId).stream()
+                .limit(3)
+                .map(this::mapBlogPost)
+                .toList();
+
+        VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config, domainLanguage, relatedPosts);
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);
+    }
+
+    private BlogPostDto mapBlogPost(BlogPost post) {
+        return new BlogPostDto(
+                post.getUrl(),
+                post.getTitle(),
+                post.getAuthor(),
+                post.getSummary(),
+                post.getBody(),
+                post.getCategory(),
+                post.getImage(),
+                post.getEditLink(),
+                post.getCreated() == null ? null : post.getCreated().getTime(),
+                post.getModified() == null ? null : post.getModified().getTime()
+        );
     }
 }
