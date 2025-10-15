@@ -239,6 +239,16 @@ public class GoogleTaxonomyService {
 	}
 
 	/**
+	 * Get the FR taxonomy name from an id
+	 * @param taxonomyId
+	 * @return
+	 */
+	public List<String> getTaxonomyName(Integer taxonomyId, String language) {
+		return localizedTaxonomy.get(language).get(taxonomyId);
+	}
+
+
+	/**
 	 * Resolve the deepest category if from several one
 	 * @param language
 	 * @param taxonomyIds
