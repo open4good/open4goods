@@ -69,6 +69,66 @@
     },
     "siteName": "Nudger"
   },
+  "category": {
+    "hero": {
+      "breadcrumbAriaLabel": "Fil d'Ariane des catégories",
+      "missingBreadcrumbTitle": "Catégorie"
+    },
+    "fastFilters": {
+      "title": "Filtres rapides",
+      "reset": "Réinitialiser les filtres rapides",
+      "activeClauses": "Filtres de sous-ensemble appliqués",
+      "operator": {
+        "greaterThan": "≥ {value}",
+        "lowerThan": "≤ {value}"
+      }
+    },
+    "filters": {
+      "globalTitle": "Filtres globaux",
+      "impactTitle": "Filtres d'impact",
+      "technicalTitle": "Filtres techniques",
+      "showMoreImpact": "Afficher plus de filtres d'impact",
+      "hideImpact": "Masquer les filtres d'impact",
+      "showMoreTechnical": "Afficher plus de filtres techniques",
+      "hideTechnical": "Masquer les filtres techniques",
+      "rangeAriaSuffix": "sélection d'intervalle",
+      "searchOptions": "Rechercher dans les options",
+      "noMatch": "Aucune option correspondante",
+      "missingLabel": "Option sans libellé",
+      "mobileApply": "Appliquer les filtres",
+      "mobileClear": "Effacer les filtres"
+    },
+    "products": {
+      "untitledProduct": "Produit sans nom",
+      "unknownBrand": "Marque inconnue",
+      "ecoscoreLabel": "Score éco {letter}",
+      "priceUnavailable": "Prix non disponible",
+      "offerCount": "{count, plural, one {# offre} other {# offres}}",
+      "notRated": "Non noté",
+      "fetchError": "Impossible de charger les produits. Veuillez réessayer.",
+      "headers": {
+        "brand": "Marque",
+        "model": "Modèle",
+        "ecoscore": "Score éco",
+        "bestPrice": "Meilleur prix",
+        "offers": "Offres"
+      },
+      "resultsCount": "{count, plural, one {# produit} other {# produits}}",
+      "searchPlaceholder": "Rechercher des produits",
+      "sortLabel": "Trier par",
+      "sortOrderAsc": "Ordre croissant",
+      "sortOrderDesc": "Ordre décroissant",
+      "viewCards": "Vue cartes",
+      "viewList": "Vue liste",
+      "viewTable": "Vue tableau",
+      "openFilters": "Filtres",
+      "noResults": "Aucun produit ne correspond aux filtres sélectionnés."
+    },
+    "documentation": {
+      "guidesTitle": "Guides utiles",
+      "postsTitle": "Articles associés"
+    }
+  },
   "blog": {
     "seo": {
       "baseTitle": "Blog Nudger",

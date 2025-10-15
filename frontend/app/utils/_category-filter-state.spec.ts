@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  buildCategoryHash,
+  deserializeCategoryHashState,
+  serializeCategoryHashState,
+  type CategoryHashState,
+} from './_category-filter-state'
+
+describe('category filter hash serialisation', () => {
+  it('serialises and deserialises state payloads', () => {
+    const state: CategoryHashState = {
+      search: 'smartphone',
+      pageNumber: 2,
+      view: 'cards',
+      activeSubsets: ['eco', 'budget'],
+      impactExpanded: true,
+      filters: {
+        filters: [
+          {
+            field: 'scores.ECOSCORE.value',
+            operator: 'range',
+            min: 80,
+            max: 100,
+          },
+        ],
+      },
+    }
+
+    const serialised = serializeCategoryHashState(state)
+    expect(serialised).toBeTypeOf('string')
+    expect(serialised.length).toBeGreaterThan(0)
+
+    const deserialised = deserializeCategoryHashState(serialised)
+    expect(deserialised).toEqual(state)
+  })
+
+  it('returns null when payload is empty or invalid', () => {
+    expect(deserializeCategoryHashState('')).toBeNull()
+    expect(deserializeCategoryHashState(undefined)).toBeNull()
+
+    const invalidPayload = 'invalid-base64'
+    expect(deserializeCategoryHashState(invalidPayload)).toBeNull()
+  })
+
+  it('buildCategoryHash prefixes with hash character', () => {
+    const payload: CategoryHashState = { view: 'list' }
+    const hash = buildCategoryHash(payload)
+
+    expect(hash.startsWith('#')).toBe(true)
+
+    const restored = deserializeCategoryHashState(hash.slice(1))
+    expect(restored).toEqual(payload)
+  })
+})

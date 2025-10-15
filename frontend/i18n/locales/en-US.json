@@ -70,6 +70,66 @@
     },
     "siteName": "Nudger"
   },
+  "category": {
+    "hero": {
+      "breadcrumbAriaLabel": "Category navigation breadcrumb",
+      "missingBreadcrumbTitle": "Category"
+    },
+    "fastFilters": {
+      "title": "Quick filters",
+      "reset": "Clear fast filters",
+      "activeClauses": "Applied subset filters",
+      "operator": {
+        "greaterThan": "≥ {value}",
+        "lowerThan": "≤ {value}"
+      }
+    },
+    "filters": {
+      "globalTitle": "Global filters",
+      "impactTitle": "Impact filters",
+      "technicalTitle": "Technical filters",
+      "showMoreImpact": "Show more impact filters",
+      "hideImpact": "Hide impact filters",
+      "showMoreTechnical": "Show more technical filters",
+      "hideTechnical": "Hide technical filters",
+      "rangeAriaSuffix": "range selection",
+      "searchOptions": "Search options",
+      "noMatch": "No matching options",
+      "missingLabel": "Unlabelled option",
+      "mobileApply": "Apply filters",
+      "mobileClear": "Clear all filters"
+    },
+    "products": {
+      "untitledProduct": "Unnamed product",
+      "unknownBrand": "Unknown brand",
+      "ecoscoreLabel": "Eco score {letter}",
+      "priceUnavailable": "Price unavailable",
+      "offerCount": "{count, plural, one {# offer} other {# offers}}",
+      "notRated": "Not rated",
+      "fetchError": "Unable to load products. Please try again.",
+      "headers": {
+        "brand": "Brand",
+        "model": "Model",
+        "ecoscore": "Eco score",
+        "bestPrice": "Best price",
+        "offers": "Offers"
+      },
+      "resultsCount": "{count, plural, one {# product} other {# products}}",
+      "searchPlaceholder": "Search products",
+      "sortLabel": "Sort by",
+      "sortOrderAsc": "Ascending order",
+      "sortOrderDesc": "Descending order",
+      "viewCards": "Card view",
+      "viewList": "List view",
+      "viewTable": "Table view",
+      "openFilters": "Filters",
+      "noResults": "No products match the selected filters."
+    },
+    "documentation": {
+      "guidesTitle": "Helpful guides",
+      "postsTitle": "Related articles"
+    }
+  },
   "blog": {
     "seo": {
       "baseTitle": "Nudger Blog – Impact Score insights",
