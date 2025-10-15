@@ -105,11 +105,11 @@ import jakarta.servlet.http.HttpServletRequest;
 public class ProductMappingService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductMappingService.class);
-    private static final String IMAGE_PREFIX = "/images/verticals/";
     private static final String DEFAULT_LANGUAGE_KEY = "default";
     private static final String IMAGES_PATH = "/images/";
     private static final String PDFS_PATH = "/pdfs/";
     private static final String VIDEOS_PATH = "/videos/";
+	private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -740,7 +740,7 @@ public class ProductMappingService {
         String originalUrl = buildResourceUrl(resource, IMAGES_PATH);
         return new ProductImageDto(
                 toWebpUrl(originalUrl),
-                MediaType.IMAGE_WEBP_VALUE,
+                IMAGE_WEBP_MEDIATYPE,
                 originalUrl,
                 resource.getMimeType(),
                 resource.getTimeStamp(),
