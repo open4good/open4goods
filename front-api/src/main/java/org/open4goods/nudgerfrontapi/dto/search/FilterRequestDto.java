@@ -12,9 +12,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Describes the filters that can be applied when searching for products.
  *
  * <p>The structure mirrors the JSON payload accepted by the {@code filters}
- * query parameter on {@code GET /products}. Clients can combine multiple
- * clauses. Each clause is evaluated with an AND semantics on the Elasticsearch
- * query.</p>
+ * property of the {@code POST /products} request body. Clients can combine
+ * multiple clauses. Each clause is evaluated with an AND semantics on the
+ * Elasticsearch query.</p>
  */
 public record FilterRequestDto(
         @Schema(description = "Collection of filter clauses. When omitted no additional filtering is applied.")

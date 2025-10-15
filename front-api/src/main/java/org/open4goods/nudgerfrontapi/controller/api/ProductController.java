@@ -28,10 +28,10 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
-import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,14 +42,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -80,21 +79,16 @@ import org.open4goods.verticals.VerticalsConfigService;
 public class ProductController {
 
     private final ProductMappingService service;
-    private final ObjectMapper objectMapper;
     private final VerticalsConfigService verticalsConfigService;
-    private final SearchService searchService;
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
 
-    public ProductController(ProductMappingService service, ObjectMapper objectMapper,
-                             VerticalsConfigService verticalsConfigService,
-                             SearchService searchService) {
+    public ProductController(ProductMappingService service,
+                             VerticalsConfigService verticalsConfigService) {
         this.service = service;
-        this.objectMapper = objectMapper;
         this.verticalsConfigService = verticalsConfigService;
-        this.searchService = searchService;
     }
 
     /**
@@ -249,7 +243,7 @@ public class ProductController {
      *   <li><b>INTERNAL_ERROR</b> – 500</li>
      * </ul>
      */
-    @GetMapping
+    @PostMapping
     @Operation(
             summary = "List products",
             description = "Return paginated products.",
@@ -265,16 +259,6 @@ public class ProductController {
                     @Parameter(name = "pageSize", in = ParameterIn.QUERY,
                             description = "Page size",
                             schema = @Schema(type = "integer", minimum = "0")),
-                    @Parameter(name = "sort", in = ParameterIn.QUERY,
-                            description = "Sort criteria. Accepts the classical Spring syntax (?sort=field,asc) as well as a JSON payload following the SortRequestDto structure.",
-                            schema = @Schema(implementation = SortRequestDto.class)),
-                    @Parameter(name = "aggs", in = ParameterIn.QUERY,
-                            description = "Aggregations definition as JSON",
-                            schema = @Schema(implementation = AggregationRequestDto.class)),
-                    @Parameter(name = "filters", in = ParameterIn.QUERY,
-                            description = "Filters definition as JSON. The payload must follow the FilterRequestDto schema.",
-                            schema = @Schema(implementation = FilterRequestDto.class),
-                            example = "{\"filters\":[{\"field\":\"condition\",\"operator\":\"term\",\"terms\":[\"NEW\"]}]}"),
                     @Parameter(name = "verticalId", in = ParameterIn.QUERY,
                             description = "Optional vertical identifier used to scope the search.",
                             schema = @Schema(type = "string")),
@@ -285,6 +269,12 @@ public class ProductController {
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class))
             },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Optional JSON payload carrying sort, aggregation and filter definitions.",
+                    required = false,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProductSearchRequestDto.class))
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Products returned",
                             headers = {
@@ -304,13 +294,11 @@ public class ProductController {
     public ResponseEntity<ProductSearchResponseDto> products(
             @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
             @RequestParam(required = false) Set<String> include,
-            @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String aggs,
-            @RequestParam(required = false) String filters,
             @RequestParam(required = false) String verticalId,
             @RequestParam(required = false) String query,
             @RequestParam() DomainLanguage domainLanguage,
-            Locale locale) {
+            Locale locale,
+            @RequestBody(required = false) ProductSearchRequestDto searchPayload) {
 
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
@@ -335,37 +323,21 @@ public class ProductController {
         }
 
         Pageable effectivePageable = page;
-        if (StringUtils.hasText(sort) && looksLikeJson(sort)) {
-            SortRequestDto sortDto;
-            try {
-                String trimmedSort = sort.trim();
-                if (!trimmedSort.isEmpty() && trimmedSort.charAt(0) == '[') {
-                    List<SortRequestDto.SortOption> options = objectMapper
-                            .readerForListOf(SortRequestDto.SortOption.class)
-                            .readValue(trimmedSort);
-                    sortDto = new SortRequestDto(options);
-                } else {
-                    sortDto = objectMapper.readValue(trimmedSort, SortRequestDto.class);
-                }
-            } catch (JsonProcessingException e) {
-                return badRequest("Invalid sort parameter", "Unable to parse sort definition: " + e.getOriginalMessage());
-            }
-
+        SortRequestDto sortDto = searchPayload == null ? null : searchPayload.sort();
+        if (sortDto != null && sortDto.sorts() != null) {
             List<Sort.Order> orders = new ArrayList<>();
-            if (sortDto.sorts() != null) {
-                for (SortRequestDto.SortOption option : sortDto.sorts()) {
-                    if (option == null || !StringUtils.hasText(option.field())) {
-                        return badRequest("Invalid sort parameter", "Sort field is mandatory");
-                    }
-                    String mapping = option.field().trim();
-                    if (!allowedSortMappings.contains(mapping)) {
-                        return badRequest("Invalid sort parameter", "Unknown sort field: " + mapping);
-                    }
-                    Sort.Direction direction = option.order() == SortRequestDto.SortOrder.desc
-                            ? Sort.Direction.DESC
-                            : Sort.Direction.ASC;
-                    orders.add(new Sort.Order(direction, mapping));
+            for (SortRequestDto.SortOption option : sortDto.sorts()) {
+                if (option == null || !StringUtils.hasText(option.field())) {
+                    return badRequest("Invalid sort parameter", "Sort field is mandatory");
                 }
+                String mapping = option.field().trim();
+                if (!allowedSortMappings.contains(mapping)) {
+                    return badRequest("Invalid sort parameter", "Unknown sort field: " + mapping);
+                }
+                Sort.Direction direction = option.order() == SortRequestDto.SortOrder.desc
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
+                orders.add(new Sort.Order(direction, mapping));
             }
             Sort sortSpec = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
             effectivePageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sortSpec);
@@ -387,12 +359,7 @@ public class ProductController {
             }
         }
 
-        AggregationRequestDto aggDto;
-        try {
-            aggDto = parseAggregationRequest(aggs);
-        } catch (IllegalArgumentException ex) {
-            return badRequest("Invalid aggregation parameter", ex.getMessage());
-        }
+        AggregationRequestDto aggDto = searchPayload == null ? null : searchPayload.aggs();
         if (aggDto != null && aggDto.aggs() != null && !aggDto.aggs().isEmpty()) {
             if (normalizedVerticalId == null) {
                 return badRequest("Invalid aggregation parameter", "Aggregations require a verticalId");
@@ -414,12 +381,7 @@ public class ProductController {
             aggDto = new AggregationRequestDto(List.of());
         }
 
-        FilterRequestDto filterDto;
-        try {
-            filterDto = parseFilterRequest(filters);
-        } catch (IllegalArgumentException ex) {
-            return badRequest("Invalid filters parameter", ex.getMessage());
-        }
+        FilterRequestDto filterDto = searchPayload == null ? null : searchPayload.filters();
         if (filterDto != null && filterDto.filters() != null) {
             Set<String> validationSet = normalizedVerticalId == null ? globalFilterMappings : allowedFilterMappings;
             List<FilterRequestDto.Filter> sanitized = new ArrayList<>();
@@ -444,52 +406,6 @@ public class ProductController {
                 domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
-    }
-
-    private AggregationRequestDto parseAggregationRequest(String aggs) {
-        if (!StringUtils.hasText(aggs)) {
-            return null;
-        }
-        String trimmed = aggs.trim();
-        try {
-            if (!trimmed.isEmpty() && trimmed.charAt(0) == '[') {
-                List<Agg> aggregations = objectMapper.readerForListOf(Agg.class).readValue(trimmed);
-                return new AggregationRequestDto(aggregations);
-            }
-            return objectMapper.readValue(trimmed, AggregationRequestDto.class);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Unable to parse aggregation query: " + e.getOriginalMessage(), e);
-        }
-    }
-
-    private FilterRequestDto parseFilterRequest(String filters) {
-        if (!StringUtils.hasText(filters)) {
-            return null;
-        }
-        String trimmed = filters.trim();
-        try {
-            if (!trimmed.isEmpty() && trimmed.charAt(0) == '[') {
-                List<FilterRequestDto.Filter> clauses = objectMapper
-                        .readerForListOf(FilterRequestDto.Filter.class)
-                        .readValue(trimmed);
-                return new FilterRequestDto(clauses);
-            }
-            return objectMapper.readValue(trimmed, FilterRequestDto.class);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Unable to parse filter definition: " + e.getOriginalMessage(), e);
-        }
-    }
-
-    private boolean looksLikeJson(String value) {
-        if (!StringUtils.hasText(value)) {
-            return false;
-        }
-        String trimmed = value.trim();
-        if (trimmed.isEmpty()) {
-            return false;
-        }
-        char first = trimmed.charAt(0);
-        return first == '{' || first == '[';
     }
 
     private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {

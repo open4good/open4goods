@@ -73,6 +73,7 @@ export * from './ProductRankingDto';
 export * from './ProductResourcesDto';
 export * from './ProductScoreDto';
 export * from './ProductScoresDto';
+export * from './ProductSearchRequestDto';
 export * from './ProductSearchResponseDto';
 export * from './ProductSourcedAttributeDto';
 export * from './ProductVideoDto';

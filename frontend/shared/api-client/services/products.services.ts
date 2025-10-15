@@ -4,6 +4,7 @@ import type {
   FilterRequestDto,
   ProductDto,
   ProductFieldOptionsResponse,
+  ProductSearchRequestDto,
   ProductSearchResponseDto,
   SortRequestDto,
 } from '..'
@@ -91,32 +92,27 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const searchProducts = async (
-    parameters: Omit<ProductsRequest, 'domainLanguage'> & {
-      aggs?: AggregationRequestDto | string
-      sort?: SortRequestDto | string
-      filters?: FilterRequestDto | string
+    parameters: Omit<ProductsRequest, 'domainLanguage' | 'body'> & {
+      aggs?: AggregationRequestDto
+      sort?: SortRequestDto
+      filters?: FilterRequestDto
     },
   ): Promise<ProductSearchResponseDto> => {
     const { aggs, sort, filters, ...rest } = parameters
 
+    const body: ProductSearchRequestDto | undefined =
+      sort || aggs || filters
+        ? {
+            ...(sort ? { sort } : {}),
+            ...(aggs ? { aggs } : {}),
+            ...(filters ? { filters } : {}),
+          }
+        : undefined
+
     const request: ProductsRequest = {
       domainLanguage,
       ...rest,
-    }
-
-    if (aggs != null) {
-      const serialized = typeof aggs === 'string' ? aggs : JSON.stringify(aggs)
-      ;(request as ProductsRequest & { aggs?: string }).aggs = serialized
-    }
-
-    if (sort != null) {
-      const serialized = typeof sort === 'string' ? sort : JSON.stringify(sort)
-      ;(request as ProductsRequest & { sort?: string }).sort = serialized
-    }
-
-    if (filters != null) {
-      const serialized = typeof filters === 'string' ? filters : JSON.stringify(filters)
-      ;(request as ProductsRequest & { filters?: string }).filters = serialized
+      ...(body ? { body } : {}),
     }
 
     try {
