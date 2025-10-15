@@ -15,6 +15,7 @@ index.ts
 models/AffiliationPartnerDto.ts
 models/Agg.ts
 models/AggregationBucketDto.ts
+models/AggregationMetadata.ts
 models/AggregationRequestDto.ts
 models/AggregationResponseDto.ts
 models/AiPromptsConfig.ts
@@ -38,6 +39,7 @@ models/FeedbackSubmissionRequestDto.ts
 models/FeedbackSubmissionResponseDto.ts
 models/FeedbackVoteEligibilityDto.ts
 models/FeedbackVoteResponseDto.ts
+models/FieldMetadataDto.ts
 models/Filter.ts
 models/FilterRequestDto.ts
 models/FullPageDto.ts

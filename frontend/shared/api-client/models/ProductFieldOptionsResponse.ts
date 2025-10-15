@@ -13,30 +13,38 @@
  */
 
 import { mapValues } from '../runtime';
+import type { FieldMetadataDto } from './FieldMetadataDto';
+import {
+    FieldMetadataDtoFromJSON,
+    FieldMetadataDtoFromJSONTyped,
+    FieldMetadataDtoToJSON,
+    FieldMetadataDtoToJSONTyped,
+} from './FieldMetadataDto';
+
 /**
- * 
+ * Product fields available for filtering or sorting, split by scope.
  * @export
  * @interface ProductFieldOptionsResponse
  */
 export interface ProductFieldOptionsResponse {
     /**
      * 
-     * @type {any}
+     * @type {Array<FieldMetadataDto>}
      * @memberof ProductFieldOptionsResponse
      */
-    global?: any | null;
+    global?: Array<FieldMetadataDto>;
     /**
      * 
-     * @type {any}
+     * @type {Array<FieldMetadataDto>}
      * @memberof ProductFieldOptionsResponse
      */
-    impact?: any | null;
+    impact?: Array<FieldMetadataDto>;
     /**
      * 
-     * @type {any}
+     * @type {Array<FieldMetadataDto>}
      * @memberof ProductFieldOptionsResponse
      */
-    technical?: any | null;
+    technical?: Array<FieldMetadataDto>;
 }
 
 /**
@@ -56,9 +64,9 @@ export function ProductFieldOptionsResponseFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
-        'global': json['global'] == null ? undefined : json['global'],
-        'impact': json['impact'] == null ? undefined : json['impact'],
-        'technical': json['technical'] == null ? undefined : json['technical'],
+        'global': json['global'] == null ? undefined : ((json['global'] as Array<any>).map(FieldMetadataDtoFromJSON)),
+        'impact': json['impact'] == null ? undefined : ((json['impact'] as Array<any>).map(FieldMetadataDtoFromJSON)),
+        'technical': json['technical'] == null ? undefined : ((json['technical'] as Array<any>).map(FieldMetadataDtoFromJSON)),
     };
 }
 
@@ -73,9 +81,9 @@ export function ProductFieldOptionsResponseToJSONTyped(value?: ProductFieldOptio
 
     return {
         
-        'global': value['global'],
-        'impact': value['impact'],
-        'technical': value['technical'],
+        'global': value['global'] == null ? undefined : ((value['global'] as Array<any>).map(FieldMetadataDtoToJSON)),
+        'impact': value['impact'] == null ? undefined : ((value['impact'] as Array<any>).map(FieldMetadataDtoToJSON)),
+        'technical': value['technical'] == null ? undefined : ((value['technical'] as Array<any>).map(FieldMetadataDtoToJSON)),
     };
 }
 

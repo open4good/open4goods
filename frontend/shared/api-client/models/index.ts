@@ -3,6 +3,7 @@
 export * from './AffiliationPartnerDto';
 export * from './Agg';
 export * from './AggregationBucketDto';
+export * from './AggregationMetadata';
 export * from './AggregationRequestDto';
 export * from './AggregationResponseDto';
 export * from './AiPromptsConfig';
@@ -26,6 +27,7 @@ export * from './FeedbackSubmissionRequestDto';
 export * from './FeedbackSubmissionResponseDto';
 export * from './FeedbackVoteEligibilityDto';
 export * from './FeedbackVoteResponseDto';
+export * from './FieldMetadataDto';
 export * from './Filter';
 export * from './FilterRequestDto';
 export * from './FullPageDto';

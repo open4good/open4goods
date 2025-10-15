@@ -13,20 +13,22 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AggregationMetadata } from './AggregationMetadata';
+import {
+    AggregationMetadataFromJSON,
+    AggregationMetadataFromJSONTyped,
+    AggregationMetadataToJSON,
+    AggregationMetadataToJSONTyped,
+} from './AggregationMetadata';
+
 /**
- * Fields exposing technical attributes available for the vertical.
+ * 
  * @export
  * @interface FieldMetadataDto
  */
 export interface FieldMetadataDto {
     /**
-     * Stable identifier of the field as exposed by the API.
-     * @type {string}
-     * @memberof FieldMetadataDto
-     */
-    id?: string;
-    /**
-     * Path of the field in the product document.
+     * Path of the field in the product document acting as its identifier.
      * @type {string}
      * @memberof FieldMetadataDto
      */
@@ -43,7 +45,30 @@ export interface FieldMetadataDto {
      * @memberof FieldMetadataDto
      */
     description?: string;
+    /**
+     * Type of values accepted by the field.
+     * @type {string}
+     * @memberof FieldMetadataDto
+     */
+    valueType?: FieldMetadataDtoValueTypeEnum;
+    /**
+     * Preferred aggregation behaviour when available.
+     * @type {AggregationMetadata}
+     * @memberof FieldMetadataDto
+     */
+    aggregationConfiguration?: AggregationMetadata;
 }
+
+
+/**
+ * @export
+ */
+export const FieldMetadataDtoValueTypeEnum = {
+    Text: 'text',
+    Numeric: 'numeric'
+} as const;
+export type FieldMetadataDtoValueTypeEnum = typeof FieldMetadataDtoValueTypeEnum[keyof typeof FieldMetadataDtoValueTypeEnum];
+
 
 /**
  * Check if a given object implements the FieldMetadataDto interface.
@@ -62,10 +87,11 @@ export function FieldMetadataDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
     }
     return {
         
-        'id': json['id'] == null ? undefined : json['id'],
         'mapping': json['mapping'] == null ? undefined : json['mapping'],
         'title': json['title'] == null ? undefined : json['title'],
         'description': json['description'] == null ? undefined : json['description'],
+        'valueType': json['valueType'] == null ? undefined : json['valueType'],
+        'aggregationConfiguration': json['aggregationConfiguration'] == null ? undefined : AggregationMetadataFromJSON(json['aggregationConfiguration']),
     };
 }
 
@@ -80,10 +106,11 @@ export function FieldMetadataDtoToJSONTyped(value?: FieldMetadataDto | null, ign
 
     return {
         
-        'id': value['id'],
         'mapping': value['mapping'],
         'title': value['title'],
         'description': value['description'],
+        'valueType': value['valueType'],
+        'aggregationConfiguration': AggregationMetadataToJSON(value['aggregationConfiguration']),
     };
 }
 
