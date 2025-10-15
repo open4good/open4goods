@@ -134,7 +134,7 @@ class ProductMappingServiceTest {
         assertThat(dto.resources().videos()).hasSize(1);
         assertThat(dto.resources().pdfs()).hasSize(1);
 
-        assertThat(dto.resources().images().get(0).url()).isEqualTo("https://static.example/images/main-image_img123.jpg");
+        assertThat(dto.resources().images().get(0).url()).isEqualTo("https://static.example/images/main-image_img123.webp");
         assertThat(dto.resources().images().get(0).height()).isEqualTo(800);
         assertThat(dto.resources().images().get(0).width()).isEqualTo(600);
 
