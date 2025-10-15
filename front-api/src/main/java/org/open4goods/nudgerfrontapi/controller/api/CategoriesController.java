@@ -1,21 +1,26 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
+import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
+import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,13 +51,16 @@ public class CategoriesController {
     private final VerticalsConfigService verticalsConfigService;
     private final CategoryMappingService categoryMappingService;
     private final BlogService blogService;
+    private final GoogleTaxonomyService googleTaxonomyService;
 
     public CategoriesController(VerticalsConfigService verticalsConfigService,
                                 CategoryMappingService categoryMappingService,
-                                BlogService blogService) {
+                                BlogService blogService,
+                                GoogleTaxonomyService googleTaxonomyService) {
         this.verticalsConfigService = verticalsConfigService;
         this.categoryMappingService = categoryMappingService;
         this.blogService = blogService;
+        this.googleTaxonomyService = googleTaxonomyService;
     }
 
     @GetMapping
@@ -127,6 +135,50 @@ public class CategoriesController {
                 .body(body);
     }
 
+    @GetMapping("/navigation")
+    @Operation(
+            summary = "Get category navigation",
+            description = "Return the Google taxonomy navigation data required to display deep category navigation.",
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields.",
+                            schema = @Schema(implementation = DomainLanguage.class)),
+                    @Parameter(name = "googleCategoryId", in = ParameterIn.QUERY,
+                            description = "Google taxonomy identifier of the category to retrieve.",
+                            schema = @Schema(type = "integer", example = "500001")),
+                    @Parameter(name = "path", in = ParameterIn.QUERY,
+                            description = "Slug path identifying the category when the googleCategoryId is not provided.",
+                            schema = @Schema(type = "string", example = "electronique/televiseurs"))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Navigation data returned",
+
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = CategoryNavigationDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Category not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<CategoryNavigationDto> navigation(
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+            @RequestParam(name = "googleCategoryId", required = false) Integer googleCategoryId,
+            @RequestParam(name = "path", required = false) String path) {
+
+        ProductCategory category = resolveCategory(domainLanguage, googleCategoryId, path);
+        if (category == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        CategoryNavigationDto body = categoryMappingService.toCategoryNavigationDto(category, domainLanguage, true);
+        if (body == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
+                .body(body);
+    }
+
     private BlogPostDto mapBlogPost(BlogPost post) {
         return new BlogPostDto(
                 post.getUrl(),
@@ -140,5 +192,40 @@ public class CategoriesController {
                 post.getCreated() == null ? null : post.getCreated().getTime(),
                 post.getModified() == null ? null : post.getModified().getTime()
         );
+    }
+
+    private ProductCategory resolveCategory(DomainLanguage domainLanguage,
+                                            Integer googleCategoryId,
+                                            String path) {
+        if (googleCategoryId != null) {
+            return googleTaxonomyService.byId(googleCategoryId);
+        }
+
+        String normalisedPath = normalisePath(path);
+        if (StringUtils.hasText(normalisedPath)) {
+            Map<String, ProductCategory> paths = googleTaxonomyService.getCategories()
+                    .paths(languageKey(domainLanguage));
+            return paths.get(normalisedPath);
+        }
+
+        return googleTaxonomyService.getCategories().asRootNode();
+    }
+
+    private String normalisePath(String path) {
+        if (!StringUtils.hasText(path)) {
+            return null;
+        }
+        String normalised = path.trim();
+        while (normalised.startsWith("/")) {
+            normalised = normalised.substring(1);
+        }
+        while (normalised.endsWith("/")) {
+            normalised = normalised.substring(0, normalised.length() - 1);
+        }
+        return normalised;
+    }
+
+    private String languageKey(DomainLanguage domainLanguage) {
+        return domainLanguage == null ? "default" : domainLanguage.name();
     }
 }

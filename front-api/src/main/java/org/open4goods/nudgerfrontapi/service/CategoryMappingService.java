@@ -1,5 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -25,7 +27,9 @@ import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
+import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
+import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreCriteriaDto;
 import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
@@ -146,6 +150,144 @@ public class CategoryMappingService {
                 mapFeatureGroups(verticalConfig.getFeatureGroups(), domainLanguage),
                 verticalConfig.getWorseLimit(),
                 verticalConfig.getBettersLimit());
+    }
+
+    /**
+     * Build the navigation DTO describing the taxonomy tree around the provided
+     * category. The structure mirrors what the legacy Thymeleaf template expects
+     * to render the breadcrumbs, the first level navigation cards and the list of
+     * leaf verticals.
+     *
+     * @param category       taxonomy node selected by the caller
+     * @param domainLanguage requested language
+     * @param havingVertical replicate the legacy flag filtering children with
+     *                       verticals in their hierarchy
+     * @return navigation DTO or {@code null} when the category is {@code null}
+     */
+    public CategoryNavigationDto toCategoryNavigationDto(ProductCategory category,
+                                                         DomainLanguage domainLanguage,
+                                                         boolean havingVertical) {
+        if (category == null) {
+            return null;
+        }
+
+        String languageKey = languageKey(domainLanguage);
+
+        GoogleCategoryDto current = toGoogleCategoryDto(category, domainLanguage, 0, havingVertical);
+
+        List<ProductCategory> directChildren = havingVertical
+                ? category.children(true)
+                : defaultList(category.getChildren());
+
+        List<GoogleCategoryDto> childCategories = directChildren.stream()
+                .map(child -> toGoogleCategoryDto(child, domainLanguage, 1, havingVertical))
+                .filter(Objects::nonNull)
+                .toList();
+
+        LinkedHashSet<Integer> excludedIds = directChildren.stream()
+                .map(ProductCategory::getGoogleCategoryId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        List<GoogleCategoryDto> descendantVerticals = category.verticals().stream()
+                .filter(node -> node.getGoogleCategoryId() != null)
+                .filter(node -> !excludedIds.contains(node.getGoogleCategoryId()))
+                .map(node -> toGoogleCategoryDto(node, domainLanguage, 0, havingVertical))
+                .filter(Objects::nonNull)
+                .toList();
+
+        return new CategoryNavigationDto(
+                current,
+                mapBreadcrumbs(category, languageKey),
+                childCategories,
+                descendantVerticals);
+    }
+
+    /**
+     * Map a product category to the DTO structure used by the API. Children are
+     * mapped recursively until {@code depth} reaches zero.
+     */
+    public GoogleCategoryDto toGoogleCategoryDto(ProductCategory category,
+                                                 DomainLanguage domainLanguage,
+                                                 int depth,
+                                                 boolean havingVertical) {
+        if (category == null) {
+            return null;
+        }
+
+        String languageKey = languageKey(domainLanguage);
+        String title = category.getGoogleNames() == null ? null : category.getGoogleNames().i18n(languageKey);
+        String slug = category.getGoogleCategoryId() != null && category.getGoogleCategoryId() == 0
+                ? ""
+                : category.getUrls() == null ? null : category.getUrls().i18n(languageKey);
+
+        List<GoogleCategoryDto> childrenDtos = Collections.emptyList();
+        if (depth > 0) {
+            List<ProductCategory> children = havingVertical
+                    ? category.children(true)
+                    : defaultList(category.getChildren());
+            childrenDtos = children.stream()
+                    .map(child -> toGoogleCategoryDto(child, domainLanguage, depth - 1, havingVertical))
+                    .filter(Objects::nonNull)
+                    .toList();
+        }
+
+        return new GoogleCategoryDto(
+                category.getGoogleCategoryId(),
+                title,
+                slug,
+                computeCategoryPath(category, languageKey),
+                category.isLeaf(),
+                category.getVertical() != null,
+                category.isHasVerticals(),
+                category.getVertical() == null ? null : toVerticalConfigDto(category.getVertical(), domainLanguage),
+                childrenDtos);
+    }
+
+    /**
+     * Build the breadcrumb entries mirroring the legacy Thymeleaf template.
+     */
+    private List<CategoryBreadcrumbItemDto> mapBreadcrumbs(ProductCategory category, String languageKey) {
+        if (category == null) {
+            return Collections.emptyList();
+        }
+
+        List<CategoryBreadcrumbItemDto> items = new ArrayList<>();
+        items.add(new CategoryBreadcrumbItemDto(null, ""));
+
+        for (ProductCategory node : category.hierarchy()) {
+            if (node.getGoogleCategoryId() == null || node.getGoogleCategoryId() == 0) {
+                continue;
+            }
+            String title = node.getGoogleNames() == null ? null : node.getGoogleNames().i18n(languageKey);
+            items.add(new CategoryBreadcrumbItemDto(title, computeCategoryPath(node, languageKey)));
+        }
+
+        return items;
+    }
+
+    /**
+     * Build the hierarchical path used to address a taxonomy node.
+     */
+    private String computeCategoryPath(ProductCategory category, String languageKey) {
+        if (category == null || category.getGoogleCategoryId() == null || category.getGoogleCategoryId() == 0) {
+            return "";
+        }
+
+        ArrayDeque<String> segments = new ArrayDeque<>();
+        ProductCategory current = category;
+        while (current != null && current.getGoogleCategoryId() != null && current.getGoogleCategoryId() != 0) {
+            String slug = current.getUrls() == null ? null : current.getUrls().i18n(languageKey);
+            if (StringUtils.hasText(slug)) {
+                segments.addFirst(slug);
+            }
+            current = current.getParent();
+        }
+        return String.join("/", segments);
+    }
+
+    private String languageKey(DomainLanguage domainLanguage) {
+        return domainLanguage == null ? DEFAULT_LANGUAGE_KEY : domainLanguage.name();
     }
 
     /**
