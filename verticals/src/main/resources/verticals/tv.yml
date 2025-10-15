@@ -313,6 +313,54 @@ subsets:
 
 
 
+
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.REPAIRABILITY_INDEX.value":
+    interval: 1
+    buckets: 10
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 25
+    buckets: 12
+  "scores.POWER_CONSUMPTION_OFF.value":
+    interval: 0.1
+    buckets: 10
+  "scores.WEIGHT.value":
+    interval: 2
+    buckets: 12
+  "scores.BRAND_SUSTAINABILITY.value":
+    interval: 5
+    buckets: 20
+  "scores.DATA_QUALITY.value":
+    interval: 5
+    buckets: 20
+  "attributes.indexed.REPAIRABILITY_INDEX":
+    interval: 1
+    buckets: 10
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 25
+    buckets: 12
+  "attributes.indexed.POWER_CONSUMPTION_OFF":
+    interval: 0.1
+    buckets: 10
+  "attributes.indexed.WEIGHT":
+    interval: 2
+    buckets: 12
+  "attributes.indexed.ENERGY_CONSUMPTION_1000_HOURS":
+    interval: 20
+    buckets: 12
+  "attributes.indexed.DIAGONALE_POUCES":
+    interval: 5
+    buckets: 12
+  "attributes.indexed.HDMI_PORTS_QUANTITY":
+    interval: 1
+    buckets: 6
+  "price.minPrice.price":
+    interval: 100
+    buckets: 20
+
 ecoFilters:
     - "REPAIRABILITY_INDEX" 
     - "CLASSE_ENERGY"   

@@ -13,6 +13,7 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.AggregationConfiguration;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
@@ -85,6 +86,7 @@ public class ProductController {
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
+    private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
 
     public ProductController(ProductMappingService service, ObjectMapper objectMapper,
                              VerticalsConfigService verticalsConfigService,
@@ -173,7 +175,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoSortableFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineSortableValueType(field)))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineSortableValueType(field), null))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -231,7 +233,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field)))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -313,7 +315,7 @@ public class ProductController {
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
         List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field)))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
                 .toList();
         ProductFieldOptionsResponse filterOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage,
                 filterableGlobal);
@@ -527,8 +529,9 @@ public class ProductController {
             return null;
         }
 
+        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, vConfig);
         List<FieldMetadataDto> impactFields = new ArrayList<>();
-        FieldMetadataDto ecoscore = buildEcoscoreField();
+        FieldMetadataDto ecoscore = buildEcoscoreField(vConfig);
         impactFields.add(ecoscore);
         mapImpactScores(vConfig, domainLanguage).stream()
                 .filter(field -> !Objects.equals(field.mapping(), ecoscore.mapping()))
@@ -539,7 +542,7 @@ public class ProductController {
         technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getGlobalTechnicalFilters(), vConfig, domainLanguage));
         technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getTechnicalFilters(), vConfig, domainLanguage));
 
-        return new ProductFieldOptionsResponse(immutableGlobal, List.copyOf(impactFields), List.copyOf(technicalFields));
+        return new ProductFieldOptionsResponse(globalWithAggregation, List.copyOf(impactFields), List.copyOf(technicalFields));
     }
 
     private ProductFieldOptionsResponse safeResolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
@@ -574,6 +577,34 @@ public class ProductController {
                 target.add(field.mapping());
             }
         }
+    }
+
+    private List<FieldMetadataDto> augmentFieldsWithAggregationMetadata(List<FieldMetadataDto> fields, VerticalConfig config) {
+        if (fields == null || fields.isEmpty()) {
+            return List.of();
+        }
+        List<FieldMetadataDto> results = new ArrayList<>(fields.size());
+        for (FieldMetadataDto field : fields) {
+            if (field == null) {
+                continue;
+            }
+            if (!StringUtils.hasText(field.mapping())) {
+                results.add(field);
+                continue;
+            }
+            FieldMetadataDto.AggregationMetadata existing = field.aggregationConfiguration();
+            if (existing != null) {
+                results.add(field);
+                continue;
+            }
+            FieldMetadataDto.AggregationMetadata resolved = resolveAggregationMetadata(config, field.mapping());
+            if (resolved == null) {
+                results.add(field);
+            } else {
+                results.add(new FieldMetadataDto(field.mapping(), field.title(), field.description(), field.valueType(), resolved));
+            }
+        }
+        return List.copyOf(results);
     }
 
     /**
@@ -618,14 +649,68 @@ public class ProductController {
             String mapping = toIndexedAttribute(normalizedName, config);
             String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
             String valueType = resolveAttributeValueType(config, normalizedName);
-            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null, valueType);
+            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedName);
+            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null, valueType, aggregation);
             results.add(dto);
         }
         return List.copyOf(results);
     }
 
-    private FieldMetadataDto buildEcoscoreField() {
-        return new FieldMetadataDto("scores.ECOSCORE.value", "impactscore", null, VALUE_TYPE_NUMERIC);
+    private FieldMetadataDto.AggregationMetadata resolveAggregationMetadata(VerticalConfig config, String mapping,
+            String... fallbackKeys) {
+        AggregationConfiguration aggregationConfig = findAggregationConfiguration(config, mapping, fallbackKeys);
+        if (aggregationConfig == null) {
+            return null;
+        }
+        Integer buckets = aggregationConfig.getBuckets();
+        Double interval = aggregationConfig.getInterval();
+        if (buckets == null && interval == null) {
+            return null;
+        }
+        return new FieldMetadataDto.AggregationMetadata(buckets, interval);
+    }
+
+    private AggregationConfiguration findAggregationConfiguration(VerticalConfig config, String mapping,
+            String... fallbackKeys) {
+        if (config == null) {
+            return null;
+        }
+        List<String> candidates = new ArrayList<>();
+        addAggregationCandidate(candidates, mapping);
+        if (fallbackKeys != null) {
+            for (String fallback : fallbackKeys) {
+                addAggregationCandidate(candidates, fallback);
+            }
+        }
+        for (String candidate : candidates) {
+            AggregationConfiguration resolved = config.getAggregationConfigurationFor(candidate);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+        return null;
+    }
+
+    private void addAggregationCandidate(List<String> target, String value) {
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        String normalized = value.trim();
+        if (!target.contains(normalized)) {
+            target.add(normalized);
+        }
+        if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
+            String shortened = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
+            if (!shortened.isEmpty() && !target.contains(shortened)) {
+                target.add(shortened);
+            }
+        }
+    }
+
+    private FieldMetadataDto buildEcoscoreField(VerticalConfig config) {
+        String mapping = "scores.ECOSCORE.value";
+        FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, "ECOSCORE");
+        return new FieldMetadataDto(mapping, "impactscore", null, VALUE_TYPE_NUMERIC, aggregation);
     }
 
     /**
@@ -664,7 +749,8 @@ public class ProductController {
             String mapping = "scores." + key + ".value";
             String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
             String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
-            results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC));
+            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, key);
+            results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC, aggregation));
         });
         return List.copyOf(results);
     }
