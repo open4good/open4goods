@@ -28,12 +28,8 @@ import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
@@ -42,7 +38,6 @@ import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
-import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -71,9 +66,6 @@ class ProductControllerIT {
 
     @MockBean
     private ProductMappingService service;
-
-    @MockBean
-    private SearchService searchService;
 
     @MockBean
     private VerticalsConfigService verticalsConfigService;
@@ -155,8 +147,13 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
+        VerticalConfig config = new VerticalConfig();
+        config.setId("electronics");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
         mockMvc.perform(get("/products")
-                        .param("aggs", "[{\"name\":\"per_price\",\"field\":\"price\",\"type\":\"terms\"}]")
+                        .param("aggs", "[{\"name\":\"per_price\",\"field\":\"price.minPrice.price\",\"type\":\"terms\"}]")
+                        .param("verticalId", "electronics")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
@@ -169,7 +166,7 @@ class ProductControllerIT {
         assertThat(aggregationRequestDto.aggs()).hasSize(1);
         AggregationRequestDto.Agg agg = aggregationRequestDto.aggs().get(0);
         assertThat(agg.name()).isEqualTo("per_price");
-        assertThat(agg.field()).isEqualTo(ProductDtoAggregatableFields.price);
+        assertThat(agg.field()).isEqualTo("price.minPrice.price");
     }
 
     @Test
@@ -180,8 +177,13 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
+        VerticalConfig config = new VerticalConfig();
+        config.setId("electronics");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
         mockMvc.perform(get("/products")
-                        .param("aggs", "{\"aggs\":[{\"name\":\"per_price\",\"field\":\"price\",\"type\":\"terms\"}]}")
+                        .param("aggs", "{\"aggs\":[{\"name\":\"per_price\",\"field\":\"price.minPrice.price\",\"type\":\"terms\"}]}")
+                        .param("verticalId", "electronics")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
@@ -194,41 +196,7 @@ class ProductControllerIT {
         assertThat(aggregationRequestDto.aggs()).hasSize(1);
         AggregationRequestDto.Agg agg = aggregationRequestDto.aggs().get(0);
         assertThat(agg.name()).isEqualTo("per_price");
-        assertThat(agg.field()).isEqualTo(ProductDtoAggregatableFields.price);
-    }
-
-    @Test
-    void aggregatableFieldsExposeDefinitions() throws Exception {
-        VerticalConfig config = new VerticalConfig();
-        config.setId("electronics");
-        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
-
-        AggregationResponseDto priceAggregation = new AggregationResponseDto("price",
-                ProductDtoAggregatableFields.price, AggType.range,
-                List.of(new AggregationBucketDto("10.0", 11.0, 4L, false)), 10d, 100d);
-        List<AggregationBucketDto> conditionBuckets = List.of(
-                new AggregationBucketDto("NEW", null, 5L, false),
-                new AggregationBucketDto("ES-UNKNOWN", null, 1L, true));
-        AggregationResponseDto conditionAggregation = new AggregationResponseDto("condition",
-                ProductDtoAggregatableFields.condition, AggType.terms, conditionBuckets, null, null);
-        SearchService.SearchResult aggregations = new SearchService.SearchResult(null,
-                List.of(priceAggregation, conditionAggregation));
-        given(searchService.search(any(Pageable.class), any(), nullable(String.class), any(AggregationRequestDto.class),
-                nullable(FilterRequestDto.class))).willReturn(aggregations);
-
-        mockMvc.perform(get("/products/fields/aggregatable/{verticalId}", "electronics")
-                        .param("domainLanguage", "FR")
-                        .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.impact[0].id").value("ecoscore"))
-                .andExpect(jsonPath("$.global[0].id").value("price"))
-                .andExpect(jsonPath("$.global[0].definition.min").value(10.0))
-                .andExpect(jsonPath("$.global[0].definition.max").value(100.0))
-                .andExpect(jsonPath("$.global[0].definition.interval").value(1.0))
-                .andExpect(jsonPath("$.global[2].id").value("condition"))
-                .andExpect(jsonPath("$.global[2].definition.buckets[0].key").value("NEW"))
-                .andExpect(jsonPath("$.global[2].definition.buckets[1].missing").value(true));
+        assertThat(agg.field()).isEqualTo("price.minPrice.price");
     }
 
 
@@ -246,6 +214,16 @@ class ProductControllerIT {
     void productsEndpointReturns400OnInvalidSort() throws Exception {
         mockMvc.perform(get("/products")
                         .param("sort", "invalid,asc")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void productsEndpointRejectsAggregationWithoutVertical() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("aggs", "[{\"name\":\"by_price\",\"field\":\"price.minPrice.price\",\"type\":\"range\"}]")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
@@ -275,6 +253,26 @@ class ProductControllerIT {
 
         mockMvc.perform(get("/products")
                         .param("sort", "attributes.indexed.battery_life.numericValue,asc")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void productsEndpointAcceptsJsonSortSyntax() throws Exception {
+        VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
+                .willReturn(responseDto);
+
+        mockMvc.perform(get("/products")
+                        .param("sort", "[{\"field\":\"attributes.indexed.battery_life.numericValue\",\"order\":\"desc\"}]")
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)

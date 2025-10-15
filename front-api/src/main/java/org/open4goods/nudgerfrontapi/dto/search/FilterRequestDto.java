@@ -1,6 +1,10 @@
 package org.open4goods.nudgerfrontapi.dto.search;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -20,8 +24,8 @@ public record FilterRequestDto(
      * Describes a single filter clause sent by the client.
      */
     public record Filter(
-            @Schema(description = "Field targeted by the filter.", implementation = FilterField.class)
-            FilterField field,
+            @Schema(description = "Field mapping targeted by the filter.", example = "price.minPrice.price")
+            String field,
             @Schema(description = "Filtering strategy to apply.", implementation = FilterOperator.class)
             FilterOperator operator,
             @Schema(description = "Exact values accepted when the operator is <code>term</code>. Multiple values are combined with OR semantics.",
@@ -58,9 +62,6 @@ public record FilterRequestDto(
             this.valueType = valueType;
         }
 
-        /**
-         * @return Elasticsearch field backing the filter.
-         */
         public String fieldPath() {
             return fieldPath;
         }
@@ -83,6 +84,12 @@ public record FilterRequestDto(
             case keyword -> operator == FilterOperator.term;
             case numeric -> operator == FilterOperator.range || operator == FilterOperator.term;
             };
+        }
+        private static final Map<String, FilterField> LOOKUP = Arrays.stream(values())
+                .collect(Collectors.toMap(FilterField::fieldPath, f -> f));
+
+        public static Optional<FilterField> fromFieldPath(String fieldPath) {
+            return Optional.ofNullable(LOOKUP.get(fieldPath));
         }
     }
 

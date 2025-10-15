@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
-import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 
 /**
  * DTO representing a comprehensive product view returned by the API.
@@ -82,47 +81,6 @@ public record ProductDto(
                 private static final Map<String, ProductDtoSortableFields> LOOKUP = Arrays.stream(values()).collect(Collectors.toMap(ProductDtoSortableFields::getText, e -> e));
 
                 public static Optional<ProductDtoSortableFields> fromText(String text) {
-                        return Optional.ofNullable(LOOKUP.get(text));
-                }
-
-        }
-
-        /**
-         * Allowed aggregation fields on Products. (must match elastic mapping)
-         */
-        public enum ProductDtoAggregatableFields {
-                price("price.minPrice.price", AggType.range),
-                offersCount("offersCount", AggType.range),
-                condition(FilterField.condition.fieldPath(), AggType.terms),
-                brand(FilterField.brand.fieldPath(), AggType.terms),
-                country(FilterField.country.fieldPath(), AggType.terms),
-                datasource(FilterField.datasource.fieldPath(), AggType.terms);
-
-                private final String text;
-                private final AggType defaultAggregationType;
-
-                ProductDtoAggregatableFields(String text, AggType defaultAggregationType) {
-                        this.text = text;
-                        this.defaultAggregationType = defaultAggregationType;
-                }
-
-                public String getText() {
-                        return text;
-                }
-
-                public AggType defaultAggregationType() {
-                        return defaultAggregationType;
-                }
-
-                @Override
-                public String toString() {
-                        return text;
-                }
-
-                private static final Map<String, ProductDtoAggregatableFields> LOOKUP =
-                        Arrays.stream(values()).collect(Collectors.toMap(ProductDtoAggregatableFields::getText, e -> e));
-
-                public static Optional<ProductDtoAggregatableFields> fromText(String text) {
                         return Optional.ofNullable(LOOKUP.get(text));
                 }
 

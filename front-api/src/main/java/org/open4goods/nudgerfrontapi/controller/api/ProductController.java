@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.Localisable;
@@ -16,7 +17,6 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoFilterFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
@@ -25,11 +25,14 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -166,72 +169,9 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoSortableFields.values())
-                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
-    }
-
-    /**
-     * List product fields that support aggregation queries.
-     */
-    @GetMapping("/fields/aggregatable")
-    @Operation(
-            summary = "Get aggregatable fields",
-            description = "Return the list of fields available for aggregation.",
-            parameters = {
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language used to localise aggregation labels in future responses.",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Fields returned",
-
-                            content = @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(type = "string"))))
-            }
-    )
-    public ResponseEntity<List<String>> aggregatableFields(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        List<String> body = Arrays.stream(ProductDtoAggregatableFields.values())
-                .map(ProductDtoAggregatableFields::getText)
-                .toList();
-        return ResponseEntity.ok(body);
-    }
-
-    /**
-     * List product field metadata that support aggregation queries for a specific vertical.
-     */
-    @GetMapping("/fields/aggregatable/{verticalId}")
-    @Operation(
-            summary = "Get aggregatable fields for a vertical",
-            description = "Return the field metadata available for aggregation, grouped by scope and enriched with vertical specific filters.",
-            parameters = {
-                    @Parameter(name = "verticalId", in = ParameterIn.PATH, required = true,
-                            description = "Identifier of the vertical whose aggregatable fields are requested.",
-                            schema = @Schema(type = "string", example = "tv")),
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language used to localise aggregation labels in future responses.",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Fields returned",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProductFieldOptionsResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "Vertical not found")
-            }
-    )
-    public ResponseEntity<ProductFieldOptionsResponse> aggregatableFieldsForVertical(
-            @PathVariable("verticalId") String verticalId,
-            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        List<FieldMetadataDto> global = new ArrayList<>();
-        for (ProductDtoAggregatableFields field : ProductDtoAggregatableFields.values()) {
-            FieldMetadataDto dto = new FieldMetadataDto(field.name(), field.getText(), null, null);
-            global.add(dto);
-        }
-        ProductFieldOptionsResponse response = resolveVerticalFields(verticalId, domainLanguage, global);
-        if (response == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(response);
     }
 
     /**
@@ -287,7 +227,7 @@ public class ProductController {
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
+                .map(field -> new FieldMetadataDto(field.getText(), null, null))
                 .toList();
         return buildVerticalFieldsResponse(verticalId, domainLanguage, global);
     }
@@ -319,9 +259,9 @@ public class ProductController {
                     @Parameter(name = "pageSize", in = ParameterIn.QUERY,
                             description = "Page size",
                             schema = @Schema(type = "integer", minimum = "0")),
-                    @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
-                            schema = @Schema(implementation = ProductDtoSortableFields.class)
-                    )),
+                    @Parameter(name = "sort", in = ParameterIn.QUERY,
+                            description = "Sort criteria. Accepts the classical Spring syntax (?sort=field,asc) as well as a JSON payload following the SortRequestDto structure.",
+                            schema = @Schema(implementation = SortRequestDto.class)),
                     @Parameter(name = "aggs", in = ParameterIn.QUERY,
                             description = "Aggregations definition as JSON",
                             schema = @Schema(implementation = AggregationRequestDto.class)),
@@ -356,168 +296,203 @@ public class ProductController {
             }
     )
     public ResponseEntity<ProductSearchResponseDto> products(
-                @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
-                @RequestParam(required=false) Set<String> include,
-                @RequestParam(required=false) String aggs,
-                @RequestParam(required = false) String filters,
-                @RequestParam(required = false) String verticalId,
-                @RequestParam(required = false) String query,
-                @RequestParam() DomainLanguage domainLanguage,
-                Locale locale) {
+            @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
+            @RequestParam(required = false) Set<String> include,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String aggs,
+            @RequestParam(required = false) String filters,
+            @RequestParam(required = false) String verticalId,
+            @RequestParam(required = false) String query,
+            @RequestParam() DomainLanguage domainLanguage,
+            Locale locale) {
 
+        String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
-                /////////////////////
-                /// Surface control
-                /////////////////////
+        List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
+                .map(field -> new FieldMetadataDto(field.getText(), null, null))
+                .toList();
+        ProductFieldOptionsResponse filterOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage,
+                filterableGlobal);
 
-                String normalizedVerticalId = (verticalId != null && !verticalId.isBlank()) ? verticalId.trim() : null;
+        Set<String> globalFilterMappings = Arrays.stream(ProductDtoFilterFields.values())
+                .map(ProductDtoFilterFields::getText)
+                .collect(Collectors.toSet());
+        Set<String> allowedFilterMappings = collectAllowedFieldMappings(filterOptions);
 
-                List<FieldMetadataDto> sortableGlobal = Arrays.stream(ProductDtoSortableFields.values())
-                        .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
-                        .toList();
-                ProductFieldOptionsResponse sortableOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage, sortableGlobal);
-                Set<String> allowedSortFields = collectAllowedFieldIdentifiers(sortableOptions);
+        Set<String> allowedSortMappings;
+        if (normalizedVerticalId == null) {
+            allowedSortMappings = Arrays.stream(ProductDtoSortableFields.values())
+                    .map(ProductDtoSortableFields::getText)
+                    .collect(Collectors.toSet());
+        } else {
+            allowedSortMappings = allowedFilterMappings;
+        }
 
-                // Validating sort field
-                for (var order : page.getSort()) {
-                        if (!allowedSortFields.contains(order.getProperty())) {
-                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                pd.setTitle("Invalid sort parameter");
-                                pd.setDetail("Unknown sort field: " + order.getProperty());
-                                @SuppressWarnings({ "unchecked", "rawtypes" })
-                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                return response;
-                        }
+        Pageable effectivePageable = page;
+        if (StringUtils.hasText(sort) && looksLikeJson(sort)) {
+            SortRequestDto sortDto;
+            try {
+                String trimmedSort = sort.trim();
+                if (!trimmedSort.isEmpty() && trimmedSort.charAt(0) == '[') {
+                    List<SortRequestDto.SortOption> options = objectMapper
+                            .readerForListOf(SortRequestDto.SortOption.class)
+                            .readValue(trimmedSort);
+                    sortDto = new SortRequestDto(options);
+                } else {
+                    sortDto = objectMapper.readValue(trimmedSort, SortRequestDto.class);
                 }
-		// Validating requested components
+            } catch (JsonProcessingException e) {
+                return badRequest("Invalid sort parameter", "Unable to parse sort definition: " + e.getOriginalMessage());
+            }
 
-		if (include != null) {
-			for (String i : include) {
-				try {
-					ProductDtoComponent.valueOf(i);
-				} catch (IllegalArgumentException ex) {
-					ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-					pd.setTitle("Invalid include parameter");
-					pd.setDetail("Unknown component: " + i);
-					@SuppressWarnings({ "unchecked", "rawtypes" })
-					ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-					return response;
-				}
-			}
-		}
-
-		// Validating requested aggregations
-
-                AggregationRequestDto aggDto = null;
-                if (aggs != null) {
-                        try {
-                                String trimmedAggs = aggs.trim();
-                                if (!trimmedAggs.isEmpty() && trimmedAggs.charAt(0) == '[') {
-                                        List<AggregationRequestDto.Agg> aggregations = objectMapper
-                                                        .readerForListOf(AggregationRequestDto.Agg.class)
-                                                        .readValue(trimmedAggs);
-                                        aggDto = new AggregationRequestDto(aggregations);
-                                } else {
-                                        aggDto = objectMapper.readValue(trimmedAggs, AggregationRequestDto.class);
-                                }
-                        } catch (JsonProcessingException e) {
-                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                pd.setTitle("Invalid aggregation parameter");
-                                pd.setDetail("Unable to parse aggregation query: " + e.getMessage());
-                                @SuppressWarnings({ "unchecked", "rawtypes" })
-                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                return response;
-                        }
+            List<Sort.Order> orders = new ArrayList<>();
+            if (sortDto.sorts() != null) {
+                for (SortRequestDto.SortOption option : sortDto.sorts()) {
+                    if (option == null || !StringUtils.hasText(option.field())) {
+                        return badRequest("Invalid sort parameter", "Sort field is mandatory");
+                    }
+                    String mapping = option.field().trim();
+                    if (!allowedSortMappings.contains(mapping)) {
+                        return badRequest("Invalid sort parameter", "Unknown sort field: " + mapping);
+                    }
+                    Sort.Direction direction = option.order() == SortRequestDto.SortOrder.desc
+                            ? Sort.Direction.DESC
+                            : Sort.Direction.ASC;
+                    orders.add(new Sort.Order(direction, mapping));
                 }
-
-                if (aggDto != null && normalizedVerticalId != null && aggDto.aggs() != null) {
-                        List<FieldMetadataDto> aggregatableGlobal = new ArrayList<>();
-                        for (ProductDtoAggregatableFields field : ProductDtoAggregatableFields.values()) {
-                                aggregatableGlobal.add(new FieldMetadataDto(field.name(), field.getText(), null, null));
-                        }
-                        ProductFieldOptionsResponse aggregationOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage, aggregatableGlobal);
-                        Set<String> allowedAggregationFields = collectAllowedFieldIdentifiers(aggregationOptions);
-                        for (Agg aggregation : aggDto.aggs()) {
-                                if (aggregation.field() == null) {
-                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                        pd.setTitle("Invalid aggregation parameter");
-                                        pd.setDetail("Aggregation field is mandatory");
-                                        @SuppressWarnings({ "unchecked", "rawtypes" })
-                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                        return response;
-                                }
-                                String enumName = aggregation.field().name();
-                                String mapping = aggregation.field().getText();
-                                if (!allowedAggregationFields.contains(enumName) && !allowedAggregationFields.contains(mapping)) {
-                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                        pd.setTitle("Invalid aggregation parameter");
-                                        pd.setDetail("Aggregation not permitted for field: " + aggregation.field());
-                                        @SuppressWarnings({ "unchecked", "rawtypes" })
-                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                        return response;
-                                }
-                        }
+            }
+            Sort sortSpec = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
+            effectivePageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sortSpec);
+        } else {
+            for (Sort.Order order : page.getSort()) {
+                if (!allowedSortMappings.contains(order.getProperty())) {
+                    return badRequest("Invalid sort parameter", "Unknown sort field: " + order.getProperty());
                 }
+            }
+        }
 
-                // Validating requested filters
-
-
-                FilterRequestDto filterDto = null;
-                if (filters != null) {
-                        try {
-                                String trimmedFilters = filters.trim();
-                                if (!trimmedFilters.isEmpty() && trimmedFilters.charAt(0) == '[') {
-                                        List<FilterRequestDto.Filter> clauses = objectMapper
-                                                        .readerForListOf(FilterRequestDto.Filter.class)
-                                                        .readValue(trimmedFilters);
-                                        filterDto = new FilterRequestDto(clauses);
-                                } else {
-                                        filterDto = objectMapper.readValue(trimmedFilters, FilterRequestDto.class);
-                                }
-                        } catch (JsonProcessingException e) {
-                                ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                pd.setTitle("Invalid filters parameter");
-                                pd.setDetail("Unable to parse filter definition: " + e.getOriginalMessage());
-                                @SuppressWarnings({ "unchecked", "rawtypes" })
-                                ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                return response;
-                        }
+        if (include != null) {
+            for (String component : include) {
+                try {
+                    ProductDtoComponent.valueOf(component);
+                } catch (IllegalArgumentException ex) {
+                    return badRequest("Invalid include parameter", "Unknown component: " + component);
                 }
+            }
+        }
 
-                if (filterDto != null && normalizedVerticalId != null && filterDto.filters() != null) {
-                        List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
-                                        .map(field -> new FieldMetadataDto(field.name(), field.getText(), null, null))
-                                        .toList();
-                        ProductFieldOptionsResponse filterOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage, filterableGlobal);
-                        Set<String> allowedFilterFields = collectAllowedFieldIdentifiers(filterOptions);
-                        for (FilterRequestDto.Filter filter : filterDto.filters()) {
-                                if (filter.field() == null) {
-                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                        pd.setTitle("Invalid filters parameter");
-                                        pd.setDetail("Filter field is mandatory");
-                                        @SuppressWarnings({ "unchecked", "rawtypes" })
-                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                        return response;
-                                }
-                                String enumName = filter.field().name();
-                                String mapping = filter.field().fieldPath();
-                                if (!allowedFilterFields.contains(enumName) && !allowedFilterFields.contains(mapping)) {
-                                        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-                                        pd.setTitle("Invalid filters parameter");
-                                        pd.setDetail("Filter not permitted for field: " + filter.field());
-                                        @SuppressWarnings({ "unchecked", "rawtypes" })
-                                        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-                                        return response;
-                                }
-                        }
+        AggregationRequestDto aggDto;
+        try {
+            aggDto = parseAggregationRequest(aggs);
+        } catch (IllegalArgumentException ex) {
+            return badRequest("Invalid aggregation parameter", ex.getMessage());
+        }
+        if (aggDto != null && aggDto.aggs() != null && !aggDto.aggs().isEmpty()) {
+            if (normalizedVerticalId == null) {
+                return badRequest("Invalid aggregation parameter", "Aggregations require a verticalId");
+            }
+            List<Agg> sanitized = new ArrayList<>();
+            for (Agg aggregation : aggDto.aggs()) {
+                if (aggregation == null || !StringUtils.hasText(aggregation.field())) {
+                    return badRequest("Invalid aggregation parameter", "Aggregation field is mandatory");
                 }
+                String mapping = aggregation.field().trim();
+                if (!allowedFilterMappings.contains(mapping)) {
+                    return badRequest("Invalid aggregation parameter", "Aggregation not permitted for field: " + mapping);
+                }
+                sanitized.add(new Agg(aggregation.name(), mapping, aggregation.type(), aggregation.min(),
+                        aggregation.max(), aggregation.buckets(), aggregation.step()));
+            }
+            aggDto = new AggregationRequestDto(List.copyOf(sanitized));
+        } else if (aggDto != null) {
+            aggDto = new AggregationRequestDto(List.of());
+        }
 
-                String normalizedQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+        FilterRequestDto filterDto;
+        try {
+            filterDto = parseFilterRequest(filters);
+        } catch (IllegalArgumentException ex) {
+            return badRequest("Invalid filters parameter", ex.getMessage());
+        }
+        if (filterDto != null && filterDto.filters() != null) {
+            Set<String> validationSet = normalizedVerticalId == null ? globalFilterMappings : allowedFilterMappings;
+            List<FilterRequestDto.Filter> sanitized = new ArrayList<>();
+            for (FilterRequestDto.Filter filter : filterDto.filters()) {
+                if (filter == null || !StringUtils.hasText(filter.field())) {
+                    return badRequest("Invalid filters parameter", "Filter field is mandatory");
+                }
+                String mapping = filter.field().trim();
+                if (!validationSet.contains(mapping)) {
+                    return badRequest("Invalid filters parameter", "Filter not permitted for field: " + mapping);
+                }
+                sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(),
+                        filter.max()));
+            }
+            filterDto = new FilterRequestDto(List.copyOf(sanitized));
+        }
 
-                Set<String> requestedComponents = include == null ? Set.of() : include;
-                ProductSearchResponseDto body = service.searchProducts(page, locale, requestedComponents, aggDto, domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
+        String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
+        Set<String> requestedComponents = include == null ? Set.of() : include;
+
+        ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
+                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+    }
+
+    private AggregationRequestDto parseAggregationRequest(String aggs) {
+        if (!StringUtils.hasText(aggs)) {
+            return null;
+        }
+        String trimmed = aggs.trim();
+        try {
+            if (!trimmed.isEmpty() && trimmed.charAt(0) == '[') {
+                List<Agg> aggregations = objectMapper.readerForListOf(Agg.class).readValue(trimmed);
+                return new AggregationRequestDto(aggregations);
+            }
+            return objectMapper.readValue(trimmed, AggregationRequestDto.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Unable to parse aggregation query: " + e.getOriginalMessage(), e);
+        }
+    }
+
+    private FilterRequestDto parseFilterRequest(String filters) {
+        if (!StringUtils.hasText(filters)) {
+            return null;
+        }
+        String trimmed = filters.trim();
+        try {
+            if (!trimmed.isEmpty() && trimmed.charAt(0) == '[') {
+                List<FilterRequestDto.Filter> clauses = objectMapper
+                        .readerForListOf(FilterRequestDto.Filter.class)
+                        .readValue(trimmed);
+                return new FilterRequestDto(clauses);
+            }
+            return objectMapper.readValue(trimmed, FilterRequestDto.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Unable to parse filter definition: " + e.getOriginalMessage(), e);
+        }
+    }
+
+    private boolean looksLikeJson(String value) {
+        if (!StringUtils.hasText(value)) {
+            return false;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return false;
+        }
+        char first = trimmed.charAt(0);
+        return first == '{' || first == '[';
+    }
+
+    private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle(title);
+        pd.setDetail(detail);
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
+        return response;
     }
 
     /**
@@ -552,7 +527,7 @@ public class ProductController {
         FieldMetadataDto ecoscore = buildEcoscoreField();
         impactFields.add(ecoscore);
         mapImpactScores(vConfig, domainLanguage).stream()
-                .filter(field -> !Objects.equals(field.id(), ecoscore.id()))
+                .filter(field -> !Objects.equals(field.mapping(), ecoscore.mapping()))
                 .forEach(impactFields::add);
 
         List<FieldMetadataDto> technicalFields = new ArrayList<>();
@@ -572,27 +547,24 @@ public class ProductController {
         return resolved;
     }
 
-    private Set<String> collectAllowedFieldIdentifiers(ProductFieldOptionsResponse fieldOptions) {
+    private Set<String> collectAllowedFieldMappings(ProductFieldOptionsResponse fieldOptions) {
         Set<String> allowed = new HashSet<>();
         if (fieldOptions == null) {
             return allowed;
         }
-        addFieldIdentifiers(allowed, fieldOptions.global());
-        addFieldIdentifiers(allowed, fieldOptions.impact());
-        addFieldIdentifiers(allowed, fieldOptions.technical());
+        addFieldMappings(allowed, fieldOptions.global());
+        addFieldMappings(allowed, fieldOptions.impact());
+        addFieldMappings(allowed, fieldOptions.technical());
         return allowed;
     }
 
-    private void addFieldIdentifiers(Set<String> target, List<FieldMetadataDto> fields) {
+    private void addFieldMappings(Set<String> target, List<FieldMetadataDto> fields) {
         if (fields == null) {
             return;
         }
         for (FieldMetadataDto field : fields) {
             if (field == null) {
                 continue;
-            }
-            if (StringUtils.hasText(field.id())) {
-                target.add(field.id());
             }
             if (StringUtils.hasText(field.mapping())) {
                 target.add(field.mapping());
@@ -641,14 +613,14 @@ public class ProductController {
             String normalizedName = filterName.trim();
             String mapping = toIndexedAttribute(normalizedName, config);
             String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
-            FieldMetadataDto dto = new FieldMetadataDto(normalizedName, mapping, title, null);
+            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null);
             results.add(dto);
         }
         return List.copyOf(results);
     }
 
     private FieldMetadataDto buildEcoscoreField() {
-        return new FieldMetadataDto("ecoscore", "scores.ECOSCORE.value", "impactscore", null);
+        return new FieldMetadataDto("scores.ECOSCORE.value", "impactscore", null);
     }
 
     /**
@@ -687,7 +659,7 @@ public class ProductController {
             String mapping = "scores." + key + ".value";
             String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
             String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
-            results.add(new FieldMetadataDto(key, mapping, title, description));
+            results.add(new FieldMetadataDto(mapping, title, description));
         });
         return List.copyOf(results);
     }

@@ -134,7 +134,7 @@ public class SearchService {
     }
 
     private boolean isValidAggregation(Agg agg) {
-        return agg != null && StringUtils.hasText(agg.name()) && agg.field() != null && agg.type() != null;
+        return agg != null && StringUtils.hasText(agg.name()) && StringUtils.hasText(agg.field()) && agg.type() != null;
     }
 
     private Criteria applyFilters(Criteria criteria, FilterRequestDto filters) {
@@ -153,34 +153,31 @@ public class SearchService {
     }
 
     private Criteria buildFilterCriteria(Filter filter) {
-        if (filter == null || filter.field() == null || filter.operator() == null) {
+        if (filter == null || !StringUtils.hasText(filter.field()) || filter.operator() == null) {
             return null;
         }
-        FilterField field = filter.field();
+        String fieldPath = filter.field().trim();
         FilterOperator operator = filter.operator();
 
-        if (!field.supports(operator)) {
-            LOGGER.warn("Ignoring filter on field {} with unsupported operator {}", field, operator);
-            return null;
-        }
+        FilterValueType valueType = resolveValueType(fieldPath, operator);
 
         return switch (operator) {
-        case term -> buildTermCriteria(field, filter.terms());
-        case range -> buildRangeCriteria(field, filter.min(), filter.max());
+        case term -> buildTermCriteria(fieldPath, valueType, filter.terms());
+        case range -> buildRangeCriteria(fieldPath, filter.min(), filter.max());
         };
     }
 
-    private Criteria buildTermCriteria(FilterField field, List<String> terms) {
+    private Criteria buildTermCriteria(String fieldPath, FilterValueType valueType, List<String> terms) {
         if (terms == null || terms.isEmpty()) {
             return null;
         }
 
-        if (field.valueType() == FilterValueType.numeric) {
-            Collection<Double> numericTerms = parseNumericTerms(field, terms);
+        if (valueType == FilterValueType.numeric) {
+            Collection<Double> numericTerms = parseNumericTerms(fieldPath, terms);
             if (numericTerms.isEmpty()) {
                 return null;
             }
-            return new Criteria(field.fieldPath()).in(numericTerms);
+            return new Criteria(fieldPath).in(numericTerms);
         }
 
         Set<String> sanitized = terms.stream()
@@ -190,10 +187,10 @@ public class SearchService {
         if (sanitized.isEmpty()) {
             return null;
         }
-        return new Criteria(field.fieldPath()).in(sanitized);
+        return new Criteria(fieldPath).in(sanitized);
     }
 
-    private Collection<Double> parseNumericTerms(FilterField field, List<String> terms) {
+    private Collection<Double> parseNumericTerms(String fieldPath, List<String> terms) {
         List<Double> values = new ArrayList<>();
         for (String term : terms) {
             if (!StringUtils.hasText(term)) {
@@ -202,18 +199,15 @@ public class SearchService {
             try {
                 values.add(Double.valueOf(term.trim()));
             } catch (NumberFormatException ex) {
-                LOGGER.warn("Ignoring filter term '{}' for field {} due to invalid number format", term, field, ex);
+                LOGGER.warn("Ignoring filter term '{}' for field {} due to invalid number format", term, fieldPath, ex);
                 return Collections.emptyList();
             }
         }
         return values;
     }
 
-    private Criteria buildRangeCriteria(FilterField field, Double min, Double max) {
-        if (field.valueType() != FilterValueType.numeric) {
-            return null;
-        }
-        Criteria clause = new Criteria(field.fieldPath());
+    private Criteria buildRangeCriteria(String fieldPath, Double min, Double max) {
+        Criteria clause = new Criteria(fieldPath);
         boolean hasBound = false;
         if (min != null) {
             clause = clause.greaterThanEqual(min);
@@ -226,10 +220,26 @@ public class SearchService {
         return hasBound ? clause : null;
     }
 
+    private FilterValueType resolveValueType(String fieldPath, FilterOperator operator) {
+        return FilterField.fromFieldPath(fieldPath)
+                .map(FilterField::valueType)
+                .orElseGet(() -> inferValueType(fieldPath, operator));
+    }
+
+    private FilterValueType inferValueType(String fieldPath, FilterOperator operator) {
+        if (operator == FilterOperator.range) {
+            return FilterValueType.numeric;
+        }
+        if (fieldPath != null && fieldPath.endsWith(".numericValue")) {
+            return FilterValueType.numeric;
+        }
+        return FilterValueType.keyword;
+    }
+
     private AggregationDescriptor configureTermsAggregation(org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder,
             Agg agg) {
         int size = agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_TERMS_SIZE;
-        builder.withAggregation(agg.name(), Aggregation.of(a -> a.terms(t -> t.field(agg.field().getText())
+        builder.withAggregation(agg.name(), Aggregation.of(a -> a.terms(t -> t.field(agg.field())
                 .size(size)
                 .missing(MISSING_BUCKET))));
         return AggregationDescriptor.forTerms(agg);
@@ -237,21 +247,42 @@ public class SearchService {
 
     private AggregationDescriptor configureRangeAggregation(org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder,
             Agg agg) {
-        int buckets = agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_BUCKET_COUNT;
-        double interval = computeInterval(agg.min(), agg.max(), buckets);
+        double interval = resolveRangeInterval(agg);
 
         String histogramName = agg.name();
         String missingName = agg.name() + "_missing";
         String statsName = agg.name() + "_stats";
 
         builder.withAggregation(histogramName,
-                Aggregation.of(a -> a.histogram(h -> h.field(agg.field().getText())
-                        .interval(interval)
-                        .minDocCount(1))))
-                .withAggregation(missingName, Aggregation.of(a -> a.missing(m -> m.field(agg.field().getText()))))
-                .withAggregation(statsName, Aggregation.of(a -> a.stats(s -> s.field(agg.field().getText()))));
+                Aggregation.of(a -> a.histogram(h -> {
+                    h.field(agg.field())
+                            .interval(interval)
+                            .minDocCount(1);
+                    if (agg.min() != null || agg.max() != null) {
+                        h.extendedBounds(b -> {
+                            if (agg.min() != null) {
+                                b.min(agg.min());
+                            }
+                            if (agg.max() != null) {
+                                b.max(agg.max());
+                            }
+                            return b;
+                        });
+                    }
+                    return h;
+                })))
+                .withAggregation(missingName, Aggregation.of(a -> a.missing(m -> m.field(agg.field()))))
+                .withAggregation(statsName, Aggregation.of(a -> a.stats(s -> s.field(agg.field()))));
 
         return AggregationDescriptor.forRange(agg, interval, histogramName, missingName, statsName);
+    }
+
+    private double resolveRangeInterval(Agg agg) {
+        if (agg.step() != null && agg.step() > 0d) {
+            return agg.step();
+        }
+        int buckets = agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_BUCKET_COUNT;
+        return computeInterval(agg.min(), agg.max(), buckets);
     }
 
     private double computeInterval(Double min, Double max, int buckets) {
