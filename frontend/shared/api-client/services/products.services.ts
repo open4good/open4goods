@@ -1,8 +1,11 @@
 import { ProductApi } from '..'
 import type {
+  AggregationRequestDto,
+  FilterRequestDto,
   ProductDto,
   ProductFieldOptionsResponse,
   ProductSearchResponseDto,
+  SortRequestDto,
 } from '..'
 import type {
   FilterableFieldsForVerticalRequest,
@@ -88,11 +91,32 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const searchProducts = async (
-    parameters: Omit<ProductsRequest, 'domainLanguage'>,
+    parameters: Omit<ProductsRequest, 'domainLanguage'> & {
+      aggs?: AggregationRequestDto | string
+      sort?: SortRequestDto | string
+      filters?: FilterRequestDto | string
+    },
   ): Promise<ProductSearchResponseDto> => {
+    const { aggs, sort, filters, ...rest } = parameters
+
     const request: ProductsRequest = {
       domainLanguage,
-      ...parameters,
+      ...rest,
+    }
+
+    if (aggs != null) {
+      const serialized = typeof aggs === 'string' ? aggs : JSON.stringify(aggs)
+      ;(request as ProductsRequest & { aggs?: string }).aggs = serialized
+    }
+
+    if (sort != null) {
+      const serialized = typeof sort === 'string' ? sort : JSON.stringify(sort)
+      ;(request as ProductsRequest & { sort?: string }).sort = serialized
+    }
+
+    if (filters != null) {
+      const serialized = typeof filters === 'string' ? filters : JSON.stringify(filters)
+      ;(request as ProductsRequest & { filters?: string }).filters = serialized
     }
 
     try {

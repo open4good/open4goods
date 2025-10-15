@@ -36,7 +36,7 @@
     </template>
 
     <template #[`item.offersCount`]="{ value }">
-      {{ $t('category.products.offerCount', { count: value ?? 0 }) }}
+      {{ translatePlural('category.products.offerCount', value ?? 0) }}
     </template>
 
   </v-data-table>
@@ -61,6 +61,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const baseHeaders = computed(() => [
   { key: 'brand', title: t('category.products.headers.brand'), sortable: false },

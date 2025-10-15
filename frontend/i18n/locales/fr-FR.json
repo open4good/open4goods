@@ -103,7 +103,10 @@
       "unknownBrand": "Marque inconnue",
       "ecoscoreLabel": "Score éco {letter}",
       "priceUnavailable": "Prix non disponible",
-      "offerCount": "{count, plural, one {# offre} other {# offres}}",
+      "offerCount": {
+        "one": "{count} offre",
+        "other": "{count} offres"
+      },
       "notRated": "Non noté",
       "fetchError": "Impossible de charger les produits. Veuillez réessayer.",
       "headers": {
@@ -113,7 +116,10 @@
         "bestPrice": "Meilleur prix",
         "offers": "Offres"
       },
-      "resultsCount": "{count, plural, one {# produit} other {# produits}}",
+      "resultsCount": {
+        "one": "{count} produit",
+        "other": "{count} produits"
+      },
       "searchPlaceholder": "Rechercher des produits",
       "sortLabel": "Trier par",
       "sortOrderAsc": "Ordre croissant",
