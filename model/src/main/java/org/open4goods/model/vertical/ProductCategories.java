@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Access to nsted Productegory lists, via first level nodes
+ * Access to nested Productegory lists, via first level nodes
  */
 public class ProductCategories {
 	private List<ProductCategory> nodes = new ArrayList<ProductCategory>();
@@ -22,10 +22,10 @@ public class ProductCategories {
 	 * @param id
 	 * @param fragments
 	 * @param language
-	 * @return 
+	 * @return
 	 */
 	public ProductCategory addGooglecategories(Integer id, List<String> fragments, String language) {
-		
+
 		ProductCategory ret = null;
 		if (fragments.size() == 1) {
 			// Root nodes
@@ -42,7 +42,7 @@ public class ProductCategories {
 			}
 		} else {
 			List<String> path = fragments.subList(0, fragments.size() -1);
-			
+
 			ProductCategory parent = null;
 			for (String fragment : path) {
 				if (null != parent) {
@@ -50,42 +50,42 @@ public class ProductCategories {
 				} else {
 					parent = getRootByName(fragment, language).orElse(null);
 				}
-				
+
 				if (null == parent) {
 					logger.error("empty parent for id {} - {}",fragments);
 				}
 			}
 
-			
+
 			ProductCategory existing = parent.getChildById(id).orElse(null);
 			if (null == existing) {
 				ProductCategory pc = new ProductCategory(id,fragments.getLast(), language);
 				pc.setParent(parent);
-				parent.addChild(pc);	
+				parent.addChild(pc);
 				ret = pc;
 			} else {
 //				language update
 				existing.addLanguage(fragments.getLast(), language);
 				ret = existing;
 			}
-			
-			
-//			String leaf = fragments.getLast();		
-//			
+
+
+//			String leaf = fragments.getLast();
+//
 //			if (path.size() == 0) {
-//				// We create a terminal leaf 
-//				this.googleCategoryId = id;			
+//				// We create a terminal leaf
+//				this.googleCategoryId = id;
 //				urls.put(language, toUrl(leaf));
 //				googleNames.put(language, leaf);
 //			} else {
 //				// We get recursivly assuming the parents have previously been created
-//				
+//
 //			}
-			
-			
+
+
 		}
 		return ret;
-		
+
 	}
 
 
@@ -97,9 +97,9 @@ public class ProductCategories {
 	public Optional<ProductCategory> getRootById(Integer id) {
 		return nodes.stream().filter(e->e.getGoogleCategoryId().equals(id)).findFirst();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param name
 	 * @param language
 	 * @return
@@ -115,20 +115,20 @@ public class ProductCategories {
 	 * @return
 	 */
 	public Map<String, ProductCategory> paths(String language) {
-		
-		
+
+
 		Map<String, ProductCategory> ret = new HashMap<String, ProductCategory>();
-		
+
 		nodes.forEach(e -> {
 			ret.putAll(e.paths(language));
 		});
-		
+
 		return ret;
 	}
-	
-	
+
+
 	/**
-	 * Get the root categories as an empty ProductCategory, with children 
+	 * Get the root categories as an empty ProductCategory, with children
 	 * @return
 	 */
 	public ProductCategory asRootNode() {
@@ -136,9 +136,9 @@ public class ProductCategories {
 		pc.setChildren(nodes);
 		return pc;
 	}
-	
-	
-	
+
+
+
 
 	public List<ProductCategory> getNodes() {
 		return nodes;
@@ -151,6 +151,6 @@ public class ProductCategories {
 
 
 
-	
-	
+
+
 }

@@ -10,43 +10,43 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.helper.IdHelper;
 
 /**
- * A ProductCategory is an tree node of ProductCategories. It is built from 
+ * A ProductCategory is an tree node of ProductCategories. It is built from
  * GoogleProductCategories, is navigable and contains linked open4goods verticals and extra informations
  */
 public class ProductCategory {
-	
+
 	/**
 	 * The  matching google category
 	 */
 	private Integer googleCategoryId;
-	
+
 	/**
 	 * The localised google names
 	 */
 	private Localisable<String, String> googleNames = new Localisable<String, String>();
-	
+
 	/**
-	 * The urls 
+	 * The urls
 	 */
 	private Localisable<String, String> urls = new Localisable<String, String>();
-	
+
 	/**
 	 * The hashed names (cleaned version of google names)
 	 */
 	private Localisable<String, String> hashedNames = new Localisable<String, String>();
-	
-	
+
+
 	/**
 	 * The associated VerticalConfig if any
 	 */
-	
+
 	private VerticalConfig vertical;
-	
+
 	/**
 	 * True if object or one of it's children has a defined vertical
 	 */
 	private boolean hasVerticals = false;
-	
+
 	/**
 	 * The children nodes
 	 */
@@ -56,14 +56,14 @@ public class ProductCategory {
 	 * The parent category, if any
 	 */
 	private ProductCategory parent;
-	
+
 	public ProductCategory(Integer id, String name, String language) {
 		this.googleCategoryId = id;
 		googleNames.put(language, name);
 		urls.put(language, toUrl(name));
 		hashedNames.put(language, toHashedName(name));
 	}
-	
+
 	private String toHashedName(String name) {
 		return IdHelper.normalizeFileName(name);
 	}
@@ -72,13 +72,13 @@ public class ProductCategory {
 		return IdHelper.normalizeFileName(name);
 	}
 
-	
+
 	@Override
 	public String toString() {
 		return googleCategoryId+":"+googleNames.toString();
 	}
 	/**
-	 * 
+	 *
 	 * @param name
 	 * @param language
 	 * @return
@@ -87,11 +87,11 @@ public class ProductCategory {
 		String hashName = toHashedName(name);
 		return children.stream().filter(e->  hashName.equals(e.hashedNames.i18n(language))).findFirst();
 	}
-	
+
 	public Optional<ProductCategory> getChildById(Integer id) {
 		return children.stream().filter(e->  e.googleCategoryId.equals(id)).findFirst();
 	}
-	
+
 
 	/**
 	 * Add (if was not already existing) a children category
@@ -101,9 +101,9 @@ public class ProductCategory {
 		if (getChildById(pc.getGoogleCategoryId()).isEmpty()) {
 			children.add(pc);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Set an associated vertical : Set the VerticalConfig and flag all the parents has having verticals
 	 * @param v
@@ -113,7 +113,7 @@ public class ProductCategory {
 		hierarchy().forEach(p -> {
 			p.setHasVerticals(true);
 		});
-		
+
 	}
 
 	/**
@@ -126,8 +126,8 @@ public class ProductCategory {
 		urls.put(language, toUrl(name));
 		hashedNames.put(language, toHashedName(name));
 	}
-	
-	
+
+
 	/**
 	 * Return the full url path pointing to this category
 	 * @param language
@@ -150,83 +150,83 @@ public class ProductCategory {
 
 		return sb.toString();
 	}
-	
+
 	/**
-	 * Return a map of url paths mapped to productCategories, recursivly 
+	 * Return a map of url paths mapped to productCategories, recursivly
 	 * @param language
 	 * @return
 	 */
 	public Map<String, ProductCategory> paths(String language) {
 		Map<String, ProductCategory> ret =new HashMap<String, ProductCategory>();
-		
+
 		ret.put(url(language), this);
-		
+
 		// Recursiv adding children
-		
+
 		for (ProductCategory child : getChildren()) {
 			ret.putAll(child.paths(language));
 		}
-		
+
 		return ret;
 	}
 
-	
+
 
 	/**
-	 * 
+	 *
 	 * @return true if this is a terminal leaf
 	 */
 	public boolean isLeaf() {
 		return children.size() == 0;
 	}
-	
+
 	/**
 	 * Return all leafs from this node
 	 */
 	public List<ProductCategory> leafs(boolean havingVertical) {
 		List<ProductCategory> ret = new ArrayList<ProductCategory>();
-		
+
 		for (ProductCategory c : children) {
 			ret.addAll(c.leafs(havingVertical));
 		}
-		
+
 		if (isLeaf()) {
 			if (getVertical() != null && havingVertical) {
 				ret.add(this);
 			} else if (!havingVertical){
 				ret.add(this);
 			}
-			
+
 		}
 
 		return ret;
-		
+
 	}
 
-	
+
 	/**
 	 * Return all verticals defined from this google node
 	 */
 	public List<ProductCategory> verticals() {
 		List<ProductCategory> ret = new ArrayList<ProductCategory>();
-		
+
 		for (ProductCategory c : children) {
 			ret.addAll(c.verticals());
 		}
-		
+
 		if (vertical != null) {
 				ret.add(this);
 		}
 
 		return ret;
-		
+
 	}
 
-	
-	
+
+
 	/**
 	 * Return the hierarchy for this category
-	 * 
+	 *
 	 * @return
 	 */
 	public List<ProductCategory> hierarchy() {
@@ -244,8 +244,8 @@ public class ProductCategory {
 
 		return ret;
 	}
-	
-	
+
+
 	public List<ProductCategory> hierarchy(boolean havingVertical) {
 		List<ProductCategory> items = hierarchy();
 		if (havingVertical) {
@@ -253,8 +253,8 @@ public class ProductCategory {
 		}
 		return items;
 	}
-	
-	
+
+
 	public List<ProductCategory> children(boolean havingVertical) {
 		List<ProductCategory> items = getChildren();
 		if (havingVertical) {
@@ -262,17 +262,17 @@ public class ProductCategory {
 		}
 		return items;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the parents categories
 	 */
 	public List<ProductCategory> parents() {
 		List<ProductCategory> items = hierarchy();
 		return hierarchy().subList(0, items.size()-1);
 	}
-	
-	
+
+
 	public List<ProductCategory> parents(boolean havingVertical) {
 		List<ProductCategory> items = parents();
 		if (havingVertical) {
@@ -280,20 +280,20 @@ public class ProductCategory {
 		}
 		return items;
 	}
-	
-	
-	
+
+
+
 	/////////////////////////////
 	// Getters and setters
 	/////////////////////////////
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 
 	public Integer getGoogleCategoryId() {
 		return googleCategoryId;
@@ -361,8 +361,8 @@ public class ProductCategory {
 
 
 
-	
-	
-	
-	
+
+
+
+
 }
