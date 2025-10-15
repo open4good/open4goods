@@ -71,20 +71,22 @@ public class AppConfig {
         return new BlogService(xwikiFacadeService, blogConfig, null);
     }
 
-    @Bean
-    GoogleTaxonomyService googleTaxonomyService(RemoteFileCachingService remoteFileCachingService) {
-        return new GoogleTaxonomyService(remoteFileCachingService) {
-            @Override
-            public void updateCategoryWithVertical(VerticalConfig verticalConfig) {
-                if (verticalConfig == null || verticalConfig.getGoogleTaxonomyId() == null) {
-                    return;
-                }
-                if (byId(verticalConfig.getGoogleTaxonomyId()) != null) {
-                    super.updateCategoryWithVertical(verticalConfig);
-                }
-            }
-        };
-    }
+	@Bean
+	GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
+		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
+
+		try {
+				// TODO : From config
+				gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
+				gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
+
+		} catch (Exception e) {
+			// TODO : Clean log
+			e.printStackTrace();
+		}
+
+		return gts;
+	}
 
     @Bean
     VerticalsConfigService verticalsConfigService(ResourcePatternResolver resourceResolver,

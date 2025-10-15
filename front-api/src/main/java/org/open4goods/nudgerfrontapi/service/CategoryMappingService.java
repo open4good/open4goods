@@ -15,12 +15,14 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
+import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
+import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
@@ -31,6 +33,7 @@ import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.verticals.GoogleTaxonomyService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -48,9 +51,11 @@ public class CategoryMappingService {
     private static final String DEFAULT_LANGUAGE_KEY = "default";
 
     private final ApiProperties apiProperties;
+    private final GoogleTaxonomyService googleTaxonomyService;
 
-    public CategoryMappingService(ApiProperties apiProperties) {
+    public CategoryMappingService(ApiProperties apiProperties, GoogleTaxonomyService googleTaxonomyService) {
         this.apiProperties = apiProperties;
+        this.googleTaxonomyService = googleTaxonomyService;
     }
     /**
      * Convert a {@link VerticalConfig} into its summary DTO representation.
@@ -113,6 +118,7 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalMetaDescription(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphTitle(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphDescription(),
+                mapCategoryBreadcrumb(verticalConfig.getGoogleTaxonomyId(), domainLanguage),
                 defaultList(relatedPosts),
                 defaultList(i18n == null ? null : i18n.getWikiPages()),
                 i18n == null ? null : i18n.getAiConfigs(),
@@ -140,6 +146,40 @@ public class CategoryMappingService {
                 mapFeatureGroups(verticalConfig.getFeatureGroups(), domainLanguage),
                 verticalConfig.getWorseLimit(),
                 verticalConfig.getBettersLimit());
+    }
+
+    /**
+     * Map the Google taxonomy hierarchy into breadcrumb items matching the requested language.
+     */
+    private List<CategoryBreadcrumbItemDto> mapCategoryBreadcrumb(Integer googleTaxonomyId, DomainLanguage domainLanguage) {
+        if (googleTaxonomyId == null) {
+            return Collections.emptyList();
+        }
+        ProductCategory category = googleTaxonomyService.byId(googleTaxonomyId);
+        if (category == null) {
+            return Collections.emptyList();
+        }
+        return category.hierarchy().stream()
+                .map(node -> mapBreadcrumbItem(node, domainLanguage))
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Convert a single taxonomy node to a breadcrumb DTO.
+     */
+    private CategoryBreadcrumbItemDto mapBreadcrumbItem(ProductCategory category, DomainLanguage domainLanguage) {
+        if (category == null) {
+            return null;
+        }
+        String languageKey = domainLanguage == null ? null : domainLanguage.name();
+        String title = category.getGoogleNames() == null ? null : category.getGoogleNames().i18n(languageKey);
+        String link = category.getUrls() == null ? null : category.getUrls().i18n(languageKey);
+
+        if (title == null && link == null) {
+            return null;
+        }
+        return new CategoryBreadcrumbItemDto(title, link);
     }
 
     /**
