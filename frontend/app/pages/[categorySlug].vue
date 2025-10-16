@@ -92,24 +92,36 @@
           class="category-page__filters"
           :temporary="!isDesktop"
         >
-          <CategoryFiltersPanel
-            :filter-options="filterOptions"
-            :aggregations="currentAggregations"
-            :filters="manualFilters"
-            :impact-expanded="impactExpanded"
-            :technical-expanded="technicalExpanded"
-            @update:filters="onFiltersChange"
-            @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
-            @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
-          />
+          <div class="category-page__filters-content">
+            <CategoryFiltersPanel
+              :filter-options="filterOptions"
+              :aggregations="currentAggregations"
+              :filters="manualFilters"
+              :impact-expanded="impactExpanded"
+              :technical-expanded="technicalExpanded"
+              @update:filters="onFiltersChange"
+              @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
+              @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+            />
 
-          <div v-if="!isDesktop" class="category-page__filters-actions">
-            <v-btn block color="primary" class="mb-2" @click="applyMobileFilters">
-              {{ $t('category.filters.mobileApply') }}
-            </v-btn>
-            <v-btn block variant="text" @click="clearAllFilters">
-              {{ $t('category.filters.mobileClear') }}
-            </v-btn>
+            <div v-if="!isDesktop" class="category-page__filters-actions">
+              <v-btn block color="primary" class="mb-2" @click="applyMobileFilters">
+                {{ $t('category.filters.mobileApply') }}
+              </v-btn>
+              <v-btn block variant="text" @click="clearAllFilters">
+                {{ $t('category.filters.mobileClear') }}
+              </v-btn>
+            </div>
+
+            <template v-if="hasDocumentation">
+              <v-divider class="my-4" />
+              <CategoryDocumentationRail
+                class="category-page__documentation-block"
+                :wiki-pages="category.wikiPages ?? []"
+                :related-posts="category.relatedPosts ?? []"
+                :vertical-home-url="category.verticalHomeUrl"
+              />
+            </template>
           </div>
         </v-navigation-drawer>
 
@@ -170,13 +182,6 @@
           </template>
         </section>
 
-        <aside class="category-page__documentation">
-          <CategoryDocumentationRail
-            :wiki-pages="category.wikiPages ?? []"
-            :related-posts="category.relatedPosts ?? []"
-            :vertical-home-url="category.verticalHomeUrl"
-          />
-        </aside>
       </div>
     </v-container>
 
@@ -278,8 +283,8 @@ const heroImage = computed(() => {
   }
 
   return (
-    category.value.imageLarge ??
     category.value.imageMedium ??
+    category.value.imageLarge ??
     category.value.imageSmall ??
     null
   )
@@ -440,11 +445,12 @@ const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
 const pageNumber = ref(0)
 const searchTerm = ref('')
 const sortField = ref<string | null>(null)
-const sortOrder = ref<'asc' | 'desc'>('asc')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 const activeSubsetIds = ref<string[]>([])
 const manualFilters = ref<FilterRequestDto>({})
 const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
+const lastAppliedDefaultSort = ref<string | null>(null)
 
 const subsetFilters = computed(() =>
   buildFilterRequestFromSubsets(category.value?.subsets ?? [], activeSubsetIds.value),
@@ -459,6 +465,27 @@ const combinedFilters = computed<FilterRequestDto | undefined>(() => {
 })
 
 const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])
+
+const defaultSortField = computed<string | null>(() => {
+  const impactFields = sortOptions.value?.impact ?? []
+  const candidate = impactFields.find((field) => typeof field.mapping === 'string')
+
+  return candidate?.mapping ? String(candidate.mapping) : null
+})
+
+const applyDefaultSort = () => {
+  if (!defaultSortField.value) {
+    sortField.value = null
+    sortOrder.value = 'desc'
+    lastAppliedDefaultSort.value = null
+    return false
+  }
+
+  sortField.value = defaultSortField.value
+  sortOrder.value = 'desc'
+  lastAppliedDefaultSort.value = defaultSortField.value
+  return true
+}
 
 const sortItems = computed(() => {
   const fields = [
@@ -479,6 +506,27 @@ const sortItems = computed(() => {
       }
     })
 })
+
+watch(
+  defaultSortField,
+  (value, previous) => {
+    if (!value) {
+      if (!sortField.value) {
+        sortOrder.value = 'desc'
+      }
+      lastAppliedDefaultSort.value = null
+      return
+    }
+
+    if (
+      !sortField.value ||
+      sortField.value === previous ||
+      sortField.value === lastAppliedDefaultSort.value
+    ) {
+      applyDefaultSort()
+    }
+  },
+)
 
 const sortRequest = computed<SortRequestDto | undefined>(() => {
   if (!sortField.value) {
@@ -504,6 +552,13 @@ const pageCount = computed(() => productsData.value?.products?.page?.totalPages 
 const currentAggregations = computed<AggregationResponseDto[]>(
   () => productsData.value?.aggregations ?? [],
 )
+
+const hasDocumentation = computed(() => {
+  const wikiCount = category.value?.wikiPages?.length ?? 0
+  const postCount = category.value?.relatedPosts?.length ?? 0
+
+  return wikiCount + postCount > 0
+})
 
 const tableFields = computed(() => {
   if (!filterOptions.value) {
@@ -730,7 +785,7 @@ onMounted(async () => {
     const sortEntry = hashPayload.sort?.sorts?.[0]
     if (sortEntry) {
       sortField.value = sortEntry.field ?? null
-      sortOrder.value = sortEntry.order ?? 'asc'
+      sortOrder.value = sortEntry.order ?? 'desc'
     }
 
     if (hashPayload.filters?.filters?.length) {
@@ -750,20 +805,33 @@ onMounted(async () => {
     }
   }
 
+  if (verticalId.value) {
+    await Promise.all([loadFilterOptions(), loadSortOptions()])
+
+    if (!sortField.value) {
+      applyDefaultSort()
+    }
+  }
+
   hasHydrated.value = true
 
   if (verticalId.value) {
-    await Promise.all([loadFilterOptions(), loadSortOptions()])
     await fetchProducts()
   }
 })
 
 watch(
   verticalId,
-  (id) => {
+  (id, previousId) => {
     if (import.meta.client && id) {
       loadFilterOptions()
       loadSortOptions()
+    }
+
+    if (id && id !== previousId) {
+      sortField.value = null
+      sortOrder.value = 'desc'
+      lastAppliedDefaultSort.value = null
     }
   },
 )
@@ -804,11 +872,10 @@ const clearAllFilters = () => {
   manualFilters.value = {}
   activeSubsetIds.value = []
   searchTerm.value = ''
-  sortField.value = null
-  sortOrder.value = 'asc'
   impactExpanded.value = false
   technicalExpanded.value = false
   pageNumber.value = 0
+  applyDefaultSort()
 }
 </script>
 
@@ -859,15 +926,22 @@ const clearAllFilters = () => {
 
   &__layout
     display: grid
-    gap: 2rem
+    gap: 1.75rem
     grid-template-columns: minmax(0, 1fr)
 
   &__filters
     position: sticky
     top: 96px
     height: calc(100vh - 120px)
-    overflow-y: auto
     border-radius: 1rem
+
+  &__filters-content
+    display: flex
+    flex-direction: column
+    gap: 1.5rem
+    height: 100%
+    padding: 1.25rem 1rem 1.5rem
+    overflow-y: auto
 
   &__filters-actions
     padding: 1rem
@@ -882,14 +956,15 @@ const clearAllFilters = () => {
   &__pagination
     justify-content: center
 
-  &__documentation
-    position: sticky
-    top: 96px
-    align-self: start
+  &__documentation-block
+    width: 100%
+    display: flex
+    flex-direction: column
+    gap: 1.5rem
 
 @media (min-width: 1280px)
   .category-page__layout
-    grid-template-columns: 320px minmax(0, 1fr) 320px
+    grid-template-columns: 320px minmax(0, 1fr)
 
   .category-page__filters
     background: transparent
@@ -905,6 +980,10 @@ const clearAllFilters = () => {
   .category-page__layout
     grid-template-columns: minmax(0, 1fr)
 
-  .category-page__documentation
+  .category-page__filters
     position: static
+    height: auto
+
+  .category-page__filters-content
+    overflow-y: visible
 </style>

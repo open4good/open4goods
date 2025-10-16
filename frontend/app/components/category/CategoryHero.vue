@@ -1,25 +1,6 @@
 <template>
-  <section
-    class="category-hero"
-    :aria-labelledby="headingId"
-    data-testid="category-hero"
-  >
+  <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
     <v-sheet class="category-hero__wrapper" elevation="0" rounded="xl">
-      <v-img
-        v-if="image"
-        :src="image"
-        :alt="title"
-        class="category-hero__image"
-        cover
-      >
-        <template #placeholder>
-          <v-skeleton-loader type="image" class="h-100" />
-        </template>
-        <template #default>
-          <v-sheet class="category-hero__overlay" color="transparent" />
-        </template>
-      </v-img>
-
       <div class="category-hero__content">
         <v-breadcrumbs
           v-if="breadcrumbs.length"
@@ -46,6 +27,14 @@
             {{ description }}
           </p>
         </div>
+      </div>
+
+      <div v-if="image" class="category-hero__media" aria-hidden="true">
+        <v-img :src="image" alt="" class="category-hero__image" cover>
+          <template #placeholder>
+            <v-skeleton-loader type="image" class="h-100" />
+          </template>
+        </v-img>
       </div>
     </v-sheet>
   </section>
@@ -77,33 +66,24 @@ defineExpose({ headingId, t })
 .category-hero
   position: relative
   display: block
-  margin-bottom: 2.5rem
+  margin-bottom: 2rem
 
   &__wrapper
     position: relative
+    display: flex
+    flex-direction: column
+    gap: 1.5rem
     overflow: hidden
-    min-height: 280px
-    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.9), rgba(var(--v-theme-hero-gradient-end), 0.85))
+    min-height: 220px
+    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.95), rgba(var(--v-theme-hero-gradient-end), 0.85))
     color: rgb(var(--v-theme-hero-overlay-strong))
-
-  &__image
-    position: absolute
-    inset: 0
-    z-index: 1
-    opacity: 0.5
-
-  &__overlay
-    position: absolute
-    inset: 0
-    background: radial-gradient(circle at top right, rgba(var(--v-theme-hero-overlay-soft), 0.25), transparent)
+    padding: clamp(1.5rem, 4vw + 1rem, 3rem)
 
   &__content
-    position: relative
-    z-index: 2
     display: flex
     flex-direction: column
     gap: 1rem
-    padding: clamp(1.75rem, 3vw + 1rem, 3.5rem)
+    max-width: 62ch
 
   &__breadcrumbs
     --v-breadcrumbs-divider-color: rgba(var(--v-theme-hero-overlay-strong), 0.6)
@@ -115,9 +95,6 @@ defineExpose({ headingId, t })
 
     :deep(.v-breadcrumbs-divider)
       color: inherit
-
-  &__copy
-    max-width: 60ch
 
   &__eyebrow
     display: inline-flex
@@ -134,19 +111,43 @@ defineExpose({ headingId, t })
   &__title
     margin: 0
     font-weight: 700
-    font-size: clamp(2rem, 2vw + 1.5rem, 3rem)
+    font-size: clamp(2rem, 2vw + 1.25rem, 2.75rem)
     line-height: 1.1
 
   &__description
     margin: 0
-    font-size: 1.125rem
+    font-size: 1.05rem
     line-height: 1.6
     color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
 
-@media (min-width: 1280px)
-  .category-hero__wrapper
-    min-height: 360px
+  &__media
+    position: relative
+    flex: 0 0 auto
+    border-radius: 1.25rem
+    overflow: hidden
+    background: rgba(var(--v-theme-hero-overlay-soft), 0.12)
 
-  .category-hero__copy
-    max-width: 48ch
+  &__image
+    height: 100%
+    min-height: 200px
+
+@media (min-width: 960px)
+  .category-hero__wrapper
+    flex-direction: row
+    align-items: stretch
+    gap: clamp(1.5rem, 4vw, 3rem)
+
+  .category-hero__content
+    flex: 0 1 66%
+
+  .category-hero__media
+    display: block
+    flex: 0 0 clamp(240px, 30vw, 360px)
+
+  .category-hero__image
+    min-height: 100%
+
+@media (max-width: 959px)
+  .category-hero__media
+    display: none
 </style>
