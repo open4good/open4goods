@@ -159,7 +159,6 @@
         "loadFailed": "We couldn’t load the category navigation. Please try again."
       },
       "hero": {
-        "eyebrow": "Browse by topic",
         "title": "All product categories",
         "rootProductsTitle": "Available products",
         "description": "Discover every product family we analyse and jump directly to the most relevant section.",

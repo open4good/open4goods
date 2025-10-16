@@ -158,7 +158,6 @@
         "loadFailed": "Impossible de charger la navigation des catégories. Veuillez réessayer."
       },
       "hero": {
-        "eyebrow": "Parcourir par thème",
         "title": "Toutes les catégories de produits",
         "rootProductsTitle": "Les produits disponibles",
         "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",

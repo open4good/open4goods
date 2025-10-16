@@ -2,7 +2,6 @@
   <div class="categories-page" data-testid="categories-index-page">
     <CategoryNavigationHero
       v-model="searchTerm"
-      :eyebrow="t('categories.navigation.hero.eyebrow')"
       :title="heroTitle"
       :description="heroDescription"
       :breadcrumbs="breadcrumbs"
@@ -114,6 +113,10 @@ const breadcrumbs = computed(() => {
   ]
 
   return trail.filter((item, idx, array) => {
+    if (!item.title?.trim()) {
+      return false
+    }
+
     if (idx === 0) {
       return true
     }

@@ -54,7 +54,7 @@ import CategoryNavigationGrid from '~/components/category/navigation/CategoryNav
 import CategoryNavigationHero from '~/components/category/navigation/CategoryNavigationHero.vue'
 import CategoryNavigationVerticalHighlights from '~/components/category/navigation/CategoryNavigationVerticalHighlights.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -105,20 +105,27 @@ const heroDescription = computed(() => {
     return navigationData.value.category.vertical.verticalHomeDescription
   }
 
+  const rawCategoryTitle = navigationData.value?.category?.title?.trim()
+  const localizedCategory = rawCategoryTitle
+    ? rawCategoryTitle.toLocaleLowerCase(locale.value)
+    : null
+
   return t('categories.navigation.hero.childDescription', {
-    category: navigationData.value?.category?.title ?? t('categories.navigation.hero.title'),
+    category: localizedCategory ?? t('categories.navigation.hero.title'),
   })
 })
 
 const breadcrumbs = computed(() => {
   const items = navigationData.value?.breadcrumbs ?? []
-  const normalized = items.map((breadcrumb, index) => ({
-    title: breadcrumb.title ?? '',
-    link:
-      index < items.length - 1 && breadcrumb.link
-        ? `/categories/${breadcrumb.link}`
-        : undefined,
-  }))
+  const normalized = items
+    .map((breadcrumb, index) => ({
+      title: breadcrumb.title ?? '',
+      link:
+        index < items.length - 1 && breadcrumb.link
+          ? `/categories/${breadcrumb.link}`
+          : undefined,
+    }))
+    .filter((breadcrumb) => breadcrumb.title.trim().length)
 
   const trail: { title: string; link?: string }[] = [
     {
@@ -131,11 +138,18 @@ const breadcrumbs = computed(() => {
   const lastBreadcrumbTitle = items.at(-1)?.title
   const currentTitle = navigationData.value?.category?.title
 
-  if (!lastBreadcrumbTitle || lastBreadcrumbTitle !== currentTitle) {
-    trail.push({ title: currentTitle ?? '' })
+  if (
+    currentTitle?.trim() &&
+    (!lastBreadcrumbTitle || lastBreadcrumbTitle !== currentTitle)
+  ) {
+    trail.push({ title: currentTitle })
   }
 
   return trail.filter((item, idx, array) => {
+    if (!item.title?.trim()) {
+      return false
+    }
+
     if (idx === 0) {
       return true
     }
