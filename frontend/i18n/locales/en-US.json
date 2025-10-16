@@ -79,6 +79,7 @@
   "category": {
     "hero": {
       "breadcrumbAriaLabel": "Category navigation breadcrumb",
+      "breadcrumbDivider": "/",
       "missingBreadcrumbTitle": "Category"
     },
     "fastFilters": {
@@ -110,6 +111,15 @@
       "unknownBrand": "Unknown brand",
       "ecoscoreLabel": "Eco score {letter}",
       "priceUnavailable": "Price unavailable",
+      "tooltips": {
+        "search": "Search within these products",
+        "sortField": "Change the field used to sort products",
+        "sortAscending": "Sort products from lowest to highest",
+        "sortDescending": "Sort products from highest to lowest",
+        "viewCards": "Show products as cards",
+        "viewList": "Show products as a list",
+        "viewTable": "Show products in a table view"
+      },
       "offerCount": {
         "one": "{count} offer",
         "other": "{count} offers"

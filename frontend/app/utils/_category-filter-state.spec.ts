@@ -43,6 +43,14 @@ describe('category filter hash serialisation', () => {
     expect(deserializeCategoryHashState(invalidPayload)).toBeNull()
   })
 
+  it('accepts URI encoded payloads', () => {
+    const state: CategoryHashState = { search: 'écologie' }
+    const serialised = serializeCategoryHashState(state)
+    const encoded = encodeURIComponent(serialised)
+
+    expect(deserializeCategoryHashState(encoded)).toEqual(state)
+  })
+
   it('buildCategoryHash prefixes with hash character', () => {
     const payload: CategoryHashState = { view: 'list' }
     const hash = buildCategoryHash(payload)

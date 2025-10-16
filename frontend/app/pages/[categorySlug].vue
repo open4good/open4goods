@@ -37,34 +37,57 @@
         </div>
 
         <div class="category-page__toolbar-actions">
-          <v-text-field
-            v-model="searchTerm"
-            :label="$t('category.products.searchPlaceholder')"
-            prepend-inner-icon="mdi-magnify"
-            clearable
-            hide-details
-            density="comfortable"
-            class="category-page__search"
-          />
-
-          <div class="category-page__sort">
-            <v-select
-              v-model="sortField"
-              :items="sortItems"
-              :label="$t('category.products.sortLabel')"
-              item-title="title"
-              item-value="value"
+          <div class="category-page__search">
+            <v-text-field
+              v-model="searchTerm"
+              :label="$t('category.products.searchPlaceholder')"
+              prepend-inner-icon="mdi-magnify"
               clearable
               hide-details
               density="comfortable"
-              class="me-2"
+              class="category-page__search-input"
             />
+            <v-tooltip
+              activator="parent"
+              :text="$t('category.products.tooltips.search')"
+              location="bottom"
+            />
+          </div>
+
+          <div class="category-page__sort">
+            <div class="category-page__sort-select">
+              <v-select
+                v-model="sortField"
+                :items="sortItems"
+                :label="$t('category.products.sortLabel')"
+                item-title="title"
+                item-value="value"
+                clearable
+                hide-details
+                density="comfortable"
+              />
+              <v-tooltip
+                activator="parent"
+                :text="$t('category.products.tooltips.sortField')"
+                location="bottom"
+              />
+            </div>
             <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
               <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
                 <v-icon icon="mdi-sort-ascending" />
+                <v-tooltip
+                  activator="parent"
+                  :text="$t('category.products.tooltips.sortAscending')"
+                  location="bottom"
+                />
               </v-btn>
               <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
                 <v-icon icon="mdi-sort-descending" />
+                <v-tooltip
+                  activator="parent"
+                  :text="$t('category.products.tooltips.sortDescending')"
+                  location="bottom"
+                />
               </v-btn>
             </v-btn-toggle>
           </div>
@@ -72,12 +95,27 @@
           <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
             <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
               <v-icon icon="mdi-view-grid" />
+              <v-tooltip
+                activator="parent"
+                :text="$t('category.products.tooltips.viewCards')"
+                location="bottom"
+              />
             </v-btn>
             <v-btn value="list" :aria-label="$t('category.products.viewList')">
               <v-icon icon="mdi-view-list" />
+              <v-tooltip
+                activator="parent"
+                :text="$t('category.products.tooltips.viewList')"
+                location="bottom"
+              />
             </v-btn>
             <v-btn value="table" :aria-label="$t('category.products.viewTable')">
               <v-icon icon="mdi-table" />
+              <v-tooltip
+                activator="parent"
+                :text="$t('category.products.tooltips.viewTable')"
+                location="bottom"
+              />
             </v-btn>
           </v-btn-toggle>
         </div>
@@ -134,7 +172,14 @@
           />
         </aside>
 
-        <section class="category-page__results">
+        <section
+          class="category-page__results"
+          itemscope
+          itemprop="mainEntity"
+          itemtype="https://schema.org/ItemList"
+        >
+          <meta itemprop="name" :content="seoTitle" />
+          <meta itemprop="numberOfItems" :content="String(resultsCount)" />
           <v-alert
             v-if="productError"
             type="error"
@@ -215,6 +260,7 @@
 import { computed, onMounted, ref, toRaw, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
+import { isNavigationFailure } from 'vue-router'
 import type {
   AggregationRequestDto,
   AggregationResponseDto,
@@ -332,7 +378,7 @@ useSeoMeta({
   ogTitle: () => ogTitle.value,
   ogDescription: () => ogDescription.value,
   ogUrl: () => canonicalUrl.value,
-  ogType: 'website',
+  ogType: 'product.group',
   ogImage: () => ogImage.value,
   ogSiteName: () => siteName.value,
   ogLocale: () => ogLocale.value,
@@ -364,18 +410,47 @@ const breadcrumbJsonLd = computed(() => {
   }
 })
 
+const toAbsoluteUrl = (value?: string | null) => {
+  if (!value) {
+    return undefined
+  }
+
+  try {
+    return new URL(value, requestURL.origin).toString()
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to build absolute URL for product entry.', error)
+    }
+
+    return undefined
+  }
+}
+
+const structuredDataScripts = computed(() => {
+  const scripts: Array<{ type: string; children: string }> = []
+
+  if (breadcrumbJsonLd.value) {
+    scripts.push({
+      type: 'application/ld+json',
+      children: JSON.stringify(breadcrumbJsonLd.value),
+    })
+  }
+
+  if (productListJsonLd.value) {
+    scripts.push({
+      type: 'application/ld+json',
+      children: JSON.stringify(productListJsonLd.value),
+    })
+  }
+
+  return scripts
+})
+
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
   ],
-  script: breadcrumbJsonLd.value
-    ? [
-        {
-          type: 'application/ld+json',
-          children: JSON.stringify(breadcrumbJsonLd.value),
-        },
-      ]
-    : [],
+  script: structuredDataScripts.value,
 }))
 
 const verticalId = computed(() => category.value?.id ?? null)
@@ -553,6 +628,90 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
 const resultsCount = computed(() => productsData.value?.products?.page?.totalElements ?? 0)
+
+const productListJsonLd = computed(() => {
+  const products = currentProducts.value
+
+  if (!products.length) {
+    return null
+  }
+
+  const items = products.slice(0, 20).map((product, index) => {
+    const name =
+      product.identity?.bestName ??
+      product.identity?.model ??
+      product.identity?.brand ??
+      (product.gtin != null ? `GTIN ${product.gtin}` : undefined)
+
+    if (!name) {
+      return null
+    }
+
+    const productUrl = toAbsoluteUrl(product.fullSlug ?? product.slug)
+    const imageUrl =
+      toAbsoluteUrl(product.resources?.coverImagePath) ??
+      toAbsoluteUrl(product.resources?.externalCover ?? product.resources?.images?.[0]?.url)
+
+    const offersCount = product.offers?.offersCount ?? 0
+    const bestPrice = product.offers?.bestPrice
+    const offer =
+      bestPrice?.price != null
+        ? {
+            '@type': 'Offer',
+            price: Number(bestPrice.price),
+            priceCurrency: bestPrice.currency ?? undefined,
+            url: productUrl ?? canonicalUrl.value,
+            availability:
+              offersCount > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          }
+        : undefined
+
+    const productSchema: Record<string, unknown> = {
+      '@type': 'Product',
+      name,
+      url: productUrl,
+      image: imageUrl,
+      brand: product.identity?.brand
+        ? {
+            '@type': 'Brand',
+            name: product.identity.brand,
+          }
+        : undefined,
+      sku: product.identity?.model,
+      offers: offer,
+    }
+
+    if (product.gtin != null) {
+      const gtin = String(product.gtin)
+      productSchema.gtin = gtin
+      if (gtin.length === 13) {
+        productSchema.gtin13 = gtin
+      }
+    }
+
+    return {
+      '@type': 'ListItem',
+      position: index + 1,
+      url: productUrl,
+      item: Object.fromEntries(Object.entries(productSchema).filter(([, value]) => value != null)),
+    }
+  })
+
+  const filteredItems = items.filter((item): item is Exclude<typeof items[number], null> => item !== null)
+
+  if (!filteredItems.length) {
+    return null
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: seoTitle.value,
+    numberOfItems: resultsCount.value,
+    itemListElement: filteredItems,
+  }
+})
+
 const resultsCountLabel = computed(() =>
   translatePlural('category.products.resultsCount', resultsCount.value),
 )
@@ -768,7 +927,15 @@ watch(
     const currentHash = window.location.hash ?? ''
 
     if (currentHash !== hash) {
-      router.replace({ hash })
+      const targetLocation = hash
+        ? { hash: hash.slice(1) }
+        : { path: route.path, query: { ...route.query } }
+
+      void router.push(targetLocation).catch((error) => {
+        if (!isNavigationFailure(error)) {
+          console.error('Failed to update category hash fragment.', error)
+        }
+      })
     }
   },
   { deep: true },
@@ -893,7 +1060,7 @@ const clearAllFilters = () => {
   flex-direction: column
 
   &__container
-    max-width: 1400px
+    max-width: 1560px
 
   &__toolbar
     display: flex
@@ -914,12 +1081,21 @@ const clearAllFilters = () => {
     gap: 1rem
 
   &__search
+    position: relative
     min-width: 240px
+
+  &__search-input
+    width: 100%
 
   &__sort
     display: flex
     align-items: center
     gap: 0.5rem
+    flex-wrap: wrap
+
+  &__sort-select
+    position: relative
+    min-width: 200px
 
   &__sort-order
     border-radius: 999px
@@ -947,16 +1123,19 @@ const clearAllFilters = () => {
     top: 96px
     align-self: start
     max-height: calc(100vh - 136px)
+    display: flex
+    flex-direction: column
     border-radius: 1rem
     background: rgb(var(--v-theme-surface-glass))
     box-shadow: 0 22px 46px -28px rgba(var(--v-theme-shadow-primary-600), 0.28)
     overflow: hidden
+    overscroll-behavior: contain
 
   &__filters-content
     display: flex
     flex-direction: column
     gap: 1.5rem
-    height: 100%
+    flex: 1 1 auto
     padding: 1.5rem 1.25rem 1.75rem
     overflow-y: auto
 
@@ -982,7 +1161,7 @@ const clearAllFilters = () => {
 
 @media (min-width: 1280px)
   .category-page__layout
-    grid-template-columns: 320px minmax(0, 1fr)
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr)
 
   .category-page__filters-surface
     max-height: calc(100vh - 152px)
@@ -993,6 +1172,16 @@ const clearAllFilters = () => {
 
   .category-page__toolbar-actions
     justify-content: space-between
+
+  .category-page__search
+    flex: 1 1 100%
+    min-width: 0
+
+  .category-page__sort
+    width: 100%
+
+  .category-page__sort-select
+    flex: 1 1 100%
 
   .category-page__layout
     grid-template-columns: minmax(0, 1fr)

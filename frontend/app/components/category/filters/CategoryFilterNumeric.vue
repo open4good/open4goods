@@ -99,7 +99,10 @@ watch(
   (filter) => {
     if (filter?.operator === 'range') {
       localValue.value = [filter.min ?? bounds.value.min, filter.max ?? bounds.value.max]
+      return
     }
+
+    localValue.value = [bounds.value.min, bounds.value.max]
   },
 )
 
