@@ -1097,8 +1097,7 @@ const clearAllFilters = () => {
 
   &__search
     position: relative
-    min-width: 240px
-    flex: 1 1 240px
+    min-width: 260px
 
   &__search-input
     width: 100%
