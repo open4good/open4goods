@@ -13,9 +13,13 @@
         <v-breadcrumbs
           v-if="breadcrumbs.length"
           :aria-label="t('category.hero.breadcrumbAriaLabel')"
-          :divider="t('category.hero.breadcrumbDivider')"
           class="category-hero__breadcrumbs"
         >
+          <template #divider>
+            <span class="category-hero__breadcrumb-divider" aria-hidden="true">
+              {{ t('category.hero.breadcrumbDivider') }}
+            </span>
+          </template>
           <v-breadcrumbs-item
             v-for="(item, index) in breadcrumbs"
             :key="`${index}-${item.title ?? item.link ?? index}`"
@@ -98,6 +102,13 @@ defineExpose({ headingId, t })
 
     :deep(.v-breadcrumbs-divider)
       color: inherit
+
+  &__breadcrumb-divider
+    display: inline-flex
+    align-items: center
+    padding: 0 0.5rem
+    color: inherit
+    font-size: inherit
 
   &__eyebrow
     display: inline-flex

@@ -14,6 +14,19 @@ export interface CategoryHashState {
   technicalExpanded?: boolean
 }
 
+const HASH_PREFIX = 'state-'
+
+const toBase64Url = (value: string): string => {
+  return value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/u, '')
+}
+
+const fromBase64Url = (value: string): string => {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
+  const paddingLength = normalized.length % 4
+  const padding = paddingLength === 0 ? '' : '='.repeat(4 - paddingLength)
+  return `${normalized}${padding}`
+}
+
 const removeUndefined = <T extends object>(value: T): Partial<T> => {
   return (Object.keys(value) as Array<keyof T>).reduce<Partial<T>>((accumulator, key) => {
     const entryValue = value[key]
@@ -56,9 +69,29 @@ export const deserializeCategoryHashState = (payload: string | null | undefined)
     return null
   }
 
+  let base64Payload: string
+
+  if (payload.startsWith(HASH_PREFIX)) {
+    const trimmed = payload.slice(HASH_PREFIX.length)
+    if (!trimmed) {
+      return null
+    }
+
+    base64Payload = fromBase64Url(trimmed)
+  } else {
+    try {
+      base64Payload = decodeURIComponent(payload)
+    } catch (error) {
+      if (import.meta.server) {
+        console.error('Failed to decode category hash state payload.', error)
+      }
+
+      return null
+    }
+  }
+
   try {
-    const decoded = decodeURIComponent(payload)
-    const json = decompressFromBase64(decoded)
+    const json = decompressFromBase64(base64Payload)
     if (!json) {
       return null
     }
@@ -76,5 +109,10 @@ export const deserializeCategoryHashState = (payload: string | null | undefined)
 
 export const buildCategoryHash = (state: CategoryHashState): string => {
   const serialized = serializeCategoryHashState(state)
-  return serialized ? `#${encodeURIComponent(serialized)}` : ''
+  if (!serialized) {
+    return ''
+  }
+
+  const safePayload = toBase64Url(serialized)
+  return `#${HASH_PREFIX}${safePayload}`
 }
