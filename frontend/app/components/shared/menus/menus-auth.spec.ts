@@ -2,12 +2,14 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import type { Ref } from 'vue'
 import { reactive, ref } from 'vue'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ThemeName } from '~~/shared/constants/theme'
 
 const isLoggedIn = ref(false)
 const logoutMock = vi.fn()
+const username = ref<string | null>(null)
+const roles = ref<string[]>([])
 const routerPush = vi.fn()
 const routerReplace = vi.fn()
 const routerInstance = {
@@ -31,6 +33,13 @@ const useStorageMock = vi.fn((_: string, defaultValue: ThemeName) => {
 
 const useCookieMock = vi.fn((_: string) => themeCookiePreference as Ref<ThemeName | null>)
 
+const fetchMock = vi.fn()
+
+const vMenuStub = {
+  template:
+    '<div class="v-menu-stub"><slot name="activator" :props="{}" /><div class="v-menu-stub__content"><slot /></div></div>',
+}
+
 function useRouteMock() {
   return currentRoute
 }
@@ -43,6 +52,8 @@ vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({
     isLoggedIn,
     logout: logoutMock,
+    username,
+    roles,
   }),
 }))
 
@@ -75,6 +86,9 @@ vi.mock('#imports', async () => {
     useRoute: useRouteMock,
     useRouter: useRouterMock,
     useCookie: useCookieMock,
+    useNuxtApp: () => ({
+      $fetch: (...args: unknown[]) => fetchMock(...args),
+    }),
   }
 })
 
@@ -82,12 +96,18 @@ vi.mock('#app', () => ({
   useRoute: useRouteMock,
   useRouter: useRouterMock,
   useCookie: useCookieMock,
+  useNuxtApp: () => ({
+    $fetch: (...args: unknown[]) => fetchMock(...args),
+  }),
 }))
 
 vi.mock('nuxt/app', () => ({
   useRoute: useRouteMock,
   useRouter: useRouterMock,
   useCookie: useCookieMock,
+  useNuxtApp: () => ({
+    $fetch: (...args: unknown[]) => fetchMock(...args),
+  }),
 }))
 
 vi.mock('vue-router', () => ({
@@ -104,6 +124,10 @@ beforeAll(async () => {
 })
 
 describe('Shared menu authentication controls', () => {
+  let reloadSpy: ReturnType<typeof vi.spyOn> | undefined
+  const heroMountOptions = { attachTo: document.body, global: { stubs: { VMenu: vMenuStub } } }
+  const mobileMountOptions = { global: { stubs: { VMenu: vMenuStub } } }
+
   beforeEach(() => {
     isLoggedIn.value = false
     logoutMock.mockReset()
@@ -116,23 +140,57 @@ describe('Shared menu authentication controls', () => {
     preferredDarkMock.value = false
     useStorageMock.mockClear()
     useCookieMock.mockClear()
+    fetchMock.mockReset()
+    username.value = null
+    roles.value = []
+
+    if (reloadSpy) {
+      reloadSpy.mockRestore()
+      reloadSpy = undefined
+    }
+
+    if (typeof window !== 'undefined') {
+      reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => undefined)
+
+      if (!('visualViewport' in window)) {
+        ;(window as unknown as {
+          visualViewport?: Pick<Window['visualViewport'], 'addEventListener' | 'removeEventListener'>
+        }).visualViewport = {
+          addEventListener: () => undefined,
+          removeEventListener: () => undefined,
+        }
+      }
+    }
+
+    ;(globalThis as { $fetch?: (...args: unknown[]) => Promise<unknown> }).$fetch = (
+      ...args: unknown[]
+    ) => fetchMock(...args)
   })
 
-  it('does not render logout controls when logged out', async () => {
-    const heroWrapper = await mountSuspended(TheHeroMenu)
-    const mobileWrapper = await mountSuspended(TheMobileMenu)
+  afterEach(() => {
+    reloadSpy?.mockRestore()
+    reloadSpy = undefined
+    delete (globalThis as { $fetch?: unknown }).$fetch
+  })
 
-    expect(heroWrapper.find('[data-testid="hero-logout"]').exists()).toBe(false)
+  it('does not render account controls when logged out', async () => {
+    const heroWrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
+    const mobileWrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+
+    expect(heroWrapper.find('[data-testid="hero-account-menu-activator"]').exists()).toBe(false)
     expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(false)
+    expect(mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()).toBe(false)
   })
 
   it('logs out and redirects from the hero menu when clicked', async () => {
     isLoggedIn.value = true
+    username.value = 'Jane Doe'
+    roles.value = ['admin']
 
-    const wrapper = await mountSuspended(TheHeroMenu)
-    const button = wrapper.get('[data-testid="hero-logout"]')
+    const wrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
 
-    await button.trigger('click')
+    const logoutItem = wrapper.get('[data-testid="hero-account-logout"]')
+    await logoutItem.trigger('click')
     await flushPromises()
 
     expect(logoutMock).toHaveBeenCalledTimes(1)
@@ -140,14 +198,49 @@ describe('Shared menu authentication controls', () => {
 
   it('logs out, redirects and closes the drawer from the mobile menu', async () => {
     isLoggedIn.value = true
+    username.value = 'Jane Doe'
+    roles.value = ['admin']
 
-    const wrapper = await mountSuspended(TheMobileMenu)
+    const wrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
     const logoutItem = wrapper.get('[data-testid="mobile-logout"]')
 
     await logoutItem.trigger('click')
     await flushPromises()
 
     expect(logoutMock).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('close')).toBeTruthy()
+  })
+
+  it('clears the caches from the hero menu and reloads the page', async () => {
+    isLoggedIn.value = true
+    username.value = 'Cache Admin'
+    roles.value = ['maintainer']
+    fetchMock.mockResolvedValue({ success: true })
+
+    const wrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
+
+    const clearItem = wrapper.get('[data-testid="hero-clear-cache"]')
+    await clearItem.trigger('click')
+    await flushPromises()
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/cache/reset', expect.objectContaining({ method: 'POST' }))
+    expect(reloadSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('clears the caches from the mobile menu and reloads the page', async () => {
+    isLoggedIn.value = true
+    username.value = 'Cache Admin'
+    roles.value = ['maintainer']
+    fetchMock.mockResolvedValue({ success: true })
+
+    const wrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    const clearCacheItem = wrapper.get('[data-testid="mobile-clear-cache"]')
+
+    await clearCacheItem.trigger('click')
+    await flushPromises()
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/admin/cache/reset', expect.objectContaining({ method: 'POST' }))
+    expect(reloadSpy).toHaveBeenCalledTimes(1)
     expect(wrapper.emitted('close')).toBeTruthy()
   })
 
