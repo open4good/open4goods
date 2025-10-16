@@ -17,6 +17,7 @@ const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
 const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
 const feedbackPath = computed(() => resolveLocalizedRoutePath('feedback', currentLocale.value))
+const categoriesPath = computed(() => resolveLocalizedRoutePath('categories', currentLocale.value))
 
 const currentYear = computed(() => new Date().getFullYear())
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
@@ -25,7 +26,11 @@ const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
     to: resolveLocalizedRoutePath('/impact-score', currentLocale.value),
-  }
+  },
+  {
+    label: t('siteIdentity.footer.highlightLinks.allProducts'),
+    to: categoriesPath.value,
+  },
 ])
 
 const resourceLinks = computed<FooterLink[]>(() => [

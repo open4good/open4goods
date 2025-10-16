@@ -32,6 +32,7 @@
       "blogLink": "Our blog",
       "highlightLinks": {
         "ecoscore": "Environmental assessment",
+        "allProducts": "All products",
         "compensation": "Ecological contribution"
       },
       "comparator": {
@@ -144,8 +145,8 @@
       },
       "hero": {
         "eyebrow": "Browse by topic",
-        "childEyebrow": "Deep dive",
         "title": "All product categories",
+        "rootProductsTitle": "Available products",
         "description": "Discover every product family we analyse and jump directly to the most relevant section.",
         "childDescription": "Explore the subcategories and curated selections inside {category}.",
         "rootBreadcrumb": "All categories",

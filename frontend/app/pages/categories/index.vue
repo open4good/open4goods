@@ -80,9 +80,15 @@ if (error.value && import.meta.server) {
 
 const navigationData = computed(() => data.value ?? null)
 
-const heroTitle = computed(() =>
-  navigationData.value?.category?.title ?? t('categories.navigation.hero.title'),
-)
+const heroTitle = computed(() => {
+  const category = navigationData.value?.category
+
+  if (category?.googleCategoryId === 0) {
+    return t('categories.navigation.hero.rootProductsTitle')
+  }
+
+  return category?.title ?? t('categories.navigation.hero.title')
+})
 
 const heroDescription = computed(() =>
   navigationData.value?.category?.vertical?.verticalHomeDescription ??

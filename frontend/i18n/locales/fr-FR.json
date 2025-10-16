@@ -31,7 +31,8 @@
       "mission": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social des biens que nous achetons.",
       "blogLink": "Notre blog",
       "highlightLinks": {
-        "ecoscore": "Évaluation environnementale"
+        "ecoscore": "Évaluation environnementale",
+        "allProducts": "Tous nos produits"
       },
       "comparator": {
         "title": "Ressources",
@@ -143,8 +144,8 @@
       },
       "hero": {
         "eyebrow": "Parcourir par thème",
-        "childEyebrow": "Approfondir",
         "title": "Toutes les catégories de produits",
+        "rootProductsTitle": "Les produits disponibles",
         "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
         "childDescription": "Explorez les sous-catégories et les sélections associées à {category}.",
         "rootBreadcrumb": "Toutes les catégories",
