@@ -57,7 +57,8 @@ export const deserializeCategoryHashState = (payload: string | null | undefined)
   }
 
   try {
-    const json = decompressFromBase64(payload)
+    const decoded = decodeURIComponent(payload)
+    const json = decompressFromBase64(decoded)
     if (!json) {
       return null
     }
@@ -75,5 +76,5 @@ export const deserializeCategoryHashState = (payload: string | null | undefined)
 
 export const buildCategoryHash = (state: CategoryHashState): string => {
   const serialized = serializeCategoryHashState(state)
-  return serialized ? `#${serialized}` : ''
+  return serialized ? `#${encodeURIComponent(serialized)}` : ''
 }

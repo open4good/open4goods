@@ -78,6 +78,7 @@
   "category": {
     "hero": {
       "breadcrumbAriaLabel": "Fil d'Ariane des catégories",
+      "breadcrumbDivider": "/",
       "missingBreadcrumbTitle": "Catégorie"
     },
     "fastFilters": {
@@ -109,6 +110,15 @@
       "unknownBrand": "Marque inconnue",
       "ecoscoreLabel": "Score éco {letter}",
       "priceUnavailable": "Prix non disponible",
+      "tooltips": {
+        "search": "Rechercher parmi ces produits",
+        "sortField": "Modifier le critère de tri des produits",
+        "sortAscending": "Trier les produits du plus bas au plus haut",
+        "sortDescending": "Trier les produits du plus haut au plus bas",
+        "viewCards": "Afficher les produits sous forme de cartes",
+        "viewList": "Afficher les produits sous forme de liste",
+        "viewTable": "Afficher les produits sous forme de tableau"
+      },
       "offerCount": {
         "one": "{count} offre",
         "other": "{count} offres"

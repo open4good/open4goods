@@ -1,6 +1,6 @@
 <template>
   <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
-    <v-sheet class="category-hero__wrapper" elevation="0" rounded="xl">
+    <v-sheet class="category-hero__wrapper" elevation="0">
       <div v-if="image" class="category-hero__media" aria-hidden="true">
         <v-img :src="image" alt="" class="category-hero__image" cover>
           <template #placeholder>
@@ -13,6 +13,7 @@
         <v-breadcrumbs
           v-if="breadcrumbs.length"
           :aria-label="t('category.hero.breadcrumbAriaLabel')"
+          :divider="t('category.hero.breadcrumbDivider')"
           class="category-hero__breadcrumbs"
         >
           <v-breadcrumbs-item
@@ -74,10 +75,11 @@ defineExpose({ headingId, t })
     grid-template-columns: minmax(0, 1fr)
     gap: 1.5rem
     overflow: hidden
-    min-height: 220px
+    min-height: clamp(160px, 26vw, 240px)
     background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.95), rgba(var(--v-theme-hero-gradient-end), 0.85))
     color: rgb(var(--v-theme-hero-overlay-strong))
     padding: clamp(1.5rem, 4vw + 1rem, 3rem)
+    border-radius: 0
 
   &__content
     display: flex
@@ -130,24 +132,29 @@ defineExpose({ headingId, t })
   &__media
     position: relative
     flex: 0 0 auto
-    border-radius: 1.25rem
+    display: flex
+    align-items: center
+    justify-content: center
     overflow: hidden
     background: rgba(var(--v-theme-hero-overlay-soft), 0.12)
+    transform: scale(0.6)
+    transform-origin: center
 
   &__image
     height: 100%
-    min-height: 200px
+    min-height: 180px
+    width: 100%
 
 @media (min-width: 960px)
   .category-hero__wrapper
-    grid-template-columns: clamp(240px, 30vw, 360px) minmax(0, 1fr)
+    grid-template-columns: clamp(200px, 22vw, 320px) minmax(0, 1fr)
     align-items: stretch
-    gap: clamp(1.5rem, 4vw, 3.5rem)
+    gap: clamp(1.25rem, 3vw, 3rem)
 
   .category-hero__media
-    display: block
+    display: flex
     grid-column: 1
-    align-self: stretch
+    align-self: center
 
   .category-hero__content
     grid-column: 2
