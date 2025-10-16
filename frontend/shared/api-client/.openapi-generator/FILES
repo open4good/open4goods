@@ -1,3 +1,4 @@
+apis/AdministrationApi.ts
 apis/AffiliationApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
