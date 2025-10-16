@@ -1,10 +1,15 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
@@ -12,8 +17,15 @@ import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
+import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.verticals.GoogleTaxonomyService;
@@ -27,6 +39,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.SearchHit;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,20 +63,30 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Categories", description = "Retrieve vertical configurations displayed in the catalog navigation.")
 public class CategoriesController {
 
+    private static final int TOP_PRODUCTS_LIMIT = 5;
+    private static final String SORT_FIELD_IMPACT_SCORE = "scores.ECOSCORE.value";
+    private static final String CONDITION_NEW = "NEW";
+    private static final String CONDITION_OCCASION = "OCCASION";
 
     private final VerticalsConfigService verticalsConfigService;
     private final CategoryMappingService categoryMappingService;
     private final BlogService blogService;
     private final GoogleTaxonomyService googleTaxonomyService;
+    private final SearchService searchService;
+    private final ProductMappingService productMappingService;
 
     public CategoriesController(VerticalsConfigService verticalsConfigService,
                                 CategoryMappingService categoryMappingService,
                                 BlogService blogService,
-                                GoogleTaxonomyService googleTaxonomyService) {
+                                GoogleTaxonomyService googleTaxonomyService,
+                                SearchService searchService,
+                                ProductMappingService productMappingService) {
         this.verticalsConfigService = verticalsConfigService;
         this.categoryMappingService = categoryMappingService;
         this.blogService = blogService;
         this.googleTaxonomyService = googleTaxonomyService;
+        this.searchService = searchService;
+        this.productMappingService = productMappingService;
     }
 
     @GetMapping
@@ -169,7 +195,12 @@ public class CategoriesController {
             return ResponseEntity.notFound().build();
         }
 
-        CategoryNavigationDto body = categoryMappingService.toCategoryNavigationDto(category, domainLanguage, true);
+        List<ProductDto> topNewProducts = resolveTopProducts(category, domainLanguage, CONDITION_NEW);
+        List<ProductDto> topOccasionProducts = resolveTopProducts(category, domainLanguage, CONDITION_OCCASION);
+
+        CategoryNavigationDto body = categoryMappingService.toCategoryNavigationDto(category, domainLanguage, true,
+                topNewProducts,
+                topOccasionProducts);
         if (body == null) {
             return ResponseEntity.notFound().build();
         }
@@ -177,6 +208,63 @@ public class CategoriesController {
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);
+    }
+
+    private List<ProductDto> resolveTopProducts(ProductCategory category,
+                                                DomainLanguage domainLanguage,
+                                                String condition) {
+        List<String> taxonomyIds = collectGoogleCategoryIds(category);
+        if (taxonomyIds.isEmpty()) {
+            return List.of();
+        }
+
+        Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term,
+                List.of(condition), null, null);
+        Filter taxonomyFilter = new Filter(FilterField.googleTaxonomyId.fieldPath(), FilterOperator.term,
+                taxonomyIds, null, null);
+        FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter, taxonomyFilter));
+
+        Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,
+                Sort.by(Sort.Order.desc(SORT_FIELD_IMPACT_SCORE)));
+
+        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters);
+        Locale locale = resolveLocale(domainLanguage);
+
+        Map<Long, ProductDto> uniqueProducts = new LinkedHashMap<>();
+        for (SearchHit<Product> hit : result.hits().getSearchHits()) {
+            ProductDto dto = productMappingService.mapProduct(hit.getContent(), locale, Collections.emptySet(), domainLanguage);
+            if (dto != null && !uniqueProducts.containsKey(dto.gtin())) {
+                uniqueProducts.put(dto.gtin(), dto);
+            }
+            if (uniqueProducts.size() >= TOP_PRODUCTS_LIMIT) {
+                break;
+            }
+        }
+        return List.copyOf(uniqueProducts.values());
+    }
+
+    private List<String> collectGoogleCategoryIds(ProductCategory category) {
+        if (category == null) {
+            return List.of();
+        }
+        LinkedHashSet<Integer> identifiers = new LinkedHashSet<>();
+        if (category.getGoogleCategoryId() != null) {
+            identifiers.add(category.getGoogleCategoryId());
+        }
+        category.verticals().stream()
+                .map(ProductCategory::getGoogleCategoryId)
+                .filter(Objects::nonNull)
+                .forEach(identifiers::add);
+        return identifiers.stream()
+                .map(String::valueOf)
+                .toList();
+    }
+
+    private Locale resolveLocale(DomainLanguage domainLanguage) {
+        if (domainLanguage != null && StringUtils.hasText(domainLanguage.languageTag())) {
+            return Locale.forLanguageTag(domainLanguage.languageTag());
+        }
+        return Locale.getDefault();
     }
 
     private BlogPostDto mapBlogPost(BlogPost post) {
