@@ -456,11 +456,19 @@ const structuredDataScripts = computed(() => {
   return scripts
 })
 
+const structuredDataHeadScripts = computed(() =>
+  structuredDataScripts.value.map((script, index) => ({
+    key: `category-structured-data-${index}`,
+    type: script.type,
+    children: script.children,
+  })),
+)
+
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
   ],
-  script: structuredDataScripts.value,
+  script: structuredDataHeadScripts.value,
 }))
 
 const verticalId = computed(() => category.value?.id ?? null)
@@ -1071,6 +1079,8 @@ const clearAllFilters = () => {
 .category-page
   display: flex
   flex-direction: column
+  min-height: 100%
+  background-color: rgb(var(--v-theme-surface-default))
 
   &__container
     max-width: 1560px

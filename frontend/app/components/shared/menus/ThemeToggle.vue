@@ -8,37 +8,29 @@
     rounded="pill"
     :data-testid="testId"
   >
-    <v-tooltip :text="lightTooltip" location="bottom">
-      <template #activator="{ props: tooltipProps }">
-        <v-btn
-          v-bind="tooltipProps"
-          :value="'light'"
-          :aria-label="lightAriaLabel"
-          :data-testid="`${testId}-light`"
-          :size="size"
-          icon
-          variant="plain"
-        >
-          <v-icon icon="mdi-white-balance-sunny" />
-        </v-btn>
-      </template>
-    </v-tooltip>
+    <v-btn
+      :value="'light'"
+      :aria-label="lightAriaLabel"
+      :data-testid="`${testId}-light`"
+      :size="size"
+      icon
+      variant="plain"
+    >
+      <v-icon icon="mdi-white-balance-sunny" />
+      <v-tooltip activator="parent" :text="lightTooltip" location="bottom" />
+    </v-btn>
 
-    <v-tooltip :text="darkTooltip" location="bottom">
-      <template #activator="{ props: tooltipProps }">
-        <v-btn
-          v-bind="tooltipProps"
-          :value="'dark'"
-          :aria-label="darkAriaLabel"
-          :data-testid="`${testId}-dark`"
-          :size="size"
-          icon
-          variant="plain"
-        >
-          <v-icon icon="mdi-weather-night" />
-        </v-btn>
-      </template>
-    </v-tooltip>
+    <v-btn
+      :value="'dark'"
+      :aria-label="darkAriaLabel"
+      :data-testid="`${testId}-dark`"
+      :size="size"
+      icon
+      variant="plain"
+    >
+      <v-icon icon="mdi-weather-night" />
+      <v-tooltip activator="parent" :text="darkTooltip" location="bottom" />
+    </v-btn>
   </v-btn-toggle>
 </template>
 
