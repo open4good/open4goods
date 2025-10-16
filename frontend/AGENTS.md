@@ -50,6 +50,9 @@ Offline mode is optional troubleshooting; use it only when network access is del
 - Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.
 - When integrating CMS/XWiki content, ensure the preprocess step (`pnpm preprocess:css`) stays current.
 
+### Impact score components
+- Every impact score visualisation must render through `~/components/shared/ui/ImpactScore.vue` to keep the UX consistent across the application. If you need additional behaviour, extend the component via props instead of duplicating markup.
+
 ### Design token glossary
 The theme palette exposes the following generic tokens. Use `rgb(var(--v-theme-<token>))` for solid fills and `rgba(var(--v-theme-<token>), <alpha>)` when translucency is needed.
 

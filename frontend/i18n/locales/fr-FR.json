@@ -4,6 +4,11 @@
     "fr": "Français",
     "en": "Anglais"
   },
+  "components": {
+    "impactScore": {
+      "tooltip": "Qualité de l'impact évalué à {value} sur {max}"
+    }
+  },
   "siteIdentity": {
     "menu": {
       "title": "Menu",
