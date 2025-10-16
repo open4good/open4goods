@@ -88,6 +88,24 @@ export interface ProductBaseDto {
      * @memberof ProductBaseDto
      */
     gtinInfo?: ProductGtinInfoDto;
+    /**
+     * Absolute URL of the preferred cover image when available
+     * @type {string}
+     * @memberof ProductBaseDto
+     */
+    coverImagePath?: string;
+    /**
+     * Best human readable name derived from brand/model or offer data
+     * @type {string}
+     * @memberof ProductBaseDto
+     */
+    bestName?: string;
+    /**
+     * Value of the ECOSCORE when available
+     * @type {number}
+     * @memberof ProductBaseDto
+     */
+    ecoscoreValue?: number;
 }
 
 /**
@@ -116,6 +134,9 @@ export function ProductBaseDtoFromJSONTyped(json: any, ignoreDiscriminator: bool
         'excluded': json['excluded'] == null ? undefined : json['excluded'],
         'excludedCauses': json['excludedCauses'] == null ? undefined : new Set(json['excludedCauses']),
         'gtinInfo': json['gtinInfo'] == null ? undefined : ProductGtinInfoDtoFromJSON(json['gtinInfo']),
+        'coverImagePath': json['coverImagePath'] == null ? undefined : json['coverImagePath'],
+        'bestName': json['bestName'] == null ? undefined : json['bestName'],
+        'ecoscoreValue': json['ecoscoreValue'] == null ? undefined : json['ecoscoreValue'],
     };
 }
 
@@ -139,6 +160,9 @@ export function ProductBaseDtoToJSONTyped(value?: ProductBaseDto | null, ignoreD
         'excluded': value['excluded'],
         'excludedCauses': value['excludedCauses'] == null ? undefined : Array.from(value['excludedCauses'] as Set<any>),
         'gtinInfo': ProductGtinInfoDtoToJSON(value['gtinInfo']),
+        'coverImagePath': value['coverImagePath'],
+        'bestName': value['bestName'],
+        'ecoscoreValue': value['ecoscoreValue'],
     };
 }
 
