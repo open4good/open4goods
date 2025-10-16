@@ -85,45 +85,54 @@
 
       <div class="category-page__layout">
         <v-navigation-drawer
+          v-if="!isDesktop"
           v-model="filtersDrawer"
-          :permanent="isDesktop"
-          :width="isDesktop ? 320 : 360"
+          :width="360"
           location="start"
-          class="category-page__filters"
-          :temporary="!isDesktop"
+          class="category-page__filters-drawer"
+          temporary
         >
-          <div class="category-page__filters-content">
-            <CategoryFiltersPanel
-              :filter-options="filterOptions"
-              :aggregations="currentAggregations"
-              :filters="manualFilters"
-              :impact-expanded="impactExpanded"
-              :technical-expanded="technicalExpanded"
-              @update:filters="onFiltersChange"
-              @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
-              @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
-            />
-
-            <div v-if="!isDesktop" class="category-page__filters-actions">
-              <v-btn block color="primary" class="mb-2" @click="applyMobileFilters">
-                {{ $t('category.filters.mobileApply') }}
-              </v-btn>
-              <v-btn block variant="text" @click="clearAllFilters">
-                {{ $t('category.filters.mobileClear') }}
-              </v-btn>
-            </div>
-
-            <template v-if="hasDocumentation">
-              <v-divider class="my-4" />
-              <CategoryDocumentationRail
-                class="category-page__documentation-block"
-                :wiki-pages="category.wikiPages ?? []"
-                :related-posts="category.relatedPosts ?? []"
-                :vertical-home-url="category.verticalHomeUrl"
-              />
-            </template>
-          </div>
+          <CategoryFiltersSidebar
+            :filter-options="filterOptions"
+            :aggregations="currentAggregations"
+            :filters="manualFilters"
+            :impact-expanded="impactExpanded"
+            :technical-expanded="technicalExpanded"
+            :show-mobile-actions="true"
+            :has-documentation="hasDocumentation"
+            :wiki-pages="category?.wikiPages ?? []"
+            :related-posts="category?.relatedPosts ?? []"
+            :vertical-home-url="category?.verticalHomeUrl ?? null"
+            @update:filters="onFiltersChange"
+            @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
+            @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+            @apply-mobile="applyMobileFilters"
+            @clear-mobile="clearAllFilters"
+          />
         </v-navigation-drawer>
+
+        <aside
+          v-else
+          class="category-page__filters-surface"
+          role="complementary"
+          :aria-label="$t('category.products.openFilters')"
+        >
+          <CategoryFiltersSidebar
+            :filter-options="filterOptions"
+            :aggregations="currentAggregations"
+            :filters="manualFilters"
+            :impact-expanded="impactExpanded"
+            :technical-expanded="technicalExpanded"
+            :show-mobile-actions="false"
+            :has-documentation="hasDocumentation"
+            :wiki-pages="category?.wikiPages ?? []"
+            :related-posts="category?.relatedPosts ?? []"
+            :vertical-home-url="category?.verticalHomeUrl ?? null"
+            @update:filters="onFiltersChange"
+            @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
+            @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+          />
+        </aside>
 
         <section class="category-page__results">
           <v-alert
@@ -218,10 +227,9 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client'
 
-import CategoryDocumentationRail from '~/components/category/CategoryDocumentationRail.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
-import CategoryFiltersPanel from '~/components/category/CategoryFiltersPanel.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
+import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
@@ -928,26 +936,36 @@ const clearAllFilters = () => {
     display: grid
     gap: 1.75rem
     grid-template-columns: minmax(0, 1fr)
+    align-items: start
 
-  &__filters
+  &__filters-drawer
+    :deep(.v-navigation-drawer__content)
+      padding: 0
+
+  &__filters-surface
     position: sticky
     top: 96px
-    height: calc(100vh - 120px)
+    align-self: start
+    max-height: calc(100vh - 136px)
     border-radius: 1rem
+    background: rgb(var(--v-theme-surface-glass))
+    box-shadow: 0 22px 46px -28px rgba(var(--v-theme-shadow-primary-600), 0.28)
+    overflow: hidden
 
   &__filters-content
     display: flex
     flex-direction: column
     gap: 1.5rem
     height: 100%
-    padding: 1.25rem 1rem 1.5rem
+    padding: 1.5rem 1.25rem 1.75rem
     overflow-y: auto
 
   &__filters-actions
-    padding: 1rem
+    padding: 0.5rem 0.75rem 0
 
   &__results
     min-height: 420px
+    min-width: 0
 
   &__no-results
     font-size: 1rem
@@ -966,9 +984,8 @@ const clearAllFilters = () => {
   .category-page__layout
     grid-template-columns: 320px minmax(0, 1fr)
 
-  .category-page__filters
-    background: transparent
-    box-shadow: none
+  .category-page__filters-surface
+    max-height: calc(100vh - 152px)
 
 @media (max-width: 959px)
   .category-page__toolbar
@@ -980,10 +997,10 @@ const clearAllFilters = () => {
   .category-page__layout
     grid-template-columns: minmax(0, 1fr)
 
-  .category-page__filters
-    position: static
-    height: auto
-
   .category-page__filters-content
+    padding: 1.25rem 1rem 1.5rem
     overflow-y: visible
+
+  .category-page__filters-actions
+    padding: 0.5rem 0
 </style>

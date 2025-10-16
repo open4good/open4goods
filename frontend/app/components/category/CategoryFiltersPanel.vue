@@ -18,7 +18,13 @@
     </div>
 
     <v-expansion-panels multiple class="category-filters__panels">
-      <v-expansion-panel value="global" :title="t('category.filters.globalTitle')" expand-icon="mdi-chevron-down">
+      <v-expansion-panel value="global" expand-icon="mdi-chevron-down">
+        <template #title>
+          <div class="category-filters__title">
+            <v-icon icon="mdi-tune-variant" size="20" class="category-filters__title-icon" />
+            <span>{{ t('category.filters.globalTitle') }}</span>
+          </div>
+        </template>
         <template #text>
           <div class="category-filters__section">
             <CategoryFilterList
@@ -32,15 +38,17 @@
         </template>
       </v-expansion-panel>
 
-      <v-expansion-panel
-        value="impact"
-        :title="t('category.filters.impactTitle')"
-        expand-icon="mdi-chevron-down"
-      >
+      <v-expansion-panel value="impact" expand-icon="mdi-chevron-down">
+        <template #title>
+          <div class="category-filters__title">
+            <v-icon icon="mdi-leaf" size="20" class="category-filters__title-icon" />
+            <span>{{ t('category.filters.impactTitle') }}</span>
+          </div>
+        </template>
         <template #text>
           <div class="category-filters__section">
-              <CategoryFilterList
-                :fields="impactPrimary"
+            <CategoryFilterList
+              :fields="impactPrimary"
               :aggregations="aggregationMap"
               :active-filters="activeFilters"
               @update-range="updateRangeFilter"
@@ -71,11 +79,13 @@
         </template>
       </v-expansion-panel>
 
-      <v-expansion-panel
-        value="technical"
-        :title="t('category.filters.technicalTitle')"
-        expand-icon="mdi-chevron-down"
-      >
+      <v-expansion-panel value="technical" expand-icon="mdi-chevron-down">
+        <template #title>
+          <div class="category-filters__title">
+            <v-icon icon="mdi-cog" size="20" class="category-filters__title-icon" />
+            <span>{{ t('category.filters.technicalTitle') }}</span>
+          </div>
+        </template>
         <template #text>
           <div class="category-filters__section">
             <CategoryFilterList
@@ -292,6 +302,16 @@ defineExpose({ activeFilterChips })
     display: flex
     flex-direction: column
     gap: 0.75rem
+
+  &__title
+    display: inline-flex
+    align-items: center
+    gap: 0.5rem
+    font-weight: 600
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__title-icon
+    color: rgba(var(--v-theme-primary), 0.85)
 
 @media (max-width: 959px)
   .category-filters__section

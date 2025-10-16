@@ -1,6 +1,14 @@
 <template>
   <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
     <v-sheet class="category-hero__wrapper" elevation="0" rounded="xl">
+      <div v-if="image" class="category-hero__media" aria-hidden="true">
+        <v-img :src="image" alt="" class="category-hero__image" cover>
+          <template #placeholder>
+            <v-skeleton-loader type="image" class="h-100" />
+          </template>
+        </v-img>
+      </div>
+
       <div class="category-hero__content">
         <v-breadcrumbs
           v-if="breadcrumbs.length"
@@ -27,14 +35,6 @@
             {{ description }}
           </p>
         </div>
-      </div>
-
-      <div v-if="image" class="category-hero__media" aria-hidden="true">
-        <v-img :src="image" alt="" class="category-hero__image" cover>
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
       </div>
     </v-sheet>
   </section>
@@ -70,8 +70,8 @@ defineExpose({ headingId, t })
 
   &__wrapper
     position: relative
-    display: flex
-    flex-direction: column
+    display: grid
+    grid-template-columns: minmax(0, 1fr)
     gap: 1.5rem
     overflow: hidden
     min-height: 220px
@@ -83,7 +83,8 @@ defineExpose({ headingId, t })
     display: flex
     flex-direction: column
     gap: 1rem
-    max-width: 62ch
+    max-width: none
+    width: 100%
 
   &__breadcrumbs
     --v-breadcrumbs-divider-color: rgba(var(--v-theme-hero-overlay-strong), 0.6)
@@ -114,6 +115,12 @@ defineExpose({ headingId, t })
     font-size: clamp(2rem, 2vw + 1.25rem, 2.75rem)
     line-height: 1.1
 
+  &__copy
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+    align-items: flex-start
+
   &__description
     margin: 0
     font-size: 1.05rem
@@ -133,19 +140,25 @@ defineExpose({ headingId, t })
 
 @media (min-width: 960px)
   .category-hero__wrapper
-    flex-direction: row
+    grid-template-columns: clamp(240px, 30vw, 360px) minmax(0, 1fr)
     align-items: stretch
-    gap: clamp(1.5rem, 4vw, 3rem)
-
-  .category-hero__content
-    flex: 0 1 66%
+    gap: clamp(1.5rem, 4vw, 3.5rem)
 
   .category-hero__media
     display: block
-    flex: 0 0 clamp(240px, 30vw, 360px)
+    grid-column: 1
+    align-self: stretch
 
-  .category-hero__image
-    min-height: 100%
+  .category-hero__content
+    grid-column: 2
+    align-self: center
+
+  .category-hero__copy
+    align-items: flex-start
+    text-align: left
+
+  .category-hero__description
+    text-align: left
 
 @media (max-width: 959px)
   .category-hero__media
