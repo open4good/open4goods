@@ -11,8 +11,8 @@
         <v-img
           :src="resolveImage(product)"
           :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
-          height="200"
-          cover
+          :aspect-ratio="4 / 3"
+          contain
           class="category-product-card-grid__image"
         >
           <template #placeholder>
@@ -112,6 +112,13 @@ const offersCountLabel = (product: ProductDto) => {
   &__image
     border-top-left-radius: inherit
     border-top-right-radius: inherit
+    background: rgb(var(--v-theme-surface-primary-080))
+    display: flex
+    align-items: center
+    justify-content: center
+
+    :deep(img)
+      object-fit: contain
 
   &__body
     display: flex

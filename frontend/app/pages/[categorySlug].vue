@@ -19,108 +19,6 @@
         @reset="onResetSubsets"
       />
 
-      <div class="category-page__toolbar">
-        <div class="category-page__toolbar-left">
-          <v-btn
-            v-if="!isDesktop"
-            color="primary"
-            variant="flat"
-            prepend-icon="mdi-filter-variant"
-            @click="filtersDrawer = true"
-          >
-            {{ $t('category.products.openFilters') }}
-          </v-btn>
-
-          <p class="category-page__results-count" aria-live="polite">
-            {{ resultsCountLabel }}
-          </p>
-        </div>
-
-        <div class="category-page__toolbar-actions">
-          <div class="category-page__search">
-            <v-text-field
-              v-model="searchTerm"
-              :label="$t('category.products.searchPlaceholder')"
-              prepend-inner-icon="mdi-magnify"
-              clearable
-              hide-details
-              density="comfortable"
-              class="category-page__search-input"
-            />
-            <v-tooltip
-              activator="parent"
-              :text="$t('category.products.tooltips.search')"
-              location="bottom"
-            />
-          </div>
-
-          <div class="category-page__sort">
-            <div class="category-page__sort-select">
-              <v-select
-                v-model="sortField"
-                :items="sortItems"
-                :label="$t('category.products.sortLabel')"
-                item-title="title"
-                item-value="value"
-                clearable
-                hide-details
-                density="comfortable"
-              />
-              <v-tooltip
-                activator="parent"
-                :text="$t('category.products.tooltips.sortField')"
-                location="bottom"
-              />
-            </div>
-            <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
-              <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
-                <v-icon icon="mdi-sort-ascending" />
-                <v-tooltip
-                  activator="parent"
-                  :text="$t('category.products.tooltips.sortAscending')"
-                  location="bottom"
-                />
-              </v-btn>
-              <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
-                <v-icon icon="mdi-sort-descending" />
-                <v-tooltip
-                  activator="parent"
-                  :text="$t('category.products.tooltips.sortDescending')"
-                  location="bottom"
-                />
-              </v-btn>
-            </v-btn-toggle>
-          </div>
-
-          <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
-            <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
-              <v-icon icon="mdi-view-grid" />
-              <v-tooltip
-                activator="parent"
-                :text="$t('category.products.tooltips.viewCards')"
-                location="bottom"
-              />
-            </v-btn>
-            <v-btn value="list" :aria-label="$t('category.products.viewList')">
-              <v-icon icon="mdi-view-list" />
-              <v-tooltip
-                activator="parent"
-                :text="$t('category.products.tooltips.viewList')"
-                location="bottom"
-              />
-            </v-btn>
-            <v-btn value="table" :aria-label="$t('category.products.viewTable')">
-              <v-icon icon="mdi-table" />
-              <v-tooltip
-                activator="parent"
-                :text="$t('category.products.tooltips.viewTable')"
-                location="bottom"
-              />
-            </v-btn>
-          </v-btn-toggle>
-        </div>
-      </div>
-
       <div class="category-page__layout">
         <v-navigation-drawer
           v-if="!isDesktop"
@@ -180,6 +78,109 @@
         >
           <meta itemprop="name" :content="seoTitle" />
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
+
+          <div class="category-page__toolbar">
+            <div class="category-page__toolbar-left">
+              <v-btn
+                v-if="!isDesktop"
+                color="primary"
+                variant="flat"
+                prepend-icon="mdi-filter-variant"
+                @click="filtersDrawer = true"
+              >
+                {{ $t('category.products.openFilters') }}
+              </v-btn>
+
+              <p class="category-page__results-count" aria-live="polite">
+                {{ resultsCountLabel }}
+              </p>
+            </div>
+
+            <div class="category-page__toolbar-actions">
+              <div class="category-page__search">
+                <v-text-field
+                  v-model="searchTerm"
+                  :label="$t('category.products.searchPlaceholder')"
+                  prepend-inner-icon="mdi-magnify"
+                  clearable
+                  hide-details
+                  density="comfortable"
+                  class="category-page__search-input"
+                />
+                <v-tooltip
+                  activator="parent"
+                  :text="$t('category.products.tooltips.search')"
+                  location="bottom"
+                />
+              </div>
+
+              <div class="category-page__sort">
+                <div class="category-page__sort-select">
+                  <v-select
+                    v-model="sortField"
+                    :items="sortItems"
+                    :label="$t('category.products.sortLabel')"
+                    item-title="title"
+                    item-value="value"
+                    clearable
+                    hide-details
+                    density="comfortable"
+                  />
+                  <v-tooltip
+                    activator="parent"
+                    :text="$t('category.products.tooltips.sortField')"
+                    location="bottom"
+                  />
+                </div>
+                <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
+                  <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
+                    <v-icon icon="mdi-sort-ascending" />
+                    <v-tooltip
+                      activator="parent"
+                      :text="$t('category.products.tooltips.sortAscending')"
+                      location="bottom"
+                    />
+                  </v-btn>
+                  <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
+                    <v-icon icon="mdi-sort-descending" />
+                    <v-tooltip
+                      activator="parent"
+                      :text="$t('category.products.tooltips.sortDescending')"
+                      location="bottom"
+                    />
+                  </v-btn>
+                </v-btn-toggle>
+              </div>
+
+              <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
+                <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
+                  <v-icon icon="mdi-view-grid" />
+                  <v-tooltip
+                    activator="parent"
+                    :text="$t('category.products.tooltips.viewCards')"
+                    location="bottom"
+                  />
+                </v-btn>
+                <v-btn value="list" :aria-label="$t('category.products.viewList')">
+                  <v-icon icon="mdi-view-list" />
+                  <v-tooltip
+                    activator="parent"
+                    :text="$t('category.products.tooltips.viewList')"
+                    location="bottom"
+                  />
+                </v-btn>
+                <v-btn value="table" :aria-label="$t('category.products.viewTable')">
+                  <v-icon icon="mdi-table" />
+                  <v-tooltip
+                    activator="parent"
+                    :text="$t('category.products.tooltips.viewTable')"
+                    location="bottom"
+                  />
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+          </div>
+
           <v-alert
             v-if="productError"
             type="error"
@@ -936,9 +937,12 @@ watch(
     const currentHash = window.location.hash ?? ''
 
     if (currentHash !== hash) {
-      const targetLocation = hash
-        ? { hash: hash.slice(1) }
-        : { path: route.path, query: { ...route.query } }
+      const baseLocation = {
+        path: route.path,
+        query: { ...route.query },
+      }
+
+      const targetLocation = hash ? { ...baseLocation, hash: hash.slice(1) } : baseLocation
 
       void router.push(targetLocation).catch((error) => {
         if (!isNavigationFailure(error)) {
@@ -1076,6 +1080,7 @@ const clearAllFilters = () => {
     flex-direction: column
     gap: 1rem
     margin-bottom: 1.5rem
+    width: 100%
 
   &__toolbar-left
     display: flex
@@ -1088,10 +1093,12 @@ const clearAllFilters = () => {
     align-items: center
     flex-wrap: wrap
     gap: 1rem
+    width: 100%
 
   &__search
     position: relative
     min-width: 240px
+    flex: 1 1 240px
 
   &__search-input
     width: 100%
@@ -1111,6 +1118,7 @@ const clearAllFilters = () => {
 
   &__view-toggle
     border-radius: 999px
+    margin-left: auto
 
   &__results-count
     margin: 0
@@ -1167,6 +1175,21 @@ const clearAllFilters = () => {
     display: flex
     flex-direction: column
     gap: 1.5rem
+
+@media (min-width: 960px)
+  .category-page__toolbar
+    flex-direction: row
+    align-items: center
+
+  .category-page__toolbar-left
+    flex: 0 0 auto
+
+  .category-page__toolbar-actions
+    flex: 1 1 auto
+    width: auto
+
+  .category-page__view-toggle
+    margin-left: auto
 
 @media (min-width: 1280px)
   .category-page__layout
