@@ -942,7 +942,7 @@ watch(
         query: { ...route.query },
       }
 
-      const targetLocation = hash ? { ...baseLocation, hash: hash.slice(1) } : baseLocation
+      const targetLocation = hash ? { ...baseLocation, hash } : baseLocation
 
       void router.push(targetLocation).catch((error) => {
         if (!isNavigationFailure(error)) {
