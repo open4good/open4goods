@@ -85,6 +85,7 @@ models/ProductRankingDto.ts
 models/ProductResourcesDto.ts
 models/ProductScoreDto.ts
 models/ProductScoresDto.ts
+models/ProductSearchRequestDto.ts
 models/ProductSearchResponseDto.ts
 models/ProductSourcedAttributeDto.ts
 models/ProductVideoDto.ts

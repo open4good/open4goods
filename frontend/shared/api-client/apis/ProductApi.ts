@@ -28,6 +28,7 @@ import {
     ProductDtoToJSON,
     ProductFieldOptionsResponseFromJSON,
     ProductFieldOptionsResponseToJSON,
+    ProductSearchRequestDtoFromJSON,
     ProductSearchRequestDtoToJSON,
     ProductSearchResponseDtoFromJSON,
     ProductSearchResponseDtoToJSON,
@@ -59,7 +60,7 @@ export interface ProductsRequest {
     pageSize?: number;
     verticalId?: string;
     query?: string;
-    body?: ProductSearchRequestDto;
+    productSearchRequestDto?: ProductSearchRequestDto;
 }
 
 export interface SortableFieldsRequest {
@@ -336,15 +337,7 @@ export class ProductApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        const consumes: Array<string> = [
-            'application/json',
-        ];
-
-        const requestBody = requestParameters['body'] == null ? undefined : ProductSearchRequestDtoToJSON(requestParameters['body']);
-
-        if (requestBody != null) {
-            headerParameters['Content-Type'] = consumes[0];
-        }
+        headerParameters['Content-Type'] = 'application/json';
 
         if (this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
@@ -362,7 +355,7 @@ export class ProductApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: requestBody,
+            body: ProductSearchRequestDtoToJSON(requestParameters['productSearchRequestDto']),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ProductSearchResponseDtoFromJSON(jsonValue));
