@@ -378,12 +378,21 @@ useSeoMeta({
   ogTitle: () => ogTitle.value,
   ogDescription: () => ogDescription.value,
   ogUrl: () => canonicalUrl.value,
-  ogType: 'product.group',
   ogImage: () => ogImage.value,
   ogSiteName: () => siteName.value,
   ogLocale: () => ogLocale.value,
   ogImageAlt: () => category.value?.verticalHomeTitle ?? siteName.value,
 })
+
+useHead(() => ({
+  meta: [
+    {
+      key: 'og:type',
+      property: 'og:type',
+      content: 'product.group',
+    },
+  ],
+}))
 
 const breadcrumbJsonLd = computed(() => {
   if (!category.value?.breadCrumb?.length) {
