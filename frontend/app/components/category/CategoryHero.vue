@@ -154,12 +154,11 @@ defineExpose({ headingId, t })
     align-self: center
 
   .category-hero__copy
-    align-items: flex-end
-    text-align: right
-    max-width: clamp(36ch, 56vw, 72ch)
+    align-items: flex-start
+    text-align: left
 
   .category-hero__description
-    text-align: right
+    text-align: left
 
 @media (max-width: 959px)
   .category-hero__media
