@@ -184,6 +184,14 @@ const handleLogout = async () => {
   }
 }
 
+const isSuccessfulCacheResetResponse = (payload: unknown): payload is { success: true } =>
+  Boolean(
+    payload &&
+      typeof payload === 'object' &&
+      'success' in payload &&
+      (payload as { success?: boolean }).success === true,
+  )
+
 const handleClearCache = async () => {
   if (!isLoggedIn.value || isClearingCache.value) {
     return
@@ -199,7 +207,13 @@ const handleClearCache = async () => {
       return
     }
 
-    await fetcher('/api/admin/cache/reset', { method: 'POST' })
+    const response = await fetcher('/api/admin/cache/reset', { method: 'POST' })
+
+    if (!isSuccessfulCacheResetResponse(response)) {
+      console.error('Failed to clear caches', new Error('Unexpected response payload'))
+      return
+    }
+
     emit('close')
 
     if (typeof window !== 'undefined') {
