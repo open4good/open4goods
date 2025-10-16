@@ -99,10 +99,18 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
       body?: ProductSearchRequestDto
     },
   ): Promise<ProductSearchResponseDto> => {
-    const { aggs, sort, filters, body: explicitBody, ...rest } = parameters
+    const {
+      aggs,
+      sort,
+      filters,
+      body: explicitBody,
+      productSearchRequestDto: providedBody,
+      ...rest
+    } = parameters
 
     const body: ProductSearchRequestDto | undefined =
       explicitBody ??
+      providedBody ??
       (sort || aggs || filters
         ? {
             ...(sort ? { sort } : {}),
@@ -114,7 +122,7 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     const request: ProductsRequest = {
       domainLanguage,
       ...rest,
-      ...(body ? { body } : {}),
+      ...(body ? { productSearchRequestDto: body } : {}),
     }
 
     try {
