@@ -48,9 +48,9 @@
                   <v-chip
                     v-for="role in accountRoles"
                     :key="role"
-                    color="surface-primary-120"
+                    color="surface-primary-100"
                     size="small"
-                    variant="tonal"
+                    variant="flat"
                     class="role-chip"
                   >
                     {{ role }}
@@ -259,6 +259,8 @@ const navigateToPage = (path: string): void => {
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .role-chip
+  background-color: rgb(var(--v-theme-surface-primary-120))
+  border: 1px solid rgb(var(--v-theme-border-primary-strong))
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .text-neutral-soft

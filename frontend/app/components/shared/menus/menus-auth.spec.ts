@@ -154,7 +154,7 @@ describe('Shared menu authentication controls', () => {
 
       if (!('visualViewport' in window)) {
         ;(window as unknown as {
-          visualViewport?: Pick<Window['visualViewport'], 'addEventListener' | 'removeEventListener'>
+          visualViewport?: Pick<NonNullable<Window['visualViewport']>, 'addEventListener' | 'removeEventListener'>
         }).visualViewport = {
           addEventListener: () => undefined,
           removeEventListener: () => undefined,
