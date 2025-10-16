@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -25,6 +26,7 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -68,6 +70,12 @@ class ProductMappingServiceTest {
         GtinInfo gtinInfo = new GtinInfo();
         gtinInfo.setCountry("FR");
         product.setGtinInfos(gtinInfo);
+        product.setCoverImagePath("/covers/main.jpg");
+        product.setOfferNames(Set.of("Eco Phone"));
+        Score ecoscore = new Score("ECOSCORE", 12.5);
+        HashMap<String, Score> scores = new HashMap<>();
+        scores.put("ECOSCORE", ecoscore);
+        product.setScores(scores);
 
         when(repository.getById(gtin)).thenReturn(product);
 
@@ -79,6 +87,9 @@ class ProductMappingServiceTest {
         assertThat(dto.base().gtinInfo().countryCode()).isEqualTo("FR");
         assertThat(dto.base().gtinInfo().countryName()).isEqualTo("France");
         assertThat(dto.base().gtinInfo().countryFlagUrl()).isEqualTo("/images/flags/fr.webp");
+        assertThat(dto.base().coverImagePath()).isEqualTo("https://static.example/covers/main.jpg");
+        assertThat(dto.base().bestName()).isEqualTo("Eco Phone");
+        assertThat(dto.base().ecoscoreValue()).isEqualTo(12.5);
         assertThat(dto.resources()).isNull();
     }
 

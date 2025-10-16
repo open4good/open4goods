@@ -26,6 +26,12 @@ public record ProductBaseDto(
         @Schema(description = "Reasons explaining why the product is excluded")
         Set<String> excludedCauses,
         @Schema(description = "Information inferred from the GTIN itself")
-        ProductGtinInfoDto gtinInfo
+        ProductGtinInfoDto gtinInfo,
+        @Schema(description = "Absolute URL of the preferred cover image when available", example = "https://cdn.example.org/covers/123.jpg", nullable = true)
+        String coverImagePath,
+        @Schema(description = "Best human readable name derived from brand/model or offer data", example = "Fairphone 4")
+        String bestName,
+        @Schema(description = "Value of the ECOSCORE when available", example = "15.5", nullable = true)
+        Double ecoscoreValue
 ) {
 }

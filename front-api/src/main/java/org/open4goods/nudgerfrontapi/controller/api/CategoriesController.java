@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.product.Product;
@@ -18,6 +19,7 @@ import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
@@ -231,8 +233,9 @@ public class CategoriesController {
         Locale locale = resolveLocale(domainLanguage);
 
         Map<Long, ProductDto> uniqueProducts = new LinkedHashMap<>();
+        Set<String> includes = Set.of(ProductDtoComponent.base.name());
         for (SearchHit<Product> hit : result.hits().getSearchHits()) {
-            ProductDto dto = productMappingService.mapProduct(hit.getContent(), locale, Collections.emptySet(), domainLanguage);
+            ProductDto dto = productMappingService.mapProduct(hit.getContent(), locale, includes, domainLanguage);
             if (dto != null && !uniqueProducts.containsKey(dto.gtin())) {
                 uniqueProducts.put(dto.gtin(), dto);
             }
