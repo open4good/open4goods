@@ -20,17 +20,29 @@ import { mapValues } from '../runtime';
  */
 export interface ProductImageDto {
     /**
-     * Resource URL
+     * Optimised resource URL
      * @type {string}
      * @memberof ProductImageDto
      */
     url?: string;
     /**
-     * Detected MIME type
+     * Optimised MIME type
      * @type {string}
      * @memberof ProductImageDto
      */
     mimeType?: string;
+    /**
+     * original resource URL
+     * @type {string}
+     * @memberof ProductImageDto
+     */
+    originalUrl?: string;
+    /**
+     * original MIME type
+     * @type {string}
+     * @memberof ProductImageDto
+     */
+    originalMimeType?: string;
     /**
      * Last update timestamp in epoch milliseconds
      * @type {number}
@@ -194,6 +206,8 @@ export function ProductImageDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'url': json['url'] == null ? undefined : json['url'],
         'mimeType': json['mimeType'] == null ? undefined : json['mimeType'],
+        'originalUrl': json['originalUrl'] == null ? undefined : json['originalUrl'],
+        'originalMimeType': json['originalMimeType'] == null ? undefined : json['originalMimeType'],
         'timeStamp': json['timeStamp'] == null ? undefined : json['timeStamp'],
         'cacheKey': json['cacheKey'] == null ? undefined : json['cacheKey'],
         'evicted': json['evicted'] == null ? undefined : json['evicted'],
@@ -226,6 +240,8 @@ export function ProductImageDtoToJSONTyped(value?: ProductImageDto | null, ignor
         
         'url': value['url'],
         'mimeType': value['mimeType'],
+        'originalUrl': value['originalUrl'],
+        'originalMimeType': value['originalMimeType'],
         'timeStamp': value['timeStamp'],
         'cacheKey': value['cacheKey'],
         'evicted': value['evicted'],
