@@ -23,10 +23,10 @@ public record CategoryNavigationDto(
         @Schema(description = "Descendant nodes exposing a vertical configuration but not already present in childCategories.")
         List<GoogleCategoryDto> descendantVerticals,
 
-        @Schema(description = "Top five new products for the category ordered by descending impact score.")
+        @Schema(description = "Top five new products for the category ordered by descending impact score. Only the base facet is populated.")
         List<ProductDto> topNewProducts,
 
-        @Schema(description = "Top five occasion products for the category ordered by descending impact score.")
+        @Schema(description = "Top five occasion products for the category ordered by descending impact score. Only the base facet is populated.")
         List<ProductDto> topOccasionProducts
 ) {
 }

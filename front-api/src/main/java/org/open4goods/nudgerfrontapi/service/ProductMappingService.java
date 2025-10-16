@@ -235,6 +235,7 @@ public class ProductMappingService {
      * Map immutable product fields describing core metadata (creation timestamps, vertical etc.).
      */
     private ProductBaseDto mapBase(Product product, DomainLanguage domainLanguage, Locale locale) {
+        Score ecoscore = product.ecoscore();
         return new ProductBaseDto(
                 product.getId(),
                 product.getCreationDate(),
@@ -244,7 +245,10 @@ public class ProductMappingService {
                 product.getGoogleTaxonomyId(),
                 product.isExcluded(),
                 product.getExcludedCauses() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getExcludedCauses()),
-                mapGtinInfo(product.getGtinInfos(), domainLanguage, locale));
+                mapGtinInfo(product.getGtinInfos(), domainLanguage, locale),
+                resolveCoverImageUrl(product.getCoverImagePath()),
+                product.bestName(),
+                ecoscore == null ? null : ecoscore.getValue());
     }
 
     /**
