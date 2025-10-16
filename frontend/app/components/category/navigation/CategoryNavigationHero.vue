@@ -3,7 +3,7 @@
     class="category-navigation-hero"
     :aria-labelledby="titleId"
   >
-    <v-container class="py-12 px-4" max-width="xl">
+    <v-container class="category-navigation-hero__container px-4" max-width="xl">
       <div class="category-navigation-hero__content">
         <div class="category-navigation-hero__copy">
           <p v-if="eyebrow" class="text-overline mb-2 text-hero-pill-on-dark">
@@ -14,10 +14,10 @@
             class="mb-4"
             v-bind="{ items: breadcrumbs, ariaLabel: breadcrumbAriaLabel }"
           />
-          <h1 :id="titleId" class="text-h3 text-sm-h2 font-weight-bold mb-4">
+          <h1 :id="titleId" class="text-h3 text-sm-h2 font-weight-bold mb-3">
             {{ title }}
           </h1>
-          <p v-if="description" class="text-body-1 text-lg-h6 mb-6">
+          <p v-if="description" class="text-body-1 text-lg-h6 mb-4">
             {{ description }}
           </p>
           <p
@@ -36,7 +36,7 @@
             :placeholder="searchPlaceholder"
             prepend-inner-icon="mdi-magnify"
             variant="solo"
-            density="comfortable"
+            density="compact"
             color="primary"
             class="category-navigation-hero__search-field"
             @update:model-value="onUpdateModelValue"
@@ -91,26 +91,41 @@ const onUpdateModelValue = (value: string) => {
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
 
+
+.category-navigation-hero__container {
+  padding-block: 2.75rem;
+}
+
 .category-navigation-hero__content {
   display: grid;
-  gap: 2.5rem;
+  gap: 1.75rem;
   align-items: center;
 }
 
 @media (min-width: 960px) {
+  .category-navigation-hero__container {
+    padding-block: 3.5rem;
+  }
+
   .category-navigation-hero__content {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3rem;
+    gap: 2.5rem;
   }
 }
 
 .category-navigation-hero__copy {
-  max-width: 640px;
+  max-width: min(60ch, 100%);
+}
+
+@media (min-width: 960px) {
+  .category-navigation-hero__copy {
+    max-width: clamp(52ch, 60vw, 72ch);
+  }
 }
 
 .category-navigation-hero__search {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .category-navigation-hero__search-field {
@@ -118,9 +133,15 @@ const onUpdateModelValue = (value: string) => {
   max-width: 420px;
   --v-field-border-opacity: 0;
   --v-field-background: rgba(255, 255, 255, 0.14);
-  --v-input-control-height: 64px;
+  --v-input-control-height: 52px;
   backdrop-filter: blur(12px);
   border-radius: 1rem;
+}
+
+@media (min-width: 960px) {
+  .category-navigation-hero__search {
+    justify-content: flex-end;
+  }
 }
 
 .text-hero-pill-on-dark {

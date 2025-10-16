@@ -120,7 +120,7 @@ const baseMenuItems: MenuItemDefinition[] = [
   },
   {
     titleKey: 'siteIdentity.menu.items.products',
-    routeName: 'produits',
+    routeName: 'categories',
     icon: 'mdi-package-variant',
   },
   {

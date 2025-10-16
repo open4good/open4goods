@@ -76,7 +76,7 @@ interface MenuItem extends MenuItemDefinition {
 
 const baseMenuItems: MenuItemDefinition[] = [
   { labelKey: 'siteIdentity.menu.items.impactScore', routeName: 'impact-score' },
-  { labelKey: 'siteIdentity.menu.items.products', routeName: 'produits' },
+  { labelKey: 'siteIdentity.menu.items.products', routeName: 'categories' },
   { labelKey: 'siteIdentity.menu.items.blog', routeName: 'blog' },
   { labelKey: 'siteIdentity.menu.items.contact', routeName: 'contact' },
 ]
