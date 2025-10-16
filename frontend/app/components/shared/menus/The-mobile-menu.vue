@@ -65,8 +65,8 @@
               v-for="role in accountRoles"
               :key="role"
               size="small"
-              variant="tonal"
-              color="surface-primary-120"
+              variant="flat"
+              color="surface-primary-100"
               class="role-chip"
             >
               {{ role }}
@@ -255,6 +255,8 @@ const menuItems = computed<MenuItem[]>(() =>
   background-color: rgb(var(--v-theme-surface-default))
 
 .role-chip
+  background-color: rgb(var(--v-theme-surface-primary-120))
+  border: 1px solid rgb(var(--v-theme-border-primary-strong))
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .text-neutral-soft
