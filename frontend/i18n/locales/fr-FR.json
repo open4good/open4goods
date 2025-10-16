@@ -152,7 +152,7 @@
         "title": "Toutes les catégories de produits",
         "rootProductsTitle": "Les produits disponibles",
         "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
-        "childDescription": "Explorez les sous-catégories et les sélections associées à {category}.",
+        "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
         "rootBreadcrumb": "Toutes les catégories",
         "searchLabel": "Rechercher une catégorie",
         "searchPlaceholder": "Tapez le nom d'une catégorie",
@@ -163,7 +163,7 @@
         }
       },
       "grid": {
-        "title": "Poursuivre l'exploration",
+        "title": "Parcourir les catégories",
         "subtitle": "Choisissez une famille pour afficher ses sous-catégories ou découvrir nos guides.",
         "emptyTitle": "Aucune catégorie trouvée",
         "emptySubtitle": "Modifiez votre recherche pour afficher des catégories pertinentes.",
@@ -177,7 +177,7 @@
       },
       "verticals": {
         "eyebrow": "Guides mis en avant",
-        "title": "Sélections à découvrir",
+        "title": "Catégories populaires",
         "subtitle": "Des guides choisis pour rejoindre rapidement les familles les plus recherchées.",
         "openVertical": "Ouvrir le guide {category}",
         "openVerticalCta": "Découvrir le guide",
