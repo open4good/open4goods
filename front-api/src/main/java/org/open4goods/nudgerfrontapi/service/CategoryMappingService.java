@@ -536,7 +536,7 @@ public class CategoryMappingService {
         if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
             return null;
         }
-        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
+        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
     }
 
     /**
@@ -546,7 +546,7 @@ public class CategoryMappingService {
         if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
             return null;
         }
-        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
+        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
     }
 
     /**
