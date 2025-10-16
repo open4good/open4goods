@@ -1,12 +1,12 @@
 <template>
   <nav
-    v-if="items.length"
+    v-if="visibleItems.length"
     class="category-navigation-breadcrumbs"
     :aria-label="ariaLabel"
   >
     <ol class="category-navigation-breadcrumbs__list">
       <li
-        v-for="(item, index) in items"
+        v-for="(item, index) in visibleItems"
         :key="`${item.title}-${index}`"
         class="category-navigation-breadcrumbs__item"
       >
@@ -21,7 +21,7 @@
           {{ item.title }}
         </NuxtLink>
         <span
-          v-if="index < items.length - 1"
+          v-if="index < visibleItems.length - 1"
           aria-hidden="true"
           class="category-navigation-breadcrumbs__separator"
         >
@@ -33,15 +33,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface BreadcrumbItem {
   title: string
   link?: string
 }
 
-defineProps<{
+const props = defineProps<{
   items: BreadcrumbItem[]
   ariaLabel: string
 }>()
+
+const visibleItems = computed(() =>
+  props.items.filter((item) => item.title?.trim().length),
+)
 </script>
 
 <style scoped>

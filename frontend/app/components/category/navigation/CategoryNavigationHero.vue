@@ -6,9 +6,6 @@
     <v-container class="category-navigation-hero__container px-4" max-width="xl">
       <div class="category-navigation-hero__content">
         <div class="category-navigation-hero__copy">
-          <p v-if="eyebrow" class="text-overline mb-2 text-hero-pill-on-dark">
-            {{ eyebrow }}
-          </p>
           <CategoryNavigationBreadcrumbs
             v-if="breadcrumbs && breadcrumbs.length"
             class="mb-4"
@@ -60,7 +57,6 @@ interface BreadcrumbItem {
 const titleId = useId()
 
 defineProps<{
-  eyebrow?: string
   title: string
   description?: string
   breadcrumbs?: BreadcrumbItem[]
@@ -100,6 +96,30 @@ const onUpdateModelValue = (value: string) => {
   display: grid;
   gap: 1.75rem;
   align-items: center;
+}
+
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs) {
+  color: rgb(var(--v-theme-hero-overlay-strong));
+}
+
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__current) {
+  color: rgb(var(--v-theme-hero-overlay-strong));
+}
+
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__separator) {
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
+}
+
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link:hover),
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link:focus-visible) {
+  color: rgb(var(--v-theme-hero-overlay-strong));
+  text-decoration: underline;
+}
+
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link:focus-visible) {
+  outline: 2px solid rgba(var(--v-theme-hero-overlay-strong), 0.8);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
 }
 
 @media (min-width: 960px) {
@@ -142,10 +162,5 @@ const onUpdateModelValue = (value: string) => {
   .category-navigation-hero__search {
     justify-content: flex-end;
   }
-}
-
-.text-hero-pill-on-dark {
-  color: rgb(var(--v-theme-hero-pill-on-dark));
-  letter-spacing: 0.12em;
 }
 </style>
