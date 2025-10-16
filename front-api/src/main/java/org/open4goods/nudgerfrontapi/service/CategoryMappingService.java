@@ -36,6 +36,7 @@ import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.springframework.stereotype.Service;
@@ -162,11 +163,15 @@ public class CategoryMappingService {
      * @param domainLanguage requested language
      * @param havingVertical replicate the legacy flag filtering children with
      *                       verticals in their hierarchy
+     * @param topNewProducts     top ranked new products associated with the category
+     * @param topOccasionProducts top ranked occasion products associated with the category
      * @return navigation DTO or {@code null} when the category is {@code null}
      */
     public CategoryNavigationDto toCategoryNavigationDto(ProductCategory category,
                                                          DomainLanguage domainLanguage,
-                                                         boolean havingVertical) {
+                                                         boolean havingVertical,
+                                                         List<ProductDto> topNewProducts,
+                                                         List<ProductDto> topOccasionProducts) {
         if (category == null) {
             return null;
         }
@@ -200,7 +205,9 @@ public class CategoryMappingService {
                 current,
                 mapBreadcrumbs(category, languageKey),
                 childCategories,
-                descendantVerticals);
+                descendantVerticals,
+                defaultList(topNewProducts),
+                defaultList(topOccasionProducts));
     }
 
     /**

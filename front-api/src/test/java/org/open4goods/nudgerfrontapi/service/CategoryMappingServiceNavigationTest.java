@@ -51,7 +51,9 @@ class CategoryMappingServiceNavigationTest {
         tv.vertical(createVerticalConfig("tv", 2));
         headphones.vertical(createVerticalConfig("headphones", 4));
 
-        CategoryNavigationDto navigation = service.toCategoryNavigationDto(electronics, DomainLanguage.fr, true);
+        CategoryNavigationDto navigation = service.toCategoryNavigationDto(electronics, DomainLanguage.fr, true,
+                List.of(),
+                List.of());
 
         assertThat(navigation).isNotNull();
         assertThat(navigation.category().googleCategoryId()).isEqualTo(1);
@@ -75,6 +77,9 @@ class CategoryMappingServiceNavigationTest {
                 .first()
                 .extracting(GoogleCategoryDto::googleCategoryId)
                 .isEqualTo(4);
+
+        assertThat(navigation.topNewProducts()).isEmpty();
+        assertThat(navigation.topOccasionProducts()).isEmpty();
     }
 
     private VerticalConfig createVerticalConfig(String id, int googleTaxonomyId) {

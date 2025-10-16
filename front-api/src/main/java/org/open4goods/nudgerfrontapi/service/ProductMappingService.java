@@ -161,7 +161,7 @@ public class ProductMappingService {
      * @param domainLanguage domain language requested by the caller
      * @return DTO representing the product or {@code null} when no vertical configuration matches
      */
-    private ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage) {
+    public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage) {
 
         VerticalConfig vConfig = verticalsConfigService.getConfigById(product.getVertical());
         if (vConfig == null) {

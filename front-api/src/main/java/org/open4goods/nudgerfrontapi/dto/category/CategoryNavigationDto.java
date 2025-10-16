@@ -2,6 +2,8 @@ package org.open4goods.nudgerfrontapi.dto.category;
 
 import java.util.List;
 
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -19,7 +21,13 @@ public record CategoryNavigationDto(
         List<GoogleCategoryDto> childCategories,
 
         @Schema(description = "Descendant nodes exposing a vertical configuration but not already present in childCategories.")
-        List<GoogleCategoryDto> descendantVerticals
+        List<GoogleCategoryDto> descendantVerticals,
+
+        @Schema(description = "Top five new products for the category ordered by descending impact score.")
+        List<ProductDto> topNewProducts,
+
+        @Schema(description = "Top five occasion products for the category ordered by descending impact score.")
+        List<ProductDto> topOccasionProducts
 ) {
 }
 
