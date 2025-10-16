@@ -1,6 +1,6 @@
 <template>
   <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
-    <v-sheet class="category-hero__wrapper" elevation="0" rounded="xl">
+    <v-sheet class="category-hero__wrapper" elevation="0">
       <div class="category-hero__content">
         <v-breadcrumbs
           v-if="breadcrumbs.length"
@@ -72,12 +72,13 @@ defineExpose({ headingId, t })
     position: relative
     display: flex
     flex-direction: column
-    gap: 1.5rem
+    gap: 1.25rem
     overflow: hidden
-    min-height: 220px
+    min-height: 180px
     background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.95), rgba(var(--v-theme-hero-gradient-end), 0.85))
     color: rgb(var(--v-theme-hero-overlay-strong))
-    padding: clamp(1.5rem, 4vw + 1rem, 3rem)
+    padding: clamp(1.25rem, 3vw + 0.75rem, 2.5rem)
+    border-radius: 0
 
   &__content
     display: flex
@@ -123,13 +124,18 @@ defineExpose({ headingId, t })
   &__media
     position: relative
     flex: 0 0 auto
-    border-radius: 1.25rem
+    display: flex
+    align-items: center
+    justify-content: center
     overflow: hidden
     background: rgba(var(--v-theme-hero-overlay-soft), 0.12)
 
   &__image
-    height: 100%
-    min-height: 200px
+    height: auto
+    width: 100%
+    max-width: 60%
+    min-height: 160px
+    margin: 0 auto
 
 @media (min-width: 960px)
   .category-hero__wrapper
@@ -141,11 +147,10 @@ defineExpose({ headingId, t })
     flex: 0 1 66%
 
   .category-hero__media
-    display: block
-    flex: 0 0 clamp(240px, 30vw, 360px)
+    flex: 0 0 clamp(180px, 18vw, 240px)
 
   .category-hero__image
-    min-height: 100%
+    max-height: 100%
 
 @media (max-width: 959px)
   .category-hero__media

@@ -129,7 +129,16 @@
       "viewList": "Vue liste",
       "viewTable": "Vue tableau",
       "openFilters": "Filtres",
-      "noResults": "Aucun produit ne correspond aux filtres sélectionnés."
+      "noResults": "Aucun produit ne correspond aux filtres sélectionnés.",
+      "tooltips": {
+        "search": "Rechercher dans les résultats",
+        "sortField": "Choisir le champ de tri des produits",
+        "sortOrderAsc": "Tri du plus bas au plus élevé",
+        "sortOrderDesc": "Tri du plus élevé au plus bas",
+        "viewCards": "Afficher les produits en cartes",
+        "viewList": "Afficher les produits en liste",
+        "viewTable": "Afficher les produits en tableau"
+      }
     },
     "documentation": {
       "guidesTitle": "Guides utiles",

@@ -130,7 +130,16 @@
       "viewList": "List view",
       "viewTable": "Table view",
       "openFilters": "Filters",
-      "noResults": "No products match the selected filters."
+      "noResults": "No products match the selected filters.",
+      "tooltips": {
+        "search": "Search within the current results",
+        "sortField": "Choose the field used to sort products",
+        "sortOrderAsc": "Sort from lowest to highest",
+        "sortOrderDesc": "Sort from highest to lowest",
+        "viewCards": "Show products as cards",
+        "viewList": "Show products in a list",
+        "viewTable": "Show products in a table"
+      }
     },
     "documentation": {
       "guidesTitle": "Helpful guides",

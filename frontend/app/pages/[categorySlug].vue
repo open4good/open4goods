@@ -37,34 +37,54 @@
         </div>
 
         <div class="category-page__toolbar-actions">
-          <v-text-field
-            v-model="searchTerm"
-            :label="$t('category.products.searchPlaceholder')"
-            prepend-inner-icon="mdi-magnify"
-            clearable
-            hide-details
-            density="comfortable"
-            class="category-page__search"
-          />
+          <div class="category-page__search">
+            <v-tooltip location="bottom">
+              <template #activator="{ props }">
+                <v-text-field
+                  v-bind="props"
+                  v-model="searchTerm"
+                  :label="$t('category.products.searchPlaceholder')"
+                  prepend-inner-icon="mdi-magnify"
+                  clearable
+                  hide-details
+                  density="comfortable"
+                  class="category-page__search-input"
+                />
+              </template>
+              <span>{{ $t('category.products.tooltips.search') }}</span>
+            </v-tooltip>
+          </div>
 
           <div class="category-page__sort">
-            <v-select
-              v-model="sortField"
-              :items="sortItems"
-              :label="$t('category.products.sortLabel')"
-              item-title="title"
-              item-value="value"
-              clearable
-              hide-details
-              density="comfortable"
-              class="me-2"
-            />
+            <v-tooltip location="bottom">
+              <template #activator="{ props }">
+                <v-select
+                  v-bind="props"
+                  v-model="sortField"
+                  :items="sortItems"
+                  :label="$t('category.products.sortLabel')"
+                  item-title="title"
+                  item-value="value"
+                  clearable
+                  hide-details
+                  density="comfortable"
+                  class="category-page__sort-select"
+                />
+              </template>
+              <span>{{ $t('category.products.tooltips.sortField') }}</span>
+            </v-tooltip>
             <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
               <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
                 <v-icon icon="mdi-sort-ascending" />
+                <v-tooltip activator="parent" location="bottom">
+                  <span>{{ $t('category.products.tooltips.sortOrderAsc') }}</span>
+                </v-tooltip>
               </v-btn>
               <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
                 <v-icon icon="mdi-sort-descending" />
+                <v-tooltip activator="parent" location="bottom">
+                  <span>{{ $t('category.products.tooltips.sortOrderDesc') }}</span>
+                </v-tooltip>
               </v-btn>
             </v-btn-toggle>
           </div>
@@ -72,12 +92,21 @@
           <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
             <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
               <v-icon icon="mdi-view-grid" />
+              <v-tooltip activator="parent" location="bottom">
+                <span>{{ $t('category.products.tooltips.viewCards') }}</span>
+              </v-tooltip>
             </v-btn>
             <v-btn value="list" :aria-label="$t('category.products.viewList')">
               <v-icon icon="mdi-view-list" />
+              <v-tooltip activator="parent" location="bottom">
+                <span>{{ $t('category.products.tooltips.viewList') }}</span>
+              </v-tooltip>
             </v-btn>
             <v-btn value="table" :aria-label="$t('category.products.viewTable')">
               <v-icon icon="mdi-table" />
+              <v-tooltip activator="parent" location="bottom">
+                <span>{{ $t('category.products.tooltips.viewTable') }}</span>
+              </v-tooltip>
             </v-btn>
           </v-btn-toggle>
         </div>
@@ -87,7 +116,7 @@
         <v-navigation-drawer
           v-model="filtersDrawer"
           :permanent="isDesktop"
-          :width="isDesktop ? 320 : 360"
+          :width="isDesktop ? 280 : 360"
           location="start"
           class="category-page__filters"
           :temporary="!isDesktop"
@@ -885,7 +914,7 @@ const clearAllFilters = () => {
   flex-direction: column
 
   &__container
-    max-width: 1400px
+    max-width: 1480px
 
   &__toolbar
     display: flex
@@ -906,12 +935,20 @@ const clearAllFilters = () => {
     gap: 1rem
 
   &__search
-    min-width: 240px
+    display: flex
+    min-width: clamp(200px, 24vw, 320px)
+    flex: 1 1 280px
+
+  &__search-input
+    width: 100%
 
   &__sort
     display: flex
     align-items: center
     gap: 0.5rem
+
+  &__sort-select
+    min-width: 180px
 
   &__sort-order
     border-radius: 999px
@@ -926,20 +963,23 @@ const clearAllFilters = () => {
 
   &__layout
     display: grid
-    gap: 1.75rem
+    gap: 1.5rem
     grid-template-columns: minmax(0, 1fr)
 
   &__filters
     position: sticky
     top: 96px
-    height: calc(100vh - 120px)
+    height: calc(100vh - 128px)
     border-radius: 1rem
+    display: flex
+    flex-direction: column
+    overflow: hidden
 
   &__filters-content
     display: flex
     flex-direction: column
     gap: 1.5rem
-    height: 100%
+    flex: 1 1 auto
     padding: 1.25rem 1rem 1.5rem
     overflow-y: auto
 
@@ -964,7 +1004,7 @@ const clearAllFilters = () => {
 
 @media (min-width: 1280px)
   .category-page__layout
-    grid-template-columns: 320px minmax(0, 1fr)
+    grid-template-columns: clamp(260px, 20vw, 300px) minmax(0, 1fr)
 
   .category-page__filters
     background: transparent
@@ -983,6 +1023,7 @@ const clearAllFilters = () => {
   .category-page__filters
     position: static
     height: auto
+    display: block
 
   .category-page__filters-content
     overflow-y: visible
