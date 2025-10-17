@@ -19,29 +19,40 @@
       @end="emitRange"
     />
 
-    <div v-if="aggregation?.buckets?.length" class="category-filter-numeric__buckets">
-      <div
-        v-for="bucket in aggregation.buckets"
-        :key="bucket.key"
-        class="category-filter-numeric__bucket"
-      >
-        <span class="category-filter-numeric__bucket-label">
-          {{ formatBucketLabel(bucket.key, bucket.to) }}
-        </span>
-        <v-progress-linear
-          :model-value="bucket.count ?? 0"
-          :max="maxBucketCount"
-          height="6"
-          color="primary"
+    <ClientOnly>
+      <VueECharts
+        v-if="chartOptions"
+        :option="chartOptions"
+        :autoresize="true"
+        class="category-filter-numeric__chart"
+        role="img"
+        :aria-label="chartAriaLabel"
+        :style="{ height: chartHeight }"
+      />
+      <template #fallback>
+        <div
+          v-if="hasBuckets"
+          class="category-filter-numeric__chart-placeholder"
+          :style="{ height: chartHeight }"
+          aria-hidden="true"
         />
-        <span class="category-filter-numeric__bucket-count">{{ bucket.count ?? 0 }}</span>
-      </div>
-    </div>
+      </template>
+    </ClientOnly>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
+import VueECharts from 'vue-echarts'
+import type { EChartsOption } from 'echarts'
+import type { CallbackDataParams } from 'echarts/types/dist/shared'
+import type { TooltipComponentOption } from 'echarts/components'
+
+type RangeBucketDatum = {
+  value: number
+  range: string
+  count: number
+}
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -52,6 +63,7 @@ const props = defineProps<{
 const emit = defineEmits<{ 'update:modelValue': [Filter | null] }>()
 
 const { t } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const displayTitle = computed(() => props.field.title ?? props.field.mapping ?? '')
 
@@ -106,8 +118,147 @@ watch(
   },
 )
 
-const maxBucketCount = computed(() => {
-  return Math.max(...(props.aggregation?.buckets?.map((bucket) => bucket.count ?? 0) ?? [0]), 1)
+const buckets = computed(() => props.aggregation?.buckets ?? [])
+
+const hasBuckets = computed(() => buckets.value.length > 0)
+
+const toRgbColor = (value: string | undefined, fallbackRaw: string) => {
+  const normalized = value?.trim() || fallbackRaw
+  if (normalized.startsWith('#') || normalized.startsWith('rgb')) {
+    return normalized
+  }
+
+  return `rgb(${normalized})`
+}
+
+const chartColorVar = import.meta.client
+  ? useCssVar('--v-theme-chart-range-bar', document.documentElement, { initialValue: '29, 78, 216' })
+  : ref('29, 78, 216')
+
+const axisColorVar = import.meta.client
+  ? useCssVar('--v-theme-text-neutral-secondary', document.documentElement, { initialValue: '71, 84, 103' })
+  : ref('71, 84, 103')
+
+const labelColorVar = import.meta.client
+  ? useCssVar('--v-theme-text-neutral-strong', document.documentElement, { initialValue: '16, 24, 40' })
+  : ref('16, 24, 40')
+
+const chartColor = computed(() => toRgbColor(chartColorVar.value, '29, 78, 216'))
+const axisColor = computed(() => toRgbColor(axisColorVar.value, '71, 84, 103'))
+const labelColor = computed(() => toRgbColor(labelColorVar.value, '16, 24, 40'))
+const gridLineColor = computed(() => toRgbColor(axisColorVar.value, '229, 231, 235'))
+
+const chartHeight = computed(() => {
+  if (!buckets.value.length) {
+    return '0px'
+  }
+
+  return `${Math.max(buckets.value.length * 32, 120)}px`
+})
+
+const chartOptions = computed<EChartsOption | null>(() => {
+  if (!buckets.value.length) {
+    return null
+  }
+
+  const data: RangeBucketDatum[] = buckets.value.map((bucket) => ({
+    value: bucket.count ?? 0,
+    range: formatBucketLabel(bucket.key, bucket.to),
+    count: bucket.count ?? 0,
+  }))
+
+  const tooltipFormatter: TooltipComponentOption['formatter'] = (rawParams) => {
+    const params = Array.isArray(rawParams) ? rawParams[0] : rawParams
+    const bucket = (params as CallbackDataParams).data as RangeBucketDatum | undefined
+    if (!bucket) {
+      return ''
+    }
+
+    const countLabel = translatePlural('category.products.resultsCount', bucket.count)
+    return `<strong>${bucket.range}</strong><br />${countLabel}`
+  }
+
+  const series = {
+    type: 'bar',
+    data,
+    barWidth: 12,
+    itemStyle: {
+      color: chartColor.value,
+      borderRadius: [6, 6, 6, 6],
+    },
+    label: {
+      show: true,
+      position: 'right',
+      color: labelColor.value,
+      fontSize: 11,
+      formatter: ({ data }: { data?: RangeBucketDatum }) => {
+        const bucket = data
+        return bucket ? String(bucket.count) : ''
+      },
+    },
+    emphasis: {
+      focus: 'self',
+    },
+  }
+
+  const options = {
+    grid: {
+      top: 8,
+      bottom: 8,
+      left: 4,
+      right: 48,
+      containLabel: false,
+    },
+    tooltip: {
+      trigger: 'item',
+      appendToBody: true,
+      confine: true,
+      formatter: tooltipFormatter,
+    },
+    xAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: {
+        lineStyle: {
+          color: gridLineColor.value,
+          opacity: 0.3,
+        },
+      },
+      axisLabel: {
+        color: axisColor.value,
+        fontSize: 11,
+      },
+    },
+    yAxis: {
+      type: 'category',
+      data: data.map((_, index) => index + 1),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { show: false },
+      splitLine: { show: false },
+    },
+    series: [series],
+    animation: false,
+  } as EChartsOption
+
+  return options
+})
+
+const chartAriaLabel = computed(() => {
+  if (!buckets.value.length) {
+    return ''
+  }
+
+  const entries = buckets.value
+    .map((bucket) => {
+      const range = formatBucketLabel(bucket.key, bucket.to)
+      const countLabel = translatePlural('category.products.resultsCount', bucket.count ?? 0)
+      return `${range}: ${countLabel}`
+    })
+    .join('; ')
+
+  return `${displayTitle.value}. ${entries}`
 })
 
 const rangeLabel = computed(() => {
@@ -171,22 +322,12 @@ const formatBucketLabel = (from?: string, to?: number) => {
   &__slider
     margin-top: 0.25rem
 
-  &__buckets
-    display: flex
-    flex-direction: column
-    gap: 0.5rem
+  &__chart
+    width: 100%
+    min-height: 7.5rem
 
-  &__bucket
-    display: grid
-    grid-template-columns: auto 1fr auto
-    gap: 0.75rem
-    align-items: center
-
-  &__bucket-label
-    font-size: 0.75rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__bucket-count
-    font-size: 0.75rem
-    font-variant-numeric: tabular-nums
+  &__chart-placeholder
+    width: 100%
+    border-radius: 0.5rem
+    background: rgba(var(--v-theme-surface-primary-080), 0.6)
 </style>
