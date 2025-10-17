@@ -99,6 +99,8 @@
       "showMoreTechnical": "Plus de filtres",
       "hideTechnical": "Masquer les filtres techniques",
       "rangeAriaSuffix": "sélection d'intervalle",
+      "rangeClear": "Réinitialiser la plage",
+      "rangeSelectionHint": "Cliquez sur une barre pour définir le minimum, puis sur une autre pour définir le maximum.",
       "searchOptions": "Rechercher dans les options",
       "noMatch": "Aucune option correspondante",
       "missingLabel": "Option sans libellé",

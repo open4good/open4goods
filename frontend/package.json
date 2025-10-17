@@ -48,7 +48,9 @@
     "sharp": "^0.34.0",
     "unhead": "^2.0.14",
     "vue": "3.5.22",
-    "vuetify-nuxt-module": "^0.18.7"
+    "vuetify-nuxt-module": "^0.18.7",
+    "echarts": "^6.0.0",
+    "vue-echarts": "^8.0.1"
   },
   "devDependencies": {
     "@iconify-json/bxl": "^1.2.2",

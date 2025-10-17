@@ -100,6 +100,8 @@
       "showMoreTechnical": "Show more technical filters",
       "hideTechnical": "Hide technical filters",
       "rangeAriaSuffix": "range selection",
+      "rangeClear": "Clear range",
+      "rangeSelectionHint": "Click a bar to set the minimum, then click another to set the maximum.",
       "searchOptions": "Search options",
       "noMatch": "No matching options",
       "missingLabel": "Unlabelled option",
