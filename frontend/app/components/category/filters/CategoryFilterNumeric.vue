@@ -28,6 +28,7 @@
         role="img"
         :aria-label="chartAriaLabel"
         :style="{ height: chartHeight }"
+        @click="onBarClick"
       />
       <template #fallback>
         <div
@@ -50,8 +51,11 @@ import type { TooltipComponentOption } from 'echarts/components'
 
 type RangeBucketDatum = {
   value: number
-  range: string
+  rangeLabel: string
   count: number
+  min: number
+  max: number
+  selected?: boolean
 }
 
 const props = defineProps<{
@@ -98,29 +102,11 @@ const sliderStep = computed(() => {
 
 const localValue = ref<[number, number]>([bounds.value.min, bounds.value.max])
 
-watch(
-  () => bounds.value,
-  (next) => {
-    localValue.value = [next.min, next.max]
-  },
-  { immediate: true },
-)
-
-watch(
-  () => props.modelValue,
-  (filter) => {
-    if (filter?.operator === 'range') {
-      localValue.value = [filter.min ?? bounds.value.min, filter.max ?? bounds.value.max]
-      return
-    }
-
-    localValue.value = [bounds.value.min, bounds.value.max]
-  },
-)
-
 const buckets = computed(() => props.aggregation?.buckets ?? [])
 
 const hasBuckets = computed(() => buckets.value.length > 0)
+
+const selectedRangeIndex = ref<number | null>(null)
 
 const toRgbColor = (value: string | undefined, fallbackRaw: string) => {
   const normalized = value?.trim() || fallbackRaw
@@ -146,7 +132,6 @@ const labelColorVar = import.meta.client
 const chartColor = computed(() => toRgbColor(chartColorVar.value, '29, 78, 216'))
 const axisColor = computed(() => toRgbColor(axisColorVar.value, '71, 84, 103'))
 const labelColor = computed(() => toRgbColor(labelColorVar.value, '16, 24, 40'))
-const gridLineColor = computed(() => toRgbColor(axisColorVar.value, '229, 231, 235'))
 
 const chartHeight = computed(() => {
   if (!buckets.value.length) {
@@ -161,11 +146,21 @@ const chartOptions = computed<EChartsOption | null>(() => {
     return null
   }
 
-  const data: RangeBucketDatum[] = buckets.value.map((bucket) => ({
-    value: bucket.count ?? 0,
-    range: formatBucketLabel(bucket.key, bucket.to),
-    count: bucket.count ?? 0,
-  }))
+  const data: RangeBucketDatum[] = buckets.value.map((bucket, index) => {
+    const parsedMin = bucket.key != null ? Number(bucket.key) : Number.NaN
+    const parsedMax = bucket.to != null ? Number(bucket.to) : Number.NaN
+    const normalizedMin = Number.isFinite(parsedMin) ? parsedMin : bounds.value.min
+    const normalizedMax = Number.isFinite(parsedMax) ? parsedMax : bounds.value.max
+
+    return {
+      value: bucket.count ?? 0,
+      rangeLabel: formatBucketLabel(bucket.key, bucket.to),
+      count: bucket.count ?? 0,
+      min: normalizedMin,
+      max: normalizedMax,
+      selected: selectedRangeIndex.value === index,
+    }
+  })
 
   const tooltipFormatter: TooltipComponentOption['formatter'] = (rawParams) => {
     const params = Array.isArray(rawParams) ? rawParams[0] : rawParams
@@ -175,16 +170,29 @@ const chartOptions = computed<EChartsOption | null>(() => {
     }
 
     const countLabel = translatePlural('category.products.resultsCount', bucket.count)
-    return `<strong>${bucket.range}</strong><br />${countLabel}`
+    return `<strong>${bucket.rangeLabel}</strong><br />${countLabel}`
   }
 
   const series = {
     type: 'bar',
     data,
-    barWidth: 12,
+    barWidth: 24,
+    barCategoryGap: '0%',
+    barGap: '0%',
     itemStyle: {
       color: chartColor.value,
       borderRadius: [6, 6, 6, 6],
+      opacity: 0.75,
+    },
+    selectedMode: 'single',
+    select: {
+      itemStyle: {
+        color: chartColor.value,
+        opacity: 1,
+      },
+      label: {
+        color: labelColor.value,
+      },
     },
     label: {
       show: true,
@@ -207,7 +215,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
       bottom: 8,
       left: 4,
       right: 48,
-      containLabel: false,
+      containLabel: true,
     },
     tooltip: {
       trigger: 'item',
@@ -219,12 +227,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
       type: 'value',
       axisLine: { show: false },
       axisTick: { show: false },
-      splitLine: {
-        lineStyle: {
-          color: gridLineColor.value,
-          opacity: 0.3,
-        },
-      },
+      splitLine: { show: false },
       axisLabel: {
         color: axisColor.value,
         fontSize: 11,
@@ -232,10 +235,13 @@ const chartOptions = computed<EChartsOption | null>(() => {
     },
     yAxis: {
       type: 'category',
-      data: data.map((_, index) => index + 1),
+      data: data.map((bucket) => bucket.rangeLabel),
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { show: false },
+      axisLabel: {
+        color: axisColor.value,
+        fontSize: 11,
+      },
       splitLine: { show: false },
     },
     series: [series],
@@ -261,6 +267,72 @@ const chartAriaLabel = computed(() => {
   return `${displayTitle.value}. ${entries}`
 })
 
+const updateSelectedIndexFromFilter = (filter: Filter | null | undefined) => {
+  if (!filter || filter.operator !== 'range') {
+    selectedRangeIndex.value = null
+    return
+  }
+
+  const targetMin = filter.min
+  const targetMax = filter.max
+
+  const index = buckets.value.findIndex((bucket) => {
+    const parsedMin = bucket.key != null ? Number(bucket.key) : Number.NaN
+    const parsedMax = bucket.to != null ? Number(bucket.to) : Number.NaN
+    const normalizedMin = Number.isFinite(parsedMin) ? parsedMin : bounds.value.min
+    const normalizedMax = Number.isFinite(parsedMax) ? parsedMax : bounds.value.max
+
+    const minMatches = targetMin == null || normalizedMin === targetMin
+    const maxMatches = targetMax == null || normalizedMax === targetMax
+
+    return minMatches && maxMatches
+  })
+
+  selectedRangeIndex.value = index >= 0 ? index : null
+}
+
+watch(
+  () => bounds.value,
+  (next) => {
+    const filter = props.modelValue
+    if (filter?.operator === 'range') {
+      const nextMin = filter.min ?? next.min
+      const nextMax = filter.max ?? next.max
+      localValue.value = [nextMin, nextMax]
+    } else {
+      localValue.value = [next.min, next.max]
+    }
+
+    updateSelectedIndexFromFilter(props.modelValue)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => props.modelValue,
+  (filter) => {
+    if (filter?.operator === 'range') {
+      const nextMin = filter.min ?? bounds.value.min
+      const nextMax = filter.max ?? bounds.value.max
+      localValue.value = [nextMin, nextMax]
+      updateSelectedIndexFromFilter(filter)
+      return
+    }
+
+    localValue.value = [bounds.value.min, bounds.value.max]
+    selectedRangeIndex.value = null
+  },
+  { immediate: true },
+)
+
+watch(
+  () => buckets.value,
+  () => {
+    updateSelectedIndexFromFilter(props.modelValue)
+  },
+  { immediate: true },
+)
+
 const rangeLabel = computed(() => {
   if (!props.modelValue || props.modelValue.operator !== 'range') {
     return null
@@ -283,6 +355,30 @@ const emitRange = () => {
     min,
     max,
   })
+}
+
+const applyBucketRange = (bucket: RangeBucketDatum, index: number) => {
+  const min = bucket.min
+  const max = bucket.max
+
+  localValue.value = [min, max]
+  selectedRangeIndex.value = index
+
+  emit('update:modelValue', {
+    field: props.field.mapping,
+    operator: 'range',
+    min,
+    max,
+  })
+}
+
+const onBarClick = (params: CallbackDataParams) => {
+  const bucket = params.data as RangeBucketDatum | undefined
+  if (!bucket || params.dataIndex == null) {
+    return
+  }
+
+  applyBucketRange(bucket, params.dataIndex)
 }
 
 const formatBucketLabel = (from?: string, to?: number) => {
