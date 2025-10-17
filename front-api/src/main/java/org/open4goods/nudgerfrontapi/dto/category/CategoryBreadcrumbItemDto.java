@@ -11,8 +11,8 @@ public record CategoryBreadcrumbItemDto(
                 example = "Électroménager")
         String title,
 
-        @Schema(description = "Localised URL fragment for the taxonomy node, resolved against the domain language.",
-                example = "electromenager")
+        @Schema(description = "Localised URL path for the taxonomy node, resolved against the domain language.",
+                example = "/categories/electromenager")
         String link
 ) {
 }
