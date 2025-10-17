@@ -20,10 +20,11 @@
     />
 
     <ClientOnly>
-      <VueECharts
-        v-if="chartOptions"
-        :option="chartOptions"
-        :autoresize="true"
+      <Bar
+        v-if="hasBuckets"
+        :data="chartData"
+        :options="chartOptions"
+        :plugins="chartPlugins"
         class="category-filter-numeric__chart"
         role="img"
         :aria-label="chartAriaLabel"
@@ -43,16 +44,20 @@
 
 <script setup lang="ts">
 import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
-import VueECharts from 'vue-echarts'
-import type { EChartsOption } from 'echarts'
-import type { CallbackDataParams } from 'echarts/types/dist/shared'
-import type { TooltipComponentOption } from 'echarts/components'
+import { Bar } from 'vue-chartjs'
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  LinearScale,
+  Tooltip,
+  type ActiveElement,
+  type ChartData,
+  type ChartOptions,
+  type Plugin,
+} from 'chart.js'
 
-type RangeBucketDatum = {
-  value: number
-  range: string
-  count: number
-}
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -146,7 +151,6 @@ const labelColorVar = import.meta.client
 const chartColor = computed(() => toRgbColor(chartColorVar.value, '29, 78, 216'))
 const axisColor = computed(() => toRgbColor(axisColorVar.value, '71, 84, 103'))
 const labelColor = computed(() => toRgbColor(labelColorVar.value, '16, 24, 40'))
-const gridLineColor = computed(() => toRgbColor(axisColorVar.value, '229, 231, 235'))
 
 const chartHeight = computed(() => {
   if (!buckets.value.length) {
@@ -156,94 +160,161 @@ const chartHeight = computed(() => {
   return `${Math.max(buckets.value.length * 32, 120)}px`
 })
 
-const chartOptions = computed<EChartsOption | null>(() => {
-  if (!buckets.value.length) {
-    return null
+const chartData = computed<ChartData<'bar'>>(() => ({
+  labels: buckets.value.map((bucket) => formatBucketLabel(bucket.key, bucket.to)),
+  datasets: [
+    {
+      label: displayTitle.value,
+      data: buckets.value.map((bucket) => bucket.count ?? 0),
+      backgroundColor: chartColor.value,
+      hoverBackgroundColor: chartColor.value,
+      borderRadius: 6,
+      borderSkipped: false,
+      barPercentage: 1,
+      categoryPercentage: 1,
+    },
+  ],
+}))
+
+const normalizeBoundary = (value: number | string | undefined, fallback: number) => {
+  if (value == null) {
+    return fallback
   }
 
-  const data: RangeBucketDatum[] = buckets.value.map((bucket) => ({
-    value: bucket.count ?? 0,
-    range: formatBucketLabel(bucket.key, bucket.to),
-    count: bucket.count ?? 0,
-  }))
+  const numeric = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(numeric) ? numeric : fallback
+}
 
-  const tooltipFormatter: TooltipComponentOption['formatter'] = (rawParams) => {
-    const params = Array.isArray(rawParams) ? rawParams[0] : rawParams
-    const bucket = (params as CallbackDataParams).data as RangeBucketDatum | undefined
-    if (!bucket) {
-      return ''
-    }
+const applyRange = (min?: number | string, max?: number) => {
+  const normalizedMin = normalizeBoundary(min, bounds.value.min)
+  const normalizedMax = normalizeBoundary(max, bounds.value.max)
 
-    const countLabel = translatePlural('category.products.resultsCount', bucket.count)
-    return `<strong>${bucket.range}</strong><br />${countLabel}`
-  }
+  localValue.value = [normalizedMin, normalizedMax]
 
-  const series = {
-    type: 'bar',
-    data,
-    barWidth: 12,
-    itemStyle: {
-      color: chartColor.value,
-      borderRadius: [6, 6, 6, 6],
-    },
-    label: {
-      show: true,
-      position: 'right',
-      color: labelColor.value,
-      fontSize: 11,
-      formatter: ({ data }: { data?: RangeBucketDatum }) => {
-        const bucket = data
-        return bucket ? String(bucket.count) : ''
-      },
-    },
-    emphasis: {
-      focus: 'self',
-    },
-  }
+  emit('update:modelValue', {
+    field: props.field.mapping,
+    operator: 'range',
+    min: normalizedMin,
+    max: normalizedMax,
+  })
+}
 
-  const options = {
-    grid: {
+const chartOptions = computed<ChartOptions<'bar'>>(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y',
+  animation: false,
+  layout: {
+    padding: {
+      right: 40,
       top: 8,
       bottom: 8,
-      left: 4,
-      right: 48,
-      containLabel: false,
+      left: 0,
     },
-    tooltip: {
-      trigger: 'item',
-      appendToBody: true,
-      confine: true,
-      formatter: tooltipFormatter,
-    },
-    xAxis: {
-      type: 'value',
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: {
-        lineStyle: {
-          color: gridLineColor.value,
-          opacity: 0.3,
+  },
+  scales: {
+    x: {
+      beginAtZero: true,
+      ticks: {
+        color: axisColor.value,
+        font: {
+          size: 11,
         },
       },
-      axisLabel: {
-        color: axisColor.value,
-        fontSize: 11,
+      grid: {
+        display: false,
+        drawBorder: false,
+      },
+      border: {
+        display: false,
       },
     },
-    yAxis: {
-      type: 'category',
-      data: data.map((_, index) => index + 1),
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { show: false },
-      splitLine: { show: false },
+    y: {
+      ticks: {
+        color: axisColor.value,
+        font: {
+          size: 11,
+        },
+        padding: 8,
+      },
+      grid: {
+        display: false,
+        drawBorder: false,
+      },
+      border: {
+        display: false,
+      },
     },
-    series: [series],
-    animation: false,
-  } as EChartsOption
+  },
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      displayColors: false,
+      callbacks: {
+        title: (items) => items[0]?.label ?? '',
+        label: (item) => translatePlural('category.products.resultsCount', Number(item.raw ?? 0)),
+      },
+    },
+  },
+  onClick: (_event, elements) => {
+    if (!elements.length) {
+      return
+    }
 
-  return options
-})
+    const [{ index }] = elements as ActiveElement[]
+    const bucket = buckets.value[index]
+    if (!bucket || bucket.missing) {
+      return
+    }
+
+    applyRange(bucket.key, bucket.to)
+  },
+  datasets: {
+    bar: {
+      borderRadius: 6,
+      borderSkipped: false,
+      barPercentage: 1,
+      categoryPercentage: 1,
+    },
+  },
+}))
+
+const chartPlugins = computed<Plugin<'bar'>[]>(() => [
+  {
+    id: 'rangeValueLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart
+      const dataset = chart.getDatasetMeta(0)
+      ctx.save()
+      ctx.fillStyle = labelColor.value
+      ctx.font = '11px var(--v-font-family, "Inter", sans-serif)'
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+
+      dataset.data.forEach((element, index) => {
+        const rawValue = chart.data.datasets[0]?.data?.[index]
+        const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0)
+        if (!Number.isFinite(numericValue)) {
+          return
+        }
+
+        const barElement = element as BarElement
+        const text = String(numericValue)
+        const padding = 8
+        const measured = ctx.measureText(text).width
+        const maxX = chart.chartArea.right - measured
+        const minX = chart.chartArea.left + padding
+        const proposed = barElement.x + padding
+        const textX = Math.min(Math.max(proposed, minX), maxX)
+        ctx.fillText(text, textX, barElement.y)
+      })
+
+      ctx.restore()
+    },
+  },
+])
 
 const chartAriaLabel = computed(() => {
   if (!buckets.value.length) {
@@ -276,13 +347,7 @@ const rangeLabel = computed(() => {
 
 const emitRange = () => {
   const [min, max] = localValue.value
-
-  emit('update:modelValue', {
-    field: props.field.mapping,
-    operator: 'range',
-    min,
-    max,
-  })
+  applyRange(min, max)
 }
 
 const formatBucketLabel = (from?: string, to?: number) => {
