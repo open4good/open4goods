@@ -54,7 +54,7 @@ import { use as useECharts } from 'echarts/core'
 import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import { VChart } from 'vue-echarts'
+import VChart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
 import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
 
@@ -316,7 +316,12 @@ function getIndicesForFilter(filter?: Filter | null) {
 
   if (Number.isFinite(max)) {
     for (let index = buckets.value.length - 1; index >= 0; index -= 1) {
-      const bucketStart = buckets.value[index].from ?? Number.NEGATIVE_INFINITY
+      const bucket = buckets.value[index]
+      if (!bucket) {
+        continue
+      }
+
+      const bucketStart = bucket.from ?? Number.NEGATIVE_INFINITY
       if (max >= bucketStart - Number.EPSILON) {
         endIndex = index
         break
