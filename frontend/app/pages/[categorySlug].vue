@@ -258,7 +258,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, toRaw, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
@@ -544,6 +544,93 @@ const manualFilters = ref<FilterRequestDto>({})
 const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
 const lastAppliedDefaultSort = ref<string | null>(null)
+
+const areFiltersEqual = (left: FilterRequestDto, right: FilterRequestDto): boolean => {
+  const leftFilters = left.filters ?? []
+  const rightFilters = right.filters ?? []
+
+  if (leftFilters.length !== rightFilters.length) {
+    return false
+  }
+
+  return leftFilters.every((filter, index) => {
+    const other = rightFilters[index]
+    return JSON.stringify(filter) === JSON.stringify(other)
+  })
+}
+
+function arraysEqual<T>(left: T[], right: T[]): boolean {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  return left.every((value, index) => value === right[index])
+}
+
+const applyHashPayload = (payload: CategoryHashState | null) => {
+  const nextViewMode = payload?.view ?? CATEGORY_DEFAULT_VIEW_MODE
+  if (viewMode.value !== nextViewMode) {
+    viewMode.value = nextViewMode
+  }
+
+  const nextPageNumber = payload?.pageNumber ?? 0
+  if (pageNumber.value !== nextPageNumber) {
+    pageNumber.value = nextPageNumber
+  }
+
+  const nextSearchTerm = payload?.search ?? ''
+  if (searchTerm.value !== nextSearchTerm) {
+    searchTerm.value = nextSearchTerm
+  }
+
+  const sortEntry = payload?.sort?.sorts?.[0]
+  const nextSortField = sortEntry?.field ?? null
+  const nextSortOrder = sortEntry?.order ?? 'desc'
+
+  if (sortField.value !== nextSortField) {
+    sortField.value = nextSortField
+  }
+
+  if (sortOrder.value !== nextSortOrder) {
+    sortOrder.value = nextSortOrder
+  }
+
+  const nextFilters: FilterRequestDto =
+    payload?.filters?.filters?.length ? payload.filters : {}
+
+  if (!areFiltersEqual(manualFilters.value, nextFilters)) {
+    manualFilters.value = nextFilters.filters?.length
+      ? {
+          ...nextFilters,
+          filters: nextFilters.filters.map((filter) => ({ ...filter })),
+        }
+      : {}
+  }
+
+  const nextActiveSubsets = payload?.activeSubsets ?? []
+  if (!arraysEqual(activeSubsetIds.value, nextActiveSubsets)) {
+    activeSubsetIds.value = [...nextActiveSubsets]
+  }
+
+  const nextImpactExpanded = payload?.impactExpanded ?? false
+  if (impactExpanded.value !== nextImpactExpanded) {
+    impactExpanded.value = nextImpactExpanded
+  }
+
+  const nextTechnicalExpanded = payload?.technicalExpanded ?? false
+  if (technicalExpanded.value !== nextTechnicalExpanded) {
+    technicalExpanded.value = nextTechnicalExpanded
+  }
+}
+
+const handleHashChange = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const payload = deserializeCategoryHashState(window.location.hash.slice(1))
+  applyHashPayload(payload)
+}
 
 const subsetFilters = computed(() =>
   buildFilterRequestFromSubsets(category.value?.subsets ?? [], activeSubsetIds.value),
@@ -955,42 +1042,9 @@ watch(
 )
 
 onMounted(async () => {
-  const hashPayload = deserializeCategoryHashState(window.location.hash.slice(1))
-
-  if (hashPayload) {
-    if (hashPayload.view) {
-      viewMode.value = hashPayload.view
-    }
-
-    if (hashPayload.pageNumber != null) {
-      pageNumber.value = hashPayload.pageNumber
-    }
-
-    if (hashPayload.search) {
-      searchTerm.value = hashPayload.search
-    }
-
-    const sortEntry = hashPayload.sort?.sorts?.[0]
-    if (sortEntry) {
-      sortField.value = sortEntry.field ?? null
-      sortOrder.value = sortEntry.order ?? 'desc'
-    }
-
-    if (hashPayload.filters?.filters?.length) {
-      manualFilters.value = hashPayload.filters
-    }
-
-    if (hashPayload.activeSubsets?.length) {
-      activeSubsetIds.value = [...hashPayload.activeSubsets]
-    }
-
-    if (typeof hashPayload.impactExpanded === 'boolean') {
-      impactExpanded.value = hashPayload.impactExpanded
-    }
-
-    if (typeof hashPayload.technicalExpanded === 'boolean') {
-      technicalExpanded.value = hashPayload.technicalExpanded
-    }
+  if (import.meta.client) {
+    applyHashPayload(deserializeCategoryHashState(window.location.hash.slice(1)))
+    window.addEventListener('hashchange', handleHashChange)
   }
 
   if (verticalId.value) {
@@ -1005,6 +1059,12 @@ onMounted(async () => {
 
   if (verticalId.value) {
     await fetchProducts()
+  }
+})
+
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    window.removeEventListener('hashchange', handleHashChange)
   }
 })
 
