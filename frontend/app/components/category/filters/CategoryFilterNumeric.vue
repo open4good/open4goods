@@ -263,7 +263,12 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => ({
       return
     }
 
-    const [{ index }] = elements as ActiveElement[]
+    const [element] = elements as ActiveElement[]
+    if (!element) {
+      return
+    }
+
+    const { index } = element
     const bucket = buckets.value[index]
     if (!bucket || bucket.missing) {
       return
