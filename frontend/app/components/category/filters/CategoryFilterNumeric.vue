@@ -173,9 +173,15 @@ const chartOptions = computed<EChartsOption | null>(() => {
     return `<strong>${bucket.rangeLabel}</strong><br />${countLabel}`
   }
 
+  const categories = data.map((bucket) => bucket.rangeLabel)
+
   const series = {
     type: 'bar',
-    data,
+    data: data.map((bucket) => ({
+      ...bucket,
+      name: bucket.rangeLabel,
+    })),
+    encode: { x: 'value', y: 'rangeLabel' },
     barWidth: 24,
     barCategoryGap: '0%',
     barGap: '0%',
@@ -235,7 +241,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
     },
     yAxis: {
       type: 'category',
-      data: data.map((bucket) => bucket.rangeLabel),
+      data: categories,
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
