@@ -48,6 +48,8 @@
     "sharp": "^0.34.0",
     "unhead": "^2.0.14",
     "vue": "3.5.22",
+    "echarts": "^5.5.1",
+    "vue-echarts": "^6.7.3",
     "vuetify-nuxt-module": "^0.18.7"
   },
   "devDependencies": {
