@@ -173,8 +173,6 @@ const chartOptions = computed<EChartsOption | null>(() => {
     return `<strong>${bucket.rangeLabel}</strong><br />${countLabel}`
   }
 
-  const categories = data.map((bucket) => bucket.rangeLabel)
-
   const series = {
     type: 'bar',
     datasetIndex: 0,
@@ -246,7 +244,6 @@ const chartOptions = computed<EChartsOption | null>(() => {
     },
     yAxis: {
       type: 'category',
-      data: categories,
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
