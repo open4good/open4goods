@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
 public class CategoryMappingService {
 
     private static final String IMAGE_PREFIX = "/images/verticals/";
+    private static final String CATEGORY_PATH_PREFIX = "/categories/";
     private static final String DEFAULT_LANGUAGE_KEY = "default";
 
     private final ApiProperties apiProperties;
@@ -321,11 +322,12 @@ public class CategoryMappingService {
         if (category == null) {
             return null;
         }
-        String languageKey = domainLanguage == null ? null : domainLanguage.name();
+        String languageKey = languageKey(domainLanguage);
         String title = category.getGoogleNames() == null ? null : category.getGoogleNames().i18n(languageKey);
-        String link = category.getUrls() == null ? null : category.getUrls().i18n(languageKey);
+        String path = computeCategoryPath(category, languageKey);
+        String link = StringUtils.hasText(path) ? CATEGORY_PATH_PREFIX + path : null;
 
-        if (title == null && link == null) {
+        if (title == null && !StringUtils.hasText(path)) {
             return null;
         }
         return new CategoryBreadcrumbItemDto(title, link);
