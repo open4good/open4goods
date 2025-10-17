@@ -177,10 +177,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
 
   const series = {
     type: 'bar',
-    data: data.map((bucket) => ({
-      ...bucket,
-      name: bucket.rangeLabel,
-    })),
+    datasetIndex: 0,
     encode: { x: 'value', y: 'rangeLabel' },
     barWidth: 24,
     barCategoryGap: '0%',
@@ -216,6 +213,14 @@ const chartOptions = computed<EChartsOption | null>(() => {
   }
 
   const options = {
+    dataset: [
+      {
+        source: data.map((bucket) => ({
+          ...bucket,
+        })),
+        dimensions: ['rangeLabel', 'value', 'count', 'min', 'max', 'selected'],
+      },
+    ],
     grid: {
       top: 8,
       bottom: 8,
