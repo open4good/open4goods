@@ -26,7 +26,7 @@ export interface CategoryBreadcrumbItemDto {
      */
     title?: string;
     /**
-     * Localised URL fragment for the taxonomy node, resolved against the domain language.
+     * Localised URL path for the taxonomy node, resolved against the domain language.
      * @type {string}
      * @memberof CategoryBreadcrumbItemDto
      */

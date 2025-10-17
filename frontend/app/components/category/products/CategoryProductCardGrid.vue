@@ -111,12 +111,7 @@ const impactScoreValue = (product: ProductDto) => {
   }
 
   const preferredKeys = [
-    'impactscore',
-    'impact_score',
-    'IMPACTSCORE',
-    'IMPACT_SCORE',
-    'scores.IMPACTSCORE.value',
-    'scores.IMPACT_SCORE.value',
+    'ECOSCORE',
   ]
 
   const impactEntry =

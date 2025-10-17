@@ -12,7 +12,6 @@
  * Do not edit the class manually.
  */
 
-
 export const BASE_PATH = "https://beta.front-api.nudger.fr".replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
