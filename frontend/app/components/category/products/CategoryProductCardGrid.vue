@@ -29,32 +29,30 @@
         </div>
 
         <v-card-item class="category-product-card-grid__body">
-          <div class="category-product-card-grid__eyebrow">
-            <span class="category-product-card-grid__brand">
-              {{ product.identity?.brand ?? $t('category.products.unknownBrand') }}
-            </span>
+          <h3 class="category-product-card-grid__title">
+            {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
+          </h3>
+
+          <div
+            v-if="impactScoreValue(product) !== null || ecoscoreLetter(product)"
+            class="category-product-card-grid__score-row"
+          >
             <ImpactScore
               v-if="impactScoreValue(product) !== null"
               :score="impactScoreValue(product) ?? 0"
               :max="5"
               size="small"
-              class="ms-auto"
             />
             <span
               v-else-if="ecoscoreLetter(product)"
-              class="category-product-card-grid__score-letter ms-auto"
+              class="category-product-card-grid__score-letter"
             >
               {{ $t('category.products.ecoscoreLabel', { letter: ecoscoreLetter(product) }) }}
             </span>
           </div>
 
-          <h3 class="category-product-card-grid__title">
-            {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
-          </h3>
-
           <div class="category-product-card-grid__meta">
             <div class="category-product-card-grid__price">
-              <v-icon icon="mdi-cash" size="20" class="category-product-card-grid__price-icon" />
               <span class="category-product-card-grid__price-value">{{ bestPriceLabel(product) }}</span>
             </div>
             <span class="category-product-card-grid__offers">
@@ -175,7 +173,7 @@ const productLink = (product: ProductDto) => {
       box-shadow: 0 16px 24px -12px rgba(var(--v-theme-shadow-primary-600), 0.3)
 
   &__media
-    background: rgb(var(--v-theme-surface-default))
+    background: #fff
     padding: clamp(0.75rem, 1.5vw, 1.25rem)
     border-top-left-radius: inherit
     border-top-right-radius: inherit
@@ -185,8 +183,14 @@ const productLink = (product: ProductDto) => {
 
   &__image
     border-radius: 0
-    background: #fff
     width: 100%
+    height: 100%
+
+    :deep(.v-img__img)
+      background-color: #fff
+      background-repeat: no-repeat
+      background-position: center
+      background-size: contain
 
     :deep(img)
       object-fit: contain
@@ -204,19 +208,6 @@ const productLink = (product: ProductDto) => {
     border-bottom-right-radius: inherit
     padding: 1rem 1.25rem
 
-  &__brand
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    text-transform: uppercase
-    letter-spacing: 0.05em
-    font-size: 0.75rem
-
-  &__eyebrow
-    display: flex
-    align-items: center
-    gap: 0.5rem
-    min-height: 1.5rem
-
   &__title
     font-size: 1.125rem
     margin: 0
@@ -225,6 +216,19 @@ const productLink = (product: ProductDto) => {
     white-space: nowrap
     overflow: hidden
     text-overflow: ellipsis
+
+  &__score-row
+    min-height: 1.5rem
+    display: flex
+    align-items: center
+
+  &__score-letter
+    font-size: 0.75rem
+    font-weight: 600
+    padding: 0.25rem 0.5rem
+    border-radius: 999px
+    background: rgba(var(--v-theme-accent-supporting), 0.12)
+    color: rgb(var(--v-theme-accent-supporting))
 
   &__meta
     display: flex
@@ -237,22 +241,11 @@ const productLink = (product: ProductDto) => {
     display: flex
     align-items: center
     gap: 0.4rem
-    font-size: 1.125rem
+    font-size: 1.25rem
     font-weight: 700
     color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__price-icon
-    color: rgba(var(--v-theme-text-neutral-soft), 0.8)
 
   &__offers
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__score-letter
-    font-size: 0.75rem
-    font-weight: 600
-    padding: 0.25rem 0.5rem
-    border-radius: 999px
-    background: rgba(var(--v-theme-accent-supporting), 0.12)
-    color: rgb(var(--v-theme-accent-supporting))
 </style>
