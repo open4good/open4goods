@@ -90,6 +90,13 @@ import {
     AiPromptsConfigToJSON,
     AiPromptsConfigToJSONTyped,
 } from './AiPromptsConfig';
+import type { AttributeConfigDto } from './AttributeConfigDto';
+import {
+    AttributeConfigDtoFromJSON,
+    AttributeConfigDtoFromJSONTyped,
+    AttributeConfigDtoToJSON,
+    AttributeConfigDtoToJSONTyped,
+} from './AttributeConfigDto';
 import type { ScoringAggregationConfig } from './ScoringAggregationConfig';
 import {
     ScoringAggregationConfigFromJSON,
@@ -130,6 +137,12 @@ export interface VerticalConfigFullDto {
      * @memberof VerticalConfigFullDto
      */
     enabled?: boolean;
+    /**
+     * Marks the category as popular when true.
+     * @type {boolean}
+     * @memberof VerticalConfigFullDto
+     */
+    popular?: boolean;
     /**
      * Google taxonomy identifier associated with this vertical.
      * @type {number}
@@ -311,6 +324,12 @@ export interface VerticalConfigFullDto {
      */
     attributesConfig?: AttributesConfigDto;
     /**
+     * Popular attributes resolved to their full configuration metadata.
+     * @type {Array<AttributeConfigDto>}
+     * @memberof VerticalConfigFullDto
+     */
+    popularAttributes?: Array<AttributeConfigDto>;
+    /**
      * Impact score criteria available for this vertical with localised metadata.
      * @type {{ [key: string]: ImpactScoreCriteriaDto; }}
      * @memberof VerticalConfigFullDto
@@ -397,6 +416,7 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         
         'id': json['id'] == null ? undefined : json['id'],
         'enabled': json['enabled'] == null ? undefined : json['enabled'],
+        'popular': json['popular'] == null ? undefined : json['popular'],
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
@@ -427,6 +447,7 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'brandsExclusion': json['brandsExclusion'] == null ? undefined : new Set(json['brandsExclusion']),
         'resourcesConfig': json['resourcesConfig'] == null ? undefined : ResourcesAggregationConfigFromJSON(json['resourcesConfig']),
         'attributesConfig': json['attributesConfig'] == null ? undefined : AttributesConfigDtoFromJSON(json['attributesConfig']),
+        'popularAttributes': json['popularAttributes'] == null ? undefined : ((json['popularAttributes'] as Array<any>).map(AttributeConfigDtoFromJSON)),
         'availableImpactScoreCriterias': json['availableImpactScoreCriterias'] == null ? undefined : (mapValues(json['availableImpactScoreCriterias'], ImpactScoreCriteriaDtoFromJSON)),
         'impactScoreConfig': json['impactScoreConfig'] == null ? undefined : ImpactScoreConfigDtoFromJSON(json['impactScoreConfig']),
         'subsets': json['subsets'] == null ? undefined : ((json['subsets'] as Array<any>).map(VerticalSubsetDtoFromJSON)),
@@ -454,6 +475,7 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         
         'id': value['id'],
         'enabled': value['enabled'],
+        'popular': value['popular'],
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
@@ -484,6 +506,7 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'brandsExclusion': value['brandsExclusion'] == null ? undefined : Array.from(value['brandsExclusion'] as Set<any>),
         'resourcesConfig': ResourcesAggregationConfigToJSON(value['resourcesConfig']),
         'attributesConfig': AttributesConfigDtoToJSON(value['attributesConfig']),
+        'popularAttributes': value['popularAttributes'] == null ? undefined : ((value['popularAttributes'] as Array<any>).map(AttributeConfigDtoToJSON)),
         'availableImpactScoreCriterias': value['availableImpactScoreCriterias'] == null ? undefined : (mapValues(value['availableImpactScoreCriterias'], ImpactScoreCriteriaDtoToJSON)),
         'impactScoreConfig': ImpactScoreConfigDtoToJSON(value['impactScoreConfig']),
         'subsets': value['subsets'] == null ? undefined : ((value['subsets'] as Array<any>).map(VerticalSubsetDtoToJSON)),

@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AttributeConfigDto } from './AttributeConfigDto';
+import {
+    AttributeConfigDtoFromJSON,
+    AttributeConfigDtoFromJSONTyped,
+    AttributeConfigDtoToJSON,
+    AttributeConfigDtoToJSONTyped,
+} from './AttributeConfigDto';
+
 /**
  * 
  * @export
@@ -31,6 +39,12 @@ export interface VerticalConfigDto {
      * @memberof VerticalConfigDto
      */
     enabled?: boolean;
+    /**
+     * Marks the category as popular when true.
+     * @type {boolean}
+     * @memberof VerticalConfigDto
+     */
+    popular?: boolean;
     /**
      * Google taxonomy identifier associated with this vertical.
      * @type {number}
@@ -85,6 +99,12 @@ export interface VerticalConfigDto {
      * @memberof VerticalConfigDto
      */
     verticalHomeUrl?: string;
+    /**
+     * Popular attributes resolved to their full configuration metadata.
+     * @type {Array<AttributeConfigDto>}
+     * @memberof VerticalConfigDto
+     */
+    popularAttributes?: Array<AttributeConfigDto>;
 }
 
 /**
@@ -106,6 +126,7 @@ export function VerticalConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         
         'id': json['id'] == null ? undefined : json['id'],
         'enabled': json['enabled'] == null ? undefined : json['enabled'],
+        'popular': json['popular'] == null ? undefined : json['popular'],
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
@@ -115,6 +136,7 @@ export function VerticalConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'verticalHomeTitle': json['verticalHomeTitle'] == null ? undefined : json['verticalHomeTitle'],
         'verticalHomeDescription': json['verticalHomeDescription'] == null ? undefined : json['verticalHomeDescription'],
         'verticalHomeUrl': json['verticalHomeUrl'] == null ? undefined : json['verticalHomeUrl'],
+        'popularAttributes': json['popularAttributes'] == null ? undefined : ((json['popularAttributes'] as Array<any>).map(AttributeConfigDtoFromJSON)),
     };
 }
 
@@ -131,6 +153,7 @@ export function VerticalConfigDtoToJSONTyped(value?: VerticalConfigDto | null, i
         
         'id': value['id'],
         'enabled': value['enabled'],
+        'popular': value['popular'],
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
@@ -140,6 +163,7 @@ export function VerticalConfigDtoToJSONTyped(value?: VerticalConfigDto | null, i
         'verticalHomeTitle': value['verticalHomeTitle'],
         'verticalHomeDescription': value['verticalHomeDescription'],
         'verticalHomeUrl': value['verticalHomeUrl'],
+        'popularAttributes': value['popularAttributes'] == null ? undefined : ((value['popularAttributes'] as Array<any>).map(AttributeConfigDtoToJSON)),
     };
 }
 

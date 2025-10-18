@@ -34,11 +34,11 @@ export interface AttributeConfigDto {
      */
     key?: string;
     /**
-     * Font Awesome icon associated with the attribute.
+     * Icon associated with the attribute.
      * @type {string}
      * @memberof AttributeConfigDto
      */
-    faIcon?: string;
+    icon?: string;
     /**
      * Localised unit displayed for this attribute.
      * @type {string}
@@ -153,7 +153,7 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'key': json['key'] == null ? undefined : json['key'],
-        'faIcon': json['faIcon'] == null ? undefined : json['faIcon'],
+        'icon': json['icon'] == null ? undefined : json['icon'],
         'unit': json['unit'] == null ? undefined : json['unit'],
         'name': json['name'] == null ? undefined : json['name'],
         'filteringType': json['filteringType'] == null ? undefined : json['filteringType'],
@@ -181,7 +181,7 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
     return {
         
         'key': value['key'],
-        'faIcon': value['faIcon'],
+        'icon': value['icon'],
         'unit': value['unit'],
         'name': value['name'],
         'filteringType': value['filteringType'],
