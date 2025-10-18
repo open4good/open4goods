@@ -1,5 +1,7 @@
 package org.open4goods.nudgerfrontapi.dto.category;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -10,6 +12,8 @@ public record VerticalConfigDto(
         String id,
         @Schema(description = "Indicates whether the vertical is exposed to end-users.", example = "true")
         boolean enabled,
+        @Schema(description = "Marks the category as popular when true.", example = "true")
+        boolean popular,
         @Schema(description = "Google taxonomy identifier associated with this vertical.", example = "404")
         Integer googleTaxonomyId,
         @Schema(description = "Icecat taxonomy identifier associated with this vertical.", example = "1584")
@@ -27,6 +31,8 @@ public record VerticalConfigDto(
         @Schema(description = "Localised home description for the vertical.", example = "Comparez les téléviseurs responsables")
         String verticalHomeDescription,
         @Schema(description = "Localised home URL slug for the vertical.", example = "televiseurs")
-        String verticalHomeUrl
+        String verticalHomeUrl,
+        @Schema(description = "Popular attributes resolved to their full configuration metadata.")
+        List<AttributeConfigDto> popularAttributes
 ) {
 }

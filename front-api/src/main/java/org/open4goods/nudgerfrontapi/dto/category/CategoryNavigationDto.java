@@ -23,6 +23,9 @@ public record CategoryNavigationDto(
         @Schema(description = "Descendant nodes exposing a vertical configuration but not already present in childCategories.")
         List<GoogleCategoryDto> descendantVerticals,
 
+        @Schema(description = "Popular categories descending from the current node, including indirect children.")
+        List<GoogleCategoryDto> popularCategories,
+
         @Schema(description = "Top five new products for the category ordered by descending impact score. Only the base facet is populated.")
         List<ProductDto> topNewProducts,
 

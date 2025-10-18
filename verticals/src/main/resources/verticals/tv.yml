@@ -29,6 +29,12 @@ verticalImage: https://nudger.fr/images/verticals/tv.jpg
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: true
 
+popular: true
+
+popularAttributes:
+  - DIAGONALE_POUCES
+  - DISPLAY_TECHNOLOGY
+
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation  

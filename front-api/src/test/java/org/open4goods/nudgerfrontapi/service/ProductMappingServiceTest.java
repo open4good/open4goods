@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -170,8 +171,8 @@ class ProductMappingServiceTest {
         when(repository.getById(gtin)).thenReturn(product);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
-        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, null, null, 1,
-                null, null, null, null, null, "telephones-reconditionnes");
+        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1,
+                null, null, null, null, null, "telephones-reconditionnes", List.of());
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(verticalConfig);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(configDto);
 

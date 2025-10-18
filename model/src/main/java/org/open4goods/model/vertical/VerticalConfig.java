@@ -55,8 +55,11 @@ public class VerticalConfig{
 	private Integer icecatTaxonomyId;
 
 
-	/** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
-	private boolean enabled = false;
+        /** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
+        private boolean enabled = false;
+
+        /** Flag indicating whether this category should be highlighted as popular. */
+        private boolean popular = false;
 
 
 	/**
@@ -80,10 +83,15 @@ public class VerticalConfig{
 	 */
 	private List<String> ecoFilters = new ArrayList<>();
 
-	/**
-	 * The list of filters to be added to the technical filters group
-	 */
-	private List<String> technicalFilters = new ArrayList<>();
+        /**
+         * The list of filters to be added to the technical filters group
+         */
+        private List<String> technicalFilters = new ArrayList<>();
+
+        /**
+         * The list of attributes considered popular for frontend rendering.
+         */
+        private List<String> popularAttributes = new ArrayList<>();
 
 
 	/**
@@ -799,17 +807,33 @@ public class VerticalConfig{
 		return technicalFilters;
 	}
 
-	public void setTechnicalFilters(List<String> technicalFilters) {
-		this.technicalFilters = technicalFilters;
-	}
+        public void setTechnicalFilters(List<String> technicalFilters) {
+                this.technicalFilters = technicalFilters;
+        }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+        public List<String> getPopularAttributes() {
+                return popularAttributes;
+        }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+        public void setPopularAttributes(List<String> popularAttributes) {
+                this.popularAttributes = popularAttributes;
+        }
+
+        public boolean isEnabled() {
+                return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+                this.enabled = enabled;
+        }
+
+        public boolean isPopular() {
+                return popular;
+        }
+
+        public void setPopular(boolean popular) {
+                this.popular = popular;
+        }
 
 	public Set<String> getRequiredAttributes() {
 		return requiredAttributes;
