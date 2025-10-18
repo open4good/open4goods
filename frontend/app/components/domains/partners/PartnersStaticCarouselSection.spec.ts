@@ -17,7 +17,6 @@ describe('PartnersStaticCarouselSection', () => {
   const baseProps = {
     title: 'Ecosystème',
     subtitle: 'Des partenaires engagés',
-    eyebrow: 'Ecosystème',
     carouselAriaLabel: 'Carrousel',
     emptyStateLabel: 'Bientôt disponible',
     linkLabel: 'Découvrir',
