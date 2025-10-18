@@ -15,7 +15,6 @@ describe('PartnersAffiliationSection', () => {
   const baseProps = {
     title: 'Nos partenaires',
     subtitle: 'Ils nous font confiance',
-    eyebrow: 'Affiliation',
     searchLabel: 'Rechercher',
     searchPlaceholder: 'Nom du partenaire',
     emptyStateLabel: 'Aucun résultat',
