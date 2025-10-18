@@ -464,12 +464,16 @@ const structuredDataScripts = computed(() => {
   return scripts
 })
 
-useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
-  script: structuredDataScripts.value,
-}))
+useHead(() => {
+  const scripts = structuredDataScripts.value
+
+  return {
+    link: [
+      { rel: 'canonical', href: canonicalUrl.value },
+    ],
+    script: scripts.length ? scripts : undefined,
+  }
+})
 
 const verticalId = computed(() => category.value?.id ?? null)
 
