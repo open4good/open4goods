@@ -15,8 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record AttributeConfigDto(
         @Schema(description = "Unique key identifying the attribute.", example = "WEIGHT")
         String key,
-        @Schema(description = "Font Awesome icon associated with the attribute.", example = "fa-weight-hanging")
-        String faIcon,
+        @Schema(description = "Icon associated with the attribute.", example = "fa-weight-hanging")
+        String icon,
         @Schema(description = "Localised unit displayed for this attribute.", example = "kg")
         String unit,
         @Schema(description = "Localised display name for this attribute.", example = "Poids")
