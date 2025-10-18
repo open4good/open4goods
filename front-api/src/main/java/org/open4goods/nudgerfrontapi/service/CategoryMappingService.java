@@ -80,6 +80,7 @@ public class CategoryMappingService {
         return new VerticalConfigDto(
                 verticalConfig.getId(),
                 verticalConfig.isEnabled(),
+                verticalConfig.isPopular(),
                 verticalConfig.getGoogleTaxonomyId(),
                 verticalConfig.getIcecatTaxonomyId(),
                 verticalConfig.getOrder(),
@@ -88,7 +89,8 @@ public class CategoryMappingService {
                 mapVerticalImageLarge(verticalConfig),
                 i18n == null ? null : i18n.getVerticalHomeTitle(),
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
-                i18n == null ? null : i18n.getVerticalHomeUrl());
+                i18n == null ? null : i18n.getVerticalHomeUrl(),
+                mapPopularAttributes(verticalConfig, domainLanguage));
     }
 
     /**
@@ -111,6 +113,7 @@ public class CategoryMappingService {
         return new VerticalConfigFullDto(
                 verticalConfig.getId(),
                 verticalConfig.isEnabled(),
+                verticalConfig.isPopular(),
                 verticalConfig.getGoogleTaxonomyId(),
                 verticalConfig.getIcecatTaxonomyId(),
                 verticalConfig.getOrder(),
@@ -141,6 +144,7 @@ public class CategoryMappingService {
                 defaultSet(verticalConfig.getBrandsExclusion()),
                 verticalConfig.getResourcesConfig(),
                 mapAttributesConfig(verticalConfig.getAttributesConfig(), domainLanguage),
+                mapPopularAttributes(verticalConfig, domainLanguage),
                 mapImpactScoreCriterias(verticalConfig.getAvailableImpactScoreCriterias(), domainLanguage),
                 mapImpactScoreConfig(verticalConfig.getImpactScoreConfig(), domainLanguage),
                 mapVerticalSubsets(verticalConfig.getSubsets(), domainLanguage),
@@ -202,11 +206,25 @@ public class CategoryMappingService {
                 .filter(Objects::nonNull)
                 .toList();
 
+        List<GoogleCategoryDto> popularCategories = category.verticals().stream()
+                .filter(node -> node != null && node.getVertical() != null && node.getVertical().isPopular())
+                .filter(node -> !Objects.equals(node.getGoogleCategoryId(), category.getGoogleCategoryId()))
+                .map(node -> toGoogleCategoryDto(node, domainLanguage, 0, havingVertical))
+                .filter(Objects::nonNull)
+                .filter(dto -> dto.googleCategoryId() != null)
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(GoogleCategoryDto::googleCategoryId,
+                                dto -> dto,
+                                (left, right) -> left,
+                                LinkedHashMap::new),
+                        map -> new ArrayList<>(map.values())));
+
         return new CategoryNavigationDto(
                 current,
                 mapBreadcrumbs(category, languageKey),
                 childCategories,
                 descendantVerticals,
+                popularCategories,
                 defaultList(topNewProducts),
                 defaultList(topOccasionProducts));
     }
@@ -347,6 +365,21 @@ public class CategoryMappingService {
         return new AttributesConfigDto(configs,
                 defaultSet(attributesConfig.getFeaturedValues()),
                 defaultSet(attributesConfig.getExclusions()));
+    }
+
+    /**
+     * Map the configured popular attributes to their DTO representation.
+     */
+    private List<AttributeConfigDto> mapPopularAttributes(VerticalConfig verticalConfig, DomainLanguage domainLanguage) {
+        if (verticalConfig == null || verticalConfig.getAttributesConfig() == null) {
+            return Collections.emptyList();
+        }
+
+        return defaultList(verticalConfig.getPopularAttributes()).stream()
+                .map(verticalConfig.getAttributesConfig()::getAttributeConfigByKey)
+                .map(attributeConfig -> mapAttributeConfig(attributeConfig, domainLanguage))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**

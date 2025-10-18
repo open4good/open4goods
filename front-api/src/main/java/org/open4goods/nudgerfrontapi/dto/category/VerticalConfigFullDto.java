@@ -24,6 +24,8 @@ public record VerticalConfigFullDto(
         String id,
         @Schema(description = "Indicates whether the vertical is exposed to end-users.", example = "true")
         boolean enabled,
+        @Schema(description = "Marks the category as popular when true.", example = "true")
+        boolean popular,
         @Schema(description = "Google taxonomy identifier associated with this vertical.", example = "404")
         Integer googleTaxonomyId,
         @Schema(description = "Icecat taxonomy identifier associated with this vertical.", example = "1584")
@@ -84,6 +86,8 @@ public record VerticalConfigFullDto(
         ResourcesAggregationConfig resourcesConfig,
         @Schema(description = "Configuration for attribute aggregation and filters.")
         AttributesConfigDto attributesConfig,
+        @Schema(description = "Popular attributes resolved to their full configuration metadata.")
+        List<AttributeConfigDto> popularAttributes,
         @Schema(description = "Impact score criteria available for this vertical with localised metadata.")
         Map<String, ImpactScoreCriteriaDto> availableImpactScoreCriterias,
         @Schema(description = "Impact score configuration balancing each criterion, with localised texts.")
