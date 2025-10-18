@@ -437,9 +437,9 @@ const toAbsoluteUrl = (value?: string | null) => {
 }
 
 type StructuredDataScript = {
-  key: string
-  type: string
-  children: string
+  id: string
+  type: 'application/ld+json'
+  innerHTML: string
 }
 
 const structuredDataScripts = computed(() => {
@@ -447,17 +447,17 @@ const structuredDataScripts = computed(() => {
 
   if (breadcrumbJsonLd.value) {
     scripts.push({
-      key: 'category-breadcrumb-jsonld',
+      id: 'category-breadcrumb-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(breadcrumbJsonLd.value),
+      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
     })
   }
 
   if (productListJsonLd.value) {
     scripts.push({
-      key: 'category-product-list-jsonld',
+      id: 'category-product-list-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(productListJsonLd.value),
+      innerHTML: JSON.stringify(productListJsonLd.value),
     })
   }
 
