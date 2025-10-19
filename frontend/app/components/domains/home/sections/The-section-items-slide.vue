@@ -27,32 +27,27 @@ const { pending } = await useAsyncData(
 );
 
 // Transform categories to image URLs for The-slide component
+type CategoryWithHomeAssets = Readonly<VerticalConfigDto> & {
+  imageSmall: string;
+  verticalHomeTitle: string;
+  verticalHomeUrl: string;
+};
+
 const categoryImages = computed(() => {
   return categories.value
-    .filter((category: VerticalConfigDto): category is VerticalConfigDto & {
-      imageSmall: string;
-      verticalHomeTitle: string;
-      verticalHomeUrl: string;
-    } =>
+    .filter((category): category is CategoryWithHomeAssets =>
       Boolean(category.imageSmall) &&
       Boolean(category.verticalHomeTitle) &&
-      Boolean(category.verticalHomeUrl))
-    .map(
-      (
-        category: VerticalConfigDto & {
-          imageSmall: string;
-          verticalHomeTitle: string;
-          verticalHomeUrl: string;
-        }
-      ) => {
-        const sanitizedSlug = category.verticalHomeUrl.replace(/^\/+/, "");
+      Boolean(category.verticalHomeUrl)
+    )
+    .map((category) => {
+      const sanitizedSlug = category.verticalHomeUrl.replace(/^\/+/, "");
 
-        return {
-          imageSmall: category.imageSmall,
-          verticalHomeTitle: category.verticalHomeTitle,
-          href: `/${sanitizedSlug}`
-        };
-      }
-    );
+      return {
+        imageSmall: category.imageSmall,
+        verticalHomeTitle: category.verticalHomeTitle,
+        href: `/${sanitizedSlug}`
+      };
+    });
 });
 </script>
