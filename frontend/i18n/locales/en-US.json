@@ -86,6 +86,12 @@
       "title": "Quick filters",
       "reset": "Clear fast filters",
       "activeClauses": "Applied subset filters",
+      "groupDefault": "Other quick filters",
+      "groups": {
+        "price": "Price",
+        "screen_size": "Screen size",
+        "default": "Other quick filters"
+      },
       "operator": {
         "greaterThan": "≥ {value}",
         "lowerThan": "≤ {value}"

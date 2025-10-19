@@ -85,6 +85,12 @@
       "title": "Filtres rapides",
       "reset": "Réinitialiser les filtres rapides",
       "activeClauses": "Filtres de sous-ensemble appliqués",
+      "groupDefault": "Autres filtres rapides",
+      "groups": {
+        "price": "Prix",
+        "screen_size": "Taille d'écran",
+        "default": "Autres filtres rapides"
+      },
       "operator": {
         "greaterThan": "≥ {value}",
         "lowerThan": "≤ {value}"

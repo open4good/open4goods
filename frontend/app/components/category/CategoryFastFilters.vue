@@ -17,29 +17,64 @@
       </v-btn>
     </header>
 
-    <v-slide-group
-      class="category-fast-filters__chips"
-      show-arrows
-      multiple
-      :model-value="activeSubsetIds"
-      @update:model-value="onChipToggle"
-    >
-      <v-chip
-        v-for="subset in subsets"
-        :key="subset.id ?? subset.caption ?? subset.title ?? subset.group"
-        :value="subset.id"
-        :color="activeSubsetIds.includes(subset.id ?? '') ? 'primary' : undefined"
-        :variant="activeSubsetIds.includes(subset.id ?? '') ? 'flat' : 'outlined'"
-        rounded="lg"
-        class="me-2 mb-2"
-        :closable="activeSubsetIds.includes(subset.id ?? '')"
-        @click:close="emitToggle(subset, false)"
+    <div class="category-fast-filters__groups">
+      <article
+        v-for="group in groupedSubsets"
+        :key="group.key"
+        class="category-fast-filters__group"
       >
-        <span class="category-fast-filters__chip-label">
-          {{ resolveSubsetLabel(subset) }}
-        </span>
-      </v-chip>
-    </v-slide-group>
+        <h3 class="category-fast-filters__group-title">{{ group.label }}</h3>
+
+        <v-chip-group
+          class="category-fast-filters__chip-group"
+          :model-value="getGroupSelection(group.key)"
+          @update:model-value="(value) => onGroupSelectionChange(group.key, value)"
+        >
+          <template
+            v-for="subset in group.subsets"
+            :key="subset.id ?? subset.caption ?? subset.title ?? subset.group ?? 'subset'"
+          >
+            <v-tooltip
+              v-if="subset.description"
+              location="bottom"
+              :text="subset.description"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <v-chip
+                  v-bind="tooltipProps"
+                  :value="subset.id"
+                  :color="isSubsetActive(subset) ? 'primary' : undefined"
+                  :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+                  rounded="lg"
+                  class="me-2 mb-2"
+                  :closable="isSubsetActive(subset)"
+                  @click:close="emitToggle(subset, false)"
+                >
+                  <span class="category-fast-filters__chip-label">
+                    {{ resolveSubsetLabel(subset) }}
+                  </span>
+                </v-chip>
+              </template>
+            </v-tooltip>
+
+            <v-chip
+              v-else
+              :value="subset.id"
+              :color="isSubsetActive(subset) ? 'primary' : undefined"
+              :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+              rounded="lg"
+              class="me-2 mb-2"
+              :closable="isSubsetActive(subset)"
+              @click:close="emitToggle(subset, false)"
+            >
+              <span class="category-fast-filters__chip-label">
+                {{ resolveSubsetLabel(subset) }}
+              </span>
+            </v-chip>
+          </template>
+        </v-chip-group>
+      </article>
+    </div>
 
     <div v-if="activeClauses.length" class="category-fast-filters__clauses">
       <p class="category-fast-filters__clauses-title">
@@ -95,6 +130,8 @@ const { t } = useI18n()
 const subsets = computed(() => props.subsets ?? [])
 const activeSubsetIds = computed(() => props.activeSubsetIds ?? [])
 
+const DEFAULT_GROUP_KEY = 'ungrouped'
+
 const subsetMap = computed(() => {
   return subsets.value.reduce<Record<string, VerticalSubsetDto>>((accumulator, subset) => {
     if (subset.id) {
@@ -103,6 +140,82 @@ const subsetMap = computed(() => {
     return accumulator
   }, {})
 })
+
+const formatGroupLabel = (groupKey: string) => {
+  return groupKey
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ')
+}
+
+const resolveGroupLabel = (groupKey: string): string => {
+  if (!groupKey || groupKey === DEFAULT_GROUP_KEY) {
+    return t('category.fastFilters.groupDefault')
+  }
+
+  const translationKey = `category.fastFilters.groups.${groupKey}`
+  const translated = t(translationKey)
+
+  if (translated !== translationKey) {
+    return translated
+  }
+
+  return formatGroupLabel(groupKey)
+}
+
+const getGroupKey = (subset: VerticalSubsetDto | undefined | null): string => {
+  return subset?.group ?? DEFAULT_GROUP_KEY
+}
+
+const groupedSubsets = computed(() => {
+  const groups = new Map<string, { key: string; label: string; subsets: VerticalSubsetDto[] }>()
+
+  subsets.value.forEach((subset) => {
+    if (!subset) {
+      return
+    }
+
+    const key = getGroupKey(subset)
+    if (!groups.has(key)) {
+      groups.set(key, { key, label: resolveGroupLabel(key), subsets: [] })
+    }
+
+    groups.get(key)?.subsets.push(subset)
+  })
+
+  return Array.from(groups.values())
+})
+
+const isSubsetActive = (subset: VerticalSubsetDto): boolean => {
+  return subset.id != null && activeSubsetIds.value.includes(subset.id)
+}
+
+const getGroupSelection = (groupKey: string): string | null => {
+  const group = groupedSubsets.value.find((entry) => entry.key === groupKey)
+  if (!group) {
+    return null
+  }
+
+  const activeSubset = group.subsets.find((subset) => subset.id && isSubsetActive(subset))
+  return activeSubset?.id ?? null
+}
+
+const normalizeSelectionValue = (value: unknown): string | null => {
+  if (Array.isArray(value)) {
+    return normalizeSelectionValue(value[0])
+  }
+
+  if (typeof value === 'string') {
+    return value.length ? value : null
+  }
+
+  if (value == null) {
+    return null
+  }
+
+  return String(value)
+}
 
 const resolveSubsetLabel = (subset: VerticalSubsetDto): string => {
   if (!subset.title && !subset.caption && import.meta.server) {
@@ -170,24 +283,32 @@ const emitToggle = (subset: VerticalSubsetDto, desired: boolean) => {
   emit('toggle-subset', subset.id, desired)
 }
 
-const onChipToggle = (subsetIds: string[]) => {
-  const current = new Set(activeSubsetIds.value)
-  const next = new Set(subsetIds)
+const onGroupSelectionChange = (groupKey: string, value: unknown) => {
+  const nextValue = normalizeSelectionValue(value)
+  const currentValue = getGroupSelection(groupKey)
 
-  subsets.value.forEach((subset) => {
-    if (!subset.id) {
-      return
+  if (nextValue == null) {
+    if (currentValue) {
+      const subset = subsetMap.value[currentValue]
+      if (subset) {
+        emitToggle(subset, false)
+      }
     }
+    return
+  }
 
-    const currentlyActive = current.has(subset.id)
-    const shouldBeActive = next.has(subset.id)
-
-    if (currentlyActive === shouldBeActive) {
-      return
+  if (nextValue === currentValue) {
+    const subset = subsetMap.value[nextValue]
+    if (subset) {
+      emitToggle(subset, false)
     }
+    return
+  }
 
-    emitToggle(subset, shouldBeActive)
-  })
+  const subset = subsetMap.value[nextValue]
+  if (subset) {
+    emitToggle(subset, true)
+  }
 }
 
 defineExpose({ activeClauses })
@@ -217,11 +338,46 @@ defineExpose({ activeClauses })
   &__reset
     text-transform: none
 
-  &__chips
-    padding-bottom: 0.5rem
+  &__groups
+    display: grid
+    gap: 1.25rem
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+
+  &__group
+    background-color: rgba(var(--v-theme-surface-primary-080), 0.7)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
+    border-radius: 0.75rem
+    padding: 1rem 1.25rem
+    transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease
+
+    &:hover
+      background-color: rgba(var(--v-theme-surface-primary-080), 0.95)
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.8)
+      box-shadow: 0 12px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.32)
+
+  &__group-title
+    margin: 0 0 0.75rem
+    font-size: 0.95rem
+    font-weight: 600
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    text-transform: uppercase
+    letter-spacing: 0.04em
+
+  &__chip-group
+    display: flex
+    flex-wrap: wrap
+    margin: -0.25rem
+
+    :deep(.v-chip)
+      margin: 0.25rem
 
   &__chip-label
     font-weight: 500
+
+  &__chip-group :deep(.v-chip--variant-flat)
+    box-shadow: 0 12px 20px -14px rgba(var(--v-theme-shadow-primary-600), 0.45)
+    font-weight: 600
+    color: rgb(var(--v-theme-on-primary))
 
   &__clauses
     margin-top: 1rem
@@ -248,4 +404,7 @@ defineExpose({ activeClauses })
 
     &__reset
       align-self: flex-end
+
+    &__groups
+      grid-template-columns: minmax(0, 1fr)
 </style>
