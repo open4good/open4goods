@@ -1,15 +1,15 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
-    <div v-if="activeFilterChips.length" class="category-filters__active">
+    <div v-if="activeChips.length" class="category-filters__active">
       <v-chip-group column>
         <v-chip
-          v-for="chip in activeFilterChips"
+          v-for="chip in activeChips"
           :key="chip.id"
           closable
           color="primary"
           variant="flat"
           size="small"
-          @click:close="removeFilter(chip.field, chip.type, chip.term)"
+          @click:close="onRemoveChip(chip)"
         >
           <v-icon icon="mdi-close-circle" size="16" class="me-1" />
           <span>{{ chip.label }}</span>
@@ -134,6 +134,25 @@ import type {
 import { useI18n } from 'vue-i18n'
 
 import CategoryFilterList from './filters/CategoryFilterList.vue'
+import type { CategorySubsetClause } from '~/types/category-subset'
+
+type ManualFilterChip = {
+  kind: 'manual'
+  id: string
+  field: string
+  type: 'term' | 'range'
+  term: string | null
+  label: string
+}
+
+type SubsetFilterChip = {
+  kind: 'subset'
+  id: string
+  label: string
+  clause: CategorySubsetClause
+}
+
+type ActiveFilterChip = ManualFilterChip | SubsetFilterChip
 
 const props = defineProps<{
   filterOptions: ProductFieldOptionsResponse | null
@@ -141,15 +160,18 @@ const props = defineProps<{
   filters: FilterRequestDto | null
   impactExpanded: boolean
   technicalExpanded: boolean
+  subsetClauses: CategorySubsetClause[]
 }>()
 
 const emit = defineEmits<{
   'update:filters': [FilterRequestDto]
   'update:impactExpanded': [boolean]
   'update:technicalExpanded': [boolean]
+  'remove-subset-clause': [CategorySubsetClause]
 }>()
 
 const activeFilters = computed(() => props.filters?.filters ?? [])
+const subsetClauses = computed(() => props.subsetClauses ?? [])
 
 const { t } = useI18n()
 
@@ -185,11 +207,12 @@ const technicalRemaining = computed<FieldMetadataDto[]>(() => {
   return entries.slice(3)
 })
 
-const activeFilterChips = computed(() => {
+const manualFilterChips = computed<ManualFilterChip[]>(() => {
   return activeFilters.value.map((filter) => {
     if (filter.operator === 'term') {
       const term = filter.terms?.[0] ?? ''
       return {
+        kind: 'manual' as const,
         id: `${filter.field}-${term}`,
         field: filter.field ?? '',
         type: 'term' as const,
@@ -199,6 +222,7 @@ const activeFilterChips = computed(() => {
     }
 
     return {
+      kind: 'manual' as const,
       id: `${filter.field}-range`,
       field: filter.field ?? '',
       type: 'range' as const,
@@ -206,6 +230,19 @@ const activeFilterChips = computed(() => {
       label: `${filter.field}: ${filter.min ?? '–'} → ${filter.max ?? '–'}`,
     }
   })
+})
+
+const subsetFilterChips = computed<SubsetFilterChip[]>(() => {
+  return subsetClauses.value.map((clause) => ({
+    kind: 'subset' as const,
+    id: clause.id,
+    label: clause.label,
+    clause,
+  }))
+})
+
+const activeChips = computed<ActiveFilterChip[]>(() => {
+  return [...subsetFilterChips.value, ...manualFilterChips.value]
 })
 
 const emitFilters = (filters: Filter[]) => {
@@ -249,7 +286,7 @@ const updateTermsFilter = (field: string, terms: string[]) => {
   ])
 }
 
-const removeFilter = (field: string, type: 'term' | 'range', term: string | null) => {
+const removeManualFilter = (field: string, type: 'term' | 'range', term: string | null) => {
   const next = activeFilters.value.filter((filter) => {
     if (filter.field !== field) {
       return true
@@ -265,6 +302,15 @@ const removeFilter = (field: string, type: 'term' | 'range', term: string | null
   emitFilters(next)
 }
 
+const onRemoveChip = (chip: ActiveFilterChip) => {
+  if (chip.kind === 'subset') {
+    emit('remove-subset-clause', chip.clause)
+    return
+  }
+
+  removeManualFilter(chip.field, chip.type, chip.term)
+}
+
 const toggleImpactExpansion = () => {
   emit('update:impactExpanded', !props.impactExpanded)
 }
@@ -273,7 +319,7 @@ const toggleTechnicalExpansion = () => {
   emit('update:technicalExpanded', !props.technicalExpanded)
 }
 
-defineExpose({ activeFilterChips })
+defineExpose({ activeChips })
 </script>
 
 <style scoped lang="sass">

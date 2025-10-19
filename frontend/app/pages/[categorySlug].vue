@@ -15,7 +15,6 @@
         :active-subset-ids="activeSubsetIds"
         class="mb-6"
         @toggle-subset="onToggleSubset"
-        @remove-clause="onRemoveSubsetClause"
         @reset="onResetSubsets"
       />
 
@@ -39,11 +38,13 @@
             :wiki-pages="category?.wikiPages ?? []"
             :related-posts="category?.relatedPosts ?? []"
             :vertical-home-url="category?.verticalHomeUrl ?? null"
+            :subset-clauses="activeSubsetClauses"
             @update:filters="onFiltersChange"
             @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
             @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
             @apply-mobile="applyMobileFilters"
             @clear-mobile="clearAllFilters"
+            @remove-subset-clause="onRemoveSubsetClause"
           />
         </v-navigation-drawer>
 
@@ -64,9 +65,11 @@
             :wiki-pages="category?.wikiPages ?? []"
             :related-posts="category?.relatedPosts ?? []"
             :vertical-home-url="category?.verticalHomeUrl ?? null"
+            :subset-clauses="activeSubsetClauses"
             @update:filters="onFiltersChange"
             @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
             @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+            @remove-subset-clause="onRemoveSubsetClause"
           />
         </aside>
 
@@ -266,6 +269,7 @@ import type {
   AggregationRequestDto,
   AggregationResponseDto,
   Agg,
+  Filter,
   FilterRequestDto,
   ProductFieldOptionsResponse,
   ProductSearchResponseDto,
@@ -289,7 +293,13 @@ import {
   type CategoryHashState,
   type CategoryViewMode,
 } from '~/utils/_category-filter-state'
-import { buildFilterRequestFromSubsets } from '~/utils/_subset-to-filters'
+import {
+  buildFilterRequestFromSubsets,
+  convertSubsetCriteriaToFilters,
+  getRemainingSubsetFilters,
+  mergeFiltersWithoutDuplicates,
+} from '~/utils/_subset-to-filters'
+import type { CategorySubsetClause } from '~/types/category-subset'
 
 const route = useRoute()
 const router = useRouter()
@@ -683,6 +693,50 @@ const handleHashChange = () => {
 const subsetFilters = computed(() =>
   buildFilterRequestFromSubsets(category.value?.subsets ?? [], activeSubsetIds.value),
 )
+
+const buildSubsetClauseLabel = (filter: Filter): string => {
+  const field = filter.field ?? 'field'
+
+  if (filter.operator === 'term') {
+    const term = filter.terms?.[0] ?? ''
+    return `${field}: ${term}`
+  }
+
+  const bounds: string[] = []
+
+  if (typeof filter.min === 'number') {
+    bounds.push(t('category.fastFilters.operator.greaterThan', { value: filter.min }))
+  }
+
+  if (typeof filter.max === 'number') {
+    bounds.push(t('category.fastFilters.operator.lowerThan', { value: filter.max }))
+  }
+
+  if (!bounds.length) {
+    return field
+  }
+
+  return `${field}: ${bounds.join(' · ')}`
+}
+
+const activeSubsetClauses = computed<CategorySubsetClause[]>(() => {
+  return activeSubsetIds.value.flatMap((subsetId) => {
+    const subset = subsetMap.value.get(subsetId)
+    if (!subset) {
+      return []
+    }
+
+    const filters = convertSubsetCriteriaToFilters(subset)
+
+    return filters.map((filter, index) => ({
+      id: `${subsetId}-${index}`,
+      subsetId,
+      filter,
+      index,
+      label: buildSubsetClauseLabel(filter),
+    }))
+  })
+})
 
 const combinedFilters = computed<FilterRequestDto | undefined>(() => {
   const subsetClauses = subsetFilters.value.filters ?? []
@@ -1170,10 +1224,22 @@ const onToggleSubset = (subsetId: string, active: boolean) => {
   activeSubsetIds.value = normalizeActiveSubsetIds(Array.from(next))
 }
 
-const onRemoveSubsetClause = (clause: { subsetId: string }) => {
+const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   activeSubsetIds.value = normalizeActiveSubsetIds(
     activeSubsetIds.value.filter((id) => id !== clause.subsetId),
   )
+
+  const subset = subsetMap.value.get(clause.subsetId)
+  const remainingFilters = getRemainingSubsetFilters(subset, clause.index)
+
+  if (!remainingFilters.length) {
+    return
+  }
+
+  const currentManualFilters = manualFilters.value.filters ?? []
+  const merged = mergeFiltersWithoutDuplicates(currentManualFilters, remainingFilters)
+
+  manualFilters.value = merged.length ? { filters: merged } : {}
 }
 
 const onResetSubsets = () => {

@@ -17,7 +17,6 @@ vi.mock('vue-i18n', () => ({
       const translations: Record<string, string> = {
         'category.fastFilters.title': 'Quick filters',
         'category.fastFilters.reset': 'Clear fast filters',
-        'category.fastFilters.activeClauses': 'Applied subset filters',
         'category.fastFilters.groupDefault': 'Other quick filters',
         'category.fastFilters.groups.price': 'Price',
         'category.fastFilters.groups.screen_size': 'Screen size',
@@ -304,15 +303,11 @@ describe('CategoryFastFilters', () => {
     expect(finalEvents).toContainEqual(['price_greater_1000', false])
   })
 
-  it('emits a removal event when closing an active quick filter chip', async () => {
+  it('keeps active quick filter chips visible without a close affordance', async () => {
     const wrapper = await mountComponent({ activeSubsetIds: ['small_screens'] })
 
-    const closeButton = wrapper.find('.v-chip-stub[data-value="small_screens"] .v-chip-stub__close')
-    expect(closeButton.exists()).toBe(true)
-
-    await closeButton.trigger('click')
-
-    const events = wrapper.emitted('toggle-subset') ?? []
-    expect(events).toContainEqual(['small_screens', false])
+    const chip = wrapper.find('.v-chip-stub[data-value="small_screens"]')
+    expect(chip.exists()).toBe(true)
+    expect(chip.attributes('data-closable')).toBe('false')
   })
 })
