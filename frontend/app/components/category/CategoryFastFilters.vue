@@ -1,58 +1,82 @@
 <template>
-    <div v-if="subsets.length" class="category-fast-filters__groups">
-      <article
-        v-for="group in groupedSubsets"
-        :key="group.key"
-        class="category-fast-filters__group"
-      >
-        <h3 class="category-fast-filters__group-title">{{ group.label }}</h3>
+  <div v-if="subsets.length" class="category-fast-filters">
+    <div class="category-fast-filters__viewport">
+      <v-btn
+        v-if="canScrollLeft"
+        class="category-fast-filters__nav category-fast-filters__nav--left"
+        icon="mdi-chevron-left"
+        color="primary"
+        variant="flat"
+        density="comfortable"
+        :aria-label="t('category.fastFilters.scrollPrevious')"
+        @click="scrollLeft"
+      />
 
-        <v-chip-group
-          class="category-fast-filters__chip-group"
-          :model-value="getGroupSelection(group.key)"
-          @update:model-value="(value) => onGroupSelectionChange(group.key, value)"
+      <div ref="scrollContainer" class="category-fast-filters__groups">
+        <article
+          v-for="group in groupedSubsets"
+          :key="group.key"
+          class="category-fast-filters__group"
         >
-          <template
-            v-for="subset in group.subsets"
-            :key="subset.id ?? subset.caption ?? subset.title ?? subset.group ?? 'subset'"
-          >
-            <v-tooltip
-              v-if="subset.description"
-              location="bottom"
-              :text="subset.description"
-            >
-              <template #activator="{ props: tooltipProps }">
-                <v-chip
-                  v-bind="tooltipProps"
-                  :value="subset.id"
-                  :color="isSubsetActive(subset) ? 'primary' : undefined"
-                  :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
-                  rounded="lg"
-                  class="me-2 mb-2"
-                >
-                  <span class="category-fast-filters__chip-label">
-                    {{ resolveSubsetLabel(subset) }}
-                  </span>
-                </v-chip>
-              </template>
-            </v-tooltip>
+          <h3 class="category-fast-filters__group-title">{{ group.label }}</h3>
 
-            <v-chip
-              v-else
-              :value="subset.id"
-              :color="isSubsetActive(subset) ? 'primary' : undefined"
-              :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
-              rounded="lg"
-              class="me-2 mb-2"
+          <v-chip-group
+            class="category-fast-filters__chip-group"
+            :model-value="getGroupSelection(group.key)"
+            @update:model-value="(value) => onGroupSelectionChange(group.key, value)"
+          >
+            <template
+              v-for="subset in group.subsets"
+              :key="subset.id ?? subset.caption ?? subset.title ?? subset.group ?? 'subset'"
             >
-              <span class="category-fast-filters__chip-label">
-                {{ resolveSubsetLabel(subset) }}
-              </span>
-            </v-chip>
-          </template>
-        </v-chip-group>
-      </article>
+              <v-tooltip
+                v-if="subset.description"
+                location="bottom"
+                :text="subset.description"
+              >
+                <template #activator="{ props: tooltipProps }">
+                  <v-chip
+                    v-bind="tooltipProps"
+                    :value="subset.id"
+                    :color="isSubsetActive(subset) ? 'primary' : undefined"
+                    :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+                    rounded="lg"
+                  >
+                    <span class="category-fast-filters__chip-label">
+                      {{ resolveSubsetLabel(subset) }}
+                    </span>
+                  </v-chip>
+                </template>
+              </v-tooltip>
+
+              <v-chip
+                v-else
+                :value="subset.id"
+                :color="isSubsetActive(subset) ? 'primary' : undefined"
+                :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+                rounded="lg"
+              >
+                <span class="category-fast-filters__chip-label">
+                  {{ resolveSubsetLabel(subset) }}
+                </span>
+              </v-chip>
+            </template>
+          </v-chip-group>
+        </article>
+      </div>
+
+      <v-btn
+        v-if="canScrollRight"
+        class="category-fast-filters__nav category-fast-filters__nav--right"
+        icon="mdi-chevron-right"
+        color="primary"
+        variant="flat"
+        density="comfortable"
+        :aria-label="t('category.fastFilters.scrollNext')"
+        @click="scrollRight"
+      />
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -131,6 +155,66 @@ const groupedSubsets = computed(() => {
   })
 
   return Array.from(groups.values())
+})
+
+const scrollContainer = ref<HTMLDivElement | null>(null)
+const canScrollLeft = ref(false)
+const canScrollRight = ref(false)
+
+const updateScrollState = () => {
+  const element = scrollContainer.value
+  if (!element) {
+    canScrollLeft.value = false
+    canScrollRight.value = false
+    return
+  }
+
+  const tolerance = 2
+  canScrollLeft.value = element.scrollLeft > tolerance
+  canScrollRight.value = element.scrollLeft + element.clientWidth < element.scrollWidth - tolerance
+}
+
+const scrollByAmount = (direction: 'left' | 'right') => {
+  const element = scrollContainer.value
+  if (!element) {
+    return
+  }
+
+  const step = Math.max(element.clientWidth * 0.75, 240)
+  const offset = direction === 'left' ? -step : step
+  element.scrollBy({ left: offset, behavior: 'smooth' })
+}
+
+const scrollLeft = () => scrollByAmount('left')
+const scrollRight = () => scrollByAmount('right')
+
+const handleResize = () => {
+  updateScrollState()
+}
+
+onMounted(() => {
+  const element = scrollContainer.value
+  updateScrollState()
+
+  if (element) {
+    element.addEventListener('scroll', updateScrollState, { passive: true })
+  }
+
+  window.addEventListener('resize', handleResize)
+})
+
+onBeforeUnmount(() => {
+  const element = scrollContainer.value
+  if (element) {
+    element.removeEventListener('scroll', updateScrollState)
+  }
+
+  window.removeEventListener('resize', handleResize)
+})
+
+watch([groupedSubsets, activeSubsetIds], async () => {
+  await nextTick()
+  updateScrollState()
 })
 
 const isSubsetActive = (subset: VerticalSubsetDto): boolean => {
@@ -214,64 +298,71 @@ const onGroupSelectionChange = (groupKey: string, value: unknown) => {
   }
 }
 
+
 </script>
 
 <style scoped lang="sass">
 .category-fast-filters
+  position: relative
   background-color: rgb(var(--v-theme-surface-glass))
   border-radius: 1rem
-  padding: 1.5rem
+  padding: 0.75rem 2.5rem
   margin-bottom: 2rem
   box-shadow: 0 24px 48px -32px rgba(var(--v-theme-shadow-primary-600), 0.3)
 
-  &__header
+  &__viewport
+    position: relative
     display: flex
     align-items: center
-    justify-content: space-between
-    gap: 1rem
-    margin-bottom: 1rem
-
-  &__title
-    margin: 0
-    font-size: 1.25rem
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__reset
-    text-transform: none
 
   &__groups
-    display: grid
-    gap: 1.25rem
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+    display: flex
+    gap: 1rem
+    overflow-x: auto
+    padding: 0.25rem 0
+    scroll-behavior: smooth
+    scrollbar-width: none
+
+    &::-webkit-scrollbar
+      display: none
 
   &__group
-    background-color: rgba(var(--v-theme-surface-primary-080), 0.7)
+    flex: 0 0 auto
+    display: flex
+    align-items: center
+    gap: 0.75rem
+    padding: 0.75rem 1rem
+    background-color: rgba(var(--v-theme-surface-primary-080), 0.75)
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
-    border-radius: 0.75rem
-    padding: 1rem 1.25rem
+    border-radius: 999px
     transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease
+    min-width: min(320px, 100%)
 
     &:hover
       background-color: rgba(var(--v-theme-surface-primary-080), 0.95)
       border-color: rgba(var(--v-theme-border-primary-strong), 0.8)
-      box-shadow: 0 12px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.32)
+      box-shadow: 0 12px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.28)
 
   &__group-title
-    margin: 0 0 0.75rem
-    font-size: 0.95rem
+    margin: 0
+    font-size: 0.85rem
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-secondary))
     text-transform: uppercase
-    letter-spacing: 0.04em
+    letter-spacing: 0.06em
+    white-space: nowrap
 
   &__chip-group
     display: flex
     flex-wrap: wrap
-    margin: -0.25rem
+    gap: 0.5rem
+    margin: 0
+    padding: 0
+    flex: 1 1 auto
+    min-width: 0
 
     :deep(.v-chip)
-      margin: 0.25rem
+      margin: 0.125rem 0
 
   &__chip-label
     font-weight: 500
@@ -281,18 +372,30 @@ const onGroupSelectionChange = (groupKey: string, value: unknown) => {
     font-weight: 600
     color: rgb(var(--v-theme-on-primary))
 
+  &__nav
+    position: absolute
+    top: 50%
+    transform: translateY(-50%)
+    z-index: 2
+    box-shadow: 0 12px 28px -18px rgba(var(--v-theme-shadow-primary-600), 0.38)
+
+  &__nav--left
+    left: 0.25rem
+
+  &__nav--right
+    right: 0.25rem
+
 @media (max-width: 959px)
   .category-fast-filters
-    padding: 1.25rem
+    padding: 0.75rem 2.25rem
 
-    &__header
-      align-items: flex-start
-      flex-direction: column
-      gap: 0.5rem
+    &__group
+      border-radius: 1rem
 
-    &__reset
-      align-self: flex-end
+@media (max-width: 599px)
+  .category-fast-filters
+    padding: 0.5rem 2rem
 
-    &__groups
-      grid-template-columns: minmax(0, 1fr)
+    &__group
+      padding: 0.5rem 0.75rem
 </style>

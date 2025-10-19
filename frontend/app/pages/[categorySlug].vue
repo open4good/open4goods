@@ -1283,6 +1283,12 @@ const clearAllFilters = () => {
     gap: 1rem
     margin-bottom: 1.5rem
     width: 100%
+    position: sticky
+    top: 0
+    z-index: 5
+    background: rgb(var(--v-theme-surface-default))
+    padding: 0.75rem 0
+    box-shadow: 0 18px 36px -28px rgba(var(--v-theme-shadow-primary-600), 0.38)
 
   &__toolbar-left
     display: flex
@@ -1338,9 +1344,9 @@ const clearAllFilters = () => {
 
   &__filters-surface
     position: sticky
-    top: 96px
+    top: 0
     align-self: start
-    max-height: calc(100vh - 136px)
+    max-height: calc(100vh - 2rem)
     display: flex
     flex-direction: column
     border-radius: 1rem
@@ -1397,7 +1403,7 @@ const clearAllFilters = () => {
     grid-template-columns: minmax(260px, 300px) minmax(0, 1fr)
 
   .category-page__filters-surface
-    max-height: calc(100vh - 152px)
+    max-height: calc(100vh - 2.5rem)
 
 @media (max-width: 959px)
   .category-page__toolbar

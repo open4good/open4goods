@@ -85,6 +85,8 @@
       "reset": "Réinitialiser les filtres rapides",
       "activeClauses": "Filtres de sous-ensemble appliqués",
       "groupDefault": "Autres filtres rapides",
+      "scrollPrevious": "Faire défiler les filtres rapides vers la gauche",
+      "scrollNext": "Faire défiler les filtres rapides vers la droite",
       "groups": {
         "price": "Prix",
         "screen_size": "Taille d'écran",
