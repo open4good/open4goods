@@ -1,13 +1,5 @@
 <template>
-  <section v-if="subsets.length" class="category-fast-filters">
-    <header class="category-fast-filters__header">
-      <h2 class="category-fast-filters__title">
-        {{ t('category.fastFilters.title') }}
-      </h2>
-
-    </header>
-
-    <div class="category-fast-filters__groups">
+    <div v-if="subsets.length" class="category-fast-filters__groups">
       <article
         v-for="group in groupedSubsets"
         :key="group.key"
@@ -61,7 +53,6 @@
         </v-chip-group>
       </article>
     </div>
-  </section>
 </template>
 
 <script setup lang="ts">

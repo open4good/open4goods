@@ -83,7 +83,6 @@
       "missingBreadcrumbTitle": "Category"
     },
     "fastFilters": {
-      "title": "Quick filters",
       "reset": "Clear fast filters",
       "activeClauses": "Applied subset filters",
       "groupDefault": "Other quick filters",
