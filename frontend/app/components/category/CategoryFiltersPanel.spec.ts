@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
+import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
+import type { CategorySubsetClause } from '~/types/category-subset'
 import type { FilterRequestDto } from '~~/shared/api-client'
 
 vi.mock('vue-i18n', () => ({
@@ -8,9 +10,6 @@ vi.mock('vue-i18n', () => ({
     t: (key: string) => key,
   }),
 }))
-
-import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
-import type { CategorySubsetClause } from '~/types/category-subset'
 
 const resolveClassList = (value: unknown): string => {
   if (!value) {
