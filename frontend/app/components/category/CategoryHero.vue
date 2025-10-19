@@ -2,7 +2,7 @@
   <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
     <v-sheet class="category-hero__wrapper" elevation="0">
       <div v-if="image" class="category-hero__media" aria-hidden="true">
-        <v-img :src="image" alt="" class="category-hero__image" cover>
+        <v-img :src="image" alt="" class="category-hero__image" cover :transition="false">
           <template #placeholder>
             <v-skeleton-loader type="image" class="h-100" />
           </template>

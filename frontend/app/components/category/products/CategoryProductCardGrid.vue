@@ -18,6 +18,7 @@
           :src="resolveImage(product)"
           :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
           :aspect-ratio="4 / 3"
+          :transition="false"
           contain
           class="category-product-card-grid__image"
         >

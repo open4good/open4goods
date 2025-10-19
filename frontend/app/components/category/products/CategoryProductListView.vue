@@ -10,6 +10,7 @@
           <v-img
             :src="resolveImage(product)"
             :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
+            :transition="false"
             cover
           >
             <template #placeholder>
