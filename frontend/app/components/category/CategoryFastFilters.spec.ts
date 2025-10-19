@@ -14,6 +14,14 @@ vi.mock('vue-i18n', () => ({
         return `≤ ${params?.value ?? ''}`
       }
 
+      if (key === 'category.fastFilters.scrollLeft') {
+        return `Scroll left for ${params?.group ?? ''}`
+      }
+
+      if (key === 'category.fastFilters.scrollRight') {
+        return `Scroll right for ${params?.group ?? ''}`
+      }
+
       const translations: Record<string, string> = {
         'category.fastFilters.title': 'Quick filters',
         'category.fastFilters.reset': 'Clear fast filters',

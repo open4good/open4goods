@@ -86,6 +86,8 @@
       "reset": "Clear fast filters",
       "activeClauses": "Applied subset filters",
       "groupDefault": "Other quick filters",
+      "scrollLeft": "Scroll quick filters to the left for {group}",
+      "scrollRight": "Scroll quick filters to the right for {group}",
       "groups": {
         "price": "Price",
         "screen_size": "Screen size",

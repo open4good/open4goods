@@ -5,8 +5,6 @@
     :items-per-page="itemsPerPage"
     class="category-product-table"
     density="comfortable"
-    :fixed-header="true"
-    height="600"
   >
     <template #[`item.brand`]="{ value }">
       <span class="category-product-table__brand">{{ value ?? $t('category.products.unknownBrand') }}</span>

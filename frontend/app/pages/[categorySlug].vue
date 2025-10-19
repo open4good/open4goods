@@ -10,14 +10,6 @@
     />
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
-      <CategoryFastFilters
-        :subsets="category.subsets ?? []"
-        :active-subset-ids="activeSubsetIds"
-        class="mb-6"
-        @toggle-subset="onToggleSubset"
-        @reset="onResetSubsets"
-      />
-
       <div class="category-page__layout">
         <v-navigation-drawer
           v-if="!isDesktop"
@@ -82,105 +74,114 @@
           <meta itemprop="name" :content="seoTitle" />
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
 
-          <div class="category-page__toolbar">
-            <div class="category-page__toolbar-left">
-              <v-btn
-                v-if="!isDesktop"
-                color="primary"
-                variant="flat"
-                prepend-icon="mdi-filter-variant"
-                @click="filtersDrawer = true"
-              >
-                {{ $t('category.products.openFilters') }}
-              </v-btn>
+          <div class="category-page__sticky-stack">
+            <CategoryFastFilters
+              :subsets="category.subsets ?? []"
+              :active-subset-ids="activeSubsetIds"
+              @toggle-subset="onToggleSubset"
+              @reset="onResetSubsets"
+            />
 
-              <p class="category-page__results-count" aria-live="polite">
-                {{ resultsCountLabel }}
-              </p>
-            </div>
+            <div class="category-page__toolbar">
+              <div class="category-page__toolbar-left">
+                <v-btn
+                  v-if="!isDesktop"
+                  color="primary"
+                  variant="flat"
+                  prepend-icon="mdi-filter-variant"
+                  @click="filtersDrawer = true"
+                >
+                  {{ $t('category.products.openFilters') }}
+                </v-btn>
 
-            <div class="category-page__toolbar-actions">
-              <div class="category-page__search">
-                <v-text-field
-                  v-model="searchTerm"
-                  :label="$t('category.products.searchPlaceholder')"
-                  prepend-inner-icon="mdi-magnify"
-                  clearable
-                  hide-details
-                  density="comfortable"
-                  class="category-page__search-input"
-                />
-                <v-tooltip
-                  activator="parent"
-                  :text="$t('category.products.tooltips.search')"
-                  location="bottom"
-                />
+                <p class="category-page__results-count" aria-live="polite">
+                  {{ resultsCountLabel }}
+                </p>
               </div>
 
-              <div class="category-page__sort">
-                <div class="category-page__sort-select">
-                  <v-select
-                    v-model="sortField"
-                    :items="sortItems"
-                    :label="$t('category.products.sortLabel')"
-                    item-title="title"
-                    item-value="value"
+              <div class="category-page__toolbar-actions">
+                <div class="category-page__search">
+                  <v-text-field
+                    v-model="searchTerm"
+                    :label="$t('category.products.searchPlaceholder')"
+                    prepend-inner-icon="mdi-magnify"
                     clearable
                     hide-details
                     density="comfortable"
+                    class="category-page__search-input"
                   />
                   <v-tooltip
                     activator="parent"
-                    :text="$t('category.products.tooltips.sortField')"
+                    :text="$t('category.products.tooltips.search')"
                     location="bottom"
                   />
                 </div>
-                <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
-                  <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
-                    <v-icon icon="mdi-sort-ascending" />
+
+                <div class="category-page__sort">
+                  <div class="category-page__sort-select">
+                    <v-select
+                      v-model="sortField"
+                      :items="sortItems"
+                      :label="$t('category.products.sortLabel')"
+                      item-title="title"
+                      item-value="value"
+                      clearable
+                      hide-details
+                      density="comfortable"
+                    />
                     <v-tooltip
                       activator="parent"
-                      :text="$t('category.products.tooltips.sortAscending')"
+                      :text="$t('category.products.tooltips.sortField')"
+                      location="bottom"
+                    />
+                  </div>
+                  <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
+                    <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
+                      <v-icon icon="mdi-sort-ascending" />
+                      <v-tooltip
+                        activator="parent"
+                        :text="$t('category.products.tooltips.sortAscending')"
+                        location="bottom"
+                      />
+                    </v-btn>
+                    <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
+                      <v-icon icon="mdi-sort-descending" />
+                      <v-tooltip
+                        activator="parent"
+                        :text="$t('category.products.tooltips.sortDescending')"
+                        location="bottom"
+                      />
+                    </v-btn>
+                  </v-btn-toggle>
+                </div>
+
+                <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
+                  <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
+                    <v-icon icon="mdi-view-grid" />
+                    <v-tooltip
+                      activator="parent"
+                      :text="$t('category.products.tooltips.viewCards')"
                       location="bottom"
                     />
                   </v-btn>
-                  <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
-                    <v-icon icon="mdi-sort-descending" />
+                  <v-btn value="list" :aria-label="$t('category.products.viewList')">
+                    <v-icon icon="mdi-view-list" />
                     <v-tooltip
                       activator="parent"
-                      :text="$t('category.products.tooltips.sortDescending')"
+                      :text="$t('category.products.tooltips.viewList')"
+                      location="bottom"
+                    />
+                  </v-btn>
+                  <v-btn value="table" :aria-label="$t('category.products.viewTable')">
+                    <v-icon icon="mdi-table" />
+                    <v-tooltip
+                      activator="parent"
+                      :text="$t('category.products.tooltips.viewTable')"
                       location="bottom"
                     />
                   </v-btn>
                 </v-btn-toggle>
               </div>
-
-              <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
-                <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
-                  <v-icon icon="mdi-view-grid" />
-                  <v-tooltip
-                    activator="parent"
-                    :text="$t('category.products.tooltips.viewCards')"
-                    location="bottom"
-                  />
-                </v-btn>
-                <v-btn value="list" :aria-label="$t('category.products.viewList')">
-                  <v-icon icon="mdi-view-list" />
-                  <v-tooltip
-                    activator="parent"
-                    :text="$t('category.products.tooltips.viewList')"
-                    location="bottom"
-                  />
-                </v-btn>
-                <v-btn value="table" :aria-label="$t('category.products.viewTable')">
-                  <v-icon icon="mdi-table" />
-                  <v-tooltip
-                    activator="parent"
-                    :text="$t('category.products.tooltips.viewTable')"
-                    location="bottom"
-                  />
-                </v-btn>
-              </v-btn-toggle>
             </div>
           </div>
 
@@ -1273,6 +1274,7 @@ const clearAllFilters = () => {
 .category-page
   display: flex
   flex-direction: column
+  --category-sticky-top: 96px
 
   &__container
     max-width: 1560px
@@ -1281,8 +1283,25 @@ const clearAllFilters = () => {
     display: flex
     flex-direction: column
     gap: 1rem
-    margin-bottom: 1.5rem
     width: 100%
+    background: rgb(var(--v-theme-surface-glass))
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
+    border-radius: 0.75rem
+    padding: 0.75rem 1rem
+    box-shadow: 0 18px 40px -30px rgba(var(--v-theme-shadow-primary-600), 0.28)
+
+  &__sticky-stack
+    position: sticky
+    top: var(--category-sticky-top)
+    z-index: 6
+    display: flex
+    flex-direction: column
+    gap: 1rem
+    width: 100%
+    background: rgb(var(--v-theme-surface-default))
+    padding-bottom: 1.25rem
+    margin-bottom: 1.5rem
+    box-shadow: 0 24px 48px -42px rgba(var(--v-theme-shadow-primary-600), 0.32)
 
   &__toolbar-left
     display: flex
@@ -1338,9 +1357,9 @@ const clearAllFilters = () => {
 
   &__filters-surface
     position: sticky
-    top: 96px
+    top: var(--category-sticky-top)
     align-self: start
-    max-height: calc(100vh - 136px)
+    max-height: calc(100vh - var(--category-sticky-top) - 40px)
     display: flex
     flex-direction: column
     border-radius: 1rem
@@ -1397,7 +1416,7 @@ const clearAllFilters = () => {
     grid-template-columns: minmax(260px, 300px) minmax(0, 1fr)
 
   .category-page__filters-surface
-    max-height: calc(100vh - 152px)
+    max-height: calc(100vh - var(--category-sticky-top) - 56px)
 
 @media (max-width: 959px)
   .category-page__toolbar
@@ -1405,6 +1424,11 @@ const clearAllFilters = () => {
 
   .category-page__toolbar-actions
     justify-content: space-between
+
+  .category-page__sticky-stack
+    gap: 0.75rem
+    padding-bottom: 1rem
+    margin-bottom: 1.25rem
 
   .category-page__search
     flex: 1 1 100%

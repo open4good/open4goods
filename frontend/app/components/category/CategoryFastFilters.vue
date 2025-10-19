@@ -1,5 +1,6 @@
 <template>
-    <div v-if="subsets.length" class="category-fast-filters__groups">
+  <div v-if="subsets.length" class="category-fast-filters">
+    <div class="category-fast-filters__groups">
       <article
         v-for="group in groupedSubsets"
         :key="group.key"
@@ -7,55 +8,85 @@
       >
         <h3 class="category-fast-filters__group-title">{{ group.label }}</h3>
 
-        <v-chip-group
-          class="category-fast-filters__chip-group"
-          :model-value="getGroupSelection(group.key)"
-          @update:model-value="(value) => onGroupSelectionChange(group.key, value)"
-        >
-          <template
-            v-for="subset in group.subsets"
-            :key="subset.id ?? subset.caption ?? subset.title ?? subset.group ?? 'subset'"
+        <div class="category-fast-filters__chip-region">
+          <v-btn
+            v-if="scrollState[group.key]?.left"
+            class="category-fast-filters__nav"
+            icon="mdi-chevron-left"
+            variant="text"
+            density="comfortable"
+            :aria-label="t('category.fastFilters.scrollLeft', { group: group.label })"
+            @click="scrollChips(group.key, -1)"
+          />
+
+          <div
+            :ref="(element) => setScrollContainer(group.key, element)"
+            class="category-fast-filters__chip-window"
+            role="group"
+            :aria-label="group.label"
+            @scroll="() => onScroll(group.key)"
           >
-            <v-tooltip
-              v-if="subset.description"
-              location="bottom"
-              :text="subset.description"
+            <v-chip-group
+              class="category-fast-filters__chip-group"
+              :model-value="getGroupSelection(group.key)"
+              @update:model-value="(value) => onGroupSelectionChange(group.key, value)"
             >
-              <template #activator="{ props: tooltipProps }">
+              <template
+                v-for="subset in group.subsets"
+                :key="subset.id ?? subset.caption ?? subset.title ?? subset.group ?? 'subset'"
+              >
+                <v-tooltip
+                  v-if="subset.description"
+                  location="bottom"
+                  :text="subset.description"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <v-chip
+                      v-bind="tooltipProps"
+                      :value="subset.id"
+                      :color="isSubsetActive(subset) ? 'primary' : undefined"
+                      :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+                      rounded="lg"
+                    >
+                      <span class="category-fast-filters__chip-label">
+                        {{ resolveSubsetLabel(subset) }}
+                      </span>
+                    </v-chip>
+                  </template>
+                </v-tooltip>
+
                 <v-chip
-                  v-bind="tooltipProps"
+                  v-else
                   :value="subset.id"
                   :color="isSubsetActive(subset) ? 'primary' : undefined"
                   :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
                   rounded="lg"
-                  class="me-2 mb-2"
                 >
                   <span class="category-fast-filters__chip-label">
                     {{ resolveSubsetLabel(subset) }}
                   </span>
                 </v-chip>
               </template>
-            </v-tooltip>
+            </v-chip-group>
+          </div>
 
-            <v-chip
-              v-else
-              :value="subset.id"
-              :color="isSubsetActive(subset) ? 'primary' : undefined"
-              :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
-              rounded="lg"
-              class="me-2 mb-2"
-            >
-              <span class="category-fast-filters__chip-label">
-                {{ resolveSubsetLabel(subset) }}
-              </span>
-            </v-chip>
-          </template>
-        </v-chip-group>
+          <v-btn
+            v-if="scrollState[group.key]?.right"
+            class="category-fast-filters__nav"
+            icon="mdi-chevron-right"
+            variant="text"
+            density="comfortable"
+            :aria-label="t('category.fastFilters.scrollRight', { group: group.label })"
+            @click="scrollChips(group.key, 1)"
+          />
+        </div>
       </article>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
 import type { VerticalSubsetDto } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
 
@@ -178,6 +209,71 @@ const resolveSubsetLabel = (subset: VerticalSubsetDto): string => {
   return subset.title ?? subset.caption ?? subset.id ?? subset.group ?? 'subset'
 }
 
+const scrollContainers = new Map<string, HTMLDivElement>()
+const scrollState = reactive<Record<string, { left: boolean; right: boolean }>>({})
+const SCROLL_AMOUNT = 240
+const SCROLL_EPSILON = 8
+
+const updateScrollState = (groupKey: string) => {
+  const container = scrollContainers.get(groupKey)
+  if (!container) {
+    return
+  }
+
+  const { scrollLeft, scrollWidth, clientWidth } = container
+  const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0)
+  scrollState[groupKey] = {
+    left: scrollLeft > SCROLL_EPSILON,
+    right: scrollLeft < Math.max(maxScrollLeft - SCROLL_EPSILON, 0),
+  }
+}
+
+const resolveScrollContainer = (
+  value: Element | ComponentPublicInstance | null,
+): HTMLDivElement | null => {
+  if (value instanceof HTMLDivElement) {
+    return value
+  }
+
+  if (value && '$el' in value) {
+    const element = (value as ComponentPublicInstance).$el
+    if (element instanceof HTMLDivElement) {
+      return element
+    }
+  }
+
+  return null
+}
+
+const setScrollContainer = (groupKey: string, element: Element | ComponentPublicInstance | null) => {
+  const resolved = resolveScrollContainer(element)
+
+  if (resolved) {
+    scrollContainers.set(groupKey, resolved)
+    updateScrollState(groupKey)
+    return
+  }
+
+  scrollContainers.delete(groupKey)
+  delete scrollState[groupKey]
+}
+
+const onScroll = (groupKey: string) => {
+  updateScrollState(groupKey)
+}
+
+const scrollChips = (groupKey: string, direction: 1 | -1) => {
+  const container = scrollContainers.get(groupKey)
+  if (!container) {
+    return
+  }
+
+  container.scrollBy({
+    left: direction * SCROLL_AMOUNT,
+    behavior: 'smooth',
+  })
+}
+
 const emitToggle = (subset: VerticalSubsetDto, desired: boolean) => {
   if (!subset.id) {
     return
@@ -214,64 +310,92 @@ const onGroupSelectionChange = (groupKey: string, value: unknown) => {
   }
 }
 
+const refreshAllScrollStates = () => {
+  groupedSubsets.value.forEach((group) => updateScrollState(group.key))
+}
+
+const handleResize = () => {
+  refreshAllScrollStates()
+}
+
+onMounted(() => {
+  nextTick(refreshAllScrollStates)
+
+  if (import.meta.client) {
+    window.addEventListener('resize', handleResize, { passive: true })
+  }
+})
+
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    window.removeEventListener('resize', handleResize)
+  }
+})
+
+watch(groupedSubsets, () => {
+  nextTick(refreshAllScrollStates)
+})
 </script>
 
 <style scoped lang="sass">
 .category-fast-filters
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
   background-color: rgb(var(--v-theme-surface-glass))
-  border-radius: 1rem
-  padding: 1.5rem
-  margin-bottom: 2rem
-  box-shadow: 0 24px 48px -32px rgba(var(--v-theme-shadow-primary-600), 0.3)
-
-  &__header
-    display: flex
-    align-items: center
-    justify-content: space-between
-    gap: 1rem
-    margin-bottom: 1rem
-
-  &__title
-    margin: 0
-    font-size: 1.25rem
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__reset
-    text-transform: none
+  border-radius: 0.75rem
+  padding: 1rem 1.25rem
+  box-shadow: 0 18px 40px -28px rgba(var(--v-theme-shadow-primary-600), 0.32)
+  width: 100%
 
   &__groups
-    display: grid
-    gap: 1.25rem
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
 
   &__group
-    background-color: rgba(var(--v-theme-surface-primary-080), 0.7)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
-    border-radius: 0.75rem
-    padding: 1rem 1.25rem
-    transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease
-
-    &:hover
-      background-color: rgba(var(--v-theme-surface-primary-080), 0.95)
-      border-color: rgba(var(--v-theme-border-primary-strong), 0.8)
-      box-shadow: 0 12px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.32)
+    display: flex
+    align-items: center
+    gap: 1rem
+    min-width: 0
 
   &__group-title
-    margin: 0 0 0.75rem
+    flex: 0 0 auto
+    margin: 0
     font-size: 0.95rem
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-secondary))
     text-transform: uppercase
     letter-spacing: 0.04em
+    white-space: nowrap
+
+  &__chip-region
+    display: flex
+    align-items: center
+    gap: 0.25rem
+    flex: 1 1 auto
+    min-width: 0
+
+  &__chip-window
+    position: relative
+    flex: 1 1 auto
+    overflow-x: auto
+    overflow-y: hidden
+    scrollbar-width: none
+    -ms-overflow-style: none
+
+    &::-webkit-scrollbar
+      display: none
 
   &__chip-group
-    display: flex
-    flex-wrap: wrap
-    margin: -0.25rem
+    display: inline-flex
+    align-items: center
+    gap: 0.5rem
+    padding: 0.25rem 0
+    min-width: 100%
 
     :deep(.v-chip)
-      margin: 0.25rem
+      flex: 0 0 auto
 
   &__chip-label
     font-weight: 500
@@ -281,18 +405,25 @@ const onGroupSelectionChange = (groupKey: string, value: unknown) => {
     font-weight: 600
     color: rgb(var(--v-theme-on-primary))
 
+  &__nav
+    flex: 0 0 auto
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
 @media (max-width: 959px)
   .category-fast-filters
-    padding: 1.25rem
+    padding: 0.75rem 1rem
 
-    &__header
-      align-items: flex-start
+    &__group
       flex-direction: column
+      align-items: stretch
       gap: 0.5rem
 
-    &__reset
-      align-self: flex-end
+    &__group-title
+      white-space: normal
 
-    &__groups
-      grid-template-columns: minmax(0, 1fr)
+    &__chip-region
+      width: 100%
+
+    &__chip-window
+      width: 100%
 </style>
