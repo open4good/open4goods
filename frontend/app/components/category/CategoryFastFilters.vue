@@ -4,17 +4,7 @@
       <h2 class="category-fast-filters__title">
         {{ t('category.fastFilters.title') }}
       </h2>
-      <v-btn
-        v-if="activeSubsetIds.length"
-        color="primary"
-        variant="text"
-        class="category-fast-filters__reset"
-        size="small"
-        @click="$emit('reset')"
-      >
-        <v-icon icon="mdi-close-circle" size="18" class="me-1" />
-        {{ t('category.fastFilters.reset') }}
-      </v-btn>
+
     </header>
 
     <div class="category-fast-filters__groups">
