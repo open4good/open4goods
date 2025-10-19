@@ -271,6 +271,7 @@ import type {
   ProductSearchResponseDto,
   SortRequestDto,
   VerticalConfigFullDto,
+  VerticalSubsetDto,
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client'
 
@@ -575,6 +576,45 @@ function arraysEqual<T>(left: T[], right: T[]): boolean {
   return left.every((value, index) => value === right[index])
 }
 
+const subsetMap = computed(() => {
+  const map = new Map<string, VerticalSubsetDto>()
+  const availableSubsets = category.value?.subsets ?? []
+
+  availableSubsets
+    .filter((subset): subset is VerticalSubsetDto => Boolean(subset && subset.id))
+    .forEach((subset) => {
+      if (subset.id) {
+        map.set(subset.id, subset)
+      }
+    })
+
+  return map
+})
+
+const DEFAULT_SUBSET_GROUP_KEY = 'ungrouped'
+
+const getSubsetGroupKey = (subset: VerticalSubsetDto | undefined | null): string => {
+  return subset?.group ?? DEFAULT_SUBSET_GROUP_KEY
+}
+
+const normalizeActiveSubsetIds = (subsetIds: string[]): string[] => {
+  const seenGroups = new Set<string>()
+  const normalized: string[] = []
+
+  subsetIds.forEach((subsetId) => {
+    const subset = subsetMap.value.get(subsetId)
+    const groupKey = subset ? getSubsetGroupKey(subset) : subsetId
+    if (seenGroups.has(groupKey)) {
+      return
+    }
+
+    seenGroups.add(groupKey)
+    normalized.push(subsetId)
+  })
+
+  return normalized
+}
+
 const applyHashPayload = (payload: CategoryHashState | null) => {
   const nextViewMode = payload?.view ?? CATEGORY_DEFAULT_VIEW_MODE
   if (viewMode.value !== nextViewMode) {
@@ -615,7 +655,7 @@ const applyHashPayload = (payload: CategoryHashState | null) => {
       : {}
   }
 
-  const nextActiveSubsets = payload?.activeSubsets ?? []
+  const nextActiveSubsets = normalizeActiveSubsetIds(payload?.activeSubsets ?? [])
   if (!arraysEqual(activeSubsetIds.value, nextActiveSubsets)) {
     activeSubsetIds.value = [...nextActiveSubsets]
   }
@@ -1092,20 +1132,48 @@ watch(
   },
 )
 
+watch(
+  subsetMap,
+  () => {
+    const normalized = normalizeActiveSubsetIds(activeSubsetIds.value)
+    if (!arraysEqual(activeSubsetIds.value, normalized)) {
+      activeSubsetIds.value = normalized
+    }
+  },
+)
+
 const onToggleSubset = (subsetId: string, active: boolean) => {
+  const subset = subsetMap.value.get(subsetId)
   const next = new Set(activeSubsetIds.value)
 
   if (active) {
+    if (subset) {
+      const targetGroup = getSubsetGroupKey(subset)
+
+      next.forEach((id) => {
+        if (id === subsetId) {
+          return
+        }
+
+        const candidate = subsetMap.value.get(id)
+        if (candidate && getSubsetGroupKey(candidate) === targetGroup) {
+          next.delete(id)
+        }
+      })
+    }
+
     next.add(subsetId)
   } else {
     next.delete(subsetId)
   }
 
-  activeSubsetIds.value = Array.from(next)
+  activeSubsetIds.value = normalizeActiveSubsetIds(Array.from(next))
 }
 
 const onRemoveSubsetClause = (clause: { subsetId: string }) => {
-  activeSubsetIds.value = activeSubsetIds.value.filter((id) => id !== clause.subsetId)
+  activeSubsetIds.value = normalizeActiveSubsetIds(
+    activeSubsetIds.value.filter((id) => id !== clause.subsetId),
+  )
 }
 
 const onResetSubsets = () => {
