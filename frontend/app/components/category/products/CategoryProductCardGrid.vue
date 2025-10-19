@@ -1,8 +1,8 @@
 <template>
   <v-row class="category-product-card-grid" dense>
     <v-col
-      v-for="product in products"
-      :key="product.gtin ?? product.identity?.bestName ?? Math.random()"
+      v-for="{ product, key } in productEntries"
+      :key="key"
       cols="12"
       sm="6"
       lg="4"
@@ -20,9 +20,14 @@
           :aspect-ratio="4 / 3"
           contain
           class="category-product-card-grid__image"
+          @loadstart="() => onImageLoadStart(key)"
+          @load="() => onImageLoad(key)"
+          @error="() => onImageError(key)"
         >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
+          <template #default>
+            <div v-if="isImageLoading(key)" class="category-product-card-grid__image-overlay">
+              <v-skeleton-loader type="image" class="h-100 w-100" />
+            </div>
           </template>
         </v-img>
 
@@ -61,10 +66,80 @@
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 
-defineProps<{ products: ProductDto[] }>()
+const props = defineProps<{ products: ProductDto[] }>()
 
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+
+type ProductEntry = {
+  product: ProductDto
+  index: number
+  key: string
+}
+
+const products = computed(() => props.products ?? [])
+
+const buildProductKey = (product: ProductDto, index: number) => {
+  const rawKey =
+    product.gtin ??
+    product.fullSlug ??
+    product.slug ??
+    product.identity?.bestName ??
+    product.identity?.model ??
+    `product-${index}`
+
+  return String(rawKey)
+}
+
+const productEntries = computed<ProductEntry[]>(() =>
+  products.value.map((product, index) => ({
+    product,
+    index,
+    key: buildProductKey(product, index),
+  })),
+)
+
+const imageLoadingState = reactive<Record<string, boolean>>({})
+
+watch(
+  productEntries,
+  (entries) => {
+    const activeKeys = new Set(entries.map((entry) => entry.key))
+
+    entries.forEach((entry) => {
+      if (!(entry.key in imageLoadingState)) {
+        imageLoadingState[entry.key] = true
+      }
+    })
+
+    Object.keys(imageLoadingState).forEach((stateKey) => {
+      if (!activeKeys.has(stateKey)) {
+        delete imageLoadingState[stateKey]
+      }
+    })
+  },
+  { immediate: true },
+)
+
+const setImageLoadingState = (key: string, isLoading: boolean) => {
+  imageLoadingState[key] = isLoading
+}
+
+const onImageLoadStart = (key: string) => {
+  setImageLoadingState(key, true)
+}
+
+const onImageLoad = (key: string) => {
+  setImageLoadingState(key, false)
+}
+
+const onImageError = (key: string) => {
+  setImageLoadingState(key, false)
+}
+
+const isImageLoading = (key: string) => {
+  return imageLoadingState[key] ?? true
+}
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -171,11 +246,21 @@ const impactScoreValue = (product: ProductDto) => {
     display: flex
     align-items: center
     justify-content: center
+    position: relative
+    overflow: hidden
 
     :deep(img)
       object-fit: contain
       mix-blend-mode: multiply
       background: #fff
+
+  &__image-overlay
+    position: absolute
+    inset: 0
+    display: flex
+    align-items: center
+    justify-content: center
+    background: rgb(var(--v-theme-surface-default))
 
   &__body
     display: flex
