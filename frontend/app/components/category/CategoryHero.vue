@@ -2,11 +2,7 @@
   <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
     <v-sheet class="category-hero__wrapper" elevation="0">
       <div v-if="image" class="category-hero__media" aria-hidden="true">
-        <v-img :src="image" alt="" class="category-hero__image" cover :transition="false">
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
+        <v-img :src="image" alt="" class="category-hero__image" cover :transition="false" />
       </div>
 
       <div class="category-hero__content">
@@ -155,6 +151,21 @@ defineExpose({ headingId, t })
     height: 100%
     min-height: 180px
     width: 100%
+    &.v-img--booting
+      background: linear-gradient(
+        90deg,
+        rgba(var(--v-theme-surface-glass), 0.4),
+        rgba(var(--v-theme-surface-glass), 0.8),
+        rgba(var(--v-theme-surface-glass), 0.4)
+      )
+      background-size: 200% 100%
+      animation: category-hero-image-skeleton 1.2s ease-in-out infinite
+
+@keyframes category-hero-image-skeleton
+  0%
+    background-position: 200% 0
+  100%
+    background-position: -200% 0
 
 @media (min-width: 960px)
   .category-hero__wrapper

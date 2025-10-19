@@ -12,11 +12,7 @@
             :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
             :transition="false"
             cover
-          >
-            <template #placeholder>
-              <v-skeleton-loader type="image" class="h-100" />
-            </template>
-          </v-img>
+          />
         </v-avatar>
       </template>
 
@@ -121,4 +117,20 @@ const offersCountLabel = (product: ProductDto) => {
     flex-wrap: wrap
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  :deep(.v-avatar .v-img--booting)
+    background: linear-gradient(
+      90deg,
+      rgba(var(--v-theme-surface-glass), 0.35),
+      rgba(var(--v-theme-surface-glass), 0.75),
+      rgba(var(--v-theme-surface-glass), 0.35)
+    )
+    background-size: 200% 100%
+    animation: category-product-list-image-skeleton 1.2s ease-in-out infinite
+
+@keyframes category-product-list-image-skeleton
+  0%
+    background-position: 200% 0
+  100%
+    background-position: -200% 0
 </style>

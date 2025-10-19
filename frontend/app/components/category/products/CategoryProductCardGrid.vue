@@ -21,11 +21,7 @@
           :transition="false"
           contain
           class="category-product-card-grid__image"
-        >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
+        />
 
         <v-card-item class="category-product-card-grid__body">
           <h3 class="category-product-card-grid__title">
@@ -172,6 +168,18 @@ const impactScoreValue = (product: ProductDto) => {
     display: flex
     align-items: center
     justify-content: center
+    position: relative
+    overflow: hidden
+
+    &.v-img--booting
+      background: linear-gradient(
+        90deg,
+        rgba(var(--v-theme-surface-glass), 0.35),
+        rgba(var(--v-theme-surface-glass), 0.75),
+        rgba(var(--v-theme-surface-glass), 0.35)
+      )
+      background-size: 200% 100%
+      animation: category-product-card-grid-image-skeleton 1.2s ease-in-out infinite
 
     :deep(img)
       object-fit: contain
@@ -223,4 +231,10 @@ const impactScoreValue = (product: ProductDto) => {
   &__score-fallback
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+@keyframes category-product-card-grid-image-skeleton
+  0%
+    background-position: 200% 0
+  100%
+    background-position: -200% 0
 </style>
