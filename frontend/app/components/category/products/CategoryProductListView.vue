@@ -12,8 +12,10 @@
             :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
             cover
           >
-            <template #placeholder>
-              <v-skeleton-loader type="image" class="h-100" />
+            <template #placeholder="{ isActive }">
+              <div v-if="isActive" class="category-product-list__placeholder">
+                <v-skeleton-loader type="image" class="category-product-list__placeholder-loader" />
+              </div>
             </template>
           </v-img>
         </v-avatar>
@@ -120,4 +122,15 @@ const offersCountLabel = (product: ProductDto) => {
     flex-wrap: wrap
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__placeholder
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 100%
+    height: 100%
+
+  &__placeholder-loader
+    width: 100%
+    height: 100%
 </style>

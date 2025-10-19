@@ -21,8 +21,10 @@
           contain
           class="category-product-card-grid__image"
         >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
+          <template #placeholder="{ isActive }">
+            <div v-if="isActive" class="category-product-card-grid__placeholder">
+              <v-skeleton-loader type="image" class="category-product-card-grid__placeholder-loader" />
+            </div>
           </template>
         </v-img>
 
@@ -176,6 +178,17 @@ const impactScoreValue = (product: ProductDto) => {
       object-fit: contain
       mix-blend-mode: multiply
       background: #fff
+
+  &__placeholder
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 100%
+    height: 100%
+
+  &__placeholder-loader
+    width: 100%
+    height: 100%
 
   &__body
     display: flex
