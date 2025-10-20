@@ -249,7 +249,9 @@ export default defineNuxtConfig({
         gtinRedirectPage.path = '/:gtin(\\d{6,})'
       }
 
-      const wikiSourcePage = pages.find(page => page.file?.includes('/app/pages/xwiki-fullpage.vue'))
+      const wikiSourcePage = pages.find((page) =>
+        normalizePath(page.file)?.includes('/app/pages/xwiki-fullpage.vue')
+      )
 
       if (!wikiSourcePage) {
         return
