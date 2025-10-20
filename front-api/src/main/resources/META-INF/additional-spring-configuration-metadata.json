@@ -44,6 +44,11 @@
       "name": "team-config",
       "type": "org.open4goods.nudgerfrontapi.config.properties.TeamProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.TeamProperties"
+    },
+    {
+      "name": "price-config",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.PriceRestitutionProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.PriceRestitutionProperties"
     }
   ],
   "properties": [
@@ -223,6 +228,31 @@
       "name": "team-config.contributors[].bloc-id",
       "type": "java.lang.String",
       "description": "XWiki bloc identifier providing the contributor biography."
+    },
+    {
+      "name": "price-config.events",
+      "type": "java.util.Map<java.lang.String, java.util.List<org.open4goods.model.priceevents.Event>>",
+      "description": "Commercial events grouped by language key (e.g. fr, en)."
+    },
+    {
+      "name": "price-config.events[].label",
+      "type": "java.lang.String",
+      "description": "Localised event label displayed on the calendar."
+    },
+    {
+      "name": "price-config.events[].start-date",
+      "type": "java.time.LocalDate",
+      "description": "Inclusive start date of the commercial event."
+    },
+    {
+      "name": "price-config.events[].end-date",
+      "type": "java.time.LocalDate",
+      "description": "Inclusive end date of the commercial event."
+    },
+    {
+      "name": "price-config.events[].color",
+      "type": "java.lang.String",
+      "description": "CSS compatible colour hint rendered by the frontend."
     }
   ]
 }
