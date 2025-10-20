@@ -45,8 +45,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       echarts:
-        specifier: ^5.5.1
-        version: 5.6.0
+        specifier: ^6.0.0
+        version: 6.0.0
       i:
         specifier: ^0.3.7
         version: 0.3.7
@@ -88,7 +88,7 @@ importers:
         version: 3.5.22(typescript@5.9.2)
       vue-echarts:
         specifier: ^6.7.3
-        version: 6.7.3(@vue/runtime-core@3.5.22)(echarts@5.6.0)(vue@3.5.22(typescript@5.9.2))
+        version: 6.7.3(@vue/runtime-core@3.5.22)(echarts@6.0.0)(vue@3.5.22(typescript@5.9.2))
       vuetify-nuxt-module:
         specifier: ^0.18.7
         version: 0.18.8(magicast@0.3.5)(typescript@5.9.2)(vite@7.1.9(@types/node@24.8.1)(jiti@2.6.1)(sass@1.93.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(vue@3.5.22(typescript@5.9.2))
@@ -4755,8 +4755,8 @@ packages:
   easy-table@1.1.0:
     resolution: {integrity: sha512-oq33hWOSSnl2Hoh00tZWaIPi1ievrD9aFG82/IgjlycAnW9hHx5PkJiXpxPsgEE+H7BsbVQXFVFST8TEXS6/pA==}
 
-  echarts@5.6.0:
-    resolution: {integrity: sha512-oTbVTsXfKuEhxftHqL5xprgLoc0k7uScAwtryCgWF6hPYFLRwOUHiFmHGCBKP5NPFNkDVopOieyUqYGH8Fa3kA==}
+  echarts@6.0.0:
+    resolution: {integrity: sha512-Tte/grDQRiETQP4xz3iZWSvoHrkCQtwqd6hs+mifXcjrCuo2iKWbajFObuLJVBlDIJlOzgQPd1hsaKt/3+OMkQ==}
 
   editorconfig@1.0.4:
     resolution: {integrity: sha512-L9Qe08KWTlqYMVvMcTIvMAdl1cDUubzRNYL+WfA4bLDMHe4nemKkpmYzkznE1FwLKu0EEmy6obgQKzMJrg4x9Q==}
@@ -9264,8 +9264,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zrender@5.6.1:
-    resolution: {integrity: sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==}
+  zrender@6.0.0:
+    resolution: {integrity: sha512-41dFXEEXuJpNecuUQq6JlbybmnHaqqpGlbH1yxnA5V9MMP4SbohSVZsJIwz+zdjQXSSlR1Vc34EgH1zxyTDvhg==}
 
 snapshots:
 
@@ -14310,10 +14310,10 @@ snapshots:
     optionalDependencies:
       wcwidth: 1.0.1
 
-  echarts@5.6.0:
+  echarts@6.0.0:
     dependencies:
       tslib: 2.3.0
-      zrender: 5.6.1
+      zrender: 6.0.0
 
   editorconfig@1.0.4:
     dependencies:
@@ -19331,9 +19331,9 @@ snapshots:
 
   vue-devtools-stub@0.1.0: {}
 
-  vue-echarts@6.7.3(@vue/runtime-core@3.5.22)(echarts@5.6.0)(vue@3.5.22(typescript@5.9.2)):
+  vue-echarts@6.7.3(@vue/runtime-core@3.5.22)(echarts@6.0.0)(vue@3.5.22(typescript@5.9.2)):
     dependencies:
-      echarts: 5.6.0
+      echarts: 6.0.0
       resize-detector: 0.3.0
       vue: 3.5.22(typescript@5.9.2)
       vue-demi: 0.13.11(vue@3.5.22(typescript@5.9.2))
@@ -19740,6 +19740,6 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zrender@5.6.1:
+  zrender@6.0.0:
     dependencies:
       tslib: 2.3.0
