@@ -262,7 +262,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
-import type { ActiveHeadEntry } from '@unhead/vue'
+import type { ActiveHeadEntry, UseHeadInput } from '@unhead/vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
@@ -482,7 +482,7 @@ useHead(() => ({
   ],
 }))
 
-let structuredDataHeadEntry: ActiveHeadEntry | null = null
+let structuredDataHeadEntry: ActiveHeadEntry<UseHeadInput> | null = null
 
 watch(
   structuredDataScripts,
