@@ -489,10 +489,12 @@
     },
     "hero": {
       "eyebrow": "Open data",
-      "title": "Des données produits ouvertes !",
-      "subtitle": "Téléchargez les jeux de données GTIN et ISBN maintenus par Nudger pour vos analyses, vos services et vos recherches.",
+      "title": "#FreeLesDonnées",
+      "subtitle": "On est des geeks mais on t'explique sans jargon technique. Nos données produits ? Open bar.
+      Nos bases : Tu peux les télécharger.
+      Nos secrets : On en a pas !",
       "primaryCta": {
-        "label": "Découvrir les jeux de données",
+        "label": "Découvre nos produits à nu(dger)",
         "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data"
       }
     },
