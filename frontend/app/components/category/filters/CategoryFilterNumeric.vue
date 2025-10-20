@@ -154,7 +154,22 @@ const chartHeight = computed(() => {
     return '0px'
   }
 
-  return `${Math.max(buckets.value.length * 32, 120)}px`
+  const baseHeight = 220
+  const extraHeight = Math.max(0, buckets.value.length - 6) * 16
+
+  return `${baseHeight + extraHeight}px`
+})
+
+const xAxisLabelRotation = computed(() => {
+  if (buckets.value.length > 6) {
+    return 45
+  }
+
+  if (buckets.value.length > 3) {
+    return 20
+  }
+
+  return 0
 })
 
 const chartOptions = computed<EChartsOption | null>(() => {
@@ -182,14 +197,14 @@ const chartOptions = computed<EChartsOption | null>(() => {
   const series = {
     type: 'bar',
     data,
-    barWidth: 12,
+    barWidth: 28,
     itemStyle: {
       color: chartColor.value,
       borderRadius: [6, 6, 6, 6],
     },
     label: {
       show: true,
-      position: 'right',
+      position: 'top',
       color: labelColor.value,
       fontSize: 11,
       formatter: ({ data }: { data?: RangeBucketDatum }) => {
@@ -204,11 +219,11 @@ const chartOptions = computed<EChartsOption | null>(() => {
 
   const options = {
     grid: {
-      top: 8,
-      bottom: 8,
-      left: 4,
-      right: 48,
-      containLabel: false,
+      top: 32,
+      bottom: 56,
+      left: 36,
+      right: 24,
+      containLabel: true,
     },
     tooltip: {
       trigger: 'item',
@@ -217,6 +232,26 @@ const chartOptions = computed<EChartsOption | null>(() => {
       formatter: tooltipFormatter,
     },
     xAxis: {
+      type: 'category',
+      data: data.map((bucket) => bucket.range),
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: gridLineColor.value,
+        },
+      },
+      axisTick: { show: false },
+      axisLabel: {
+        color: axisColor.value,
+        fontSize: 11,
+        interval: 0,
+        rotate: xAxisLabelRotation.value,
+        overflow: 'truncate',
+      },
+      boundaryGap: true,
+      splitLine: { show: false },
+    },
+    yAxis: {
       type: 'value',
       axisLine: { show: false },
       axisTick: { show: false },
@@ -230,14 +265,6 @@ const chartOptions = computed<EChartsOption | null>(() => {
         color: axisColor.value,
         fontSize: 11,
       },
-    },
-    yAxis: {
-      type: 'category',
-      data: data.map((_, index) => index + 1),
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { show: false },
-      splitLine: { show: false },
     },
     series: [series],
     animation: false,
