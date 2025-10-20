@@ -93,18 +93,12 @@ Legacy `team-*` tokens remain for backwards compatibility; prefer the generic na
 - Stores: `useXStore` created via `defineStore`.
 - Tests: colocate `*.spec.ts` files near the code under test (or in `tests/`).
 
-## Testing & Quality Gates
-Before opening a PR run, at minimum:
+## Testing & hardening
+Every code that is produced MUST me validated using :
 - `pnpm lint`
 - `pnpm test`
-- `pnpm build`
-- `pnpm generate` (for static output regressions)
-- `pnpm preprocess:css` (if CMS styling changed)
-- `pnpm generate:api` whenever backend contracts affecting the generated client changed
+- `pnpm generate` 
 
-Document any intentionally skipped check in your summary/PR.
-
-> **Test updates**: Whenever you author or modify spec/test files, run `pnpm generate`, `pnpm lint` and `pnpm build` in addition to `pnpm test` to catch type and generation regressions early.
 
 ## Documentation Expectations
 - Update or extend README, AGENTS.md, architectural notes, and comments when behaviour changes.
