@@ -67,13 +67,15 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
 </script>
 
 <style scoped lang="sass">
+
 .category-filter-list
   display: grid
   gap: 1.5rem
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr))
   align-items: stretch
 
   &__item
     display: flex
     flex-direction: column
+    min-width: 0
 </style>
