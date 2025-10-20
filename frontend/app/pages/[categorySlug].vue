@@ -301,6 +301,7 @@ import {
   mergeFiltersWithoutDuplicates,
 } from '~/utils/_subset-to-filters'
 import type { CategorySubsetClause } from '~/types/category-subset'
+import { resolveSortFieldTitle } from '~/utils/_field-localization'
 
 const route = useRoute()
 const router = useRouter()
@@ -762,7 +763,7 @@ const sortItems = computed(() => {
       seen.add(field.mapping as string)
       return {
         value: field.mapping as string,
-        title: field.title ?? field.mapping,
+        title: resolveSortFieldTitle(field, t),
       }
     })
 })

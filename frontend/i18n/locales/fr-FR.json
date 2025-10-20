@@ -108,7 +108,16 @@
       "noMatch": "Aucune option correspondante",
       "missingLabel": "Option sans libellé",
       "mobileApply": "Appliquer les filtres",
-      "mobileClear": "Effacer les filtres"
+      "mobileClear": "Effacer les filtres",
+      "fields": {
+        "price": "Fourchette de prix",
+        "offersCount": "Nombre d'offres",
+        "condition": "État des offres",
+        "googleTaxonomyId": "Catégorie produit Google",
+        "brand": "Marque",
+        "country": "Code pays du GTIN",
+        "datasource": "Sources de données"
+      }
     },
     "products": {
       "untitledProduct": "Produit sans nom",
@@ -149,7 +158,13 @@
       "viewList": "Vue liste",
       "viewTable": "Vue tableau",
       "openFilters": "Filtres",
-      "noResults": "Aucun produit ne correspond aux filtres sélectionnés."
+      "noResults": "Aucun produit ne correspond aux filtres sélectionnés.",
+      "sort": {
+        "fields": {
+          "price": "Prix le plus bas",
+          "offersCount": "Nombre d'offres"
+        }
+      }
     },
     "documentation": {
       "guidesTitle": "Guides utiles",

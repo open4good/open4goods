@@ -109,7 +109,16 @@
       "noMatch": "No matching options",
       "missingLabel": "Unlabelled option",
       "mobileApply": "Apply filters",
-      "mobileClear": "Clear all filters"
+      "mobileClear": "Clear all filters",
+      "fields": {
+        "price": "Price range",
+        "offersCount": "Number of offers",
+        "condition": "Offer condition",
+        "googleTaxonomyId": "Google product category",
+        "brand": "Brand",
+        "country": "GTIN country code",
+        "datasource": "Data sources"
+      }
     },
     "products": {
       "untitledProduct": "Unnamed product",
@@ -150,7 +159,13 @@
       "viewList": "List view",
       "viewTable": "Table view",
       "openFilters": "Filters",
-      "noResults": "No products match the selected filters."
+      "noResults": "No products match the selected filters.",
+      "sort": {
+        "fields": {
+          "price": "Lowest price",
+          "offersCount": "Number of offers"
+        }
+      }
     },
     "documentation": {
       "guidesTitle": "Helpful guides",

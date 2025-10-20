@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import type { FieldMetadataDto, ProductDto } from '~~/shared/api-client'
+import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 
 interface CategoryProductTableRow extends Record<string, unknown> {
   product: ProductDto
@@ -81,7 +82,7 @@ const dynamicHeaders = computed(() => {
       seen.add(mapping)
       return {
         key: mapping,
-        title: field.title ?? mapping,
+        title: resolveFilterFieldTitle(field, t, mapping),
         sortable: false,
       }
     })

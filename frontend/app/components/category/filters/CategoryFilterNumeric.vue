@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
+import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 import VueECharts from 'vue-echarts'
 import type { EChartsOption } from 'echarts'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
@@ -65,7 +66,7 @@ const emit = defineEmits<{ 'update:modelValue': [Filter | null] }>()
 const { t } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
-const displayTitle = computed(() => props.field.title ?? props.field.mapping ?? '')
+const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 
 const ariaLabel = computed(() => `${displayTitle.value} ${t('category.filters.rangeAriaSuffix')}`)
 
