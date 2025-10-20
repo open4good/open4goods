@@ -154,3 +154,37 @@ team-config:
       blocId: 'pages:team:stephane-castrec:'
       linkedInUrl: https://www.linkedin.com/in/scastrec/
       imageUrl: /images/team/Stephane.jpeg
+
+price-config:
+  events:
+    fr:
+      - label: "Soldes d'hiver"
+        startDate: "2025-01-08"
+        endDate: "2025-02-04"
+      - label: "French Days (Printemps)"
+        startDate: "2025-04-30"
+        endDate: "2025-05-07"
+      - label: "Soldes d'été"
+        startDate: "2025-06-25"
+        endDate: "2025-07-22"
+      - label: "Amazon Prime Day"
+        startDate: "2025-07-16"
+        endDate: "2025-07-17"
+      - label: "Rentrée scolaire"
+        startDate: "2025-09-01"
+        endDate: "2025-09-01"
+      - label: "French Days (Automne)"
+        startDate: "2025-09-23"
+        endDate: "2025-09-29"
+      - label: "Singles' Day"
+        startDate: "2025-11-11"
+        endDate: "2025-11-11"
+      - label: "Black Friday"
+        startDate: "2025-11-28"
+        endDate: "2025-11-28"
+      - label: "Cyber Monday"
+        startDate: "2025-12-01"
+        endDate: "2025-12-01"
+      - label: "Noël"
+        startDate: "2025-12-25"
+        endDate: "2025-12-25"
