@@ -28,6 +28,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
+import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
@@ -62,8 +63,10 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
+import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryEntryDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductPriceTrendDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPdfDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductRankingDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
@@ -468,7 +471,8 @@ public class ProductMappingService {
         Map<ProductCondition, List<ProductAggregatedPriceDto>> offersByCondition = Collections.emptyMap();
         ProductPriceHistoryDto newHistory = null;
         ProductPriceHistoryDto occasionHistory = null;
-        Map<ProductCondition, Integer> trends = Collections.emptyMap();
+        ProductPriceTrendDto newTrend = null;
+        ProductPriceTrendDto occasionTrend = null;
         Double historyPriceGap = null;
 
         if (aggregatedPrices != null) {
@@ -484,9 +488,10 @@ public class ProductMappingService {
                                     () -> new EnumMap<>(ProductCondition.class)));
             newHistory = mapPriceHistory(aggregatedPrices.getNewPricehistory());
             occasionHistory = mapPriceHistory(aggregatedPrices.getOccasionPricehistory());
-            trends = aggregatedPrices.getTrends() == null
-                    ? Collections.emptyMap()
-                    : new EnumMap<>(aggregatedPrices.getTrends());
+            newTrend = mapPriceTrend(computePriceTrend(aggregatedPrices.getNewPricehistory(),
+                    aggregatedPrices.bestNewOffer()));
+            occasionTrend = mapPriceTrend(computePriceTrend(aggregatedPrices.getOccasionPricehistory(),
+                    aggregatedPrices.bestOccasionOffer()));
             historyPriceGap = aggregatedPrices.historyPriceGap();
         }
 
@@ -499,7 +504,8 @@ public class ProductMappingService {
                 offersByCondition,
                 newHistory,
                 occasionHistory,
-                trends,
+                newTrend,
+                occasionTrend,
                 historyPriceGap);
     }
 
@@ -875,6 +881,58 @@ public class ProductMappingService {
                 mapPriceHistoryEntry(lowest),
                 mapPriceHistoryEntry(highest),
                 average);
+    }
+
+    /**
+     * Build the DTO representation of a price trend computed from a price history.
+     *
+     * @param priceTrend domain model trend computed from {@link PriceTrend#of(java.util.List, AggregatedPrice)}
+     * @return DTO mirroring the supplied trend or {@code null} when none is provided
+     */
+    private ProductPriceTrendDto mapPriceTrend(PriceTrend priceTrend) {
+        if (priceTrend == null) {
+            return null;
+        }
+        return new ProductPriceTrendDto(
+                toTrendState(priceTrend.trend()),
+                priceTrend.period(),
+                priceTrend.actualPrice(),
+                priceTrend.lastPrice(),
+                priceTrend.variation(),
+                priceTrend.historicalLowestPrice(),
+                priceTrend.historicalVariation());
+    }
+
+    /**
+     * Compute the raw price trend using the supplied history and reference price.
+     *
+     * @param history     chronological price history entries
+     * @param actualPrice price used as the current reference for the trend
+     * @return computed {@link PriceTrend} or {@code null} when the history is missing
+     */
+    private PriceTrend computePriceTrend(List<PriceHistory> history, AggregatedPrice actualPrice) {
+        if (history == null || history.isEmpty()) {
+            return null;
+        }
+        return PriceTrend.of(history, actualPrice);
+    }
+
+    /**
+     * Convert the integer trend indicator to its API level enumeration.
+     *
+     * @param trendValue numeric trend indicator returned by the domain model
+     * @return matching {@link PriceTrendState} or {@code null} when the value is not recognised
+     */
+    private PriceTrendState toTrendState(Integer trendValue) {
+        if (trendValue == null) {
+            return null;
+        }
+        return switch (trendValue) {
+        case -1 -> PriceTrendState.PRICE_DECREASE;
+        case 0 -> PriceTrendState.PRICE_STABLE;
+        case 1 -> PriceTrendState.PRICE_INCREASE;
+        default -> null;
+        };
     }
 
     /**

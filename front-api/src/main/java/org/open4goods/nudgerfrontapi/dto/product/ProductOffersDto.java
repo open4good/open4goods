@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.dto.product;
 
 import java.util.List;
 import java.util.Map;
+
 import org.open4goods.model.product.ProductCondition;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,8 +27,10 @@ public record ProductOffersDto(
         ProductPriceHistoryDto newHistory,
         @Schema(description = "Price history for second hand products", nullable = true)
         ProductPriceHistoryDto occasionHistory,
-        @Schema(description = "Price evolution trends per condition", nullable = true)
-        Map<ProductCondition, Integer> trends,
+        @Schema(description = "Trend computed from brand new offers", nullable = true)
+        ProductPriceTrendDto newTrend,
+        @Schema(description = "Trend computed from occasion offers", nullable = true)
+        ProductPriceTrendDto occasionTrend,
         @Schema(description = "Gap between current best price and historical lowest price", nullable = true)
         Double historyPriceGap
 ) {
