@@ -84,6 +84,7 @@ models/ProductPriceHistoryDto.ts
 models/ProductPriceHistoryEntryDto.ts
 models/ProductPriceTrendDto.ts
 models/ProductRankingDto.ts
+models/ProductReferenceDto.ts
 models/ProductResourcesDto.ts
 models/ProductScoreDto.ts
 models/ProductScoresDto.ts

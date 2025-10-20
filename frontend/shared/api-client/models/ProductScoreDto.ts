@@ -20,6 +20,13 @@ import {
     ProductCardinalityDtoToJSON,
     ProductCardinalityDtoToJSONTyped,
 } from './ProductCardinalityDto';
+import type { ProductReferenceDto } from './ProductReferenceDto';
+import {
+    ProductReferenceDtoFromJSON,
+    ProductReferenceDtoFromJSONTyped,
+    ProductReferenceDtoToJSON,
+    ProductReferenceDtoToJSONTyped,
+} from './ProductReferenceDto';
 
 /**
  * 
@@ -82,17 +89,17 @@ export interface ProductScoreDto {
      */
     ranking?: number;
     /**
-     * GTIN of the product with the lowest score
-     * @type {number}
+     * Details for the product with the lowest score
+     * @type {ProductReferenceDto}
      * @memberof ProductScoreDto
      */
-    lowestScoreId?: number;
+    lowestScore?: ProductReferenceDto;
     /**
-     * GTIN of the product with the highest score
-     * @type {number}
+     * Details for the product with the highest score
+     * @type {ProductReferenceDto}
      * @memberof ProductScoreDto
      */
-    highestScoreId?: number;
+    highestScore?: ProductReferenceDto;
     /**
      * Percentage representation of the score on a 0-100 scale
      * @type {number}
@@ -151,8 +158,8 @@ export function ProductScoreDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'relativ': json['relativ'] == null ? undefined : ProductCardinalityDtoFromJSON(json['relativ']),
         'metadatas': json['metadatas'] == null ? undefined : json['metadatas'],
         'ranking': json['ranking'] == null ? undefined : json['ranking'],
-        'lowestScoreId': json['lowestScoreId'] == null ? undefined : json['lowestScoreId'],
-        'highestScoreId': json['highestScoreId'] == null ? undefined : json['highestScoreId'],
+        'lowestScore': json['lowestScore'] == null ? undefined : ProductReferenceDtoFromJSON(json['lowestScore']),
+        'highestScore': json['highestScore'] == null ? undefined : ProductReferenceDtoFromJSON(json['highestScore']),
         'percent': json['percent'] == null ? undefined : json['percent'],
         'on20': json['on20'] == null ? undefined : json['on20'],
         'absoluteValue': json['absoluteValue'] == null ? undefined : json['absoluteValue'],
@@ -181,8 +188,8 @@ export function ProductScoreDtoToJSONTyped(value?: ProductScoreDto | null, ignor
         'relativ': ProductCardinalityDtoToJSON(value['relativ']),
         'metadatas': value['metadatas'],
         'ranking': value['ranking'],
-        'lowestScoreId': value['lowestScoreId'],
-        'highestScoreId': value['highestScoreId'],
+        'lowestScore': ProductReferenceDtoToJSON(value['lowestScore']),
+        'highestScore': ProductReferenceDtoToJSON(value['highestScore']),
         'percent': value['percent'],
         'on20': value['on20'],
         'absoluteValue': value['absoluteValue'],

@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProductReferenceDto } from './ProductReferenceDto';
+import {
+    ProductReferenceDtoFromJSON,
+    ProductReferenceDtoFromJSONTyped,
+    ProductReferenceDtoToJSON,
+    ProductReferenceDtoToJSONTyped,
+} from './ProductReferenceDto';
+
 /**
  * 
  * @export
@@ -32,17 +40,17 @@ export interface ProductRankingDto {
      */
     globalCount?: number;
     /**
-     * GTIN of the best ranked product in the global ranking
-     * @type {number}
+     * Details about the best ranked product
+     * @type {ProductReferenceDto}
      * @memberof ProductRankingDto
      */
-    globalBest?: number;
+    globalBest?: ProductReferenceDto;
     /**
-     * GTIN of the product ranked immediately above
-     * @type {number}
+     * Details about the product ranked immediately above
+     * @type {ProductReferenceDto}
      * @memberof ProductRankingDto
      */
-    globalBetter?: number;
+    globalBetter?: ProductReferenceDto;
     /**
      * Specialised ranking position
      * @type {number}
@@ -88,8 +96,8 @@ export function ProductRankingDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         
         'globalPosition': json['globalPosition'] == null ? undefined : json['globalPosition'],
         'globalCount': json['globalCount'] == null ? undefined : json['globalCount'],
-        'globalBest': json['globalBest'] == null ? undefined : json['globalBest'],
-        'globalBetter': json['globalBetter'] == null ? undefined : json['globalBetter'],
+        'globalBest': json['globalBest'] == null ? undefined : ProductReferenceDtoFromJSON(json['globalBest']),
+        'globalBetter': json['globalBetter'] == null ? undefined : ProductReferenceDtoFromJSON(json['globalBetter']),
         'specializedPosition': json['specializedPosition'] == null ? undefined : json['specializedPosition'],
         'specializedCount': json['specializedCount'] == null ? undefined : json['specializedCount'],
         'specializedBest': json['specializedBest'] == null ? undefined : json['specializedBest'],
@@ -110,8 +118,8 @@ export function ProductRankingDtoToJSONTyped(value?: ProductRankingDto | null, i
         
         'globalPosition': value['globalPosition'],
         'globalCount': value['globalCount'],
-        'globalBest': value['globalBest'],
-        'globalBetter': value['globalBetter'],
+        'globalBest': ProductReferenceDtoToJSON(value['globalBest']),
+        'globalBetter': ProductReferenceDtoToJSON(value['globalBetter']),
         'specializedPosition': value['specializedPosition'],
         'specializedCount': value['specializedCount'],
         'specializedBest': value['specializedBest'],
