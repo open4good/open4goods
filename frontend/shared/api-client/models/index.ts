@@ -18,6 +18,7 @@ export * from './CategoriesStatsDto';
 export * from './CategoryBreadcrumbItemDto';
 export * from './CategoryNavigationDto';
 export * from './CategoryNavigationDtoChildCategoriesInner';
+export * from './CommercialEvent';
 export * from './ContactRequestDto';
 export * from './ContactResponseDto';
 export * from './DescriptionsAggregationConfig';

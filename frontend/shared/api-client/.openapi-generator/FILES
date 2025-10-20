@@ -3,6 +3,7 @@ apis/AffiliationApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/CategoriesApi.ts
+apis/CommercialEventsApi.ts
 apis/ContactApi.ts
 apis/ContentApi.ts
 apis/FeedbackApi.ts
@@ -31,6 +32,7 @@ models/CategoriesStatsDto.ts
 models/CategoryBreadcrumbItemDto.ts
 models/CategoryNavigationDto.ts
 models/CategoryNavigationDtoChildCategoriesInner.ts
+models/CommercialEvent.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
