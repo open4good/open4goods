@@ -1,4 +1,4 @@
-package org.open4goods.commons.config.yml.ui;
+package org.open4goods.model.priceevents;
 
 import java.time.LocalDate;
 import java.util.List;
