@@ -262,6 +262,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
+import type { ActiveHeadEntry } from '@unhead/vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
@@ -479,8 +480,26 @@ useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
   ],
-  script: structuredDataScripts.value,
 }))
+
+let structuredDataHeadEntry: ActiveHeadEntry | null = null
+
+watch(
+  structuredDataScripts,
+  (scripts) => {
+    structuredDataHeadEntry?.dispose?.()
+
+    if (!scripts.length) {
+      structuredDataHeadEntry = null
+      return
+    }
+
+    structuredDataHeadEntry = useHead({
+      script: scripts,
+    })
+  },
+  { immediate: true },
+)
 
 const verticalId = computed(() => category.value?.id ?? null)
 
@@ -1168,6 +1187,9 @@ onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('hashchange', handleHashChange)
   }
+
+  structuredDataHeadEntry?.dispose?.()
+  structuredDataHeadEntry = null
 })
 
 watch(
