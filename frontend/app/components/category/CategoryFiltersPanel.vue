@@ -135,6 +135,7 @@ import { useI18n } from 'vue-i18n'
 
 import CategoryFilterList from './filters/CategoryFilterList.vue'
 import type { CategorySubsetClause } from '~/types/category-subset'
+import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 
 type ManualFilterChip = {
   kind: 'manual'
@@ -185,6 +186,22 @@ const aggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
   }, {})
 })
 
+const fieldMetadataMap = computed<Record<string, FieldMetadataDto>>(() => {
+  const entries = [
+    ...(props.filterOptions?.global ?? []),
+    ...(props.filterOptions?.impact ?? []),
+    ...(props.filterOptions?.technical ?? []),
+  ]
+
+  return entries.reduce<Record<string, FieldMetadataDto>>((accumulator, field) => {
+    if (field.mapping) {
+      accumulator[field.mapping] = field
+    }
+
+    return accumulator
+  }, {})
+})
+
 const impactPrimary = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.impact ?? []
   const ecoscore = entries.filter((item) => item.mapping === 'scores.ECOSCORE.value')
@@ -209,25 +226,29 @@ const technicalRemaining = computed<FieldMetadataDto[]>(() => {
 
 const manualFilterChips = computed<ManualFilterChip[]>(() => {
   return activeFilters.value.map((filter) => {
+    const mapping = filter.field ?? ''
+    const metadata = mapping ? fieldMetadataMap.value[mapping] : undefined
+    const label = resolveFilterFieldTitle(metadata, t, mapping)
+
     if (filter.operator === 'term') {
       const term = filter.terms?.[0] ?? ''
       return {
         kind: 'manual' as const,
-        id: `${filter.field}-${term}`,
-        field: filter.field ?? '',
+        id: `${mapping}-${term}`,
+        field: mapping,
         type: 'term' as const,
         term,
-        label: `${filter.field}: ${term}`,
+        label: term ? `${label}: ${term}` : label,
       }
     }
 
     return {
       kind: 'manual' as const,
-      id: `${filter.field}-range`,
-      field: filter.field ?? '',
+      id: `${mapping}-range`,
+      field: mapping,
       type: 'range' as const,
       term: null,
-      label: `${filter.field}: ${filter.min ?? '–'} → ${filter.max ?? '–'}`,
+      label: `${label}: ${filter.min ?? '–'} → ${filter.max ?? '–'}`,
     }
   })
 })
