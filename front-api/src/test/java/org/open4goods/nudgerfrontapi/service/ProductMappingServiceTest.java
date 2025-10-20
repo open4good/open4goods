@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,15 +11,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.Currency;
@@ -32,9 +37,12 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 
 
 class ProductMappingServiceTest {
@@ -47,6 +55,7 @@ class ProductMappingServiceTest {
     private AffiliationService affiliationService;
     private IcecatService icecatService;
     private SearchService searchService;
+    private CacheManager cacheManager;
 
     @BeforeEach
     void setUp() {
@@ -58,8 +67,11 @@ class ProductMappingServiceTest {
         affiliationService = mock(AffiliationService.class);
         icecatService = mock(IcecatService.class);
         searchService = mock(SearchService.class);
+        cacheManager = mock(CacheManager.class);
+        ConcurrentMapCache referenceCache = new ConcurrentMapCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
+        when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
-                verticalsConfigService, searchService, affiliationService, icecatService);
+                verticalsConfigService, searchService, affiliationService, icecatService, cacheManager);
     }
 
     @Test
@@ -92,6 +104,73 @@ class ProductMappingServiceTest {
         assertThat(dto.base().bestName()).isEqualTo("Eco Phone");
         assertThat(dto.base().ecoscoreValue()).isEqualTo(12.5);
         assertThat(dto.resources()).isNull();
+    }
+
+    @Test
+    void scoresIncludeReferencedProducts() throws Exception {
+        long gtin = 555L;
+        Product product = new Product(gtin);
+        product.setVertical("phones");
+
+        Score score = new Score("ENERGY", 10.0);
+        score.setLowestScoreId(111L);
+        score.setHighestScoreId(222L);
+        HashMap<String, Score> scores = new HashMap<>();
+        scores.put("ENERGY", score);
+        product.setScores(scores);
+
+        EcoScoreRanking ranking = new EcoScoreRanking();
+        ranking.setGlobalBest(111L);
+        ranking.setGlobalBetter(222L);
+        product.setRanking(ranking);
+
+        when(repository.getById(gtin)).thenReturn(product);
+
+        Product lowest = new Product(111L);
+        lowest.setVertical("phones");
+        ProductTexts lowestTexts = new ProductTexts();
+        Localisable<String, String> lowestUrl = new Localisable<>();
+        lowestUrl.put("en", "lowest");
+        lowestTexts.setUrl(lowestUrl);
+        lowest.setNames(lowestTexts);
+        lowest.setOfferNames(Set.of("Lowest offer"));
+
+        Product highest = new Product(222L);
+        highest.setVertical("phones");
+        ProductTexts highestTexts = new ProductTexts();
+        Localisable<String, String> highestUrl = new Localisable<>();
+        highestUrl.put("en", "highest");
+        highestTexts.setUrl(highestUrl);
+        highest.setNames(highestTexts);
+        highest.setOfferNames(Set.of("Highest offer"));
+
+        Map<String, Product> referenced = new HashMap<>();
+        referenced.put("111", lowest);
+        referenced.put("222", highest);
+        when(repository.multiGetById(anyCollection())).thenReturn(referenced);
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("phones");
+        when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
+        when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
+
+        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,
+                "Phones", "Phones description", "phones", List.of());
+        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(verticalDto);
+
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("scores"), DomainLanguage.en);
+
+        assertThat(dto.scores()).isNotNull();
+        ProductScoreDto mappedScore = dto.scores().scores().get("ENERGY");
+        assertThat(mappedScore).isNotNull();
+        assertThat(mappedScore.lowestScore()).isNotNull();
+        assertThat(mappedScore.lowestScore().id()).isEqualTo(111L);
+        assertThat(mappedScore.lowestScore().fullSlug()).isEqualTo("/phones/lowest");
+        assertThat(mappedScore.highestScore()).isNotNull();
+        assertThat(mappedScore.highestScore().id()).isEqualTo(222L);
+        assertThat(dto.scores().ranking()).isNotNull();
+        assertThat(dto.scores().ranking().globalBest()).isNotNull();
+        assertThat(dto.scores().ranking().globalBest().id()).isEqualTo(111L);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -24,6 +25,7 @@ import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
@@ -69,6 +71,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryEntryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceTrendDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPdfDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductRankingDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductReferenceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
@@ -83,6 +86,8 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -112,7 +117,8 @@ public class ProductMappingService {
     private static final String IMAGES_PATH = "/images/";
     private static final String PDFS_PATH = "/pdfs/";
     private static final String VIDEOS_PATH = "/videos/";
-	private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
+    private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
+    private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -121,6 +127,7 @@ public class ProductMappingService {
     private final SearchService searchService;
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
+    private final Cache referenceCache;
 
 
     public ProductMappingService(ProductRepository repository,
@@ -129,7 +136,8 @@ public class ProductMappingService {
             VerticalsConfigService verticalsConfigService,
             SearchService searchService,
             AffiliationService affiliationService,
-            IcecatService icecatService) {
+            IcecatService icecatService,
+            CacheManager cacheManager) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -137,6 +145,11 @@ public class ProductMappingService {
         this.searchService = searchService;
         this.affiliationService = affiliationService;
         this.icecatService = icecatService;
+        this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
+        if (this.referenceCache == null) {
+            logger.warn("Cache {} is not configured; product reference caching disabled.",
+                    CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
+        }
     }
 
     /**
@@ -166,10 +179,7 @@ public class ProductMappingService {
      */
     public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage) {
 
-        VerticalConfig vConfig = verticalsConfigService.getConfigById(product.getVertical());
-        if (vConfig == null) {
-            vConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
-        }
+        VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
         ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale) : null;
@@ -178,7 +188,12 @@ public class ProductMappingService {
         ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes) ? mapAttributes(product, vConfig, domainLanguage) : null;
         ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product) : null;
         ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources) ? mapDatasources(product) : null;
-        ProductScoresDto scores = components.contains(ProductDtoComponent.scores) ? mapScores(product, domainLanguage, vConfig) : null;
+        Map<Long, ProductReferenceDto> referencedProducts = components.contains(ProductDtoComponent.scores)
+                ? resolveReferencedProducts(product, domainLanguage, locale)
+                : Collections.emptyMap();
+        ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
+                ? mapScores(product, domainLanguage, vConfig, referencedProducts)
+                : null;
         ProductAiTextsDto aiTexts = components.contains(ProductDtoComponent.aiTexts) ? mapAiTexts(product, domainLanguage, locale) : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
 
@@ -208,6 +223,179 @@ public class ProductMappingService {
                 scores,
                 aiTexts,
                 offers);
+    }
+
+    /**
+     * Resolve the products referenced by score extremes or rankings and project them to lightweight DTOs.
+     */
+    private Map<Long, ProductReferenceDto> resolveReferencedProducts(Product product, DomainLanguage domainLanguage,
+            Locale locale) {
+        Set<Long> referencedIds = collectReferencedProductIds(product);
+        if (referencedIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return fetchProductReferences(referencedIds, domainLanguage, locale);
+    }
+
+    /**
+     * Collect all product identifiers referenced by score extremes or rankings.
+     */
+    private Set<Long> collectReferencedProductIds(Product product) {
+        if (product == null) {
+            return Collections.emptySet();
+        }
+        Set<Long> ids = new LinkedHashSet<>();
+        collectScoreReferences(ids, product.getScores() == null ? null : product.getScores().values());
+        collectScoreReferences(ids, product.realScores());
+        collectScoreReferences(ids, product.virtualScores());
+        Score ecoscore = product.ecoscore();
+        if (ecoscore != null) {
+            collectScoreReferences(ids, List.of(ecoscore));
+        }
+        EcoScoreRanking ranking = product.getRanking();
+        if (ranking != null) {
+            if (ranking.getGlobalBest() != null) {
+                ids.add(ranking.getGlobalBest());
+            }
+            if (ranking.getGlobalBetter() != null) {
+                ids.add(ranking.getGlobalBetter());
+            }
+        }
+        return ids;
+    }
+
+    /**
+     * Append score extreme identifiers to the provided set.
+     */
+    private void collectScoreReferences(Set<Long> ids, Collection<Score> scores) {
+        if (ids == null || scores == null) {
+            return;
+        }
+        for (Score score : scores) {
+            if (score == null) {
+                continue;
+            }
+            if (score.getLowestScoreId() != null) {
+                ids.add(score.getLowestScoreId());
+            }
+            if (score.getHighestScoreId() != null) {
+                ids.add(score.getHighestScoreId());
+            }
+        }
+    }
+
+    /**
+     * Retrieve product references from the cache or repository.
+     */
+    private Map<Long, ProductReferenceDto> fetchProductReferences(Set<Long> ids, DomainLanguage domainLanguage,
+            Locale locale) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Long, ProductReferenceDto> resolved = new LinkedHashMap<>();
+        List<Long> missing = new ArrayList<>();
+        for (Long id : ids) {
+            if (id == null) {
+                continue;
+            }
+            ProductReferenceDto cached = getCachedProductReference(id, domainLanguage, locale);
+            if (cached != null) {
+                resolved.put(id, cached);
+            }
+            else {
+                missing.add(id);
+            }
+        }
+        if (!missing.isEmpty()) {
+            try {
+                Map<String, Product> fetched = repository.multiGetById(missing);
+                for (Long id : missing) {
+                    Product referencedProduct = fetched.get(String.valueOf(id));
+                    if (referencedProduct != null) {
+                        ProductReferenceDto referenceDto = mapProductReference(referencedProduct, domainLanguage, locale);
+                        resolved.put(id, referenceDto);
+                        cacheProductReference(id, domainLanguage, locale, referenceDto);
+                    }
+                }
+            }
+            catch (ResourceNotFoundException ex) {
+                logger.warn("Unable to resolve referenced products {}: {}", missing, ex.getMessage());
+            }
+        }
+        return resolved;
+    }
+
+    /**
+     * Project a referenced product to the lightweight DTO used by rankings and extremes.
+     */
+    private ProductReferenceDto mapProductReference(Product referencedProduct, DomainLanguage domainLanguage, Locale locale) {
+        if (referencedProduct == null) {
+            return null;
+        }
+        String slug = null;
+        if (referencedProduct.getNames() != null) {
+            slug = resolveLocalisedString(referencedProduct.getNames().getUrl(), domainLanguage, locale);
+        }
+        String fullSlug = null;
+        if (StringUtils.hasText(slug)) {
+            VerticalConfig config = resolveVerticalConfig(referencedProduct.getVertical());
+            String verticalHomeUrl = resolveVerticalHomeUrl(referencedProduct.getVertical(), domainLanguage, config);
+            if (StringUtils.hasText(verticalHomeUrl)) {
+                fullSlug = "/" + verticalHomeUrl + "/" + slug;
+            }
+        }
+        return new ProductReferenceDto(
+                referencedProduct.getId(),
+                fullSlug,
+                referencedProduct.bestName(),
+                referencedProduct.brand(),
+                referencedProduct.model());
+    }
+
+    /**
+     * Retrieve a product reference from the cache when available.
+     */
+    private ProductReferenceDto getCachedProductReference(Long id, DomainLanguage domainLanguage, Locale locale) {
+        if (referenceCache == null || id == null) {
+            return null;
+        }
+        Cache.ValueWrapper wrapper = referenceCache.get(referenceCacheKey(id, domainLanguage, locale));
+        if (wrapper == null) {
+            return null;
+        }
+        Object value = wrapper.get();
+        if (value instanceof ProductReferenceDto referenceDto) {
+            return referenceDto;
+        }
+        return null;
+    }
+
+    /**
+     * Store a freshly resolved product reference in the cache.
+     */
+    private void cacheProductReference(Long id, DomainLanguage domainLanguage, Locale locale,
+            ProductReferenceDto referenceDto) {
+        if (referenceCache == null || id == null || referenceDto == null) {
+            return;
+        }
+        referenceCache.put(referenceCacheKey(id, domainLanguage, locale), referenceDto);
+    }
+
+    /**
+     * Build the cache key used to store referenced products.
+     */
+    private String referenceCacheKey(Long id, DomainLanguage domainLanguage, Locale locale) {
+        String languageKey;
+        if (domainLanguage != null && StringUtils.hasText(domainLanguage.languageTag())) {
+            languageKey = domainLanguage.languageTag();
+        }
+        else if (locale != null) {
+            languageKey = locale.toLanguageTag();
+        }
+        else {
+            languageKey = DEFAULT_LANGUAGE_KEY;
+        }
+        return PRODUCT_REFERENCE_CACHE_PREFIX + ':' + id + ':' + languageKey;
     }
 
     /**
@@ -395,28 +583,31 @@ public class ProductMappingService {
     /**
      * Map eco score and other computed scores into DTO representations.
      */
-    private ProductScoresDto mapScores(Product product, DomainLanguage domainLanguage, VerticalConfig vConf) {
+    private ProductScoresDto mapScores(Product product, DomainLanguage domainLanguage, VerticalConfig vConf,
+            Map<Long, ProductReferenceDto> referencedProducts) {
         Map<String, ProductScoreDto> scores = product.getScores() == null
                 ? Collections.emptyMap()
                 : product.getScores().entrySet().stream()
                         .collect(Collectors.toMap(Entry::getKey,
-                                entry -> mapScore(entry.getValue(), domainLanguage, vConf),
+                                entry -> mapScore(entry.getValue(), domainLanguage, vConf, referencedProducts),
                                 (left, right) -> right,
                                 LinkedHashMap::new));
         List<ProductScoreDto> realScores = product.realScores() == null
                 ? Collections.emptyList()
-                : product.realScores().stream().map(e -> mapScore(e,domainLanguage, vConf)).toList();
+                : product.realScores().stream().map(e -> mapScore(e, domainLanguage, vConf, referencedProducts)).toList();
         List<ProductScoreDto> virtualScores = product.virtualScores() == null
                 ? Collections.emptyList()
-                : product.virtualScores().stream().map(e -> mapScore(e,domainLanguage, vConf)).toList();
-        ProductScoreDto ecoscore = product.ecoscore() == null ? null : mapScore(product.ecoscore(),domainLanguage, vConf);
+                : product.virtualScores().stream().map(e -> mapScore(e, domainLanguage, vConf, referencedProducts)).toList();
+        ProductScoreDto ecoscore = product.ecoscore() == null
+                ? null
+                : mapScore(product.ecoscore(), domainLanguage, vConf, referencedProducts);
         Set<String> worstScores = product.getWorsesScores() == null
                 ? Collections.emptySet()
                 : new LinkedHashSet<>(product.getWorsesScores());
         Set<String> bestScores = product.getBestsScores() == null
                 ? Collections.emptySet()
                 : new LinkedHashSet<>(product.getBestsScores());
-        ProductRankingDto ranking = mapRanking(product);
+        ProductRankingDto ranking = mapRanking(product, referencedProducts);
 
         return new ProductScoresDto(scores, realScores, virtualScores, ecoscore, worstScores, bestScores, ranking);
     }
@@ -424,7 +615,7 @@ public class ProductMappingService {
     /**
      * Map ranking information provided by the product repository.
      */
-    private ProductRankingDto mapRanking(Product product) {
+    private ProductRankingDto mapRanking(Product product, Map<Long, ProductReferenceDto> referencedProducts) {
         EcoScoreRanking ranking = product.getRanking();
         if (ranking == null) {
             return null;
@@ -432,8 +623,8 @@ public class ProductMappingService {
         return new ProductRankingDto(
                 ranking.getGlobalPosition(),
                 ranking.getGlobalCount(),
-                ranking.getGlobalBest(),
-                ranking.getGlobalBetter(),
+                referencedProducts.get(ranking.getGlobalBest()),
+                referencedProducts.get(ranking.getGlobalBetter()),
                 ranking.getSpecializedPosition(),
                 ranking.getSpecializedCount(),
                 ranking.getSpecializedBest(),
@@ -612,6 +803,20 @@ public class ProductMappingService {
             return ULocale.forLocale(locale);
         }
         return ULocale.getDefault();
+    }
+
+    /**
+     * Resolve the vertical configuration matching the provided identifier with fallback to the default configuration.
+     */
+    private VerticalConfig resolveVerticalConfig(String verticalId) {
+        if (!StringUtils.hasText(verticalId)) {
+            return null;
+        }
+        VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+        if (config == null) {
+            config = verticalsConfigService.getConfigByIdOrDefault(verticalId);
+        }
+        return config;
     }
 
     /**
@@ -948,7 +1153,8 @@ public class ProductMappingService {
     /**
      * Map a score into its DTO, including localisation of impact criteria when possible.
      */
-    private ProductScoreDto mapScore(Score score, DomainLanguage domainLanguage, VerticalConfig vConf) {
+    private ProductScoreDto mapScore(Score score, DomainLanguage domainLanguage, VerticalConfig vConf,
+            Map<Long, ProductReferenceDto> referencedProducts) {
         if (score == null) {
             return null;
         }
@@ -970,8 +1176,10 @@ public class ProductMappingService {
         }
 
 
+        Map<Long, ProductReferenceDto> references = referencedProducts == null ? Collections.emptyMap() : referencedProducts;
+
         return new ProductScoreDto(
-        		score.getName(),
+                score.getName(),
                 title,
                 description,
                 score.getVirtual(),
@@ -980,8 +1188,8 @@ public class ProductMappingService {
                 mapCardinality(score.getRelativ()),
                 score.getMetadatas(),
                 score.getRanking(),
-                score.getLowestScoreId(),
-                score.getHighestScoreId(),
+                references.get(score.getLowestScoreId()),
+                references.get(score.getHighestScoreId()),
                 safeCall(score::percent),
                 safeCall(score::on20),
                 safeCall(score::absValue),

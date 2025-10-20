@@ -10,10 +10,10 @@ public record ProductRankingDto(
         Long globalPosition,
         @Schema(description = "Number of items considered in the global ranking", example = "5000")
         Long globalCount,
-        @Schema(description = "GTIN of the best ranked product in the global ranking", nullable = true)
-        Long globalBest,
-        @Schema(description = "GTIN of the product ranked immediately above", nullable = true)
-        Long globalBetter,
+        @Schema(description = "Details about the best ranked product", implementation = ProductReferenceDto.class, nullable = true)
+        ProductReferenceDto globalBest,
+        @Schema(description = "Details about the product ranked immediately above", implementation = ProductReferenceDto.class, nullable = true)
+        ProductReferenceDto globalBetter,
         @Schema(description = "Specialised ranking position", example = "12")
         Long specializedPosition,
         @Schema(description = "Number of items considered in the specialised ranking", example = "120")
