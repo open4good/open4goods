@@ -570,7 +570,9 @@ const layoutStyle = computed(() => {
   const width = clampFiltersPanelWidth(filtersPanelWidth.value)
 
   return {
-    gridTemplateColumns: `${width}px ${RESIZER_COLUMN_WIDTH}px minmax(0, 1fr)`,
+    gridTemplateColumns: `${width}px minmax(0, 1fr)`,
+    '--filters-panel-width': `${width}px`,
+    '--filters-resizer-hitbox': `${RESIZER_COLUMN_WIDTH}px`,
   }
 })
 
@@ -1507,6 +1509,7 @@ const clearAllFilters = () => {
 
   &__layout
     display: grid
+    position: relative
     row-gap: 1.75rem
     column-gap: 1.75rem
     grid-template-columns: minmax(0, 1fr)
@@ -1531,24 +1534,31 @@ const clearAllFilters = () => {
 
   &__filters-resizer
     display: none
-    align-self: stretch
-    width: 12px
-    min-height: 100%
+    position: absolute
+    top: 0
+    bottom: 0
+    left: var(--filters-panel-width, 300px)
+    transform: translateX(-50%)
+    width: var(--filters-resizer-hitbox, 12px)
     cursor: col-resize
     border-radius: 999px
     background: transparent
-    position: relative
     justify-content: center
     align-items: center
     outline: none
     touch-action: none
+    z-index: 1
 
     &::before
       content: ''
+      position: absolute
+      left: 50%
+      top: 20%
+      bottom: 20%
       width: 2px
-      height: 60%
       border-radius: 999px
       background: rgba(var(--v-theme-border-primary-strong), 0.6)
+      transform: translateX(-50%)
       transition: background-color 0.2s ease
 
     &:hover::before
@@ -1603,7 +1613,7 @@ const clearAllFilters = () => {
 
 @media (min-width: 1280px)
   .category-page__layout
-    grid-template-columns: minmax(260px, 300px) 12px minmax(0, 1fr)
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr)
     column-gap: 1.5rem
 
   .category-page__filters-surface
