@@ -732,11 +732,12 @@ public class ProductController {
                     @Parameter(name = "gtin",
                             description = "Global Trade Item Number (8–14 digit numeric code)",
                             example = "8806095491998",
-                            required = true),
+                            required = true,
+                            schema = @Schema(type = "integer", format = "int64", minimum = "0")),
                     @Parameter(
                             name        = "include",
                             in          = ParameterIn.QUERY,
-                            description = "Champs à inclure (peut se répéter)",
+                            description = "Components to include in the response (repeatable parameter)",
                             array       = @ArraySchema(
                                 schema = @Schema(implementation = ProductDtoComponent.class)
                             )
