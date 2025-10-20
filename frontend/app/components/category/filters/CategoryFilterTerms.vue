@@ -118,6 +118,10 @@ const formatOptionLabel = (key?: string) => key ?? t('category.filters.missingLa
     flex-direction: column
     gap: 0.5rem
 
+  &__search
+    width: 100%
+    min-width: 0
+
   &__title
     margin: 0
     font-size: 1rem

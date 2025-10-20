@@ -323,6 +323,8 @@ const formatBucketLabel = (from?: string, to?: number) => {
 
   &__slider
     margin-top: 0.25rem
+    width: 100%
+    min-width: 0
 
   &__chart
     width: 100%
