@@ -490,9 +490,7 @@
     "hero": {
       "eyebrow": "Open data",
       "title": "#FreeLesDonnées",
-      "subtitle": "On est des geeks mais on t'explique sans jargon technique. Nos données produits ? Open bar.
-      Nos bases : Tu peux les télécharger.
-      Nos secrets : On en a pas !",
+      "subtitle": "On est des geeks mais on t'explique sans jargon technique. Nos données produits ? Open bar. Nos bases : Tu peux les télécharger. Nos secrets : On en a pas !",
       "primaryCta": {
         "label": "Découvre nos produits à nu(dger)",
         "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data"
