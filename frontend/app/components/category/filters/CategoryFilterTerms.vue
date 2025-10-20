@@ -111,6 +111,7 @@ const formatOptionLabel = (key?: string) => key ?? t('category.filters.missingLa
   display: flex
   flex-direction: column
   gap: 0.75rem
+  height: 100%
 
   &__header
     display: flex

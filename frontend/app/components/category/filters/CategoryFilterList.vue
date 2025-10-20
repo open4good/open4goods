@@ -68,7 +68,12 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
 
 <style scoped lang="sass">
 .category-filter-list
-  display: flex
-  flex-direction: column
+  display: grid
   gap: 1.5rem
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+  align-items: stretch
+
+  &__item
+    display: flex
+    flex-direction: column
 </style>
