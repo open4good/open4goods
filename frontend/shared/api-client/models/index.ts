@@ -69,6 +69,7 @@ export * from './ProductOffersDto';
 export * from './ProductPdfDto';
 export * from './ProductPriceHistoryDto';
 export * from './ProductPriceHistoryEntryDto';
+export * from './ProductPriceTrendDto';
 export * from './ProductRankingDto';
 export * from './ProductResourcesDto';
 export * from './ProductScoreDto';

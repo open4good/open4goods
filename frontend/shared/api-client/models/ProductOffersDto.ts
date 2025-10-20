@@ -27,6 +27,13 @@ import {
     ProductAggregatedPriceDtoToJSON,
     ProductAggregatedPriceDtoToJSONTyped,
 } from './ProductAggregatedPriceDto';
+import type { ProductPriceTrendDto } from './ProductPriceTrendDto';
+import {
+    ProductPriceTrendDtoFromJSON,
+    ProductPriceTrendDtoFromJSONTyped,
+    ProductPriceTrendDtoToJSON,
+    ProductPriceTrendDtoToJSONTyped,
+} from './ProductPriceTrendDto';
 
 /**
  * 
@@ -83,11 +90,17 @@ export interface ProductOffersDto {
      */
     occasionHistory?: ProductPriceHistoryDto;
     /**
-     * Price evolution trends per condition
-     * @type {{ [key: string]: number; }}
+     * Trend computed from brand new offers
+     * @type {ProductPriceTrendDto}
      * @memberof ProductOffersDto
      */
-    trends?: { [key: string]: number; };
+    newTrend?: ProductPriceTrendDto;
+    /**
+     * Trend computed from occasion offers
+     * @type {ProductPriceTrendDto}
+     * @memberof ProductOffersDto
+     */
+    occasionTrend?: ProductPriceTrendDto;
     /**
      * Gap between current best price and historical lowest price
      * @type {number}
@@ -121,7 +134,8 @@ export function ProductOffersDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'offersByCondition': json['offersByCondition'] == null ? undefined : json['offersByCondition'],
         'newHistory': json['newHistory'] == null ? undefined : ProductPriceHistoryDtoFromJSON(json['newHistory']),
         'occasionHistory': json['occasionHistory'] == null ? undefined : ProductPriceHistoryDtoFromJSON(json['occasionHistory']),
-        'trends': json['trends'] == null ? undefined : json['trends'],
+        'newTrend': json['newTrend'] == null ? undefined : ProductPriceTrendDtoFromJSON(json['newTrend']),
+        'occasionTrend': json['occasionTrend'] == null ? undefined : ProductPriceTrendDtoFromJSON(json['occasionTrend']),
         'historyPriceGap': json['historyPriceGap'] == null ? undefined : json['historyPriceGap'],
     };
 }
@@ -145,7 +159,8 @@ export function ProductOffersDtoToJSONTyped(value?: ProductOffersDto | null, ign
         'offersByCondition': value['offersByCondition'],
         'newHistory': ProductPriceHistoryDtoToJSON(value['newHistory']),
         'occasionHistory': ProductPriceHistoryDtoToJSON(value['occasionHistory']),
-        'trends': value['trends'],
+        'newTrend': ProductPriceTrendDtoToJSON(value['newTrend']),
+        'occasionTrend': ProductPriceTrendDtoToJSON(value['occasionTrend']),
         'historyPriceGap': value['historyPriceGap'],
     };
 }
