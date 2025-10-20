@@ -16,9 +16,7 @@ public record CommercialEventDto(
         LocalDate startDate,
 
         @Schema(description = "Inclusive event end date.", type = "string", format = "date", example = "2025-11-29")
-        LocalDate endDate,
+        LocalDate endDate
 
-        @Schema(description = "CSS compatible colour hint used when displaying the event.",
-                example = "rgba(176,255,76,0.25)")
-        String color) {
+      ) {
 }

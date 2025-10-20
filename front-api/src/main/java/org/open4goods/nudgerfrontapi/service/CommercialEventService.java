@@ -72,6 +72,6 @@ public class CommercialEventService {
     }
 
     private CommercialEventDto toDto(Event event) {
-        return new CommercialEventDto(event.getLabel(), event.getStartDate(), event.getEndDate(), event.getColor());
+        return new CommercialEventDto(event.getLabel(), event.getStartDate(), event.getEndDate());
     }
 }
