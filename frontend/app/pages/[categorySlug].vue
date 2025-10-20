@@ -18,7 +18,7 @@
         @reset="onResetSubsets"
       />
 
-      <div class="category-page__layout">
+      <div ref="layoutRef" class="category-page__layout" :style="layoutStyle">
         <v-navigation-drawer
           v-if="!isDesktop"
           v-model="filtersDrawer"
@@ -50,9 +50,11 @@
 
         <aside
           v-else
+          ref="filtersSidebarRef"
           class="category-page__filters-surface"
           role="complementary"
           :aria-label="$t('category.products.openFilters')"
+          :style="filtersStyle"
         >
           <CategoryFiltersSidebar
             :filter-options="filterOptions"
@@ -72,6 +74,16 @@
             @remove-subset-clause="onRemoveSubsetClause"
           />
         </aside>
+
+        <div
+          v-if="isDesktop"
+          ref="filtersResizerRef"
+          class="category-page__filters-resizer"
+          role="separator"
+          aria-orientation="vertical"
+          tabindex="0"
+          @pointerdown="onResizeHandlePointerDown"
+        />
 
         <section
           class="category-page__results"
@@ -263,7 +275,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import type { ActiveHeadEntry, UseHeadInput } from '@unhead/vue'
-import { useDebounceFn } from '@vueuse/core'
+import { useDebounceFn, useEventListener, useStorage } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
 import type {
@@ -524,10 +536,153 @@ const display = useDisplay()
 const isDesktop = computed(() => display.lgAndUp.value)
 const filtersDrawer = ref(false)
 
+const FILTERS_PANEL_STORAGE_KEY = 'category-page-filters-width'
+const DEFAULT_FILTERS_PANEL_WIDTH = 300
+const MIN_FILTERS_PANEL_WIDTH = 260
+const MAX_FILTERS_PANEL_WIDTH = 480
+const RESIZER_COLUMN_WIDTH = 12
+
+const clampFiltersPanelWidth = (value: number | null | undefined): number => {
+  const numericValue = typeof value === 'number' && !Number.isNaN(value)
+    ? value
+    : DEFAULT_FILTERS_PANEL_WIDTH
+
+  return Math.min(MAX_FILTERS_PANEL_WIDTH, Math.max(MIN_FILTERS_PANEL_WIDTH, numericValue))
+}
+
+const filtersPanelWidth = useStorage<number>(
+  FILTERS_PANEL_STORAGE_KEY,
+  DEFAULT_FILTERS_PANEL_WIDTH,
+)
+
+filtersPanelWidth.value = clampFiltersPanelWidth(filtersPanelWidth.value)
+
+const layoutRef = ref<HTMLElement | null>(null)
+const filtersSidebarRef = ref<HTMLElement | null>(null)
+const filtersResizerRef = ref<HTMLElement | null>(null)
+const isResizing = ref(false)
+
+const layoutStyle = computed(() => {
+  if (!isDesktop.value) {
+    return {}
+  }
+
+  const width = clampFiltersPanelWidth(filtersPanelWidth.value)
+
+  return {
+    gridTemplateColumns: `${width}px ${RESIZER_COLUMN_WIDTH}px minmax(0, 1fr)`,
+  }
+})
+
+const filtersStyle = computed(() => {
+  if (!isDesktop.value) {
+    return {}
+  }
+
+  const width = clampFiltersPanelWidth(filtersPanelWidth.value)
+
+  return {
+    width: `${width}px`,
+  }
+})
+
+let activePointerId: number | null = null
+let initialPointerX = 0
+let initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+
+let stopPointerMove: (() => void) | undefined
+let stopPointerUp: (() => void) | undefined
+let stopPointerCancel: (() => void) | undefined
+
+const removePointerListeners = () => {
+  stopPointerMove?.()
+  stopPointerMove = undefined
+  stopPointerUp?.()
+  stopPointerUp = undefined
+  stopPointerCancel?.()
+  stopPointerCancel = undefined
+
+  if (activePointerId !== null) {
+    filtersResizerRef.value?.releasePointerCapture?.(activePointerId)
+  }
+}
+
+const onPointerMove = (event: PointerEvent) => {
+  if (!isResizing.value || (activePointerId !== null && event.pointerId !== activePointerId)) {
+    return
+  }
+
+  event.preventDefault()
+
+  const deltaX = event.clientX - initialPointerX
+  const nextWidth = clampFiltersPanelWidth(initialPanelWidth + deltaX)
+  filtersPanelWidth.value = nextWidth
+}
+
+const onPointerEnd = (event: PointerEvent) => {
+  if (!isResizing.value || (activePointerId !== null && event.pointerId !== activePointerId)) {
+    return
+  }
+
+  isResizing.value = false
+  activePointerId = null
+  initialPointerX = 0
+  initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+
+  if (event.pointerId !== undefined) {
+    filtersResizerRef.value?.releasePointerCapture?.(event.pointerId)
+  }
+
+  removePointerListeners()
+}
+
+const onResizeHandlePointerDown = (event: PointerEvent) => {
+  if (!isDesktop.value) {
+    return
+  }
+
+  event.preventDefault()
+
+  removePointerListeners()
+
+  isResizing.value = true
+  activePointerId = event.pointerId
+  initialPointerX = event.clientX
+  const sidebarRect = filtersSidebarRef.value?.getBoundingClientRect()
+  initialPanelWidth = sidebarRect
+    ? clampFiltersPanelWidth(sidebarRect.width)
+    : clampFiltersPanelWidth(filtersPanelWidth.value)
+
+  filtersPanelWidth.value = initialPanelWidth
+
+  filtersResizerRef.value?.setPointerCapture?.(event.pointerId)
+
+  if (!stopPointerMove) {
+    stopPointerMove = useEventListener(window, 'pointermove', onPointerMove)
+  }
+
+  if (!stopPointerUp) {
+    stopPointerUp = useEventListener(window, 'pointerup', onPointerEnd)
+  }
+
+  if (!stopPointerCancel) {
+    stopPointerCancel = useEventListener(window, 'pointercancel', onPointerEnd)
+  }
+}
+
+
 watch(
   isDesktop,
   (value) => {
     filtersDrawer.value = value
+
+    if (!value) {
+      removePointerListeners()
+      isResizing.value = false
+      activePointerId = null
+      initialPointerX = 0
+      initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+    }
   },
   { immediate: true },
 )
@@ -1191,6 +1346,7 @@ onBeforeUnmount(() => {
 
   structuredDataHeadEntry?.dispose?.()
   structuredDataHeadEntry = null
+  removePointerListeners()
 })
 
 watch(
@@ -1351,7 +1507,8 @@ const clearAllFilters = () => {
 
   &__layout
     display: grid
-    gap: 1.75rem
+    row-gap: 1.75rem
+    column-gap: 1.75rem
     grid-template-columns: minmax(0, 1fr)
     align-items: start
 
@@ -1371,6 +1528,35 @@ const clearAllFilters = () => {
     box-shadow: 0 22px 46px -28px rgba(var(--v-theme-shadow-primary-600), 0.28)
     overflow: hidden
     overscroll-behavior: contain
+
+  &__filters-resizer
+    display: none
+    align-self: stretch
+    width: 12px
+    min-height: 100%
+    cursor: col-resize
+    border-radius: 999px
+    background: transparent
+    position: relative
+    justify-content: center
+    align-items: center
+    outline: none
+    touch-action: none
+
+    &::before
+      content: ''
+      width: 2px
+      height: 60%
+      border-radius: 999px
+      background: rgba(var(--v-theme-border-primary-strong), 0.6)
+      transition: background-color 0.2s ease
+
+    &:hover::before
+      background: rgb(var(--v-theme-border-primary-strong))
+
+    &:focus-visible
+      outline: 2px solid rgb(var(--v-theme-accent-primary-highlight))
+      outline-offset: 2px
 
   &__filters-content
     display: flex
@@ -1417,10 +1603,14 @@ const clearAllFilters = () => {
 
 @media (min-width: 1280px)
   .category-page__layout
-    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr)
+    grid-template-columns: minmax(260px, 300px) 12px minmax(0, 1fr)
+    column-gap: 1.5rem
 
   .category-page__filters-surface
     max-height: calc(100vh - 152px)
+
+  .category-page__filters-resizer
+    display: flex
 
 @media (max-width: 959px)
   .category-page__toolbar
