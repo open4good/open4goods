@@ -890,7 +890,7 @@ public class ProductMappingService {
      * @return DTO mirroring the supplied trend or {@code null} when none is provided
      */
     private ProductPriceTrendDto mapPriceTrend(PriceTrend priceTrend) {
-        if (priceTrend == null) {
+        if (priceTrend == null || null == priceTrend.actualPrice()) {
             return null;
         }
         return new ProductPriceTrendDto(
