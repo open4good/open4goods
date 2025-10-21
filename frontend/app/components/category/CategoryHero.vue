@@ -10,24 +10,11 @@
       </div>
 
       <div class="category-hero__content">
-        <v-breadcrumbs
-          v-if="breadcrumbs.length"
-          :aria-label="t('category.hero.breadcrumbAriaLabel')"
+        <CategoryNavigationBreadcrumbs
+          v-if="heroBreadcrumbs.length"
+          v-bind="heroBreadcrumbProps"
           class="category-hero__breadcrumbs"
-        >
-          <template #divider>
-            <span class="category-hero__breadcrumb-divider" aria-hidden="true">
-              {{ t('category.hero.breadcrumbDivider') }}
-            </span>
-          </template>
-          <v-breadcrumbs-item
-            v-for="(item, index) in breadcrumbs"
-            :key="`${index}-${item.title ?? item.link ?? index}`"
-            :href="item.link || undefined"
-          >
-            {{ item.title ?? item.link ?? t('category.hero.missingBreadcrumbTitle') }}
-          </v-breadcrumbs-item>
-        </v-breadcrumbs>
+        />
 
         <div class="category-hero__copy">
           <p v-if="eyebrow" class="category-hero__eyebrow">
@@ -50,6 +37,13 @@ import { useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
 
+import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
+
+type HeroBreadcrumbItem = {
+  title: string
+  link?: string
+}
+
 const props = defineProps<{
   title: string
   description?: string | null
@@ -63,6 +57,34 @@ const { t } = useI18n()
 
 const breadcrumbs = computed(() => props.breadcrumbs ?? [])
 const eyebrow = computed(() => props.eyebrow ?? null)
+
+const heroBreadcrumbs = computed<HeroBreadcrumbItem[]>(() => {
+  const items = breadcrumbs.value
+    .map((item) => ({
+      title:
+        item.title?.trim().length
+          ? item.title
+          : item.link?.trim().length
+            ? item.link
+            : t('category.hero.missingBreadcrumbTitle'),
+      link: item.link?.trim().length ? item.link : undefined,
+    }))
+    .filter((item) => item.title.trim().length)
+
+  if (!items.length) {
+    return []
+  }
+
+  return items.map((item, index) => ({
+    ...item,
+    link: index === items.length - 1 ? undefined : item.link,
+  }))
+})
+
+const heroBreadcrumbProps = computed(() => ({
+  items: heroBreadcrumbs.value,
+  ariaLabel: t('category.hero.breadcrumbAriaLabel'),
+}))
 
 defineExpose({ headingId, t })
 </script>
@@ -93,22 +115,25 @@ defineExpose({ headingId, t })
     width: 100%
 
   &__breadcrumbs
-    --v-breadcrumbs-divider-color: rgba(var(--v-theme-hero-overlay-strong), 0.6)
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
-    font-size: 0.875rem
-
-    :deep(.v-breadcrumbs-item)
-      color: inherit
-
-    :deep(.v-breadcrumbs-divider)
-      color: inherit
-
-  &__breadcrumb-divider
     display: inline-flex
-    align-items: center
-    padding: 0 0.5rem
-    color: inherit
-    font-size: inherit
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
+
+    :deep(.category-navigation-breadcrumbs)
+      color: inherit
+
+    :deep(.category-navigation-breadcrumbs__separator)
+      color: rgba(var(--v-theme-hero-overlay-strong), 0.6)
+
+    :deep(.category-navigation-breadcrumbs__current)
+      color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+
+    :deep(.category-navigation-breadcrumbs__link)
+      color: inherit
+
+    :deep(.category-navigation-breadcrumbs__link:hover),
+    :deep(.category-navigation-breadcrumbs__link:focus-visible)
+      color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+      text-decoration: underline
 
   &__eyebrow
     display: inline-flex

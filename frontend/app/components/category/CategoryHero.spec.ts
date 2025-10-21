@@ -37,9 +37,8 @@ describe('CategoryHero', () => {
             template: '<div class="v-img"><slot /></div>',
             props: ['src', 'alt', 'cover'],
           },
-          VBreadcrumbs: { template: '<nav class="v-breadcrumbs"><slot /></nav>' },
-          VBreadcrumbsItem: { template: '<span class="v-breadcrumbs-item"><slot /></span>' },
           VSkeletonLoader: { template: '<div class="v-skeleton" />' },
+          NuxtLink: { template: '<a><slot /></a>' },
         },
       },
     })
@@ -59,10 +58,16 @@ describe('CategoryHero', () => {
     expect(wrapper.get('h1').text()).toBe('Energy efficient dishwashers')
     expect(wrapper.text()).toContain('Compare eco-designed dishwashers to reduce energy consumption.')
 
-    const breadcrumbItems = wrapper.findAll('.v-breadcrumbs-item')
+    const breadcrumbItems = wrapper.findAll(
+      '.category-navigation-breadcrumbs__item',
+    )
     expect(breadcrumbItems).toHaveLength(2)
-    const firstBreadcrumb = breadcrumbItems.at(0)
-    expect(firstBreadcrumb?.text()).toBe('Home')
+    const firstBreadcrumbLink = breadcrumbItems.at(0)?.find('a')
+    expect(firstBreadcrumbLink?.text()).toBe('Home')
+
+    const lastBreadcrumb = breadcrumbItems.at(1)
+    expect(lastBreadcrumb?.find('a').exists()).toBe(false)
+    expect(lastBreadcrumb?.text()).toContain('Appliances')
 
     const section = wrapper.get('section')
     expect(section.attributes('aria-labelledby')).toBeTruthy()
