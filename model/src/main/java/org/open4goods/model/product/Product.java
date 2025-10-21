@@ -131,6 +131,7 @@ public class Product implements Standardisable {
 
 
 	/** The ai generated texts, keyed by language**/
+	// TODO : Deprecated
 	private Localisable<String,AiDescriptions> genaiTexts = new Localisable<>();
 
 	/**

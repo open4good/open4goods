@@ -32,8 +32,6 @@ public record ProductDto(
         ProductDatasourcesDto datasources,
         @Schema(description = "Score and ranking related information")
         ProductScoresDto scores,
-        @Schema(description = "AI generated texts localised according to the requested domainLanguage when implemented.")
-        ProductAiTextsDto aiTexts,
         @Schema(description = "Product offers and pricing information")
         ProductOffersDto offers
 ) {

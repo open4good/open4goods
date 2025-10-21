@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.ai.AiDescriptions;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
@@ -47,9 +46,8 @@ import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
+import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAiDescriptionDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
@@ -60,16 +58,15 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductImageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
-import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
+import org.open4goods.nudgerfrontapi.dto.product.ProductPdfDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceHistoryEntryDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductPriceTrendDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductPdfDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductRankingDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReferenceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
@@ -93,7 +90,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -194,7 +190,6 @@ public class ProductMappingService {
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
                 ? mapScores(product, domainLanguage, vConfig, referencedProducts)
                 : null;
-        ProductAiTextsDto aiTexts = components.contains(ProductDtoComponent.aiTexts) ? mapAiTexts(product, domainLanguage, locale) : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
 
         String slug = null;
@@ -221,7 +216,6 @@ public class ProductMappingService {
                 resources,
                 datasources,
                 scores,
-                aiTexts,
                 offers);
     }
 
@@ -631,24 +625,6 @@ public class ProductMappingService {
                 ranking.getSpecializedBetter());
     }
 
-    /**
-     * Map AI generated descriptive texts.
-     */
-    private ProductAiTextsDto mapAiTexts(Product product, DomainLanguage domainLanguage, Locale locale) {
-        ResolvedLocalisedValue<AiDescriptions> resolved = resolveLocalised(product.getGenaiTexts(), domainLanguage, locale);
-        if (resolved.value() == null) {
-            return null;
-        }
-        Map<String, ProductAiDescriptionDto> descriptions = Optional.ofNullable(resolved.value().getDescriptions())
-                .orElse(Collections.emptyMap())
-                .entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .collect(Collectors.toMap(Entry::getKey,
-                        entry -> new ProductAiDescriptionDto(entry.getValue().getTs(), entry.getValue().getContent()),
-                        (left, right) -> right,
-                        LinkedHashMap::new));
-        return new ProductAiTextsDto(resolved.key(), descriptions);
-    }
 
     /**
      * Map offers including best prices, histories and trends.
