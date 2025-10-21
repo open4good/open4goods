@@ -21,6 +21,9 @@ models/AggregationMetadata.ts
 models/AggregationRequestDto.ts
 models/AggregationResponseDto.ts
 models/AiPromptsConfig.ts
+models/AiReviewAttributeDto.ts
+models/AiReviewDto.ts
+models/AiReviewSourceDto.ts
 models/AttributeConfigDto.ts
 models/AttributeParserConfig.ts
 models/AttributesConfigDto.ts
@@ -64,8 +67,7 @@ models/PageDtoProductDto.ts
 models/PageMetaDto.ts
 models/ProblemDetail.ts
 models/ProductAggregatedPriceDto.ts
-models/ProductAiDescriptionDto.ts
-models/ProductAiTextsDto.ts
+models/ProductAiReviewDto.ts
 models/ProductAttributeDto.ts
 models/ProductAttributesDto.ts
 models/ProductBaseDto.ts

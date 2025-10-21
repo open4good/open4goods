@@ -236,7 +236,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Return high‑level product information and aggregated scores.
+     * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
      * Get product view
      */
     async productRaw(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductDto>> {
@@ -289,7 +289,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Return high‑level product information and aggregated scores.
+     * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
      * Get product view
      */
     async product(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductDto> {
@@ -523,6 +523,7 @@ export const ProductIncludeEnum = {
     Resources: 'resources',
     Datasources: 'datasources',
     Scores: 'scores',
+    AiReview: 'aiReview',
     AiTexts: 'aiTexts',
     Offers: 'offers'
 } as const;
@@ -546,6 +547,7 @@ export const ProductsIncludeEnum = {
     Resources: 'resources',
     Datasources: 'datasources',
     Scores: 'scores',
+    AiReview: 'aiReview',
     AiTexts: 'aiTexts',
     Offers: 'offers'
 } as const;

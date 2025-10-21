@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ProductAiTextsDto } from './ProductAiTextsDto';
-import {
-    ProductAiTextsDtoFromJSON,
-    ProductAiTextsDtoFromJSONTyped,
-    ProductAiTextsDtoToJSON,
-    ProductAiTextsDtoToJSONTyped,
-} from './ProductAiTextsDto';
 import type { ProductNamesDto } from './ProductNamesDto';
 import {
     ProductNamesDtoFromJSON,
@@ -69,6 +62,13 @@ import {
     ProductResourcesDtoToJSON,
     ProductResourcesDtoToJSONTyped,
 } from './ProductResourcesDto';
+import type { ProductAiReviewDto } from './ProductAiReviewDto';
+import {
+    ProductAiReviewDtoFromJSON,
+    ProductAiReviewDtoFromJSONTyped,
+    ProductAiReviewDtoToJSON,
+    ProductAiReviewDtoToJSONTyped,
+} from './ProductAiReviewDto';
 import type { ProductScoresDto } from './ProductScoresDto';
 import {
     ProductScoresDtoFromJSON,
@@ -144,11 +144,11 @@ export interface ProductDto {
      */
     scores?: ProductScoresDto;
     /**
-     * AI generated texts localised according to the requested domainLanguage when implemented.
-     * @type {ProductAiTextsDto}
+     * AI generated review resolved for the requested domain language
+     * @type {ProductAiReviewDto}
      * @memberof ProductDto
      */
-    aiTexts?: ProductAiTextsDto;
+    aiReview?: ProductAiReviewDto;
     /**
      * Product offers and pricing information
      * @type {ProductOffersDto}
@@ -184,7 +184,7 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         'resources': json['resources'] == null ? undefined : ProductResourcesDtoFromJSON(json['resources']),
         'datasources': json['datasources'] == null ? undefined : ProductDatasourcesDtoFromJSON(json['datasources']),
         'scores': json['scores'] == null ? undefined : ProductScoresDtoFromJSON(json['scores']),
-        'aiTexts': json['aiTexts'] == null ? undefined : ProductAiTextsDtoFromJSON(json['aiTexts']),
+        'aiReview': json['aiReview'] == null ? undefined : ProductAiReviewDtoFromJSON(json['aiReview']),
         'offers': json['offers'] == null ? undefined : ProductOffersDtoFromJSON(json['offers']),
     };
 }
@@ -210,7 +210,7 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
         'resources': ProductResourcesDtoToJSON(value['resources']),
         'datasources': ProductDatasourcesDtoToJSON(value['datasources']),
         'scores': ProductScoresDtoToJSON(value['scores']),
-        'aiTexts': ProductAiTextsDtoToJSON(value['aiTexts']),
+        'aiReview': ProductAiReviewDtoToJSON(value['aiReview']),
         'offers': ProductOffersDtoToJSON(value['offers']),
     };
 }

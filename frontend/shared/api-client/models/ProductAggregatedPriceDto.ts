@@ -26,6 +26,12 @@ export interface ProductAggregatedPriceDto {
      */
     datasourceName?: string;
     /**
+     * URL pointing to the datasource favicon
+     * @type {string}
+     * @memberof ProductAggregatedPriceDto
+     */
+    favicon?: string;
+    /**
      * Displayed offer title
      * @type {string}
      * @memberof ProductAggregatedPriceDto
@@ -120,6 +126,7 @@ export function ProductAggregatedPriceDtoFromJSONTyped(json: any, ignoreDiscrimi
     return {
         
         'datasourceName': json['datasourceName'] == null ? undefined : json['datasourceName'],
+        'favicon': json['favicon'] == null ? undefined : json['favicon'],
         'offerName': json['offerName'] == null ? undefined : json['offerName'],
         'url': json['url'] == null ? undefined : json['url'],
         'compensation': json['compensation'] == null ? undefined : json['compensation'],
@@ -144,6 +151,7 @@ export function ProductAggregatedPriceDtoToJSONTyped(value?: ProductAggregatedPr
     return {
         
         'datasourceName': value['datasourceName'],
+        'favicon': value['favicon'],
         'offerName': value['offerName'],
         'url': value['url'],
         'compensation': value['compensation'],
