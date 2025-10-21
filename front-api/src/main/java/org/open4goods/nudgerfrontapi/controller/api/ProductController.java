@@ -712,7 +712,8 @@ public class ProductController {
     }
 
     /**
-     * Return high level information for a product.
+     * Return high level information for a product, including optional AI generated review
+     * metadata when the corresponding component is requested.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -726,7 +727,7 @@ public class ProductController {
     @GetMapping("/{gtin}")
     @Operation(
             summary = "Get product view",
-            description = "Return high‑level product information and aggregated scores.",
+            description = "Return high‑level product information, aggregated scores and optional AI review content.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "gtin",

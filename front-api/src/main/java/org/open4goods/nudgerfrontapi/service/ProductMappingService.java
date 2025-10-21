@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
+import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
@@ -30,6 +31,7 @@ import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.price.PriceTrend;
+import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
@@ -46,9 +48,13 @@ import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
+import org.open4goods.nudgerfrontapi.dto.product.AiReviewAttributeDto;
+import org.open4goods.nudgerfrontapi.dto.product.AiReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.AiReviewSourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductCardinalityDto;
@@ -190,6 +196,9 @@ public class ProductMappingService {
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
                 ? mapScores(product, domainLanguage, vConfig, referencedProducts)
                 : null;
+        ProductAiReviewDto aiReview = components.contains(ProductDtoComponent.aiReview)
+                ? mapAiReview(product, domainLanguage, locale)
+                : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
 
         String slug = null;
@@ -216,6 +225,7 @@ public class ProductMappingService {
                 resources,
                 datasources,
                 scores,
+                aiReview,
                 offers);
     }
 
@@ -604,6 +614,114 @@ public class ProductMappingService {
         ProductRankingDto ranking = mapRanking(product, referencedProducts);
 
         return new ProductScoresDto(scores, realScores, virtualScores, ecoscore, worstScores, bestScores, ranking);
+    }
+
+    /**
+     * Map the AI generated review associated with the product using localisation fallback rules.
+     *
+     * @param product        product retrieved from the repository
+     * @param domainLanguage requested domain language guiding localisation
+     * @param locale         HTTP locale fallback used when the domain language is not provided
+     * @return DTO describing the AI review or {@code null} when none is available
+     */
+    private ProductAiReviewDto mapAiReview(Product product, DomainLanguage domainLanguage, Locale locale) {
+        if (product == null || product.getReviews() == null || product.getReviews().isEmpty()) {
+            return null;
+        }
+
+        ResolvedLocalisedValue<AiReviewHolder> resolved = resolveLocalised(product.getReviews(), domainLanguage, locale);
+        AiReviewHolder holder = resolved.value();
+        if (holder == null) {
+            return null;
+        }
+
+        AiReviewDto reviewDto = mapAiReview(holder.getReview());
+        Map<String, Integer> sources = sanitizeSourceWeights(holder.getSources());
+        return new ProductAiReviewDto(
+                resolved.key(),
+                reviewDto,
+                sources,
+                holder.isEnoughData(),
+                holder.getTotalTokens(),
+                holder.getCreatedMs());
+    }
+
+    /**
+     * Convert the domain {@link AiReview} to its transport representation.
+     */
+    private AiReviewDto mapAiReview(AiReview review) {
+        if (review == null) {
+            return null;
+        }
+
+        List<String> pros = review.getPros() == null
+                ? List.of()
+                : review.getPros().stream().filter(Objects::nonNull).toList();
+        List<String> cons = review.getCons() == null
+                ? List.of()
+                : review.getCons().stream().filter(Objects::nonNull).toList();
+        List<AiReviewSourceDto> sources = review.getSources() == null
+                ? List.of()
+                : review.getSources().stream()
+                        .map(this::mapAiReviewSource)
+                        .filter(Objects::nonNull)
+                        .toList();
+        List<AiReviewAttributeDto> attributes = review.getAttributes() == null
+                ? List.of()
+                : review.getAttributes().stream()
+                        .map(this::mapAiReviewAttribute)
+                        .filter(Objects::nonNull)
+                        .toList();
+
+        return new AiReviewDto(
+                review.getDescription(),
+                review.getShortDescription(),
+                review.getMediumTitle(),
+                review.getShortTitle(),
+                review.getTechnicalReview(),
+                review.getEcologicalReview(),
+                review.getSummary(),
+                pros,
+                cons,
+                sources,
+                attributes,
+                review.getDataQuality());
+    }
+
+    /**
+     * Map an {@link AiReview.AiSource} to the DTO representation.
+     */
+    private AiReviewSourceDto mapAiReviewSource(AiReview.AiSource source) {
+        if (source == null) {
+            return null;
+        }
+        return new AiReviewSourceDto(source.getNumber(), source.getName(), source.getDescription(), source.getUrl());
+    }
+
+    /**
+     * Map an {@link AiReview.AiAttribute} to the DTO representation.
+     */
+    private AiReviewAttributeDto mapAiReviewAttribute(AiReview.AiAttribute attribute) {
+        if (attribute == null) {
+            return null;
+        }
+        return new AiReviewAttributeDto(attribute.getName(), attribute.getValue(), attribute.getNumber());
+    }
+
+    /**
+     * Remove null entries from the AI review sources map and expose an immutable view.
+     */
+    private Map<String, Integer> sanitizeSourceWeights(Map<String, Integer> sources) {
+        if (sources == null || sources.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, Integer> sanitized = new LinkedHashMap<>();
+        sources.forEach((key, value) -> {
+            if (key != null && value != null) {
+                sanitized.put(key, value);
+            }
+        });
+        return sanitized.isEmpty() ? Map.of() : Map.copyOf(sanitized);
     }
 
     /**
