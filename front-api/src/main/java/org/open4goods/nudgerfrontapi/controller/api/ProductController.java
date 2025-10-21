@@ -727,7 +727,8 @@ public class ProductController {
     @GetMapping("/{gtin}")
     @Operation(
             summary = "Get product view",
-            description = "Return high‑level product information, aggregated scores and optional AI review content.",
+            description = "Return high‑level product information, aggregated scores and optional AI review content, "
+                    + "including datasource favicons for offers and AI source references.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "gtin",

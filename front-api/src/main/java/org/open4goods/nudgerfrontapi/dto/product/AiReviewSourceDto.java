@@ -16,6 +16,10 @@ public record AiReviewSourceDto(
         String description,
 
         @Schema(description = "Public URL to access the source", format = "uri", example = "https://example.org/datasheet.pdf")
-        String url
+        String url,
+
+        @Schema(description = "URL pointing to the favicon associated with the source domain", format = "uri",
+                example = "https://static.open4goods.org/favicon?url=https://example.org")
+        String favicon
 ) {
 }

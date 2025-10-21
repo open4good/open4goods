@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ProductAggregatedPriceDto(
         @Schema(description = "Datasource providing the offer", example = "amazon.fr")
         String datasourceName,
+        @Schema(description = "URL pointing to the datasource favicon", format = "uri",
+                example = "https://static.open4goods.org/icon/amazon.fr")
+        String favicon,
         @Schema(description = "Displayed offer title")
         String offerName,
         @Schema(description = "Target URL of the offer", example = "https://example.org/product/123")
