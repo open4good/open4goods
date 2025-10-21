@@ -1,5 +1,6 @@
 package org.open4goods.nudgerfrontapi.service;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -119,6 +120,8 @@ public class ProductMappingService {
     private static final String IMAGES_PATH = "/images/";
     private static final String PDFS_PATH = "/pdfs/";
     private static final String VIDEOS_PATH = "/videos/";
+    private static final String ICON_PATH = "/icon/";
+    private static final String FAVICON_ENDPOINT = "/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
 
@@ -695,7 +698,12 @@ public class ProductMappingService {
         if (source == null) {
             return null;
         }
-        return new AiReviewSourceDto(source.getNumber(), source.getName(), source.getDescription(), source.getUrl());
+        return new AiReviewSourceDto(
+                source.getNumber(),
+                source.getName(),
+                source.getDescription(),
+                source.getUrl(),
+                buildSourceFavicon(source.getUrl()));
     }
 
     /**
@@ -1148,6 +1156,7 @@ public class ProductMappingService {
         }
         return new ProductAggregatedPriceDto(
                 price.getDatasourceName(),
+                buildDatasourceFavicon(price.getDatasourceName()),
                 price.getOfferName(),
                 url,
                 price.getCompensation(),
@@ -1157,6 +1166,68 @@ public class ProductMappingService {
                 price.getCurrency(),
                 price.getTimeStamp(),
                 safeCall(price::shortPrice));
+    }
+
+    /**
+     * Build the favicon URL for the provided datasource.
+     */
+    private String buildDatasourceFavicon(String datasourceName) {
+        if (!StringUtils.hasText(datasourceName)) {
+            return null;
+        }
+        String resourceRoot = apiProperties.getResourceRootPath();
+        if (!StringUtils.hasText(resourceRoot)) {
+            return null;
+        }
+        return resourceRoot + ICON_PATH + datasourceName;
+    }
+
+    /**
+     * Build the favicon proxy URL for the provided source URL.
+     */
+    private String buildSourceFavicon(String sourceUrl) {
+        if (!StringUtils.hasText(sourceUrl)) {
+            return null;
+        }
+        String resourceRoot = apiProperties.getResourceRootPath();
+        if (!StringUtils.hasText(resourceRoot)) {
+            return null;
+        }
+        String root = safeCall(() -> extractRootUrl(sourceUrl));
+        if (!StringUtils.hasText(root)) {
+            return null;
+        }
+        return resourceRoot + FAVICON_ENDPOINT + root;
+    }
+
+    /**
+     * Extract the canonical root URL (scheme, host and optional port) from a full URL.
+     */
+    private String extractRootUrl(String url) {
+        URI uri = URI.create(url);
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (!StringUtils.hasText(scheme) || !StringUtils.hasText(host)) {
+            return null;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(scheme).append("://").append(host);
+        int port = uri.getPort();
+        if (port > 0 && port != defaultPortForScheme(scheme)) {
+            builder.append(':').append(port);
+        }
+        return builder.toString();
+    }
+
+    private int defaultPortForScheme(String scheme) {
+        if (!StringUtils.hasText(scheme)) {
+            return -1;
+        }
+        return switch (scheme.toLowerCase(Locale.ROOT)) {
+        case "http" -> 80;
+        case "https" -> 443;
+        default -> -1;
+        };
     }
 
     /**

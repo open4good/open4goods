@@ -3,10 +3,12 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.util.List;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.event.CommercialEventDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CommercialEventService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -46,7 +48,8 @@ public class CommercialEventsController {
      * List commercial events configured in the application properties.
      *
      * @param domainLanguage mandatory domain language hint driving localisation
-     * @return commercial events ready to be consumed by the frontend
+     * @return commercial events ready to be consumed by the frontend. Results are cached for one hour using the
+     *         {@link CacheConstants#ONE_HOUR_LOCAL_CACHE_NAME} cache to avoid recomputing static configuration.
      */
     @GetMapping
     @Operation(
@@ -67,6 +70,7 @@ public class CommercialEventsController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<List<CommercialEventDto>> commercialEvents(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<CommercialEventDto> events = commercialEventService.commercialEvents(domainLanguage);
