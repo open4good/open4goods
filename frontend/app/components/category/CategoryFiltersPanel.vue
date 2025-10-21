@@ -1,7 +1,7 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
     <div v-if="activeChips.length" class="category-filters__active">
-      <v-chip-group column>
+      <div class="category-filters__chips">
         <v-chip
           v-for="chip in activeChips"
           :key="chip.id"
@@ -11,10 +11,9 @@
           size="small"
           @click:close="onRemoveChip(chip)"
         >
-          <v-icon icon="mdi-close-circle" size="16" class="me-1" />
           <span>{{ chip.label }}</span>
         </v-chip>
-      </v-chip-group>
+      </div>
     </div>
 
     <v-expansion-panels multiple class="category-filters__panels">
@@ -353,6 +352,11 @@ defineExpose({ activeChips })
     padding: 0.5rem
     background: rgb(var(--v-theme-surface-glass))
     border-radius: 0.75rem
+
+  &__chips
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
 
   &__panels
     background: transparent
