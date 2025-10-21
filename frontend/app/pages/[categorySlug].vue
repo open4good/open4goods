@@ -282,6 +282,7 @@ import type {
   AggregationRequestDto,
   AggregationResponseDto,
   Agg,
+  FieldMetadataDto,
   Filter,
   FilterRequestDto,
   ProductFieldOptionsResponse,
@@ -313,7 +314,7 @@ import {
   mergeFiltersWithoutDuplicates,
 } from '~/utils/_subset-to-filters'
 import type { CategorySubsetClause } from '~/types/category-subset'
-import { resolveSortFieldTitle } from '~/utils/_field-localization'
+import { resolveFilterFieldTitle, resolveSortFieldTitle } from '~/utils/_field-localization'
 
 const route = useRoute()
 const router = useRouter()
@@ -831,11 +832,14 @@ const subsetFilters = computed(() =>
 )
 
 const buildSubsetClauseLabel = (filter: Filter): string => {
-  const field = filter.field ?? 'field'
+  const mapping = filter.field ?? ''
+  const fallbackField = mapping || 'field'
+  const metadata = mapping ? filterFieldMap.value[mapping] : undefined
+  const fieldLabel = resolveFilterFieldTitle(metadata, t, fallbackField) || fallbackField
 
   if (filter.operator === 'term') {
     const term = filter.terms?.[0] ?? ''
-    return `${field}: ${term}`
+    return term ? `${fieldLabel}: ${term}` : fieldLabel
   }
 
   const bounds: string[] = []
@@ -849,10 +853,10 @@ const buildSubsetClauseLabel = (filter: Filter): string => {
   }
 
   if (!bounds.length) {
-    return field
+    return fieldLabel
   }
 
-  return `${field}: ${bounds.join(' · ')}`
+  return `${fieldLabel}: ${bounds.join(' · ')}`
 }
 
 const activeSubsetClauses = computed<CategorySubsetClause[]>(() => {
@@ -1103,7 +1107,7 @@ const hasDocumentation = computed(() => {
   return wikiCount + postCount > 0
 })
 
-const tableFields = computed(() => {
+const tableFields = computed<FieldMetadataDto[]>(() => {
   if (!filterOptions.value) {
     return []
   }
@@ -1113,6 +1117,16 @@ const tableFields = computed(() => {
     ...(filterOptions.value.impact ?? []),
     ...(filterOptions.value.technical ?? []),
   ]
+})
+
+const filterFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
+  return tableFields.value.reduce<Record<string, FieldMetadataDto>>((accumulator, field) => {
+    if (field.mapping) {
+      accumulator[String(field.mapping)] = field
+    }
+
+    return accumulator
+  }, {})
 })
 
 const viewComponent = computed(() => {
