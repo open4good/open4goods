@@ -32,6 +32,9 @@ public record ProductDto(
         ProductDatasourcesDto datasources,
         @Schema(description = "Score and ranking related information")
         ProductScoresDto scores,
+        @Schema(description = "AI generated review resolved for the requested domain language")
+        ProductAiReviewDto aiReview,
+
         @Schema(description = "Product offers and pricing information")
         ProductOffersDto offers
 ) {
@@ -47,6 +50,7 @@ public record ProductDto(
                 resources,
                 datasources,
                 scores,
+                aiReview,
                 aiTexts,
                 offers
         }
