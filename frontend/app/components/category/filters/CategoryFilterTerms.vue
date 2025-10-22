@@ -3,6 +3,7 @@
     <div class="category-filter-terms__header">
       <p class="category-filter-terms__title">{{ displayTitle }}</p>
       <v-text-field
+        v-if="showSearch"
         v-model="search"
         :label="$t('category.filters.searchOptions')"
         density="compact"
@@ -14,7 +15,7 @@
       />
     </div>
 
-    <div class="category-filter-terms__options" role="listbox">
+    <div ref="optionsContainer" class="category-filter-terms__options" role="listbox">
       <v-checkbox
         v-for="option in filteredOptions"
         :key="option.key"
@@ -39,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { useResizeObserver } from '@vueuse/core'
 import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 
@@ -56,6 +58,8 @@ const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 
 const search = ref('')
 const localTerms = ref<string[]>(props.modelValue?.terms ?? [])
+const optionsContainer = ref<HTMLElement | null>(null)
+const hasScrollableOptions = ref(false)
 
 watch(
   () => props.modelValue,
@@ -75,6 +79,38 @@ const filteredOptions = computed(() => {
 
   return options.value.filter((option) => option.key?.toLowerCase().includes(query))
 })
+
+const updateScrollState = () => {
+  const element = optionsContainer.value
+  if (!element) {
+    hasScrollableOptions.value = false
+    return
+  }
+
+  hasScrollableOptions.value = element.scrollHeight - element.clientHeight > 1
+}
+
+const { stop: stopResizeObserver } = useResizeObserver(optionsContainer, () => {
+  updateScrollState()
+})
+
+watch(
+  () => [options.value.length, filteredOptions.value.length, search.value],
+  () => {
+    nextTick(() => updateScrollState())
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  nextTick(() => updateScrollState())
+})
+
+onBeforeUnmount(() => {
+  stopResizeObserver()
+})
+
+const showSearch = computed(() => hasScrollableOptions.value || search.value.trim().length > 0)
 
 const onCheckboxChange = (term: string | undefined, selected: boolean | null) => {
   if (!term) {

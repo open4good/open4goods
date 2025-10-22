@@ -28,6 +28,7 @@
         role="img"
         :aria-label="chartAriaLabel"
         :style="{ height: chartHeight }"
+        @click="onBarClick"
       />
       <template #fallback>
         <div
@@ -53,7 +54,13 @@ type RangeBucketDatum = {
   value: number
   range: string
   count: number
+  from?: number
+  to?: number
+  missing?: boolean
 }
+
+const MAX_CHART_HEIGHT = 250
+const MAX_VISIBLE_LABELS = 6
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -157,7 +164,7 @@ const chartHeight = computed(() => {
   const baseHeight = 220
   const extraHeight = Math.max(0, buckets.value.length - 6) * 16
 
-  return `${baseHeight + extraHeight}px`
+  return `${Math.min(MAX_CHART_HEIGHT, baseHeight + extraHeight)}px`
 })
 
 const xAxisLabelRotation = computed(() => {
@@ -172,6 +179,15 @@ const xAxisLabelRotation = computed(() => {
   return 0
 })
 
+const labelStep = computed(() => {
+  const total = buckets.value.length
+  if (total <= MAX_VISIBLE_LABELS) {
+    return 1
+  }
+
+  return Math.max(1, Math.ceil(total / MAX_VISIBLE_LABELS))
+})
+
 const chartOptions = computed<EChartsOption | null>(() => {
   if (!buckets.value.length) {
     return null
@@ -179,9 +195,26 @@ const chartOptions = computed<EChartsOption | null>(() => {
 
   const data: RangeBucketDatum[] = buckets.value.map((bucket) => ({
     value: bucket.count ?? 0,
-    range: formatBucketLabel(bucket.key, bucket.to),
+    range: formatBucketLabel(bucket.key, bucket.to, bucket.missing),
     count: bucket.count ?? 0,
+    from: parseNumericBound(bucket.key),
+    to: parseNumericBound(bucket.to),
+    missing: bucket.missing ?? false,
   }))
+
+  const totalBuckets = data.length
+
+  const shouldDisplayLabelAtIndex = (index: number) => {
+    if (totalBuckets <= MAX_VISIBLE_LABELS) {
+      return true
+    }
+
+    if (index === 0 || index === totalBuckets - 1) {
+      return true
+    }
+
+    return index % labelStep.value === 0
+  }
 
   const tooltipFormatter: TooltipComponentOption['formatter'] = (rawParams) => {
     const params = Array.isArray(rawParams) ? rawParams[0] : rawParams
@@ -207,14 +240,20 @@ const chartOptions = computed<EChartsOption | null>(() => {
       position: 'top',
       color: labelColor.value,
       fontSize: 11,
-      formatter: ({ data }: { data?: RangeBucketDatum }) => {
+      formatter: ({ data, dataIndex }: { data?: RangeBucketDatum; dataIndex?: number }) => {
+        const index = dataIndex ?? 0
         const bucket = data
-        return bucket ? String(bucket.count) : ''
+        if (!bucket || !shouldDisplayLabelAtIndex(index)) {
+          return ''
+        }
+
+        return String(bucket.count)
       },
     },
     emphasis: {
       focus: 'self',
     },
+    cursor: 'pointer',
   }
 
   const options = {
@@ -247,6 +286,8 @@ const chartOptions = computed<EChartsOption | null>(() => {
         interval: 0,
         rotate: xAxisLabelRotation.value,
         overflow: 'truncate',
+        hideOverlap: true,
+        formatter: (value: string, index: number) => (shouldDisplayLabelAtIndex(index) ? value : ''),
       },
       boundaryGap: true,
       splitLine: { show: false },
@@ -280,7 +321,7 @@ const chartAriaLabel = computed(() => {
 
   const entries = buckets.value
     .map((bucket) => {
-      const range = formatBucketLabel(bucket.key, bucket.to)
+      const range = formatBucketLabel(bucket.key, bucket.to, bucket.missing)
       const countLabel = translatePlural('category.products.resultsCount', bucket.count ?? 0)
       return `${range}: ${countLabel}`
     })
@@ -313,13 +354,44 @@ const emitRange = () => {
   })
 }
 
-const formatBucketLabel = (from?: string, to?: number) => {
+const onBarClick = (params: CallbackDataParams) => {
+  const bucket = params.data as RangeBucketDatum | undefined
+  if (!bucket || bucket.missing || !props.field.mapping) {
+    return
+  }
+
+  emit('update:modelValue', {
+    field: props.field.mapping,
+    operator: 'range',
+    min: bucket.from,
+    max: bucket.to,
+  })
+}
+
+const parseNumericBound = (value: string | number | null | undefined) => {
+  if (value == null) {
+    return undefined
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+const formatBucketLabel = (from?: string | number | null, to?: number | null, missing?: boolean) => {
+  if (missing) {
+    return t('category.filters.missingLabel')
+  }
+
   if (from == null && to == null) {
     return ''
   }
 
   if (to == null) {
-    return `${from}+`
+    return `${from ?? '–'}+`
   }
 
   return `${from ?? '–'} → ${to}`
@@ -356,9 +428,11 @@ const formatBucketLabel = (from?: string, to?: number) => {
   &__chart
     width: 100%
     min-height: 7.5rem
+    max-height: 15.625rem
 
   &__chart-placeholder
     width: 100%
     border-radius: 0.5rem
     background: rgba(var(--v-theme-surface-primary-080), 0.6)
+    max-height: 15.625rem
 </style>
