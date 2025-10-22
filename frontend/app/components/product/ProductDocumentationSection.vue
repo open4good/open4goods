@@ -31,7 +31,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, type PropType } from 'vue'
-import '@vue-pdf-viewer/viewer/dist/style.css'
 import { useI18n } from 'vue-i18n'
 import type { ProductPdfDto } from '~~/shared/api-client'
 
