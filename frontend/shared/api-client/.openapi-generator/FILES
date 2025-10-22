@@ -20,10 +20,14 @@ models/AggregationBucketDto.ts
 models/AggregationMetadata.ts
 models/AggregationRequestDto.ts
 models/AggregationResponseDto.ts
+models/AiAttribute.ts
 models/AiPromptsConfig.ts
+models/AiReview.ts
 models/AiReviewAttributeDto.ts
 models/AiReviewDto.ts
+models/AiReviewHolder.ts
 models/AiReviewSourceDto.ts
+models/AiSource.ts
 models/AttributeConfigDto.ts
 models/AttributeParserConfig.ts
 models/AttributesConfigDto.ts
@@ -100,6 +104,7 @@ models/RecommandationChoice.ts
 models/RecommandationCriteria.ts
 models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
+models/ReviewGenerationStatus.ts
 models/ScoringAggregationConfig.ts
 models/SortOption.ts
 models/SortRequestDto.ts
