@@ -1123,6 +1123,124 @@
       "imageAlt": "Illustration of the Nudger community feedback board."
     }
   },
+  "product": {
+    "navigation": {
+      "label": "Product detail navigation",
+      "overview": "Overview",
+      "impact": "Environmental impact",
+      "ai": "AI summary",
+      "price": "Pricing",
+      "attributes": "Specifications",
+      "docs": "Documentation",
+      "admin": "Administration"
+    },
+    "hero": {
+      "gtin": "GTIN code",
+      "offersCount": "Number of offers",
+      "bestPriceTitle": "Best price",
+      "priceFrom": "From {source}",
+      "compensation": "Donation {amount}",
+      "viewOffers": "View all offers"
+    },
+    "impact": {
+      "title": "Environmental impact",
+      "subtitle": "Explore how this product scores across ecological and social criteria.",
+      "radarAria": "Impact radar chart for {product}",
+      "rankingTitle": "Ranking",
+      "rankingValue": "Position {position} of {total}",
+      "bestProduct": "Best rated product: {name}",
+      "betterProduct": "Next best product: {name}",
+      "scoreValue": "Relative score",
+      "absoluteValue": "Absolute value",
+      "percentile": "Percentile",
+      "scoreRanking": "Factor ranking",
+      "detailsTitle": "Assessment details",
+      "tableHeaders": {
+        "score": "Indicator",
+        "value": "Value",
+        "ranking": "Rank",
+        "percent": "Percentile"
+      }
+    },
+    "aiReview": {
+      "title": "Test & review summary",
+      "subtitle": "An AI-written synthesis built from verified sources.",
+      "generatedAt": "Summary generated on {date}",
+      "sections": {
+        "overall": "Overall summary",
+        "details": "In detail",
+        "technical": "Technical analysis",
+        "ecological": "Environmental analysis",
+        "pros": "Pros",
+        "cons": "Cons",
+        "identity": "Identity card",
+        "sources": "Consulted sources"
+      },
+      "sources": {
+        "index": "Ref.",
+        "source": "Source",
+        "description": "Description"
+      },
+      "empty": "Summary not requested yet.",
+      "requestButton": "Request the summary",
+      "status": {
+        "running": "Generation in progress ({step})",
+        "success": "Summary available",
+        "failed": "Generation failed"
+      },
+      "errors": {
+        "captcha": "Please validate the captcha before continuing.",
+        "generic": "An error occurred while generating the summary."
+      }
+    },
+    "price": {
+      "title": "Prices and trends",
+      "subtitle": "Track price evolution and compare offers.",
+      "newOffers": "New offers",
+      "occasionOffers": "Second-hand offers",
+      "trend": {
+        "decrease": "Price drop of {amount}",
+        "increase": "Price increase of {amount}",
+        "stable": "Price unchanged"
+      },
+      "noOccasionHistory": "No history for second-hand offers.",
+      "offerList": "Offer list",
+      "headers": {
+        "source": "Source",
+        "offer": "Offer",
+        "price": "Price",
+        "condition": "Condition",
+        "updated": "Updated"
+      },
+      "condition": {
+        "new": "New",
+        "occasion": "Second-hand",
+        "used": "Second-hand",
+        "refurbished": "Refurbished",
+        "unknown": "Unknown"
+      }
+    },
+    "attributes": {
+      "title": "Technical specifications",
+      "subtitle": "Browse every specification and filter with keywords.",
+      "searchPlaceholder": "Search a specification",
+      "referentialTitle": "Reference identifiers",
+      "indexedGroup": "Indexed attributes",
+      "features": "Highlights",
+      "unfeatures": "Watchouts"
+    },
+    "docs": {
+      "title": "Documentation",
+      "subtitle": "Preview and download official documents.",
+      "download": "Download PDF",
+      "untitled": "Untitled document",
+      "pageCount": "{count} page(s)"
+    },
+    "admin": {
+      "title": "Admin section",
+      "subtitle": "Full JSON payload of the product."
+    }
+  },
   "cms": {
     "page": {
       "loading": "Loading page…",

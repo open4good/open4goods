@@ -36,7 +36,8 @@ export default defineNuxtConfig({
     typeCheck: true,
     tsConfig: {
       compilerOptions: {
-        esModuleInterop: true
+        esModuleInterop: true,
+        typeRoots: ['types', './node_modules/@types']
       }
     }
   },
