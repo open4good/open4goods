@@ -9,8 +9,8 @@
 
     <v-range-slider
       v-model="localValue"
-      :min="bounds.min"
-      :max="bounds.max"
+      :min="sliderBounds.min"
+      :max="sliderBounds.max"
       :step="sliderStep"
       :aria-label="ariaLabel"
       class="category-filter-numeric__slider"
@@ -49,6 +49,7 @@ import VueECharts from 'vue-echarts'
 import type { EChartsOption } from 'echarts'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
 import type { TooltipComponentOption } from 'echarts/components'
+import { clampSliderRange, isPriceField, priceToSliderValue, sliderValueToPrice } from './price-scale'
 
 type RangeBucketDatum = {
   value: number
@@ -77,7 +78,7 @@ const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 
 const ariaLabel = computed(() => `${displayTitle.value} ${t('category.filters.rangeAriaSuffix')}`)
 
-const bounds = computed(() => {
+const numericBounds = computed(() => {
   const min = props.aggregation?.min ?? (props.aggregation?.buckets?.[0]?.key ? Number(props.aggregation?.buckets?.[0]?.key) : 0)
   const max = props.aggregation?.max ?? (props.aggregation?.buckets?.at(-1)?.to ?? min)
 
@@ -91,7 +92,13 @@ const bounds = computed(() => {
   return { min, max }
 })
 
+const priceField = computed(() => isPriceField(props.field.mapping))
+
 const sliderStep = computed(() => {
+  if (priceField.value) {
+    return 1
+  }
+
   const buckets = props.aggregation?.buckets ?? []
   if (buckets.length > 1) {
     const [firstBucket, secondBucket] = buckets
@@ -104,10 +111,42 @@ const sliderStep = computed(() => {
   return props.field.aggregationConfiguration?.interval
 })
 
-const localValue = ref<[number, number]>([bounds.value.min, bounds.value.max])
+const sliderBounds = computed(() => {
+  if (!priceField.value) {
+    return numericBounds.value
+  }
+
+  return {
+    min: priceToSliderValue(numericBounds.value.min),
+    max: priceToSliderValue(numericBounds.value.max),
+  }
+})
+
+const resolveSliderRange = (min?: number | null, max?: number | null): [number, number] => {
+  if (priceField.value) {
+    const resolvedMin = priceToSliderValue(min ?? numericBounds.value.min)
+    const resolvedMax = priceToSliderValue(max ?? numericBounds.value.max)
+    return clampSliderRange([resolvedMin, resolvedMax])
+  }
+
+  const fallbackMin = min ?? numericBounds.value.min
+  const fallbackMax = max ?? numericBounds.value.max
+  return clampSliderRange([fallbackMin, fallbackMax])
+}
+
+const toNumericRange = (range: [number, number]): [number, number] => {
+  if (!priceField.value) {
+    return clampSliderRange(range)
+  }
+
+  const [start, end] = range
+  return clampSliderRange([sliderValueToPrice(start), sliderValueToPrice(end)])
+}
+
+const localValue = ref<[number, number]>([sliderBounds.value.min, sliderBounds.value.max])
 
 watch(
-  () => bounds.value,
+  () => sliderBounds.value,
   (next) => {
     localValue.value = [next.min, next.max]
   },
@@ -118,11 +157,11 @@ watch(
   () => props.modelValue,
   (filter) => {
     if (filter?.operator === 'range') {
-      localValue.value = [filter.min ?? bounds.value.min, filter.max ?? bounds.value.max]
+      localValue.value = resolveSliderRange(filter.min, filter.max)
       return
     }
 
-    localValue.value = [bounds.value.min, bounds.value.max]
+    localValue.value = [sliderBounds.value.min, sliderBounds.value.max]
   },
 )
 
@@ -344,7 +383,11 @@ const rangeLabel = computed(() => {
 })
 
 const emitRange = () => {
-  const [min, max] = localValue.value
+  if (!props.field.mapping) {
+    return
+  }
+
+  const [min, max] = toNumericRange(localValue.value)
 
   emit('update:modelValue', {
     field: props.field.mapping,
@@ -359,6 +402,9 @@ const onBarClick = (params: CallbackDataParams) => {
   if (!bucket || bucket.missing || !props.field.mapping) {
     return
   }
+
+  const [min, max] = resolveSliderRange(bucket.from, bucket.to)
+  localValue.value = [min, max]
 
   emit('update:modelValue', {
     field: props.field.mapping,
