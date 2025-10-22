@@ -6,6 +6,7 @@ import type {
   ProductFieldOptionsResponse,
   ProductSearchRequestDto,
   ProductSearchResponseDto,
+  ReviewGenerationStatus,
   SortRequestDto,
 } from '..'
 import type {
@@ -133,10 +134,58 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     }
   }
 
+  const getReviewStatus = async (
+    gtin: string | number,
+  ): Promise<ReviewGenerationStatus> => {
+    const parsedGtin = typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
+
+    if (!Number.isFinite(parsedGtin)) {
+      throw new TypeError('GTIN must be a number.')
+    }
+
+    try {
+      return await resolveApi().reviewStatus({
+        gtin: parsedGtin,
+        domainLanguage,
+      })
+    } catch (error) {
+      console.error('Error fetching review status for product', parsedGtin, error)
+      throw error
+    }
+  }
+
+  const triggerReviewGeneration = async (
+    gtin: string | number,
+    hcaptchaResponse: string,
+  ): Promise<number> => {
+    const parsedGtin = typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
+
+    if (!Number.isFinite(parsedGtin)) {
+      throw new TypeError('GTIN must be a number.')
+    }
+
+    if (!hcaptchaResponse) {
+      throw new TypeError('hCaptcha response is required to trigger review generation.')
+    }
+
+    try {
+      return await resolveApi().triggerReview({
+        gtin: parsedGtin,
+        hcaptchaResponse,
+        domainLanguage,
+      })
+    } catch (error) {
+      console.error('Error triggering review generation for product', parsedGtin, error)
+      throw error
+    }
+  }
+
   return {
     getProductByGtin,
     getFilterableFieldsForVertical,
     getSortableFieldsForVertical,
     searchProducts,
+    getReviewStatus,
+    triggerReviewGeneration,
   }
 }
