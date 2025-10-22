@@ -43,6 +43,7 @@ import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
+import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
@@ -54,8 +55,8 @@ import org.open4goods.nudgerfrontapi.dto.product.AiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.AiReviewSourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductCardinalityDto;
@@ -86,6 +87,8 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.utils.IpUtils;
+import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -133,6 +136,8 @@ public class ProductMappingService {
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
     private final Cache referenceCache;
+    private final ReviewGenerationClient reviewGenerationClient;
+    private final HcaptchaService hcaptchaService;
 
 
     public ProductMappingService(ProductRepository repository,
@@ -142,7 +147,9 @@ public class ProductMappingService {
             SearchService searchService,
             AffiliationService affiliationService,
             IcecatService icecatService,
-            CacheManager cacheManager) {
+            CacheManager cacheManager,
+            ReviewGenerationClient reviewGenerationClient,
+            HcaptchaService hcaptchaService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -151,6 +158,8 @@ public class ProductMappingService {
         this.affiliationService = affiliationService;
         this.icecatService = icecatService;
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
+        this.reviewGenerationClient = reviewGenerationClient;
+        this.hcaptchaService = hcaptchaService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -853,12 +862,33 @@ public class ProductMappingService {
     }
 
     /**
-     * Request AI review generation for the product (currently delegated to the repository).
+     * Request AI review generation for the product after verifying captcha and product existence.
+     *
+     * @param gtin             product identifier used to trigger generation
+     * @param captchaResponse  hCaptcha token provided by the caller
+     * @param request          HTTP request used to resolve the client IP address
+     * @return UPC echoed back by the back-office API once the job is scheduled
+     * @throws ResourceNotFoundException when the product cannot be found locally
+     * @throws SecurityException         when captcha verification fails
      */
-    public void createReview(long gtin, String captchaResponse, HttpServletRequest request)
+    public long createReview(long gtin, String captchaResponse, HttpServletRequest request)
             throws ResourceNotFoundException, SecurityException {
-        repository.getById(gtin);
+        String clientIp = IpUtils.getIp(request);
+        hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
+        Product product = repository.getById(gtin);
+        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId());
         logger.info("AI review generation requested for product {}", gtin);
+        return scheduledUpc;
+    }
+
+    /**
+     * Retrieve the status of an AI review generation process.
+     *
+     * @param gtin product identifier used when the generation was triggered
+     * @return status returned by the back-office API or {@code null} when the UPC is unknown upstream
+     */
+    public ReviewGenerationStatus getReviewStatus(long gtin) {
+        return reviewGenerationClient.getStatus(gtin);
     }
 
     /**

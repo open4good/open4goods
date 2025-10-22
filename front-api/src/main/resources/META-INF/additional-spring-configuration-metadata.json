@@ -26,6 +26,11 @@
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties"
     },
     {
+      "name": "front.review-generation",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties"
+    },
+    {
       "name": "front.contact",
       "type": "org.open4goods.nudgerfrontapi.config.properties.ContactProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ContactProperties"
@@ -123,6 +128,22 @@
       "name": "front.affiliation-partners.api-key",
       "type": "java.lang.String",
       "description": "API key forwarded when calling the affiliation partner backend."
+    },
+    {
+      "name": "front.review-generation.api-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the back-office API exposing review generation endpoints."
+    },
+    {
+      "name": "front.review-generation.api-key",
+      "type": "java.lang.String",
+      "description": "API key forwarded when calling the review generation backend."
+    },
+    {
+      "name": "front.review-generation.review-path",
+      "type": "java.lang.String",
+      "description": "Path appended to the base URL when triggering or polling review generation.",
+      "defaultValue": "/review"
     },
     {
       "name": "front.contact.email",

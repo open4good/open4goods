@@ -9,46 +9,49 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.AggregationConfiguration;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
+import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoFilterFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
-import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
-import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.util.StringUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,7 +63,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.open4goods.verticals.VerticalsConfigService;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * REST controller exposing read‑only information about a product as well as the ability to
@@ -709,6 +712,89 @@ public class ProductController {
         }
         String language = domainLanguage != null ? domainLanguage.languageTag() : null;
         return localisable.i18n(language);
+    }
+
+    /**
+     * Trigger asynchronous AI review generation after verifying hCaptcha.
+     */
+    @PostMapping("/{gtin}/review")
+    @Operation(
+            summary = "Trigger AI review generation",
+            description = "Validate the provided hCaptcha token and forward the request to the back-office API.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
+            parameters = {
+                    @Parameter(name = "gtin",
+                            in = ParameterIn.PATH,
+                            required = true,
+                            description = "Product GTIN/UPC (numeric identifier)",
+                            schema = @Schema(type = "integer", format = "int64", minimum = "0", example = "8806095491998")),
+                    @Parameter(name = "hcaptchaResponse",
+                            in = ParameterIn.QUERY,
+                            required = true,
+                            description = "hCaptcha token returned by the widget.",
+                            schema = @Schema(type = "string")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Generation scheduled",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(type = "integer", format = "int64"))),
+                    @ApiResponse(responseCode = "400", description = "Captcha verification failed"),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Product not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<Long> triggerReview(@PathVariable Long gtin,
+                                              @RequestParam(name = "hcaptchaResponse") String hcaptchaResponse,
+                                              @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                                              HttpServletRequest request)
+            throws ResourceNotFoundException {
+        long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .header("X-Locale", domainLanguage.languageTag())
+                .body(scheduledUpc);
+    }
+
+    /**
+     * Poll the AI review generation status for a product.
+     */
+    @GetMapping("/{gtin}/review")
+    @Operation(
+            summary = "Get AI review generation status",
+            description = "Return the latest status snapshot for the requested product.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
+            parameters = {
+                    @Parameter(name = "gtin",
+                            in = ParameterIn.PATH,
+                            required = true,
+                            description = "Product GTIN/UPC (numeric identifier)",
+                            schema = @Schema(type = "integer", format = "int64", minimum = "0", example = "8806095491998")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Status returned",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ReviewGenerationStatus.class))),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Product not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<ReviewGenerationStatus> reviewStatus(@PathVariable Long gtin,
+                                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        ReviewGenerationStatus status = service.getReviewStatus(gtin);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .header("X-Locale", domainLanguage.languageTag())
+                .body(status);
     }
 
     /**

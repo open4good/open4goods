@@ -1,4 +1,4 @@
-package org.open4goods.services.reviewgeneration.dto;
+package org.open4goods.model.review;
 
 import java.time.Instant;
 import java.util.ArrayList;
