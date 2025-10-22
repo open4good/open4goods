@@ -46,6 +46,7 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -87,6 +88,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +105,8 @@ import org.springframework.util.StringUtils;
 import com.ibm.icu.util.ULocale;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.open4goods.nudgerfrontapi.utils.IpUtils;
 
 /**
  * Maps {@link Product} domain entities to DTOs consumed by the frontend API.
@@ -133,6 +137,8 @@ public class ProductMappingService {
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
     private final Cache referenceCache;
+    private final ReviewGenerationClient reviewGenerationClient;
+    private final HcaptchaService hcaptchaService;
 
 
     public ProductMappingService(ProductRepository repository,
@@ -142,7 +148,9 @@ public class ProductMappingService {
             SearchService searchService,
             AffiliationService affiliationService,
             IcecatService icecatService,
-            CacheManager cacheManager) {
+            CacheManager cacheManager,
+            ReviewGenerationClient reviewGenerationClient,
+            HcaptchaService hcaptchaService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -151,6 +159,8 @@ public class ProductMappingService {
         this.affiliationService = affiliationService;
         this.icecatService = icecatService;
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
+        this.reviewGenerationClient = reviewGenerationClient;
+        this.hcaptchaService = hcaptchaService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -853,12 +863,33 @@ public class ProductMappingService {
     }
 
     /**
-     * Request AI review generation for the product (currently delegated to the repository).
+     * Request AI review generation for the product after verifying captcha and product existence.
+     *
+     * @param gtin             product identifier used to trigger generation
+     * @param captchaResponse  hCaptcha token provided by the caller
+     * @param request          HTTP request used to resolve the client IP address
+     * @return UPC echoed back by the back-office API once the job is scheduled
+     * @throws ResourceNotFoundException when the product cannot be found locally
+     * @throws SecurityException         when captcha verification fails
      */
-    public void createReview(long gtin, String captchaResponse, HttpServletRequest request)
+    public long createReview(long gtin, String captchaResponse, HttpServletRequest request)
             throws ResourceNotFoundException, SecurityException {
-        repository.getById(gtin);
+        String clientIp = IpUtils.getIp(request);
+        hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
+        Product product = repository.getById(gtin);
+        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId());
         logger.info("AI review generation requested for product {}", gtin);
+        return scheduledUpc;
+    }
+
+    /**
+     * Retrieve the status of an AI review generation process.
+     *
+     * @param gtin product identifier used when the generation was triggered
+     * @return status returned by the back-office API or {@code null} when the UPC is unknown upstream
+     */
+    public ReviewGenerationStatus getReviewStatus(long gtin) {
+        return reviewGenerationClient.getStatus(gtin);
     }
 
     /**

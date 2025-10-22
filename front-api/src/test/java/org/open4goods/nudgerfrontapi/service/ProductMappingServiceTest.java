@@ -39,10 +39,14 @@ import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 class ProductMappingServiceTest {
@@ -56,6 +60,9 @@ class ProductMappingServiceTest {
     private IcecatService icecatService;
     private SearchService searchService;
     private CacheManager cacheManager;
+    private ReviewGenerationClient reviewGenerationClient;
+    private HcaptchaService hcaptchaService;
+    private HttpServletRequest httpServletRequest;
 
     @BeforeEach
     void setUp() {
@@ -68,10 +75,14 @@ class ProductMappingServiceTest {
         icecatService = mock(IcecatService.class);
         searchService = mock(SearchService.class);
         cacheManager = mock(CacheManager.class);
+        reviewGenerationClient = mock(ReviewGenerationClient.class);
+        hcaptchaService = mock(HcaptchaService.class);
+        httpServletRequest = mock(HttpServletRequest.class);
         ConcurrentMapCache referenceCache = new ConcurrentMapCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
-                verticalsConfigService, searchService, affiliationService, icecatService, cacheManager);
+                verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
+                reviewGenerationClient, hcaptchaService);
     }
 
     @Test
@@ -300,12 +311,32 @@ class ProductMappingServiceTest {
 
 
     @Test
-    void createReviewCallsRepository() throws Exception {
+    void createReviewVerifiesCaptchaAndDelegatesToClient() throws Exception {
         long gtin = 42L;
-        when(repository.getById(gtin)).thenReturn(new Product(gtin));
+        when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
+        when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        Product product = new Product(gtin);
+        when(repository.getById(gtin)).thenReturn(product);
+        when(reviewGenerationClient.triggerGeneration(gtin)).thenReturn(gtin);
 
-        service.createReview(gtin, "token", null);
+        long scheduled = service.createReview(gtin, "token", httpServletRequest);
 
+        verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
         verify(repository).getById(gtin);
+        verify(reviewGenerationClient).triggerGeneration(gtin);
+        assertThat(scheduled).isEqualTo(gtin);
+    }
+
+    @Test
+    void getReviewStatusDelegatesToClient() {
+        long gtin = 77L;
+        ReviewGenerationStatus status = new ReviewGenerationStatus();
+        status.setUpc(gtin);
+        when(reviewGenerationClient.getStatus(gtin)).thenReturn(status);
+
+        ReviewGenerationStatus returned = service.getReviewStatus(gtin);
+
+        assertThat(returned).isEqualTo(status);
     }
 }
