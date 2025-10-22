@@ -65,11 +65,7 @@
       <version>${global.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>reviewgeneration</artifactId>
-      <version>${global.version}</version>
-    </dependency>
+
 
 
     <dependency>

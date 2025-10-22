@@ -1,8 +1,8 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import org.open4goods.model.constants.UrlConstants;
+import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
-import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 

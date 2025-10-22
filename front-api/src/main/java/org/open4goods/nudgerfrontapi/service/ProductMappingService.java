@@ -43,10 +43,10 @@ import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
+import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -55,8 +55,8 @@ import org.open4goods.nudgerfrontapi.dto.product.AiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.AiReviewSourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductCardinalityDto;
@@ -87,8 +87,9 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.utils.IpUtils;
+import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,8 +106,6 @@ import org.springframework.util.StringUtils;
 import com.ibm.icu.util.ULocale;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.open4goods.nudgerfrontapi.utils.IpUtils;
 
 /**
  * Maps {@link Product} domain entities to DTOs consumed by the frontend API.
