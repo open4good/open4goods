@@ -322,6 +322,44 @@ const { locale, t } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 const requestURL = useRequestURL()
 
+const MOBILE_USER_AGENT_PATTERN =
+  /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
+
+const resolveUserAgentFromHeader = (headerValue: string | string[] | undefined): string | null => {
+  if (!headerValue) {
+    return null
+  }
+
+  if (Array.isArray(headerValue)) {
+    return headerValue[0] ?? null
+  }
+
+  return headerValue
+}
+
+const display = useDisplay()
+
+const initialIsDesktop = useState<boolean>('category-page-initial-is-desktop', () => {
+  if (import.meta.server) {
+    const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
+    const userAgent = resolveUserAgentFromHeader(userAgentHeader)
+
+    if (!userAgent) {
+      return true
+    }
+
+    return !MOBILE_USER_AGENT_PATTERN.test(userAgent)
+  }
+
+  return display.lgAndUp.value
+})
+
+const isHydrated = ref(false)
+
+onMounted(() => {
+  isHydrated.value = true
+})
+
 const rawParam = route.params.categorySlug
 const slug = Array.isArray(rawParam) ? rawParam[0] ?? '' : rawParam ?? ''
 const slugPattern = /^[a-z-]+$/
@@ -533,8 +571,7 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
 const filterOptions = computed(() => filterOptionsData.value ?? null)
 const sortOptions = computed(() => sortOptionsData.value ?? null)
 
-const display = useDisplay()
-const isDesktop = computed(() => display.lgAndUp.value)
+const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value))
 const filtersDrawer = ref(false)
 
 const FILTERS_PANEL_STORAGE_KEY = 'category-page-filters-width'
