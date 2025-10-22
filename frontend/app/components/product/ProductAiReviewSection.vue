@@ -268,6 +268,16 @@ const statusMessage = computed(() => {
   })
 })
 
+function sanitizeHtml(content: string | null): string | null {
+  if (!content) {
+    return null
+  }
+
+  return DOMPurify.sanitize(content, {
+    ADD_ATTR: ['target', 'rel', 'class'],
+  })
+}
+
 function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
   if (!reviewData) {
     return null
@@ -316,16 +326,6 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     attributes,
     dataQuality: reviewData.dataQuality ?? null,
   }
-}
-
-const sanitizeHtml = (content: string | null): string | null => {
-  if (!content) {
-    return null
-  }
-
-  return DOMPurify.sanitize(content, {
-    ADD_ATTR: ['target', 'rel', 'class'],
-  })
 }
 
 const startRequest = () => {
