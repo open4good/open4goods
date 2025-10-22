@@ -17,7 +17,11 @@
       thumb-label="always"
       color="primary"
       @end="emitRange"
-    />
+    >
+      <template #thumb-label="{ modelValue: thumbValue }">
+        {{ formatSliderValue(Array.isArray(thumbValue) ? thumbValue[0] : thumbValue) }}
+      </template>
+    </v-range-slider>
 
     <ClientOnly>
       <VueECharts
@@ -71,7 +75,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [Filter | null] }>()
 
-const { t } = useI18n()
+const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
@@ -141,6 +145,19 @@ const toNumericRange = (range: [number, number]): [number, number] => {
 
   const [start, end] = range
   return clampSliderRange([sliderValueToPrice(start), sliderValueToPrice(end)])
+}
+
+const formatSliderValue = (value: number): string => {
+  if (!Number.isFinite(value)) {
+    return '–'
+  }
+
+  const resolvedValue = priceField.value ? sliderValueToPrice(value) : value
+  const formatOptions: Intl.NumberFormatOptions = priceField.value
+    ? { maximumFractionDigits: 0 }
+    : { maximumFractionDigits: 2 }
+
+  return n(resolvedValue, formatOptions)
 }
 
 const localValue = ref<[number, number]>([sliderBounds.value.min, sliderBounds.value.max])
