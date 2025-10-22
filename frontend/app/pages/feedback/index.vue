@@ -232,8 +232,19 @@ const fetchIssues = async (category: FeedbackCategory) => {
 }
 
 const votesRequestNonce = ref(0)
+interface VotesQuery {
+  cacheBuster?: string
+}
 
-const buildVotesQuery = () => (votesRequestNonce.value > 0 ? { cacheBuster: String(votesRequestNonce.value) } : undefined)
+const buildVotesQuery = (): VotesQuery => {
+  const query: VotesQuery = {}
+
+  if (votesRequestNonce.value > 0) {
+    query.cacheBuster = String(votesRequestNonce.value)
+  }
+
+  return query
+}
 
 const ideaIssues = ref<FeedbackIssueDisplay[]>([])
 const bugIssues = ref<FeedbackIssueDisplay[]>([])
@@ -260,6 +271,8 @@ const loadIssuesForCategory = async (category: FeedbackCategory) => {
 
 const remainingVotesState = ref<FeedbackRemainingVotesDto | null>(null)
 const canVoteState = ref<FeedbackVoteEligibilityDto | null>(null)
+const votesRemainingEndpoint: string = '/api/feedback/votes/remaining'
+const votesEligibilityEndpoint: string = '/api/feedback/votes/can'
 
 const loadRemainingVotes = async () => {
   if (!import.meta.client) {
@@ -267,7 +280,7 @@ const loadRemainingVotes = async () => {
   }
 
   try {
-    remainingVotesState.value = await $fetch('/api/feedback/votes/remaining', {
+    remainingVotesState.value = await $fetch<FeedbackRemainingVotesDto, string>(votesRemainingEndpoint, {
       query: buildVotesQuery(),
       headers: {
         ...requestHeaders,
@@ -286,7 +299,7 @@ const loadVoteEligibility = async () => {
   }
 
   try {
-    canVoteState.value = await $fetch('/api/feedback/votes/can', {
+    canVoteState.value = await $fetch<FeedbackVoteEligibilityDto, string>(votesEligibilityEndpoint, {
       query: buildVotesQuery(),
       headers: {
         ...requestHeaders,
