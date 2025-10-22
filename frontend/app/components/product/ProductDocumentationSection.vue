@@ -30,16 +30,16 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, type DefineComponent, type PropType } from 'vue'
+import { defineAsyncComponent, type PropType } from 'vue'
 import '@vue-pdf-viewer/viewer/dist/style.css'
 import { useI18n } from 'vue-i18n'
 import type { ProductPdfDto } from '~~/shared/api-client'
 
-type PdfViewerComponent = DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>
+type PdfViewerComponent = (typeof import('@vue-pdf-viewer/viewer'))['VPdfViewer']
 
 const PdfViewer = defineAsyncComponent<PdfViewerComponent>(async () => {
   const module = await import('@vue-pdf-viewer/viewer')
-  return module.VPdfViewer as PdfViewerComponent
+  return module.VPdfViewer
 })
 
 defineProps({
