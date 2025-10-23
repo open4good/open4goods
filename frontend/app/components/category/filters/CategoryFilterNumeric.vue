@@ -70,6 +70,7 @@ const MAX_VISIBLE_LABELS = 6
 const props = defineProps<{
   field: FieldMetadataDto
   aggregation?: AggregationResponseDto
+  baselineAggregation?: AggregationResponseDto
   modelValue?: Filter | null
 }>()
 
@@ -82,18 +83,56 @@ const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 
 const ariaLabel = computed(() => `${displayTitle.value} ${t('category.filters.rangeAriaSuffix')}`)
 
-const numericBounds = computed(() => {
-  const min = props.aggregation?.min ?? (props.aggregation?.buckets?.[0]?.key ? Number(props.aggregation?.buckets?.[0]?.key) : 0)
-  const max = props.aggregation?.max ?? (props.aggregation?.buckets?.at(-1)?.to ?? min)
+const parseNumericBound = (value: string | number | null | undefined): number | undefined => {
+  if (value == null) {
+    return undefined
+  }
 
-  if (props.modelValue?.operator === 'range') {
-    return {
-      min: props.modelValue.min ?? min,
-      max: props.modelValue.max ?? max,
-    }
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+const resolveAggregationBounds = (
+  aggregation?: AggregationResponseDto,
+): { min: number; max: number } | undefined => {
+  if (!aggregation) {
+    return undefined
+  }
+
+  const buckets = aggregation.buckets ?? []
+  const firstBucket = buckets[0]
+  const lastBucket = buckets[buckets.length - 1]
+
+  const derivedMin = parseNumericBound(firstBucket?.key)
+  const derivedMax =
+    parseNumericBound(lastBucket?.to) ?? parseNumericBound(lastBucket?.key) ?? derivedMin
+
+  const min = aggregation.min ?? derivedMin
+  const max = aggregation.max ?? derivedMax
+
+  if (min == null || max == null) {
+    return undefined
   }
 
   return { min, max }
+}
+
+const numericBounds = computed(() => {
+  const baseline = resolveAggregationBounds(props.baselineAggregation)
+  if (baseline) {
+    return baseline
+  }
+
+  const current = resolveAggregationBounds(props.aggregation)
+  if (current) {
+    return current
+  }
+
+  return { min: 0, max: 0 }
 })
 
 const priceField = computed(() => isPriceField(props.field.mapping))
@@ -429,19 +468,6 @@ const onBarClick = (params: CallbackDataParams) => {
     min: bucket.from,
     max: bucket.to,
   })
-}
-
-const parseNumericBound = (value: string | number | null | undefined) => {
-  if (value == null) {
-    return undefined
-  }
-
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : undefined
-  }
-
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : undefined
 }
 
 const formatBucketLabel = (from?: string | number | null, to?: number | null, missing?: boolean) => {

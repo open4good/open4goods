@@ -3,6 +3,7 @@
     <CategoryFiltersPanel
       :filter-options="props.filterOptions"
       :aggregations="props.aggregations"
+      :baseline-aggregations="props.baselineAggregations"
       :filters="props.filters"
       :impact-expanded="props.impactExpanded"
       :technical-expanded="props.technicalExpanded"
@@ -49,19 +50,26 @@ import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
 import type { CategorySubsetClause } from '~/types/category-subset'
 
-const props = defineProps<{
-  filterOptions: ProductFieldOptionsResponse | null
-  aggregations: AggregationResponseDto[]
-  filters: FilterRequestDto | null
-  impactExpanded: boolean
-  technicalExpanded: boolean
-  showMobileActions: boolean
-  hasDocumentation: boolean
-  wikiPages: WikiPageConfig[]
-  relatedPosts: BlogPostDto[]
-  verticalHomeUrl?: string | null
-  subsetClauses: CategorySubsetClause[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    filterOptions: ProductFieldOptionsResponse | null
+    aggregations: AggregationResponseDto[]
+    baselineAggregations?: AggregationResponseDto[]
+    filters: FilterRequestDto | null
+    impactExpanded: boolean
+    technicalExpanded: boolean
+    showMobileActions: boolean
+    hasDocumentation: boolean
+    wikiPages: WikiPageConfig[]
+    relatedPosts: BlogPostDto[]
+    verticalHomeUrl?: string | null
+    subsetClauses: CategorySubsetClause[]
+  }>(),
+  {
+    baselineAggregations: () => [],
+    verticalHomeUrl: null,
+  },
+)
 
 const emit = defineEmits<{
   'update:filters': [FilterRequestDto]

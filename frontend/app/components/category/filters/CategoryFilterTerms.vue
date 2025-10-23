@@ -18,17 +18,23 @@
     <div ref="optionsContainer" class="category-filter-terms__options" role="listbox">
       <v-checkbox
         v-for="option in filteredOptions"
-        :key="option.key"
+        :key="option.key ?? '__missing__'"
         :label="formatOptionLabel(option.key)"
         :model-value="localTerms.includes(option.key ?? '')"
         density="compact"
         hide-details
         color="primary"
-        class="category-filter-terms__checkbox"
+        :class="[
+          'category-filter-terms__checkbox',
+          {
+            'category-filter-terms__checkbox--zero':
+              option.count === 0 && !localTerms.includes(option.key ?? ''),
+          },
+        ]"
         @update:model-value="onCheckboxChange(option.key, $event)"
       >
         <template #append>
-          <span class="category-filter-terms__count">{{ option.count ?? 0 }}</span>
+          <span class="category-filter-terms__count">{{ option.count }}</span>
         </template>
       </v-checkbox>
 
@@ -47,6 +53,7 @@ import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 const props = defineProps<{
   field: FieldMetadataDto
   aggregation?: AggregationResponseDto
+  baselineAggregation?: AggregationResponseDto
   modelValue?: Filter | null
 }>()
 
@@ -69,15 +76,90 @@ watch(
   { immediate: true },
 )
 
-const options = computed(() => props.aggregation?.buckets ?? [])
+const MISSING_TERM_KEY = '__missing__'
+
+const toTermValue = (value: unknown): string | undefined => {
+  if (value == null) {
+    return undefined
+  }
+
+  return String(value)
+}
+
+const normalizeTermKey = (key?: string | null) => key ?? MISSING_TERM_KEY
+
+type TermOption = {
+  key?: string
+  count: number
+}
+
+const currentBuckets = computed(() => props.aggregation?.buckets ?? [])
+const baselineBuckets = computed(() => props.baselineAggregation?.buckets ?? [])
+
+const currentCounts = computed(() => {
+  const map = new Map<string, number>()
+
+  currentBuckets.value.forEach((bucket) => {
+    const key = normalizeTermKey(toTermValue(bucket.key))
+    map.set(key, bucket.count ?? 0)
+  })
+
+  return map
+})
+
+const mergedOptions = computed<TermOption[]>(() => {
+  const seen = new Set<string>()
+  const options: TermOption[] = []
+
+  const upsertOption = (key: string | undefined, count: number) => {
+    const normalized = normalizeTermKey(key)
+
+    if (seen.has(normalized)) {
+      const index = options.findIndex((option) => normalizeTermKey(option.key) === normalized)
+      if (index !== -1) {
+        options[index] = { key, count }
+      }
+      return
+    }
+
+    seen.add(normalized)
+    options.push({ key, count })
+  }
+
+  baselineBuckets.value.forEach((bucket) => {
+    const key = toTermValue(bucket.key)
+    const normalized = normalizeTermKey(key)
+    const currentCount = currentCounts.value.get(normalized) ?? 0
+    upsertOption(key, currentCount)
+  })
+
+  currentBuckets.value.forEach((bucket) => {
+    const key = toTermValue(bucket.key)
+    const normalized = normalizeTermKey(key)
+    const count = currentCounts.value.get(normalized) ?? bucket.count ?? 0
+    upsertOption(key, count)
+  })
+
+  const selectedTerms = new Set(localTerms.value)
+  selectedTerms.forEach((term) => {
+    const normalized = normalizeTermKey(term)
+    if (!seen.has(normalized)) {
+      seen.add(normalized)
+      const count = currentCounts.value.get(normalized) ?? 0
+      options.push({ key: term, count })
+    }
+  })
+
+  return options
+})
 
 const filteredOptions = computed(() => {
   const query = search.value.trim().toLowerCase()
   if (!query) {
-    return options.value
+    return mergedOptions.value
   }
 
-  return options.value.filter((option) => option.key?.toLowerCase().includes(query))
+  return mergedOptions.value.filter((option) => option.key?.toLowerCase().includes(query))
 })
 
 const updateScrollState = () => {
@@ -95,7 +177,7 @@ const { stop: stopResizeObserver } = useResizeObserver(optionsContainer, () => {
 })
 
 watch(
-  () => [options.value.length, filteredOptions.value.length, search.value],
+  () => [mergedOptions.value.length, filteredOptions.value.length, search.value],
   () => {
     nextTick(() => updateScrollState())
   },
@@ -170,6 +252,12 @@ const formatOptionLabel = (key?: string) => key ?? t('category.filters.missingLa
     display: flex
     flex-direction: column
     gap: 0.25rem
+
+  &__checkbox--zero
+    opacity: 0.6
+
+  &__checkbox--zero.v-selection-control--dirty
+    opacity: 1
 
   &__count
     font-size: 0.75rem

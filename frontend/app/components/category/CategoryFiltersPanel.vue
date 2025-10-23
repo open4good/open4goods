@@ -29,6 +29,7 @@
             <CategoryFilterList
               :fields="filterOptions?.global ?? []"
               :aggregations="aggregationMap"
+              :baseline-aggregations="baselineAggregationMap"
               :active-filters="activeFilters"
               @update-range="updateRangeFilter"
               @update-terms="updateTermsFilter"
@@ -49,6 +50,7 @@
             <CategoryFilterList
               :fields="impactPrimary"
               :aggregations="aggregationMap"
+              :baseline-aggregations="baselineAggregationMap"
               :active-filters="activeFilters"
               @update-range="updateRangeFilter"
               @update-terms="updateTermsFilter"
@@ -68,6 +70,7 @@
                 v-if="impactExpanded"
                 :fields="impactRemaining"
                 :aggregations="aggregationMap"
+                :baseline-aggregations="baselineAggregationMap"
                 :active-filters="activeFilters"
                 class="mt-3"
                 @update-range="updateRangeFilter"
@@ -90,6 +93,7 @@
             <CategoryFilterList
               :fields="technicalPrimary"
               :aggregations="aggregationMap"
+              :baseline-aggregations="baselineAggregationMap"
               :active-filters="activeFilters"
               @update-range="updateRangeFilter"
               @update-terms="updateTermsFilter"
@@ -109,6 +113,7 @@
                 v-if="technicalExpanded"
                 :fields="technicalRemaining"
                 :aggregations="aggregationMap"
+                :baseline-aggregations="baselineAggregationMap"
                 :active-filters="activeFilters"
                 class="mt-3"
                 @update-range="updateRangeFilter"
@@ -154,14 +159,20 @@ type SubsetFilterChip = {
 
 type ActiveFilterChip = ManualFilterChip | SubsetFilterChip
 
-const props = defineProps<{
-  filterOptions: ProductFieldOptionsResponse | null
-  aggregations: AggregationResponseDto[]
-  filters: FilterRequestDto | null
-  impactExpanded: boolean
-  technicalExpanded: boolean
-  subsetClauses: CategorySubsetClause[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    filterOptions: ProductFieldOptionsResponse | null
+    aggregations: AggregationResponseDto[]
+    baselineAggregations?: AggregationResponseDto[]
+    filters: FilterRequestDto | null
+    impactExpanded: boolean
+    technicalExpanded: boolean
+    subsetClauses: CategorySubsetClause[]
+  }>(),
+  {
+    baselineAggregations: () => [],
+  },
+)
 
 const emit = defineEmits<{
   'update:filters': [FilterRequestDto]
@@ -178,6 +189,16 @@ const { t } = useI18n()
 const aggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
   return (props.aggregations ?? []).reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
     if (aggregation.field) {
+      accumulator[aggregation.field] = aggregation
+    }
+
+    return accumulator
+  }, {})
+})
+
+const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
+  return (props.baselineAggregations ?? []).reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
+    if (aggregation.field && !(aggregation.field in accumulator)) {
       accumulator[aggregation.field] = aggregation
     }
 
