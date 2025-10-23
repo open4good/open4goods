@@ -334,14 +334,17 @@ aggregationConfiguration:
     interval: 0.1
     buckets: 10
   "scores.WEIGHT.value":
-    interval: 2
-    buckets: 12
+    interval: 1
+    buckets: 5
   "scores.BRAND_SUSTAINABILITY.value":
-    interval: 5
-    buckets: 20
+    interval: 1
+    buckets: 5
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
   "scores.DATA_QUALITY.value":
-    interval: 5
-    buckets: 20
+    interval: 1
+    buckets: 5
   "attributes.indexed.REPAIRABILITY_INDEX":
     interval: 1
     buckets: 10
