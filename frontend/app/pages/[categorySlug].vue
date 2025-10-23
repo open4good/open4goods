@@ -30,6 +30,7 @@
           <CategoryFiltersSidebar
             :filter-options="filterOptions"
             :aggregations="currentAggregations"
+            :baseline-aggregations="baselineAggregations"
             :filters="manualFilters"
             :impact-expanded="impactExpanded"
             :technical-expanded="technicalExpanded"
@@ -59,6 +60,7 @@
           <CategoryFiltersSidebar
             :filter-options="filterOptions"
             :aggregations="currentAggregations"
+            :baseline-aggregations="baselineAggregations"
             :filters="manualFilters"
             :impact-expanded="impactExpanded"
             :technical-expanded="technicalExpanded"
@@ -539,6 +541,10 @@ watch(initialProductsData, (value) => {
     productsData.value = value
   }
 })
+
+const baselineAggregationMap = ref<Record<string, AggregationResponseDto>>({})
+
+const baselineAggregations = computed(() => Object.values(baselineAggregationMap.value))
 
 const { data: filterOptionsData, execute: loadFilterOptions } = useLazyAsyncData(
   `category-filter-options-${slug}`,
@@ -1135,6 +1141,57 @@ const resultsCountLabel = computed(() =>
 const pageCount = computed(() => productsData.value?.products?.page?.totalPages ?? 1)
 const currentAggregations = computed<AggregationResponseDto[]>(
   () => productsData.value?.aggregations ?? [],
+)
+
+const captureBaselineAggregations = (
+  aggregations: AggregationResponseDto[] | null | undefined,
+) => {
+  if (!aggregations || !aggregations.length) {
+    baselineAggregationMap.value = {}
+    return
+  }
+
+  baselineAggregationMap.value = aggregations.reduce<Record<string, AggregationResponseDto>>(
+    (accumulator, aggregation) => {
+      if (aggregation.field) {
+        accumulator[aggregation.field] = aggregation
+      }
+
+      return accumulator
+    },
+    {},
+  )
+}
+
+watch(
+  () => ({
+    aggregations: productsData.value?.aggregations ?? null,
+    manualFiltersCount: manualFilters.value.filters?.length ?? 0,
+  }),
+  (state, previous) => {
+    if (state.manualFiltersCount !== 0) {
+      return
+    }
+
+    if (!state.aggregations || !state.aggregations.length) {
+      baselineAggregationMap.value = {}
+      return
+    }
+
+    if (state.aggregations === previous?.aggregations) {
+      return
+    }
+
+    captureBaselineAggregations(state.aggregations)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => verticalId.value,
+  () => {
+    baselineAggregationMap.value = {}
+  },
 )
 
 const hasDocumentation = computed(() => {

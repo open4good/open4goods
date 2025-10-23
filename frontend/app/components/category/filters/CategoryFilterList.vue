@@ -6,6 +6,7 @@
       :key="field.mapping ?? field.title"
       :field="field"
       :aggregation="aggregations[field.mapping ?? '']"
+      :baseline-aggregation="baselineAggregations[field.mapping ?? '']"
       :model-value="findActiveFilter(field.mapping)"
       class="category-filter-list__item"
       @update:model-value="onFilterChange(field, $event)"
@@ -23,11 +24,17 @@ import type {
 import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
 
-const props = defineProps<{
-  fields: FieldMetadataDto[]
-  aggregations: Record<string, AggregationResponseDto>
-  activeFilters: Filter[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    fields: FieldMetadataDto[]
+    aggregations: Record<string, AggregationResponseDto>
+    baselineAggregations?: Record<string, AggregationResponseDto>
+    activeFilters: Filter[]
+  }>(),
+  {
+    baselineAggregations: () => ({} as Record<string, AggregationResponseDto>),
+  },
+)
 
 const emit = defineEmits<{
   'update-range': [field: string, payload: { min?: number; max?: number }]
