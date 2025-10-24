@@ -83,7 +83,7 @@
         "badge": "Page introuvable",
         "title": "Nous ne trouvons pas cette page",
         "description": "Le lien suivi est peut-être obsolète ou la page a été déplacée.",
-        "helper": "Utilisez les liens ci-dessous ou retournez à l’accueil pour poursuivre votre exploration responsable.",
+        "helper": "Utilisez les liens ci-dessous ou retournez à l’accueil pour poursuivre votre exploration.",
         "statusMessage": "Erreur 404 — la ressource demandée est introuvable."
       },
       "generic": {
