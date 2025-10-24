@@ -76,6 +76,41 @@
     },
     "siteName": "Nudger"
   },
+  "error": {
+    "page": {
+      "eyebrow": "Unexpected detour",
+      "statusLabel": "Status code {code}",
+      "notFound": {
+        "badge": "Page missing",
+        "title": "We can’t find this page",
+        "description": "The link you followed may be broken or the page may have moved.",
+        "helper": "Use the navigation links below or return to the homepage to continue exploring responsible shopping.",
+        "statusMessage": "Error 404 — the requested resource could not be located."
+      },
+      "generic": {
+        "badge": "We hit a snag",
+        "title": "We're working on a fix",
+        "description": "An unexpected error prevented us from loading this page.",
+        "helper": "Please try another section of Nudger or reach out if the problem persists.",
+        "statusMessage": "Error 500 — something went wrong on our side."
+      },
+      "actions": {
+        "ariaLabel": "Error recovery quick actions",
+        "goHome": "Back to homepage",
+        "browseCategories": "Browse categories",
+        "contactSupport": "Contact support"
+      },
+      "aside": {
+        "title": "Here’s what you can do",
+        "description": "Keep exploring our transparent impact resources while we guide you back on track.",
+        "highlights": {
+          "catalog": "Discover curated guides across every product category.",
+          "impact": "Understand how we calculate environmental impact with open data.",
+          "community": "Join the community and share feedback to improve Nudger."
+        }
+      }
+    }
+  },
   "category": {
     "hero": {
       "breadcrumbAriaLabel": "Category navigation breadcrumb",
