@@ -2,7 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import type { Ref } from 'vue'
 import { reactive, ref } from 'vue'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 
 import type { ThemeName } from '~~/shared/constants/theme'
 
@@ -20,18 +20,39 @@ const currentRoute = reactive({ path: '/', fullPath: '/' })
 
 const themeName = ref<ThemeName>('light')
 const storedThemePreference = ref<ThemeName>('light')
-const themeCookiePreference = ref<ThemeName | null>(null)
-const preferredDarkMock = ref(false)
+function createUseStorageMock(): MockInstance<(key: string, defaultValue: ThemeName) => Ref<ThemeName>> {
+  return vi.fn((_: string, defaultValue: ThemeName) => {
+    if (!storedThemePreference.value) {
+      storedThemePreference.value = defaultValue
+    }
 
-const useStorageMock = vi.fn((_: string, defaultValue: ThemeName) => {
-  if (!storedThemePreference.value) {
-    storedThemePreference.value = defaultValue
+    return storedThemePreference as Ref<ThemeName>
+  })
+}
+function createUseCookieMock(): MockInstance<(key: string) => Ref<ThemeName | null>> {
+  return vi.fn((_: string) => themeCookiePreference as Ref<ThemeName | null>)
+}
+function getStorageMockRegistry() {
+  return globalThis as {
+    __menusAuthUseStorageMock__?: ReturnType<typeof createUseStorageMock>
+  }
+}
+function ensureCookieMock() {
+  const registry = getCookieMockRegistry()
+
+  if (!registry.__menusAuthUseCookieMock__) {
+    registry.__menusAuthUseCookieMock__ = createUseCookieMock()
   }
 
-  return storedThemePreference as Ref<ThemeName>
-})
-
-const useCookieMock = vi.fn((_: string) => themeCookiePreference as Ref<ThemeName | null>)
+  return registry.__menusAuthUseCookieMock__
+}
+function getCookieMockRegistry() {
+  return globalThis as {
+    __menusAuthUseCookieMock__?: ReturnType<typeof createUseCookieMock>
+  }
+}
+const themeCookiePreference = ref<ThemeName | null>(null)
+const preferredDarkMock = ref(false)
 
 const fetchMock = vi.fn()
 
@@ -71,44 +92,63 @@ vi.mock('vuetify', () => ({
   }),
 }))
 
-vi.mock('@vueuse/core', () => ({
-  usePreferredDark: () => preferredDarkMock,
-  useStorage: useStorageMock,
-}))
+vi.mock('@vueuse/core', () => {
+  const registry = getStorageMockRegistry()
+  const localUseStorageMock = createUseStorageMock()
+  registry.__menusAuthUseStorageMock__ = localUseStorageMock
+
+  return {
+    usePreferredDark: () => preferredDarkMock,
+    useStorage: localUseStorageMock,
+  }
+})
+
+const useStorageMock = getStorageMockRegistry().__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
 
 type NuxtImports = typeof import('#imports')
 
 vi.mock('#imports', async () => {
   const actual = await vi.importActual<NuxtImports>('#imports')
+  const cookieMock = ensureCookieMock()
 
   return {
     ...actual,
     useRoute: useRouteMock,
     useRouter: useRouterMock,
-    useCookie: useCookieMock,
+    useCookie: cookieMock,
     useNuxtApp: () => ({
       $fetch: (...args: unknown[]) => fetchMock(...args),
     }),
   }
 })
 
-vi.mock('#app', () => ({
-  useRoute: useRouteMock,
-  useRouter: useRouterMock,
-  useCookie: useCookieMock,
-  useNuxtApp: () => ({
-    $fetch: (...args: unknown[]) => fetchMock(...args),
-  }),
-}))
+vi.mock('#app', () => {
+  const cookieMock = ensureCookieMock()
 
-vi.mock('nuxt/app', () => ({
-  useRoute: useRouteMock,
-  useRouter: useRouterMock,
-  useCookie: useCookieMock,
-  useNuxtApp: () => ({
-    $fetch: (...args: unknown[]) => fetchMock(...args),
-  }),
-}))
+  return {
+    useRoute: useRouteMock,
+    useRouter: useRouterMock,
+    useCookie: cookieMock,
+    useNuxtApp: () => ({
+      $fetch: (...args: unknown[]) => fetchMock(...args),
+    }),
+  }
+})
+
+vi.mock('nuxt/app', () => {
+  const cookieMock = ensureCookieMock()
+
+  return {
+    useRoute: useRouteMock,
+    useRouter: useRouterMock,
+    useCookie: cookieMock,
+    useNuxtApp: () => ({
+      $fetch: (...args: unknown[]) => fetchMock(...args),
+    }),
+  }
+})
+
+const useCookieMock = ensureCookieMock()
 
 vi.mock('vue-router', () => ({
   useRoute: useRouteMock,
