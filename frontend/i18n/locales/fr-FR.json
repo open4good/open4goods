@@ -1173,7 +1173,16 @@
       "bestPriceTitle": "Meilleur prix",
       "priceFrom": "Chez {source}",
       "compensation": "Reversement {amount}",
-      "viewOffers": "Voir toutes les offres"
+      "viewOffers": "Voir toutes les offres",
+      "openGalleryImage": "Afficher l’image « {label} » en plein écran",
+      "openGalleryVideo": "Lire la vidéo « {label} »",
+      "openGalleryFallback": "Ouvrir la galerie média du produit",
+      "thumbnailLabel": "Sélectionner {type} {index} sur {total} : {label}",
+      "mediaType": {
+        "image": "l’image",
+        "video": "la vidéo"
+      },
+      "videoBadge": "Vidéo"
     },
     "impact": {
       "title": "Impact écologique",
