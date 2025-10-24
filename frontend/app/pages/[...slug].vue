@@ -127,20 +127,20 @@ const { t } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
 
-const slugParam = route.params.slug
-const segments = Array.isArray(slugParam)
-  ? slugParam.filter((segment): segment is string => typeof segment === 'string')
-  : typeof slugParam === 'string'
-    ? [slugParam]
-    : []
+const pathSegments = computed(() =>
+  route.path
+    .split('/')
+    .map((segment) => segment.trim())
+    .filter((segment): segment is string => Boolean(segment?.length)),
+)
 
-const productRoute = matchProductRouteFromSegments(segments)
+const productRoute = computed(() => matchProductRouteFromSegments(pathSegments.value))
 
-if (!productRoute) {
+if (!productRoute.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
 }
 
-const { categorySlug, gtin } = productRoute
+const { categorySlug, gtin } = productRoute.value
 
 const productLoadError = ref<Error | null>(null)
 
