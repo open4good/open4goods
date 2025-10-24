@@ -1140,7 +1140,16 @@
       "bestPriceTitle": "Best price",
       "priceFrom": "From {source}",
       "compensation": "Donation {amount}",
-      "viewOffers": "View all offers"
+      "viewOffers": "View all offers",
+      "openGalleryImage": "View image \"{label}\" in fullscreen",
+      "openGalleryVideo": "Play video \"{label}\"",
+      "openGalleryFallback": "Open product media gallery",
+      "thumbnailLabel": "Select {type} {index} of {total}: {label}",
+      "mediaType": {
+        "image": "image",
+        "video": "video"
+      },
+      "videoBadge": "Video"
     },
     "impact": {
       "title": "Environmental impact",

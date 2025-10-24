@@ -417,6 +417,22 @@ const orientation = computed<'vertical' | 'horizontal'>(() => (display.mdAndDown
 const activeSection = ref<string>(sectionIds.hero)
 
 const observer = ref<IntersectionObserver | null>(null)
+const visibleSectionRatios = new Map<string, number>()
+const MIN_SECTION_RATIO = 0.6
+
+const refreshActiveSection = () => {
+  if (!visibleSectionRatios.size) {
+    activeSection.value = sections.value[0]?.id ?? sectionIds.hero
+    return
+  }
+
+  const sorted = [...visibleSectionRatios.entries()].sort((a, b) => b[1] - a[1])
+  const [nextActive] = sorted.find(([, ratio]) => ratio >= MIN_SECTION_RATIO) ?? sorted[0] ?? []
+
+  if (nextActive) {
+    activeSection.value = nextActive
+  }
+}
 
 const observeSections = () => {
   if (!import.meta.client) {
@@ -424,18 +440,25 @@ const observeSections = () => {
   }
 
   observer.value?.disconnect()
+  visibleSectionRatios.clear()
+  refreshActiveSection()
 
   observer.value = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          activeSection.value = entry.target.id
+        const ratio = entry.intersectionRatio
+        if (ratio > 0) {
+          visibleSectionRatios.set(entry.target.id, ratio)
+        } else {
+          visibleSectionRatios.delete(entry.target.id)
         }
       })
+
+      refreshActiveSection()
     },
     {
-      rootMargin: '-30% 0px -50% 0px',
-      threshold: [0.25, 0.5, 0.75],
+      rootMargin: '-15% 0px -35% 0px',
+      threshold: Array.from({ length: 11 }, (_, index) => index / 10),
     },
   )
 
@@ -463,6 +486,7 @@ watch(
 
 onBeforeUnmount(() => {
   observer.value?.disconnect()
+  visibleSectionRatios.clear()
 })
 
 const scrollToSection = (sectionId: string) => {
@@ -474,6 +498,8 @@ const scrollToSection = (sectionId: string) => {
   if (!element) {
     return
   }
+
+  activeSection.value = sectionId
 
   const offset = orientation.value === 'horizontal' ? 96 : 120
   const top = element.getBoundingClientRect().top + window.scrollY - offset

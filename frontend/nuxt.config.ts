@@ -37,7 +37,10 @@ export default defineNuxtConfig({
     tsConfig: {
       compilerOptions: {
         esModuleInterop: true,
-        typeRoots: ['types', './node_modules/@types']
+        typeRoots: ['types', '../types', './node_modules/@types'],
+        paths: {
+          'vue3-picture-swipe': ['../types/vue3-picture-swipe']
+        }
       }
     }
   },
