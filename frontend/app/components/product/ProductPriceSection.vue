@@ -1,7 +1,7 @@
 <template>
   <section :id="sectionId" class="product-price">
     <header class="product-price__header">
-      <h2 class="product-price__title">
+      <h2 id="price-history" class="product-price__title">
         {{ $t('product.price.title') }}
       </h2>
       <p class="product-price__subtitle">
@@ -48,7 +48,7 @@
     </div>
 
     <div class="product-price__offers">
-      <h3>{{ $t('product.price.offerList') }}</h3>
+      <h3 id="offers-list">{{ $t('product.price.offerList') }}</h3>
       <v-table density="comfortable">
         <thead>
           <tr>
