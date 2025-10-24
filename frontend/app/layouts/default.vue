@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <PageLoadingOverlay />
     <The-main-menu-container @toggle-drawer="toggleDrawer" />
 
     <!-- Mobile menu -->

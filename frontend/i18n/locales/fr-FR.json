@@ -7,6 +7,9 @@
   "components": {
     "impactScore": {
       "tooltip": "Qualité de l'impact évalué à {value} sur {max}"
+    },
+    "pageLoadingOverlay": {
+      "label": "Chargement du contenu"
     }
   },
   "siteIdentity": {
