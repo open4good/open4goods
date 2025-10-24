@@ -50,16 +50,6 @@
                 {{ actionLabels.goHome }}
               </v-btn>
               <v-btn
-                variant="tonal"
-                color="primary"
-                class="error-page__action"
-                size="large"
-                prepend-icon="mdi-compass-outline"
-                @click="handleBrowseCategories"
-              >
-                {{ actionLabels.browseCategories }}
-              </v-btn>
-              <v-btn
                 variant="text"
                 color="primary"
                 class="error-page__action"
@@ -87,31 +77,6 @@
                 {{ pageStrings.statusMessage }}
               </p>
 
-              <div class="error-page__divider" role="presentation" />
-
-              <p class="error-page__aside-title">
-                {{ asideTitle }}
-              </p>
-              <p class="error-page__aside-description">
-                {{ asideDescription }}
-              </p>
-
-              <ul class="error-page__highlight-list">
-                <li
-                  v-for="highlight in asideHighlights"
-                  :key="highlight"
-                  class="error-page__highlight-item"
-                >
-                  <v-icon
-                    icon="mdi-check-circle-outline"
-                    size="small"
-                    class="error-page__highlight-icon"
-                  />
-                  <span class="error-page__highlight-text">
-                    {{ highlight }}
-                  </span>
-                </li>
-              </ul>
             </div>
           </aside>
         </v-container>
@@ -183,17 +148,8 @@ const actionsAriaLabel = computed(() => String(t('error.page.actions.ariaLabel')
 
 const actionLabels = computed(() => ({
   goHome: String(t('error.page.actions.goHome')),
-  browseCategories: String(t('error.page.actions.browseCategories')),
   contactSupport: String(t('error.page.actions.contactSupport')),
 }))
-
-const asideTitle = computed(() => String(t('error.page.aside.title')))
-const asideDescription = computed(() => String(t('error.page.aside.description')))
-const asideHighlights = computed(() => [
-  String(t('error.page.aside.highlights.catalog')),
-  String(t('error.page.aside.highlights.impact')),
-  String(t('error.page.aside.highlights.community')),
-])
 
 useSeoMeta({
   title: () => pageStrings.value.title,
@@ -210,11 +166,6 @@ const toggleDrawer = () => {
 const handleGoHome = () => {
   clearError({ redirect: localePath('index') })
 }
-
-const handleBrowseCategories = () => {
-  clearError({ redirect: localePath('categories') })
-}
-
 const handleContactSupport = () => {
   clearError({ redirect: localePath('contact') })
 }
@@ -322,42 +273,6 @@ const handleContactSupport = () => {
 .error-page__status-message
   font-size: 1rem
   color: rgba(var(--v-theme-text-neutral-soft), 0.95)
-
-.error-page__divider
-  height: 1px
-  background: linear-gradient(90deg, rgba(var(--v-theme-border-primary-strong), 0), rgba(var(--v-theme-border-primary-strong), 0.65), rgba(var(--v-theme-border-primary-strong), 0))
-  margin-block: 0.5rem
-
-.error-page__aside-title
-  font-size: 1.125rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-strong))
-
-.error-page__aside-description
-  font-size: 1rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
-
-.error-page__highlight-list
-  list-style: none
-  padding: 0
-  margin: 0
-  display: grid
-  gap: 0.75rem
-
-.error-page__highlight-item
-  display: flex
-  align-items: center
-  gap: 0.5rem
-  padding: 0.75rem 1rem
-  border-radius: 16px
-  background: rgba(var(--v-theme-surface-primary-080), 0.9)
-
-.error-page__highlight-icon
-  color: rgb(var(--v-theme-accent-supporting))
-
-.error-page__highlight-text
-  font-size: 0.95rem
-  color: rgb(var(--v-theme-text-neutral-strong))
 
 @media (max-width: 959px)
   .error-page__content, .error-page__status-card

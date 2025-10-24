@@ -97,17 +97,7 @@
       "actions": {
         "ariaLabel": "Error recovery quick actions",
         "goHome": "Back to homepage",
-        "browseCategories": "Browse categories",
         "contactSupport": "Contact support"
-      },
-      "aside": {
-        "title": "Here’s what you can do",
-        "description": "Keep exploring our transparent impact resources while we guide you back on track.",
-        "highlights": {
-          "catalog": "Discover curated guides across every product category.",
-          "impact": "Understand how we calculate environmental impact with open data.",
-          "community": "Join the community and share feedback to improve Nudger."
-        }
       }
     }
   },
