@@ -108,6 +108,7 @@ import {
 import { matchProductRouteFromSegments, isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
+import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import ProductImpactSection from '~/components/product/ProductImpactSection.vue'
 import ProductAiReviewSection from '~/components/product/ProductAiReviewSection.vue'
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
@@ -247,34 +248,39 @@ const productTitle = computed(() => {
   )
 })
 
-const productBreadcrumbs = computed(() => {
-  const categoryItems = (categoryDetail.value?.breadCrumb ?? [])
-    .map((item) => ({
-      title: item.title ?? item.link ?? '',
-      link: item.link ?? undefined,
-    }))
-    .filter((item) => (item.title?.toString().trim().length ?? 0) > 0 || (item.link?.toString().trim().length ?? 0) > 0)
+const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
+  const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
+  const categoryFullSlug = (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ?? null
 
-  if (!product.value) {
-    return categoryItems
-  }
+  return breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, crumb, index, array) => {
+    const rawTitle = crumb?.title ?? crumb?.link ?? ''
+    const title = rawTitle.toString().trim()
+    if (!title.length) {
+      return acc
+    }
 
-  const productLinkRaw = product.value.fullSlug ?? product.value.slug ?? route.fullPath
-  const normalizedLink = productLinkRaw
-    ? productLinkRaw.startsWith('http')
-      ? productLinkRaw
-      : productLinkRaw.startsWith('/')
-        ? productLinkRaw
-        : `/${productLinkRaw}`
-    : route.fullPath
+    const crumbFullSlug = (crumb as { fullSlug?: string | null }).fullSlug ?? null
+    const rawLink =
+      crumbFullSlug ??
+      (index === array.length - 1 ? categoryFullSlug ?? crumb?.link : crumb?.link) ??
+      null
 
-  return [
-    ...categoryItems,
-    {
-      title: productTitle.value,
-      link: normalizedLink,
-    },
-  ]
+    const trimmed = rawLink?.toString().trim() ?? ''
+    const normalized = trimmed
+      ? trimmed.startsWith('http')
+        ? trimmed
+        : trimmed.startsWith('/')
+          ? trimmed
+          : `/${trimmed}`
+      : undefined
+
+    acc.push({
+      title,
+      link: normalized ?? undefined,
+    })
+
+    return acc
+  }, [])
 })
 
 const productSubtitle = computed(() => {
