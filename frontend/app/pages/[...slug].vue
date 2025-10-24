@@ -142,6 +142,8 @@ if (!productRoute) {
 
 const { categorySlug, gtin } = productRoute
 
+const productLoadError = ref<Error | null>(null)
+
 const {
   data: productData,
   pending,
@@ -149,6 +151,7 @@ const {
 } = await useAsyncData<ProductDto | null>(
   `product-${gtin}`,
   async () => {
+    productLoadError.value = null
     try {
       return await $fetch<ProductDto>(`/api/products/${gtin}`)
     } catch (fetchError) {
@@ -160,7 +163,21 @@ const {
         })
       }
 
-      throw fetchError
+      const fallbackMessage =
+        fetchError instanceof Error && fetchError.message?.trim().length
+          ? fetchError.message
+          : String(t('error.page.generic.statusMessage'))
+
+      productLoadError.value =
+        fetchError instanceof Error ? fetchError : new Error(fallbackMessage)
+
+      if (!productLoadError.value.message?.trim().length) {
+        productLoadError.value.message = fallbackMessage
+      }
+
+      console.error('Failed to load product details', fetchError)
+
+      return null
     }
   },
   { server: true, immediate: true },
@@ -569,15 +586,19 @@ const scrollToSection = (sectionId: string) => {
 }
 
 const errorMessage = computed(() => {
-  if (!error.value) {
-    return null
+  if (error.value) {
+    if (error.value instanceof Error) {
+      return error.value.message
+    }
+
+    return String(error.value)
   }
 
-  if (error.value instanceof Error) {
-    return error.value.message
+  if (productLoadError.value) {
+    return productLoadError.value.message
   }
 
-  return String(error.value)
+  return null
 })
 
 const structuredOffers = computed(() => {
