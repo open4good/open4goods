@@ -119,12 +119,11 @@ import {
   shallowRef,
   watch,
   type ComponentPublicInstance,
-  type DefineComponent,
   type PropType,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
-import type { VuePictureSwipeItem, VuePictureSwipeOptions } from 'vue3-picture-swipe'
+import type { PictureSwipeItem, PictureSwipeOptions } from 'vue3-picture-swipe'
 
 defineOptions({ inheritAttrs: false })
 
@@ -139,7 +138,7 @@ const props = defineProps({
   },
 })
 
-type PictureSwipeComponent = DefineComponent<{ items: VuePictureSwipeItem[]; options?: VuePictureSwipeOptions }>
+type PictureSwipeComponent = typeof import('vue3-picture-swipe')['default']
 
 type PictureSwipeComponentInstance = ComponentPublicInstance<{ pswp?: LightboxInstance }> & {
   open?: (index: number) => void
@@ -379,7 +378,7 @@ const escapeMap: Record<string, string> = {
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => escapeMap[char] ?? char)
 const escapeAttribute = (value: string | null | undefined) => escapeHtml(String(value ?? ''))
 
-const pictureSwipeItems = computed<VuePictureSwipeItem[]>(() =>
+const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
   galleryItems.value.map((item) => {
     const caption = item.caption || props.title
     const sanitizedCaption = escapeHtml(caption)
@@ -413,8 +412,8 @@ const pictureSwipeItems = computed<VuePictureSwipeItem[]>(() =>
   }),
 )
 
-const pictureSwipeOptions = computed<VuePictureSwipeOptions>(() => {
-  const base: VuePictureSwipeOptions = {
+const pictureSwipeOptions = computed<PictureSwipeOptions>(() => {
+  const base: PictureSwipeOptions = {
     shareEl: false,
     fullscreenEl: true,
     zoomEl: true,

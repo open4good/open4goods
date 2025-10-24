@@ -52,6 +52,24 @@
             </span>
           </div>
         </v-card-item>
+
+        <v-card-actions class="category-product-card-grid__actions">
+          <v-btn
+            class="category-product-card-grid__compare"
+            :class="{ 'category-product-card-grid__compare--active': isProductSelected(product) }"
+            :variant="isProductSelected(product) ? 'flat' : 'outlined'"
+            color="primary"
+            size="small"
+            :title="compareTooltip(product)"
+            :aria-pressed="isProductSelected(product)"
+            :aria-label="compareAriaLabel(product)"
+            :disabled="isCompareDisabled(product)"
+            data-test="category-product-compare"
+            @click.stop.prevent="toggleCompare(product)"
+          >
+            {{ compareLabel(product) }}
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-col>
   </v-row>
@@ -60,11 +78,17 @@
 <script setup lang="ts">
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import {
+  MAX_COMPARE_ITEMS,
+  useProductCompareStore,
+  type CompareListBlockReason,
+} from '~/stores/useProductCompareStore'
 
 defineProps<{ products: ProductDto[] }>()
 
-const { t, n } = useI18n()
+const { t, n, te } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+const compareStore = useProductCompareStore()
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -147,6 +171,80 @@ const impactScoreValue = (product: ProductDto) => {
 
   return null
 }
+
+const productDisplayName = (product: ProductDto) => {
+  return (
+    product.identity?.bestName ??
+    product.base?.bestName ??
+    product.identity?.model ??
+    product.identity?.brand ??
+    t('category.products.untitledProduct')
+  )
+}
+
+const isProductSelected = (product: ProductDto) => compareStore.hasProduct(product)
+
+const compareLabel = (product: ProductDto) =>
+  isProductSelected(product)
+    ? t('category.products.compare.removeFromList')
+    : t('category.products.compare.addToList')
+
+const reasonMessage = (reason: CompareListBlockReason | undefined) => {
+  switch (reason) {
+    case 'limit-reached':
+      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
+    case 'vertical-mismatch':
+      return t('category.products.compare.differentCategory')
+    case 'missing-identifier':
+      return t('category.products.compare.missingIdentifier')
+    default:
+      return null
+  }
+}
+
+const isCompareDisabled = (product: ProductDto) => {
+  if (isProductSelected(product)) {
+    return false
+  }
+
+  const eligibility = compareStore.canAddProduct(product)
+  return !eligibility.success
+}
+
+const compareTooltip = (product: ProductDto) => {
+  if (isProductSelected(product)) {
+    return t('category.products.compare.removeFromList')
+  }
+
+  const eligibility = compareStore.canAddProduct(product)
+
+  if (!eligibility.success) {
+    return reasonMessage(eligibility.reason) ?? t('category.products.compare.addToList')
+  }
+
+  return t('category.products.compare.addToList')
+}
+
+const compareAriaLabel = (product: ProductDto) => {
+  if (isProductSelected(product)) {
+    if (te('category.products.compare.removeSingle')) {
+      return t('category.products.compare.removeSingle', { name: productDisplayName(product) })
+    }
+
+    return t('category.products.compare.removeFromList')
+  }
+
+  const eligibility = compareStore.canAddProduct(product)
+  return reasonMessage(eligibility.reason) ?? t('category.products.compare.addToList')
+}
+
+const toggleCompare = (product: ProductDto) => {
+  if (isCompareDisabled(product) && !isProductSelected(product)) {
+    return
+  }
+
+  compareStore.toggleProduct(product)
+}
 </script>
 
 <style scoped lang="sass">
@@ -187,6 +285,17 @@ const impactScoreValue = (product: ProductDto) => {
     background: rgb(var(--v-theme-surface-glass))
     border-bottom-left-radius: inherit
     border-bottom-right-radius: inherit
+
+  &__actions
+    padding: 0 1.25rem 1.25rem
+    justify-content: center
+
+  &__compare
+    text-transform: none
+    font-weight: 600
+
+    &--active
+      color: rgb(var(--v-theme-text-on-accent))
 
   &__title
     font-size: 1.125rem

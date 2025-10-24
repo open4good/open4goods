@@ -1,22 +1,43 @@
 declare module 'vue3-picture-swipe' {
   import type { DefineComponent } from 'vue'
 
-  export interface VuePictureSwipeItem {
+  interface PictureSwipeItem {
     src: string
-    thumbnail?: string
-    w: number
-    h: number
+    msrc?: string
+    width?: number
+    height?: number
     title?: string
-    alt?: string
     html?: string
-    htmlAfterThumbnail?: string
+    el?: HTMLElement
+  }
+
+  interface PictureSwipeOptions {
+    loop?: boolean
+    allowPanToNext?: boolean
+    spacing?: number
+    bgOpacity?: number
+    mouseUsed?: boolean
+    escKey?: boolean
+    arrowKeys?: boolean
+    history?: boolean
+    galleryUID?: string
+    gallerySelector?: string | false
+    getThumbBoundsFn?: (index: number) => { x: number; y: number; w: number }
+    shareEl?: boolean
+    fullscreenEl?: boolean
+    zoomEl?: boolean
+    counterEl?: boolean
+    closeOnScroll?: boolean
     [key: string]: unknown
   }
 
-  export interface VuePictureSwipeOptions {
-    [key: string]: unknown
-  }
+  const VuePictureSwipe: DefineComponent<{
+    items: PictureSwipeItem[]
+    options?: PictureSwipeOptions
+    openOn?: number | null
+    isOpen?: boolean
+  }>
 
-  const VuePictureSwipe: DefineComponent<{ items: VuePictureSwipeItem[]; options?: VuePictureSwipeOptions }>
+  export type { PictureSwipeItem, PictureSwipeOptions }
   export default VuePictureSwipe
 }

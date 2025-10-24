@@ -31,6 +31,8 @@
         <TheMainFooterContent />
       </template>
     </TheMainFooter>
+
+    <CategoryComparePanel />
   </v-app>
 </template>
 
