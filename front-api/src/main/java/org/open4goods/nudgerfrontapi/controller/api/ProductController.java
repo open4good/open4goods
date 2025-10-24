@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
@@ -87,6 +86,7 @@ public class ProductController {
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
+    private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
 
     public ProductController(ProductMappingService service,
                              VerticalsConfigService verticalsConfigService) {
@@ -308,49 +308,17 @@ public class ProductController {
         List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
                 .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
                 .toList();
-        ProductFieldOptionsResponse filterOptions = safeResolveVerticalFields(normalizedVerticalId, domainLanguage,
-                filterableGlobal);
 
-        Set<String> globalFilterMappings = Arrays.stream(ProductDtoFilterFields.values())
-                .map(ProductDtoFilterFields::getText)
-                .collect(Collectors.toSet());
-        Set<String> allowedFilterMappings = collectAllowedFieldMappings(filterOptions);
-
-        Set<String> allowedSortMappings;
-        if (normalizedVerticalId == null) {
-            allowedSortMappings = Arrays.stream(ProductDtoSortableFields.values())
-                    .map(ProductDtoSortableFields::getText)
-                    .collect(Collectors.toSet());
-        } else {
-            allowedSortMappings = allowedFilterMappings;
-        }
+        SearchCapabilities capabilities = buildSearchCapabilities(normalizedVerticalId, domainLanguage, filterableGlobal);
+        Set<String> allowedSortMappings = capabilities.allowedSorts();
 
         Pageable effectivePageable = page;
         SortRequestDto sortDto = searchPayload == null ? null : searchPayload.sort();
-        if (sortDto != null && sortDto.sorts() != null) {
-            List<Sort.Order> orders = new ArrayList<>();
-            for (SortRequestDto.SortOption option : sortDto.sorts()) {
-                if (option == null || !StringUtils.hasText(option.field())) {
-                    return badRequest("Invalid sort parameter", "Sort field is mandatory");
-                }
-                String mapping = option.field().trim();
-                if (!allowedSortMappings.contains(mapping)) {
-                    return badRequest("Invalid sort parameter", "Unknown sort field: " + mapping);
-                }
-                Sort.Direction direction = option.order() == SortRequestDto.SortOrder.desc
-                        ? Sort.Direction.DESC
-                        : Sort.Direction.ASC;
-                orders.add(new Sort.Order(direction, mapping));
-            }
-            Sort sortSpec = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
-            effectivePageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sortSpec);
-        } else {
-            for (Sort.Order order : page.getSort()) {
-                if (!allowedSortMappings.contains(order.getProperty())) {
-                    return badRequest("Invalid sort parameter", "Unknown sort field: " + order.getProperty());
-                }
-            }
+        Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
+        if (sortValidation.hasError()) {
+            return sortValidation.error();
         }
+        effectivePageable = sortValidation.value();
 
         if (include != null) {
             for (String component : include) {
@@ -363,44 +331,19 @@ public class ProductController {
         }
 
         AggregationRequestDto aggDto = searchPayload == null ? null : searchPayload.aggs();
-        if (aggDto != null && aggDto.aggs() != null && !aggDto.aggs().isEmpty()) {
-            if (normalizedVerticalId == null) {
-                return badRequest("Invalid aggregation parameter", "Aggregations require a verticalId");
-            }
-            List<Agg> sanitized = new ArrayList<>();
-            for (Agg aggregation : aggDto.aggs()) {
-                if (aggregation == null || !StringUtils.hasText(aggregation.field())) {
-                    return badRequest("Invalid aggregation parameter", "Aggregation field is mandatory");
-                }
-                String mapping = aggregation.field().trim();
-                if (!allowedFilterMappings.contains(mapping)) {
-                    return badRequest("Invalid aggregation parameter", "Aggregation not permitted for field: " + mapping);
-                }
-                sanitized.add(new Agg(aggregation.name(), mapping, aggregation.type(), aggregation.min(),
-                        aggregation.max(), aggregation.buckets(), aggregation.step()));
-            }
-            aggDto = new AggregationRequestDto(List.copyOf(sanitized));
-        } else if (aggDto != null) {
-            aggDto = new AggregationRequestDto(List.of());
+        Validation<AggregationRequestDto> aggregationValidation = sanitizeAggregations(aggDto, normalizedVerticalId,
+                capabilities.allowedAggregations());
+        if (aggregationValidation.hasError()) {
+            return aggregationValidation.error();
         }
+        aggDto = aggregationValidation.value();
 
         FilterRequestDto filterDto = searchPayload == null ? null : searchPayload.filters();
-        if (filterDto != null && filterDto.filters() != null) {
-            Set<String> validationSet = normalizedVerticalId == null ? globalFilterMappings : allowedFilterMappings;
-            List<FilterRequestDto.Filter> sanitized = new ArrayList<>();
-            for (FilterRequestDto.Filter filter : filterDto.filters()) {
-                if (filter == null || !StringUtils.hasText(filter.field())) {
-                    return badRequest("Invalid filters parameter", "Filter field is mandatory");
-                }
-                String mapping = filter.field().trim();
-                if (!validationSet.contains(mapping)) {
-                    return badRequest("Invalid filters parameter", "Filter not permitted for field: " + mapping);
-                }
-                sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(),
-                        filter.max()));
-            }
-            filterDto = new FilterRequestDto(List.copyOf(sanitized));
+        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, capabilities.allowedFilters());
+        if (filterValidation.hasError()) {
+            return filterValidation.error();
         }
+        filterDto = filterValidation.value();
 
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
         Set<String> requestedComponents = include == null ? Set.of() : include;
@@ -438,9 +381,8 @@ public class ProductController {
 
     private ProductFieldOptionsResponse resolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
             List<FieldMetadataDto> globalFields) {
-        List<FieldMetadataDto> immutableGlobal = List.copyOf(globalFields);
         if (!StringUtils.hasText(verticalId)) {
-            return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
+            return resolveVerticalFields((VerticalConfig) null, domainLanguage, globalFields);
         }
 
         VerticalConfig vConfig = verticalsConfigService.getConfigById(verticalId);
@@ -448,29 +390,49 @@ public class ProductController {
             return null;
         }
 
-        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, vConfig);
+        return resolveVerticalFields(vConfig, domainLanguage, globalFields);
+    }
+
+    private ProductFieldOptionsResponse resolveVerticalFields(VerticalConfig config, DomainLanguage domainLanguage,
+            List<FieldMetadataDto> globalFields) {
+        List<FieldMetadataDto> immutableGlobal = List.copyOf(globalFields);
+        if (config == null) {
+            return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
+        }
+
+        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, config);
         List<FieldMetadataDto> impactFields = new ArrayList<>();
-        FieldMetadataDto ecoscore = buildEcoscoreField(vConfig);
+        FieldMetadataDto ecoscore = buildEcoscoreField(config);
         impactFields.add(ecoscore);
-        mapImpactScores(vConfig, domainLanguage).stream()
+        mapImpactScores(config, domainLanguage).stream()
                 .filter(field -> !Objects.equals(field.mapping(), ecoscore.mapping()))
                 .forEach(impactFields::add);
 
         List<FieldMetadataDto> technicalFields = new ArrayList<>();
-        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getEcoFilters(), vConfig, domainLanguage));
-        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getGlobalTechnicalFilters(), vConfig, domainLanguage));
-        technicalFields.addAll(mapVerticalAttributeFilters(vConfig.getTechnicalFilters(), vConfig, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(config.getEcoFilters(), config, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(config.getGlobalTechnicalFilters(), config, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(config.getTechnicalFilters(), config, domainLanguage));
 
         return new ProductFieldOptionsResponse(globalWithAggregation, List.copyOf(impactFields), List.copyOf(technicalFields));
     }
 
-    private ProductFieldOptionsResponse safeResolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
+    /**
+     * Resolve the search capabilities for the requested vertical.
+     *
+     * @param normalizedVerticalId optional vertical identifier supplied by the client
+     * @param domainLanguage       language used to localise filter metadata
+     * @param globalFields         list of fields available regardless of the vertical
+     * @return aggregation, sort and filter capabilities derived from the vertical configuration
+     */
+    private SearchCapabilities buildSearchCapabilities(String normalizedVerticalId, DomainLanguage domainLanguage,
             List<FieldMetadataDto> globalFields) {
-        ProductFieldOptionsResponse resolved = resolveVerticalFields(verticalId, domainLanguage, globalFields);
-        if (resolved == null) {
-            return new ProductFieldOptionsResponse(List.copyOf(globalFields), List.of(), List.of());
-        }
-        return resolved;
+        boolean hasVertical = StringUtils.hasText(normalizedVerticalId);
+        VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
+        ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
+        Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
+        Set<String> allowedSorts = hasVertical ? allowedFilters : collectGlobalSortMappings();
+        Set<String> allowedAggregations = collectAllowedAggregationMappings(allowedFilters, config);
+        return new SearchCapabilities(allowedFilters, allowedSorts, allowedAggregations);
     }
 
     private Set<String> collectAllowedFieldMappings(ProductFieldOptionsResponse fieldOptions) {
@@ -482,6 +444,183 @@ public class ProductController {
         addFieldMappings(allowed, fieldOptions.impact());
         addFieldMappings(allowed, fieldOptions.technical());
         return allowed;
+    }
+
+    /**
+     * Combine the explicit filter mappings with the aggregation hints defined in the vertical configuration.
+     *
+     * @param allowedFilterMappings mappings allowed for filtering
+     * @param config                vertical configuration possibly containing aggregation hints
+     * @return set of mappings that may be used to request aggregations
+     */
+    private Set<String> collectAllowedAggregationMappings(Set<String> allowedFilterMappings, VerticalConfig config) {
+        Set<String> allowed = new HashSet<>(allowedFilterMappings);
+        if (config == null || config.getAggregationConfiguration() == null) {
+            return allowed;
+        }
+        config.getAggregationConfiguration().keySet()
+                .forEach(candidate -> addAggregationKeyVariants(allowed, candidate, config));
+        return allowed;
+    }
+
+    /**
+     * Add acceptable aggregation key variants (with or without the {@code .numericValue} suffix).
+     *
+     * @param target    destination set to update
+     * @param candidate aggregation key declared in the configuration
+     * @param config    vertical configuration used to infer attribute metadata
+     */
+    private void addAggregationKeyVariants(Set<String> target, String candidate, VerticalConfig config) {
+        if (!StringUtils.hasText(candidate)) {
+            return;
+        }
+        String normalized = candidate.trim();
+        target.add(normalized);
+        if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
+            String base = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
+            if (!base.isEmpty()) {
+                target.add(base);
+            }
+            return;
+        }
+        if (normalized.startsWith(INDEXED_ATTRIBUTE_PREFIX)) {
+            String attributeKey = normalized.substring(INDEXED_ATTRIBUTE_PREFIX.length());
+            if (VALUE_TYPE_NUMERIC.equals(resolveAttributeValueType(config, attributeKey))) {
+                target.add(normalized + NUMERIC_VALUE_SUFFIX);
+            }
+        }
+    }
+
+    /**
+     * @return default sort mappings accepted when no vertical override is provided.
+     */
+    private Set<String> collectGlobalSortMappings() {
+        Set<String> fields = new HashSet<>();
+        for (ProductDtoSortableFields field : ProductDtoSortableFields.values()) {
+            fields.add(field.getText());
+        }
+        return fields;
+    }
+
+    /**
+     * Validate and normalise the requested sort specification.
+     */
+    private Validation<Pageable> sanitizeSort(Pageable requestedPageable, SortRequestDto sortDto,
+            Set<String> allowedSortMappings) {
+        if (sortDto == null || sortDto.sorts() == null) {
+            for (Sort.Order order : requestedPageable.getSort()) {
+                if (!allowedSortMappings.contains(order.getProperty())) {
+                    return Validation.error(badRequest("Invalid sort parameter",
+                            "Unknown sort field: " + order.getProperty()));
+                }
+            }
+            return Validation.ok(requestedPageable);
+        }
+
+        List<Sort.Order> orders = new ArrayList<>();
+        for (SortRequestDto.SortOption option : sortDto.sorts()) {
+            if (option == null || !StringUtils.hasText(option.field())) {
+                return Validation.error(badRequest("Invalid sort parameter", "Sort field is mandatory"));
+            }
+            String mapping = option.field().trim();
+            if (!allowedSortMappings.contains(mapping)) {
+                return Validation.error(badRequest("Invalid sort parameter", "Unknown sort field: " + mapping));
+            }
+            Sort.Direction direction = option.order() == SortRequestDto.SortOrder.desc
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+            orders.add(new Sort.Order(direction, mapping));
+        }
+
+        Sort sortSpec = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
+        Pageable sanitized = PageRequest.of(requestedPageable.getPageNumber(), requestedPageable.getPageSize(), sortSpec);
+        return Validation.ok(sanitized);
+    }
+
+    /**
+     * Validate aggregations and ensure they target authorised mappings.
+     */
+    private Validation<AggregationRequestDto> sanitizeAggregations(AggregationRequestDto aggregationRequest,
+            String normalizedVerticalId, Set<String> allowedAggregationMappings) {
+        if (aggregationRequest == null) {
+            return Validation.ok(null);
+        }
+
+        List<Agg> aggregations = aggregationRequest.aggs();
+        if (aggregations == null || aggregations.isEmpty()) {
+            if (normalizedVerticalId == null) {
+                return Validation.error(badRequest("Invalid aggregation parameter",
+                        "Aggregations require a verticalId"));
+            }
+            return Validation.ok(new AggregationRequestDto(List.of()));
+        }
+
+        if (normalizedVerticalId == null) {
+            return Validation.error(badRequest("Invalid aggregation parameter", "Aggregations require a verticalId"));
+        }
+
+        List<Agg> sanitized = new ArrayList<>();
+        for (Agg aggregation : aggregations) {
+            if (aggregation == null || !StringUtils.hasText(aggregation.field())) {
+                return Validation.error(badRequest("Invalid aggregation parameter", "Aggregation field is mandatory"));
+            }
+            String mapping = aggregation.field().trim();
+            if (!allowedAggregationMappings.contains(mapping)) {
+                return Validation.error(badRequest("Invalid aggregation parameter",
+                        "Aggregation not permitted for field: " + mapping));
+            }
+            sanitized.add(new Agg(aggregation.name(), mapping, aggregation.type(), aggregation.min(), aggregation.max(),
+                    aggregation.buckets(), aggregation.step()));
+        }
+
+        return Validation.ok(new AggregationRequestDto(List.copyOf(sanitized)));
+    }
+
+    /**
+     * Validate filter clauses and keep only authorised mappings.
+     */
+    private Validation<FilterRequestDto> sanitizeFilters(FilterRequestDto filterRequest,
+            Set<String> allowedFilterMappings) {
+        if (filterRequest == null) {
+            return Validation.ok(null);
+        }
+        if (filterRequest.filters() == null) {
+            return Validation.ok(filterRequest);
+        }
+
+        List<FilterRequestDto.Filter> sanitized = new ArrayList<>();
+        for (FilterRequestDto.Filter filter : filterRequest.filters()) {
+            if (filter == null || !StringUtils.hasText(filter.field())) {
+                return Validation.error(badRequest("Invalid filters parameter", "Filter field is mandatory"));
+            }
+            String mapping = filter.field().trim();
+            if (!allowedFilterMappings.contains(mapping)) {
+                return Validation.error(badRequest("Invalid filters parameter",
+                        "Filter not permitted for field: " + mapping));
+            }
+            sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max()));
+        }
+
+        return Validation.ok(new FilterRequestDto(List.copyOf(sanitized)));
+    }
+
+    private record SearchCapabilities(Set<String> allowedFilters, Set<String> allowedSorts,
+            Set<String> allowedAggregations) {
+    }
+
+    private record Validation<T>(T value, ResponseEntity<ProductSearchResponseDto> error) {
+
+        static <T> Validation<T> ok(T value) {
+            return new Validation<>(value, null);
+        }
+
+        static <T> Validation<T> error(ResponseEntity<ProductSearchResponseDto> error) {
+            return new Validation<>(null, error);
+        }
+
+        boolean hasError() {
+            return error != null;
+        }
     }
 
     private void addFieldMappings(Set<String> target, List<FieldMetadataDto> fields) {
