@@ -75,6 +75,31 @@
     },
     "siteName": "Nudger"
   },
+  "error": {
+    "page": {
+      "eyebrow": "Changement de cap inattendu",
+      "statusLabel": "Code statut {code}",
+      "notFound": {
+        "badge": "Page introuvable",
+        "title": "Nous ne trouvons pas cette page",
+        "description": "Le lien suivi est peut-être obsolète ou la page a été déplacée.",
+        "helper": "Utilisez les liens ci-dessous ou retournez à l’accueil pour poursuivre votre exploration.",
+        "statusMessage": "Erreur 404 — la ressource demandée est introuvable."
+      },
+      "generic": {
+        "badge": "Un contretemps est survenu",
+        "title": "Nous corrigeons le problème",
+        "description": "Une erreur inattendue nous a empêchés de charger cette page.",
+        "helper": "Essayez une autre section de Nudger ou contactez-nous si le problème persiste.",
+        "statusMessage": "Erreur 500 — quelque chose s’est mal passé de notre côté."
+      },
+      "actions": {
+        "ariaLabel": "Actions rapides pour se remettre sur la bonne voie",
+        "goHome": "Retour à l’accueil",
+        "contactSupport": "Contacter le support"
+      }
+    }
+  },
   "category": {
     "hero": {
       "breadcrumbAriaLabel": "Fil d'Ariane des catégories",
