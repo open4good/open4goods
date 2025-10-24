@@ -166,6 +166,24 @@
         "other": "{count} offres"
       },
       "notRated": "Non noté",
+      "compare": {
+        "title": "Comparer les produits",
+        "expandPanel": "Afficher la liste",
+        "collapsePanel": "Masquer la liste",
+        "removeSingle": "Retirer {name}",
+        "addMoreHint": "Sélectionnez au moins deux produits pour lancer une comparaison.",
+        "launchComparison": "Comparer maintenant",
+        "regionLabel": "Produits sélectionnés pour la comparaison",
+        "itemsCount": {
+          "one": "{count} produit sélectionné",
+          "other": "{count} produits sélectionnés"
+        },
+        "addToList": "Ajouter à la comparaison",
+        "removeFromList": "Retirer de la comparaison",
+        "limitReached": "Vous pouvez comparer jusqu'à {count} produits.",
+        "differentCategory": "Comparez uniquement des produits de la même catégorie.",
+        "missingIdentifier": "Impossible de comparer ce produit."
+      },
       "fetchError": "Impossible de charger les produits. Veuillez réessayer.",
       "headers": {
         "brand": "Marque",

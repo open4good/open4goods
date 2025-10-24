@@ -23,6 +23,12 @@ declare module 'vue3-picture-swipe' {
     galleryUID?: string
     gallerySelector?: string | false
     getThumbBoundsFn?: (index: number) => { x: number; y: number; w: number }
+    shareEl?: boolean
+    fullscreenEl?: boolean
+    zoomEl?: boolean
+    counterEl?: boolean
+    closeOnScroll?: boolean
+    [key: string]: unknown
   }
 
   const VuePictureSwipe: DefineComponent<{
