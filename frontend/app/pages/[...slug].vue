@@ -129,9 +129,15 @@ const display = useDisplay()
 
 const slugParam = route.params.slug
 const segments = Array.isArray(slugParam)
-  ? slugParam.filter((segment): segment is string => typeof segment === 'string')
+  ? slugParam
+      .filter((segment): segment is string => typeof segment === 'string')
+      .map((segment) => segment.trim())
+      .filter((segment) => segment.length > 0)
   : typeof slugParam === 'string'
-    ? [slugParam]
+    ? slugParam
+        .split('/')
+        .map((segment) => segment.trim())
+        .filter((segment) => segment.length > 0)
     : []
 
 const productRoute = matchProductRouteFromSegments(segments)
