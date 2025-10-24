@@ -45,12 +45,12 @@ excludingTokensFromCategoriesMatching:
 
 # The scores that are available to build the impact score
 availableImpactScoreCriterias:
-#    CLASSE_ENERGY:
-#      key: CLASSE_ENERGY
-#      title:
-#        fr: "Classe énergétique"      
-#      description:
-#        fr: "La classe énergétique"
+    CLASSE_ENERGY:
+      key: CLASSE_ENERGY
+      title:
+        fr: "Classe énergétique"
+      description:
+        fr: "La classe énergétique"
     REPAIRABILITY_INDEX:
       key: REPAIRABILITY_INDEX
       title:
