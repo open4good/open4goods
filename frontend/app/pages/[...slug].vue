@@ -185,6 +185,30 @@ const categoryDetail = ref<Awaited<ReturnType<typeof selectCategoryBySlug>> | nu
 const loadingAggregations = ref(false)
 const aggregations = ref<Record<string, AggregationResponseDto>>({})
 
+const requestedScoreIds = computed(() => {
+  const ids: string[] = []
+
+  const pushId = (candidate: unknown) => {
+    if (typeof candidate !== 'string') {
+      return
+    }
+
+    const normalized = candidate.trim()
+    if (!normalized.length || ids.includes(normalized)) {
+      return
+    }
+
+    ids.push(normalized)
+  }
+
+  pushId('ECOSCORE')
+
+  const ponderations = categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
+  Object.keys(ponderations).forEach((key) => pushId(key))
+
+  return ids
+})
+
 if (categorySlug) {
   try {
     categoryDetail.value = await selectCategoryBySlug(categorySlug)
@@ -198,7 +222,7 @@ const scoreAggregations = async () => {
     return
   }
 
-  const scores = Object.keys(product.value.scores?.scores ?? {})
+  const scores = requestedScoreIds.value
   if (!scores.length) {
     return
   }
@@ -328,9 +352,11 @@ type ImpactRankingInfo = {
 }
 
 const impactScores = computed(() => {
-  const scoreMap = product.value?.scores?.scores ?? {}
+  const scoreMap = (product.value?.scores?.scores ?? {}) as Record<string, ProductScoreDto | undefined>
+  const desiredIds = requestedScoreIds.value
 
-  return Object.values(scoreMap)
+  return desiredIds
+    .map((scoreId) => scoreMap[scoreId])
     .filter(isRenderableScore)
     .map((score) => {
       const aggregation = aggregations.value[`score_${score.id}`]
