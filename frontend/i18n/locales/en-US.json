@@ -167,6 +167,24 @@
         "other": "{count} offers"
       },
       "notRated": "Not rated",
+      "compare": {
+        "title": "Compare products",
+        "expandPanel": "Show list",
+        "collapsePanel": "Hide list",
+        "removeSingle": "Remove {name}",
+        "addMoreHint": "Select at least two products to start a comparison.",
+        "launchComparison": "Compare now",
+        "regionLabel": "Products selected for comparison",
+        "itemsCount": {
+          "one": "{count} product selected",
+          "other": "{count} products selected"
+        },
+        "addToList": "Add to compare",
+        "removeFromList": "Remove from compare",
+        "limitReached": "You can compare up to {count} products.",
+        "differentCategory": "Only compare products from the same category.",
+        "missingIdentifier": "Cannot compare this product."
+      },
       "fetchError": "Unable to load products. Please try again.",
       "headers": {
         "brand": "Brand",
