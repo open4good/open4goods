@@ -1,0 +1,170 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
+import type { Pinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
+import type { I18n } from 'vue-i18n'
+import { h } from 'vue'
+import type { Component } from 'vue'
+import { createVuetify } from 'vuetify'
+import type { ProductDto } from '~~/shared/api-client'
+import { useProductCompareStore } from '~/stores/useProductCompareStore'
+
+vi.mock('~/composables/usePluralizedTranslation', () => ({
+  usePluralizedTranslation: () => ({
+    translatePlural: (_key: string, count: number) => `${count}`,
+  }),
+}))
+
+const createStub = (tag: string): Component => ({
+  inheritAttrs: false,
+  setup(_props, { slots, attrs }) {
+    return () => h(tag, attrs, slots.default?.())
+  },
+})
+
+const VBtnStub: Component = {
+  inheritAttrs: false,
+  props: {
+    disabled: Boolean,
+  },
+  emits: ['click'],
+  setup(props, { slots, attrs, emit }) {
+    return () =>
+      h(
+        'button',
+        {
+          ...attrs,
+          type: 'button',
+          disabled: props.disabled,
+          onClick: (event: MouseEvent) => {
+            if (props.disabled) {
+              event.preventDefault()
+              return
+            }
+            emit('click', event)
+          },
+        },
+        slots.default?.(),
+      )
+  },
+}
+
+type VuetifyInstance = ReturnType<typeof createVuetify>
+
+let pinia: Pinia
+let i18n: I18n
+let vuetify: VuetifyInstance
+
+const mountGrid = async (products: ProductDto[]) => {
+  const module = await import('./CategoryProductCardGrid.vue')
+  const CategoryProductCardGrid = module.default
+
+  return mount(CategoryProductCardGrid, {
+    props: { products },
+    global: {
+      plugins: [pinia, i18n, vuetify],
+      stubs: {
+        VRow: createStub('div'),
+        VCol: createStub('div'),
+        VCard: createStub('div'),
+        VCardItem: createStub('div'),
+        VImg: createStub('div'),
+        VSkeletonLoader: createStub('div'),
+        VTooltip: createStub('div'),
+        VBtn: VBtnStub,
+        ImpactScore: createStub('div'),
+        NuxtLink: createStub('a'),
+      },
+    },
+  })
+}
+
+const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
+  gtin: overrides.gtin ?? 1,
+  base: {
+    vertical: overrides.base?.vertical ?? 'electronics',
+    bestName: overrides.base?.bestName ?? 'Example product',
+  },
+  identity: {
+    bestName: overrides.identity?.bestName ?? 'Example product',
+  },
+  resources: {
+    coverImagePath: overrides.resources?.coverImagePath,
+  },
+  offers: overrides.offers,
+  names: overrides.names,
+  scores: overrides.scores,
+  attributes: overrides.attributes,
+  datasources: overrides.datasources,
+  aiReview: overrides.aiReview,
+  slug: overrides.slug,
+  fullSlug: overrides.fullSlug,
+})
+
+describe('CategoryProductCardGrid', () => {
+  beforeEach(() => {
+    pinia = createPinia()
+    setActivePinia(pinia)
+    localStorage.clear()
+    vuetify = createVuetify()
+    i18n = createI18n({
+      legacy: false,
+      locale: 'en-US',
+      messages: {
+        'en-US': {
+          category: {
+            products: {
+              untitledProduct: 'Untitled product',
+              notRated: 'Not rated yet',
+              priceUnavailable: 'Price unavailable',
+              compare: {
+                addToList: 'Add to compare',
+                removeFromList: 'Remove from compare',
+                limitReached: 'Maximum reached {count}',
+                differentCategory: 'Only compare products from the same category.',
+                missingIdentifier: 'Cannot compare this product.',
+              },
+            },
+          },
+        },
+      },
+    })
+  })
+
+  it('toggles a product in the compare list', async () => {
+    const product = buildProduct({ gtin: 1001 })
+    const wrapper = await mountGrid([product])
+    const store = useProductCompareStore()
+
+    const button = wrapper.get('[data-test="category-product-compare"]')
+
+    await button.trigger('click')
+    expect(store.items).toHaveLength(1)
+
+    await button.trigger('click')
+    expect(store.items).toHaveLength(0)
+  })
+
+  it('disables the compare button for incompatible categories', async () => {
+    const first = buildProduct({ gtin: 2001, base: { vertical: 'electronics' } as ProductDto['base'] })
+    const other = buildProduct({
+      gtin: 2002,
+      base: { vertical: 'kitchen' } as ProductDto['base'],
+    })
+
+    const wrapper = await mountGrid([first, other])
+    const store = useProductCompareStore()
+
+    const buttons = wrapper.findAll('[data-test="category-product-compare"]')
+    expect(buttons).toHaveLength(2)
+
+    const firstButton = buttons[0]!
+    const secondButton = buttons[1]!
+
+    await firstButton.trigger('click')
+    expect(store.items).toHaveLength(1)
+
+    expect((secondButton.element as HTMLButtonElement).disabled).toBe(true)
+  })
+})
