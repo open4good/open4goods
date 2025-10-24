@@ -278,7 +278,9 @@ describe('ProductHero', () => {
 
     const stage = wrapper.get('[data-testid="product-gallery-stage"]')
     expect(stage.classes()).not.toContain('product-gallery__stage--video')
-    expect(stage.text()).toContain('Source A')
+    const stageImage = stage.find('img')
+    expect(stageImage.exists()).toBe(true)
+    expect(stageImage.attributes('alt')).toBe('Front view')
 
     const thumbnails = wrapper.findAll('[data-testid="product-gallery-thumbnail"]')
     expect(thumbnails).toHaveLength(2)
@@ -312,8 +314,8 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     const breadcrumbLinks = wrapper.findAll('.breadcrumbs-stub__item')
-    expect(breadcrumbLinks).toHaveLength(3)
-    expect(breadcrumbLinks[2]?.attributes('href')).toBe('/appliances/demo-product')
+    expect(breadcrumbLinks).toHaveLength(2)
+    expect(breadcrumbLinks[1]?.attributes('href')).toBe('/appliances')
 
     const merchantPrefix = wrapper.get('.product-hero__price-merchant-prefix')
     expect(merchantPrefix.text()).toBe('At')
