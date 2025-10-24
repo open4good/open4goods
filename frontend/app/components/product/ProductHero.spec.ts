@@ -81,9 +81,12 @@ describe('ProductHero', () => {
             gtin: 'GTIN code',
             offersCount: 'Number of offers',
             bestPriceTitle: 'Best price',
-            priceFrom: 'From {source}',
-            compensation: 'Donation {amount}',
-            viewOffers: 'View all offers',
+            priceMerchantPrefix: 'At',
+            viewSingleOffer: 'View the offer',
+            viewOffersCount: 'View the {count} offers',
+            breadcrumbAriaLabel: 'Product breadcrumb',
+            missingBreadcrumbTitle: 'Category',
+            gtinTooltip: 'Tooltip text',
             openGalleryImage: 'View image "{label}" in fullscreen',
             openGalleryVideo: 'Play video "{label}"',
             openGalleryFallback: 'Open product media gallery',
@@ -93,6 +96,13 @@ describe('ProductHero', () => {
               video: 'video',
             },
             videoBadge: 'Video',
+          },
+          price: {
+            trend: {
+              decrease: 'Price drop of {amount}',
+              increase: 'Price increase of {amount}',
+              stable: 'Price unchanged',
+            },
           },
         },
       },
@@ -116,6 +126,11 @@ describe('ProductHero', () => {
         currency: 'EUR',
         datasourceName: 'Shop',
         url: 'https://example.com',
+        favicon: 'https://example.com/favicon.ico',
+      },
+      newTrend: {
+        trend: 'PRICE_DECREASE',
+        variation: -10,
       },
     },
     resources: {
@@ -145,9 +160,15 @@ describe('ProductHero', () => {
     },
   } as unknown as ProductDto
 
+  const breadcrumbs = [
+    { title: 'Home', link: '/' },
+    { title: 'Appliances', link: '/appliances' },
+    { title: 'Demo Product', link: '/appliances/demo-product' },
+  ]
+
   const mountComponent = async () =>
     await mountSuspended(ProductHero, {
-      props: { product },
+      props: { product, breadcrumbs },
       global: {
         plugins: [i18n],
         stubs: {
@@ -178,17 +199,74 @@ describe('ProductHero', () => {
               return () => h('span', { class: 'v-icon-stub' }, props.icon as string)
             },
           }),
-          'v-chip': defineComponent({
-            name: 'VChipStub',
-            setup(_, { slots }) {
-              return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
-            },
-          }),
           'v-btn': defineComponent({
             name: 'VBtnStub',
-            props: ['href'],
+            setup(_, { slots, attrs }) {
+              return () =>
+                h(
+                  'button',
+                  {
+                    class: 'v-btn-stub',
+                    type: 'button',
+                    onClick: attrs.onClick as ((event: MouseEvent) => void) | undefined,
+                  },
+                  slots.default?.(),
+                )
+            },
+          }),
+          'v-tooltip': defineComponent({
+            name: 'VTooltipStub',
+            props: ['text'],
             setup(props, { slots }) {
-              return () => h('a', { class: 'v-btn-stub', href: props.href as string }, slots.default?.())
+              return () =>
+                h('div', { class: 'v-tooltip-stub', 'data-tooltip': props.text }, [
+                  slots.activator?.({ props: {} }),
+                  slots.default?.(),
+                ])
+            },
+          }),
+          NuxtLink: defineComponent({
+            name: 'NuxtLinkStub',
+            props: ['to'],
+            setup(props, { slots, attrs }) {
+              return () =>
+                h(
+                  'a',
+                  {
+                    class: 'nuxt-link-stub',
+                    href: props.to as string,
+                    target: attrs.target as string | undefined,
+                    rel: attrs.rel as string | undefined,
+                  },
+                  slots.default?.(),
+                )
+            },
+          }),
+          CategoryNavigationBreadcrumbs: defineComponent({
+            name: 'CategoryNavigationBreadcrumbsStub',
+            props: {
+              items: {
+                type: Array as PropType<Array<{ title: string; link?: string }>>,
+                default: () => [],
+              },
+              ariaLabel: {
+                type: String,
+                default: '',
+              },
+            },
+            setup(props) {
+              return () =>
+                h(
+                  'nav',
+                  { 'aria-label': props.ariaLabel, class: 'breadcrumbs-stub' },
+                  props.items.map((item) =>
+                    h(
+                      'a',
+                      { class: 'breadcrumbs-stub__item', href: item.link ?? '#' },
+                      item.title,
+                    ),
+                  ),
+                )
             },
           }),
         },
@@ -213,6 +291,55 @@ describe('ProductHero', () => {
     expect(stage.classes()).toContain('product-gallery__stage--video')
     expect(stage.find('.product-gallery__stage-overlay').exists()).toBe(true)
 
+    await wrapper.unmount()
+  })
+
+  it('renders pricing metadata, breadcrumbs and smooth scroll actions', async () => {
+    const priceHeading = document.createElement('h2')
+    priceHeading.id = 'price-history'
+    priceHeading.getBoundingClientRect = () =>
+      ({ top: 200, left: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0 } as DOMRect)
+    document.body.appendChild(priceHeading)
+
+    const offersHeading = document.createElement('h3')
+    offersHeading.id = 'offers-list'
+    offersHeading.getBoundingClientRect = () =>
+      ({ top: 400, left: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0 } as DOMRect)
+    document.body.appendChild(offersHeading)
+
+    const scrollToSpy = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+
+    const wrapper = await mountComponent()
+
+    const breadcrumbLinks = wrapper.findAll('.breadcrumbs-stub__item')
+    expect(breadcrumbLinks).toHaveLength(3)
+    expect(breadcrumbLinks[2]?.attributes('href')).toBe('/appliances/demo-product')
+
+    const merchantPrefix = wrapper.get('.product-hero__price-merchant-prefix')
+    expect(merchantPrefix.text()).toBe('At')
+
+    const merchantLink = wrapper.get('.nuxt-link-stub')
+    expect(merchantLink.text()).toContain('Shop')
+    expect(merchantLink.attributes('href')).toBe('https://example.com')
+    expect(wrapper.find('.product-hero__price-merchant-favicon').attributes('src')).toBe(
+      'https://example.com/favicon.ico',
+    )
+
+    const trendButton = wrapper.get('.product-hero__price-trend')
+    expect(trendButton.text()).toContain('Price drop of')
+    await trendButton.trigger('click')
+    expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ top: 80, behavior: 'smooth' }))
+
+    scrollToSpy.mockClear()
+
+    const offersButton = wrapper.get('.v-btn-stub')
+    expect(offersButton.text()).toBe('View the 4 offers')
+    await offersButton.trigger('click')
+    expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ top: 264, behavior: 'smooth' }))
+
+    scrollToSpy.mockRestore()
+    priceHeading.remove()
+    offersHeading.remove()
     await wrapper.unmount()
   })
 })

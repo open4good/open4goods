@@ -29,7 +29,7 @@
 
       <main class="product-page__content">
         <section :id="sectionIds.hero" class="product-page__section">
-          <ProductHero :product="product" />
+          <ProductHero :product="product" :breadcrumbs="productBreadcrumbs" />
         </section>
 
         <section
@@ -245,6 +245,36 @@ const productTitle = computed(() => {
     product.value?.slug ??
     `GTIN ${product.value?.gtin ?? gtin}`
   )
+})
+
+const productBreadcrumbs = computed(() => {
+  const categoryItems = (categoryDetail.value?.breadCrumb ?? [])
+    .map((item) => ({
+      title: item.title ?? item.link ?? '',
+      link: item.link ?? undefined,
+    }))
+    .filter((item) => (item.title?.toString().trim().length ?? 0) > 0 || (item.link?.toString().trim().length ?? 0) > 0)
+
+  if (!product.value) {
+    return categoryItems
+  }
+
+  const productLinkRaw = product.value.fullSlug ?? product.value.slug ?? route.fullPath
+  const normalizedLink = productLinkRaw
+    ? productLinkRaw.startsWith('http')
+      ? productLinkRaw
+      : productLinkRaw.startsWith('/')
+        ? productLinkRaw
+        : `/${productLinkRaw}`
+    : route.fullPath
+
+  return [
+    ...categoryItems,
+    {
+      title: productTitle.value,
+      link: normalizedLink,
+    },
+  ]
 })
 
 const productSubtitle = computed(() => {

@@ -119,6 +119,11 @@
     </div>
 
     <div class="product-hero__details">
+      <CategoryNavigationBreadcrumbs
+        v-if="heroBreadcrumbs.length"
+        v-bind="heroBreadcrumbProps"
+        class="product-hero__breadcrumbs"
+      />
       <p v-if="product.identity?.brand" class="product-hero__eyebrow">
         {{ product.identity.brand }}
       </p>
@@ -138,20 +143,23 @@
           :show-value="true"
           class="product-hero__impact"
         />
-        <div v-if="product.base?.gtinInfo" class="product-hero__origin">
-          <NuxtImg
-            v-if="product.base.gtinInfo.countryFlagUrl"
-            :src="product.base.gtinInfo.countryFlagUrl"
-            :alt="product.base.gtinInfo.countryName ?? ''"
-            width="32"
-            height="24"
-            class="product-hero__flag"
-          />
-          <span>
-            {{ product.base.gtinInfo.countryName }}
-          </span>
-        </div>
       </div>
+
+      <v-tooltip v-if="gtinCountry" location="bottom" :text="t('product.hero.gtinTooltip')">
+        <template #activator="{ props: tooltipProps }">
+          <span v-bind="tooltipProps" class="product-hero__origin">
+            <NuxtImg
+              v-if="gtinCountry.flag"
+              :src="gtinCountry.flag"
+              :alt="gtinCountry.name"
+              width="32"
+              height="24"
+              class="product-hero__flag"
+            />
+            <span>{{ gtinCountry.name }}</span>
+          </span>
+        </template>
+      </v-tooltip>
 
       <div class="product-hero__facts">
         <div class="product-hero__fact">
@@ -184,28 +192,40 @@
             {{ product.offers?.bestPrice?.currency ?? '€' }}
           </span>
         </div>
-        <p v-if="product.offers?.bestPrice?.datasourceName" class="product-hero__price-source">
-          {{ $t('product.hero.priceFrom', { source: product.offers.bestPrice.datasourceName }) }}
-        </p>
-        <div v-if="product.offers?.bestPrice?.compensation" class="product-hero__price-meta">
-          <v-chip
-            size="small"
-            color="success"
-            variant="tonal"
-            class="product-hero__price-chip"
+        <div class="product-hero__price-meta">
+          <div v-if="bestPriceMerchant" class="product-hero__price-merchant">
+            <span class="product-hero__price-merchant-prefix">{{ t('product.hero.priceMerchantPrefix') }}</span>
+            <NuxtLink
+              :to="bestPriceMerchant.url"
+              class="product-hero__price-merchant-link"
+              target="_blank"
+              rel="nofollow noopener"
+            >
+              <NuxtImg
+                v-if="bestPriceMerchant.favicon"
+                :src="bestPriceMerchant.favicon"
+                :alt="bestPriceMerchant.name"
+                width="20"
+                height="20"
+                class="product-hero__price-merchant-favicon"
+              />
+              <span>{{ bestPriceMerchant.name }}</span>
+            </NuxtLink>
+          </div>
+
+          <button
+            v-if="priceTrendLabel"
+            type="button"
+            class="product-hero__price-trend"
+            @click="scrollToSelector('#price-history')"
           >
-            {{ $t('product.hero.compensation', { amount: compensationLabel }) }}
-          </v-chip>
+            <v-icon icon="mdi-chart-line" size="18" class="product-hero__price-trend-icon" />
+            <span>{{ priceTrendLabel }}</span>
+          </button>
         </div>
         <div class="product-hero__price-actions">
-          <v-btn
-            color="primary"
-            :href="product.offers?.bestPrice?.url ?? '#prix'"
-            :target="product.offers?.bestPrice?.url ? '_blank' : undefined"
-            rel="nofollow noopener"
-            variant="flat"
-          >
-            {{ $t('product.hero.viewOffers') }}
+          <v-btn color="primary" variant="flat" @click="scrollToSelector('#offers-list', 136)">
+            {{ viewOffersLabel }}
           </v-btn>
         </div>
       </div>
@@ -216,6 +236,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, shallowRef, watch, type Component, type ComponentPublicInstance, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import type { ProductDto } from '~~/shared/api-client'
 
@@ -223,6 +244,10 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     required: true,
+  },
+  breadcrumbs: {
+    type: Array as PropType<Array<{ title?: string | null; link?: string | null }>>,
+    default: () => [],
   },
 })
 
@@ -280,22 +305,102 @@ const bestPriceLabel = computed(() => {
   })
 })
 
-const compensationLabel = computed(() => {
-  if (!bestPrice.value?.compensation) {
+const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
+
+const offersCountLabel = computed(() => n(offersCount.value))
+
+const viewOffersLabel = computed(() =>
+  offersCount.value <= 1
+    ? t('product.hero.viewSingleOffer')
+    : t('product.hero.viewOffersCount', { count: offersCountLabel.value }),
+)
+
+const heroBreadcrumbs = computed(() =>
+  props.breadcrumbs
+    .map((item) => ({
+      title:
+        item.title?.toString().trim().length
+          ? item.title?.toString() ?? ''
+          : item.link?.toString().trim().length
+            ? item.link?.toString() ?? ''
+            : t('product.hero.missingBreadcrumbTitle'),
+      link: item.link?.toString().trim().length ? item.link?.toString() : undefined,
+    }))
+    .filter((item) => item.title.trim().length),
+)
+
+const heroBreadcrumbProps = computed(() => ({
+  items: heroBreadcrumbs.value,
+  ariaLabel: t('product.hero.breadcrumbAriaLabel'),
+}))
+
+const gtinCountry = computed(() => {
+  const info = props.product.base?.gtinInfo
+  if (!info?.countryName) {
     return null
   }
 
-  return n(bestPrice.value.compensation, {
-    style: 'currency',
-    currency: bestPrice.value.currency ?? 'EUR',
-    maximumFractionDigits: 2,
-  })
+  return {
+    name: info.countryName,
+    flag: info.countryFlagUrl ?? null,
+  }
 })
 
-const offersCountLabel = computed(() => {
-  const count = props.product.offers?.offersCount ?? 0
-  return n(count)
+const bestPriceMerchant = computed(() => {
+  const merchant = props.product.offers?.bestPrice
+  if (!merchant?.datasourceName || !merchant?.url) {
+    return null
+  }
+
+  return {
+    name: merchant.datasourceName,
+    url: merchant.url,
+    favicon: merchant.favicon ?? null,
+  }
 })
+
+const priceTrendLabel = computed(() => {
+  const trend = props.product.offers?.newTrend
+  if (!trend) {
+    return null
+  }
+
+  if (trend.trend === 'PRICE_DECREASE') {
+    return t('product.price.trend.decrease', {
+      amount: n(Math.abs(trend.variation ?? 0), {
+        style: 'currency',
+        currency: props.product.offers?.bestPrice?.currency ?? 'EUR',
+        maximumFractionDigits: 2,
+      }),
+    })
+  }
+
+  if (trend.trend === 'PRICE_INCREASE') {
+    return t('product.price.trend.increase', {
+      amount: n(Math.abs(trend.variation ?? 0), {
+        style: 'currency',
+        currency: props.product.offers?.bestPrice?.currency ?? 'EUR',
+        maximumFractionDigits: 2,
+      }),
+    })
+  }
+
+  return t('product.price.trend.stable')
+})
+
+const scrollToSelector = (selector: string, offset = 120) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const target = document.querySelector<HTMLElement>(selector)
+  if (!target) {
+    return
+  }
+
+  const top = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) - offset
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+}
 
 const impactScore = computed(() => {
   const ecoscore = props.product.base?.ecoscoreValue
@@ -846,6 +951,24 @@ onMounted(async () => {
   gap: 1.25rem;
 }
 
+.product-hero__breadcrumbs {
+  display: flex;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+}
+
+.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__link) {
+  color: inherit;
+}
+
+.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__link:hover),
+.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__link:focus-visible) {
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__current) {
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
 .product-hero__eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -883,6 +1006,7 @@ onMounted(async () => {
   gap: 0.5rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
+  width: fit-content;
 }
 
 .product-hero__flag {
@@ -956,9 +1080,70 @@ onMounted(async () => {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.8);
 }
 
-.product-hero__price-source {
+.product-hero__price-meta {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.product-hero__price-merchant {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.95rem;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+  color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.product-hero__price-merchant-prefix {
+  font-weight: 600;
+}
+
+.product-hero__price-merchant-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+}
+
+.product-hero__price-merchant-link:hover,
+.product-hero__price-merchant-link:focus-visible {
+  text-decoration: underline;
+}
+
+.product-hero__price-merchant-favicon {
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.product-hero__price-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.6);
+  color: rgb(var(--v-theme-text-neutral-secondary));
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.product-hero__price-trend:hover,
+.product-hero__price-trend:focus-visible {
+  background: rgba(var(--v-theme-surface-primary-100), 0.85);
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-hero__price-trend-icon {
+  color: rgb(var(--v-theme-accent-primary-highlight));
 }
 
 .product-hero__price-actions {
