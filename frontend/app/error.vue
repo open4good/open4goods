@@ -112,6 +112,9 @@ const localePath = useLocalePath()
 
 const drawer = useState('mobileDrawer', () => false)
 const drawerStore = useState('mobileDrawer', () => false)
+const routeLoading = useState('routeLoading', () => false)
+
+routeLoading.value = false
 
 const statusCode = computed(() => props.error?.statusCode ?? 500)
 const paddedStatusCode = computed(() => String(statusCode.value).padStart(3, '0'))
