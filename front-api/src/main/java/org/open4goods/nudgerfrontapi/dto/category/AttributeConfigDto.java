@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.Order;
 
@@ -29,6 +30,8 @@ public record AttributeConfigDto(
         boolean asScore,
         @Schema(description = "Indicates whether lower values should yield higher scores.")
         boolean reverseScore,
+        @Schema(description = "Comparison rule applied to determine which values are considered better.")
+        AttributeComparisonRule betterIs,
         @Schema(description = "Ordering applied when displaying attribute values.")
         Order attributeValuesOrdering,
         @Schema(description = "When true, the attribute values ordering is reversed.")
