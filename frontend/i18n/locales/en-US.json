@@ -101,6 +101,12 @@
         "ariaLabel": "Error recovery quick actions",
         "goHome": "Back to homepage",
         "contactSupport": "Contact support"
+      },
+      "debug": {
+        "title": "Technical details",
+        "messageLabel": "Error message",
+        "stackLabel": "Stack trace",
+        "empty": "No additional diagnostic information is available."
       }
     }
   },
