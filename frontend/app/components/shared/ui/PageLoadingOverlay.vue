@@ -1,44 +1,101 @@
 <template>
-  <v-overlay
-    data-testid="page-loading-overlay"
-    class="page-loading-overlay"
-    :model-value="routeLoading"
-    :scrim="scrimColor"
-    persistent
-  >
+  <teleport to="body">
     <div
       v-if="routeLoading"
-      class="page-loading-overlay__content"
+      data-testid="page-loading-overlay"
+      class="page-loading-overlay"
       role="status"
       aria-live="polite"
+      aria-busy="true"
+      :style="{ backgroundColor: scrimColor }"
     >
-      <v-progress-circular
-        data-testid="page-loading-spinner"
-        color="primary"
-        size="64"
-        indeterminate
-        :aria-label="spinnerLabel"
-      />
-      <span class="visually-hidden">{{ spinnerLabel }}</span>
+      <div class="page-loading-overlay__content">
+        <v-progress-circular
+          data-testid="page-loading-spinner"
+          color="primary"
+          size="64"
+          indeterminate
+          :aria-label="spinnerLabel"
+        />
+        <span class="visually-hidden">{{ spinnerLabel }}</span>
+      </div>
     </div>
-  </v-overlay>
+  </teleport>
 </template>
 
 <script setup lang="ts">
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+
 const routeLoading = useState<boolean>('routeLoading', () => false)
 const { t } = useI18n()
 
 const spinnerLabel = computed(() => String(t('components.pageLoadingOverlay.label')))
 const scrimColor = computed(() => 'rgba(var(--v-theme-surface-default), 0.72)')
+
+const previousOverflow = ref<string | null>(null)
+
+const lockScroll = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const root = document.documentElement
+  if (!root) {
+    return
+  }
+
+  if (previousOverflow.value === null) {
+    previousOverflow.value = root.style.overflow || ''
+  }
+
+  root.style.overflow = 'hidden'
+}
+
+const unlockScroll = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const root = document.documentElement
+  if (!root) {
+    return
+  }
+
+  if (previousOverflow.value !== null) {
+    root.style.overflow = previousOverflow.value
+    previousOverflow.value = null
+  }
+}
+
+if (import.meta.client) {
+  watch(
+    routeLoading,
+    (isLoading) => {
+      if (isLoading) {
+        lockScroll()
+      } else {
+        unlockScroll()
+      }
+    },
+    { immediate: true },
+  )
+}
+
+onBeforeUnmount(() => {
+  unlockScroll()
+})
 </script>
 
 <style scoped lang="sass">
-.page-loading-overlay :deep(.v-overlay__content)
-  width: 100vw
-  height: 100vh
+.page-loading-overlay
+  position: fixed
+  inset: 0
+  z-index: 5000
   display: flex
   align-items: center
   justify-content: center
+  backdrop-filter: blur(4px)
+  pointer-events: all
 
 .page-loading-overlay__content
   display: flex
