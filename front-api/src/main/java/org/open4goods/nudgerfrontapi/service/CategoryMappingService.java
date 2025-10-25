@@ -360,8 +360,17 @@ public class CategoryMappingService {
         if (category == null) {
             return Collections.emptyList();
         }
-        return category.hierarchy().stream()
-                .map(node -> mapBreadcrumbItem(node, domainLanguage))
+
+        List<ProductCategory> hierarchy = category.hierarchy();
+        if (hierarchy.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String languageKey = languageKey(domainLanguage);
+        ProductCategory terminal = hierarchy.get(hierarchy.size() - 1);
+
+        return hierarchy.stream()
+                .map(node -> mapBreadcrumbItem(node, terminal, domainLanguage, languageKey))
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -369,14 +378,16 @@ public class CategoryMappingService {
     /**
      * Convert a single taxonomy node to a breadcrumb DTO.
      */
-    private CategoryBreadcrumbItemDto mapBreadcrumbItem(ProductCategory category, DomainLanguage domainLanguage) {
+    private CategoryBreadcrumbItemDto mapBreadcrumbItem(ProductCategory category,
+                                                       ProductCategory terminal,
+                                                       DomainLanguage domainLanguage,
+                                                       String languageKey) {
         if (category == null) {
             return null;
         }
-        String languageKey = languageKey(domainLanguage);
         String title = category.getGoogleNames() == null ? null : category.getGoogleNames().i18n(languageKey);
         String path = computeCategoryPath(category, languageKey);
-        String link = StringUtils.hasText(path) ? CATEGORY_PATH_PREFIX + path : null;
+        String link = resolveBreadcrumbLink(category, terminal, domainLanguage, path);
 
         if (title == null && !StringUtils.hasText(path)) {
             return null;
