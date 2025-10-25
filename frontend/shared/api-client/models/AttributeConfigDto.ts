@@ -46,6 +46,12 @@ export interface AttributeConfigDto {
      */
     unit?: string;
     /**
+     * Localised suffix appended to the attribute value for compact rendering.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    suffix?: string;
+    /**
      * Localised display name for this attribute.
      * @type {string}
      * @memberof AttributeConfigDto
@@ -170,6 +176,7 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'key': json['key'] == null ? undefined : json['key'],
         'icon': json['icon'] == null ? undefined : json['icon'],
         'unit': json['unit'] == null ? undefined : json['unit'],
+        'suffix': json['suffix'] == null ? undefined : json['suffix'],
         'name': json['name'] == null ? undefined : json['name'],
         'filteringType': json['filteringType'] == null ? undefined : json['filteringType'],
         'icecatFeaturesIds': json['icecatFeaturesIds'] == null ? undefined : new Set(json['icecatFeaturesIds']),
@@ -199,6 +206,7 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'key': value['key'],
         'icon': value['icon'],
         'unit': value['unit'],
+        'suffix': value['suffix'],
         'name': value['name'],
         'filteringType': value['filteringType'],
         'icecatFeaturesIds': value['icecatFeaturesIds'] == null ? undefined : Array.from(value['icecatFeaturesIds'] as Set<any>),
