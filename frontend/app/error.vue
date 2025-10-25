@@ -79,7 +79,7 @@
               </p>
 
               <section
-                v-if="errorMessage || errorStack"
+                v-if="!is404 && (errorMessage || errorStack)"
                 class="error-page__debug"
                 aria-labelledby="error-debug-heading"
               >
