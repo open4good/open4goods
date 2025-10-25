@@ -257,7 +257,7 @@ const itemInitials = (name: string) => {
     width: 100%
 
     &__card
-      border-radius: 0
+      border-radius: 1.25rem 1.25rem 0 0
       box-shadow: 0 -18px 32px rgba(15, 35, 65, 0.16)
       padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px))
 
