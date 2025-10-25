@@ -63,7 +63,7 @@ class CategoryMappingServiceNavigationTest {
         assertThat(navigation.breadcrumbs().get(0).title()).isNull();
         assertThat(navigation.breadcrumbs().get(0).link()).isEmpty();
         assertThat(navigation.breadcrumbs().get(1).title()).isEqualTo("Électronique");
-        assertThat(navigation.breadcrumbs().get(1).link()).isEqualTo("electronique");
+        assertThat(navigation.breadcrumbs().get(1).link()).isEqualTo("/categories/electronique");
 
         List<GoogleCategoryDto> children = navigation.childCategories();
         assertThat(children).hasSize(2);
@@ -80,6 +80,29 @@ class CategoryMappingServiceNavigationTest {
 
         assertThat(navigation.topNewProducts()).isEmpty();
         assertThat(navigation.topOccasionProducts()).isEmpty();
+    }
+
+    @Test
+    void toCategoryNavigationDtoUsesVerticalLandingPageForTerminalBreadcrumb() {
+        ProductCategory root = new ProductCategory(0, "Root", "default");
+
+        ProductCategory electronics = new ProductCategory(1, "Électronique", "fr");
+        electronics.setParent(root);
+        root.addChild(electronics);
+
+        ProductCategory tv = new ProductCategory(2, "Téléviseurs", "fr");
+        tv.setParent(electronics);
+        electronics.addChild(tv);
+
+        tv.vertical(createVerticalConfig("tv", 2));
+
+        CategoryNavigationDto navigation = service.toCategoryNavigationDto(tv, DomainLanguage.fr, true,
+                List.of(),
+                List.of());
+
+        assertThat(navigation.breadcrumbs()).hasSize(3);
+        assertThat(navigation.breadcrumbs().get(2).title()).isEqualTo("Téléviseurs");
+        assertThat(navigation.breadcrumbs().get(2).link()).isEqualTo("/tv-url");
     }
 
     private VerticalConfig createVerticalConfig(String id, int googleTaxonomyId) {

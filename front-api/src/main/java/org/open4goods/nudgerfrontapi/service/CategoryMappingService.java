@@ -181,8 +181,6 @@ public class CategoryMappingService {
             return null;
         }
 
-        String languageKey = languageKey(domainLanguage);
-
         GoogleCategoryDto current = toGoogleCategoryDto(category, domainLanguage, 0, havingVertical);
 
         List<ProductCategory> directChildren = havingVertical
@@ -221,7 +219,7 @@ public class CategoryMappingService {
 
         return new CategoryNavigationDto(
                 current,
-                mapBreadcrumbs(category, languageKey),
+                mapBreadcrumbs(category, domainLanguage),
                 childCategories,
                 descendantVerticals,
                 popularCategories,
@@ -271,25 +269,58 @@ public class CategoryMappingService {
     }
 
     /**
-     * Build the breadcrumb entries mirroring the legacy Thymeleaf template.
+     * Build the breadcrumb entries mirroring the legacy Thymeleaf template. The terminal
+     * breadcrumb item points to the vertical landing page when available so the frontend
+     * can jump directly to the curated vertical homepage.
      */
-    private List<CategoryBreadcrumbItemDto> mapBreadcrumbs(ProductCategory category, String languageKey) {
+    private List<CategoryBreadcrumbItemDto> mapBreadcrumbs(ProductCategory category, DomainLanguage domainLanguage) {
         if (category == null) {
             return Collections.emptyList();
         }
 
+        String languageKey = languageKey(domainLanguage);
         List<CategoryBreadcrumbItemDto> items = new ArrayList<>();
         items.add(new CategoryBreadcrumbItemDto(null, ""));
 
-        for (ProductCategory node : category.hierarchy()) {
+        List<ProductCategory> hierarchy = category.hierarchy();
+        for (ProductCategory node : hierarchy) {
             if (node.getGoogleCategoryId() == null || node.getGoogleCategoryId() == 0) {
                 continue;
             }
             String title = node.getGoogleNames() == null ? null : node.getGoogleNames().i18n(languageKey);
-            items.add(new CategoryBreadcrumbItemDto(title, computeCategoryPath(node, languageKey)));
+            String link = resolveBreadcrumbLink(node,
+                    hierarchy.get(hierarchy.size() - 1),
+                    domainLanguage,
+                    computeCategoryPath(node, languageKey));
+            items.add(new CategoryBreadcrumbItemDto(title, link));
         }
 
         return items;
+    }
+
+    /**
+     * Resolve the hyperlink associated with a breadcrumb node. For the terminal node the
+     * vertical landing page URL takes precedence over the taxonomy path so the frontend
+     * lands on the dedicated vertical homepage.
+     *
+     * @param node             breadcrumb node currently processed
+     * @param terminal         last node in the breadcrumb hierarchy (the requested category)
+     * @param domainLanguage   language requested by the caller
+     * @param taxonomyPath     fallback taxonomy path computed for the node
+     * @return fully qualified link or {@code null} when no link can be derived
+     */
+    private String resolveBreadcrumbLink(ProductCategory node,
+                                         ProductCategory terminal,
+                                         DomainLanguage domainLanguage,
+                                         String taxonomyPath) {
+        if (node != null && node.equals(terminal) && node.getVertical() != null) {
+            ProductI18nElements verticalI18n = localise(node.getVertical().getI18n(), domainLanguage);
+            String verticalHomeUrl = verticalI18n == null ? null : verticalI18n.getVerticalHomeUrl();
+            if (StringUtils.hasText(verticalHomeUrl)) {
+                return verticalHomeUrl.startsWith("/") ? verticalHomeUrl : "/" + verticalHomeUrl;
+            }
+        }
+        return StringUtils.hasText(taxonomyPath) ? CATEGORY_PATH_PREFIX + taxonomyPath : null;
     }
 
     /**
@@ -327,8 +358,17 @@ public class CategoryMappingService {
         if (category == null) {
             return Collections.emptyList();
         }
-        return category.hierarchy().stream()
-                .map(node -> mapBreadcrumbItem(node, domainLanguage))
+
+        List<ProductCategory> hierarchy = category.hierarchy();
+        if (hierarchy.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String languageKey = languageKey(domainLanguage);
+        ProductCategory terminal = hierarchy.get(hierarchy.size() - 1);
+
+        return hierarchy.stream()
+                .map(node -> mapBreadcrumbItem(node, terminal, domainLanguage, languageKey))
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -336,14 +376,16 @@ public class CategoryMappingService {
     /**
      * Convert a single taxonomy node to a breadcrumb DTO.
      */
-    private CategoryBreadcrumbItemDto mapBreadcrumbItem(ProductCategory category, DomainLanguage domainLanguage) {
+    private CategoryBreadcrumbItemDto mapBreadcrumbItem(ProductCategory category,
+                                                       ProductCategory terminal,
+                                                       DomainLanguage domainLanguage,
+                                                       String languageKey) {
         if (category == null) {
             return null;
         }
-        String languageKey = languageKey(domainLanguage);
         String title = category.getGoogleNames() == null ? null : category.getGoogleNames().i18n(languageKey);
         String path = computeCategoryPath(category, languageKey);
-        String link = StringUtils.hasText(path) ? CATEGORY_PATH_PREFIX + path : null;
+        String link = resolveBreadcrumbLink(category, terminal, domainLanguage, path);
 
         if (title == null && !StringUtils.hasText(path)) {
             return null;
