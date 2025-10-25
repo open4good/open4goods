@@ -181,8 +181,6 @@ public class CategoryMappingService {
             return null;
         }
 
-        String languageKey = languageKey(domainLanguage);
-
         GoogleCategoryDto current = toGoogleCategoryDto(category, domainLanguage, 0, havingVertical);
 
         List<ProductCategory> directChildren = havingVertical
