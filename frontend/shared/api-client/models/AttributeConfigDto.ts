@@ -76,6 +76,12 @@ export interface AttributeConfigDto {
      */
     reverseScore?: boolean;
     /**
+     * Comparison rule applied to determine which values are considered better.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    betterIs?: AttributeConfigDtoBetterIsEnum;
+    /**
      * Ordering applied when displaying attribute values.
      * @type {string}
      * @memberof AttributeConfigDto
@@ -127,6 +133,15 @@ export type AttributeConfigDtoFilteringTypeEnum = typeof AttributeConfigDtoFilte
 /**
  * @export
  */
+export const AttributeConfigDtoBetterIsEnum = {
+    Greater: 'GREATER',
+    Lower: 'LOWER'
+} as const;
+export type AttributeConfigDtoBetterIsEnum = typeof AttributeConfigDtoBetterIsEnum[keyof typeof AttributeConfigDtoBetterIsEnum];
+
+/**
+ * @export
+ */
 export const AttributeConfigDtoAttributeValuesOrderingEnum = {
     Alpha: 'ALPHA',
     Count: 'COUNT',
@@ -160,6 +175,7 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'icecatFeaturesIds': json['icecatFeaturesIds'] == null ? undefined : new Set(json['icecatFeaturesIds']),
         'asScore': json['asScore'] == null ? undefined : json['asScore'],
         'reverseScore': json['reverseScore'] == null ? undefined : json['reverseScore'],
+        'betterIs': json['betterIs'] == null ? undefined : json['betterIs'],
         'attributeValuesOrdering': json['attributeValuesOrdering'] == null ? undefined : json['attributeValuesOrdering'],
         'attributeValuesReverseOrder': json['attributeValuesReverseOrder'] == null ? undefined : json['attributeValuesReverseOrder'],
         'synonyms': json['synonyms'] == null ? undefined : json['synonyms'],
@@ -188,6 +204,7 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'icecatFeaturesIds': value['icecatFeaturesIds'] == null ? undefined : Array.from(value['icecatFeaturesIds'] as Set<any>),
         'asScore': value['asScore'],
         'reverseScore': value['reverseScore'],
+        'betterIs': value['betterIs'],
         'attributeValuesOrdering': value['attributeValuesOrdering'],
         'attributeValuesReverseOrder': value['attributeValuesReverseOrder'],
         'synonyms': value['synonyms'],
