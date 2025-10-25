@@ -4,6 +4,9 @@
       v-for="product in products"
       :key="product.gtin ?? product.identity?.bestName ?? Math.random()"
       class="category-product-list__item"
+      :to="productLink(product)"
+      link
+      rounded="lg"
     >
       <template #prepend>
         <v-avatar size="88" rounded="lg">
@@ -21,38 +24,71 @@
 
       <div class="category-product-list__content">
         <div class="category-product-list__header">
-          <span class="category-product-list__brand">
-            {{ product.identity?.brand ?? $t('category.products.unknownBrand') }}
+          <h3 class="category-product-list__title">
+            {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
+          </h3>
+          <ImpactScore
+            v-if="impactScoreValue(product) != null"
+            :score="impactScoreValue(product) ?? 0"
+            :max="5"
+            size="small"
+          />
+          <span v-else class="category-product-list__score-fallback">
+            {{ $t('category.products.notRated') }}
           </span>
-          <v-chip v-if="ecoscoreLetter(product)" size="small" color="success" variant="flat">
-            {{ $t('category.products.ecoscoreLabel', { letter: ecoscoreLetter(product) }) }}
-          </v-chip>
         </div>
-        <h3 class="category-product-list__title">
-          {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
-        </h3>
+
         <div class="category-product-list__meta">
-          <span>
-            <v-icon icon="mdi-cash" size="18" class="me-1" />
-            {{ bestPriceLabel(product) }}
+          <span class="category-product-list__price">
+            <span aria-hidden="true" class="category-product-list__price-icon">€</span>
+            {{ listPriceValue(product) }}
           </span>
-          <span>
+          <span class="category-product-list__offers">
             <v-icon icon="mdi-store" size="18" class="me-1" />
             {{ offersCountLabel(product) }}
           </span>
         </div>
+
+        <ul v-if="popularAttributesByProduct(product).length" class="category-product-list__attributes" role="list">
+          <li
+            v-for="attribute in popularAttributesByProduct(product)"
+            :key="attribute.key"
+            class="category-product-list__attribute"
+            role="listitem"
+          >
+            <span class="category-product-list__attribute-label">{{ attribute.label }}</span>
+            <span class="category-product-list__attribute-value">{{ attribute.value }}</span>
+          </li>
+        </ul>
       </div>
+
+      <template #append>
+        <div class="category-product-list__aside">
+          <CategoryProductCompareToggle :product="product" />
+        </div>
+      </template>
     </v-list-item>
   </v-list>
 </template>
 
 <script setup lang="ts">
-import type { ProductDto } from '~~/shared/api-client'
+import { computed } from 'vue'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
-defineProps<{ products: ProductDto[] }>()
+const props = defineProps<{
+  products: ProductDto[]
+  popularAttributes?: AttributeConfigDto[]
+}>()
 
-const { t } = useI18n()
+const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+
+const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -63,27 +99,51 @@ const resolveImage = (product: ProductDto) => {
   )
 }
 
-const ecoscoreLetter = (product: ProductDto) => {
-  return (
-    product.scores?.ecoscore?.letter ??
-    product.scores?.scores?.['scores.ECOSCORE.value']?.letter ??
-    product.scores?.scores?.['ECOSCORE']?.letter ??
-    null
-  )
+const productLink = (product: ProductDto) => product.fullSlug ?? product.slug ?? undefined
+
+const impactScoreValue = (product: ProductDto) => resolvePrimaryImpactScore(product)
+
+const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
+
+const listPriceValue = (product: ProductDto) => {
+  const currency = product.offers?.bestPrice?.currency
+  const price = product.offers?.bestPrice?.price
+
+  if (currency && currency !== 'EUR') {
+    return bestPriceLabel(product)
+  }
+
+  if (price != null) {
+    return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
+  return bestPriceLabel(product)
 }
 
-const bestPriceLabel = (product: ProductDto) => {
-  return (
-    product.offers?.bestPrice?.shortPrice ??
-    (product.offers?.bestPrice?.price != null
-      ? `${product.offers?.bestPrice?.price} ${product.offers?.bestPrice?.currency ?? ''}`
-      : t('category.products.priceUnavailable'))
-  )
+const offersCountLabel = (product: ProductDto) => formatOffersCount(product, translatePlural)
+
+type DisplayedAttribute = {
+  key: string
+  label: string
+  value: string
 }
 
-const offersCountLabel = (product: ProductDto) => {
-  const count = product.offers?.offersCount ?? 0
-  return translatePlural('category.products.offerCount', count)
+const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] => {
+  return resolvePopularAttributes(product, popularAttributeConfigs.value)
+    .map((attribute) => {
+      const value = formatAttributeValue(attribute, t, n)
+
+      if (!value) {
+        return null
+      }
+
+      return {
+        key: attribute.key,
+        label: attribute.label,
+        value,
+      }
+    })
+    .filter((attribute): attribute is DisplayedAttribute => attribute != null)
 }
 </script>
 
@@ -96,28 +156,79 @@ const offersCountLabel = (product: ProductDto) => {
     border-radius: 1rem
     margin-bottom: 1rem
     padding-inline: 1rem
+    transition: box-shadow 0.2s ease, transform 0.2s ease
+
+    &:hover
+      box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
+      transform: translateY(-2px)
 
   &__content
     display: flex
     flex-direction: column
     gap: 0.5rem
 
+  &__aside
+    display: flex
+    align-items: flex-start
+    padding-left: 0.75rem
+
   &__header
     display: flex
     gap: 0.75rem
     align-items: center
-    font-size: 0.875rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__title
     margin: 0
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
+    flex: 1 1 auto
+    min-width: 0
 
   &__meta
     display: flex
     gap: 1rem
     flex-wrap: wrap
     font-size: 0.875rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__price
+    display: inline-flex
+    align-items: center
+    gap: 0.4rem
+    font-weight: 600
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__price-icon
+    font-size: 1rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__offers
+    display: inline-flex
+    align-items: center
+    gap: 0.35rem
+
+  &__score-fallback
+    font-size: 0.875rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__attributes
+    display: flex
+    flex-wrap: wrap
+    gap: 0.5rem 1.25rem
+    margin: 0
+    padding: 0
+    list-style: none
+
+  &__attribute
+    display: flex
+    gap: 0.35rem
+    align-items: baseline
+    font-size: 0.875rem
+
+  &__attribute-label
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__attribute-value
     color: rgb(var(--v-theme-text-neutral-secondary))
 </style>

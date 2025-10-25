@@ -192,11 +192,15 @@
       },
       "fetchError": "Impossible de charger les produits. Veuillez réessayer.",
       "headers": {
+        "compare": "Comparer",
         "brand": "Marque",
         "model": "Modèle",
         "ecoscore": "Score éco",
+        "impactScore": "Score d'impact",
         "bestPrice": "Meilleur prix",
-        "offers": "Offres"
+        "offers": "Offres",
+        "popularAttributes": "Atouts clés",
+        "remainingAttributes": "Autres attributs"
       },
       "resultsCount": {
         "one": "{count} produit",
@@ -306,6 +310,10 @@
     "actions": {
       "retry": "Réessayer",
       "goHome": "Retour à l'accueil"
+    },
+    "boolean": {
+      "true": "Oui",
+      "false": "Non"
     }
   },
   "contrib": {

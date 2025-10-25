@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { Pinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import type { I18n } from 'vue-i18n'
-import { h } from 'vue'
+import { computed, h } from 'vue'
 import type { Component } from 'vue'
 import { createVuetify } from 'vuetify'
 import type { ProductDto } from '~~/shared/api-client'
@@ -50,6 +50,50 @@ const VBtnStub: Component = {
   },
 }
 
+const VTooltipStub: Component = {
+  inheritAttrs: false,
+  setup(_props, { slots, attrs }) {
+    return () => h('div', attrs, [slots.activator?.({ props: {} }), slots.default?.()])
+  },
+}
+
+const CompareToggleStub: Component = {
+  inheritAttrs: false,
+  props: {
+    product: {
+      type: Object,
+      required: true,
+    },
+  },
+  setup(props) {
+    const store = useProductCompareStore()
+    const isSelected = computed(() => store.hasProduct(props.product as ProductDto))
+    const isDisabled = computed(() => {
+      if (isSelected.value) {
+        return false
+      }
+
+      return !store.canAddProduct(props.product as ProductDto).success
+    })
+
+    const toggle = () => {
+      if (isDisabled.value) {
+        return
+      }
+
+      store.toggleProduct(props.product as ProductDto)
+    }
+
+    return () =>
+      h('button', {
+        type: 'button',
+        'data-test': 'category-product-compare',
+        disabled: isDisabled.value,
+        onClick: toggle,
+      })
+  },
+}
+
 type VuetifyInstance = ReturnType<typeof createVuetify>
 
 let pinia: Pinia
@@ -71,10 +115,12 @@ const mountGrid = async (products: ProductDto[]) => {
         VCardItem: createStub('div'),
         VImg: createStub('div'),
         VSkeletonLoader: createStub('div'),
-        VTooltip: createStub('div'),
+        VTooltip: VTooltipStub,
         VBtn: VBtnStub,
+        VIcon: createStub('i'),
         ImpactScore: createStub('div'),
         NuxtLink: createStub('a'),
+        CategoryProductCompareToggle: CompareToggleStub,
       },
     },
   })
@@ -125,6 +171,12 @@ describe('CategoryProductCardGrid', () => {
                 differentCategory: 'Only compare products from the same category.',
                 missingIdentifier: 'Cannot compare this product.',
               },
+            },
+          },
+          common: {
+            boolean: {
+              true: 'Yes',
+              false: 'No',
             },
           },
         },

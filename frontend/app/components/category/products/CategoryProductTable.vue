@@ -7,7 +7,15 @@
     density="comfortable"
     :fixed-header="true"
     height="600"
+    :sort-by="internalSortBy"
+    :item-class="() => 'category-product-table__row'"
+    @update:sort-by="onSortByUpdate"
+    @click:row="onRowClick"
   >
+    <template #[`item.compare`]="{ item }">
+      <CategoryProductCompareToggle :product="item.product" class="category-product-table__compare" />
+    </template>
+
     <template #[`item.brand`]="{ value }">
       <span class="category-product-table__brand">{{ value ?? $t('category.products.unknownBrand') }}</span>
     </template>
@@ -17,17 +25,11 @@
         <div class="category-product-table__model-name">
           {{ value ?? item.product.identity?.bestName ?? '#' + (item.product.gtin ?? '') }}
         </div>
-        <div class="category-product-table__model-meta">
-          <v-icon icon="mdi-cash" size="16" class="me-1" />
-          {{ bestPriceLabel(item.product) }}
-        </div>
       </div>
     </template>
 
-    <template #[`item.ecoscore`]="{ value }">
-      <v-chip v-if="value" size="small" color="success" variant="flat">
-        {{ value }}
-      </v-chip>
+    <template #[`item.impactScore`]="{ value }">
+      <ImpactScore v-if="value != null" :score="value" :max="5" size="small" />
       <span v-else>{{ $t('category.products.notRated') }}</span>
     </template>
 
@@ -35,127 +37,221 @@
       {{ value ?? $t('category.products.priceUnavailable') }}
     </template>
 
-    <template #[`item.offersCount`]="{ value }">
-      {{ translatePlural('category.products.offerCount', value ?? 0) }}
+    <template #[`item.offersCount`]="{ item }">
+      {{ offersCountLabel(item.product) }}
     </template>
 
+    <template #[`item.popularAttributes`]="{ value }">
+      <ul v-if="value.length" class="category-product-table__attributes" role="list">
+        <li v-for="attribute in value" :key="attribute.key" class="category-product-table__attribute" role="listitem">
+          <span class="category-product-table__attribute-label">{{ attribute.label }}</span>
+          <span class="category-product-table__attribute-value">{{ attribute.value }}</span>
+        </li>
+      </ul>
+      <span v-else class="category-product-table__empty">—</span>
+    </template>
+
+    <template #[`item.remainingAttributes`]="{ value }">
+      <ul v-if="value.length" class="category-product-table__attributes" role="list">
+        <li v-for="attribute in value" :key="attribute.key" class="category-product-table__attribute" role="listitem">
+          <span class="category-product-table__attribute-label">{{ attribute.label }}</span>
+          <span class="category-product-table__attribute-value">{{ attribute.value }}</span>
+        </li>
+      </ul>
+      <span v-else class="category-product-table__empty">—</span>
+    </template>
   </v-data-table>
 </template>
 
 <script setup lang="ts">
-import type { FieldMetadataDto, ProductDto } from '~~/shared/api-client'
-import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import { computed } from 'vue'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import {
+  formatAttributeValue,
+  resolvePopularAttributes,
+  resolveRemainingAttributes,
+} from '~/utils/_product-attributes'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
-interface CategoryProductTableRow extends Record<string, unknown> {
+interface TableAttribute {
+  key: string
+  label: string
+  value: string
+}
+
+interface CategoryProductTableRow {
   product: ProductDto
+  compare: null
   brand: string | null | undefined
   model: string | null | undefined
-  ecoscore: string | null
+  impactScore: number | null
   bestPrice: string | null
   offersCount: number
+  popularAttributes: TableAttribute[]
+  remainingAttributes: TableAttribute[]
 }
 
 const props = defineProps<{
   products: ProductDto[]
-  fields: FieldMetadataDto[]
   itemsPerPage: number
+  popularAttributes?: AttributeConfigDto[]
+  sortField?: string | null
+  sortOrder?: 'asc' | 'desc'
 }>()
 
-const { t } = useI18n()
+const emit = defineEmits<{
+  (event: 'update:sort-field', field: string | null): void
+  (event: 'update:sort-order', order: 'asc' | 'desc'): void
+}>()
+
+const router = useRouter()
+const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
-const baseHeaders = computed(() => [
-  { key: 'brand', title: t('category.products.headers.brand'), sortable: false },
-  { key: 'model', title: t('category.products.headers.model'), sortable: false },
-  { key: 'ecoscore', title: t('category.products.headers.ecoscore'), sortable: false },
-  { key: 'bestPrice', title: t('category.products.headers.bestPrice'), sortable: false },
-  { key: 'offersCount', title: t('category.products.headers.offers'), sortable: false },
+const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
+
+const headers = computed(() => [
+  { key: 'compare', title: t('category.products.headers.compare'), sortable: false, width: 48 },
+  { key: 'brand', title: t('category.products.headers.brand'), sortable: false, width: 140 },
+  { key: 'model', title: t('category.products.headers.model'), sortable: false, minWidth: 200 },
+  { key: 'impactScore', title: t('category.products.headers.impactScore'), sortable: false, width: 140 },
+  {
+    key: 'bestPrice',
+    title: t('category.products.headers.bestPrice'),
+    sortable: true,
+    width: 140,
+  },
+  {
+    key: 'offersCount',
+    title: t('category.products.headers.offers'),
+    sortable: true,
+    width: 140,
+  },
+  { key: 'popularAttributes', title: t('category.products.headers.popularAttributes'), sortable: false, minWidth: 220 },
+  {
+    key: 'remainingAttributes',
+    title: t('category.products.headers.remainingAttributes'),
+    sortable: false,
+    minWidth: 220,
+  },
 ])
 
-const dynamicHeaders = computed(() => {
-  const seen = new Set<string>()
+const sortHeaderToFieldMapping: Record<string, string> = {
+  bestPrice: 'price.minPrice.price',
+  offersCount: 'offersCount',
+}
 
-  return props.fields
-    .filter((field) => field.mapping && !seen.has(field.mapping))
-    .map((field) => {
-      const mapping = field.mapping as string
-      seen.add(mapping)
-      return {
-        key: mapping,
-        title: resolveFilterFieldTitle(field, t, mapping),
-        sortable: false,
-      }
-    })
+const fieldToSortHeader = Object.fromEntries(Object.entries(sortHeaderToFieldMapping).map(([key, value]) => [value, key]))
+
+const internalSortBy = computed(() => {
+  const field = props.sortField ?? null
+  const headerKey = field ? (fieldToSortHeader[field] ?? null) : null
+
+  if (!headerKey) {
+    return []
+  }
+
+  return [
+    {
+      key: headerKey,
+      order: props.sortOrder ?? 'desc',
+    },
+  ]
 })
 
-const headers = computed(() => [...baseHeaders.value, ...dynamicHeaders.value])
+const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
+const offersCountLabel = (product: ProductDto) => formatOffersCount(product, translatePlural)
 
-const getValueByPath = (product: ProductDto, path: string | undefined) => {
-  if (!path) {
-    return undefined
-  }
+const formatAttributes = (attributes: ReturnType<typeof resolvePopularAttributes>) => {
+  return attributes
+    .map((attribute) => {
+      const value = formatAttributeValue(attribute, t, n)
 
-  return path.split('.').reduce<unknown>((accumulator, segment) => {
-    if (accumulator == null || typeof accumulator !== 'object' || Array.isArray(accumulator)) {
-      return undefined
-    }
+      if (!value) {
+        return null
+      }
 
-    const record = accumulator as Record<string, unknown>
-
-    if (!(segment in record)) {
-      return undefined
-    }
-
-    return record[segment]
-  }, product as unknown)
+      return {
+        key: attribute.key,
+        label: attribute.label,
+        value,
+      }
+    })
+    .filter((attribute): attribute is TableAttribute => attribute != null)
 }
 
-const ecoscoreLabel = (product: ProductDto) => {
-  const letter =
-    product.scores?.ecoscore?.letter ??
-    product.scores?.scores?.['scores.ECOSCORE.value']?.letter ??
-    product.scores?.scores?.['ECOSCORE']?.letter
+const formatRemainingAttributes = (attributes: ReturnType<typeof resolveRemainingAttributes>) => {
+  return attributes
+    .map((attribute) => {
+      const value = formatAttributeValue(attribute, t, n)
 
-  const value =
-    product.scores?.ecoscore?.percent ??
-    product.scores?.scores?.['scores.ECOSCORE.value']?.percent ??
-    product.scores?.scores?.['ECOSCORE']?.percent
+      if (!value) {
+        return null
+      }
 
-  if (!letter) {
-    return null
-  }
-
-  return value != null ? `${letter} (${Math.round(value)}%)` : letter
-}
-
-const bestPriceLabel = (product: ProductDto) => {
-  return (
-    product.offers?.bestPrice?.shortPrice ??
-    (product.offers?.bestPrice?.price != null
-      ? `${product.offers?.bestPrice?.price} ${product.offers?.bestPrice?.currency ?? ''}`
-      : t('category.products.priceUnavailable'))
-  )
+      return {
+        key: attribute.key,
+        label: attribute.label,
+        value,
+      }
+    })
+    .filter((attribute): attribute is TableAttribute => attribute != null)
 }
 
 const rows = computed<CategoryProductTableRow[]>(() => {
   return props.products.map((product) => {
-    const row: CategoryProductTableRow = {
+    const popular = formatAttributes(resolvePopularAttributes(product, popularAttributeConfigs.value))
+    const remaining = formatRemainingAttributes(
+      resolveRemainingAttributes(
+        product,
+        popularAttributeConfigs.value.map((attribute) => attribute.key ?? '').filter(Boolean),
+      ),
+    )
+
+    return {
       product,
+      compare: null,
       brand: product.identity?.brand,
       model: product.identity?.model ?? product.identity?.bestName ?? product.identity?.brand,
-      ecoscore: ecoscoreLabel(product),
+      impactScore: resolvePrimaryImpactScore(product),
       bestPrice: bestPriceLabel(product),
       offersCount: product.offers?.offersCount ?? 0,
+      popularAttributes: popular,
+      remainingAttributes: remaining,
     }
-
-    dynamicHeaders.value.forEach((header) => {
-      const value = getValueByPath(product, header.key)
-      row[header.key] = typeof value === 'number' ? value : value ?? null
-    })
-
-    return row
   })
 })
+
+const onSortByUpdate = (sortBy: { key: string; order?: 'asc' | 'desc' }[]) => {
+  const entry = sortBy[0]
+
+  if (!entry) {
+    emit('update:sort-field', null)
+    emit('update:sort-order', 'desc')
+    return
+  }
+
+  const field = sortHeaderToFieldMapping[entry.key]
+
+  if (!field) {
+    return
+  }
+
+  emit('update:sort-field', field)
+  emit('update:sort-order', entry.order ?? 'asc')
+}
+
+const onRowClick = (_event: MouseEvent, item: { item: CategoryProductTableRow }) => {
+  const product = item.item.product
+  const target = product.fullSlug ?? product.slug
+
+  if (target) {
+    router.push(target)
+  }
+}
 </script>
 
 <style scoped lang="sass">
@@ -163,8 +259,13 @@ const rows = computed<CategoryProductTableRow[]>(() => {
   width: 100%
 
   :deep(.v-data-table__tr)
+    cursor: pointer
+
     &:nth-child(even)
       background-color: rgba(var(--v-theme-surface-muted), 0.6)
+
+    &:hover
+      background-color: rgba(var(--v-theme-surface-muted), 0.9)
 
   &__brand
     font-weight: 500
@@ -179,7 +280,28 @@ const rows = computed<CategoryProductTableRow[]>(() => {
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
 
-  &__model-meta
-    font-size: 0.75rem
+  &__attributes
+    display: grid
+    gap: 0.4rem
+    padding: 0
+    margin: 0
+    list-style: none
+
+  &__attribute
+    display: flex
+    gap: 0.4rem
+    align-items: baseline
+
+  &__attribute-label
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__attribute-value
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__empty
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__compare :deep(.v-btn)
+    margin-inline: auto
 </style>

@@ -193,11 +193,15 @@
       },
       "fetchError": "Unable to load products. Please try again.",
       "headers": {
+        "compare": "Compare",
         "brand": "Brand",
         "model": "Model",
         "ecoscore": "Eco score",
+        "impactScore": "Impact score",
         "bestPrice": "Best price",
-        "offers": "Offers"
+        "offers": "Offers",
+        "popularAttributes": "Key details",
+        "remainingAttributes": "Other attributes"
       },
       "resultsCount": {
         "one": "{count} product",
@@ -307,6 +311,10 @@
     "actions": {
       "retry": "Retry",
       "goHome": "Back to homepage"
+    },
+    "boolean": {
+      "true": "Yes",
+      "false": "No"
     }
   },
   "contrib": {

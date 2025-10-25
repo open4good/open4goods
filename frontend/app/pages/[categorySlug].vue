@@ -233,10 +233,10 @@
           <template v-else>
             <component
               :is="viewComponent"
-              :products="currentProducts"
-              :fields="tableFields"
-              :items-per-page="pageSize"
+              v-bind="viewComponentProps"
               class="mb-6"
+              @update:sort-field="onTableSortFieldUpdate"
+              @update:sort-order="onTableSortOrderUpdate"
             />
 
             <p v-if="!currentProducts.length" class="category-page__no-results">
@@ -1235,6 +1235,26 @@ const viewComponent = computed(() => {
   return CategoryProductCardGrid
 })
 
+const popularAttributes = computed(() => category.value?.popularAttributes ?? [])
+
+const viewComponentProps = computed(() => {
+  const base = {
+    products: currentProducts.value,
+    popularAttributes: popularAttributes.value,
+  }
+
+  if (viewMode.value === 'table') {
+    return {
+      ...base,
+      itemsPerPage: pageSize.value,
+      sortField: sortField.value,
+      sortOrder: sortOrder.value,
+    }
+  }
+
+  return base
+})
+
 const loadingProducts = ref(false)
 const productError = ref<string | null>(null)
 const hasHydrated = ref(false)
@@ -1399,6 +1419,18 @@ const hashState = computed<CategoryHashState>(() => ({
   impactExpanded: impactExpanded.value || undefined,
   technicalExpanded: technicalExpanded.value || undefined,
 }))
+
+const onTableSortFieldUpdate = (field: string | null) => {
+  if (sortField.value !== field) {
+    sortField.value = field
+  }
+}
+
+const onTableSortOrderUpdate = (order: 'asc' | 'desc') => {
+  if (sortOrder.value !== order) {
+    sortOrder.value = order
+  }
+}
 
 watch(
   hashState,
