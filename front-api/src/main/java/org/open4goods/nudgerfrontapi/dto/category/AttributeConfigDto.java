@@ -20,6 +20,8 @@ public record AttributeConfigDto(
         String icon,
         @Schema(description = "Localised unit displayed for this attribute.", example = "kg")
         String unit,
+        @Schema(description = "Localised suffix appended to the attribute value for compact rendering.", example = "\"")
+        String suffix,
         @Schema(description = "Localised display name for this attribute.", example = "Poids")
         String name,
         @Schema(description = "Type of filtering applied for this attribute.")

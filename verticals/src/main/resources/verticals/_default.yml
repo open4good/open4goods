@@ -580,11 +580,14 @@ attributesConfig:
     betterIs: "LOWER"
     icecatFeaturesIds:
       - 94
-      - 33015    
+      - 33015
     faIcon: "fa-weight"
     name:
       default: "Weight"
       fr: "Poids"
+    suffix:
+      default: "kg"
+      fr: "kg"
     filteringType: "NUMERIC"
     asScore: true
     reverseScore: true

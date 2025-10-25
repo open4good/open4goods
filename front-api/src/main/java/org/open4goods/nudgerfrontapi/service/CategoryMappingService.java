@@ -435,6 +435,7 @@ public class CategoryMappingService {
                 attributeConfig.getKey(),
                 attributeConfig.getFaIcon(),
                 localise(attributeConfig.getUnit(), domainLanguage),
+                localise(attributeConfig.getSuffix(), domainLanguage),
                 localise(attributeConfig.getName(), domainLanguage),
                 attributeConfig.getFilteringType(),
                 defaultSet(attributeConfig.getIcecatFeaturesIds()),

@@ -43,10 +43,16 @@ public class AttributeConfig {
 	private String faIcon = "fa-wrench";
 
 	
-	/**
-	 * The localised units
-	 */
-	private Localisable<String,String> unit;
+        /**
+         * The localised units
+         */
+        private Localisable<String,String> unit;
+
+        /**
+         * Localised suffix appended to the raw value when displayed to end-users.
+         * Designed for compact units such as symbols or abbreviations (for example the inch symbol).
+         */
+        private Localisable<String, String> suffix;
 	
 	
 	/**
@@ -388,13 +394,31 @@ public class AttributeConfig {
                 this.betterIs = betterIs == null ? AttributeComparisonRule.GREATER : betterIs;
         }
 
-	public Localisable<String, String> getUnit() {
-		return unit;
-	}
+        public Localisable<String, String> getUnit() {
+                return unit;
+        }
 
-	public void setUnit(Localisable<String, String> unit) {
-		this.unit = unit;
-	}
+        public void setUnit(Localisable<String, String> unit) {
+                this.unit = unit;
+        }
+
+        /**
+         * Gets the suffix appended to the attribute value for display purposes.
+         *
+         * @return the configured suffix or {@code null} when no suffix is required
+         */
+        public Localisable<String, String> getSuffix() {
+                return suffix;
+        }
+
+        /**
+         * Sets the suffix appended to the attribute value for display purposes.
+         *
+         * @param suffix localised suffix to append to rendered values
+         */
+        public void setSuffix(Localisable<String, String> suffix) {
+                this.suffix = suffix;
+        }
 
 
 }
