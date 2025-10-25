@@ -169,7 +169,7 @@ export const useProductCompareStore = defineStore('product-compare', () => {
       id: identifier,
       gtin: product.gtin,
       slug: product.slug,
-      fullSlug: product.fullSlug,
+      fullSlug: product.fullSlug ?? product.slug,
       verticalId: resolveProductVertical(product),
       name: resolveProductName(product),
       image: resolveProductImage(product),
