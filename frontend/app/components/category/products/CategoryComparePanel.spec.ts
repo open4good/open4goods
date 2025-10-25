@@ -131,11 +131,11 @@ describe('CategoryComparePanel', () => {
     vuetify = createVuetify()
   })
 
-  const mountPanel = async () => {
-    const module = await import('./CategoryComparePanel.vue')
-    const CategoryComparePanel = module.default
+const mountPanel = async () => {
+  const module = await import('./CategoryComparePanel.vue')
+  const CategoryComparePanel = module.default
 
-    return mount(CategoryComparePanel, {
+  return mount(CategoryComparePanel, {
       global: {
         plugins: [pinia, i18n, vuetify],
         stubs: {
@@ -148,6 +148,17 @@ describe('CategoryComparePanel', () => {
           VTooltip: simpleStub('div'),
           VExpandTransition: ExpandTransitionStub,
           VIcon: simpleStub('span'),
+          NuxtLink: {
+            props: {
+              to: {
+                type: [String, Object],
+                default: '#',
+              },
+            },
+            setup(props, { slots }) {
+              return () => h('a', { href: typeof props.to === 'string' ? props.to : '#', role: 'link' }, slots.default?.())
+            },
+          },
         },
       },
     })
@@ -193,5 +204,23 @@ describe('CategoryComparePanel', () => {
     const emitted = wrapper.emitted('launch-comparison') as unknown[][] | undefined
     expect(emitted).toBeTruthy()
     expect(emitted?.[0]?.[0]).toHaveLength(2)
+  })
+
+  it('links to the product detail page when a slug is available', async () => {
+    const store = useProductCompareStore()
+    store.addProduct(
+      createProduct({
+        fullSlug: '/products/example-product',
+        base: { bestName: 'Linked product' },
+        identity: { bestName: 'Linked product' },
+      }),
+    )
+
+    const wrapper = await mountPanel()
+    const link = wrapper.get('.category-compare-panel__item-name--link')
+
+    expect(link.element.tagName).toBe('A')
+    expect(link.attributes('href')).toBe('/products/example-product')
+    expect(link.text()).toContain('Linked product')
   })
 })

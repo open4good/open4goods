@@ -46,7 +46,14 @@
                   </v-avatar>
 
                   <div class="category-compare-panel__item-content">
-                    <span class="category-compare-panel__item-name">{{ item.name }}</span>
+                    <NuxtLink
+                      v-if="itemLink(item)"
+                      :to="itemLink(item)"
+                      class="category-compare-panel__item-name category-compare-panel__item-name--link"
+                    >
+                      {{ item.name }}
+                    </NuxtLink>
+                    <span v-else class="category-compare-panel__item-name">{{ item.name }}</span>
                     <v-btn
                       class="category-compare-panel__item-remove"
                       variant="text"
@@ -112,6 +119,10 @@ const toggleCollapse = () => {
 
 const remove = (id: string) => {
   compareStore.removeById(id)
+}
+
+const itemLink = (item: CompareListItem) => {
+  return item.fullSlug ?? item.slug ?? undefined
 }
 
 const launchComparison = () => {
@@ -214,6 +225,17 @@ const itemInitials = (name: string) => {
     overflow: hidden
     text-overflow: ellipsis
 
+    &--link
+      display: inline-block
+      color: rgb(var(--v-theme-primary))
+      text-decoration: none
+      transition: text-decoration-color 0.2s ease
+
+      &:hover,
+      &:focus-visible
+        text-decoration: underline
+        text-decoration-color: currentColor
+
   &__item-remove
     align-self: flex-start
     padding: 0
@@ -230,6 +252,18 @@ const itemInitials = (name: string) => {
 
 @media (max-width: 600px)
   .category-compare-panel
-    inset-inline: 1rem
-    width: auto
+    inset-inline: 0
+    inset-block-end: 0
+    width: 100%
+
+    &__card
+      border-radius: 0
+      box-shadow: 0 -18px 32px rgba(15, 35, 65, 0.16)
+      padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px))
+
+    &__body
+      gap: 0.75rem
+
+    &__items
+      gap: 0.5rem
 </style>
