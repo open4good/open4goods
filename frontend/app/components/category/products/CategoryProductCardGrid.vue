@@ -27,9 +27,12 @@
         </v-img>
 
         <v-card-item class="category-product-card-grid__body">
-          <h3 class="category-product-card-grid__title">
-            {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
-          </h3>
+          <div class="category-product-card-grid__header">
+            <h3 class="category-product-card-grid__title">
+              {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
+            </h3>
+            <CategoryProductCompareToggle :product="product" />
+          </div>
 
           <div class="category-product-card-grid__score" role="presentation">
             <ImpactScore
@@ -51,44 +54,43 @@
               {{ offersCountLabel(product) }}
             </span>
           </div>
-        </v-card-item>
 
-        <v-card-actions class="category-product-card-grid__actions">
-          <v-btn
-            class="category-product-card-grid__compare"
-            :class="{ 'category-product-card-grid__compare--active': isProductSelected(product) }"
-            :variant="isProductSelected(product) ? 'flat' : 'outlined'"
-            color="primary"
-            size="small"
-            :title="compareTooltip(product)"
-            :aria-pressed="isProductSelected(product)"
-            :aria-label="compareAriaLabel(product)"
-            :disabled="isCompareDisabled(product)"
-            data-test="category-product-compare"
-            @click.stop.prevent="toggleCompare(product)"
-          >
-            {{ compareLabel(product) }}
-          </v-btn>
-        </v-card-actions>
+          <ul v-if="popularAttributesByProduct(product).length" class="category-product-card-grid__attributes" role="list">
+            <li
+              v-for="attribute in popularAttributesByProduct(product)"
+              :key="attribute.key"
+              class="category-product-card-grid__attribute"
+              role="listitem"
+            >
+              <v-icon v-if="attribute.icon" :icon="attribute.icon" size="16" class="me-1" />
+              <span class="category-product-card-grid__attribute-label">{{ attribute.label }}</span>
+              <span class="category-product-card-grid__attribute-value">{{ attribute.value }}</span>
+            </li>
+          </ul>
+        </v-card-item>
       </v-card>
     </v-col>
   </v-row>
 </template>
 
 <script setup lang="ts">
-import type { ProductDto } from '~~/shared/api-client'
+import { computed } from 'vue'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import {
-  MAX_COMPARE_ITEMS,
-  useProductCompareStore,
-  type CompareListBlockReason,
-} from '~/stores/useProductCompareStore'
+import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
-defineProps<{ products: ProductDto[] }>()
+const props = defineProps<{
+  products: ProductDto[]
+  popularAttributes?: AttributeConfigDto[]
+}>()
 
-const { t, n, te } = useI18n()
+const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
-const compareStore = useProductCompareStore()
+
+const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -99,151 +101,43 @@ const resolveImage = (product: ProductDto) => {
   )
 }
 
-const bestPriceLabel = (product: ProductDto) => {
-  const price = product.offers?.bestPrice?.price
-  const currency = product.offers?.bestPrice?.currency
-
-  if (price == null) {
-    return t('category.products.priceUnavailable')
-  }
-
-  if (currency) {
-    try {
-      return n(price, { style: 'currency', currency })
-    } catch {
-      return `${n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
-    }
-  }
-
-  return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const offersCountLabel = (product: ProductDto) => {
-  const count = product.offers?.offersCount ?? 0
-  return translatePlural('category.products.offerCount', count)
-}
-
 const productLink = (product: ProductDto) => {
   return product.fullSlug ?? product.slug ?? undefined
 }
 
-const impactScoreValue = (product: ProductDto) => {
-  const scores = product.scores?.scores
+const impactScoreValue = (product: ProductDto) => resolvePrimaryImpactScore(product)
 
-  if (!scores) {
-    return null
-  }
+const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 
-  const preferredKeys = [
-    'ECOSCORE',
-  ]
+const offersCountLabel = (product: ProductDto) => formatOffersCount(product, translatePlural)
 
-  const impactEntry =
-    preferredKeys.map((key) => scores[key]).find((entry) => entry != null) ??
-    Object.values(scores).find((entry) => entry?.id?.toLowerCase()?.includes('impact')) ??
-    null
-
-  if (!impactEntry) {
-    return null
-  }
-
-  const normalize = (score: number) => Math.max(0, Math.min(score, 5))
-
-  if (impactEntry.on20 != null && Number.isFinite(impactEntry.on20)) {
-    return normalize((impactEntry.on20 / 20) * 5)
-  }
-
-  if (impactEntry.percent != null && Number.isFinite(impactEntry.percent)) {
-    return normalize((impactEntry.percent / 100) * 5)
-  }
-
-  if (impactEntry.value != null && impactEntry.absolute?.max) {
-    const max = impactEntry.absolute.max
-
-    if (Number.isFinite(max) && max > 0) {
-      return normalize((impactEntry.value / max) * 5)
-    }
-  }
-
-  if (impactEntry.value != null && Number.isFinite(impactEntry.value)) {
-    return normalize(impactEntry.value)
-  }
-
-  return null
+type DisplayedAttribute = {
+  key: string
+  label: string
+  value: string
+  icon?: string | null
 }
 
-const productDisplayName = (product: ProductDto) => {
-  return (
-    product.identity?.bestName ??
-    product.base?.bestName ??
-    product.identity?.model ??
-    product.identity?.brand ??
-    t('category.products.untitledProduct')
-  )
-}
+const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] => {
+  const attributes = resolvePopularAttributes(product, popularAttributeConfigs.value)
+  const entries: DisplayedAttribute[] = []
 
-const isProductSelected = (product: ProductDto) => compareStore.hasProduct(product)
+  attributes.forEach((attribute) => {
+    const value = formatAttributeValue(attribute, t, n)
 
-const compareLabel = (product: ProductDto) =>
-  isProductSelected(product)
-    ? t('category.products.compare.removeFromList')
-    : t('category.products.compare.addToList')
-
-const reasonMessage = (reason: CompareListBlockReason | undefined) => {
-  switch (reason) {
-    case 'limit-reached':
-      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
-    case 'vertical-mismatch':
-      return t('category.products.compare.differentCategory')
-    case 'missing-identifier':
-      return t('category.products.compare.missingIdentifier')
-    default:
-      return null
-  }
-}
-
-const isCompareDisabled = (product: ProductDto) => {
-  if (isProductSelected(product)) {
-    return false
-  }
-
-  const eligibility = compareStore.canAddProduct(product)
-  return !eligibility.success
-}
-
-const compareTooltip = (product: ProductDto) => {
-  if (isProductSelected(product)) {
-    return t('category.products.compare.removeFromList')
-  }
-
-  const eligibility = compareStore.canAddProduct(product)
-
-  if (!eligibility.success) {
-    return reasonMessage(eligibility.reason) ?? t('category.products.compare.addToList')
-  }
-
-  return t('category.products.compare.addToList')
-}
-
-const compareAriaLabel = (product: ProductDto) => {
-  if (isProductSelected(product)) {
-    if (te('category.products.compare.removeSingle')) {
-      return t('category.products.compare.removeSingle', { name: productDisplayName(product) })
+    if (!value) {
+      return
     }
 
-    return t('category.products.compare.removeFromList')
-  }
+    entries.push({
+      key: attribute.key,
+      label: attribute.label,
+      value,
+      icon: attribute.icon ?? null,
+    })
+  })
 
-  const eligibility = compareStore.canAddProduct(product)
-  return reasonMessage(eligibility.reason) ?? t('category.products.compare.addToList')
-}
-
-const toggleCompare = (product: ProductDto) => {
-  if (isCompareDisabled(product) && !isProductSelected(product)) {
-    return
-  }
-
-  compareStore.toggleProduct(product)
+  return entries
 }
 </script>
 
@@ -278,39 +172,32 @@ const toggleCompare = (product: ProductDto) => {
   &__body
     display: flex
     flex-direction: column
-    gap: 0.75rem
-    align-items: center
-    text-align: center
+    gap: 1rem
+    align-items: stretch
+    text-align: left
     padding: 1.25rem
     background: rgb(var(--v-theme-surface-glass))
     border-bottom-left-radius: inherit
     border-bottom-right-radius: inherit
 
-  &__actions
-    padding: 0 1.25rem 1.25rem
-    justify-content: center
-
-  &__compare
-    text-transform: none
-    font-weight: 600
-
-    &--active
-      color: rgb(var(--v-theme-text-on-accent))
+  &__header
+    display: flex
+    align-items: flex-start
+    gap: 0.75rem
 
   &__title
     font-size: 1.125rem
     margin: 0
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
-    width: 100%
-    white-space: nowrap
-    overflow: hidden
-    text-overflow: ellipsis
+    flex: 1 1 auto
+    min-width: 0
+    white-space: normal
 
   &__meta
     display: flex
     flex-direction: column
-    align-items: center
+    align-items: flex-start
     gap: 0.25rem
 
   &__offers
@@ -325,10 +212,30 @@ const toggleCompare = (product: ProductDto) => {
   &__score
     display: flex
     align-items: center
-    justify-content: center
     min-height: 1.75rem
 
   &__score-fallback
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__attributes
+    display: grid
+    gap: 0.5rem
+    padding: 0
+    margin: 0
+    list-style: none
+
+  &__attribute
+    display: flex
+    align-items: center
+    font-size: 0.875rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__attribute-label
+    font-weight: 500
+    margin-right: 0.35rem
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__attribute-value
+    color: inherit
 </style>
