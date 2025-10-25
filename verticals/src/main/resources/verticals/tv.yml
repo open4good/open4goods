@@ -411,6 +411,7 @@ attributesConfig:
      # DIAGONALE
      ##################################
      - key: "DIAGONALE_POUCES"
+       betterIs: "GREATER"
        icecatFeaturesIds:
          - 944       
        faIcon: "fa-arrow-up-right-from-square"
@@ -439,7 +440,8 @@ attributesConfig:
      # TYPE TV
      ##################################
      - key: "DISPLAY_TECHNOLOGY"
-       icecatFeaturesIds: 
+       betterIs: "GREATER"
+       icecatFeaturesIds:
          - 9713          
        faIcon: "fa-tv"
        name:

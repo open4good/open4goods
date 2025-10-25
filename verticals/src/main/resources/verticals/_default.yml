@@ -378,6 +378,7 @@ attributesConfig:
   ##################################
   
   - key: "CLASSE_ENERGY"
+    betterIs: "GREATER"
     faIcon: "fa-bolt"
     name:
       default: "Energy class"
@@ -440,6 +441,7 @@ attributesConfig:
   ##################################
   
   - key: "REPAIRABILITY_INDEX"
+    betterIs: "GREATER"
     faIcon: "fa-screwdriver-wrench"
     name:
       default: "Repairability index"
@@ -472,6 +474,7 @@ attributesConfig:
   ##################################
   
   - key: "YEAR"
+    betterIs: "GREATER"
     faIcon: "calendar-days"
     name:
       default: "Year"
@@ -504,6 +507,7 @@ attributesConfig:
   ##################################
   
   - key: "HDMI_PORTS_QUANTITY"
+    betterIs: "GREATER"
     faIcon: "fa-sitemap"
     icecatFeaturesIds: 
       - 3566      
@@ -537,6 +541,7 @@ attributesConfig:
   ##################################
   
   - key: "COLOR"
+    betterIs: "GREATER"
     faIcon: "fa-droplet"
     name:
       default: "Color"
@@ -572,6 +577,7 @@ attributesConfig:
   ##################################
   
   - key: "WEIGHT"
+    betterIs: "LOWER"
     icecatFeaturesIds:
       - 94
       - 33015    
@@ -618,6 +624,7 @@ attributesConfig:
 #   
   ##################################
   - key: "POWER_CONSUMPTION_TYPICAL"
+    betterIs: "LOWER"
     filteringType: "NUMERIC"
     asScore: true
     reverseScore: true    
@@ -657,6 +664,7 @@ attributesConfig:
 #   
   ##################################
   - key: "POWER_CONSUMPTION_OFF"
+    betterIs: "LOWER"
     filteringType: "NUMERIC"
     asScore: true
     reverseScore: true    
@@ -697,6 +705,7 @@ attributesConfig:
   ##################################
   
   - key: "FEATURES"
+    betterIs: "GREATER"
     faIcon: "fa-list"
     attributePath: attributes.features
     name:
@@ -704,6 +713,7 @@ attributesConfig:
       fr: "Fonctionnalités"
       
   - key: "BRAND_SUSTAINABILITY"
+    betterIs: "GREATER"
     faIcon: "fa-globe"
 #    attributePath: attributes.features
     name:
@@ -712,6 +722,7 @@ attributesConfig:
       
 
   - key: "DATA_QUALITY"
+    betterIs: "GREATER"
     faIcon: "fa-file-shield"
 #    attributePath: attributes.features
     name:

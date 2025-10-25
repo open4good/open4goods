@@ -71,10 +71,16 @@ public class AttributeConfig {
 	 */
 	private boolean asScore = false;
 
-	/**
-	 * If true, attribute value to score will be reversed (ie : for weight, the better score is the lowest weight)
-	 */
-	private boolean reverseScore = false;
+        /**
+         * If true, attribute value to score will be reversed (ie : for weight, the better score is the lowest weight)
+         */
+        private boolean reverseScore = false;
+
+        /**
+         * Indicates which comparison rule should be applied to determine the most
+         * desirable value when comparing products.
+         */
+        private AttributeComparisonRule betterIs = AttributeComparisonRule.GREATER;
 
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
@@ -354,13 +360,33 @@ public class AttributeConfig {
 		this.icecatFeaturesIds = icecatFeaturesIds;
 	}
 
-	public boolean isReverseScore() {
-		return reverseScore;
-	}
+        public boolean isReverseScore() {
+                return reverseScore;
+        }
 
-	public void setReverseScore(boolean reverseScore) {
-		this.reverseScore = reverseScore;
-	}
+        public void setReverseScore(boolean reverseScore) {
+                this.reverseScore = reverseScore;
+        }
+
+        /**
+         * Gets the comparison rule describing which values are considered better for
+         * this attribute.
+         *
+         * @return the configured comparison rule, defaults to {@link AttributeComparisonRule#GREATER}.
+         */
+        public AttributeComparisonRule getBetterIs() {
+                return betterIs;
+        }
+
+        /**
+         * Sets the comparison rule describing which values are considered better for
+         * this attribute.
+         *
+         * @param betterIs the comparison rule to apply when comparing values.
+         */
+        public void setBetterIs(AttributeComparisonRule betterIs) {
+                this.betterIs = betterIs == null ? AttributeComparisonRule.GREATER : betterIs;
+        }
 
 	public Localisable<String, String> getUnit() {
 		return unit;
