@@ -78,6 +78,30 @@
                 {{ pageStrings.statusMessage }}
               </p>
 
+              <section
+                v-if="!is404 && (errorMessage || errorStack)"
+                class="error-page__debug"
+                aria-labelledby="error-debug-heading"
+              >
+                <h2 id="error-debug-heading" class="error-page__debug-title">
+                  {{ debugStrings.title }}
+                </h2>
+                <p v-if="errorMessage" class="error-page__debug-message">
+                  <span class="error-page__debug-label">{{ debugStrings.messageLabel }}</span>
+                  <span class="error-page__debug-value">{{ errorMessage }}</span>
+                </p>
+                <div v-if="errorStack" class="error-page__debug-stack">
+                  <p class="error-page__debug-label">{{ debugStrings.stackLabel }}</p>
+                  <pre class="error-page__debug-stack-content">{{ errorStack }}</pre>
+                </div>
+                <p
+                  v-else-if="errorMessage"
+                  class="error-page__debug-empty"
+                >
+                  {{ debugStrings.empty }}
+                </p>
+              </section>
+
             </div>
           </aside>
         </v-container>
@@ -101,6 +125,13 @@ interface ErrorPageStrings {
   description: string
   helper: string
   statusMessage: string
+}
+
+interface ErrorDebugStrings {
+  title: string
+  messageLabel: string
+  stackLabel: string
+  empty: string
 }
 
 const props = defineProps<{
@@ -154,6 +185,63 @@ const actionLabels = computed(() => ({
   goHome: String(t('error.page.actions.goHome')),
   contactSupport: String(t('error.page.actions.contactSupport')),
 }))
+
+const debugStrings = computed<ErrorDebugStrings>(() => ({
+  title: String(t('error.page.debug.title')),
+  messageLabel: String(t('error.page.debug.messageLabel')),
+  stackLabel: String(t('error.page.debug.stackLabel')),
+  empty: String(t('error.page.debug.empty')),
+}))
+
+const normaliseErrorDetail = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value.trim()
+  }
+
+  if (value instanceof Error) {
+    return normaliseErrorDetail(value.stack ?? value.message)
+  }
+
+  if (value == null) {
+    return ''
+  }
+
+  try {
+    return JSON.stringify(value, null, 2)
+  }
+  catch {
+    return String(value)
+  }
+}
+
+const selectErrorDetail = (candidates: unknown[]): string => {
+  for (const candidate of candidates) {
+    const detail = normaliseErrorDetail(candidate)
+
+    if (detail.length > 0) {
+      return detail
+    }
+  }
+
+  return ''
+}
+
+const errorMessage = computed(() =>
+  selectErrorDetail([
+    props.error?.message,
+    props.error?.statusMessage,
+    (props.error?.data as { message?: unknown } | undefined)?.message,
+    (props.error?.cause as { message?: unknown } | undefined)?.message,
+  ]),
+)
+
+const errorStack = computed(() =>
+  selectErrorDetail([
+    props.error?.stack,
+    (props.error?.cause as { stack?: unknown } | undefined)?.stack,
+    (props.error?.data as { stack?: unknown } | undefined)?.stack,
+  ]),
+)
 
 useSeoMeta({
   title: () => pageStrings.value.title,
@@ -276,6 +364,50 @@ const handleContactSupport = () => {
 
 .error-page__status-message
   font-size: 1rem
+  color: rgba(var(--v-theme-text-neutral-soft), 0.95)
+
+.error-page__debug
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+  margin-top: 1.5rem
+  padding-top: 1.5rem
+  border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
+
+.error-page__debug-title
+  font-size: 1rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.error-page__debug-label
+  display: block
+  font-size: 0.875rem
+  font-weight: 600
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+  margin-bottom: 0.35rem
+
+.error-page__debug-message
+  margin: 0
+
+.error-page__debug-value
+  display: block
+  font-size: 0.95rem
+  line-height: 1.5
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.error-page__debug-stack-content
+  font-family: var(--font-mono, 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier', monospace)
+  font-size: 0.8rem
+  line-height: 1.45
+  max-height: 220px
+  overflow: auto
+  padding: 0.75rem
+  border-radius: 12px
+  background: rgba(var(--v-theme-surface-primary-080), 0.9)
+  color: rgba(var(--v-theme-text-neutral-soft), 1)
+
+.error-page__debug-empty
+  font-size: 0.9rem
   color: rgba(var(--v-theme-text-neutral-soft), 0.95)
 
 @media (max-width: 959px)
