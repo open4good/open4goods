@@ -86,6 +86,7 @@ public class ProductController {
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
+    private static final String KEYWORD_VALUE_SUFFIX = ".keyword";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
 
     public ProductController(ProductMappingService service,
@@ -483,10 +484,20 @@ public class ProductController {
             }
             return;
         }
+        if (normalized.endsWith(KEYWORD_VALUE_SUFFIX)) {
+            String base = normalized.substring(0, normalized.length() - KEYWORD_VALUE_SUFFIX.length());
+            if (!base.isEmpty()) {
+                target.add(base);
+            }
+            return;
+        }
         if (normalized.startsWith(INDEXED_ATTRIBUTE_PREFIX)) {
             String attributeKey = normalized.substring(INDEXED_ATTRIBUTE_PREFIX.length());
-            if (VALUE_TYPE_NUMERIC.equals(resolveAttributeValueType(config, attributeKey))) {
+            String valueType = resolveAttributeValueType(config, attributeKey);
+            if (VALUE_TYPE_NUMERIC.equals(valueType)) {
                 target.add(normalized + NUMERIC_VALUE_SUFFIX);
+            } else if (VALUE_TYPE_TEXT.equals(valueType)) {
+                target.add(normalized + KEYWORD_VALUE_SUFFIX);
             }
         }
     }
@@ -670,7 +681,10 @@ public class ProductController {
      *
      * @param filterName filter identifier as defined in the vertical configuration
      * @param config     vertical configuration used to resolve attribute metadata
-     * @return fully qualified field path pointing to the indexed attribute value
+     * @return fully qualified field path pointing to the indexed attribute value. Numeric
+     *         attributes resolve to the <code>.numericValue</code> sub-field and textual ones to
+     *         the <code>.keyword</code> sub-field in order to target the appropriate Elasticsearch
+     *         data type.
      */
     private String toIndexedAttribute(String filterName, VerticalConfig config) {
         String baseField = "attributes.indexed." + filterName;
@@ -678,8 +692,13 @@ public class ProductController {
         if (config.getAttributesConfig() != null) {
             attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(filterName);
         }
-        if (attributeConfig != null && attributeConfig.getFilteringType() == AttributeType.NUMERIC) {
-            return baseField + ".numericValue";
+        if (attributeConfig != null) {
+            if (attributeConfig.getFilteringType() == AttributeType.NUMERIC) {
+                return baseField + NUMERIC_VALUE_SUFFIX;
+            }
+            if (attributeConfig.getFilteringType() == AttributeType.TEXT) {
+                return baseField + KEYWORD_VALUE_SUFFIX;
+            }
         }
         return baseField;
     }
@@ -759,6 +778,12 @@ public class ProductController {
         }
         if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
             String shortened = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
+            if (!shortened.isEmpty() && !target.contains(shortened)) {
+                target.add(shortened);
+            }
+        }
+        if (normalized.endsWith(KEYWORD_VALUE_SUFFIX)) {
+            String shortened = normalized.substring(0, normalized.length() - KEYWORD_VALUE_SUFFIX.length());
             if (!shortened.isEmpty() && !target.contains(shortened)) {
                 target.add(shortened);
             }
