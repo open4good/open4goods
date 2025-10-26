@@ -25,8 +25,12 @@ const FALLBACK_DOMAIN_LANGUAGE_SITEMAP_CONFIG: DomainLanguageSitemapConfig = {
 }
 
 const CONFIGURED_DOMAIN_LANGUAGE_SITEMAPS: Partial<Record<DomainLanguage, DomainLanguageSitemapConfig>> = {
-  en: FALLBACK_DOMAIN_LANGUAGE_SITEMAP_CONFIG,
-  fr: FALLBACK_DOMAIN_LANGUAGE_SITEMAP_CONFIG,
+  en: {
+    additionalPaths: DEFAULT_ADDITIONAL_SITEMAP_PATHS,
+  },
+  fr: {
+    additionalPaths: DEFAULT_ADDITIONAL_SITEMAP_PATHS,
+  },
 }
 
 const ABSOLUTE_URL_PATTERN = /^[a-zA-Z][a-zA-Z\d+\-.]*:/
