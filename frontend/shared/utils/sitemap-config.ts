@@ -7,13 +7,13 @@ import {
 } from './domain-language'
 
 export const SITEMAP_PATH_PREFIX = '/sitemap'
-export const APP_ROUTES_SITEMAP_KEY = 'app-pages'
+export const APP_ROUTES_SITEMAP_KEY = 'main-pages'
 
 const DEFAULT_ADDITIONAL_SITEMAP_PATHS = [
-  '/sitemap/blog-posts.xml',
-  '/sitemap/category-pages.xml',
-  '/sitemap/product-pages.xml',
-  '/sitemap/wiki-pages.xml',
+  'https://nudger.fr/sitemap/blog-posts.xml',
+  'https://nudger.fr/sitemap/category-pages.xml',
+  'https://nudger.fr/sitemap/product-pages.xml',
+  'https://nudger.fr/sitemap/wiki-pages.xml',
 ] as const
 
 export interface DomainLanguageSitemapConfig {
