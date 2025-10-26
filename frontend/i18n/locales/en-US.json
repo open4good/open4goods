@@ -173,6 +173,18 @@
         "other": "{count} offers"
       },
       "notRated": "Not rated",
+      "conditions": {
+        "new": "New",
+        "occasion": "Second-hand",
+        "unknown": "Unspecified",
+        "other": "{condition}"
+      },
+      "pricing": {
+        "newOfferLabel": "New offer",
+        "occasionOfferLabel": "Second-hand offer",
+        "bestOfferLabel": "Best price",
+        "conditionLabel": "Condition: {condition}"
+      },
       "compare": {
         "title": "Compare products",
         "expandPanel": "Show list",
@@ -219,7 +231,10 @@
       "sort": {
         "fields": {
           "price": "Lowest price",
-          "offersCount": "Number of offers"
+          "offersCount": "Number of offers",
+          "brand": "Brand",
+          "model": "Model",
+          "impactScore": "Impact score"
         }
       }
     },

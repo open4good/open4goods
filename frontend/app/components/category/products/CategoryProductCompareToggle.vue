@@ -4,14 +4,15 @@
       <v-btn
         v-bind="tooltipProps"
         class="category-product-compare-toggle"
-        :class="{
-          'category-product-compare-toggle--active': isSelected,
-          'category-product-compare-toggle--inactive': !isSelected,
-        }"
+        :class="[
+          sizeClass,
+          {
+            'category-product-compare-toggle--active': isSelected,
+            'category-product-compare-toggle--inactive': !isSelected,
+          },
+        ]"
         variant="flat"
-        size="large"
         color="primary"
-        :icon="isSelected ? activeIcon : icon"
         :aria-pressed="isSelected"
         :aria-label="ariaLabel"
         :title="tooltip"
@@ -19,7 +20,12 @@
         data-test="category-product-compare"
         @click.stop.prevent="toggle"
       >
-        <v-icon :icon="isSelected ? activeIcon : icon" size="40" />
+        <template v-if="isSelected">
+          <span class="category-product-compare-toggle__minus" aria-hidden="true">&minus;</span>
+        </template>
+        <template v-else>
+          <v-icon :icon="icon" :size="iconSize" />
+        </template>
       </v-btn>
     </template>
   </v-tooltip>
@@ -38,11 +44,11 @@ const props = withDefaults(
   defineProps<{
     product: ProductDto
     icon?: string
-    activeIcon?: string
+    size?: 'compact' | 'comfortable' | 'large'
   }>(),
   {
     icon: 'mdi-compare-horizontal',
-    activeIcon: 'mdi-compare-horizontal',
+    size: 'comfortable',
   },
 )
 
@@ -56,6 +62,21 @@ const { t, te } = useI18n()
 const compareStore = useProductCompareStore()
 
 const isSelected = computed(() => compareStore.hasProduct(props.product))
+
+const sizeClass = computed(() =>
+  `category-product-compare-toggle--size-${props.size ?? 'comfortable'}`,
+)
+
+const iconSize = computed(() => {
+  switch (props.size) {
+    case 'compact':
+      return 26
+    case 'large':
+      return 40
+    default:
+      return 32
+  }
+})
 
 const reasonMessage = (reason: CompareListBlockReason | undefined) => {
   switch (reason) {
@@ -127,12 +148,32 @@ const toggle = () => {
 .category-product-compare-toggle
   border-radius: 50%
   transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease
-  width: 3.25rem
-  min-width: 3.25rem
-  height: 3.25rem
-  padding: 0
   background-color: rgba(var(--v-theme-surface-default), 0.92)
   box-shadow: 0 6px 16px rgba(21, 46, 73, 0.12)
+  display: inline-flex
+  align-items: center
+  justify-content: center
+
+  &--size-compact
+    width: 2.5rem
+    min-width: 2.5rem
+    height: 2.5rem
+
+    :deep(.v-icon)
+      font-size: 1.35rem
+
+  &--size-comfortable
+    width: 3.125rem
+    min-width: 3.125rem
+    height: 3.125rem
+
+  &--size-large
+    width: 3.75rem
+    min-width: 3.75rem
+    height: 3.75rem
+
+    :deep(.v-icon)
+      font-size: 2.25rem
 
   &:hover
     opacity: 0.9
@@ -150,4 +191,16 @@ const toggle = () => {
 
   &--active :deep(.v-icon)
     transform: scale(1.05)
+
+  &__minus
+    font-size: 1.75rem
+    font-weight: 600
+    line-height: 1
+    color: currentColor
+
+  &--size-compact &__minus
+    font-size: 1.4rem
+
+  &--size-large &__minus
+    font-size: 2rem
 </style>

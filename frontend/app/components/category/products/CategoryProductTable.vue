@@ -13,7 +13,11 @@
     @click:row="onRowClick"
   >
     <template #[`item.compare`]="{ item }">
-      <CategoryProductCompareToggle :product="item.product" class="category-product-table__compare" />
+      <CategoryProductCompareToggle
+        :product="item.product"
+        size="compact"
+        class="category-product-table__compare"
+      />
     </template>
 
     <template #[`item.brand`]="{ value }">
@@ -195,9 +199,9 @@ const attributeColumns = computed<AttributeColumn[]>(() => {
 
 const headers = computed(() => [
   { key: 'compare', title: t('category.products.headers.compare'), sortable: false, width: 48 },
-  { key: 'brand', title: t('category.products.headers.brand'), sortable: false, width: 140 },
-  { key: 'model', title: t('category.products.headers.model'), sortable: false, minWidth: 200 },
-  { key: 'impactScore', title: t('category.products.headers.impactScore'), sortable: false, width: 140 },
+  { key: 'brand', title: t('category.products.headers.brand'), sortable: true, width: 140 },
+  { key: 'model', title: t('category.products.headers.model'), sortable: true, minWidth: 200 },
+  { key: 'impactScore', title: t('category.products.headers.impactScore'), sortable: true, width: 140 },
   {
     key: 'bestPrice',
     title: t('category.products.headers.bestPrice'),
@@ -219,6 +223,9 @@ const headers = computed(() => [
 ])
 
 const staticSortHeaderToFieldMapping: Record<string, string> = {
+  brand: 'identity.brand.keyword',
+  model: 'identity.model.keyword',
+  impactScore: 'scores.ECOSCORE.value',
   bestPrice: 'price.minPrice.price',
   offersCount: 'offersCount',
 }

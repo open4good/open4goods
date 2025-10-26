@@ -15,6 +15,9 @@ const FILTER_FIELD_TRANSLATION_KEYS: Record<string, string> = {
 const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   'price.minPrice.price': 'category.products.sort.fields.price',
   offersCount: 'category.products.sort.fields.offersCount',
+  'identity.brand.keyword': 'category.products.sort.fields.brand',
+  'identity.model.keyword': 'category.products.sort.fields.model',
+  'scores.ECOSCORE.value': 'category.products.sort.fields.impactScore',
 }
 
 const resolveTranslation = (mapping: string, t: TranslateFn, keys: Record<string, string>): string | null => {

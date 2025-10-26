@@ -172,6 +172,18 @@
         "other": "{count} offres"
       },
       "notRated": "Non noté",
+      "conditions": {
+        "new": "Neuf",
+        "occasion": "Occasion",
+        "unknown": "Non précisée",
+        "other": "Autre ({condition})"
+      },
+      "pricing": {
+        "newOfferLabel": "Offre neuve",
+        "occasionOfferLabel": "Offre d'occasion",
+        "bestOfferLabel": "Meilleur prix",
+        "conditionLabel": "Condition : {condition}"
+      },
       "compare": {
         "title": "Comparer les produits",
         "expandPanel": "Afficher la liste",
@@ -218,7 +230,10 @@
       "sort": {
         "fields": {
           "price": "Prix le plus bas",
-          "offersCount": "Nombre d'offres"
+          "offersCount": "Nombre d'offres",
+          "brand": "Marque",
+          "model": "Modèle",
+          "impactScore": "Score d'impact"
         }
       }
     },

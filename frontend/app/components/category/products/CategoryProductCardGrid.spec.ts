@@ -64,6 +64,10 @@ const CompareToggleStub: Component = {
       type: Object,
       required: true,
     },
+    size: {
+      type: String,
+      default: 'comfortable',
+    },
   },
   setup(props) {
     const store = useProductCompareStore()
@@ -115,6 +119,7 @@ const mountGrid = async (products: ProductDto[]) => {
         VCardItem: createStub('div'),
         VImg: createStub('div'),
         VSkeletonLoader: createStub('div'),
+        VChip: createStub('div'),
         VTooltip: VTooltipStub,
         VBtn: VBtnStub,
         VIcon: createStub('i'),
@@ -164,6 +169,18 @@ describe('CategoryProductCardGrid', () => {
               untitledProduct: 'Untitled product',
               notRated: 'Not rated yet',
               priceUnavailable: 'Price unavailable',
+              conditions: {
+                new: 'New',
+                occasion: 'Occasion',
+                unknown: 'Unknown',
+                other: 'Other ({condition})',
+              },
+              pricing: {
+                newOfferLabel: 'New',
+                occasionOfferLabel: 'Occasion',
+                bestOfferLabel: 'Best',
+                conditionLabel: 'Condition: {condition}',
+              },
               compare: {
                 addToList: 'Add to compare',
                 removeFromList: 'Remove from compare',

@@ -47,6 +47,10 @@ const CompareToggleStub: Component = {
       type: Object,
       required: true,
     },
+    size: {
+      type: String,
+      default: 'comfortable',
+    },
   },
   setup() {
     return () => h('button', { type: 'button', 'data-test': 'category-product-compare' })
@@ -207,5 +211,25 @@ describe('CategoryProductTable', () => {
       'attributes.indexed.DIAGONALE_POUCES.numericValue',
     )
     expect(wrapper.emitted('update:sort-order')?.[0]?.[0]).toBe('asc')
+  })
+
+  it('emits sort updates for static sortable columns', async () => {
+    const wrapper = await mountTable({
+      products: [buildProduct()],
+    })
+
+    const table = wrapper.getComponent(VDataTableStub)
+
+    table.vm.$emit('update:sort-by', [{ key: 'brand', order: 'asc' }])
+    expect(wrapper.emitted('update:sort-field')?.[0]?.[0]).toBe('identity.brand.keyword')
+    expect(wrapper.emitted('update:sort-order')?.[0]?.[0]).toBe('asc')
+
+    table.vm.$emit('update:sort-by', [{ key: 'model', order: 'desc' }])
+    expect(wrapper.emitted('update:sort-field')?.[1]?.[0]).toBe('identity.model.keyword')
+    expect(wrapper.emitted('update:sort-order')?.[1]?.[0]).toBe('desc')
+
+    table.vm.$emit('update:sort-by', [{ key: 'impactScore' }])
+    expect(wrapper.emitted('update:sort-field')?.[2]?.[0]).toBe('scores.ECOSCORE.value')
+    expect(wrapper.emitted('update:sort-order')?.[2]?.[0]).toBe('asc')
   })
 })
