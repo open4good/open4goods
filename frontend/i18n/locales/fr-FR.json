@@ -179,8 +179,8 @@
         "other": "Autre ({condition})"
       },
       "pricing": {
-        "newOfferLabel": "Offre neuve",
-        "occasionOfferLabel": "Offre d'occasion",
+        "newOfferLabel": "Neuf",
+        "occasionOfferLabel": "Occasion",
         "bestOfferLabel": "Meilleur prix",
         "conditionLabel": "Condition : {condition}"
       },

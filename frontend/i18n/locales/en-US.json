@@ -180,8 +180,8 @@
         "other": "{condition}"
       },
       "pricing": {
-        "newOfferLabel": "New offer",
-        "occasionOfferLabel": "Second-hand offer",
+        "newOfferLabel": "New",
+        "occasionOfferLabel": "Second-hand",
         "bestOfferLabel": "Best price",
         "conditionLabel": "Condition: {condition}"
       },
