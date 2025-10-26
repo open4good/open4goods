@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
+import { APP_ROUTES_SITEMAP_KEY, SITEMAP_PATH_PREFIX } from './shared/utils/sitemap-config'
 import { LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
 
 const localeDomains = buildI18nLocaleDomains()
@@ -24,6 +25,10 @@ export default defineNuxtConfig({
         { rel: 'manifest', href: '/site.webmanifest' },
       ],
     },
+  },
+  site: {
+    url: 'https://nudger.com',
+    name: 'Nudger',
   },
   devtools: {
     enabled: process.env.NODE_ENV !== 'production',
@@ -60,7 +65,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     "@nuxt/icon",
     "@pinia/nuxt",
-    'nuxt-mcp'
+    'nuxt-mcp',
+    '@nuxtjs/sitemap',
   ],
 
   vueuse: {
@@ -180,6 +186,18 @@ export default defineNuxtConfig({
     'vuetify/styles',
     '~/assets/sass/main.sass',
   ],
+
+  sitemap: {
+    credits: false,
+    autoLastmod: false,
+    sitemapsPathPrefix: SITEMAP_PATH_PREFIX,
+    sitemaps: {
+      [APP_ROUTES_SITEMAP_KEY]: {
+        sitemapName: `${APP_ROUTES_SITEMAP_KEY}.xml`,
+        includeAppSources: true,
+      },
+    },
+  },
 
   postcss: {
     plugins: {

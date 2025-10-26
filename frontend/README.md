@@ -19,6 +19,8 @@ Use this document as the bible for:
 - understanding project architecture
 - adhering to our coding standards
 
+> 📄 **Need to update the sitemap?** See [docs/sitemap-generation.md](docs/sitemap-generation.md) for the end-to-end workflow and configuration reference.
+
 ## Getting Started: Installation & Setup
 
 To get the project up and running locally, follow these steps:
