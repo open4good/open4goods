@@ -22,51 +22,56 @@
         </v-avatar>
       </template>
 
-      <div class="category-product-list__content">
-        <div class="category-product-list__header">
-          <h3 class="category-product-list__title">
-            {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
-          </h3>
+      <div class="category-product-list__layout">
+        <div class="category-product-list__content">
+          <div class="category-product-list__header">
+            <h3 class="category-product-list__title">
+              {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
+            </h3>
+          </div>
+
+          <div class="category-product-list__meta">
+            <span class="category-product-list__price">
+              <span aria-hidden="true" class="category-product-list__price-icon">€</span>
+              {{ listPriceValue(product) }}
+            </span>
+            <span class="category-product-list__offers">
+              <v-icon icon="mdi-store" size="18" class="me-1" />
+              {{ offersCountLabel(product) }}
+            </span>
+          </div>
+
+          <ul v-if="popularAttributesByProduct(product).length" class="category-product-list__attributes" role="list">
+            <li
+              v-for="attribute in popularAttributesByProduct(product)"
+              :key="attribute.key"
+              class="category-product-list__attribute"
+              role="listitem"
+            >
+              <span class="category-product-list__attribute-label">{{ attribute.label }}</span>
+              <span class="category-product-list__attribute-separator" aria-hidden="true">:</span>
+              <span class="category-product-list__attribute-value">{{ attribute.value }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="category-product-list__score">
           <ImpactScore
             v-if="impactScoreValue(product) != null"
             :score="impactScoreValue(product) ?? 0"
             :max="5"
-            size="small"
+            size="large"
+            :show-value="true"
           />
           <span v-else class="category-product-list__score-fallback">
             {{ $t('category.products.notRated') }}
           </span>
         </div>
 
-        <div class="category-product-list__meta">
-          <span class="category-product-list__price">
-            <span aria-hidden="true" class="category-product-list__price-icon">€</span>
-            {{ listPriceValue(product) }}
-          </span>
-          <span class="category-product-list__offers">
-            <v-icon icon="mdi-store" size="18" class="me-1" />
-            {{ offersCountLabel(product) }}
-          </span>
-        </div>
-
-        <ul v-if="popularAttributesByProduct(product).length" class="category-product-list__attributes" role="list">
-          <li
-            v-for="attribute in popularAttributesByProduct(product)"
-            :key="attribute.key"
-            class="category-product-list__attribute"
-            role="listitem"
-          >
-            <span class="category-product-list__attribute-label">{{ attribute.label }}</span>
-            <span class="category-product-list__attribute-value">{{ attribute.value }}</span>
-          </li>
-        </ul>
-      </div>
-
-      <template #append>
-        <div class="category-product-list__aside">
+        <div class="category-product-list__actions">
           <CategoryProductCompareToggle :product="product" />
         </div>
-      </template>
+      </div>
     </v-list-item>
   </v-list>
 </template>
@@ -162,15 +167,17 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
       box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
       transform: translateY(-2px)
 
+  &__layout
+    display: flex
+    align-items: stretch
+    gap: 1.5rem
+    flex-wrap: wrap
+
   &__content
     display: flex
     flex-direction: column
-    gap: 0.5rem
-
-  &__aside
-    display: flex
-    align-items: flex-start
-    padding-left: 0.75rem
+    gap: 0.75rem
+    flex: 1 1 auto
 
   &__header
     display: flex
@@ -207,6 +214,19 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
     align-items: center
     gap: 0.35rem
 
+  &__score
+    display: flex
+    align-items: center
+    justify-content: center
+    min-width: 180px
+    flex: 0 0 auto
+
+  &__actions
+    display: flex
+    align-items: center
+    justify-content: flex-end
+    flex: 0 0 auto
+
   &__score-fallback
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
@@ -228,6 +248,10 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
   &__attribute-label
     font-weight: 500
     color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__attribute-separator
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    font-weight: 600
 
   &__attribute-value
     color: rgb(var(--v-theme-text-neutral-secondary))
