@@ -21,6 +21,11 @@
           contain
           class="category-product-card-grid__image"
         >
+          <template #default>
+            <div class="category-product-card-grid__compare">
+              <CategoryProductCompareToggle :product="product" />
+            </div>
+          </template>
           <template #placeholder>
             <v-skeleton-loader type="image" class="h-100" />
           </template>
@@ -31,7 +36,6 @@
             <h3 class="category-product-card-grid__title">
               {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
             </h3>
-            <CategoryProductCompareToggle :product="product" />
           </div>
 
           <div class="category-product-card-grid__score" role="presentation">
@@ -39,7 +43,7 @@
               v-if="impactScoreValue(product) != null"
               :score="impactScoreValue(product) ?? 0"
               :max="5"
-              size="small"
+              size="medium"
             />
             <span v-else class="category-product-card-grid__score-fallback">
               {{ $t('category.products.notRated') }}
@@ -55,18 +59,12 @@
             </span>
           </div>
 
-          <ul v-if="popularAttributesByProduct(product).length" class="category-product-card-grid__attributes" role="list">
-            <li
-              v-for="attribute in popularAttributesByProduct(product)"
-              :key="attribute.key"
-              class="category-product-card-grid__attribute"
-              role="listitem"
-            >
-              <v-icon v-if="attribute.icon" :icon="attribute.icon" size="16" class="me-1" />
-              <span class="category-product-card-grid__attribute-label">{{ attribute.label }}</span>
-              <span class="category-product-card-grid__attribute-value">{{ attribute.value }}</span>
-            </li>
-          </ul>
+          <p
+            v-if="popularAttributesHighlightLine(product)"
+            class="category-product-card-grid__attributes"
+          >
+            {{ popularAttributesHighlightLine(product) }}
+          </p>
         </v-card-item>
       </v-card>
     </v-col>
@@ -139,6 +137,20 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
 
   return entries
 }
+
+const popularAttributesHighlights = (product: ProductDto): string[] => {
+  return popularAttributesByProduct(product).map((attribute) => attribute.value)
+}
+
+const popularAttributesHighlightLine = (product: ProductDto): string | null => {
+  const highlights = popularAttributesHighlights(product)
+
+  if (!highlights.length) {
+    return null
+  }
+
+  return highlights.join(' - ')
+}
 </script>
 
 <style scoped lang="sass">
@@ -163,18 +175,27 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
     display: flex
     align-items: center
     justify-content: center
+    position: relative
 
     :deep(img)
       object-fit: contain
       mix-blend-mode: multiply
       background: #fff
 
+  &__compare
+    position: absolute
+    top: 1rem
+    right: 1rem
+    display: flex
+    justify-content: flex-end
+    z-index: 1
+
   &__body
     display: flex
     flex-direction: column
     gap: 1rem
-    align-items: stretch
-    text-align: left
+    align-items: center
+    text-align: center
     padding: 1.25rem
     background: rgb(var(--v-theme-surface-glass))
     border-bottom-left-radius: inherit
@@ -182,22 +203,20 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
 
   &__header
     display: flex
-    align-items: flex-start
-    gap: 0.75rem
+    align-items: center
+    justify-content: center
 
   &__title
     font-size: 1.125rem
     margin: 0
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
-    flex: 1 1 auto
-    min-width: 0
-    white-space: normal
+    text-align: center
 
   &__meta
     display: flex
     flex-direction: column
-    align-items: flex-start
+    align-items: center
     gap: 0.25rem
 
   &__offers
@@ -212,6 +231,7 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
   &__score
     display: flex
     align-items: center
+    justify-content: center
     min-height: 1.75rem
 
   &__score-fallback
@@ -219,23 +239,7 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
     color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__attributes
-    display: grid
-    gap: 0.5rem
-    padding: 0
     margin: 0
-    list-style: none
-
-  &__attribute
-    display: flex
-    align-items: center
-    font-size: 0.875rem
+    font-size: 0.95rem
     color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__attribute-label
-    font-weight: 500
-    margin-right: 0.35rem
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__attribute-value
-    color: inherit
 </style>

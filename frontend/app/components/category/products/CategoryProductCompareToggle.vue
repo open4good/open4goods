@@ -4,20 +4,22 @@
       <v-btn
         v-bind="tooltipProps"
         class="category-product-compare-toggle"
-        :class="{ 'category-product-compare-toggle--active': isSelected }"
-        variant="text"
-        size="small"
+        :class="{
+          'category-product-compare-toggle--active': isSelected,
+          'category-product-compare-toggle--inactive': !isSelected,
+        }"
+        variant="flat"
+        size="large"
         color="primary"
         :icon="isSelected ? activeIcon : icon"
         :aria-pressed="isSelected"
         :aria-label="ariaLabel"
         :title="tooltip"
         :disabled="isDisabled"
-        density="comfortable"
         data-test="category-product-compare"
         @click.stop.prevent="toggle"
       >
-        <v-icon :icon="isSelected ? activeIcon : icon" size="20" />
+        <v-icon :icon="isSelected ? activeIcon : icon" size="40" />
       </v-btn>
     </template>
   </v-tooltip>
@@ -39,8 +41,8 @@ const props = withDefaults(
     activeIcon?: string
   }>(),
   {
-    icon: 'mdi-compare',
-    activeIcon: 'mdi-compare',
+    icon: 'mdi-compare-horizontal',
+    activeIcon: 'mdi-compare-horizontal',
   },
 )
 
@@ -124,10 +126,23 @@ const toggle = () => {
 <style scoped lang="sass">
 .category-product-compare-toggle
   border-radius: 50%
-  transition: background-color 0.2s ease, color 0.2s ease
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease
+  width: 3.25rem
+  min-width: 3.25rem
+  height: 3.25rem
+  padding: 0
+  background-color: rgba(var(--v-theme-surface-default), 0.92)
+  box-shadow: 0 6px 16px rgba(21, 46, 73, 0.12)
+
+  &:hover
+    opacity: 0.9
+
+  &--inactive
+    opacity: 0.6
 
   &--active
-    background-color: rgba(var(--v-theme-primary), 0.12)
+    opacity: 1
+    background-color: rgba(var(--v-theme-primary), 0.16)
     color: rgb(var(--v-theme-primary))
 
   :deep(.v-icon)

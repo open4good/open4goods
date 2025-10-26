@@ -284,6 +284,7 @@ import type {
   AggregationRequestDto,
   AggregationResponseDto,
   Agg,
+  AttributeConfigDto,
   FieldMetadataDto,
   Filter,
   FilterRequestDto,
@@ -1237,6 +1238,29 @@ const viewComponent = computed(() => {
 
 const popularAttributes = computed(() => category.value?.popularAttributes ?? [])
 
+const attributeKeys = computed(() => {
+  const technical = category.value?.technicalFilters ?? []
+  const eco = category.value?.ecoFilters ?? []
+
+  return Array.from(
+    new Set(
+      [...technical, ...eco].filter((entry): entry is string => Boolean(entry)),
+    ),
+  )
+})
+
+const attributeConfigMap = computed<Record<string, AttributeConfigDto>>(() => {
+  const configs = category.value?.attributesConfig?.configs ?? []
+
+  return configs.reduce<Record<string, AttributeConfigDto>>((accumulator, config) => {
+    if (config?.key) {
+      accumulator[config.key] = config
+    }
+
+    return accumulator
+  }, {})
+})
+
 const viewComponentProps = computed(() => {
   const base = {
     products: currentProducts.value,
@@ -1249,6 +1273,9 @@ const viewComponentProps = computed(() => {
       itemsPerPage: pageSize.value,
       sortField: sortField.value,
       sortOrder: sortOrder.value,
+      attributeKeys: attributeKeys.value,
+      attributeConfigs: attributeConfigMap.value,
+      fieldMetadata: filterFieldMap.value,
     }
   }
 

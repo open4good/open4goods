@@ -9,6 +9,7 @@ export interface ResolvedProductAttribute {
   rawValue: unknown
   unit?: string | null
   icon?: string | null
+  suffix?: string | null
 }
 
 const hasMeaningfulValue = (value: unknown): boolean => {
@@ -108,6 +109,10 @@ const resolveAttributeRawValue = (product: ProductDto, key: string): unknown => 
   return null
 }
 
+export const resolveAttributeRawValueByKey = (product: ProductDto, key: string): unknown => {
+  return resolveAttributeRawValue(product, key)
+}
+
 export const resolvePopularAttributes = (
   product: ProductDto,
   configs: AttributeConfigDto[] | null | undefined,
@@ -133,6 +138,7 @@ export const resolvePopularAttributes = (
       rawValue,
       unit: config.unit,
       icon: config.icon,
+      suffix: config.suffix ?? null,
     })
 
     return accumulator
@@ -231,10 +237,16 @@ export const formatAttributeValue = (
     return null
   }
 
+  let formatted = base
+
   if (attribute.unit) {
-    return `${base}\u00a0${attribute.unit}`
+    formatted = `${formatted}\u00a0${attribute.unit}`
   }
 
-  return base
+  if (attribute.suffix) {
+    formatted = `${formatted} ${attribute.suffix}`
+  }
+
+  return formatted
 }
 
