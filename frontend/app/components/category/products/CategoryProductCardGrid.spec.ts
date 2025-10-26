@@ -177,7 +177,7 @@ describe('CategoryProductCardGrid', () => {
               },
               pricing: {
                 newOfferLabel: 'New',
-                occasionOfferLabel: 'Occasion',
+                occasionOfferLabel: 'Second-hand',
                 bestOfferLabel: 'Best',
                 conditionLabel: 'Condition: {condition}',
               },
@@ -235,5 +235,22 @@ describe('CategoryProductCardGrid', () => {
     expect(store.items).toHaveLength(1)
 
     expect((secondButton.element as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('renders new and occasion badges side by side without condition text', async () => {
+    const product = buildProduct({
+      offers: {
+        bestNewOffer: { price: 1068, currency: 'EUR' },
+        bestOccasionOffer: { price: 690, currency: 'EUR' },
+      } as ProductDto['offers'],
+    })
+
+    const wrapper = await mountGrid([product])
+
+    const pricing = wrapper.get('.category-product-card-grid__pricing')
+    expect(pricing.classes()).toContain('category-product-card-grid__pricing--split')
+
+    expect(wrapper.findAll('.category-product-card-grid__price-badge')).toHaveLength(2)
+    expect(wrapper.findAll('.category-product-card-grid__price-badge-condition')).toHaveLength(0)
   })
 })

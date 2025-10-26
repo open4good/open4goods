@@ -79,23 +79,35 @@
             </span>
           </div>
 
-          <div
-            v-if="offerBadges(product).length"
-            class="category-product-card-grid__pricing"
-            role="list"
+          <template
+            v-for="(badges, index) in [offerBadges(product)]"
+            :key="`pricing-${index}-${
+              product.gtin ??
+              product.identity?.bestName ??
+              product.identity?.model ??
+              product.slug ??
+              product.fullSlug ??
+              'fallback'
+            }`"
           >
             <div
-              v-for="badge in offerBadges(product)"
-              :key="badge.key"
-              class="category-product-card-grid__price-badge"
-              :class="`category-product-card-grid__price-badge--${badge.appearance}`"
-              role="listitem"
+              v-if="badges.length"
+              class="category-product-card-grid__pricing"
+              :class="{ 'category-product-card-grid__pricing--split': badges.length > 1 }"
+              role="list"
             >
-              <span class="category-product-card-grid__price-badge-label">{{ badge.label }}</span>
-              <span class="category-product-card-grid__price-badge-amount">{{ badge.price }}</span>
-              <span class="category-product-card-grid__price-badge-condition">{{ badge.conditionText }}</span>
+              <div
+                v-for="badge in badges"
+                :key="badge.key"
+                class="category-product-card-grid__price-badge"
+                :class="`category-product-card-grid__price-badge--${badge.appearance}`"
+                role="listitem"
+              >
+                <span class="category-product-card-grid__price-badge-label">{{ badge.label }}</span>
+                <span class="category-product-card-grid__price-badge-amount">{{ badge.price }}</span>
+              </div>
             </div>
-          </div>
+          </template>
 
           <div class="category-product-card-grid__meta">
             <span class="category-product-card-grid__offers">
@@ -182,24 +194,6 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
   return entries
 }
 
-const conditionLabel = (condition?: string | null) => {
-  if (!condition) {
-    return t('category.products.conditions.unknown')
-  }
-
-  const normalized = condition.toUpperCase()
-
-  if (normalized === 'NEW') {
-    return t('category.products.conditions.new')
-  }
-
-  if (normalized === 'OCCASION' || normalized === 'SECOND_HAND') {
-    return t('category.products.conditions.occasion')
-  }
-
-  return t('category.products.conditions.other', { condition })
-}
-
 const formatOfferPrice = (
   offer: ProductAggregatedPriceDto | undefined,
   fallback: ProductDto,
@@ -235,7 +229,6 @@ type OfferBadge = {
   key: string
   label: string
   price: string
-  conditionText: string
   appearance: 'new' | 'occasion' | 'default'
 }
 
@@ -252,9 +245,6 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         key: 'new',
         label: t('category.products.pricing.newOfferLabel'),
         price: formatted,
-        conditionText: t('category.products.pricing.conditionLabel', {
-          condition: conditionLabel(newOffer.condition),
-        }),
         appearance: 'new',
       })
     }
@@ -268,9 +258,6 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         key: 'occasion',
         label: t('category.products.pricing.occasionOfferLabel'),
         price: formatted,
-        conditionText: t('category.products.pricing.conditionLabel', {
-          condition: conditionLabel(occasionOffer.condition),
-        }),
         appearance: 'occasion',
       })
     }
@@ -284,9 +271,6 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       key: 'best',
       label: t('category.products.pricing.bestOfferLabel'),
       price: formatted,
-      conditionText: t('category.products.pricing.conditionLabel', {
-        condition: conditionLabel(fallbackOffer?.condition ?? null),
-      }),
       appearance: 'default',
     })
   }
@@ -399,16 +383,25 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     display: grid
     gap: 0.75rem
     width: 100%
+    grid-template-columns: minmax(0, 1fr)
+
+  &__pricing--split
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    @media (max-width: 600px)
+      grid-template-columns: minmax(0, 1fr)
 
   &__price-badge
     background: rgba(var(--v-theme-surface-primary-080), 0.8)
     border-radius: 1rem
-    padding: 0.75rem 1rem
+    padding: 0.85rem 1.1rem
     display: flex
     flex-direction: column
-    gap: 0.25rem
+    justify-content: center
+    gap: 0.35rem
     align-items: center
     text-align: center
+    min-height: 100%
 
     &--new
       background: rgba(var(--v-theme-primary), 0.12)
@@ -426,14 +419,11 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     text-transform: uppercase
     letter-spacing: 0.08em
     font-weight: 600
+    color: rgba(var(--v-theme-text-neutral-strong), 0.9)
 
   &__price-badge-amount
     font-size: 1.25rem
     font-weight: 700
-
-  &__price-badge-condition
-    font-size: 0.875rem
-    color: rgba(var(--v-theme-text-neutral-strong), 0.72)
 
   &--size-compact
     .category-product-card-grid__body
@@ -445,7 +435,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       font-size: 1rem
 
     .category-product-card-grid__price-badge
-      padding: 0.6rem 0.85rem
+      padding: 0.65rem 0.85rem
 
     .category-product-card-grid__price-badge-amount
       font-size: 1.1rem
@@ -453,6 +443,4 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     .category-product-card-grid__price-badge-label
       font-size: 0.7rem
 
-    .category-product-card-grid__price-badge-condition
-      font-size: 0.8rem
 </style>
