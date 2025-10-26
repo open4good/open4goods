@@ -29,7 +29,7 @@ const extractUrlKey = (entry: SitemapUrlInput): string | null => {
   return null
 }
 
-export default (nitroApp: import('nitro/app').NitroApp) => {
+export default defineNitroPlugin((nitroApp) => {
   nitroApp.hooks.hook('sitemap:input', (ctx) => {
     if (ctx.sitemapName !== MAIN_PAGES_SITEMAP_FILENAME) {
       return
@@ -61,8 +61,8 @@ export default (nitroApp: import('nitro/app').NitroApp) => {
         return
       }
 
-      ctx.urls.push(path)
+      ctx.urls.push({ loc: path })
       seen.add(path)
     })
   })
-}
+})

@@ -13,6 +13,10 @@ describe('getMainPagePathsForDomainLanguage', () => {
     expect(paths).toContain('/partners')
     expect(paths).toContain('/legal-notice')
     expect(paths).toContain('/data-privacy')
+    expect(paths).toContain('/impact-score')
+    expect(paths).toContain('/opendata/gtin')
+    expect(paths).toContain('/opendata/isbn')
+    expect(paths).toContain('/opensource')
   })
 
   it('returns localized french paths', () => {
@@ -24,5 +28,9 @@ describe('getMainPagePathsForDomainLanguage', () => {
     expect(paths).toContain('/mentions-legales')
     expect(paths).toContain('/politique-confidentialite')
     expect(paths).not.toContain('/team')
+    expect(paths).toContain('/impact-score')
+    expect(paths).toContain('/opendata/gtin')
+    expect(paths).toContain('/opendata/isbn')
+    expect(paths).toContain('/opensource')
   })
 })

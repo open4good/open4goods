@@ -15,8 +15,12 @@ locale or section needs to be published.
    `app-pages.xml` under the `/sitemap` prefix. The Nitro plugin in
    [`server/plugins/sitemap-main-pages.ts`](../server/plugins/sitemap-main-pages.ts)
    ensures the main marketing pages are always emitted for the requested
-   domain language, even when the automatic page discovery returns an empty
-   result.
+   domain language. It scans the static pages under `app/pages` (skipping
+   auth/contrib flows and other dynamic routes) and merges them with the
+   localized wiki routes defined in
+   [`shared/utils/localized-routes.ts`](../shared/utils/localized-routes.ts).
+   This keeps the list self-updating as new marketing sections are added
+   without editing the plugin.
 2. The Nitro plugin in
    [`server/plugins/sitemap-index.ts`](../server/plugins/sitemap-index.ts)
    listens to the `sitemap:index-resolved` hook. For each request it
