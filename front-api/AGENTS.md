@@ -177,6 +177,7 @@ public record OfferDto(
 | Mark nullable fields explicitly    | Client safety                   |
 | Use constants for descriptions     | DRY & consistency               |
 | Test controllers & inner services  | No contract regressions         |
+| Controller logging                 | INFO on method entry, WARN for validation issues, ERROR for critical failures |
 
 
 
