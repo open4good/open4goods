@@ -290,11 +290,11 @@ describe('CategoryFastFilters', () => {
   it('renders quick filter groups with localized labels and tooltips', async () => {
     const wrapper = await mountComponent()
 
-    const groupTitles = wrapper
-      .findAll('.category-fast-filters__group-label')
-      .map((node) => node.text().replace(':', '').trim())
+    const groups = wrapper.findAll('.category-fast-filters__group')
+    expect(groups).toHaveLength(2)
 
-    expect(groupTitles).toEqual(['Price', 'Screen size'])
+    const groupLabels = groups.map((node) => node.attributes('aria-label'))
+    expect(groupLabels).toEqual(['Price', 'Screen size'])
 
     const tooltipNodes = wrapper.findAll('.v-tooltip-stub')
     expect(tooltipNodes).toHaveLength(sampleSubsets.length)

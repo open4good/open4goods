@@ -18,14 +18,21 @@
           <template #activator="{ props: tooltipProps }">
             <v-btn
               class="category-page__fast-filters-toggle"
+              :class="{
+                'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
+              }"
+              icon
               variant="text"
-              :color="filtersCollapsed ? 'primary' : undefined"
               v-bind="tooltipProps"
               :aria-label="filtersToggleLabel"
               :aria-pressed="(!filtersCollapsed).toString()"
               @click="onToggleFiltersVisibility"
             >
-              <v-icon :icon="filtersToggleIcon" />
+              <v-icon
+                :icon="filtersToggleIcon"
+                size="40"
+                class="category-page__fast-filters-toggle-icon"
+              />
             </v-btn>
           </template>
         </v-tooltip>
@@ -40,73 +47,81 @@
       </div>
 
       <div ref="layoutRef" class="category-page__layout" :style="layoutStyle">
-        <v-navigation-drawer
-          v-if="!isDesktop"
-          v-model="filtersDrawer"
-          :width="360"
-          location="start"
-          class="category-page__filters-drawer"
-          temporary
-        >
-          <CategoryFiltersSidebar
-            :filter-options="filterOptions"
-            :aggregations="currentAggregations"
-            :baseline-aggregations="baselineAggregations"
-            :filters="manualFilters"
-            :impact-expanded="impactExpanded"
-            :technical-expanded="technicalExpanded"
-            :show-mobile-actions="true"
-            :has-documentation="hasDocumentation"
-            :wiki-pages="category?.wikiPages ?? []"
-            :related-posts="category?.relatedPosts ?? []"
-            :vertical-home-url="category?.verticalHomeUrl ?? null"
-            :subset-clauses="activeSubsetClauses"
-            @update:filters="onFiltersChange"
-            @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
-            @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
-            @apply-mobile="applyMobileFilters"
-            @clear-mobile="clearAllFilters"
-            @remove-subset-clause="onRemoveSubsetClause"
-          />
-        </v-navigation-drawer>
+        <template v-if="!isDesktop">
+          <v-navigation-drawer
+            v-model="filtersDrawer"
+            :width="360"
+            location="start"
+            class="category-page__filters-drawer"
+            temporary
+          >
+            <CategoryFiltersSidebar
+              :filter-options="filterOptions"
+              :aggregations="currentAggregations"
+              :baseline-aggregations="baselineAggregations"
+              :filters="manualFilters"
+              :impact-expanded="impactExpanded"
+              :technical-expanded="technicalExpanded"
+              :show-mobile-actions="true"
+              :has-documentation="hasDocumentation"
+              :wiki-pages="category?.wikiPages ?? []"
+              :related-posts="category?.relatedPosts ?? []"
+              :vertical-home-url="category?.verticalHomeUrl ?? null"
+              :subset-clauses="activeSubsetClauses"
+              @update:filters="onFiltersChange"
+              @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
+              @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+              @apply-mobile="applyMobileFilters"
+              @clear-mobile="clearAllFilters"
+              @remove-subset-clause="onRemoveSubsetClause"
+            />
+          </v-navigation-drawer>
+        </template>
+        <template v-else>
+          <aside
+            ref="filtersSidebarRef"
+            class="category-page__filters-surface"
+            :class="{
+              'category-page__filters-surface--collapsed': !isFiltersColumnVisible,
+            }"
+            role="complementary"
+            :aria-label="$t('category.products.openFilters')"
+            :aria-hidden="(!isFiltersColumnVisible).toString()"
+            :inert="!isFiltersColumnVisible"
+            :style="filtersStyle"
+          >
+            <CategoryFiltersSidebar
+              :filter-options="filterOptions"
+              :aggregations="currentAggregations"
+              :baseline-aggregations="baselineAggregations"
+              :filters="manualFilters"
+              :impact-expanded="impactExpanded"
+              :technical-expanded="technicalExpanded"
+              :show-mobile-actions="false"
+              :has-documentation="hasDocumentation"
+              :wiki-pages="category?.wikiPages ?? []"
+              :related-posts="category?.relatedPosts ?? []"
+              :vertical-home-url="category?.verticalHomeUrl ?? null"
+              :subset-clauses="activeSubsetClauses"
+              @update:filters="onFiltersChange"
+              @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
+              @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+              @remove-subset-clause="onRemoveSubsetClause"
+            />
+          </aside>
 
-        <aside
-          v-else-if="isFiltersColumnVisible"
-          ref="filtersSidebarRef"
-          class="category-page__filters-surface"
-          role="complementary"
-          :aria-label="$t('category.products.openFilters')"
-          :style="filtersStyle"
-        >
-          <CategoryFiltersSidebar
-            :filter-options="filterOptions"
-            :aggregations="currentAggregations"
-            :baseline-aggregations="baselineAggregations"
-            :filters="manualFilters"
-            :impact-expanded="impactExpanded"
-            :technical-expanded="technicalExpanded"
-            :show-mobile-actions="false"
-            :has-documentation="hasDocumentation"
-            :wiki-pages="category?.wikiPages ?? []"
-            :related-posts="category?.relatedPosts ?? []"
-            :vertical-home-url="category?.verticalHomeUrl ?? null"
-            :subset-clauses="activeSubsetClauses"
-            @update:filters="onFiltersChange"
-            @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
-            @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
-            @remove-subset-clause="onRemoveSubsetClause"
+          <div
+            ref="filtersResizerRef"
+            class="category-page__filters-resizer"
+            :class="{
+              'category-page__filters-resizer--collapsed': !isFiltersColumnVisible,
+            }"
+            role="separator"
+            aria-orientation="vertical"
+            :tabindex="isFiltersColumnVisible ? 0 : -1"
+            @pointerdown="onResizeHandlePointerDown"
           />
-        </aside>
-
-        <div
-          v-if="isFiltersColumnVisible"
-          ref="filtersResizerRef"
-          class="category-page__filters-resizer"
-          role="separator"
-          aria-orientation="vertical"
-          tabindex="0"
-          @pointerdown="onResizeHandlePointerDown"
-        />
+        </template>
 
         <section
           class="category-page__results"
@@ -644,32 +659,30 @@ const layoutStyle = computed(() => {
     return {}
   }
 
-  if (!isFiltersColumnVisible.value) {
-    return {
-      gridTemplateColumns: 'minmax(0, 1fr)',
-      '--filters-panel-width': '0px',
-      '--filters-resizer-hitbox': '0px',
-    }
-  }
-
   const width = clampFiltersPanelWidth(filtersPanelWidth.value)
+  const activeWidth = isFiltersColumnVisible.value ? width : 0
+  const resizerHitbox = isFiltersColumnVisible.value ? RESIZER_COLUMN_WIDTH : 0
 
   return {
-    gridTemplateColumns: `${width}px minmax(0, 1fr)`,
+    gridTemplateColumns: `${activeWidth}px minmax(0, 1fr)`,
+    columnGap: isFiltersColumnVisible.value ? '1.75rem' : '0',
     '--filters-panel-width': `${width}px`,
-    '--filters-resizer-hitbox': `${RESIZER_COLUMN_WIDTH}px`,
+    '--filters-active-width': `${activeWidth}px`,
+    '--filters-resizer-hitbox': `${resizerHitbox}px`,
   }
 })
 
 const filtersStyle = computed(() => {
-  if (!isFiltersColumnVisible.value) {
+  if (!isDesktop.value) {
     return {}
   }
 
   const width = clampFiltersPanelWidth(filtersPanelWidth.value)
+  const activeWidth = isFiltersColumnVisible.value ? width : 0
 
   return {
-    width: `${width}px`,
+    width: `${activeWidth}px`,
+    maxWidth: `${width}px`,
   }
 })
 
@@ -1707,6 +1720,37 @@ const clearAllFilters = () => {
   &__fast-filters-toggle
     flex: 0 0 auto
     align-self: center
+    width: 48px
+    height: 48px
+    min-width: 48px
+    border-radius: 999px
+    background: rgb(var(--v-theme-surface-glass))
+    box-shadow: 0 14px 28px -24px rgba(var(--v-theme-shadow-primary-600), 0.4)
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    transition: background-color 0.24s ease, box-shadow 0.24s ease, transform 0.2s ease
+
+    :deep(.v-btn__overlay)
+      opacity: 0
+
+    &:hover
+      transform: translateY(-1px)
+
+    &:active
+      transform: translateY(0)
+
+    &:focus-visible
+      outline: 2px solid rgb(var(--v-theme-accent-primary-highlight))
+      outline-offset: 3px
+
+  &__fast-filters-toggle--collapsed
+    background: rgba(var(--v-theme-surface-primary-080), 0.85)
+    color: rgb(var(--v-theme-primary))
+
+  &__fast-filters-toggle-icon
+    color: inherit
 
   &__fast-filters-groups
     flex: 1 1 auto
@@ -1748,6 +1792,7 @@ const clearAllFilters = () => {
     column-gap: 1.75rem
     grid-template-columns: minmax(0, 1fr)
     align-items: start
+    transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1), column-gap 0.3s cubic-bezier(0.4, 0, 0.2, 1)
 
   &__filters-drawer
     :deep(.v-navigation-drawer__content)
@@ -1765,13 +1810,22 @@ const clearAllFilters = () => {
     box-shadow: 0 22px 46px -28px rgba(var(--v-theme-shadow-primary-600), 0.28)
     overflow: hidden
     overscroll-behavior: contain
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.24s ease, box-shadow 0.24s ease
+    opacity: 1
+    visibility: visible
+
+  &__filters-surface--collapsed
+    opacity: 0
+    visibility: hidden
+    pointer-events: none
+    box-shadow: none
 
   &__filters-resizer
     display: none
     position: absolute
     top: 0
     bottom: 0
-    left: var(--filters-panel-width, 300px)
+    left: var(--filters-active-width, 0px)
     transform: translateX(-50%)
     width: var(--filters-resizer-hitbox, 12px)
     cursor: col-resize
@@ -1782,6 +1836,8 @@ const clearAllFilters = () => {
     outline: none
     touch-action: none
     z-index: 1
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.24s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1)
+    opacity: 1
 
     &::before
       content: ''
@@ -1801,6 +1857,11 @@ const clearAllFilters = () => {
     &:focus-visible
       outline: 2px solid rgb(var(--v-theme-accent-primary-highlight))
       outline-offset: 2px
+
+  &__filters-resizer--collapsed
+    opacity: 0
+    pointer-events: none
+    width: 0
 
   &__filters-content
     display: flex
