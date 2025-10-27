@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
 import type { VerticalSubsetDto } from '~~/shared/api-client'
 
@@ -20,6 +20,10 @@ vi.mock('vue-i18n', () => ({
         'category.fastFilters.groupDefault': 'Other quick filters',
         'category.fastFilters.groups.price': 'Price',
         'category.fastFilters.groups.screen_size': 'Screen size',
+        'category.fastFilters.navigation.previous': 'Previous quick filters',
+        'category.fastFilters.navigation.next': 'Next quick filters',
+        'category.filters.toggle.show': 'Show filters column',
+        'category.filters.toggle.hide': 'Hide filters column',
       }
 
       return translations[key] ?? key
@@ -262,12 +266,33 @@ const mountComponent = async (overrides: Partial<{ subsets: VerticalSubsetDto[];
 }
 
 describe('CategoryFastFilters', () => {
+  beforeAll(() => {
+    class ResizeObserverStub {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+
+    vi.stubGlobal('ResizeObserver', ResizeObserverStub)
+
+    if (!HTMLElement.prototype.scrollTo) {
+      Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
+        value: vi.fn(),
+        writable: true,
+      })
+    }
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
+  })
+
   it('renders quick filter groups with localized labels and tooltips', async () => {
     const wrapper = await mountComponent()
 
     const groupTitles = wrapper
-      .findAll('.category-fast-filters__group-title')
-      .map((node) => node.text())
+      .findAll('.category-fast-filters__group-label')
+      .map((node) => node.text().replace(':', '').trim())
 
     expect(groupTitles).toEqual(['Price', 'Screen size'])
 
@@ -309,5 +334,42 @@ describe('CategoryFastFilters', () => {
     const chip = wrapper.find('.v-chip-stub[data-value="small_screens"]')
     expect(chip.exists()).toBe(true)
     expect(chip.attributes('data-closable')).toBe('false')
+  })
+
+  it('enables horizontal navigation when quick filters overflow', async () => {
+    const wrapper = await mountComponent()
+    const scroller = wrapper.find('.category-fast-filters__scroller')
+    expect(scroller.exists()).toBe(true)
+
+    const element = scroller.element as HTMLElement & { scrollTo: (options: ScrollToOptions) => void }
+    const scrollToSpy = vi.fn()
+    let currentScrollLeft = 0
+
+    Object.defineProperty(element, 'clientWidth', { configurable: true, value: 200 })
+    Object.defineProperty(element, 'scrollWidth', { configurable: true, value: 500 })
+    Object.defineProperty(element, 'scrollLeft', {
+      configurable: true,
+      get: () => currentScrollLeft,
+      set: (value) => {
+        currentScrollLeft = value
+      },
+    })
+    element.scrollTo = scrollToSpy
+
+    window.dispatchEvent(new Event('resize'))
+    await wrapper.vm.$nextTick()
+
+    const nextButton = wrapper.find('[data-testid="category-fast-filters-next"]')
+    expect(nextButton.exists()).toBe(true)
+
+    await nextButton.trigger('click')
+    expect(scrollToSpy).toHaveBeenCalled()
+
+    currentScrollLeft = 250
+    element.dispatchEvent(new Event('scroll'))
+    await wrapper.vm.$nextTick()
+
+    const prevButton = wrapper.find('[data-testid="category-fast-filters-prev"]')
+    expect(prevButton.exists()).toBe(true)
   })
 })

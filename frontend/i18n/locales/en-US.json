@@ -125,6 +125,10 @@
         "screen_size": "Screen size",
         "default": "Other quick filters"
       },
+      "navigation": {
+        "previous": "Scroll previous quick filters",
+        "next": "Scroll next quick filters"
+      },
       "operator": {
         "greaterThan": "≥ {value}",
         "lowerThan": "≤ {value}"
@@ -144,6 +148,10 @@
       "missingLabel": "Unlabelled option",
       "mobileApply": "Apply filters",
       "mobileClear": "Clear all filters",
+      "toggle": {
+        "show": "Show filters column",
+        "hide": "Hide filters column"
+      },
       "fields": {
         "price": "Price range",
         "offersCount": "Number of offers",
