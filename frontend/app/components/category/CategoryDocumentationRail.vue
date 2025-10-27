@@ -10,9 +10,7 @@
         <v-list-item
           v-for="page in wikiPages"
           :key="page.title ?? page.verticalUrl ?? page.wikiUrl"
-          :href="resolveWikiUrl(page)"
-          target="_blank"
-          rel="noopener"
+          v-bind="buildWikiLinkProps(page)"
         >
           <v-list-item-title>{{ page.title }}</v-list-item-title>
         </v-list-item>
@@ -29,7 +27,7 @@
         <v-list-item
           v-for="post in relatedPosts"
           :key="post.url ?? post.title"
-          :href="resolvePostUrl(post)"
+          v-bind="buildPostLinkProps(post)"
         >
           <v-list-item-title>{{ post.title }}</v-list-item-title>
           <v-list-item-subtitle v-if="post.summary">
@@ -53,20 +51,85 @@ const props = defineProps<{
 const wikiPages = computed(() => props.wikiPages ?? [])
 const relatedPosts = computed(() => props.relatedPosts ?? [])
 
-const resolveWikiUrl = (page: WikiPageConfig) => {
-  if (page.wikiUrl) {
-    return page.wikiUrl
+const sanitizePathSegment = (value: string | undefined | null): string => {
+  const raw = (value ?? '').trim()
+
+  if (!raw) {
+    return ''
   }
 
-  if (props.verticalHomeUrl && page.verticalUrl) {
-    return `${props.verticalHomeUrl.replace(/\/$/, '')}/${page.verticalUrl.replace(/^\//, '')}`
+  try {
+    const parsed = new URL(raw)
+    return parsed.pathname.replace(/^\/+|\/+$/gu, '')
+  } catch {
+    return raw
+      .replace(/^https?:\/\/[^/]+/iu, '')
+      .replace(/^\/+|\/+$/gu, '')
   }
-
-  return page.verticalUrl ?? '#'
 }
 
-const resolvePostUrl = (post: BlogPostDto) => {
-  return post.url ?? '#'
+const buildWikiPath = (page: WikiPageConfig): string | null => {
+  const base = sanitizePathSegment(props.verticalHomeUrl)
+  const child = sanitizePathSegment(page.verticalUrl)
+
+  if (!base || !child) {
+    return null
+  }
+
+  return `/${base}/${child}`
+}
+
+const buildWikiLinkProps = (page: WikiPageConfig) => {
+  const path = buildWikiPath(page)
+
+  if (path) {
+    return {
+      to: path,
+      nuxt: true,
+    }
+  }
+
+  return {
+    href: '#',
+  }
+}
+
+const resolvePostPath = (post: BlogPostDto): string | null => {
+  const slug = (post.url ?? '').trim()
+
+  if (!slug) {
+    return null
+  }
+
+  if (/^https?:\/\//iu.test(slug)) {
+    return slug
+  }
+
+  const normalized = slug.replace(/^\/+/, '')
+  const prefixed = normalized.startsWith('blog/') ? normalized : `blog/${normalized}`
+
+  return `/${prefixed}`
+}
+
+const buildPostLinkProps = (post: BlogPostDto) => {
+  const path = resolvePostPath(post)
+
+  if (!path) {
+    return { href: '#' }
+  }
+
+  if (/^https?:\/\//iu.test(path)) {
+    return {
+      href: path,
+      target: '_blank',
+      rel: 'noopener',
+    }
+  }
+
+  return {
+    to: path,
+    nuxt: true,
+  }
 }
 </script>
 

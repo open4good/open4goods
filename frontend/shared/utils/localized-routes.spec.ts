@@ -1,16 +1,23 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import {
   LOCALIZED_ROUTE_PATHS,
   LOCALIZED_WIKI_PATHS,
   buildI18nPagesConfig,
+  clearDynamicWikiRoutes,
+  deriveWikiPageIdFromUrl,
   matchLocalizedRouteByPath,
   matchLocalizedWikiRouteByPath,
   normalizeLocale,
+  registerDynamicWikiRoute,
   resolveLocalizedRoutePath,
 } from './localized-routes'
 
 describe('localized-routes utilities', () => {
+  afterEach(() => {
+    clearDynamicWikiRoutes()
+  })
+
   it('normalizes supported locales', () => {
     expect(normalizeLocale('fr-FR')).toBe('fr-FR')
     expect(normalizeLocale('en-US')).toBe('en-US')
@@ -71,6 +78,40 @@ describe('localized-routes utilities', () => {
       pageId: LOCALIZED_WIKI_PATHS['data-privacy']['en-US'].pageId,
     })
     expect(matchLocalizedWikiRouteByPath('/team')).toBeNull()
+  })
+
+  it('registers dynamic wiki routes at runtime', () => {
+    registerDynamicWikiRoute('/televiseurs/guide-achat', {
+      pageId: 'verticals:tv:guide-achat:WebHome',
+      locale: 'fr-FR',
+      name: 'tv-buying-guide',
+    })
+
+    expect(matchLocalizedWikiRouteByPath('/televiseurs/guide-achat')).toEqual({
+      routeName: 'tv-buying-guide',
+      locale: 'fr-FR',
+      pageId: 'verticals:tv:guide-achat:WebHome',
+    })
+
+    registerDynamicWikiRoute('/televiseurs/guide-achat', {
+      pageId: 'verticals:tv:guide-achat:WebHome',
+    })
+
+    expect(matchLocalizedWikiRouteByPath('/televiseurs/guide-achat')).toEqual({
+      routeName: '/televiseurs/guide-achat',
+      locale: 'en-US',
+      pageId: 'verticals:tv:guide-achat:WebHome',
+    })
+  })
+
+  it('derives wiki page identifiers from wiki URLs', () => {
+    expect(deriveWikiPageIdFromUrl('/verticals/tv/technologies-tv/WebHome')).toBe(
+      'verticals:tv:technologies-tv:WebHome',
+    )
+    expect(
+      deriveWikiPageIdFromUrl('https://wiki.example.org/bin/view/verticals/tv/technologies-tv/WebHome'),
+    ).toBe('verticals:tv:technologies-tv:WebHome')
+    expect(deriveWikiPageIdFromUrl('')).toBeNull()
   })
 
 

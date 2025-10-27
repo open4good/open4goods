@@ -140,7 +140,7 @@ const props = defineProps<{
   size?: 'compact' | 'comfortable'
 }>()
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
@@ -194,6 +194,47 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
   return entries
 }
 
+const resolveCurrencySymbol = (currency: string | null | undefined): string | null => {
+  if (!currency) {
+    return null
+  }
+
+  try {
+    const formatter = new Intl.NumberFormat(locale.value, {
+      style: 'currency',
+      currency,
+      currencyDisplay: 'symbol',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+
+    const symbolPart = formatter.formatToParts(0).find((part) => part.type === 'currency')
+    return symbolPart?.value ?? currency
+  } catch {
+    return currency
+  }
+}
+
+const appendCurrencySymbol = (value: string, currency: string | null | undefined): string => {
+  if (!currency) {
+    return value
+  }
+
+  const symbol = resolveCurrencySymbol(currency)
+
+  if (!symbol) {
+    return value
+  }
+
+  const upperValue = value.toUpperCase()
+
+  if (value.includes(symbol) || upperValue.includes(currency.toUpperCase())) {
+    return value
+  }
+
+  return `${value} ${symbol}`.trim()
+}
+
 const formatOfferPrice = (
   offer: ProductAggregatedPriceDto | undefined,
   fallback: ProductDto,
@@ -203,7 +244,8 @@ const formatOfferPrice = (
   }
 
   if (offer.shortPrice) {
-    return offer.shortPrice
+    const currency = offer.currency ?? fallback.offers?.bestPrice?.currency
+    return appendCurrencySymbol(offer.shortPrice, currency)
   }
 
   const price = offer.price
@@ -216,9 +258,10 @@ const formatOfferPrice = (
 
   if (currency) {
     try {
-      return n(price, { style: 'currency', currency })
+      return n(price, { style: 'currency', currency, currencyDisplay: 'symbol' })
     } catch {
-      return `${n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
+      const numericValue = n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      return appendCurrencySymbol(numericValue, currency)
     }
   }
 

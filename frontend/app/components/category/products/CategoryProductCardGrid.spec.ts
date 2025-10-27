@@ -253,4 +253,20 @@ describe('CategoryProductCardGrid', () => {
     expect(wrapper.findAll('.category-product-card-grid__price-badge')).toHaveLength(2)
     expect(wrapper.findAll('.category-product-card-grid__price-badge-condition')).toHaveLength(0)
   })
+
+  it('appends the currency symbol to short price labels', async () => {
+    const product = buildProduct({
+      offers: {
+        bestNewOffer: {
+          shortPrice: '1 299',
+          currency: 'EUR',
+        },
+      } as ProductDto['offers'],
+    })
+
+    const wrapper = await mountGrid([product])
+
+    const amount = wrapper.get('.category-product-card-grid__price-badge-amount')
+    expect(amount.text()).toContain('€')
+  })
 })

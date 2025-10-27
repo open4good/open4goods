@@ -177,8 +177,28 @@ const normalizePath = (path: string): string => {
   return prefixedPath.replace(/\/+$/u, '')
 }
 
+type DynamicWikiRouteEntry = {
+  pageId: string
+  locale: NuxtLocale
+  name: string
+}
+
+const DYNAMIC_WIKI_ROUTES_STATE_KEY = '__open4goods_dynamic_wiki_routes__'
+
+const getDynamicWikiRoutes = (): Map<string, DynamicWikiRouteEntry> => {
+  const globalObject = globalThis as typeof globalThis & {
+    [DYNAMIC_WIKI_ROUTES_STATE_KEY]?: Map<string, DynamicWikiRouteEntry>
+  }
+
+  if (!globalObject[DYNAMIC_WIKI_ROUTES_STATE_KEY]) {
+    globalObject[DYNAMIC_WIKI_ROUTES_STATE_KEY] = new Map<string, DynamicWikiRouteEntry>()
+  }
+
+  return globalObject[DYNAMIC_WIKI_ROUTES_STATE_KEY]!
+}
+
 export interface MatchedLocalizedRoute {
-  routeName: LocalizedRouteName
+  routeName: string
   locale: NuxtLocale
 }
 
@@ -206,6 +226,17 @@ export interface MatchedLocalizedWikiRoute extends MatchedLocalizedRoute {
 }
 
 export const matchLocalizedWikiRouteByPath = (path: string): MatchedLocalizedWikiRoute | null => {
+  const normalizedPath = normalizePath(path)
+  const dynamicEntry = getDynamicWikiRoutes().get(normalizedPath)
+
+  if (dynamicEntry) {
+    return {
+      routeName: dynamicEntry.name,
+      locale: dynamicEntry.locale,
+      pageId: dynamicEntry.pageId,
+    }
+  }
+
   const baseMatch = matchLocalizedRouteByPath(path)
   if (!baseMatch) {
     return null
@@ -226,4 +257,82 @@ export const matchLocalizedWikiRouteByPath = (path: string): MatchedLocalizedWik
     ...baseMatch,
     pageId: match.pageId,
   }
+}
+
+export interface DynamicWikiRouteOptions {
+  pageId: string
+  locale?: string | NuxtLocale | null
+  name?: string
+}
+
+export const registerDynamicWikiRoute = (path: string, options: DynamicWikiRouteOptions): void => {
+  const normalizedPath = normalizePath(path)
+
+  if (!normalizedPath || !options.pageId) {
+    return
+  }
+
+  const locale = normalizeLocale(options.locale ?? undefined)
+  const entry: DynamicWikiRouteEntry = {
+    pageId: options.pageId,
+    locale,
+    name: options.name ?? normalizedPath,
+  }
+
+  getDynamicWikiRoutes().set(normalizedPath, entry)
+}
+
+export const unregisterDynamicWikiRoute = (path: string): void => {
+  const normalizedPath = normalizePath(path)
+
+  if (!normalizedPath) {
+    return
+  }
+
+  getDynamicWikiRoutes().delete(normalizedPath)
+}
+
+export const clearDynamicWikiRoutes = (): void => {
+  getDynamicWikiRoutes().clear()
+}
+
+export const deriveWikiPageIdFromUrl = (wikiUrl: string | null | undefined): string | null => {
+  if (!wikiUrl) {
+    return null
+  }
+
+  const raw = wikiUrl.trim()
+
+  if (!raw) {
+    return null
+  }
+
+  let path = raw
+
+  try {
+    const parsed = new URL(raw)
+    path = parsed.pathname
+  } catch {
+    path = raw.replace(/^https?:\/\/[^/]+/iu, '')
+  }
+
+  const cleanPath = path.split(/[?#]/u)[0]?.replace(/^\/+|\/+$/gu, '') ?? ''
+
+  if (!cleanPath) {
+    return null
+  }
+
+  const normalizedPath = cleanPath.replace(/^bin\/view\//iu, '')
+
+  if (!normalizedPath) {
+    return null
+  }
+
+  const segments = normalizedPath.split('/').filter(Boolean)
+
+  if (!segments.length) {
+    return null
+  }
+
+  return segments.join(':')
 }
