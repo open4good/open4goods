@@ -33,6 +33,8 @@ import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -89,6 +91,8 @@ public class ProductController {
     private static final String KEYWORD_VALUE_SUFFIX = ".keyword";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
+
     public ProductController(ProductMappingService service,
                              VerticalsConfigService verticalsConfigService) {
         this.service = service;
@@ -115,6 +119,7 @@ public class ProductController {
             }
     )
     public ResponseEntity<List<String>> components(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering components(domainLanguage={})", domainLanguage);
         List<String> body = Arrays.stream(ProductDtoComponent.values())
                 .map(Enum::name)
                 .toList();
@@ -141,6 +146,7 @@ public class ProductController {
             }
     )
     public ResponseEntity<List<String>> sortableFields(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering sortableFields(domainLanguage={})", domainLanguage);
         List<String> body = Arrays.stream(ProductDtoSortableFields.values())
                 .map(ProductDtoSortableFields::getText)
                 .toList();
@@ -172,6 +178,7 @@ public class ProductController {
     public ResponseEntity<ProductFieldOptionsResponse> sortableFieldsForVertical(
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering sortableFieldsForVertical(verticalId={}, domainLanguage={})", verticalId, domainLanguage);
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoSortableFields.values())
                 .map(field -> new FieldMetadataDto(field.getText(), null, null, determineSortableValueType(field), null))
                 .toList();
@@ -199,6 +206,7 @@ public class ProductController {
     )
     public ResponseEntity<List<String>> filterableFields(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering filterableFields(domainLanguage={})", domainLanguage);
         List<String> body = Arrays.stream(ProductDtoFilterFields.values())
                 .map(ProductDtoFilterFields::getText)
                 .toList();
@@ -230,6 +238,7 @@ public class ProductController {
     public ResponseEntity<ProductFieldOptionsResponse> filterableFieldsForVertical(
             @PathVariable("verticalId") String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering filterableFieldsForVertical(verticalId={}, domainLanguage={})", verticalId, domainLanguage);
         List<FieldMetadataDto> global = Arrays.stream(ProductDtoFilterFields.values())
                 .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
                 .toList();
@@ -304,6 +313,10 @@ public class ProductController {
             Locale locale,
             @RequestBody(required = false) ProductSearchRequestDto searchPayload) {
 
+        LOGGER.info(
+                "Entering products(page={}, include={}, verticalId={}, query={}, domainLanguage={}, locale={}, hasSearchPayload={})",
+                page, include, verticalId, query, domainLanguage, locale, searchPayload != null);
+
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
         List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
@@ -317,6 +330,7 @@ public class ProductController {
         SortRequestDto sortDto = searchPayload == null ? null : searchPayload.sort();
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
         if (sortValidation.hasError()) {
+            LOGGER.warn("Sort validation failed for request: {}", sortDto);
             return sortValidation.error();
         }
         effectivePageable = sortValidation.value();
@@ -326,6 +340,7 @@ public class ProductController {
                 try {
                     ProductDtoComponent.valueOf(component);
                 } catch (IllegalArgumentException ex) {
+                    LOGGER.warn("Invalid include parameter encountered: {}", component, ex);
                     return badRequest("Invalid include parameter", "Unknown component: " + component);
                 }
             }
@@ -335,6 +350,7 @@ public class ProductController {
         Validation<AggregationRequestDto> aggregationValidation = sanitizeAggregations(aggDto, normalizedVerticalId,
                 capabilities.allowedAggregations());
         if (aggregationValidation.hasError()) {
+            LOGGER.warn("Aggregation validation failed for request: {}", aggDto);
             return aggregationValidation.error();
         }
         aggDto = aggregationValidation.value();
@@ -342,6 +358,7 @@ public class ProductController {
         FilterRequestDto filterDto = searchPayload == null ? null : searchPayload.filters();
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, capabilities.allowedFilters());
         if (filterValidation.hasError()) {
+            LOGGER.warn("Filter validation failed for request: {}", filterDto);
             return filterValidation.error();
         }
         filterDto = filterValidation.value();
@@ -356,6 +373,7 @@ public class ProductController {
     }
 
     private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {
+        LOGGER.warn("Returning bad request ProblemDetail with title='{}', detail='{}'", title, detail);
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle(title);
         pd.setDetail(detail);
@@ -373,8 +391,12 @@ public class ProductController {
      */
     private ResponseEntity<ProductFieldOptionsResponse> buildVerticalFieldsResponse(String verticalId,
             DomainLanguage domainLanguage, List<FieldMetadataDto> globalFields) {
+        LOGGER.info(
+                "Entering buildVerticalFieldsResponse(verticalId={}, domainLanguage={}, globalFieldCount={})",
+                verticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
         ProductFieldOptionsResponse body = resolveVerticalFields(verticalId, domainLanguage, globalFields);
         if (body == null) {
+            LOGGER.warn("No vertical configuration found for id='{}'", verticalId);
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(body);
@@ -382,12 +404,16 @@ public class ProductController {
 
     private ProductFieldOptionsResponse resolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
             List<FieldMetadataDto> globalFields) {
+        LOGGER.info(
+                "Entering resolveVerticalFields(verticalId={}, domainLanguage={}, globalFieldCount={})",
+                verticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
         if (!StringUtils.hasText(verticalId)) {
             return resolveVerticalFields((VerticalConfig) null, domainLanguage, globalFields);
         }
 
         VerticalConfig vConfig = verticalsConfigService.getConfigById(verticalId);
         if (vConfig == null) {
+            LOGGER.warn("Vertical configuration not found for id='{}'", verticalId);
             return null;
         }
 
@@ -396,6 +422,9 @@ public class ProductController {
 
     private ProductFieldOptionsResponse resolveVerticalFields(VerticalConfig config, DomainLanguage domainLanguage,
             List<FieldMetadataDto> globalFields) {
+        LOGGER.info(
+                "Entering resolveVerticalFields(config={}, domainLanguage={}, globalFieldCount={})",
+                config, domainLanguage, globalFields != null ? globalFields.size() : 0);
         List<FieldMetadataDto> immutableGlobal = List.copyOf(globalFields);
         if (config == null) {
             return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
@@ -427,6 +456,9 @@ public class ProductController {
      */
     private SearchCapabilities buildSearchCapabilities(String normalizedVerticalId, DomainLanguage domainLanguage,
             List<FieldMetadataDto> globalFields) {
+        LOGGER.info(
+                "Entering buildSearchCapabilities(normalizedVerticalId={}, domainLanguage={}, globalFieldCount={})",
+                normalizedVerticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
         boolean hasVertical = StringUtils.hasText(normalizedVerticalId);
         VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
         ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
@@ -437,6 +469,7 @@ public class ProductController {
     }
 
     private Set<String> collectAllowedFieldMappings(ProductFieldOptionsResponse fieldOptions) {
+        LOGGER.info("Entering collectAllowedFieldMappings(fieldOptions={})", fieldOptions);
         Set<String> allowed = new HashSet<>();
         if (fieldOptions == null) {
             return allowed;
@@ -455,6 +488,8 @@ public class ProductController {
      * @return set of mappings that may be used to request aggregations
      */
     private Set<String> collectAllowedAggregationMappings(Set<String> allowedFilterMappings, VerticalConfig config) {
+        LOGGER.info("Entering collectAllowedAggregationMappings(allowedFilterMappingsSize={}, config={})",
+                allowedFilterMappings != null ? allowedFilterMappings.size() : 0, config);
         Set<String> allowed = new HashSet<>(allowedFilterMappings);
         if (config == null || config.getAggregationConfiguration() == null) {
             return allowed;
@@ -472,6 +507,7 @@ public class ProductController {
      * @param config    vertical configuration used to infer attribute metadata
      */
     private void addAggregationKeyVariants(Set<String> target, String candidate, VerticalConfig config) {
+        LOGGER.info("Entering addAggregationKeyVariants(candidate={}, config={})", candidate, config);
         if (!StringUtils.hasText(candidate)) {
             return;
         }
@@ -506,6 +542,7 @@ public class ProductController {
      * @return default sort mappings accepted when no vertical override is provided.
      */
     private Set<String> collectGlobalSortMappings() {
+        LOGGER.info("Entering collectGlobalSortMappings()");
         Set<String> fields = new HashSet<>();
         for (ProductDtoSortableFields field : ProductDtoSortableFields.values()) {
             fields.add(field.getText());
@@ -518,9 +555,12 @@ public class ProductController {
      */
     private Validation<Pageable> sanitizeSort(Pageable requestedPageable, SortRequestDto sortDto,
             Set<String> allowedSortMappings) {
+        LOGGER.info("Entering sanitizeSort(requestedPageable={}, sortDto={}, allowedSortMappingsSize={})",
+                requestedPageable, sortDto, allowedSortMappings != null ? allowedSortMappings.size() : 0);
         if (sortDto == null || sortDto.sorts() == null) {
             for (Sort.Order order : requestedPageable.getSort()) {
                 if (!allowedSortMappings.contains(order.getProperty())) {
+                    LOGGER.warn("Sort order property '{}' is not permitted", order.getProperty());
                     return Validation.error(badRequest("Invalid sort parameter",
                             "Unknown sort field: " + order.getProperty()));
                 }
@@ -531,10 +571,12 @@ public class ProductController {
         List<Sort.Order> orders = new ArrayList<>();
         for (SortRequestDto.SortOption option : sortDto.sorts()) {
             if (option == null || !StringUtils.hasText(option.field())) {
+                LOGGER.warn("Sort option is missing a field definition: {}", option);
                 return Validation.error(badRequest("Invalid sort parameter", "Sort field is mandatory"));
             }
             String mapping = option.field().trim();
             if (!allowedSortMappings.contains(mapping)) {
+                LOGGER.warn("Sort field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid sort parameter", "Unknown sort field: " + mapping));
             }
             Sort.Direction direction = option.order() == SortRequestDto.SortOrder.desc
@@ -553,6 +595,10 @@ public class ProductController {
      */
     private Validation<AggregationRequestDto> sanitizeAggregations(AggregationRequestDto aggregationRequest,
             String normalizedVerticalId, Set<String> allowedAggregationMappings) {
+        LOGGER.info(
+                "Entering sanitizeAggregations(aggregationRequest={}, normalizedVerticalId={}, allowedAggregationMappingsSize={})",
+                aggregationRequest, normalizedVerticalId,
+                allowedAggregationMappings != null ? allowedAggregationMappings.size() : 0);
         if (aggregationRequest == null) {
             return Validation.ok(null);
         }
@@ -560,6 +606,7 @@ public class ProductController {
         List<Agg> aggregations = aggregationRequest.aggs();
         if (aggregations == null || aggregations.isEmpty()) {
             if (normalizedVerticalId == null) {
+                LOGGER.warn("Aggregation request requires a verticalId when aggregations are empty");
                 return Validation.error(badRequest("Invalid aggregation parameter",
                         "Aggregations require a verticalId"));
             }
@@ -567,16 +614,19 @@ public class ProductController {
         }
 
         if (normalizedVerticalId == null) {
+            LOGGER.warn("Aggregation request received without a verticalId");
             return Validation.error(badRequest("Invalid aggregation parameter", "Aggregations require a verticalId"));
         }
 
         List<Agg> sanitized = new ArrayList<>();
         for (Agg aggregation : aggregations) {
             if (aggregation == null || !StringUtils.hasText(aggregation.field())) {
+                LOGGER.warn("Aggregation entry is missing a field definition: {}", aggregation);
                 return Validation.error(badRequest("Invalid aggregation parameter", "Aggregation field is mandatory"));
             }
             String mapping = aggregation.field().trim();
             if (!allowedAggregationMappings.contains(mapping)) {
+                LOGGER.warn("Aggregation field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid aggregation parameter",
                         "Aggregation not permitted for field: " + mapping));
             }
@@ -592,6 +642,8 @@ public class ProductController {
      */
     private Validation<FilterRequestDto> sanitizeFilters(FilterRequestDto filterRequest,
             Set<String> allowedFilterMappings) {
+        LOGGER.info("Entering sanitizeFilters(filterRequest={}, allowedFilterMappingsSize={})", filterRequest,
+                allowedFilterMappings != null ? allowedFilterMappings.size() : 0);
         if (filterRequest == null) {
             return Validation.ok(null);
         }
@@ -602,10 +654,12 @@ public class ProductController {
         List<FilterRequestDto.Filter> sanitized = new ArrayList<>();
         for (FilterRequestDto.Filter filter : filterRequest.filters()) {
             if (filter == null || !StringUtils.hasText(filter.field())) {
+                LOGGER.warn("Filter entry is missing a field definition: {}", filter);
                 return Validation.error(badRequest("Invalid filters parameter", "Filter field is mandatory"));
             }
             String mapping = filter.field().trim();
             if (!allowedFilterMappings.contains(mapping)) {
+                LOGGER.warn("Filter field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid filters parameter",
                         "Filter not permitted for field: " + mapping));
             }
@@ -635,6 +689,8 @@ public class ProductController {
     }
 
     private void addFieldMappings(Set<String> target, List<FieldMetadataDto> fields) {
+        LOGGER.info("Entering addFieldMappings(currentTargetSize={}, fieldsSize={})",
+                target != null ? target.size() : 0, fields != null ? fields.size() : null);
         if (fields == null) {
             return;
         }
@@ -649,6 +705,8 @@ public class ProductController {
     }
 
     private List<FieldMetadataDto> augmentFieldsWithAggregationMetadata(List<FieldMetadataDto> fields, VerticalConfig config) {
+        LOGGER.info("Entering augmentFieldsWithAggregationMetadata(fieldsSize={}, config={})",
+                fields != null ? fields.size() : null, config);
         if (fields == null || fields.isEmpty()) {
             return List.of();
         }
@@ -687,6 +745,7 @@ public class ProductController {
      *         data type.
      */
     private String toIndexedAttribute(String filterName, VerticalConfig config) {
+        LOGGER.info("Entering toIndexedAttribute(filterName={}, config={})", filterName, config);
         String baseField = "attributes.indexed." + filterName;
         AttributeConfig attributeConfig = null;
         if (config.getAttributesConfig() != null) {
@@ -713,6 +772,8 @@ public class ProductController {
      */
     private List<FieldMetadataDto> mapVerticalAttributeFilters(List<String> filters, VerticalConfig config,
             DomainLanguage domainLanguage) {
+        LOGGER.info("Entering mapVerticalAttributeFilters(filtersSize={}, config={}, domainLanguage={})",
+                filters != null ? filters.size() : null, config, domainLanguage);
         if (filters == null || filters.isEmpty()) {
             return List.of();
         }
@@ -735,6 +796,8 @@ public class ProductController {
 
     private FieldMetadataDto.AggregationMetadata resolveAggregationMetadata(VerticalConfig config, String mapping,
             String... fallbackKeys) {
+        LOGGER.info("Entering resolveAggregationMetadata(mapping={}, fallbackKeysCount={}, config={})", mapping,
+                fallbackKeys != null ? fallbackKeys.length : 0, config);
         AggregationConfiguration aggregationConfig = findAggregationConfiguration(config, mapping, fallbackKeys);
         if (aggregationConfig == null) {
             return null;
@@ -749,6 +812,8 @@ public class ProductController {
 
     private AggregationConfiguration findAggregationConfiguration(VerticalConfig config, String mapping,
             String... fallbackKeys) {
+        LOGGER.info("Entering findAggregationConfiguration(mapping={}, fallbackKeysCount={}, config={})", mapping,
+                fallbackKeys != null ? fallbackKeys.length : 0, config);
         if (config == null) {
             return null;
         }
@@ -769,6 +834,7 @@ public class ProductController {
     }
 
     private void addAggregationCandidate(List<String> target, String value) {
+        LOGGER.info("Entering addAggregationCandidate(value={})", value);
         if (!StringUtils.hasText(value)) {
             return;
         }
@@ -791,6 +857,7 @@ public class ProductController {
     }
 
     private FieldMetadataDto buildEcoscoreField(VerticalConfig config) {
+        LOGGER.info("Entering buildEcoscoreField(config={})", config);
         String mapping = "scores.ECOSCORE.value";
         FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, "ECOSCORE");
         return new FieldMetadataDto(mapping, "impactscore", null, VALUE_TYPE_NUMERIC, aggregation);
@@ -805,6 +872,8 @@ public class ProductController {
      * @return localised title or {@code null} when no localisation is available
      */
     private String resolveAttributeTitle(VerticalConfig config, String attributeKey, DomainLanguage domainLanguage) {
+        LOGGER.info("Entering resolveAttributeTitle(attributeKey={}, domainLanguage={}, config={})", attributeKey,
+                domainLanguage, config);
         if (config.getAttributesConfig() == null) {
             return null;
         }
@@ -823,6 +892,7 @@ public class ProductController {
      * @return immutable list of {@link FieldMetadataDto} representing the scores
      */
     private List<FieldMetadataDto> mapImpactScores(VerticalConfig config, DomainLanguage domainLanguage) {
+        LOGGER.info("Entering mapImpactScores(config={}, domainLanguage={})", config, domainLanguage);
         if (config.getAvailableImpactScoreCriterias() == null || config.getAvailableImpactScoreCriterias().isEmpty()) {
             return List.of();
         }
@@ -839,6 +909,7 @@ public class ProductController {
     }
 
     private String resolveAttributeValueType(VerticalConfig config, String attributeKey) {
+        LOGGER.info("Entering resolveAttributeValueType(attributeKey={}, config={})", attributeKey, config);
         if (config.getAttributesConfig() == null) {
             return VALUE_TYPE_TEXT;
         }
@@ -853,6 +924,7 @@ public class ProductController {
     }
 
     private String determineSortableValueType(ProductDtoSortableFields field) {
+        LOGGER.info("Entering determineSortableValueType(field={})", field);
         return switch (field) {
         case price, offersCount -> VALUE_TYPE_NUMERIC;
 		case brand, model -> VALUE_TYPE_TEXT;
@@ -861,6 +933,7 @@ public class ProductController {
     }
 
     private String determineFilterValueType(ProductDtoFilterFields field) {
+        LOGGER.info("Entering determineFilterValueType(field={})", field);
         FilterValueType delegateType = field.getDelegate().valueType();
         return delegateType == FilterValueType.numeric ? VALUE_TYPE_NUMERIC : VALUE_TYPE_TEXT;
     }
@@ -873,6 +946,7 @@ public class ProductController {
      * @return translated value or {@code null} when none is defined
      */
     private String localise(Localisable<String, String> localisable, DomainLanguage domainLanguage) {
+        LOGGER.info("Entering localise(localisable={}, domainLanguage={})", localisable, domainLanguage);
         if (localisable == null) {
             return null;
         }
@@ -919,6 +993,8 @@ public class ProductController {
                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                               HttpServletRequest request)
             throws ResourceNotFoundException {
+        LOGGER.info("Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, remoteAddr={})", gtin,
+                domainLanguage, StringUtils.hasText(hcaptchaResponse), request != null ? request.getRemoteAddr() : null);
         long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache())
@@ -956,6 +1032,7 @@ public class ProductController {
     )
     public ResponseEntity<ReviewGenerationStatus> reviewStatus(@PathVariable Long gtin,
                                                                @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering reviewStatus(gtin={}, domainLanguage={})", gtin, domainLanguage);
         ReviewGenerationStatus status = service.getReviewStatus(gtin);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache())
@@ -1014,11 +1091,12 @@ public class ProductController {
             }
     )
     public ResponseEntity<ProductDto> product(@PathVariable Long gtin,
-	                                           @RequestParam(required = false)
-	                                           Set<String> include,
-	                                           @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-	                                           Locale locale) throws ResourceNotFoundException {
-
+                                                   @RequestParam(required = false)
+                                                   Set<String> include,
+                                                   @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                                                   Locale locale) throws ResourceNotFoundException {
+        LOGGER.info("Entering product(gtin={}, include={}, domainLanguage={}, locale={})", gtin, include, domainLanguage,
+                locale);
         ProductDto body = service.getProduct(gtin, locale, include, domainLanguage);
 
 
