@@ -101,12 +101,6 @@ export interface ProductOffersDto {
      * @memberof ProductOffersDto
      */
     occasionTrend?: ProductPriceTrendDto;
-    /**
-     * Gap between current best price and historical lowest price
-     * @type {number}
-     * @memberof ProductOffersDto
-     */
-    historyPriceGap?: number;
 }
 
 /**
@@ -136,7 +130,6 @@ export function ProductOffersDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'occasionHistory': json['occasionHistory'] == null ? undefined : ProductPriceHistoryDtoFromJSON(json['occasionHistory']),
         'newTrend': json['newTrend'] == null ? undefined : ProductPriceTrendDtoFromJSON(json['newTrend']),
         'occasionTrend': json['occasionTrend'] == null ? undefined : ProductPriceTrendDtoFromJSON(json['occasionTrend']),
-        'historyPriceGap': json['historyPriceGap'] == null ? undefined : json['historyPriceGap'],
     };
 }
 
@@ -161,7 +154,6 @@ export function ProductOffersDtoToJSONTyped(value?: ProductOffersDto | null, ign
         'occasionHistory': ProductPriceHistoryDtoToJSON(value['occasionHistory']),
         'newTrend': ProductPriceTrendDtoToJSON(value['newTrend']),
         'occasionTrend': ProductPriceTrendDtoToJSON(value['occasionTrend']),
-        'historyPriceGap': value['historyPriceGap'],
     };
 }
 
