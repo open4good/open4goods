@@ -775,7 +775,6 @@ public class ProductMappingService {
         ProductPriceHistoryDto occasionHistory = null;
         ProductPriceTrendDto newTrend = null;
         ProductPriceTrendDto occasionTrend = null;
-        Double historyPriceGap = null;
 
         if (aggregatedPrices != null) {
             offersByCondition = aggregatedPrices.getConditions() == null
@@ -794,7 +793,6 @@ public class ProductMappingService {
                     aggregatedPrices.bestNewOffer()));
             occasionTrend = mapPriceTrend(computePriceTrend(aggregatedPrices.getOccasionPricehistory(),
                     aggregatedPrices.bestOccasionOffer()));
-            historyPriceGap = aggregatedPrices.historyPriceGap();
         }
 
         return new ProductOffersDto(
@@ -807,8 +805,8 @@ public class ProductMappingService {
                 newHistory,
                 occasionHistory,
                 newTrend,
-                occasionTrend,
-                historyPriceGap);
+                occasionTrend
+                );
     }
 
     /**

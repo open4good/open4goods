@@ -25,15 +25,15 @@ public class AggregatedPrices implements Standardisable {
 	private List<PriceHistory> newPricehistory = new ArrayList<>();
 
 	private List<PriceHistory> occasionPricehistory = new ArrayList<>();
-		
+
 	// Price evolution trend :
 	// 0 -> equals
 	// 1 -> Increasing
 	// -1 -> Decreasing
 	// TODO(perf, p2) : Remove, migration on trends
 //	private Integer trend= 0;
-	
-	
+
+
 	/** Trends by product condition **/
 	private Map<ProductCondition, Integer> trends = new HashMap<>();
 
@@ -44,16 +44,16 @@ public class AggregatedPrices implements Standardisable {
 	public List<AggregatedPrice> newOffers() {
 		return sortedOffers(ProductCondition.NEW);
 	}
-	
-	
+
+
 	public List<AggregatedPrice> occasionOffers() {
 		return sortedOffers(ProductCondition.OCCASION);
 	}
-	
-	
+
+
 	/**
 	 * Sort offers, always the cheapest compensated order first, then price sorting
-	 * @param productState 
+	 * @param productState
 	 * @return
 	 */
 	public List<AggregatedPrice> sortedOffers(ProductCondition productState) {
@@ -68,7 +68,7 @@ public class AggregatedPrices implements Standardisable {
 
 
 	}
-	
+
 	public AggregatedPrice bestOccasionOffer() {
 		return bestOffer(ProductCondition.OCCASION);
 	}
@@ -77,17 +77,17 @@ public class AggregatedPrices implements Standardisable {
 		return bestOffer(ProductCondition.NEW);
 	}
 
-	
+
 	public AggregatedPrice bestOffer(ProductCondition condition) {
 		var list = sortedOffers(condition);
 		if (list != null && list.size() > 0 ) {
 			return list.getFirst();
 		}
 		return null;
-		
+
 	}
 
-	
+
 	public List<PriceHistory> getHistory(ProductCondition state) {
 
 		return switch (state) {
@@ -110,7 +110,7 @@ public class AggregatedPrices implements Standardisable {
                 .min(Comparator.comparing(PriceHistory::getPrice))
                 .orElse(null);
     }
-    
+
     public boolean isHistoricalLowest(AggregatedPrice price) {
     	PriceHistory lowest = getHistoryLowest(price.getProductState());
     	return (lowest.getPrice().equals(bestOffer(price.getProductState()).getPrice()));
@@ -144,33 +144,9 @@ public class AggregatedPrices implements Standardisable {
                 .average()
                 .orElse(Double.NaN); // Can also return null if preferred
     }
-	
-	
-	
-	
-	/**
-	 * Get the gap between cureent best price and the lowest price ever measured
-	 * @return
-	 */
-	public Double historyPriceGap() {
-		List<PriceHistory> histo = getHistory(ProductCondition.NEW);
-		if (null == histo || histo.isEmpty()) {
-			return null;
-		}
-		PriceHistory lowest = histo.stream().min(Comparator.comparing(PriceHistory::getPrice)).get();
-		
-		if (null != lowest) {
-            
-			if (minPrice.getPrice() > lowest.getPrice()) {
-				return lowest.getPrice();		
-			} else {
-				return minPrice.getPrice();
-			}
-        }
-		
-		return null;
-	}
-	
+
+
+
 
 	@Override
 	public Set<Standardisable> standardisableChildren() {
@@ -187,13 +163,13 @@ public class AggregatedPrices implements Standardisable {
 		// NOTE(gof) : handled externally
 
 	}
-	
+
 	public Optional<AggregatedPrice> getMinPrice(ProductCondition state) {
 		return offers.stream().filter(e -> e.getProductState().equals(state)) .min(Comparator.comparing(AggregatedPrice::getPrice)) ;
 	}
-	
-	
-	
+
+
+
 	/////////////////////////////////////////////
 	// Getters / Setters
 	////////////////////////////////////////////

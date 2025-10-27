@@ -30,8 +30,6 @@ public record ProductOffersDto(
         @Schema(description = "Trend computed from brand new offers", nullable = true)
         ProductPriceTrendDto newTrend,
         @Schema(description = "Trend computed from occasion offers", nullable = true)
-        ProductPriceTrendDto occasionTrend,
-        @Schema(description = "Gap between current best price and historical lowest price", nullable = true)
-        Double historyPriceGap
+        ProductPriceTrendDto occasionTrend
 ) {
 }
