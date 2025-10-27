@@ -180,9 +180,10 @@ describe('ProductHeroGallery', () => {
 
     const stage = wrapper.get('[data-testid="product-gallery-stage"]')
 
-    await stage.trigger('click')
+    const clickPromise = stage.trigger('click')
 
     await vi.runAllTimersAsync()
+    await clickPromise
 
     expect(openLightboxMock).toHaveBeenCalledWith(0)
   })
