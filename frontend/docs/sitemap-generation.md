@@ -12,7 +12,15 @@ locale or section needs to be published.
 1. `nuxt.config.ts` enables the `@nuxtjs/sitemap` module and registers the app
    routes sitemap under the `app-pages` key. Nuxt automatically crawls the
    file-based routes in `app/pages` for each configured locale and generates
-   `app-pages.xml` under the `/sitemap` prefix.
+   `app-pages.xml` under the `/sitemap` prefix. The Nitro plugin in
+   [`server/plugins/sitemap-main-pages.ts`](../server/plugins/sitemap-main-pages.ts)
+   ensures the main marketing pages are always emitted for the requested
+   domain language. It scans the static pages under `app/pages` (skipping
+   auth/contrib flows and other dynamic routes) and merges them with the
+   localized wiki routes defined in
+   [`shared/utils/localized-routes.ts`](../shared/utils/localized-routes.ts).
+   This keeps the list self-updating as new marketing sections are added
+   without editing the plugin.
 2. The Nitro plugin in
    [`server/plugins/sitemap-index.ts`](../server/plugins/sitemap-index.ts)
    listens to the `sitemap:index-resolved` hook. For each request it

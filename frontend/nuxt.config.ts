@@ -5,7 +5,19 @@ import { fileURLToPath } from 'node:url'
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { APP_ROUTES_SITEMAP_KEY, SITEMAP_PATH_PREFIX } from './shared/utils/sitemap-config'
-import { LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
+import { LOCALIZED_ROUTE_PATHS, LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
+import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
+
+const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
+
+const STATIC_MAIN_PAGE_ROUTE_NAMES = Array.from(
+  new Set([
+    ...collectStaticPageRouteNames(APP_PAGES_DIR, { rootDir: APP_PAGES_DIR }),
+    ...Object.keys(LOCALIZED_ROUTE_PATHS),
+  ]),
+).sort((a, b) => a.localeCompare(b))
+
+process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify(STATIC_MAIN_PAGE_ROUTE_NAMES)
 
 const localeDomains = buildI18nLocaleDomains()
 
@@ -250,6 +262,7 @@ export default defineNuxtConfig({
     // Shared token for server-to-server authentication (server-only)
     machineToken: process.env.MACHINE_TOKEN || '',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
+    staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
 
     // Public keys (exposed to the client side)
     public: {
