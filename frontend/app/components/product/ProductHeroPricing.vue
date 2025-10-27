@@ -7,7 +7,26 @@
     v-bind="$attrs"
   >
     <meta itemprop="offerCount" :content="String(product.offers?.offersCount ?? 0)" />
-    <meta itemprop="priceCurrency" :content="product.offers?.bestPrice?.currency ?? 'EUR'" />
+    <meta itemprop="priceCurrency" :content="bestPriceCurrency" />
+    <div
+      v-if="conditionOptions.length"
+      class="product-hero__price-conditions"
+      role="group"
+      :aria-label="conditionToggleAriaLabel"
+    >
+      <button
+        v-for="option in conditionOptions"
+        :key="option.value"
+        type="button"
+        class="product-hero__price-chip"
+        :class="{ 'product-hero__price-chip--active': option.selected }"
+        :aria-pressed="option.selected"
+        :disabled="!hasConditionToggle && !option.selected"
+        @click="selectCondition(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    </div>
     <h2 class="product-hero__pricing-title">
       {{ $t('product.hero.bestPriceTitle') }}
     </h2>
@@ -16,28 +35,76 @@
         {{ bestPriceLabel }}
       </span>
       <span class="product-hero__price-currency">
-        {{ product.offers?.bestPrice?.currency ?? '€' }}
+        {{ bestPriceCurrency }}
       </span>
     </div>
     <div class="product-hero__price-meta">
       <div v-if="bestPriceMerchant" class="product-hero__price-merchant">
-        <span class="product-hero__price-merchant-prefix">{{ t('product.hero.priceMerchantPrefix') }}</span>
-        <NuxtLink
-          :to="bestPriceMerchant.url"
-          class="product-hero__price-merchant-link"
-          target="_blank"
-          rel="nofollow noopener"
-        >
+        <template v-if="bestPriceMerchant.url">
+          <ClientOnly v-if="bestPriceMerchant.clientOnly">
+            <template #default>
+              <NuxtLink
+                :to="bestPriceMerchant.url"
+                class="product-hero__price-merchant-link"
+                :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
+                :rel="bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'"
+                :prefetch="false"
+              >
+                <img
+                  v-if="bestPriceMerchant.favicon"
+                  :src="bestPriceMerchant.favicon"
+                  :alt="bestPriceMerchant.name"
+                  width="48"
+                  height="48"
+                  class="product-hero__price-merchant-favicon"
+                />
+                <span>{{ bestPriceMerchant.name }}</span>
+              </NuxtLink>
+            </template>
+            <template #fallback>
+              <div class="product-hero__price-merchant-static">
+                <img
+                  v-if="bestPriceMerchant.favicon"
+                  :src="bestPriceMerchant.favicon"
+                  :alt="bestPriceMerchant.name"
+                  width="48"
+                  height="48"
+                  class="product-hero__price-merchant-favicon"
+                />
+                <span>{{ bestPriceMerchant.name }}</span>
+              </div>
+            </template>
+          </ClientOnly>
+          <NuxtLink
+            v-else
+            :to="bestPriceMerchant.url"
+            class="product-hero__price-merchant-link"
+            :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
+            :rel="bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'"
+            :prefetch="false"
+          >
+            <img
+              v-if="bestPriceMerchant.favicon"
+              :src="bestPriceMerchant.favicon"
+              :alt="bestPriceMerchant.name"
+              width="48"
+              height="48"
+              class="product-hero__price-merchant-favicon"
+            />
+            <span>{{ bestPriceMerchant.name }}</span>
+          </NuxtLink>
+        </template>
+        <div v-else class="product-hero__price-merchant-static">
           <img
             v-if="bestPriceMerchant.favicon"
             :src="bestPriceMerchant.favicon"
             :alt="bestPriceMerchant.name"
-            width="18"
-            height="18"
+            width="48"
+            height="48"
             class="product-hero__price-merchant-favicon"
           />
           <span>{{ bestPriceMerchant.name }}</span>
-        </NuxtLink>
+        </div>
       </div>
 
       <button
@@ -59,9 +126,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, ref, watch, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
+
+type OfferCondition = 'occasion' | 'new'
 
 defineOptions({ inheritAttrs: false })
 
@@ -74,19 +143,104 @@ const props = defineProps({
 
 const { n, t } = useI18n()
 
-const bestPrice = computed(() => props.product.offers?.bestPrice ?? null)
+type AggregatedOffer = NonNullable<NonNullable<ProductDto['offers']>['bestPrice']>
+
+const aggregatedBestOffer = computed<AggregatedOffer | null>(() => props.product.offers?.bestPrice ?? null)
+
+const bestOffersByCondition = computed<Record<OfferCondition, AggregatedOffer | null>>(() => {
+  const offers = props.product.offers
+  const aggregated = aggregatedBestOffer.value
+
+  const mapped: Record<OfferCondition, AggregatedOffer | null> = {
+    occasion: offers?.bestOccasionOffer ?? null,
+    new: offers?.bestNewOffer ?? null,
+  }
+
+  if (!mapped.occasion && aggregated?.condition === 'OCCASION') {
+    mapped.occasion = aggregated
+  }
+
+  if (!mapped.new && aggregated?.condition === 'NEW') {
+    mapped.new = aggregated
+  }
+
+  if (!mapped.new && !mapped.occasion && aggregated) {
+    mapped.new = aggregated
+  }
+
+  return mapped
+})
+
+const conditionPriority: OfferCondition[] = ['occasion', 'new']
+
+const availableConditions = computed<OfferCondition[]>(() =>
+  conditionPriority.filter((condition) => Boolean(bestOffersByCondition.value[condition])),
+)
+
+const selectedCondition = ref<OfferCondition>(conditionPriority[0])
+
+watch(
+  availableConditions,
+  (conditions) => {
+    if (!conditions.length) {
+      return
+    }
+
+    if (!conditions.includes(selectedCondition.value)) {
+      selectedCondition.value = conditions[0]
+    }
+  },
+  { immediate: true },
+)
+
+const activeCondition = computed<OfferCondition>(() => {
+  if (availableConditions.value.includes(selectedCondition.value)) {
+    return selectedCondition.value
+  }
+
+  return availableConditions.value[0] ?? 'new'
+})
+
+const selectCondition = (condition: OfferCondition) => {
+  if (!availableConditions.value.includes(condition)) {
+    return
+  }
+
+  selectedCondition.value = condition
+}
+
+const activeOffer = computed<AggregatedOffer | null>(() => bestOffersByCondition.value[activeCondition.value])
+
+const conditionOptions = computed(() =>
+  availableConditions.value.map((condition) => ({
+    value: condition,
+    label: t(`product.hero.offerConditions.${condition}`),
+    selected: condition === activeCondition.value,
+  })),
+)
+
+const hasConditionToggle = computed(() => conditionOptions.value.length > 1)
+
+const conditionToggleAriaLabel = computed(() => t('product.hero.offerConditionsToggleAria'))
 
 const bestPriceLabel = computed(() => {
-  if (!bestPrice.value?.price) {
+  const price = activeOffer.value?.price
+  if (typeof price !== 'number') {
     return '—'
   }
 
-  return n(bestPrice.value.price, {
+  const currency = activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR'
+
+  return n(price, {
     style: 'currency',
-    currency: bestPrice.value.currency ?? 'EUR',
-    maximumFractionDigits: 0,
+    currency,
+    maximumFractionDigits: price >= 100 ? 0 : 2,
   })
 })
+
+const bestPriceCurrency = computed(
+  () => activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR',
+)
 
 const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
 
@@ -98,30 +252,54 @@ const viewOffersLabel = computed(() =>
     : t('product.hero.viewOffersCount', { count: offersCountLabel.value }),
 )
 
-const bestPriceMerchant = computed(() => {
-  const merchant = props.product.offers?.bestPrice
-  if (!merchant?.datasourceName || !merchant?.url) {
+const isSingleOffer = computed(() => offersCount.value === 1)
+
+const affiliationLink = computed(() => {
+  if (!isSingleOffer.value) {
     return null
   }
 
+  const token = activeOffer.value?.affiliationToken ?? aggregatedBestOffer.value?.affiliationToken
+  return token ? `/contrib/${token}` : null
+})
+
+const bestPriceMerchant = computed(() => {
+  const merchant = activeOffer.value
+  if (!merchant?.datasourceName) {
+    return null
+  }
+
+  const url = isSingleOffer.value
+    ? affiliationLink.value ?? merchant.url ?? null
+    : merchant.url ?? null
+
   return {
     name: merchant.datasourceName,
-    url: merchant.url,
+    url,
     favicon: merchant.favicon ?? null,
+    isInternal: typeof url === 'string' && url.startsWith('/'),
+    clientOnly: isSingleOffer.value && Boolean(affiliationLink.value),
   }
 })
 
 const priceTrendLabel = computed(() => {
-  const trend = props.product.offers?.newTrend
+  const offers = props.product.offers
+  if (!offers) {
+    return null
+  }
+
+  const trend = activeCondition.value === 'occasion' ? offers.occasionTrend : offers.newTrend
   if (!trend) {
     return null
   }
+
+  const currency = activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR'
 
   if (trend.trend === 'PRICE_DECREASE') {
     return t('product.price.trend.decrease', {
       amount: n(Math.abs(trend.variation ?? 0), {
         style: 'currency',
-        currency: props.product.offers?.bestPrice?.currency ?? 'EUR',
+        currency,
         maximumFractionDigits: 2,
       }),
     })
@@ -131,7 +309,7 @@ const priceTrendLabel = computed(() => {
     return t('product.price.trend.increase', {
       amount: n(Math.abs(trend.variation ?? 0), {
         style: 'currency',
-        currency: props.product.offers?.bestPrice?.currency ?? 'EUR',
+        currency,
         maximumFractionDigits: 2,
       }),
     })
@@ -166,6 +344,44 @@ const scrollToSelector = (selector: string, offset = 120) => {
   gap: 1rem;
 }
 
+.product-hero__price-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.product-hero__price-chip {
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(var(--v-theme-surface-default), 0.85);
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-hero__price-chip:hover,
+.product-hero__price-chip:focus-visible {
+  background: rgba(var(--v-theme-surface-default), 1);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+.product-hero__price-chip--active {
+  background: rgba(var(--v-theme-primary), 0.18);
+  color: rgb(var(--v-theme-primary));
+  box-shadow: 0 8px 20px rgba(var(--v-theme-primary), 0.18);
+}
+
+.product-hero__price-chip:disabled {
+  cursor: default;
+  box-shadow: none;
+}
+
 .product-hero__pricing-title {
   margin: 0;
   font-size: 1.2rem;
@@ -197,35 +413,38 @@ const scrollToSelector = (selector: string, offset = 120) => {
 }
 
 .product-hero__price-merchant {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  color: rgb(var(--v-theme-text-neutral-secondary));
+  gap: 0.65rem;
 }
 
-.product-hero__price-merchant-prefix {
+.product-hero__price-merchant-link,
+.product-hero__price-merchant-static {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 16px;
   font-weight: 600;
+  text-decoration: none;
+  background: rgba(var(--v-theme-surface-default), 0.92);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__price-merchant-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
   color: rgb(var(--v-theme-primary));
-  text-decoration: none;
 }
 
 .product-hero__price-merchant-link:hover,
 .product-hero__price-merchant-link:focus-visible {
-  text-decoration: underline;
+  box-shadow: 0 16px 36px rgba(var(--v-theme-primary), 0.2);
 }
 
 .product-hero__price-merchant-favicon {
   border-radius: 4px;
-  width: 18px;
-  height: 18px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
 }
 

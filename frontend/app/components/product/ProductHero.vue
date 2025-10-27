@@ -34,6 +34,20 @@
           :show-value="true"
           class="product-hero__impact"
         />
+        <v-btn
+          class="product-hero__compare-button"
+          :class="{ 'product-hero__compare-button--active': isCompareSelected }"
+          color="primary"
+          variant="flat"
+          :aria-pressed="isCompareSelected"
+          :aria-label="compareButtonAriaLabel"
+          :title="compareButtonTitle"
+          :disabled="isCompareDisabled"
+          @click="toggleCompare"
+        >
+          <v-icon :icon="compareButtonIcon" size="20" class="product-hero__compare-icon" />
+          <span class="product-hero__compare-label">{{ compareButtonText }}</span>
+        </v-btn>
       </div>
 
       <v-tooltip v-if="gtinCountry" location="bottom" :text="t('product.hero.gtinTooltip')">
@@ -52,20 +66,6 @@
         </template>
       </v-tooltip>
 
-      <div class="product-hero__facts">
-        <div class="product-hero__fact">
-          <span class="product-hero__fact-label">{{ $t('product.hero.gtin') }}</span>
-          <span class="product-hero__fact-value" itemprop="gtin13">
-            {{ product.gtin }}
-          </span>
-        </div>
-        <div class="product-hero__fact">
-          <span class="product-hero__fact-label">{{ $t('product.hero.offersCount') }}</span>
-          <span class="product-hero__fact-value">
-            {{ offersCountLabel }}
-          </span>
-        </div>
-      </div>
     </div>
 
     <aside class="product-hero__pricing">
@@ -81,6 +81,11 @@ import CategoryNavigationBreadcrumbs from '~/components/category/navigation/Cate
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductHeroGallery from '~/components/product/ProductHeroGallery.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
+import {
+  MAX_COMPARE_ITEMS,
+  useProductCompareStore,
+  type CompareListBlockReason,
+} from '~/stores/useProductCompareStore'
 import type { ProductDto } from '~~/shared/api-client'
 
 export interface ProductHeroBreadcrumb {
@@ -99,7 +104,7 @@ const props = defineProps({
   },
 })
 
-const { n, t } = useI18n()
+const { t, te } = useI18n()
 
 const title = computed(
   () =>
@@ -109,8 +114,77 @@ const title = computed(
     '',
 )
 
-const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
-const offersCountLabel = computed(() => n(offersCount.value))
+const compareStore = useProductCompareStore()
+
+const reasonMessage = (reason: CompareListBlockReason | undefined) => {
+  switch (reason) {
+    case 'limit-reached':
+      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
+    case 'vertical-mismatch':
+      return t('category.products.compare.differentCategory')
+    case 'missing-identifier':
+      return t('category.products.compare.missingIdentifier')
+    default:
+      return t('product.hero.compare.add')
+  }
+}
+
+const compareEligibility = computed(() => compareStore.canAddProduct(props.product))
+const isCompareSelected = computed(() => compareStore.hasProduct(props.product))
+
+const compareButtonText = computed(() =>
+  isCompareSelected.value ? t('product.hero.compare.selected') : t('product.hero.compare.label'),
+)
+
+const compareButtonTitle = computed(() => {
+  if (isCompareSelected.value) {
+    return t('product.hero.compare.remove')
+  }
+
+  if (!compareEligibility.value.success) {
+    return reasonMessage(compareEligibility.value.reason)
+  }
+
+  return t('product.hero.compare.add')
+})
+
+const compareButtonAriaLabel = computed(() => {
+  const productName = title.value || props.product.identity?.bestName || props.product.base?.bestName
+
+  if (isCompareSelected.value) {
+    if (te('product.hero.compare.ariaSelected')) {
+      return t('product.hero.compare.ariaSelected', { name: productName })
+    }
+
+    return t('product.hero.compare.remove')
+  }
+
+  if (!compareEligibility.value.success) {
+    return reasonMessage(compareEligibility.value.reason)
+  }
+
+  if (te('product.hero.compare.ariaAdd')) {
+    return t('product.hero.compare.ariaAdd', { name: productName })
+  }
+
+  return t('product.hero.compare.add')
+})
+
+const compareButtonIcon = computed(() =>
+  isCompareSelected.value ? 'mdi-check-circle-outline' : 'mdi-compare-horizontal',
+)
+
+const isCompareDisabled = computed(
+  () => !isCompareSelected.value && !compareEligibility.value.success,
+)
+
+const toggleCompare = () => {
+  if (isCompareDisabled.value) {
+    return
+  }
+
+  compareStore.toggleProduct(props.product)
+}
 
 const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const normalizedProductTitle = title.value.trim().toLowerCase()
@@ -268,32 +342,41 @@ const impactScore = computed(() => {
   object-fit: cover;
 }
 
-.product-hero__facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-top: 0.5rem;
+.product-hero__compare-button {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1.2rem;
+  background-color: rgba(var(--v-theme-surface-default), 0.92);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.product-hero__fact {
-  background: rgba(var(--v-theme-surface-glass-strong), 0.6);
-  border-radius: 14px;
-  padding: 0.875rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+.product-hero__compare-button:hover {
+  background-color: rgba(var(--v-theme-surface-default), 1);
 }
 
-.product-hero__fact-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+.product-hero__compare-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(var(--v-theme-accent-primary-highlight), 0.45);
 }
 
-.product-hero__fact-value {
-  font-weight: 700;
-  font-size: 1rem;
+.product-hero__compare-button--active {
+  background-color: rgba(var(--v-theme-primary), 0.16);
+  color: rgb(var(--v-theme-primary));
+  box-shadow: 0 14px 32px rgba(var(--v-theme-primary), 0.18);
+}
+
+.product-hero__compare-icon {
+  margin-inline-end: 0.25rem;
+}
+
+.product-hero__compare-label {
+  font-size: 0.95rem;
 }
 
 
