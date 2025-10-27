@@ -1,103 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { defineNuxtConfig } from 'nuxt/config'
-import { readdirSync } from 'node:fs'
-import { join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { APP_ROUTES_SITEMAP_KEY, SITEMAP_PATH_PREFIX } from './shared/utils/sitemap-config'
 import { LOCALIZED_ROUTE_PATHS, LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
+import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 
-const PAGE_EXTENSION_PATTERN = /\.(vue|md)$/iu
-const DYNAMIC_SEGMENT_PATTERN = /(^|\/)\[[^/]+?\](?=\/|$)/u
-const EXCLUDED_ROUTE_SEGMENTS = new Set(['auth', 'contrib'])
-const EXCLUDED_ROUTE_PATHS = new Set(['index-v1', 'xwiki-fullpage', 'blog/test-images'])
-
-const toPosixPath = (value: string): string => value.split(sep).join('/')
-
-const normalizeRouteNameFromRelativePath = (relativePath: string): string | null => {
-  if (!PAGE_EXTENSION_PATTERN.test(relativePath)) {
-    return null
-  }
-
-  const withoutExtension = relativePath.replace(PAGE_EXTENSION_PATTERN, '')
-
-  if (!withoutExtension || DYNAMIC_SEGMENT_PATTERN.test(withoutExtension)) {
-    return null
-  }
-
-  if (EXCLUDED_ROUTE_PATHS.has(withoutExtension)) {
-    return null
-  }
-
-  const segments = withoutExtension.split('/')
-
-  if (segments.some((segment) => EXCLUDED_ROUTE_SEGMENTS.has(segment))) {
-    return null
-  }
-
-  if (withoutExtension === 'index') {
-    return 'index'
-  }
-
-  if (withoutExtension.endsWith('/index')) {
-    const trimmed = withoutExtension.slice(0, -'/index'.length)
-
-    return trimmed || 'index'
-  }
-
-  return withoutExtension
-}
-
-const collectStaticPageRouteNames = (directory: string): string[] => {
-  const entries = readdirSync(directory, { withFileTypes: true })
-  const routeNames: string[] = []
-
-  for (const entry of entries) {
-    const entryPath = join(directory, entry.name)
-
-    if (entry.isDirectory()) {
-      const relativeDirectory = toPosixPath(relative(APP_PAGES_DIR, entryPath))
-
-      if (relativeDirectory && DYNAMIC_SEGMENT_PATTERN.test(relativeDirectory)) {
-        continue
-      }
-
-      if (relativeDirectory) {
-        const segments = relativeDirectory.split('/')
-
-        if (segments.some((segment) => EXCLUDED_ROUTE_SEGMENTS.has(segment))) {
-          continue
-        }
-      }
-
-      routeNames.push(...collectStaticPageRouteNames(entryPath))
-      continue
-    }
-
-    if (!entry.isFile()) {
-      continue
-    }
-
-    const relativePath = toPosixPath(relative(APP_PAGES_DIR, entryPath))
-    const routeName = normalizeRouteNameFromRelativePath(relativePath)
-
-    if (!routeName) {
-      continue
-    }
-
-    routeNames.push(routeName)
-  }
-
-  return routeNames
-}
-
 const STATIC_MAIN_PAGE_ROUTE_NAMES = Array.from(
   new Set([
-    ...collectStaticPageRouteNames(APP_PAGES_DIR),
+    ...collectStaticPageRouteNames(APP_PAGES_DIR, { rootDir: APP_PAGES_DIR }),
     ...Object.keys(LOCALIZED_ROUTE_PATHS),
   ]),
 ).sort((a, b) => a.localeCompare(b))
