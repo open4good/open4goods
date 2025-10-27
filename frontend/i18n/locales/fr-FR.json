@@ -1248,6 +1248,8 @@
     "impact": {
       "title": "Impact écologique",
       "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",
+      "primaryScoreLabel": "Score global",
+      "noPrimaryScore": "Score indisponible",
       "radarAria": "Radar des scores pour {product}",
       "rankingTitle": "Classement",
       "rankingValue": "Position {position} sur {total}",
