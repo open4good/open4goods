@@ -10,13 +10,34 @@
     />
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
-      <CategoryFastFilters
-        :subsets="category.subsets ?? []"
-        :active-subset-ids="activeSubsetIds"
-        class="mb-6"
-        @toggle-subset="onToggleSubset"
-        @reset="onResetSubsets"
-      />
+      <div
+        v-if="hasFastFilters || isDesktop"
+        class="category-page__fast-filters mb-6"
+      >
+        <v-tooltip v-if="isDesktop" :text="filtersToggleLabel">
+          <template #activator="{ props: tooltipProps }">
+            <v-btn
+              class="category-page__fast-filters-toggle"
+              variant="text"
+              :color="filtersCollapsed ? 'primary' : undefined"
+              v-bind="tooltipProps"
+              :aria-label="filtersToggleLabel"
+              :aria-pressed="(!filtersCollapsed).toString()"
+              @click="onToggleFiltersVisibility"
+            >
+              <v-icon :icon="filtersToggleIcon" />
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <CategoryFastFilters
+          class="category-page__fast-filters-groups"
+          :subsets="category.subsets ?? []"
+          :active-subset-ids="activeSubsetIds"
+          @toggle-subset="onToggleSubset"
+          @reset="onResetSubsets"
+        />
+      </div>
 
       <div ref="layoutRef" class="category-page__layout" :style="layoutStyle">
         <v-navigation-drawer
@@ -50,7 +71,7 @@
         </v-navigation-drawer>
 
         <aside
-          v-else
+          v-else-if="isFiltersColumnVisible"
           ref="filtersSidebarRef"
           class="category-page__filters-surface"
           role="complementary"
@@ -78,7 +99,7 @@
         </aside>
 
         <div
-          v-if="isDesktop"
+          v-if="isFiltersColumnVisible"
           ref="filtersResizerRef"
           class="category-page__filters-resizer"
           role="separator"
@@ -398,6 +419,7 @@ const category = computed<VerticalConfigFullDto | null>(() => {
   return fallback ? (toRaw(fallback) as VerticalConfigFullDto) : null
 })
 const errorMessage = computed(() => categoriesError.value)
+const hasFastFilters = computed(() => (category.value?.subsets?.length ?? 0) > 0)
 
 const heroImage = computed(() => {
   if (!category.value) {
@@ -580,6 +602,16 @@ const sortOptions = computed(() => sortOptionsData.value ?? null)
 
 const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value))
 const filtersDrawer = ref(false)
+const filtersCollapsed = ref(false)
+const filtersToggleIcon = computed(() =>
+  filtersCollapsed.value ? 'mdi-filter-variant' : 'mdi-filter-variant-off',
+)
+const filtersToggleLabel = computed(() =>
+  filtersCollapsed.value
+    ? t('category.filters.toggle.show')
+    : t('category.filters.toggle.hide'),
+)
+const isFiltersColumnVisible = computed(() => isDesktop.value && !filtersCollapsed.value)
 
 const FILTERS_PANEL_STORAGE_KEY = 'category-page-filters-width'
 const DEFAULT_FILTERS_PANEL_WIDTH = 300
@@ -612,6 +644,14 @@ const layoutStyle = computed(() => {
     return {}
   }
 
+  if (!isFiltersColumnVisible.value) {
+    return {
+      gridTemplateColumns: 'minmax(0, 1fr)',
+      '--filters-panel-width': '0px',
+      '--filters-resizer-hitbox': '0px',
+    }
+  }
+
   const width = clampFiltersPanelWidth(filtersPanelWidth.value)
 
   return {
@@ -622,7 +662,7 @@ const layoutStyle = computed(() => {
 })
 
 const filtersStyle = computed(() => {
-  if (!isDesktop.value) {
+  if (!isFiltersColumnVisible.value) {
     return {}
   }
 
@@ -684,7 +724,7 @@ const onPointerEnd = (event: PointerEvent) => {
 }
 
 const onResizeHandlePointerDown = (event: PointerEvent) => {
-  if (!isDesktop.value) {
+  if (!isDesktop.value || !isFiltersColumnVisible.value) {
     return
   }
 
@@ -724,6 +764,7 @@ watch(
     filtersDrawer.value = value
 
     if (!value) {
+      filtersCollapsed.value = false
       removePointerListeners()
       isResizing.value = false
       activePointerId = null
@@ -733,6 +774,19 @@ watch(
   },
   { immediate: true },
 )
+
+watch(filtersCollapsed, (collapsed) => {
+  if (collapsed) {
+    removePointerListeners()
+    isResizing.value = false
+    activePointerId = null
+    initialPointerX = 0
+  }
+})
+
+const onToggleFiltersVisibility = () => {
+  filtersCollapsed.value = !filtersCollapsed.value
+}
 
 const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
 const pageNumber = ref(0)
@@ -1645,6 +1699,19 @@ const clearAllFilters = () => {
     gap: 1rem
     width: 100%
 
+  &__fast-filters
+    display: flex
+    align-items: center
+    gap: 0.75rem
+
+  &__fast-filters-toggle
+    flex: 0 0 auto
+    align-self: center
+
+  &__fast-filters-groups
+    flex: 1 1 auto
+    min-width: 0
+
   &__search
     position: relative
     min-width: 260px
@@ -1791,6 +1858,10 @@ const clearAllFilters = () => {
 
 @media (max-width: 959px)
   .category-page__toolbar
+    align-items: stretch
+
+  .category-page__fast-filters
+    flex-direction: column
     align-items: stretch
 
   .category-page__toolbar-actions

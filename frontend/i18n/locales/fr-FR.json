@@ -124,6 +124,10 @@
         "screen_size": "Taille d'écran",
         "default": "Autres filtres rapides"
       },
+      "navigation": {
+        "previous": "Défiler vers les filtres rapides précédents",
+        "next": "Défiler vers les filtres rapides suivants"
+      },
       "operator": {
         "greaterThan": "≥ {value}",
         "lowerThan": "≤ {value}"
@@ -143,6 +147,10 @@
       "missingLabel": "Option sans libellé",
       "mobileApply": "Appliquer les filtres",
       "mobileClear": "Effacer les filtres",
+      "toggle": {
+        "show": "Afficher la colonne des filtres",
+        "hide": "Masquer la colonne des filtres"
+      },
       "fields": {
         "price": "Fourchette de prix",
         "offersCount": "Nombre d'offres",

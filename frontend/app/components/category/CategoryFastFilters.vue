@@ -1,11 +1,25 @@
 <template>
-    <div v-if="subsets.length" class="category-fast-filters__groups">
+  <div v-if="subsets.length" class="category-fast-filters">
+    <v-btn
+      v-if="canScrollPrev"
+      icon
+      variant="text"
+      color="primary"
+      class="category-fast-filters__nav"
+      data-testid="category-fast-filters-prev"
+      :aria-label="t('category.fastFilters.navigation.previous')"
+      @click="scrollBackward"
+    >
+      <v-icon icon="mdi-chevron-left" />
+    </v-btn>
+
+    <div ref="scrollContainer" class="category-fast-filters__scroller">
       <article
         v-for="group in groupedSubsets"
         :key="group.key"
         class="category-fast-filters__group"
       >
-        <h3 class="category-fast-filters__group-title">{{ group.label }}</h3>
+        <h3 class="category-fast-filters__group-label">{{ group.label }}</h3>
 
         <v-chip-group
           class="category-fast-filters__chip-group"
@@ -28,7 +42,7 @@
                   :color="isSubsetActive(subset) ? 'primary' : undefined"
                   :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
                   rounded="lg"
-                  class="me-2 mb-2"
+                  class="category-fast-filters__chip"
                 >
                   <span class="category-fast-filters__chip-label">
                     {{ resolveSubsetLabel(subset) }}
@@ -43,7 +57,7 @@
               :color="isSubsetActive(subset) ? 'primary' : undefined"
               :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
               rounded="lg"
-              class="me-2 mb-2"
+              class="category-fast-filters__chip"
             >
               <span class="category-fast-filters__chip-label">
                 {{ resolveSubsetLabel(subset) }}
@@ -53,9 +67,25 @@
         </v-chip-group>
       </article>
     </div>
+
+    <v-btn
+      v-if="canScrollNext"
+      icon
+      variant="text"
+      color="primary"
+      class="category-fast-filters__nav"
+      data-testid="category-fast-filters-next"
+      :aria-label="t('category.fastFilters.navigation.next')"
+      @click="scrollForward"
+    >
+      <v-icon icon="mdi-chevron-right" />
+    </v-btn>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useEventListener, useResizeObserver } from '@vueuse/core'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { VerticalSubsetDto } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
 
@@ -214,64 +244,134 @@ const onGroupSelectionChange = (groupKey: string, value: unknown) => {
   }
 }
 
+const scrollContainer = ref<HTMLElement | null>(null)
+const canScrollPrev = ref(false)
+const canScrollNext = ref(false)
+
+const updateNavigationState = () => {
+  if (!import.meta.client) {
+    canScrollPrev.value = false
+    canScrollNext.value = false
+    return
+  }
+
+  const element = scrollContainer.value
+  if (!element) {
+    canScrollPrev.value = false
+    canScrollNext.value = false
+    return
+  }
+
+  const maxScroll = Math.max(element.scrollWidth - element.clientWidth, 0)
+  canScrollPrev.value = element.scrollLeft > 8
+  canScrollNext.value = element.scrollLeft < maxScroll - 8
+}
+
+const scrollBy = (direction: 'forward' | 'backward') => {
+  const element = scrollContainer.value
+  if (!element) {
+    return
+  }
+
+  const step = element.clientWidth * 0.8 || 320
+  const nextPosition =
+    direction === 'forward' ? element.scrollLeft + step : element.scrollLeft - step
+
+  element.scrollTo({ left: nextPosition, behavior: 'smooth' })
+}
+
+const scrollForward = () => scrollBy('forward')
+const scrollBackward = () => scrollBy('backward')
+
+let stopResizeObserver: (() => void) | undefined
+let stopWindowListener: (() => void) | undefined
+let stopScrollListener: (() => void) | undefined
+
+onMounted(() => {
+  updateNavigationState()
+
+  stopScrollListener = useEventListener(scrollContainer, 'scroll', updateNavigationState)
+  stopWindowListener = useEventListener(window, 'resize', updateNavigationState)
+  const resizeObserver = useResizeObserver(scrollContainer, updateNavigationState)
+  stopResizeObserver = resizeObserver.stop
+})
+
+onBeforeUnmount(() => {
+  stopScrollListener?.()
+  stopWindowListener?.()
+  stopResizeObserver?.()
+})
+
+watch(groupedSubsets, () => {
+  nextTick(() => {
+    updateNavigationState()
+  })
+})
 </script>
 
 <style scoped lang="sass">
 .category-fast-filters
-  background-color: rgb(var(--v-theme-surface-glass))
-  border-radius: 1rem
-  padding: 1.5rem
-  margin-bottom: 2rem
-  box-shadow: 0 24px 48px -32px rgba(var(--v-theme-shadow-primary-600), 0.3)
+  display: flex
+  align-items: center
+  gap: 0.75rem
+  width: 100%
+  background: rgb(var(--v-theme-surface-glass))
+  border-radius: 999px
+  padding: 0.75rem 1rem
+  box-shadow: 0 14px 34px -26px rgba(var(--v-theme-shadow-primary-600), 0.32)
 
-  &__header
+  &__scroller
+    flex: 1 1 auto
     display: flex
     align-items: center
-    justify-content: space-between
-    gap: 1rem
-    margin-bottom: 1rem
+    gap: 1.5rem
+    overflow-x: auto
+    scrollbar-width: thin
+    scrollbar-color: rgba(var(--v-theme-border-primary-strong), 0.6) transparent
+    scroll-behavior: smooth
+    padding: 0.25rem 0
 
-  &__title
-    margin: 0
-    font-size: 1.25rem
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-strong))
+    &::-webkit-scrollbar
+      height: 6px
 
-  &__reset
-    text-transform: none
+    &::-webkit-scrollbar-track
+      background: transparent
 
-  &__groups
-    display: grid
-    gap: 1.25rem
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+    &::-webkit-scrollbar-thumb
+      background-color: rgba(var(--v-theme-border-primary-strong), 0.6)
+      border-radius: 999px
 
   &__group
-    background-color: rgba(var(--v-theme-surface-primary-080), 0.7)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
-    border-radius: 0.75rem
-    padding: 1rem 1.25rem
-    transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease
+    flex: 0 0 auto
+    display: flex
+    align-items: center
+    gap: 0.75rem
+    min-width: 0
 
-    &:hover
-      background-color: rgba(var(--v-theme-surface-primary-080), 0.95)
-      border-color: rgba(var(--v-theme-border-primary-strong), 0.8)
-      box-shadow: 0 12px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.32)
-
-  &__group-title
-    margin: 0 0 0.75rem
-    font-size: 0.95rem
+  &__group-label
+    margin: 0
+    font-size: 0.85rem
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-secondary))
     text-transform: uppercase
     letter-spacing: 0.04em
+    white-space: nowrap
+
+    &::after
+      content: ':'
+      margin-left: 0.35rem
 
   &__chip-group
     display: flex
-    flex-wrap: wrap
-    margin: -0.25rem
+    flex-wrap: nowrap
+    gap: 0.5rem
+    min-width: 0
 
-    :deep(.v-chip)
-      margin: 0.25rem
+    :deep(.v-chip-group__container)
+      display: contents
+
+  &__chip
+    flex: 0 0 auto
 
   &__chip-label
     font-weight: 500
@@ -281,18 +381,27 @@ const onGroupSelectionChange = (groupKey: string, value: unknown) => {
     font-weight: 600
     color: rgb(var(--v-theme-on-primary))
 
+  &__nav
+    flex: 0 0 auto
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
 @media (max-width: 959px)
   .category-fast-filters
-    padding: 1.25rem
+    flex-direction: column
+    align-items: stretch
+    gap: 0.75rem
+    border-radius: 1rem
 
-    &__header
-      align-items: flex-start
-      flex-direction: column
-      gap: 0.5rem
+    &__scroller
+      gap: 1rem
+      padding: 0
 
-    &__reset
-      align-self: flex-end
+    &__group
+      flex-wrap: wrap
 
-    &__groups
-      grid-template-columns: minmax(0, 1fr)
+    &__group-label
+      font-size: 0.9rem
+
+    &__chip-group
+      flex-wrap: wrap
 </style>
