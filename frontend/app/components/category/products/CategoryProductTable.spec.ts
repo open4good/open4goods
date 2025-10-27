@@ -221,7 +221,7 @@ describe('CategoryProductTable', () => {
     const table = wrapper.getComponent(VDataTableStub)
 
     table.vm.$emit('update:sort-by', [{ key: 'brand', order: 'asc' }])
-    expect(wrapper.emitted('update:sort-field')?.[0]?.[0]).toBe('identity.brand.keyword')
+    expect(wrapper.emitted('update:sort-field')?.[0]?.[0]).toBe('attributes.referentielAttributes.BRAND.keyword')
     expect(wrapper.emitted('update:sort-order')?.[0]?.[0]).toBe('asc')
 
     table.vm.$emit('update:sort-by', [{ key: 'model', order: 'desc' }])
