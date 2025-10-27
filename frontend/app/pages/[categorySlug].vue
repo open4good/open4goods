@@ -604,7 +604,7 @@ const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : ini
 const filtersDrawer = ref(false)
 const filtersCollapsed = ref(false)
 const filtersToggleIcon = computed(() =>
-  filtersCollapsed.value ? 'mdi-filter-variant' : 'mdi-filter-variant-off',
+  filtersCollapsed.value ? 'mdi-filter-variant-plus' : 'mdi-filter-variant-minus',
 )
 const filtersToggleLabel = computed(() =>
   filtersCollapsed.value
