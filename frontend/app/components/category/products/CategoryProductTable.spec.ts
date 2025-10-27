@@ -225,7 +225,7 @@ describe('CategoryProductTable', () => {
     expect(wrapper.emitted('update:sort-order')?.[0]?.[0]).toBe('asc')
 
     table.vm.$emit('update:sort-by', [{ key: 'model', order: 'desc' }])
-    expect(wrapper.emitted('update:sort-field')?.[1]?.[0]).toBe('identity.model.keyword')
+    expect(wrapper.emitted('update:sort-field')?.[1]?.[0]).toBe('attributes.referentielAttributes.MODEL.keyword')
     expect(wrapper.emitted('update:sort-order')?.[1]?.[0]).toBe('desc')
 
     table.vm.$emit('update:sort-by', [{ key: 'impactScore' }])

@@ -223,8 +223,8 @@ const headers = computed(() => [
 ])
 
 const staticSortHeaderToFieldMapping: Record<string, string> = {
-  brand: 'identity.brand.keyword',
-  model: 'identity.model.keyword',
+  brand: 'attributes.referentielAttributes.BRAND.keyword',
+  model: 'attributes.referentielAttributes.MODEL.keyword',
   impactScore: 'scores.ECOSCORE.value',
   bestPrice: 'price.minPrice.price',
   offersCount: 'offersCount',

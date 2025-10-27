@@ -855,6 +855,8 @@ public class ProductController {
     private String determineSortableValueType(ProductDtoSortableFields field) {
         return switch (field) {
         case price, offersCount -> VALUE_TYPE_NUMERIC;
+		case brand, model -> VALUE_TYPE_TEXT;
+		default -> throw new IllegalArgumentException("Unexpected value: " + field);
         };
     }
 

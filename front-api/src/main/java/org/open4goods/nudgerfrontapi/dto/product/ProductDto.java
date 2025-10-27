@@ -60,7 +60,10 @@ public record ProductDto(
          */
         public enum ProductDtoSortableFields {
                 price("price.minPrice.price"),
-                offersCount("offersCount");
+                offersCount("offersCount"),
+                brand("attributes.referentielAttributes.BRAND.keyword"),
+                model("attributes.referentielAttributes.MODEL.keyword");
+
 
                 private final String text;
 
@@ -96,8 +99,7 @@ public record ProductDto(
                 offersCount(FilterField.offersCount),
                 condition(FilterField.condition),
                 brand(FilterField.brand),
-                country(FilterField.country),
-                datasource(FilterField.datasource);
+                country(FilterField.country);
 
                 private final FilterField delegate;
 
