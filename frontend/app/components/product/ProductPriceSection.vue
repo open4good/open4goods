@@ -91,6 +91,7 @@ import {
   TooltipComponent,
   DataZoomComponent,
   LegendComponent,
+  TitleComponent,
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { useI18n } from 'vue-i18n'
@@ -98,7 +99,7 @@ import { formatDistanceToNow, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import type { ProductDto, CommercialEvent } from '~~/shared/api-client'
 
-use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, LegendComponent, CanvasRenderer])
+use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, LegendComponent, TitleComponent, CanvasRenderer])
 
 const props = defineProps({
   sectionId: {

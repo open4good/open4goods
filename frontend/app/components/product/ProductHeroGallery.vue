@@ -199,11 +199,20 @@ interface ProductGalleryItem {
   posterUrl?: string
 }
 
+interface LightboxMediaMeta {
+  type: ProductGalleryItem['type']
+  width: number
+  height: number
+  videoUrl?: string
+  posterUrl?: string
+}
+
 type LightboxItem = {
   el?: Element | null
   html?: string
   w?: number
   h?: number
+  open4goodsMeta?: LightboxMediaMeta
   [key: string]: unknown
 }
 
@@ -385,21 +394,13 @@ const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
     const caption = item.caption || props.title
     const sanitizedCaption = escapeHtml(caption)
 
-    const datasetAttributes = [
-      `data-type="${item.type}"`,
-      `data-width="${item.width}"`,
-      `data-height="${item.height}"`,
-    ]
-
-    if (item.videoUrl) {
-      datasetAttributes.push(`data-video="${escapeAttribute(item.videoUrl)}"`)
+    const meta: LightboxMediaMeta = {
+      type: item.type,
+      width: item.width,
+      height: item.height,
+      videoUrl: item.videoUrl,
+      posterUrl: item.posterUrl,
     }
-
-    if (item.posterUrl) {
-      datasetAttributes.push(`data-poster="${escapeAttribute(item.posterUrl)}"`)
-    }
-
-    const htmlAfterThumbnail = `<span class="product-gallery__lightbox-caption" ${datasetAttributes.join(' ')}>${sanitizedCaption}</span>`
 
     return {
       src: item.type === 'video' ? item.posterUrl ?? item.originalUrl : item.originalUrl,
@@ -409,7 +410,7 @@ const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
       title: sanitizedCaption,
       alt: item.alt,
       type: item.type,
-      htmlAfterThumbnail,
+      open4goodsMeta: meta,
     }
   }),
 )
@@ -471,15 +472,17 @@ const bindLightboxListeners = () => {
   }
 
   instance.listen('gettingData', (_index: number, item: LightboxItem) => {
-    const captionElement = item?.el?.querySelector?.('.product-gallery__lightbox-caption') as HTMLElement | undefined
-    const dataset = captionElement?.dataset
+    const meta = item.open4goodsMeta
 
-    if (dataset?.type === 'video' && dataset.video) {
-      const poster = dataset.poster ? ` poster="${dataset.poster}"` : ''
-      item.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${poster} src="${dataset.video}"></video></div>`
-      item.w = Number(dataset.width) || item.w || DEFAULT_VIDEO_WIDTH
-      item.h = Number(dataset.height) || item.h || DEFAULT_VIDEO_HEIGHT
+    if (meta?.type === 'video' && meta.videoUrl) {
+      const posterAttribute = meta.posterUrl ? ` poster="${escapeAttribute(meta.posterUrl)}"` : ''
+      item.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${posterAttribute} src="${escapeAttribute(meta.videoUrl)}"></video></div>`
+      item.w = meta.width || item.w || DEFAULT_VIDEO_WIDTH
+      item.h = meta.height || item.h || DEFAULT_VIDEO_HEIGHT
+      return
     }
+
+    item.html = undefined
   })
 
   instance.listen('afterChange', () => {

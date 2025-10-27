@@ -9,6 +9,13 @@ declare module 'vue3-picture-swipe' {
     title?: string
     html?: string
     el?: HTMLElement
+    thumbnail?: string
+    w?: number
+    h?: number
+    alt?: string
+    type?: string
+    open4goodsMeta?: Record<string, unknown>
+    [key: string]: unknown
   }
 
   interface PictureSwipeOptions {
