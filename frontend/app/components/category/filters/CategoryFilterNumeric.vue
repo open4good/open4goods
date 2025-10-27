@@ -250,6 +250,7 @@ const chartColor = computed(() => toRgbColor(chartColorVar.value, '29, 78, 216')
 const axisColor = computed(() => toRgbColor(axisColorVar.value, '71, 84, 103'))
 const labelColor = computed(() => toRgbColor(labelColorVar.value, '16, 24, 40'))
 const gridLineColor = computed(() => toRgbColor(axisColorVar.value, '229, 231, 235'))
+const CHART_HORIZONTAL_PADDING = 8
 
 const chartHeight = computed(() => {
   if (!buckets.value.length) {
@@ -355,8 +356,8 @@ const chartOptions = computed<EChartsOption | null>(() => {
     grid: {
       top: 32,
       bottom: 56,
-      left: 36,
-      right: 24,
+      left: CHART_HORIZONTAL_PADDING,
+      right: CHART_HORIZONTAL_PADDING,
       containLabel: true,
     },
     tooltip: {

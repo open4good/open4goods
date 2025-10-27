@@ -18,9 +18,8 @@
         v-for="group in groupedSubsets"
         :key="group.key"
         class="category-fast-filters__group"
+        :aria-label="group.label"
       >
-        <h3 class="category-fast-filters__group-label">{{ group.label }}</h3>
-
         <v-chip-group
           class="category-fast-filters__chip-group"
           :model-value="getGroupSelection(group.key)"
@@ -345,21 +344,8 @@ watch(groupedSubsets, () => {
     flex: 0 0 auto
     display: flex
     align-items: center
-    gap: 0.75rem
+    gap: 0.5rem
     min-width: 0
-
-  &__group-label
-    margin: 0
-    font-size: 0.85rem
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    text-transform: uppercase
-    letter-spacing: 0.04em
-    white-space: nowrap
-
-    &::after
-      content: ':'
-      margin-left: 0.35rem
 
   &__chip-group
     display: flex
@@ -398,9 +384,6 @@ watch(groupedSubsets, () => {
 
     &__group
       flex-wrap: wrap
-
-    &__group-label
-      font-size: 0.9rem
 
     &__chip-group
       flex-wrap: wrap
