@@ -1,9 +1,11 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
+import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHero from './ProductHero.vue'
+import { useProductCompareStore } from '~/stores/useProductCompareStore'
 
 vi.mock('#imports', () => ({
   useImage: () => (src: string) => src,
@@ -96,6 +98,19 @@ describe('ProductHero', () => {
               video: 'video',
             },
             videoBadge: 'Video',
+            compare: {
+              label: 'Compare',
+              selected: 'In comparison',
+              add: 'Add to compare',
+              remove: 'Remove from compare',
+              ariaAdd: 'Add {name} to compare',
+              ariaSelected: '{name} is in your comparison list',
+            },
+            offerConditions: {
+              occasion: 'Second-hand',
+              new: 'New',
+            },
+            offerConditionsToggleAria: 'Choose which offer condition to highlight',
           },
           price: {
             trend: {
@@ -105,8 +120,25 @@ describe('ProductHero', () => {
             },
           },
         },
+        category: {
+          products: {
+            compare: {
+              limitReached: 'Limit reached',
+              differentCategory: 'Different category',
+              missingIdentifier: 'Missing identifier',
+              addToList: 'Add to compare',
+              removeFromList: 'Remove from compare',
+            },
+            untitledProduct: 'Untitled product',
+          },
+        },
       },
     },
+  })
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    window.localStorage.clear()
   })
 
   const product = {
@@ -122,11 +154,32 @@ describe('ProductHero', () => {
     offers: {
       offersCount: 4,
       bestPrice: {
-        price: 199,
+        price: 799,
         currency: 'EUR',
         datasourceName: 'Shop',
         url: 'https://example.com',
         favicon: 'https://example.com/favicon.ico',
+        condition: 'NEW',
+      },
+      bestNewOffer: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://example.com',
+        favicon: 'https://example.com/favicon.ico',
+        condition: 'NEW',
+      },
+      bestOccasionOffer: {
+        price: 649,
+        currency: 'EUR',
+        datasourceName: 'Merchant U',
+        url: 'https://merchant-u.example',
+        favicon: 'https://merchant-u.example/favicon.ico',
+        condition: 'OCCASION',
+      },
+      occasionTrend: {
+        trend: 'PRICE_INCREASE',
+        variation: 5,
       },
       newTrend: {
         trend: 'PRICE_DECREASE',
@@ -206,8 +259,12 @@ describe('ProductHero', () => {
                 h(
                   'button',
                   {
-                    class: 'v-btn-stub',
+                    class: ['v-btn-stub', attrs.class],
                     type: 'button',
+                    disabled: attrs.disabled as boolean | undefined,
+                    'aria-pressed': attrs['aria-pressed'] as string | boolean | undefined,
+                    'aria-label': attrs['aria-label'] as string | undefined,
+                    title: attrs.title as string | undefined,
                     onClick: attrs.onClick as ((event: MouseEvent) => void) | undefined,
                   },
                   slots.default?.(),
@@ -233,7 +290,7 @@ describe('ProductHero', () => {
                 h(
                   'a',
                   {
-                    class: 'nuxt-link-stub',
+                    class: ['nuxt-link-stub', attrs.class],
                     href: props.to as string,
                     target: attrs.target as string | undefined,
                     rel: attrs.rel as string | undefined,
@@ -277,21 +334,45 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     const stage = wrapper.get('[data-testid="product-gallery-stage"]')
+    expect(stage.classes()).toContain('product-gallery__stage--video')
+    expect(stage.find('.product-gallery__stage-overlay').exists()).toBe(true)
+
+    const thumbnails = wrapper.findAll('[data-testid="product-gallery-thumbnail"]')
+    expect(thumbnails).toHaveLength(2)
+    expect(thumbnails[0]?.find('.product-gallery__thumbnail-badge').exists()).toBe(true)
+    expect(thumbnails[0]?.classes()).toContain('product-gallery__thumbnail-button--active')
+
+    await thumbnails[1]?.trigger('click')
+    await wrapper.vm.$nextTick()
+
     expect(stage.classes()).not.toContain('product-gallery__stage--video')
     const stageImage = stage.find('img')
     expect(stageImage.exists()).toBe(true)
     expect(stageImage.attributes('alt')).toBe('Front view')
 
-    const thumbnails = wrapper.findAll('[data-testid="product-gallery-thumbnail"]')
-    expect(thumbnails).toHaveLength(2)
-    expect(thumbnails[0]?.classes()).toContain('product-gallery__thumbnail-button--active')
-    expect(thumbnails[1]?.find('.product-gallery__thumbnail-badge').exists()).toBe(true)
+    await wrapper.unmount()
+  })
 
-    await thumbnails[1]?.trigger('click')
+  it('toggles compare state with visual feedback', async () => {
+    const wrapper = await mountComponent()
+    const store = useProductCompareStore()
+
+    const compareButton = wrapper.get('.product-hero__compare-button')
+    expect(compareButton.get('.product-hero__compare-label').text()).toBe('Compare')
+    expect(compareButton.classes()).not.toContain('product-hero__compare-button--active')
+    expect(store.hasProduct(product)).toBe(false)
+
+    await compareButton.trigger('click')
     await wrapper.vm.$nextTick()
 
-    expect(stage.classes()).toContain('product-gallery__stage--video')
-    expect(stage.find('.product-gallery__stage-overlay').exists()).toBe(true)
+    expect(store.hasProduct(product)).toBe(true)
+    expect(compareButton.get('.product-hero__compare-label').text()).toBe('In comparison')
+    expect(compareButton.classes()).toContain('product-hero__compare-button--active')
+
+    await compareButton.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(store.hasProduct(product)).toBe(false)
 
     await wrapper.unmount()
   })
@@ -317,26 +398,44 @@ describe('ProductHero', () => {
     expect(breadcrumbLinks).toHaveLength(2)
     expect(breadcrumbLinks[1]?.attributes('href')).toBe('/appliances')
 
-    const merchantPrefix = wrapper.get('.product-hero__price-merchant-prefix')
-    expect(merchantPrefix.text()).toBe('At')
+    const chips = wrapper.findAll('.product-hero__price-chip')
+    expect(chips).toHaveLength(2)
+    expect(chips[0]?.text()).toBe('Second-hand')
+    expect(chips[0]?.classes()).toContain('product-hero__price-chip--active')
 
-    const merchantLink = wrapper.get('.nuxt-link-stub')
-    expect(merchantLink.text()).toContain('Shop')
-    expect(merchantLink.attributes('href')).toBe('https://example.com')
-    expect(wrapper.find('.product-hero__price-merchant-favicon').attributes('src')).toBe(
-      'https://example.com/favicon.ico',
-    )
+    const priceValue = wrapper.get('.product-hero__price-value')
+    expect(priceValue.text()).toBe('€649')
 
-    const trendButton = wrapper.get('.product-hero__price-trend')
-    expect(trendButton.text()).toContain('Price drop of')
+    const merchantLink = wrapper.get('.product-hero__price-merchant-link')
+    expect(merchantLink.text()).toContain('Merchant U')
+    expect(merchantLink.attributes('href')).toBe('https://merchant-u.example')
+    expect(merchantLink.find('.product-hero__price-merchant-favicon').attributes('width')).toBe('48')
+
+    let trendButton = wrapper.get('.product-hero__price-trend')
+    expect(trendButton.text()).toContain('Price increase of')
     await trendButton.trigger('click')
     expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ top: 80, behavior: 'smooth' }))
 
     scrollToSpy.mockClear()
 
-    const offersButton = wrapper.get('.v-btn-stub')
-    expect(offersButton.text()).toBe('View the 4 offers')
-    await offersButton.trigger('click')
+    await chips[1]?.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(chips[1]?.classes()).toContain('product-hero__price-chip--active')
+    expect(priceValue.text()).toBe('€799')
+
+    const refreshedMerchantLink = wrapper.get('.product-hero__price-merchant-link')
+    expect(refreshedMerchantLink.text()).toContain('Shop')
+    expect(refreshedMerchantLink.attributes('href')).toBe('https://example.com')
+
+    trendButton = wrapper.get('.product-hero__price-trend')
+    expect(trendButton.text()).toContain('Price drop of')
+
+    const offersButton = wrapper
+      .findAll('.v-btn-stub')
+      .find((btn) => btn.text().includes('View the 4 offers'))
+    expect(offersButton?.exists()).toBe(true)
+    await offersButton?.trigger('click')
     expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ top: 264, behavior: 'smooth' }))
 
     scrollToSpy.mockRestore()

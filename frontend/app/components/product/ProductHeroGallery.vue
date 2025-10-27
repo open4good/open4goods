@@ -219,12 +219,14 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
   const images = props.product.resources?.images ?? []
   const videos = props.product.resources?.videos ?? []
 
-  const items: ProductGalleryItem[] = []
   const fallbackPoster =
     coverImageRaw.value ??
     images[0]?.url ??
     images[0]?.originalUrl ??
     ''
+
+  const imageItems: ProductGalleryItem[] = []
+  const videoItems: ProductGalleryItem[] = []
 
   images.forEach((image) => {
     const original = image.originalUrl ?? image.url ?? ''
@@ -249,7 +251,7 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
       format: 'webp',
     }) || preview
 
-    items.push({
+    imageItems.push({
       id: `image-${image.cacheKey ?? original}`,
       type: 'image',
       originalUrl: original,
@@ -290,7 +292,7 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
         }) || posterSource
       : ''
 
-    items.push({
+    videoItems.push({
       id: `video-${video.cacheKey ?? url}`,
       type: 'video',
       originalUrl: poster || url,
@@ -307,7 +309,7 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
     })
   })
 
-  return items.filter((item) => Boolean(item.originalUrl))
+  return [...videoItems, ...imageItems].filter((item) => Boolean(item.originalUrl))
 })
 
 const heroFallbackImage = computed(() => {
@@ -522,6 +524,36 @@ const ensureLightbox = async () => {
   }
 }
 
+const pendingOpenIndex = ref<number | null>(null)
+
+const openLightboxAt = (index: number) => {
+  const componentInstance = pictureSwipeRef.value
+
+  if (!componentInstance) {
+    pendingOpenIndex.value = index
+    return false
+  }
+
+  if (componentInstance.open) {
+    componentInstance.open(index)
+    window.setTimeout(bindLightboxListeners, 150)
+    return true
+  }
+
+  const rootElement = (componentInstance.$el ?? pictureSwipeContainer.value) as HTMLElement | undefined
+  const anchors = rootElement?.querySelectorAll<HTMLAnchorElement>('figure.gallery-thumbnail a')
+  const target = anchors?.[index]
+
+  if (target) {
+    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    window.setTimeout(bindLightboxListeners, 150)
+    return true
+  }
+
+  pendingOpenIndex.value = index
+  return false
+}
+
 const openGallery = async (index: number) => {
   if (!galleryItems.value.length) {
     return
@@ -532,28 +564,28 @@ const openGallery = async (index: number) => {
 
   const safeIndex = Math.min(Math.max(index, 0), galleryItems.value.length - 1)
   activeMediaIndex.value = safeIndex
-
-  const componentInstance = pictureSwipeRef.value
-
-  if (componentInstance?.open) {
-    componentInstance.open(safeIndex)
-    window.setTimeout(bindLightboxListeners, 150)
-    return
-  }
-
-  const rootElement = (componentInstance?.$el ?? pictureSwipeContainer.value) as HTMLElement | undefined
-  const anchors = rootElement?.querySelectorAll<HTMLAnchorElement>('figure.gallery-thumbnail a')
-  const target = anchors?.[safeIndex]
-
-  if (target) {
-    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
-    window.setTimeout(bindLightboxListeners, 150)
-  }
+  openLightboxAt(safeIndex)
 }
 
 onMounted(async () => {
   await ensureLightbox()
 })
+
+watch(
+  pictureSwipeRef,
+  async (instance) => {
+    if (!instance || pendingOpenIndex.value === null) {
+      return
+    }
+
+    await nextTick()
+
+    const index = pendingOpenIndex.value
+    pendingOpenIndex.value = null
+    openLightboxAt(index)
+  },
+  { flush: 'post' },
+)
 </script>
 
 <style scoped>

@@ -1243,7 +1243,20 @@
         "image": "l’image",
         "video": "la vidéo"
       },
-      "videoBadge": "Vidéo"
+      "videoBadge": "Vidéo",
+      "compare": {
+        "label": "Comparer",
+        "selected": "Comparé",
+        "add": "Ajouter à la comparaison",
+        "remove": "Retirer de la comparaison",
+        "ariaAdd": "Ajouter {name} à la comparaison",
+        "ariaSelected": "{name} est dans la comparaison"
+      },
+      "offerConditions": {
+        "occasion": "Occasion",
+        "new": "Neuf"
+      },
+      "offerConditionsToggleAria": "Sélectionner le type d'offre à afficher"
     },
     "impact": {
       "title": "Impact écologique",

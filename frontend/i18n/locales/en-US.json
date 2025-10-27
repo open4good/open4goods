@@ -1235,7 +1235,20 @@
         "image": "image",
         "video": "video"
       },
-      "videoBadge": "Video"
+      "videoBadge": "Video",
+      "compare": {
+        "label": "Compare",
+        "selected": "In comparison",
+        "add": "Add to compare",
+        "remove": "Remove from compare",
+        "ariaAdd": "Add {name} to compare",
+        "ariaSelected": "{name} is in your comparison list"
+      },
+      "offerConditions": {
+        "occasion": "Second-hand",
+        "new": "New"
+      },
+      "offerConditionsToggleAria": "Choose which offer condition to highlight"
     },
     "impact": {
       "title": "Environmental impact",
