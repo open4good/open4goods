@@ -114,6 +114,7 @@
 import {
   computed,
   nextTick,
+  onBeforeUnmount,
   onMounted,
   ref,
   shallowRef,
@@ -148,6 +149,7 @@ type PictureSwipeComponentInstance = ComponentPublicInstance<{ pswp?: LightboxIn
 const pictureSwipeComponent = shallowRef<PictureSwipeComponent | null>(null)
 const pictureSwipeRef = ref<PictureSwipeComponentInstance | null>(null)
 const pictureSwipeContainer = ref<HTMLElement | null>(null)
+const lightboxRetryHandle = ref<number | null>(null)
 
 const { t } = useI18n()
 const nuxtImage = useImage()
@@ -529,7 +531,37 @@ const ensureLightbox = async () => {
 
 const pendingOpenIndex = ref<number | null>(null)
 
-const openLightboxAt = (index: number) => {
+const LIGHTBOX_RETRY_DELAY = 80
+const LIGHTBOX_MAX_ATTEMPTS = 10
+
+const clearLightboxRetry = () => {
+  if (lightboxRetryHandle.value === null) {
+    return
+  }
+
+  if (import.meta.client) {
+    window.clearTimeout(lightboxRetryHandle.value)
+  } else {
+    clearTimeout(lightboxRetryHandle.value)
+  }
+
+  lightboxRetryHandle.value = null
+}
+
+const scheduleLightboxRetry = (index: number, attempt: number) => {
+  if (!import.meta.client || attempt >= LIGHTBOX_MAX_ATTEMPTS) {
+    return
+  }
+
+  clearLightboxRetry()
+
+  lightboxRetryHandle.value = window.setTimeout(() => {
+    lightboxRetryHandle.value = null
+    openLightboxAt(index, attempt + 1)
+  }, LIGHTBOX_RETRY_DELAY)
+}
+
+const openLightboxAt = (index: number, attempt = 0) => {
   const componentInstance = pictureSwipeRef.value
 
   if (!componentInstance) {
@@ -538,6 +570,8 @@ const openLightboxAt = (index: number) => {
   }
 
   if (componentInstance.open) {
+    clearLightboxRetry()
+    pendingOpenIndex.value = null
     componentInstance.open(index)
     window.setTimeout(bindLightboxListeners, 150)
     return true
@@ -548,6 +582,16 @@ const openLightboxAt = (index: number) => {
   const target = anchors?.[index]
 
   if (target) {
+    const galleryElement = rootElement?.querySelector<HTMLElement>('.my-gallery')
+
+    if (!galleryElement || typeof galleryElement.onclick !== 'function') {
+      pendingOpenIndex.value = index
+      scheduleLightboxRetry(index, attempt)
+      return false
+    }
+
+    clearLightboxRetry()
+    pendingOpenIndex.value = null
     target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
     window.setTimeout(bindLightboxListeners, 150)
     return true
@@ -572,6 +616,10 @@ const openGallery = async (index: number) => {
 
 onMounted(async () => {
   await ensureLightbox()
+})
+
+onBeforeUnmount(() => {
+  clearLightboxRetry()
 })
 
 watch(
