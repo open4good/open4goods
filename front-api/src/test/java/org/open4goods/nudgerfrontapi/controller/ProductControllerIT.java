@@ -273,7 +273,7 @@ class ProductControllerIT {
                 .willReturn(responseDto);
 
         mockMvc.perform(get("/products")
-                        .param("sort", "attributes.referentielAttributes.BRAND.keyword,asc")
+                        .param("sort", "attributes.referentielAttributes.BRAND,asc")
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)

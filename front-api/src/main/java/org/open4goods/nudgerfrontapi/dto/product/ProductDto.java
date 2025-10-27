@@ -61,8 +61,8 @@ public record ProductDto(
         public enum ProductDtoSortableFields {
                 price("price.minPrice.price"),
                 offersCount("offersCount"),
-                brand("attributes.referentielAttributes.BRAND.keyword"),
-                model("attributes.referentielAttributes.MODEL.keyword");
+                brand("attributes.referentielAttributes.BRAND"),
+                model("attributes.referentielAttributes.MODEL");
 
 
                 private final String text;
