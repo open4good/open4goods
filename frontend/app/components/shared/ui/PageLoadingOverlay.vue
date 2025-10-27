@@ -1,13 +1,14 @@
 <template>
   <teleport to="body">
     <div
-      v-if="routeLoading"
+      v-show="routeLoading"
       data-testid="page-loading-overlay"
       class="page-loading-overlay"
+      :style="{ backgroundColor: scrimColor }"
       role="status"
       aria-live="polite"
-      aria-busy="true"
-      :style="{ backgroundColor: scrimColor }"
+      :aria-busy="routeLoading ? 'true' : 'false'"
+      :aria-hidden="(!routeLoading).toString()"
     >
       <div class="page-loading-overlay__content">
         <v-progress-circular
