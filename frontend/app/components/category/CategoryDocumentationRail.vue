@@ -65,8 +65,26 @@ const resolveWikiUrl = (page: WikiPageConfig) => {
   return page.verticalUrl ?? '#'
 }
 
+const BLOG_POST_PATH_PREFIX = '/blog/'
+
 const resolvePostUrl = (post: BlogPostDto) => {
-  return post.url ?? '#'
+  const rawUrl = post.url?.trim()
+
+  if (!rawUrl) {
+    return '#'
+  }
+
+  if (/^https?:\/\//i.test(rawUrl)) {
+    return rawUrl
+  }
+
+  const normalised = rawUrl.replace(/^\/+/, '')
+
+  if (normalised.startsWith('blog/')) {
+    return `/${normalised}`
+  }
+
+  return `${BLOG_POST_PATH_PREFIX}${normalised}`
 }
 </script>
 

@@ -143,6 +143,42 @@ const props = defineProps<{
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
+const currencySymbolCache = new Map<string, string>()
+const NBSP = '\u00A0'
+
+const resolveCurrencySymbol = (currency?: string | null): string | null => {
+  if (!currency) {
+    return null
+  }
+
+  const upperCaseCurrency = currency.toUpperCase()
+
+  if (currencySymbolCache.has(upperCaseCurrency)) {
+    return currencySymbolCache.get(upperCaseCurrency) ?? null
+  }
+
+  try {
+    const formatter = new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: upperCaseCurrency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+      currencyDisplay: 'symbol',
+    })
+
+    const symbol =
+      formatter.formatToParts(0).find((part) => part.type === 'currency')?.value ?? upperCaseCurrency
+
+    currencySymbolCache.set(upperCaseCurrency, symbol)
+
+    return symbol
+  } catch {
+    currencySymbolCache.set(upperCaseCurrency, upperCaseCurrency)
+
+    return upperCaseCurrency
+  }
+}
+
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 const cardSize = computed(() => props.size ?? 'comfortable')
 
@@ -202,8 +238,25 @@ const formatOfferPrice = (
     return null
   }
 
-  if (offer.shortPrice) {
-    return offer.shortPrice
+  const currency = offer.currency ?? fallback.offers?.bestPrice?.currency
+  const shortPrice = offer.shortPrice?.trim()
+
+  if (shortPrice) {
+    if (!currency) {
+      return shortPrice
+    }
+
+    const symbol = resolveCurrencySymbol(currency)
+
+    if (!symbol) {
+      return shortPrice
+    }
+
+    const normalisedShortPrice = shortPrice.replace(/\s+/g, ' ').trim()
+    const containsSymbol =
+      normalisedShortPrice.includes(symbol) || normalisedShortPrice.toUpperCase().includes(currency.toUpperCase())
+
+    return containsSymbol ? normalisedShortPrice : `${normalisedShortPrice}${NBSP}${symbol}`
   }
 
   const price = offer.price
@@ -211,8 +264,6 @@ const formatOfferPrice = (
   if (price == null) {
     return null
   }
-
-  const currency = offer.currency ?? fallback.offers?.bestPrice?.currency
 
   if (currency) {
     try {
