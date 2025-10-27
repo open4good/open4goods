@@ -261,6 +261,27 @@ class ProductControllerIT {
     }
 
     @Test
+    void productsEndpointAllowsGlobalSortWhenVerticalSpecified() throws Exception {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("electronics");
+        given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
+
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
+                .willReturn(responseDto);
+
+        mockMvc.perform(get("/products")
+                        .param("sort", "attributes.referentielAttributes.BRAND.keyword,asc")
+                        .param("verticalId", "electronics")
+                        .param("domainLanguage", "FR")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void productsEndpointAcceptsJsonSortSyntax() throws Exception {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);

@@ -463,7 +463,10 @@ public class ProductController {
         VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
         ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
         Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
-        Set<String> allowedSorts = hasVertical ? allowedFilters : collectGlobalSortMappings();
+        Set<String> allowedSorts = collectGlobalSortMappings();
+        if (hasVertical) {
+            allowedSorts.addAll(allowedFilters);
+        }
         Set<String> allowedAggregations = collectAllowedAggregationMappings(allowedFilters, config);
         return new SearchCapabilities(allowedFilters, allowedSorts, allowedAggregations);
     }
