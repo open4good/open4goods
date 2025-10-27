@@ -1253,6 +1253,8 @@
     "impact": {
       "title": "Environmental impact",
       "subtitle": "Explore how this product scores across ecological and social criteria.",
+      "primaryScoreLabel": "Overall impact",
+      "noPrimaryScore": "Impact score unavailable",
       "radarAria": "Impact radar chart for {product}",
       "rankingTitle": "Ranking",
       "rankingValue": "Position {position} of {total}",
