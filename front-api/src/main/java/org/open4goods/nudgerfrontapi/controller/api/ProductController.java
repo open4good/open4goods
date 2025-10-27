@@ -88,7 +88,7 @@ public class ProductController {
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
-    private static final String KEYWORD_VALUE_SUFFIX = ".keyword";
+    private static final String KEYWORD_VALUE_SUFFIX = ".value";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
