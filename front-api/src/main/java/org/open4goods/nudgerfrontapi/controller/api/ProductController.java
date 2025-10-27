@@ -88,7 +88,7 @@ public class ProductController {
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
-    private static final String KEYWORD_VALUE_SUFFIX = ".keyword";
+    private static final String KEYWORD_VALUE_SUFFIX = ".value";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
@@ -463,7 +463,10 @@ public class ProductController {
         VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
         ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
         Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
-        Set<String> allowedSorts = hasVertical ? allowedFilters : collectGlobalSortMappings();
+        Set<String> allowedSorts = collectGlobalSortMappings();
+        if (hasVertical) {
+            allowedSorts.addAll(allowedFilters);
+        }
         Set<String> allowedAggregations = collectAllowedAggregationMappings(allowedFilters, config);
         return new SearchCapabilities(allowedFilters, allowedSorts, allowedAggregations);
     }
