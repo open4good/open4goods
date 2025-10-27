@@ -235,7 +235,7 @@ public class CategoriesController {
         Map<Long, ProductDto> uniqueProducts = new LinkedHashMap<>();
         Set<String> includes = Set.of(ProductDtoComponent.base.name());
         for (SearchHit<Product> hit : result.hits().getSearchHits()) {
-            ProductDto dto = productMappingService.mapProduct(hit.getContent(), locale, includes, domainLanguage);
+            ProductDto dto = productMappingService.mapProduct(hit.getContent(), locale, includes, domainLanguage, false);
             if (dto != null && !uniqueProducts.containsKey(dto.gtin())) {
                 uniqueProducts.put(dto.gtin(), dto);
             }

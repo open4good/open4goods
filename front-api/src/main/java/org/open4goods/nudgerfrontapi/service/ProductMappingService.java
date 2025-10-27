@@ -179,7 +179,7 @@ public class ProductMappingService {
     public ProductDto getProduct(long gtin, Locale locale, Set<String> includes, DomainLanguage domainLanguage)
             throws ResourceNotFoundException {
         Product product = repository.getById(gtin);
-        return mapProduct(product, locale, includes, domainLanguage);
+        return mapProduct(product, locale, includes, domainLanguage, true);
     }
 
     /**
@@ -191,7 +191,7 @@ public class ProductMappingService {
      * @param domainLanguage domain language requested by the caller
      * @return DTO representing the product or {@code null} when no vertical configuration matches
      */
-    public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage) {
+    public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage, boolean resolveProductReferences) {
 
         VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
@@ -202,7 +202,7 @@ public class ProductMappingService {
         ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes) ? mapAttributes(product, vConfig, domainLanguage) : null;
         ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product) : null;
         ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources) ? mapDatasources(product) : null;
-        Map<Long, ProductReferenceDto> referencedProducts = components.contains(ProductDtoComponent.scores)
+        Map<Long, ProductReferenceDto> referencedProducts = components.contains(ProductDtoComponent.scores) && resolveProductReferences
                 ? resolveReferencedProducts(product, domainLanguage, locale)
                 : Collections.emptyMap();
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
@@ -841,7 +841,7 @@ public class ProductMappingService {
 
         List<ProductDto> items = hits.getSearchHits().stream()
                 .map(SearchHit::getContent)
-                .map(product -> mapProduct(product, locale, includes, domainLanguage))
+                .map(product -> mapProduct(product, locale, includes, domainLanguage, false))
                 .toList();
 
         Page<ProductDto> page = new PageImpl<>(items, pageable, hits.getTotalHits());
