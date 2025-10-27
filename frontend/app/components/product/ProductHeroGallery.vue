@@ -75,12 +75,17 @@
             </li>
           </ul>
 
-          <div v-if="pictureSwipeComponent" ref="pictureSwipeContainer" class="product-gallery__lightbox">
+          <div v-if="lightGalleryComponent" class="product-gallery__lightbox">
             <component
-              :is="pictureSwipeComponent"
-              ref="pictureSwipeRef"
-              :items="pictureSwipeItems"
-              :options="pictureSwipeOptions"
+              :is="lightGalleryComponent"
+              :settings="lightGallerySettings"
+              :plugins="lightGalleryPlugins"
+              :dynamic="true"
+              :dynamic-el="lightGalleryItems"
+              @on-init="handleLightGalleryInit"
+              @on-after-slide="handleAfterSlide"
+              @on-before-slide="handleBeforeSlide"
+              @on-before-close="handleBeforeClose"
             />
           </div>
         </div>
@@ -111,19 +116,9 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onMounted,
-  ref,
-  shallowRef,
-  watch,
-  type ComponentPublicInstance,
-  type PropType,
-} from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, watch, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
-import type { PictureSwipeItem, PictureSwipeOptions } from 'vue3-picture-swipe'
 
 defineOptions({ inheritAttrs: false })
 
@@ -138,16 +133,26 @@ const props = defineProps({
   },
 })
 
-type PictureSwipeComponent = typeof import('vue3-picture-swipe')['default']
+type LightGalleryComponent = typeof import('lightgallery/vue')['LightGallery']
 
-type PictureSwipeComponentInstance = ComponentPublicInstance<{ pswp?: LightboxInstance }> & {
-  open?: (index: number) => void
-  $el?: HTMLElement
+type LightGalleryModule = unknown
+
+interface LightGalleryInstance {
+  openGallery: (index?: number) => void
+  closeGallery?: () => void
 }
 
-const pictureSwipeComponent = shallowRef<PictureSwipeComponent | null>(null)
-const pictureSwipeRef = ref<PictureSwipeComponentInstance | null>(null)
-const pictureSwipeContainer = ref<HTMLElement | null>(null)
+interface LightGalleryInitDetail {
+  instance: LightGalleryInstance | null
+}
+
+interface LightGallerySlideDetail {
+  index?: number
+}
+
+const lightGalleryComponent = shallowRef<LightGalleryComponent | null>(null)
+const lightGalleryPlugins = shallowRef<LightGalleryModule[]>([])
+const lightGalleryInstance = shallowRef<LightGalleryInstance | null>(null)
 
 const { t } = useI18n()
 const nuxtImage = useImage()
@@ -197,31 +202,6 @@ interface ProductGalleryItem {
   caption: string
   videoUrl?: string
   posterUrl?: string
-}
-
-interface LightboxMediaMeta {
-  type: ProductGalleryItem['type']
-  width: number
-  height: number
-  videoUrl?: string
-  posterUrl?: string
-}
-
-type LightboxItem = {
-  el?: Element | null
-  html?: string
-  w?: number
-  h?: number
-  open4goodsMeta?: LightboxMediaMeta
-  [key: string]: unknown
-}
-
-interface LightboxInstance {
-  listen(event: 'gettingData', handler: (index: number, item: LightboxItem) => void): void
-  listen(event: string, handler: (...args: unknown[]) => void): void
-  getCurrentIndex?: () => number
-  container?: HTMLElement
-  init?: () => void
 }
 
 const galleryItems = computed<ProductGalleryItem[]>(() => {
@@ -386,175 +366,96 @@ const escapeMap: Record<string, string> = {
   "'": '&#39;',
 }
 
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => escapeMap[char] ?? char)
-const escapeAttribute = (value: string | null | undefined) => escapeHtml(String(value ?? ''))
-
-const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
-  galleryItems.value.map((item) => {
-    const caption = item.caption || props.title
-    const sanitizedCaption = escapeHtml(caption)
-
-    const meta: LightboxMediaMeta = {
-      type: item.type,
-      width: item.width,
-      height: item.height,
-      videoUrl: item.videoUrl,
-      posterUrl: item.posterUrl,
-    }
-
-    return {
-      src: item.type === 'video' ? item.posterUrl ?? item.originalUrl : item.originalUrl,
-      thumbnail: item.thumbnailUrl,
-      w: item.width,
-      h: item.height,
-      title: sanitizedCaption,
-      alt: item.alt,
-      type: item.type,
-      open4goodsMeta: meta,
-    }
-  }),
-)
-
-const pictureSwipeOptions = computed<PictureSwipeOptions>(() => {
-  const base: PictureSwipeOptions = {
-    shareEl: false,
-    fullscreenEl: true,
-    zoomEl: true,
-    counterEl: true,
-    history: false,
-    bgOpacity: 0.95,
-    closeOnScroll: false,
-  }
-
-  if (import.meta.client) {
-    base.getThumbBoundsFn = (index: number) => {
-      const thumbnails = document.querySelectorAll<HTMLElement>('.product-gallery__thumbnail-image')
-      const element = thumbnails[index]
-
-      if (!element) {
-        const scrollY = window.scrollY || document.documentElement.scrollTop
-        return { x: window.innerWidth / 2, y: scrollY + window.innerHeight / 2, w: 0 }
-      }
-
-      const rect = element.getBoundingClientRect()
-      const scrollY = window.scrollY || document.documentElement.scrollTop
-
-      return {
-        x: rect.left,
-        y: rect.top + scrollY,
-        w: rect.width,
-      }
-    }
-  }
-
-  return base
-})
-
-const lightboxBound = ref(false)
-
-const bindLightboxListeners = () => {
-  const instance = (pictureSwipeRef.value as ComponentPublicInstance<{ pswp?: LightboxInstance }> | null)?.pswp
-
-  if (!instance || lightboxBound.value) {
-    return
-  }
-
-  lightboxBound.value = true
-  let activeVideo: HTMLVideoElement | null = null
-
-  const stopVideo = () => {
-    if (activeVideo) {
-      activeVideo.pause()
-      activeVideo.removeAttribute('src')
-      activeVideo.load()
-      activeVideo = null
-    }
-  }
-
-  instance.listen('gettingData', (_index: number, item: LightboxItem) => {
-    const meta = item.open4goodsMeta
-
-    if (meta?.type === 'video' && meta.videoUrl) {
-      const posterAttribute = meta.posterUrl ? ` poster="${escapeAttribute(meta.posterUrl)}"` : ''
-      item.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${posterAttribute} src="${escapeAttribute(meta.videoUrl)}"></video></div>`
-      item.w = meta.width || item.w || DEFAULT_VIDEO_WIDTH
-      item.h = meta.height || item.h || DEFAULT_VIDEO_HEIGHT
-      return
-    }
-
-    item.html = undefined
-  })
-
-  instance.listen('afterChange', () => {
-    activeMediaIndex.value = instance.getCurrentIndex?.() ?? activeMediaIndex.value
-    stopVideo()
-
-    nextTick(() => {
-      const video = instance.container?.querySelector?.('.product-gallery__lightbox-video video')
-      if (video instanceof HTMLVideoElement) {
-        activeVideo = video
-        video.play().catch(() => {})
-      }
-    })
-  })
-
-  const resetBinding = () => {
-    stopVideo()
-    lightboxBound.value = false
-  }
-
-  instance.listen('beforeChange', stopVideo)
-  instance.listen('close', resetBinding)
-  instance.listen('destroy', resetBinding)
-}
-
 const setActiveMedia = (index: number) => {
   if (index >= 0 && index < galleryItems.value.length) {
     activeMediaIndex.value = index
   }
 }
 
-const ensureLightbox = async () => {
-  if (pictureSwipeComponent.value || !import.meta.client) {
+const pendingOpenIndex = ref<number | null>(null)
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => escapeMap[char] ?? char)
+
+const lightGalleryItems = computed(() =>
+  galleryItems.value.map((item) => {
+    const caption = item.caption || props.title
+    const sanitizedCaption = escapeHtml(caption)
+
+    const base = {
+      src: item.type === 'video' ? item.posterUrl ?? item.originalUrl : item.originalUrl,
+      thumb: item.thumbnailUrl,
+      subHtml: `<div class="product-gallery__lightbox-caption" data-type="${item.type}">${sanitizedCaption}</div>`,
+      poster: item.posterUrl,
+    }
+
+    if (item.type === 'video' && item.videoUrl) {
+      return {
+        ...base,
+        video: {
+          source: [
+            {
+              src: item.videoUrl,
+              type: 'video/mp4',
+            },
+          ],
+          attributes: {
+            preload: 'none',
+            controls: 'true',
+            playsinline: 'true',
+          },
+        },
+      }
+    }
+
+    return base
+  }),
+)
+
+const lightGallerySettings = computed(() => ({
+  licenseKey: '0000-0000-000-0000',
+  download: false,
+  hideBarsDelay: 3000,
+  speed: 400,
+  counter: true,
+  zoom: true,
+  fullScreen: true,
+  selector: '',
+  dynamic: true,
+  thumbnail: true,
+}))
+
+const ensureLightGallery = async () => {
+  if (!import.meta.client) {
     return
   }
 
-  try {
-    const [{ default: VuePictureSwipe }] = await Promise.all([import('vue3-picture-swipe')])
-    pictureSwipeComponent.value = VuePictureSwipe
-  } catch (error) {
-    console.error('Failed to load gallery', error)
-  }
-}
+  if (!lightGalleryComponent.value) {
+    await Promise.all([
+      import('lightgallery/css/lightgallery.css'),
+      import('lightgallery/css/lg-zoom.css'),
+      import('lightgallery/css/lg-fullscreen.css'),
+      import('lightgallery/css/lg-thumbnail.css'),
+      import('lightgallery/css/lg-video.css'),
+    ])
 
-const pendingOpenIndex = ref<number | null>(null)
-
-const openLightboxAt = (index: number) => {
-  const componentInstance = pictureSwipeRef.value
-
-  if (!componentInstance) {
-    pendingOpenIndex.value = index
-    return false
+    const [{ LightGallery }] = await Promise.all([import('lightgallery/vue')])
+    lightGalleryComponent.value = LightGallery
   }
 
-  if (componentInstance.open) {
-    componentInstance.open(index)
-    window.setTimeout(bindLightboxListeners, 150)
-    return true
+  if (!lightGalleryPlugins.value.length) {
+    const [
+      { default: lgZoom },
+      { default: lgFullscreen },
+      { default: lgThumbnail },
+      { default: lgVideo },
+    ] = await Promise.all([
+      import('lightgallery/plugins/zoom'),
+      import('lightgallery/plugins/fullscreen'),
+      import('lightgallery/plugins/thumbnail'),
+      import('lightgallery/plugins/video'),
+    ])
+
+    lightGalleryPlugins.value = [lgZoom, lgFullscreen, lgThumbnail, lgVideo]
   }
-
-  const rootElement = (componentInstance.$el ?? pictureSwipeContainer.value) as HTMLElement | undefined
-  const anchors = rootElement?.querySelectorAll<HTMLAnchorElement>('figure.gallery-thumbnail a')
-  const target = anchors?.[index]
-
-  if (target) {
-    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
-    window.setTimeout(bindLightboxListeners, 150)
-    return true
-  }
-
-  pendingOpenIndex.value = index
-  return false
 }
 
 const openGallery = async (index: number) => {
@@ -562,33 +463,51 @@ const openGallery = async (index: number) => {
     return
   }
 
-  await ensureLightbox()
+  await ensureLightGallery()
   await nextTick()
 
   const safeIndex = Math.min(Math.max(index, 0), galleryItems.value.length - 1)
   activeMediaIndex.value = safeIndex
-  openLightboxAt(safeIndex)
+
+  const instance = lightGalleryInstance.value
+
+  if (!instance) {
+    pendingOpenIndex.value = safeIndex
+    return
+  }
+
+  instance.openGallery(safeIndex)
+}
+
+const handleLightGalleryInit = (detail: LightGalleryInitDetail) => {
+  lightGalleryInstance.value = detail.instance
+
+  if (pendingOpenIndex.value !== null && detail.instance) {
+    const index = pendingOpenIndex.value
+    pendingOpenIndex.value = null
+    detail.instance.openGallery(index)
+  }
+}
+
+const handleBeforeSlide = (detail: LightGallerySlideDetail) => {
+  if (typeof detail.index === 'number') {
+    activeMediaIndex.value = detail.index
+  }
+}
+
+const handleAfterSlide = (detail: LightGallerySlideDetail) => {
+  if (typeof detail.index === 'number') {
+    activeMediaIndex.value = detail.index
+  }
+}
+
+const handleBeforeClose = () => {
+  pendingOpenIndex.value = null
 }
 
 onMounted(async () => {
-  await ensureLightbox()
+  await ensureLightGallery()
 })
-
-watch(
-  pictureSwipeRef,
-  async (instance) => {
-    if (!instance || pendingOpenIndex.value === null) {
-      return
-    }
-
-    await nextTick()
-
-    const index = pendingOpenIndex.value
-    pendingOpenIndex.value = null
-    openLightboxAt(index)
-  },
-  { flush: 'post' },
-)
 </script>
 
 <style scoped>
@@ -711,6 +630,14 @@ watch(
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
+}
+
+.product-gallery__lightbox-caption {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  padding: 0.75rem 1rem;
 }
 
 .product-gallery__sr-only {

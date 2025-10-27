@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
+import { defineComponent, h, onMounted, type PropType } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
@@ -11,66 +11,42 @@ vi.mock('#imports', () => ({
   useImage: () => (src: string) => src,
 }))
 
-type StubItem = {
-  src?: string
-  title?: string
-  thumbnail?: string
-  alt?: string
-  type?: string
-}
+const { lightGalleryOpenSpy } = vi.hoisted(() => ({
+  lightGalleryOpenSpy: vi.fn(),
+}))
 
-vi.mock('vue3-picture-swipe', () => {
-  const VuePictureSwipeStub = defineComponent({
-    name: 'VuePictureSwipeStub',
+vi.mock('lightgallery/vue', () => {
+  const LightGalleryStub = defineComponent({
+    name: 'LightGalleryStub',
     props: {
-      items: {
-        type: Array as PropType<StubItem[]>,
-        default: () => [] as StubItem[],
-      },
-      options: {
-        type: Object as PropType<Record<string, unknown>>,
-        default: () => ({}),
+      dynamicEl: {
+        type: Array as PropType<unknown[]>,
+        default: () => [],
       },
     },
-    setup(props, { expose }) {
-      const root = ref<HTMLElement | null>(null)
-      const pswp = {
-        listen: () => {},
-        getCurrentIndex: () => 0,
-        container: typeof document !== 'undefined' ? document.createElement('div') : undefined,
-      }
-
+    emits: ['onInit', 'onAfterSlide', 'onBeforeSlide', 'onBeforeClose'],
+    setup(_props, { emit }) {
       onMounted(() => {
-        expose({ $el: root.value, pswp })
+        emit('onInit', { instance: { openGallery: lightGalleryOpenSpy } })
       })
 
-      return () =>
-        h(
-          'div',
-          { ref: root, class: 'vue-picture-swipe-stub' },
-          (props.items as StubItem[]).map((item, index: number) =>
-            h('figure', { class: 'gallery-thumbnail', id: `item-${index}` }, [
-              h(
-                'a',
-                { href: item.src ?? '', title: item.title ?? '' },
-                [h('img', { src: item.thumbnail ?? '', alt: item.alt ?? '' })],
-              ),
-              h(
-                'span',
-                {
-                  class: 'product-gallery__lightbox-caption',
-                  'data-type': item.type ?? 'image',
-                },
-                item.title ?? '',
-              ),
-            ]),
-          ),
-        )
+      return () => h('div', { class: 'lightgallery-stub' })
     },
   })
 
-  return { default: VuePictureSwipeStub }
+  return { LightGallery: LightGalleryStub }
 })
+
+vi.mock('lightgallery/plugins/zoom', () => ({ default: () => ({}) }))
+vi.mock('lightgallery/plugins/fullscreen', () => ({ default: () => ({}) }))
+vi.mock('lightgallery/plugins/thumbnail', () => ({ default: () => ({}) }))
+vi.mock('lightgallery/plugins/video', () => ({ default: () => ({}) }))
+
+vi.mock('lightgallery/css/lightgallery.css', () => ({}), { virtual: true })
+vi.mock('lightgallery/css/lg-zoom.css', () => ({}), { virtual: true })
+vi.mock('lightgallery/css/lg-fullscreen.css', () => ({}), { virtual: true })
+vi.mock('lightgallery/css/lg-thumbnail.css', () => ({}), { virtual: true })
+vi.mock('lightgallery/css/lg-video.css', () => ({}), { virtual: true })
 
 describe('ProductHero', () => {
   const i18n = createI18n({
