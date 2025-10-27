@@ -115,6 +115,10 @@
       "breadcrumbDivider": "/",
       "missingBreadcrumbTitle": "Catégorie"
     },
+    "ecoscorePage": {
+      "title": "{category} – {label}",
+      "description": "Nous préparons un contenu dédié au score éco pour {category}. Revenez bientôt !"
+    },
     "fastFilters": {
       "reset": "Réinitialiser les filtres rapides",
       "activeClauses": "Filtres de sous-ensemble appliqués",

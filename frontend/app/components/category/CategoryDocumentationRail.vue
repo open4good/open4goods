@@ -10,11 +10,11 @@
         <v-list-item
           v-for="page in wikiPages"
           :key="page.title ?? page.verticalUrl ?? page.wikiUrl"
-          :href="resolveWikiUrl(page)"
-          target="_blank"
-          rel="noopener"
+          v-bind="resolveWikiLinkProps(page)"
         >
-          <v-list-item-title>{{ page.title }}</v-list-item-title>
+          <template #title>
+            <span class="category-doc-rail__link">{{ page.title }}</span>
+          </template>
         </v-list-item>
       </v-list>
     </v-card>
@@ -42,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { BlogPostDto, WikiPageConfig } from '~~/shared/api-client'
 
 const props = defineProps<{
@@ -53,16 +54,51 @@ const props = defineProps<{
 const wikiPages = computed(() => props.wikiPages ?? [])
 const relatedPosts = computed(() => props.relatedPosts ?? [])
 
-const resolveWikiUrl = (page: WikiPageConfig) => {
+const normalizePathSegment = (value: string) => value.replace(/^\/+|\/+$/g, '')
+
+const internalBasePath = computed(() => {
+  const raw = props.verticalHomeUrl?.trim()
+  if (!raw || /^https?:\/\//i.test(raw)) {
+    return null
+  }
+
+  return `/${normalizePathSegment(raw)}`
+})
+
+const resolveExternalWikiUrl = (page: WikiPageConfig) => {
   if (page.wikiUrl) {
     return page.wikiUrl
   }
 
   if (props.verticalHomeUrl && page.verticalUrl) {
-    return `${props.verticalHomeUrl.replace(/\/$/, '')}/${page.verticalUrl.replace(/^\//, '')}`
+    return `${props.verticalHomeUrl.replace(/\/$/, '')}/${normalizePathSegment(page.verticalUrl)}`
   }
 
   return page.verticalUrl ?? '#'
+}
+
+type WikiLinkProps = {
+  to?: string
+  href?: string
+  target?: string
+  rel?: string
+}
+
+const resolveWikiLinkProps = (page: WikiPageConfig): WikiLinkProps => {
+  const slug = page.verticalUrl ? normalizePathSegment(page.verticalUrl) : ''
+  const basePath = internalBasePath.value
+
+  if (basePath && slug) {
+    return { to: `${basePath}/${slug}`.replace(/\/+$/, '') }
+  }
+
+  const externalUrl = resolveExternalWikiUrl(page)
+
+  return {
+    href: externalUrl,
+    target: '_blank',
+    rel: 'noopener',
+  }
 }
 
 const BLOG_POST_PATH_PREFIX = '/blog/'
@@ -101,6 +137,12 @@ const resolvePostUrl = (post: BlogPostDto) => {
     font-weight: 600
     display: flex
     align-items: center
+
+  &__link
+    display: inline-flex
+    align-items: center
+    gap: 0.25rem
+    color: inherit
 
   :deep(.v-list-item-title)
     font-weight: 500
