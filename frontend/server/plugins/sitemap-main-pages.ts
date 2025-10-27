@@ -12,7 +12,7 @@ export default defineNitroPlugin((nitroApp) => {
       return
     }
 
-    const requestURL = ctx.event ? getRequestURL(ctx.event) : new URL('https://nudger.com')
+    const requestURL = ctx.event ? getRequestURL(ctx.event) : new URL('https://nudger.fr')
     const { domainLanguage } = getDomainLanguageFromHostname(requestURL.hostname)
 
     const staticPaths = Array.from(new Set(getMainPagePathsForDomainLanguage(domainLanguage)))

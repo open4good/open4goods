@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     },
   },
   site: {
-    url: 'https://nudger.com',
+    url: 'https://nudger.fr',
     name: 'Nudger',
   },
   devtools: {
