@@ -8,7 +8,7 @@ const MAIN_PAGES_SITEMAP_FILENAME = `${APP_ROUTES_SITEMAP_KEY}.xml`
 
 export default defineNitroPlugin((nitroApp) => {
   nitroApp.hooks.hook('sitemap:sources', (ctx) => {
-    if (ctx.sitemapName !== MAIN_PAGES_SITEMAP_FILENAME) {
+    if (ctx.sitemapName !== MAIN_PAGES_SITEMAP_FILENAME && ctx.sitemapName !== APP_ROUTES_SITEMAP_KEY) {
       return
     }
 
