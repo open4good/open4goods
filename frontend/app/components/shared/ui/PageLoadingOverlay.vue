@@ -1,26 +1,28 @@
 <template>
-  <teleport to="body">
-    <div
-      v-if="routeLoading"
-      data-testid="page-loading-overlay"
-      class="page-loading-overlay"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-      :style="{ backgroundColor: scrimColor }"
-    >
-      <div class="page-loading-overlay__content">
-        <v-progress-circular
-          data-testid="page-loading-spinner"
-          color="primary"
-          size="64"
-          indeterminate
-          :aria-label="spinnerLabel"
-        />
-        <span class="visually-hidden">{{ spinnerLabel }}</span>
+  <ClientOnly>
+    <teleport to="body">
+      <div
+        v-if="routeLoading"
+        data-testid="page-loading-overlay"
+        class="page-loading-overlay"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        :style="{ backgroundColor: scrimColor }"
+      >
+        <div class="page-loading-overlay__content">
+          <v-progress-circular
+            data-testid="page-loading-spinner"
+            color="primary"
+            size="64"
+            indeterminate
+            :aria-label="spinnerLabel"
+          />
+          <span class="visually-hidden">{{ spinnerLabel }}</span>
+        </div>
       </div>
-    </div>
-  </teleport>
+    </teleport>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
