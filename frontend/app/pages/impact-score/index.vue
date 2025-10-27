@@ -2,8 +2,8 @@
   <div class="impact-score-page">
     <section class="impact-score-page__hero">
       <v-container class="py-12">
-        <v-row class="impact-score-page__hero-row" align="center" justify="space-between">
-          <v-col cols="12" md="7">
+        <v-row class="impact-score-page__hero-row" align="center" justify="center">
+          <v-col cols="12" md="10" lg="8" class="impact-score-page__hero-content">
             <p class="impact-score-page__eyebrow">Impact environnemental</p>
             <h1 class="impact-score-page__title">
               L’Impact Score : évaluation de l'impact environnemental de vos produits
@@ -11,22 +11,30 @@
             <div class="impact-score-page__intro text-body-1">
               <TextContent bloc-id="ECOSCORE:1:" />
             </div>
-          </v-col>
-          <v-col cols="12" md="5" class="impact-score-page__hero-figure">
-            <v-img
-              src="https://nudger.fr/img/impactscore-illustration.png"
-              alt="Illustration Impact Score"
-              aspect-ratio="4/3"
-              contain
-            />
+            <div class="impact-score-page__hero-actions">
+              <v-btn
+                class="impact-score-page__hero-button"
+                color="surface"
+                size="large"
+                variant="elevated"
+                prepend-icon="mdi-compass-outline"
+                @click="scrollToSection(sectionIds.overview)"
+              >
+                Explorer la méthodologie
+              </v-btn>
+            </div>
           </v-col>
         </v-row>
       </v-container>
     </section>
 
     <v-container class="impact-score-page__content py-12">
-      <v-row class="impact-score-page__layout" align="start" justify="center">
-        <v-col cols="12" md="3" class="impact-score-page__nav-col">
+      <div class="impact-score-page__layout">
+        <aside
+          class="impact-score-page__nav"
+          :class="{ 'impact-score-page__nav--mobile': orientation === 'horizontal' }"
+          aria-label="Plan de page Impact Score"
+        >
           <StickySectionNavigation
             :sections="navigationSections"
             :active-section="activeSection"
@@ -34,9 +42,9 @@
             aria-label="Navigation Impact Score"
             @navigate="scrollToSection"
           />
-        </v-col>
+        </aside>
 
-        <v-col cols="12" md="9" class="impact-score-page__main">
+        <main class="impact-score-page__sections" role="main">
           <section :id="sectionIds.overview" class="impact-score-section impact-score-section--intro">
             <v-sheet class="impact-score-section__surface" rounded="xl" elevation="0">
               <header class="impact-score-section__header">
@@ -44,37 +52,29 @@
                 <h2 class="impact-score-section__title">Qu’est-ce que l’Impact Score&nbsp;?</h2>
               </header>
 
-              <v-row class="impact-score-section__row" align="start">
+              <v-row class="impact-score-section__row impact-score-section__row--balanced" align="stretch">
                 <v-col cols="12" md="7">
                   <div class="impact-score-section__body">
                     <TextContent bloc-id="ECOSCORE:2:" />
                   </div>
-
-                  <v-card variant="flat" class="impact-score-rating" elevation="0">
-                    <div class="impact-score-rating__value">
-                      <span class="impact-score-rating__number">{{ formatCoeff(localRating) }}</span>
-                      <span class="impact-score-rating__suffix">/5</span>
-                    </div>
-                    <v-rating
-                      v-model="localRating"
-                      half-increments
-                      length="5"
-                      readonly
-                      :aria-label="`Évaluation : ${localRating} sur 5`"
-                    />
-                    <p class="impact-score-rating__caption">Évaluation indicative basée sur notre méthodologie</p>
-                  </v-card>
                 </v-col>
 
-                <v-col cols="12" md="5">
-                  <div class="impact-score-section__figure">
-                    <v-img
-                      src="https://nudger.fr/img/what-impactscore.png"
-                      alt="Présentation Impact Score"
-                      aspect-ratio="4/3"
-                      contain
+                <v-col cols="12" md="5" class="impact-score-section__rating">
+                  <v-card variant="flat" class="impact-score-example" elevation="0">
+                    <div class="impact-score-example__header">
+                      <span class="impact-score-example__eyebrow">Évaluation indicative</span>
+                      <strong class="impact-score-example__value">{{ formatCoeff(localRating) }}</strong>
+                    </div>
+                    <ImpactScore
+                      :score="localRating"
+                      :max="5"
+                      size="large"
+                      show-value
                     />
-                  </div>
+                    <p class="impact-score-example__caption">
+                      Évaluation indicative basée sur notre méthodologie
+                    </p>
+                  </v-card>
                 </v-col>
               </v-row>
             </v-sheet>
@@ -90,19 +90,19 @@
               </header>
 
               <v-row class="impact-score-section__row" align="center">
-                <v-col cols="12" md="7">
-                  <div class="impact-score-section__body">
-                    <TextContent bloc-id="ECOSCORE:3:" />
-                  </div>
-                </v-col>
                 <v-col cols="12" md="5">
-                  <div class="impact-score-section__figure impact-score-section__figure--compact">
+                  <div class="impact-score-section__figure">
                     <v-img
                       src="https://nudger.fr/img/impactscore-illustration.png"
-                      alt="Écoscore Nudger"
+                      alt="Illustration de notre démarche ecoscore"
                       aspect-ratio="1"
                       contain
                     />
+                  </div>
+                </v-col>
+                <v-col cols="12" md="7">
+                  <div class="impact-score-section__body">
+                    <TextContent bloc-id="ECOSCORE:3:" />
                   </div>
                 </v-col>
               </v-row>
@@ -184,43 +184,41 @@
                 <h2 class="impact-score-section__title">Relativisation et qualité de la donnée</h2>
               </header>
 
-              <v-row class="impact-score-section__row" align="stretch" justify="space-between">
-                <v-col cols="12" md="6">
-                  <v-card variant="tonal" class="impact-score-card" color="primary">
-                    <div class="impact-score-card__media">
-                      <v-img
-                        src="https://nudger.fr/img/relativisation.png"
-                        alt="Relativisation"
-                        aspect-ratio="1"
-                        contain
-                      />
-                    </div>
-                    <div class="impact-score-card__content">
-                      <TextContent bloc-id="ECOSCORE:4-1:" />
-                    </div>
-                  </v-card>
-                </v-col>
+              <div class="impact-score-insights">
+                <article class="impact-score-insight impact-score-insight--reverse">
+                  <div class="impact-score-insight__content">
+                    <h3 class="impact-score-insight__title">Principe de relativisation</h3>
+                    <TextContent bloc-id="ECOSCORE:4-1:" />
+                  </div>
+                  <div class="impact-score-insight__media">
+                    <v-img
+                      src="https://nudger.fr/img/relativisation.png"
+                      alt="Illustration du principe de relativisation"
+                      aspect-ratio="1"
+                      contain
+                    />
+                  </div>
+                </article>
 
-                <v-col cols="12" md="6">
-                  <v-card variant="tonal" class="impact-score-card" color="primary">
-                    <div class="impact-score-card__media">
-                      <v-img
-                        src="https://nudger.fr/img/data-quality.png"
-                        alt="Qualité de la donnée"
-                        aspect-ratio="1"
-                        contain
-                      />
-                    </div>
-                    <div class="impact-score-card__content">
-                      <TextContent bloc-id="ECOSCORE:4-2:" />
-                    </div>
-                  </v-card>
-                </v-col>
-              </v-row>
+                <article class="impact-score-insight">
+                  <div class="impact-score-insight__media">
+                    <v-img
+                      src="https://nudger.fr/img/data-quality.png"
+                      alt="Illustration sur la qualité de la donnée"
+                      aspect-ratio="1"
+                      contain
+                    />
+                  </div>
+                  <div class="impact-score-insight__content">
+                    <h3 class="impact-score-insight__title">La qualité de la donnée, enjeu majeur</h3>
+                    <TextContent bloc-id="ECOSCORE:4-2:" />
+                  </div>
+                </article>
+              </div>
             </v-sheet>
           </section>
-        </v-col>
-      </v-row>
+        </main>
+      </div>
     </v-container>
   </div>
 </template>
@@ -228,6 +226,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 
 const props = defineProps({
@@ -371,12 +370,28 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-page__hero {
-  background: linear-gradient(140deg, rgba(var(--v-theme-hero-gradient-start), 0.85), rgba(var(--v-theme-hero-gradient-end), 0.85));
+  background: linear-gradient(140deg, rgba(var(--v-theme-hero-gradient-start), 0.88), rgba(var(--v-theme-hero-gradient-end), 0.88));
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.impact-score-page__hero::after {
+  content: '';
+  position: absolute;
+  inset: 10% -20% -40% -20%;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 65%);
+  pointer-events: none;
 }
 
 .impact-score-page__hero-row {
-  gap: 2rem;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.impact-score-page__hero-content {
+  text-align: center;
 }
 
 .impact-score-page__eyebrow {
@@ -399,17 +414,20 @@ function formatCoeff(n: number | null | undefined) {
   margin-bottom: 1rem;
 }
 
-.impact-score-page__hero-figure {
+.impact-score-page__hero-actions {
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
 }
 
-.impact-score-page__hero-figure .v-img {
-  max-width: 380px;
-  border-radius: 24px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
-  background: rgba(255, 255, 255, 0.12);
-  padding: 1.5rem;
+.impact-score-page__hero-button {
+  font-weight: 600;
+  border-radius: 999px;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.25);
+}
+
+.impact-score-page__hero-button :deep(.v-icon) {
+  color: rgb(var(--v-theme-accent-supporting));
 }
 
 .impact-score-page__content {
@@ -417,18 +435,33 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-page__layout {
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  gap: 2.5rem;
 }
 
-.impact-score-page__nav-col {
-  position: relative;
-  z-index: 20;
+.impact-score-page__nav {
+  position: sticky;
+  top: 104px;
+  align-self: start;
+  height: fit-content;
+  z-index: 10;
 }
 
-.impact-score-page__main {
+.impact-score-page__nav--mobile {
+  position: static;
+  top: auto;
+  margin-bottom: 1.5rem;
+}
+
+.impact-score-page__sections {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+}
+
+.impact-score-section {
+  scroll-margin-top: 120px;
 }
 
 .impact-score-section__surface {
@@ -468,6 +501,10 @@ function formatCoeff(n: number | null | undefined) {
   gap: 1.5rem;
 }
 
+.impact-score-section__row--balanced {
+  align-items: stretch;
+}
+
 .impact-score-section__body :deep(p + p) {
   margin-top: 1rem;
 }
@@ -482,44 +519,46 @@ function formatCoeff(n: number | null | undefined) {
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
 }
 
-.impact-score-section__figure--compact {
-  max-width: 280px;
-  margin-left: auto;
-  margin-right: auto;
+.impact-score-section__rating {
+  display: flex;
+  align-items: center;
 }
 
-.impact-score-rating {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  border-radius: 18px;
+.impact-score-example {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.75rem;
+  border-radius: 20px;
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
   background: rgba(var(--v-theme-surface-primary-080), 0.8);
-  display: grid;
-  gap: 0.5rem;
-  justify-items: flex-start;
 }
 
-.impact-score-rating__value {
+.impact-score-example__header {
   display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.impact-score-rating__number {
-  font-size: 2.5rem;
+.impact-score-example__eyebrow {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.impact-score-example__value {
+  font-size: 2.75rem;
   font-weight: 700;
   line-height: 1;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.impact-score-rating__suffix {
-  font-size: 1rem;
-  color: rgb(var(--v-theme-text-neutral-secondary));
-}
-
-.impact-score-rating__caption {
+.impact-score-example__caption {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
@@ -553,31 +592,75 @@ function formatCoeff(n: number | null | undefined) {
   background: rgba(var(--v-theme-surface-primary-080), 0.6);
 }
 
-.impact-score-card {
-  height: 100%;
-  padding: 1.5rem;
+.impact-score-insights {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 2rem;
+}
+
+.impact-score-insight {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 280px);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.impact-score-insight--reverse {
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 280px);
+}
+
+.impact-score-insight--reverse .impact-score-insight__content {
+  order: 1;
+}
+
+.impact-score-insight--reverse .impact-score-insight__media {
+  order: 2;
+}
+
+.impact-score-insight__title {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-score-insight__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--v-theme-surface-primary-100), 0.8);
   border-radius: 20px;
-  box-shadow: none;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25);
-  background: rgba(var(--v-theme-surface-primary-080), 0.65);
+  padding: 1.5rem;
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
 }
 
-.impact-score-card__media {
-  align-self: center;
-  width: 140px;
-}
-
-.impact-score-card__media .v-img {
+.impact-score-insight__media .v-img {
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface-default), 0.85);
-  padding: 1rem;
 }
 
-.impact-score-card__content :deep(p + p) {
+.impact-score-insight__content :deep(p + p) {
   margin-top: 1rem;
+}
+
+@media (max-width: 1280px) {
+  .impact-score-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-score-page__nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .impact-score-page__nav--mobile {
+    position: static;
+    top: auto;
+  }
+
+  .impact-score-section {
+    scroll-margin-top: 160px;
+  }
 }
 
 @media (max-width: 960px) {
@@ -585,20 +668,30 @@ function formatCoeff(n: number | null | undefined) {
     margin-top: -32px;
   }
 
+  .impact-score-page__hero-content {
+    text-align: left;
+  }
+
+  .impact-score-page__hero-actions {
+    justify-content: flex-start;
+  }
+
   .impact-score-section__surface {
-    padding: 1.75rem;
+    padding: 1.9rem;
   }
 
-  .impact-score-section__figure {
-    padding: 1rem;
-  }
-
-  .impact-score-card {
+  .impact-score-section__figure,
+  .impact-score-insight__media {
     padding: 1.25rem;
   }
 
-  .impact-score-card__media {
-    width: 120px;
+  .impact-score-insight {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-score-insight--reverse .impact-score-insight__content,
+  .impact-score-insight--reverse .impact-score-insight__media {
+    order: initial;
   }
 }
 
@@ -606,11 +699,6 @@ function formatCoeff(n: number | null | undefined) {
   .impact-score-page__hero {
     border-bottom-left-radius: 28px;
     border-bottom-right-radius: 28px;
-  }
-
-  .impact-score-page__hero-figure .v-img {
-    max-width: 280px;
-    padding: 1rem;
   }
 
   .impact-score-section__surface {
@@ -623,6 +711,10 @@ function formatCoeff(n: number | null | undefined) {
 
   .impact-score-section__list {
     padding: 0.5rem 0.25rem;
+  }
+
+  .impact-score-example {
+    padding: 1.5rem;
   }
 }
 </style>
