@@ -23,6 +23,12 @@
       </v-btn>
     </div>
 
+    <CategoryEcoscoreCard
+      v-if="ecoscoreLinkAvailable"
+      class="category-page__ecoscore-entry mt-4"
+      :vertical-home-url="props.verticalHomeUrl ?? undefined"
+    />
+
     <template v-if="hasDocumentation">
       <v-divider class="my-4" />
       <CategoryDocumentationRail
@@ -46,8 +52,9 @@ import type {
   WikiPageConfig,
 } from '~~/shared/api-client'
 
-import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
+import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
+import CategoryEcoscoreCard from './CategoryEcoscoreCard.vue'
 import type { CategorySubsetClause } from '~/types/category-subset'
 
 const props = withDefaults(
@@ -86,4 +93,5 @@ const wikiPages = computed(() => props.wikiPages ?? [])
 const relatedPosts = computed(() => props.relatedPosts ?? [])
 const hasDocumentation = computed(() => props.hasDocumentation)
 const showMobileActions = computed(() => props.showMobileActions)
+const ecoscoreLinkAvailable = computed(() => Boolean(props.verticalHomeUrl))
 </script>

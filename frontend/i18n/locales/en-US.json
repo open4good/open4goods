@@ -206,6 +206,12 @@
       "toggle": {
         "hide": "Hide filters column",
         "show": "Show filters column"
+      },
+      "ecoscore": {
+        "title": "Discover the Eco-score",
+        "description": "Understand how we evaluate each product's environmental footprint and the indicators we monitor.",
+        "cta": "Explore the methodology",
+        "ariaLabel": "Open the Eco-score guide"
       }
     },
     "hero": {
