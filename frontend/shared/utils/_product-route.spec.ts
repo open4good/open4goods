@@ -45,6 +45,16 @@ describe('_product-route', () => {
       ).toBeNull()
     })
 
+    it('accepts product segments that start with at least five digits followed by a hyphen', () => {
+      const match = matchProductRouteFromSegments(['tech', '12345-hyphenated-slug'])
+
+      expect(match).toEqual({
+        categorySlug: 'tech',
+        gtin: '12345',
+        slug: 'hyphenated-slug',
+      })
+    })
+
     it('rejects category slugs with invalid characters', () => {
       expect(
         matchProductRouteFromSegments(['electronics123', '123456-valid-slug'])
@@ -61,7 +71,7 @@ describe('_product-route', () => {
         matchProductRouteFromSegments(['tech', '1234567890'])
       ).toBeNull()
       expect(
-        matchProductRouteFromSegments(['tech', '12345-missing-digits'])
+        matchProductRouteFromSegments(['tech', '1234-missing-digit'])
       ).toBeNull()
     })
   })
