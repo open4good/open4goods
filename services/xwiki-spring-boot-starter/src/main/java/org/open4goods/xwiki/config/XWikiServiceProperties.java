@@ -7,39 +7,42 @@ import jakarta.validation.constraints.NotNull;
 
 /**
  * Properties from configuration file
- * 
+ *
  * @author Thierry.Ledan
  */
 
 @ConfigurationProperties(prefix = "xwiki")
 @Validated
 public class XWikiServiceProperties{
-	
+
 	// TODO : Critical : Must be configurable in config
 	public final static String SPRING_CACHE_NAME = "ONE_HOUR_LOCAL_CACHE";
-	
+
 	@NotNull
 	public String baseUrl;
 
 	@NotNull
 	public String username;
-	
+
 	@NotNull
 	public String password;
-	
+
+	@NotNull
+	public String proxyficationRootUrl="";
+
 	@NotNull
 	public boolean httpsOnly;
-	
+
 	@NotNull
-	public String media = "json";	
-	
+	public String media = "json";
+
 	@NotNull
-	public String apiEntrypoint = "rest";	
-	
+	public String apiEntrypoint = "rest";
+
 	@NotNull
 	public String apiWiki = "xwiki";
 
-	
+
 	public String getApiWiki() {
 		return apiWiki;
 	}
@@ -95,7 +98,15 @@ public class XWikiServiceProperties{
 	public void setBaseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
 	}
-	
-	
+
+	public String getProxyficationRootUrl() {
+		return proxyficationRootUrl;
+	}
+
+	public void setProxyficationRootUrl(String proxyficationRootUrl) {
+		this.proxyficationRootUrl = proxyficationRootUrl;
+	}
+
+
 }
 

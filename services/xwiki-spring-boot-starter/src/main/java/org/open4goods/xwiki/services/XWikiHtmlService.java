@@ -66,7 +66,7 @@ public class XWikiHtmlService {
 		// TODO : From const
 		// TODO : Make it generic ? Provide the associated resource controller ?
 		if (!StringUtils.isEmpty(ret)) {
-			ret = ret.replace("/bin/download", XWikiHtmlService.PROXYFIED_FOLDER);
+			ret = ret.replace("/bin/download", xWikiProperties.getProxyficationRootUrl() +  XWikiHtmlService.PROXYFIED_FOLDER);
 
 			if (null != plain && plain.booleanValue()) {
 				// We remove the <p>
