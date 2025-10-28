@@ -1436,7 +1436,27 @@
       "navigationAria": "Liste des documents du produit",
       "empty": "Aucun document n’est encore disponible pour ce produit.",
       "previewUnavailable": "Aucun aperçu n’est disponible pour ce document. Utilisez le lien de téléchargement.",
-      "loading": "Chargement de l’aperçu du document…"
+      "loading": "Chargement de l’aperçu du document…",
+      "loadError": "Impossible de charger ce document. Téléchargez-le pour le consulter.",
+      "printError": "L’impression a échoué. Veuillez utiliser le téléchargement.",
+      "toolbar": {
+        "ariaLabel": "Contrôles du visualiseur PDF",
+        "zoomOut": "Zoom arrière",
+        "fitToWidth": "Ajuster à la largeur",
+        "zoomIn": "Zoom avant",
+        "zoomAuto": "Auto",
+        "zoomIndicator": "{value}\u00a0%",
+        "pageLabel": "Page",
+        "allPages": "Toutes les pages",
+        "pageOption": "Page {page}",
+        "rotationLabel": "Rotation",
+        "rotationOption": "{angle}°",
+        "textLayer": "Calque texte",
+        "annotationLayer": "Annotations",
+        "print": "Imprimer",
+        "scrollPrevious": "Faire défiler les documents vers la gauche",
+        "scrollNext": "Faire défiler les documents vers la droite"
+      }
     },
     "admin": {
       "title": "Section administration",

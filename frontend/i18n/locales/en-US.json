@@ -1428,7 +1428,27 @@
       "navigationAria": "Product documentation list",
       "empty": "No documents are available for this product yet.",
       "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
-      "loading": "Loading document preview…"
+      "loading": "Loading document preview…",
+      "loadError": "We could not load this document. Try downloading it instead.",
+      "printError": "Printing failed. Please use the download link instead.",
+      "toolbar": {
+        "ariaLabel": "PDF viewer controls",
+        "zoomOut": "Zoom out",
+        "fitToWidth": "Fit to width",
+        "zoomIn": "Zoom in",
+        "zoomAuto": "Auto",
+        "zoomIndicator": "{value}%",
+        "pageLabel": "Page",
+        "allPages": "All pages",
+        "pageOption": "Page {page}",
+        "rotationLabel": "Rotation",
+        "rotationOption": "{angle}°",
+        "textLayer": "Text layer",
+        "annotationLayer": "Annotations",
+        "print": "Print",
+        "scrollPrevious": "Scroll documents backwards",
+        "scrollNext": "Scroll documents forwards"
+      }
     },
     "admin": {
       "title": "Admin section",
