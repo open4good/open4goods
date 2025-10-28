@@ -33,6 +33,19 @@ describe('_product-route', () => {
       })
     })
 
+    it('accepts product segments starting with at least five digits', () => {
+      const match = matchProductRouteFromSegments([
+        'audio',
+        '12345-haut-parleur',
+      ])
+
+      expect(match).toEqual({
+        categorySlug: 'audio',
+        gtin: '12345',
+        slug: 'haut-parleur',
+      })
+    })
+
     it('returns null when the route does not contain exactly two segments', () => {
       expect(matchProductRouteFromSegments([])).toBeNull()
       expect(matchProductRouteFromSegments(['only-one'])).toBeNull()
@@ -55,13 +68,11 @@ describe('_product-route', () => {
     })
 
     it('requires the product segment to expose a GTIN and slug separated by a hyphen', () => {
+      expect(matchProductRouteFromSegments(['tech', '1234-produit'])).toBeNull()
       expect(matchProductRouteFromSegments(['tech', '12345'])).toBeNull()
       expect(matchProductRouteFromSegments(['tech', '123456'])).toBeNull()
       expect(
         matchProductRouteFromSegments(['tech', '1234567890'])
-      ).toBeNull()
-      expect(
-        matchProductRouteFromSegments(['tech', '12345-missing-digits'])
       ).toBeNull()
     })
   })
