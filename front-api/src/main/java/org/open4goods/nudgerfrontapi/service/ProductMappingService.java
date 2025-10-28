@@ -1184,7 +1184,7 @@ public class ProductMappingService {
         }
         return new ProductAggregatedPriceDto(
                 price.getDatasourceName(),
-                buildDatasourceFavicon(price.getDatasourceName()),
+                buildSourceFavicon(price.getDatasourceName()),
                 price.getOfferName(),
                 url,
                 price.getCompensation(),
@@ -1196,19 +1196,7 @@ public class ProductMappingService {
                 safeCall(price::shortPrice));
     }
 
-    /**
-     * Build the favicon URL for the provided datasource.
-     */
-    private String buildDatasourceFavicon(String datasourceName) {
-        if (!StringUtils.hasText(datasourceName)) {
-            return null;
-        }
-        String resourceRoot = apiProperties.getResourceRootPath();
-        if (!StringUtils.hasText(resourceRoot)) {
-            return null;
-        }
-        return resourceRoot + ICON_PATH + datasourceName;
-    }
+
 
     /**
      * Build the favicon proxy URL for the provided source URL.
@@ -1232,7 +1220,12 @@ public class ProductMappingService {
      * Extract the canonical root URL (scheme, host and optional port) from a full URL.
      */
     private String extractRootUrl(String url) {
-        URI uri = URI.create(url);
+
+    	String normUrl = url;
+    	if (!normUrl.startsWith("http")) {
+    		normUrl = "https://" + normUrl;
+    	}
+        URI uri = URI.create(normUrl);
         String scheme = uri.getScheme();
         String host = uri.getHost();
         if (!StringUtils.hasText(scheme) || !StringUtils.hasText(host)) {
