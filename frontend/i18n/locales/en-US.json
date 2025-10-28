@@ -118,7 +118,82 @@
     },
     "ecoscorePage": {
       "title": "{category} – {label}",
-      "description": "We are crafting dedicated eco score insights for {category}. Check back soon!"
+      "description": "We are crafting dedicated eco score insights for {category}. Check back soon!",
+      "impactScoreLabel": "Impact Score",
+      "breadcrumbLeaf": "impactscore",
+      "seo": {
+        "title": "{category} – Impact Score breakdown",
+        "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit."
+      },
+      "navigation": {
+        "ariaLabel": "Impact Score section navigation",
+        "overview": "Overview",
+        "purpose": "Purpose & data",
+        "criteria": "Criteria",
+        "transparency": "Transparency",
+        "aiAudit": "AI audit"
+      },
+      "sections": {
+        "overview": {
+          "eyebrow": "Introduction",
+          "title": "Impact Score for {category}",
+          "card": {
+            "title": "Nudger Impact Score",
+            "subtitle": "Methodology applied to {category}",
+            "description": "This page details the criteria and weightings used to assess the environmental impact of this category.",
+            "cta": "Understand the global methodology",
+            "aria": "Learn more about the global Impact Score methodology",
+            "imageAlt": "Impact Score illustration for {category}"
+          }
+        },
+        "purpose": {
+          "eyebrow": "Our approach",
+          "title": "Why and how we score {category}",
+          "objectiveTitle": "Objective",
+          "objectiveFallback": "The objective description will be available soon.",
+          "dataTitle": "Available data",
+          "dataFallback": "Detailed data for each criterion will be available soon."
+        },
+        "criteria": {
+          "eyebrow": "Criteria",
+          "title": "Selected criteria and weights",
+          "empty": "Criteria will be published soon."
+        },
+        "transparency": {
+          "eyebrow": "Transparency",
+          "title": "Transparency and traceability",
+          "criticalReviewTitle": "Critical review",
+          "criticalReviewFallback": "The critical review will be shared soon.",
+          "communityTitle": "Join the discussion",
+          "communityBody": "The {category} Impact Score definition is public on GitHub. Share your feedback or suggest adjustments.",
+          "communityCta": "View the configuration",
+          "communityIssues": "Open an issue",
+          "intro": "Nudger is built as an open project:",
+          "connector": "and",
+          "openSourceLink": "open-source",
+          "openDataLink": "open-data",
+          "introSuffix": "to guarantee traceability for the {category} scoring methodology.",
+          "tableTitle": "Coefficient summary",
+          "tableHelper": "Comparison between the AI-generated proposal and the coefficients currently applied.",
+          "tableFallback": "Detailed coefficients will be published soon.",
+          "tableHeaders": {
+            "name": "Criterion name",
+            "proposed": "Proposed coef.",
+            "applied": "Applied coef."
+          }
+        },
+        "aiAudit": {
+          "eyebrow": "AI audit",
+          "title": "Impact Score generation audit",
+          "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
+          "promptTitle": "YAML generation prompt",
+          "promptHelper": "Instructions sent to the model to produce the configuration.",
+          "responseTitle": "Model response",
+          "responseHelper": "JSON output from the AI used as the basis of the configuration.",
+          "yamlUnavailable": "Prompt unavailable.",
+          "jsonUnavailable": "AI response unavailable."
+        }
+      }
     },
     "fastFilters": {
       "reset": "Clear fast filters",
