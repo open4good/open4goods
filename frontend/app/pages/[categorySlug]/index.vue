@@ -20,6 +20,7 @@
               class="category-page__fast-filters-toggle"
               :class="{
                 'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
+                'category-page__fast-filters-toggle--expanded': !filtersCollapsed,
               }"
               icon
               variant="text"
@@ -29,9 +30,13 @@
               @click="onToggleFiltersVisibility"
             >
               <v-icon
-                :icon="filtersToggleIcon"
+                icon="mdi-filter-variant"
                 size="40"
                 class="category-page__fast-filters-toggle-icon"
+                :class="{
+                  'category-page__fast-filters-toggle-icon--collapsed': filtersCollapsed,
+                  'category-page__fast-filters-toggle-icon--expanded': !filtersCollapsed,
+                }"
               />
             </v-btn>
           </template>
@@ -144,9 +149,7 @@
                 {{ $t('category.products.openFilters') }}
               </v-btn>
 
-              <p class="category-page__results-count" aria-live="polite">
-                {{ resultsCountLabel }}
-              </p>
+              <CategoryResultsCount :count="resultsCount" />
             </div>
 
             <div class="category-page__toolbar-actions">
@@ -335,6 +338,7 @@ import { AggTypeEnum } from '~~/shared/api-client'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
+import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
@@ -358,7 +362,6 @@ import { resolveFilterFieldTitle, resolveSortFieldTitle } from '~/utils/_field-l
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
-const { translatePlural } = usePluralizedTranslation()
 const requestURL = useRequestURL()
 
 const MOBILE_USER_AGENT_PATTERN =
@@ -618,9 +621,6 @@ const sortOptions = computed(() => sortOptionsData.value ?? null)
 const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value))
 const filtersDrawer = ref(false)
 const filtersCollapsed = ref(false)
-const filtersToggleIcon = computed(() =>
-  filtersCollapsed.value ? 'mdi-filter-variant-plus' : 'mdi-filter-variant-minus',
-)
 const filtersToggleLabel = computed(() =>
   filtersCollapsed.value
     ? t('category.filters.toggle.show')
@@ -1203,9 +1203,6 @@ watch(
   { immediate: true },
 )
 
-const resultsCountLabel = computed(() =>
-  translatePlural('category.products.resultsCount', resultsCount.value),
-)
 const pageCount = computed(() => productsData.value?.products?.page?.totalPages ?? 1)
 const currentAggregations = computed<AggregationResponseDto[]>(
   () => productsData.value?.aggregations ?? [],
@@ -1749,8 +1746,24 @@ const clearAllFilters = () => {
     background: rgba(var(--v-theme-surface-primary-080), 0.85)
     color: rgb(var(--v-theme-primary))
 
+  &__fast-filters-toggle--expanded
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
   &__fast-filters-toggle-icon
     color: inherit
+    transform-origin: center
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)
+    will-change: transform
+
+  &__fast-filters-toggle-icon--collapsed
+    transform: rotate(-90deg)
+
+  &__fast-filters-toggle-icon--expanded
+    transform: rotate(90deg)
+
+  @media (prefers-reduced-motion: reduce)
+    &__fast-filters-toggle-icon
+      transition: none
 
   &__fast-filters-groups
     flex: 1 1 auto

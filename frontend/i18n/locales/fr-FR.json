@@ -206,6 +206,12 @@
       "toggle": {
         "hide": "Masquer la colonne des filtres",
         "show": "Afficher la colonne des filtres"
+      },
+      "ecoscore": {
+        "title": "Découvrir l'Eco-score",
+        "description": "Comprenez comment nous évaluons l'empreinte environnementale de chaque produit et les indicateurs suivis.",
+        "cta": "Explorer la méthodologie",
+        "ariaLabel": "Ouvrir le guide Eco-score"
       }
     },
     "hero": {
