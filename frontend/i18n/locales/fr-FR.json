@@ -117,7 +117,82 @@
     },
     "ecoscorePage": {
       "title": "{category} – {label}",
-      "description": "Nous préparons un contenu dédié au score éco pour {category}. Revenez bientôt !"
+      "description": "Nous préparons un contenu dédié au score éco pour {category}. Revenez bientôt !",
+      "impactScoreLabel": "Impact Score",
+      "breadcrumbLeaf": "impactscore",
+      "seo": {
+        "title": "{category} – Impact Score détaillé",
+        "description": "Découvrez comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA."
+      },
+      "navigation": {
+        "ariaLabel": "Navigation des sections Impact Score",
+        "overview": "Présentation",
+        "purpose": "Objectif & données",
+        "criteria": "Critères retenus",
+        "transparency": "Transparence",
+        "aiAudit": "Audit IA"
+      },
+      "sections": {
+        "overview": {
+          "eyebrow": "Introduction",
+          "title": "Impact Score des {category}",
+          "card": {
+            "title": "Impact Score Nudger",
+            "subtitle": "Méthodologie appliquée aux {category}",
+            "description": "Cette page détaille les critères et pondérations utilisés pour évaluer l'impact environnemental de cette catégorie.",
+            "cta": "Comprendre notre méthodologie globale",
+            "aria": "Découvrir la méthodologie Impact Score globale",
+            "imageAlt": "Illustration de l'Impact Score pour les {category}"
+          }
+        },
+        "purpose": {
+          "eyebrow": "Notre démarche",
+          "title": "Pourquoi et comment nous évaluons les {category}",
+          "objectiveTitle": "Objectif",
+          "objectiveFallback": "La description de l'objectif sera bientôt disponible.",
+          "dataTitle": "Données disponibles",
+          "dataFallback": "Les données détaillées des critères seront bientôt disponibles."
+        },
+        "criteria": {
+          "eyebrow": "Critères",
+          "title": "Critères retenus et pondérations",
+          "empty": "Les critères seront publiés prochainement."
+        },
+        "transparency": {
+          "eyebrow": "Transparence",
+          "title": "Transparence et traçabilité",
+          "criticalReviewTitle": "Revue critique",
+          "criticalReviewFallback": "La revue critique n'est pas encore disponible.",
+          "communityTitle": "En discuter",
+          "communityBody": "La définition de l'Impact Score {category} est disponible sur GitHub. Partagez vos retours ou proposez des ajustements.",
+          "communityCta": "Consulter la configuration",
+          "communityIssues": "Ouvrir une discussion",
+          "intro": "Nudger est construit dans un modèle ouvert :",
+          "connector": "et",
+          "openSourceLink": "open-source",
+          "openDataLink": "open-data",
+          "introSuffix": "pour garantir la traçabilité de notre méthode d'évaluation des {category}.",
+          "tableTitle": "Synthèse des coefficients",
+          "tableHelper": "Comparaison entre la proposition générée par l'IA et les coefficients actuellement appliqués.",
+          "tableFallback": "Les coefficients détaillés seront publiés prochainement.",
+          "tableHeaders": {
+            "name": "Nom du critère",
+            "proposed": "Coef. proposé",
+            "applied": "Coef. appliqué"
+          }
+        },
+        "aiAudit": {
+          "eyebrow": "Audit IA",
+          "title": "Audit de génération IA",
+          "intro": "Audit des prompts et réponses qui ont servi à configurer l'Impact Score des {category}.",
+          "promptTitle": "Prompt YAML générateur",
+          "promptHelper": "Instructions envoyées au modèle pour produire la configuration.",
+          "responseTitle": "Réponse du modèle",
+          "responseHelper": "Résultat JSON de l'IA ayant servi de base à la configuration.",
+          "yamlUnavailable": "Prompt indisponible.",
+          "jsonUnavailable": "Réponse IA indisponible."
+        }
+      }
     },
     "fastFilters": {
       "reset": "Réinitialiser les filtres rapides",
