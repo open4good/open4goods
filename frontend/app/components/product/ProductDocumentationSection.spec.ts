@@ -5,6 +5,11 @@ import { defineComponent, h } from 'vue'
 import ProductDocumentationSection from './ProductDocumentationSection.vue'
 import type { ProductPdfDto } from '~~/shared/api-client'
 
+vi.mock('@vueuse/core', () => ({
+  useEventListener: vi.fn(() => () => {}),
+  useResizeObserver: vi.fn(() => () => {}),
+}))
+
 vi.mock('vue-pdf-embed', () => ({
   default: defineComponent({
     name: 'VuePdfEmbedStub',
@@ -46,6 +51,26 @@ const createI18nPlugin = () =>
             empty: 'No documents are available for this product yet.',
             previewUnavailable: 'Preview unavailable for this document. Use the download link instead.',
             loading: 'Loading document preview…',
+            controls: {
+              zoomIn: 'Zoom in',
+              zoomOut: 'Zoom out',
+              resetView: 'Reset view',
+              reset: 'Reset',
+              fitWidth: 'Fit to width',
+              fit: 'Fit width',
+              rotate: 'Rotate document',
+              rotateLabel: 'Rotate',
+              switchSinglePage: 'Switch to single page view',
+              switchAllPages: 'Show all pages',
+              allPages: 'All pages',
+              singlePage: 'Single page',
+              pageNavigation: 'Page navigation',
+              previousPage: 'Previous page',
+              nextPage: 'Next page',
+              pageOf: 'Page {page} / {total}',
+              scrollLeft: 'Scroll left',
+              scrollRight: 'Scroll right',
+            },
           },
         },
       },
@@ -92,6 +117,9 @@ describe('ProductDocumentationSection', () => {
 
     const language = wrapper.get('.product-docs__viewer-language').text()
     expect(language).toContain('French')
+
+    const fitWidth = wrapper.get('[aria-label="Fit to width"]')
+    expect(fitWidth.attributes('aria-pressed')).toBe('true')
   })
 
   it('switches the active PDF when selecting a different tab', async () => {
@@ -112,6 +140,53 @@ describe('ProductDocumentationSection', () => {
     const viewer = wrapper.get('.vue-pdf-embed-stub')
     expect(viewer.attributes('data-source')).toBe(pdfs[1].url)
     expect(tabs[1].classes()).toContain('product-docs__tab--active')
+  })
+
+  it('toggles zoom controls off fit width when zooming in', async () => {
+    const wrapper = mountComponent({ pdfs: [basePdf()] })
+
+    await flushPromises()
+
+    const zoomInButton = wrapper.get('[aria-label="Zoom in"]')
+    const fitWidth = wrapper.get('[aria-label="Fit to width"]')
+
+    expect(fitWidth.attributes('aria-pressed')).toBe('true')
+
+    await zoomInButton.trigger('click')
+    await flushPromises()
+
+    expect(fitWidth.attributes('aria-pressed')).toBe('false')
+  })
+
+  it('supports switching to single page mode with page navigation', async () => {
+    const wrapper = mountComponent({ pdfs: [basePdf()] })
+
+    await flushPromises()
+
+    const toggleView = wrapper.get('[aria-label="Switch to single page view"]')
+    expect(toggleView.text()).toBe('All pages')
+
+    await toggleView.trigger('click')
+    await flushPromises()
+
+    expect(toggleView.text()).toBe('Single page')
+    const indicator = wrapper.get('.product-docs__page-indicator')
+    expect(indicator.text()).toBe('Page 1 / 3')
+
+    const nextButton = wrapper.get('[aria-label="Next page"]')
+    await nextButton.trigger('click')
+    await flushPromises()
+
+    expect(indicator.text()).toBe('Page 2 / 3')
+  })
+
+  it('falls back to raw language label when Intl formatting fails', async () => {
+    const wrapper = mountComponent({ pdfs: [basePdf({ language: 'Multilingue' })] })
+
+    await flushPromises()
+
+    const languageLabel = wrapper.get('.product-docs__viewer-language').text()
+    expect(languageLabel).toBe('Multilingue')
   })
 
   it('falls back to a message when a PDF has no preview URL', async () => {
