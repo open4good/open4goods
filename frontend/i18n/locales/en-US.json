@@ -1,8 +1,319 @@
 {
-  "welcome": "Welcome",
-  "lang": {
-    "fr": "French",
-    "en": "English"
+  "blog": {
+    "article": {
+      "edit": "Edit this article",
+      "empty": "The content of this article will be available soon.",
+      "featuredImageAlt": "Featured image for {title}",
+      "readingTime": "Approx. {minutes} min read",
+      "updated": "Updated {date}"
+    },
+    "hero": {
+      "eyebrow": "Nudger blog",
+      "subtitle": "Short reads on sustainable appliances, nudges and the lessons we learn while building Nudger.",
+      "title": "Fresh insights on responsible shopping"
+    },
+    "list": {
+      "loading": "Loading articles…",
+      "readMore": "Read more",
+      "tagWithCount": "{tag} ({count})",
+      "tagsAll": "All topics",
+      "tagsAriaLabel": "Filter blog posts by tag",
+      "tagsLoading": "Loading tags…",
+      "tagsTitle": "Filter by tag"
+    },
+    "pagination": {
+      "ariaLabel": "Blog pagination links",
+      "info": "Showing page {current} of {total} ({count} articles)",
+      "pageLink": "Blog page {page}"
+    },
+    "seo": {
+      "baseTitle": "Nudger Blog – Impact Score insights",
+      "description": "Explore the latest guides on sustainable appliances and energy-efficient choices from Nudger.",
+      "pageTitle": "{title} – Page {page}",
+      "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
+      "tagTitle": "{tag} articles – Nudger Blog"
+    }
+  },
+  "categories": {
+    "navigation": {
+      "error": {
+        "loadFailed": "We couldn’t load the category navigation. Please try again."
+      },
+      "grid": {
+        "cardAriaLabel": "Category card for {category}",
+        "emptySubtitle": "Try adjusting your search to find relevant categories.",
+        "emptyTitle": "No matching categories",
+        "leafLabel": "Leaf node",
+        "openSubcategory": "Open {category} subcategories",
+        "openSubcategoryCta": "View subcategories",
+        "subtitle": "Select a family to reveal its subcategories or discover our curated guides.",
+        "title": "Continue exploring",
+        "verticalLabel": "Curated guide",
+        "viewVertical": "Open the {category} guide",
+        "viewVerticalCta": "View guide"
+      },
+      "hero": {
+        "breadcrumbAriaLabel": "Category navigation breadcrumb trail",
+        "childDescription": "Explore the subcategories and curated selections inside {category}.",
+        "description": "Discover every product family we analyse and jump directly to the most relevant section.",
+        "resultsSummary": {
+          "one": "{count} category visible",
+          "other": "{count} categories visible"
+        },
+        "rootBreadcrumb": "All categories",
+        "rootProductsTitle": "Available products",
+        "searchLabel": "Search categories",
+        "searchPlaceholder": "Search for a category",
+        "title": "All product categories"
+      },
+      "loading": "Loading category navigation",
+      "verticals": {
+        "eyebrow": "Highlighted guides",
+        "openVertical": "Open the {category} guide",
+        "openVerticalCta": "Discover the guide",
+        "subtitle": "Hand-picked guides to jump straight into popular product families.",
+        "title": "Featured selections",
+        "viewPath": "Open the {category} taxonomy path",
+        "viewPathCta": "Browse taxonomy"
+      }
+    }
+  },
+  "category": {
+    "documentation": {
+      "guidesTitle": "Helpful guides",
+      "postsTitle": "Related articles"
+    },
+    "ecoscorePage": {
+      "breadcrumbLeaf": "impactscore",
+      "description": "We are crafting dedicated eco score insights for {category}. Check back soon!",
+      "impactScoreLabel": "Impact Score",
+      "navigation": {
+        "aiAudit": "AI audit",
+        "ariaLabel": "Impact Score section navigation",
+        "criteria": "Criteria",
+        "overview": "Overview",
+        "purpose": "Purpose & data",
+        "transparency": "Transparency"
+      },
+      "sections": {
+        "aiAudit": {
+          "eyebrow": "AI audit",
+          "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
+          "jsonUnavailable": "AI response unavailable.",
+          "promptHelper": "Instructions sent to the model to produce the configuration.",
+          "promptTitle": "YAML generation prompt",
+          "responseHelper": "JSON output from the AI used as the basis of the configuration.",
+          "responseTitle": "Model response",
+          "title": "Impact Score generation audit",
+          "yamlUnavailable": "Prompt unavailable."
+        },
+        "criteria": {
+          "empty": "Criteria will be published soon.",
+          "eyebrow": "Criteria",
+          "title": "Selected criteria and weights"
+        },
+        "overview": {
+          "card": {
+            "aria": "Learn more about the global Impact Score methodology",
+            "cta": "Understand the global methodology",
+            "description": "This page details the criteria and weightings used to assess the environmental impact of this category.",
+            "imageAlt": "Impact Score illustration for {category}",
+            "subtitle": "Methodology applied to {category}",
+            "title": "Nudger Impact Score"
+          },
+          "eyebrow": "Introduction",
+          "title": "Impact Score for {category}"
+        },
+        "purpose": {
+          "dataFallback": "Detailed data for each criterion will be available soon.",
+          "dataTitle": "Available data",
+          "eyebrow": "Our approach",
+          "objectiveFallback": "The objective description will be available soon.",
+          "objectiveTitle": "Objective",
+          "title": "Why and how we score {category}"
+        },
+        "transparency": {
+          "communityBody": "The {category} Impact Score definition is public on GitHub. Share your feedback or suggest adjustments.",
+          "communityCta": "View the configuration",
+          "communityIssues": "Open an issue",
+          "communityTitle": "Join the discussion",
+          "connector": "and",
+          "criticalReviewFallback": "The critical review will be shared soon.",
+          "criticalReviewTitle": "Critical review",
+          "eyebrow": "Transparency",
+          "intro": "Nudger is built as an open project:",
+          "introSuffix": "to guarantee traceability for the {category} scoring methodology.",
+          "openDataLink": "open-data",
+          "openSourceLink": "open-source",
+          "tableFallback": "Detailed coefficients will be published soon.",
+          "tableHeaders": {
+            "applied": "Applied coef.",
+            "name": "Criterion name",
+            "proposed": "Proposed coef."
+          },
+          "tableHelper": "Comparison between the AI-generated proposal and the coefficients currently applied.",
+          "tableTitle": "Coefficient summary",
+          "title": "Transparency and traceability"
+        }
+      },
+      "seo": {
+        "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
+        "title": "{category} – Impact Score breakdown"
+      },
+      "title": "{category} – {label}"
+    },
+    "fastFilters": {
+      "activeClauses": "Applied subset filters",
+      "groupDefault": "Other quick filters",
+      "groups": {
+        "default": "Other quick filters",
+        "price": "Price",
+        "screen_size": "Screen size"
+      },
+      "navigation": {
+        "next": "Scroll next quick filters",
+        "previous": "Scroll previous quick filters"
+      },
+      "operator": {
+        "greaterThan": "≥ {value}",
+        "lowerThan": "≤ {value}"
+      },
+      "reset": "Clear fast filters"
+    },
+    "filters": {
+      "fields": {
+        "brand": "Brand",
+        "condition": "Offer condition",
+        "country": "GTIN country code",
+        "datasource": "Data sources",
+        "googleTaxonomyId": "Google product category",
+        "offersCount": "Number of offers",
+        "price": "Price range"
+      },
+      "globalTitle": "Global filters",
+      "hideImpact": "Hide impact filters",
+      "hideTechnical": "Hide technical filters",
+      "impactTitle": "Impact filters",
+      "missingLabel": "Unlabelled option",
+      "mobileApply": "Apply filters",
+      "mobileClear": "Clear all filters",
+      "noMatch": "No matching options",
+      "rangeAriaSuffix": "range selection",
+      "searchOptions": "Search options",
+      "showMoreImpact": "Show more impact filters",
+      "showMoreTechnical": "Show more technical filters",
+      "technicalTitle": "Technical filters",
+      "toggle": {
+        "hide": "Hide filters column",
+        "show": "Show filters column"
+      }
+    },
+    "hero": {
+      "breadcrumbAriaLabel": "Category navigation breadcrumb",
+      "breadcrumbDivider": "/",
+      "missingBreadcrumbTitle": "Category"
+    },
+    "products": {
+      "compare": {
+        "addMoreHint": "Select at least two products to start a comparison.",
+        "addToList": "Add to compare",
+        "collapsePanel": "Hide list",
+        "differentCategory": "Only compare products from the same category.",
+        "expandPanel": "Show list",
+        "itemsCount": {
+          "one": "{count} product selected",
+          "other": "{count} products selected"
+        },
+        "launchComparison": "Compare now",
+        "limitReached": "You can compare up to {count} products.",
+        "missingIdentifier": "Cannot compare this product.",
+        "regionLabel": "Products selected for comparison",
+        "removeFromList": "Remove from compare",
+        "removeSingle": "Remove {name}",
+        "title": "Compare products"
+      },
+      "conditions": {
+        "new": "New",
+        "occasion": "Second-hand",
+        "other": "{condition}",
+        "unknown": "Unspecified"
+      },
+      "ecoscoreLabel": "Eco score {letter}",
+      "fetchError": "Unable to load products. Please try again.",
+      "headers": {
+        "bestPrice": "Best price",
+        "brand": "Brand",
+        "compare": "Compare",
+        "ecoscore": "Eco score",
+        "impactScore": "Impact score",
+        "model": "Model",
+        "offers": "Offers",
+        "popularAttributes": "Key details",
+        "remainingAttributes": "Other attributes"
+      },
+      "noResults": "No products match the selected filters.",
+      "notRated": "Not rated",
+      "offerCount": {
+        "one": "{count} offer",
+        "other": "{count} offers"
+      },
+      "openFilters": "Filters",
+      "priceUnavailable": "Price unavailable",
+      "pricing": {
+        "bestOfferLabel": "Best price",
+        "conditionLabel": "Condition: {condition}",
+        "newOfferLabel": "New",
+        "occasionOfferLabel": "Second-hand"
+      },
+      "resultsCount": {
+        "one": "{count} product",
+        "other": "{count} products"
+      },
+      "searchPlaceholder": "Search products",
+      "sort": {
+        "fields": {
+          "brand": "Brand",
+          "impactScore": "Impact score",
+          "model": "Model",
+          "offersCount": "Number of offers",
+          "price": "Lowest price"
+        }
+      },
+      "sortLabel": "Sort by",
+      "sortOrderAsc": "Ascending order",
+      "sortOrderDesc": "Descending order",
+      "tooltips": {
+        "search": "Search within these products",
+        "sortAscending": "Sort products from lowest to highest",
+        "sortDescending": "Sort products from highest to lowest",
+        "sortField": "Change the field used to sort products",
+        "viewCards": "Show products as cards",
+        "viewList": "Show products as a list",
+        "viewTable": "Show products in a table view"
+      },
+      "unknownBrand": "Unknown brand",
+      "untitledProduct": "Unnamed product",
+      "viewCards": "Card view",
+      "viewList": "List view",
+      "viewTable": "Table view"
+    }
+  },
+  "cms": {
+    "page": {
+      "edit": "Edit this page",
+      "error": "We could not load this page. Please try again later.",
+      "loading": "Loading page…"
+    }
+  },
+  "common": {
+    "actions": {
+      "goHome": "Back to homepage",
+      "retry": "Retry"
+    },
+    "boolean": {
+      "false": "No",
+      "true": "Yes"
+    }
   },
   "components": {
     "impactScore": {
@@ -12,1102 +323,61 @@
       "label": "Loading page content"
     }
   },
-  "siteIdentity": {
-    "menu": {
-      "title": "Menu",
-      "closeLabel": "Close menu",
-      "themeToggle": "Toggle theme",
-      "theme": {
-        "lightTooltip": "Switch to light theme",
-        "darkTooltip": "Switch to dark theme",
-        "lightAriaLabel": "Activate light theme",
-        "darkAriaLabel": "Activate dark theme"
-      },
-      "items": {
-        "impactScore": "Impact Score",
-        "products": "Products",
-        "blog": "Blog",
-        "contact": "Contact"
-      }
-    },
-    "links": {
-      "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
-    },
-    "footer": {
-      "rightsReserved": "All Rights Reserved",
-      "accessibleTitle": "Footer information",
-      "mission": "nudger.fr is an open approach to assess the environmental impact of consumer goods and partially offset the impact of your online purchases.",
-      "blogLink": "Our blog",
-      "highlightLinks": {
-        "ecoscore": "Environmental assessment",
-        "allProducts": "All products",
-        "compensation": "Ecological contribution"
-      },
-      "comparator": {
-        "title": "Resources",
-        "links": {
-          "openData": "Open data",
-          "openSource": "Open source",
-          "privacy": "Privacy policy",
-          "legal": "Legal notice"
-        }
-      },
-      "community": {
-        "title": "Community",
-        "links": {
-          "team": "Our team",
-          "partners": "Our partners"
-        }
-      },
-      "feedback": {
-        "title": "Get involved",
-        "cta": "Share your feedback",
-        "links": {
-          "contact": "Contact us",
-          "linkedin": "Follow us on LinkedIn"
-        }
-      },
-      "logoAlt": "Nudger orange logo icon",
-      "copyright": "Copyright ©{year} open4goods. Common good product."
-    },
-    "hero": {
-      "mainTitle": "The Comparator That Thinks About Tomorrow",
-      "mainSubtitle": "Your Free and Independent Shopping Assistant",
-      "defaultTitle": "Default Title",
-      "defaultSubtitle": "Video demo hero to show a clean integration in a Vue 3 application.",
-      "defaultCtaText": "Call to Action"
-    },
-    "siteName": "Nudger"
-  },
-  "error": {
-    "page": {
-      "eyebrow": "Unexpected detour",
-      "statusLabel": "Status code {code}",
-      "notFound": {
-        "badge": "Page missing",
-        "title": "We can’t find this page",
-        "description": "The link you followed may be broken or the page may have moved.",
-        "helper": "Use the navigation links below or return to the homepage to continue exploring responsible shopping.",
-        "statusMessage": "Error 404 — the requested resource could not be located."
-      },
-      "generic": {
-        "badge": "We hit a snag",
-        "title": "We're working on a fix",
-        "description": "An unexpected error prevented us from loading this page.",
-        "helper": "Please try another section of Nudger or reach out if the problem persists.",
-        "statusMessage": "Error 500 — something went wrong on our side."
-      },
-      "actions": {
-        "ariaLabel": "Error recovery quick actions",
-        "goHome": "Back to homepage",
-        "contactSupport": "Contact support"
-      },
-      "debug": {
-        "title": "Technical details",
-        "messageLabel": "Error message",
-        "stackLabel": "Stack trace",
-        "empty": "No additional diagnostic information is available."
-      }
-    }
-  },
-  "category": {
-    "hero": {
-      "breadcrumbAriaLabel": "Category navigation breadcrumb",
-      "breadcrumbDivider": "/",
-      "missingBreadcrumbTitle": "Category"
-    },
-    "ecoscorePage": {
-      "title": "{category} – {label}",
-      "description": "We are crafting dedicated eco score insights for {category}. Check back soon!",
-      "impactScoreLabel": "Impact Score",
-      "breadcrumbLeaf": "impactscore",
-      "seo": {
-        "title": "{category} – Impact Score breakdown",
-        "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit."
-      },
-      "navigation": {
-        "ariaLabel": "Impact Score section navigation",
-        "overview": "Overview",
-        "purpose": "Purpose & data",
-        "criteria": "Criteria",
-        "transparency": "Transparency",
-        "aiAudit": "AI audit"
-      },
-      "sections": {
-        "overview": {
-          "eyebrow": "Introduction",
-          "title": "Impact Score for {category}",
-          "card": {
-            "title": "Nudger Impact Score",
-            "subtitle": "Methodology applied to {category}",
-            "description": "This page details the criteria and weightings used to assess the environmental impact of this category.",
-            "cta": "Understand the global methodology",
-            "aria": "Learn more about the global Impact Score methodology",
-            "imageAlt": "Impact Score illustration for {category}"
-          }
-        },
-        "purpose": {
-          "eyebrow": "Our approach",
-          "title": "Why and how we score {category}",
-          "objectiveTitle": "Objective",
-          "objectiveFallback": "The objective description will be available soon.",
-          "dataTitle": "Available data",
-          "dataFallback": "Detailed data for each criterion will be available soon."
-        },
-        "criteria": {
-          "eyebrow": "Criteria",
-          "title": "Selected criteria and weights",
-          "empty": "Criteria will be published soon."
-        },
-        "transparency": {
-          "eyebrow": "Transparency",
-          "title": "Transparency and traceability",
-          "criticalReviewTitle": "Critical review",
-          "criticalReviewFallback": "The critical review will be shared soon.",
-          "communityTitle": "Join the discussion",
-          "communityBody": "The {category} Impact Score definition is public on GitHub. Share your feedback or suggest adjustments.",
-          "communityCta": "View the configuration",
-          "communityIssues": "Open an issue",
-          "intro": "Nudger is built as an open project:",
-          "connector": "and",
-          "openSourceLink": "open-source",
-          "openDataLink": "open-data",
-          "introSuffix": "to guarantee traceability for the {category} scoring methodology.",
-          "tableTitle": "Coefficient summary",
-          "tableHelper": "Comparison between the AI-generated proposal and the coefficients currently applied.",
-          "tableFallback": "Detailed coefficients will be published soon.",
-          "tableHeaders": {
-            "name": "Criterion name",
-            "proposed": "Proposed coef.",
-            "applied": "Applied coef."
-          }
-        },
-        "aiAudit": {
-          "eyebrow": "AI audit",
-          "title": "Impact Score generation audit",
-          "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
-          "promptTitle": "YAML generation prompt",
-          "promptHelper": "Instructions sent to the model to produce the configuration.",
-          "responseTitle": "Model response",
-          "responseHelper": "JSON output from the AI used as the basis of the configuration.",
-          "yamlUnavailable": "Prompt unavailable.",
-          "jsonUnavailable": "AI response unavailable."
-        }
-      }
-    },
-    "fastFilters": {
-      "reset": "Clear fast filters",
-      "activeClauses": "Applied subset filters",
-      "groupDefault": "Other quick filters",
-      "groups": {
-        "price": "Price",
-        "screen_size": "Screen size",
-        "default": "Other quick filters"
-      },
-      "navigation": {
-        "previous": "Scroll previous quick filters",
-        "next": "Scroll next quick filters"
-      },
-      "operator": {
-        "greaterThan": "≥ {value}",
-        "lowerThan": "≤ {value}"
-      }
-    },
-    "filters": {
-      "globalTitle": "Global filters",
-      "impactTitle": "Impact filters",
-      "technicalTitle": "Technical filters",
-      "showMoreImpact": "Show more impact filters",
-      "hideImpact": "Hide impact filters",
-      "showMoreTechnical": "Show more technical filters",
-      "hideTechnical": "Hide technical filters",
-      "rangeAriaSuffix": "range selection",
-      "searchOptions": "Search options",
-      "noMatch": "No matching options",
-      "missingLabel": "Unlabelled option",
-      "mobileApply": "Apply filters",
-      "mobileClear": "Clear all filters",
-      "toggle": {
-        "show": "Show filters column",
-        "hide": "Hide filters column"
-      },
-      "fields": {
-        "price": "Price range",
-        "offersCount": "Number of offers",
-        "condition": "Offer condition",
-        "googleTaxonomyId": "Google product category",
-        "brand": "Brand",
-        "country": "GTIN country code",
-        "datasource": "Data sources"
-      }
-    },
-    "products": {
-      "untitledProduct": "Unnamed product",
-      "unknownBrand": "Unknown brand",
-      "ecoscoreLabel": "Eco score {letter}",
-      "priceUnavailable": "Price unavailable",
-      "tooltips": {
-        "search": "Search within these products",
-        "sortField": "Change the field used to sort products",
-        "sortAscending": "Sort products from lowest to highest",
-        "sortDescending": "Sort products from highest to lowest",
-        "viewCards": "Show products as cards",
-        "viewList": "Show products as a list",
-        "viewTable": "Show products in a table view"
-      },
-      "offerCount": {
-        "one": "{count} offer",
-        "other": "{count} offers"
-      },
-      "notRated": "Not rated",
-      "conditions": {
-        "new": "New",
-        "occasion": "Second-hand",
-        "unknown": "Unspecified",
-        "other": "{condition}"
-      },
-      "pricing": {
-        "newOfferLabel": "New",
-        "occasionOfferLabel": "Second-hand",
-        "bestOfferLabel": "Best price",
-        "conditionLabel": "Condition: {condition}"
-      },
-      "compare": {
-        "title": "Compare products",
-        "expandPanel": "Show list",
-        "collapsePanel": "Hide list",
-        "removeSingle": "Remove {name}",
-        "addMoreHint": "Select at least two products to start a comparison.",
-        "launchComparison": "Compare now",
-        "regionLabel": "Products selected for comparison",
-        "itemsCount": {
-          "one": "{count} product selected",
-          "other": "{count} products selected"
-        },
-        "addToList": "Add to compare",
-        "removeFromList": "Remove from compare",
-        "limitReached": "You can compare up to {count} products.",
-        "differentCategory": "Only compare products from the same category.",
-        "missingIdentifier": "Cannot compare this product."
-      },
-      "fetchError": "Unable to load products. Please try again.",
-      "headers": {
-        "compare": "Compare",
-        "brand": "Brand",
-        "model": "Model",
-        "ecoscore": "Eco score",
-        "impactScore": "Impact score",
-        "bestPrice": "Best price",
-        "offers": "Offers",
-        "popularAttributes": "Key details",
-        "remainingAttributes": "Other attributes"
-      },
-      "resultsCount": {
-        "one": "{count} product",
-        "other": "{count} products"
-      },
-      "searchPlaceholder": "Search products",
-      "sortLabel": "Sort by",
-      "sortOrderAsc": "Ascending order",
-      "sortOrderDesc": "Descending order",
-      "viewCards": "Card view",
-      "viewList": "List view",
-      "viewTable": "Table view",
-      "openFilters": "Filters",
-      "noResults": "No products match the selected filters.",
-      "sort": {
-        "fields": {
-          "price": "Lowest price",
-          "offersCount": "Number of offers",
-          "brand": "Brand",
-          "model": "Model",
-          "impactScore": "Impact score"
-        }
-      }
-    },
-    "documentation": {
-      "guidesTitle": "Helpful guides",
-      "postsTitle": "Related articles"
-    }
-  },
-  "categories": {
-    "navigation": {
-      "loading": "Loading category navigation",
-      "error": {
-        "loadFailed": "We couldn’t load the category navigation. Please try again."
-      },
-      "hero": {
-        "title": "All product categories",
-        "rootProductsTitle": "Available products",
-        "description": "Discover every product family we analyse and jump directly to the most relevant section.",
-        "childDescription": "Explore the subcategories and curated selections inside {category}.",
-        "rootBreadcrumb": "All categories",
-        "searchLabel": "Search categories",
-        "searchPlaceholder": "Search for a category",
-        "breadcrumbAriaLabel": "Category navigation breadcrumb trail",
-        "resultsSummary": {
-          "one": "{count} category visible",
-          "other": "{count} categories visible"
-        }
-      },
-      "grid": {
-        "title": "Continue exploring",
-        "subtitle": "Select a family to reveal its subcategories or discover our curated guides.",
-        "emptyTitle": "No matching categories",
-        "emptySubtitle": "Try adjusting your search to find relevant categories.",
-        "verticalLabel": "Curated guide",
-        "leafLabel": "Leaf node",
-        "openSubcategory": "Open {category} subcategories",
-        "openSubcategoryCta": "View subcategories",
-        "viewVertical": "Open the {category} guide",
-        "viewVerticalCta": "View guide",
-        "cardAriaLabel": "Category card for {category}"
-      },
-      "verticals": {
-        "eyebrow": "Highlighted guides",
-        "title": "Featured selections",
-        "subtitle": "Hand-picked guides to jump straight into popular product families.",
-        "openVertical": "Open the {category} guide",
-        "openVerticalCta": "Discover the guide",
-        "viewPath": "Open the {category} taxonomy path",
-        "viewPathCta": "Browse taxonomy"
-      }
-    }
-  },
-  "blog": {
-    "seo": {
-      "baseTitle": "Nudger Blog – Impact Score insights",
-      "tagTitle": "{tag} articles – Nudger Blog",
-      "pageTitle": "{title} – Page {page}",
-      "description": "Explore the latest guides on sustainable appliances and energy-efficient choices from Nudger.",
-      "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice."
-    },
-    "pagination": {
-      "info": "Showing page {current} of {total} ({count} articles)",
-      "ariaLabel": "Blog pagination links",
-      "pageLink": "Blog page {page}"
-    },
-    "article": {
-      "updated": "Updated {date}",
-      "readingTime": "Approx. {minutes} min read",
-      "featuredImageAlt": "Featured image for {title}",
-      "empty": "The content of this article will be available soon.",
-      "edit": "Edit this article"
-    },
-    "hero": {
-      "eyebrow": "Nudger blog",
-      "title": "Fresh insights on responsible shopping",
-      "subtitle": "Short reads on sustainable appliances, nudges and the lessons we learn while building Nudger."
-    },
-    "list": {
-      "loading": "Loading articles…",
-      "readMore": "Read more",
-      "tagsTitle": "Filter by tag",
-      "tagsAll": "All topics",
-      "tagWithCount": "{tag} ({count})",
-      "tagsLoading": "Loading tags…",
-      "tagsAriaLabel": "Filter blog posts by tag"
-    }
-  },
-  "common": {
-    "actions": {
-      "retry": "Retry",
-      "goHome": "Back to homepage"
-    },
-    "boolean": {
-      "true": "Yes",
-      "false": "No"
-    }
-  },
-  "contrib": {
-    "seo": {
-      "title": "Redirecting you to our partner",
-      "description": "We are validating your secure contribution link before redirecting you to Nudger's partner."
-    },
-    "loading": {
-      "title": "Preparing your redirect…",
-      "message": "Please wait while we validate your contribution link."
-    },
-    "success": {
-      "title": "Ready to redirect",
-      "message": "You will be redirected shortly. If nothing happens, use the button below.",
-      "cta": "Continue to partner site"
-    },
-    "error": {
-      "title": "We could not validate this link",
-      "description": "The contribution link may have expired or is invalid. You can return to the homepage and try again.",
-      "detailsPrefix": "Details:",
-      "cta": "Back to homepage"
-    }
-  },
-  "team": {
-    "seo": {
-      "title": "Meet the Nudger team",
-      "description": "Discover the collective of entrepreneurs, engineers and volunteers building the sustainable shopping assistant Nudger."
-    },
-    "hero": {
-      "eyebrow": "Our collective",
-      "title": "The people behind Nudger",
-      "subtitle": "A passionate crew blending tech, sustainability and social impact."
-    },
-    "loading": "Loading team members…",
-    "errors": {
-      "loadFailed": "We could not load the team roster. Please try again."
-    },
-    "sections": {
-      "empty": "The team roster will be published soon.",
-      "core": {
-        "title": "Core team"
-      },
-      "contributors": {
-        "title": "Contributors"
-      }
-    },
-    "cards": {
-      "portraitAlt": "Portrait of {name}",
-      "linkedIn": "Open {name}'s LinkedIn profile",
-      "connect": "Connect on LinkedIn",
-      "unknownName": "a team member"
-    },
-    "callouts": {
-      "partners": {
-        "title": "Our partners",
-        "cta": "Discover our partners",
-        "link": "/partners"
-      },
-      "contact": {
-        "title": "Curious to chat?",
-        "description": "Want to co-create the future of responsible shopping or ask us something specific? We would love to talk.",
-        "cta": "Contact us"
-      }
-    }
-  },
-  "partners": {
-    "seo": {
-      "title": "Our partners and mentors",
-      "description": "Meet the organisations, marketplaces and mentors helping Nudger accelerate responsible commerce."
-    },
-    "hero": {
-      "eyebrow": "Collective impact",
-      "title": "Partners who amplify Nudger",
-      "subtitle": "A trusted network of retailers, ecosystem builders and mentors committed to fairer shopping.",
-      "description": "Browse affiliation partners you can support, discover the ecosystem backing Nudger and the mentors guiding our mission."
-    },
-    "loading": "Loading partners…",
-    "errors": {
-      "loadFailed": "We could not load partner data. Please try again."
-    },
-    "affiliation": {
-      "title": "They trust Nudger",
-      "subtitle": "Explore the merchants who work with us through affiliation and discover their offers.",
-      "search": {
-        "label": "Search partners",
-        "placeholder": "Search by partner name"
-      },
-      "empty": "No partners match your search yet. Try another term.",
-      "carouselAriaLabel": "Affiliation partners carousel",
-      "linkLabel": "Visit this partner"
-    },
-    "ecosystem": {
-      "title": "Nudger grows within a dynamic ecosystem",
-      "subtitle": "These organisations collaborate with us to build public-interest digital services.",
-      "empty": "Our ecosystem partners will appear here soon.",
-      "carouselAriaLabel": "Ecosystem partners carousel",
-      "linkLabel": "Discover the initiative",
-      "fallbackDescription": "Content about this partner will be published soon."
-    },
-    "mentors": {
-      "title": "They support us",
-      "subtitle": "Entrepreneurship is never simple. These mentors share their experience with kindness.",
-      "empty": "Mentor profiles will arrive shortly.",
-      "carouselAriaLabel": "Mentor carousel",
-      "linkLabel": "Learn more",
-      "fallbackDescription": "More information about this mentor is coming soon."
-    },
-    "cta": {
-      "eyebrow": "Join the movement",
-      "title": "Want to become a partner?",
-      "description": "We are always looking for new allies who want to build responsible shopping with us.",
-      "ctaLabel": "Contact the team"
-    }
-  },
-  "opensource": {
-    "seo": {
-      "title": "Open source at Nudger",
-      "description": "Discover how Nudger shares its code, data and governance to build a responsible shopping commons together.",
-      "imageAlt": "Nudger logomark representing the open source programme"
-    },
-    "hero": {
-      "title": "We build a commons for responsible shopping",
-      "subtitle": "Code, data and governance are transparent so anyone can audit and improve Nudger.",
-      "primaryCta": {
-        "label": "Explore the repositories",
-        "ariaLabel": "Open the Nudger GitHub organization in a new tab"
-      },
-      "ctaGroupLabel": "Primary hero actions",
-      "infoCard": {
-        "highlight": "Open4goods",
-        "description": "grows with everyone. Every pull request, issue or piece of feedback makes the platform more transparent.",
-        "items": {
-          "openLicenses": "Code and data published under open licences",
-          "collaborativeReviews": "Collaborative reviews of contributions",
-          "sharedGovernance": "Shared governance and living documentation"
-        }
-      }
-    },
-    "pillars": {
-      "eyebrow": "Our commitments",
-      "title": "An open ecosystem you can trust",
-      "cards": {
-        "transparency": {
-          "title": "Transparent architecture",
-          "cta": "Browse the source code",
-          "ariaLabel": "Open the Nudger GitHub repository in a new tab"
-        },
-        "methodology": {
-          "title": "Documented methodology",
-          "cta": "Understand the Impact Score",
-          "ariaLabel": "Navigate to the Impact Score page"
-        },
-        "community": {
-          "title": "Inclusive community",
-          "cta": "Meet the team",
-          "ariaLabel": "Navigate to the Nudger team page"
-        }
-      }
-    },
-    "contribution": {
-      "eyebrow": "Contribute",
-      "title": "Join the collective in a few steps",
-      "steps": {
-        "setup": {
-          "title": "Set up the project locally"
-        },
-        "issues": {
-          "title": "Pick an issue that inspires you"
-        },
-        "share": {
-          "title": "Share, review and celebrate"
-        }
-      }
-    },
-    "resources": {
-      "eyebrow": "Resources",
-      "title": "Everything you need to get started",
-      "links": {
-        "guide": {
-          "title": "Contribution guide",
-          "ariaLabel": "Open the Nudger contribution guide on GitHub in a new tab"
-        },
-        "issues": {
-          "title": "Issue tracker",
-          "ariaLabel": "Open the Nudger GitHub issues board in a new tab"
-        },
-        "updates": {
-          "title": "Community updates",
-          "ariaLabel": "Open the Nudger blog"
-        }
-      },
-      "opendata": {
-        "title": "Open data for transparent decisions",
-        "description": "Nudger datasets are published so you can analyse product footprints, cross-check our scoring and build your own projects.",
-        "cta": {
-          "label": "Browse the open data portal",
-          "ariaLabel": "Navigate to the open data page"
-        }
-      },
-      "contact": {
-        "title": "Need a human sparring partner?",
-        "cta": {
-          "label": "Contact the team",
-          "ariaLabel": "Navigate to the contact page"
-        }
-      },
-      "feedback": {
-        "title": "Share feedback and ideas",
-        "description": "Report bugs, submit feature ideas and help us prioritise what matters next.",
-        "points": {
-          "bugs": "Log a bug in just a few clicks",
-          "features": "Suggest new features and improvements",
-          "votes": "Vote on the topics that matter to you"
-        },
-        "cta": {
-          "label": "Open the feedback board",
-          "ariaLabel": "Navigate to the user feedback page"
-        }
-      }
-    }
-  },
-  "opendata": {
-    "seo": {
-      "title": "Nudger open data portal",
-      "description": "Explore GTIN and ISBN datasets curated by Nudger, including weekly exports and download guidance."
-    },
-    "loading": "Loading open data information…",
-    "errors": {
-      "overviewFailed": "We could not load the open data overview. Please try again.",
-      "datasetFailed": "We could not load the dataset details. Please try again."
-    },
-    "hero": {
-      "eyebrow": "Open data",
-      "title": "Transparent product data for responsible commerce",
-      "subtitle": "Download GTIN and ISBN datasets maintained by Nudger to build your own analyses, services and research.",
-      "primaryCta": {
-        "label": "Explore the datasets",
-        "ariaLabel": "Scroll to the open data datasets section"
-      }
-    },
-    "stats": {
-      "accessibilityTitle": "Key open data metrics",
-      "placeholder": "—",
-      "totalProducts": {
-        "label": "Products covered",
-        "description": "Unique products referenced across all exports.",
-        "millions": "+{value} million"
-      },
-      "datasets": {
-        "label": "Published datasets",
-        "description": "Currently available data packages."
-      },
-      "totalSize": {
-        "label": "Combined size",
-        "description": "Total compressed footprint of weekly exports."
-      }
-    },
-    "datasets": {
-      "title": "Two complementary datasets",
-      "subtitle": "Pick the export that matches your project. Both are updated weekly and delivered under the Open Database Licence.",
-      "cards": {
-        "gtin": {
-          "title": "GTIN catalogue",
-          "description": "All products indexed in Nudger with brand, model, price range and category insights.",
-          "features": {
-            "refresh": "Weekly refreshed snapshot",
-            "coverage": "Includes EAN13, UPC and GS1 country metadata",
-            "uses": "Ideal for price comparison, assortment analysis and category monitoring"
-          },
-          "cta": {
-            "label": "View GTIN dataset",
-            "ariaLabel": "Open the GTIN open data page"
-          }
-        },
-        "isbn": {
-          "title": "ISBN library",
-          "description": "Dedicated export for books with pricing, availability and classification information.",
-          "features": {
-            "refresh": "Weekly refreshed snapshot",
-            "catalogue": "Includes publisher, format and Decitre classifications",
-            "research": "Great for catalogue enrichment, research and cultural analytics"
-          },
-          "cta": {
-            "label": "View ISBN dataset",
-            "ariaLabel": "Open the ISBN open data page"
-          }
-        }
-      },
-      "common": {
-        "placeholder": "—",
-        "breadcrumb": {
-          "label": "opendata",
-          "ariaLabel": "Back to the open data overview"
-        },
-        "summary": {
-          "records": "Total records",
-          "updated": "Last updated",
-          "size": "Compressed size"
-        },
-        "columnName": "Column",
-        "columnDescription": "Description",
-        "download": {
-          "fast": {
-            "title": "Fast mirror (data.gouv.fr)",
-            "description": "Download via the official open data portal hosted by the French government.",
-            "badge": "Recommended",
-            "speed": "High bandwidth infrastructure",
-            "cta": {
-              "label": "Download from data.gouv.fr",
-              "ariaLabel": "Open the dataset on data.gouv.fr in a new tab",
-              "href": "https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/"
-            }
-          },
-          "direct": {
-            "title": "Direct download from Nudger",
-            "description": "Retrieve the ZIP file directly from Nudger's infrastructure.",
-            "concurrent": "Up to {value} simultaneous downloads",
-            "concurrentUnknown": "Concurrent downloads limited",
-            "speed": "Limited to {value} per client",
-            "speedUnknown": "Download speed limited per client",
-            "cta": {
-              "label": "Download from nudger.fr",
-              "ariaLabel": "Start the direct download from Nudger"
-            }
-          }
-        }
-      },
-      "gtin": {
-        "seo": {
-          "title": "GTIN open data – download the barcode catalogue",
-          "description": "Access Nudger's GTIN dataset with weekly updates, download options and schema details for your barcode data projects."
-        },
-        "hero": {
-          "eyebrow": "GTIN export",
-          "title": "Barcode data for consumer products",
-          "stats": {
-            "records": "Products",
-            "updated": "Last updated",
-            "size": "ZIP size"
-          }
-        },
-        "summary": {
-          "title": "GTIN dataset overview"
-        },
-        "download": {
-          "title": "Download options",
-          "subtitle": "Choose the mirror that matches your bandwidth and automation needs.",
-          "fast": {
-            "highlight": "Curated for broad retail and circular economy use cases"
-          }
-        },
-        "format": {
-          "title": "File format",
-          "description": "Data is delivered as a compressed CSV archive ready for ingestion.",
-          "bullets": {
-            "type": "CSV file compressed as ZIP",
-            "separator": "Field separator: comma (,)",
-            "quote": "Text qualifier: double quotes (\")"
-          }
-        },
-        "columnsTitle": "Columns included in the GTIN dataset",
-        "columnsSubtitle": "Each row represents a product identifier enriched with metadata gathered by Nudger.",
-        "columns": {
-          "gtin": {
-            "label": "gtin",
-            "description": "Global Trade Item Number (EAN13/UPC)."
-          },
-          "brand": {
-            "label": "brand",
-            "description": "Brand declared or inferred for the product."
-          },
-          "model": {
-            "label": "model",
-            "description": "Manufacturer model or SKU reference when available."
-          },
-          "name": {
-            "label": "name",
-            "description": "Marketing name or product title."
-          },
-          "last_updated": {
-            "label": "last_updated",
-            "description": "Epoch timestamp (ms) of the latest update for this product."
-          },
-          "gs1_country": {
-            "label": "gs1_country",
-            "description": "Country code derived from the GS1 prefix."
-          },
-          "gtinType": {
-            "label": "gtinType",
-            "description": "Type of barcode detected (EAN13, UPC, etc.)."
-          },
-          "offers_count": {
-            "label": "offers_count",
-            "description": "Number of commercial offers tracked for the product."
-          },
-          "min_price": {
-            "label": "min_price",
-            "description": "Lowest observed price across all offers."
-          },
-          "min_price_compensation": {
-            "label": "min_price_compensation",
-            "description": "Carbon contribution associated with the lowest price."
-          },
-          "currency": {
-            "label": "currency",
-            "description": "Currency code of the lowest price."
-          },
-          "categories": {
-            "label": "categories",
-            "description": "Product categories aggregated by Nudger (pipe-separated)."
-          },
-          "url": {
-            "label": "url",
-            "description": "Product page URL when public offers are available."
-          }
-        },
-        "faq": {
-          "title": "Frequently asked questions",
-          "subtitle": "Understand how to work with the GTIN dataset.",
-          "items": {
-            "whatIs": {
-              "question": "What is a GTIN and why does it matter?",
-              "answer": "<p><strong>The GTIN (Global Trade Item Number)</strong> is a unique identifier used to recognise products worldwide. It comes in several formats (GTIN-12, GTIN-13, GTIN-14), each tailored to specific product types or regions. For example, GTIN-13 is commonly used in Europe, while GTIN-12 is more frequent in North America. Every GTIN ensures a product can be tracked, identified and catalogued anywhere in the world, enabling efficient stock and sales management.</p>"
-            },
-            "differenceEan": {
-              "question": "What is the difference between GTIN and EAN?",
-              "answer": "<p><strong>The EAN (European Article Number)</strong> used to be the standard identifier in Europe for marking products. Today the term GTIN has replaced EAN to standardise product codes globally. The EAN-13 is now a GTIN-13. In practice the change is mainly a matter of naming and the code structure remains the same. GTIN also covers other identifiers such as the UPC (Universal Product Code) used in North America.</p>"
-            },
-            "formats": {
-              "question": "What are the different GTIN formats?",
-              "answer": "<p><strong>The main GTIN formats</strong> are: GTIN-12 (commonly used in the United States and Canada under the name UPC), GTIN-13 (most common in Europe) and GTIN-14 (for logistic units). These different formats meet the specific needs of each region and supply chain. GTIN-14 is generally used to identify larger logistic units, such as cartons or pallets, rather than single items.</p>"
-            },
-            "differenceUpc": {
-              "question": "What is the difference between GTIN and UPC?",
-              "answer": "<p><strong>The UPC (Universal Product Code)</strong> is a form of GTIN-12 mainly used in North America. The difference between GTIN and UPC is mostly regional usage: GTIN is the broader global term, while UPC refers to a specific code used in a North American context. Both systems are interoperable and, within the GTIN standard, UPC is recognised as a sub-category.</p>"
-            },
-            "ean13": {
-              "question": "What is the EAN-13 format?",
-              "answer": "<p><strong>The EAN-13</strong> is a barcode made up of 13 digits that identifies products internationally, mainly in Europe. EAN-13 is also called GTIN-13 and is widely used at points of sale to scan and track items. It includes a country prefix, a company code, a product code and a check digit that ensures the code is valid.</p>"
-            },
-            "logistics": {
-              "question": "How is GTIN used in logistics?",
-              "answer": "<p><strong>GTIN in logistics</strong> plays an essential role in identifying products across supply chains. For example, the GTIN-14 format makes it possible to identify shipping units such as cartons or pallets, which simplifies stock management and shipping operations. Using GTIN barcodes in logistics allows precise traceability of products throughout their lifecycle, from manufacturer to distributor.</p>"
-            }
-          }
-        }
-      },
-      "isbn": {
-        "seo": {
-          "title": "ISBN open data – download the book metadata export",
-          "description": "Retrieve Nudger's ISBN dataset with weekly refreshes, download mirrors and schema information for publishing analytics."
-        },
-        "hero": {
-          "eyebrow": "ISBN export",
-          "title": "Comprehensive metadata for books",
-          "stats": {
-            "records": "Publications",
-            "updated": "Last updated",
-            "size": "ZIP size"
-          }
-        },
-        "summary": {
-          "title": "ISBN dataset overview"
-        },
-        "download": {
-          "title": "Download options",
-          "subtitle": "Pick the mirror that suits your workflow and traffic needs.",
-          "fast": {
-            "highlight": "Mirror maintained for open culture and library reuse"
-          }
-        },
-        "format": {
-          "title": "File format",
-          "description": "Data is delivered as a compressed CSV archive ready for ingestion.",
-          "bullets": {
-            "type": "CSV file compressed as ZIP",
-            "separator": "Field separator: comma (,)",
-            "quote": "Text qualifier: double quotes (\")"
-          }
-        },
-        "columnsTitle": "Columns included in the ISBN dataset",
-        "columnsSubtitle": "Each row corresponds to a book identified by its ISBN.",
-        "columns": {
-          "isbn": {
-            "label": "isbn",
-            "description": "International Standard Book Number."
-          },
-          "title": {
-            "label": "title",
-            "description": "Book title as provided by sources."
-          },
-          "last_updated": {
-            "label": "last_updated",
-            "description": "Epoch timestamp (ms) of the last update."
-          },
-          "offers_count": {
-            "label": "offers_count",
-            "description": "Number of commercial offers tracked for the book."
-          },
-          "min_price": {
-            "label": "min_price",
-            "description": "Lowest observed retail price."
-          },
-          "min_price_compensation": {
-            "label": "min_price_compensation",
-            "description": "Carbon contribution associated with the lowest price."
-          },
-          "currency": {
-            "label": "currency",
-            "description": "Currency code of the lowest price."
-          },
-          "url": {
-            "label": "url",
-            "description": "Product page URL when offers are available."
-          },
-          "editeur": {
-            "label": "editeur",
-            "description": "Publisher name."
-          },
-          "format": {
-            "label": "format",
-            "description": "Book format (paperback, digital, etc.)."
-          },
-          "nb_page": {
-            "label": "nb_page",
-            "description": "Number of pages."
-          },
-          "classification_decitre_1": {
-            "label": "classification_decitre_1",
-            "description": "Decitre classification – level 1."
-          },
-          "classification_decitre_2": {
-            "label": "classification_decitre_2",
-            "description": "Decitre classification – level 2."
-          },
-          "classification_decitre_3": {
-            "label": "classification_decitre_3",
-            "description": "Decitre classification – level 3."
-          },
-          "souscategorie": {
-            "label": "souscategorie",
-            "description": "Primary subcategory assigned to the book."
-          },
-          "souscategorie2": {
-            "label": "souscategorie2",
-            "description": "Secondary subcategory assigned to the book."
-          }
-        },
-        "faq": {
-          "title": "Frequently asked questions",
-          "subtitle": "Key concepts about the ISBN export.",
-          "items": {
-            "whatIs": {
-              "question": "What is an ISBN?",
-              "answer": "<p>An ISBN (International Standard Book Number) is a unique number that identifies a book worldwide. It is essential for publishers, booksellers, libraries and any platform selling books. ISBNs make it easier to manage inventory, distribution and sales. Each book or edition of the same book has its own ISBN, ensuring unique identification in databases and catalogues. ISBNs are used for both printed books and e-books, helping readers find the exact title they need in library systems and online marketplaces.</p>"
-            },
-            "meaning": {
-              "question": "What does ISBN stand for?",
-              "answer": "<p>ISBN stands for <strong>“International Standard Book Number”</strong>, a standardised international number for books. It uniquely identifies a publication worldwide and simplifies the management of books in storage, distribution and sales systems. The ISBN system is used in many countries and is managed by national agencies. Each ISBN is assigned to a specific title and edition, preventing any confusion between different editions or formats of the same work (for example, between a hardback and a paperback edition).</p>"
-            },
-            "structure": {
-              "question": "How is an ISBN structured?",
-              "answer": "<p>An ISBN consists of 13 digits (or 10 in the former system) split into five segments. These segments include: a prefix (identifying the numbering system), a registration group (representing the country or language area), a publisher number, a title number (identifying a specific work) and a check digit that validates the structure of the ISBN. This structure allows rapid and accurate identification of books, simplifying their management worldwide. The move to ISBN-13 in 2007 aligned the system with global barcode standards, making book distribution even more efficient across retail and library networks.</p>"
-            },
-            "difference": {
-              "question": "What is the difference between ISBN-10 and ISBN-13?",
-              "answer": "<p>ISBN-10 was the original format used until 2007 and consisted of 10 digits. To align with the global EAN-13 barcode standards, the system moved to a 13-digit format: ISBN-13. This change standardised sales and distribution processes worldwide because ISBN-13 codes are compatible with commercial barcode systems used across industries. While ISBN-10 codes still exist for older works, new books published since 2007 exclusively use ISBN-13, which provides greater capacity for future identifiers.</p>"
-            },
-            "assignment": {
-              "question": "How is an ISBN assigned to a book?",
-              "answer": "<p>An ISBN is assigned by a national ISBN agency in each country, responsible for distributing and registering ISBN numbers. Publishers or authors contact this agency to obtain an ISBN for their book. When applying, they provide information about the work, such as the title, author, format and edition. Once assigned, the ISBN is unique to that edition and cannot be reused for another. This ensures efficient management of books in library, sales and distribution systems. It is essential for any work intended for wide circulation or sale.</p>"
-            },
-            "importance": {
-              "question": "Why are ISBNs important?",
-              "answer": "<p>An ISBN is important because it provides a unique, standardised identifier for a book within management, sales and distribution systems. Without an ISBN, a book can be difficult to find in online catalogues or bookshops because distribution systems rely heavily on this identifier. ISBNs also facilitate indexing in library and bookstore databases, improving visibility and accessibility for readers. They are essential for a book to be widely distributed, whether in print or digital format.</p>"
-            },
-            "nonBook": {
-              "question": "Why do I sometimes find non-book products in the database?",
-              "answer": "<p>Sometimes an ISBN is used to identify something other than a book. Several situations can lead to this:</p><ul><li><strong>Lack of understanding of standards</strong>: Some sellers or platforms use the ISBN as a generic identifier, especially when the product is cultural or related to creative hobbies.</li><li><strong>Cost savings</strong>: In certain cases it is cheaper for a small manufacturer to reuse an existing ISBN code, even though it falls outside the standards.</li><li><strong>Code format confusion</strong>: Some marketplaces do not strictly validate standard codes and accept ISBNs for non-book products, which creates ambiguities.</li><li><strong>Reassignment or attribution error</strong>: ISBNs are sometimes used incorrectly for non-editorial products, especially when the manufacturer or distributor does not have an appropriate GTIN barcode.</li></ul>"
-            }
-          }
-        }
-      }
-    },
-    "license": {
-      "title": "Open Database Licence (ODbL)",
-      "description": "You may use, share and adapt the data provided you credit Nudger and share any derivative databases under the same licence.",
-      "cta": {
-        "label": "Read the ODbL licence",
-        "ariaLabel": "Open the Open Database Licence documentation in a new tab",
-        "href": "https://spdx.org/licenses/ODbL-1.0.html#licenseText"
-      }
-    },
-    "faq": {
-      "title": "Frequently asked questions",
-      "subtitle": "Understand our approach to open data.",
-      "items": {
-        "sources": {
-          "question": "Where do the datasets come from?",
-          "answer": "<p>Extractions provided by Nudger stem from our work aggregating product data. We integrate a wide variety of sources that we group into several categories:</p><p><strong>Brand and manufacturer websites:</strong><br>We extract data directly from product sheets made available by brands and manufacturers.</p><p><strong>Institutional websites and open data:</strong> (base eprel, open food facts)<br>We integrate data from public or open repositories.</p><p><strong>Affiliate feeds and marketplaces:</strong> (awin, effinity, affilae, amazon, ..)<br>These come from promotional partnerships between Nudger and the platforms. We include a link in our extract so affiliate tracking applies when active offers exist for the product.</p><p>Nudger aggregates, normalises and resolves conflicts to publish factual, minimal product data. Building and sharing this database follows a commons mindset. We are convinced that sharing these datasets benefits every stakeholder in the consumption chain (manufacturers, retailers, researchers, citizens).</p><p>We are also mindful of intellectual property. Feel free to <a href=\"/contact\">contact us</a> with any question or if, as a data holder, you wish to opt out of this dataset.</p>"
-        },
-        "definition": {
-          "question": "What do we mean by open data?",
-          "answer": "<p>Open data refers to data that is made accessible to everyone without access restrictions and in formats that can be freely reused. They can be reused, modified and redistributed by anyone for personal or professional purposes. The goal is to maximise access to information in order to encourage transparency, innovation and efficiency across sectors. Open data is often provided by public organisations, but some private companies have also started to publish portions of their data. A key aspect of open data is technical accessibility: data must be available in standard, machine-readable formats (such as CSV, JSON or XML) so they can be reused without major technical hurdles. By easing access to data, open data unlocks numerous applications, from mobile apps and visualisations to in-depth analyses.</p>"
-        },
-        "importance": {
-          "question": "Why is open data important for commerce?",
-          "answer": "<p>Open data is crucial for promoting transparency and innovation. By making data accessible, it helps citizens better understand government decisions and participate in public debate with informed arguments. Companies can use these data to develop new products and services, stimulating economic growth. Open data also supports better decision-making because public information can be analysed to improve policies, reduce inefficiencies and make institutions more accountable. Finally, open data fosters collaboration between stakeholders—researchers, entrepreneurs, developers and local communities—who can work together to solve shared challenges creatively.</p>"
-        },
-        "contributors": {
-          "question": "How can contributors help improve the datasets?",
-          "answer": "<p>Nudger aggregates, normalises and resolves conflicts to publish factual product data, but contributions remain essential. You can share additional sources, report issues in the datasets or suggest improvements. Collaborating with manufacturers, distributors, researchers and citizens helps us keep the exports accurate, up to date and useful for everyone.</p>"
-        }
-      }
-    },
-    "opensource": {
-      "title": "Nudger is open source too",
-      "description": "Curious about the code powering these datasets? Discover the services, governance and community behind Nudger.",
-      "cta": {
-        "label": "Visit the open source page",
-        "ariaLabel": "Navigate to the open source page"
-      }
-    }
-  },
   "contact": {
-    "seo": {
-      "title": "Contact Nudger",
-      "description": "Get in touch with the Nudger collective for partnerships, product questions or impact insights.",
-      "imageAlt": "Nudger logomark used for the contact page preview"
-    },
-    "hero": {
-      "eyebrow": "Let's talk",
-      "title": "We would love to hear from you",
-      "subtitle": "Partnerships, product questions or impact insights? Our team is ready.",
-      "description": "Tell us more about your project, your organisation or the way you use Nudger so we can connect you with the right people.",
-      "highlights": {
-        "commitment": "Replies within two working days for most requests.",
-        "expertise": "Product, data and impact experts dedicated to responsible commerce.",
-        "impact": "Every message helps us build a fairer, more sustainable marketplace."
-      },
-      "channels": {
-        "title": "How we can help",
-        "subtitle": "Pick the topic that suits you best—every request reaches the same caring team.",
-        "support": {
-          "label": "Product & user support",
-          "description": "Questions about the comparator or trouble signing in? We will guide you step by step."
-        },
-        "partnerships": {
-          "label": "Partnerships & ecosystem",
-          "description": "Looking to collaborate, integrate Nudger data or co-create initiatives? Let's explore it together."
-        },
-        "trust": {
-          "label": "Press & civic impact",
-          "description": "Media, institutions or researchers can reach us for interviews, testimonies and key figures."
-        }
-      }
-    },
     "details": {
-      "eyebrow": "Stay connected",
-      "title": "Different ways to collaborate",
-      "subtitle": "Our collective unites citizens, entrepreneurs and institutions around responsible consumption.",
       "cards": {
-        "support": {
-          "title": "Need help with the platform?",
-          "description": "Describe your question in the form and share as much context as possible so we can provide an actionable answer.",
-          "cta": "Write to us",
-          "ctaAria": "Scroll to the contact form to write to the Nudger team"
+        "community": {
+          "cta": "Follow us on LinkedIn",
+          "ctaAria": "Open Nudger's LinkedIn page in a new tab",
+          "description": "Follow our updates, product releases and community calls on LinkedIn.",
+          "title": "Join the conversation"
         },
         "partnerships": {
-          "title": "Co-create impactful projects",
-          "description": "From retailers to NGOs and local authorities, we build bridges to accelerate ecological transition.",
           "cta": "Meet the team",
-          "ctaAria": "Discover the Nudger team page"
+          "ctaAria": "Discover the Nudger team page",
+          "description": "From retailers to NGOs and local authorities, we build bridges to accelerate ecological transition.",
+          "title": "Co-create impactful projects"
         },
-        "community": {
-          "title": "Join the conversation",
-          "description": "Follow our updates, product releases and community calls on LinkedIn.",
-          "cta": "Follow us on LinkedIn",
-          "ctaAria": "Open Nudger's LinkedIn page in a new tab"
+        "support": {
+          "cta": "Write to us",
+          "ctaAria": "Scroll to the contact form to write to the Nudger team",
+          "description": "Describe your question in the form and share as much context as possible so we can provide an actionable answer.",
+          "title": "Need help with the platform?"
         }
-      }
+      },
+      "eyebrow": "Stay connected",
+      "subtitle": "Our collective unites citizens, entrepreneurs and institutions around responsible consumption.",
+      "title": "Different ways to collaborate"
     },
     "form": {
-      "eyebrow": "Contact form",
-      "title": "Tell us more about you",
-      "subtitle": "Fill in the information below and we will get back to you as soon as possible.",
-      "fields": {
-        "name": {
-          "label": "Your name",
-          "placeholder": "e.g. Alex Martin"
+      "actions": {
+        "reset": "Clear form",
+        "submit": "Send message"
+      },
+      "errors": {
+        "captchaExpired": "Captcha expired, please try again.",
+        "captchaFailed": "Captcha verification failed. Please refresh and try again.",
+        "email": {
+          "invalid": "Please enter a valid email address.",
+          "required": "Please enter your email address."
         },
+        "message": {
+          "length": "Your message must be at least 10 characters long.",
+          "required": "Please describe your request."
+        },
+        "missingCaptcha": "Please complete the captcha before sending.",
+        "name": {
+          "length": "Your name must contain at least 2 characters.",
+          "required": "Please enter your name."
+        }
+      },
+      "eyebrow": "Contact form",
+      "feedback": {
+        "genericError": "We were unable to send your message. Please try again or contact us later.",
+        "missingSiteKey": "Captcha is not configured yet. Please try again later.",
+        "success": "Thank you! Your message has been sent. We will contact you shortly."
+      },
+      "fields": {
         "email": {
           "label": "Email address",
           "placeholder": "you{'@'}example.org"
@@ -1115,331 +385,1113 @@
         "message": {
           "label": "Message",
           "placeholder": "How can we help?"
+        },
+        "name": {
+          "label": "Your name",
+          "placeholder": "e.g. Alex Martin"
         }
       },
+      "privacy": "We only use your contact details to answer your request and never share them with third parties.",
+      "subtitle": "Fill in the information below and we will get back to you as soon as possible.",
+      "title": "Tell us more about you"
+    },
+    "hero": {
+      "channels": {
+        "partnerships": {
+          "description": "Looking to collaborate, integrate Nudger data or co-create initiatives? Let's explore it together.",
+          "label": "Partnerships & ecosystem"
+        },
+        "subtitle": "Pick the topic that suits you best—every request reaches the same caring team.",
+        "support": {
+          "description": "Questions about the comparator or trouble signing in? We will guide you step by step.",
+          "label": "Product & user support"
+        },
+        "title": "How we can help",
+        "trust": {
+          "description": "Media, institutions or researchers can reach us for interviews, testimonies and key figures.",
+          "label": "Press & civic impact"
+        }
+      },
+      "description": "Tell us more about your project, your organisation or the way you use Nudger so we can connect you with the right people.",
+      "eyebrow": "Let's talk",
+      "highlights": {
+        "commitment": "Replies within two working days for most requests.",
+        "expertise": "Product, data and impact experts dedicated to responsible commerce.",
+        "impact": "Every message helps us build a fairer, more sustainable marketplace."
+      },
+      "subtitle": "Partnerships, product questions or impact insights? Our team is ready.",
+      "title": "We would love to hear from you"
+    },
+    "seo": {
+      "description": "Get in touch with the Nudger collective for partnerships, product questions or impact insights.",
+      "imageAlt": "Nudger logomark used for the contact page preview",
+      "title": "Contact Nudger"
+    }
+  },
+  "contrib": {
+    "error": {
+      "cta": "Back to homepage",
+      "description": "The contribution link may have expired or is invalid. You can return to the homepage and try again.",
+      "detailsPrefix": "Details:",
+      "title": "We could not validate this link"
+    },
+    "loading": {
+      "message": "Please wait while we validate your contribution link.",
+      "title": "Preparing your redirect…"
+    },
+    "seo": {
+      "description": "We are validating your secure contribution link before redirecting you to Nudger's partner.",
+      "title": "Redirecting you to our partner"
+    },
+    "success": {
+      "cta": "Continue to partner site",
+      "message": "You will be redirected shortly. If nothing happens, use the button below.",
+      "title": "Ready to redirect"
+    }
+  },
+  "error": {
+    "page": {
       "actions": {
-        "submit": "Send message",
-        "reset": "Clear form"
+        "ariaLabel": "Error recovery quick actions",
+        "contactSupport": "Contact support",
+        "goHome": "Back to homepage"
       },
-      "feedback": {
-        "success": "Thank you! Your message has been sent. We will contact you shortly.",
-        "genericError": "We were unable to send your message. Please try again or contact us later.",
-        "missingSiteKey": "Captcha is not configured yet. Please try again later."
+      "debug": {
+        "empty": "No additional diagnostic information is available.",
+        "messageLabel": "Error message",
+        "stackLabel": "Stack trace",
+        "title": "Technical details"
       },
-      "errors": {
-        "name": {
-          "required": "Please enter your name.",
-          "length": "Your name must contain at least 2 characters."
-        },
-        "email": {
-          "required": "Please enter your email address.",
-          "invalid": "Please enter a valid email address."
-        },
-        "message": {
-          "required": "Please describe your request.",
-          "length": "Your message must be at least 10 characters long."
-        },
-        "captchaExpired": "Captcha expired, please try again.",
-        "captchaFailed": "Captcha verification failed. Please refresh and try again.",
-        "missingCaptcha": "Please complete the captcha before sending."
+      "eyebrow": "Unexpected detour",
+      "generic": {
+        "badge": "We hit a snag",
+        "description": "An unexpected error prevented us from loading this page.",
+        "helper": "Please try another section of Nudger or reach out if the problem persists.",
+        "statusMessage": "Error 500 — something went wrong on our side.",
+        "title": "We're working on a fix"
       },
-      "privacy": "We only use your contact details to answer your request and never share them with third parties."
+      "notFound": {
+        "badge": "Page missing",
+        "description": "The link you followed may be broken or the page may have moved.",
+        "helper": "Use the navigation links below or return to the homepage to continue exploring responsible shopping.",
+        "statusMessage": "Error 404 — the requested resource could not be located.",
+        "title": "We can’t find this page"
+      },
+      "statusLabel": "Status code {code}"
     }
   },
   "feedback": {
-    "hero": {
-      "eyebrow": "Product feedback",
-      "title": "Shape Nudger with your ideas",
-      "subtitle": "Report bugs, suggest features and vote on the improvements you need next.",
-      "description": "Your feedback steers our roadmap. Discover what others requested, upvote the most useful ideas and submit your own improvements.",
-      "ctaGroupLabel": "Feedback actions",
-      "primaryCta": {
-        "label": "Browse the feedback board",
-        "ariaLabel": "Scroll to the Nudger feedback board"
-      },
-      "secondaryCta": {
-        "label": "Open GitHub issues",
-        "ariaLabel": "Open Nudger's GitHub issues in a new tab"
-      },
-      "stats": {
-        "eyebrow": "How it works",
-        "title": "A living roadmap",
-        "description": "Help us focus on improvements that matter most.",
-        "items": {
-          "iterations": "Weekly iterations on the most upvoted ideas.",
-          "votes": "Three votes per person to highlight key needs.",
-          "transparency": "Public updates for every discussion and decision."
-        }
-      }
-    },
-    "tabs": {
-      "eyebrow": "Community board",
-      "title": "Help us prioritise the roadmap",
-      "description": "Pick a category to explore ongoing discussions, vote for the topics that resonate with you, or open a new one.",
-      "ariaLabel": "Feedback categories",
-      "idea": {
-        "label": "Ideas",
-        "issueTitle": "Community ideas",
-        "description": "Suggest enhancements that would make Nudger more helpful for you or your organisation. We review every idea weekly."
-      },
-      "bug": {
-        "label": "Bugs",
-        "issueTitle": "Reported bugs",
-        "description": "Describe any malfunction or inaccurate behaviour you spotted. Precise reports help us fix issues faster."
-      }
-    },
-    "issues": {
-      "empty": {
-        "idea": "No ideas yet. Be the first to share yours!",
-        "bug": "No bugs reported here right now. Thanks for keeping an eye out."
-      },
-      "loadError": "We couldn't load the feedback board. Please try again."
-    },
-    "voting": {
-      "voteButton": "Vote",
-      "voteButtonAria": "Vote for",
-      "openIssue": "Open discussion",
-      "noVotes": "You have no votes left right now.",
-      "limitReached": "You reached your voting limit for now.",
-      "remaining": "You have {count} votes remaining.",
-      "voteCompleted": "Done"
-    },
-    "form": {
-      "sections": {
-        "idea": {
-          "eyebrow": "Share an idea",
-          "title": "Imagine the next improvement",
-          "subtitle": "Explain how Nudger could better help you or your organisation.",
-          "intro": "Explain the context of your idea, why it matters and how it would improve Nudger for everyone.",
-          "titlePlaceholder": "e.g. Compare the carbon footprint of fridges",
-          "messagePlaceholder": "Describe your idea, the context and the impact you expect."
-        },
-        "bug": {
-          "eyebrow": "Report a bug",
-          "title": "Tell us what went wrong",
-          "subtitle": "The more details you share, the faster we can investigate and fix it.",
-          "intro": "Share the steps to reproduce the bug, what you expected and what actually happened so we can investigate quickly.",
-          "titlePlaceholder": "e.g. Error 500 on the product page",
-          "messagePlaceholder": "List the steps to reproduce, what you expected and what happened."
-        }
-      },
-      "fields": {
-        "author": {
-          "label": "Display name",
-          "placeholder": "How should we credit you?",
-          "default": "Nudger community member"
-        },
-        "title": {
-          "label": "Title"
-        },
-        "message": {
-          "label": "Message"
-        }
-      },
-      "actions": {
-        "submit": "Send feedback",
-        "reset": "Clear form"
-      },
-      "feedback": {
-        "success": "Thank you! Your contribution has been recorded and will appear on the board soon.",
-        "missingSiteKey": "Captcha is not configured yet. Feedback submissions are temporarily disabled."
-      },
-      "errors": {
-        "missingCaptcha": "Please complete the captcha before sending your feedback.",
-        "captchaExpired": "Captcha expired, please try again.",
-        "captchaFailed": "Captcha verification failed. Please retry.",
-        "title": {
-          "length": "The title must contain at least 4 characters."
-        },
-        "message": {
-          "length": "The message must contain at least 20 characters."
-        }
-      },
-      "privacy": "Feedback is public—please avoid sharing personal or sensitive data."
-    },
     "common": {
       "genericError": "Something went wrong. Please try again."
     },
-    "openSource": {
-      "eyebrow": "Open collaboration",
-      "title": "Explore our open source and open data",
-      "description": "We publish our roadmap, code and datasets so anyone can audit, reuse or contribute to Nudger.",
-      "cards": {
-        "opensource": {
-          "title": "Contribute on GitHub",
-          "description": "Browse our repositories, follow ongoing pull requests and submit your own contributions.",
-          "cta": "Visit the open source page",
-          "ariaLabel": "Go to the Nudger open source page"
+    "form": {
+      "actions": {
+        "reset": "Clear form",
+        "submit": "Send feedback"
+      },
+      "errors": {
+        "captchaExpired": "Captcha expired, please try again.",
+        "captchaFailed": "Captcha verification failed. Please retry.",
+        "message": {
+          "length": "The message must contain at least 20 characters."
         },
-        "opendata": {
-          "title": "Analyse our open data",
-          "description": "Download the datasets powering Nudger and reuse them in your research or projects.",
-          "cta": "Visit the open data page",
-          "ariaLabel": "Go to the Nudger open data page"
+        "missingCaptcha": "Please complete the captcha before sending your feedback.",
+        "title": {
+          "length": "The title must contain at least 4 characters."
+        }
+      },
+      "feedback": {
+        "missingSiteKey": "Captcha is not configured yet. Feedback submissions are temporarily disabled.",
+        "success": "Thank you! Your contribution has been recorded and will appear on the board soon."
+      },
+      "fields": {
+        "author": {
+          "default": "Nudger community member",
+          "label": "Display name",
+          "placeholder": "How should we credit you?"
+        },
+        "message": {
+          "label": "Message"
+        },
+        "title": {
+          "label": "Title"
+        }
+      },
+      "privacy": "Feedback is public—please avoid sharing personal or sensitive data.",
+      "sections": {
+        "bug": {
+          "eyebrow": "Report a bug",
+          "intro": "Share the steps to reproduce the bug, what you expected and what actually happened so we can investigate quickly.",
+          "messagePlaceholder": "List the steps to reproduce, what you expected and what happened.",
+          "subtitle": "The more details you share, the faster we can investigate and fix it.",
+          "title": "Tell us what went wrong",
+          "titlePlaceholder": "e.g. Error 500 on the product page"
+        },
+        "idea": {
+          "eyebrow": "Share an idea",
+          "intro": "Explain the context of your idea, why it matters and how it would improve Nudger for everyone.",
+          "messagePlaceholder": "Describe your idea, the context and the impact you expect.",
+          "subtitle": "Explain how Nudger could better help you or your organisation.",
+          "title": "Imagine the next improvement",
+          "titlePlaceholder": "e.g. Compare the carbon footprint of fridges"
         }
       }
     },
+    "hero": {
+      "ctaGroupLabel": "Feedback actions",
+      "description": "Your feedback steers our roadmap. Discover what others requested, upvote the most useful ideas and submit your own improvements.",
+      "eyebrow": "Product feedback",
+      "primaryCta": {
+        "ariaLabel": "Scroll to the Nudger feedback board",
+        "label": "Browse the feedback board"
+      },
+      "secondaryCta": {
+        "ariaLabel": "Open Nudger's GitHub issues in a new tab",
+        "label": "Open GitHub issues"
+      },
+      "stats": {
+        "description": "Help us focus on improvements that matter most.",
+        "eyebrow": "How it works",
+        "items": {
+          "iterations": "Weekly iterations on the most upvoted ideas.",
+          "transparency": "Public updates for every discussion and decision.",
+          "votes": "Three votes per person to highlight key needs."
+        },
+        "title": "A living roadmap"
+      },
+      "subtitle": "Report bugs, suggest features and vote on the improvements you need next.",
+      "title": "Shape Nudger with your ideas"
+    },
+    "issues": {
+      "empty": {
+        "bug": "No bugs reported here right now. Thanks for keeping an eye out.",
+        "idea": "No ideas yet. Be the first to share yours!"
+      },
+      "loadError": "We couldn't load the feedback board. Please try again."
+    },
+    "openSource": {
+      "cards": {
+        "opendata": {
+          "ariaLabel": "Go to the Nudger open data page",
+          "cta": "Visit the open data page",
+          "description": "Download the datasets powering Nudger and reuse them in your research or projects.",
+          "title": "Analyse our open data"
+        },
+        "opensource": {
+          "ariaLabel": "Go to the Nudger open source page",
+          "cta": "Visit the open source page",
+          "description": "Browse our repositories, follow ongoing pull requests and submit your own contributions.",
+          "title": "Contribute on GitHub"
+        }
+      },
+      "description": "We publish our roadmap, code and datasets so anyone can audit, reuse or contribute to Nudger.",
+      "eyebrow": "Open collaboration",
+      "title": "Explore our open source and open data"
+    },
     "seo": {
-      "title": "Feedback & roadmap – Nudger community board",
       "description": "Share ideas, report bugs and vote on Nudger's public roadmap for responsible shopping.",
-      "imageAlt": "Illustration of the Nudger community feedback board."
+      "imageAlt": "Illustration of the Nudger community feedback board.",
+      "title": "Feedback & roadmap – Nudger community board"
+    },
+    "tabs": {
+      "ariaLabel": "Feedback categories",
+      "bug": {
+        "description": "Describe any malfunction or inaccurate behaviour you spotted. Precise reports help us fix issues faster.",
+        "issueTitle": "Reported bugs",
+        "label": "Bugs"
+      },
+      "description": "Pick a category to explore ongoing discussions, vote for the topics that resonate with you, or open a new one.",
+      "eyebrow": "Community board",
+      "idea": {
+        "description": "Suggest enhancements that would make Nudger more helpful for you or your organisation. We review every idea weekly.",
+        "issueTitle": "Community ideas",
+        "label": "Ideas"
+      },
+      "title": "Help us prioritise the roadmap"
+    },
+    "voting": {
+      "limitReached": "You reached your voting limit for now.",
+      "noVotes": "You have no votes left right now.",
+      "openIssue": "Open discussion",
+      "remaining": "You have {count} votes remaining.",
+      "voteButton": "Vote",
+      "voteButtonAria": "Vote for",
+      "voteCompleted": "Done"
+    }
+  },
+  "impactScorePage": {
+    "aria": {
+      "navigation": "Impact Score section navigation",
+      "pageOutline": "Impact Score page outline"
+    },
+    "hero": {
+      "title": "Impact Score: assessing the environmental footprint of your products"
+    },
+    "navigation": {
+      "analysis": "Deep dive",
+      "approach": "Our approach",
+      "methodology": "Methodology",
+      "overview": "Overview"
+    },
+    "sections": {
+      "analysis": {
+        "dataQuality": {
+          "imageAlt": "Visual about data quality",
+          "title": "Data quality, a key requirement"
+        },
+        "eyebrow": "Deep dive",
+        "relativisation": {
+          "imageAlt": "Visual of the relativisation principle",
+          "title": "Relativisation principle"
+        },
+        "title": "Relativisation and data quality"
+      },
+      "approach": {
+        "eyebrow": "Our approach",
+        "imageAlt": "Illustration of our ecoscore approach",
+        "title": "Our ecoscore: transparent, innovative and effective"
+      },
+      "methodology": {
+        "empty": "Categories will be published soon.",
+        "eyebrow": "Methodology",
+        "intro": "The ecoscore calculation rules are detailed on every product (see the “environmental balance” section). Each product category has its own criteria and weights. These categories are currently covered:",
+        "title": "How is the Impact Score calculated?",
+        "verticalCardAria": "Open the ecoscore details for the {vertical} category",
+        "verticalCta": "Open the ecoscore details",
+        "verticalImageAlt": "Illustration for the {vertical} category",
+        "verticalLabel": "Category"
+      },
+      "overview": {
+        "eyebrow": "Overview",
+        "sample": {
+          "caption": "Indicative evaluation based on our methodology",
+          "title": "Indicative rating"
+        },
+        "title": "What is the Impact Score?"
+      }
+    }
+  },
+  "lang": {
+    "en": "English",
+    "fr": "French"
+  },
+  "opendata": {
+    "datasets": {
+      "cards": {
+        "gtin": {
+          "cta": {
+            "ariaLabel": "Open the GTIN open data page",
+            "label": "View GTIN dataset"
+          },
+          "description": "All products indexed in Nudger with brand, model, price range and category insights.",
+          "features": {
+            "coverage": "Includes EAN13, UPC and GS1 country metadata",
+            "refresh": "Weekly refreshed snapshot",
+            "uses": "Ideal for price comparison, assortment analysis and category monitoring"
+          },
+          "title": "GTIN catalogue"
+        },
+        "isbn": {
+          "cta": {
+            "ariaLabel": "Open the ISBN open data page",
+            "label": "View ISBN dataset"
+          },
+          "description": "Dedicated export for books with pricing, availability and classification information.",
+          "features": {
+            "catalogue": "Includes publisher, format and Decitre classifications",
+            "refresh": "Weekly refreshed snapshot",
+            "research": "Great for catalogue enrichment, research and cultural analytics"
+          },
+          "title": "ISBN library"
+        }
+      },
+      "common": {
+        "breadcrumb": {
+          "ariaLabel": "Back to the open data overview",
+          "label": "opendata"
+        },
+        "columnDescription": "Description",
+        "columnName": "Column",
+        "download": {
+          "direct": {
+            "concurrent": "Up to {value} simultaneous downloads",
+            "concurrentUnknown": "Concurrent downloads limited",
+            "cta": {
+              "ariaLabel": "Start the direct download from Nudger",
+              "label": "Download from nudger.fr"
+            },
+            "description": "Retrieve the ZIP file directly from Nudger's infrastructure.",
+            "speed": "Limited to {value} per client",
+            "speedUnknown": "Download speed limited per client",
+            "title": "Direct download from Nudger"
+          },
+          "fast": {
+            "badge": "Recommended",
+            "cta": {
+              "ariaLabel": "Open the dataset on data.gouv.fr in a new tab",
+              "href": "https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/",
+              "label": "Download from data.gouv.fr"
+            },
+            "description": "Download via the official open data portal hosted by the French government.",
+            "speed": "High bandwidth infrastructure",
+            "title": "Fast mirror (data.gouv.fr)"
+          }
+        },
+        "placeholder": "—",
+        "summary": {
+          "records": "Total records",
+          "size": "Compressed size",
+          "updated": "Last updated"
+        }
+      },
+      "gtin": {
+        "columns": {
+          "brand": {
+            "description": "Brand declared or inferred for the product.",
+            "label": "brand"
+          },
+          "categories": {
+            "description": "Product categories aggregated by Nudger (pipe-separated).",
+            "label": "categories"
+          },
+          "currency": {
+            "description": "Currency code of the lowest price.",
+            "label": "currency"
+          },
+          "gs1_country": {
+            "description": "Country code derived from the GS1 prefix.",
+            "label": "gs1_country"
+          },
+          "gtin": {
+            "description": "Global Trade Item Number (EAN13/UPC).",
+            "label": "gtin"
+          },
+          "gtinType": {
+            "description": "Type of barcode detected (EAN13, UPC, etc.).",
+            "label": "gtinType"
+          },
+          "last_updated": {
+            "description": "Epoch timestamp (ms) of the latest update for this product.",
+            "label": "last_updated"
+          },
+          "min_price": {
+            "description": "Lowest observed price across all offers.",
+            "label": "min_price"
+          },
+          "min_price_compensation": {
+            "description": "Carbon contribution associated with the lowest price.",
+            "label": "min_price_compensation"
+          },
+          "model": {
+            "description": "Manufacturer model or SKU reference when available.",
+            "label": "model"
+          },
+          "name": {
+            "description": "Marketing name or product title.",
+            "label": "name"
+          },
+          "offers_count": {
+            "description": "Number of commercial offers tracked for the product.",
+            "label": "offers_count"
+          },
+          "url": {
+            "description": "Product page URL when public offers are available.",
+            "label": "url"
+          }
+        },
+        "columnsSubtitle": "Each row represents a product identifier enriched with metadata gathered by Nudger.",
+        "columnsTitle": "Columns included in the GTIN dataset",
+        "download": {
+          "fast": {
+            "highlight": "Curated for broad retail and circular economy use cases"
+          },
+          "subtitle": "Choose the mirror that matches your bandwidth and automation needs.",
+          "title": "Download options"
+        },
+        "faq": {
+          "items": {
+            "differenceEan": {
+              "answer": "<p><strong>The EAN (European Article Number)</strong> used to be the standard identifier in Europe for marking products. Today the term GTIN has replaced EAN to standardise product codes globally. The EAN-13 is now a GTIN-13. In practice the change is mainly a matter of naming and the code structure remains the same. GTIN also covers other identifiers such as the UPC (Universal Product Code) used in North America.</p>",
+              "question": "What is the difference between GTIN and EAN?"
+            },
+            "differenceUpc": {
+              "answer": "<p><strong>The UPC (Universal Product Code)</strong> is a form of GTIN-12 mainly used in North America. The difference between GTIN and UPC is mostly regional usage: GTIN is the broader global term, while UPC refers to a specific code used in a North American context. Both systems are interoperable and, within the GTIN standard, UPC is recognised as a sub-category.</p>",
+              "question": "What is the difference between GTIN and UPC?"
+            },
+            "ean13": {
+              "answer": "<p><strong>The EAN-13</strong> is a barcode made up of 13 digits that identifies products internationally, mainly in Europe. EAN-13 is also called GTIN-13 and is widely used at points of sale to scan and track items. It includes a country prefix, a company code, a product code and a check digit that ensures the code is valid.</p>",
+              "question": "What is the EAN-13 format?"
+            },
+            "formats": {
+              "answer": "<p><strong>The main GTIN formats</strong> are: GTIN-12 (commonly used in the United States and Canada under the name UPC), GTIN-13 (most common in Europe) and GTIN-14 (for logistic units). These different formats meet the specific needs of each region and supply chain. GTIN-14 is generally used to identify larger logistic units, such as cartons or pallets, rather than single items.</p>",
+              "question": "What are the different GTIN formats?"
+            },
+            "logistics": {
+              "answer": "<p><strong>GTIN in logistics</strong> plays an essential role in identifying products across supply chains. For example, the GTIN-14 format makes it possible to identify shipping units such as cartons or pallets, which simplifies stock management and shipping operations. Using GTIN barcodes in logistics allows precise traceability of products throughout their lifecycle, from manufacturer to distributor.</p>",
+              "question": "How is GTIN used in logistics?"
+            },
+            "whatIs": {
+              "answer": "<p><strong>The GTIN (Global Trade Item Number)</strong> is a unique identifier used to recognise products worldwide. It comes in several formats (GTIN-12, GTIN-13, GTIN-14), each tailored to specific product types or regions. For example, GTIN-13 is commonly used in Europe, while GTIN-12 is more frequent in North America. Every GTIN ensures a product can be tracked, identified and catalogued anywhere in the world, enabling efficient stock and sales management.</p>",
+              "question": "What is a GTIN and why does it matter?"
+            }
+          },
+          "subtitle": "Understand how to work with the GTIN dataset.",
+          "title": "Frequently asked questions"
+        },
+        "format": {
+          "bullets": {
+            "quote": "Text qualifier: double quotes (\")",
+            "separator": "Field separator: comma (,)",
+            "type": "CSV file compressed as ZIP"
+          },
+          "description": "Data is delivered as a compressed CSV archive ready for ingestion.",
+          "title": "File format"
+        },
+        "hero": {
+          "eyebrow": "GTIN export",
+          "stats": {
+            "records": "Products",
+            "size": "ZIP size",
+            "updated": "Last updated"
+          },
+          "title": "Barcode data for consumer products"
+        },
+        "seo": {
+          "description": "Access Nudger's GTIN dataset with weekly updates, download options and schema details for your barcode data projects.",
+          "title": "GTIN open data – download the barcode catalogue"
+        },
+        "summary": {
+          "title": "GTIN dataset overview"
+        }
+      },
+      "isbn": {
+        "columns": {
+          "classification_decitre_1": {
+            "description": "Decitre classification – level 1.",
+            "label": "classification_decitre_1"
+          },
+          "classification_decitre_2": {
+            "description": "Decitre classification – level 2.",
+            "label": "classification_decitre_2"
+          },
+          "classification_decitre_3": {
+            "description": "Decitre classification – level 3.",
+            "label": "classification_decitre_3"
+          },
+          "currency": {
+            "description": "Currency code of the lowest price.",
+            "label": "currency"
+          },
+          "editeur": {
+            "description": "Publisher name.",
+            "label": "editeur"
+          },
+          "format": {
+            "description": "Book format (paperback, digital, etc.).",
+            "label": "format"
+          },
+          "isbn": {
+            "description": "International Standard Book Number.",
+            "label": "isbn"
+          },
+          "last_updated": {
+            "description": "Epoch timestamp (ms) of the last update.",
+            "label": "last_updated"
+          },
+          "min_price": {
+            "description": "Lowest observed retail price.",
+            "label": "min_price"
+          },
+          "min_price_compensation": {
+            "description": "Carbon contribution associated with the lowest price.",
+            "label": "min_price_compensation"
+          },
+          "nb_page": {
+            "description": "Number of pages.",
+            "label": "nb_page"
+          },
+          "offers_count": {
+            "description": "Number of commercial offers tracked for the book.",
+            "label": "offers_count"
+          },
+          "souscategorie": {
+            "description": "Primary subcategory assigned to the book.",
+            "label": "souscategorie"
+          },
+          "souscategorie2": {
+            "description": "Secondary subcategory assigned to the book.",
+            "label": "souscategorie2"
+          },
+          "title": {
+            "description": "Book title as provided by sources.",
+            "label": "title"
+          },
+          "url": {
+            "description": "Product page URL when offers are available.",
+            "label": "url"
+          }
+        },
+        "columnsSubtitle": "Each row corresponds to a book identified by its ISBN.",
+        "columnsTitle": "Columns included in the ISBN dataset",
+        "download": {
+          "fast": {
+            "highlight": "Mirror maintained for open culture and library reuse"
+          },
+          "subtitle": "Pick the mirror that suits your workflow and traffic needs.",
+          "title": "Download options"
+        },
+        "faq": {
+          "items": {
+            "assignment": {
+              "answer": "<p>An ISBN is assigned by a national ISBN agency in each country, responsible for distributing and registering ISBN numbers. Publishers or authors contact this agency to obtain an ISBN for their book. When applying, they provide information about the work, such as the title, author, format and edition. Once assigned, the ISBN is unique to that edition and cannot be reused for another. This ensures efficient management of books in library, sales and distribution systems. It is essential for any work intended for wide circulation or sale.</p>",
+              "question": "How is an ISBN assigned to a book?"
+            },
+            "difference": {
+              "answer": "<p>ISBN-10 was the original format used until 2007 and consisted of 10 digits. To align with the global EAN-13 barcode standards, the system moved to a 13-digit format: ISBN-13. This change standardised sales and distribution processes worldwide because ISBN-13 codes are compatible with commercial barcode systems used across industries. While ISBN-10 codes still exist for older works, new books published since 2007 exclusively use ISBN-13, which provides greater capacity for future identifiers.</p>",
+              "question": "What is the difference between ISBN-10 and ISBN-13?"
+            },
+            "importance": {
+              "answer": "<p>An ISBN is important because it provides a unique, standardised identifier for a book within management, sales and distribution systems. Without an ISBN, a book can be difficult to find in online catalogues or bookshops because distribution systems rely heavily on this identifier. ISBNs also facilitate indexing in library and bookstore databases, improving visibility and accessibility for readers. They are essential for a book to be widely distributed, whether in print or digital format.</p>",
+              "question": "Why are ISBNs important?"
+            },
+            "meaning": {
+              "answer": "<p>ISBN stands for <strong>“International Standard Book Number”</strong>, a standardised international number for books. It uniquely identifies a publication worldwide and simplifies the management of books in storage, distribution and sales systems. The ISBN system is used in many countries and is managed by national agencies. Each ISBN is assigned to a specific title and edition, preventing any confusion between different editions or formats of the same work (for example, between a hardback and a paperback edition).</p>",
+              "question": "What does ISBN stand for?"
+            },
+            "nonBook": {
+              "answer": "<p>Sometimes an ISBN is used to identify something other than a book. Several situations can lead to this:</p><ul><li><strong>Lack of understanding of standards</strong>: Some sellers or platforms use the ISBN as a generic identifier, especially when the product is cultural or related to creative hobbies.</li><li><strong>Cost savings</strong>: In certain cases it is cheaper for a small manufacturer to reuse an existing ISBN code, even though it falls outside the standards.</li><li><strong>Code format confusion</strong>: Some marketplaces do not strictly validate standard codes and accept ISBNs for non-book products, which creates ambiguities.</li><li><strong>Reassignment or attribution error</strong>: ISBNs are sometimes used incorrectly for non-editorial products, especially when the manufacturer or distributor does not have an appropriate GTIN barcode.</li></ul>",
+              "question": "Why do I sometimes find non-book products in the database?"
+            },
+            "structure": {
+              "answer": "<p>An ISBN consists of 13 digits (or 10 in the former system) split into five segments. These segments include: a prefix (identifying the numbering system), a registration group (representing the country or language area), a publisher number, a title number (identifying a specific work) and a check digit that validates the structure of the ISBN. This structure allows rapid and accurate identification of books, simplifying their management worldwide. The move to ISBN-13 in 2007 aligned the system with global barcode standards, making book distribution even more efficient across retail and library networks.</p>",
+              "question": "How is an ISBN structured?"
+            },
+            "whatIs": {
+              "answer": "<p>An ISBN (International Standard Book Number) is a unique number that identifies a book worldwide. It is essential for publishers, booksellers, libraries and any platform selling books. ISBNs make it easier to manage inventory, distribution and sales. Each book or edition of the same book has its own ISBN, ensuring unique identification in databases and catalogues. ISBNs are used for both printed books and e-books, helping readers find the exact title they need in library systems and online marketplaces.</p>",
+              "question": "What is an ISBN?"
+            }
+          },
+          "subtitle": "Key concepts about the ISBN export.",
+          "title": "Frequently asked questions"
+        },
+        "format": {
+          "bullets": {
+            "quote": "Text qualifier: double quotes (\")",
+            "separator": "Field separator: comma (,)",
+            "type": "CSV file compressed as ZIP"
+          },
+          "description": "Data is delivered as a compressed CSV archive ready for ingestion.",
+          "title": "File format"
+        },
+        "hero": {
+          "eyebrow": "ISBN export",
+          "stats": {
+            "records": "Publications",
+            "size": "ZIP size",
+            "updated": "Last updated"
+          },
+          "title": "Comprehensive metadata for books"
+        },
+        "seo": {
+          "description": "Retrieve Nudger's ISBN dataset with weekly refreshes, download mirrors and schema information for publishing analytics.",
+          "title": "ISBN open data – download the book metadata export"
+        },
+        "summary": {
+          "title": "ISBN dataset overview"
+        }
+      },
+      "subtitle": "Pick the export that matches your project. Both are updated weekly and delivered under the Open Database Licence.",
+      "title": "Two complementary datasets"
+    },
+    "errors": {
+      "datasetFailed": "We could not load the dataset details. Please try again.",
+      "overviewFailed": "We could not load the open data overview. Please try again."
+    },
+    "faq": {
+      "items": {
+        "contributors": {
+          "answer": "<p>Nudger aggregates, normalises and resolves conflicts to publish factual product data, but contributions remain essential. You can share additional sources, report issues in the datasets or suggest improvements. Collaborating with manufacturers, distributors, researchers and citizens helps us keep the exports accurate, up to date and useful for everyone.</p>",
+          "question": "How can contributors help improve the datasets?"
+        },
+        "definition": {
+          "answer": "<p>Open data refers to data that is made accessible to everyone without access restrictions and in formats that can be freely reused. They can be reused, modified and redistributed by anyone for personal or professional purposes. The goal is to maximise access to information in order to encourage transparency, innovation and efficiency across sectors. Open data is often provided by public organisations, but some private companies have also started to publish portions of their data. A key aspect of open data is technical accessibility: data must be available in standard, machine-readable formats (such as CSV, JSON or XML) so they can be reused without major technical hurdles. By easing access to data, open data unlocks numerous applications, from mobile apps and visualisations to in-depth analyses.</p>",
+          "question": "What do we mean by open data?"
+        },
+        "importance": {
+          "answer": "<p>Open data is crucial for promoting transparency and innovation. By making data accessible, it helps citizens better understand government decisions and participate in public debate with informed arguments. Companies can use these data to develop new products and services, stimulating economic growth. Open data also supports better decision-making because public information can be analysed to improve policies, reduce inefficiencies and make institutions more accountable. Finally, open data fosters collaboration between stakeholders—researchers, entrepreneurs, developers and local communities—who can work together to solve shared challenges creatively.</p>",
+          "question": "Why is open data important for commerce?"
+        },
+        "sources": {
+          "answer": "<p>Extractions provided by Nudger stem from our work aggregating product data. We integrate a wide variety of sources that we group into several categories:</p><p><strong>Brand and manufacturer websites:</strong><br>We extract data directly from product sheets made available by brands and manufacturers.</p><p><strong>Institutional websites and open data:</strong> (base eprel, open food facts)<br>We integrate data from public or open repositories.</p><p><strong>Affiliate feeds and marketplaces:</strong> (awin, effinity, affilae, amazon, ..)<br>These come from promotional partnerships between Nudger and the platforms. We include a link in our extract so affiliate tracking applies when active offers exist for the product.</p><p>Nudger aggregates, normalises and resolves conflicts to publish factual, minimal product data. Building and sharing this database follows a commons mindset. We are convinced that sharing these datasets benefits every stakeholder in the consumption chain (manufacturers, retailers, researchers, citizens).</p><p>We are also mindful of intellectual property. Feel free to <a href=\"/contact\">contact us</a> with any question or if, as a data holder, you wish to opt out of this dataset.</p>",
+          "question": "Where do the datasets come from?"
+        }
+      },
+      "subtitle": "Understand our approach to open data.",
+      "title": "Frequently asked questions"
+    },
+    "hero": {
+      "eyebrow": "Open data",
+      "primaryCta": {
+        "ariaLabel": "Scroll to the open data datasets section",
+        "label": "Explore the datasets"
+      },
+      "subtitle": "Download GTIN and ISBN datasets maintained by Nudger to build your own analyses, services and research.",
+      "title": "Transparent product data for responsible commerce"
+    },
+    "license": {
+      "cta": {
+        "ariaLabel": "Open the Open Database Licence documentation in a new tab",
+        "href": "https://spdx.org/licenses/ODbL-1.0.html#licenseText",
+        "label": "Read the ODbL licence"
+      },
+      "description": "You may use, share and adapt the data provided you credit Nudger and share any derivative databases under the same licence.",
+      "title": "Open Database Licence (ODbL)"
+    },
+    "loading": "Loading open data information…",
+    "opensource": {
+      "cta": {
+        "ariaLabel": "Navigate to the open source page",
+        "label": "Visit the open source page"
+      },
+      "description": "Curious about the code powering these datasets? Discover the services, governance and community behind Nudger.",
+      "title": "Nudger is open source too"
+    },
+    "seo": {
+      "description": "Explore GTIN and ISBN datasets curated by Nudger, including weekly exports and download guidance.",
+      "title": "Nudger open data portal"
+    },
+    "stats": {
+      "accessibilityTitle": "Key open data metrics",
+      "datasets": {
+        "description": "Currently available data packages.",
+        "label": "Published datasets"
+      },
+      "placeholder": "—",
+      "totalProducts": {
+        "description": "Unique products referenced across all exports.",
+        "label": "Products covered",
+        "millions": "+{value} million"
+      },
+      "totalSize": {
+        "description": "Total compressed footprint of weekly exports.",
+        "label": "Combined size"
+      }
+    }
+  },
+  "opensource": {
+    "contribution": {
+      "eyebrow": "Contribute",
+      "steps": {
+        "issues": {
+          "title": "Pick an issue that inspires you"
+        },
+        "setup": {
+          "title": "Set up the project locally"
+        },
+        "share": {
+          "title": "Share, review and celebrate"
+        }
+      },
+      "title": "Join the collective in a few steps"
+    },
+    "hero": {
+      "ctaGroupLabel": "Primary hero actions",
+      "infoCard": {
+        "description": "grows with everyone. Every pull request, issue or piece of feedback makes the platform more transparent.",
+        "highlight": "Open4goods",
+        "items": {
+          "collaborativeReviews": "Collaborative reviews of contributions",
+          "openLicenses": "Code and data published under open licences",
+          "sharedGovernance": "Shared governance and living documentation"
+        }
+      },
+      "primaryCta": {
+        "ariaLabel": "Open the Nudger GitHub organization in a new tab",
+        "label": "Explore the repositories"
+      },
+      "subtitle": "Code, data and governance are transparent so anyone can audit and improve Nudger.",
+      "title": "We build a commons for responsible shopping"
+    },
+    "pillars": {
+      "cards": {
+        "community": {
+          "ariaLabel": "Navigate to the Nudger team page",
+          "cta": "Meet the team",
+          "title": "Inclusive community"
+        },
+        "methodology": {
+          "ariaLabel": "Navigate to the Impact Score page",
+          "cta": "Understand the Impact Score",
+          "title": "Documented methodology"
+        },
+        "transparency": {
+          "ariaLabel": "Open the Nudger GitHub repository in a new tab",
+          "cta": "Browse the source code",
+          "title": "Transparent architecture"
+        }
+      },
+      "eyebrow": "Our commitments",
+      "title": "An open ecosystem you can trust"
+    },
+    "resources": {
+      "contact": {
+        "cta": {
+          "ariaLabel": "Navigate to the contact page",
+          "label": "Contact the team"
+        },
+        "title": "Need a human sparring partner?"
+      },
+      "eyebrow": "Resources",
+      "feedback": {
+        "cta": {
+          "ariaLabel": "Navigate to the user feedback page",
+          "label": "Open the feedback board"
+        },
+        "description": "Report bugs, submit feature ideas and help us prioritise what matters next.",
+        "points": {
+          "bugs": "Log a bug in just a few clicks",
+          "features": "Suggest new features and improvements",
+          "votes": "Vote on the topics that matter to you"
+        },
+        "title": "Share feedback and ideas"
+      },
+      "links": {
+        "guide": {
+          "ariaLabel": "Open the Nudger contribution guide on GitHub in a new tab",
+          "title": "Contribution guide"
+        },
+        "issues": {
+          "ariaLabel": "Open the Nudger GitHub issues board in a new tab",
+          "title": "Issue tracker"
+        },
+        "updates": {
+          "ariaLabel": "Open the Nudger blog",
+          "title": "Community updates"
+        }
+      },
+      "opendata": {
+        "cta": {
+          "ariaLabel": "Navigate to the open data page",
+          "label": "Browse the open data portal"
+        },
+        "description": "Nudger datasets are published so you can analyse product footprints, cross-check our scoring and build your own projects.",
+        "title": "Open data for transparent decisions"
+      },
+      "title": "Everything you need to get started"
+    },
+    "seo": {
+      "description": "Discover how Nudger shares its code, data and governance to build a responsible shopping commons together.",
+      "imageAlt": "Nudger logomark representing the open source programme",
+      "title": "Open source at Nudger"
+    }
+  },
+  "partners": {
+    "affiliation": {
+      "carouselAriaLabel": "Affiliation partners carousel",
+      "empty": "No partners match your search yet. Try another term.",
+      "linkLabel": "Visit this partner",
+      "search": {
+        "label": "Search partners",
+        "placeholder": "Search by partner name"
+      },
+      "subtitle": "Explore the merchants who work with us through affiliation and discover their offers.",
+      "title": "They trust Nudger"
+    },
+    "cta": {
+      "ctaLabel": "Contact the team",
+      "description": "We are always looking for new allies who want to build responsible shopping with us.",
+      "eyebrow": "Join the movement",
+      "title": "Want to become a partner?"
+    },
+    "ecosystem": {
+      "carouselAriaLabel": "Ecosystem partners carousel",
+      "empty": "Our ecosystem partners will appear here soon.",
+      "fallbackDescription": "Content about this partner will be published soon.",
+      "linkLabel": "Discover the initiative",
+      "subtitle": "These organisations collaborate with us to build public-interest digital services.",
+      "title": "Nudger grows within a dynamic ecosystem"
+    },
+    "errors": {
+      "loadFailed": "We could not load partner data. Please try again."
+    },
+    "hero": {
+      "description": "Browse affiliation partners you can support, discover the ecosystem backing Nudger and the mentors guiding our mission.",
+      "eyebrow": "Collective impact",
+      "subtitle": "A trusted network of retailers, ecosystem builders and mentors committed to fairer shopping.",
+      "title": "Partners who amplify Nudger"
+    },
+    "loading": "Loading partners…",
+    "mentors": {
+      "carouselAriaLabel": "Mentor carousel",
+      "empty": "Mentor profiles will arrive shortly.",
+      "fallbackDescription": "More information about this mentor is coming soon.",
+      "linkLabel": "Learn more",
+      "subtitle": "Entrepreneurship is never simple. These mentors share their experience with kindness.",
+      "title": "They support us"
+    },
+    "seo": {
+      "description": "Meet the organisations, marketplaces and mentors helping Nudger accelerate responsible commerce.",
+      "title": "Our partners and mentors"
     }
   },
   "product": {
-    "navigation": {
-      "label": "Product detail navigation",
-      "overview": "Overview",
-      "impact": "Environmental impact",
-      "ai": "AI summary",
-      "price": "Pricing",
-      "attributes": "Specifications",
-      "docs": "Documentation",
-      "admin": "Administration"
+    "admin": {
+      "subtitle": "Full JSON payload of the product.",
+      "title": "Admin section"
+    },
+    "aiReview": {
+      "empty": "Summary not requested yet.",
+      "errors": {
+        "captcha": "Please validate the captcha before continuing.",
+        "generic": "An error occurred while generating the summary."
+      },
+      "generatedAt": "Summary generated on {date}",
+      "requestButton": "Request the summary",
+      "sections": {
+        "cons": "Cons",
+        "details": "In detail",
+        "ecological": "Environmental analysis",
+        "identity": "Identity card",
+        "overall": "Overall summary",
+        "pros": "Pros",
+        "sources": "Consulted sources",
+        "technical": "Technical analysis"
+      },
+      "sources": {
+        "description": "Description",
+        "index": "Ref.",
+        "source": "Source"
+      },
+      "status": {
+        "failed": "Generation failed",
+        "running": "Generation in progress ({step})",
+        "success": "Summary available"
+      },
+      "subtitle": "An AI-written synthesis built from verified sources.",
+      "title": "Test & review summary"
+    },
+    "attributes": {
+      "features": "Highlights",
+      "indexedGroup": "Indexed attributes",
+      "referentialTitle": "Reference identifiers",
+      "searchPlaceholder": "Search a specification",
+      "subtitle": "Browse every specification and filter with keywords.",
+      "title": "Technical specifications",
+      "unfeatures": "Watchouts"
+    },
+    "docs": {
+      "download": "Download PDF",
+      "empty": "No documents are available for this product yet.",
+      "loading": "Loading document preview…",
+      "navigationAria": "Product documentation list",
+      "pageCount": "{count} page(s)",
+      "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
+      "sidebarTitle": "Available documents",
+      "subtitle": "Preview and download official documents.",
+      "title": "Documentation",
+      "untitled": "Untitled document"
     },
     "hero": {
-      "gtin": "GTIN code",
-      "offersCount": "Number of offers",
       "bestPriceTitle": "Best price",
-      "priceMerchantPrefix": "At",
-      "viewSingleOffer": "View the offer",
-      "viewOffersCount": "View the {count} offers",
       "breadcrumbAriaLabel": "Product breadcrumb",
-      "missingBreadcrumbTitle": "Category",
+      "compare": {
+        "add": "Add to compare",
+        "ariaAdd": "Add {name} to compare",
+        "ariaSelected": "{name} is in your comparison list",
+        "label": "Compare",
+        "remove": "Remove from compare",
+        "selected": "In comparison"
+      },
+      "gtin": "GTIN code",
       "gtinTooltip": "Based on the product GTIN code, this does not necessarily indicate the manufacturing location.",
-      "openGalleryImage": "View image \"{label}\" in fullscreen",
-      "openGalleryVideo": "Play video \"{label}\"",
-      "openGalleryFallback": "Open product media gallery",
-      "thumbnailLabel": "Select {type} {index} of {total}: {label}",
       "mediaType": {
         "image": "image",
         "video": "video"
       },
-      "videoBadge": "Video",
-      "compare": {
-        "label": "Compare",
-        "selected": "In comparison",
-        "add": "Add to compare",
-        "remove": "Remove from compare",
-        "ariaAdd": "Add {name} to compare",
-        "ariaSelected": "{name} is in your comparison list"
-      },
+      "missingBreadcrumbTitle": "Category",
       "offerConditions": {
-        "occasion": "Second-hand",
-        "new": "New"
+        "new": "New",
+        "occasion": "Second-hand"
       },
-      "offerConditionsToggleAria": "Choose which offer condition to highlight"
+      "offerConditionsToggleAria": "Choose which offer condition to highlight",
+      "offersCount": "Number of offers",
+      "openGalleryFallback": "Open product media gallery",
+      "openGalleryImage": "View image \"{label}\" in fullscreen",
+      "openGalleryVideo": "Play video \"{label}\"",
+      "priceMerchantPrefix": "At",
+      "thumbnailLabel": "Select {type} {index} of {total}: {label}",
+      "videoBadge": "Video",
+      "viewOffersCount": "View the {count} offers",
+      "viewSingleOffer": "View the offer"
     },
     "impact": {
-      "title": "Environmental impact",
-      "subtitle": "Explore how this product scores across ecological and social criteria.",
-      "primaryScoreLabel": "Overall impact",
+      "absoluteValue": "Absolute value",
+      "bestProduct": "Best rated product: {name}",
+      "betterProduct": "Next best product: {name}",
+      "detailsTitle": "Assessment details",
       "noPrimaryScore": "Impact score unavailable",
+      "percentile": "Percentile",
+      "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
       "rankingTitle": "Ranking",
       "rankingValue": "Position {position} of {total}",
-      "bestProduct": "Best rated product: {name}",
-      "betterProduct": "Next best product: {name}",
-      "scoreValue": "Relative score",
-      "absoluteValue": "Absolute value",
-      "percentile": "Percentile",
       "scoreRanking": "Factor ranking",
-      "detailsTitle": "Assessment details",
+      "scoreValue": "Relative score",
+      "subtitle": "Explore how this product scores across ecological and social criteria.",
       "tableHeaders": {
-        "score": "Indicator",
-        "value": "Value",
+        "percent": "Percentile",
         "ranking": "Rank",
-        "percent": "Percentile"
-      }
+        "score": "Indicator",
+        "value": "Value"
+      },
+      "title": "Environmental impact"
     },
-    "aiReview": {
-      "title": "Test & review summary",
-      "subtitle": "An AI-written synthesis built from verified sources.",
-      "generatedAt": "Summary generated on {date}",
-      "sections": {
-        "overall": "Overall summary",
-        "details": "In detail",
-        "technical": "Technical analysis",
-        "ecological": "Environmental analysis",
-        "pros": "Pros",
-        "cons": "Cons",
-        "identity": "Identity card",
-        "sources": "Consulted sources"
-      },
-      "sources": {
-        "index": "Ref.",
-        "source": "Source",
-        "description": "Description"
-      },
-      "empty": "Summary not requested yet.",
-      "requestButton": "Request the summary",
-      "status": {
-        "running": "Generation in progress ({step})",
-        "success": "Summary available",
-        "failed": "Generation failed"
-      },
-      "errors": {
-        "captcha": "Please validate the captcha before continuing.",
-        "generic": "An error occurred while generating the summary."
-      }
+    "navigation": {
+      "admin": "Administration",
+      "ai": "AI summary",
+      "attributes": "Specifications",
+      "docs": "Documentation",
+      "impact": "Environmental impact",
+      "label": "Product detail navigation",
+      "overview": "Overview",
+      "price": "Pricing"
     },
     "price": {
-      "title": "Prices and trends",
-      "subtitle": "Track price evolution and compare offers.",
+      "condition": {
+        "new": "New",
+        "occasion": "Second-hand",
+        "refurbished": "Refurbished",
+        "unknown": "Unknown",
+        "used": "Second-hand"
+      },
+      "headers": {
+        "condition": "Condition",
+        "offer": "Offer",
+        "price": "Price",
+        "source": "Source",
+        "updated": "Updated"
+      },
       "newOffers": "New offers",
+      "noOccasionHistory": "No history for second-hand offers.",
       "occasionOffers": "Second-hand offers",
+      "offerList": "Offer list",
+      "subtitle": "Track price evolution and compare offers.",
+      "title": "Prices and trends",
       "trend": {
         "decrease": "Price drop of {amount}",
         "increase": "Price increase of {amount}",
         "stable": "Price unchanged"
-      },
-      "noOccasionHistory": "No history for second-hand offers.",
-      "offerList": "Offer list",
-      "headers": {
-        "source": "Source",
-        "offer": "Offer",
-        "price": "Price",
-        "condition": "Condition",
-        "updated": "Updated"
-      },
-      "condition": {
-        "new": "New",
-        "occasion": "Second-hand",
-        "used": "Second-hand",
-        "refurbished": "Refurbished",
-        "unknown": "Unknown"
       }
-    },
-    "attributes": {
-      "title": "Technical specifications",
-      "subtitle": "Browse every specification and filter with keywords.",
-      "searchPlaceholder": "Search a specification",
-      "referentialTitle": "Reference identifiers",
-      "indexedGroup": "Indexed attributes",
-      "features": "Highlights",
-      "unfeatures": "Watchouts"
-    },
-    "docs": {
-      "title": "Documentation",
-      "subtitle": "Preview and download official documents.",
-      "download": "Download PDF",
-      "untitled": "Untitled document",
-      "pageCount": "{count} page(s)",
-      "sidebarTitle": "Available documents",
-      "navigationAria": "Product documentation list",
-      "empty": "No documents are available for this product yet.",
-      "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
-      "loading": "Loading document preview…"
-    },
-    "admin": {
-      "title": "Admin section",
-      "subtitle": "Full JSON payload of the product."
     }
   },
-  "cms": {
-    "page": {
-      "loading": "Loading page…",
-      "error": "We could not load this page. Please try again later.",
-      "edit": "Edit this page"
+  "siteIdentity": {
+    "footer": {
+      "accessibleTitle": "Footer information",
+      "blogLink": "Our blog",
+      "community": {
+        "links": {
+          "partners": "Our partners",
+          "team": "Our team"
+        },
+        "title": "Community"
+      },
+      "comparator": {
+        "links": {
+          "legal": "Legal notice",
+          "openData": "Open data",
+          "openSource": "Open source",
+          "privacy": "Privacy policy"
+        },
+        "title": "Resources"
+      },
+      "copyright": "Copyright ©{year} open4goods. Common good product.",
+      "feedback": {
+        "cta": "Share your feedback",
+        "links": {
+          "contact": "Contact us",
+          "linkedin": "Follow us on LinkedIn"
+        },
+        "title": "Get involved"
+      },
+      "highlightLinks": {
+        "allProducts": "All products",
+        "compensation": "Ecological contribution",
+        "ecoscore": "Environmental assessment"
+      },
+      "logoAlt": "Nudger orange logo icon",
+      "mission": "nudger.fr is an open approach to assess the environmental impact of consumer goods and partially offset the impact of your online purchases.",
+      "rightsReserved": "All Rights Reserved"
+    },
+    "hero": {
+      "defaultCtaText": "Call to Action",
+      "defaultSubtitle": "Video demo hero to show a clean integration in a Vue 3 application.",
+      "defaultTitle": "Default Title",
+      "mainSubtitle": "Your Free and Independent Shopping Assistant",
+      "mainTitle": "The Comparator That Thinks About Tomorrow"
+    },
+    "links": {
+      "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
+    },
+    "menu": {
+      "closeLabel": "Close menu",
+      "items": {
+        "blog": "Blog",
+        "contact": "Contact",
+        "impactScore": "Impact Score",
+        "products": "Products"
+      },
+      "theme": {
+        "darkAriaLabel": "Activate dark theme",
+        "darkTooltip": "Switch to dark theme",
+        "lightAriaLabel": "Activate light theme",
+        "lightTooltip": "Switch to light theme"
+      },
+      "themeToggle": "Toggle theme",
+      "title": "Menu"
+    },
+    "siteName": "Nudger"
+  },
+  "team": {
+    "callouts": {
+      "contact": {
+        "cta": "Contact us",
+        "description": "Want to co-create the future of responsible shopping or ask us something specific? We would love to talk.",
+        "title": "Curious to chat?"
+      },
+      "partners": {
+        "cta": "Discover our partners",
+        "link": "/partners",
+        "title": "Our partners"
+      }
+    },
+    "cards": {
+      "connect": "Connect on LinkedIn",
+      "linkedIn": "Open {name}'s LinkedIn profile",
+      "portraitAlt": "Portrait of {name}",
+      "unknownName": "a team member"
+    },
+    "errors": {
+      "loadFailed": "We could not load the team roster. Please try again."
+    },
+    "hero": {
+      "eyebrow": "Our collective",
+      "subtitle": "A passionate crew blending tech, sustainability and social impact.",
+      "title": "The people behind Nudger"
+    },
+    "loading": "Loading team members…",
+    "sections": {
+      "contributors": {
+        "title": "Contributors"
+      },
+      "core": {
+        "title": "Core team"
+      },
+      "empty": "The team roster will be published soon."
+    },
+    "seo": {
+      "description": "Discover the collective of entrepreneurs, engineers and volunteers building the sustainable shopping assistant Nudger.",
+      "title": "Meet the Nudger team"
     }
-  }
+  },
+  "welcome": "Welcome"
 }

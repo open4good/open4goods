@@ -1,27 +1,19 @@
 <template>
   <div class="impact-score-page">
-    <section class="impact-score-page__hero">
+    <section
+      class="impact-score-page__hero"
+      aria-labelledby="impact-score-hero-title"
+      aria-describedby="impact-score-hero-intro"
+      role="region"
+    >
       <v-container class="py-12">
         <v-row class="impact-score-page__hero-row" align="center" justify="center">
           <v-col cols="12" md="10" lg="8" class="impact-score-page__hero-content">
-            <p class="impact-score-page__eyebrow">Impact environnemental</p>
-            <h1 class="impact-score-page__title">
-              L’Impact Score : évaluation de l'impact environnemental de vos produits
+            <h1 id="impact-score-hero-title" class="impact-score-page__title">
+              {{ t('impactScorePage.hero.title') }}
             </h1>
-            <div class="impact-score-page__intro text-body-1">
+            <div id="impact-score-hero-intro" class="impact-score-page__intro text-body-1">
               <TextContent bloc-id="ECOSCORE:1:" />
-            </div>
-            <div class="impact-score-page__hero-actions">
-              <v-btn
-                class="impact-score-page__hero-button"
-                color="surface"
-                size="large"
-                variant="elevated"
-                prepend-icon="mdi-compass-outline"
-                @click="scrollToSection(sectionIds.overview)"
-              >
-                Explorer la méthodologie
-              </v-btn>
             </div>
           </v-col>
         </v-row>
@@ -33,36 +25,57 @@
         <aside
           class="impact-score-page__nav"
           :class="{ 'impact-score-page__nav--mobile': orientation === 'horizontal' }"
-          aria-label="Plan de page Impact Score"
+          :aria-label="t('impactScorePage.aria.pageOutline')"
         >
           <StickySectionNavigation
             :sections="navigationSections"
             :active-section="activeSection"
             :orientation="orientation"
-            aria-label="Navigation Impact Score"
+            :aria-label="t('impactScorePage.aria.navigation')"
             @navigate="scrollToSection"
           />
         </aside>
 
         <main class="impact-score-page__sections" role="main">
-          <section :id="sectionIds.overview" class="impact-score-section impact-score-section--intro">
+          <section
+            :id="sectionIds.overview"
+            class="impact-score-section impact-score-section--intro"
+            :aria-labelledby="`${sectionIds.overview}-title`"
+            role="region"
+          >
             <v-sheet class="impact-score-section__surface" rounded="xl" elevation="0">
               <header class="impact-score-section__header">
-                <span class="impact-score-section__eyebrow">Présentation</span>
-                <h2 class="impact-score-section__title">Qu’est-ce que l’Impact Score&nbsp;?</h2>
+                <span class="impact-score-section__eyebrow">
+                  {{ t('impactScorePage.sections.overview.eyebrow') }}
+                </span>
+                <h2 :id="`${sectionIds.overview}-title`" class="impact-score-section__title">
+                  {{ t('impactScorePage.sections.overview.title') }}
+                </h2>
               </header>
 
               <v-row class="impact-score-section__row impact-score-section__row--balanced" align="stretch">
-                <v-col cols="12" md="7">
+                <v-col cols="12" lg="7">
                   <div class="impact-score-section__body">
                     <TextContent bloc-id="ECOSCORE:2:" />
                   </div>
                 </v-col>
 
-                <v-col cols="12" md="5" class="impact-score-section__rating">
-                  <v-card variant="flat" class="impact-score-example" elevation="0">
+                <v-col cols="12" lg="5" class="impact-score-section__rating">
+                  <v-card
+                    variant="flat"
+                    class="impact-score-example"
+                    elevation="0"
+                    role="group"
+                    :aria-labelledby="`${sectionIds.overview}-rating-title`"
+                    :aria-describedby="`${sectionIds.overview}-rating-caption`"
+                  >
                     <div class="impact-score-example__header">
-                      <span class="impact-score-example__eyebrow">Évaluation indicative</span>
+                      <span
+                        :id="`${sectionIds.overview}-rating-title`"
+                        class="impact-score-example__eyebrow"
+                      >
+                        {{ t('impactScorePage.sections.overview.sample.title') }}
+                      </span>
                       <strong class="impact-score-example__value">{{ formatCoeff(localRating) }}</strong>
                     </div>
                     <ImpactScore
@@ -71,8 +84,11 @@
                       size="large"
                       show-value
                     />
-                    <p class="impact-score-example__caption">
-                      Évaluation indicative basée sur notre méthodologie
+                    <p
+                      :id="`${sectionIds.overview}-rating-caption`"
+                      class="impact-score-example__caption"
+                    >
+                      {{ t('impactScorePage.sections.overview.sample.caption') }}
                     </p>
                   </v-card>
                 </v-col>
@@ -80,27 +96,34 @@
             </v-sheet>
           </section>
 
-          <section :id="sectionIds.ecoscore" class="impact-score-section">
+          <section
+            :id="sectionIds.ecoscore"
+            class="impact-score-section"
+            :aria-labelledby="`${sectionIds.ecoscore}-title`"
+            role="region"
+          >
             <v-sheet class="impact-score-section__surface impact-score-section__surface--muted" rounded="xl" elevation="0">
               <header class="impact-score-section__header">
-                <span class="impact-score-section__eyebrow">Notre démarche</span>
-                <h2 class="impact-score-section__title">
-                  Notre ecoscore&nbsp;: transparent, innovant et performant
+                <span class="impact-score-section__eyebrow">
+                  {{ t('impactScorePage.sections.approach.eyebrow') }}
+                </span>
+                <h2 :id="`${sectionIds.ecoscore}-title`" class="impact-score-section__title">
+                  {{ t('impactScorePage.sections.approach.title') }}
                 </h2>
               </header>
 
-              <v-row class="impact-score-section__row" align="center">
-                <v-col cols="12" md="5">
-                  <div class="impact-score-section__figure">
+              <v-row class="impact-score-section__row impact-score-section__row--media" align="center">
+                <v-col cols="12" md="5" lg="4" class="impact-score-section__media">
+                  <figure class="impact-score-media" role="presentation">
                     <v-img
-                      src="https://nudger.fr/img/impactscore-illustration.png"
-                      alt="Illustration de notre démarche ecoscore"
-                      aspect-ratio="1"
-                      contain
+                      src="https://nudger.fr/img/impactscore-illustration.webp"
+                      :alt="t('impactScorePage.sections.approach.imageAlt')"
+                      class="impact-score-media__image"
+                      cover
                     />
-                  </div>
+                  </figure>
                 </v-col>
-                <v-col cols="12" md="7">
+                <v-col cols="12" md="7" lg="8">
                   <div class="impact-score-section__body">
                     <TextContent bloc-id="ECOSCORE:3:" />
                   </div>
@@ -109,35 +132,72 @@
             </v-sheet>
           </section>
 
-          <section :id="sectionIds.calculation" class="impact-score-section">
+          <section
+            :id="sectionIds.calculation"
+            class="impact-score-section"
+            :aria-labelledby="`${sectionIds.calculation}-title`"
+            role="region"
+          >
             <v-sheet class="impact-score-section__surface" rounded="xl" elevation="0">
               <header class="impact-score-section__header">
-                <span class="impact-score-section__eyebrow">Méthodologie</span>
-                <h2 class="impact-score-section__title">Comment est calculé l'Impact Score&nbsp;?</h2>
+                <span class="impact-score-section__eyebrow">
+                  {{ t('impactScorePage.sections.methodology.eyebrow') }}
+                </span>
+                <h2 :id="`${sectionIds.calculation}-title`" class="impact-score-section__title">
+                  {{ t('impactScorePage.sections.methodology.title') }}
+                </h2>
               </header>
 
               <div class="impact-score-section__body">
-                <p>
-                  Les règles de calcul de l’ecoscore sont détaillées sur chaque produit (section «&nbsp;bilan écologique&nbsp;»).
-                  Chaque catégorie de produit a ses propres critères et pondérations. Voici les catégories couvertes :
-                </p>
+                <p>{{ t('impactScorePage.sections.methodology.intro') }}</p>
               </div>
 
-              <v-sheet class="impact-score-section__list" rounded="lg" elevation="0">
-                <v-list density="comfortable" bg-color="transparent">
-                  <v-list-item
-                    v-for="v in verticals"
-                    :key="v.url"
-                    :href="v.url"
-                    :title="v.title"
-                    link
+              <div v-if="verticalCards.length" class="impact-score-verticals" role="list">
+                <v-row class="impact-score-verticals__row" align="stretch" justify="start">
+                  <v-col
+                    v-for="vertical in verticalCards"
+                    :key="vertical.id"
+                    cols="12"
+                    sm="6"
+                    md="4"
+                    role="listitem"
                   >
-                    <template #append>
-                      <v-icon icon="mdi-chevron-right" />
-                    </template>
-                  </v-list-item>
-                </v-list>
-              </v-sheet>
+                    <NuxtLink
+                      :to="vertical.href"
+                      class="impact-score-vertical-card"
+                      :aria-label="t('impactScorePage.sections.methodology.verticalCardAria', { vertical: vertical.displayName })"
+                    >
+                      <v-img
+                        v-if="vertical.image"
+                        :src="vertical.image"
+                        :alt="t('impactScorePage.sections.methodology.verticalImageAlt', { vertical: vertical.displayName })"
+                        class="impact-score-vertical-card__image"
+                        cover
+                      />
+                      <div class="impact-score-vertical-card__content">
+                        <span class="impact-score-vertical-card__eyebrow">
+                          {{ t('impactScorePage.sections.methodology.verticalLabel') }}
+                        </span>
+                        <strong class="impact-score-vertical-card__title">{{ vertical.displayName }}</strong>
+                        <span class="impact-score-vertical-card__cta">
+                          {{ t('impactScorePage.sections.methodology.verticalCta') }}
+                        </span>
+                      </div>
+                    </NuxtLink>
+                  </v-col>
+                </v-row>
+              </div>
+              <v-alert
+                v-else
+                type="info"
+                variant="tonal"
+                class="impact-score-verticals__empty"
+                border="start"
+                density="comfortable"
+                :aria-label="t('impactScorePage.sections.methodology.empty')"
+              >
+                {{ t('impactScorePage.sections.methodology.empty') }}
+              </v-alert>
 
               <div class="impact-score-section__body">
                 <TextContent bloc-id="ECOSCORE:4:" />
@@ -145,57 +205,36 @@
             </v-sheet>
           </section>
 
-          <section :id="sectionIds.criteria" class="impact-score-section">
-            <v-sheet class="impact-score-section__surface" rounded="xl" elevation="0">
-              <header class="impact-score-section__header">
-                <span class="impact-score-section__eyebrow">Pondérations</span>
-                <h2 class="impact-score-section__title">
-                  Critères et coefficients de l'ecoscore téléviseurs
-                </h2>
-              </header>
-
-              <v-table class="impact-score-table" density="comfortable">
-                <thead>
-                  <tr>
-                    <th scope="col" class="text-left">Nom du critère</th>
-                    <th scope="col" class="text-left">Coefficient (0–1)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(c, i) in criterias" :key="i">
-                    <td>{{ c.name }}</td>
-                    <td>{{ formatCoeff(c.coefficient) }}</td>
-                  </tr>
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <th scope="row">Total</th>
-                    <td><strong>{{ formatCoeff(total) }}</strong></td>
-                  </tr>
-                </tfoot>
-              </v-table>
-            </v-sheet>
-          </section>
-
-          <section :id="sectionIds.dataQuality" class="impact-score-section">
+          <section
+            :id="sectionIds.dataQuality"
+            class="impact-score-section"
+            :aria-labelledby="`${sectionIds.dataQuality}-title`"
+            role="region"
+          >
             <v-sheet class="impact-score-section__surface impact-score-section__surface--muted" rounded="xl" elevation="0">
               <header class="impact-score-section__header">
-                <span class="impact-score-section__eyebrow">Analyse approfondie</span>
-                <h2 class="impact-score-section__title">Relativisation et qualité de la donnée</h2>
+                <span class="impact-score-section__eyebrow">
+                  {{ t('impactScorePage.sections.analysis.eyebrow') }}
+                </span>
+                <h2 :id="`${sectionIds.dataQuality}-title`" class="impact-score-section__title">
+                  {{ t('impactScorePage.sections.analysis.title') }}
+                </h2>
               </header>
 
               <div class="impact-score-insights">
                 <article class="impact-score-insight impact-score-insight--reverse">
                   <div class="impact-score-insight__content">
-                    <h3 class="impact-score-insight__title">Principe de relativisation</h3>
+                    <h3 class="impact-score-insight__title">
+                      {{ t('impactScorePage.sections.analysis.relativisation.title') }}
+                    </h3>
                     <TextContent bloc-id="ECOSCORE:4-1:" />
                   </div>
                   <div class="impact-score-insight__media">
                     <v-img
-                      src="https://nudger.fr/img/relativisation.png"
-                      alt="Illustration du principe de relativisation"
-                      aspect-ratio="1"
-                      contain
+                      src="https://nudger.fr/img/relativisation.webp"
+                      :alt="t('impactScorePage.sections.analysis.relativisation.imageAlt')"
+                      class="impact-score-media__image"
+                      cover
                     />
                   </div>
                 </article>
@@ -203,14 +242,16 @@
                 <article class="impact-score-insight">
                   <div class="impact-score-insight__media">
                     <v-img
-                      src="https://nudger.fr/img/data-quality.png"
-                      alt="Illustration sur la qualité de la donnée"
-                      aspect-ratio="1"
-                      contain
+                      src="https://nudger.fr/img/data-quality.webp"
+                      :alt="t('impactScorePage.sections.analysis.dataQuality.imageAlt')"
+                      class="impact-score-media__image"
+                      cover
                     />
                   </div>
                   <div class="impact-score-insight__content">
-                    <h3 class="impact-score-insight__title">La qualité de la donnée, enjeu majeur</h3>
+                    <h3 class="impact-score-insight__title">
+                      {{ t('impactScorePage.sections.analysis.dataQuality.title') }}
+                    </h3>
                     <TextContent bloc-id="ECOSCORE:4-2:" />
                   </div>
                 </article>
@@ -226,17 +267,70 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
+import { useI18n } from 'vue-i18n'
+import type { VerticalConfigDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 
 const props = defineProps({
   rating: { type: Number, default: 4.5 },
-  verticals: { type: Array, default: () => [] },
-  criterias: { type: Array, default: () => [] },
-  total: { type: Number, default: 1.0 },
 })
 
+const { t, locale } = useI18n()
 const display = useDisplay()
+
+const { data: fetchedVerticals } = await useAsyncData<VerticalConfigDto[]>(
+  'impact-score-verticals',
+  () =>
+    $fetch<VerticalConfigDto[]>('/api/categories', {
+      params: { onlyEnabled: true },
+    }),
+  {
+    default: () => [],
+    server: true,
+  },
+)
+
+type VerticalCard = {
+  id: string
+  href: string
+  image: string | null
+  displayName: string
+}
+
+const normalizedLocale = computed(() => locale.value ?? 'fr-FR')
+
+const verticalCards = computed<VerticalCard[]>(() => {
+  const data = fetchedVerticals.value ?? []
+
+  return data
+    .filter((vertical) => Boolean(vertical?.verticalHomeTitle && vertical?.verticalHomeUrl))
+    .map((vertical) => {
+      const rawUrl = (vertical.verticalHomeUrl ?? '').trim()
+      const trimmedBase = rawUrl.replace(/\/+$/, '')
+      if (!trimmedBase.length) {
+        return null
+      }
+
+      const rawTitle = (vertical.verticalHomeTitle ?? '').trim()
+      if (!rawTitle.length) {
+        return null
+      }
+
+      const hrefBase = trimmedBase.startsWith('/') ? trimmedBase : `/${trimmedBase}`
+      const displayName = rawTitle.toLocaleLowerCase(normalizedLocale.value)
+      const href = `${hrefBase}/ecoscore`
+      const image = vertical.imageSmall ?? null
+
+      return {
+        id: vertical.id ?? href,
+        href,
+        image,
+        displayName,
+      }
+    })
+    .filter((card): card is VerticalCard => Boolean(card))
+})
 
 const localRating = ref(props.rating)
 
@@ -251,17 +345,15 @@ const sectionIds = {
   overview: 'impact-overview',
   ecoscore: 'impact-ecoscore',
   calculation: 'impact-calculation',
-  criteria: 'impact-criteria',
   dataQuality: 'impact-data-quality',
 } as const
 
-const navigationSections = [
-  { id: sectionIds.overview, label: 'Présentation', icon: 'mdi-information-outline' },
-  { id: sectionIds.ecoscore, label: 'Notre démarche', icon: 'mdi-leaf' },
-  { id: sectionIds.calculation, label: 'Calcul', icon: 'mdi-chart-timeline-variant' },
-  { id: sectionIds.criteria, label: 'Critères', icon: 'mdi-table' },
-  { id: sectionIds.dataQuality, label: 'Qualité des données', icon: 'mdi-shield-check-outline' },
-]
+const navigationSections = computed(() => [
+  { id: sectionIds.overview, label: t('impactScorePage.navigation.overview'), icon: 'mdi-information-outline' },
+  { id: sectionIds.ecoscore, label: t('impactScorePage.navigation.approach'), icon: 'mdi-leaf' },
+  { id: sectionIds.calculation, label: t('impactScorePage.navigation.methodology'), icon: 'mdi-chart-timeline-variant' },
+  { id: sectionIds.dataQuality, label: t('impactScorePage.navigation.analysis'), icon: 'mdi-shield-check-outline' },
+])
 
 const orientation = computed<'vertical' | 'horizontal'>(() => (display.mdAndDown.value ? 'horizontal' : 'vertical'))
 
@@ -271,8 +363,9 @@ const visibleSectionRatios = new Map<string, number>()
 const MIN_SECTION_RATIO = 0.4
 
 const refreshActiveSection = () => {
+  const sections = navigationSections.value
   if (!visibleSectionRatios.size) {
-    activeSection.value = navigationSections[0]?.id ?? sectionIds.overview
+    activeSection.value = sections[0]?.id ?? sectionIds.overview
     return
   }
 
@@ -313,7 +406,7 @@ const observeSections = () => {
   )
 
   nextTick(() => {
-    navigationSections.forEach((section) => {
+    navigationSections.value.forEach((section) => {
       const element = document.getElementById(section.id)
       if (element) {
         observer.value?.observe(element)
@@ -331,13 +424,20 @@ onBeforeUnmount(() => {
   visibleSectionRatios.clear()
 })
 
+watch(orientation, () => {
+  nextTick(() => {
+    observeSections()
+  })
+})
+
 watch(
-  orientation,
+  navigationSections,
   () => {
     nextTick(() => {
       observeSections()
     })
   },
+  { deep: true },
 )
 
 const scrollToSection = (sectionId: string) => {
@@ -365,23 +465,37 @@ function formatCoeff(n: number | null | undefined) {
 
 <style scoped>
 .impact-score-page {
-  background: rgb(var(--v-theme-surface-muted));
+  background: linear-gradient(
+      180deg,
+      rgba(var(--v-theme-hero-gradient-start), 0.95) 0%,
+      rgba(var(--v-theme-hero-gradient-end), 0.92) 48%,
+      rgb(var(--v-theme-surface-muted)) 48%
+    );
   color: rgb(var(--v-theme-text-neutral-strong));
+  min-height: 100%;
 }
 
 .impact-score-page__hero {
-  background: linear-gradient(140deg, rgba(var(--v-theme-hero-gradient-start), 0.88), rgba(var(--v-theme-hero-gradient-end), 0.88));
-  color: white;
   position: relative;
+  color: white;
   overflow: hidden;
+}
+
+.impact-score-page__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(140deg, rgba(var(--v-theme-hero-gradient-start), 0.9), rgba(var(--v-theme-hero-gradient-end), 0.88));
+  z-index: 0;
 }
 
 .impact-score-page__hero::after {
   content: '';
   position: absolute;
-  inset: 10% -20% -40% -20%;
-  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 65%);
+  inset: 12% -25% -45% -25%;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 70%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .impact-score-page__hero-row {
@@ -391,47 +505,26 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-page__hero-content {
+  max-width: 760px;
+  margin-inline: auto;
   text-align: center;
 }
 
-.impact-score-page__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-  font-size: 0.78rem;
-  margin-bottom: 0.75rem;
-  color: rgba(255, 255, 255, 0.75);
-}
-
 .impact-score-page__title {
-  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-size: clamp(2.15rem, 2.6vw, 3rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
   margin-bottom: 1.5rem;
 }
 
 .impact-score-page__intro :deep(p) {
   margin-bottom: 1rem;
-}
-
-.impact-score-page__hero-actions {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-}
-
-.impact-score-page__hero-button {
-  font-weight: 600;
-  border-radius: 999px;
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.25);
-}
-
-.impact-score-page__hero-button :deep(.v-icon) {
-  color: rgb(var(--v-theme-accent-supporting));
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1.05rem;
 }
 
 .impact-score-page__content {
-  margin-top: -64px;
+  margin-top: -72px;
 }
 
 .impact-score-page__layout {
@@ -442,7 +535,7 @@ function formatCoeff(n: number | null | undefined) {
 
 .impact-score-page__nav {
   position: sticky;
-  top: 104px;
+  top: 96px;
   align-self: start;
   height: fit-content;
   z-index: 10;
@@ -465,15 +558,16 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-section__surface {
-  padding: 2.5rem;
+  padding: clamp(1.8rem, 2vw + 1.5rem, 2.6rem);
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
   background: rgb(var(--v-theme-surface-default));
+  border-radius: 28px;
 }
 
 .impact-score-section__surface--muted {
   background: rgba(var(--v-theme-surface-primary-080), 0.7);
-  border-color: rgba(var(--v-theme-border-primary-strong), 0.2);
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.24);
 }
 
 .impact-score-section__header {
@@ -493,103 +587,162 @@ function formatCoeff(n: number | null | undefined) {
 .impact-score-section__title {
   margin: 0;
   font-weight: 700;
-  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
   line-height: 1.3;
 }
 
 .impact-score-section__row {
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .impact-score-section__row--balanced {
   align-items: stretch;
 }
 
+.impact-score-section__row--media {
+  align-items: center;
+}
+
 .impact-score-section__body :deep(p + p) {
   margin-top: 1rem;
 }
 
-.impact-score-section__figure {
+.impact-score-section__media {
+  display: flex;
+  justify-content: center;
+}
+
+.impact-score-media,
+.impact-score-insight__media {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--v-theme-surface-primary-100), 0.8);
-  border-radius: 20px;
+  background: rgba(var(--v-theme-surface-primary-100), 0.85);
+  border-radius: 24px;
   padding: 1.5rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.22);
+  width: 100%;
+  max-width: 320px;
+  margin-inline: auto;
+}
+
+.impact-score-media__image {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1;
+  border-radius: 18px;
 }
 
 .impact-score-section__rating {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .impact-score-example {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.75rem;
-  border-radius: 20px;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
-  background: rgba(var(--v-theme-surface-primary-080), 0.8);
+  gap: 1.25rem;
+  padding: clamp(1.6rem, 2vw + 1rem, 2.2rem);
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+  border-radius: 24px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-surface-primary-100), 0.35);
 }
 
 .impact-score-example__header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .impact-score-example__eyebrow {
+  font-size: 0.82rem;
   text-transform: uppercase;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
+  font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .impact-score-example__value {
-  font-size: 2.75rem;
+  font-size: clamp(2.1rem, 2vw + 1.8rem, 2.75rem);
   font-weight: 700;
-  line-height: 1;
-  color: rgb(var(--v-theme-text-neutral-strong));
+  color: rgb(var(--v-theme-accent-primary-highlight));
 }
 
 .impact-score-example__caption {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
-.impact-score-section__list {
-  margin: 1.5rem 0;
-  padding: 0.75rem 0.5rem;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25);
+.impact-score-verticals {
+  margin: 1.75rem 0;
 }
 
-.impact-score-section__list :deep(.v-list-item) {
-  border-radius: 12px;
-  transition: background 0.25s ease, transform 0.25s ease;
+.impact-score-verticals__row {
+  row-gap: 1.5rem;
 }
 
-.impact-score-section__list :deep(.v-list-item:hover) {
-  background: rgba(var(--v-theme-surface-primary-100), 0.8);
-  transform: translateX(4px);
+.impact-score-vertical-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  height: 100%;
+  padding: 1.75rem;
+  border-radius: 24px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.28);
+  background: rgba(var(--v-theme-surface-glass), 0.9);
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.06);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.impact-score-table {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+.impact-score-vertical-card:focus-visible,
+.impact-score-vertical-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--v-theme-accent-primary-highlight), 0.55);
+  box-shadow: 0 22px 40px rgba(15, 23, 42, 0.12);
 }
 
-.impact-score-table thead {
-  background: rgba(var(--v-theme-surface-primary-080), 0.6);
+.impact-score-vertical-card__image {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  background: rgba(var(--v-theme-surface-primary-100), 0.6);
 }
 
-.impact-score-table tfoot {
-  background: rgba(var(--v-theme-surface-primary-080), 0.6);
+.impact-score-vertical-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.impact-score-vertical-card__eyebrow {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.impact-score-vertical-card__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.impact-score-vertical-card__cta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-accent-primary-highlight));
+}
+
+.impact-score-verticals__empty {
+  margin-top: 1.5rem;
 }
 
 .impact-score-insights {
@@ -600,13 +753,13 @@ function formatCoeff(n: number | null | undefined) {
 
 .impact-score-insight {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(200px, 280px);
-  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
+  gap: 1.75rem;
   align-items: center;
 }
 
 .impact-score-insight--reverse {
-  grid-template-columns: minmax(0, 1fr) minmax(200px, 280px);
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 300px);
 }
 
 .impact-score-insight--reverse .impact-score-insight__content {
@@ -624,20 +777,6 @@ function formatCoeff(n: number | null | undefined) {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.impact-score-insight__media {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(var(--v-theme-surface-primary-100), 0.8);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
-}
-
-.impact-score-insight__media .v-img {
-  border-radius: 16px;
-}
-
 .impact-score-insight__content :deep(p + p) {
   margin-top: 1rem;
 }
@@ -653,36 +792,37 @@ function formatCoeff(n: number | null | undefined) {
     z-index: 20;
   }
 
-  .impact-score-page__nav--mobile {
-    position: static;
-    top: auto;
-  }
-
   .impact-score-section {
     scroll-margin-top: 160px;
   }
 }
 
-@media (max-width: 960px) {
-  .impact-score-page__content {
-    margin-top: -32px;
-  }
-
+@media (max-width: 1080px) {
   .impact-score-page__hero-content {
     text-align: left;
   }
 
-  .impact-score-page__hero-actions {
-    justify-content: flex-start;
+  .impact-score-page__title {
+    font-size: clamp(2rem, 2.4vw, 2.5rem);
+  }
+}
+
+@media (max-width: 960px) {
+  .impact-score-page__content {
+    margin-top: -36px;
   }
 
   .impact-score-section__surface {
-    padding: 1.9rem;
+    padding: 1.8rem;
+    border-radius: 24px;
   }
 
-  .impact-score-section__figure,
-  .impact-score-insight__media {
-    padding: 1.25rem;
+  .impact-score-section__row {
+    gap: 1.5rem;
+  }
+
+  .impact-score-section__media {
+    margin-bottom: 0.5rem;
   }
 
   .impact-score-insight {
@@ -701,20 +841,30 @@ function formatCoeff(n: number | null | undefined) {
     border-bottom-right-radius: 28px;
   }
 
+  .impact-score-page__hero-content {
+    text-align: left;
+  }
+
+  .impact-score-page__intro :deep(p) {
+    font-size: 1rem;
+  }
+
   .impact-score-section__surface {
     padding: 1.5rem;
+    border-radius: 20px;
   }
 
   .impact-score-section__title {
     font-size: 1.4rem;
   }
 
-  .impact-score-section__list {
-    padding: 0.5rem 0.25rem;
+  .impact-score-example {
+    padding: 1.6rem;
   }
 
-  .impact-score-example {
+  .impact-score-vertical-card {
     padding: 1.5rem;
   }
 }
 </style>
+
