@@ -33,7 +33,11 @@ definePageMeta({
       .map(segment => (typeof segment === 'string' ? segment.trim() : ''))
       .filter((segment): segment is string => segment.length > 0)
 
-    return !matchProductRouteFromSegments(trimmedSegments)
+    if (matchProductRouteFromSegments(trimmedSegments)) {
+      return true
+    }
+
+    return trimmedSegments.length > 1
   },
 })
 
@@ -57,42 +61,58 @@ const pageId = ref<string | null>(null)
 const fallbackTitle = ref<string | null>(null)
 const fallbackDescription = ref<string | null>(null)
 
-const slugPath = slugSegments.join('/')
-const normalisedSlug = normaliseSlug(slugPath)
+const trimmedSegments = [categorySlug.value, ...slugSegments]
+  .map(segment => (typeof segment === 'string' ? segment.trim() : ''))
+  .filter((segment): segment is string => segment.length > 0)
 
-if (!normalisedSlug) {
-  throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
-}
+const productRoute = matchProductRouteFromSegments(trimmedSegments)
 
-let categoryDetail: VerticalConfigFullDto
+if (productRoute) {
+  await navigateTo(
+    {
+      name: 'slug',
+      params: { slug: [productRoute.categorySlug, `${productRoute.gtin}-${productRoute.slug}`] },
+    },
+    { replace: true, redirectCode: 301 },
+  )
+} else {
+  const slugPath = slugSegments.join('/')
+  const normalisedSlug = normaliseSlug(slugPath)
 
-try {
-  categoryDetail = await selectCategoryBySlug(categorySlug.value)
-} catch (error) {
-  if (error instanceof Error && error.name === 'CategoryNotFoundError') {
-    throw createError({ statusCode: 404, statusMessage: 'Category not found', cause: error })
+  if (!normalisedSlug) {
+    throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
   }
 
-  console.error('Failed to resolve category for wiki guide', error)
-  throw createError({ statusCode: 500, statusMessage: 'Failed to load category', cause: error })
+  let categoryDetail: VerticalConfigFullDto
+
+  try {
+    categoryDetail = await selectCategoryBySlug(categorySlug.value)
+  } catch (error) {
+    if (error instanceof Error && error.name === 'CategoryNotFoundError') {
+      throw createError({ statusCode: 404, statusMessage: 'Category not found', cause: error })
+    }
+
+    console.error('Failed to resolve category for wiki guide', error)
+    throw createError({ statusCode: 500, statusMessage: 'Failed to load category', cause: error })
+  }
+
+  const matchedPage =
+    categoryDetail.wikiPages?.find(page => normaliseSlug(page.verticalUrl) === normalisedSlug) ?? null
+
+  if (!matchedPage) {
+    throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
+  }
+
+  const resolvedPageId = matchedPage.wikiUrl?.trim().replace(/^\/+/, '') ?? null
+
+  if (!resolvedPageId) {
+    throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
+  }
+
+  pageId.value = resolvedPageId
+  fallbackTitle.value = matchedPage.title ?? null
+  fallbackDescription.value = categoryDetail.verticalHomeDescription ?? null
 }
-
-const matchedPage =
-  categoryDetail.wikiPages?.find(page => normaliseSlug(page.verticalUrl) === normalisedSlug) ?? null
-
-if (!matchedPage) {
-  throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
-}
-
-const resolvedPageId = matchedPage.wikiUrl?.trim().replace(/^\/+/, '') ?? null
-
-if (!resolvedPageId) {
-  throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
-}
-
-pageId.value = resolvedPageId
-fallbackTitle.value = matchedPage.title ?? null
-fallbackDescription.value = categoryDetail.verticalHomeDescription ?? null
 </script>
 
 <template>
