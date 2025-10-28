@@ -9,6 +9,8 @@ const normaliseSlug = (value: string | null | undefined) =>
   value?.trim().replace(/^\/+|\/+$/g, '').toLowerCase() ?? ''
 
 definePageMeta({
+  path:
+    '/:categorySlug/:guideSlug([A-Za-z][A-Za-z0-9-]*)',
   validate(route) {
     const raw = route.params.guideSlug
     const slug = Array.isArray(raw) ? raw.join('/') : String(raw ?? '')
