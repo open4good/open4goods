@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import XwikiFullPageRenderer from '~/components/cms/XwikiFullPageRenderer.vue'
 import { useCategories } from '~/composables/categories/useCategories'
+import { normalizeWikiPageId } from '~/utils/_wiki-page'
 import type { VerticalConfigFullDto } from '~~/shared/api-client'
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 
@@ -84,7 +85,7 @@ if (!matchedPage) {
   throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
 }
 
-const resolvedPageId = matchedPage.wikiUrl?.trim().replace(/^\/+/, '') ?? null
+const resolvedPageId = normalizeWikiPageId(matchedPage.wikiUrl)
 
 if (!resolvedPageId) {
   throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
