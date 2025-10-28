@@ -1352,7 +1352,12 @@
       "subtitle": "Consultez et téléchargez les documents officiels.",
       "download": "Télécharger le PDF",
       "untitled": "Document sans titre",
-      "pageCount": "{count} page(s)"
+      "pageCount": "{count} page(s)",
+      "sidebarTitle": "Documents disponibles",
+      "navigationAria": "Liste des documents du produit",
+      "empty": "Aucun document n’est encore disponible pour ce produit.",
+      "previewUnavailable": "Aucun aperçu n’est disponible pour ce document. Utilisez le lien de téléchargement.",
+      "loading": "Chargement de l’aperçu du document…"
     },
     "admin": {
       "title": "Section administration",

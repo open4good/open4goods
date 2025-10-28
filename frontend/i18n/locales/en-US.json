@@ -1344,7 +1344,12 @@
       "subtitle": "Preview and download official documents.",
       "download": "Download PDF",
       "untitled": "Untitled document",
-      "pageCount": "{count} page(s)"
+      "pageCount": "{count} page(s)",
+      "sidebarTitle": "Available documents",
+      "navigationAria": "Product documentation list",
+      "empty": "No documents are available for this product yet.",
+      "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
+      "loading": "Loading document preview…"
     },
     "admin": {
       "title": "Admin section",
