@@ -198,6 +198,8 @@
       "hideImpact": "Hide impact filters",
       "hideTechnical": "Hide technical filters",
       "impactTitle": "Impact filters",
+      "activeTitle": "Active filters",
+      "clearAllTooltip": "Clear all filters",
       "missingLabel": "Unlabelled option",
       "mobileApply": "Apply filters",
       "mobileClear": "Clear all filters",
