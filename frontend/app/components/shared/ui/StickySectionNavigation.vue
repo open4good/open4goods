@@ -147,11 +147,19 @@ const onNavigate = (sectionId: string) => {
 }
 
 .sticky-section-navigation__label {
-  white-space: nowrap;
+  display: inline-block;
+  white-space: normal;
+  line-height: 1.35;
+  text-align: left;
+  word-break: break-word;
 }
 
 .sticky-section-navigation--horizontal .sticky-section-navigation__link {
   justify-content: center;
+}
+
+.sticky-section-navigation--horizontal .sticky-section-navigation__label {
+  text-align: center;
 }
 
 .sticky-section-navigation--horizontal.sticky-section-navigation--sticky {

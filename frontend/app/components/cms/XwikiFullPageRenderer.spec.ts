@@ -117,6 +117,13 @@ const mountComponent = async (
         VBtn: { template: '<button><slot /></button>' },
         VProgressLinear: { template: '<div class="v-progress-linear" />' },
         VAlert: { template: '<div class="v-alert"><slot /></div>' },
+        VImg: {
+          name: 'VImg',
+          props: { src: { type: String, default: '' } },
+          template:
+            '<div class="v-img" v-bind="$attrs" :data-src="src"><slot name="placeholder" /></div>',
+        },
+        VSkeletonLoader: { template: '<div class="v-skeleton-loader" />' },
         NuxtLink: { template: '<a><slot /></a>' },
       },
     },
@@ -162,5 +169,27 @@ describe('XwikiFullPageRenderer', () => {
 
     const sidebar = wrapper.get('.cms-page__sidebar')
     expect(sidebar.text()).toContain('Sidebar content')
+  })
+
+  it('renders hero media when an image is provided', async () => {
+    const wrapper = await mountComponent({ heroImage: 'https://cdn.example.com/hero.png' })
+
+    const media = wrapper.find('.cms-page__hero-media')
+    expect(media.exists()).toBe(true)
+
+    const image = wrapper.findComponent({ name: 'VImg' })
+    expect(image.exists()).toBe(true)
+    expect(image.props('src')).toBe('https://cdn.example.com/hero.png')
+  })
+
+  it('enables wide layout variant when requested', async () => {
+    const wrapper = await mountComponent({ layoutVariant: 'wide' }, {
+      sidebar: () => h('div', { 'data-test': 'sidebar-slot' }, 'Sidebar content'),
+    })
+
+    expect(wrapper.classes()).toContain('cms-page--wide')
+
+    const layout = wrapper.get('.cms-page__layout')
+    expect(layout.classes()).toContain('cms-page__layout--wide')
   })
 })
