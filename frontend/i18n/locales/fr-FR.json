@@ -83,6 +83,21 @@
       "guidesTitle": "Guides utiles",
       "postsTitle": "Articles associés"
     },
+    "guidePage": {
+      "breadcrumbs": {
+        "ariaLabel": "Fil d'Ariane des guides"
+      },
+      "navigation": {
+        "ariaLabel": "Naviguer entre les guides de cette catégorie",
+        "title": "Autres guides"
+      },
+      "cta": {
+        "title": "Retour à {category}",
+        "description": "Revenir à la page {category} pour parcourir toutes les ressources.",
+        "button": "Retour à {category}",
+        "imageAlt": "Illustration pour {category}"
+      }
+    },
     "ecoscorePage": {
       "breadcrumbLeaf": "impactscore",
       "description": "Nous préparons un contenu dédié au score éco pour {category}. Revenez bientôt !",

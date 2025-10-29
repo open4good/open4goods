@@ -83,6 +83,21 @@
       "guidesTitle": "Helpful guides",
       "postsTitle": "Related articles"
     },
+    "guidePage": {
+      "breadcrumbs": {
+        "ariaLabel": "Guide breadcrumb navigation"
+      },
+      "navigation": {
+        "ariaLabel": "Navigate between guides in this category",
+        "title": "More guides"
+      },
+      "cta": {
+        "title": "Back to {category}",
+        "description": "Return to the {category} overview to browse every resource.",
+        "button": "Back to {category}",
+        "imageAlt": "Illustration for {category}"
+      }
+    },
     "ecoscorePage": {
       "breadcrumbLeaf": "impactscore",
       "description": "We are crafting dedicated eco score insights for {category}. Check back soon!",
