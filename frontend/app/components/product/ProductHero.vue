@@ -26,13 +26,6 @@
         {{ brandModelLine }}
       </p>
 
-      <p
-        v-if="bestName && bestName !== heroTitle"
-        class="product-hero__name"
-      >
-        {{ bestName }}
-      </p>
-
       <ul v-if="popularAttributes.length" class="product-hero__attributes" role="list">
         <li
           v-for="attribute in popularAttributes"
