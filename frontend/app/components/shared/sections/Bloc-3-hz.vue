@@ -9,15 +9,13 @@
         md="4"
         class="pa-2 d-flex justify-center"
       >
-        <v-sheet
-          :color="section.color"
+        <img
+          :src="'https://placehold.co/' + section.width + 'x' + section.height"
           :height="section.height"
           :width="section.width"
           rounded="xl"
-          class="d-flex justify-center align-center"
+          class="d-flex justify-center align-center rounded-xl"
         >
-          <!-- Placeholder for section content -->
-        </v-sheet>
       </v-col>
     </v-row>
   </v-container>
@@ -45,6 +43,5 @@ withDefaults(
 </script>
 
 <style lang="sass" scoped>
-.container-section_bloc-3
-  min-height: 100vh
+
 </style>

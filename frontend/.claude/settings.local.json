@@ -7,7 +7,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(pnpm dev:*)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "mcp__figma__get_design_context",
+      "Bash(git checkout:*)",
+      "mcp__figma__get_metadata"
     ],
     "deny": [],
     "ask": []

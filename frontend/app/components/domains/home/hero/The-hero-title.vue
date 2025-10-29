@@ -13,7 +13,7 @@ const { t } = useI18n()
             {{ t('siteIdentity.hero.mainSubtitle') }}
         </h2>
         <div class="pt-2">
-            <TheSearchBar />
+            <The-search-cta />
         </div>
     </div>
 </template>

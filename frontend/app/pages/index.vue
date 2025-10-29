@@ -12,8 +12,21 @@ const toggleDrawer = () => {
 
     <The-section-items-slide />
 
-    <Bloc3Hz />
+    <Bloc-3-hz />
 
+    <The-bloc-text-image
+      image-src="https://placehold.co"
+      title="Main feature text"
+      subtitle="This is a subtitle"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+      ctaLabel="bouton"
+    />
+
+    <v-container>
+      <The-search-cta />
+    </v-container>
+
+    <The-bloc-features />
   </div>
 </template>
 
