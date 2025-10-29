@@ -639,6 +639,28 @@ const filtersToggleLabel = computed(() =>
 )
 const isFiltersColumnVisible = computed(() => isDesktop.value && !filtersCollapsed.value)
 
+const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
+const pageNumber = ref(0)
+const searchTerm = ref('')
+const sortField = ref<string | null>(null)
+const sortOrder = ref<'asc' | 'desc'>('desc')
+const activeSubsetIds = ref<string[]>([])
+const manualFilters = ref<FilterRequestDto>({})
+const impactExpanded = ref(false)
+const technicalExpanded = ref(false)
+const lastAppliedDefaultSort = ref<string | null>(null)
+
+type ManualFilterRemovalPayload = {
+  field: string
+  type: 'term' | 'range'
+  term: string | null
+}
+
+const hasActiveFilters = computed(
+  () => (manualFilters.value.filters?.length ?? 0) > 0 || activeSubsetIds.value.length > 0,
+)
+const showControls = computed(() => hasFastFilters.value || isDesktop.value || hasActiveFilters.value)
+
 const FILTERS_PANEL_STORAGE_KEY = 'category-page-filters-width'
 const DEFAULT_FILTERS_PANEL_WIDTH = 300
 const MIN_FILTERS_PANEL_WIDTH = 260
@@ -698,35 +720,6 @@ const filtersStyle = computed(() => {
     width: `${activeWidth}px`,
     maxWidth: `${width}px`,
   }
-})
-
-const updateControlsHeight = () => {
-  if (!isDesktop.value || !showControls.value || !controlsRef.value) {
-    controlsHeight.value = 0
-    return
-  }
-
-  controlsHeight.value = controlsRef.value.getBoundingClientRect().height
-}
-
-useResizeObserver(controlsRef, (entries) => {
-  if (!isDesktop.value || !showControls.value) {
-    return
-  }
-
-  const entry = entries[0]
-  if (entry) {
-    controlsHeight.value = entry.contentRect.height
-  }
-})
-
-watch(showControls, (visible) => {
-  if (!isDesktop.value || !visible) {
-    controlsHeight.value = 0
-    return
-  }
-
-  nextTick(() => updateControlsHeight())
 })
 
 let activePointerId: number | null = null
@@ -813,6 +806,34 @@ const onResizeHandlePointerDown = (event: PointerEvent) => {
   }
 }
 
+const updateControlsHeight = () => {
+  if (!isDesktop.value || !showControls.value || !controlsRef.value) {
+    controlsHeight.value = 0
+    return
+  }
+
+  controlsHeight.value = controlsRef.value.getBoundingClientRect().height
+}
+
+useResizeObserver(controlsRef, (entries) => {
+  if (!isDesktop.value || !showControls.value) {
+    return
+  }
+
+  const entry = entries[0]
+  if (entry) {
+    controlsHeight.value = entry.contentRect.height
+  }
+})
+
+watch(showControls, (visible) => {
+  if (!isDesktop.value || !visible) {
+    controlsHeight.value = 0
+    return
+  }
+
+  nextTick(() => updateControlsHeight())
+})
 
 watch(
   isDesktop,
@@ -851,28 +872,6 @@ watch(filtersCollapsed, (collapsed) => {
 const onToggleFiltersVisibility = () => {
   filtersCollapsed.value = !filtersCollapsed.value
 }
-
-const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
-const pageNumber = ref(0)
-const searchTerm = ref('')
-const sortField = ref<string | null>(null)
-const sortOrder = ref<'asc' | 'desc'>('desc')
-const activeSubsetIds = ref<string[]>([])
-const manualFilters = ref<FilterRequestDto>({})
-const impactExpanded = ref(false)
-const technicalExpanded = ref(false)
-const lastAppliedDefaultSort = ref<string | null>(null)
-
-type ManualFilterRemovalPayload = {
-  field: string
-  type: 'term' | 'range'
-  term: string | null
-}
-
-const hasActiveFilters = computed(
-  () => (manualFilters.value.filters?.length ?? 0) > 0 || activeSubsetIds.value.length > 0,
-)
-const showControls = computed(() => hasFastFilters.value || isDesktop.value || hasActiveFilters.value)
 
 const areFiltersEqual = (left: FilterRequestDto, right: FilterRequestDto): boolean => {
   const leftFilters = left.filters ?? []
