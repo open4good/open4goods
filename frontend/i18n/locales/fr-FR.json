@@ -1246,6 +1246,53 @@
       "title": "Nos partenaires et mentors"
     }
   },
+  "compare": {
+    "title": "Comparateur de produits",
+    "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.",
+    "alerts": {
+      "verticalMismatch": "Ces produits appartiennent à des catégories différentes. Certaines données ne sont pas comparables."
+    },
+    "states": {
+      "loading": "Chargement du comparateur…"
+    },
+    "empty": {
+      "title": "Ajoutez des produits pour commencer",
+      "description": "Depuis les pages produits ou catégories, utilisez le bouton comparer pour bâtir votre tableau."
+    },
+    "sections": {
+      "overview": "Vue d’ensemble",
+      "pricing": "Tarifs",
+      "ecological": "Impact écologique",
+      "technical": "Caractéristiques techniques",
+      "technicalGroupFallback": "Autres caractéristiques"
+    },
+    "a11y": {
+      "featureColumn": "Critères de comparaison"
+    },
+    "actions": {
+      "remove": "Retirer {name} de la comparaison",
+      "removeShort": "Retirer"
+    },
+    "textual": {
+      "description": "Description",
+      "pros": "Atouts",
+      "cons": "Limites",
+      "empty": "Non communiqué"
+    },
+    "pricing": {
+      "newPrice": "Meilleur prix neuf",
+      "occasionPrice": "Meilleur prix d’occasion",
+      "offersCount": "Nombre d’offres"
+    },
+    "ecological": {
+      "ecoscore": "Ecoscore",
+      "brandSustainability": "Durabilité de la marque",
+      "dataQuality": "Qualité des données"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger la comparaison. Actualisez la page et réessayez."
+    }
+  },
   "product": {
     "admin": {
       "subtitle": "Aperçu JSON complet du produit.",
