@@ -48,8 +48,8 @@ describe('ProductImpactEcoScoreCard', () => {
     })
 
     expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
-    expect(wrapper.text()).toContain('78.12')
-    expect(wrapper.text()).toContain('Absolute value')
+    expect(wrapper.text()).toContain('score:4.2')
+    expect(wrapper.text()).not.toContain('Absolute value')
   })
 
   it('renders a placeholder message when the score is missing', () => {
