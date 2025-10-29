@@ -1756,10 +1756,10 @@ const clearAllFilters = () => {
     will-change: transform
 
   &__fast-filters-toggle-icon--collapsed
-    transform: rotate(-90deg)
+    transform: rotate(90deg)
 
   &__fast-filters-toggle-icon--expanded
-    transform: rotate(90deg)
+    transform: rotate(-90deg)
 
   @media (prefers-reduced-motion: reduce)
     &__fast-filters-toggle-icon
