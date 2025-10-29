@@ -5,10 +5,28 @@ import type { Pinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import type { I18n } from 'vue-i18n'
 import { createVuetify } from 'vuetify'
-import { h, defineComponent } from 'vue'
+import { h, defineComponent, nextTick } from 'vue'
 import type { Component } from 'vue'
 import { useProductCompareStore } from '~/stores/useProductCompareStore'
 import type { ProductDto } from '~~/shared/api-client'
+
+const routerPush = vi.fn(async () => {})
+const routerReplace = vi.fn(async () => {})
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: routerPush,
+    replace: routerReplace,
+  }),
+  useRoute: () => ({
+    path: '/compare',
+    hash: '',
+  }),
+}))
+
+vi.mock('~~/shared/utils/localized-routes', () => ({
+  resolveLocalizedRoutePath: () => '/compare',
+}))
 
 vi.mock('~/composables/usePluralizedTranslation', () => ({
   usePluralizedTranslation: () => ({
@@ -96,6 +114,10 @@ const createProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
 
 describe('CategoryComparePanel', () => {
   beforeEach(() => {
+    routerPush.mockReset()
+    routerReplace.mockReset()
+    routerPush.mockResolvedValue(undefined)
+    routerReplace.mockResolvedValue(undefined)
     pinia = createPinia()
     setActivePinia(pinia)
     localStorage.clear()
@@ -184,7 +206,9 @@ const mountPanel = async () => {
     const firstRemoveButton = removeButtons[0]!
 
     await firstRemoveButton.trigger('click')
+    await nextTick()
     expect(store.items).toHaveLength(1)
+    expect(routerReplace).toHaveBeenCalled()
   })
 
   it('emits launch event when comparison is triggered', async () => {
@@ -201,9 +225,11 @@ const mountPanel = async () => {
     expect((launchButton.element as HTMLButtonElement).disabled).toBe(false)
 
     await launchButton.trigger('click')
+    await nextTick()
     const emitted = wrapper.emitted('launch-comparison') as unknown[][] | undefined
     expect(emitted).toBeTruthy()
     expect(emitted?.[0]?.[0]).toHaveLength(2)
+    expect(routerPush).toHaveBeenCalled()
   })
 
   it('links to the product detail page when a slug is available', async () => {

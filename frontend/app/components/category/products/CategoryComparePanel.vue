@@ -93,17 +93,24 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import { buildCompareHashFragment } from '~/utils/_compare-url'
 import { useProductCompareStore, type CompareListItem } from '~/stores/useProductCompareStore'
 
 const emit = defineEmits<{
   (event: 'launch-comparison', items: CompareListItem[]): void
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+const router = useRouter()
+const route = useRoute()
 
 const compareStore = useProductCompareStore()
 const { items, isCollapsed } = storeToRefs(compareStore)
+
+const comparePath = computed(() => resolveLocalizedRoutePath('compare', locale.value))
 
 const hasItems = computed(() => items.value.length > 0)
 
@@ -119,6 +126,15 @@ const toggleCollapse = () => {
 
 const remove = (id: string) => {
   compareStore.removeById(id)
+
+  if (route.path === comparePath.value) {
+    const hashFragment = buildCompareHashFragment(items.value.map((item) => item.gtin))
+    if (hashFragment) {
+      router.replace({ path: comparePath.value, hash: hashFragment })
+    } else {
+      router.replace({ path: comparePath.value })
+    }
+  }
 }
 
 const itemLink = (item: CompareListItem) => {
@@ -130,6 +146,14 @@ const launchComparison = () => {
     return
   }
 
+  const gtins = items.value.map((item) => item.gtin)
+  const hashFragment = buildCompareHashFragment(gtins)
+
+  if (!hashFragment) {
+    return
+  }
+
+  router.push({ path: comparePath.value, hash: hashFragment })
   emit('launch-comparison', [...items.value])
 }
 

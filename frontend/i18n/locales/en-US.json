@@ -1246,6 +1246,53 @@
       "title": "Our partners and mentors"
     }
   },
+  "compare": {
+    "title": "Product comparison",
+    "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",
+    "alerts": {
+      "verticalMismatch": "These products belong to different categories. Some metrics may not be comparable."
+    },
+    "states": {
+      "loading": "Loading product comparison…"
+    },
+    "empty": {
+      "title": "Add products to start comparing",
+      "description": "Use the compare buttons on product or category pages to build your comparison table."
+    },
+    "sections": {
+      "overview": "Overview",
+      "pricing": "Pricing",
+      "ecological": "Ecological impact",
+      "technical": "Technical attributes",
+      "technicalGroupFallback": "Additional specifications"
+    },
+    "a11y": {
+      "featureColumn": "Comparison criteria"
+    },
+    "actions": {
+      "remove": "Remove {name} from comparison",
+      "removeShort": "Remove"
+    },
+    "textual": {
+      "description": "Description",
+      "pros": "Pros",
+      "cons": "Cons",
+      "empty": "Not available"
+    },
+    "pricing": {
+      "newPrice": "Best new price",
+      "occasionPrice": "Best second-hand price",
+      "offersCount": "Offer count"
+    },
+    "ecological": {
+      "ecoscore": "Ecoscore",
+      "brandSustainability": "Brand sustainability",
+      "dataQuality": "Data quality"
+    },
+    "errors": {
+      "loadFailed": "We could not load the comparison. Please refresh and try again."
+    }
+  },
   "product": {
     "admin": {
       "subtitle": "Full JSON payload of the product.",

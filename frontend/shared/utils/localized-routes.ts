@@ -4,7 +4,8 @@ import { DEFAULT_NUXT_LOCALE } from './domain-language'
 const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
 
 export type LocalizedRouteName =
-   'partners'
+   'compare'
+   | 'partners'
    | 'team'
    | LocalizedWikiRouteName
 
@@ -58,6 +59,10 @@ const mapWikiRoutesToLocalizedPaths = <T extends Record<string, Record<NuxtLocal
 const LOCALIZED_WIKI_ROUTE_PATHS = mapWikiRoutesToLocalizedPaths(LOCALIZED_WIKI_PATHS)
 
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
+  compare: {
+    'fr-FR': '/comparer',
+    'en-US': '/compare',
+  },
   partners: {
     'fr-FR': '/partenaires',
     'en-US': '/partners',

@@ -14,7 +14,7 @@ export type CompareListBlockReason =
 
 export interface CompareListItem {
   id: string
-  gtin?: number
+  gtin: number
   slug?: string
   fullSlug?: string
   verticalId?: string | null
@@ -28,30 +28,11 @@ export interface CompareListActionResult {
 }
 
 const getProductIdentifier = (product: ProductDto): string | null => {
-  if (product.gtin != null) {
-    return String(product.gtin)
+  if (product.gtin == null) {
+    return null
   }
 
-  if (product.slug) {
-    return product.slug
-  }
-
-  if (product.fullSlug) {
-    return product.fullSlug
-  }
-
-  const fallbackParts = [
-    product.identity?.bestName,
-    product.identity?.model,
-    product.identity?.brand,
-    product.base?.bestName,
-  ].filter((part): part is string => Boolean(part))
-
-  if (fallbackParts.length > 0) {
-    return fallbackParts.join('|')
-  }
-
-  return null
+  return String(product.gtin)
 }
 
 const resolveProductName = (product: ProductDto): string => {
@@ -84,6 +65,13 @@ export const useProductCompareStore = defineStore('product-compare', () => {
     deep: true,
   })
   const isCollapsed = useLocalStorage<boolean>(COLLAPSE_STORAGE_KEY, false)
+
+  if (items.value.some((item) => item.gtin == null)) {
+    items.value = items.value
+      .filter((item): item is CompareListItem => item.gtin != null)
+      .map((item) => ({ ...item, gtin: Number(item.gtin) }))
+      .filter((item) => Number.isFinite(item.gtin))
+  }
 
   const referenceVerticalId = computed(() => {
     return items.value.find((item) => item.verticalId)?.verticalId ?? null
@@ -167,7 +155,7 @@ export const useProductCompareStore = defineStore('product-compare', () => {
 
     const newItem: CompareListItem = {
       id: identifier,
-      gtin: product.gtin,
+      gtin: product.gtin!,
       slug: product.slug,
       fullSlug: product.fullSlug ?? product.slug,
       verticalId: resolveProductVertical(product),
