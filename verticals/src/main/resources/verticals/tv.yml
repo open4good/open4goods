@@ -373,7 +373,6 @@ aggregationConfiguration:
 ecoFilters:
     - "REPAIRABILITY_INDEX" 
     - "CLASSE_ENERGY"   
-    - "ENERGY_CONSUMPTION_1000_HOURS"
 
 technicalFilters:
     - "DIAGONALE_POUCES"
