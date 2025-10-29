@@ -1,33 +1,45 @@
 <template>
-  <div class="cms-page">
+  <div class="cms-page" :class="{ 'cms-page--wide': isWideLayout }">
     <section class="cms-page__hero" role="banner">
       <v-container class="cms-page__hero-container" fluid>
-        <div class="cms-page__hero-content">
-          <CategoryNavigationBreadcrumbs
-            v-if="hasHeroBreadcrumbs"
-            v-bind="heroBreadcrumbProps"
-            class="cms-page__hero-breadcrumbs"
-          />
-
-          <h1 class="cms-page__hero-title">{{ pageTitle }}</h1>
-          <p v-if="metaDescription" class="cms-page__hero-description">
-            {{ metaDescription }}
-          </p>
-          <div class="cms-page__hero-actions">
-            <v-btn
-              v-if="canEdit"
-              :href="editLink || undefined"
-              target="_blank"
-              rel="noopener noreferrer"
-              prepend-icon="mdi-open-in-new"
-              variant="outlined"
-              color="white"
-              class="cms-page__edit-button"
-            >
-              {{ t('cms.page.edit') }}
-            </v-btn>
+        <v-sheet class="cms-page__hero-wrapper" elevation="0">
+          <div v-if="hasHeroImage" class="cms-page__hero-media" aria-hidden="true">
+            <v-img :src="heroImage" alt="" class="cms-page__hero-image" cover>
+              <template #placeholder>
+                <v-skeleton-loader type="image" class="cms-page__hero-image-placeholder" />
+              </template>
+            </v-img>
           </div>
-        </div>
+
+          <div class="cms-page__hero-content">
+            <CategoryNavigationBreadcrumbs
+              v-if="hasHeroBreadcrumbs"
+              v-bind="heroBreadcrumbProps"
+              class="cms-page__hero-breadcrumbs"
+            />
+
+            <div class="cms-page__hero-copy">
+              <h1 class="cms-page__hero-title">{{ effectivePageTitle }}</h1>
+              <p v-if="effectiveMetaDescription" class="cms-page__hero-description">
+                {{ effectiveMetaDescription }}
+              </p>
+              <div class="cms-page__hero-actions">
+                <v-btn
+                  v-if="canEdit"
+                  :href="editLink || undefined"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  prepend-icon="mdi-open-in-new"
+                  variant="outlined"
+                  color="white"
+                  class="cms-page__edit-button"
+                >
+                  {{ t('cms.page.edit') }}
+                </v-btn>
+              </div>
+            </div>
+          </div>
+        </v-sheet>
       </v-container>
     </section>
 
@@ -48,7 +60,10 @@
     >
       <div
         class="cms-page__layout"
-        :class="{ 'cms-page__layout--with-sidebar': hasSidebar }"
+        :class="{
+          'cms-page__layout--with-sidebar': hasSidebar,
+          'cms-page__layout--wide': isWideLayout,
+        }"
       >
         <aside v-if="hasSidebar" class="cms-page__sidebar">
           <slot name="sidebar" />
@@ -92,6 +107,8 @@ const props = defineProps<{
   fallbackTitle?: string | null
   fallbackDescription?: string | null
   breadcrumbs?: BreadcrumbInput[] | null
+  heroImage?: string | null
+  layoutVariant?: 'default' | 'wide'
 }>()
 
 const { t } = useI18n()
@@ -146,6 +163,10 @@ const heroBreadcrumbProps = computed(() => ({
 
 const hasSidebar = computed(() => Boolean(slots.sidebar))
 
+const isWideLayout = computed(() => (props.layoutVariant ?? 'default') === 'wide')
+const heroImage = computed(() => props.heroImage?.trim() ?? '')
+const hasHeroImage = computed(() => heroImage.value.length > 0)
+
 const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])
 const canEdit = computed(() => {
@@ -156,9 +177,14 @@ const canEdit = computed(() => {
 const containerClass = computed(() => [
   'cms-page__container',
   `cms-page__container--${width.value}`,
+  { 'cms-page__container--wide': isWideLayout.value },
 ])
 
 const containerMaxWidth = computed(() => {
+  if (isWideLayout.value) {
+    return undefined
+  }
+
   switch (width.value) {
     case 'container':
       return 'lg'
@@ -169,7 +195,9 @@ const containerMaxWidth = computed(() => {
   }
 })
 
-const isFluidContainer = computed(() => width.value === 'container-fluid')
+const isFluidContainer = computed(
+  () => isWideLayout.value || width.value === 'container-fluid',
+)
 
 useSeoMeta({
   title: () => metaTitle.value || effectivePageTitle.value,
@@ -213,6 +241,30 @@ useSeoMeta({
   position: relative
   z-index: 1
 
+.cms-page__hero-wrapper
+  position: relative
+  display: grid
+  grid-template-columns: minmax(0, 1fr)
+  gap: 1.5rem
+  overflow: hidden
+  min-height: clamp(180px, 28vw, 260px)
+  background: inherit
+  border-radius: clamp(18px, 3vw, 28px)
+  color: inherit
+
+.cms-page__hero-media
+  display: none
+  position: relative
+  align-items: center
+  justify-content: center
+  border-radius: clamp(16px, 3vw, 24px)
+  overflow: hidden
+
+.cms-page__hero-image,
+.cms-page__hero-image-placeholder
+  width: 100%
+  height: 100%
+
 .cms-page__hero-content
   display: flex
   flex-direction: column
@@ -223,9 +275,32 @@ useSeoMeta({
 .cms-page__hero-breadcrumbs
   color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
 
+  :deep(.category-navigation-breadcrumbs)
+    color: inherit
+
+  :deep(.category-navigation-breadcrumbs__separator)
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.6)
+
+  :deep(.category-navigation-breadcrumbs__current)
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+
+  :deep(.category-navigation-breadcrumbs__link)
+    color: inherit
+
+  :deep(.category-navigation-breadcrumbs__link:hover),
+  :deep(.category-navigation-breadcrumbs__link:focus-visible)
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+    text-decoration: underline
+
+.cms-page__hero-copy
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+  align-items: flex-start
+
 .cms-page__hero-title
   margin: 0
-  font-size: clamp(2.25rem, 4vw, 3.5rem)
+  font-size: clamp(2.25rem, 4vw, 3.25rem)
   font-weight: 700
   line-height: 1.1
 
@@ -249,13 +324,23 @@ useSeoMeta({
   width: min(900px, 90vw)
 
 .cms-page__container
-  padding-block: clamp(1rem, 1vw, 1rem)
+  padding-block: clamp(1.25rem, 2vw, 2rem)
+  padding-inline: clamp(1rem, 4vw, 3rem)
+  margin-inline: auto
 
 .cms-page__container--container
   max-width: min(960px, 100%) !important
 
 .cms-page__container--container-semi-fluid
-  max-width: min(1100px, 92vw) !important
+  max-width: min(1560px, 100%) !important
+
+.cms-page__container--wide
+  max-width: min(1560px, 100%) !important
+
+.cms-page--wide .cms-page__hero-container,
+.cms-page--wide .cms-page__container
+  max-width: min(1560px, 100%)
+  margin-inline: auto
 
 .cms-page__layout
   display: grid
@@ -287,6 +372,13 @@ useSeoMeta({
   gap: 1.5rem
 
 @media (min-width: 960px)
+  .cms-page__hero-wrapper
+    grid-template-columns: clamp(200px, 22vw, 320px) minmax(0, 1fr)
+    gap: clamp(1.25rem, 3vw, 3rem)
+
+  .cms-page__hero-media
+    display: flex
+
   .cms-page__layout
     gap: 2.5rem
 
@@ -294,6 +386,23 @@ useSeoMeta({
     grid-template-columns: clamp(220px, 26vw, 320px) minmax(0, 1fr)
     align-items: start
 
+  .cms-page__layout--with-sidebar.cms-page__layout--wide
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr)
+    column-gap: clamp(1.5rem, 3vw, 2rem)
+
   .cms-page__sidebar
+    order: 0
+
+@media (min-width: 1280px)
+  .cms-page__layout--with-sidebar.cms-page__layout--wide
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr)
+    column-gap: clamp(1.75rem, 3vw, 2.5rem)
+
+@media (max-width: 959px)
+  .cms-page__hero-wrapper
+    border-radius: clamp(12px, 4vw, 20px)
+
+  .cms-page__sidebar
+    margin-bottom: 1.5rem
     order: 0
 </style>

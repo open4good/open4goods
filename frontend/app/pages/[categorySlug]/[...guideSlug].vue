@@ -216,6 +216,21 @@ const shouldDisplaySidebar = computed(
     ),
 )
 
+const categoryImage = computed(() => {
+  const sources = [
+    categoryDetail.imageLarge,
+    categoryDetail.imageMedium,
+    categoryDetail.imageSmall,
+  ]
+
+  const resolved = sources
+    .map((source) => source?.trim())
+    .filter((source): source is string => Boolean(source && source.length))
+    .at(0)
+
+  return resolved ?? null
+})
+
 const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
   const base = (categoryDetail.breadCrumb ?? []).map((item) => ({ ...item }))
   const guideLeaf = truncatedGuideTitle.value
@@ -235,6 +250,8 @@ const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
     :fallback-title="fallbackTitle"
     :fallback-description="fallbackDescription"
     :breadcrumbs="heroBreadcrumbs"
+    :hero-image="categoryImage"
+    layout-variant="wide"
   >
     <template v-if="shouldDisplaySidebar" #sidebar>
       <GuideStickySidebar
