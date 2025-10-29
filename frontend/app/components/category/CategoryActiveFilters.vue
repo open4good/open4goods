@@ -1,5 +1,9 @@
 <template>
-  <div class="category-active-filters" data-testid="category-active-filters">
+  <div
+    v-if="hasChips"
+    class="category-active-filters"
+    data-testid="category-active-filters"
+  >
     <div class="category-active-filters__chips">
       <v-chip
         v-for="chip in chips"
@@ -148,6 +152,8 @@ const chips = computed<ActiveFilterChip[]>(() => {
   return [...subsetFilterChips.value, ...manualFilterChips.value]
 })
 
+const hasChips = computed(() => chips.value.length > 0)
+
 const dismissAllLabel = computed(() => t('category.filters.clearAll'))
 const dismissAllTooltip = computed(() => t('category.filters.tooltips.clearAll'))
 
@@ -178,17 +184,21 @@ defineExpose({
 <style scoped lang="sass">
 .category-active-filters
   display: flex
-  align-items: stretch
+  flex-wrap: wrap
+  align-items: center
   gap: 0.75rem
+  width: 100%
   padding: 0.75rem 1rem
   border-radius: 1rem
   background: rgba(var(--v-theme-surface-primary-080), 0.9)
   box-shadow: 0 18px 38px -28px rgba(var(--v-theme-shadow-primary-600), 0.25)
 
   &__chips
-    flex: 1 1 auto
+    flex: 1 1 220px
+    min-width: 0
     display: flex
     flex-wrap: wrap
+    align-items: center
     gap: 0.5rem
 
   &__chip
@@ -198,14 +208,20 @@ defineExpose({
     flex: 0 0 auto
     display: flex
     align-items: center
+    margin-left: auto
 
   &__dismiss
     color: rgb(var(--v-theme-primary))
 
-  @media (max-width: 959px)
+  @media (max-width: 599px)
     flex-direction: column
     align-items: stretch
 
+    &__chips
+      width: 100%
+
     &__actions
+      width: 100%
       justify-content: flex-end
+      margin-left: 0
 </style>

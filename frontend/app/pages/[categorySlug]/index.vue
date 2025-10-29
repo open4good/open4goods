@@ -49,16 +49,18 @@
           />
         </div>
 
-        <CategoryActiveFilters
-          v-if="hasActiveFilters"
-          class="category-page__active-filters"
-          :filter-options="filterOptions"
-          :filters="manualFilters"
-          :subset-clauses="activeSubsetClauses"
-          @remove-manual-filter="onRemoveManualFilter"
-          @remove-subset-clause="onRemoveSubsetClause"
-          @clear-all="clearAllFilters"
-        />
+        <v-expand-transition>
+          <div v-if="hasActiveFilters" class="category-page__active-filters">
+            <CategoryActiveFilters
+              :filter-options="filterOptions"
+              :filters="manualFilters"
+              :subset-clauses="activeSubsetClauses"
+              @remove-manual-filter="onRemoveManualFilter"
+              @remove-subset-clause="onRemoveSubsetClause"
+              @clear-all="clearAllFilters"
+            />
+          </div>
+        </v-expand-transition>
       </div>
 
       <div ref="layoutRef" class="category-page__layout" :style="layoutStyle">
@@ -1781,7 +1783,7 @@ const clearAllFilters = () => {
     box-shadow: 0 20px 40px -32px rgba(var(--v-theme-shadow-primary-600), 0.35)
 
   &__active-filters
-    margin-top: 0.5rem
+    width: 100%
 
   &__toolbar
     display: flex

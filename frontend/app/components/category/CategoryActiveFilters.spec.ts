@@ -144,6 +144,23 @@ describe('CategoryActiveFilters', () => {
       },
     })
 
+  const mountWithNoChips = () =>
+    mount(CategoryActiveFilters, {
+      props: {
+        filterOptions,
+        filters: {},
+        subsetClauses: [],
+      },
+      global: {
+        stubs: {
+          VChip: VChipStub,
+          VBtn: VBtnStub,
+          VIcon: VIconStub,
+          VTooltip: VTooltipStub,
+        },
+      },
+    })
+
   it('renders subset and manual filter chips and emits removal events', () => {
     const wrapper = mountComponent()
 
@@ -167,5 +184,11 @@ describe('CategoryActiveFilters', () => {
     wrapper.get('.v-btn-stub').trigger('click')
 
     expect(wrapper.emitted('clear-all')).toBeTruthy()
+  })
+
+  it('hides the container when no filters or subsets are active', () => {
+    const wrapper = mountWithNoChips()
+
+    expect(wrapper.find('[data-testid="category-active-filters"]').exists()).toBe(false)
   })
 })
