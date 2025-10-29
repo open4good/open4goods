@@ -2,7 +2,13 @@
   <div class="cms-page">
     <section class="cms-page__hero" role="banner">
       <v-container class="cms-page__hero-container" fluid>
-        <div class="text-center cms-page__hero-content">
+        <div class="cms-page__hero-content">
+          <CategoryNavigationBreadcrumbs
+            v-if="hasHeroBreadcrumbs"
+            v-bind="heroBreadcrumbProps"
+            class="cms-page__hero-breadcrumbs"
+          />
+
           <h1 class="cms-page__hero-title">{{ pageTitle }}</h1>
           <p v-if="metaDescription" class="cms-page__hero-description">
             {{ metaDescription }}
@@ -40,39 +46,57 @@
       :max-width="containerMaxWidth"
       :fluid="isFluidContainer"
     >
-      <v-sheet class="cms-page__content" elevation="0" rounded="xl">
-        <div v-if="error" class="cms-page__error" role="alert">
-          <v-alert type="error" variant="tonal" border="start" prominent>
-            {{ t('cms.page.error') }}
-          </v-alert>
-          <v-btn color="primary" variant="tonal" @click="refresh">
-            {{ t('common.actions.retry') }}
-          </v-btn>
-        </div>
+      <div
+        class="cms-page__layout"
+        :class="{ 'cms-page__layout--with-sidebar': hasSidebar }"
+      >
+        <aside v-if="hasSidebar" class="cms-page__sidebar">
+          <slot name="sidebar" />
+        </aside>
 
-        <div v-else class="cms-page__html" role="article" aria-label="CMS content">
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="xwiki-sandbox" v-html="htmlContent" />
-        </div>
-      </v-sheet>
+        <v-sheet class="cms-page__content" elevation="0" rounded="xl">
+          <div v-if="error" class="cms-page__error" role="alert">
+            <v-alert type="error" variant="tonal" border="start" prominent>
+              {{ t('cms.page.error') }}
+            </v-alert>
+            <v-btn color="primary" variant="tonal" @click="refresh">
+              {{ t('common.actions.retry') }}
+            </v-btn>
+          </div>
+
+          <div v-else class="cms-page__html" role="article" aria-label="CMS content">
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div class="xwiki-sandbox" v-html="htmlContent" />
+          </div>
+        </v-sheet>
+      </div>
     </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
+import { useI18n } from 'vue-i18n'
 import '~/assets/css/text-content.css'
+import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import { useFullPage } from '~/composables/cms/useFullPage'
 import { useAuth } from '~/composables/useAuth'
+
+type BreadcrumbInput = {
+  title?: string | null
+  link?: string | null
+}
 
 const props = defineProps<{
   pageId: string | null
   fallbackTitle?: string | null
   fallbackDescription?: string | null
+  breadcrumbs?: BreadcrumbInput[] | null
 }>()
 
 const { t } = useI18n()
 const config = useRuntimeConfig()
+const slots = useSlots()
 
 const resolvedPageId = computed(() => props.pageId?.trim() ?? null)
 
@@ -96,6 +120,31 @@ const effectivePageTitle = computed(() => pageTitle.value || props.fallbackTitle
 const effectiveMetaDescription = computed(
   () => metaDescription.value || props.fallbackDescription || '',
 )
+
+const rawBreadcrumbs = computed(() => props.breadcrumbs ?? [])
+
+const heroBreadcrumbs = computed(() => {
+  const items = rawBreadcrumbs.value
+    .map((item) => ({
+      title: item?.title?.trim() ?? '',
+      link: item?.link?.trim() ?? '',
+    }))
+    .filter((item) => item.title.length)
+
+  return items.map((item, index) => ({
+    title: item.title,
+    link: index === items.length - 1 ? undefined : item.link || undefined,
+  }))
+})
+
+const hasHeroBreadcrumbs = computed(() => heroBreadcrumbs.value.length > 0)
+
+const heroBreadcrumbProps = computed(() => ({
+  items: heroBreadcrumbs.value,
+  ariaLabel: t('category.hero.breadcrumbAriaLabel'),
+}))
+
+const hasSidebar = computed(() => Boolean(slots.sidebar))
 
 const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])
@@ -168,6 +217,11 @@ useSeoMeta({
   display: flex
   flex-direction: column
   gap: 1rem
+  align-items: flex-start
+  text-align: left
+
+.cms-page__hero-breadcrumbs
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
 
 .cms-page__hero-title
   margin: 0
@@ -203,6 +257,16 @@ useSeoMeta({
 .cms-page__container--container-semi-fluid
   max-width: min(1100px, 92vw) !important
 
+.cms-page__layout
+  display: grid
+  gap: 1.5rem
+
+.cms-page__layout--with-sidebar
+  grid-template-columns: minmax(0, 1fr)
+
+.cms-page__sidebar
+  order: -1
+
 .cms-page__content
   padding: clamp(1.75rem, 3vw, 3rem)
   background: rgb(var(--v-theme-surface-glass))
@@ -221,4 +285,15 @@ useSeoMeta({
   display: flex
   flex-direction: column
   gap: 1.5rem
+
+@media (min-width: 960px)
+  .cms-page__layout
+    gap: 2.5rem
+
+  .cms-page__layout--with-sidebar
+    grid-template-columns: clamp(220px, 26vw, 320px) minmax(0, 1fr)
+    align-items: start
+
+  .cms-page__sidebar
+    order: 0
 </style>
