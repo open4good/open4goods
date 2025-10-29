@@ -14,40 +14,53 @@
         v-if="hasFastFilters || isDesktop"
         class="category-page__fast-filters mb-6"
       >
-        <v-tooltip v-if="isDesktop" :text="filtersToggleLabel">
-          <template #activator="{ props: tooltipProps }">
-            <v-btn
-              class="category-page__fast-filters-toggle"
-              :class="{
-                'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
-                'category-page__fast-filters-toggle--expanded': !filtersCollapsed,
-              }"
-              icon
-              variant="text"
-              v-bind="tooltipProps"
-              :aria-label="filtersToggleLabel"
-              :aria-pressed="(!filtersCollapsed).toString()"
-              @click="onToggleFiltersVisibility"
-            >
-              <v-icon
-                icon="mdi-filter-variant"
-                size="40"
-                class="category-page__fast-filters-toggle-icon"
+        <div class="category-page__fast-filters-row">
+          <v-tooltip v-if="isDesktop" :text="filtersToggleLabel">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                class="category-page__fast-filters-toggle"
                 :class="{
-                  'category-page__fast-filters-toggle-icon--collapsed': filtersCollapsed,
-                  'category-page__fast-filters-toggle-icon--expanded': !filtersCollapsed,
+                  'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
+                  'category-page__fast-filters-toggle--expanded': !filtersCollapsed,
                 }"
-              />
-            </v-btn>
-          </template>
-        </v-tooltip>
+                icon
+                variant="text"
+                v-bind="tooltipProps"
+                :aria-label="filtersToggleLabel"
+                :aria-pressed="(!filtersCollapsed).toString()"
+                @click="onToggleFiltersVisibility"
+              >
+                <v-icon
+                  icon="mdi-filter-variant"
+                  size="40"
+                  class="category-page__fast-filters-toggle-icon"
+                  :class="{
+                    'category-page__fast-filters-toggle-icon--collapsed': filtersCollapsed,
+                    'category-page__fast-filters-toggle-icon--expanded': !filtersCollapsed,
+                  }"
+                />
+              </v-btn>
+            </template>
+          </v-tooltip>
 
-        <CategoryFastFilters
-          class="category-page__fast-filters-groups"
-          :subsets="category.subsets ?? []"
-          :active-subset-ids="activeSubsetIds"
-          @toggle-subset="onToggleSubset"
-          @reset="onResetSubsets"
+          <CategoryFastFilters
+            class="category-page__fast-filters-groups"
+            :subsets="category.subsets ?? []"
+            :active-subset-ids="activeSubsetIds"
+            @toggle-subset="onToggleSubset"
+            @reset="onResetSubsets"
+          />
+        </div>
+
+        <CategoryActiveFilters
+          v-if="hasActiveFilters"
+          class="category-page__active-filters"
+          :filters="manualFilters"
+          :subset-clauses="activeSubsetClauses"
+          :field-metadata="filterFieldMap"
+          @remove-filter="onRemoveManualFilter"
+          @remove-subset-clause="onRemoveSubsetClause"
+          @clear-all="clearAllFilters"
         />
       </div>
 
@@ -72,13 +85,11 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :subset-clauses="activeSubsetClauses"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
               @apply-mobile="applyMobileFilters"
               @clear-mobile="clearAllFilters"
-              @remove-subset-clause="onRemoveSubsetClause"
             />
           </v-navigation-drawer>
         </template>
@@ -107,11 +118,9 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :subset-clauses="activeSubsetClauses"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
-              @remove-subset-clause="onRemoveSubsetClause"
             />
           </aside>
 
@@ -335,6 +344,7 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client'
 
+import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
@@ -987,6 +997,11 @@ const activeSubsetClauses = computed<CategorySubsetClause[]>(() => {
       label: buildSubsetClauseLabel(filter),
     }))
   })
+})
+
+const hasActiveFilters = computed(() => {
+  const manualCount = manualFilters.value.filters?.length ?? 0
+  return manualCount > 0 || activeSubsetClauses.value.length > 0
 })
 
 const combinedFilters = computed<FilterRequestDto | undefined>(() => {
@@ -1654,6 +1669,22 @@ const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   manualFilters.value = merged.length ? { filters: merged } : {}
 }
 
+const onRemoveManualFilter = (field: string, type: 'term' | 'range', term: string | null) => {
+  const next = (manualFilters.value.filters ?? []).filter((filter) => {
+    if (filter.field !== field) {
+      return true
+    }
+
+    if (type === 'term') {
+      return !(filter.operator === 'term' && filter.terms?.includes(term ?? ''))
+    }
+
+    return filter.operator !== 'range'
+  })
+
+  manualFilters.value = next.length ? { filters: next } : {}
+}
+
 const onResetSubsets = () => {
   activeSubsetIds.value = []
 }
@@ -1710,6 +1741,11 @@ const clearAllFilters = () => {
     width: 100%
 
   &__fast-filters
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+
+  &__fast-filters-row
     display: flex
     align-items: center
     gap: 0.75rem
@@ -1768,6 +1804,9 @@ const clearAllFilters = () => {
   &__fast-filters-groups
     flex: 1 1 auto
     min-width: 0
+
+  &__active-filters
+    width: 100%
 
   &__search
     position: relative

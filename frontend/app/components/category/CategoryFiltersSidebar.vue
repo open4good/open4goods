@@ -7,11 +7,9 @@
       :filters="props.filters"
       :impact-expanded="props.impactExpanded"
       :technical-expanded="props.technicalExpanded"
-      :subset-clauses="props.subsetClauses"
       @update:filters="(value) => emit('update:filters', value)"
       @update:impact-expanded="(value) => emit('update:impactExpanded', value)"
       @update:technical-expanded="(value) => emit('update:technicalExpanded', value)"
-      @remove-subset-clause="(clause) => emit('remove-subset-clause', clause)"
     />
 
     <div v-if="showMobileActions" class="category-page__filters-actions">
@@ -55,8 +53,6 @@ import type {
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
 import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
 import CategoryEcoscoreCard from './CategoryEcoscoreCard.vue'
-import type { CategorySubsetClause } from '~/types/category-subset'
-
 const props = withDefaults(
   defineProps<{
     filterOptions: ProductFieldOptionsResponse | null
@@ -70,7 +66,6 @@ const props = withDefaults(
     wikiPages: WikiPageConfig[]
     relatedPosts: BlogPostDto[]
     verticalHomeUrl?: string | null
-    subsetClauses: CategorySubsetClause[]
   }>(),
   {
     baselineAggregations: () => [],
@@ -84,7 +79,6 @@ const emit = defineEmits<{
   'update:technicalExpanded': [boolean]
   'apply-mobile': []
   'clear-mobile': []
-  'remove-subset-clause': [CategorySubsetClause]
 }>()
 
 const { t } = useI18n()

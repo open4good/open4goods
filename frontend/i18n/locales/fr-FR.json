@@ -198,6 +198,8 @@
       "hideImpact": "Masquer les filtres d'impact",
       "hideTechnical": "Masquer les filtres techniques",
       "impactTitle": "Filtres d'impact",
+      "activeTitle": "Filtres actifs",
+      "clearAllTooltip": "Effacer tous les filtres",
       "missingLabel": "Option sans libellé",
       "mobileApply": "Appliquer les filtres",
       "mobileClear": "Effacer les filtres",
