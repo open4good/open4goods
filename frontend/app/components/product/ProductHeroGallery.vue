@@ -944,12 +944,22 @@ onBeforeUnmount(() => {
 }
 
 .product-gallery__lightbox {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+.product-gallery__lightbox :deep(.my-gallery) {
   position: absolute;
   width: 1px;
   height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
 }
 
 .product-gallery__sr-only {
