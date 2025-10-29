@@ -82,7 +82,7 @@
     "documentation": {
       "guidesTitle": "Guides utiles",
       "postsTitle": "Articles associés",
-      "backToCategory": "Retour à {category}",
+      "backToCategory": "Retour aux {category}",
       "sidebarAria": "Navigation de documentation pour {category}",
       "guidesAria": "Autres guides pour {category}",
       "postsAria": "Articles de blog liés à {category}"
