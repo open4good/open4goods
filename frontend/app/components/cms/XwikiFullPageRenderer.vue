@@ -248,8 +248,7 @@ useSeoMeta({
   gap: 1.5rem
   overflow: hidden
   min-height: clamp(180px, 28vw, 260px)
-  padding: clamp(1.75rem, 4vw, 3rem)
-  background: rgba(var(--v-theme-hero-overlay-soft), 0.08)
+  background: inherit
   border-radius: clamp(18px, 3vw, 28px)
   color: inherit
 
@@ -258,7 +257,6 @@ useSeoMeta({
   position: relative
   align-items: center
   justify-content: center
-  background: rgba(var(--v-theme-hero-overlay-soft), 0.12)
   border-radius: clamp(16px, 3vw, 24px)
   overflow: hidden
 
@@ -334,7 +332,7 @@ useSeoMeta({
   max-width: min(960px, 100%) !important
 
 .cms-page__container--container-semi-fluid
-  max-width: min(1100px, 92vw) !important
+  max-width: min(1560px, 100%) !important
 
 .cms-page__container--wide
   max-width: min(1560px, 100%) !important
