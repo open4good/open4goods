@@ -7,7 +7,13 @@
     <meta itemprop="sku" :content="String(product.base?.gtin ?? '')" />
     <meta itemprop="brand" :content="product.identity?.brand ?? ''" />
 
-    <ProductHeroGallery class="product-hero__gallery" :product="product" :title="title" />
+    <header v-if="heroTitle" class="product-hero__heading">
+      <h1 class="product-hero__title" itemprop="name">
+        {{ heroTitle }}
+      </h1>
+    </header>
+
+    <ProductHeroGallery class="product-hero__gallery" :product="product" :title="heroTitle" />
 
     <div class="product-hero__details">
       <CategoryNavigationBreadcrumbs
@@ -15,10 +21,6 @@
         v-bind="heroBreadcrumbProps"
         class="product-hero__breadcrumbs"
       />
-
-      <h1 v-if="bestName" class="product-hero__title" itemprop="name">
-        {{ bestName }}
-      </h1>
 
       <p v-if="brandModelLine" class="product-hero__brand-line">
         {{ brandModelLine }}
@@ -123,17 +125,39 @@ const props = defineProps({
 
 const { t, te, n } = useI18n()
 
-const title = computed(
-  () =>
-    props.product.names?.h1Title ??
-    props.product.identity?.bestName ??
-    props.product.base?.bestName ??
-    '',
-)
+const normalizeString = (value: string | null | undefined) =>
+  typeof value === 'string' ? value.trim() : ''
 
-const bestName = computed(() =>
-  props.product.identity?.bestName ?? props.product.base?.bestName ?? title.value,
-)
+const fallbackTitle = computed(() => {
+  const medium = normalizeString(props.product.names?.h1Title)
+  const identity = normalizeString(props.product.identity?.bestName)
+  const base = normalizeString(props.product.base?.bestName)
+
+  return medium || identity || base || ''
+})
+
+const bestName = computed(() => {
+  const identity = normalizeString(props.product.identity?.bestName)
+  if (identity) {
+    return identity
+  }
+
+  const base = normalizeString(props.product.base?.bestName)
+  if (base) {
+    return base
+  }
+
+  return fallbackTitle.value
+})
+
+const heroTitle = computed(() => {
+  const aiTitle = normalizeString(props.product.aiReview?.review?.mediumTitle)
+  if (aiTitle) {
+    return aiTitle
+  }
+
+  return fallbackTitle.value || bestName.value
+})
 
 const brandModelLine = computed(() => {
   const brand = props.product.identity?.brand?.trim()
@@ -198,7 +222,8 @@ const compareButtonTitle = computed(() => {
 })
 
 const compareButtonAriaLabel = computed(() => {
-  const productName = title.value || props.product.identity?.bestName || props.product.base?.bestName
+  const productName =
+    heroTitle.value || props.product.identity?.bestName || props.product.base?.bestName
 
   if (isCompareSelected.value) {
     if (te('product.hero.compare.ariaSelected')) {
@@ -236,7 +261,7 @@ const toggleCompare = () => {
 }
 
 const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
-  const normalizedProductTitle = title.value.trim().toLowerCase()
+  const normalizedProductTitle = heroTitle.value.trim().toLowerCase()
   const normalizedProductSlug = (props.product.fullSlug ?? props.product.slug ?? '').trim().toLowerCase()
 
   return props.breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, breadcrumb) => {
@@ -338,11 +363,18 @@ const impactScore = computed(() => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
+.product-hero__heading {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
 .product-hero__title {
   font-size: clamp(2rem, 2.8vw, 3rem);
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__details {
@@ -357,17 +389,24 @@ const impactScore = computed(() => {
   margin: 0;
 }
 
-.product-hero__attributes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.5rem 1.25rem;
-  padding: 0;
+.product-hero__name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
   margin: 0;
+}
+
+.product-hero__attributes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0 0 1.25rem;
   list-style: none;
 }
 
 .product-hero__attribute {
-  display: inline-flex;
+  display: flex;
   align-items: baseline;
   gap: 0.35rem;
   font-size: 0.95rem;

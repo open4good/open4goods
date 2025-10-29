@@ -38,42 +38,77 @@
             </div>
           </button>
 
-          <ul class="product-gallery__thumbnails" role="list">
-            <li
-              v-for="(item, index) in galleryItems"
-              :key="item.id"
-              class="product-gallery__thumbnail"
+          <div
+            class="product-gallery__thumbnails"
+            :class="{ 'product-gallery__thumbnails--nav': showThumbnailNavigation }"
+            role="group"
+            :aria-label="thumbnailGroupLabel"
+          >
+            <button
+              v-if="showThumbnailNavigation"
+              type="button"
+              class="product-gallery__thumbnails-arrow product-gallery__thumbnails-arrow--prev"
+              :aria-label="previousThumbnailsLabel"
+              :disabled="!canScrollThumbnailsLeft"
+              @click="scrollThumbnails('left')"
             >
-              <button
-                type="button"
-                class="product-gallery__thumbnail-button"
-                :class="{ 'product-gallery__thumbnail-button--active': index === activeMediaIndex }"
-                data-testid="product-gallery-thumbnail"
-                :aria-label="thumbnailAriaLabel(item, index)"
-                :aria-pressed="index === activeMediaIndex"
-                @click="setActiveMedia(index)"
-                @dblclick="openGallery(index)"
-                @keydown.enter.prevent="openGallery(index)"
-                @keydown.space.prevent="openGallery(index)"
-              >
-                <NuxtImg
-                  :src="item.thumbnailUrl"
-                  :alt="item.alt"
-                  class="product-gallery__thumbnail-image"
-                  format="webp"
-                  :width="item.thumbnailWidth"
-                  :height="item.thumbnailHeight"
-                />
-                <span
-                  v-if="item.type === 'video'"
-                  class="product-gallery__thumbnail-badge"
-                  aria-hidden="true"
+              <v-icon icon="mdi-chevron-left" size="22" />
+            </button>
+
+            <div
+              ref="thumbnailViewport"
+              class="product-gallery__thumbnails-viewport"
+              @scroll="handleThumbnailScroll"
+            >
+              <ul ref="thumbnailList" class="product-gallery__thumbnails-list" role="list">
+                <li
+                  v-for="(item, index) in galleryItems"
+                  :key="item.id"
+                  class="product-gallery__thumbnail"
                 >
-                  <v-icon icon="mdi-video-outline" size="18" />
-                </span>
-              </button>
-            </li>
-          </ul>
+                  <button
+                    type="button"
+                    class="product-gallery__thumbnail-button"
+                    :class="{ 'product-gallery__thumbnail-button--active': index === activeMediaIndex }"
+                    data-testid="product-gallery-thumbnail"
+                    :aria-label="thumbnailAriaLabel(item, index)"
+                    :aria-pressed="index === activeMediaIndex"
+                    @click="setActiveMedia(index)"
+                    @dblclick="openGallery(index)"
+                    @keydown.enter.prevent="openGallery(index)"
+                    @keydown.space.prevent="openGallery(index)"
+                  >
+                    <NuxtImg
+                      :src="item.thumbnailUrl"
+                      :alt="item.alt"
+                      class="product-gallery__thumbnail-image"
+                      format="webp"
+                      :width="item.thumbnailWidth"
+                      :height="item.thumbnailHeight"
+                    />
+                    <span
+                      v-if="item.type === 'video'"
+                      class="product-gallery__thumbnail-badge"
+                      aria-hidden="true"
+                    >
+                      <v-icon icon="mdi-video-outline" size="18" />
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              v-if="showThumbnailNavigation"
+              type="button"
+              class="product-gallery__thumbnails-arrow product-gallery__thumbnails-arrow--next"
+              :aria-label="nextThumbnailsLabel"
+              :disabled="!canScrollThumbnailsRight"
+              @click="scrollThumbnails('right')"
+            >
+              <v-icon icon="mdi-chevron-right" size="22" />
+            </button>
+          </div>
 
           <div v-if="pictureSwipeComponent" ref="pictureSwipeContainer" class="product-gallery__lightbox">
             <component
@@ -114,6 +149,7 @@
 import {
   computed,
   nextTick,
+  onBeforeUnmount,
   onMounted,
   ref,
   shallowRef,
@@ -149,8 +185,123 @@ const pictureSwipeComponent = shallowRef<PictureSwipeComponent | null>(null)
 const pictureSwipeRef = ref<PictureSwipeComponentInstance | null>(null)
 const pictureSwipeContainer = ref<HTMLElement | null>(null)
 
-const { t } = useI18n()
+const thumbnailViewport = ref<HTMLDivElement | null>(null)
+const thumbnailList = ref<HTMLUListElement | null>(null)
+const showThumbnailNavigation = ref(false)
+const canScrollThumbnailsLeft = ref(false)
+const canScrollThumbnailsRight = ref(false)
+
+const { t, te } = useI18n()
 const nuxtImage = useImage()
+
+const thumbnailGroupLabel = computed(() =>
+  te('product.hero.thumbnails.groupLabel')
+    ? t('product.hero.thumbnails.groupLabel')
+    : 'Product media thumbnails',
+)
+
+const previousThumbnailsLabel = computed(() =>
+  te('product.hero.thumbnails.previous')
+    ? t('product.hero.thumbnails.previous')
+    : 'Scroll thumbnails backward',
+)
+
+const nextThumbnailsLabel = computed(() =>
+  te('product.hero.thumbnails.next')
+    ? t('product.hero.thumbnails.next')
+    : 'Scroll thumbnails forward',
+)
+
+let thumbnailResizeObserver: ResizeObserver | null = null
+
+const updateThumbnailOverflow = () => {
+  const viewport = thumbnailViewport.value
+  if (!viewport) {
+    showThumbnailNavigation.value = false
+    canScrollThumbnailsLeft.value = false
+    canScrollThumbnailsRight.value = false
+    return
+  }
+
+  const totalWidth = viewport.scrollWidth
+  const visibleWidth = viewport.clientWidth
+  const maxScrollLeft = Math.max(totalWidth - visibleWidth, 0)
+
+  showThumbnailNavigation.value = totalWidth - visibleWidth > 1
+  canScrollThumbnailsLeft.value = viewport.scrollLeft > 0
+  canScrollThumbnailsRight.value = viewport.scrollLeft < maxScrollLeft - 1
+}
+
+const handleThumbnailScroll = () => {
+  updateThumbnailOverflow()
+}
+
+const scrollThumbnails = (direction: ThumbnailScrollDirection) => {
+  const viewport = thumbnailViewport.value
+  if (!viewport) {
+    return
+  }
+
+  const scrollAmount = Math.max(viewport.clientWidth * 0.8, 120)
+  const delta = direction === 'left' ? -scrollAmount : scrollAmount
+
+  viewport.scrollBy({ left: delta, behavior: 'smooth' })
+}
+
+const scrollActiveThumbnailIntoView = () => {
+  const viewport = thumbnailViewport.value
+  const list = thumbnailList.value
+  if (!viewport || !list) {
+    return
+  }
+
+  const activeItem = list.children[activeMediaIndex.value] as HTMLElement | undefined
+  if (!activeItem) {
+    return
+  }
+
+  const itemStart = activeItem.offsetLeft
+  const itemEnd = itemStart + activeItem.offsetWidth
+  const viewportStart = viewport.scrollLeft
+  const viewportEnd = viewportStart + viewport.clientWidth
+
+  if (itemStart < viewportStart) {
+    viewport.scrollTo({ left: itemStart, behavior: 'smooth' })
+    return
+  }
+
+  if (itemEnd > viewportEnd) {
+    viewport.scrollTo({ left: itemEnd - viewport.clientWidth, behavior: 'smooth' })
+  }
+}
+
+const observeThumbnailElements = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (!thumbnailResizeObserver) {
+    thumbnailResizeObserver = new ResizeObserver(() => {
+      updateThumbnailOverflow()
+      scrollActiveThumbnailIntoView()
+    })
+  }
+
+  thumbnailResizeObserver.disconnect()
+
+  const viewport = thumbnailViewport.value
+  const list = thumbnailList.value
+
+  if (viewport) {
+    thumbnailResizeObserver.observe(viewport)
+  }
+
+  if (list) {
+    thumbnailResizeObserver.observe(list)
+  }
+
+  updateThumbnailOverflow()
+}
 
 type ImageModifiers = Parameters<typeof nuxtImage>[1]
 
@@ -223,6 +374,8 @@ interface LightboxInstance {
   container?: HTMLElement
   init?: () => void
 }
+
+type ThumbnailScrollDirection = 'left' | 'right'
 
 const galleryItems = computed<ProductGalleryItem[]>(() => {
   const images = props.product.resources?.images ?? []
@@ -342,12 +495,21 @@ watch(
   (items) => {
     if (!items.length) {
       activeMediaIndex.value = 0
+      void nextTick(() => {
+        observeThumbnailElements()
+        updateThumbnailOverflow()
+      })
       return
     }
 
     if (activeMediaIndex.value >= items.length) {
       activeMediaIndex.value = items.length - 1
     }
+
+    void nextTick(() => {
+      observeThumbnailElements()
+      scrollActiveThumbnailIntoView()
+    })
   },
   { immediate: true },
 )
@@ -511,6 +673,10 @@ const bindLightboxListeners = () => {
 const setActiveMedia = (index: number) => {
   if (index >= 0 && index < galleryItems.value.length) {
     activeMediaIndex.value = index
+    void nextTick(() => {
+      scrollActiveThumbnailIntoView()
+      updateThumbnailOverflow()
+    })
   }
 }
 
@@ -567,11 +733,21 @@ const openGallery = async (index: number) => {
 
   const safeIndex = Math.min(Math.max(index, 0), galleryItems.value.length - 1)
   activeMediaIndex.value = safeIndex
-  openLightboxAt(safeIndex)
+  let opened = openLightboxAt(safeIndex)
+
+  if (!opened) {
+    await nextTick()
+    opened = openLightboxAt(safeIndex)
+  }
+
+  pendingOpenIndex.value = opened ? null : safeIndex
 }
 
 onMounted(async () => {
   await ensureLightbox()
+  await nextTick()
+  observeThumbnailElements()
+  scrollActiveThumbnailIntoView()
 })
 
 watch(
@@ -589,6 +765,22 @@ watch(
   },
   { flush: 'post' },
 )
+
+watch([thumbnailViewport, thumbnailList], () => {
+  observeThumbnailElements()
+})
+
+watch(activeMediaIndex, () => {
+  void nextTick(() => {
+    scrollActiveThumbnailIntoView()
+    updateThumbnailOverflow()
+  })
+})
+
+onBeforeUnmount(() => {
+  thumbnailResizeObserver?.disconnect()
+  thumbnailResizeObserver = null
+})
 </script>
 
 <style scoped>
@@ -646,17 +838,64 @@ watch(
 }
 
 .product-gallery__thumbnails {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.product-gallery__thumbnails--nav {
+  padding-inline: 0.25rem;
+  justify-content: space-between;
+}
+
+.product-gallery__thumbnails-viewport {
+  flex: 1 1 auto;
+  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+.product-gallery__thumbnails-list {
   list-style: none;
   display: flex;
   gap: 0.75rem;
   padding: 0;
   margin: 0;
-  overflow-x: auto;
-  scrollbar-width: thin;
 }
 
 .product-gallery__thumbnail {
   flex: 0 0 auto;
+}
+
+.product-gallery__thumbnails-arrow {
+  border: none;
+  background: rgba(var(--v-theme-surface-default), 0.92);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-gallery__thumbnails-arrow:hover:not(:disabled) {
+  background: rgba(var(--v-theme-surface-default), 1);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+}
+
+.product-gallery__thumbnails-arrow:focus-visible {
+  outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.6);
+  outline-offset: 3px;
+}
+
+.product-gallery__thumbnails-arrow:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+  cursor: default;
 }
 
 .product-gallery__thumbnail-button {
@@ -760,6 +999,11 @@ watch(
 
   .product-gallery__stage {
     min-height: 240px;
+  }
+
+  .product-gallery__thumbnails-arrow {
+    width: 36px;
+    height: 36px;
   }
 
   .product-gallery__thumbnail-image {
