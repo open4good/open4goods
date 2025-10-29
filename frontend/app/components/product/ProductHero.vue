@@ -15,40 +15,36 @@
         v-bind="heroBreadcrumbProps"
         class="product-hero__breadcrumbs"
       />
-      <p v-if="product.identity?.brand" class="product-hero__eyebrow">
-        {{ product.identity.brand }}
-      </p>
-      <h1 class="product-hero__title" itemprop="name">
-        {{ title }}
+
+      <h1 v-if="bestName" class="product-hero__title" itemprop="name">
+        {{ bestName }}
       </h1>
-      <p v-if="product.identity?.model" class="product-hero__subtitle">
-        {{ product.identity.model }}
+
+      <p v-if="brandModelLine" class="product-hero__brand-line">
+        {{ brandModelLine }}
       </p>
 
-      <div class="product-hero__meta">
-        <ImpactScore
-          v-if="impactScore !== null"
-          :score="impactScore"
-          :max="5"
-          size="large"
-          :show-value="true"
-          class="product-hero__impact"
-        />
-        <v-btn
-          class="product-hero__compare-button"
-          :class="{ 'product-hero__compare-button--active': isCompareSelected }"
-          color="primary"
-          variant="flat"
-          :aria-pressed="isCompareSelected"
-          :aria-label="compareButtonAriaLabel"
-          :title="compareButtonTitle"
-          :disabled="isCompareDisabled"
-          @click="toggleCompare"
+      <ul v-if="popularAttributes.length" class="product-hero__attributes" role="list">
+        <li
+          v-for="attribute in popularAttributes"
+          :key="attribute.key"
+          class="product-hero__attribute"
+          role="listitem"
         >
-          <v-icon :icon="compareButtonIcon" size="20" class="product-hero__compare-icon" />
-          <span class="product-hero__compare-label">{{ compareButtonText }}</span>
-        </v-btn>
-      </div>
+          <span class="product-hero__attribute-label">{{ attribute.label }}</span>
+          <span class="product-hero__attribute-separator" aria-hidden="true">:</span>
+          <span class="product-hero__attribute-value">{{ attribute.value }}</span>
+        </li>
+      </ul>
+
+      <ImpactScore
+        v-if="impactScore !== null"
+        :score="impactScore"
+        :max="5"
+        size="large"
+        :show-value="true"
+        class="product-hero__impact"
+      />
 
       <v-tooltip v-if="gtinCountry" location="bottom" :text="t('product.hero.gtinTooltip')">
         <template #activator="{ props: tooltipProps }">
@@ -66,6 +62,22 @@
         </template>
       </v-tooltip>
 
+      <div class="product-hero__spacer" aria-hidden="true"></div>
+
+      <v-btn
+        class="product-hero__compare-button"
+        :class="{ 'product-hero__compare-button--active': isCompareSelected }"
+        color="primary"
+        variant="flat"
+        :aria-pressed="isCompareSelected"
+        :aria-label="compareButtonAriaLabel"
+        :title="compareButtonTitle"
+        :disabled="isCompareDisabled"
+        @click="toggleCompare"
+      >
+        <v-icon :icon="compareButtonIcon" size="20" class="product-hero__compare-icon" />
+        <span class="product-hero__compare-label">{{ compareButtonText }}</span>
+      </v-btn>
     </div>
 
     <aside class="product-hero__pricing">
@@ -86,7 +98,8 @@ import {
   useProductCompareStore,
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
-import type { ProductDto } from '~~/shared/api-client'
+import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 
 export interface ProductHeroBreadcrumb {
   title: string
@@ -102,9 +115,13 @@ const props = defineProps({
     type: Array as PropType<ProductHeroBreadcrumb[]>,
     default: () => [],
   },
+  popularAttributes: {
+    type: Array as PropType<AttributeConfigDto[]>,
+    default: () => [],
+  },
 })
 
-const { t, te } = useI18n()
+const { t, te, n } = useI18n()
 
 const title = computed(
   () =>
@@ -112,6 +129,38 @@ const title = computed(
     props.product.identity?.bestName ??
     props.product.base?.bestName ??
     '',
+)
+
+const bestName = computed(() =>
+  props.product.identity?.bestName ?? props.product.base?.bestName ?? title.value,
+)
+
+const brandModelLine = computed(() => {
+  const brand = props.product.identity?.brand?.trim()
+  const model = props.product.identity?.model?.trim()
+
+  return [brand, model].filter((value) => Boolean(value && value.length)).join(' - ')
+})
+
+type DisplayedAttribute = { key: string; label: string; value: string }
+
+const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
+
+const popularAttributes = computed<DisplayedAttribute[]>(() =>
+  resolvePopularAttributes(props.product, popularAttributeConfigs.value)
+    .map((attribute) => {
+      const value = formatAttributeValue(attribute, t, n)
+      if (!value) {
+        return null
+      }
+
+      return {
+        key: attribute.key,
+        label: attribute.label,
+        value,
+      }
+    })
+    .filter((attribute): attribute is DisplayedAttribute => attribute != null),
 )
 
 const compareStore = useProductCompareStore()
@@ -271,12 +320,6 @@ const impactScore = computed(() => {
 }
 
 
-.product-hero__details {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
 .product-hero__breadcrumbs {
   display: flex;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
@@ -295,14 +338,6 @@ const impactScore = computed(() => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-hero__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.8);
-}
-
 .product-hero__title {
   font-size: clamp(2rem, 2.8vw, 3rem);
   font-weight: 700;
@@ -310,16 +345,46 @@ const impactScore = computed(() => {
   margin: 0;
 }
 
-.product-hero__subtitle {
-  font-size: 1.1rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+.product-hero__details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.product-hero__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
+.product-hero__brand-line {
+  font-size: 1.05rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  margin: 0;
+}
+
+.product-hero__attributes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem 1.25rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.product-hero__attribute {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+}
+
+.product-hero__attribute-label {
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-hero__attribute-separator {
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.6);
+}
+
+.product-hero__attribute-value {
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
 }
 
 .product-hero__impact {
@@ -340,6 +405,10 @@ const impactScore = computed(() => {
   width: 32px;
   height: 24px;
   object-fit: cover;
+}
+
+.product-hero__spacer {
+  flex: 1 1 auto;
 }
 
 .product-hero__compare-button {

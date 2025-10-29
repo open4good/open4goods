@@ -133,14 +133,16 @@ describe('ProductHeroPricing', () => {
     const chips = wrapper.findAll('.product-hero__price-chip')
     expect(chips).toHaveLength(2)
     expect(chips[0]?.classes()).toContain('product-hero__price-chip--active')
-    expect(wrapper.get('.product-hero__price-value').text()).toBe('€649')
+    expect(wrapper.get('.product-hero__price-value').text()).toBe('649')
+    expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
     expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain('Merchant U')
 
     await chips[1]?.trigger('click')
     await wrapper.vm.$nextTick()
 
     expect(chips[1]?.classes()).toContain('product-hero__price-chip--active')
-    expect(wrapper.get('.product-hero__price-value').text()).toBe('€799')
+    expect(wrapper.get('.product-hero__price-value').text()).toBe('799')
+    expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
     expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain('Shop')
 
     await wrapper.unmount()
@@ -172,6 +174,33 @@ describe('ProductHeroPricing', () => {
     const clientOnlyLink = wrapper.get('.client-only-stub .product-hero__price-merchant-link')
     expect(clientOnlyLink.attributes('href')).toBe('/contrib/abc123')
     expect(clientOnlyLink.attributes('target')).toBeUndefined()
+
+    await wrapper.unmount()
+  })
+
+  it('falls back to currency code when highlighting non-euro prices', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 2,
+      bestPrice: {
+        price: 120,
+        currency: 'USD',
+        datasourceName: 'US Shop',
+        url: 'https://us-shop.example',
+        favicon: 'https://us-shop.example/favicon.ico',
+        condition: 'NEW',
+      },
+      bestNewOffer: {
+        price: 120,
+        currency: 'USD',
+        datasourceName: 'US Shop',
+        url: 'https://us-shop.example',
+        favicon: 'https://us-shop.example/favicon.ico',
+        condition: 'NEW',
+      },
+    })
+
+    expect(wrapper.get('.product-hero__price-value').text()).toBe('$120')
+    expect(wrapper.get('.product-hero__price-currency').text()).toBe('USD')
 
     await wrapper.unmount()
   })
