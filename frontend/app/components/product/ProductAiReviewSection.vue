@@ -10,62 +10,149 @@
     </header>
 
     <div v-if="reviewContent" class="product-ai-review__content" itemscope itemtype="https://schema.org/Review">
-      <p v-if="createdDate" class="product-ai-review__metadata">
-        {{ $t('product.aiReview.generatedAt', { date: createdDate }) }}
-      </p>
+      <div v-if="createdDate" class="product-ai-review__metadata">
+        <v-icon icon="mdi-calendar-clock" size="18" class="product-ai-review__metadata-icon" />
+        <span>{{ $t('product.aiReview.generatedAt', { date: createdDate }) }}</span>
+      </div>
 
       <article class="product-ai-review__article">
-        <h3 v-if="reviewContent.mediumTitle" class="product-ai-review__article-title">
-          {{ reviewContent.mediumTitle }}
-        </h3>
-        <p v-if="reviewContent.shortDescription" class="product-ai-review__summary" itemprop="description">
-          {{ reviewContent.shortDescription }}
-        </p>
-
-        <div v-if="reviewContent.summary" class="product-ai-review__block" itemprop="reviewBody">
-          <h4>{{ $t('product.aiReview.sections.overall') }}</h4>
-          <p>{{ reviewContent.summary }}</p>
+        <div
+          v-if="reviewContent.mediumTitle || reviewContent.shortDescription"
+          class="product-ai-review__intro-card"
+        >
+          <div class="product-ai-review__intro-icon">
+            <v-icon icon="mdi-robot-outline" size="28" />
+          </div>
+          <div class="product-ai-review__intro-content">
+            <h3 v-if="reviewContent.mediumTitle" class="product-ai-review__article-title">
+              {{ reviewContent.mediumTitle }}
+            </h3>
+            <p
+              v-if="reviewContent.shortDescription"
+              class="product-ai-review__summary"
+              itemprop="description"
+            >
+              {{ reviewContent.shortDescription }}
+            </p>
+          </div>
         </div>
 
-        <div v-if="reviewContent.description" class="product-ai-review__block">
-          <h4>{{ $t('product.aiReview.sections.details') }}</h4>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div ref="descriptionRef" class="product-ai-review__richtext" v-html="reviewContent.description" />
-        </div>
+        <div v-if="hasAnalysisSections" class="product-ai-review__analysis-grid">
+          <section v-if="reviewContent.summary" class="product-ai-review__card" itemprop="reviewBody">
+            <header class="product-ai-review__card-header">
+              <div class="product-ai-review__card-icon">
+                <v-icon icon="mdi-lightbulb-on-outline" size="22" />
+              </div>
+              <h4 class="product-ai-review__card-title">
+                {{ $t('product.aiReview.sections.overall') }}
+              </h4>
+            </header>
+            <p class="product-ai-review__card-text">{{ reviewContent.summary }}</p>
+          </section>
 
-        <div v-if="reviewContent.technicalReview" class="product-ai-review__block">
-          <h4>{{ $t('product.aiReview.sections.technical') }}</h4>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p v-html="reviewContent.technicalReview" />
-        </div>
+          <section
+            v-if="reviewContent.description"
+            class="product-ai-review__card product-ai-review__card--wide"
+          >
+            <header class="product-ai-review__card-header">
+              <div class="product-ai-review__card-icon product-ai-review__card-icon--accent">
+                <v-icon icon="mdi-text-box-outline" size="22" />
+              </div>
+              <h4 class="product-ai-review__card-title">
+                {{ $t('product.aiReview.sections.details') }}
+              </h4>
+            </header>
+            <div class="product-ai-review__card-body">
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <div ref="descriptionRef" class="product-ai-review__richtext" v-html="reviewContent.description" />
+            </div>
+          </section>
 
-        <div v-if="reviewContent.ecologicalReview" class="product-ai-review__block">
-          <h4>{{ $t('product.aiReview.sections.ecological') }}</h4>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p v-html="reviewContent.ecologicalReview" />
+          <section v-if="reviewContent.technicalReview" class="product-ai-review__card">
+            <header class="product-ai-review__card-header">
+              <div class="product-ai-review__card-icon">
+                <v-icon icon="mdi-cog-outline" size="22" />
+              </div>
+              <h4 class="product-ai-review__card-title">
+                {{ $t('product.aiReview.sections.technical') }}
+              </h4>
+            </header>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <p class="product-ai-review__card-text" v-html="reviewContent.technicalReview" />
+          </section>
+
+          <section v-if="reviewContent.ecologicalReview" class="product-ai-review__card">
+            <header class="product-ai-review__card-header">
+              <div class="product-ai-review__card-icon product-ai-review__card-icon--eco">
+                <v-icon icon="mdi-leaf-outline" size="22" />
+              </div>
+              <h4 class="product-ai-review__card-title">
+                {{ $t('product.aiReview.sections.ecological') }}
+              </h4>
+            </header>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <p class="product-ai-review__card-text" v-html="reviewContent.ecologicalReview" />
+          </section>
         </div>
       </article>
 
-      <div class="product-ai-review__grid">
-        <div v-if="reviewContent.pros?.length" class="product-ai-review__panel">
-          <h4>{{ $t('product.aiReview.sections.pros') }}</h4>
-          <ul>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <li v-for="pro in reviewContent.pros" :key="pro" v-html="pro" />
+      <div
+        v-if="reviewContent.pros?.length || reviewContent.cons?.length"
+        class="product-ai-review__insights"
+      >
+        <section v-if="reviewContent.pros?.length" class="product-ai-review__panel">
+          <header class="product-ai-review__panel-header">
+            <div class="product-ai-review__panel-icon product-ai-review__panel-icon--pros">
+              <v-icon icon="mdi-thumb-up-outline" size="20" />
+            </div>
+            <h4 class="product-ai-review__panel-title">
+              {{ $t('product.aiReview.sections.pros') }}
+            </h4>
+          </header>
+          <ul class="product-ai-review__list">
+            <li v-for="pro in reviewContent.pros" :key="pro" class="product-ai-review__list-item">
+              <v-icon
+                icon="mdi-check-circle-outline"
+                size="18"
+                class="product-ai-review__list-icon product-ai-review__list-icon--pros"
+              />
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <span v-html="pro" />
+            </li>
           </ul>
-        </div>
-        <div v-if="reviewContent.cons?.length" class="product-ai-review__panel">
-          <h4>{{ $t('product.aiReview.sections.cons') }}</h4>
-          <ul>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <li v-for="con in reviewContent.cons" :key="con" v-html="con" />
+        </section>
+
+        <section v-if="reviewContent.cons?.length" class="product-ai-review__panel">
+          <header class="product-ai-review__panel-header">
+            <div class="product-ai-review__panel-icon product-ai-review__panel-icon--cons">
+              <v-icon icon="mdi-alert-circle-outline" size="20" />
+            </div>
+            <h4 class="product-ai-review__panel-title">
+              {{ $t('product.aiReview.sections.cons') }}
+            </h4>
+          </header>
+          <ul class="product-ai-review__list">
+            <li v-for="con in reviewContent.cons" :key="con" class="product-ai-review__list-item">
+              <v-icon
+                icon="mdi-close-circle-outline"
+                size="18"
+                class="product-ai-review__list-icon product-ai-review__list-icon--cons"
+              />
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <span v-html="con" />
+            </li>
           </ul>
-        </div>
+        </section>
       </div>
 
       <div v-if="reviewContent.attributes?.length" class="product-ai-review__attributes">
-        <h4>{{ $t('product.aiReview.sections.identity') }}</h4>
-        <v-table density="comfortable">
+        <header class="product-ai-review__section-header">
+          <div class="product-ai-review__section-icon">
+            <v-icon icon="mdi-card-account-details-outline" size="20" />
+          </div>
+          <h4>{{ $t('product.aiReview.sections.identity') }}</h4>
+        </header>
+        <v-table density="comfortable" class="product-ai-review__table">
           <tbody>
             <tr v-for="attribute in reviewContent.attributes" :key="attribute.name">
               <th scope="row">{{ attribute.name }}</th>
@@ -76,8 +163,13 @@
       </div>
 
       <div v-if="reviewContent.sources?.length" class="product-ai-review__sources">
-        <h4>{{ $t('product.aiReview.sections.sources') }}</h4>
-        <v-table density="compact">
+        <header class="product-ai-review__section-header">
+          <div class="product-ai-review__section-icon">
+            <v-icon icon="mdi-book-open-variant" size="20" />
+          </div>
+          <h4>{{ $t('product.aiReview.sections.sources') }}</h4>
+        </header>
+        <v-table density="compact" class="product-ai-review__table product-ai-review__table--compact">
           <thead>
             <tr>
               <th scope="col">{{ $t('product.aiReview.sources.index') }}</th>
@@ -236,6 +328,15 @@ const captchaTheme = computed(() => (theme.global.current.value.dark ? 'dark' : 
 const captchaLocale = computed(() => (locale.value.startsWith('fr') ? 'fr' : 'en'))
 
 const reviewContent = computed(() => review.value)
+
+const hasAnalysisSections = computed(() => {
+  const content = reviewContent.value
+  if (!content) {
+    return false
+  }
+
+  return Boolean(content.summary || content.description || content.technicalReview || content.ecologicalReview)
+})
 
 const createdDate = computed(() => {
   if (!createdMs.value) {
@@ -475,34 +576,144 @@ const handleReferenceClick = (event: Event) => {
 }
 
 .product-ai-review__metadata {
-  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.95);
   font-size: 0.95rem;
+  background: rgba(var(--v-theme-surface-primary-080), 0.6);
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.product-ai-review__metadata-icon {
+  color: rgb(var(--v-theme-accent-primary-highlight));
 }
 
 .product-ai-review__content {
   background: rgba(var(--v-theme-surface-glass), 0.92);
   border-radius: 24px;
   padding: 1.75rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08),
+    0 18px 40px -24px rgba(var(--v-theme-shadow-primary-600), 0.4);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .product-ai-review__article {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+}
+
+.product-ai-review__intro-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: 1rem;
+  align-items: flex-start;
+  padding: 1.4rem;
+  border-radius: 20px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.12);
+}
+
+.product-ai-review__intro-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 16px;
+  background: rgba(var(--v-theme-accent-primary-highlight), 0.16);
+  color: rgb(var(--v-theme-accent-primary-highlight));
 }
 
 .product-ai-review__article-title {
-  font-size: 1.3rem;
+  font-size: clamp(1.3rem, 2vw, 1.6rem);
   font-weight: 600;
+  margin-bottom: 0.35rem;
 }
 
-.product-ai-review__block h4 {
-  margin-bottom: 0.5rem;
+.product-ai-review__summary {
+  margin: 0;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  line-height: 1.6;
+}
+
+.product-ai-review__analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
+}
+
+.product-ai-review__card {
+  background: rgba(var(--v-theme-surface-glass-strong), 0.96);
+  border-radius: 18px;
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.06);
+}
+
+.product-ai-review__card--wide {
+  grid-column: span 1;
+}
+
+.product-ai-review__card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.product-ai-review__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+}
+
+.product-ai-review__card-icon--accent {
+  background: rgba(var(--v-theme-surface-primary-100), 0.95);
+}
+
+.product-ai-review__card-icon--eco {
+  background: rgba(var(--v-theme-accent-supporting), 0.18);
+  color: rgb(var(--v-theme-accent-supporting));
+}
+
+.product-ai-review__card-title {
   font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.product-ai-review__card-text {
+  margin: 0;
+  line-height: 1.65;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-ai-review__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-ai-review__richtext {
+  line-height: 1.7;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.product-ai-review__richtext p {
+  margin: 0;
 }
 
 .product-ai-review__richtext a {
@@ -510,35 +721,145 @@ const handleReferenceClick = (event: Event) => {
   text-decoration: underline;
 }
 
-.product-ai-review__grid {
+.product-ai-review__insights {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
 .product-ai-review__panel {
-  background: rgba(var(--v-theme-surface-glass-strong), 0.95);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.98);
   border-radius: 18px;
-  padding: 1.25rem;
+  padding: 1.3rem;
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
-.product-ai-review__panel h4 {
-  margin-bottom: 0.75rem;
+.product-ai-review__panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.product-ai-review__panel ul {
+.product-ai-review__panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.8);
+}
+
+.product-ai-review__panel-icon--pros {
+  color: rgb(var(--v-theme-accent-supporting));
+  background: rgba(var(--v-theme-accent-supporting), 0.16);
+}
+
+.product-ai-review__panel-icon--cons {
+  color: rgba(var(--v-theme-error), 0.8);
+  background: rgba(var(--v-theme-error), 0.18);
+}
+
+.product-ai-review__panel-title {
+  font-size: 1.05rem;
+  font-weight: 600;
   margin: 0;
-  padding-left: 1.1rem;
+}
+
+.product-ai-review__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.65rem;
+}
+
+.product-ai-review__list-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  align-items: flex-start;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-ai-review__list-icon {
+  margin-top: 0.2rem;
+}
+
+.product-ai-review__list-icon--pros {
+  color: rgb(var(--v-theme-accent-supporting));
+}
+
+.product-ai-review__list-icon--cons {
+  color: rgba(var(--v-theme-error), 0.85);
 }
 
 .product-ai-review__attributes,
 .product-ai-review__sources {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.9rem;
+}
+
+.product-ai-review__section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.product-ai-review__section-header h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.product-ai-review__section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.85);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+}
+
+.product-ai-review__table {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.98);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.06);
+}
+
+.product-ai-review__table :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-ai-review__table :deep(th),
+.product-ai-review__table :deep(td) {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.08);
+  text-align: left;
+}
+
+.product-ai-review__table :deep(thead th) {
+  background: rgba(var(--v-theme-surface-primary-080), 0.8);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-weight: 600;
+}
+
+.product-ai-review__table :deep(tbody tr:last-child th),
+.product-ai-review__table :deep(tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+.product-ai-review__table--compact :deep(th),
+.product-ai-review__table--compact :deep(td) {
+  padding: 0.65rem 0.75rem;
 }
 
 .product-ai-review__source-info {
@@ -552,18 +873,20 @@ const handleReferenceClick = (event: Event) => {
 }
 
 .product-ai-review__empty {
-  background: rgba(var(--v-theme-surface-glass), 0.9);
+  background: rgba(var(--v-theme-surface-glass), 0.92);
   border-radius: 24px;
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
   align-items: flex-start;
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
 }
 
 .product-ai-review__empty-message {
   font-size: 1rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.92);
+  line-height: 1.55;
 }
 
 .product-ai-review__status {
@@ -573,10 +896,25 @@ const handleReferenceClick = (event: Event) => {
   gap: 0.5rem;
 }
 
+@media (min-width: 960px) {
+  .product-ai-review__card--wide {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 768px) {
   .product-ai-review__content,
   .product-ai-review__empty {
-    padding: 1.25rem;
+    padding: 1.35rem;
+  }
+
+  .product-ai-review__intro-card {
+    grid-template-columns: 1fr;
+  }
+
+  .product-ai-review__intro-icon {
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }
 </style>
