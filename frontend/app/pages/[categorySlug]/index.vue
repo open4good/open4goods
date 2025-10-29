@@ -10,44 +10,54 @@
     />
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
-      <div
-        v-if="hasFastFilters || isDesktop"
-        class="category-page__fast-filters mb-6"
-      >
-        <v-tooltip v-if="isDesktop" :text="filtersToggleLabel">
-          <template #activator="{ props: tooltipProps }">
-            <v-btn
-              class="category-page__fast-filters-toggle"
-              :class="{
-                'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
-                'category-page__fast-filters-toggle--expanded': !filtersCollapsed,
-              }"
-              icon
-              variant="text"
-              v-bind="tooltipProps"
-              :aria-label="filtersToggleLabel"
-              :aria-pressed="(!filtersCollapsed).toString()"
-              @click="onToggleFiltersVisibility"
-            >
-              <v-icon
-                icon="mdi-filter-variant"
-                size="40"
-                class="category-page__fast-filters-toggle-icon"
+      <div v-if="showControls" ref="controlsRef" class="category-page__controls">
+        <div v-if="hasFastFilters || isDesktop" class="category-page__fast-filters">
+          <v-tooltip v-if="isDesktop" :text="filtersToggleLabel">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                class="category-page__fast-filters-toggle"
                 :class="{
-                  'category-page__fast-filters-toggle-icon--collapsed': filtersCollapsed,
-                  'category-page__fast-filters-toggle-icon--expanded': !filtersCollapsed,
+                  'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
+                  'category-page__fast-filters-toggle--expanded': !filtersCollapsed,
                 }"
-              />
-            </v-btn>
-          </template>
-        </v-tooltip>
+                icon
+                variant="text"
+                v-bind="tooltipProps"
+                :aria-label="filtersToggleLabel"
+                :aria-pressed="(!filtersCollapsed).toString()"
+                @click="onToggleFiltersVisibility"
+              >
+                <v-icon
+                  icon="mdi-filter-variant"
+                  size="40"
+                  class="category-page__fast-filters-toggle-icon"
+                  :class="{
+                    'category-page__fast-filters-toggle-icon--collapsed': filtersCollapsed,
+                    'category-page__fast-filters-toggle-icon--expanded': !filtersCollapsed,
+                  }"
+                />
+              </v-btn>
+            </template>
+          </v-tooltip>
 
-        <CategoryFastFilters
-          class="category-page__fast-filters-groups"
-          :subsets="category.subsets ?? []"
-          :active-subset-ids="activeSubsetIds"
-          @toggle-subset="onToggleSubset"
-          @reset="onResetSubsets"
+          <CategoryFastFilters
+            class="category-page__fast-filters-groups"
+            :subsets="category.subsets ?? []"
+            :active-subset-ids="activeSubsetIds"
+            @toggle-subset="onToggleSubset"
+            @reset="onResetSubsets"
+          />
+        </div>
+
+        <CategoryActiveFilters
+          v-if="hasActiveFilters"
+          class="category-page__active-filters"
+          :filter-options="filterOptions"
+          :filters="manualFilters"
+          :subset-clauses="activeSubsetClauses"
+          @remove-manual-filter="onRemoveManualFilter"
+          @remove-subset-clause="onRemoveSubsetClause"
+          @clear-all="clearAllFilters"
         />
       </div>
 
@@ -72,13 +82,11 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :subset-clauses="activeSubsetClauses"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
               @apply-mobile="applyMobileFilters"
               @clear-mobile="clearAllFilters"
-              @remove-subset-clause="onRemoveSubsetClause"
             />
           </v-navigation-drawer>
         </template>
@@ -107,11 +115,9 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :subset-clauses="activeSubsetClauses"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
-              @remove-subset-clause="onRemoveSubsetClause"
             />
           </aside>
 
@@ -314,9 +320,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import type { ActiveHeadEntry, UseHeadInput } from '@unhead/vue'
-import { useDebounceFn, useEventListener, useStorage } from '@vueuse/core'
+import { useDebounceFn, useEventListener, useResizeObserver, useStorage } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
 import type {
@@ -335,6 +341,7 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client'
 
+import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
@@ -400,6 +407,10 @@ const isHydrated = ref(false)
 
 onMounted(() => {
   isHydrated.value = true
+
+  if (isDesktop.value && showControls.value) {
+    nextTick(() => updateControlsHeight())
+  }
 })
 
 const rawParam = route.params.categorySlug
@@ -649,10 +660,12 @@ const filtersPanelWidth = useStorage<number>(
 
 filtersPanelWidth.value = clampFiltersPanelWidth(filtersPanelWidth.value)
 
+const controlsRef = ref<HTMLElement | null>(null)
 const layoutRef = ref<HTMLElement | null>(null)
 const filtersSidebarRef = ref<HTMLElement | null>(null)
 const filtersResizerRef = ref<HTMLElement | null>(null)
 const isResizing = ref(false)
+const controlsHeight = ref(0)
 
 const layoutStyle = computed(() => {
   if (!isDesktop.value) {
@@ -669,6 +682,7 @@ const layoutStyle = computed(() => {
     '--filters-panel-width': `${width}px`,
     '--filters-active-width': `${activeWidth}px`,
     '--filters-resizer-hitbox': `${resizerHitbox}px`,
+    '--category-controls-height': isDesktop.value ? `${controlsHeight.value}px` : '0px',
   }
 })
 
@@ -684,6 +698,35 @@ const filtersStyle = computed(() => {
     width: `${activeWidth}px`,
     maxWidth: `${width}px`,
   }
+})
+
+const updateControlsHeight = () => {
+  if (!isDesktop.value || !showControls.value || !controlsRef.value) {
+    controlsHeight.value = 0
+    return
+  }
+
+  controlsHeight.value = controlsRef.value.getBoundingClientRect().height
+}
+
+useResizeObserver(controlsRef, (entries) => {
+  if (!isDesktop.value || !showControls.value) {
+    return
+  }
+
+  const entry = entries[0]
+  if (entry) {
+    controlsHeight.value = entry.contentRect.height
+  }
+})
+
+watch(showControls, (visible) => {
+  if (!isDesktop.value || !visible) {
+    controlsHeight.value = 0
+    return
+  }
+
+  nextTick(() => updateControlsHeight())
 })
 
 let activePointerId: number | null = null
@@ -783,7 +826,15 @@ watch(
       activePointerId = null
       initialPointerX = 0
       initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+      controlsHeight.value = 0
+      return
     }
+
+    nextTick(() => {
+      if (showControls.value) {
+        updateControlsHeight()
+      }
+    })
   },
   { immediate: true },
 )
@@ -811,6 +862,17 @@ const manualFilters = ref<FilterRequestDto>({})
 const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
 const lastAppliedDefaultSort = ref<string | null>(null)
+
+type ManualFilterRemovalPayload = {
+  field: string
+  type: 'term' | 'range'
+  term: string | null
+}
+
+const hasActiveFilters = computed(
+  () => (manualFilters.value.filters?.length ?? 0) > 0 || activeSubsetIds.value.length > 0,
+)
+const showControls = computed(() => hasFastFilters.value || isDesktop.value || hasActiveFilters.value)
 
 const areFiltersEqual = (left: FilterRequestDto, right: FilterRequestDto): boolean => {
   const leftFilters = left.filters ?? []
@@ -1654,6 +1716,23 @@ const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   manualFilters.value = merged.length ? { filters: merged } : {}
 }
 
+const onRemoveManualFilter = ({ field, type, term }: ManualFilterRemovalPayload) => {
+  const current = manualFilters.value.filters ?? []
+  const next = current.filter((filter) => {
+    if (filter.field !== field) {
+      return true
+    }
+
+    if (type === 'term') {
+      return !(filter.operator === 'term' && filter.terms?.includes(term ?? ''))
+    }
+
+    return filter.operator !== 'range'
+  })
+
+  manualFilters.value = next.length ? { filters: next } : {}
+}
+
 const onResetSubsets = () => {
   activeSubsetIds.value = []
 }
@@ -1683,11 +1762,27 @@ const clearAllFilters = () => {
 
 <style scoped lang="sass">
 .category-page
+  --category-sticky-top: 96px
   display: flex
   flex-direction: column
 
   &__container
     max-width: 1560px
+
+  &__controls
+    position: sticky
+    top: var(--category-sticky-top)
+    z-index: 6
+    display: flex
+    flex-direction: column
+    gap: 1rem
+    padding: 0.75rem 0
+    margin-bottom: 1.5rem
+    background: rgb(var(--v-theme-surface-default))
+    box-shadow: 0 20px 40px -32px rgba(var(--v-theme-shadow-primary-600), 0.35)
+
+  &__active-filters
+    margin-top: 0.5rem
 
   &__toolbar
     display: flex
@@ -1695,6 +1790,12 @@ const clearAllFilters = () => {
     gap: 1rem
     margin-bottom: 1.5rem
     width: 100%
+    position: sticky
+    top: calc(var(--category-sticky-top) + var(--category-controls-height, 0px))
+    z-index: 5
+    background: rgb(var(--v-theme-surface-default))
+    padding: 1rem 0
+    box-shadow: 0 16px 32px -32px rgba(var(--v-theme-shadow-primary-600), 0.35)
 
   &__toolbar-left
     display: flex
@@ -1756,10 +1857,10 @@ const clearAllFilters = () => {
     will-change: transform
 
   &__fast-filters-toggle-icon--collapsed
-    transform: rotate(-90deg)
+    transform: rotate(90deg)
 
   &__fast-filters-toggle-icon--expanded
-    transform: rotate(90deg)
+    transform: rotate(-90deg)
 
   @media (prefers-reduced-motion: reduce)
     &__fast-filters-toggle-icon
@@ -1813,9 +1914,9 @@ const clearAllFilters = () => {
 
   &__filters-surface
     position: sticky
-    top: 96px
+    top: calc(var(--category-sticky-top) + var(--category-controls-height, 0px))
     align-self: start
-    max-height: calc(100vh - 136px)
+    max-height: calc(100vh - 136px - var(--category-controls-height, 0px))
     display: flex
     flex-direction: column
     border-radius: 1rem
@@ -1931,8 +2032,19 @@ const clearAllFilters = () => {
     display: flex
 
 @media (max-width: 959px)
+  .category-page__controls
+    position: static
+    top: auto
+    box-shadow: none
+    padding: 0
+    margin-bottom: 1.5rem
+
   .category-page__toolbar
     align-items: stretch
+    position: static
+    top: auto
+    box-shadow: none
+    padding: 0
 
   .category-page__fast-filters
     flex-direction: column

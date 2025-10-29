@@ -197,6 +197,10 @@
       "missingLabel": "Option sans libellé",
       "mobileApply": "Appliquer les filtres",
       "mobileClear": "Effacer les filtres",
+      "clearAll": "Effacer tous les filtres",
+      "tooltips": {
+        "clearAll": "Supprimer tous les filtres actifs"
+      },
       "noMatch": "Aucune option correspondante",
       "rangeAriaSuffix": "sélection d'intervalle",
       "searchOptions": "Rechercher dans les options",

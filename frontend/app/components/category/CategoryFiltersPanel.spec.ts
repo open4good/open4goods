@@ -1,9 +1,9 @@
-import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
+import { mount } from '@vue/test-utils'
+
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
-import type { CategorySubsetClause } from '~/types/category-subset'
-import type { FilterRequestDto } from '~~/shared/api-client'
+import type { FilterRequestDto, ProductFieldOptionsResponse } from '~~/shared/api-client'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -33,52 +33,6 @@ const resolveClassList = (value: unknown): string => {
 
   return String(value)
 }
-
-const VChipGroupStub = defineComponent({
-  name: 'VChipGroup',
-  setup(_, { slots, attrs }) {
-    const className = ['v-chip-group-stub', resolveClassList((attrs as Record<string, unknown>).class)]
-      .filter(Boolean)
-      .join(' ')
-
-    return () => h('div', { ...attrs, class: className }, slots.default?.())
-  },
-})
-
-const VChipStub = defineComponent({
-  name: 'VChip',
-  props: {
-    closable: { type: Boolean, default: false },
-    variant: { type: String, default: 'flat' },
-  },
-  emits: ['click:close'],
-  setup(props, { slots, emit, attrs }) {
-    const className = ['v-chip-stub', resolveClassList((attrs as Record<string, unknown>).class)]
-      .filter(Boolean)
-      .join(' ')
-
-    return () =>
-      h(
-        'button',
-        {
-          ...attrs,
-          class: className,
-          type: 'button',
-          'data-closable': props.closable ? 'true' : 'false',
-          onClick: () => emit('click:close'),
-        },
-        slots.default?.(),
-      )
-  },
-})
-
-const VIconStub = defineComponent({
-  name: 'VIcon',
-  props: { icon: { type: String, default: '' } },
-  setup(props) {
-    return () => h('span', { class: 'v-icon-stub', 'data-icon': props.icon })
-  },
-})
 
 const VExpansionPanelsStub = defineComponent({
   name: 'VExpansionPanels',
@@ -114,59 +68,91 @@ const VBtnStub = defineComponent({
   },
 })
 
+const VIconStub = defineComponent({
+  name: 'VIcon',
+  props: { icon: { type: String, default: '' } },
+  setup(props) {
+    return () => h('span', { class: 'v-icon-stub', 'data-icon': props.icon })
+  },
+})
+
 const CategoryFilterListStub = defineComponent({
   name: 'CategoryFilterList',
-  setup(_, { slots }) {
-    return () => h('div', { class: 'category-filter-list-stub' }, slots.default?.())
+  emits: ['update-range', 'update-terms'],
+  setup(_, { slots, attrs }) {
+    return () => h('div', { class: 'category-filter-list-stub', ...attrs }, slots.default?.())
   },
 })
 
 describe('CategoryFiltersPanel', () => {
-  const subsetClause: CategorySubsetClause = {
-    id: 'subset-0',
-    subsetId: 'subset',
-    index: 0,
-    label: 'Price ≤ 500',
-    filter: { field: 'price.min', operator: 'range', max: 500 },
+  const filterOptions: ProductFieldOptionsResponse = {
+    global: [],
+    impact: [
+      { mapping: 'scores.ECOSCORE.value', title: 'Eco score' },
+      { mapping: 'scores.CARBON.value', title: 'CO2' },
+    ],
+    technical: [
+      { mapping: 'price.min', title: 'Price min' },
+      { mapping: 'price.max', title: 'Price max' },
+      { mapping: 'brand', title: 'Brand' },
+      { mapping: 'condition', title: 'Condition' },
+    ],
   }
 
-  const manualFilters: FilterRequestDto = {
+  const baseFilters: FilterRequestDto = {
     filters: [{ field: 'brand', operator: 'term', terms: ['Acme'] }],
   }
 
-  it('renders subset and manual filter chips together and emits removal events', () => {
-    const wrapper = mount(CategoryFiltersPanel, {
+  const mountComponent = (overrides: Partial<FilterRequestDto> = {}) =>
+    mount(CategoryFiltersPanel, {
       props: {
-        filterOptions: null,
+        filterOptions,
         aggregations: [],
-        filters: manualFilters,
+        filters: { ...baseFilters, ...overrides },
         impactExpanded: false,
         technicalExpanded: false,
-        subsetClauses: [subsetClause],
       },
       global: {
         stubs: {
-          VChipGroup: VChipGroupStub,
-          VChip: VChipStub,
-          VIcon: VIconStub,
           VExpansionPanels: VExpansionPanelsStub,
           VExpansionPanel: VExpansionPanelStub,
           VBtn: VBtnStub,
+          VIcon: VIconStub,
           CategoryFilterList: CategoryFilterListStub,
         },
       },
     })
 
-    const chips = wrapper.findAll('.v-chip-stub')
-    expect(chips).toHaveLength(2)
+  it('emits update:filters when a range filter is updated', () => {
+    const wrapper = mountComponent()
 
-    expect(chips[0]?.text()).toContain('Price ≤ 500')
-    expect(chips[1]?.text()).toContain('brand: Acme')
+    const filterLists = wrapper.findAllComponents(CategoryFilterListStub)
+    expect(filterLists.length).toBeGreaterThan(0)
 
-    chips[0]?.trigger('click')
+    filterLists[0]?.vm.$emit('update-range', 'price.min', { min: 10, max: 50 })
 
-    const removalEvents = wrapper.emitted('remove-subset-clause') ?? []
-    expect(removalEvents).toHaveLength(1)
-    expect(removalEvents[0]?.[0]).toEqual(subsetClause)
+    const emitted = wrapper.emitted('update:filters') ?? []
+    expect(emitted).toHaveLength(1)
+    expect(emitted[0]?.[0]).toEqual({
+      filters: [
+        { field: 'brand', operator: 'term', terms: ['Acme'] },
+        { field: 'price.min', operator: 'range', min: 10, max: 50 },
+      ],
+    })
+  })
+
+  it('replaces term filters when updating terms', () => {
+    const wrapper = mountComponent()
+
+    const filterLists = wrapper.findAllComponents(CategoryFilterListStub)
+    expect(filterLists.length).toBeGreaterThan(0)
+
+    filterLists[0]?.vm.$emit('update-terms', 'brand', ['Nudger'])
+
+    const emitted = wrapper.emitted('update:filters') ?? []
+    expect(emitted).toHaveLength(1)
+    expect(emitted[0]?.[0]).toEqual({
+      filters: [{ field: 'brand', operator: 'term', terms: ['Nudger'] }],
+    })
   })
 })

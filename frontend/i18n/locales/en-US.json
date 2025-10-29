@@ -197,6 +197,10 @@
       "missingLabel": "Unlabelled option",
       "mobileApply": "Apply filters",
       "mobileClear": "Clear all filters",
+      "clearAll": "Clear all filters",
+      "tooltips": {
+        "clearAll": "Remove all active filters"
+      },
       "noMatch": "No matching options",
       "rangeAriaSuffix": "range selection",
       "searchOptions": "Search options",
