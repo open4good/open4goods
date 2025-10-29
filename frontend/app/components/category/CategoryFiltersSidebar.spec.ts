@@ -56,7 +56,6 @@ describe('CategoryFiltersSidebar', () => {
     wikiPages: [],
     relatedPosts: [],
     verticalHomeUrl: 'https://open4goods.example/maison',
-    subsetClauses: [],
   }
 
   const mountComponent = (overrides: Partial<typeof baseProps> = {}) =>

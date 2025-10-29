@@ -185,6 +185,8 @@
       "reset": "Clear fast filters"
     },
     "filters": {
+      "activeTitle": "Active filters",
+      "clearActive": "Clear all active filters",
       "fields": {
         "brand": "Brand",
         "condition": "Offer condition",

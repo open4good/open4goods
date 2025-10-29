@@ -51,6 +51,17 @@
         />
       </div>
 
+      <CategoryActiveFilters
+        v-if="hasActiveFilters"
+        class="category-page__active-filters mb-6"
+        :filters="manualFilters"
+        :subset-clauses="activeSubsetClauses"
+        :filter-options="filterOptions"
+        @update:filters="onFiltersChange"
+        @remove-subset-clause="onRemoveSubsetClause"
+        @clear-all="clearActiveFilters"
+      />
+
       <div ref="layoutRef" class="category-page__layout" :style="layoutStyle">
         <template v-if="!isDesktop">
           <v-navigation-drawer
@@ -72,7 +83,6 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :subset-clauses="activeSubsetClauses"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
@@ -107,7 +117,6 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :subset-clauses="activeSubsetClauses"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
@@ -989,6 +998,11 @@ const activeSubsetClauses = computed<CategorySubsetClause[]>(() => {
   })
 })
 
+const hasActiveFilters = computed(() => {
+  const manualCount = manualFilters.value.filters?.length ?? 0
+  return manualCount > 0 || activeSubsetClauses.value.length > 0
+})
+
 const combinedFilters = computed<FilterRequestDto | undefined>(() => {
   const subsetClauses = subsetFilters.value.filters ?? []
   const manualClauses = manualFilters.value.filters ?? []
@@ -1654,6 +1668,11 @@ const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   manualFilters.value = merged.length ? { filters: merged } : {}
 }
 
+const clearActiveFilters = () => {
+  manualFilters.value = {}
+  activeSubsetIds.value = []
+}
+
 const onResetSubsets = () => {
   activeSubsetIds.value = []
 }
@@ -1768,6 +1787,9 @@ const clearAllFilters = () => {
   &__fast-filters-groups
     flex: 1 1 auto
     min-width: 0
+
+  &__active-filters
+    width: 100%
 
   &__search
     position: relative

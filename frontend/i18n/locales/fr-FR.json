@@ -185,6 +185,8 @@
       "reset": "Réinitialiser les filtres rapides"
     },
     "filters": {
+      "activeTitle": "Filtres actifs",
+      "clearActive": "Retirer tous les filtres actifs",
       "fields": {
         "brand": "Marque",
         "condition": "État des offres",

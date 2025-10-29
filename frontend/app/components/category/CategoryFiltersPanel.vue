@@ -1,21 +1,5 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
-    <div v-if="activeChips.length" class="category-filters__active">
-      <div class="category-filters__chips">
-        <v-chip
-          v-for="chip in activeChips"
-          :key="chip.id"
-          closable
-          color="primary"
-          variant="flat"
-          size="small"
-          @click:close="onRemoveChip(chip)"
-        >
-          <span>{{ chip.label }}</span>
-        </v-chip>
-      </div>
-    </div>
-
     <v-expansion-panels multiple class="category-filters__panels">
       <v-expansion-panel value="global" expand-icon="mdi-chevron-down">
         <template #title>
@@ -138,26 +122,6 @@ import type {
 import { useI18n } from 'vue-i18n'
 
 import CategoryFilterList from './filters/CategoryFilterList.vue'
-import type { CategorySubsetClause } from '~/types/category-subset'
-import { resolveFilterFieldTitle } from '~/utils/_field-localization'
-
-type ManualFilterChip = {
-  kind: 'manual'
-  id: string
-  field: string
-  type: 'term' | 'range'
-  term: string | null
-  label: string
-}
-
-type SubsetFilterChip = {
-  kind: 'subset'
-  id: string
-  label: string
-  clause: CategorySubsetClause
-}
-
-type ActiveFilterChip = ManualFilterChip | SubsetFilterChip
 
 const props = withDefaults(
   defineProps<{
@@ -167,7 +131,6 @@ const props = withDefaults(
     filters: FilterRequestDto | null
     impactExpanded: boolean
     technicalExpanded: boolean
-    subsetClauses: CategorySubsetClause[]
   }>(),
   {
     baselineAggregations: () => [],
@@ -178,11 +141,9 @@ const emit = defineEmits<{
   'update:filters': [FilterRequestDto]
   'update:impactExpanded': [boolean]
   'update:technicalExpanded': [boolean]
-  'remove-subset-clause': [CategorySubsetClause]
 }>()
 
 const activeFilters = computed(() => props.filters?.filters ?? [])
-const subsetClauses = computed(() => props.subsetClauses ?? [])
 
 const { t } = useI18n()
 
@@ -200,22 +161,6 @@ const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(
   return (props.baselineAggregations ?? []).reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
     if (aggregation.field && !(aggregation.field in accumulator)) {
       accumulator[aggregation.field] = aggregation
-    }
-
-    return accumulator
-  }, {})
-})
-
-const fieldMetadataMap = computed<Record<string, FieldMetadataDto>>(() => {
-  const entries = [
-    ...(props.filterOptions?.global ?? []),
-    ...(props.filterOptions?.impact ?? []),
-    ...(props.filterOptions?.technical ?? []),
-  ]
-
-  return entries.reduce<Record<string, FieldMetadataDto>>((accumulator, field) => {
-    if (field.mapping) {
-      accumulator[field.mapping] = field
     }
 
     return accumulator
@@ -242,48 +187,6 @@ const technicalPrimary = computed<FieldMetadataDto[]>(() => {
 const technicalRemaining = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.technical ?? []
   return entries.slice(3)
-})
-
-const manualFilterChips = computed<ManualFilterChip[]>(() => {
-  return activeFilters.value.map((filter) => {
-    const mapping = filter.field ?? ''
-    const metadata = mapping ? fieldMetadataMap.value[mapping] : undefined
-    const label = resolveFilterFieldTitle(metadata, t, mapping)
-
-    if (filter.operator === 'term') {
-      const term = filter.terms?.[0] ?? ''
-      return {
-        kind: 'manual' as const,
-        id: `${mapping}-${term}`,
-        field: mapping,
-        type: 'term' as const,
-        term,
-        label: term ? `${label}: ${term}` : label,
-      }
-    }
-
-    return {
-      kind: 'manual' as const,
-      id: `${mapping}-range`,
-      field: mapping,
-      type: 'range' as const,
-      term: null,
-      label: `${label}: ${filter.min ?? '–'} → ${filter.max ?? '–'}`,
-    }
-  })
-})
-
-const subsetFilterChips = computed<SubsetFilterChip[]>(() => {
-  return subsetClauses.value.map((clause) => ({
-    kind: 'subset' as const,
-    id: clause.id,
-    label: clause.label,
-    clause,
-  }))
-})
-
-const activeChips = computed<ActiveFilterChip[]>(() => {
-  return [...subsetFilterChips.value, ...manualFilterChips.value]
 })
 
 const emitFilters = (filters: Filter[]) => {
@@ -327,31 +230,6 @@ const updateTermsFilter = (field: string, terms: string[]) => {
   ])
 }
 
-const removeManualFilter = (field: string, type: 'term' | 'range', term: string | null) => {
-  const next = activeFilters.value.filter((filter) => {
-    if (filter.field !== field) {
-      return true
-    }
-
-    if (type === 'term') {
-      return !(filter.operator === 'term' && filter.terms?.includes(term ?? ''))
-    }
-
-    return !(filter.operator === 'range')
-  })
-
-  emitFilters(next)
-}
-
-const onRemoveChip = (chip: ActiveFilterChip) => {
-  if (chip.kind === 'subset') {
-    emit('remove-subset-clause', chip.clause)
-    return
-  }
-
-  removeManualFilter(chip.field, chip.type, chip.term)
-}
-
 const toggleImpactExpansion = () => {
   emit('update:impactExpanded', !props.impactExpanded)
 }
@@ -359,8 +237,6 @@ const toggleImpactExpansion = () => {
 const toggleTechnicalExpansion = () => {
   emit('update:technicalExpanded', !props.technicalExpanded)
 }
-
-defineExpose({ activeChips })
 </script>
 
 <style scoped lang="sass">
@@ -368,16 +244,6 @@ defineExpose({ activeChips })
   display: flex
   flex-direction: column
   gap: 1rem
-
-  &__active
-    padding: 0.5rem
-    background: rgb(var(--v-theme-surface-glass))
-    border-radius: 0.75rem
-
-  &__chips
-    display: flex
-    flex-direction: column
-    gap: 0.5rem
 
   &__panels
     background: transparent
