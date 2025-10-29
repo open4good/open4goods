@@ -7,7 +7,7 @@
     v-bind="$attrs"
   >
     <meta itemprop="offerCount" :content="String(product.offers?.offersCount ?? 0)" />
-    <meta itemprop="priceCurrency" :content="bestPriceCurrency" />
+    <meta itemprop="priceCurrency" :content="priceCurrencyCode" />
     <div
       v-if="conditionOptions.length"
       class="product-hero__price-conditions"
@@ -34,8 +34,8 @@
       <span class="product-hero__price-value" itemprop="lowPrice">
         {{ bestPriceLabel }}
       </span>
-      <span class="product-hero__price-currency">
-        {{ bestPriceCurrency }}
+      <span v-if="displayCurrency" class="product-hero__price-currency">
+        {{ displayCurrency }}
       </span>
     </div>
     <div class="product-hero__price-meta">
@@ -223,24 +223,40 @@ const hasConditionToggle = computed(() => conditionOptions.value.length > 1)
 
 const conditionToggleAriaLabel = computed(() => t('product.hero.offerConditionsToggleAria'))
 
+const priceCurrencyCode = computed(
+  () => activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR',
+)
+
 const bestPriceLabel = computed(() => {
   const price = activeOffer.value?.price
   if (typeof price !== 'number') {
     return '—'
   }
 
-  const currency = activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR'
+  const currency = priceCurrencyCode.value
+
+  if (currency !== 'EUR') {
+    return n(price, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: price >= 100 ? 0 : 2,
+    })
+  }
 
   return n(price, {
-    style: 'currency',
-    currency,
+    style: 'decimal',
+    minimumFractionDigits: price >= 100 ? 0 : 2,
     maximumFractionDigits: price >= 100 ? 0 : 2,
   })
 })
 
-const bestPriceCurrency = computed(
-  () => activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR',
-)
+const displayCurrency = computed(() => {
+  if (bestPriceLabel.value === '—') {
+    return null
+  }
+
+  return priceCurrencyCode.value === 'EUR' ? '€' : priceCurrencyCode.value
+})
 
 const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
 
@@ -293,7 +309,7 @@ const priceTrendLabel = computed(() => {
     return null
   }
 
-  const currency = activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR'
+  const currency = priceCurrencyCode.value
 
   if (trend.trend === 'PRICE_DECREASE') {
     return t('product.price.trend.decrease', {

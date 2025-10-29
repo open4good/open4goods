@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
-import type { ProductDto } from '~~/shared/api-client'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ProductHero from './ProductHero.vue'
 import { useProductCompareStore } from '~/stores/useProductCompareStore'
 
@@ -219,9 +219,14 @@ describe('ProductHero', () => {
     { title: 'Demo Product', link: '/appliances/demo-product' },
   ]
 
+  const popularAttributes = [
+    { key: 'identity.model', name: 'Model' },
+    { key: 'base.gtinInfo.countryName', name: 'Origin' },
+  ] as AttributeConfigDto[]
+
   const mountComponent = async () =>
     await mountSuspended(ProductHero, {
-      props: { product, breadcrumbs },
+      props: { product, breadcrumbs, popularAttributes },
       global: {
         plugins: [i18n],
         stubs: {
@@ -353,6 +358,22 @@ describe('ProductHero', () => {
     await wrapper.unmount()
   })
 
+  it('displays brand, model and popular attributes beneath the title', async () => {
+    const wrapper = await mountComponent()
+
+    expect(wrapper.get('.product-hero__title').text()).toBe('Demo Product')
+    expect(wrapper.get('.product-hero__brand-line').text()).toBe('BrandCo - Model X')
+
+    const attributes = wrapper.findAll('.product-hero__attribute')
+    expect(attributes).toHaveLength(2)
+    expect(attributes[0]?.text()).toContain('Model')
+    expect(attributes[0]?.text()).toContain('Model X')
+    expect(attributes[1]?.text()).toContain('Origin')
+    expect(attributes[1]?.text()).toContain('France')
+
+    await wrapper.unmount()
+  })
+
   it('toggles compare state with visual feedback', async () => {
     const wrapper = await mountComponent()
     const store = useProductCompareStore()
@@ -404,7 +425,8 @@ describe('ProductHero', () => {
     expect(chips[0]?.classes()).toContain('product-hero__price-chip--active')
 
     const priceValue = wrapper.get('.product-hero__price-value')
-    expect(priceValue.text()).toBe('€649')
+    expect(priceValue.text()).toBe('649')
+    expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
 
     const merchantLink = wrapper.get('.product-hero__price-merchant-link')
     expect(merchantLink.text()).toContain('Merchant U')
@@ -422,7 +444,8 @@ describe('ProductHero', () => {
     await wrapper.vm.$nextTick()
 
     expect(chips[1]?.classes()).toContain('product-hero__price-chip--active')
-    expect(priceValue.text()).toBe('€799')
+    expect(priceValue.text()).toBe('799')
+    expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
 
     const refreshedMerchantLink = wrapper.get('.product-hero__price-merchant-link')
     expect(refreshedMerchantLink.text()).toContain('Shop')

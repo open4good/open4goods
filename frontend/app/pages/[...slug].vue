@@ -29,7 +29,11 @@
 
       <main class="product-page__content">
         <section :id="sectionIds.hero" class="product-page__section">
-          <ProductHero :product="product" :breadcrumbs="productBreadcrumbs" />
+          <ProductHero
+            :product="product"
+            :breadcrumbs="productBreadcrumbs"
+            :popular-attributes="heroPopularAttributes"
+          />
         </section>
 
         <section
@@ -288,6 +292,8 @@ const productTitle = computed(() => {
     `GTIN ${product.value?.gtin ?? gtin}`
   )
 })
+
+const heroPopularAttributes = computed(() => categoryDetail.value?.popularAttributes ?? [])
 
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
