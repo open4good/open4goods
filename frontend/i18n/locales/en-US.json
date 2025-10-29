@@ -81,7 +81,11 @@
   "category": {
     "documentation": {
       "guidesTitle": "Helpful guides",
-      "postsTitle": "Related articles"
+      "postsTitle": "Related articles",
+      "backToCategory": "Back to {category}",
+      "sidebarAria": "{category} documentation navigation",
+      "guidesAria": "Other guides for {category}",
+      "postsAria": "Related blog posts about {category}"
     },
     "ecoscorePage": {
       "breadcrumbLeaf": "impactscore",

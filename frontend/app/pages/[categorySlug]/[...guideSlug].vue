@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import GuideStickySidebar from '~/components/category/guides/GuideStickySidebar.vue'
 import XwikiFullPageRenderer from '~/components/cms/XwikiFullPageRenderer.vue'
 import { useCategories } from '~/composables/categories/useCategories'
-import type { VerticalConfigFullDto } from '~~/shared/api-client'
+import type {
+  BlogPostDto,
+  CategoryBreadcrumbItemDto,
+  VerticalConfigFullDto,
+  WikiPageConfig,
+} from '~~/shared/api-client'
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 
 const normaliseSlug = (value: string | null | undefined) =>
@@ -95,6 +101,131 @@ if (!resolvedPageId) {
 pageId.value = resolvedPageId
 fallbackTitle.value = matchedPage.title ?? null
 fallbackDescription.value = categoryDetail.verticalHomeDescription ?? null
+
+const truncateText = (value: string | null | undefined, limit: number) => {
+  const source = value?.trim() ?? ''
+
+  if (!source.length) {
+    return ''
+  }
+
+  if (source.length <= limit) {
+    return source
+  }
+
+  return `${source.slice(0, limit - 1).trimEnd()}…`
+}
+
+const resolvedGuideTitle = computed(() => {
+  return (
+    fallbackTitle.value?.trim() ||
+    matchedPage.title?.trim() ||
+    slugSegments.at(-1)?.trim() ||
+    normalisedSlug
+  )
+})
+
+const truncatedGuideTitle = computed(() => truncateText(resolvedGuideTitle.value, 48))
+
+const categoryName = computed(() => {
+  return (
+    categoryDetail.verticalHomeTitle?.trim() ||
+    categoryDetail.verticalMetaTitle?.trim() ||
+    categoryDetail.breadCrumb?.at(-1)?.title?.trim() ||
+    categorySlug.value
+  )
+})
+
+const categoryPath = computed(() => {
+  const raw = categoryDetail.verticalHomeUrl?.trim() ?? ''
+
+  if (!raw.length) {
+    return null
+  }
+
+  return raw.startsWith('/') ? raw : `/${raw}`
+})
+
+const buildGuidePath = (guide: WikiPageConfig | null | undefined) => {
+  if (!guide) {
+    return null
+  }
+
+  const guideSlug = normaliseSlug(guide.verticalUrl)
+
+  if (!guideSlug || guideSlug === normalisedSlug) {
+    return null
+  }
+
+  return {
+    title: guide.title?.trim() || guideSlug.replace(/[-_]/g, ' '),
+    to: `/${categorySlug.value}/${guideSlug}`,
+  }
+}
+
+const otherGuideLinks = computed(() => {
+  const guides = categoryDetail.wikiPages ?? []
+
+  const mapped = guides
+    .map(buildGuidePath)
+    .filter((item): item is { title: string; to: string } => !!item?.to)
+
+  const unique = new Map<string, { title: string; to: string }>()
+  mapped.forEach((item) => {
+    if (!unique.has(item.to)) {
+      unique.set(item.to, item)
+    }
+  })
+
+  return Array.from(unique.values())
+})
+
+const relatedPostLinks = computed(() => {
+  const posts = categoryDetail.relatedPosts ?? []
+
+  const mapped = posts
+    .filter((post): post is BlogPostDto => !!post && typeof post === 'object')
+    .map((post) => {
+      const slug = post.url?.trim().replace(/^\/+/, '') ?? ''
+
+      if (!slug.length) {
+        return null
+      }
+
+      return {
+        title: post.title?.trim() || slug.replace(/[-_]/g, ' '),
+        to: `/blog/${slug}`,
+      }
+    })
+    .filter((item): item is { title: string; to: string } => !!item?.to)
+
+  const unique = new Map<string, { title: string; to: string }>()
+  mapped.forEach((item) => {
+    if (!unique.has(item.to)) {
+      unique.set(item.to, item)
+    }
+  })
+
+  return Array.from(unique.values())
+})
+
+const shouldDisplaySidebar = computed(
+  () =>
+    Boolean(
+      categoryPath.value || otherGuideLinks.value.length || relatedPostLinks.value.length,
+    ),
+)
+
+const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
+  const base = (categoryDetail.breadCrumb ?? []).map((item) => ({ ...item }))
+  const guideLeaf = truncatedGuideTitle.value
+
+  if (guideLeaf) {
+    return [...base, { title: guideLeaf }]
+  }
+
+  return base
+})
 </script>
 
 <template>
@@ -103,5 +234,15 @@ fallbackDescription.value = categoryDetail.verticalHomeDescription ?? null
     :page-id="pageId"
     :fallback-title="fallbackTitle"
     :fallback-description="fallbackDescription"
-  />
+    :breadcrumbs="heroBreadcrumbs"
+  >
+    <template v-if="shouldDisplaySidebar" #sidebar>
+      <GuideStickySidebar
+        :category-name="categoryName"
+        :category-path="categoryPath"
+        :guides="otherGuideLinks"
+        :posts="relatedPostLinks"
+      />
+    </template>
+  </XwikiFullPageRenderer>
 </template>

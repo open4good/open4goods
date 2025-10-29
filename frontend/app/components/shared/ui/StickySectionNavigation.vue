@@ -1,7 +1,10 @@
 <template>
   <nav
     class="sticky-section-navigation"
-    :class="`sticky-section-navigation--${orientation}`"
+    :class="[
+      `sticky-section-navigation--${orientation}`,
+      { 'sticky-section-navigation--sticky': sticky },
+    ]"
     :aria-label="ariaLabel"
   >
     <ul class="sticky-section-navigation__list">
@@ -49,6 +52,10 @@ const _props = defineProps({
     type: String,
     default: 'Page navigation',
   },
+  sticky: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits<{ navigate: [string] }>()
@@ -60,14 +67,19 @@ const onNavigate = (sectionId: string) => {
 
 <style scoped>
 .sticky-section-navigation {
-  position: sticky;
-  top: 96px;
+  position: relative;
+  top: auto;
   z-index: 10;
   padding: 1.5rem 1rem;
   border-radius: 18px;
   background: rgba(var(--v-theme-surface-glass));
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(10px);
+}
+
+.sticky-section-navigation--sticky {
+  position: sticky;
+  top: 96px;
 }
 
 .sticky-section-navigation--horizontal {
@@ -140,6 +152,10 @@ const onNavigate = (sectionId: string) => {
 
 .sticky-section-navigation--horizontal .sticky-section-navigation__link {
   justify-content: center;
+}
+
+.sticky-section-navigation--horizontal.sticky-section-navigation--sticky {
+  top: 0;
 }
 
 @media (max-width: 960px) {
