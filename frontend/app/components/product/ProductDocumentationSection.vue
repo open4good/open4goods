@@ -622,7 +622,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: 18px;
-  background: rgba(var(--v-theme-surface-glass), 0.92);
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
 }
 
@@ -690,7 +689,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
 
 .product-docs__tab:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
 }
 
 .product-docs__tab:focus-visible {
@@ -701,7 +699,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
 .product-docs__tab--active {
   border-color: rgba(var(--v-theme-accent-primary-highlight), 0.9);
   background: rgba(var(--v-theme-surface-primary-080), 0.9);
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
 }
 
 .product-docs__tab-title {
