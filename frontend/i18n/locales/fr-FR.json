@@ -1454,6 +1454,7 @@
     "bestOffer": "Meilleure offre",
     "highest": "Prix le plus haut",
     "lowest": "Prix le plus bas",
+    "viewOffer": "Ouvrir l'offre chez {source}",
     "unknownSource": "Source inconnue"
   },
   "noHistory": "L'historique des prix n'est pas encore disponible pour ce produit.",

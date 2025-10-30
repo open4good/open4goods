@@ -44,6 +44,7 @@ const i18nMessages = {
           lowest: 'Prix le plus bas',
           average: 'Prix moyen',
           highest: 'Prix le plus haut',
+          viewOffer: "Ouvrir l'offre chez {source}",
         },
         noHistory: "L'historique des prix n'est pas encore disponible pour ce produit.",
         headers: {
@@ -83,6 +84,7 @@ const i18nMessages = {
           lowest: 'Lowest price',
           average: 'Average price',
           highest: 'Highest price',
+          viewOffer: 'Open offer from {source}',
         },
         noHistory: 'Price history is not yet available for this product.',
         headers: {
@@ -114,6 +116,7 @@ describe('ProductPriceSection', () => {
       currency: 'EUR',
       url: 'https://merchant-b.example',
       compensation: 2.5,
+      affiliationToken: 'shared-token',
     },
     bestNewOffer: {
       datasourceName: 'Merchant B',
@@ -121,6 +124,7 @@ describe('ProductPriceSection', () => {
       currency: 'EUR',
       url: 'https://merchant-b.example',
       compensation: 2.5,
+      affiliationToken: 'abc123',
     },
     bestOccasionOffer: {
       datasourceName: 'Merchant U',
@@ -129,6 +133,7 @@ describe('ProductPriceSection', () => {
       url: 'https://merchant-u.example',
       compensation: 1.5,
       condition: 'OCCASION',
+      affiliationToken: 'def456',
     },
     offersByCondition: {
       NEW: [
@@ -224,6 +229,13 @@ describe('ProductPriceSection', () => {
               return () => slots.default?.()
             },
           }),
+          NuxtLink: defineComponent({
+            name: 'NuxtLinkStub',
+            props: { to: { type: String, required: true } },
+            setup(props, { slots }) {
+              return () => h('a', { href: props.to, class: 'nuxt-link-stub' }, slots.default?.())
+            },
+          }),
           'v-table': TableStub,
         },
       },
@@ -261,6 +273,8 @@ describe('ProductPriceSection', () => {
     const markAreaLabel = option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
     expect(markAreaLabel).toBe('Summer sales')
     expect(option?.series?.[0]?.type).toBe('bar')
+    expect(option?.series?.[0]?.barCategoryGap).toBe('0%')
+    expect(option?.series?.[0]?.barGap).toBe('0%')
 
     await wrapper.unmount()
   })
@@ -270,9 +284,29 @@ describe('ProductPriceSection', () => {
 
     const metrics = wrapper.findAll('.product-price__metrics')
     expect(metrics).toHaveLength(2)
-    expect(metrics[0]?.text()).toContain('Meilleure offre')
     expect(metrics[0]?.text()).toMatch(/799/)
     expect(metrics[0]?.text()).toMatch(/Prix le plus bas/)
+    expect(wrapper.findAll('.product-price__metrics-stat-icon')).toHaveLength(6)
+
+    await wrapper.unmount()
+  })
+
+  it('links to the affiliation redirect when best offers have a token', async () => {
+    const wrapper = await mountComponent()
+
+    const links = wrapper.findAll('.product-price__metrics-offer--link')
+    expect(links).toHaveLength(2)
+    expect(links[0]?.attributes('href')).toBe('/contrib/abc123')
+    expect(links[1]?.attributes('href')).toBe('/contrib/def456')
+
+    await wrapper.unmount()
+  })
+
+  it('omits best offer highlight when no best new offer is available', async () => {
+    const wrapper = await mountComponent({ bestNewOffer: undefined })
+
+    expect(wrapper.findAll('.product-price__metrics-highlight')).toHaveLength(1)
+    expect(wrapper.find('.product-price__metrics-highlight').text()).toContain('Merchant U')
 
     await wrapper.unmount()
   })
