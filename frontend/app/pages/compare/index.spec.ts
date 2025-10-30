@@ -1,279 +1,311 @@
+import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
-import { createPinia, setActivePinia } from 'pinia'
-import { reactive } from 'vue'
-import { createI18n } from 'vue-i18n'
-import { createVuetify } from 'vuetify'
-import type { CompareProductEntry } from '~/services/compare/CompareService'
-import type {
-  AttributeConfigDto,
-  ProductDto,
-  VerticalConfigFullDto,
-} from '~~/shared/api-client'
+import { defineComponent, h, reactive, ref } from 'vue'
+import { flushPromises } from '@vue/test-utils'
 
-vi.mock('~/composables/usePluralizedTranslation', () => ({
-  usePluralizedTranslation: () => ({
-    translatePlural: (_key: string, count: number) => (count === 1 ? '1 offer' : `${count} offers`),
+type CompareProductEntryLike = {
+  gtin: string
+  verticalId: string | null
+  product: Record<string, unknown>
+  title: string
+  brand: string | null
+  model: string | null
+  coverImage: string | null
+  impactScore: number | null
+  review: { description: string | null; pros: string[]; cons: string[] }
+  country: { name: string; flag?: string } | null
+}
+
+const loadProductsMock = vi.fn<[string[]], Promise<CompareProductEntryLike[]>>()
+const loadVerticalMock = vi.fn<[string | null], Promise<Record<string, unknown> | null>>()
+const hasMixedVerticalsMock = vi.fn<[CompareProductEntryLike[]], boolean>()
+
+vi.mock('~/services/compare/CompareService', () => ({
+  createCompareService: () => ({
+    loadProducts: loadProductsMock,
+    loadVertical: loadVerticalMock,
+    hasMixedVerticals: hasMixedVerticalsMock,
   }),
 }))
 
-const routerPush = vi.fn(async () => {})
-const routerReplace = vi.fn(async () => {})
+const compareStore = {
+  clear: vi.fn(),
+  addProduct: vi.fn(),
+  removeById: vi.fn(),
+}
 
-const route = reactive({
-  path: '/compare',
-  hash: '#123Vs456',
-})
+vi.mock('~/stores/useProductCompareStore', () => ({
+  useProductCompareStore: () => compareStore,
+}))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: routerPush,
-    replace: routerReplace,
+vi.mock('~/utils/_compare-url', () => ({
+  parseCompareHash: vi.fn(() => ['1234567890123']),
+  buildCompareHash: vi.fn(() => '#1234567890123'),
+}))
+
+vi.mock('~/utils/_product-pricing', () => ({
+  formatBestPrice: () => null,
+  formatOffersCount: () => null,
+}))
+
+vi.mock('~/utils/_product-attributes', () => ({
+  formatAttributeValue: () => null,
+  resolveAttributeRawValueByKey: () => null,
+}))
+
+vi.mock('~/components/shared/ui/ImpactScore.vue', () => ({
+  default: defineComponent({
+    name: 'ImpactScoreStub',
+    props: { score: { type: Number, default: 0 } },
+    setup(props) {
+      return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+    },
   }),
-  useRoute: () => route,
+}))
+
+const localeRef = ref('fr-FR')
+
+const messages: Record<string, string> = {
+  'compare.title': 'Comparateur de produits',
+  'compare.subtitle':
+    'Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.',
+  'compare.hero.title': 'Comparateur de {verticalTitle}',
+  'compare.hero.subtitle':
+    'Analysez les fiches techniques, les prix et les indicateurs écologiques des {verticalTitle} sélectionnés.',
+  'compare.hero.backToCategory': 'Retour aux {verticalTitle}',
+  'compare.hero.backAria': 'Retourner à la catégorie {verticalTitle}',
+  'compare.hero.backFallback': 'Retour à la catégorie',
+  'compare.hero.backAriaFallback': 'Revenir à la catégorie précédente',
+  'compare.a11y.featureColumn': 'Critères',
+  'compare.a11y.viewProduct': 'Voir {name}',
+  'compare.a11y.bestValue': 'Meilleure valeur',
+  'compare.textual.description': 'Description',
+  'compare.textual.pros': 'Atouts',
+  'compare.textual.cons': 'Limites',
+  'compare.textual.empty': '—',
+  'compare.pricing.newPrice': 'Prix neuf',
+  'compare.pricing.occasionPrice': 'Prix occasion',
+  'compare.pricing.offersCount': 'Nombre d’offres',
+  'compare.ecological.ecoscore': 'Écoscore',
+  'compare.ecological.brandSustainability': 'Durabilité marque',
+  'compare.ecological.dataQuality': 'Qualité des données',
+  'compare.sections.pricing': 'Tarifs',
+  'compare.sections.ecological': 'Impact écologique',
+  'compare.sections.technical': 'Fiche technique',
+  'compare.sections.technicalGroupFallback': 'Autres',
+  'compare.alerts.verticalMismatch': 'Alerte',
+  'compare.actions.remove': 'Retirer {name}',
+  'compare.actions.removeShort': 'Retirer',
+  'compare.states.loading': 'Chargement',
+  'compare.empty.title': 'Ajoutez des produits',
+  'compare.empty.description': 'Utilisez le bouton comparer.',
+  'compare.errors.loadFailed': 'Échec de chargement',
+  'category.products.compare.itemsCount': '{count} produits',
+  'components.impactScore.tooltip': '{value} sur {max}',
+}
+
+const translate = (key: string, params: Record<string, unknown> = {}) => {
+  const template = messages[key] ?? key
+  return template.replace(/\{(\w+)\}/g, (_, match) => String(params[match] ?? ''))
+}
+
+mockNuxtImport('useI18n', () => () => ({
+  t: (key: string, params: Record<string, unknown> = {}) => translate(key, params),
+  n: (value: number | bigint, _options?: Intl.NumberFormatOptions) => String(value),
+  locale: localeRef,
+}))
+
+mockNuxtImport('useId', () => () => 'compare-hero')
+
+const route = reactive({ hash: '#compare=1234567890123' })
+const routerReplace = vi.fn()
+
+mockNuxtImport('useRoute', () => () => route)
+mockNuxtImport('useRouter', () => () => ({
+  replace: routerReplace,
+  resolve: (to: unknown) => {
+    if (typeof to === 'string') {
+      return { href: to }
+    }
+
+    if (to && typeof to === 'object' && 'path' in to && typeof to.path === 'string') {
+      return { href: to.path }
+    }
+
+    if (to && typeof to === 'object' && 'href' in to && typeof to.href === 'string') {
+      return { href: to.href }
+    }
+
+    return { href: '' }
+  },
+}))
+
+vi.mock('~/composables/usePluralizedTranslation', () => ({
+  usePluralizedTranslation: () => ({
+    translatePlural: (_key: string, count: number) => `${count} produits`,
+  }),
 }))
 
 vi.mock('~~/shared/utils/localized-routes', () => ({
   resolveLocalizedRoutePath: () => '/compare',
 }))
 
-const entries: CompareProductEntry[] = [
-  {
-    gtin: '123',
-    product: {
-      gtin: 123,
-      base: {
-        vertical: 'electronics',
-        bestName: 'Product A',
-        gtinInfo: { countryName: 'France', countryFlagUrl: '/flags/fr.svg' },
-      },
-      identity: { brand: 'Brand A', model: 'Model A', bestName: 'Product A' },
-      resources: { coverImagePath: '/images/a.jpg' },
-      offers: {
-        bestNewOffer: { price: 100, currency: 'EUR' },
-        bestOccasionOffer: { price: 80, currency: 'EUR' },
-        offersCount: 5,
-      },
-      scores: {
-        ecoscore: { percent: 60 },
-        scores: {
-          BRAND_SUSTAINABILITY: { percent: 70 },
-          DATA_QUALITY: { percent: 40 },
-        },
-      },
-      attributes: {
-        indexedAttributes: {
-          POWER: { name: 'Power', value: '500', numericValue: 500 },
-          ECO: { name: 'Eco attr', value: '40', numericValue: 40 },
-        },
-        classifiedAttributes: [
-          {
-            name: 'Dimensions',
-            attributes: [{ name: 'Height', value: '10 cm' }],
-          },
-        ],
-      },
-      aiReview: {
-        review: {
-          description: '<p>A strong product.</p>',
-          pros: ['<strong>Efficient</strong>'],
-          cons: ['<em>Heavy</em>'],
-        },
-      },
-    } as ProductDto,
-    verticalId: 'electronics',
-    title: 'Product A',
-    brand: 'Brand A',
-    model: 'Model A',
-    coverImage: '/images/a.jpg',
-    impactScore: 3,
-    review: {
-      description: 'A strong product.',
-      pros: ['<strong>Efficient</strong>'],
-      cons: ['<em>Heavy</em>'],
+const simpleStub = (tag: string) =>
+  defineComponent({
+    name: `${tag}-stub`,
+    setup(_props, { slots, attrs }) {
+      return () => h(tag, attrs, slots.default?.())
     },
-    country: { name: 'France', flag: '/flags/fr.svg' },
-  },
-  {
-    gtin: '456',
-    product: {
-      gtin: 456,
-      base: {
-        vertical: 'electronics',
-        bestName: 'Product B',
-        gtinInfo: { countryName: 'Germany', countryFlagUrl: '/flags/de.svg' },
-      },
-      identity: { brand: 'Brand B', model: 'Model B', bestName: 'Product B' },
-      resources: { coverImagePath: '/images/b.jpg' },
-      offers: {
-        bestNewOffer: { price: 120, currency: 'EUR' },
-        bestOccasionOffer: { price: 90, currency: 'EUR' },
-        offersCount: 3,
-      },
-      scores: {
-        ecoscore: { percent: 75 },
-        scores: {
-          BRAND_SUSTAINABILITY: { percent: 65 },
-          DATA_QUALITY: { percent: 55 },
-        },
-      },
-      attributes: {
-        indexedAttributes: {
-          POWER: { name: 'Power', value: '450', numericValue: 450 },
-          ECO: { name: 'Eco attr', value: '35', numericValue: 35 },
-        },
-        classifiedAttributes: [
-          {
-            name: 'Dimensions',
-            attributes: [{ name: 'Height', value: '11 cm' }],
-          },
-        ],
-      },
-      aiReview: {
-        review: {
-          description: '<p>An efficient model.</p>',
-          pros: ['<strong>Silent</strong>'],
-          cons: ['<em>Bulky</em>'],
-        },
-      },
-    } as ProductDto,
-    verticalId: 'electronics',
-    title: 'Product B',
-    brand: 'Brand B',
-    model: 'Model B',
-    coverImage: '/images/b.jpg',
-    impactScore: 4,
-    review: {
-      description: 'An efficient model.',
-      pros: ['<strong>Silent</strong>'],
-      cons: ['<em>Bulky</em>'],
-    },
-    country: { name: 'Germany', flag: '/flags/de.svg' },
-  },
-]
-
-const powerConfig: AttributeConfigDto = {
-  key: 'POWER',
-  name: 'Power',
-  icon: 'mdi-flash',
-  unit: 'W',
-  betterIs: 'GREATER',
-}
-
-const ecoConfig: AttributeConfigDto = {
-  key: 'ECO',
-  name: 'Eco attribute',
-  icon: 'mdi-leaf',
-  asScore: true,
-  betterIs: 'LOWER',
-}
-
-const verticalConfig: VerticalConfigFullDto = {
-  attributesConfig: {
-    configs: [powerConfig, ecoConfig],
-  },
-  popularAttributes: [powerConfig],
-} as VerticalConfigFullDto
-
-vi.mock('~/services/compare/CompareService', async (importOriginal) => {
-  const actual = (await importOriginal()) as typeof import('~/services/compare/CompareService')
-  return {
-    ...actual,
-    createCompareService: () => ({
-      loadProducts: vi.fn().mockResolvedValue(entries),
-      loadVertical: vi.fn().mockResolvedValue(verticalConfig),
-      hasMixedVerticals: vi.fn().mockReturnValue(false),
-    }),
-  }
-})
+  })
 
 const mountPage = async () => {
-  const module = await import('./index.vue')
-  const ComparePage = module.default
-  const pinia = createPinia()
-  setActivePinia(pinia)
+  const component = (await import('./index.vue')).default
 
-  const i18n = createI18n({
-    legacy: false,
-    locale: 'en-US',
-    messages: {
-      'en-US': {
-        compare: {
-          title: 'Product comparison',
-          subtitle: 'subtitle',
-          alerts: { verticalMismatch: 'Mismatch' },
-          states: { loading: 'Loading…' },
-          empty: { title: 'Empty', description: 'desc' },
-          sections: {
-            overview: 'Overview',
-            pricing: 'Pricing',
-            ecological: 'Ecological',
-            technical: 'Technical',
-            technicalGroupFallback: 'Other specs',
-          },
-          a11y: {
-            featureColumn: 'Feature column',
-            viewProduct: 'View {name}',
-            bestValue: 'Best value',
-          },
-          actions: { remove: 'Remove {name}', removeShort: 'Remove' },
-          textual: { description: 'Description', pros: 'Pros', cons: 'Cons', empty: 'N/A' },
-          pricing: { newPrice: 'New price', occasionPrice: 'Second-hand price', offersCount: 'Offer count' },
-          ecological: {
-            ecoscore: 'Ecoscore',
-            brandSustainability: 'Brand sustainability',
-            dataQuality: 'Data quality',
-          },
-          errors: { loadFailed: 'Error' },
-        },
-      },
-    },
-  })
-
-  const vuetify = createVuetify()
-
-  return mount(ComparePage, {
+  return mountSuspended(component, {
     global: {
-      plugins: [pinia, i18n, vuetify],
       stubs: {
-        VAlert: { template: '<div class="v-alert"><slot /></div>' },
-        VProgressLinear: { template: '<div class="v-progress" />' },
-        VIcon: { template: '<span class="v-icon"><slot /></span>' },
-        VBtn: { template: '<button><slot /></button>' },
-        VTooltip: { template: '<div><slot name="activator" :props="{}"></slot><slot /></div>' },
-        NuxtImg: { template: '<img />' },
-        ImpactScore: { template: '<div class="impact-score" />' },
+        VContainer: simpleStub('div'),
+        VIcon: defineComponent({
+          name: 'VIconStub',
+          props: { icon: { type: String, default: '' }, size: { type: [Number, String], default: 24 } },
+          setup(props) {
+            return () => h('span', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
+          },
+        }),
+        VAlert: simpleStub('div'),
+        VProgressLinear: simpleStub('div'),
+        VBtn: defineComponent({
+          name: 'VBtnStub',
+          props: { type: { type: String, default: 'button' } },
+          setup(props, { slots, attrs }) {
+            return () => h('button', { ...attrs, type: props.type }, slots.default?.())
+          },
+        }),
+        VTooltip: defineComponent({
+          name: 'VTooltipStub',
+          props: { text: { type: String, default: '' }, location: { type: String, default: '' } },
+          setup(_props, { slots }) {
+            const activator = slots.activator?.({ props: {} })
+            const content = slots.default?.()
+            return () => h('div', { class: 'v-tooltip-stub' }, [activator, content])
+          },
+        }),
+        NuxtLink: defineComponent({
+          name: 'NuxtLinkStub',
+          props: {
+            to: { type: [String, Object], default: '' },
+            custom: { type: Boolean, default: false },
+          },
+          setup(props, { slots, attrs }) {
+            const resolveHref = () => {
+              if (typeof props.to === 'string') {
+                return props.to
+              }
+
+              if (props.to && typeof props.to === 'object') {
+                if ('path' in props.to && typeof props.to.path === 'string') {
+                  return props.to.path
+                }
+
+                if ('href' in props.to && typeof props.to.href === 'string') {
+                  return props.to.href
+                }
+              }
+
+              return ''
+            }
+
+            if (props.custom) {
+              return () =>
+                slots.default?.({
+                  href: resolveHref(),
+                  navigate: vi.fn(),
+                  isActive: false,
+                  isExactActive: false,
+                })
+            }
+
+            return () => h('a', { ...attrs, href: resolveHref() }, slots.default?.())
+          },
+        }),
+        NuxtImg: defineComponent({
+          name: 'NuxtImgStub',
+          props: { alt: { type: String, default: '' }, src: { type: String, default: '' } },
+          setup(props) {
+            return () => h('img', { alt: props.alt, src: props.src })
+          },
+        }),
       },
     },
   })
 }
 
-describe('Compare page', () => {
+const createEntry = (overrides: Partial<CompareProductEntryLike> = {}): CompareProductEntryLike => ({
+  gtin: '1234567890123',
+  verticalId: 'vertical-1',
+  product: {
+    identity: { brand: 'Brand', model: 'Model' },
+    base: {},
+    offers: {},
+    scores: {},
+    attributes: {},
+  },
+  title: 'Produit 1',
+  brand: 'Brand',
+  model: 'Model',
+  coverImage: null,
+  impactScore: 4,
+  review: { description: null, pros: [], cons: [] },
+  country: null,
+  ...overrides,
+})
+
+describe('Compare page hero', () => {
   beforeEach(() => {
-    routerPush.mockReset()
+    loadProductsMock.mockReset()
+    loadVerticalMock.mockReset()
+    hasMixedVerticalsMock.mockReset()
+    compareStore.clear.mockReset()
+    compareStore.addProduct.mockReset()
+    compareStore.removeById.mockReset()
     routerReplace.mockReset()
-    routerPush.mockResolvedValue(undefined)
-    routerReplace.mockResolvedValue(undefined)
+    route.hash = '#compare=1234567890123'
+    localeRef.value = 'fr-FR'
+    hasMixedVerticalsMock.mockReturnValue(false)
   })
 
-  it('renders fetched products and textual data', async () => {
+  it('renders the hero with the vertical title in lowercase when available', async () => {
+    loadProductsMock.mockResolvedValue([createEntry({ verticalId: 'vertical-1' })])
+    loadVerticalMock.mockResolvedValue({
+      verticalHomeTitle: 'Lave-vaisselle',
+      verticalHomeUrl: 'electromenager/lave-vaisselle',
+    })
+
+    const wrapper = await mountPage()
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.get('.compare-page__title').text()).toBe('Comparateur de lave-vaisselle')
+    expect(wrapper.get('.compare-page__subtitle').text()).toBe(
+      'Analysez les fiches techniques, les prix et les indicateurs écologiques des lave-vaisselle sélectionnés.',
+    )
+
+    const backLink = wrapper.get('.compare-page__hero-back')
+    expect(backLink.text()).toContain('Retour aux lave-vaisselle')
+    expect(backLink.attributes('href')).toBe('/electromenager/lave-vaisselle')
+  })
+
+  it('falls back to generic hero copy when the vertical configuration is unavailable', async () => {
+    loadProductsMock.mockResolvedValue([createEntry({ verticalId: null })])
+    loadVerticalMock.mockResolvedValue(null)
+
     const wrapper = await mountPage()
     await flushPromises()
 
-    const productHeaders = wrapper.findAll('.compare-grid__product')
-    expect(productHeaders).toHaveLength(2)
-    expect(wrapper.text()).toContain('Model A')
-    expect(wrapper.text()).toContain('Model B')
-    expect(wrapper.text()).toContain('A strong product.')
-    expect(wrapper.findAll('.compare-grid__list-item')).toHaveLength(4)
-  })
-
-  it('updates the hash when removing a product', async () => {
-    const wrapper = await mountPage()
-    await flushPromises()
-
-    const removeButton = wrapper.get('.compare-grid__product-remove')
-    await removeButton.trigger('click')
-    expect(routerReplace).toHaveBeenCalled()
+    expect(wrapper.get('.compare-page__title').text()).toBe('Comparateur de produits')
+    expect(wrapper.get('.compare-page__subtitle').text()).toBe(
+      'Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.',
+    )
+    expect(wrapper.find('.compare-page__hero-back').exists()).toBe(false)
   })
 })

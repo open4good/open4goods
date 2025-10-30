@@ -1249,6 +1249,14 @@
   "compare": {
     "title": "Product comparison",
     "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",
+    "hero": {
+      "title": "Comparing {verticalTitle}",
+      "subtitle": "Contrast specifications, pricing and ecological indicators across the selected {verticalTitle}.",
+      "backToCategory": "Back to {verticalTitle}",
+      "backAria": "Go back to the {verticalTitle} category",
+      "backFallback": "Back to the category",
+      "backAriaFallback": "Return to the previous category"
+    },
     "alerts": {
       "verticalMismatch": "These products belong to different categories. Some metrics may not be comparable."
     },
