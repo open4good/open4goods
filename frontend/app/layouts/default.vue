@@ -32,13 +32,19 @@
       </template>
     </TheMainFooter>
 
-    <CategoryComparePanel />
+    <CategoryComparePanel v-if="showComparePanel" />
   </v-app>
 </template>
 
 <script setup lang="ts">
 const drawer = useState('mobileDrawer', () => false)
 const drawerStore = useState("mobileDrawer", () => false);
+const route = useRoute()
+
+const showComparePanel = computed(() => {
+  const routeName = route.name?.toString() ?? ''
+  return !routeName.startsWith('compare')
+})
 
 const toggleDrawer = () => {
   drawerStore.value = !drawerStore.value;

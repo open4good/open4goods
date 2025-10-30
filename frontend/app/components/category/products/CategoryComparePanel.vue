@@ -95,7 +95,7 @@ import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import { buildCompareHashFragment } from '~/utils/_compare-url'
+import { buildCompareHash } from '~/utils/_compare-url'
 import { useProductCompareStore, type CompareListItem } from '~/stores/useProductCompareStore'
 
 const emit = defineEmits<{
@@ -128,12 +128,8 @@ const remove = (id: string) => {
   compareStore.removeById(id)
 
   if (route.path === comparePath.value) {
-    const hashFragment = buildCompareHashFragment(items.value.map((item) => item.gtin))
-    if (hashFragment) {
-      router.replace({ path: comparePath.value, hash: hashFragment })
-    } else {
-      router.replace({ path: comparePath.value })
-    }
+    const hash = buildCompareHash(items.value.map((item) => item.gtin))
+    router.replace(hash ? `${comparePath.value}${hash}` : comparePath.value)
   }
 }
 
@@ -147,13 +143,13 @@ const launchComparison = () => {
   }
 
   const gtins = items.value.map((item) => item.gtin)
-  const hashFragment = buildCompareHashFragment(gtins)
+  const hash = buildCompareHash(gtins)
 
-  if (!hashFragment) {
+  if (!hash) {
     return
   }
 
-  router.push({ path: comparePath.value, hash: hashFragment })
+  router.push(`${comparePath.value}${hash}`)
   emit('launch-comparison', [...items.value])
 }
 

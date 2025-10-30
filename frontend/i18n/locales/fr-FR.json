@@ -1267,7 +1267,9 @@
       "technicalGroupFallback": "Autres caractéristiques"
     },
     "a11y": {
-      "featureColumn": "Critères de comparaison"
+      "featureColumn": "Critères de comparaison",
+      "viewProduct": "Voir la fiche produit de {name}",
+      "bestValue": "Meilleure valeur pour ce critère"
     },
     "actions": {
       "remove": "Retirer {name} de la comparaison",

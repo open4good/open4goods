@@ -211,7 +211,11 @@ const mountPage = async () => {
             technical: 'Technical',
             technicalGroupFallback: 'Other specs',
           },
-          a11y: { featureColumn: 'Feature column' },
+          a11y: {
+            featureColumn: 'Feature column',
+            viewProduct: 'View {name}',
+            bestValue: 'Best value',
+          },
           actions: { remove: 'Remove {name}', removeShort: 'Remove' },
           textual: { description: 'Description', pros: 'Pros', cons: 'Cons', empty: 'N/A' },
           pricing: { newPrice: 'New price', occasionPrice: 'Second-hand price', offersCount: 'Offer count' },
