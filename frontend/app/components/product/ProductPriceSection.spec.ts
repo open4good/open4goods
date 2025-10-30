@@ -125,6 +125,7 @@ describe('ProductPriceSection', () => {
       url: 'https://merchant-b.example',
       compensation: 2.5,
       affiliationToken: 'abc123',
+      favicon: 'https://merchant-b.example/icon.png',
     },
     bestOccasionOffer: {
       datasourceName: 'Merchant U',
@@ -134,6 +135,7 @@ describe('ProductPriceSection', () => {
       compensation: 1.5,
       condition: 'OCCASION',
       affiliationToken: 'def456',
+      favicon: 'https://merchant-u.example/icon.png',
     },
     offersByCondition: {
       NEW: [
@@ -273,6 +275,7 @@ describe('ProductPriceSection', () => {
     const markAreaLabel = option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
     expect(markAreaLabel).toBe('Summer sales')
     expect(option?.series?.[0]?.type).toBe('bar')
+    expect(option?.series?.[0]?.barWidth).toBe('98%')
     expect(option?.series?.[0]?.barCategoryGap).toBe('0%')
     expect(option?.series?.[0]?.barGap).toBe('0%')
 
@@ -294,10 +297,23 @@ describe('ProductPriceSection', () => {
   it('links to the affiliation redirect when best offers have a token', async () => {
     const wrapper = await mountComponent()
 
-    const links = wrapper.findAll('.product-price__metrics-offer--link')
+    const headerHighlights = wrapper.findAll('.product-price__chart-header .product-price__metrics-highlight')
+    expect(headerHighlights).toHaveLength(2)
+    const links = wrapper.findAll('.product-price__chart-header .product-price__metrics-offer--link')
     expect(links).toHaveLength(2)
     expect(links[0]?.attributes('href')).toBe('/contrib/abc123')
     expect(links[1]?.attributes('href')).toBe('/contrib/def456')
+
+    await wrapper.unmount()
+  })
+
+  it('displays compact favicon sizes for best offer highlights', async () => {
+    const wrapper = await mountComponent()
+
+    const icons = wrapper.findAll('.product-price__metrics-highlight img')
+    expect(icons).toHaveLength(2)
+    expect(icons.every((icon) => icon.attributes('width') === '48')).toBe(true)
+    expect(icons.every((icon) => icon.attributes('height') === '48')).toBe(true)
 
     await wrapper.unmount()
   })
