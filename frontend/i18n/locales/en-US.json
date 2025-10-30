@@ -1434,9 +1434,17 @@
       },
       "newOffers": "New offers",
       "noOccasionHistory": "No history for second-hand offers.",
-      "occasionOffers": "Second-hand offers",
-      "offerList": "Offer list",
-      "subtitle": "Track price evolution and compare offers.",
+  "occasionOffers": "Second-hand offers",
+  "offerList": "Offer list",
+  "metrics": {
+    "average": "Average price",
+    "bestOffer": "Best offer",
+    "highest": "Highest price",
+    "lowest": "Lowest price",
+    "unknownSource": "Unknown source"
+  },
+  "noHistory": "Price history is not yet available for this product.",
+  "subtitle": "Track price evolution and compare offers.",
       "title": "Prices and trends",
       "trend": {
         "decrease": "Price drop of {amount}",

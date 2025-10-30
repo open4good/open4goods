@@ -1434,9 +1434,17 @@
       },
       "newOffers": "Offres neuves",
       "noOccasionHistory": "Pas d'historique pour les offres d'occasion.",
-      "occasionOffers": "Offres d'occasion",
-      "offerList": "Liste des offres",
-      "subtitle": "Suivez l’évolution des prix et comparez les offres.",
+  "occasionOffers": "Offres d'occasion",
+  "offerList": "Liste des offres",
+  "metrics": {
+    "average": "Prix moyen",
+    "bestOffer": "Meilleure offre",
+    "highest": "Prix le plus haut",
+    "lowest": "Prix le plus bas",
+    "unknownSource": "Source inconnue"
+  },
+  "noHistory": "L'historique des prix n'est pas encore disponible pour ce produit.",
+  "subtitle": "Suivez l’évolution des prix et comparez les offres.",
       "title": "Prix et évolution",
       "trend": {
         "decrease": "Baisse de {amount}",
