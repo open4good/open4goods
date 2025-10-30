@@ -96,6 +96,7 @@ const messages: Record<string, string> = {
   'compare.alerts.verticalMismatch': 'Alerte',
   'compare.actions.remove': 'Retirer {name}',
   'compare.actions.removeShort': 'Retirer',
+  'compare.headers.productOverview': 'Visuel et Impact Score',
   'compare.states.loading': 'Chargement',
   'compare.empty.title': 'Ajoutez des produits',
   'compare.empty.description': 'Utilisez le bouton comparer.',

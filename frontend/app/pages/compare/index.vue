@@ -74,48 +74,6 @@
                 class="compare-grid__product"
                 role="columnheader"
               >
-                <div class="compare-grid__product-media">
-                  <NuxtLink
-                    v-if="productLink(product)"
-                    :to="productLink(product)"
-                    class="compare-grid__product-link"
-                    :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
-                  >
-                    <NuxtImg
-                      v-if="product.coverImage"
-                      :src="product.coverImage"
-                      :alt="product.title"
-                      width="180"
-                      height="180"
-                      format="webp"
-                      class="compare-grid__product-image"
-                    />
-                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                      {{ productInitials(product.title) }}
-                    </div>
-                  </NuxtLink>
-                  <template v-else>
-                    <NuxtImg
-                      v-if="product.coverImage"
-                      :src="product.coverImage"
-                      :alt="product.title"
-                      width="180"
-                      height="180"
-                      format="webp"
-                      class="compare-grid__product-image"
-                    />
-                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                      {{ productInitials(product.title) }}
-                    </div>
-                  </template>
-                </div>
-                <ImpactScore
-                  v-if="product.impactScore !== null"
-                  :score="product.impactScore"
-                  :max="5"
-                  size="medium"
-                  class="compare-grid__product-impact"
-                />
                 <NuxtLink
                   v-if="productLink(product)"
                   :to="productLink(product)"
@@ -155,6 +113,63 @@
                 </v-btn>
               </article>
             </div>
+          </div>
+
+          <div class="compare-grid__media" role="row">
+            <div class="compare-grid__feature compare-grid__feature--media" role="rowheader">
+              <span class="compare-grid__feature-label compare-grid__feature-label--muted">
+                {{ t('compare.headers.productOverview') }}
+              </span>
+            </div>
+            <article
+              v-for="product in products"
+              :key="product.gtin"
+              class="compare-grid__media-product"
+              role="cell"
+            >
+              <div class="compare-grid__product-media">
+                <NuxtLink
+                  v-if="productLink(product)"
+                  :to="productLink(product)"
+                  class="compare-grid__product-link"
+                  :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
+                >
+                  <NuxtImg
+                    v-if="product.coverImage"
+                    :src="product.coverImage"
+                    :alt="product.title"
+                    width="180"
+                    height="180"
+                    format="webp"
+                    class="compare-grid__product-image"
+                  />
+                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                    {{ productInitials(product.title) }}
+                  </div>
+                </NuxtLink>
+                <template v-else>
+                  <NuxtImg
+                    v-if="product.coverImage"
+                    :src="product.coverImage"
+                    :alt="product.title"
+                    width="180"
+                    height="180"
+                    format="webp"
+                    class="compare-grid__product-image"
+                  />
+                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                    {{ productInitials(product.title) }}
+                  </div>
+                </template>
+              </div>
+              <ImpactScore
+                v-if="product.impactScore !== null"
+                :score="product.impactScore"
+                :max="5"
+                size="medium"
+                class="compare-grid__product-impact"
+              />
+            </article>
           </div>
 
           <div v-for="row in textualRows" :key="row.key" class="compare-grid__row" role="row">
@@ -1394,7 +1409,7 @@ const productInitials = (title: string) => {
 
 <style scoped lang="sass">
 .compare-page
-  --compare-grid-sticky-offset: clamp(88px, 9vw, 132px)
+  --compare-grid-sticky-offset: var(--v-layout-top, 72px)
   display: flex
   flex-direction: column
   gap: 2.5rem
@@ -1535,7 +1550,7 @@ const productInitials = (title: string) => {
   background: rgba(var(--v-theme-surface-glass), 0.94)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
   border-radius: 16px
-  padding: 1rem
+  padding: 0.75rem 1rem
   box-shadow: 0 22px 48px -32px rgba(var(--v-theme-shadow-primary-600), 0.35)
   backdrop-filter: blur(16px)
 
@@ -1549,12 +1564,35 @@ const productInitials = (title: string) => {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
   gap: 1rem
 
-.compare-grid__product
+.compare-grid__media
+  display: grid
+  grid-template-columns: minmax(180px, 220px) repeat(auto-fit, minmax(220px, 1fr))
+  gap: 1rem
+  align-items: start
+
+.compare-grid__feature--media
+  display: flex
+  align-items: center
+  justify-content: center
+  text-align: center
+  padding: 0.75rem
+
+.compare-grid__feature-label--muted
+  font-size: 0.875rem
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9)
+
+.compare-grid__media-product
   display: flex
   flex-direction: column
   align-items: center
-  gap: 0.5rem
-  text-align: center
+  gap: 0.75rem
+
+.compare-grid__product
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 0.4rem
+  text-align: left
 
 .compare-grid__product-media
   display: flex
@@ -1618,7 +1656,7 @@ const productInitials = (title: string) => {
 
 .compare-grid__product-country
   display: flex
-  justify-content: center
+  justify-content: flex-start
 
 .compare-grid__product-country-flag
   display: inline-flex
@@ -1631,6 +1669,7 @@ const productInitials = (title: string) => {
 
 .compare-grid__product-remove
   margin-top: 0.5rem
+  align-self: flex-start
 
 .compare-grid__row
   display: grid
@@ -1822,6 +1861,9 @@ const productInitials = (title: string) => {
 
 @media (max-width: 960px)
   .compare-grid__header
+    display: none
+
+  .compare-grid__media
     display: none
 
   .compare-grid__row

@@ -1283,6 +1283,9 @@
       "remove": "Remove {name} from comparison",
       "removeShort": "Remove"
     },
+    "headers": {
+      "productOverview": "Visual & Impact Score"
+    },
     "textual": {
       "description": "Description",
       "pros": "Pros",

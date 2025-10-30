@@ -1283,6 +1283,9 @@
       "remove": "Retirer {name} de la comparaison",
       "removeShort": "Retirer"
     },
+    "headers": {
+      "productOverview": "Visuel et Impact Score"
+    },
     "textual": {
       "description": "Description",
       "pros": "Atouts",
