@@ -208,7 +208,7 @@ const mountPanel = async () => {
     await firstRemoveButton.trigger('click')
     await nextTick()
     expect(store.items).toHaveLength(1)
-    expect(routerReplace).toHaveBeenCalled()
+    expect(routerReplace).toHaveBeenLastCalledWith('/compare#102')
   })
 
   it('emits launch event when comparison is triggered', async () => {
@@ -229,7 +229,7 @@ const mountPanel = async () => {
     const emitted = wrapper.emitted('launch-comparison') as unknown[][] | undefined
     expect(emitted).toBeTruthy()
     expect(emitted?.[0]?.[0]).toHaveLength(2)
-    expect(routerPush).toHaveBeenCalled()
+    expect(routerPush).toHaveBeenLastCalledWith('/compare#201Vs202')
   })
 
   it('links to the product detail page when a slug is available', async () => {

@@ -1,9 +1,23 @@
 <template>
   <div class="compare-page">
-    <header class="compare-page__hero" :aria-labelledby="heroId">
-      <h1 :id="heroId" class="compare-page__title">{{ t('compare.title') }}</h1>
-      <p class="compare-page__subtitle">{{ t('compare.subtitle') }}</p>
-    </header>
+    <section class="compare-page__hero" :aria-labelledby="heroId">
+      <div class="compare-page__hero-surface">
+        <v-container class="compare-page__hero-container">
+          <div class="compare-page__hero-content">
+            <div class="compare-page__hero-eyebrow">
+              <v-icon icon="mdi-compare" size="20" aria-hidden="true" />
+              <span>{{ t('compare.sections.overview') }}</span>
+            </div>
+            <h1 :id="heroId" class="compare-page__title">{{ t('compare.title') }}</h1>
+            <p class="compare-page__subtitle">{{ t('compare.subtitle') }}</p>
+            <p v-if="productCount" class="compare-page__hero-meta">
+              <v-icon icon="mdi-package-variant-closed" size="18" aria-hidden="true" />
+              <span>{{ compareSummary }}</span>
+            </p>
+          </div>
+        </v-container>
+      </div>
+    </section>
 
     <v-alert
       v-if="loadError"
@@ -57,18 +71,39 @@
                 role="columnheader"
               >
                 <div class="compare-grid__product-media">
-                  <NuxtImg
-                    v-if="product.coverImage"
-                    :src="product.coverImage"
-                    :alt="product.title"
-                    width="180"
-                    height="180"
-                    format="webp"
-                    class="compare-grid__product-image"
-                  />
-                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                    {{ productInitials(product.title) }}
-                  </div>
+                  <NuxtLink
+                    v-if="productLink(product)"
+                    :to="productLink(product)"
+                    class="compare-grid__product-link"
+                    :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
+                  >
+                    <NuxtImg
+                      v-if="product.coverImage"
+                      :src="product.coverImage"
+                      :alt="product.title"
+                      width="180"
+                      height="180"
+                      format="webp"
+                      class="compare-grid__product-image"
+                    />
+                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                      {{ productInitials(product.title) }}
+                    </div>
+                  </NuxtLink>
+                  <template v-else>
+                    <NuxtImg
+                      v-if="product.coverImage"
+                      :src="product.coverImage"
+                      :alt="product.title"
+                      width="180"
+                      height="180"
+                      format="webp"
+                      class="compare-grid__product-image"
+                    />
+                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                      {{ productInitials(product.title) }}
+                    </div>
+                  </template>
                 </div>
                 <ImpactScore
                   v-if="product.impactScore !== null"
@@ -77,7 +112,15 @@
                   size="small"
                   class="compare-grid__product-impact"
                 />
-                <p class="compare-grid__product-model">{{ product.model ?? '—' }}</p>
+                <NuxtLink
+                  v-if="productLink(product)"
+                  :to="productLink(product)"
+                  class="compare-grid__product-model compare-grid__product-model--link"
+                  :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
+                >
+                  {{ productModelLabel(product) }}
+                </NuxtLink>
+                <p v-else class="compare-grid__product-model">{{ productModelLabel(product) }}</p>
                 <p class="compare-grid__product-brand">{{ product.brand ?? '—' }}</p>
                 <div v-if="product.country" class="compare-grid__product-country">
                   <v-tooltip :text="product.country.name" location="bottom">
@@ -119,7 +162,7 @@
               <div
                 v-for="(value, columnIndex) in row.values"
                 :key="`${row.key}-${products[columnIndex]!.gtin}`"
-                class="compare-grid__value"
+                :class="['compare-grid__value', { 'compare-grid__value--has-list': row.type === 'list' }]"
               >
                 <template v-if="row.type === 'text'">
                   <p class="compare-grid__value-text">
@@ -167,10 +210,22 @@
               <div
                 v-for="(cell, index) in row.values"
                 :key="`${row.key}-${products[index]!.gtin}`"
-                class="compare-grid__value"
-                :class="{ 'compare-grid__value--highlight': row.highlight.has(index) }"
+                :class="[
+                  'compare-grid__value',
+                  { 'compare-grid__value--highlight': row.highlight.has(index) },
+                ]"
               >
-                <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                <div class="compare-grid__value-inner">
+                  <span v-if="row.highlight.has(index)" class="sr-only">{{ t('compare.a11y.bestValue') }}</span>
+                  <v-icon
+                    v-if="row.highlight.has(index)"
+                    :icon="highlightIcon"
+                    class="compare-grid__value-badge"
+                    size="20"
+                    aria-hidden="true"
+                  />
+                  <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -194,10 +249,22 @@
               <div
                 v-for="(cell, index) in row.values"
                 :key="`${row.key}-${products[index]!.gtin}`"
-                class="compare-grid__value"
-                :class="{ 'compare-grid__value--highlight': row.highlight.has(index) }"
+                :class="[
+                  'compare-grid__value',
+                  { 'compare-grid__value--highlight': row.highlight.has(index) },
+                ]"
               >
-                <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                <div class="compare-grid__value-inner">
+                  <span v-if="row.highlight.has(index)" class="sr-only">{{ t('compare.a11y.bestValue') }}</span>
+                  <v-icon
+                    v-if="row.highlight.has(index)"
+                    :icon="highlightIcon"
+                    class="compare-grid__value-badge"
+                    size="20"
+                    aria-hidden="true"
+                  />
+                  <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -216,10 +283,22 @@
               <div
                 v-for="(cell, index) in row.values"
                 :key="`${row.key}-${products[index]!.gtin}`"
-                class="compare-grid__value"
-                :class="{ 'compare-grid__value--highlight': row.highlight.has(index) }"
+                :class="[
+                  'compare-grid__value',
+                  { 'compare-grid__value--highlight': row.highlight.has(index) },
+                ]"
               >
-                <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                <div class="compare-grid__value-inner">
+                  <span v-if="row.highlight.has(index)" class="sr-only">{{ t('compare.a11y.bestValue') }}</span>
+                  <v-icon
+                    v-if="row.highlight.has(index)"
+                    :icon="highlightIcon"
+                    class="compare-grid__value-badge"
+                    size="20"
+                    aria-hidden="true"
+                  />
+                  <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -243,10 +322,22 @@
               <div
                 v-for="(cell, index) in row.values"
                 :key="`${row.key}-${products[index]!.gtin}`"
-                class="compare-grid__value"
-                :class="{ 'compare-grid__value--highlight': row.highlight.has(index) }"
+                :class="[
+                  'compare-grid__value',
+                  { 'compare-grid__value--highlight': row.highlight.has(index) },
+                ]"
               >
-                <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                <div class="compare-grid__value-inner">
+                  <span v-if="row.highlight.has(index)" class="sr-only">{{ t('compare.a11y.bestValue') }}</span>
+                  <v-icon
+                    v-if="row.highlight.has(index)"
+                    :icon="highlightIcon"
+                    class="compare-grid__value-badge"
+                    size="20"
+                    aria-hidden="true"
+                  />
+                  <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -265,10 +356,22 @@
               <div
                 v-for="(cell, index) in row.values"
                 :key="`${row.key}-${products[index]!.gtin}`"
-                class="compare-grid__value"
-                :class="{ 'compare-grid__value--highlight': row.highlight.has(index) }"
+                :class="[
+                  'compare-grid__value',
+                  { 'compare-grid__value--highlight': row.highlight.has(index) },
+                ]"
               >
-                <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                <div class="compare-grid__value-inner">
+                  <span v-if="row.highlight.has(index)" class="sr-only">{{ t('compare.a11y.bestValue') }}</span>
+                  <v-icon
+                    v-if="row.highlight.has(index)"
+                    :icon="highlightIcon"
+                    class="compare-grid__value-badge"
+                    size="20"
+                    aria-hidden="true"
+                  />
+                  <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -293,10 +396,22 @@
                 <div
                   v-for="(cell, index) in row.values"
                   :key="`${row.key}-${products[index]!.gtin}`"
-                  class="compare-grid__value"
-                  :class="{ 'compare-grid__value--highlight': row.highlight.has(index) }"
+                  :class="[
+                    'compare-grid__value',
+                    { 'compare-grid__value--highlight': row.highlight.has(index) },
+                  ]"
                 >
-                  <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                  <div class="compare-grid__value-inner">
+                    <span v-if="row.highlight.has(index)" class="sr-only">{{ t('compare.a11y.bestValue') }}</span>
+                    <v-icon
+                      v-if="row.highlight.has(index)"
+                      :icon="highlightIcon"
+                      class="compare-grid__value-badge"
+                      size="20"
+                      aria-hidden="true"
+                    />
+                    <p class="compare-grid__value-text">{{ cell ?? t('compare.textual.empty') }}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -315,7 +430,7 @@ import { useId } from '#imports'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import { createCompareService, type CompareProductEntry } from '~/services/compare/CompareService'
 import { useProductCompareStore } from '~/stores/useProductCompareStore'
-import { buildCompareHashFragment, parseCompareHash } from '~/utils/_compare-url'
+import { buildCompareHash, parseCompareHash } from '~/utils/_compare-url'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 import {
   formatAttributeValue,
@@ -346,6 +461,7 @@ interface AttributeRow {
   label: string
   values: Array<string | null>
   highlight: Set<number>
+  availability: boolean[]
 }
 
 interface ClassifiedGroup {
@@ -376,6 +492,18 @@ const requestedGtins = ref<string[]>([])
 const comparePath = computed(() => resolveLocalizedRoutePath('compare', locale.value))
 
 const productCount = computed(() => products.value.length)
+
+const compareSummary = computed(() => {
+  if (!productCount.value) {
+    return ''
+  }
+
+  return translatePlural('category.products.compare.itemsCount', productCount.value, {
+    count: productCount.value,
+  })
+})
+
+const highlightIcon = 'mdi-crown'
 
 const hasMixedVerticals = computed(() => service.hasMixedVerticals(products.value))
 
@@ -432,6 +560,43 @@ const computeHighlightSet = (values: Array<number | null>, preference: 'higher' 
   return new Set(entries.filter((entry) => entry.value === targetValue).map((entry) => entry.index))
 }
 
+const hasMeaningfulCellValue = (value: unknown): boolean => {
+  if (value == null) {
+    return false
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((entry) => hasMeaningfulCellValue(entry))
+  }
+
+  if (typeof value === 'string') {
+    return value.trim().length > 0
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value)
+  }
+
+  if (typeof value === 'boolean') {
+    return true
+  }
+
+  return true
+}
+
+const computeAvailabilityFromValues = (values: unknown[]): boolean[] => {
+  return values.map((value) => hasMeaningfulCellValue(value))
+}
+
+const hasEnoughAvailability = (availability: boolean[]): boolean => {
+  const missing = availability.filter((value) => !value).length
+  return missing < 2
+}
+
+const filterSparseAttributeRows = (rows: AttributeRow[]): AttributeRow[] => {
+  return rows.filter((row) => hasEnoughAvailability(row.availability))
+}
+
 const formatPrice = (offer: ProductAggregatedPriceDto | undefined, product: ProductDto): string | null => {
   if (!offer) {
     return null
@@ -442,6 +607,10 @@ const formatPrice = (offer: ProductAggregatedPriceDto | undefined, product: Prod
   const shortPrice = offer.shortPrice?.trim()
 
   if (shortPrice) {
+    if (currency && !/[^0-9.,\s-]/u.test(shortPrice)) {
+      return `${shortPrice} ${currency}`.trim()
+    }
+
     return shortPrice
   }
 
@@ -537,7 +706,7 @@ watch(
 )
 
 const textualRows = computed<TextualRow[]>(() => {
-  return [
+  const rows: TextualRow[] = [
     {
       key: 'description',
       icon: 'mdi-text-box-outline',
@@ -560,6 +729,8 @@ const textualRows = computed<TextualRow[]>(() => {
       values: productEntries.value.map((entry) => entry.review.cons),
     },
   ]
+
+  return rows.filter((row) => hasEnoughAvailability(computeAvailabilityFromValues(row.values)))
 })
 
 const priceRows = computed<AttributeRow[]>(() => {
@@ -567,7 +738,7 @@ const priceRows = computed<AttributeRow[]>(() => {
   const occasionPrices = productEntries.value.map((entry) => entry.product.offers?.bestOccasionOffer?.price ?? null)
   const offersCounts = productEntries.value.map((entry) => entry.product.offers?.offersCount ?? null)
 
-  return [
+  const rows: AttributeRow[] = [
     {
       key: 'new-price',
       icon: 'mdi-currency-eur',
@@ -576,15 +747,15 @@ const priceRows = computed<AttributeRow[]>(() => {
         formatPrice(entry.product.offers?.bestNewOffer, entry.product) ?? formatBestPrice(entry.product, t, n),
       ),
       highlight: computeHighlightSet(newPrices, 'lower'),
+      availability: newPrices.map((value) => value != null),
     },
     {
       key: 'occasion-price',
       icon: 'mdi-rotate-orbit',
       label: t('compare.pricing.occasionPrice'),
-      values: productEntries.value.map((entry) =>
-        formatPrice(entry.product.offers?.bestOccasionOffer, entry.product) ?? t('compare.textual.empty'),
-      ),
+      values: productEntries.value.map((entry) => formatPrice(entry.product.offers?.bestOccasionOffer, entry.product)),
       highlight: computeHighlightSet(occasionPrices, 'lower'),
+      availability: occasionPrices.map((value) => value != null),
     },
     {
       key: 'offers-count',
@@ -592,8 +763,11 @@ const priceRows = computed<AttributeRow[]>(() => {
       label: t('compare.pricing.offersCount'),
       values: productEntries.value.map((entry) => formatOffersCount(entry.product, translatePlural)),
       highlight: computeHighlightSet(offersCounts, 'higher'),
+      availability: offersCounts.map((value) => value != null),
     },
   ]
+
+  return filterSparseAttributeRows(rows)
 })
 
 const ecologicalScoreRows = computed<AttributeRow[]>(() => {
@@ -605,13 +779,14 @@ const ecologicalScoreRows = computed<AttributeRow[]>(() => {
     resolveScoreValue(entry.product.scores?.scores?.DATA_QUALITY ?? null),
   )
 
-  return [
+  const rows: AttributeRow[] = [
     {
       key: 'ecoscore',
       icon: 'mdi-leaf',
       label: t('compare.ecological.ecoscore'),
       values: ecoscoreData.map((entry) => entry.display),
       highlight: computeHighlightSet(ecoscoreData.map((entry) => entry.numeric), 'higher'),
+      availability: ecoscoreData.map((entry) => entry.display != null),
     },
     {
       key: 'brand-sustainability',
@@ -619,6 +794,7 @@ const ecologicalScoreRows = computed<AttributeRow[]>(() => {
       label: t('compare.ecological.brandSustainability'),
       values: brandScoreData.map((entry) => entry.display),
       highlight: computeHighlightSet(brandScoreData.map((entry) => entry.numeric), 'higher'),
+      availability: brandScoreData.map((entry) => entry.display != null),
     },
     {
       key: 'data-quality',
@@ -626,8 +802,11 @@ const ecologicalScoreRows = computed<AttributeRow[]>(() => {
       label: t('compare.ecological.dataQuality'),
       values: dataQualityData.map((entry) => entry.display),
       highlight: computeHighlightSet(dataQualityData.map((entry) => entry.numeric), 'higher'),
+      availability: dataQualityData.map((entry) => entry.display != null),
     },
   ]
+
+  return filterSparseAttributeRows(rows)
 })
 
 const resolveAttributeRow = (config: AttributeConfigDto | null, key: string, label?: string): AttributeRow => {
@@ -646,6 +825,7 @@ const resolveAttributeRow = (config: AttributeConfigDto | null, key: string, lab
 
   const formattedValues = resolvedAttributes.map((attribute) => formatAttributeValue(attribute, t, n))
   const numericValues = rawValues.map((raw) => normalizeNumericValue(raw))
+  const availability = rawValues.map((raw) => hasMeaningfulCellValue(raw))
 
   return {
     key,
@@ -653,15 +833,24 @@ const resolveAttributeRow = (config: AttributeConfigDto | null, key: string, lab
     label: label ?? config?.name ?? key,
     values: formattedValues,
     highlight: computeHighlightSet(numericValues, betterIs),
+    availability,
   }
 }
 
 const ecologicalAttributeRows = computed<AttributeRow[]>(() => {
-  return scoringAttributeConfigs.value.map((config) => resolveAttributeRow(config, config.key ?? '', config.name))
+  const rows = scoringAttributeConfigs.value.map((config) =>
+    resolveAttributeRow(config, config.key ?? '', config.name),
+  )
+
+  return filterSparseAttributeRows(rows)
 })
 
 const popularAttributeRows = computed<AttributeRow[]>(() => {
-  return popularAttributeConfigs.value.map((config) => resolveAttributeRow(config, config.key ?? '', config.name))
+  const rows = popularAttributeConfigs.value.map((config) =>
+    resolveAttributeRow(config, config.key ?? '', config.name),
+  )
+
+  return filterSparseAttributeRows(rows)
 })
 
 const indexedAttributeRows = computed<AttributeRow[]>(() => {
@@ -696,7 +885,11 @@ const indexedAttributeRows = computed<AttributeRow[]>(() => {
     return indexA - indexB
   })
 
-  return orderedKeys.map((key) => resolveAttributeRow(attributeConfigMap.value.get(key) ?? null, key, attributeConfigMap.value.get(key)?.name ?? key))
+  const rows = orderedKeys.map((key) =>
+    resolveAttributeRow(attributeConfigMap.value.get(key) ?? null, key, attributeConfigMap.value.get(key)?.name ?? key),
+  )
+
+  return filterSparseAttributeRows(rows)
 })
 
 const classifiedAttributeGroups = computed<ClassifiedGroup[]>(() => {
@@ -724,11 +917,22 @@ const classifiedAttributeGroups = computed<ClassifiedGroup[]>(() => {
             label: attributeName,
             values: Array(productCount.value).fill<string | null>(null),
             highlight: new Set(),
+            availability: Array(productCount.value).fill(false),
           })
         }
 
         const row = currentGroup.rows.get(key)!
-        row.values[index] = attribute?.value ?? null
+        const rawValue = attribute?.value ?? null
+        const normalizedValue =
+          typeof rawValue === 'string'
+            ? rawValue.trim().length > 0
+              ? rawValue.trim()
+              : null
+            : rawValue
+
+        row.values[index] = normalizedValue == null ? null : String(normalizedValue)
+        row.availability[index] = hasMeaningfulCellValue(normalizedValue)
+
         const numericValues = row.values.map((value) => normalizeNumericValue(value))
         const preference = attributeConfigMap.value.get(attributeName ?? '')?.betterIs === 'LOWER' ? 'lower' : 'higher'
         row.highlight = computeHighlightSet(numericValues, preference)
@@ -736,22 +940,28 @@ const classifiedAttributeGroups = computed<ClassifiedGroup[]>(() => {
     })
   })
 
-  return Array.from(groups.values()).map((group) => ({
-    name: group.name,
-    rows: Array.from(group.rows.values()),
-  }))
+  return Array.from(groups.values())
+    .map((group) => ({
+      name: group.name,
+      rows: filterSparseAttributeRows(Array.from(group.rows.values())),
+    }))
+    .filter((group) => group.rows.length > 0)
 })
 
 const handleRemove = (gtin: string) => {
   compareStore.removeById(gtin)
   const remaining = requestedGtins.value.filter((value) => value !== gtin)
-  const fragment = buildCompareHashFragment(remaining)
+  const hash = buildCompareHash(remaining)
 
-  if (fragment) {
-    router.replace({ path: comparePath.value, hash: fragment })
-  } else {
-    router.replace({ path: comparePath.value })
-  }
+  router.replace(hash ? `${comparePath.value}${hash}` : comparePath.value)
+}
+
+const productLink = (entry: CompareProductEntry) => {
+  return entry.product.fullSlug ?? entry.product.slug ?? null
+}
+
+const productModelLabel = (entry: CompareProductEntry) => {
+  return entry.model ?? entry.title ?? '—'
 }
 
 const productInitials = (title: string) => {
@@ -772,16 +982,69 @@ const productInitials = (title: string) => {
   padding-bottom: 3rem
 
 .compare-page__hero
+  position: relative
+  overflow: hidden
+  background: radial-gradient(
+    circle at top left,
+    rgba(var(--v-theme-hero-gradient-start), 0.75),
+    rgba(var(--v-theme-hero-gradient-end), 0.9)
+  )
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+
+.compare-page__hero-surface
+  position: relative
+  isolation: isolate
+
+.compare-page__hero-surface::after
+  content: ''
+  position: absolute
+  inset: 0
+  background: linear-gradient(135deg, rgba(var(--v-theme-hero-overlay-soft), 0.12), rgba(var(--v-theme-hero-overlay-soft), 0.04))
+  z-index: 0
+
+.compare-page__hero-container
+  position: relative
+  z-index: 1
+  padding-block: clamp(3rem, 6vw, 5rem)
+
+.compare-page__hero-content
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 1rem
   text-align: center
-  padding-block: 2rem 1rem
+  max-width: 720px
+  margin: 0 auto
+
+.compare-page__hero-eyebrow
+  display: inline-flex
+  align-items: center
+  gap: 0.5rem
+  padding: 0.35rem 0.9rem
+  border-radius: 999px
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.15)
+  font-weight: 600
+  letter-spacing: 0.08em
+  text-transform: uppercase
+
+.compare-page__hero-meta
+  display: inline-flex
+  align-items: center
+  gap: 0.5rem
+  padding: 0.5rem 0.75rem
+  border-radius: 999px
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.18)
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+  font-weight: 500
 
 .compare-page__title
   font-size: clamp(2rem, 3vw, 2.75rem)
   font-weight: 700
   margin-bottom: 0.75rem
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.98)
 
 .compare-page__subtitle
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.85)
   max-width: 720px
   margin: 0 auto
 
@@ -870,6 +1133,26 @@ const productInitials = (title: string) => {
   border-radius: 16px
   overflow: hidden
 
+.compare-grid__product-link
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 100%
+  height: 100%
+  border-radius: inherit
+  text-decoration: none
+  color: inherit
+  transition: transform 0.2s ease, box-shadow 0.2s ease
+
+.compare-grid__product-link:hover,
+.compare-grid__product-link:focus-visible
+  transform: scale(1.02)
+  box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.18)
+
+.compare-grid__product-link:focus-visible
+  outline: 2px solid rgba(var(--v-theme-accent-supporting), 0.6)
+  outline-offset: 2px
+
 .compare-grid__product-image
   object-fit: contain
   max-width: 100%
@@ -886,6 +1169,15 @@ const productInitials = (title: string) => {
 .compare-grid__product-model
   font-weight: 600
   margin: 0
+
+.compare-grid__product-model--link
+  text-decoration: none
+  color: rgb(var(--v-theme-text-neutral-strong))
+  transition: color 0.2s ease
+
+.compare-grid__product-model--link:hover,
+.compare-grid__product-model--link:focus-visible
+  color: rgb(var(--v-theme-accent-supporting))
 
 .compare-grid__product-brand
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
@@ -944,14 +1236,35 @@ const productInitials = (title: string) => {
 .compare-grid__value
   background: rgb(var(--v-theme-surface-default))
   border-radius: 16px
-  padding: 1rem
+  padding: 1rem 1.25rem
   min-height: 100%
   display: flex
-  align-items: flex-start
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  text-align: center
+  gap: 0.75rem
+
+.compare-grid__value-inner
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 0.5rem
+  width: 100%
+
+.compare-grid__value-badge
+  color: rgb(var(--v-theme-accent-supporting))
 
 .compare-grid__value--highlight
   border: 2px solid rgba(var(--v-theme-accent-supporting), 0.6)
   box-shadow: 0 0 0 2px rgba(var(--v-theme-accent-supporting), 0.2)
+
+.compare-grid__value--has-list
+  align-items: stretch
+  text-align: left
+
+.compare-grid__value--has-list .compare-grid__list
+  align-items: flex-start
 
 .compare-grid__value-text
   margin: 0
@@ -964,6 +1277,7 @@ const productInitials = (title: string) => {
   display: flex
   flex-direction: column
   gap: 0.5rem
+  width: 100%
 
 .compare-grid__list-item
   position: relative
