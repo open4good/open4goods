@@ -1342,15 +1342,28 @@
     },
     "docs": {
       "download": "Télécharger le PDF",
+      "documentPdf": "Document PDF",
       "empty": "Aucun document n’est encore disponible pour ce produit.",
       "loading": "Chargement de l’aperçu du document…",
       "navigationAria": "Liste des documents du produit",
-      "pageCount": "{count} page(s)",
+      "pageCount": "{count} page | {count} pages",
       "previewUnavailable": "Aucun aperçu n’est disponible pour ce document. Utilisez le lien de téléchargement.",
       "sidebarTitle": "Documents disponibles",
       "subtitle": "Consultez et téléchargez les documents officiels.",
       "title": "Documentation",
-      "untitled": "Document sans titre"
+      "untitled": "Document sans titre",
+      "controls": {
+        "fit": "Ajuster",
+        "fitWidth": "Ajuster à la largeur",
+        "reset": "Réinitialiser",
+        "resetView": "Réinitialiser la vue",
+        "rotate": "Pivoter le document",
+        "rotateLabel": "Pivoter",
+        "scrollLeft": "Faire défiler vers la gauche",
+        "scrollRight": "Faire défiler vers la droite",
+        "zoomIn": "Zoom avant",
+        "zoomOut": "Zoom arrière"
+      }
     },
     "hero": {
       "bestPriceTitle": "Meilleur prix",

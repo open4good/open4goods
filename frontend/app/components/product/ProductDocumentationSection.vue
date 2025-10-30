@@ -14,6 +14,7 @@
         data-testid="product-docs-nav"
       >
         <button
+          v-if="tabsOverflowing"
           type="button"
           class="product-docs__nav-arrow"
           :aria-label="tWithFallback('product.docs.controls.scrollLeft', 'Scroll left')"
@@ -39,16 +40,31 @@
             @keydown="onTabKeydown(index, $event)"
           >
             <span class="product-docs__tab-title">{{ pdfTitle(pdf) }}</span>
-            <span v-if="formatMeta(pdf)" class="product-docs__tab-meta">
-              {{ formatMeta(pdf) }}
-            </span>
-            <span v-if="formatLanguage(pdf)" class="product-docs__tab-language">
-              {{ formatLanguage(pdf) }}
-            </span>
+            <div class="product-docs__tab-columns">
+              <div class="product-docs__tab-column product-docs__tab-column--left">
+                <span
+                  v-for="(item, leftIndex) in getTabLeftMeta(pdf)"
+                  :key="`left-${pdf.cacheKey ?? index}-${leftIndex}`"
+                  class="product-docs__tab-meta"
+                >
+                  {{ item }}
+                </span>
+              </div>
+              <div class="product-docs__tab-column product-docs__tab-column--right">
+                <span
+                  v-for="(item, rightIndex) in getTabRightMeta(pdf)"
+                  :key="`right-${pdf.cacheKey ?? index}-${rightIndex}`"
+                  class="product-docs__tab-meta"
+                >
+                  {{ item }}
+                </span>
+              </div>
+            </div>
           </button>
         </div>
 
         <button
+          v-if="tabsOverflowing"
           type="button"
           class="product-docs__nav-arrow"
           :aria-label="tWithFallback('product.docs.controls.scrollRight', 'Scroll right')"
@@ -67,14 +83,17 @@
         data-testid="product-docs-viewer"
       >
         <header class="product-docs__viewer-header">
-          <div class="product-docs__viewer-header-text">
-            <h3 class="product-docs__viewer-title">{{ activePdfTitle }}</h3>
-            <p v-if="activePdfMeta" class="product-docs__viewer-meta">
-              {{ activePdfMeta }}
-            </p>
-            <p v-if="activePdfLanguage" class="product-docs__viewer-language">
-              {{ activePdfLanguage }}
-            </p>
+          <div class="product-docs__viewer-heading">
+            <v-icon icon="mdi-file-pdf-box" size="28" class="product-docs__viewer-icon" />
+            <div class="product-docs__viewer-header-text">
+              <h3 class="product-docs__viewer-title">{{ activePdfTitle }}</h3>
+              <p v-if="activePdfMetaLeft" class="product-docs__viewer-meta">
+                {{ activePdfMetaLeft }}
+              </p>
+              <p v-if="activePdfMetaRight" class="product-docs__viewer-meta">
+                {{ activePdfMetaRight }}
+              </p>
+            </div>
           </div>
           <div class="product-docs__viewer-actions">
             <a
@@ -128,57 +147,13 @@
               >
                 {{ tWithFallback('product.docs.controls.rotateLabel', 'Rotate') }}
               </button>
-              <button
-                type="button"
-                class="product-docs__control"
-                :aria-label="
-                  showAllPages
-                    ? tWithFallback('product.docs.controls.switchSinglePage', 'Switch to single page view')
-                    : tWithFallback('product.docs.controls.switchAllPages', 'Show all pages')
-                "
-                @click="togglePageView"
-              >
-                {{
-                  showAllPages
-                    ? tWithFallback('product.docs.controls.allPages', 'All pages')
-                    : tWithFallback('product.docs.controls.singlePage', 'Single page')
-                }}
-              </button>
-              <div
-                v-if="!showAllPages && totalPages > 1"
-                class="product-docs__page-controls"
-                role="group"
-                :aria-label="tWithFallback('product.docs.controls.pageNavigation', 'Page navigation')"
-              >
-                <button
-                  type="button"
-                  class="product-docs__control"
-                  :disabled="currentPage <= 1"
-                  :aria-label="tWithFallback('product.docs.controls.previousPage', 'Previous page')"
-                  @click="previousPage"
-                >
-                  ‹
-                </button>
-                <span class="product-docs__page-indicator">
-                  {{ pageIndicatorLabel }}
-                </span>
-                <button
-                  type="button"
-                  class="product-docs__control"
-                  :disabled="currentPage >= totalPages"
-                  :aria-label="tWithFallback('product.docs.controls.nextPage', 'Next page')"
-                  @click="nextPage"
-                >
-                  ›
-                </button>
-              </div>
             </div>
           </div>
         </header>
 
         <ClientOnly>
           <template #default>
-              <div ref="viewerSurfaceRef" class="product-docs__viewer-surface">
+            <div ref="viewerSurfaceRef" class="product-docs__viewer-surface">
               <div class="product-docs__viewer-scroll">
                 <VuePdfEmbed
                   v-if="activePdf?.url"
@@ -187,7 +162,6 @@
                   text-layer
                   annotation-layer
                   class="product-docs__viewer-frame"
-                  :page="viewerPage"
                   :scale="viewerScale"
                   :rotation="viewerRotation"
                   :width="viewerWidth"
@@ -263,12 +237,11 @@ const pdfViewerRef = ref<InstanceType<VuePdfEmbedComponent> | null>(null)
 const measuredViewerWidth = ref(0)
 const canScrollTabsBackward = ref(false)
 const canScrollTabsForward = ref(false)
+const tabsOverflowing = ref(false)
 
 const isFitWidth = ref(true)
 const zoomLevel = ref(1)
 const rotation = ref(0)
-const showAllPages = ref(true)
-const currentPage = ref(1)
 const pdfLoadedPageCount = ref<number | null>(null)
 
 const MIN_ZOOM = 0.5
@@ -293,20 +266,6 @@ const viewerScale = computed(() => (!isFitWidth.value ? zoomLevel.value : undefi
 
 const viewerRotation = computed(() => ((rotation.value % 360) + 360) % 360)
 
-const viewerPage = computed(() => (showAllPages.value ? undefined : currentPage.value))
-
-const pageIndicatorLabel = computed(() => {
-  if (!totalPages.value) {
-    return ''
-  }
-
-  if (te('product.docs.controls.pageOf')) {
-    return t('product.docs.controls.pageOf', { page: currentPage.value, total: totalPages.value })
-  }
-
-  return `Page ${currentPage.value} / ${totalPages.value}`
-})
-
 const languageDisplayNames = computed(() => {
   try {
     return new Intl.DisplayNames([locale.value], { type: 'language' })
@@ -329,20 +288,20 @@ const selectPdf = (index: number) => {
   activePdfIndex.value = index
 }
 
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
-
 const updateTabScrollState = () => {
   const track = tabsTrackRef.value
 
   if (!track) {
     canScrollTabsBackward.value = false
     canScrollTabsForward.value = false
+    tabsOverflowing.value = false
     return
   }
 
   const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0)
   canScrollTabsBackward.value = track.scrollLeft > 1
   canScrollTabsForward.value = track.scrollLeft + 1 < maxScrollLeft
+  tabsOverflowing.value = track.scrollWidth - track.clientWidth > 1
 }
 
 const scrollTabs = (direction: number) => {
@@ -422,30 +381,24 @@ const onTabKeydown = (index: number, event: KeyboardEvent) => {
   }
 }
 
-const pdfTitle = (pdf: ProductPdfDto) => pdf.extractedTitle ?? pdf.metadataTitle ?? pdf.fileName ?? t('product.docs.untitled')
+const pdfTitle = (pdf: ProductPdfDto) =>
+  pdf.extractedTitle ?? pdf.metadataTitle ?? pdf.fileName ?? tWithFallback('product.docs.documentPdf', 'Document PDF')
 
-const formatMeta = (pdf: ProductPdfDto) => {
-  const parts: string[] = []
-
-  const size = formatBytes(pdf.fileSize)
-  if (size) {
-    parts.push(size)
+const formatPageCount = (count?: number | null) => {
+  if (!Number.isFinite(count)) {
+    return null
   }
 
-  if (pdf.numberOfPages) {
-    parts.push(t('product.docs.pageCount', { count: pdf.numberOfPages }))
+  const total = Math.max(0, Math.round(Number(count)))
+  if (!total) {
+    return null
   }
 
-  const dateLabel = formatDate(pdf)
-  if (dateLabel) {
-    parts.push(dateLabel)
+  if (te('product.docs.pageCount')) {
+    return t('product.docs.pageCount', total, { count: total })
   }
 
-  if (pdf.author) {
-    parts.push(pdf.author)
-  }
-
-  return parts.join(' · ')
+  return `${total} page${total === 1 ? '' : 's'}`
 }
 
 const formatDate = (pdf: ProductPdfDto) => {
@@ -488,6 +441,11 @@ const formatLanguage = (pdf: ProductPdfDto) => {
   return `${displayName} · ${canonical.toUpperCase()}`
 }
 
+const formatProducer = (pdf: ProductPdfDto) => {
+  const producer = pdf.author?.trim()
+  return producer?.length ? producer : null
+}
+
 const formatBytes = (bytes?: number) => {
   if (!Number.isFinite(bytes) || !bytes || bytes <= 0) {
     return null
@@ -502,9 +460,22 @@ const formatBytes = (bytes?: number) => {
   return `${n(mb, { maximumFractionDigits: 1 })} MB`
 }
 
+const getTabLeftMeta = (pdf: ProductPdfDto) => {
+  const inferredPageCount = pdf === activePdf.value ? totalPages.value : pdf.numberOfPages
+
+  return [formatPageCount(inferredPageCount), formatDate(pdf), formatLanguage(pdf)].filter(
+    (value): value is string => Boolean(value)
+  )
+}
+
+const getTabRightMeta = (pdf: ProductPdfDto) =>
+  [formatBytes(pdf.fileSize), formatProducer(pdf)].filter((value): value is string => Boolean(value))
+
+const joinMetaParts = (parts: string[]) => parts.filter((value) => value?.trim().length).join(' · ')
+
 const activePdfTitle = computed(() => (activePdf.value ? pdfTitle(activePdf.value) : t('product.docs.title')))
-const activePdfMeta = computed(() => (activePdf.value ? formatMeta(activePdf.value) : null))
-const activePdfLanguage = computed(() => (activePdf.value ? formatLanguage(activePdf.value) : null))
+const activePdfMetaLeft = computed(() => (activePdf.value ? joinMetaParts(getTabLeftMeta(activePdf.value)) : ''))
+const activePdfMetaRight = computed(() => (activePdf.value ? joinMetaParts(getTabRightMeta(activePdf.value)) : ''))
 
 watch(
   activePdf,
@@ -512,71 +483,36 @@ watch(
     zoomLevel.value = 1
     rotation.value = 0
     isFitWidth.value = true
-    showAllPages.value = true
-    currentPage.value = 1
     pdfLoadedPageCount.value = null
   },
   { immediate: true }
 )
 
-watch(totalPages, (nextTotal) => {
-  if (!showAllPages.value && nextTotal > 0) {
-    currentPage.value = clamp(currentPage.value, 1, nextTotal)
-  }
-})
-
-watch(showAllPages, (allPages) => {
-  if (allPages) {
-    currentPage.value = 1
-  } else if (totalPages.value > 0) {
-    currentPage.value = clamp(currentPage.value, 1, totalPages.value)
-  }
-})
-
 const zoomIn = () => {
   isFitWidth.value = false
   zoomLevel.value = Math.min(zoomLevel.value + ZOOM_STEP, MAX_ZOOM)
+  nextTick(applyViewerZoom)
 }
 
 const zoomOut = () => {
   isFitWidth.value = false
   zoomLevel.value = Math.max(zoomLevel.value - ZOOM_STEP, MIN_ZOOM)
+  nextTick(applyViewerZoom)
 }
 
 const resetView = () => {
   zoomLevel.value = 1
   rotation.value = 0
   isFitWidth.value = true
-  showAllPages.value = true
-  currentPage.value = 1
 }
 
 const applyFitWidth = () => {
   isFitWidth.value = true
+  zoomLevel.value = 1
 }
 
 const rotateClockwise = () => {
   rotation.value = (rotation.value + 90) % 360
-}
-
-const togglePageView = () => {
-  showAllPages.value = !showAllPages.value
-}
-
-const previousPage = () => {
-  if (showAllPages.value || currentPage.value <= 1) {
-    return
-  }
-
-  currentPage.value = clamp(currentPage.value - 1, 1, totalPages.value || 1)
-}
-
-const nextPage = () => {
-  if (showAllPages.value || !totalPages.value || currentPage.value >= totalPages.value) {
-    return
-  }
-
-  currentPage.value = clamp(currentPage.value + 1, 1, totalPages.value)
 }
 
 const onPdfLoaded = (doc: { numPages?: number } | null) => {
@@ -584,6 +520,15 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   if (Number.isFinite(pages)) {
     pdfLoadedPageCount.value = Number(pages)
   }
+}
+
+const applyViewerZoom = () => {
+  if (isFitWidth.value) {
+    return
+  }
+
+  const viewer = pdfViewerRef.value as unknown as { setZoom?: (scale: number) => void } | null
+  viewer?.setZoom?.(zoomLevel.value)
 }
 </script>
 
@@ -616,8 +561,7 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
 }
 
 .product-docs__nav {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
@@ -657,6 +601,7 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
 }
 
 .product-docs__nav-track {
+  flex: 1 1 auto;
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
@@ -706,14 +651,27 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   font-size: 1.05rem;
 }
 
+.product-docs__tab-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.75rem;
+  width: 100%;
+}
+
+.product-docs__tab-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.product-docs__tab-column--right {
+  text-align: right;
+  align-items: flex-end;
+}
+
 .product-docs__tab-meta {
   font-size: 0.9rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
-}
-
-.product-docs__tab-language {
-  font-size: 0.85rem;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.95);
 }
 
 .product-docs__viewer-pane {
@@ -733,6 +691,17 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   gap: 1rem;
 }
 
+.product-docs__viewer-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.product-docs__viewer-icon {
+  color: rgba(var(--v-theme-accent-primary-highlight), 0.95);
+  margin-top: 0.1rem;
+}
+
 .product-docs__viewer-header-text {
   display: flex;
   flex-direction: column;
@@ -747,11 +716,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
 .product-docs__viewer-meta {
   font-size: 0.95rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-}
-
-.product-docs__viewer-language {
-  font-size: 0.9rem;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.95);
 }
 
 .product-docs__viewer-actions {
@@ -828,20 +792,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   background: rgba(var(--v-theme-surface-primary-080), 0.95);
   border-color: rgba(var(--v-theme-accent-primary-highlight), 0.7);
   color: rgba(var(--v-theme-text-neutral-strong), 0.95);
-}
-
-.product-docs__page-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 0.5rem;
-}
-
-.product-docs__page-indicator {
-  min-width: 80px;
-  text-align: center;
-  font-weight: 600;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
 }
 
 .product-docs__viewer-surface {
@@ -938,13 +888,21 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
 
 @media (max-width: 599px) {
   .product-docs__nav {
-    grid-template-columns: auto 1fr auto;
     padding: 0.75rem;
   }
 
   .product-docs__tab {
     min-width: 210px;
     padding: 0.85rem 1rem;
+  }
+
+  .product-docs__tab-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .product-docs__tab-column--right {
+    align-items: flex-start;
+    text-align: left;
   }
 
   .product-docs__viewer-pane {
