@@ -190,6 +190,7 @@ const mountPage = async () => {
             return () => h('div', { class: 'v-tooltip-stub' }, [activator, content])
           },
         }),
+        ClientOnly: simpleStub('div'),
         NuxtLink: defineComponent({
           name: 'NuxtLinkStub',
           props: {
