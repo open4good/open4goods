@@ -19,8 +19,17 @@ vi.mock('vue-pdf-embed', () => ({
         default: '',
       },
     },
-    setup(props) {
-      return () => h('div', { class: 'vue-pdf-embed-stub', 'data-source': props.source ?? '' })
+    setup(props, { attrs }) {
+      return () =>
+        h(
+          'div',
+          {
+            ...attrs,
+            class: ['vue-pdf-embed-stub', attrs.class],
+            'data-source': props.source ?? '',
+          },
+          [],
+        )
     },
   }),
 }))
@@ -109,6 +118,8 @@ describe('ProductDocumentationSection', () => {
 
     const viewer = wrapper.get('.vue-pdf-embed-stub')
     expect(viewer.attributes('data-source')).toBe(pdfs[0].url)
+    expect(viewer.classes()).toContain('product-docs__viewer-frame')
+    expect(viewer.classes()).toContain('product-docs__viewer-frame--fit')
 
     const activeTab = wrapper.get('[data-testid="product-docs-tab"]')
     expect(activeTab.classes()).toContain('product-docs__tab--active')
@@ -158,6 +169,8 @@ describe('ProductDocumentationSection', () => {
     await flushPromises()
 
     expect(fitWidth.attributes('aria-pressed')).toBe('false')
+    const viewer = wrapper.get('.vue-pdf-embed-stub')
+    expect(viewer.classes()).not.toContain('product-docs__viewer-frame--fit')
   })
 
   it('hides navigation arrows when documents fit within the viewport', async () => {
@@ -201,5 +214,21 @@ describe('ProductDocumentationSection', () => {
     await flushPromises()
 
     expect(wrapper.get('.product-docs__viewer-title').text()).toBe('Document PDF')
+  })
+
+  it('truncates long document titles in navigation tabs and preserves the full title in the tooltip', async () => {
+    const longTitle = 'Very long product documentation title exceeding thirty five characters'
+    const wrapper = mountComponent({
+      pdfs: [basePdf({ cacheKey: 'doc-long', extractedTitle: longTitle })],
+    })
+
+    await flushPromises()
+
+    const tab = wrapper.get('[data-testid="product-docs-tab"]')
+    expect(tab.attributes('title')).toBe(longTitle)
+
+    const tabTitle = tab.get('.product-docs__tab-title').text()
+    expect(tabTitle.endsWith('…')).toBe(true)
+    expect(tabTitle.length).toBeLessThanOrEqual(35)
   })
 })
