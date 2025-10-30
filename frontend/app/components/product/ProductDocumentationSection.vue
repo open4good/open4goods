@@ -36,10 +36,11 @@
             :aria-selected="index === activePdfIndex"
             :aria-controls="panelId"
             data-testid="product-docs-tab"
+            :title="pdfTitle(pdf)"
             @click="selectPdf(index)"
             @keydown="onTabKeydown(index, $event)"
           >
-            <span class="product-docs__tab-title">{{ pdfTitle(pdf) }}</span>
+            <span class="product-docs__tab-title">{{ truncatedTabTitle(pdf) }}</span>
             <div class="product-docs__tab-columns">
               <div class="product-docs__tab-column product-docs__tab-column--left">
                 <span
@@ -84,16 +85,13 @@
       >
         <header class="product-docs__viewer-header">
           <div class="product-docs__viewer-heading">
-            <v-icon icon="mdi-file-pdf-box" size="28" class="product-docs__viewer-icon" />
-            <div class="product-docs__viewer-header-text">
-              <h3 class="product-docs__viewer-title">{{ activePdfTitle }}</h3>
-              <p v-if="activePdfMetaLeft" class="product-docs__viewer-meta">
-                {{ activePdfMetaLeft }}
-              </p>
-              <p v-if="activePdfMetaRight" class="product-docs__viewer-meta">
-                {{ activePdfMetaRight }}
-              </p>
-            </div>
+            <h3 class="product-docs__viewer-title">{{ activePdfTitle }}</h3>
+            <p v-if="activePdfMetaLeft" class="product-docs__viewer-meta">
+              {{ activePdfMetaLeft }}
+            </p>
+            <p v-if="activePdfMetaRight" class="product-docs__viewer-meta">
+              {{ activePdfMetaRight }}
+            </p>
           </div>
           <div class="product-docs__viewer-actions">
             <a
@@ -103,7 +101,8 @@
               rel="noopener"
               class="product-docs__download"
             >
-              {{ $t('product.docs.download') }}
+              <v-icon icon="mdi-file-pdf-box" size="20" class="product-docs__download-icon" />
+              <span>{{ $t('product.docs.download') }}</span>
             </a>
             <div class="product-docs__viewer-toolbar" role="group">
               <button
@@ -161,7 +160,7 @@
                   :source="activePdf.url"
                   text-layer
                   annotation-layer
-                  class="product-docs__viewer-frame"
+                  :class="['product-docs__viewer-frame', { 'product-docs__viewer-frame--fit': isFitWidth }]"
                   :scale="viewerScale"
                   :rotation="viewerRotation"
                   :width="viewerWidth"
@@ -247,6 +246,7 @@ const pdfLoadedPageCount = ref<number | null>(null)
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 3
 const ZOOM_STEP = 0.25
+const MAX_TAB_TITLE_LENGTH = 35
 
 const activePdf = computed(() => (activePdfIndex.value >= 0 ? pdfs.value[activePdfIndex.value] ?? null : null))
 
@@ -383,6 +383,16 @@ const onTabKeydown = (index: number, event: KeyboardEvent) => {
 
 const pdfTitle = (pdf: ProductPdfDto) =>
   pdf.extractedTitle ?? pdf.metadataTitle ?? pdf.fileName ?? tWithFallback('product.docs.documentPdf', 'Document PDF')
+
+const truncatedTabTitle = (pdf: ProductPdfDto) => {
+  const title = pdfTitle(pdf)
+  if (title.length <= MAX_TAB_TITLE_LENGTH) {
+    return title
+  }
+
+  const sliceLength = Math.max(0, MAX_TAB_TITLE_LENGTH - 1)
+  return `${title.slice(0, sliceLength).trimEnd()}…`
+}
 
 const formatPageCount = (count?: number | null) => {
   if (!Number.isFinite(count)) {
@@ -693,18 +703,8 @@ const applyViewerZoom = () => {
 
 .product-docs__viewer-heading {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.product-docs__viewer-icon {
-  color: rgba(var(--v-theme-accent-primary-highlight), 0.95);
-  margin-top: 0.1rem;
-}
-
-.product-docs__viewer-header-text {
-  display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 
@@ -737,6 +737,10 @@ const applyViewerZoom = () => {
   background: rgb(var(--v-theme-accent-primary-highlight));
   box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-docs__download-icon {
+  color: currentColor;
 }
 
 .product-docs__download:hover {
@@ -821,16 +825,19 @@ const applyViewerZoom = () => {
 }
 
 .product-docs__viewer-frame {
-  width: 100%;
   display: block;
 }
 
 .product-docs__viewer-frame :deep(canvas) {
-  width: 100% !important;
-  height: auto !important;
+  display: block;
   margin: 0 auto 1.5rem;
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
   border-radius: 12px;
+}
+
+.product-docs__viewer-frame--fit :deep(canvas) {
+  width: 100% !important;
+  height: auto !important;
 }
 
 .product-docs__viewer-frame :deep(canvas:last-child) {
