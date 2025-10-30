@@ -1249,6 +1249,14 @@
   "compare": {
     "title": "Comparateur de produits",
     "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.",
+    "hero": {
+      "title": "Comparateur de {verticalTitle}",
+      "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des {verticalTitle} sélectionnés.",
+      "backToCategory": "Retour aux {verticalTitle}",
+      "backAria": "Retourner à la catégorie {verticalTitle}",
+      "backFallback": "Retour à la catégorie",
+      "backAriaFallback": "Revenir à la catégorie précédente"
+    },
     "alerts": {
       "verticalMismatch": "Ces produits appartiennent à des catégories différentes. Certaines données ne sont pas comparables."
     },

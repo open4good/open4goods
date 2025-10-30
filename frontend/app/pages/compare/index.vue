@@ -4,12 +4,17 @@
       <div class="compare-page__hero-surface">
         <v-container class="compare-page__hero-container">
           <div class="compare-page__hero-content">
-            <div class="compare-page__hero-eyebrow">
-              <v-icon icon="mdi-compare" size="20" aria-hidden="true" />
-              <span>{{ t('compare.sections.overview') }}</span>
-            </div>
-            <h1 :id="heroId" class="compare-page__title">{{ t('compare.title') }}</h1>
-            <p class="compare-page__subtitle">{{ t('compare.subtitle') }}</p>
+            <NuxtLink
+              v-if="heroBackLink"
+              :to="heroBackLink"
+              class="compare-page__hero-back"
+              :aria-label="heroBackAriaLabel"
+            >
+              <v-icon icon="mdi-arrow-left" size="18" aria-hidden="true" />
+              <span>{{ heroBackLabel }}</span>
+            </NuxtLink>
+            <h1 :id="heroId" class="compare-page__title">{{ heroTitle }}</h1>
+            <p class="compare-page__subtitle">{{ heroSubtitle }}</p>
             <p v-if="productCount" class="compare-page__hero-meta">
               <v-icon icon="mdi-package-variant-closed" size="18" aria-hidden="true" />
               <span>{{ compareSummary }}</span>
@@ -57,7 +62,6 @@
 
     <div v-else class="compare-page__content">
       <section class="compare-section">
-        <h2 class="compare-section__title">{{ t('compare.sections.overview') }}</h2>
         <div class="compare-grid" role="table">
           <div class="compare-grid__header" role="row">
             <div class="compare-grid__feature compare-grid__feature--header" role="columnheader">
@@ -109,7 +113,7 @@
                   v-if="product.impactScore !== null"
                   :score="product.impactScore"
                   :max="5"
-                  size="small"
+                  size="medium"
                   class="compare-grid__product-impact"
                 />
                 <NuxtLink
@@ -501,6 +505,65 @@ const compareSummary = computed(() => {
   return translatePlural('category.products.compare.itemsCount', productCount.value, {
     count: productCount.value,
   })
+})
+
+const rawVerticalTitle = computed(() => verticalConfig.value?.verticalHomeTitle?.trim() ?? '')
+
+const normalizedVerticalTitle = computed(() => {
+  if (!rawVerticalTitle.value) {
+    return ''
+  }
+
+  try {
+    return rawVerticalTitle.value.toLocaleLowerCase(locale.value ?? undefined)
+  } catch {
+    return rawVerticalTitle.value.toLowerCase()
+  }
+})
+
+const heroTitle = computed(() => {
+  if (normalizedVerticalTitle.value) {
+    return t('compare.hero.title', { verticalTitle: normalizedVerticalTitle.value })
+  }
+
+  return t('compare.title')
+})
+
+const heroSubtitle = computed(() => {
+  if (normalizedVerticalTitle.value) {
+    return t('compare.hero.subtitle', { verticalTitle: normalizedVerticalTitle.value })
+  }
+
+  return t('compare.subtitle')
+})
+
+const heroBackLink = computed(() => {
+  const raw = verticalConfig.value?.verticalHomeUrl?.trim()
+  if (!raw) {
+    return null
+  }
+
+  if (/^https?:\/\//iu.test(raw)) {
+    return raw
+  }
+
+  return raw.startsWith('/') ? raw : `/${raw}`
+})
+
+const heroBackLabel = computed(() => {
+  if (normalizedVerticalTitle.value) {
+    return t('compare.hero.backToCategory', { verticalTitle: normalizedVerticalTitle.value })
+  }
+
+  return t('compare.hero.backFallback')
+})
+
+const heroBackAriaLabel = computed(() => {
+  if (normalizedVerticalTitle.value) {
+    return t('compare.hero.backAria', { verticalTitle: normalizedVerticalTitle.value })
+  }
+
+  return t('compare.hero.backAriaFallback')
 })
 
 const highlightIcon = 'mdi-crown'
@@ -976,6 +1039,7 @@ const productInitials = (title: string) => {
 
 <style scoped lang="sass">
 .compare-page
+  --compare-grid-sticky-offset: clamp(88px, 9vw, 132px)
   display: flex
   flex-direction: column
   gap: 2.5rem
@@ -1011,21 +1075,31 @@ const productInitials = (title: string) => {
   display: flex
   flex-direction: column
   align-items: center
-  gap: 1rem
+  gap: 1.25rem
   text-align: center
   max-width: 720px
   margin: 0 auto
 
-.compare-page__hero-eyebrow
+.compare-page__hero-back
   display: inline-flex
   align-items: center
   gap: 0.5rem
-  padding: 0.35rem 0.9rem
+  padding: 0.4rem 0.95rem
   border-radius: 999px
-  background: rgba(var(--v-theme-hero-overlay-soft), 0.15)
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.18)
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.96)
   font-weight: 600
-  letter-spacing: 0.08em
-  text-transform: uppercase
+  text-decoration: none
+  transition: background 0.2s ease, transform 0.2s ease
+
+.compare-page__hero-back:hover,
+.compare-page__hero-back:focus-visible
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.26)
+  transform: translateY(-1px)
+
+.compare-page__hero-back:focus-visible
+  outline: 2px solid rgba(var(--v-theme-hero-overlay-strong), 0.4)
+  outline-offset: 3px
 
 .compare-page__hero-meta
   display: inline-flex
@@ -1084,6 +1158,7 @@ const productInitials = (title: string) => {
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .compare-grid
+  position: relative
   overflow-x: auto
   background: rgb(var(--v-theme-surface-glass))
   border-radius: 20px
@@ -1100,11 +1175,14 @@ const productInitials = (title: string) => {
   grid-template-columns: minmax(180px, 220px) repeat(auto-fit, minmax(220px, 1fr))
   gap: 1rem
   position: sticky
-  top: 0
-  z-index: 2
-  background: rgba(var(--v-theme-surface-glass), 0.95)
-  border-radius: 12px
+  top: var(--compare-grid-sticky-offset)
+  z-index: 4
+  background: rgba(var(--v-theme-surface-glass), 0.94)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  border-radius: 16px
   padding: 1rem
+  box-shadow: 0 22px 48px -32px rgba(var(--v-theme-shadow-primary-600), 0.35)
+  backdrop-filter: blur(16px)
 
 .compare-grid__feature--header
   display: flex
@@ -1307,6 +1385,14 @@ const productInitials = (title: string) => {
   clip: rect(0, 0, 0, 0)
   white-space: nowrap
   border: 0
+
+@media (min-width: 960px)
+  .compare-page__hero-content
+    align-items: flex-start
+    text-align: left
+
+  .compare-page__hero-back
+    align-self: flex-start
 
 @media (max-width: 960px)
   .compare-grid__header
