@@ -32,6 +32,16 @@ const ClientOnlyStub = defineComponent({
   },
 })
 
+const VIconStub = defineComponent({
+  name: 'VIconStub',
+  props: {
+    icon: { type: [String, Array], default: '' },
+  },
+  setup(props) {
+    return () => h('span', { class: 'v-icon-stub', 'data-icon': props.icon ?? '' })
+  },
+})
+
 const createI18nPlugin = () =>
   createI18n({
     legacy: false,
@@ -45,7 +55,8 @@ const createI18nPlugin = () =>
             subtitle: 'Preview and download official documents.',
             download: 'Download PDF',
             untitled: 'Untitled document',
-            pageCount: '{count} page(s)',
+            documentPdf: 'Document PDF',
+            pageCount: '{count} page | {count} pages',
             sidebarTitle: 'Available documents',
             navigationAria: 'Product documentation list',
             empty: 'No documents are available for this product yet.',
@@ -60,14 +71,6 @@ const createI18nPlugin = () =>
               fit: 'Fit width',
               rotate: 'Rotate document',
               rotateLabel: 'Rotate',
-              switchSinglePage: 'Switch to single page view',
-              switchAllPages: 'Show all pages',
-              allPages: 'All pages',
-              singlePage: 'Single page',
-              pageNavigation: 'Page navigation',
-              previousPage: 'Previous page',
-              nextPage: 'Next page',
-              pageOf: 'Page {page} / {total}',
               scrollLeft: 'Scroll left',
               scrollRight: 'Scroll right',
             },
@@ -94,7 +97,7 @@ describe('ProductDocumentationSection', () => {
       props,
       global: {
         plugins: [createI18nPlugin()],
-        stubs: { ClientOnly: ClientOnlyStub },
+        stubs: { ClientOnly: ClientOnlyStub, VIcon: VIconStub, 'v-icon': VIconStub },
       },
     })
 
@@ -110,13 +113,12 @@ describe('ProductDocumentationSection', () => {
     const activeTab = wrapper.get('[data-testid="product-docs-tab"]')
     expect(activeTab.classes()).toContain('product-docs__tab--active')
 
-    const meta = wrapper.get('.product-docs__viewer-meta').text()
-    expect(meta).toContain('1.2 KB')
-    expect(meta).toMatch(/3 page\(s\)/)
-    expect(meta).toMatch(/2024/)
-
-    const language = wrapper.get('.product-docs__viewer-language').text()
-    expect(language).toContain('French')
+    const metas = wrapper.findAll('.product-docs__viewer-meta').map((node) => node.text())
+    expect(metas[0]).toContain('3 pages')
+    expect(metas[0]).toMatch(/2024/)
+    expect(metas[0]).toContain('French')
+    expect(metas[1]).toContain('1.2 KB')
+    expect(metas[1]).toContain('Open4Goods')
 
     const fitWidth = wrapper.get('[aria-label="Fit to width"]')
     expect(fitWidth.attributes('aria-pressed')).toBe('true')
@@ -158,26 +160,12 @@ describe('ProductDocumentationSection', () => {
     expect(fitWidth.attributes('aria-pressed')).toBe('false')
   })
 
-  it('supports switching to single page mode with page navigation', async () => {
+  it('hides navigation arrows when documents fit within the viewport', async () => {
     const wrapper = mountComponent({ pdfs: [basePdf()] })
 
     await flushPromises()
 
-    const toggleView = wrapper.get('[aria-label="Switch to single page view"]')
-    expect(toggleView.text()).toBe('All pages')
-
-    await toggleView.trigger('click')
-    await flushPromises()
-
-    expect(toggleView.text()).toBe('Single page')
-    const indicator = wrapper.get('.product-docs__page-indicator')
-    expect(indicator.text()).toBe('Page 1 / 3')
-
-    const nextButton = wrapper.get('[aria-label="Next page"]')
-    await nextButton.trigger('click')
-    await flushPromises()
-
-    expect(indicator.text()).toBe('Page 2 / 3')
+    expect(wrapper.findAll('.product-docs__nav-arrow')).toHaveLength(0)
   })
 
   it('falls back to raw language label when Intl formatting fails', async () => {
@@ -185,8 +173,8 @@ describe('ProductDocumentationSection', () => {
 
     await flushPromises()
 
-    const languageLabel = wrapper.get('.product-docs__viewer-language').text()
-    expect(languageLabel).toBe('Multilingue')
+    const metas = wrapper.findAll('.product-docs__viewer-meta').map((node) => node.text())
+    expect(metas[0]).toContain('Multilingue')
   })
 
   it('falls back to a message when a PDF has no preview URL', async () => {
@@ -201,5 +189,17 @@ describe('ProductDocumentationSection', () => {
     const wrapper = mountComponent({ pdfs: [] })
 
     expect(wrapper.get('[data-testid="product-docs-empty"]').text()).toContain('No documents are available')
+  })
+
+  it('uses a localized fallback title when the document has no metadata', async () => {
+    const wrapper = mountComponent({
+      pdfs: [
+        basePdf({ cacheKey: 'doc-3', url: 'https://example.com/doc-3.pdf', extractedTitle: undefined, metadataTitle: undefined, fileName: undefined }),
+      ],
+    })
+
+    await flushPromises()
+
+    expect(wrapper.get('.product-docs__viewer-title').text()).toBe('Document PDF')
   })
 })

@@ -1340,15 +1340,28 @@
     },
     "docs": {
       "download": "Download PDF",
+      "documentPdf": "Document PDF",
       "empty": "No documents are available for this product yet.",
       "loading": "Loading document preview…",
       "navigationAria": "Product documentation list",
-      "pageCount": "{count} page(s)",
+      "pageCount": "{count} page | {count} pages",
       "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
       "sidebarTitle": "Available documents",
       "subtitle": "Preview and download official documents.",
       "title": "Documentation",
-      "untitled": "Untitled document"
+      "untitled": "Untitled document",
+      "controls": {
+        "fit": "Fit width",
+        "fitWidth": "Fit to width",
+        "reset": "Reset",
+        "resetView": "Reset view",
+        "rotate": "Rotate document",
+        "rotateLabel": "Rotate",
+        "scrollLeft": "Scroll left",
+        "scrollRight": "Scroll right",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
+      }
     },
     "hero": {
       "bestPriceTitle": "Best price",
