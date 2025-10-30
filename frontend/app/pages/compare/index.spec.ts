@@ -121,7 +121,24 @@ const route = reactive({ hash: '#compare=1234567890123' })
 const routerReplace = vi.fn()
 
 mockNuxtImport('useRoute', () => () => route)
-mockNuxtImport('useRouter', () => () => ({ replace: routerReplace }))
+mockNuxtImport('useRouter', () => () => ({
+  replace: routerReplace,
+  resolve: (to: unknown) => {
+    if (typeof to === 'string') {
+      return { href: to }
+    }
+
+    if (to && typeof to === 'object' && 'path' in to && typeof to.path === 'string') {
+      return { href: to.path }
+    }
+
+    if (to && typeof to === 'object' && 'href' in to && typeof to.href === 'string') {
+      return { href: to.href }
+    }
+
+    return { href: '' }
+  },
+}))
 
 vi.mock('~/composables/usePluralizedTranslation', () => ({
   usePluralizedTranslation: () => ({
@@ -129,7 +146,7 @@ vi.mock('~/composables/usePluralizedTranslation', () => ({
   }),
 }))
 
-mockNuxtImport('~~/shared/utils/localized-routes', () => ({
+vi.mock('~~/shared/utils/localized-routes', () => ({
   resolveLocalizedRoutePath: () => '/compare',
 }))
 
@@ -171,6 +188,44 @@ const mountPage = async () => {
             const activator = slots.activator?.({ props: {} })
             const content = slots.default?.()
             return () => h('div', { class: 'v-tooltip-stub' }, [activator, content])
+          },
+        }),
+        NuxtLink: defineComponent({
+          name: 'NuxtLinkStub',
+          props: {
+            to: { type: [String, Object], default: '' },
+            custom: { type: Boolean, default: false },
+          },
+          setup(props, { slots, attrs }) {
+            const resolveHref = () => {
+              if (typeof props.to === 'string') {
+                return props.to
+              }
+
+              if (props.to && typeof props.to === 'object') {
+                if ('path' in props.to && typeof props.to.path === 'string') {
+                  return props.to.path
+                }
+
+                if ('href' in props.to && typeof props.to.href === 'string') {
+                  return props.to.href
+                }
+              }
+
+              return ''
+            }
+
+            if (props.custom) {
+              return () =>
+                slots.default?.({
+                  href: resolveHref(),
+                  navigate: vi.fn(),
+                  isActive: false,
+                  isExactActive: false,
+                })
+            }
+
+            return () => h('a', { ...attrs, href: resolveHref() }, slots.default?.())
           },
         }),
         NuxtImg: defineComponent({
