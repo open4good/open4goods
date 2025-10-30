@@ -38,6 +38,14 @@ const i18nMessages = {
         },
         noOccasionHistory: "Pas d'historique pour les offres d'occasion.",
         offerList: 'Liste des offres',
+        metrics: {
+          bestOffer: 'Meilleure offre',
+          unknownSource: 'Source inconnue',
+          lowest: 'Prix le plus bas',
+          average: 'Prix moyen',
+          highest: 'Prix le plus haut',
+        },
+        noHistory: "L'historique des prix n'est pas encore disponible pour ce produit.",
         headers: {
           source: 'Source',
           offer: 'Offre',
@@ -69,6 +77,14 @@ const i18nMessages = {
         },
         noOccasionHistory: 'No history for second-hand offers.',
         offerList: 'Offer list',
+        metrics: {
+          bestOffer: 'Best offer',
+          unknownSource: 'Unknown source',
+          lowest: 'Lowest price',
+          average: 'Average price',
+          highest: 'Highest price',
+        },
+        noHistory: 'Price history is not yet available for this product.',
         headers: {
           source: 'Source',
           offer: 'Offer',
@@ -152,12 +168,14 @@ describe('ProductPriceSection', () => {
     },
     newHistory: {
       entries: [
+        { timestamp: Date.UTC(2024, 3, 1), price: 949 },
         { timestamp: Date.UTC(2024, 4, 1), price: 899 },
         { timestamp: Date.UTC(2024, 5, 1), price: 799 },
       ],
     },
     occasionHistory: {
       entries: [
+        { timestamp: Date.UTC(2024, 3, 20), price: 729 },
         { timestamp: Date.UTC(2024, 4, 15), price: 699 },
         { timestamp: Date.UTC(2024, 5, 1), price: 649 },
       ],
@@ -186,12 +204,15 @@ describe('ProductPriceSection', () => {
     vi.useRealTimers()
   })
 
-  const mountComponent = async () => {
+  const mountComponent = async (overrides?: Partial<NonNullable<ProductDto['offers']>>) => {
     const i18n = createI18n({ legacy: false, locale: 'fr-FR', fallbackLocale: 'en-US', messages: i18nMessages })
+
+    const offers = JSON.parse(JSON.stringify(baseOffers)) as typeof baseOffers
+    Object.assign(offers, overrides)
 
     return mountSuspended(ProductPriceSection, {
       props: {
-        offers: baseOffers,
+        offers,
         commercialEvents,
       },
       global: {
@@ -239,6 +260,31 @@ describe('ProductPriceSection', () => {
     const option = JSON.parse(chart.attributes('data-option') ?? '{}')
     const markAreaLabel = option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
     expect(markAreaLabel).toBe('Summer sales')
+    expect(option?.series?.[0]?.type).toBe('bar')
+
+    await wrapper.unmount()
+  })
+
+  it('renders metrics beneath each chart', async () => {
+    const wrapper = await mountComponent()
+
+    const metrics = wrapper.findAll('.product-price__metrics')
+    expect(metrics).toHaveLength(2)
+    expect(metrics[0]?.text()).toContain('Meilleure offre')
+    expect(metrics[0]?.text()).toMatch(/799/)
+    expect(metrics[0]?.text()).toMatch(/Prix le plus bas/)
+
+    await wrapper.unmount()
+  })
+
+  it('hides charts when history has fewer than three points', async () => {
+    const wrapper = await mountComponent({
+      newHistory: { entries: [{ timestamp: Date.UTC(2024, 4, 1), price: 899 }] },
+      occasionHistory: { entries: [{ timestamp: Date.UTC(2024, 5, 1), price: 649 }, { timestamp: Date.UTC(2024, 4, 15), price: 699 }] },
+    })
+
+    expect(wrapper.findAll('.echart-stub')).toHaveLength(0)
+    expect(wrapper.find('.product-price__charts-empty-message').exists()).toBe(true)
 
     await wrapper.unmount()
   })

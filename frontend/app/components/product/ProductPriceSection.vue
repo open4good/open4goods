@@ -9,8 +9,14 @@
       </p>
     </header>
 
-    <div class="product-price__charts">
-      <article class="product-price__chart-card">
+    <div
+      class="product-price__charts"
+      :class="{
+        'product-price__charts--single': visibleChartsCount === 1,
+        'product-price__charts--empty': visibleChartsCount === 0,
+      }"
+    >
+      <article v-if="hasNewHistory" class="product-price__chart-card">
         <header>
           <h3>{{ $t('product.price.newOffers') }}</h3>
           <p v-if="newTrendLabel" class="product-price__trend">{{ newTrendLabel }}</p>
@@ -26,9 +32,45 @@
             <div class="product-price__chart-placeholder" />
           </template>
         </ClientOnly>
+        <footer v-if="bestNewOffer || newStats" class="product-price__metrics">
+          <div class="product-price__metrics-highlight">
+            <p class="product-price__metrics-label">{{ $t('product.price.metrics.bestOffer') }}</p>
+            <div class="product-price__metrics-offer">
+              <img
+                v-if="bestNewOffer?.favicon"
+                :src="bestNewOffer.favicon"
+                :alt="bestNewOffer.datasourceName ?? ''"
+                width="64"
+                height="64"
+              >
+              <div class="product-price__metrics-offer-text">
+                <p class="product-price__metrics-price">
+                  {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
+                </p>
+                <p class="product-price__metrics-source">
+                  {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <dl v-if="newStats" class="product-price__metrics-stats">
+            <div>
+              <dt>{{ $t('product.price.metrics.lowest') }}</dt>
+              <dd>{{ formatStat(newStats.min, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+            </div>
+            <div>
+              <dt>{{ $t('product.price.metrics.average') }}</dt>
+              <dd>{{ formatStat(newStats.average, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+            </div>
+            <div>
+              <dt>{{ $t('product.price.metrics.highest') }}</dt>
+              <dd>{{ formatStat(newStats.max, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+            </div>
+          </dl>
+        </footer>
       </article>
 
-      <article class="product-price__chart-card">
+      <article v-if="hasOccasionHistory" class="product-price__chart-card">
         <header>
           <h3>{{ $t('product.price.occasionOffers') }}</h3>
         </header>
@@ -43,8 +85,47 @@
             <div class="product-price__chart-placeholder" />
           </template>
         </ClientOnly>
-        <p v-if="!occasionChartOption" class="product-price__empty">{{ $t('product.price.noOccasionHistory') }}</p>
+        <footer v-if="bestOccasionOffer || occasionStats" class="product-price__metrics">
+          <div class="product-price__metrics-highlight">
+            <p class="product-price__metrics-label">{{ $t('product.price.metrics.bestOffer') }}</p>
+            <div class="product-price__metrics-offer">
+              <img
+                v-if="bestOccasionOffer?.favicon"
+                :src="bestOccasionOffer.favicon"
+                :alt="bestOccasionOffer.datasourceName ?? ''"
+                width="64"
+                height="64"
+              >
+              <div class="product-price__metrics-offer-text">
+                <p class="product-price__metrics-price">
+                  {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
+                </p>
+                <p class="product-price__metrics-source">
+                  {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <dl v-if="occasionStats" class="product-price__metrics-stats">
+            <div>
+              <dt>{{ $t('product.price.metrics.lowest') }}</dt>
+              <dd>{{ formatStat(occasionStats.min, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+            </div>
+            <div>
+              <dt>{{ $t('product.price.metrics.average') }}</dt>
+              <dd>{{ formatStat(occasionStats.average, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+            </div>
+            <div>
+              <dt>{{ $t('product.price.metrics.highest') }}</dt>
+              <dd>{{ formatStat(occasionStats.max, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+            </div>
+          </dl>
+        </footer>
       </article>
+
+      <p v-if="visibleChartsCount === 0" class="product-price__charts-empty-message">
+        {{ $t('product.price.noHistory') }}
+      </p>
     </div>
 
     <div class="product-price__offers">
@@ -85,7 +166,7 @@ import { computed } from 'vue'
 import type { PropType } from 'vue'
 import VueECharts from 'vue-echarts'
 import { use } from 'echarts/core'
-import { LineChart } from 'echarts/charts'
+import { BarChart } from 'echarts/charts'
 import {
   GridComponent,
   TooltipComponent,
@@ -99,7 +180,7 @@ import { formatDistanceToNow, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import type { ProductDto, CommercialEvent } from '~~/shared/api-client'
 
-use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, LegendComponent, TitleComponent, CanvasRenderer])
+use([BarChart, GridComponent, TooltipComponent, DataZoomComponent, LegendComponent, TitleComponent, CanvasRenderer])
 
 const props = defineProps({
   sectionId: {
@@ -130,8 +211,13 @@ const normalizeHistoryEntries = (
     }))
     .filter((entry): entry is HistoryEntry => Number.isFinite(entry.timestamp) && Number.isFinite(entry.price))
 
+const MIN_HISTORY_POINTS = 3
+
 const newHistory = computed(() => normalizeHistoryEntries(props.offers?.newHistory?.entries))
 const occasionHistory = computed(() => normalizeHistoryEntries(props.offers?.occasionHistory?.entries))
+
+const hasNewHistory = computed(() => newHistory.value.length >= MIN_HISTORY_POINTS)
+const hasOccasionHistory = computed(() => occasionHistory.value.length >= MIN_HISTORY_POINTS)
 
 const resolvedEvents = computed(() =>
   props.commercialEvents
@@ -143,10 +229,42 @@ const resolvedEvents = computed(() =>
     .filter((event) => Number.isFinite(event.start) && Number.isFinite(event.end) && event.start <= event.end),
 )
 
-const newChartOption = computed(() => buildChartOption(newHistory.value, resolvedEvents.value, t('product.price.newOffers')))
-const occasionChartOption = computed(() =>
-  occasionHistory.value.length ? buildChartOption(occasionHistory.value, resolvedEvents.value, t('product.price.occasionOffers')) : null,
+const newChartOption = computed(() =>
+  hasNewHistory.value ? buildChartOption(newHistory.value, resolvedEvents.value, t('product.price.newOffers')) : null,
 )
+const occasionChartOption = computed(() =>
+  hasOccasionHistory.value ? buildChartOption(occasionHistory.value, resolvedEvents.value, t('product.price.occasionOffers')) : null,
+)
+
+const visibleChartsCount = computed(() => [hasNewHistory.value, hasOccasionHistory.value].filter(Boolean).length)
+
+type HistoryStats = {
+  average: number
+  min: number
+  max: number
+}
+
+const computeHistoryStats = (entries: HistoryEntry[]): HistoryStats | null => {
+  if (!entries.length) {
+    return null
+  }
+
+  const prices = entries.map((entry) => entry.price)
+  const min = Math.min(...prices)
+  const max = Math.max(...prices)
+  const average = prices.reduce((acc, price) => acc + price, 0) / prices.length
+
+  return { min, max, average }
+}
+
+const newStats = computed(() => (hasNewHistory.value ? computeHistoryStats(newHistory.value) : null))
+const occasionStats = computed(() => (hasOccasionHistory.value ? computeHistoryStats(occasionHistory.value) : null))
+
+const bestNewOffer = computed(() => props.offers?.bestNewOffer ?? props.offers?.bestPrice ?? null)
+const bestOccasionOffer = computed(() => props.offers?.bestOccasionOffer ?? props.offers?.bestPrice ?? null)
+
+const formatStat = (value?: number | null, currency: string = 'EUR') =>
+  value == null || Number.isNaN(value) ? '—' : n(value, { style: 'currency', currency, maximumFractionDigits: 2 })
 
 const newTrendLabel = computed(() => {
   const trend = props.offers?.newTrend
@@ -186,7 +304,7 @@ const buildChartOption = (
   events: Array<{ start: number; end: number; label?: string }>,
   title: string,
 ) => {
-  if (!entries.length) {
+  if (entries.length < MIN_HISTORY_POINTS) {
     return null
   }
 
@@ -245,13 +363,13 @@ const buildChartOption = (
     ],
     series: [
       {
-        type: 'line',
-        smooth: true,
-        symbol: 'circle',
-        symbolSize: 6,
-        areaStyle: { opacity: 0.08 },
+        type: 'bar',
         data,
-        lineStyle: { color: '#2563eb' },
+        barMaxWidth: 26,
+        itemStyle: {
+          borderRadius: 8,
+          color: '#2563eb',
+        },
         markArea: markArea.length ? { data: markArea } : undefined,
       },
     ],
@@ -307,6 +425,14 @@ const formatUpdated = (timestamp?: number | null) => {
   gap: 1.5rem;
 }
 
+.product-price__charts--single {
+  grid-template-columns: 1fr;
+}
+
+.product-price__charts--empty {
+  display: block;
+}
+
 .product-price__chart-card {
   background: rgba(var(--v-theme-surface-glass), 0.92);
   border-radius: 24px;
@@ -332,8 +458,93 @@ const formatUpdated = (timestamp?: number | null) => {
   background: rgba(148, 163, 184, 0.14);
 }
 
-.product-price__empty {
+.product-price__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
+}
+
+.product-price__metrics-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.product-price__metrics-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+}
+
+.product-price__metrics-offer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.product-price__metrics-offer img {
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  object-fit: contain;
+}
+
+.product-price__metrics-offer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.product-price__metrics-price {
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 700;
+  color: rgba(var(--v-theme-text-neutral-strong), 1);
+}
+
+.product-price__metrics-source {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.product-price__metrics-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.product-price__metrics-stats div {
+  background: rgba(var(--v-theme-surface-primary-080), 0.8);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-price__metrics-stats dt {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.product-price__metrics-stats dd {
+  margin: 0;
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-strong), 1);
+}
+
+.product-price__charts-empty-message {
+  padding: 1.25rem 1.5rem;
+  border-radius: 18px;
+  background: rgba(var(--v-theme-surface-primary-050), 0.9);
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.4);
 }
 
 .product-price__offers {
@@ -359,6 +570,15 @@ const formatUpdated = (timestamp?: number | null) => {
 @media (max-width: 768px) {
   .product-price__chart {
     height: 240px;
+  }
+
+  .product-price__metrics {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-price__metrics-stats {
+    grid-template-columns: 1fr;
   }
 }
 </style>
