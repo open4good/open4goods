@@ -1400,6 +1400,10 @@
       "openGalleryFallback": "Open product media gallery",
       "openGalleryImage": "View image \"{label}\" in fullscreen",
       "openGalleryVideo": "Play video \"{label}\"",
+      "impactBadge": {
+        "title": "Impact score: {score}",
+        "learnMore": "Learn more"
+      },
       "priceMerchantPrefix": "At",
       "thumbnailLabel": "Select {type} {index} of {total}: {label}",
       "videoBadge": "Video",
