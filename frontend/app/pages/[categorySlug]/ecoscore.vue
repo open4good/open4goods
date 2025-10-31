@@ -63,7 +63,7 @@
                         </p>
                       </div>
                     </v-col>
-                    <v-col cols="12" md="8" class="d-flex flex-column justify-center">
+                    <v-col cols="12" md="7" class="d-flex flex-column justify-center">
                       <div class="category-ecoscore__intro-copy">
                         <h3 class="category-ecoscore__intro-title">
                           {{ t('category.ecoscorePage.sections.overview.card.title') }}
@@ -168,7 +168,7 @@
                     :key="criterion.key"
                     cols="12"
                     md="6"
-                    lg="4"
+                    lg="5"
                   >
                     <article class="category-ecoscore__criteria-card" data-test="impact-criteria-card">
                       <div class="category-ecoscore__criteria-icon" aria-hidden="true">
@@ -228,7 +228,7 @@
                     </v-card>
                   </v-col>
 
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="5">
                     <v-card class="category-ecoscore__community-card" elevation="0" rounded="xl">
                       <h3 class="category-ecoscore__community-title">
                         {{ t('category.ecoscorePage.sections.transparency.communityTitle') }}
@@ -310,7 +310,7 @@
                     {{ t('category.ecoscorePage.sections.transparency.cardsTitle') }}
                   </h3>
                   <v-row class="category-ecoscore__transparency-grid" align="stretch">
-                    <v-col v-for="card in transparencyCards" :key="card.key" cols="12" md="6">
+                    <v-col v-for="card in transparencyCards" :key="card.key" cols="12" md="5">
                       <v-card class="category-ecoscore__transparency-card" elevation="4" rounded="xl">
                         <div class="category-ecoscore__transparency-card-header">
                           <v-avatar size="48" class="category-ecoscore__transparency-card-icon" color="surface-primary-120">
