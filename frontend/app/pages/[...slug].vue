@@ -609,8 +609,8 @@ const productStructuredData = computed(() => {
   }
 
   const aggregateRatingValue =
-    typeof product.value.scores?.ecoscore?.relativ?.value === 'number'
-      ? product.value.scores.ecoscore.relativ.value
+    typeof product.value.scores?.ecoscore?.value === 'number'
+      ? product.value.scores.ecoscore.value
       : null
 
   return {
