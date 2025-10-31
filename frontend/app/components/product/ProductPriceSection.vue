@@ -22,59 +22,6 @@
             <h3>{{ $t('product.price.newOffers') }}</h3>
             <p v-if="newTrendLabel" class="product-price__trend">{{ newTrendLabel }}</p>
           </div>
-          <ClientOnly>
-            <NuxtLink
-              v-if="bestNewOffer && bestNewOfferLink"
-              :to="bestNewOfferLink"
-              class="product-price__metrics-highlight product-price__metrics-highlight--inline product-price__metrics-offer product-price__metrics-offer--link"
-              :aria-label="$t('product.price.metrics.viewOffer', {
-                source: bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
-              })"
-            >
-              <span class="product-price__metrics-label product-price__metrics-label--inline">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <img
-                v-if="bestNewOffer?.favicon"
-                :src="bestNewOffer.favicon"
-                :alt="bestNewOffer.datasourceName ?? ''"
-                width="48"
-                height="48"
-              >
-              <div class="product-price__metrics-offer-text">
-                <p class="product-price__metrics-price">
-                  {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
-                </p>
-                <p class="product-price__metrics-source">
-                  {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
-                </p>
-              </div>
-              <v-icon icon="mdi-open-in-new" size="18" class="product-price__metrics-offer-icon" aria-hidden="true" />
-            </NuxtLink>
-            <div
-              v-else-if="bestNewOffer"
-              class="product-price__metrics-highlight product-price__metrics-highlight--inline product-price__metrics-offer"
-            >
-              <span class="product-price__metrics-label product-price__metrics-label--inline">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <img
-                v-if="bestNewOffer?.favicon"
-                :src="bestNewOffer.favicon"
-                :alt="bestNewOffer.datasourceName ?? ''"
-                width="48"
-                height="48"
-              >
-              <div class="product-price__metrics-offer-text">
-                <p class="product-price__metrics-price">
-                  {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
-                </p>
-                <p class="product-price__metrics-source">
-                  {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
-                </p>
-              </div>
-            </div>
-          </ClientOnly>
         </header>
         <ClientOnly>
           <VueECharts
@@ -87,31 +34,93 @@
             <div class="product-price__chart-placeholder" />
           </template>
         </ClientOnly>
-        <footer v-if="newStats" class="product-price__metrics">
-          <p v-if="bestNewOffer" class="product-price__metrics-label">{{ $t('product.price.metrics.bestOffer') }}</p>
-          <dl class="product-price__metrics-stats">
-            <div>
-              <v-icon icon="mdi-trending-down" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
-              <div class="product-price__metrics-stat-text">
-                <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                <dd>{{ formatStat(newStats.min, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+        <footer
+          v-if="newStats"
+          class="product-price__metrics"
+          :class="bestNewOffer ? 'product-price__metrics--with-offer' : 'product-price__metrics--solo'"
+        >
+          <ClientOnly>
+            <NuxtLink
+              v-if="bestNewOffer && bestNewOfferLink"
+              :to="bestNewOfferLink"
+              class="product-price__metrics-highlight product-price__metrics-offer-card product-price__metrics-offer--link"
+              :aria-label="$t('product.price.metrics.viewOffer', {
+                source: bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
+              })"
+            >
+              <span class="product-price__metrics-label">
+                {{ $t('product.price.metrics.bestOffer') }}
+              </span>
+              <div class="product-price__metrics-offer">
+                <img
+                  v-if="bestNewOffer?.favicon"
+                  :src="bestNewOffer.favicon"
+                  :alt="bestNewOffer.datasourceName ?? ''"
+                  width="48"
+                  height="48"
+                >
+                <div class="product-price__metrics-offer-text">
+                  <p class="product-price__metrics-price">
+                    {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
+                  </p>
+                  <p class="product-price__metrics-source">
+                    {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                  </p>
+                </div>
+                <v-icon icon="mdi-open-in-new" size="18" class="product-price__metrics-offer-icon" aria-hidden="true" />
+              </div>
+            </NuxtLink>
+            <div
+              v-else-if="bestNewOffer"
+              class="product-price__metrics-highlight product-price__metrics-offer-card"
+            >
+              <span class="product-price__metrics-label">
+                {{ $t('product.price.metrics.bestOffer') }}
+              </span>
+              <div class="product-price__metrics-offer">
+                <img
+                  v-if="bestNewOffer?.favicon"
+                  :src="bestNewOffer.favicon"
+                  :alt="bestNewOffer.datasourceName ?? ''"
+                  width="48"
+                  height="48"
+                >
+                <div class="product-price__metrics-offer-text">
+                  <p class="product-price__metrics-price">
+                    {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
+                  </p>
+                  <p class="product-price__metrics-source">
+                    {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                  </p>
+                </div>
               </div>
             </div>
-            <div>
-              <v-icon icon="mdi-chart-line" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
-              <div class="product-price__metrics-stat-text">
-                <dt>{{ $t('product.price.metrics.average') }}</dt>
-                <dd>{{ formatStat(newStats.average, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+          </ClientOnly>
+          <div class="product-price__metrics-summary">
+            <dl>
+              <div class="product-price__metrics-row">
+                <v-icon icon="mdi-trending-down" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <div class="product-price__metrics-stat-text">
+                  <dt>{{ $t('product.price.metrics.lowest') }}</dt>
+                  <dd>{{ formatStat(newStats.min, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                </div>
               </div>
-            </div>
-            <div>
-              <v-icon icon="mdi-trending-up" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
-              <div class="product-price__metrics-stat-text">
-                <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                <dd>{{ formatStat(newStats.max, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+              <div class="product-price__metrics-row">
+                <v-icon icon="mdi-chart-line" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <div class="product-price__metrics-stat-text">
+                  <dt>{{ $t('product.price.metrics.average') }}</dt>
+                  <dd>{{ formatStat(newStats.average, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                </div>
               </div>
-            </div>
-          </dl>
+              <div class="product-price__metrics-row">
+                <v-icon icon="mdi-trending-up" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <div class="product-price__metrics-stat-text">
+                  <dt>{{ $t('product.price.metrics.highest') }}</dt>
+                  <dd>{{ formatStat(newStats.max, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                </div>
+              </div>
+            </dl>
+          </div>
         </footer>
       </article>
 
@@ -120,59 +129,6 @@
           <div class="product-price__chart-heading">
             <h3>{{ $t('product.price.occasionOffers') }}</h3>
           </div>
-          <ClientOnly>
-            <NuxtLink
-              v-if="bestOccasionOffer && bestOccasionOfferLink"
-              :to="bestOccasionOfferLink"
-              class="product-price__metrics-highlight product-price__metrics-highlight--inline product-price__metrics-offer product-price__metrics-offer--link"
-              :aria-label="$t('product.price.metrics.viewOffer', {
-                source: bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
-              })"
-            >
-              <span class="product-price__metrics-label product-price__metrics-label--inline">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <img
-                v-if="bestOccasionOffer?.favicon"
-                :src="bestOccasionOffer.favicon"
-                :alt="bestOccasionOffer.datasourceName ?? ''"
-                width="48"
-                height="48"
-              >
-              <div class="product-price__metrics-offer-text">
-                <p class="product-price__metrics-price">
-                  {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
-                </p>
-                <p class="product-price__metrics-source">
-                  {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
-                </p>
-              </div>
-              <v-icon icon="mdi-open-in-new" size="18" class="product-price__metrics-offer-icon" aria-hidden="true" />
-            </NuxtLink>
-            <div
-              v-else-if="bestOccasionOffer"
-              class="product-price__metrics-highlight product-price__metrics-highlight--inline product-price__metrics-offer"
-            >
-              <span class="product-price__metrics-label product-price__metrics-label--inline">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <img
-                v-if="bestOccasionOffer?.favicon"
-                :src="bestOccasionOffer.favicon"
-                :alt="bestOccasionOffer.datasourceName ?? ''"
-                width="48"
-                height="48"
-              >
-              <div class="product-price__metrics-offer-text">
-                <p class="product-price__metrics-price">
-                  {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
-                </p>
-                <p class="product-price__metrics-source">
-                  {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
-                </p>
-              </div>
-            </div>
-          </ClientOnly>
         </header>
         <ClientOnly>
           <VueECharts
@@ -185,31 +141,93 @@
             <div class="product-price__chart-placeholder" />
           </template>
         </ClientOnly>
-        <footer v-if="occasionStats" class="product-price__metrics">
-          <p v-if="bestOccasionOffer" class="product-price__metrics-label">{{ $t('product.price.metrics.bestOffer') }}</p>
-          <dl class="product-price__metrics-stats">
-            <div>
-              <v-icon icon="mdi-trending-down" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
-              <div class="product-price__metrics-stat-text">
-                <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                <dd>{{ formatStat(occasionStats.min, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+        <footer
+          v-if="occasionStats"
+          class="product-price__metrics"
+          :class="bestOccasionOffer ? 'product-price__metrics--with-offer' : 'product-price__metrics--solo'"
+        >
+          <ClientOnly>
+            <NuxtLink
+              v-if="bestOccasionOffer && bestOccasionOfferLink"
+              :to="bestOccasionOfferLink"
+              class="product-price__metrics-highlight product-price__metrics-offer-card product-price__metrics-offer--link"
+              :aria-label="$t('product.price.metrics.viewOffer', {
+                source: bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
+              })"
+            >
+              <span class="product-price__metrics-label">
+                {{ $t('product.price.metrics.bestOffer') }}
+              </span>
+              <div class="product-price__metrics-offer">
+                <img
+                  v-if="bestOccasionOffer?.favicon"
+                  :src="bestOccasionOffer.favicon"
+                  :alt="bestOccasionOffer.datasourceName ?? ''"
+                  width="48"
+                  height="48"
+                >
+                <div class="product-price__metrics-offer-text">
+                  <p class="product-price__metrics-price">
+                    {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
+                  </p>
+                  <p class="product-price__metrics-source">
+                    {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                  </p>
+                </div>
+                <v-icon icon="mdi-open-in-new" size="18" class="product-price__metrics-offer-icon" aria-hidden="true" />
+              </div>
+            </NuxtLink>
+            <div
+              v-else-if="bestOccasionOffer"
+              class="product-price__metrics-highlight product-price__metrics-offer-card"
+            >
+              <span class="product-price__metrics-label">
+                {{ $t('product.price.metrics.bestOffer') }}
+              </span>
+              <div class="product-price__metrics-offer">
+                <img
+                  v-if="bestOccasionOffer?.favicon"
+                  :src="bestOccasionOffer.favicon"
+                  :alt="bestOccasionOffer.datasourceName ?? ''"
+                  width="48"
+                  height="48"
+                >
+                <div class="product-price__metrics-offer-text">
+                  <p class="product-price__metrics-price">
+                    {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
+                  </p>
+                  <p class="product-price__metrics-source">
+                    {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                  </p>
+                </div>
               </div>
             </div>
-            <div>
-              <v-icon icon="mdi-chart-line" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
-              <div class="product-price__metrics-stat-text">
-                <dt>{{ $t('product.price.metrics.average') }}</dt>
-                <dd>{{ formatStat(occasionStats.average, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+          </ClientOnly>
+          <div class="product-price__metrics-summary">
+            <dl>
+              <div class="product-price__metrics-row">
+                <v-icon icon="mdi-trending-down" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <div class="product-price__metrics-stat-text">
+                  <dt>{{ $t('product.price.metrics.lowest') }}</dt>
+                  <dd>{{ formatStat(occasionStats.min, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                </div>
               </div>
-            </div>
-            <div>
-              <v-icon icon="mdi-trending-up" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
-              <div class="product-price__metrics-stat-text">
-                <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                <dd>{{ formatStat(occasionStats.max, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+              <div class="product-price__metrics-row">
+                <v-icon icon="mdi-chart-line" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <div class="product-price__metrics-stat-text">
+                  <dt>{{ $t('product.price.metrics.average') }}</dt>
+                  <dd>{{ formatStat(occasionStats.average, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                </div>
               </div>
-            </div>
-          </dl>
+              <div class="product-price__metrics-row">
+                <v-icon icon="mdi-trending-up" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <div class="product-price__metrics-stat-text">
+                  <dt>{{ $t('product.price.metrics.highest') }}</dt>
+                  <dd>{{ formatStat(occasionStats.max, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                </div>
+              </div>
+            </dl>
+          </div>
         </footer>
       </article>
 
@@ -256,12 +274,11 @@ import { computed } from 'vue'
 import type { PropType } from 'vue'
 import VueECharts from 'vue-echarts'
 import { use } from 'echarts/core'
-import { BarChart } from 'echarts/charts'
+import { LineChart } from 'echarts/charts'
 import {
   GridComponent,
   TooltipComponent,
   DataZoomComponent,
-  LegendComponent,
   TitleComponent,
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -270,7 +287,7 @@ import { formatDistanceToNow, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import type { ProductDto, CommercialEvent, ProductAggregatedPriceDto } from '~~/shared/api-client'
 
-use([BarChart, GridComponent, TooltipComponent, DataZoomComponent, LegendComponent, TitleComponent, CanvasRenderer])
+use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, TitleComponent, CanvasRenderer])
 
 const props = defineProps({
   sectionId: {
@@ -432,7 +449,16 @@ const buildChartOption = (
 
   return {
     title: { text: title, left: 'center', top: 10, textStyle: { fontSize: 14, fontWeight: 600 } },
-    tooltip: { trigger: 'axis' },
+    tooltip: {
+      trigger: 'axis',
+      valueFormatter: (value: number | string) =>
+        n(Number(value), {
+          style: 'currency',
+          currency: props.offers?.bestPrice?.currency ?? 'EUR',
+          maximumFractionDigits: 2,
+        }),
+      axisPointer: { type: 'line' },
+    },
     grid: { left: 40, right: 24, top: 48, bottom: 48 },
     xAxis: {
       type: 'time',
@@ -469,15 +495,18 @@ const buildChartOption = (
     ],
     series: [
       {
-        type: 'bar',
+        type: 'line',
         data,
-        barWidth: '98%',
-        barGap: '0%',
-        barCategoryGap: '0%',
-        itemStyle: {
-          borderRadius: 6,
+        smooth: true,
+        showSymbol: false,
+        lineStyle: {
+          width: 3,
           color: '#2563eb',
         },
+        areaStyle: {
+          color: 'rgba(37, 99, 235, 0.12)',
+        },
+        emphasis: { focus: 'series' },
         markArea: markArea.length ? { data: markArea } : undefined,
       },
     ],
@@ -584,27 +613,64 @@ const formatUpdated = (timestamp?: number | null) => {
 .product-price__metrics {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
   padding-top: 0.75rem;
   border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
+  align-items: stretch;
+}
+
+.product-price__metrics--solo {
+  align-items: center;
+}
+
+.product-price__metrics--with-offer {
+  gap: 1.5rem;
 }
 
 .product-price__metrics-highlight {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  min-width: 220px;
+  gap: 0.75rem;
+  background: rgba(var(--v-theme-surface-primary-080), 0.82);
+  border-radius: 20px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+  width: 100%;
 }
 
-.product-price__metrics-highlight--inline {
-  flex-direction: row;
+.product-price__metrics-offer-card {
+  flex: 1 1 0%;
+}
+
+.product-price__metrics-summary {
+  flex: 1 1 0%;
+  background: rgba(var(--v-theme-surface-primary-080), 0.65);
+  border-radius: 20px;
+  padding: 1rem 1.25rem;
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.product-price__metrics--solo .product-price__metrics-summary {
+  width: min(100%, 520px);
+  margin-inline: auto;
+}
+
+.product-price__metrics-summary dl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.product-price__metrics-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
   align-items: center;
-  gap: 0.9rem;
-  padding: 0.75rem 1rem;
-  background: rgba(var(--v-theme-surface-primary-080), 0.75);
-  border-radius: 18px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-  margin-left: auto;
 }
 
 .product-price__metrics-label {
@@ -614,16 +680,10 @@ const formatUpdated = (timestamp?: number | null) => {
   color: rgba(var(--v-theme-text-neutral-soft), 0.9);
 }
 
-.product-price__metrics-label--inline {
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.95);
-}
-
 .product-price__metrics-offer {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
 .product-price__metrics-offer--link {
@@ -635,7 +695,7 @@ const formatUpdated = (timestamp?: number | null) => {
 .product-price__metrics-offer--link:hover,
 .product-price__metrics-offer--link:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
 }
 
 .product-price__metrics-offer--link:focus-visible {
@@ -670,23 +730,6 @@ const formatUpdated = (timestamp?: number | null) => {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
 }
 
-.product-price__metrics-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(120px, 1fr));
-  gap: 1rem;
-  width: 100%;
-}
-
-.product-price__metrics-stats div {
-  background: rgba(var(--v-theme-surface-primary-080), 0.8);
-  border-radius: 14px;
-  padding: 0.85rem 1rem;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.75rem;
-  align-items: center;
-}
-
 .product-price__metrics-stat-icon {
   color: rgba(var(--v-theme-accent-supporting), 0.9);
 }
@@ -697,14 +740,14 @@ const formatUpdated = (timestamp?: number | null) => {
   gap: 0.35rem;
 }
 
-.product-price__metrics-stats dt {
+.product-price__metrics-stat-text dt {
   font-size: 0.85rem;
   color: rgba(var(--v-theme-text-neutral-soft), 0.9);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.product-price__metrics-stats dd {
+.product-price__metrics-stat-text dd {
   margin: 0;
   font-weight: 600;
   color: rgba(var(--v-theme-text-neutral-strong), 1);
@@ -738,16 +781,18 @@ const formatUpdated = (timestamp?: number | null) => {
   border-radius: 4px;
 }
 
+@media (min-width: 960px) {
+  .product-price__metrics--with-offer {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
 @media (max-width: 768px) {
   .product-price__chart-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-  }
-
-  .product-price__metrics-highlight--inline {
-    width: 100%;
-    margin-left: 0;
   }
 
   .product-price__chart {
@@ -759,8 +804,13 @@ const formatUpdated = (timestamp?: number | null) => {
     align-items: stretch;
   }
 
-  .product-price__metrics-stats {
-    grid-template-columns: 1fr;
+  .product-price__metrics--solo {
+    align-items: stretch;
+  }
+
+  .product-price__metrics-summary,
+  .product-price__metrics-offer-card {
+    max-width: 100%;
   }
 }
 </style>
