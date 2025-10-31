@@ -482,7 +482,8 @@ const fetchAlternatives = async () => {
       return
     }
 
-    const products = (response.products ?? []).filter((candidate) => candidate.gtin !== props.product?.gtin)
+    const pageData = Array.isArray(response.products?.data) ? response.products.data : []
+    const products = pageData.filter((candidate) => candidate.gtin !== props.product?.gtin)
     alternatives.value = products.slice(0, props.maxResults)
   } catch (error) {
     if (currentToken !== requestToken) {
