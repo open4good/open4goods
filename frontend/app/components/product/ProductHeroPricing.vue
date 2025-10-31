@@ -445,6 +445,7 @@ const scrollToSelector = (selector: string, offset = 120) => {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
+  flex: 1 1 100%;
 }
 
 .product-hero__price {

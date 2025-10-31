@@ -380,7 +380,7 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     const impactCard = wrapper.get('.product-hero__impact-card')
-    expect(impactCard.get('.product-hero__impact-title').text()).toBe('Impact score: 3.5')
+    expect(impactCard.get('.product-hero__impact-title').text()).toBe('Impact score')
 
     const learnMoreLink = impactCard.get('.product-hero__impact-link')
     expect(learnMoreLink.attributes('href')).toBe('/appliances/ecoscore')
