@@ -137,6 +137,11 @@ describe('ProductHeroPricing', () => {
     expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
     expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain('Merchant U')
 
+    const trendChip = wrapper.get('.product-hero__price-trend')
+    expect(trendChip.classes()).toContain('product-hero__price-trend--increase')
+    expect(trendChip.find('.v-icon-stub').text()).toBe('mdi-trending-up')
+    expect(trendChip.text()).toContain('Price increase of €5.00')
+
     await chips[1]?.trigger('click')
     await wrapper.vm.$nextTick()
 
@@ -144,6 +149,11 @@ describe('ProductHeroPricing', () => {
     expect(wrapper.get('.product-hero__price-value').text()).toBe('799')
     expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
     expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain('Shop')
+
+    const updatedTrendChip = wrapper.get('.product-hero__price-trend')
+    expect(updatedTrendChip.classes()).toContain('product-hero__price-trend--decrease')
+    expect(updatedTrendChip.find('.v-icon-stub').text()).toBe('mdi-trending-down')
+    expect(updatedTrendChip.text()).toContain('Price drop of €10.00')
 
     await wrapper.unmount()
   })

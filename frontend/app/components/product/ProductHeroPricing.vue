@@ -27,9 +27,22 @@
         {{ option.label }}
       </button>
     </div>
-    <h2 class="product-hero__pricing-title">
-      {{ $t('product.hero.bestPriceTitle') }}
-    </h2>
+    <div class="product-hero__pricing-header">
+      <button
+        v-if="priceTrendLabel"
+        type="button"
+        class="product-hero__price-trend"
+        :class="priceTrendToneClass"
+        @click="scrollToSelector('#price-history')"
+      >
+        <v-icon :icon="priceTrendIcon" size="18" class="product-hero__price-trend-icon" />
+        <span>{{ priceTrendLabel }}</span>
+      </button>
+
+      <h2 class="product-hero__pricing-title">
+        {{ $t('product.hero.bestPriceTitle') }}
+      </h2>
+    </div>
     <div class="product-hero__price">
       <span class="product-hero__price-value" itemprop="lowPrice">
         {{ bestPriceLabel }}
@@ -107,15 +120,6 @@
         </div>
       </div>
 
-      <button
-        v-if="priceTrendLabel"
-        type="button"
-        class="product-hero__price-trend"
-        @click="scrollToSelector('#price-history')"
-      >
-        <v-icon icon="mdi-chart-line" size="18" class="product-hero__price-trend-icon" />
-        <span>{{ priceTrendLabel }}</span>
-      </button>
     </div>
     <div class="product-hero__price-actions">
       <v-btn color="primary" variant="flat" @click="scrollToSelector('#offers-list', 136)">
@@ -298,13 +302,18 @@ const bestPriceMerchant = computed(() => {
   }
 })
 
-const priceTrendLabel = computed(() => {
+const priceTrend = computed(() => {
   const offers = props.product.offers
   if (!offers) {
     return null
   }
 
   const trend = activeCondition.value === 'occasion' ? offers.occasionTrend : offers.newTrend
+  return trend ?? null
+})
+
+const priceTrendLabel = computed(() => {
+  const trend = priceTrend.value
   if (!trend) {
     return null
   }
@@ -333,6 +342,32 @@ const priceTrendLabel = computed(() => {
 
   return t('product.price.trend.stable')
 })
+
+const priceTrendTone = computed<'decrease' | 'increase' | 'stable'>(() => {
+  const trendType = priceTrend.value?.trend
+  if (trendType === 'PRICE_DECREASE') {
+    return 'decrease'
+  }
+
+  if (trendType === 'PRICE_INCREASE') {
+    return 'increase'
+  }
+
+  return 'stable'
+})
+
+const priceTrendIcon = computed(() => {
+  switch (priceTrendTone.value) {
+    case 'decrease':
+      return 'mdi-trending-down'
+    case 'increase':
+      return 'mdi-trending-up'
+    default:
+      return 'mdi-trending-neutral'
+  }
+})
+
+const priceTrendToneClass = computed(() => `product-hero__price-trend--${priceTrendTone.value}`)
 
 const scrollToSelector = (selector: string, offset = 120) => {
   if (!import.meta.client) {
@@ -396,6 +431,14 @@ const scrollToSelector = (selector: string, offset = 120) => {
 .product-hero__price-chip:disabled {
   cursor: default;
   box-shadow: none;
+}
+
+.product-hero__pricing-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .product-hero__pricing-title {
@@ -468,25 +511,67 @@ const scrollToSelector = (selector: string, offset = 120) => {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.5rem;
+  padding: 0.4rem 0.6rem;
   border: none;
   border-radius: 999px;
-  background: rgba(var(--v-theme-surface-primary-080), 0.6);
-  color: rgb(var(--v-theme-text-neutral-secondary));
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  background: transparent;
+  color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .product-hero__price-trend:hover,
 .product-hero__price-trend:focus-visible {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+}
+
+.product-hero__price-trend-icon {
+  transition: color 0.2s ease;
+}
+
+.product-hero__price-trend--stable {
+  background: rgba(var(--v-theme-surface-primary-080), 0.6);
+  color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.product-hero__price-trend--stable .product-hero__price-trend-icon {
+  color: rgb(var(--v-theme-accent-primary-highlight));
+}
+
+.product-hero__price-trend--stable:hover,
+.product-hero__price-trend--stable:focus-visible {
   background: rgba(var(--v-theme-surface-primary-100), 0.85);
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-hero__price-trend-icon {
-  color: rgb(var(--v-theme-accent-primary-highlight));
+.product-hero__price-trend--decrease {
+  background: rgba(var(--v-theme-primary), 0.14);
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-hero__price-trend--decrease .product-hero__price-trend-icon {
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-hero__price-trend--decrease:hover,
+.product-hero__price-trend--decrease:focus-visible {
+  background: rgba(var(--v-theme-primary), 0.22);
+}
+
+.product-hero__price-trend--increase {
+  background: rgba(var(--v-theme-error), 0.18);
+  color: rgb(var(--v-theme-error));
+}
+
+.product-hero__price-trend--increase .product-hero__price-trend-icon {
+  color: rgb(var(--v-theme-error));
+}
+
+.product-hero__price-trend--increase:hover,
+.product-hero__price-trend--increase:focus-visible {
+  background: rgba(var(--v-theme-error), 0.26);
 }
 
 .product-hero__price-actions {

@@ -151,6 +151,8 @@ describe('ProductHero', () => {
       gtinInfo: { countryName: 'France', countryFlagUrl: '/flag.png' },
       coverImagePath: '/cover.jpg',
     },
+    slug: 'demo-product',
+    fullSlug: 'appliances/demo-product',
     offers: {
       offersCount: 4,
       bestPrice: {
@@ -370,6 +372,19 @@ describe('ProductHero', () => {
     expect(attributes[0]?.text()).toContain('Model X')
     expect(attributes[1]?.text()).toContain('Origin')
     expect(attributes[1]?.text()).toContain('France')
+
+    await wrapper.unmount()
+  })
+
+  it('renders the impact badge with formatted score and learn-more link', async () => {
+    const wrapper = await mountComponent()
+
+    const impactCard = wrapper.get('.product-hero__impact-card')
+    expect(impactCard.get('.product-hero__impact-title').text()).toBe('Impact score: 3.5')
+
+    const learnMoreLink = impactCard.get('.product-hero__impact-link')
+    expect(learnMoreLink.attributes('href')).toBe('/appliances/ecoscore')
+    expect(learnMoreLink.text()).toBe('Learn more')
 
     await wrapper.unmount()
   })
