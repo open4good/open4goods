@@ -345,35 +345,20 @@ const impactScore = computed(() => {
   return typeof relative === 'number' ? relative : null
 })
 
-const impactScoreFormatted = computed(() => {
-  if (impactScore.value === null) {
-    return null
-  }
-
-  const value = impactScore.value
-  const hasFraction = Math.abs(value % 1) > 0.001
-
-  return n(value, {
-    style: 'decimal',
-    minimumFractionDigits: hasFraction ? 1 : 0,
-    maximumFractionDigits: hasFraction ? 1 : 0,
-  })
-})
-
 const impactBadgeTitle = computed(() => {
-  if (impactScoreFormatted.value === null) {
+  if (impactScore.value === null) {
     return ''
   }
 
   if (te('product.hero.impactBadge.title')) {
-    return t('product.hero.impactBadge.title', { score: impactScoreFormatted.value })
+    return t('product.hero.impactBadge.title')
   }
 
   if (te('product.hero.impactScoreLabel')) {
-    return `${t('product.hero.impactScoreLabel')}: ${impactScoreFormatted.value}`
+    return t('product.hero.impactScoreLabel')
   }
 
-  return `Impact score: ${impactScoreFormatted.value}`
+  return 'Impact score'
 })
 
 const impactBadgeLinkLabel = computed(() => {
@@ -589,6 +574,7 @@ const impactScoreLearnMoreLink = computed(() => {
   font-size: 1rem;
   font-weight: 700;
   color: rgb(var(--v-theme-text-neutral-strong));
+  text-align: center;
 }
 
 .product-hero__impact-score {

@@ -1395,7 +1395,7 @@
       "openGalleryImage": "Afficher l’image « {label} » en plein écran",
       "openGalleryVideo": "Lire la vidéo « {label} »",
       "impactBadge": {
-        "title": "Score d'impact : {score}",
+        "title": "Score d'impact",
         "learnMore": "En savoir plus"
       },
       "priceMerchantPrefix": "Chez",
