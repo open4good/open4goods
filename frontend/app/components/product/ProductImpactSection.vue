@@ -11,10 +11,11 @@
 
     <div class="product-impact__top">
       <ProductImpactEcoScoreCard :score="primaryScore" />
-      <ProductImpactRankingCard
-        v-if="ranking || country"
-        :ranking="ranking"
-        :country="country"
+      <ProductAlternatives
+        v-if="product && verticalId"
+        :product="product"
+        :vertical-id="verticalId"
+        :popular-attributes="popularAttributes"
       />
     </div>
 
@@ -52,11 +53,12 @@
 import { computed, toRefs } from 'vue'
 import type { PropType } from 'vue'
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
-import ProductImpactRankingCard from './impact/ProductImpactRankingCard.vue'
+import ProductAlternatives from './impact/ProductAlternatives.vue'
 import ProductImpactRadarChart from './impact/ProductImpactRadarChart.vue'
 import ProductImpactDetailsTable from './impact/ProductImpactDetailsTable.vue'
 import ProductImpactSubscoreCard from './impact/ProductImpactSubscoreCard.vue'
-import type { CountryInfo, RankingInfo, ScoreView } from './impact/impact-types'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import type { ScoreView } from './impact/impact-types'
 
 const props = defineProps({
   sectionId: {
@@ -71,13 +73,17 @@ const props = defineProps({
     type: Array as PropType<Array<{ name: string; value: number }>>,
     default: () => [],
   },
-  ranking: {
-    type: Object as PropType<RankingInfo | null>,
+  product: {
+    type: Object as PropType<ProductDto | null>,
     default: null,
   },
-  country: {
-    type: Object as PropType<CountryInfo | null>,
-    default: null,
+  verticalId: {
+    type: String,
+    default: '',
+  },
+  popularAttributes: {
+    type: Array as PropType<AttributeConfigDto[]>,
+    default: () => [],
   },
   productName: {
     type: String,
@@ -89,13 +95,11 @@ const props = defineProps({
   },
 })
 
-const { radarValues, productName } = toRefs(props)
+const { radarValues, productName, product, verticalId, popularAttributes } = toRefs(props)
 
 const primaryScore = computed(() => props.scores[0] ?? null)
 const secondaryScores = computed(() => props.scores.slice(1))
 const scores = computed(() => props.scores)
-const ranking = computed(() => props.ranking)
-const country = computed(() => props.country)
 </script>
 
 <style scoped>

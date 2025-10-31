@@ -1405,16 +1405,32 @@
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
+      "alternatives": {
+        "title": "Alternatives plus vertes",
+        "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact ou un prix plus accessible.",
+        "empty": "Aucune alternative ne correspond encore aux filtres sélectionnés.",
+        "error": "Impossible de charger les alternatives pour le moment. Réessayez.",
+        "retry": "Réessayer",
+        "untitled": "Produit sans nom",
+        "viewProduct": "Voir la fiche {name}",
+        "filters": {
+          "price": "Prix ≤ au vôtre",
+          "ecoscore": "Éco-score ≥ au vôtre"
+        },
+        "tooltips": {
+          "price": "Afficher les produits dont le prix est inférieur ou égal à {value}.",
+          "ecoscore": "Afficher les produits dont l'éco-score est supérieur ou égal à {value}.",
+          "attributeBetter": "Afficher les produits avec {label} supérieur ou égal à votre produit.",
+          "attributeLower": "Afficher les produits avec {label} inférieur ou égal à votre produit.",
+          "attributeEqual": "Afficher les produits où {label} correspond à votre produit."
+        }
+      },
       "absoluteValue": "Valeur absolue",
-      "bestProduct": "Produit le mieux noté : {name}",
-      "betterProduct": "Produit juste devant : {name}",
       "detailsTitle": "Détails de l'évaluation",
       "noPrimaryScore": "Score indisponible",
       "percentile": "Percentile",
       "primaryScoreLabel": "Score global",
       "radarAria": "Radar des scores pour {product}",
-      "rankingTitle": "Classement",
-      "rankingValue": "Position {position} sur {total}",
       "scoreRanking": "Classement du facteur",
       "scoreValue": "Score relatif",
       "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",

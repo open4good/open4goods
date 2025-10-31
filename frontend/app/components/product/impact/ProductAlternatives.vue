@@ -1,0 +1,643 @@
+<template>
+  <article class="product-alternatives">
+    <header class="product-alternatives__header">
+      <h3 class="product-alternatives__title">{{ t('product.impact.alternatives.title') }}</h3>
+      <p class="product-alternatives__subtitle">{{ t('product.impact.alternatives.subtitle') }}</p>
+    </header>
+
+    <div v-if="filterDefinitions.length" class="product-alternatives__filters">
+      <div class="product-alternatives__chips">
+        <v-tooltip
+          v-for="filter in filterDefinitions"
+          :key="filter.key"
+          :text="filter.tooltip"
+          location="top"
+        >
+          <template #activator="{ props: tooltipProps }">
+            <button
+              type="button"
+              class="product-alternatives__chip"
+              :class="{
+                'product-alternatives__chip--active': isFilterActive(filter.key),
+                'product-alternatives__chip--disabled': filter.disabled,
+              }"
+              v-bind="tooltipProps"
+              :aria-pressed="isFilterActive(filter.key)"
+              :disabled="filter.disabled"
+              @click="toggleFilter(filter.key)"
+            >
+              <span>{{ filter.label }}</span>
+            </button>
+          </template>
+        </v-tooltip>
+      </div>
+    </div>
+
+    <div class="product-alternatives__content">
+      <v-skeleton-loader
+        v-if="loading && !alternatives.length"
+        type="image, article"
+        class="product-alternatives__skeleton"
+      />
+      <template v-else>
+        <div v-if="alternatives.length" class="product-alternatives__scroller">
+          <v-slide-group show-arrows class="product-alternatives__slide-group">
+            <v-slide-group-item
+              v-for="alternative in alternatives"
+              :key="alternative.gtin ?? alternative.fullSlug ?? alternative.slug ?? JSON.stringify(alternative.identity)"
+              class="product-alternatives__slide-item"
+            >
+              <ProductAlternativeCard :product="alternative" class="product-alternatives__card" />
+            </v-slide-group-item>
+          </v-slide-group>
+        </div>
+        <div v-else-if="errorMessage" class="product-alternatives__empty product-alternatives__empty--error">
+          <p>{{ errorMessage }}</p>
+          <v-btn color="primary" variant="text" @click="retryFetch">
+            {{ t('product.impact.alternatives.retry') }}
+          </v-btn>
+        </div>
+        <div v-else class="product-alternatives__empty">
+          <p>{{ t('product.impact.alternatives.empty') }}</p>
+        </div>
+      </template>
+    </div>
+  </article>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import type { PropType } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type {
+  AttributeConfigDto,
+  Filter,
+  ProductDto,
+  ProductSearchResponseDto,
+} from '~~/shared/api-client'
+import { ProductsIncludeEnum } from '~~/shared/api-client'
+import ProductAlternativeCard from './ProductAlternativeCard.vue'
+import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
+
+const props = defineProps({
+  product: {
+    type: Object as PropType<ProductDto | null>,
+    default: null,
+  },
+  verticalId: {
+    type: String,
+    default: '',
+  },
+  popularAttributes: {
+    type: Array as PropType<AttributeConfigDto[]>,
+    default: () => [],
+  },
+  maxResults: {
+    type: Number,
+    default: 5,
+  },
+})
+
+const { t, n } = useI18n()
+
+const alternatives = ref<ProductDto[]>([])
+const loading = ref(false)
+const errorMessage = ref<string | null>(null)
+const hasInteracted = ref(false)
+const activeFilterKeys = ref<Set<string>>(new Set())
+let requestToken = 0
+
+const normalizedPopularAttributes = computed(() => props.popularAttributes ?? [])
+
+const formatCurrency = (value: number, currency?: string | null) => {
+  if (!Number.isFinite(value)) {
+    return null
+  }
+
+  if (!currency) {
+    return n(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
+  try {
+    return n(value, { style: 'currency', currency })
+  } catch {
+    return `${n(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
+  }
+}
+
+const ecoscoreValue = computed<number | null>(() => {
+  const base = props.product?.base?.ecoscoreValue
+  if (typeof base === 'number' && Number.isFinite(base)) {
+    return base
+  }
+
+  const ecoscoreScore = props.product?.scores?.ecoscore?.value
+  if (typeof ecoscoreScore === 'number' && Number.isFinite(ecoscoreScore)) {
+    return ecoscoreScore
+  }
+
+  const mapValue = props.product?.scores?.scores?.ECOSCORE?.value
+  if (typeof mapValue === 'number' && Number.isFinite(mapValue)) {
+    return mapValue
+  }
+
+  return null
+})
+
+const priceValue = computed<number | null>(() => {
+  const price = props.product?.offers?.bestPrice?.price
+  return typeof price === 'number' && Number.isFinite(price) ? price : null
+})
+
+const priceCurrency = computed(() => props.product?.offers?.bestPrice?.currency ?? null)
+
+const toNumeric = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+
+  return null
+}
+
+const toTerm = (value: unknown): string | null => {
+  if (value == null) {
+    return null
+  }
+
+  if (Array.isArray(value)) {
+    const firstMeaningful = value.find((entry) => entry != null)
+    return toTerm(firstMeaningful)
+  }
+
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false'
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return `${value}`
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed.length ? trimmed : null
+  }
+
+  return null
+}
+
+const resolveAttributeMapping = (key: string, config: AttributeConfigDto | undefined): string | null => {
+  if (!props.product) {
+    return null
+  }
+
+  const indexed = props.product.attributes?.indexedAttributes?.[key]
+  if (indexed) {
+    if (config?.filteringType === 'NUMERIC' || typeof indexed.numericValue === 'number') {
+      return `attributes.indexed.${key}.numericValue`
+    }
+
+    if (config?.filteringType === 'BOOLEAN' || typeof indexed.booleanValue === 'boolean') {
+      return `attributes.indexed.${key}.booleanValue`
+    }
+
+    return `attributes.indexed.${key}.value`
+  }
+
+  if (props.product.attributes?.referentialAttributes?.[key] != null) {
+    return `attributes.referentialAttributes.${key}`
+  }
+
+  if (config?.filteringType === 'NUMERIC') {
+    return `attributes.indexed.${key}.numericValue`
+  }
+
+  if (config?.filteringType === 'BOOLEAN') {
+    return `attributes.indexed.${key}.booleanValue`
+  }
+
+  return `attributes.indexed.${key}.value`
+}
+
+type AlternativeFilterDefinition = {
+  key: string
+  label: string
+  tooltip: string
+  defaultSelected: boolean
+  disabled: boolean
+  resolveClause: () => Filter | null
+}
+
+const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(() => {
+  if (ecoscoreValue.value == null) {
+    return null
+  }
+
+  const value = ecoscoreValue.value
+  return {
+    key: 'ecoscore',
+    label: t('product.impact.alternatives.filters.ecoscore'),
+    tooltip: t('product.impact.alternatives.tooltips.ecoscore', {
+      value: n(value, { maximumFractionDigits: 1, minimumFractionDigits: 0 }),
+    }),
+    defaultSelected: true,
+    disabled: false,
+    resolveClause: () => ({
+      field: 'scores.ECOSCORE.value',
+      operator: 'range',
+      min: value,
+    }),
+  }
+})
+
+const priceFilterDefinition = computed<AlternativeFilterDefinition | null>(() => {
+  if (priceValue.value == null) {
+    return null
+  }
+
+  const value = priceValue.value
+  return {
+    key: 'price',
+    label: t('product.impact.alternatives.filters.price'),
+    tooltip:
+      t('product.impact.alternatives.tooltips.price', {
+        value: formatCurrency(value, priceCurrency.value) ?? n(value, { maximumFractionDigits: 2 }),
+      }) ?? '',
+    defaultSelected: true,
+    disabled: false,
+    resolveClause: () => ({
+      field: 'price.minPrice.price',
+      operator: 'range',
+      max: value,
+    }),
+  }
+})
+
+const attributeFilterDefinitions = computed<AlternativeFilterDefinition[]>(() => {
+  if (!props.product) {
+    return []
+  }
+
+  return normalizedPopularAttributes.value.reduce<AlternativeFilterDefinition[]>((accumulator, config) => {
+    const key = config.key?.trim()
+    if (!key) {
+      return accumulator
+    }
+
+    const mapping = resolveAttributeMapping(key, config)
+    if (!mapping) {
+      return accumulator
+    }
+
+    const rawValue = resolveAttributeRawValueByKey(props.product as ProductDto, key)
+    if (rawValue == null) {
+      return accumulator
+    }
+
+    const betterRule = config.betterIs ?? null
+    const readableLabel = config.name ?? key
+
+    if (betterRule) {
+      const numericValue = toNumeric(rawValue)
+      if (numericValue == null) {
+        return accumulator
+      }
+
+      const prefersGreater = betterRule === 'GREATER'
+      const symbol = prefersGreater ? '↑' : '↓'
+
+      accumulator.push({
+        key: `attribute:${key}`,
+        label: `${readableLabel} ${symbol}`,
+        tooltip: prefersGreater
+          ? t('product.impact.alternatives.tooltips.attributeBetter', { label: readableLabel })
+          : t('product.impact.alternatives.tooltips.attributeLower', { label: readableLabel }),
+        defaultSelected: true,
+        disabled: false,
+        resolveClause: () => ({
+          field: mapping,
+          operator: 'range',
+          ...(prefersGreater ? { min: numericValue } : { max: numericValue }),
+        }),
+      })
+
+      return accumulator
+    }
+
+    const term = toTerm(rawValue)
+    if (!term) {
+      return accumulator
+    }
+
+    accumulator.push({
+      key: `attribute:${key}`,
+      label: `${readableLabel} =`,
+      tooltip: t('product.impact.alternatives.tooltips.attributeEqual', { label: readableLabel }),
+      defaultSelected: false,
+      disabled: false,
+      resolveClause: () => ({
+        field: mapping,
+        operator: 'term',
+        terms: [term],
+      }),
+    })
+
+    return accumulator
+  }, [])
+})
+
+const filterDefinitions = computed<AlternativeFilterDefinition[]>(() => {
+  const definitions: AlternativeFilterDefinition[] = []
+
+  if (priceFilterDefinition.value) {
+    definitions.push(priceFilterDefinition.value)
+  }
+
+  if (ecoscoreFilterDefinition.value) {
+    definitions.push(ecoscoreFilterDefinition.value)
+  }
+
+  definitions.push(...attributeFilterDefinitions.value)
+
+  return definitions
+})
+
+const filterDefinitionMap = computed(() =>
+  new Map(filterDefinitions.value.map((definition) => [definition.key, definition])),
+)
+
+const isFilterActive = (key: string) => activeFilterKeys.value.has(key)
+
+const toggleFilter = (key: string) => {
+  const definition = filterDefinitionMap.value.get(key)
+  if (!definition || definition.disabled) {
+    return
+  }
+
+  hasInteracted.value = true
+  const next = new Set(activeFilterKeys.value)
+  if (next.has(key)) {
+    next.delete(key)
+  } else {
+    next.add(key)
+  }
+  activeFilterKeys.value = next
+}
+
+const activeClauses = computed<Filter[]>(() => {
+  return Array.from(activeFilterKeys.value)
+    .map((key) => filterDefinitionMap.value.get(key))
+    .filter((definition): definition is AlternativeFilterDefinition => Boolean(definition) && !definition.disabled)
+    .map((definition) => definition.resolveClause())
+    .filter((clause): clause is Filter => clause != null)
+})
+
+const canSearch = computed(() => Boolean(props.product?.gtin) && props.verticalId.trim().length > 0)
+
+const syncActiveFilters = (preserveSelection: boolean) => {
+  const previous = new Set(activeFilterKeys.value)
+  const next = new Set<string>()
+
+  filterDefinitions.value.forEach((definition) => {
+    if (definition.disabled) {
+      return
+    }
+
+    if (preserveSelection) {
+      if (previous.has(definition.key)) {
+        next.add(definition.key)
+      }
+      return
+    }
+
+    if (definition.defaultSelected) {
+      next.add(definition.key)
+    }
+  })
+
+  activeFilterKeys.value = next
+}
+
+watch(
+  () => props.product?.gtin ?? null,
+  () => {
+    hasInteracted.value = false
+    alternatives.value = []
+    errorMessage.value = null
+    syncActiveFilters(false)
+  },
+  { immediate: true },
+)
+
+watch(
+  filterDefinitions,
+  () => {
+    syncActiveFilters(hasInteracted.value)
+  },
+  { immediate: true },
+)
+
+const fetchAlternatives = async () => {
+  if (!canSearch.value) {
+    alternatives.value = []
+    return
+  }
+
+  const body: Record<string, unknown> = {
+    verticalId: props.verticalId,
+    pageSize: props.maxResults,
+    pageNumber: 0,
+    include: [
+      ProductsIncludeEnum.Base,
+      ProductsIncludeEnum.Identity,
+      ProductsIncludeEnum.Offers,
+      ProductsIncludeEnum.Scores,
+      ProductsIncludeEnum.Resources,
+    ],
+    sort: {
+      field: 'scores.ECOSCORE.value',
+      order: 'DESC',
+    },
+  }
+
+  if (activeClauses.value.length) {
+    body.filters = { filters: activeClauses.value }
+  }
+
+  const currentToken = ++requestToken
+  loading.value = true
+  errorMessage.value = null
+
+  try {
+    const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
+      method: 'POST',
+      body,
+    })
+
+    if (currentToken !== requestToken) {
+      return
+    }
+
+    const products = (response.products ?? []).filter((candidate) => candidate.gtin !== props.product?.gtin)
+    alternatives.value = products.slice(0, props.maxResults)
+  } catch (error) {
+    if (currentToken !== requestToken) {
+      return
+    }
+
+    console.error('Failed to fetch product alternatives', error)
+    errorMessage.value = t('product.impact.alternatives.error')
+    alternatives.value = []
+  } finally {
+    if (currentToken === requestToken) {
+      loading.value = false
+    }
+  }
+}
+
+watch(
+  [() => props.verticalId, () => props.product?.gtin ?? null, activeClauses],
+  () => {
+    if (canSearch.value) {
+      fetchAlternatives()
+    }
+  },
+  { immediate: true },
+)
+
+const retryFetch = () => {
+  fetchAlternatives()
+}
+</script>
+
+<style scoped>
+.product-alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 24px;
+  min-height: 100%;
+  background: linear-gradient(135deg, rgba(var(--v-theme-surface-glass), 0.95), rgba(var(--v-theme-surface-primary-080), 0.9));
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+}
+
+.product-alternatives__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-alternatives__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-alternatives__subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+}
+
+.product-alternatives__filters {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.product-alternatives__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.product-alternatives__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18);
+  background-color: rgba(var(--v-theme-surface-default), 0.95);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-alternatives__chip:hover:not(:disabled),
+.product-alternatives__chip:focus-visible:not(:disabled) {
+  border-color: rgba(var(--v-theme-primary), 0.6);
+  box-shadow: 0 4px 14px rgba(21, 46, 73, 0.12);
+}
+
+.product-alternatives__chip--active {
+  background-color: rgba(var(--v-theme-primary), 0.12);
+  border-color: rgba(var(--v-theme-primary), 0.4);
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-alternatives__chip--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.product-alternatives__content {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-alternatives__scroller {
+  position: relative;
+  display: flex;
+}
+
+.product-alternatives__slide-group {
+  width: 100%;
+}
+
+.product-alternatives__slide-item {
+  padding-right: 1rem;
+}
+
+.product-alternatives__card {
+  width: 220px;
+  max-width: 100%;
+}
+
+.product-alternatives__skeleton {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.product-alternatives__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: center;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+  font-size: 0.95rem;
+}
+
+.product-alternatives__empty--error {
+  color: rgb(var(--v-theme-error));
+}
+
+@media (max-width: 960px) {
+  .product-alternatives {
+    padding: 1.25rem;
+  }
+
+  .product-alternatives__card {
+    width: 200px;
+  }
+}
+</style>
