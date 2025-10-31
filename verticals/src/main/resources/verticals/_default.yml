@@ -379,7 +379,7 @@ attributesConfig:
   
   - key: "CLASSE_ENERGY"
     betterIs: "GREATER"
-    faIcon: "fa-bolt"
+    faIcon: "mdi-flash"
     name:
       default: "Energy class"
       fr: "Classe énergétique"
@@ -442,7 +442,7 @@ attributesConfig:
   
   - key: "REPAIRABILITY_INDEX"
     betterIs: "GREATER"
-    faIcon: "fa-screwdriver-wrench"
+    faIcon: "mdi-tools"
     name:
       default: "Repairability index"
       fr: "Indice de réparabilité"
@@ -475,7 +475,7 @@ attributesConfig:
   
   - key: "YEAR"
     betterIs: "GREATER"
-    faIcon: "calendar-days"
+    faIcon: "mdi-calendar"
     name:
       default: "Year"
       fr: "Année de mise en service"
@@ -508,7 +508,7 @@ attributesConfig:
   
   - key: "HDMI_PORTS_QUANTITY"
     betterIs: "GREATER"
-    faIcon: "fa-sitemap"
+    faIcon: "mdi-sitemap"
     icecatFeaturesIds: 
       - 3566      
     name:
@@ -542,7 +542,7 @@ attributesConfig:
   
   - key: "COLOR"
     betterIs: "GREATER"
-    faIcon: "fa-droplet"
+    faIcon: "mdi-water"
     name:
       default: "Color"
       fr: "Couleur"
@@ -581,7 +581,7 @@ attributesConfig:
     icecatFeaturesIds:
       - 94
       - 33015
-    faIcon: "fa-weight"
+    faIcon: "mdi-weight"
     name:
       default: "Weight"
       fr: "Poids"
@@ -631,7 +631,7 @@ attributesConfig:
     filteringType: "NUMERIC"
     asScore: true
     reverseScore: true    
-    faIcon: "fa-plug-circle-check"
+    faIcon: "mdi-power-plug"
   
     icecatFeaturesIds:      
         - 445
@@ -671,7 +671,7 @@ attributesConfig:
     filteringType: "NUMERIC"
     asScore: true
     reverseScore: true    
-    faIcon: "fa-plug-circle-xmark"
+    faIcon: "mdi-power-plug-off"
   
     icecatFeaturesIds:      
          - 2034
@@ -709,7 +709,7 @@ attributesConfig:
   
   - key: "FEATURES"
     betterIs: "GREATER"
-    faIcon: "fa-list"
+    faIcon: "mdi-format-list-bulleted"
     attributePath: attributes.features
     name:
       default: "Features"
@@ -717,7 +717,7 @@ attributesConfig:
       
   - key: "BRAND_SUSTAINABILITY"
     betterIs: "GREATER"
-    faIcon: "fa-globe"
+    faIcon: "mdi-web"
 #    attributePath: attributes.features
     name:
       default: "Evaluation ESG (Sustainalytics) de la marque"
@@ -726,7 +726,7 @@ attributesConfig:
 
   - key: "DATA_QUALITY"
     betterIs: "GREATER"
-    faIcon: "fa-file-shield"
+    faIcon: "mdi-file-shield-outline"
 #    attributePath: attributes.features
     name:
       default: "Data quality"

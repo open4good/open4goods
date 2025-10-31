@@ -129,7 +129,7 @@ i18n:
         - wikiUrl: verticals:tv:technologies-tv:WebHome
           verticalUrl: "oled-qled-lcd-que-choisir"
           title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
-          faIcon: "fa-star"
+          faIcon: "mdi-star"
 
   en:
    # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
@@ -413,7 +413,7 @@ attributesConfig:
        betterIs: "GREATER"
        icecatFeaturesIds:
          - 944       
-       faIcon: "fa-arrow-up-right-from-square"
+       faIcon: "mdi-arrow-top-right-bottom-left"
        name:
          default: "Screen size"
          fr: "Diagonale (en pouces)"
@@ -444,7 +444,7 @@ attributesConfig:
      - key: "DISPLAY_TECHNOLOGY"
        icecatFeaturesIds:
          - 9713          
-       faIcon: "fa-tv"
+       faIcon: "mdi-television"
        name:
          default: "Display technology"
          fr: "Technologie d'affichage"
