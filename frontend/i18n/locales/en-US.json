@@ -101,7 +101,6 @@
       },
       "sections": {
         "aiAudit": {
-          "eyebrow": "AI audit",
           "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
           "jsonUnavailable": "AI response unavailable.",
           "promptHelper": "Instructions sent to the model to produce the configuration.",
@@ -113,25 +112,23 @@
         },
         "criteria": {
           "empty": "Criteria will be published soon.",
-          "eyebrow": "Criteria",
-          "title": "Selected criteria and weights"
+          "title": "Selected criteria and weights",
+          "coefficientPrefix": "Counts for",
+          "coefficientSuffix": "in the overall score"
         },
         "overview": {
           "card": {
             "aria": "Learn more about the global Impact Score methodology",
             "cta": "Understand the global methodology",
             "description": "This page details the criteria and weightings used to assess the environmental impact of this category.",
-            "imageAlt": "Impact Score illustration for {category}",
-            "subtitle": "Methodology applied to {category}",
+            "scoreLabel": "Sample Impact Score",
             "title": "Nudger Impact Score"
           },
-          "eyebrow": "Introduction",
           "title": "Impact Score for {category}"
         },
         "purpose": {
           "dataFallback": "Detailed data for each criterion will be available soon.",
           "dataTitle": "Available data",
-          "eyebrow": "Our approach",
           "objectiveFallback": "The objective description will be available soon.",
           "objectiveTitle": "Objective",
           "title": "Why and how we score {category}"
@@ -141,14 +138,8 @@
           "communityCta": "View the configuration",
           "communityIssues": "Open an issue",
           "communityTitle": "Join the discussion",
-          "connector": "and",
           "criticalReviewFallback": "The critical review will be shared soon.",
           "criticalReviewTitle": "Critical review",
-          "eyebrow": "Transparency",
-          "intro": "Nudger is built as an open project:",
-          "introSuffix": "to guarantee traceability for the {category} scoring methodology.",
-          "openDataLink": "open-data",
-          "openSourceLink": "open-source",
           "tableFallback": "Detailed coefficients will be published soon.",
           "tableHeaders": {
             "applied": "Applied coef.",
@@ -157,7 +148,22 @@
           },
           "tableHelper": "Comparison between the AI-generated proposal and the coefficients currently applied.",
           "tableTitle": "Coefficient summary",
-          "title": "Transparency and traceability"
+          "title": "Transparency and traceability",
+          "cardsTitle": "Open methodology resources",
+          "cards": {
+            "openSource": {
+              "title": "Open-source methodology",
+              "description": "Follow our public repositories to track how we refine the Impact Score for {category}.",
+              "cta": "Explore our open-source approach",
+              "aria": "Explore open-source resources for the {category} Impact Score"
+            },
+            "openData": {
+              "title": "Open data exports",
+              "description": "Access the datasets powering the Impact Score for {category} and reuse them in your analyses.",
+              "cta": "Browse the data workspace",
+              "aria": "Browse open data resources for the {category} Impact Score"
+            }
+          }
         }
       },
       "seo": {
