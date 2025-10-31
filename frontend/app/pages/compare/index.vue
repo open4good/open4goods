@@ -63,6 +63,52 @@
     <div v-else class="compare-page__content">
       <section class="compare-section">
         <div class="compare-grid" role="table">
+          <div class="compare-grid__media" role="row" aria-hidden="true">
+            <div class="compare-grid__feature compare-grid__feature--media" role="presentation">
+              <span class="sr-only">{{ t('compare.a11y.featureColumn') }}</span>
+            </div>
+            <div class="compare-grid__products" role="presentation">
+              <div
+                v-for="product in products"
+                :key="`media-${product.gtin}`"
+                class="compare-grid__product-media"
+              >
+                <NuxtLink
+                  v-if="productLink(product)"
+                  :to="productLink(product)"
+                  class="compare-grid__product-link"
+                  :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
+                >
+                  <NuxtImg
+                    v-if="product.coverImage"
+                    :src="product.coverImage"
+                    :alt="product.title"
+                    width="180"
+                    height="180"
+                    format="webp"
+                    class="compare-grid__product-image"
+                  />
+                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                    {{ productInitials(product.title) }}
+                  </div>
+                </NuxtLink>
+                <template v-else>
+                  <NuxtImg
+                    v-if="product.coverImage"
+                    :src="product.coverImage"
+                    :alt="product.title"
+                    width="180"
+                    height="180"
+                    format="webp"
+                    class="compare-grid__product-image"
+                  />
+                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                    {{ productInitials(product.title) }}
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
           <div class="compare-grid__header" role="row">
             <div class="compare-grid__feature compare-grid__feature--header" role="columnheader">
               <span class="sr-only">{{ t('compare.a11y.featureColumn') }}</span>
@@ -74,41 +120,6 @@
                 class="compare-grid__product"
                 role="columnheader"
               >
-                <div class="compare-grid__product-media">
-                  <NuxtLink
-                    v-if="productLink(product)"
-                    :to="productLink(product)"
-                    class="compare-grid__product-link"
-                    :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
-                  >
-                    <NuxtImg
-                      v-if="product.coverImage"
-                      :src="product.coverImage"
-                      :alt="product.title"
-                      width="180"
-                      height="180"
-                      format="webp"
-                      class="compare-grid__product-image"
-                    />
-                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                      {{ productInitials(product.title) }}
-                    </div>
-                  </NuxtLink>
-                  <template v-else>
-                    <NuxtImg
-                      v-if="product.coverImage"
-                      :src="product.coverImage"
-                      :alt="product.title"
-                      width="180"
-                      height="180"
-                      format="webp"
-                      class="compare-grid__product-image"
-                    />
-                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                      {{ productInitials(product.title) }}
-                    </div>
-                  </template>
-                </div>
                 <ImpactScore
                   v-if="product.impactScore !== null"
                   :score="product.impactScore"
@@ -1052,6 +1063,25 @@ const resolveScoreValue = (score: ProductScoreDto | null | undefined): { display
     return { display: null, numeric: null }
   }
 
+  const relativeValueCandidates: Array<number | null> = [
+    typeof score.relativ?.value === 'number' && Number.isFinite(score.relativ.value)
+      ? score.relativ.value
+      : null,
+    (() => {
+      const legacyRelative = (score as { relative?: { value?: number | null } }).relative?.value
+      return typeof legacyRelative === 'number' && Number.isFinite(legacyRelative) ? legacyRelative : null
+    })(),
+  ]
+
+  const relativeValue = relativeValueCandidates.find((value): value is number => value != null) ?? null
+
+  if (relativeValue != null) {
+    return {
+      display: n(relativeValue, { maximumFractionDigits: 2 }),
+      numeric: relativeValue,
+    }
+  }
+
   if (score.percent != null && Number.isFinite(score.percent)) {
     return {
       display: n(score.percent, { maximumFractionDigits: 0 }),
@@ -1073,7 +1103,7 @@ const resolveScoreValue = (score: ProductScoreDto | null | undefined): { display
     }
   }
 
-  return { display: score.absoluteValue ?? null, numeric: null }
+  return { display: score.absoluteValue ?? score.relativeValue ?? null, numeric: null }
 }
 
 const syncHash = async (hash: string) => {
@@ -1394,7 +1424,7 @@ const productInitials = (title: string) => {
 
 <style scoped lang="sass">
 .compare-page
-  --compare-grid-sticky-offset: clamp(88px, 9vw, 132px)
+  --compare-grid-sticky-offset: var(--v-layout-top, 0px)
   display: flex
   flex-direction: column
   gap: 2.5rem
@@ -1517,10 +1547,21 @@ const productInitials = (title: string) => {
   overflow-x: auto
   background: rgb(var(--v-theme-surface-glass))
   border-radius: 20px
-  padding: 1.5rem
+  padding: 0 1.5rem 1.5rem
   display: flex
   flex-direction: column
   gap: 1rem
+
+.compare-grid__media
+  display: grid
+  grid-template-columns: minmax(180px, 220px) repeat(auto-fit, minmax(220px, 1fr))
+  gap: 1rem
+  padding-top: 1.5rem
+
+.compare-grid__feature--media
+  display: flex
+  align-items: center
+  justify-content: center
 
 .compare-grid--compact
   padding-inline: 1rem
@@ -1813,12 +1854,6 @@ const productInitials = (title: string) => {
 
   .compare-page__hero-back
     align-self: flex-start
-
-@media (min-width: 1280px)
-  .compare-page__content > .compare-section:first-of-type
-    position: sticky
-    top: var(--compare-grid-sticky-offset)
-    z-index: 5
 
 @media (max-width: 960px)
   .compare-grid__header
