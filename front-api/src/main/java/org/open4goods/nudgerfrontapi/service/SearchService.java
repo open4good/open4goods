@@ -87,6 +87,9 @@ public class SearchService {
             FilterRequestDto filters) {
         Criteria criteria = repository.getRecentPriceQuery();
 
+        // Remove excluded articles
+        criteria = criteria.and(new Criteria("excluded").is(false));
+
         if (StringUtils.hasText(verticalId) && verticalsConfigService.getConfigById(verticalId) != null) {
             criteria = criteria.and(new Criteria("vertical").is(verticalId));
         } else if (StringUtils.hasText(verticalId)) {
