@@ -85,7 +85,7 @@
       >
         <header class="product-docs__viewer-header">
           <div class="product-docs__viewer-heading">
-            <h3 class="product-docs__viewer-title">{{ activePdfTitle }}</h3>
+            <h3 class="product-docs__viewer-title" :title="activePdfTitle">{{ activePdfDisplayTitle }}</h3>
             <p v-if="activePdfMetaLeft" class="product-docs__viewer-meta">
               {{ activePdfMetaLeft }}
             </p>
@@ -108,39 +108,6 @@
               <button
                 type="button"
                 class="product-docs__control"
-                :aria-label="tWithFallback('product.docs.controls.zoomOut', 'Zoom out')"
-                @click="zoomOut"
-              >
-                −
-              </button>
-              <button
-                type="button"
-                class="product-docs__control"
-                :aria-label="tWithFallback('product.docs.controls.zoomIn', 'Zoom in')"
-                @click="zoomIn"
-              >
-                +
-              </button>
-              <button
-                type="button"
-                class="product-docs__control"
-                :aria-label="tWithFallback('product.docs.controls.resetView', 'Reset view')"
-                @click="resetView"
-              >
-                {{ tWithFallback('product.docs.controls.reset', 'Reset') }}
-              </button>
-              <button
-                type="button"
-                class="product-docs__control"
-                :aria-pressed="isFitWidth"
-                :aria-label="tWithFallback('product.docs.controls.fitWidth', 'Fit to width')"
-                @click="applyFitWidth"
-              >
-                {{ tWithFallback('product.docs.controls.fit', 'Fit width') }}
-              </button>
-              <button
-                type="button"
-                class="product-docs__control"
                 :aria-label="tWithFallback('product.docs.controls.rotate', 'Rotate document')"
                 @click="rotateClockwise"
               >
@@ -156,12 +123,10 @@
               <div class="product-docs__viewer-scroll">
                 <VuePdfEmbed
                   v-if="activePdf?.url"
-                  ref="pdfViewerRef"
                   :source="activePdf.url"
                   text-layer
                   annotation-layer
-                  :class="['product-docs__viewer-frame', { 'product-docs__viewer-frame--fit': isFitWidth }]"
-                  :scale="viewerScale"
+                  class="product-docs__viewer-frame product-docs__viewer-frame--fit"
                   :rotation="viewerRotation"
                   :width="viewerWidth"
                   @loaded="onPdfLoaded"
@@ -231,21 +196,15 @@ const pdfs = computed(() => props.pdfs ?? [])
 const activePdfIndex = ref(-1)
 const tabsTrackRef = ref<HTMLElement | null>(null)
 const viewerSurfaceRef = ref<HTMLElement | null>(null)
-const pdfViewerRef = ref<InstanceType<VuePdfEmbedComponent> | null>(null)
 
 const measuredViewerWidth = ref(0)
 const canScrollTabsBackward = ref(false)
 const canScrollTabsForward = ref(false)
 const tabsOverflowing = ref(false)
 
-const isFitWidth = ref(true)
-const zoomLevel = ref(1)
 const rotation = ref(0)
 const pdfLoadedPageCount = ref<number | null>(null)
 
-const MIN_ZOOM = 0.5
-const MAX_ZOOM = 3
-const ZOOM_STEP = 0.25
 const MAX_TAB_TITLE_LENGTH = 35
 
 const activePdf = computed(() => (activePdfIndex.value >= 0 ? pdfs.value[activePdfIndex.value] ?? null : null))
@@ -260,9 +219,7 @@ const activeTabId = computed(() => (activePdfIndex.value >= 0 ? tabId(activePdfI
 
 const totalPages = computed(() => activePdf.value?.numberOfPages ?? pdfLoadedPageCount.value ?? 0)
 
-const viewerWidth = computed(() => (isFitWidth.value && measuredViewerWidth.value > 0 ? measuredViewerWidth.value : undefined))
-
-const viewerScale = computed(() => (!isFitWidth.value ? zoomLevel.value : undefined))
+const viewerWidth = computed(() => (measuredViewerWidth.value > 0 ? measuredViewerWidth.value : undefined))
 
 const viewerRotation = computed(() => ((rotation.value % 360) + 360) % 360)
 
@@ -381,11 +338,15 @@ const onTabKeydown = (index: number, event: KeyboardEvent) => {
   }
 }
 
-const pdfTitle = (pdf: ProductPdfDto) =>
-  pdf.extractedTitle ?? pdf.metadataTitle ?? pdf.fileName ?? tWithFallback('product.docs.documentPdf', 'Document PDF')
+const fallbackDocumentTitle = computed(() => tWithFallback('product.docs.documentPdf', 'Document PDF'))
 
-const truncatedTabTitle = (pdf: ProductPdfDto) => {
-  const title = pdfTitle(pdf)
+const resolvePdfTitle = (pdf: ProductPdfDto) => {
+  const candidates = [pdf.extractedTitle, pdf.metadataTitle, pdf.fileName]
+  const resolved = candidates.find((value): value is string => typeof value === 'string' && value.trim().length)
+  return resolved?.trim() ?? fallbackDocumentTitle.value
+}
+
+const truncateTitle = (title: string) => {
   if (title.length <= MAX_TAB_TITLE_LENGTH) {
     return title
   }
@@ -393,6 +354,10 @@ const truncatedTabTitle = (pdf: ProductPdfDto) => {
   const sliceLength = Math.max(0, MAX_TAB_TITLE_LENGTH - 1)
   return `${title.slice(0, sliceLength).trimEnd()}…`
 }
+
+const pdfTitle = (pdf: ProductPdfDto) => resolvePdfTitle(pdf)
+
+const truncatedTabTitle = (pdf: ProductPdfDto) => truncateTitle(pdfTitle(pdf))
 
 const formatPageCount = (count?: number | null) => {
   if (!Number.isFinite(count)) {
@@ -484,42 +449,18 @@ const getTabRightMeta = (pdf: ProductPdfDto) =>
 const joinMetaParts = (parts: string[]) => parts.filter((value) => value?.trim().length).join(' · ')
 
 const activePdfTitle = computed(() => (activePdf.value ? pdfTitle(activePdf.value) : t('product.docs.title')))
+const activePdfDisplayTitle = computed(() => truncateTitle(activePdfTitle.value))
 const activePdfMetaLeft = computed(() => (activePdf.value ? joinMetaParts(getTabLeftMeta(activePdf.value)) : ''))
 const activePdfMetaRight = computed(() => (activePdf.value ? joinMetaParts(getTabRightMeta(activePdf.value)) : ''))
 
 watch(
   activePdf,
   () => {
-    zoomLevel.value = 1
     rotation.value = 0
-    isFitWidth.value = true
     pdfLoadedPageCount.value = null
   },
   { immediate: true }
 )
-
-const zoomIn = () => {
-  isFitWidth.value = false
-  zoomLevel.value = Math.min(zoomLevel.value + ZOOM_STEP, MAX_ZOOM)
-  nextTick(applyViewerZoom)
-}
-
-const zoomOut = () => {
-  isFitWidth.value = false
-  zoomLevel.value = Math.max(zoomLevel.value - ZOOM_STEP, MIN_ZOOM)
-  nextTick(applyViewerZoom)
-}
-
-const resetView = () => {
-  zoomLevel.value = 1
-  rotation.value = 0
-  isFitWidth.value = true
-}
-
-const applyFitWidth = () => {
-  isFitWidth.value = true
-  zoomLevel.value = 1
-}
 
 const rotateClockwise = () => {
   rotation.value = (rotation.value + 90) % 360
@@ -532,14 +473,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   }
 }
 
-const applyViewerZoom = () => {
-  if (isFitWidth.value) {
-    return
-  }
-
-  const viewer = pdfViewerRef.value as unknown as { setZoom?: (scale: number) => void } | null
-  viewer?.setZoom?.(zoomLevel.value)
-}
 </script>
 
 <style scoped>
@@ -685,7 +618,7 @@ const applyViewerZoom = () => {
 }
 
 .product-docs__viewer-pane {
-  --product-docs-viewer-height: min(70vh, 720px);
+  --product-docs-viewer-height: min(140vh, 1440px);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
