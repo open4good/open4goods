@@ -274,10 +274,9 @@ describe('ProductPriceSection', () => {
     const option = JSON.parse(chart.attributes('data-option') ?? '{}')
     const markAreaLabel = option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
     expect(markAreaLabel).toBe('Summer sales')
-    expect(option?.series?.[0]?.type).toBe('bar')
-    expect(option?.series?.[0]?.barWidth).toBe('98%')
-    expect(option?.series?.[0]?.barCategoryGap).toBe('0%')
-    expect(option?.series?.[0]?.barGap).toBe('0%')
+    expect(option?.series?.[0]?.type).toBe('line')
+    expect(option?.series?.[0]?.showSymbol).toBe(false)
+    expect(option?.series?.[0]?.smooth).toBe(true)
 
     await wrapper.unmount()
   })
@@ -297,9 +296,9 @@ describe('ProductPriceSection', () => {
   it('links to the affiliation redirect when best offers have a token', async () => {
     const wrapper = await mountComponent()
 
-    const headerHighlights = wrapper.findAll('.product-price__chart-header .product-price__metrics-highlight')
-    expect(headerHighlights).toHaveLength(2)
-    const links = wrapper.findAll('.product-price__chart-header .product-price__metrics-offer--link')
+    const footerHighlights = wrapper.findAll('.product-price__metrics .product-price__metrics-highlight')
+    expect(footerHighlights).toHaveLength(2)
+    const links = wrapper.findAll('.product-price__metrics .product-price__metrics-offer--link')
     expect(links).toHaveLength(2)
     expect(links[0]?.attributes('href')).toBe('/contrib/abc123')
     expect(links[1]?.attributes('href')).toBe('/contrib/def456')
