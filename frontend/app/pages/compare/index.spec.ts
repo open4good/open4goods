@@ -111,7 +111,10 @@ const translate = (key: string, params: Record<string, unknown> = {}) => {
 
 mockNuxtImport('useI18n', () => () => ({
   t: (key: string, params: Record<string, unknown> = {}) => translate(key, params),
-  n: (value: number | bigint, _options?: Intl.NumberFormatOptions) => String(value),
+  n: (value: number | bigint, options?: Intl.NumberFormatOptions) => {
+    const numericValue = typeof value === 'bigint' ? Number(value) : value
+    return new Intl.NumberFormat(localeRef.value, options).format(numericValue)
+  },
   locale: localeRef,
 }))
 
@@ -308,5 +311,100 @@ describe('Compare page hero', () => {
       'Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.',
     )
     expect(wrapper.find('.compare-page__hero-back').exists()).toBe(false)
+  })
+})
+
+describe('Ecological scores', () => {
+  beforeEach(() => {
+    loadProductsMock.mockReset()
+    loadVerticalMock.mockReset()
+    hasMixedVerticalsMock.mockReset()
+    compareStore.clear.mockReset()
+    compareStore.addProduct.mockReset()
+    compareStore.removeById.mockReset()
+    routerReplace.mockReset()
+    route.hash = '#compare=1234567890123'
+    localeRef.value = 'fr-FR'
+    hasMixedVerticalsMock.mockReturnValue(false)
+  })
+
+  it('displays relative ecological scores with up to two decimals and highlights the best values', async () => {
+    loadProductsMock.mockResolvedValue([
+      createEntry({
+        gtin: '0001',
+        product: {
+          identity: { brand: 'Brand A', model: 'Model A' },
+          base: {},
+          offers: {},
+          scores: {
+            ecoscore: { relativ: { value: 3.456 } },
+            scores: {
+              BRAND_SUSTAINABILITY: { relativ: { value: 2.1 } },
+              DATA_QUALITY: { relativ: { value: 4.789 } },
+            },
+          },
+          attributes: {},
+        },
+        title: 'Produit A',
+        brand: 'Brand A',
+        model: 'Model A',
+      }),
+      createEntry({
+        gtin: '0002',
+        product: {
+          identity: { brand: 'Brand B', model: 'Model B' },
+          base: {},
+          offers: {},
+          scores: {
+            ecoscore: { relativ: { value: 2.1 } },
+            scores: {
+              BRAND_SUSTAINABILITY: { relativ: { value: 4.123 } },
+              DATA_QUALITY: { relativ: { value: 3.5 } },
+            },
+          },
+          attributes: {},
+        },
+        title: 'Produit B',
+        brand: 'Brand B',
+        model: 'Model B',
+      }),
+    ])
+
+    loadVerticalMock.mockResolvedValue(null)
+
+    const wrapper = await mountPage()
+    await flushPromises()
+    await flushPromises()
+
+    const ecologicalSection = wrapper
+      .findAll('.compare-section')
+      .find((section) =>
+        section.findAll('.compare-section__title').some((title) => title.text() === 'Impact écologique'),
+      )
+
+    expect(ecologicalSection).toBeDefined()
+
+    const rows = ecologicalSection!.findAll('.compare-grid__row')
+    const ecoscoreRow = rows.find((row) => row.find('.compare-grid__feature-label')?.text() === 'Écoscore')
+
+    expect(ecoscoreRow).toBeTruthy()
+
+    const ecoscoreCells = ecoscoreRow!.findAll('.compare-grid__value')
+    expect(ecoscoreCells).toHaveLength(2)
+    expect(ecoscoreCells[0].text()).toContain('3,46')
+    expect(ecoscoreCells[1].text()).toContain('2,1')
+    expect(ecoscoreCells[0].classes()).toContain('compare-grid__value--highlight')
+    expect(ecoscoreCells[1].classes()).not.toContain('compare-grid__value--highlight')
+
+    const brandRow = rows.find(
+      (row) => row.find('.compare-grid__feature-label')?.text() === 'Durabilité marque',
+    )
+
+    expect(brandRow).toBeTruthy()
+
+    const brandCells = brandRow!.findAll('.compare-grid__value')
+    expect(brandCells[0].text()).toContain('2,1')
+    expect(brandCells[1].text()).toContain('4,12')
+    expect(brandCells[1].classes()).toContain('compare-grid__value--highlight')
   })
 })

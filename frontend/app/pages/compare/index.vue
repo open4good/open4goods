@@ -1052,6 +1052,25 @@ const resolveScoreValue = (score: ProductScoreDto | null | undefined): { display
     return { display: null, numeric: null }
   }
 
+  const relativeValueCandidates: Array<number | null> = [
+    typeof score.relativ?.value === 'number' && Number.isFinite(score.relativ.value)
+      ? score.relativ.value
+      : null,
+    (() => {
+      const legacyRelative = (score as { relative?: { value?: number | null } }).relative?.value
+      return typeof legacyRelative === 'number' && Number.isFinite(legacyRelative) ? legacyRelative : null
+    })(),
+  ]
+
+  const relativeValue = relativeValueCandidates.find((value): value is number => value != null) ?? null
+
+  if (relativeValue != null) {
+    return {
+      display: n(relativeValue, { maximumFractionDigits: 2 }),
+      numeric: relativeValue,
+    }
+  }
+
   if (score.percent != null && Number.isFinite(score.percent)) {
     return {
       display: n(score.percent, { maximumFractionDigits: 0 }),
@@ -1073,7 +1092,7 @@ const resolveScoreValue = (score: ProductScoreDto | null | undefined): { display
     }
   }
 
-  return { display: score.absoluteValue ?? null, numeric: null }
+  return { display: score.absoluteValue ?? score.relativeValue ?? null, numeric: null }
 }
 
 const syncHash = async (hash: string) => {
@@ -1394,7 +1413,7 @@ const productInitials = (title: string) => {
 
 <style scoped lang="sass">
 .compare-page
-  --compare-grid-sticky-offset: clamp(88px, 9vw, 132px)
+  --compare-grid-sticky-offset: var(--v-layout-top, 0px)
   display: flex
   flex-direction: column
   gap: 2.5rem
@@ -1813,12 +1832,6 @@ const productInitials = (title: string) => {
 
   .compare-page__hero-back
     align-self: flex-start
-
-@media (min-width: 1280px)
-  .compare-page__content > .compare-section:first-of-type
-    position: sticky
-    top: var(--compare-grid-sticky-offset)
-    z-index: 5
 
 @media (max-width: 960px)
   .compare-grid__header
