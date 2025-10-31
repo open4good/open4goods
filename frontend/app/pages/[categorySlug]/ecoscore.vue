@@ -360,7 +360,7 @@
                 </p>
 
                 <v-row class="category-ecoscore__ai-grid" align="stretch">
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" lg="12">
                     <v-card class="category-ecoscore__code-card" elevation="0" rounded="xl">
                       <h3 class="category-ecoscore__code-title">
                         {{ t('category.ecoscorePage.sections.aiAudit.promptTitle') }}
@@ -379,7 +379,7 @@
                     </v-card>
                   </v-col>
 
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" lg="12">
                     <v-card class="category-ecoscore__code-card" elevation="0" rounded="xl">
                       <h3 class="category-ecoscore__code-title">
                         {{ t('category.ecoscorePage.sections.aiAudit.responseTitle') }}
