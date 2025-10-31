@@ -72,12 +72,6 @@ const createI18nPlugin = () =>
             previewUnavailable: 'Preview unavailable for this document. Use the download link instead.',
             loading: 'Loading document preview…',
             controls: {
-              zoomIn: 'Zoom in',
-              zoomOut: 'Zoom out',
-              resetView: 'Reset view',
-              reset: 'Reset',
-              fitWidth: 'Fit to width',
-              fit: 'Fit width',
               rotate: 'Rotate document',
               rotateLabel: 'Rotate',
               scrollLeft: 'Scroll left',
@@ -98,6 +92,7 @@ describe('ProductDocumentationSection', () => {
     modificationDate: new Date('2024-03-25').getTime(),
     language: 'fr',
     author: 'Open4Goods',
+    metadataTitle: 'Quick start manual',
     ...overrides,
   })
 
@@ -123,6 +118,11 @@ describe('ProductDocumentationSection', () => {
 
     const activeTab = wrapper.get('[data-testid="product-docs-tab"]')
     expect(activeTab.classes()).toContain('product-docs__tab--active')
+    expect(activeTab.find('.product-docs__tab-title').text()).toBe('Quick start manual')
+
+    const viewerTitle = wrapper.get('.product-docs__viewer-title')
+    expect(viewerTitle.text()).toBe('Quick start manual')
+    expect(viewerTitle.attributes('title')).toBe('Quick start manual')
 
     const metas = wrapper.findAll('.product-docs__viewer-meta').map((node) => node.text())
     expect(metas[0]).toContain('3 pages')
@@ -130,9 +130,6 @@ describe('ProductDocumentationSection', () => {
     expect(metas[0]).toContain('French')
     expect(metas[1]).toContain('1.2 KB')
     expect(metas[1]).toContain('Open4Goods')
-
-    const fitWidth = wrapper.get('[aria-label="Fit to width"]')
-    expect(fitWidth.attributes('aria-pressed')).toBe('true')
   })
 
   it('switches the active PDF when selecting a different tab', async () => {
@@ -153,24 +150,6 @@ describe('ProductDocumentationSection', () => {
     const viewer = wrapper.get('.vue-pdf-embed-stub')
     expect(viewer.attributes('data-source')).toBe(pdfs[1].url)
     expect(tabs[1].classes()).toContain('product-docs__tab--active')
-  })
-
-  it('toggles zoom controls off fit width when zooming in', async () => {
-    const wrapper = mountComponent({ pdfs: [basePdf()] })
-
-    await flushPromises()
-
-    const zoomInButton = wrapper.get('[aria-label="Zoom in"]')
-    const fitWidth = wrapper.get('[aria-label="Fit to width"]')
-
-    expect(fitWidth.attributes('aria-pressed')).toBe('true')
-
-    await zoomInButton.trigger('click')
-    await flushPromises()
-
-    expect(fitWidth.attributes('aria-pressed')).toBe('false')
-    const viewer = wrapper.get('.vue-pdf-embed-stub')
-    expect(viewer.classes()).not.toContain('product-docs__viewer-frame--fit')
   })
 
   it('hides navigation arrows when documents fit within the viewport', async () => {
@@ -204,19 +183,29 @@ describe('ProductDocumentationSection', () => {
     expect(wrapper.get('[data-testid="product-docs-empty"]').text()).toContain('No documents are available')
   })
 
-  it('uses a localized fallback title when the document has no metadata', async () => {
+  it('falls back to a translated generic title when a PDF has no title metadata', async () => {
     const wrapper = mountComponent({
       pdfs: [
-        basePdf({ cacheKey: 'doc-3', url: 'https://example.com/doc-3.pdf', extractedTitle: undefined, metadataTitle: undefined, fileName: undefined }),
+        basePdf({
+          cacheKey: 'doc-3',
+          url: 'https://example.com/doc-3.pdf',
+          extractedTitle: undefined,
+          metadataTitle: undefined,
+          fileName: undefined,
+        }),
       ],
     })
 
     await flushPromises()
 
-    expect(wrapper.get('.product-docs__viewer-title').text()).toBe('Document PDF')
+    const tabTitle = wrapper.get('.product-docs__tab-title').text()
+    const viewerTitle = wrapper.get('.product-docs__viewer-title').text()
+
+    expect(tabTitle).toBe('Document PDF')
+    expect(viewerTitle).toBe('Document PDF')
   })
 
-  it('truncates long document titles in navigation tabs and preserves the full title in the tooltip', async () => {
+  it('uses the same truncated title in the viewer and the navigation tab', async () => {
     const longTitle = 'Very long product documentation title exceeding thirty five characters'
     const wrapper = mountComponent({
       pdfs: [basePdf({ cacheKey: 'doc-long', extractedTitle: longTitle })],
@@ -228,7 +217,11 @@ describe('ProductDocumentationSection', () => {
     expect(tab.attributes('title')).toBe(longTitle)
 
     const tabTitle = tab.get('.product-docs__tab-title').text()
+    const viewerTitle = wrapper.get('.product-docs__viewer-title').text()
+
     expect(tabTitle.endsWith('…')).toBe(true)
-    expect(tabTitle.length).toBeLessThanOrEqual(35)
+    expect(tabTitle).toHaveLength(35)
+    expect(viewerTitle).toBe(tabTitle)
+    expect(wrapper.get('.product-docs__viewer-title').attributes('title')).toBe(longTitle)
   })
 })

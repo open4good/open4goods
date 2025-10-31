@@ -1361,16 +1361,10 @@
       "title": "Documentation",
       "untitled": "Document sans titre",
       "controls": {
-        "fit": "Ajuster",
-        "fitWidth": "Ajuster à la largeur",
-        "reset": "Réinitialiser",
-        "resetView": "Réinitialiser la vue",
         "rotate": "Pivoter le document",
         "rotateLabel": "Pivoter",
         "scrollLeft": "Faire défiler vers la gauche",
-        "scrollRight": "Faire défiler vers la droite",
-        "zoomIn": "Zoom avant",
-        "zoomOut": "Zoom arrière"
+        "scrollRight": "Faire défiler vers la droite"
       }
     },
     "hero": {
