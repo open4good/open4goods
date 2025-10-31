@@ -44,10 +44,11 @@
           <ProductImpactSection
             :scores="impactScores"
             :radar-values="radarValues"
-            :ranking="rankingInfo"
-            :country="countryInfo"
             :loading="loadingAggregations"
             :product-name="productTitle"
+            :product="product"
+            :vertical-id="categoryDetail?.id ?? ''"
+            :popular-attributes="categoryDetail?.popularAttributes ?? []"
           />
         </section>
 
@@ -367,13 +368,6 @@ const isRenderableScore = (score: ProductScoreDto | undefined | null): score is 
   return typeof score?.id === 'string' && score.id.length > 0 && typeof score.name === 'string' && score.name.length > 0
 }
 
-type ImpactRankingInfo = {
-  position: number
-  total: number
-  globalBest?: { fullSlug: string; bestName: string }
-  globalBetter?: { fullSlug: string; bestName: string }
-}
-
 const impactScores = computed(() => {
   const scoreMap = (product.value?.scores?.scores ?? {}) as Record<string, ProductScoreDto | undefined>
   const desiredIds = requestedScoreIds.value
@@ -410,46 +404,6 @@ const radarValues = computed(() =>
     .map((score) => ({ name: score.label, value: score.relativeValue ?? 0 }))
     .filter((entry): entry is { name: string; value: number } => Boolean(entry.name) && Number.isFinite(entry.value)),
 )
-
-const rankingInfo = computed(() => {
-  const ranking = product.value?.scores?.ranking
-  if (!ranking) {
-    return null
-  }
-
-  const info: ImpactRankingInfo = {
-    position: ranking.globalPosition ?? 0,
-    total: ranking.globalCount ?? 0,
-  }
-
-  if (ranking.globalBest?.fullSlug && ranking.globalBest?.bestName) {
-    info.globalBest = {
-      fullSlug: ranking.globalBest.fullSlug,
-      bestName: ranking.globalBest.bestName,
-    }
-  }
-
-  if (ranking.globalBetter?.fullSlug && ranking.globalBetter?.bestName) {
-    info.globalBetter = {
-      fullSlug: ranking.globalBetter.fullSlug,
-      bestName: ranking.globalBetter.bestName,
-    }
-  }
-
-  return info
-})
-
-const countryInfo = computed(() => {
-  const info = product.value?.base?.gtinInfo
-  if (!info) {
-    return null
-  }
-
-  return {
-    name: info.countryName ?? '',
-    flag: info.countryFlagUrl ?? undefined,
-  }
-})
 
 const { data: commercialEventsData } = await useAsyncData<CommercialEvent[] | null>(
   'commercial-events',

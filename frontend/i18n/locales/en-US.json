@@ -1407,16 +1407,32 @@
       "viewSingleOffer": "View the offer"
     },
     "impact": {
+      "alternatives": {
+        "title": "Greener alternatives",
+        "subtitle": "Discover similar products with a better impact score or price.",
+        "empty": "No alternatives match the selected filters yet.",
+        "error": "We couldn't load alternative products. Please try again.",
+        "retry": "Retry",
+        "untitled": "Unnamed product",
+        "viewProduct": "View product {name}",
+        "filters": {
+          "price": "Price ≤ yours",
+          "ecoscore": "Eco-score ≥ yours"
+        },
+        "tooltips": {
+          "price": "Show products priced at or below {value}.",
+          "ecoscore": "Show products with an eco-score equal or higher than {value}.",
+          "attributeBetter": "Show products with {label} equal or higher than your product.",
+          "attributeLower": "Show products with {label} equal or lower than your product.",
+          "attributeEqual": "Show products where {label} matches your product."
+        }
+      },
       "absoluteValue": "Absolute value",
-      "bestProduct": "Best rated product: {name}",
-      "betterProduct": "Next best product: {name}",
       "detailsTitle": "Assessment details",
       "noPrimaryScore": "Impact score unavailable",
       "percentile": "Percentile",
       "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
-      "rankingTitle": "Ranking",
-      "rankingValue": "Position {position} of {total}",
       "scoreRanking": "Factor ranking",
       "scoreValue": "Relative score",
       "subtitle": "Explore how this product scores across ecological and social criteria.",
