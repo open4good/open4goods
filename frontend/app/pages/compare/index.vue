@@ -63,6 +63,52 @@
     <div v-else class="compare-page__content">
       <section class="compare-section">
         <div class="compare-grid" role="table">
+          <div class="compare-grid__media" role="row" aria-hidden="true">
+            <div class="compare-grid__feature compare-grid__feature--media" role="presentation">
+              <span class="sr-only">{{ t('compare.a11y.featureColumn') }}</span>
+            </div>
+            <div class="compare-grid__products" role="presentation">
+              <div
+                v-for="product in products"
+                :key="`media-${product.gtin}`"
+                class="compare-grid__product-media"
+              >
+                <NuxtLink
+                  v-if="productLink(product)"
+                  :to="productLink(product)"
+                  class="compare-grid__product-link"
+                  :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
+                >
+                  <NuxtImg
+                    v-if="product.coverImage"
+                    :src="product.coverImage"
+                    :alt="product.title"
+                    width="180"
+                    height="180"
+                    format="webp"
+                    class="compare-grid__product-image"
+                  />
+                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                    {{ productInitials(product.title) }}
+                  </div>
+                </NuxtLink>
+                <template v-else>
+                  <NuxtImg
+                    v-if="product.coverImage"
+                    :src="product.coverImage"
+                    :alt="product.title"
+                    width="180"
+                    height="180"
+                    format="webp"
+                    class="compare-grid__product-image"
+                  />
+                  <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
+                    {{ productInitials(product.title) }}
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
           <div class="compare-grid__header" role="row">
             <div class="compare-grid__feature compare-grid__feature--header" role="columnheader">
               <span class="sr-only">{{ t('compare.a11y.featureColumn') }}</span>
@@ -74,41 +120,6 @@
                 class="compare-grid__product"
                 role="columnheader"
               >
-                <div class="compare-grid__product-media">
-                  <NuxtLink
-                    v-if="productLink(product)"
-                    :to="productLink(product)"
-                    class="compare-grid__product-link"
-                    :aria-label="t('compare.a11y.viewProduct', { name: product.title })"
-                  >
-                    <NuxtImg
-                      v-if="product.coverImage"
-                      :src="product.coverImage"
-                      :alt="product.title"
-                      width="180"
-                      height="180"
-                      format="webp"
-                      class="compare-grid__product-image"
-                    />
-                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                      {{ productInitials(product.title) }}
-                    </div>
-                  </NuxtLink>
-                  <template v-else>
-                    <NuxtImg
-                      v-if="product.coverImage"
-                      :src="product.coverImage"
-                      :alt="product.title"
-                      width="180"
-                      height="180"
-                      format="webp"
-                      class="compare-grid__product-image"
-                    />
-                    <div v-else class="compare-grid__product-placeholder" aria-hidden="true">
-                      {{ productInitials(product.title) }}
-                    </div>
-                  </template>
-                </div>
                 <ImpactScore
                   v-if="product.impactScore !== null"
                   :score="product.impactScore"
@@ -1536,10 +1547,21 @@ const productInitials = (title: string) => {
   overflow-x: auto
   background: rgb(var(--v-theme-surface-glass))
   border-radius: 20px
-  padding: 1.5rem
+  padding: 0 1.5rem 1.5rem
   display: flex
   flex-direction: column
   gap: 1rem
+
+.compare-grid__media
+  display: grid
+  grid-template-columns: minmax(180px, 220px) repeat(auto-fit, minmax(220px, 1fr))
+  gap: 1rem
+  padding-top: 1.5rem
+
+.compare-grid__feature--media
+  display: flex
+  align-items: center
+  justify-content: center
 
 .compare-grid--compact
   padding-inline: 1rem
