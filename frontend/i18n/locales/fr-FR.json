@@ -101,7 +101,6 @@
       },
       "sections": {
         "aiAudit": {
-          "eyebrow": "Audit IA",
           "intro": "Audit des prompts et réponses qui ont servi à configurer l'Impact Score des {category}.",
           "jsonUnavailable": "Réponse IA indisponible.",
           "promptHelper": "Instructions envoyées au modèle pour produire la configuration.",
@@ -113,25 +112,23 @@
         },
         "criteria": {
           "empty": "Les critères seront publiés prochainement.",
-          "eyebrow": "Critères",
-          "title": "Critères retenus et pondérations"
+          "title": "Critères retenus et pondérations",
+          "coefficientPrefix": "Compte pour",
+          "coefficientSuffix": "dans la note globale"
         },
         "overview": {
           "card": {
             "aria": "Découvrir la méthodologie Impact Score globale",
             "cta": "Comprendre notre méthodologie globale",
             "description": "Cette page détaille les critères et pondérations utilisés pour évaluer l'impact environnemental de cette catégorie.",
-            "imageAlt": "Illustration de l'Impact Score pour les {category}",
-            "subtitle": "Méthodologie appliquée aux {category}",
+            "scoreLabel": "Exemple d'Impact Score",
             "title": "Impact Score Nudger"
           },
-          "eyebrow": "Introduction",
           "title": "Impact Score des {category}"
         },
         "purpose": {
           "dataFallback": "Les données détaillées des critères seront bientôt disponibles.",
           "dataTitle": "Données disponibles",
-          "eyebrow": "Notre démarche",
           "objectiveFallback": "La description de l'objectif sera bientôt disponible.",
           "objectiveTitle": "Objectif",
           "title": "Pourquoi et comment nous évaluons les {category}"
@@ -141,14 +138,8 @@
           "communityCta": "Consulter la configuration",
           "communityIssues": "Ouvrir une discussion",
           "communityTitle": "En discuter",
-          "connector": "et",
           "criticalReviewFallback": "La revue critique n'est pas encore disponible.",
           "criticalReviewTitle": "Revue critique",
-          "eyebrow": "Transparence",
-          "intro": "Nudger est construit dans un modèle ouvert :",
-          "introSuffix": "pour garantir la traçabilité de notre méthode d'évaluation des {category}.",
-          "openDataLink": "open-data",
-          "openSourceLink": "open-source",
           "tableFallback": "Les coefficients détaillés seront publiés prochainement.",
           "tableHeaders": {
             "applied": "Coef. appliqué",
@@ -157,7 +148,22 @@
           },
           "tableHelper": "Comparaison entre la proposition générée par l'IA et les coefficients actuellement appliqués.",
           "tableTitle": "Synthèse des coefficients",
-          "title": "Transparence et traçabilité"
+          "title": "Transparence et traçabilité",
+          "cardsTitle": "Ressources ouvertes",
+          "cards": {
+            "openSource": {
+              "title": "Méthodologie open-source",
+              "description": "Consultez nos dépôts publics pour suivre l'amélioration de l'Impact Score des {category}.",
+              "cta": "Découvrir notre démarche open-source",
+              "aria": "Découvrir les ressources open-source pour l'Impact Score des {category}"
+            },
+            "openData": {
+              "title": "Données ouvertes",
+              "description": "Accédez aux jeux de données qui alimentent l'Impact Score des {category} et réutilisez-les pour vos analyses.",
+              "cta": "Explorer l'espace données",
+              "aria": "Explorer les ressources open data pour l'Impact Score des {category}"
+            }
+          }
         }
       },
       "seo": {

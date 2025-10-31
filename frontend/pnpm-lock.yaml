@@ -50,6 +50,9 @@ importers:
       echarts:
         specifier: ^6.0.0
         version: 6.0.0
+      highlight.js:
+        specifier: ^11.10.0
+        version: 11.11.1
       i:
         specifier: ^0.3.7
         version: 0.3.7
@@ -5599,6 +5602,10 @@ packages:
 
   highlight.js@10.7.3:
     resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
+
+  highlight.js@11.11.1:
+    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+    engines: {node: '>=12.0.0'}
 
   hook-std@4.0.0:
     resolution: {integrity: sha512-IHI4bEVOt3vRUDJ+bFA9VUJlo7SzvFARPNLw75pqSmAOP2HmTWfFJtPvLBrDrlgjEYXY9zs7SFdHPQaJShkSCQ==}
@@ -15502,6 +15509,8 @@ snapshots:
   hex-rgb@4.3.0: {}
 
   highlight.js@10.7.3: {}
+
+  highlight.js@11.11.1: {}
 
   hook-std@4.0.0: {}
 

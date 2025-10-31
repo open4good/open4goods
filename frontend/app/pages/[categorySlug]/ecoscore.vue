@@ -6,7 +6,6 @@
       :description="heroDescription"
       :image="heroImage"
       :breadcrumbs="heroBreadcrumbs"
-      :eyebrow="category.verticalMetaTitle"
     />
 
     <div v-if="category" class="category-ecoscore__content">
@@ -36,9 +35,6 @@
             >
               <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
                 <header class="category-ecoscore__header">
-                  <span class="category-ecoscore__eyebrow">
-                    {{ t('category.ecoscorePage.sections.overview.eyebrow') }}
-                  </span>
                   <h2 :id="`${sectionIds.overview}-title`" class="category-ecoscore__title">
                     {{ t('category.ecoscorePage.sections.overview.title', { category: categoryLabel }) }}
                   </h2>
@@ -58,12 +54,17 @@
                   rounded="xl"
                   variant="elevated"
                 >
-                  <v-row align="stretch" class="ga-4" justify="center">
-                    <v-col cols="12" md="7" class="d-flex flex-column justify-center">
-                      <div class="category-ecoscore__intro-copy">
-                        <p class="category-ecoscore__intro-eyebrow">
-                          {{ t('category.ecoscorePage.sections.overview.card.subtitle', { category: categoryLabel }) }}
+                  <v-row align="stretch" class="ga-6" justify="space-between">
+                    <v-col cols="12" md="4" class="d-flex justify-center align-center">
+                      <div class="category-ecoscore__intro-score">
+                        <ImpactScore :score="4.3" size="large" show-value />
+                        <p class="category-ecoscore__intro-score-label">
+                          {{ t('category.ecoscorePage.sections.overview.card.scoreLabel') }}
                         </p>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="8" class="d-flex flex-column justify-center">
+                      <div class="category-ecoscore__intro-copy">
                         <h3 class="category-ecoscore__intro-title">
                           {{ t('category.ecoscorePage.sections.overview.card.title') }}
                         </h3>
@@ -83,15 +84,6 @@
                         </v-btn>
                       </div>
                     </v-col>
-                    <v-col cols="12" md="5" class="d-flex justify-center">
-                      <v-img
-                        v-if="overviewIllustration"
-                        :src="overviewIllustration"
-                        :alt="t('category.ecoscorePage.sections.overview.card.imageAlt', { category: categoryLabel })"
-                        class="category-ecoscore__intro-image"
-                        cover
-                      />
-                    </v-col>
                   </v-row>
                 </v-card>
               </v-sheet>
@@ -105,9 +97,6 @@
             >
               <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
                 <header class="category-ecoscore__header">
-                  <span class="category-ecoscore__eyebrow">
-                    {{ t('category.ecoscorePage.sections.purpose.eyebrow') }}
-                  </span>
                   <h2 :id="`${sectionIds.purpose}-title`" class="category-ecoscore__title">
                     {{ t('category.ecoscorePage.sections.purpose.title', { category: categoryLabel }) }}
                   </h2>
@@ -160,9 +149,6 @@
             >
               <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
                 <header class="category-ecoscore__header">
-                  <span class="category-ecoscore__eyebrow">
-                    {{ t('category.ecoscorePage.sections.criteria.eyebrow') }}
-                  </span>
                   <h2 :id="`${sectionIds.criteria}-title`" class="category-ecoscore__title">
                     {{ t('category.ecoscorePage.sections.criteria.title', { category: categoryLabel }) }}
                   </h2>
@@ -176,7 +162,7 @@
                   />
                 </div>
 
-                <v-row v-if="criteriaCards.length" class="category-ecoscore__criteria-grid" dense>
+                <v-row v-if="criteriaCards.length" class="category-ecoscore__criteria-grid" dense justify="center">
                   <v-col
                     v-for="criterion in criteriaCards"
                     :key="criterion.key"
@@ -194,9 +180,13 @@
                         <p v-if="criterion.description" class="category-ecoscore__criteria-description">
                           {{ criterion.description }}
                         </p>
-                        <p v-if="criterion.coefficient !== null" class="category-ecoscore__criteria-coefficient">
-                          {{ formatPercentage(criterion.coefficient) }}
-                        </p>
+                        <footer v-if="criterion.coefficient !== null" class="category-ecoscore__criteria-footer">
+                          <span>{{ t('category.ecoscorePage.sections.criteria.coefficientPrefix') }}</span>
+                          <span class="category-ecoscore__criteria-coefficient">
+                            {{ formatPercentage(criterion.coefficient) }}
+                          </span>
+                          <span>{{ t('category.ecoscorePage.sections.criteria.coefficientSuffix') }}</span>
+                        </footer>
                       </div>
                     </article>
                   </v-col>
@@ -216,24 +206,16 @@
             >
               <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
                 <header class="category-ecoscore__header">
-                  <span class="category-ecoscore__eyebrow">
-                    {{ t('category.ecoscorePage.sections.transparency.eyebrow') }}
-                  </span>
                   <h2 :id="`${sectionIds.transparency}-title`" class="category-ecoscore__title">
                     {{ t('category.ecoscorePage.sections.transparency.title') }}
                   </h2>
                 </header>
 
                 <v-row class="category-ecoscore__critical-grid" align="stretch">
-                  <v-col cols="12" lg="8">
+                  <v-col cols="12" md="6">
                     <v-card class="category-ecoscore__critical-card" elevation="0" rounded="xl">
                       <div class="category-ecoscore__critical-media">
-                        <v-img
-                          :src="transparencyIllustration"
-                          alt=""
-                          class="category-ecoscore__critical-image"
-                          cover
-                        />
+                        <v-icon class="category-ecoscore__critical-icon" icon="mdi-alarm-light-outline" size="96" />
                       </div>
                       <div class="category-ecoscore__critical-body">
                         <h3 class="category-ecoscore__critical-title">
@@ -246,7 +228,7 @@
                     </v-card>
                   </v-col>
 
-                  <v-col cols="12" lg="4">
+                  <v-col cols="12" md="6">
                     <v-card class="category-ecoscore__community-card" elevation="0" rounded="xl">
                       <h3 class="category-ecoscore__community-title">
                         {{ t('category.ecoscorePage.sections.transparency.communityTitle') }}
@@ -280,20 +262,6 @@
                     </v-card>
                   </v-col>
                 </v-row>
-
-                <div class="category-ecoscore__transparency-intro">
-                  <p class="category-ecoscore__transparency-text">
-                    {{ t('category.ecoscorePage.sections.transparency.intro') }}
-                    <NuxtLink to="/opensource" class="category-ecoscore__inline-link">
-                      {{ t('category.ecoscorePage.sections.transparency.openSourceLink') }}
-                    </NuxtLink>
-                    {{ t('category.ecoscorePage.sections.transparency.connector') }}
-                    <NuxtLink to="/opendata" class="category-ecoscore__inline-link">
-                      {{ t('category.ecoscorePage.sections.transparency.openDataLink') }}
-                    </NuxtLink>
-                    {{ t('category.ecoscorePage.sections.transparency.introSuffix', { category: categoryLabel }) }}
-                  </p>
-                </div>
 
                 <div class="category-ecoscore__table-wrapper">
                   <h3 class="category-ecoscore__table-title">
@@ -336,6 +304,39 @@
                     {{ t('category.ecoscorePage.sections.transparency.tableFallback') }}
                   </p>
                 </div>
+
+                <div class="category-ecoscore__transparency-cards">
+                  <h3 class="category-ecoscore__table-title">
+                    {{ t('category.ecoscorePage.sections.transparency.cardsTitle') }}
+                  </h3>
+                  <v-row class="category-ecoscore__transparency-grid" align="stretch">
+                    <v-col v-for="card in transparencyCards" :key="card.key" cols="12" md="6">
+                      <v-card class="category-ecoscore__transparency-card" elevation="4" rounded="xl">
+                        <div class="category-ecoscore__transparency-card-header">
+                          <v-avatar size="48" class="category-ecoscore__transparency-card-icon" color="surface-primary-120">
+                            <v-icon :icon="card.icon" size="28" color="primary" />
+                          </v-avatar>
+                          <h3 class="category-ecoscore__transparency-card-title">{{ card.title }}</h3>
+                        </div>
+                        <p class="category-ecoscore__transparency-card-text">
+                          {{ card.description }}
+                        </p>
+                        <v-btn
+                          :to="card.to"
+                          :href="card.href"
+                          :aria-label="card.aria"
+                          :target="card.target"
+                          :rel="card.rel"
+                          color="primary"
+                          variant="outlined"
+                          append-icon="mdi-arrow-right"
+                        >
+                          {{ card.cta }}
+                        </v-btn>
+                      </v-card>
+                    </v-col>
+                  </v-row>
+                </div>
               </v-sheet>
             </section>
 
@@ -347,9 +348,6 @@
             >
               <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
                 <header class="category-ecoscore__header">
-                  <span class="category-ecoscore__eyebrow">
-                    {{ t('category.ecoscorePage.sections.aiAudit.eyebrow') }}
-                  </span>
                   <h2 :id="`${sectionIds.aiAudit}-title`" class="category-ecoscore__title">
                     {{ t('category.ecoscorePage.sections.aiAudit.title') }}
                   </h2>
@@ -368,13 +366,21 @@
                       <p class="category-ecoscore__code-helper">
                         {{ t('category.ecoscorePage.sections.aiAudit.promptHelper') }}
                       </p>
+                      <!-- eslint-disable vue/no-v-html -->
                       <pre
                         class="category-ecoscore__code-block"
                         data-test="ai-yaml"
                         role="region"
                         aria-live="polite"
                       >
-{{ formattedYamlPrompt ?? t('category.ecoscorePage.sections.aiAudit.yamlUnavailable') }}
+                        <code
+                          v-if="highlightedYamlPrompt"
+                          class="hljs language-yaml"
+                          v-html="highlightedYamlPrompt"
+                        />
+                        <code v-else class="category-ecoscore__code-fallback">
+                          {{ t('category.ecoscorePage.sections.aiAudit.yamlUnavailable') }}
+                        </code>
                       </pre>
                     </v-card>
                   </v-col>
@@ -393,8 +399,16 @@
                         role="region"
                         aria-live="polite"
                       >
-{{ formattedAiJson ?? t('category.ecoscorePage.sections.aiAudit.jsonUnavailable') }}
+                        <code
+                          v-if="highlightedAiJson"
+                          class="hljs language-json"
+                          v-html="highlightedAiJson"
+                        />
+                        <code v-else class="category-ecoscore__code-fallback">
+                          {{ t('category.ecoscorePage.sections.aiAudit.jsonUnavailable') }}
+                        </code>
                       </pre>
+                      <!-- eslint-enable vue/no-v-html -->
                     </v-card>
                   </v-col>
                 </v-row>
@@ -425,8 +439,21 @@ import type {
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import TextContent from '~/components/domains/content/TextContent.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import hljs from 'highlight.js/lib/core'
+import json from 'highlight.js/lib/languages/json'
+import yaml from 'highlight.js/lib/languages/yaml'
+import 'highlight.js/styles/github-dark.css'
 import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
 import { useCategories } from '~/composables/categories/useCategories'
+
+if (!hljs.getLanguage('json')) {
+  hljs.registerLanguage('json', json)
+}
+
+if (!hljs.getLanguage('yaml')) {
+  hljs.registerLanguage('yaml', yaml)
+}
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -546,15 +573,6 @@ const criteriaCards = computed(() => {
   })
 })
 
-const overviewIllustration = computed(() => {
-  if (!category.value?.id) {
-    return heroImage.value
-  }
-  return `/images/verticals/${category.value.id}.jpg`
-})
-
-const transparencyIllustration = computed(() => '/icons/categories/ecoscore/revue_critique.jpg')
-
 const rawYamlPrompt = computed(() => impactScoreConfig.value?.yamlPrompt?.trim() || '')
 const formattedYamlPrompt = computed(() => (rawYamlPrompt.value.length ? rawYamlPrompt.value : null))
 
@@ -577,6 +595,32 @@ const formattedAiJson = computed(() => {
     return JSON.stringify(parsedAiJson.value, null, 2)
   }
   return rawAiJson.value.length ? rawAiJson.value : null
+})
+
+const highlightedYamlPrompt = computed(() => {
+  if (!formattedYamlPrompt.value) {
+    return null
+  }
+
+  try {
+    return hljs.highlight(formattedYamlPrompt.value, { language: 'yaml' }).value
+  } catch (error) {
+    console.warn('Unable to highlight YAML prompt for impact score', error)
+    return formattedYamlPrompt.value
+  }
+})
+
+const highlightedAiJson = computed(() => {
+  if (!formattedAiJson.value) {
+    return null
+  }
+
+  try {
+    return hljs.highlight(formattedAiJson.value, { language: 'json' }).value
+  } catch (error) {
+    console.warn('Unable to highlight AI JSON response for impact score', error)
+    return formattedAiJson.value
+  }
 })
 
 const aiCoefficients = computed<Record<string, number>>(() => {
@@ -762,6 +806,39 @@ const githubConfigUrl = computed(() =>
     : null,
 )
 
+const transparencyCards = computed(() => {
+  const cards = [
+    {
+      key: 'openSource',
+      icon: 'mdi-source-branch',
+      to: '/opensource',
+      href: undefined,
+      target: undefined,
+      rel: undefined,
+    },
+    {
+      key: 'openData',
+      icon: 'mdi-database-outline',
+      to: '/opendata',
+      href: undefined,
+      target: undefined,
+      rel: undefined,
+    },
+  ] as const
+
+  return cards.map((card) => ({
+    ...card,
+    title: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.title`),
+    description: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.description`, {
+      category: categoryLabel.value,
+    }),
+    cta: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.cta`),
+    aria: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.aria`, {
+      category: categoryLabel.value,
+    }),
+  }))
+})
+
 function formatPercentage(value: number | null) {
   if (value == null || Number.isNaN(value)) {
     return '—'
@@ -852,20 +929,8 @@ useSeoMeta({
 .category-ecoscore__header
   display: flex
   flex-direction: column
-  gap: 0.5rem
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem)
-
-.category-ecoscore__eyebrow
-  display: inline-flex
-  align-items: center
-  gap: 0.5rem
-  padding: 0.25rem 0.75rem
-  border-radius: 999px
-  background: rgba(var(--v-theme-surface-primary-100), 0.9)
-  color: rgb(var(--v-theme-accent-primary-highlight))
-  font-size: 0.75rem
-  letter-spacing: 0.08em
-  text-transform: uppercase
+  gap: 0.35rem
+  margin-bottom: clamp(1.25rem, 3vw, 2rem)
 
 .category-ecoscore__title
   margin: 0
@@ -881,14 +946,27 @@ useSeoMeta({
   line-height: 1.7
   color: rgba(var(--v-theme-text-neutral-strong), 0.92)
 
+
 .category-ecoscore__intro-card
   background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-050), 0.75), rgba(var(--v-theme-surface-glass), 0.95))
   padding: clamp(1.5rem, 2vw, 2.5rem)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18)
 
-.category-ecoscore__intro-eyebrow
-  font-size: 0.85rem
-  text-transform: uppercase
-  letter-spacing: 0.08em
+.category-ecoscore__intro-score
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  gap: 0.75rem
+  background: rgba(var(--v-theme-surface-default), 0.85)
+  border-radius: 24px
+  padding: clamp(1.25rem, 2vw, 2rem)
+  box-shadow: 0 24px 45px rgba(var(--v-theme-shadow-primary-600), 0.15)
+
+.category-ecoscore__intro-score-label
+  margin: 0
+  text-align: center
+  font-size: 0.95rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
 .category-ecoscore__intro-title
@@ -900,10 +978,6 @@ useSeoMeta({
   margin-bottom: 1.25rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.96)
 
-.category-ecoscore__intro-image
-  max-width: min(320px, 100%)
-  border-radius: 24px
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12)
 
 .category-ecoscore__purpose-grid
   gap: clamp(1.5rem, 3vw, 2rem)
@@ -973,6 +1047,14 @@ useSeoMeta({
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.5
 
+.category-ecoscore__criteria-footer
+  display: flex
+  flex-wrap: wrap
+  gap: 0.35rem
+  align-items: baseline
+  font-size: 0.95rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
+
 .category-ecoscore__criteria-coefficient
   margin: 0
   font-weight: 700
@@ -996,13 +1078,16 @@ useSeoMeta({
   height: 100%
 
 .category-ecoscore__critical-media
-  flex: 0 0 clamp(140px, 12vw, 180px)
-  border-radius: 18px
-  overflow: hidden
+  flex: 0 0 clamp(160px, 14vw, 200px)
+  display: flex
+  align-items: center
+  justify-content: center
+  border-radius: 20px
+  background: rgba(var(--v-theme-surface-primary-100), 0.65)
+  color: rgb(var(--v-theme-primary))
 
-.category-ecoscore__critical-image
-  width: 100%
-  height: 100%
+.category-ecoscore__critical-icon
+  filter: drop-shadow(0 18px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
 
 .category-ecoscore__critical-title
   margin: 0 0 0.75rem
@@ -1038,17 +1123,44 @@ useSeoMeta({
   flex-direction: column
   gap: 0.5rem
 
-.category-ecoscore__transparency-intro
-  margin-top: clamp(1.5rem, 2.5vw, 2.5rem)
 
-.category-ecoscore__transparency-text
+.category-ecoscore__transparency-cards
+  margin-top: clamp(1.75rem, 3vw, 2.75rem)
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 2vw, 2rem)
+
+.category-ecoscore__transparency-grid
+  gap: clamp(1.25rem, 2vw, 2rem)
+
+.category-ecoscore__transparency-card
+  padding: clamp(1.5rem, 2vw, 2.25rem)
+  display: flex
+  flex-direction: column
+  gap: 1.25rem
+  background: rgba(var(--v-theme-surface-glass), 0.95)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18)
+  height: 100%
+
+.category-ecoscore__transparency-card-header
+  display: flex
+  align-items: center
+  gap: 1rem
+
+.category-ecoscore__transparency-card-icon
+  backdrop-filter: blur(10px)
+  box-shadow: 0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
+
+.category-ecoscore__transparency-card-title
   margin: 0
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.92)
-  line-height: 1.6
+  font-size: 1.15rem
+  font-weight: 600
 
-.category-ecoscore__inline-link
-  color: rgb(var(--v-theme-accent-primary-highlight))
-  text-decoration: underline
+.category-ecoscore__transparency-card-text
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+  line-height: 1.6
+  flex: 1
 
 .category-ecoscore__table-wrapper
   margin-top: clamp(1.5rem, 2.5vw, 2.5rem)
@@ -1111,9 +1223,29 @@ useSeoMeta({
   font-size: 0.85rem
   line-height: 1.6
   color: rgba(var(--v-theme-text-neutral-strong), 0.92)
-  white-space: pre-wrap
+  white-space: pre
   word-break: break-word
   overflow: auto
+
+.category-ecoscore__code-block :deep(.hljs)
+  background: transparent
+  color: rgba(var(--v-theme-text-neutral-strong), 0.94)
+
+.category-ecoscore__code-block :deep(.hljs-keyword)
+  color: rgb(var(--v-theme-primary))
+
+.category-ecoscore__code-block :deep(.hljs-string)
+  color: rgb(var(--v-theme-accent-supporting))
+
+.category-ecoscore__code-block :deep(.hljs-number)
+  color: rgb(var(--v-theme-accent-primary-highlight))
+
+.category-ecoscore__code-block :deep(.hljs-literal)
+  color: rgb(var(--v-theme-secondary))
+
+.category-ecoscore__code-fallback
+  display: block
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
 @media (min-width: 1280px)
   .category-ecoscore__layout
@@ -1141,9 +1273,6 @@ useSeoMeta({
 
   .category-ecoscore__intro-card
     padding: clamp(1rem, 4vw, 2rem)
-
-  .category-ecoscore__intro-image
-    max-width: 220px
 
   .category-ecoscore__code-block
     max-height: 320px

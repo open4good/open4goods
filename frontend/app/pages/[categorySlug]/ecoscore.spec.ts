@@ -18,25 +18,22 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.navigation.criteria': 'Criteria',
   'category.ecoscorePage.navigation.transparency': 'Transparency',
   'category.ecoscorePage.navigation.aiAudit': 'AI audit',
-  'category.ecoscorePage.sections.overview.eyebrow': 'Introduction',
   'category.ecoscorePage.sections.overview.title': 'Impact Score for {category}',
-  'category.ecoscorePage.sections.overview.card.subtitle': 'Methodology applied to {category}',
   'category.ecoscorePage.sections.overview.card.title': 'Nudger Impact Score',
   'category.ecoscorePage.sections.overview.card.description':
     'This page details the criteria and weightings used to assess the environmental impact of this category.',
   'category.ecoscorePage.sections.overview.card.aria': 'Learn more about the global Impact Score methodology',
   'category.ecoscorePage.sections.overview.card.cta': 'Understand the global methodology',
-  'category.ecoscorePage.sections.overview.card.imageAlt': 'Impact Score illustration for {category}',
-  'category.ecoscorePage.sections.purpose.eyebrow': 'Our approach',
+  'category.ecoscorePage.sections.overview.card.scoreLabel': 'Sample Impact Score',
   'category.ecoscorePage.sections.purpose.title': 'Why and how we score {category}',
   'category.ecoscorePage.sections.purpose.objectiveTitle': 'Objective',
   'category.ecoscorePage.sections.purpose.objectiveFallback': 'The objective description will be available soon.',
   'category.ecoscorePage.sections.purpose.dataTitle': 'Available data',
   'category.ecoscorePage.sections.purpose.dataFallback': 'Detailed data for each criterion will be available soon.',
-  'category.ecoscorePage.sections.criteria.eyebrow': 'Criteria',
   'category.ecoscorePage.sections.criteria.title': 'Selected criteria and weights',
+  'category.ecoscorePage.sections.criteria.coefficientPrefix': 'Counts for',
+  'category.ecoscorePage.sections.criteria.coefficientSuffix': 'in the overall score',
   'category.ecoscorePage.sections.criteria.empty': 'Criteria will be published soon.',
-  'category.ecoscorePage.sections.transparency.eyebrow': 'Transparency',
   'category.ecoscorePage.sections.transparency.title': 'Transparency and traceability',
   'category.ecoscorePage.sections.transparency.criticalReviewTitle': 'Critical review',
   'category.ecoscorePage.sections.transparency.criticalReviewFallback': 'The critical review will be shared soon.',
@@ -45,12 +42,19 @@ const messages: Record<string, string> = {
     'The {category} Impact Score definition is public on GitHub. Share your feedback or suggest adjustments.',
   'category.ecoscorePage.sections.transparency.communityCta': 'View the configuration',
   'category.ecoscorePage.sections.transparency.communityIssues': 'Open an issue',
-  'category.ecoscorePage.sections.transparency.intro': 'Nudger is built as an open project:',
-  'category.ecoscorePage.sections.transparency.connector': 'and',
-  'category.ecoscorePage.sections.transparency.openSourceLink': 'open-source',
-  'category.ecoscorePage.sections.transparency.openDataLink': 'open-data',
-  'category.ecoscorePage.sections.transparency.introSuffix':
-    'to guarantee traceability for the {category} scoring methodology.',
+  'category.ecoscorePage.sections.transparency.cardsTitle': 'Open methodology resources',
+  'category.ecoscorePage.sections.transparency.cards.openSource.title': 'Open-source methodology',
+  'category.ecoscorePage.sections.transparency.cards.openSource.description':
+    'Follow our public repositories to track how we refine the Impact Score for {category}.',
+  'category.ecoscorePage.sections.transparency.cards.openSource.cta': 'Explore our open-source approach',
+  'category.ecoscorePage.sections.transparency.cards.openSource.aria':
+    'Explore open-source resources for the {category} Impact Score',
+  'category.ecoscorePage.sections.transparency.cards.openData.title': 'Open data exports',
+  'category.ecoscorePage.sections.transparency.cards.openData.description':
+    'Access the datasets powering the Impact Score for {category} and reuse them in your analyses.',
+  'category.ecoscorePage.sections.transparency.cards.openData.cta': 'Browse the data workspace',
+  'category.ecoscorePage.sections.transparency.cards.openData.aria':
+    'Browse open data resources for the {category} Impact Score',
   'category.ecoscorePage.sections.transparency.tableTitle': 'Coefficient summary',
   'category.ecoscorePage.sections.transparency.tableHelper':
     'Comparison between the AI-generated proposal and the coefficients currently applied.',
@@ -58,7 +62,6 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.sections.transparency.tableHeaders.name': 'Criterion name',
   'category.ecoscorePage.sections.transparency.tableHeaders.proposed': 'Proposed coef.',
   'category.ecoscorePage.sections.transparency.tableHeaders.applied': 'Applied coef.',
-  'category.ecoscorePage.sections.aiAudit.eyebrow': 'AI audit',
   'category.ecoscorePage.sections.aiAudit.title': 'Impact Score generation audit',
   'category.ecoscorePage.sections.aiAudit.intro':
     'Audit the prompts and responses used to configure the {category} Impact Score.',
@@ -166,6 +169,18 @@ vi.mock('~/components/domains/content/TextContent.vue', () => ({
   }),
 }))
 
+vi.mock('~/components/shared/ui/ImpactScore.vue', () => ({
+  default: defineComponent({
+    name: 'ImpactScoreStub',
+    props: {
+      score: { type: Number, default: 0 },
+    },
+    setup(props) {
+      return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+    },
+  }),
+}))
+
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({ selectCategoryBySlug: selectCategoryBySlugMock }),
 }))
@@ -239,6 +254,7 @@ const vuetifyStubs = {
     },
   }),
   'v-icon': { template: '<i class="v-icon-stub"><slot /></i>' },
+  'v-avatar': { template: '<div class="v-avatar-stub"><slot /></div>' },
   'v-img': defineComponent({
     name: 'VImgStub',
     props: { src: { type: String, default: '' }, alt: { type: String, default: '' } },
@@ -314,6 +330,9 @@ describe('Category ecosystem Impact Score page', () => {
     expect(criteriaCards[0].text()).toContain('Energy efficiency')
     expect(criteriaCards[0].text()).toContain('30%')
 
+    const sampleScore = wrapper.get('.impact-score-stub').text()
+    expect(sampleScore).toContain('score:4.3')
+
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')
 
@@ -325,6 +344,10 @@ describe('Category ecosystem Impact Score page', () => {
     expect(table).toContain('Energy efficiency')
     expect(table).toContain('0.30')
     expect(table).toContain('0.35')
+
+    const transparencyCards = wrapper.findAll('.category-ecoscore__transparency-card')
+    expect(transparencyCards).toHaveLength(2)
+    expect(transparencyCards[0].text()).toContain('Open-source methodology')
   })
 
   it('scrolls smoothly to the requested section via sticky navigation', async () => {
