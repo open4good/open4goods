@@ -55,6 +55,8 @@ import type {
 
 import type { CategorySubsetClause } from '~/types/category-subset'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import { formatNumericRangeValue } from '~/utils/_number-formatting'
+import { isPriceField } from './filters/price-scale'
 
 type ManualFilterChip = {
   kind: 'manual'
@@ -86,11 +88,15 @@ const emit = defineEmits<{
   'clear-all': []
 }>()
 
-const { t } = useI18n()
+const { t, n } = useI18n()
 
 const activeFilters = computed(() => props.filters?.filters ?? [])
 const subsetClauses = computed(() => props.subsetClauses ?? [])
 const metadata = computed(() => props.fieldMetadata ?? {})
+
+const formatChipBoundary = (value: number | string | null | undefined, isPrice: boolean) => {
+  return formatNumericRangeValue(value, n, { isPrice })
+}
 
 const createManualLabel = (filter: Filter) => {
   const mapping = filter.field ?? ''
@@ -101,8 +107,9 @@ const createManualLabel = (filter: Filter) => {
     return term ? `${fieldLabel}: ${term}` : fieldLabel
   }
 
-  const minLabel = filter.min ?? '–'
-  const maxLabel = filter.max ?? '–'
+  const priceField = isPriceField(mapping)
+  const minLabel = formatChipBoundary(filter.min ?? null, priceField)
+  const maxLabel = formatChipBoundary(filter.max ?? null, priceField)
   return `${fieldLabel}: ${minLabel} → ${maxLabel}`
 }
 

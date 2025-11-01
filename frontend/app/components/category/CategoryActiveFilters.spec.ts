@@ -9,6 +9,8 @@ import type { FieldMetadataDto, FilterRequestDto } from '~~/shared/api-client'
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
+    n: (value: number, options?: Intl.NumberFormatOptions) =>
+      new Intl.NumberFormat('en', options).format(value),
   }),
 }))
 
@@ -168,5 +170,27 @@ describe('CategoryActiveFilters', () => {
     const wrapper = mountComponent({ filters: {}, subsetClauses: [] })
 
     expect(wrapper.html()).toBe('<!--v-if-->')
+  })
+
+  it('formats range filters with one decimal place in chip labels', () => {
+    const wrapper = mountComponent({
+      filters: {
+        filters: [
+          {
+            field: 'weight',
+            operator: 'range',
+            min: 1.234,
+            max: 5.678,
+          },
+        ],
+      },
+      subsetClauses: [],
+      fieldMetadata: {
+        weight: { mapping: 'weight', title: 'Weight' } as FieldMetadataDto,
+      },
+    })
+
+    const chipTexts = wrapper.findAll('.v-chip-stub').map((chip) => chip.text())
+    expect(chipTexts).toContain('Weight: 1.2 → 5.7')
   })
 })
