@@ -1432,10 +1432,13 @@
         }
       },
       "absoluteValue": "Absolute value",
+      "explanationTitle": "How to interpret this indicator",
       "detailsTitle": "Assessment details",
       "noPrimaryScore": "Impact score unavailable",
       "noDetailsAvailable": "No details are available for this assessment yet.",
       "percentile": "Percentile",
+      "weightChip": "Counts for {value}% of the total score",
+      "subscoreEyebrow": "Impact indicator",
       "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
       "scoreRanking": "Factor ranking",

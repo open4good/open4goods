@@ -12,8 +12,10 @@ export type ScoreView = {
   percent?: number | null
   ranking?: number | string | null
   letter?: string | null
+  on20?: number | null
   distribution?: DistributionBucket[]
   energyLetter?: string | null
+  metadatas?: Record<string, string> | null
 }
 
 export type RankingInfo = {
