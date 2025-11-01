@@ -357,7 +357,58 @@ const productMetaDescription = computed(() => {
   )
 })
 
-const canonicalUrl = computed(() => new URL(route.fullPath, requestURL.origin).toString())
+const toAbsoluteUrl = (value?: string | null) => {
+  if (!value) {
+    return undefined
+  }
+
+  try {
+    return new URL(value, requestURL.origin).toString()
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to build absolute URL for product asset.', error)
+    }
+
+    return undefined
+  }
+}
+
+const canonicalPath = computed(() => {
+  const fallbackPath = route.path.startsWith('/') ? route.path : `/${route.path}`
+  const preferredSlug = product.value?.fullSlug ?? product.value?.slug ?? null
+  const normalizedSlug = preferredSlug
+    ? preferredSlug.startsWith('/')
+      ? preferredSlug
+      : `/${preferredSlug}`
+    : fallbackPath
+
+  const sanitized = normalizedSlug.split('#')[0]?.split('?')[0]
+
+  return sanitized?.length ? sanitized : fallbackPath
+})
+
+const canonicalUrl = computed(() => new URL(canonicalPath.value, requestURL.origin).toString())
+
+const resolvedProductImageSource = computed(() => {
+  const galleryImages = product.value?.resources?.images ?? []
+  const firstGalleryImage = galleryImages.find((image) => Boolean(image?.url))?.url
+    ?? galleryImages.find((image) => Boolean(image?.originalUrl))?.originalUrl
+
+  return (
+    product.value?.resources?.coverImagePath ??
+    product.value?.resources?.externalCover ??
+    product.value?.base?.coverImagePath ??
+    firstGalleryImage ??
+    null
+  )
+})
+
+const ogImageUrl = computed(() => {
+  const source = resolvedProductImageSource.value ?? '/nudger-icon-512x512.png'
+  return toAbsoluteUrl(source)
+})
+
+const ogImageAlt = computed(() => productTitle.value)
 
 useSeoMeta({
   title: () => productTitle.value,
@@ -365,7 +416,9 @@ useSeoMeta({
   ogTitle: () => product.value?.names?.ogTitle ?? productTitle.value,
   ogDescription: () => product.value?.names?.ogDescription ?? productMetaDescription.value,
   ogUrl: () => canonicalUrl.value,
-  ogType: 'website',
+  ogType: 'product',
+  ogImage: () => ogImageUrl.value,
+  ogImageAlt: () => ogImageAlt.value,
 })
 
 useHead(() => ({
@@ -585,15 +638,23 @@ const errorMessage = computed(() => {
 })
 
 const structuredOffers = computed(() => {
-  const offers = product.value?.offers?.offersByCondition ?? {}
-  return Object.values(offers)
-    .flat()
-    .filter((offer) => typeof offer?.price === 'number' && Boolean(offer?.url))
+  const offersByCondition = product.value?.offers?.offersByCondition ?? {}
+  const normalizedOffers = Object.values(offersByCondition)
+    .flatMap((entries) => entries ?? [])
+    .filter(
+      (offer): offer is {
+        price: number
+        url: string
+        currency?: string | null
+        condition?: string | null
+        datasourceName?: string | null
+      } => typeof offer?.price === 'number' && Boolean(offer?.url),
+    )
     .map((offer) => ({
       '@type': 'Offer',
-      price: offer.price as number,
+      price: offer.price,
       priceCurrency: offer.currency ?? 'EUR',
-      url: offer.url as string,
+      url: offer.url,
       availability: 'https://schema.org/InStock',
       itemCondition:
         offer.condition === 'NEW'
@@ -604,6 +665,8 @@ const structuredOffers = computed(() => {
         name: offer.datasourceName ?? 'Unknown',
       },
     }))
+
+  return normalizedOffers.length > 0 ? normalizedOffers : undefined
 })
 
 const reviewStructuredData = computed(() => {
@@ -636,6 +699,9 @@ const productStructuredData = computed(() => {
       ? product.value.scores.ecoscore.value
       : null
 
+  const offers = structuredOffers.value
+  const imageUrl = ogImageUrl.value
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -646,7 +712,7 @@ const productStructuredData = computed(() => {
       '@type': 'Brand',
       name: product.value.identity?.brand ?? '',
     },
-    offers: structuredOffers.value,
+    offers,
     aggregateRating: aggregateRatingValue
       ? {
           '@type': 'AggregateRating',
@@ -655,6 +721,7 @@ const productStructuredData = computed(() => {
         }
       : undefined,
     review: reviewStructuredData.value ?? undefined,
+    image: imageUrl ?? undefined,
   }
 })
 
