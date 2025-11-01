@@ -376,15 +376,15 @@ describe('ProductHero', () => {
     await wrapper.unmount()
   })
 
-  it('renders the impact badge with formatted score and learn-more link', async () => {
+  it('places the impact score summary before the attribute list', async () => {
     const wrapper = await mountComponent()
 
-    const impactCard = wrapper.get('.product-hero__impact-card')
-    expect(impactCard.get('.product-hero__impact-title').text()).toBe('Impact score')
+    const impactOverview = wrapper.get('.product-hero__impact-overview')
+    expect(impactOverview.text()).toContain('Impact score')
+    expect(impactOverview.get('.impact-score-stub').text()).toBe('3.5')
 
-    const learnMoreLink = impactCard.get('.product-hero__impact-link')
-    expect(learnMoreLink.attributes('href')).toBe('/appliances/ecoscore')
-    expect(learnMoreLink.text()).toBe('Learn more')
+    const attributes = wrapper.get('.product-hero__attributes')
+    expect(attributes.element.previousElementSibling).toBe(impactOverview.element)
 
     await wrapper.unmount()
   })

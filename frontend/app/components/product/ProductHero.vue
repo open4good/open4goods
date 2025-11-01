@@ -26,6 +26,11 @@
         {{ brandModelLine }}
       </p>
 
+      <div v-if="impactScore !== null" class="product-hero__impact-overview">
+        <span class="product-hero__impact-label">{{ impactScoreLabel }}</span>
+        <ImpactScore :score="impactScore" :max="5" size="large" :show-value="true" />
+      </div>
+
       <ul v-if="popularAttributes.length" class="product-hero__attributes" role="list">
         <li
           v-for="attribute in popularAttributes"
@@ -56,24 +61,6 @@
               </span>
             </template>
           </v-tooltip>
-        </div>
-
-        <div v-if="impactScore !== null" class="product-hero__meta-middle">
-          <div class="product-hero__impact-card">
-            <p class="product-hero__impact-title">{{ impactBadgeTitle }}</p>
-
-            <div class="product-hero__impact-score">
-              <ImpactScore :score="impactScore" :max="5" size="large" :show-value="true" />
-            </div>
-
-            <NuxtLink
-              v-if="impactScoreLearnMoreLink"
-              :to="impactScoreLearnMoreLink"
-              class="product-hero__impact-link"
-            >
-              {{ impactBadgeLinkLabel }}
-            </NuxtLink>
-          </div>
         </div>
 
         <div class="product-hero__meta-bottom">
@@ -345,79 +332,20 @@ const impactScore = computed(() => {
   return typeof relative === 'number' ? relative : null
 })
 
-const impactBadgeTitle = computed(() => {
+const impactScoreLabel = computed(() => {
   if (impactScore.value === null) {
     return ''
-  }
-
-  if (te('product.hero.impactBadge.title')) {
-    return t('product.hero.impactBadge.title')
   }
 
   if (te('product.hero.impactScoreLabel')) {
     return t('product.hero.impactScoreLabel')
   }
 
+  if (te('product.hero.impactBadge.title')) {
+    return t('product.hero.impactBadge.title')
+  }
+
   return 'Impact score'
-})
-
-const impactBadgeLinkLabel = computed(() => {
-  if (te('product.hero.impactBadge.learnMore')) {
-    return t('product.hero.impactBadge.learnMore')
-  }
-
-  if (te('common.actions.learnMore')) {
-    return t('common.actions.learnMore')
-  }
-
-  if (te('common.learnMore')) {
-    return t('common.learnMore')
-  }
-
-  return 'Learn more'
-})
-
-const verticalHomeSegment = computed(() => {
-  const fullSlug = props.product.fullSlug?.toString().trim() ?? ''
-  const slug = props.product.slug?.toString().trim() ?? ''
-
-  if (fullSlug && slug && fullSlug.endsWith(slug)) {
-    const base = fullSlug.slice(0, fullSlug.length - slug.length).replace(/\/$/, '')
-    const normalized = base.replace(/^\/+/, '')
-    return normalized.length ? normalized : null
-  }
-
-  if (fullSlug) {
-    const segments = fullSlug.split('/').filter(Boolean)
-    segments.pop()
-    if (!segments.length) {
-      return null
-    }
-
-    return segments.join('/')
-  }
-
-  if (slug.includes('/')) {
-    const segments = slug.split('/').filter(Boolean)
-    segments.pop()
-    if (!segments.length) {
-      return null
-    }
-
-    return segments.join('/')
-  }
-
-  return null
-})
-
-const impactScoreLearnMoreLink = computed(() => {
-  const base = verticalHomeSegment.value
-  if (!base) {
-    return null
-  }
-
-  const normalized = base.replace(/\/$/, '')
-  return `/${normalized}/ecoscore`
 })
 </script>
 
@@ -465,10 +393,15 @@ const impactScoreLearnMoreLink = computed(() => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
+.product-hero__gallery {
+  min-width: 0;
+}
+
 .product-hero__details {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 .product-hero__brand-line {
@@ -517,10 +450,11 @@ const impactScoreLearnMoreLink = computed(() => {
 
 .product-hero__meta-group {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto;
   gap: clamp(0.75rem, 2vh, 1.25rem);
   flex: 1 1 auto;
   min-height: 0;
+  align-content: start;
 }
 
 .product-hero__meta-top,
@@ -529,13 +463,6 @@ const impactScoreLearnMoreLink = computed(() => {
   flex-direction: column;
   gap: 0.75rem;
   align-items: flex-start;
-}
-
-.product-hero__meta-middle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 }
 
 .product-hero__origin {
@@ -554,71 +481,26 @@ const impactScoreLearnMoreLink = computed(() => {
   object-fit: cover;
 }
 
-.product-hero__impact-card {
-  width: 100%;
-  border-radius: 24px;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-surface-primary-050), 0.95),
-    rgba(var(--v-theme-surface-glass), 0.92)
-  );
-  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.12);
-  padding: clamp(1.25rem, 2vw, 1.75rem);
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.product-hero__impact-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
+.product-hero__impact-overview {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
   color: rgb(var(--v-theme-text-neutral-strong));
-  text-align: center;
 }
 
-.product-hero__impact-score {
-  display: flex;
-  justify-content: center;
-}
-
-.product-hero__impact-link {
-  align-self: flex-end;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
-}
-
-.product-hero__impact-link:hover,
-.product-hero__impact-link:focus-visible {
-  color: rgb(var(--v-theme-accent-primary-highlight));
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
+.product-hero__impact-label {
+  font-weight: 700;
+  font-size: clamp(1rem, 2vw, 1.2rem);
 }
 
 .product-hero__meta-bottom {
   justify-content: flex-end;
 }
 
-@media (max-width: 1280px) {
-  .product-hero__impact-card {
-    padding: clamp(1.1rem, 2.4vw, 1.5rem);
-  }
-}
-
 @media (max-width: 960px) {
-  .product-hero__impact-card {
-    padding: 1.1rem;
-  }
-
-  .product-hero__impact-title {
-    font-size: 0.95rem;
-  }
-
-  .product-hero__impact-link {
-    font-size: 0.85rem;
+  .product-hero__impact-overview {
+    justify-content: flex-start;
   }
 }
 
