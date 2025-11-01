@@ -403,8 +403,10 @@ const impactScores = computed(() => {
         percent: score.percent ?? null,
         ranking: score.ranking ?? null,
         letter: score.letter ?? null,
+        on20: score.on20 ?? null,
         distribution,
         energyLetter: score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
+        metadatas: score.metadatas ?? null,
       }
     })
 })
