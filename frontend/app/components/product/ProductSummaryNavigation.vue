@@ -14,6 +14,8 @@
           type="button"
           class="product-summary-navigation__link"
           :class="{ 'product-summary-navigation__link--active': section.id === activeSection }"
+          :aria-current="section.id === activeSection ? 'true' : undefined"
+          :aria-controls="section.id"
           @click="onNavigate(section.id)"
         >
           <v-icon
