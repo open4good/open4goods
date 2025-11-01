@@ -307,13 +307,16 @@ let stopViewerResize: (() => void) | undefined
 
 if (import.meta.client) {
   onMounted(() => {
+    const tabResizeObserver = useResizeObserver(tabsTrackRef, updateTabScrollState)
+
     stopTabScrollListeners = [
       useEventListener(tabsTrackRef, 'scroll', updateTabScrollState),
       useEventListener(window, 'resize', () => requestAnimationFrame(updateTabScrollState)),
-      useResizeObserver(tabsTrackRef, updateTabScrollState),
-    ]
+      tabResizeObserver.stop,
+    ].filter((stop): stop is () => void => typeof stop === 'function')
 
-    stopViewerResize = useResizeObserver(viewerSurfaceRef, updateViewerWidth)
+    const viewerResizeObserver = useResizeObserver(viewerSurfaceRef, updateViewerWidth)
+    stopViewerResize = typeof viewerResizeObserver.stop === 'function' ? viewerResizeObserver.stop : undefined
 
     nextTick(() => {
       updateTabScrollState()
@@ -324,10 +327,8 @@ if (import.meta.client) {
     stopTabScrollListeners.forEach((stop) => stop())
     stopTabScrollListeners = []
 
-    if (stopViewerResize) {
-      stopViewerResize()
-      stopViewerResize = undefined
-    }
+    stopViewerResize?.()
+    stopViewerResize = undefined
   })
 }
 
