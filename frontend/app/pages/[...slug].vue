@@ -46,9 +46,6 @@
             :radar-values="radarValues"
             :loading="loadingAggregations"
             :product-name="productTitle"
-            :product="product"
-            :vertical-id="categoryDetail?.id ?? ''"
-            :popular-attributes="categoryDetail?.popularAttributes ?? []"
           />
         </section>
 
@@ -66,6 +63,18 @@
             v-if="product.offers"
             :offers="product.offers"
             :commercial-events="commercialEvents"
+          />
+        </section>
+
+        <section
+          v-if="showAlternativesSection"
+          :id="sectionIds.alternatives"
+          class="product-page__section"
+        >
+          <ProductAlternatives
+            :product="product"
+            :vertical-id="categoryDetail?.id ?? ''"
+            :popular-attributes="categoryDetail?.popularAttributes ?? []"
           />
         </section>
 
@@ -117,6 +126,7 @@ import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue
 import ProductImpactSection from '~/components/product/ProductImpactSection.vue'
 import ProductAiReviewSection from '~/components/product/ProductAiReviewSection.vue'
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
+import ProductAlternatives from '~/components/product/impact/ProductAlternatives.vue'
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
 import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
 import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
@@ -401,8 +411,11 @@ const impactScores = computed(() => {
 
 const radarValues = computed(() =>
   impactScores.value
-    .map((score) => ({ name: score.label, value: score.relativeValue ?? 0 }))
-    .filter((entry): entry is { name: string; value: number } => Boolean(entry.name) && Number.isFinite(entry.value)),
+    .map((score) => ({ id: score.id, name: score.label, value: score.relativeValue ?? 0 }))
+    .filter(
+      (entry): entry is { id: string; name: string; value: number } =>
+        Boolean(entry.id) && Boolean(entry.name) && Number.isFinite(entry.value),
+    ),
 )
 
 const { data: commercialEventsData } = await useAsyncData<CommercialEvent[] | null>(
@@ -423,12 +436,16 @@ const commercialEvents = computed(() => commercialEventsData.value ?? [])
 const hcaptchaSiteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
 
 const showAdminSection = computed(() => isLoggedIn.value)
+const showAlternativesSection = computed(
+  () => Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0),
+)
 
 const sectionIds = {
   hero: 'hero',
   impact: 'impact',
   ai: 'synthese',
   price: 'prix',
+  alternatives: 'alternatives',
   attributes: 'caracteristiques',
   docs: 'documentation',
   admin: 'admin',
@@ -441,6 +458,12 @@ const sections = computed(() => {
       { id: sectionIds.impact, label: t('product.navigation.impact'), icon: 'mdi-leaf', condition: impactScores.value.length > 0 },
       { id: sectionIds.ai, label: t('product.navigation.ai'), icon: 'mdi-robot-outline', condition: true },
       { id: sectionIds.price, label: t('product.navigation.price'), icon: 'mdi-currency-eur', condition: !!product.value?.offers },
+      {
+        id: sectionIds.alternatives,
+        label: t('product.navigation.alternatives'),
+        icon: 'mdi-compare-horizontal',
+        condition: showAlternativesSection.value,
+      },
       { id: sectionIds.attributes, label: t('product.navigation.attributes'), icon: 'mdi-format-list-bulleted', condition: !!product.value?.attributes },
       { id: sectionIds.docs, label: t('product.navigation.docs'), icon: 'mdi-file-document-outline', condition: (product.value?.resources?.pdfs?.length ?? 0) > 0 },
       { id: sectionIds.admin, label: t('product.navigation.admin'), icon: 'mdi-shield-account-outline', condition: showAdminSection.value },

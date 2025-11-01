@@ -1,22 +1,21 @@
 <template>
   <article class="impact-details">
     <h3 class="impact-details__title">{{ $t('product.impact.detailsTitle') }}</h3>
-    <v-table density="compact" class="impact-details__table">
+    <v-table v-if="displayScores.length" density="compact" class="impact-details__table">
       <thead>
         <tr>
           <th scope="col">{{ $t('product.impact.tableHeaders.score') }}</th>
           <th scope="col">{{ $t('product.impact.tableHeaders.value') }}</th>
-          <th scope="col">{{ $t('product.impact.tableHeaders.ranking') }}</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="score in scores" :key="`${score.id}-details`">
+        <tr v-for="score in displayScores" :key="`${score.id}-details`">
           <th scope="row">{{ score.label }}</th>
           <td>{{ formatScore(score.relativeValue) }} / 5</td>
-          <td>{{ score.ranking ?? '—' }}</td>
         </tr>
       </tbody>
     </v-table>
+    <p v-else class="impact-details__empty">{{ $t('product.impact.noDetailsAvailable') }}</p>
   </article>
 </template>
 
@@ -28,7 +27,7 @@ const props = defineProps<{
   scores: ScoreView[]
 }>()
 
-const scores = computed(() => props.scores)
+const displayScores = computed(() => props.scores.filter((score) => score.id !== 'ECOSCORE'))
 
 const formatScore = (value: number | null) => {
   if (value == null || Number.isNaN(value)) {
@@ -59,5 +58,11 @@ const formatScore = (value: number | null) => {
 
 .impact-details__table :deep(tbody th) {
   font-weight: 500;
+}
+
+.impact-details__empty {
+  margin: 0;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+  font-size: 0.95rem;
 }
 </style>

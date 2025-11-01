@@ -1434,6 +1434,7 @@
       "absoluteValue": "Valeur absolue",
       "detailsTitle": "Détails de l'évaluation",
       "noPrimaryScore": "Score indisponible",
+      "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
       "percentile": "Percentile",
       "primaryScoreLabel": "Score global",
       "radarAria": "Radar des scores pour {product}",
@@ -1456,6 +1457,7 @@
       "impact": "Impact écologique",
       "label": "Navigation de la fiche produit",
       "overview": "Aperçu",
+      "alternatives": "Alternatives",
       "price": "Prix"
     },
     "price": {

@@ -1434,6 +1434,7 @@
       "absoluteValue": "Absolute value",
       "detailsTitle": "Assessment details",
       "noPrimaryScore": "Impact score unavailable",
+      "noDetailsAvailable": "No details are available for this assessment yet.",
       "percentile": "Percentile",
       "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
@@ -1456,6 +1457,7 @@
       "impact": "Environmental impact",
       "label": "Product detail navigation",
       "overview": "Overview",
+      "alternatives": "Alternatives",
       "price": "Pricing"
     },
     "price": {
