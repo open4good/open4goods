@@ -7,22 +7,6 @@
       </p>
     </div>
 
-    <v-range-slider
-      v-model="localValue"
-      :min="sliderBounds.min"
-      :max="sliderBounds.max"
-      :step="sliderStep"
-      :aria-label="ariaLabel"
-      class="category-filter-numeric__slider"
-      thumb-label="always"
-      color="primary"
-      @end="emitRange"
-    >
-      <template #thumb-label="{ modelValue: thumbValue }">
-        {{ formatSliderValue(Array.isArray(thumbValue) ? thumbValue[0] : thumbValue) }}
-      </template>
-    </v-range-slider>
-
     <ClientOnly>
       <VueECharts
         v-if="chartOptions"
@@ -43,12 +27,29 @@
         />
       </template>
     </ClientOnly>
+
+    <v-range-slider
+      v-model="localValue"
+      :min="sliderBounds.min"
+      :max="sliderBounds.max"
+      :step="sliderStep"
+      :aria-label="ariaLabel"
+      class="category-filter-numeric__slider"
+      thumb-label="always"
+      color="primary"
+      @end="emitRange"
+    >
+      <template #thumb-label="{ modelValue: thumbValue }">
+        {{ formatSliderValue(Array.isArray(thumbValue) ? thumbValue[0] : thumbValue) }}
+      </template>
+    </v-range-slider>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import { formatNumericRangeValue } from '~/utils/_number-formatting'
 import VueECharts from 'vue-echarts'
 import type { EChartsOption } from 'echarts'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
@@ -192,11 +193,11 @@ const formatSliderValue = (value: number): string => {
   }
 
   const resolvedValue = priceField.value ? sliderValueToPrice(value) : value
-  const formatOptions: Intl.NumberFormatOptions = priceField.value
-    ? { maximumFractionDigits: 0 }
-    : { maximumFractionDigits: 2 }
+  return formatNumericRangeValue(resolvedValue, n, { isPrice: priceField.value })
+}
 
-  return n(resolvedValue, formatOptions)
+const formatBoundary = (value: number | string | null | undefined): string => {
+  return formatNumericRangeValue(value, n, { isPrice: priceField.value })
 }
 
 const localValue = ref<[number, number]>([sliderBounds.value.min, sliderBounds.value.max])
@@ -225,18 +226,34 @@ const buckets = computed(() => props.aggregation?.buckets ?? [])
 
 const hasBuckets = computed(() => buckets.value.length > 0)
 
-const toRgbColor = (value: string | undefined, fallbackRaw: string) => {
-  const normalized = value?.trim() || fallbackRaw
-  if (normalized.startsWith('#') || normalized.startsWith('rgb')) {
+const toColorWithAlpha = (value: string | undefined, fallbackRaw: string, alpha = 1) => {
+  const normalized = value?.trim()
+  if (!normalized) {
+    return alpha === 1 ? `rgb(${fallbackRaw})` : `rgba(${fallbackRaw}, ${alpha})`
+  }
+
+  if (normalized.startsWith('#')) {
     return normalized
   }
 
-  return `rgb(${normalized})`
+  if (normalized.startsWith('rgba')) {
+    return normalized
+  }
+
+  if (normalized.startsWith('rgb')) {
+    if (alpha === 1) {
+      return normalized
+    }
+
+    return normalized.replace(/^rgb\((.+)\)$/i, `rgba($1, ${alpha})`)
+  }
+
+  return alpha === 1 ? `rgb(${normalized})` : `rgba(${normalized}, ${alpha})`
 }
 
 const chartColorVar = import.meta.client
-  ? useCssVar('--v-theme-chart-range-bar', document.documentElement, { initialValue: '29, 78, 216' })
-  : ref('29, 78, 216')
+  ? useCssVar('--v-theme-chart-range-bar', document.documentElement, { initialValue: '33, 150, 243' })
+  : ref('33, 150, 243')
 
 const axisColorVar = import.meta.client
   ? useCssVar('--v-theme-text-neutral-secondary', document.documentElement, { initialValue: '71, 84, 103' })
@@ -246,10 +263,12 @@ const labelColorVar = import.meta.client
   ? useCssVar('--v-theme-text-neutral-strong', document.documentElement, { initialValue: '16, 24, 40' })
   : ref('16, 24, 40')
 
-const chartColor = computed(() => toRgbColor(chartColorVar.value, '29, 78, 216'))
-const axisColor = computed(() => toRgbColor(axisColorVar.value, '71, 84, 103'))
-const labelColor = computed(() => toRgbColor(labelColorVar.value, '16, 24, 40'))
-const gridLineColor = computed(() => toRgbColor(axisColorVar.value, '229, 231, 235'))
+const chartBarColor = computed(() => toColorWithAlpha(chartColorVar.value, '33, 150, 243', 0.75))
+const chartBarHoverColor = computed(() => toColorWithAlpha(chartColorVar.value, '33, 150, 243', 1))
+const axisColor = computed(() => toColorWithAlpha(axisColorVar.value, '71, 84, 103'))
+const labelColor = computed(() => toColorWithAlpha(labelColorVar.value, '16, 24, 40'))
+const gridLineColor = computed(() => toColorWithAlpha(axisColorVar.value, '229, 231, 235'))
+const pointerShadowColor = computed(() => toColorWithAlpha(axisColorVar.value, '148, 163, 184', 0.18))
 const CHART_HORIZONTAL_PADDING = 8
 
 const chartHeight = computed(() => {
@@ -328,7 +347,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
     data,
     barWidth: 28,
     itemStyle: {
-      color: chartColor.value,
+      color: chartBarColor.value,
       borderRadius: [6, 6, 6, 6],
     },
     label: {
@@ -347,7 +366,10 @@ const chartOptions = computed<EChartsOption | null>(() => {
       },
     },
     emphasis: {
-      focus: 'self',
+      focus: 'series',
+      itemStyle: {
+        color: chartBarHoverColor.value,
+      },
     },
     cursor: 'pointer',
   }
@@ -361,7 +383,13 @@ const chartOptions = computed<EChartsOption | null>(() => {
       containLabel: true,
     },
     tooltip: {
-      trigger: 'item',
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow',
+        shadowStyle: {
+          color: pointerShadowColor.value,
+        },
+      },
       appendToBody: true,
       confine: true,
       formatter: tooltipFormatter,
@@ -436,7 +464,7 @@ const rangeLabel = computed(() => {
     return null
   }
 
-  return `${min ?? '–'} → ${max ?? '–'}`
+  return `${formatBoundary(min)} → ${formatBoundary(max)}`
 })
 
 const emitRange = () => {
@@ -481,10 +509,10 @@ const formatBucketLabel = (from?: string | number | null, to?: number | null, mi
   }
 
   if (to == null) {
-    return `${from ?? '–'}+`
+    return `${formatBoundary(from)}+`
   }
 
-  return `${from ?? '–'} → ${to}`
+  return `${formatBoundary(from)} → ${formatBoundary(to)}`
 }
 </script>
 
