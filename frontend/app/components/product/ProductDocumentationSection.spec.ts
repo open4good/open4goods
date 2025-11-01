@@ -7,7 +7,7 @@ import type { ProductPdfDto } from '~~/shared/api-client'
 
 vi.mock('@vueuse/core', () => ({
   useEventListener: vi.fn(() => () => {}),
-  useResizeObserver: vi.fn(() => () => {}),
+  useResizeObserver: vi.fn(() => ({ stop: vi.fn() })),
 }))
 
 vi.mock('vue-pdf-embed', () => ({
