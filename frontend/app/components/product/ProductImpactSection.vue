@@ -9,25 +9,21 @@
       </p>
     </header>
 
-    <div class="product-impact__top">
+    <div class="product-impact__primary">
       <ProductImpactEcoScoreCard :score="primaryScore" />
-      <ProductAlternatives
-        v-if="product && verticalId"
-        :product="product"
-        :vertical-id="verticalId"
-        :popular-attributes="popularAttributes"
-      />
     </div>
 
     <div class="product-impact__analysis">
       <ProductImpactRadarChart
+        v-if="showRadar"
         class="product-impact__analysis-radar"
-        :values="radarValues"
+        :values="filteredRadarValues"
         :product-name="productName"
       />
       <ProductImpactDetailsTable
         class="product-impact__analysis-details"
-        :scores="scores"
+        :class="{ 'product-impact__analysis-details--full': !showRadar }"
+        :scores="detailScores"
       />
     </div>
 
@@ -50,14 +46,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
-import ProductAlternatives from './impact/ProductAlternatives.vue'
 import ProductImpactRadarChart from './impact/ProductImpactRadarChart.vue'
 import ProductImpactDetailsTable from './impact/ProductImpactDetailsTable.vue'
 import ProductImpactSubscoreCard from './impact/ProductImpactSubscoreCard.vue'
-import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import type { ScoreView } from './impact/impact-types'
 
 const props = defineProps({
@@ -70,19 +64,7 @@ const props = defineProps({
     default: () => [],
   },
   radarValues: {
-    type: Array as PropType<Array<{ name: string; value: number }>>,
-    default: () => [],
-  },
-  product: {
-    type: Object as PropType<ProductDto | null>,
-    default: null,
-  },
-  verticalId: {
-    type: String,
-    default: '',
-  },
-  popularAttributes: {
-    type: Array as PropType<AttributeConfigDto[]>,
+    type: Array as PropType<Array<{ id: string; name: string; value: number }>>,
     default: () => [],
   },
   productName: {
@@ -95,11 +77,19 @@ const props = defineProps({
   },
 })
 
-const { radarValues, productName, product, verticalId, popularAttributes } = toRefs(props)
+const radarValues = toRef(props, 'radarValues')
+const productName = toRef(props, 'productName')
 
 const primaryScore = computed(() => props.scores[0] ?? null)
 const secondaryScores = computed(() => props.scores.slice(1))
-const scores = computed(() => props.scores)
+const detailScores = computed(() => props.scores.filter((score) => score.id !== 'ECOSCORE'))
+const filteredRadarValues = computed(() =>
+  radarValues.value
+    .filter((entry) => entry.id && entry.name && entry.name.trim().length && Number.isFinite(entry.value))
+    .filter((entry) => entry.id.toUpperCase() !== 'ECOSCORE')
+    .map((entry) => ({ name: entry.name, value: entry.value })),
+)
+const showRadar = computed(() => filteredRadarValues.value.length >= 3)
 </script>
 
 <style scoped>
@@ -125,25 +115,20 @@ const scores = computed(() => props.scores)
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
 }
 
-.product-impact__top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: 1.5rem;
+.product-impact__primary {
+  display: flex;
+  flex-direction: column;
 }
 
 .product-impact__analysis {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   align-items: stretch;
 }
 
-.product-impact__analysis-radar {
-  grid-column: 1 / span 1;
-}
-
-.product-impact__analysis-details {
-  grid-column: 2 / span 1;
+.product-impact__analysis-details--full {
+  grid-column: 1 / -1;
 }
 
 .product-impact__subscores {
@@ -158,14 +143,8 @@ const scores = computed(() => props.scores)
 }
 
 @media (max-width: 1280px) {
-  .product-impact__top,
   .product-impact__analysis {
     grid-template-columns: 1fr;
-  }
-
-  .product-impact__analysis-radar,
-  .product-impact__analysis-details {
-    grid-column: auto;
   }
 }
 

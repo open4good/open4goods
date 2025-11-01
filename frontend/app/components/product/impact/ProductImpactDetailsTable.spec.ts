@@ -17,8 +17,8 @@ describe('ProductImpactDetailsTable', () => {
             tableHeaders: {
               score: 'Indicator',
               value: 'Value',
-              ranking: 'Rank',
             },
+            noDetailsAvailable: 'No details available',
           },
         },
       },
@@ -30,7 +30,7 @@ describe('ProductImpactDetailsTable', () => {
     { id: 'CO2', label: 'CO2', relativeValue: 3.1, ranking: 12 },
   ]
 
-  it('renders a table without the percentile column', () => {
+  it('renders details without the ranking column and hides ecoscore', () => {
     const wrapper = mount(ProductImpactDetailsTable, {
       props: { scores },
       global: {
@@ -49,7 +49,30 @@ describe('ProductImpactDetailsTable', () => {
     const headers = wrapper.findAll('th').map((node) => node.text())
     expect(headers).toContain('Indicator')
     expect(headers).toContain('Value')
-    expect(headers).toContain('Rank')
-    expect(headers).not.toContain('Percentile')
+    expect(headers).not.toContain('Rank')
+
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows).toHaveLength(1)
+    expect(rows[0]?.text()).toContain('CO2')
+    expect(wrapper.text()).not.toContain('Eco')
+  })
+
+  it('shows a fallback message when no rows remain', () => {
+    const wrapper = mount(ProductImpactDetailsTable, {
+      props: { scores: [{ id: 'ECOSCORE', label: 'Eco', relativeValue: 4.2 }] },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          'v-table': defineComponent({
+            name: 'VTableStub',
+            setup(_, { slots }) {
+              return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+            },
+          }),
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain('No details available')
   })
 })
