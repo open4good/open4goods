@@ -10,6 +10,7 @@ apis/FeedbackApi.ts
 apis/OpenDataApi.ts
 apis/PartnerApi.ts
 apis/ProductApi.ts
+apis/SearchApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
 apis/index.ts
@@ -55,6 +56,9 @@ models/FieldMetadataDto.ts
 models/Filter.ts
 models/FilterRequestDto.ts
 models/FullPageDto.ts
+models/GlobalSearchResponseDto.ts
+models/GlobalSearchResultDto.ts
+models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreCriteriaDto.ts

@@ -412,15 +412,15 @@ public class SearchService {
 
     private Query buildGlobalSearchQuery(String sanitizedQuery, boolean requireVertical, boolean missingVertical,
             List<String> tokens) {
-        long expiration = repository.expirationClause();
+        Long expiration = repository.expirationClause();
 
         return Query.of(q -> q.functionScore(fs -> {
             fs.scoreMode(FunctionScoreMode.Multiply);
             fs.boostMode(FunctionBoostMode.Multiply);
             fs.query(inner -> inner.bool(b -> {
-                b.filter(f -> f.range(r -> r.number(n -> n
+                b.filter(f -> f.range(r -> r.date(n -> n
                         .field("lastChange")
-                        .gt((double) expiration)
+                        .gt( expiration.toString())
                 )));
                 b.filter(f -> f.range(r -> r.number(n -> n
                         .field("offersCount")
