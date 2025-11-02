@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
@@ -26,6 +28,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.domain.PageRequest;
@@ -104,5 +107,71 @@ class SearchServiceTest {
                 .collect(Collectors.toSet());
         assertThat(fieldNames).contains("price.minPrice.price");
         assertThat(fieldNames).contains("price.conditions");
+    }
+
+    @Test
+    void globalSearchReturnsGroupedResults() {
+        when(repository.getRecentPriceQuery()).thenReturn(new Criteria("offersCount").greaterThan(0));
+        when(repository.expirationClause()).thenReturn(123L);
+
+        Product phone = new Product(1L);
+        phone.setVertical("phones");
+        phone.setOffersCount(5);
+        phone.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Fairphone");
+        phone.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Fairphone 4");
+        phone.getOfferNames().add("Fairphone 4 128 Go");
+
+        Product laptop = new Product(2L);
+        laptop.setVertical("laptops");
+        laptop.setOffersCount(3);
+        laptop.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Framework");
+        laptop.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Framework Laptop");
+        laptop.getOfferNames().add("Framework Laptop 13");
+
+        SearchHit<Product> phoneHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "1", null, 5f, null,
+                Map.of(), Map.of(), null, null, List.of(), phone);
+        SearchHit<Product> laptopHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "2", null, 3f, null,
+                Map.of(), Map.of(), null, null, List.of(), laptop);
+        SearchHits<Product> firstPassHits = mock(SearchHits.class);
+        when(firstPassHits.isEmpty()).thenReturn(false);
+        when(firstPassHits.getSearchHits()).thenReturn(List.of(phoneHit, laptopHit));
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(firstPassHits);
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch("Fairphone", DomainLanguage.fr);
+
+        assertThat(result.verticalGroups()).hasSize(2);
+        assertThat(result.verticalGroups().get(0).verticalId()).isEqualTo("phones");
+        assertThat(result.verticalGroups().get(0).results()).hasSize(1);
+        assertThat(result.fallbackResults()).isEmpty();
+        assertThat(result.fallbackTriggered()).isFalse();
+    }
+
+    @Test
+    void globalSearchTriggersFallbackWhenNoFirstPassHits() {
+        when(repository.getRecentPriceQuery()).thenReturn(new Criteria("offersCount").greaterThan(0));
+        when(repository.expirationClause()).thenReturn(123L);
+
+        SearchHits<Product> emptyHits = mock(SearchHits.class);
+        when(emptyHits.isEmpty()).thenReturn(true);
+
+        Product accessory = new Product(3L);
+        accessory.setOffersCount(2);
+        accessory.getOfferNames().add("Universal Charger");
+
+        SearchHit<Product> fallbackHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "3", null, 2f, null,
+                Map.of(), Map.of(), null, null, List.of(), accessory);
+        SearchHits<Product> fallbackHits = mock(SearchHits.class);
+        when(fallbackHits.isEmpty()).thenReturn(false);
+        when(fallbackHits.getSearchHits()).thenReturn(List.of(fallbackHit));
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits,
+                fallbackHits);
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch("chargeur", DomainLanguage.en);
+
+        assertThat(result.verticalGroups()).isEmpty();
+        assertThat(result.fallbackResults()).hasSize(1);
+        assertThat(result.fallbackResults().get(0).gtin()).isEqualTo(3L);
+        assertThat(result.fallbackTriggered()).isTrue();
     }
 }
