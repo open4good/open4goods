@@ -1346,13 +1346,38 @@
       "title": "Test & review summary"
     },
     "attributes": {
-      "features": "Highlights",
-      "indexedGroup": "Indexed attributes",
-      "referentialTitle": "Reference identifiers",
-      "searchPlaceholder": "Search a specification",
-      "subtitle": "Browse every specification and filter with keywords.",
       "title": "Technical specifications",
-      "unfeatures": "Watchouts"
+      "subtitle": "Browse every specification and filter with keywords.",
+      "searchPlaceholder": "Search a specification",
+      "features": "Highlights",
+      "unfeatures": "Watchouts",
+      "main": {
+        "title": "Key specifications",
+        "identity": {
+          "title": "Identity card",
+          "brand": "Brand",
+          "akaBrands": "Also referenced as",
+          "model": "Model",
+          "akaModels": "Other names",
+          "knownSince": "Known since",
+          "lastUpdated": "Last update",
+          "gtin": "GTIN",
+          "gtinLabel": "GTIN barcode reference",
+          "gtinImageAlt": "GTIN barcode for {gtin}",
+          "empty": "Identity information is not yet available for this product."
+        },
+        "attributes": {
+          "title": "Indexed attributes",
+          "empty": "Indexed attributes will appear here when available."
+        }
+      },
+      "detailed": {
+        "title": "Detailed specifications",
+        "unknownLabel": "Specification",
+        "untitledGroup": "Additional details",
+        "empty": "No detailed specifications are available for this product yet.",
+        "noResults": "No specifications match your search."
+      }
     },
     "docs": {
       "download": "Download PDF",

@@ -270,6 +270,7 @@ export default defineNuxtConfig({
       // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
       hcaptchaSiteKey: process.env.HCAPTCHA_SITE_KEY || '',
+      staticServer: process.env.STATIC_SERVER || 'https://nudger.fr',
     }
   },
   hooks: {
