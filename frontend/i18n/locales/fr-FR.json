@@ -1432,10 +1432,13 @@
         }
       },
       "absoluteValue": "Valeur absolue",
+      "explanationTitle": "Comment lire cet indicateur",
       "detailsTitle": "Détails de l'évaluation",
       "noPrimaryScore": "Score indisponible",
       "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
       "percentile": "Percentile",
+      "weightChip": "Compte pour {value}% de la note totale",
+      "subscoreEyebrow": "Indicateur d'impact",
       "primaryScoreLabel": "Score global",
       "radarAria": "Radar des scores pour {product}",
       "scoreRanking": "Classement du facteur",
