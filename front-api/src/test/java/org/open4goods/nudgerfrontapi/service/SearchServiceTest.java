@@ -3,22 +3,27 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
@@ -26,6 +31,8 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.domain.PageRequest;
@@ -55,11 +62,14 @@ class SearchServiceTest {
     @Mock
     private VerticalsConfigService verticalsConfigService;
 
+    @Mock
+    private ProductMappingService productMappingService;
+
     private SearchService searchService;
 
     @BeforeEach
     void setUp() {
-        searchService = new SearchService(repository, verticalsConfigService);
+        searchService = new SearchService(repository, verticalsConfigService, productMappingService);
     }
 
     @Test
@@ -104,5 +114,75 @@ class SearchServiceTest {
                 .collect(Collectors.toSet());
         assertThat(fieldNames).contains("price.minPrice.price");
         assertThat(fieldNames).contains("price.conditions");
+    }
+
+    @Test
+    void globalSearchReturnsGroupedResults() {
+        when(repository.getRecentPriceQuery()).thenReturn(new Criteria("offersCount").greaterThan(0));
+        when(repository.expirationClause()).thenReturn(123L);
+
+        Product phone = new Product(1L);
+        phone.setVertical("phones");
+
+        Product laptop = new Product(2L);
+        laptop.setVertical("laptops");
+
+        ProductDto phoneDto = new ProductDto(1L, null, null, null, null, null, null, null, null, null, null, null);
+        ProductDto laptopDto = new ProductDto(2L, null, null, null, null, null, null, null, null, null, null, null);
+        when(productMappingService.mapProduct(eq(phone), any(Locale.class), ArgumentMatchers.<Set<String>>isNull(),
+                eq(DomainLanguage.fr), eq(true)))
+                .thenReturn(phoneDto);
+        when(productMappingService.mapProduct(eq(laptop), any(Locale.class), ArgumentMatchers.<Set<String>>isNull(),
+                eq(DomainLanguage.fr), eq(true)))
+                .thenReturn(laptopDto);
+
+        SearchHit<Product> phoneHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "1", null, 5f, null,
+                Map.of(), Map.of(), null, null, List.of(), phone);
+        SearchHit<Product> laptopHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "2", null, 3f, null,
+                Map.of(), Map.of(), null, null, List.of(), laptop);
+        SearchHits<Product> firstPassHits = mock(SearchHits.class);
+        when(firstPassHits.isEmpty()).thenReturn(false);
+        when(firstPassHits.getSearchHits()).thenReturn(List.of(phoneHit, laptopHit));
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(firstPassHits);
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch("Fairphone", DomainLanguage.fr);
+
+        assertThat(result.verticalGroups()).hasSize(2);
+        assertThat(result.verticalGroups().get(0).verticalId()).isEqualTo("phones");
+        assertThat(result.verticalGroups().get(0).results()).hasSize(1);
+        assertThat(result.fallbackResults()).isEmpty();
+        assertThat(result.fallbackTriggered()).isFalse();
+    }
+
+    @Test
+    void globalSearchTriggersFallbackWhenNoFirstPassHits() {
+        when(repository.getRecentPriceQuery()).thenReturn(new Criteria("offersCount").greaterThan(0));
+        when(repository.expirationClause()).thenReturn(123L);
+
+        SearchHits<Product> emptyHits = mock(SearchHits.class);
+        when(emptyHits.isEmpty()).thenReturn(true);
+
+        Product accessory = new Product(3L);
+
+        ProductDto accessoryDto = new ProductDto(3L, null, null, null, null, null, null, null, null, null, null, null);
+        when(productMappingService.mapProduct(eq(accessory), any(Locale.class), ArgumentMatchers.<Set<String>>isNull(),
+                eq(DomainLanguage.en), eq(true)))
+                .thenReturn(accessoryDto);
+
+        SearchHit<Product> fallbackHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "3", null, 2f, null,
+                Map.of(), Map.of(), null, null, List.of(), accessory);
+        SearchHits<Product> fallbackHits = mock(SearchHits.class);
+        when(fallbackHits.isEmpty()).thenReturn(false);
+        when(fallbackHits.getSearchHits()).thenReturn(List.of(fallbackHit));
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits,
+                fallbackHits);
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch("chargeur", DomainLanguage.en);
+
+        assertThat(result.verticalGroups()).isEmpty();
+        assertThat(result.fallbackResults()).hasSize(1);
+        assertThat(result.fallbackResults().get(0).product().gtin()).isEqualTo(3L);
+        assertThat(result.fallbackTriggered()).isTrue();
     }
 }

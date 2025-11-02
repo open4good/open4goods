@@ -1,15 +1,22 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
@@ -25,9 +32,13 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
@@ -35,6 +46,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.Script;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
@@ -44,6 +60,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.MissingAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StatsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.json.JsonData;
 
 /**
  * Dedicated search service tailored for the frontend API.
@@ -63,13 +80,36 @@ public class SearchService {
     private static final String MISSING_BUCKET = "ES-UNKNOWN";
     private static final int DEFAULT_BUCKET_COUNT = 10;
     private static final int DEFAULT_TERMS_SIZE = 50;
+    private static final int GLOBAL_SEARCH_LIMIT = 100;
+    private static final String OFFER_NAMES_DENSITY_SCRIPT = """
+            if (params.tokens == null || params.tokens.isEmpty()) { return _score; }
+            def offers = params['_source'].offerNames;
+            if (offers == null) { return _score; }
+            double matched = 0;
+            for (token in params.tokens) {
+                if (token == null) { continue; }
+                for (offer in offers) {
+                    if (offer == null) { continue; }
+                    if (offer.toLowerCase().contains(token)) {
+                        matched += 1;
+                        break;
+                    }
+                }
+            }
+            double density = matched / params.tokens.size();
+            if (density <= 0) { return _score; }
+            return _score * (1.0 + density);
+            """;
 
     private final ProductRepository repository;
     private final VerticalsConfigService verticalsConfigService;
+    private final ProductMappingService productMappingService;
 
-    public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService) {
+    public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
+            @Lazy ProductMappingService productMappingService) {
         this.repository = repository;
         this.verticalsConfigService = verticalsConfigService;
+        this.productMappingService = productMappingService;
     }
 
     /**
@@ -134,6 +174,33 @@ public class SearchService {
 		}
         List<AggregationResponseDto> aggregations = extractAggregationResults(hits, descriptors);
         return new SearchResult(hits, List.copyOf(aggregations));
+    }
+
+    /**
+     * Execute the two-pass global search strategy described in the functional specification.
+     *
+     * @param query          raw user query
+     * @param domainLanguage localisation hint (currently unused but kept for future enhancements)
+     * @return grouped search results and fallback hits when necessary
+     */
+    public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage) {
+        Criteria criteria = repository.getRecentPriceQuery();
+        criteria = criteria.and(new Criteria("excluded").is(false));
+
+        String sanitizedQuery = sanitize(query);
+        if (!StringUtils.hasText(sanitizedQuery)) {
+            return new GlobalSearchResult(List.of(), List.of(), false);
+        }
+
+        SearchHits<Product> firstPassHits = executeGlobalSearch(sanitizedQuery, true, false);
+        if (firstPassHits != null && !firstPassHits.isEmpty()) {
+            List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits, domainLanguage);
+            return new GlobalSearchResult(groups, List.of(), false);
+        }
+
+        SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
+        List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
+        return new GlobalSearchResult(List.of(), fallback, true);
     }
 
     private boolean isValidAggregation(Agg agg) {
@@ -322,6 +389,128 @@ public class SearchService {
         return responses;
     }
 
+    private SearchHits<Product> executeGlobalSearch(String sanitizedQuery, boolean requireVertical, boolean missingVertical) {
+        List<String> tokens = Arrays.stream(sanitizedQuery.toLowerCase(Locale.ROOT).split("\\s+"))
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .map(token -> token.toLowerCase(Locale.ROOT))
+                .distinct()
+                .toList();
+
+        Query query = buildGlobalSearchQuery(sanitizedQuery, requireVertical, missingVertical, tokens);
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(query)
+                .withPageable(PageRequest.of(0, GLOBAL_SEARCH_LIMIT));
+
+        try {
+            return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+    }
+
+    private Query buildGlobalSearchQuery(String sanitizedQuery, boolean requireVertical, boolean missingVertical,
+            List<String> tokens) {
+        long expiration = repository.expirationClause();
+
+        return Query.of(q -> q.functionScore(fs -> {
+            fs.scoreMode(FunctionScoreMode.Multiply);
+            fs.boostMode(FunctionBoostMode.Multiply);
+            fs.query(inner -> inner.bool(b -> {
+                b.filter(f -> f.range(r -> r.number(n -> n
+                        .field("lastChange")
+                        .gt((double) expiration)
+                )));
+                b.filter(f -> f.range(r -> r.number(n -> n
+                        .field("offersCount")
+                        .gt(0.0)
+                )));
+                b.filter(f -> f.term(t -> t.field("excluded").value(false)));
+                if (requireVertical) {
+                    b.filter(f -> f.exists(e -> e.field("vertical")));
+                }
+                if (missingVertical) {
+                    b.mustNot(m -> m.exists(e -> e.field("vertical")));
+                }
+                b.should(s -> s.match(m -> m.field("attributes.referentielAttributes.MODEL")
+                        .query(sanitizedQuery)
+                        .boost(8f)));
+                b.should(s -> s.match(m -> m.field("offerNames")
+                        .query(sanitizedQuery)
+                        .operator(Operator.And)
+                        .boost(4f)));
+                b.should(s -> s.match(m -> m.field("attributes.referentielAttributes.BRAND")
+                        .query(sanitizedQuery)
+                        .boost(2f)));
+                b.minimumShouldMatch("1");
+                return b;
+            }));
+            if (!tokens.isEmpty()) {
+                fs.functions(func -> func.scriptScore(ss -> ss.script(Script.of(s -> s
+                        .lang("painless")
+                        .source(OFFER_NAMES_DENSITY_SCRIPT)
+                        .params(Map.of("tokens", JsonData.of(tokens)))))));
+            }
+            return fs;
+        }));
+    }
+
+    private List<GlobalSearchVerticalGroup> groupByVertical(SearchHits<Product> hits, DomainLanguage domainLanguage) {
+        if (hits == null || hits.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, List<GlobalSearchHit>> grouped = new LinkedHashMap<>();
+        for (SearchHit<Product> hit : hits.getSearchHits()) {
+            GlobalSearchHit mapped = mapHit(hit, domainLanguage);
+            if (mapped == null) {
+                continue;
+            }
+            grouped.computeIfAbsent(mapped.verticalId(), key -> new ArrayList<>()).add(mapped);
+        }
+
+        return grouped.entrySet().stream()
+                .map(entry -> new GlobalSearchVerticalGroup(entry.getKey(), entry.getValue().stream()
+                        .sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
+                        .toList()))
+                .sorted(Comparator.comparing((GlobalSearchVerticalGroup group) -> group.results().isEmpty() ? Double.NEGATIVE_INFINITY
+                        : group.results().get(0).score()).reversed())
+                .toList();
+    }
+
+    private List<GlobalSearchHit> mapHits(SearchHits<Product> hits, DomainLanguage domainLanguage) {
+        if (hits == null || hits.isEmpty()) {
+            return List.of();
+        }
+        return hits.getSearchHits().stream()
+                .map(hit -> mapHit(hit, domainLanguage))
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
+                .toList();
+    }
+
+    private GlobalSearchHit mapHit(SearchHit<Product> hit, DomainLanguage domainLanguage) {
+        if (hit == null || hit.getContent() == null) {
+            return null;
+        }
+        Product product = hit.getContent();
+        Locale locale = resolveLocale(domainLanguage);
+        ProductDto productDto = productMappingService.mapProduct(product, locale, null, domainLanguage, true);
+        if (productDto == null) {
+            return null;
+        }
+        double score = hit.getScore();
+        return new GlobalSearchHit(product.getVertical(), productDto, score);
+    }
+
+    private Locale resolveLocale(DomainLanguage domainLanguage) {
+        if (domainLanguage == null || !StringUtils.hasText(domainLanguage.languageTag())) {
+            return Locale.ROOT;
+        }
+        return Locale.forLanguageTag(domainLanguage.languageTag());
+    }
+
     private AggregationResponseDto extractTermsAggregation(ElasticsearchAggregations aggregations, AggregationDescriptor descriptor) {
         var aggregation = aggregations.get(descriptor.histogramName);
         if (aggregation == null) {
@@ -386,6 +575,34 @@ public class SearchService {
         String sanitized = value.replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}\\s]", " ");
         sanitized = sanitized.replaceAll("\\s+", " ").trim();
         return sanitized;
+    }
+
+    /**
+     * Global search result including grouped hits and optional fallback.
+     */
+    public record GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
+            List<GlobalSearchHit> fallbackResults, boolean fallbackTriggered) {
+
+        public GlobalSearchResult {
+            verticalGroups = List.copyOf(verticalGroups);
+            fallbackResults = List.copyOf(fallbackResults);
+        }
+    }
+
+    /**
+     * Group of hits belonging to the same vertical.
+     */
+    public record GlobalSearchVerticalGroup(String verticalId, List<GlobalSearchHit> results) {
+
+        public GlobalSearchVerticalGroup {
+            results = List.copyOf(results);
+        }
+    }
+
+    /**
+     * Lightweight representation of a product hit used by the controller layer.
+     */
+    public record GlobalSearchHit(String verticalId, ProductDto product, double score) {
     }
 
     /**
