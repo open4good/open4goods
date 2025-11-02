@@ -69,7 +69,7 @@ describe('ProductImpactSubscoreChart', () => {
 
     const option = echartStub.props('option') as EChartsOption
     const grid = Array.isArray(option.grid) ? option.grid[0] : option.grid
-    expect(grid?.top).toBe(52)
+    expect(grid?.top).toBe(32)
 
     const yAxis = Array.isArray(option.yAxis) ? option.yAxis[0] : option.yAxis
     expect(yAxis?.max).toBeCloseTo(11.2)
@@ -109,5 +109,35 @@ describe('ProductImpactSubscoreChart', () => {
     const seriesOption = (Array.isArray(option.series) ? option.series[0] : option.series) as BarSeriesOption
     const markLine = seriesOption.markLine as MarkLineComponentOption
     expect(markLine?.lineStyle?.color).toBe('#2563eb')
+  })
+
+  it('still aligns the indicator when bucket labels use comma separators', async () => {
+    const wrapper = mount(ProductImpactSubscoreChart, {
+      props: {
+        distribution: [
+          { label: '0,5', value: 12 },
+          { label: '1,5', value: 8 },
+          { label: '2,5', value: 4 },
+        ],
+        label: 'CO2 emissions',
+        relativeValue: 1.4,
+        productName: 'Demo product',
+        percent: 75,
+      },
+      global: {
+        stubs: {
+          ClientOnly: clientOnlyStub,
+        },
+      },
+    })
+
+    await nextTick()
+
+    const option = wrapper.findComponent({ name: 'VueEChartsStub' }).props('option') as EChartsOption
+    const seriesOption = (Array.isArray(option.series) ? option.series[0] : option.series) as BarSeriesOption
+    const markLine = seriesOption.markLine as MarkLineComponentOption
+    const markLineData = Array.isArray(markLine?.data) ? markLine?.data[0] : undefined
+
+    expect(markLineData && 'xAxis' in markLineData ? markLineData.xAxis : undefined).toBe('1,5')
   })
 })

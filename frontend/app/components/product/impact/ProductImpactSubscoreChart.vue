@@ -31,6 +31,16 @@ const props = defineProps<{
 
 const ARROW_SYMBOL = 'path://M12 24L24 8H16V0H8V8H0L12 24Z'
 
+const parseBucketLabel = (label: string): number | null => {
+  const normalised = label.replace(',', '.').trim()
+  if (!normalised) {
+    return null
+  }
+
+  const numericValue = Number(normalised)
+  return Number.isFinite(numericValue) ? numericValue : null
+}
+
 const computeIndicatorColor = (percent?: number | null): string => {
   if (percent == null || Number.isNaN(percent)) {
     return '#2563eb'
@@ -61,23 +71,23 @@ const chartOption = computed<EChartsOption | null>(() => {
 
     const relativeValue = props.relativeValue
 
-    const closest = props.distribution.reduce<DistributionBucket | null>((candidate, bucket) => {
-      const labelNumber = Number(bucket.label)
-      if (!Number.isFinite(labelNumber)) {
-        return candidate
+    let closestBucket: DistributionBucket | null = null
+    let smallestDistance = Number.POSITIVE_INFINITY
+
+    for (const bucket of props.distribution) {
+      const labelValue = parseBucketLabel(bucket.label)
+      if (labelValue == null) {
+        continue
       }
 
-      if (!candidate) {
-        return bucket
+      const distance = Math.abs(labelValue - relativeValue)
+      if (distance < smallestDistance) {
+        smallestDistance = distance
+        closestBucket = bucket
       }
+    }
 
-      const candidateDistance = Math.abs(Number(candidate.label) - relativeValue)
-      const currentDistance = Math.abs(labelNumber - relativeValue)
-
-      return candidateDistance <= currentDistance ? candidate : bucket
-    }, null)
-
-    return closest?.label ?? null
+    return closestBucket?.label ?? null
   })()
 
   const indicatorColor = computeIndicatorColor(props.percent ?? null)
@@ -86,7 +96,7 @@ const chartOption = computed<EChartsOption | null>(() => {
   const indicatorYAxis = yAxisMax ?? maxBucketValue.value
 
   return {
-    grid: { top: 52, left: 40, right: 20, bottom: 40 },
+    grid: { top: 32, left: 40, right: 20, bottom: 40 },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: {
       type: 'category',
