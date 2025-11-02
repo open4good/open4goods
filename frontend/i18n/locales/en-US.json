@@ -1252,6 +1252,50 @@
       "title": "Our partners and mentors"
     }
   },
+  "search": {
+    "loadingAriaLabel": "Loading search results",
+    "hero": {
+      "eyebrow": "Product search",
+      "title": "Find the right product",
+      "subtitle": "Search the Nudger catalogue to compare ecological impact, pricing and trustworthy data.",
+      "form": {
+        "label": "Search products",
+        "placeholder": "Search by brand, model or category",
+        "submit": "Search"
+      }
+    },
+    "results": {
+      "summary": {
+        "one": "{count} product found for “{query}”",
+        "other": "{count} products found for “{query}”"
+      },
+      "start": {
+        "title": "Start exploring products",
+        "description": "Enter a keyword to discover sustainable alternatives from Nudger."
+      },
+      "noResults": {
+        "title": "No results for “{query}”",
+        "description": "Try another keyword or explore our categories."
+      },
+      "error": {
+        "title": "We couldn't load search results."
+      },
+      "verticalLinkLabel": "View all {vertical}",
+      "unknownVertical": "Other products"
+    },
+    "sections": {
+      "verticalEyebrow": "Category",
+      "fallbackEyebrow": "Global results",
+      "fallbackTitle": "Highlighted products",
+      "fallbackDescription": "No specific category matched your search, so here are global products that relate to it."
+    },
+    "seo": {
+      "title": "Search Nudger products",
+      "description": "Use Nudger's search to compare ecological impact, pricing and trusted data across responsible products.",
+      "titleWithQuery": "Search results for “{query}”",
+      "descriptionWithQuery": "Discover products related to “{query}” across the Nudger catalogue."
+    }
+  },
   "compare": {
     "title": "Product comparison",
     "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",

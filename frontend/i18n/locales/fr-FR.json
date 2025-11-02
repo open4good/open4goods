@@ -1252,6 +1252,50 @@
       "title": "Nos partenaires et mentors"
     }
   },
+  "search": {
+    "loadingAriaLabel": "Chargement des résultats de recherche",
+    "hero": {
+      "eyebrow": "Recherche de produits",
+      "title": "Trouvez le bon produit",
+      "subtitle": "Parcourez le catalogue Nudger pour comparer impact écologique, prix et données fiables.",
+      "form": {
+        "label": "Rechercher des produits",
+        "placeholder": "Rechercher par marque, modèle ou catégorie",
+        "submit": "Rechercher"
+      }
+    },
+    "results": {
+      "summary": {
+        "one": "{count} produit trouvé pour « {query} »",
+        "other": "{count} produits trouvés pour « {query} »"
+      },
+      "start": {
+        "title": "Commencez votre recherche",
+        "description": "Saisissez un mot-clé pour découvrir des alternatives responsables sur Nudger."
+      },
+      "noResults": {
+        "title": "Aucun résultat pour « {query} »",
+        "description": "Essayez un autre mot-clé ou explorez nos catégories."
+      },
+      "error": {
+        "title": "Impossible de charger les résultats de recherche."
+      },
+      "verticalLinkLabel": "Voir tous les {vertical}",
+      "unknownVertical": "Autres produits"
+    },
+    "sections": {
+      "verticalEyebrow": "Catégorie",
+      "fallbackEyebrow": "Résultats globaux",
+      "fallbackTitle": "Sélection globale",
+      "fallbackDescription": "Aucune catégorie précise ne correspond à votre recherche ; voici des produits globaux associés."
+    },
+    "seo": {
+      "title": "Rechercher des produits Nudger",
+      "description": "Utilisez la recherche Nudger pour comparer impact écologique, prix et données fiables sur des produits responsables.",
+      "titleWithQuery": "Résultats de recherche pour « {query} »",
+      "descriptionWithQuery": "Découvrez les produits associés à « {query} » dans le catalogue Nudger."
+    }
+  },
   "compare": {
     "title": "Comparateur de produits",
     "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.",
