@@ -1346,13 +1346,38 @@
       "title": "Synthèse des tests et avis"
     },
     "attributes": {
-      "features": "Points forts",
-      "indexedGroup": "Attributs indexés",
-      "referentialTitle": "Identifiants de référence",
-      "searchPlaceholder": "Rechercher une caractéristique",
-      "subtitle": "Explorez toutes les caractéristiques et filtrez par mots-clés.",
       "title": "Caractéristiques techniques",
-      "unfeatures": "Points à surveiller"
+      "subtitle": "Explorez toutes les caractéristiques et filtrez par mots-clés.",
+      "searchPlaceholder": "Rechercher une caractéristique",
+      "features": "Points forts",
+      "unfeatures": "Points à surveiller",
+      "main": {
+        "title": "Caractéristiques principales",
+        "identity": {
+          "title": "Fiche d'identité",
+          "brand": "Marque",
+          "akaBrands": "Aussi référencé comme",
+          "model": "Modèle",
+          "akaModels": "Autres appellations",
+          "knownSince": "Présent dans notre base depuis",
+          "lastUpdated": "Mise à jour :",
+          "gtin": "GTIN",
+          "gtinLabel": "Référence code-barres GTIN",
+          "gtinImageAlt": "Code-barres GTIN pour {gtin}",
+          "empty": "Les informations d'identité ne sont pas encore disponibles pour ce produit."
+        },
+        "attributes": {
+          "title": "Attributs indexés",
+          "empty": "Les attributs indexés apparaîtront ici dès qu'ils seront disponibles."
+        }
+      },
+      "detailed": {
+        "title": "Caractéristiques détaillées",
+        "unknownLabel": "Spécification",
+        "untitledGroup": "Détails complémentaires",
+        "empty": "Aucune caractéristique détaillée n'est disponible pour ce produit pour le moment.",
+        "noResults": "Aucune caractéristique ne correspond à votre recherche."
+      }
     },
     "docs": {
       "download": "Télécharger le PDF",

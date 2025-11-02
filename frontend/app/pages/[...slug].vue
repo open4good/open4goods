@@ -79,11 +79,11 @@
         </section>
 
         <section
-          v-if="product.attributes"
+          v-if="showAttributesSection"
           :id="sectionIds.attributes"
           class="product-page__section"
         >
-          <ProductAttributesSection :attributes="product.attributes" />
+          <ProductAttributesSection :product="product" />
         </section>
 
         <section
@@ -491,6 +491,51 @@ const commercialEvents = computed(() => commercialEventsData.value ?? [])
 const hcaptchaSiteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
 
 const showAdminSection = computed(() => isLoggedIn.value)
+const showAttributesSection = computed(() => {
+  const currentProduct = product.value
+  if (!currentProduct) {
+    return false
+  }
+
+  const identity = currentProduct.identity
+  const hasIdentityStrings = Boolean(
+    identity &&
+      [identity.brand, identity.model, identity.bestName]
+        .filter((value): value is string => typeof value === 'string')
+        .some((value) => value.trim().length > 0),
+  )
+
+  const hasCollectionValues = (input: unknown): boolean => {
+    if (input instanceof Set) {
+      return input.size > 0
+    }
+
+    if (Array.isArray(input)) {
+      return input.length > 0
+    }
+
+    return false
+  }
+
+  const hasIdentityCollections =
+    hasCollectionValues(identity?.akaBrands) || hasCollectionValues(identity?.akaModels)
+
+  const attributes = currentProduct.attributes
+  const hasIndexed = Object.keys(attributes?.indexedAttributes ?? {}).length > 0
+  const hasClassified = (attributes?.classifiedAttributes ?? []).some((group) => {
+    if (!group) {
+      return false
+    }
+
+    return (
+      (group.attributes?.length ?? 0) > 0 ||
+      (group.features?.length ?? 0) > 0 ||
+      (group.unFeatures?.length ?? 0) > 0
+    )
+  })
+
+  return hasIdentityStrings || hasIdentityCollections || hasIndexed || hasClassified
+})
 const showAlternativesSection = computed(
   () => Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0),
 )
@@ -519,7 +564,12 @@ const sections = computed(() => {
         icon: 'mdi-compare-horizontal',
         condition: showAlternativesSection.value,
       },
-      { id: sectionIds.attributes, label: t('product.navigation.attributes'), icon: 'mdi-format-list-bulleted', condition: !!product.value?.attributes },
+      {
+        id: sectionIds.attributes,
+        label: t('product.navigation.attributes'),
+        icon: 'mdi-format-list-bulleted',
+        condition: showAttributesSection.value,
+      },
       { id: sectionIds.docs, label: t('product.navigation.docs'), icon: 'mdi-file-document-outline', condition: (product.value?.resources?.pdfs?.length ?? 0) > 0 },
       { id: sectionIds.admin, label: t('product.navigation.admin'), icon: 'mdi-shield-account-outline', condition: showAdminSection.value },
     ]
