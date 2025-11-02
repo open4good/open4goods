@@ -184,8 +184,6 @@ public class SearchService {
      * @return grouped search results and fallback hits when necessary
      */
     public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage) {
-        Criteria criteria = repository.getRecentPriceQuery();
-        criteria = criteria.and(new Criteria("excluded").is(false));
 
         String sanitizedQuery = sanitize(query);
         if (!StringUtils.hasText(sanitizedQuery)) {
@@ -496,7 +494,7 @@ public class SearchService {
         }
         Product product = hit.getContent();
         Locale locale = resolveLocale(domainLanguage);
-        ProductDto productDto = productMappingService.mapProduct(product, locale, null, domainLanguage, true);
+        ProductDto productDto = productMappingService.mapProduct(product, locale, null, domainLanguage, false);
         if (productDto == null) {
             return null;
         }
