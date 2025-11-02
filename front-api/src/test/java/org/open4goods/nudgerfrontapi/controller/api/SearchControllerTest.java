@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
@@ -38,7 +39,8 @@ class SearchControllerTest {
 
     @Test
     void globalSearchReturnsGroupedPayload() throws Exception {
-        GlobalSearchHit hit = new GlobalSearchHit(1L, "phones", "Fairphone 4", "Fairphone", "Fairphone 4", 5, 7.2d);
+        ProductDto phone = new ProductDto(1L, null, null, null, null, null, null, null, null, null, null, null);
+        GlobalSearchHit hit = new GlobalSearchHit("phones", phone, 7.2d);
         GlobalSearchVerticalGroup group = new GlobalSearchVerticalGroup("phones", List.of(hit));
         GlobalSearchResult serviceResult = new GlobalSearchResult(List.of(group), List.of(), false);
         when(searchService.globalSearch("fairphone", DomainLanguage.fr)).thenReturn(serviceResult);
@@ -49,13 +51,14 @@ class SearchControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Locale", "fr"))
                 .andExpect(jsonPath("$.verticalGroups[0].verticalId").value("phones"))
-                .andExpect(jsonPath("$.verticalGroups[0].results[0].gtin").value(1))
+                .andExpect(jsonPath("$.verticalGroups[0].results[0].product.gtin").value(1))
                 .andExpect(jsonPath("$.fallbackTriggered").value(false));
     }
 
     @Test
     void globalSearchIncludesFallbackResults() throws Exception {
-        GlobalSearchHit fallbackHit = new GlobalSearchHit(2L, null, "Universal Charger", null, null, 2, 3.5d);
+        ProductDto accessory = new ProductDto(2L, "universal-charger", null, null, null, null, null, null, null, null, null, null);
+        GlobalSearchHit fallbackHit = new GlobalSearchHit(null, accessory, 3.5d);
         GlobalSearchResult serviceResult = new GlobalSearchResult(List.of(), List.of(fallbackHit), true);
         when(searchService.globalSearch("chargeur", DomainLanguage.en)).thenReturn(serviceResult);
 
@@ -65,7 +68,7 @@ class SearchControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Locale", "en"))
                 .andExpect(jsonPath("$.verticalGroups").isEmpty())
-                .andExpect(jsonPath("$.fallbackResults[0].title").value("Universal Charger"))
+                .andExpect(jsonPath("$.fallbackResults[0].product.slug").value("universal-charger"))
                 .andExpect(jsonPath("$.fallbackTriggered").value(true));
     }
 }

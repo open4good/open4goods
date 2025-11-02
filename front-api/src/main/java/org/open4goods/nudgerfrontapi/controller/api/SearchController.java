@@ -27,7 +27,6 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -80,7 +79,6 @@ public class SearchController {
                             })
             }
     )
-    @SecurityRequirement(name = "basicAuth")
     public ResponseEntity<GlobalSearchResponseDto> globalSearch(
             @RequestParam(name = "query") String query,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
@@ -103,7 +101,6 @@ public class SearchController {
     }
 
     private GlobalSearchResultDto toDto(GlobalSearchHit hit) {
-        return new GlobalSearchResultDto(hit.gtin(), hit.verticalId(), hit.title(), hit.brand(), hit.model(),
-                hit.offersCount(), hit.score());
+        return new GlobalSearchResultDto(hit.product(), hit.score());
     }
 }

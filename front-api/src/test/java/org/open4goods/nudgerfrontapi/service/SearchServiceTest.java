@@ -8,19 +8,22 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
@@ -29,6 +32,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.domain.PageRequest;
@@ -58,11 +62,14 @@ class SearchServiceTest {
     @Mock
     private VerticalsConfigService verticalsConfigService;
 
+    @Mock
+    private ProductMappingService productMappingService;
+
     private SearchService searchService;
 
     @BeforeEach
     void setUp() {
-        searchService = new SearchService(repository, verticalsConfigService);
+        searchService = new SearchService(repository, verticalsConfigService, productMappingService);
     }
 
     @Test
@@ -116,17 +123,18 @@ class SearchServiceTest {
 
         Product phone = new Product(1L);
         phone.setVertical("phones");
-        phone.setOffersCount(5);
-        phone.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Fairphone");
-        phone.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Fairphone 4");
-        phone.getOfferNames().add("Fairphone 4 128 Go");
 
         Product laptop = new Product(2L);
         laptop.setVertical("laptops");
-        laptop.setOffersCount(3);
-        laptop.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Framework");
-        laptop.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Framework Laptop");
-        laptop.getOfferNames().add("Framework Laptop 13");
+
+        ProductDto phoneDto = new ProductDto(1L, null, null, null, null, null, null, null, null, null, null, null);
+        ProductDto laptopDto = new ProductDto(2L, null, null, null, null, null, null, null, null, null, null, null);
+        when(productMappingService.mapProduct(eq(phone), any(Locale.class), ArgumentMatchers.<Set<String>>isNull(),
+                eq(DomainLanguage.fr), eq(true)))
+                .thenReturn(phoneDto);
+        when(productMappingService.mapProduct(eq(laptop), any(Locale.class), ArgumentMatchers.<Set<String>>isNull(),
+                eq(DomainLanguage.fr), eq(true)))
+                .thenReturn(laptopDto);
 
         SearchHit<Product> phoneHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "1", null, 5f, null,
                 Map.of(), Map.of(), null, null, List.of(), phone);
@@ -155,8 +163,11 @@ class SearchServiceTest {
         when(emptyHits.isEmpty()).thenReturn(true);
 
         Product accessory = new Product(3L);
-        accessory.setOffersCount(2);
-        accessory.getOfferNames().add("Universal Charger");
+
+        ProductDto accessoryDto = new ProductDto(3L, null, null, null, null, null, null, null, null, null, null, null);
+        when(productMappingService.mapProduct(eq(accessory), any(Locale.class), ArgumentMatchers.<Set<String>>isNull(),
+                eq(DomainLanguage.en), eq(true)))
+                .thenReturn(accessoryDto);
 
         SearchHit<Product> fallbackHit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "3", null, 2f, null,
                 Map.of(), Map.of(), null, null, List.of(), accessory);
@@ -171,7 +182,7 @@ class SearchServiceTest {
 
         assertThat(result.verticalGroups()).isEmpty();
         assertThat(result.fallbackResults()).hasSize(1);
-        assertThat(result.fallbackResults().get(0).gtin()).isEqualTo(3L);
+        assertThat(result.fallbackResults().get(0).product().gtin()).isEqualTo(3L);
         assertThat(result.fallbackTriggered()).isTrue();
     }
 }

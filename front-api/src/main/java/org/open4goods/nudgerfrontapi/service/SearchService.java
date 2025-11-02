@@ -13,9 +13,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
@@ -32,6 +32,7 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
@@ -102,10 +103,13 @@ public class SearchService {
 
     private final ProductRepository repository;
     private final VerticalsConfigService verticalsConfigService;
+    private final ProductMappingService productMappingService;
 
-    public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService) {
+    public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
+            @Lazy ProductMappingService productMappingService) {
         this.repository = repository;
         this.verticalsConfigService = verticalsConfigService;
+        this.productMappingService = productMappingService;
     }
 
     /**
@@ -190,12 +194,12 @@ public class SearchService {
 
         SearchHits<Product> firstPassHits = executeGlobalSearch(sanitizedQuery, true, false);
         if (firstPassHits != null && !firstPassHits.isEmpty()) {
-            List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits);
+            List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits, domainLanguage);
             return new GlobalSearchResult(groups, List.of(), false);
         }
 
         SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
-        List<GlobalSearchHit> fallback = mapHits(fallbackHits);
+        List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
         return new GlobalSearchResult(List.of(), fallback, true);
     }
 
@@ -452,14 +456,14 @@ public class SearchService {
         }));
     }
 
-    private List<GlobalSearchVerticalGroup> groupByVertical(SearchHits<Product> hits) {
+    private List<GlobalSearchVerticalGroup> groupByVertical(SearchHits<Product> hits, DomainLanguage domainLanguage) {
         if (hits == null || hits.isEmpty()) {
             return List.of();
         }
 
         Map<String, List<GlobalSearchHit>> grouped = new LinkedHashMap<>();
         for (SearchHit<Product> hit : hits.getSearchHits()) {
-            GlobalSearchHit mapped = mapHit(hit);
+            GlobalSearchHit mapped = mapHit(hit, domainLanguage);
             if (mapped == null) {
                 continue;
             }
@@ -475,50 +479,36 @@ public class SearchService {
                 .toList();
     }
 
-    private List<GlobalSearchHit> mapHits(SearchHits<Product> hits) {
+    private List<GlobalSearchHit> mapHits(SearchHits<Product> hits, DomainLanguage domainLanguage) {
         if (hits == null || hits.isEmpty()) {
             return List.of();
         }
         return hits.getSearchHits().stream()
-                .map(this::mapHit)
+                .map(hit -> mapHit(hit, domainLanguage))
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
                 .toList();
     }
 
-    private GlobalSearchHit mapHit(SearchHit<Product> hit) {
+    private GlobalSearchHit mapHit(SearchHit<Product> hit, DomainLanguage domainLanguage) {
         if (hit == null || hit.getContent() == null) {
             return null;
         }
         Product product = hit.getContent();
-        String brand = resolveReferential(product, ReferentielKey.BRAND);
-        String model = resolveReferential(product, ReferentielKey.MODEL);
-        String title = resolveTitle(product, brand, model);
-        double score = hit.getScore();
-        return new GlobalSearchHit(product.getId(), product.getVertical(), title, brand, model, product.getOffersCount(), score);
-    }
-
-    private String resolveReferential(Product product, ReferentielKey key) {
-        if (product.getAttributes() == null || product.getAttributes().getReferentielAttributes() == null) {
+        Locale locale = resolveLocale(domainLanguage);
+        ProductDto productDto = productMappingService.mapProduct(product, locale, null, domainLanguage, true);
+        if (productDto == null) {
             return null;
         }
-        return product.getAttributes().getReferentielAttributes().get(key);
+        double score = hit.getScore();
+        return new GlobalSearchHit(product.getVertical(), productDto, score);
     }
 
-    private String resolveTitle(Product product, String brand, String model) {
-        if (product.getOfferNames() != null && !product.getOfferNames().isEmpty()) {
-            return product.getOfferNames().iterator().next();
+    private Locale resolveLocale(DomainLanguage domainLanguage) {
+        if (domainLanguage == null || !StringUtils.hasText(domainLanguage.languageTag())) {
+            return Locale.ROOT;
         }
-        if (StringUtils.hasText(brand) && StringUtils.hasText(model)) {
-            return brand + " " + model;
-        }
-        if (StringUtils.hasText(model)) {
-            return model;
-        }
-        if (StringUtils.hasText(brand)) {
-            return brand;
-        }
-        return null;
+        return Locale.forLanguageTag(domainLanguage.languageTag());
     }
 
     private AggregationResponseDto extractTermsAggregation(ElasticsearchAggregations aggregations, AggregationDescriptor descriptor) {
@@ -612,8 +602,7 @@ public class SearchService {
     /**
      * Lightweight representation of a product hit used by the controller layer.
      */
-    public record GlobalSearchHit(Long gtin, String verticalId, String title, String brand, String model,
-            Integer offersCount, double score) {
+    public record GlobalSearchHit(String verticalId, ProductDto product, double score) {
     }
 
     /**
