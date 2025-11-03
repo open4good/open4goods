@@ -48,7 +48,7 @@ export const useSearchService = (domainLanguage: DomainLanguage) => {
     }
 
     try {
-      return await resolveApi().searchSuggest({
+      return await resolveApi().suggest({
         query: normalizedQuery,
         domainLanguage,
       })
