@@ -1,38 +1,44 @@
 <template>
   <div class="search-page">
-    <v-container class="search-page__hero" fluid>
-      <div class="search-page__hero-content">
-        <p class="search-page__eyebrow">{{ t('search.hero.eyebrow') }}</p>
-        <h1 class="search-page__title">{{ t('search.hero.title') }}</h1>
-        <p class="search-page__subtitle">{{ t('search.hero.subtitle') }}</p>
-      </div>
+    <section class="search-hero" aria-labelledby="search-hero-heading">
+      <v-container class="search-hero__container py-0 px-4 mx-auto" max-width="xl">
+        <div class="search-hero__content">
+          <p class="search-hero__eyebrow">{{ t('search.hero.eyebrow') }}</p>
+          <div class="search-hero__copy">
+            <h1 id="search-hero-heading" class="search-hero__title">
+              {{ t('search.hero.title') }}
+            </h1>
+            <p class="search-hero__subtitle">{{ t('search.hero.subtitle') }}</p>
+          </div>
 
-      <form class="search-page__form" @submit.prevent="handleSearchSubmit">
-        <v-text-field
-          v-model="searchInput"
-          :label="t('search.form.label')"
-          :placeholder="t('search.form.placeholder')"
-          :aria-label="t('search.form.ariaLabel')"
-          prepend-inner-icon="mdi-magnify"
-          variant="solo"
-          density="comfortable"
-          clearable
-          hide-details
-          class="search-page__field"
-          @click:clear="handleClear"
-        />
-        <v-btn class="search-page__submit" type="submit" color="primary" size="large">
-          {{ t('search.form.submit') }}
-        </v-btn>
-      </form>
+          <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
+            <v-text-field
+              v-model="searchInput"
+              :label="t('search.form.label')"
+              :placeholder="t('search.form.placeholder')"
+              :aria-label="t('search.form.ariaLabel')"
+              prepend-inner-icon="mdi-magnify"
+              variant="solo"
+              density="comfortable"
+              clearable
+              hide-details
+              class="search-hero__field"
+              @click:clear="handleClear"
+            />
+            <v-btn class="search-hero__submit" type="submit" size="large">
+              {{ t('search.form.submit') }}
+            </v-btn>
+          </form>
 
-      <p v-if="showInitialState" class="search-page__helper">
-        {{ t('search.states.initial') }}
-      </p>
-      <p v-else-if="showMinimumNotice" class="search-page__helper search-page__helper--warning">
-        {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
-      </p>
-    </v-container>
+          <p v-if="showInitialState" class="search-hero__helper">
+            {{ t('search.states.initial') }}
+          </p>
+          <p v-else-if="showMinimumNotice" class="search-hero__helper search-hero__helper--warning">
+            {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
+          </p>
+        </div>
+      </v-container>
+    </section>
 
     <v-progress-linear
       v-if="pending"
@@ -43,7 +49,7 @@
       role="progressbar"
     />
 
-    <v-container v-if="hasMinimumLength" class="search-page__results" fluid>
+    <v-container v-if="hasMinimumLength" class="search-page__results py-10 px-4 mx-auto" max-width="xl">
       <v-alert
         v-if="error"
         type="error"
@@ -74,7 +80,7 @@
 
         <div v-else class="search-page__group-wrapper">
           <p class="search-page__summary">
-            {{ t('search.results.summary', { count: totalResults, query: normalizedQuery }) }}
+            {{ resultsSummaryLabel }}
           </p>
           <p v-if="usingFallback" class="search-page__fallback">
             {{ t('search.notice.fallback') }}
@@ -84,10 +90,12 @@
             v-for="group in displayGroups"
             :key="group.key"
             :title="group.title"
-            :eyebrow="group.eyebrow"
             :count-label="group.countLabel"
             :products="group.products"
             :popular-attributes="group.popularAttributes"
+            :vertical-home-url="group.verticalHomeUrl"
+            :category-link-label="t('search.groups.viewCategory')"
+            :category-link-aria="t('search.groups.viewCategoryAria', { title: group.title })"
           />
         </div>
       </template>
@@ -105,6 +113,7 @@ import type {
   VerticalConfigDto,
 } from '~~/shared/api-client'
 import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
+import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 
 const MIN_QUERY_LENGTH = 2
 
@@ -113,6 +122,7 @@ definePageMeta({
 })
 
 const { t, locale, availableLocales } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
@@ -196,11 +206,28 @@ const verticalById = computed(() => {
 interface SearchGroup {
   key: string
   title: string
-  eyebrow: string | null
   countLabel: string | null
   products: ProductDto[]
   popularAttributes: AttributeConfigDto[]
+  verticalHomeUrl: string | null
 }
+
+const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
+  if (!raw) {
+    return null
+  }
+
+  const trimmed = raw.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+}
+
+const buildGroupCountLabel = (count: number) =>
+  translatePlural('search.groups.count', count, { count })
 
 const extractProducts = (
   results: { product?: ProductDto | null }[] | undefined,
@@ -226,18 +253,16 @@ const primaryGroups = computed(() => {
         vertical?.verticalHomeTitle ??
         (verticalId ? formatFallbackVerticalTitle(verticalId) : t('search.groups.unknownTitle'))
 
-      const eyebrow = vertical?.verticalHomeDescription ?? null
-      const countLabel = t('search.groups.count', {
-        count: products.length,
-      })
+      const countLabel = buildGroupCountLabel(products.length)
+      const verticalHomeUrl = normalizeVerticalHomeUrl(vertical?.verticalHomeUrl)
 
       return {
         key: `primary-${verticalId ?? index}`,
         title,
-        eyebrow,
         countLabel,
         products,
         popularAttributes: vertical?.popularAttributes ?? [],
+        verticalHomeUrl,
       } satisfies SearchGroup | null
     })
     .filter((group): group is SearchGroup => Boolean(group))
@@ -270,18 +295,16 @@ const fallbackGroups = computed(() => {
       const title =
         vertical?.verticalHomeTitle ??
         (verticalId ? formatFallbackVerticalTitle(verticalId) : t('search.groups.unknownTitle'))
-      const eyebrow = vertical?.verticalHomeDescription ?? null
-      const countLabel = t('search.groups.count', {
-        count: products.length,
-      })
+      const countLabel = buildGroupCountLabel(products.length)
+      const verticalHomeUrl = normalizeVerticalHomeUrl(vertical?.verticalHomeUrl)
 
       return {
         key: `fallback-${verticalId ?? index}`,
         title,
-        eyebrow,
         countLabel,
         products,
         popularAttributes: vertical?.popularAttributes ?? [],
+        verticalHomeUrl,
       } satisfies SearchGroup | null
     })
     .filter((group): group is SearchGroup => Boolean(group))
@@ -297,6 +320,19 @@ const displayGroups = computed(() =>
 
 const totalResults = computed(() =>
   displayGroups.value.reduce((sum, group) => sum + group.products.length, 0),
+)
+
+const resultsCountLabel = computed(() =>
+  translatePlural('search.results.count', totalResults.value, {
+    count: totalResults.value,
+  }),
+)
+
+const resultsSummaryLabel = computed(() =>
+  t('search.results.summary', {
+    countLabel: resultsCountLabel.value,
+    query: normalizedQuery.value,
+  }),
 )
 
 const handleSearchSubmit = () => {
@@ -375,76 +411,10 @@ function formatFallbackVerticalTitle(verticalId: string): string {
   flex-direction: column
   gap: 0
 
-  &__hero
-    padding: clamp(2rem, 5vw, 4rem) 1.5rem
-    background: linear-gradient(
-      135deg,
-      rgba(var(--v-theme-surface-primary-080), 0.9),
-      rgba(var(--v-theme-surface-glass), 0.9)
-    )
-
-    @media (min-width: 960px)
-      padding-inline: clamp(2rem, 10vw, 6rem)
-
-  &__hero-content
-    display: flex
-    flex-direction: column
-    gap: 0.75rem
-    margin-bottom: 1.5rem
-
-  &__eyebrow
-    margin: 0
-    font-size: 0.875rem
-    letter-spacing: 0.1em
-    text-transform: uppercase
-    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-
-  &__title
-    margin: 0
-    font-size: clamp(2rem, 1.5rem + 1.5vw, 3rem)
-    font-weight: 700
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__subtitle
-    margin: 0
-    max-width: 42rem
-    font-size: clamp(1rem, 0.95rem + 0.4vw, 1.25rem)
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__form
-    display: flex
-    flex-direction: column
-    gap: 0.75rem
-
-    @media (min-width: 640px)
-      flex-direction: row
-      align-items: center
-      gap: 1rem
-
-  &__field
-    flex: 1 1 auto
-
-  &__submit
-    align-self: stretch
-
-    @media (min-width: 640px)
-      align-self: center
-      min-width: 8rem
-
-  &__helper
-    margin: 0
-    margin-top: 1rem
-    font-size: 0.95rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
-    &--warning
-      color: rgb(var(--v-theme-accent-supporting))
-
   &__loader
     margin-top: -1px
 
   &__results
-    padding: clamp(2rem, 5vw, 4rem) 1.5rem
     max-width: 1200px
     margin: 0 auto
 
@@ -499,4 +469,127 @@ function formatFallbackVerticalTitle(verticalId: string): string {
   &__group-wrapper :deep(.search-result-group:last-of-type)
     padding-bottom: 0
     border-bottom: none
+
+.search-hero
+  position: relative
+  width: 100%
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-hero-gradient-start)) 0%,
+    rgba(var(--v-theme-hero-gradient-mid), 0.92) 55%,
+    rgb(var(--v-theme-hero-gradient-end)) 100%
+  )
+  color: rgb(255, 255, 255)
+  padding-block: clamp(1.75rem, 4vw, 3rem)
+  margin-bottom: clamp(1.5rem, 4vw, 2.75rem)
+  overflow: hidden
+  box-shadow: 0 18px 40px -24px rgba(var(--v-theme-shadow-primary-600), 0.45)
+
+  &::after
+    content: ''
+    position: absolute
+    inset: 0
+    background: radial-gradient(circle at 20% 20%, rgba(var(--v-theme-hero-overlay-strong), 0.2), transparent 60%)
+    pointer-events: none
+
+  &__container
+    position: relative
+    z-index: 1
+    padding-block: clamp(1rem, 3vw, 1.75rem)
+
+  &__content
+    display: flex
+    flex-direction: column
+    gap: 0.85rem
+    max-width: min(52rem, 100%)
+
+  &__eyebrow
+    display: inline-flex
+    align-items: center
+    align-self: flex-start
+    padding: 0.4rem 0.9rem
+    border-radius: 999px
+    background-color: rgba(var(--v-theme-hero-pill-on-dark), 0.16)
+    font-weight: 600
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    font-size: 0.75rem
+    line-height: 1.1
+
+  &__copy
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+
+  &__title
+    font-weight: 700
+    font-size: clamp(1.95rem, 4.5vw, 2.65rem)
+    line-height: 1.2
+    margin: 0
+
+  &__subtitle
+    margin: 0
+    font-size: clamp(1rem, 2.2vw, 1.2rem)
+    line-height: 1.55
+    color: rgba(var(--v-theme-hero-overlay-soft), 0.85)
+
+  &__form
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+    margin-top: 1rem
+
+    @media (min-width: 640px)
+      flex-direction: row
+      align-items: center
+      gap: 1rem
+
+  &__field
+    flex: 1 1 auto
+
+    :deep(.v-field)
+      background-color: rgba(var(--v-theme-hero-overlay-soft), 0.94)
+      border-radius: 1rem
+      box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
+
+    :deep(.v-field__prepend-inner .v-icon)
+      color: rgba(var(--v-theme-text-on-accent), 0.7)
+
+    :deep(input)
+      color: rgb(var(--v-theme-text-on-accent))
+
+  &__submit
+    align-self: stretch
+    text-transform: none
+    font-weight: 600
+    letter-spacing: 0
+    border-radius: 999px
+
+    @media (min-width: 640px)
+      align-self: center
+      min-width: 8rem
+
+    :deep(.v-btn)
+      background-color: rgba(var(--v-theme-hero-overlay-soft), 0.18)
+      color: rgb(var(--v-theme-hero-overlay-soft))
+      border-radius: 999px
+      padding-inline: 1.75rem
+      backdrop-filter: blur(6px)
+      transition: background-color 0.2s ease, transform 0.2s ease
+
+      &:hover
+        background-color: rgba(var(--v-theme-hero-overlay-soft), 0.28)
+        transform: translateY(-1px)
+
+      &:focus-visible
+        box-shadow: 0 0 0 3px rgba(var(--v-theme-hero-overlay-soft), 0.35)
+
+  &__helper
+    margin: 0
+    margin-top: 0.75rem
+    font-size: 0.95rem
+    color: rgba(var(--v-theme-hero-overlay-soft), 0.82)
+
+    &--warning
+      color: rgba(var(--v-theme-hero-overlay-soft), 0.95)
 </style>

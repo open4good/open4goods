@@ -2,8 +2,17 @@
   <section class="search-result-group">
     <header class="search-result-group__header">
       <div class="search-result-group__headline">
-        <p v-if="eyebrow" class="search-result-group__eyebrow">{{ eyebrow }}</p>
         <h2 class="search-result-group__title">{{ title }}</h2>
+        <NuxtLink
+          v-if="verticalHomeUrl"
+          :to="verticalHomeUrl"
+          class="search-result-group__link"
+          :aria-label="categoryLinkAria || undefined"
+          data-test="search-result-group-link"
+        >
+          <span>{{ categoryLinkLabel }}</span>
+          <v-icon icon="mdi-arrow-right" size="small" aria-hidden="true" />
+        </NuxtLink>
       </div>
       <p v-if="countLabel" class="search-result-group__count">{{ countLabel }}</p>
     </header>
@@ -27,12 +36,16 @@ withDefaults(
     products: ProductDto[]
     countLabel?: string | null
     popularAttributes?: AttributeConfigDto[]
-    eyebrow?: string | null
+    verticalHomeUrl?: string | null
+    categoryLinkLabel?: string | null
+    categoryLinkAria?: string | null
   }>(),
   {
     countLabel: null,
     popularAttributes: () => [],
-    eyebrow: null,
+    verticalHomeUrl: null,
+    categoryLinkLabel: '',
+    categoryLinkAria: null,
   },
 )
 </script>
@@ -61,20 +74,31 @@ withDefaults(
   &__headline
     display: flex
     flex-direction: column
-    gap: 0.25rem
-
-  &__eyebrow
-    margin: 0
-    font-size: 0.875rem
-    letter-spacing: 0.08em
-    text-transform: uppercase
-    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+    gap: 0.5rem
 
   &__title
     margin: 0
     font-size: clamp(1.5rem, 1.1rem + 0.9vw, 2rem)
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__link
+    display: inline-flex
+    align-items: center
+    gap: 0.4rem
+    align-self: flex-start
+    padding: 0.25rem 0.6rem 0.25rem 0
+    border-radius: 999px
+    font-size: 0.95rem
+    font-weight: 500
+    color: rgba(var(--v-theme-accent-primary-highlight), 0.95)
+    text-decoration: none
+    transition: color 0.2s ease, transform 0.2s ease
+
+    &:hover,
+    &:focus-visible
+      color: rgb(var(--v-theme-primary))
+      transform: translateX(2px)
 
   &__count
     margin: 0

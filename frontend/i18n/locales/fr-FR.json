@@ -1278,14 +1278,23 @@
       }
     },
     "results": {
-      "summary": "Affichage de {count, plural, one {# résultat} other {# résultats}} pour \u00ab {query} \u00bb"
+      "summary": "Affichage de {countLabel} pour \u00ab {query} \u00bb",
+      "count": {
+        "one": "{count} résultat",
+        "other": "{count} résultats"
+      }
     },
     "notice": {
       "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
     },
     "groups": {
-      "count": "{count, plural, one {# produit} other {# produits}}",
-      "unknownTitle": "Autres produits"
+      "count": {
+        "one": "{count} produit",
+        "other": "{count} produits"
+      },
+      "unknownTitle": "Autres produits",
+      "viewCategory": "Accéder à la catégorie",
+      "viewCategoryAria": "Accéder à la catégorie {title}"
     },
     "seo": {
       "title": "Recherche de produits",
