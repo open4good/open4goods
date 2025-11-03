@@ -16,15 +16,23 @@
 import * as runtime from '../runtime';
 import type {
   GlobalSearchResponseDto,
+  SearchSuggestResponseDto,
 } from '../models/index';
 import {
     GlobalSearchResponseDtoFromJSON,
     GlobalSearchResponseDtoToJSON,
+    SearchSuggestResponseDtoFromJSON,
+    SearchSuggestResponseDtoToJSON,
 } from '../models/index';
 
 export interface GlobalSearchRequest {
     query: string;
     domainLanguage: GlobalSearchDomainLanguageEnum;
+}
+
+export interface SuggestRequest {
+    query: string;
+    domainLanguage: SuggestDomainLanguageEnum;
 }
 
 /**
@@ -93,6 +101,67 @@ export class SearchApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
+     * Retrieve search suggestions
+     */
+    async suggestRaw(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
+        if (requestParameters['query'] == null) {
+            throw new runtime.RequiredError(
+                'query',
+                'Required parameter "query" was null or undefined when calling suggest().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling suggest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['query'] != null) {
+            queryParameters['query'] = requestParameters['query'];
+        }
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/search/suggest`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SearchSuggestResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
+     * Retrieve search suggestions
+     */
+    async suggest(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SearchSuggestResponseDto> {
+        const response = await this.suggestRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -103,3 +172,11 @@ export const GlobalSearchDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type GlobalSearchDomainLanguageEnum = typeof GlobalSearchDomainLanguageEnum[keyof typeof GlobalSearchDomainLanguageEnum];
+/**
+ * @export
+ */
+export const SuggestDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type SuggestDomainLanguageEnum = typeof SuggestDomainLanguageEnum[keyof typeof SuggestDomainLanguageEnum];

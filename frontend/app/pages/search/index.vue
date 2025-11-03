@@ -12,18 +12,16 @@
           </div>
 
           <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
-            <v-text-field
+            <SearchSuggestField
               v-model="searchInput"
+              class="search-hero__field"
               :label="t('search.form.label')"
               :placeholder="t('search.form.placeholder')"
               :aria-label="t('search.form.ariaLabel')"
-              prepend-inner-icon="mdi-magnify"
-              variant="solo"
-              density="comfortable"
-              clearable
-              hide-details
-              class="search-hero__field"
-              @click:clear="handleClear"
+              :min-chars="MIN_QUERY_LENGTH"
+              @clear="handleClear"
+              @select-category="handleCategorySuggestion"
+              @select-product="handleProductSuggestion"
             />
             <v-btn class="search-hero__submit" type="submit" size="large">
               {{ t('search.form.submit') }}
@@ -112,6 +110,10 @@ import type {
   ProductDto,
   VerticalConfigDto,
 } from '~~/shared/api-client'
+import SearchSuggestField, {
+  type CategorySuggestionItem,
+  type ProductSuggestionItem,
+} from '~/components/search/SearchSuggestField.vue'
 import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 
@@ -356,6 +358,36 @@ const handleClear = () => {
   })
 }
 
+const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
+  const verticalUrl = normalizeVerticalHomeUrl(
+    suggestion.url ??
+      (suggestion.verticalId
+        ? verticalById.value.get(suggestion.verticalId)?.verticalHomeUrl
+        : null),
+  )
+
+  if (!verticalUrl) {
+    return
+  }
+
+  router.push(verticalUrl)
+}
+
+const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
+  const gtin = suggestion.gtin?.trim()
+
+  if (!gtin) {
+    return
+  }
+
+  router.push(
+    localePath({
+      name: 'gtin',
+      params: { gtin },
+    }),
+  )
+}
+
 const canonicalUrl = computed(
   () => new URL(localePath({ name: 'search' }), requestURL.origin).toString(),
 )
@@ -546,17 +578,6 @@ function formatFallbackVerticalTitle(verticalId: string): string {
 
   &__field
     flex: 1 1 auto
-
-    :deep(.v-field)
-      background-color: rgba(var(--v-theme-hero-overlay-soft), 0.94)
-      border-radius: 1rem
-      box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
-
-    :deep(.v-field__prepend-inner .v-icon)
-      color: rgba(var(--v-theme-text-on-accent), 0.7)
-
-    :deep(input)
-      color: rgb(var(--v-theme-text-on-accent))
 
   &__submit
     align-self: stretch

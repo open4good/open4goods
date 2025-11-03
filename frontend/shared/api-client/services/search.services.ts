@@ -1,5 +1,5 @@
 import { SearchApi } from '..'
-import type { GlobalSearchResponseDto } from '..'
+import type { GlobalSearchResponseDto, SearchSuggestResponseDto } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
@@ -38,7 +38,32 @@ export const useSearchService = (domainLanguage: DomainLanguage) => {
     }
   }
 
+  const fetchSearchSuggestions = async (
+    query: string,
+  ): Promise<SearchSuggestResponseDto> => {
+    const normalizedQuery = query?.trim()
+
+    if (!normalizedQuery) {
+      throw new TypeError('Query is required to fetch search suggestions.')
+    }
+
+    try {
+      return await resolveApi().searchSuggest({
+        query: normalizedQuery,
+        domainLanguage,
+      })
+    } catch (error) {
+      console.error('Error fetching search suggestions', {
+        query: normalizedQuery,
+        domainLanguage,
+      }, error)
+
+      throw error
+    }
+  }
+
   return {
     executeGlobalSearch,
+    fetchSearchSuggestions,
   }
 }
