@@ -1,9 +1,18 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
-import { defineComponent } from 'vue'
+import { describe, expect, it, vi } from 'vitest'
+import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductAlternativeCard from './ProductAlternativeCard.vue'
+
+vi.mock('~/stores/useProductCompareStore', () => ({
+  useProductCompareStore: () => ({
+    hasProduct: vi.fn().mockReturnValue(false),
+    canAddProduct: vi.fn().mockReturnValue({ success: true }),
+    toggleProduct: vi.fn(),
+  }),
+  MAX_COMPARE_ITEMS: 4,
+}))
 
 describe('ProductAlternativeCard', () => {
   const i18n = createI18n({
@@ -16,6 +25,16 @@ describe('ProductAlternativeCard', () => {
             alternatives: {
               untitled: 'Untitled product',
               viewProduct: 'View product {name}',
+            },
+          },
+          hero: {
+            compare: {
+              add: 'Add to compare',
+              remove: 'Remove from compare',
+              label: 'Compare',
+              selected: 'In comparison',
+              ariaAdd: 'Add {name} to compare',
+              ariaSelected: '{name} already in compare',
             },
           },
         },
@@ -83,9 +102,24 @@ describe('ProductAlternativeCard', () => {
             name: 'ImpactScoreStub',
             template: '<div class="impact-score-stub"></div>',
           }),
-          CategoryProductCompareToggle: defineComponent({
-            name: 'CategoryProductCompareToggleStub',
-            template: '<div data-test="category-product-compare"></div>',
+          'v-tooltip': defineComponent({
+            name: 'VTooltipStub',
+            props: ['text'],
+            setup(_, { slots }) {
+              return () => slots.activator?.({ props: {} }) ?? slots.default?.() ?? h('div')
+            },
+          }),
+          'v-icon': defineComponent({
+            name: 'VIconStub',
+            props: ['icon', 'size'],
+            template: '<span class="v-icon-stub"></span>',
+          }),
+          'v-btn': defineComponent({
+            name: 'VBtnStub',
+            props: ['variant', 'color', 'ariaPressed', 'ariaLabel', 'title', 'disabled'],
+            setup(_, { slots }) {
+              return () => h('button', { class: 'v-btn-stub', type: 'button' }, slots.default?.())
+            },
           }),
         },
       },
@@ -98,6 +132,6 @@ describe('ProductAlternativeCard', () => {
     expect(priceText).toMatch(/299/)
 
     expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
-    expect(wrapper.find('[data-test="category-product-compare"]').exists()).toBe(true)
+    expect(wrapper.find('.product-alternative-card__compare-btn').exists()).toBe(true)
   })
 })

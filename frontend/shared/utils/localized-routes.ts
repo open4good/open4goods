@@ -4,7 +4,7 @@ import { DEFAULT_NUXT_LOCALE } from './domain-language'
 const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
 
 export type LocalizedRouteName =
-  | 'compare'
+  'compare'
   | 'partners'
   | 'team'
   | 'search'

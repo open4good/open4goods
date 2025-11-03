@@ -19,6 +19,7 @@ describe('ProductImpactDetailsTable', () => {
               value: 'Value',
             },
             noDetailsAvailable: 'No details available',
+            valueOutOf: '{value} / {max}',
           },
         },
       },
@@ -27,7 +28,7 @@ describe('ProductImpactDetailsTable', () => {
 
   const scores: ScoreView[] = [
     { id: 'ECOSCORE', label: 'Eco', relativeValue: 4.5 },
-    { id: 'CO2', label: 'CO2', relativeValue: 3.1, ranking: 12 },
+    { id: 'CO2', label: 'CO2', relativeValue: 3.1, value: 2.8, ranking: 12 },
   ]
 
   it('renders details without the ranking column and hides ecoscore', () => {
@@ -42,6 +43,13 @@ describe('ProductImpactDetailsTable', () => {
               return () => h('table', { class: 'v-table-stub' }, slots.default?.())
             },
           }),
+          ProductImpactSubscoreRating: defineComponent({
+            name: 'ProductImpactSubscoreRatingStub',
+            props: ['score', 'max', 'size', 'showValue'],
+            setup(props) {
+              return () => h('div', { class: 'subscore-rating-stub' }, `rating:${props.score}`)
+            },
+          }),
         },
       },
     })
@@ -54,6 +62,8 @@ describe('ProductImpactDetailsTable', () => {
     const rows = wrapper.findAll('tbody tr')
     expect(rows).toHaveLength(1)
     expect(rows[0]?.text()).toContain('CO2')
+    expect(rows[0]?.text()).toContain('rating:2.8')
+    expect(rows[0]?.text()).toContain('2.8 / 5')
     expect(wrapper.text()).not.toContain('Eco')
   })
 
@@ -67,6 +77,13 @@ describe('ProductImpactDetailsTable', () => {
             name: 'VTableStub',
             setup(_, { slots }) {
               return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+            },
+          }),
+          ProductImpactSubscoreRating: defineComponent({
+            name: 'ProductImpactSubscoreRatingStub',
+            props: ['score', 'max', 'size', 'showValue'],
+            setup(props) {
+              return () => h('div', { class: 'subscore-rating-stub' }, `rating:${props.score}`)
             },
           }),
         },

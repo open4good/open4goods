@@ -1511,6 +1511,8 @@
       "detailsTitle": "Détails de l'évaluation",
       "noPrimaryScore": "Score indisponible",
       "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
+      "methodologyLink": "Accéder à la méthodologie",
+      "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
       "percentile": "Percentile",
       "weightChip": "Compte pour {value}% de la note totale",
       "subscoreEyebrow": "Indicateur d'impact",
@@ -1518,6 +1520,7 @@
       "radarAria": "Radar des scores pour {product}",
       "scoreRanking": "Classement du facteur",
       "scoreValue": "Score relatif",
+      "valueOutOf": "{value} / {max}",
       "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",
       "tableHeaders": {
         "percent": "Percentile",

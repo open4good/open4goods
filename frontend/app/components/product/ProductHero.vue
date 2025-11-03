@@ -27,7 +27,6 @@
       </p>
 
       <div v-if="impactScore !== null" class="product-hero__impact-overview">
-        <span class="product-hero__impact-label">{{ impactScoreLabel }}</span>
         <ImpactScore :score="impactScore" :max="5" size="large" :show-value="true" />
       </div>
 
@@ -332,21 +331,6 @@ const impactScore = computed(() => {
   return typeof relative === 'number' ? relative : null
 })
 
-const impactScoreLabel = computed(() => {
-  if (impactScore.value === null) {
-    return ''
-  }
-
-  if (te('product.hero.impactScoreLabel')) {
-    return t('product.hero.impactScoreLabel')
-  }
-
-  if (te('product.hero.impactBadge.title')) {
-    return t('product.hero.impactBadge.title')
-  }
-
-  return 'Impact score'
-})
 </script>
 
 <style scoped>
@@ -487,11 +471,6 @@ const impactScoreLabel = computed(() => {
   align-items: center;
   gap: 0.75rem;
   color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-hero__impact-label {
-  font-weight: 700;
-  font-size: clamp(1rem, 2vw, 1.2rem);
 }
 
 .product-hero__meta-bottom {

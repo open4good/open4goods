@@ -452,6 +452,7 @@ const impactScores = computed(() => {
         label: score.name,
         description: score.description ?? null,
         relativeValue: typeof score.relativ?.value === 'number' ? score.relativ.value : null,
+        value: typeof score.value === 'number' ? score.value : null,
         absoluteValue: score.absoluteValue ?? null,
         percent: score.percent ?? null,
         ranking: score.ranking ?? null,

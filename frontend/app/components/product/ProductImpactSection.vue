@@ -133,7 +133,7 @@ const showRadar = computed(() => filteredRadarValues.value.length >= 3)
 
 .product-impact__subscores {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
@@ -148,9 +148,15 @@ const showRadar = computed(() => filteredRadarValues.value.length >= 3)
   }
 }
 
-@media (max-width: 960px) {
+@media (min-width: 640px) {
   .product-impact__subscores {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .product-impact__subscores {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 </style>
