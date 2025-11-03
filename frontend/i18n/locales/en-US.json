@@ -1287,6 +1287,19 @@
     "notice": {
       "fallback": "We could not match a specific category, so we are showing the most relevant products overall."
     },
+    "suggestions": {
+      "sections": {
+        "categories": "Categories",
+        "products": "Products"
+      },
+      "empty": "No suggestions yet. Keep typing to discover matches.",
+      "error": "We couldn't load suggestions. Please try again.",
+      "minimum": "Type at least {min} characters to see suggestions.",
+      "unknownCategory": "Category",
+      "unknownProduct": "Product",
+      "categoryAria": "Open the {category} category",
+      "productAria": "View the {product} product detail"
+    },
     "groups": {
       "count": {
         "one": "{count} product",

@@ -16,10 +16,13 @@
 import * as runtime from '../runtime';
 import type {
   GlobalSearchResponseDto,
+  SearchSuggestResponseDto,
 } from '../models/index';
 import {
     GlobalSearchResponseDtoFromJSON,
     GlobalSearchResponseDtoToJSON,
+    SearchSuggestResponseDtoFromJSON,
+    SearchSuggestResponseDtoToJSON,
 } from '../models/index';
 
 export interface GlobalSearchRequest {
@@ -27,8 +30,13 @@ export interface GlobalSearchRequest {
     domainLanguage: GlobalSearchDomainLanguageEnum;
 }
 
+export interface SearchSuggestRequest {
+    query: string;
+    domainLanguage: GlobalSearchDomainLanguageEnum;
+}
+
 /**
- * 
+ *
  */
 export class SearchApi extends runtime.BaseAPI {
 
@@ -90,6 +98,67 @@ export class SearchApi extends runtime.BaseAPI {
      */
     async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResponseDto> {
         const response = await this.globalSearchRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieves suggested categories and products matching a partial query
+     * Search suggestions
+     */
+    async searchSuggestRaw(requestParameters: SearchSuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
+        if (requestParameters['query'] == null) {
+            throw new runtime.RequiredError(
+                'query',
+                'Required parameter "query" was null or undefined when calling searchSuggest().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling searchSuggest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['query'] != null) {
+            queryParameters['query'] = requestParameters['query'];
+        }
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/search/suggest`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SearchSuggestResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieves suggested categories and products matching a partial query
+     * Search suggestions
+     */
+    async searchSuggest(requestParameters: SearchSuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SearchSuggestResponseDto> {
+        const response = await this.searchSuggestRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

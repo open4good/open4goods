@@ -1287,6 +1287,19 @@
     "notice": {
       "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
     },
+    "suggestions": {
+      "sections": {
+        "categories": "Catégories",
+        "products": "Produits"
+      },
+      "empty": "Aucune suggestion pour le moment. Continuez à saisir votre recherche.",
+      "error": "Impossible de charger les suggestions. Réessayez.",
+      "minimum": "Saisissez au moins {min} caractères pour afficher des suggestions.",
+      "unknownCategory": "Catégorie",
+      "unknownProduct": "Produit",
+      "categoryAria": "Ouvrir la catégorie {category}",
+      "productAria": "Voir la fiche produit {product}"
+    },
     "groups": {
       "count": {
         "one": "{count} produit",

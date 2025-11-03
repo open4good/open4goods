@@ -89,6 +89,7 @@ export * from './ProductSearchRequestDto';
 export * from './ProductSearchResponseDto';
 export * from './ProductSourcedAttributeDto';
 export * from './ProductVideoDto';
+export * from './SearchSuggestResponseDto';
 export * from './RecommandationChoice';
 export * from './RecommandationCriteria';
 export * from './RecommandationsConfig';
