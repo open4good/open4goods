@@ -1252,6 +1252,47 @@
       "title": "Nos partenaires et mentors"
     }
   },
+  "search": {
+    "hero": {
+      "eyebrow": "Explorer le catalogue",
+      "title": "Rechercher des produits responsables",
+      "subtitle": "Trouvez des produits, des marques et des références sélectionnés par Nudger dans chaque verticale."
+    },
+    "form": {
+      "label": "Rechercher dans le catalogue",
+      "placeholder": "Saisissez un produit, une marque ou un GTIN",
+      "ariaLabel": "Rechercher un produit, une marque ou un GTIN",
+      "submit": "Rechercher"
+    },
+    "states": {
+      "initial": "Saisissez un produit, une marque ou une référence pour commencer à explorer le catalogue.",
+      "minimum": "Saisissez au moins {min} caractères pour lancer la recherche.",
+      "loadingAria": "Chargement des résultats de recherche",
+      "error": {
+        "title": "Impossible de charger les résultats",
+        "description": "Une erreur est survenue lors de l'interrogation du service de recherche. Veuillez réessayer."
+      },
+      "empty": {
+        "title": "Aucun résultat pour \u00ab {query} \u00bb",
+        "description": "Essayez un autre mot-clé ou explorez le catalogue depuis la page des catégories."
+      }
+    },
+    "results": {
+      "summary": "Affichage de {count, plural, one {# résultat} other {# résultats}} pour \u00ab {query} \u00bb"
+    },
+    "notice": {
+      "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
+    },
+    "groups": {
+      "count": "{count, plural, one {# produit} other {# produits}}",
+      "unknownTitle": "Autres produits"
+    },
+    "seo": {
+      "title": "Recherche de produits",
+      "description": "Recherchez dans le catalogue de consommation responsable de Nudger pour découvrir produits, marques et verticales.",
+      "imageAlt": "Illustration de l'expérience de recherche Nudger"
+    }
+  },
   "compare": {
     "title": "Comparateur de produits",
     "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.",

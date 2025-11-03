@@ -1252,6 +1252,47 @@
       "title": "Our partners and mentors"
     }
   },
+  "search": {
+    "hero": {
+      "eyebrow": "Discover the catalogue",
+      "title": "Search responsible products",
+      "subtitle": "Find products, brands and references curated by Nudger across every vertical."
+    },
+    "form": {
+      "label": "Search the catalogue",
+      "placeholder": "Type a product, brand or GTIN",
+      "ariaLabel": "Search for a product, brand or GTIN",
+      "submit": "Search"
+    },
+    "states": {
+      "initial": "Enter a product, brand or reference to start exploring the catalogue.",
+      "minimum": "Enter at least {min} characters to launch the search.",
+      "loadingAria": "Loading search results",
+      "error": {
+        "title": "We could not load results",
+        "description": "Something went wrong while contacting the search service. Please try again."
+      },
+      "empty": {
+        "title": "No results for \u201c{query}\u201d",
+        "description": "Try another keyword or explore the catalogue from the categories page."
+      }
+    },
+    "results": {
+      "summary": "Displaying {count, plural, one {# result} other {# results}} for \u201c{query}\u201d"
+    },
+    "notice": {
+      "fallback": "We could not match a specific category, so we are showing the most relevant products overall."
+    },
+    "groups": {
+      "count": "{count, plural, one {# product} other {# products}}",
+      "unknownTitle": "Other products"
+    },
+    "seo": {
+      "title": "Product search",
+      "description": "Search Nudger's responsible shopping catalogue to discover products, brands and categories.",
+      "imageAlt": "Illustration of the Nudger product search experience"
+    }
+  },
   "compare": {
     "title": "Product comparison",
     "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",
