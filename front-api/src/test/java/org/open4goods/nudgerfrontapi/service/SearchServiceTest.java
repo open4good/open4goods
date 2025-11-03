@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
@@ -65,11 +67,15 @@ class SearchServiceTest {
     @Mock
     private ProductMappingService productMappingService;
 
+    @Mock
+    private ApiProperties apiProperties;
+
     private SearchService searchService;
 
     @BeforeEach
     void setUp() {
-        searchService = new SearchService(repository, verticalsConfigService, productMappingService);
+        lenient().when(apiProperties.getResourceRootPath()).thenReturn("https://assets.nudger.test");
+        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties);
     }
 
     @Test

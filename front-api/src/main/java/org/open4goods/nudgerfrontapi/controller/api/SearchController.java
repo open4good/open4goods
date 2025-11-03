@@ -7,6 +7,9 @@ import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResultDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchVerticalGroupDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestProductDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
@@ -100,7 +103,66 @@ public class SearchController {
                 .body(body);
     }
 
+    /**
+     * Provide typeahead suggestions mixing vertical matches and product hits.
+     *
+     * @param query          free text value entered by the end user
+     * @param domainLanguage localisation hint used for category lookup
+     * @return category and product matches tailored for suggest usage
+     */
+    @GetMapping("/suggest")
+    @Operation(
+            summary = "Retrieve search suggestions",
+            description = "Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.",
+            parameters = {
+                    @Parameter(name = "query", in = ParameterIn.QUERY, required = true,
+                            description = "Free-text fragment typed by the user.",
+                            schema = @Schema(type = "string", example = "télév")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language hint to resolve localised category metadata.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Suggestions generated successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SearchSuggestResponseDto.class)),
+                            headers = {
+                                    @Header(name = "X-Locale", description = "Resolved locale for the response",
+                                            schema = @Schema(type = "string", example = "fr"))
+                            })
+            }
+    )
+    public ResponseEntity<SearchSuggestResponseDto> suggest(
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering suggest(query='{}', domainLanguage={})", query, domainLanguage);
+        SearchService.SuggestResult result = searchService.suggest(query, domainLanguage);
+
+        List<SearchSuggestCategoryDto> categoryMatches = result.categoryMatches().stream()
+                .map(this::toCategoryDto)
+                .toList();
+        List<SearchSuggestProductDto> productMatches = result.productMatches().stream()
+                .map(this::toProductDto)
+                .toList();
+
+        SearchSuggestResponseDto body = new SearchSuggestResponseDto(categoryMatches, productMatches);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .header("X-Locale", domainLanguage.languageTag())
+                .body(body);
+    }
+
     private GlobalSearchResultDto toDto(GlobalSearchHit hit) {
         return new GlobalSearchResultDto(hit.product(), hit.score());
+    }
+
+    private SearchSuggestCategoryDto toCategoryDto(SearchService.CategorySuggestion suggestion) {
+        return new SearchSuggestCategoryDto(suggestion.verticalId(), suggestion.imageSmall(),
+                suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
+    }
+
+    private SearchSuggestProductDto toProductDto(SearchService.ProductSuggestHit hit) {
+        return new SearchSuggestProductDto(hit.model(), hit.brand(), hit.gtin(), hit.coverImagePath(), hit.verticalId(),
+                hit.ecoscoreValue(), hit.score());
     }
 }
