@@ -7,6 +7,7 @@ export type LocalizedRouteName =
    'compare'
    | 'partners'
    | 'team'
+   | 'search'
    | LocalizedWikiRouteName
 
 export type LocalizedRoutePath = `/${string}`
@@ -59,6 +60,10 @@ const mapWikiRoutesToLocalizedPaths = <T extends Record<string, Record<NuxtLocal
 const LOCALIZED_WIKI_ROUTE_PATHS = mapWikiRoutesToLocalizedPaths(LOCALIZED_WIKI_PATHS)
 
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
+  search: {
+      'fr-FR': '/rechercher',
+      'en-US': '/search',
+  },
   compare: {
     'fr-FR': '/comparer',
     'en-US': '/compare',
