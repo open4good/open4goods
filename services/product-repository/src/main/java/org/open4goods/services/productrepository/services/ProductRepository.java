@@ -665,11 +665,11 @@ public class ProductRepository {
 //		});
 //
 		// Getting the one we don't have in redis from elastic
-		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
+                Set<String> missingIds = computeMissingIds(ids, ret);
 		logger.info("returned hits : {}, missing : {}",ret.size(), missingIds.size());
 
 
-		if (missingIds.size() != 0) {
+                if (missingIds.size() != 0) {
 
 
 			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
@@ -709,6 +709,13 @@ public class ProductRepository {
         public Long countMainIndexHavingRecentPrices() {
                 CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        static Set<String> computeMissingIds(Collection<Long> ids, Map<String, ?> existingResults) {
+                return ids.stream()
+                                .map(String::valueOf)
+                                .filter(id -> !existingResults.containsKey(id))
+                                .collect(Collectors.toSet());
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
