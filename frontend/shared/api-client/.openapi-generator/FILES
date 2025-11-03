@@ -110,6 +110,9 @@ models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
 models/ReviewGenerationStatus.ts
 models/ScoringAggregationConfig.ts
+models/SearchSuggestCategoryDto.ts
+models/SearchSuggestProductDto.ts
+models/SearchSuggestResponseDto.ts
 models/SortOption.ts
 models/SortRequestDto.ts
 models/StaticPartnerDto.ts

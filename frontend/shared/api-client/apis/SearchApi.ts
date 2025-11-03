@@ -30,13 +30,13 @@ export interface GlobalSearchRequest {
     domainLanguage: GlobalSearchDomainLanguageEnum;
 }
 
-export interface SearchSuggestRequest {
+export interface SuggestRequest {
     query: string;
-    domainLanguage: GlobalSearchDomainLanguageEnum;
+    domainLanguage: SuggestDomainLanguageEnum;
 }
 
 /**
- *
+ * 
  */
 export class SearchApi extends runtime.BaseAPI {
 
@@ -102,21 +102,21 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * Retrieves suggested categories and products matching a partial query
-     * Search suggestions
+     * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
+     * Retrieve search suggestions
      */
-    async searchSuggestRaw(requestParameters: SearchSuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
+    async suggestRaw(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
         if (requestParameters['query'] == null) {
             throw new runtime.RequiredError(
                 'query',
-                'Required parameter "query" was null or undefined when calling searchSuggest().'
+                'Required parameter "query" was null or undefined when calling suggest().'
             );
         }
 
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling searchSuggest().'
+                'Required parameter "domainLanguage" was null or undefined when calling suggest().'
             );
         }
 
@@ -154,11 +154,11 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
-     * Retrieves suggested categories and products matching a partial query
-     * Search suggestions
+     * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
+     * Retrieve search suggestions
      */
-    async searchSuggest(requestParameters: SearchSuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SearchSuggestResponseDto> {
-        const response = await this.searchSuggestRaw(requestParameters, initOverrides);
+    async suggest(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SearchSuggestResponseDto> {
+        const response = await this.suggestRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -172,3 +172,11 @@ export const GlobalSearchDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type GlobalSearchDomainLanguageEnum = typeof GlobalSearchDomainLanguageEnum[keyof typeof GlobalSearchDomainLanguageEnum];
+/**
+ * @export
+ */
+export const SuggestDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type SuggestDomainLanguageEnum = typeof SuggestDomainLanguageEnum[keyof typeof SuggestDomainLanguageEnum];
