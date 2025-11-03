@@ -11,7 +11,18 @@
       <tbody>
         <tr v-for="score in displayScores" :key="`${score.id}-details`">
           <th scope="row">{{ score.label }}</th>
-          <td>{{ formatScore(score.relativeValue) }} / 5</td>
+          <td>
+            <div class="impact-details__value">
+              <ProductImpactSubscoreRating
+                v-if="score.displayValue != null"
+                :score="score.displayValue"
+                :max="5"
+                size="x-small"
+                :show-value="false"
+              />
+              <span class="impact-details__value-text">{{ formatScoreLabel(score.displayValue) }}</span>
+            </div>
+          </td>
         </tr>
       </tbody>
     </v-table>
@@ -21,13 +32,36 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import ProductImpactSubscoreRating from './ProductImpactSubscoreRating.vue'
 import type { ScoreView } from './impact-types'
 
 const props = defineProps<{
   scores: ScoreView[]
 }>()
 
-const displayScores = computed(() => props.scores.filter((score) => score.id !== 'ECOSCORE'))
+type DetailedScore = ScoreView & { displayValue: number | null }
+
+const resolveScoreValue = (score: ScoreView): number | null => {
+  if (score.value != null && Number.isFinite(score.value)) {
+    return Number(score.value)
+  }
+
+  if (score.relativeValue != null && Number.isFinite(score.relativeValue)) {
+    return Number(score.relativeValue)
+  }
+
+  return null
+}
+
+const displayScores = computed<DetailedScore[]>(() =>
+  props.scores
+    .filter((score) => score.id !== 'ECOSCORE')
+    .map((score) => ({
+      ...score,
+      displayValue: resolveScoreValue(score),
+    })),
+)
 
 const formatScore = (value: number | null) => {
   if (value == null || Number.isNaN(value)) {
@@ -35,6 +69,17 @@ const formatScore = (value: number | null) => {
   }
 
   return value.toFixed(1)
+}
+
+const { t } = useI18n()
+
+const formatScoreLabel = (value: number | null) => {
+  const formatted = formatScore(value)
+  if (formatted === '—') {
+    return formatted
+  }
+
+  return t('product.impact.valueOutOf', { value: formatted, max: 5 })
 }
 </script>
 
@@ -58,6 +103,17 @@ const formatScore = (value: number | null) => {
 
 .impact-details__table :deep(tbody th) {
   font-weight: 500;
+}
+
+.impact-details__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.impact-details__value-text {
+  font-weight: 500;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .impact-details__empty {

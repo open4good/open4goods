@@ -16,6 +16,8 @@ describe('ProductImpactEcoScoreCard', () => {
             primaryScoreLabel: 'Overall impact',
             absoluteValue: 'Absolute value',
             noPrimaryScore: 'No score',
+            methodologyLink: 'Access the methodology',
+            methodologyLinkAria: 'Open the Impact Score methodology',
           },
         },
       },
@@ -27,6 +29,7 @@ describe('ProductImpactEcoScoreCard', () => {
     label: 'Eco score',
     description: 'Overall environmental score',
     relativeValue: 4.2,
+    value: 3.6,
     absoluteValue: 78.123,
   }
 
@@ -43,12 +46,30 @@ describe('ProductImpactEcoScoreCard', () => {
               return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
             },
           }),
+          NuxtLink: defineComponent({
+            name: 'NuxtLinkStub',
+            props: ['to', 'ariaLabel'],
+            setup(props, { slots }) {
+              return () =>
+                h(
+                  'a',
+                  { class: 'nuxt-link-stub', href: typeof props.to === 'string' ? props.to : '#', 'data-to': props.to },
+                  slots.default?.(),
+                )
+            },
+          }),
+          'v-icon': defineComponent({
+            name: 'VIconStub',
+            props: ['icon', 'size'],
+            template: '<span class="v-icon-stub"></span>',
+          }),
         },
       },
     })
 
     expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
-    expect(wrapper.text()).toContain('score:4.2')
+    expect(wrapper.text()).toContain('score:3.6')
+    expect(wrapper.find('.impact-ecoscore__cta').text()).toContain('Access the methodology')
     expect(wrapper.text()).not.toContain('Absolute value')
   })
 

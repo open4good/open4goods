@@ -380,7 +380,8 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     const impactOverview = wrapper.get('.product-hero__impact-overview')
-    expect(impactOverview.text()).toContain('Impact score')
+    expect(impactOverview.text()).toContain('3.5')
+    expect(impactOverview.text()).not.toContain('Impact score')
     expect(impactOverview.get('.impact-score-stub').text()).toBe('3.5')
 
     const attributes = wrapper.get('.product-hero__attributes')

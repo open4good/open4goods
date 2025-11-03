@@ -8,6 +8,7 @@ export type ScoreView = {
   label: string
   description?: string | null
   relativeValue: number | null
+  value?: number | null
   absoluteValue?: string | number | null
   percent?: number | null
   ranking?: number | string | null

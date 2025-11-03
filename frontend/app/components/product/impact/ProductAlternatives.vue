@@ -602,10 +602,19 @@ const retryFetch = () => {
 
 .product-alternatives__slide-group {
   width: 100%;
+  padding: 0.25rem 0.5rem;
 }
 
 .product-alternatives__slide-item {
-  padding-right: 1rem;
+  padding-inline: 0.75rem;
+}
+
+.product-alternatives__slide-item:first-child {
+  padding-left: 0.5rem;
+}
+
+.product-alternatives__slide-item:last-child {
+  padding-right: 0.5rem;
 }
 
 .product-alternatives__card {

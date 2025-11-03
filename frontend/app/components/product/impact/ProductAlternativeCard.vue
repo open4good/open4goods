@@ -33,12 +33,27 @@
         </div>
       </div>
     </NuxtLink>
-    <CategoryProductCompareToggle
-      :product="product"
-      size="compact"
-      class="product-alternative-card__compare"
-      icon="mdi-compare"
-    />
+    <div class="product-alternative-card__compare">
+      <v-tooltip :text="compareButtonTitle" location="top" open-delay="150">
+        <template #activator="{ props: tooltipProps }">
+          <v-btn
+            v-bind="tooltipProps"
+            class="product-alternative-card__compare-btn"
+            :class="{ 'product-alternative-card__compare-btn--active': isCompareSelected }"
+            variant="flat"
+            color="primary"
+            :aria-pressed="isCompareSelected"
+            :aria-label="compareButtonAriaLabel"
+            :title="compareButtonTitle"
+            :disabled="isCompareDisabled"
+            @click.stop.prevent="toggleCompare"
+          >
+            <v-icon :icon="compareButtonIcon" size="18" />
+            <span class="product-alternative-card__compare-label">{{ compareButtonLabel }}</span>
+          </v-btn>
+        </template>
+      </v-tooltip>
+    </div>
   </article>
 </template>
 
@@ -48,7 +63,11 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import CategoryProductCompareToggle from '~/components/category/products/CategoryProductCompareToggle.vue'
+import {
+  MAX_COMPARE_ITEMS,
+  useProductCompareStore,
+  type CompareListBlockReason,
+} from '~/stores/useProductCompareStore'
 import { formatBestPrice } from '~/utils/_product-pricing'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 
@@ -59,7 +78,7 @@ const props = defineProps({
   },
 })
 
-const { t, n } = useI18n()
+const { t, n, te } = useI18n()
 
 const product = computed(() => props.product)
 
@@ -102,6 +121,78 @@ const impactScore = computed(() => resolvePrimaryImpactScore(product.value))
 const productLink = computed(() => {
   return product.value.fullSlug ?? product.value.slug ?? '#'
 })
+
+const compareStore = useProductCompareStore()
+
+const reasonMessage = (reason: CompareListBlockReason | undefined) => {
+  switch (reason) {
+    case 'limit-reached':
+      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
+    case 'vertical-mismatch':
+      return t('category.products.compare.differentCategory')
+    case 'missing-identifier':
+      return t('category.products.compare.missingIdentifier')
+    default:
+      return t('product.hero.compare.add')
+  }
+}
+
+const compareEligibility = computed(() => compareStore.canAddProduct(product.value))
+const isCompareSelected = computed(() => compareStore.hasProduct(product.value))
+
+const compareButtonLabel = computed(() =>
+  isCompareSelected.value ? t('product.hero.compare.selected') : t('product.hero.compare.label'),
+)
+
+const compareButtonIcon = computed(() =>
+  isCompareSelected.value ? 'mdi-check-circle-outline' : 'mdi-compare-horizontal',
+)
+
+const compareButtonTitle = computed(() => {
+  if (isCompareSelected.value) {
+    return t('product.hero.compare.remove')
+  }
+
+  if (!compareEligibility.value.success) {
+    return reasonMessage(compareEligibility.value.reason)
+  }
+
+  return t('product.hero.compare.add')
+})
+
+const compareButtonAriaLabel = computed(() => {
+  const name = displayName.value
+
+  if (isCompareSelected.value) {
+    if (te('product.hero.compare.ariaSelected')) {
+      return t('product.hero.compare.ariaSelected', { name })
+    }
+
+    return t('product.hero.compare.remove')
+  }
+
+  if (!compareEligibility.value.success) {
+    return reasonMessage(compareEligibility.value.reason)
+  }
+
+  if (te('product.hero.compare.ariaAdd')) {
+    return t('product.hero.compare.ariaAdd', { name })
+  }
+
+  return t('product.hero.compare.add')
+})
+
+const isCompareDisabled = computed(
+  () => !isCompareSelected.value && !compareEligibility.value.success,
+)
+
+const toggleCompare = () => {
+  if (isCompareDisabled.value) {
+    return
+  }
+
+  compareStore.toggleProduct(product.value)
+}
 </script>
 
 <style scoped>
@@ -201,5 +292,44 @@ const productLink = computed(() => {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+}
+
+.product-alternative-card__compare-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  padding: 0.45rem 0.9rem;
+  min-width: unset;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+  background-color: rgba(var(--v-theme-surface-default), 0.95);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.product-alternative-card__compare-btn:hover,
+.product-alternative-card__compare-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22);
+}
+
+.product-alternative-card__compare-btn--active {
+  background-color: rgba(var(--v-theme-primary), 0.16);
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-alternative-card__compare-label {
+  font-size: 0.85rem;
+}
+
+.product-alternative-card__compare-btn :deep(.v-icon) {
+  transition: transform 0.2s ease;
+}
+
+.product-alternative-card__compare-btn--active :deep(.v-icon) {
+  transform: scale(1.05);
 }
 </style>
