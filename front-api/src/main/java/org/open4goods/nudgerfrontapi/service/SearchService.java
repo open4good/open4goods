@@ -1,5 +1,6 @@
 package org.open4goods.nudgerfrontapi.service;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,11 +11,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import jakarta.annotation.PostConstruct;
 
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.Score;
+import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
@@ -42,6 +52,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -81,6 +92,16 @@ public class SearchService {
     private static final int DEFAULT_BUCKET_COUNT = 10;
     private static final int DEFAULT_TERMS_SIZE = 50;
     private static final int GLOBAL_SEARCH_LIMIT = 100;
+    private static final int SUGGEST_RESULT_LIMIT = 5;
+    private static final String[] SUGGEST_SOURCE_INCLUDES = {
+            "attributes.referentielAttributes.MODEL",
+            "attributes.referentielAttributes.BRAND",
+            "attributes.referentielAttributes.GTIN",
+            "coverImagePath",
+            "vertical",
+            "scores.ECOSCORE"
+    };
+    private static final String DEFAULT_LANGUAGE_KEY = "default";
     private static final String OFFER_NAMES_DENSITY_SCRIPT = """
             if (params.tokens == null || params.tokens.isEmpty()) { return _score; }
             def offers = params['_source'].offerNames;
@@ -104,12 +125,20 @@ public class SearchService {
     private final ProductRepository repository;
     private final VerticalsConfigService verticalsConfigService;
     private final ProductMappingService productMappingService;
+    private final ApiProperties apiProperties;
+    private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
     public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
-            @Lazy ProductMappingService productMappingService) {
+            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties) {
         this.repository = repository;
         this.verticalsConfigService = verticalsConfigService;
         this.productMappingService = productMappingService;
+        this.apiProperties = apiProperties;
+    }
+
+    @PostConstruct
+    void initializeSuggestIndex() {
+        rebuildVerticalSuggestions();
     }
 
     /**
@@ -199,6 +228,209 @@ public class SearchService {
         SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
         List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
         return new GlobalSearchResult(List.of(), fallback, true);
+    }
+
+    /**
+     * Generate suggest data by combining vertical matches and product hits.
+     *
+     * @param query          user input fragment
+     * @param domainLanguage localisation hint for categories
+     * @return bundle of category and product suggestions
+     */
+    public SuggestResult suggest(String query, DomainLanguage domainLanguage) {
+        String sanitizedQuery = sanitize(query);
+        if (!StringUtils.hasText(sanitizedQuery)) {
+            return new SuggestResult(List.of(), List.of());
+        }
+
+        List<String> categoryTokens = normalizedTokens(normalizeForComparison(sanitizedQuery));
+        List<CategorySuggestion> categoryMatches = categoryTokens.isEmpty()
+                ? List.of()
+                : findCategoryMatches(categoryTokens, domainLanguage);
+
+        List<String> scriptTokens = tokenizeForScript(sanitizedQuery);
+        SearchHits<Product> productHits = executeSuggestProductSearch(sanitizedQuery, scriptTokens);
+        List<ProductSuggestHit> productMatches = mapSuggestHits(productHits);
+
+        return new SuggestResult(categoryMatches, productMatches);
+    }
+
+    private List<CategorySuggestion> findCategoryMatches(List<String> tokens, DomainLanguage domainLanguage) {
+        if (tokens == null || tokens.isEmpty()) {
+            return List.of();
+        }
+        String requestedLanguage = domainLanguage != null ? domainLanguage.languageTag() : null;
+        List<VerticalSuggestionEntry> suggestions = verticalSuggestions;
+        List<CategorySuggestion> matches = suggestions.stream()
+                .filter(entry -> entry.matchesLanguage(requestedLanguage))
+                .filter(entry -> entry.matches(tokens))
+                .limit(SUGGEST_RESULT_LIMIT)
+                .map(this::toCategorySuggestion)
+                .toList();
+
+        if (matches.isEmpty() && StringUtils.hasText(requestedLanguage)) {
+            matches = suggestions.stream()
+                    .filter(VerticalSuggestionEntry::isDefaultLanguage)
+                    .filter(entry -> entry.matches(tokens))
+                    .limit(SUGGEST_RESULT_LIMIT)
+                    .map(this::toCategorySuggestion)
+                    .toList();
+        }
+        return matches;
+    }
+
+    private CategorySuggestion toCategorySuggestion(VerticalSuggestionEntry entry) {
+        return new CategorySuggestion(entry.verticalId(), entry.imageSmall(), entry.title(), entry.url());
+    }
+
+    private List<ProductSuggestHit> mapSuggestHits(SearchHits<Product> hits) {
+        if (hits == null || hits.isEmpty()) {
+            return List.of();
+        }
+        return hits.getSearchHits().stream()
+                .map(this::mapSuggestHit)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private ProductSuggestHit mapSuggestHit(SearchHit<Product> hit) {
+        if (hit == null || hit.getContent() == null) {
+            return null;
+        }
+        Product product = hit.getContent();
+        Map<ReferentielKey, String> referentiel = product.getAttributes() != null
+                ? product.getAttributes().getReferentielAttributes()
+                : null;
+        String model = referentiel != null ? referentiel.get(ReferentielKey.MODEL) : null;
+        String brand = referentiel != null ? referentiel.get(ReferentielKey.BRAND) : null;
+        String gtin = referentiel != null ? referentiel.get(ReferentielKey.GTIN) : null;
+        Score ecoscore = product.ecoscore();
+        Double ecoscoreValue = ecoscore != null ? ecoscore.getValue() : null;
+        return new ProductSuggestHit(model, brand, gtin, product.getCoverImagePath(), product.getVertical(), ecoscoreValue,
+                (double) hit.getScore());
+    }
+
+    private SearchHits<Product> executeSuggestProductSearch(String sanitizedQuery, List<String> tokens) {
+        if (!StringUtils.hasText(sanitizedQuery)) {
+            return null;
+        }
+        Query query = buildSuggestProductQuery(sanitizedQuery, tokens);
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(query)
+                .withPageable(PageRequest.of(0, SUGGEST_RESULT_LIMIT))
+                .withSourceFilter(new FetchSourceFilter(true, SUGGEST_SOURCE_INCLUDES, null));
+        try {
+            return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+    }
+
+    private Query buildSuggestProductQuery(String sanitizedQuery, List<String> tokens) {
+        Long expiration = repository.expirationClause();
+
+        return Query.of(q -> q.functionScore(fs -> {
+            fs.scoreMode(FunctionScoreMode.Multiply);
+            fs.boostMode(FunctionBoostMode.Multiply);
+            fs.query(inner -> inner.bool(b -> {
+                b.filter(f -> f.range(r -> r.date(d -> d
+                        .field("lastChange")
+                        .gt(expiration.toString()))));
+                b.filter(f -> f.range(r -> r.number(n -> n
+                        .field("offersCount")
+                        .gt(0.0))));
+                b.filter(f -> f.term(t -> t.field("excluded").value(false)));
+                b.filter(f -> f.exists(e -> e.field("vertical")));
+                b.must(m -> m.match(mq -> mq.field("offerNames")
+                        .query(sanitizedQuery)
+                        .operator(Operator.And)));
+                return b;
+            }));
+            if (tokens != null && !tokens.isEmpty()) {
+                fs.functions(func -> func.scriptScore(ss -> ss.script(Script.of(s -> s
+                        .lang("painless")
+                        .source(OFFER_NAMES_DENSITY_SCRIPT)
+                        .params(Map.of("tokens", JsonData.of(tokens)))))));
+            }
+            return fs;
+        }));
+    }
+
+    private void rebuildVerticalSuggestions() {
+        List<VerticalSuggestionEntry> entries = verticalsConfigService.getConfigsWithoutDefault().stream()
+                .flatMap(config -> {
+                    if (config.getI18n() == null) {
+                        return Stream.<VerticalSuggestionEntry>empty();
+                    }
+                    return config.getI18n().entrySet().stream()
+                            .map(entry -> buildVerticalSuggestion(config, entry.getKey(), entry.getValue()))
+                            .flatMap(Optional::stream);
+                })
+                .toList();
+        verticalSuggestions = List.copyOf(entries);
+    }
+
+    private Optional<VerticalSuggestionEntry> buildVerticalSuggestion(VerticalConfig config, String languageKey,
+            ProductI18nElements i18n) {
+        if (config == null || i18n == null) {
+            return Optional.empty();
+        }
+        String verticalId = config.getId();
+        String title = StringUtils.hasText(i18n.getVerticalHomeTitle()) ? i18n.getVerticalHomeTitle().trim() : null;
+        String url = StringUtils.hasText(i18n.getVerticalHomeUrl()) ? i18n.getVerticalHomeUrl().trim() : null;
+        if (!StringUtils.hasText(verticalId) || !StringUtils.hasText(title) || !StringUtils.hasText(url)) {
+            return Optional.empty();
+        }
+        String language = StringUtils.hasText(languageKey) ? languageKey.trim() : DEFAULT_LANGUAGE_KEY;
+        String normalizedTitle = normalizeForComparison(title);
+        String normalizedId = normalizeForComparison(verticalId);
+        String normalizedUrl = normalizeForComparison(url);
+        String imageSmall = buildVerticalImageSmall(verticalId);
+        VerticalSuggestionEntry entry = new VerticalSuggestionEntry(verticalId, language, imageSmall, title, url,
+                normalizedTitle, normalizedId, normalizedUrl);
+        return Optional.of(entry);
+    }
+
+    private String buildVerticalImageSmall(String verticalId) {
+        if (!StringUtils.hasText(apiProperties.getResourceRootPath()) || !StringUtils.hasText(verticalId)) {
+            return null;
+        }
+        return apiProperties.getResourceRootPath() + "/images/verticals/" + verticalId + "-100.webp";
+    }
+
+    private String normalizeForComparison(String value) {
+        if (!StringUtils.hasText(value)) {
+            return "";
+        }
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^\\p{Alnum}\\s]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+        return normalized.toLowerCase(Locale.ROOT);
+    }
+
+    private List<String> normalizedTokens(String normalized) {
+        if (!StringUtils.hasText(normalized)) {
+            return List.of();
+        }
+        return Arrays.stream(normalized.split("\\s+"))
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .distinct()
+                .toList();
+    }
+
+    private List<String> tokenizeForScript(String value) {
+        if (!StringUtils.hasText(value)) {
+            return List.of();
+        }
+        return Arrays.stream(value.toLowerCase(Locale.ROOT).split("\\s+"))
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .distinct()
+                .toList();
     }
 
     private boolean isValidAggregation(Agg agg) {
@@ -601,6 +833,57 @@ public class SearchService {
      * Lightweight representation of a product hit used by the controller layer.
      */
     public record GlobalSearchHit(String verticalId, ProductDto product, double score) {
+    }
+
+    /**
+     * Result returned by the suggest feature combining category and product matches.
+     */
+    public record SuggestResult(List<CategorySuggestion> categoryMatches, List<ProductSuggestHit> productMatches) {
+
+        public SuggestResult {
+            categoryMatches = List.copyOf(categoryMatches);
+            productMatches = List.copyOf(productMatches);
+        }
+    }
+
+    /**
+     * Category suggestion projected from the in-memory vertical index.
+     */
+    public record CategorySuggestion(String verticalId, String imageSmall, String verticalHomeTitle, String verticalHomeUrl) {
+    }
+
+    /**
+     * Product suggestion built from a lightweight Elasticsearch hit.
+     */
+    public record ProductSuggestHit(String model, String brand, String gtin, String coverImagePath, String verticalId,
+            Double ecoscoreValue, Double score) {
+    }
+
+    private record VerticalSuggestionEntry(String verticalId, String languageKey, String imageSmall, String title,
+            String url, String normalizedTitle, String normalizedId, String normalizedUrl) {
+
+        boolean matchesLanguage(String requestedLanguage) {
+            if (!StringUtils.hasText(requestedLanguage)) {
+                return true;
+            }
+            return requestedLanguage.equalsIgnoreCase(languageKey);
+        }
+
+        boolean isDefaultLanguage() {
+            return DEFAULT_LANGUAGE_KEY.equalsIgnoreCase(languageKey);
+        }
+
+        boolean matches(List<String> tokens) {
+            if (tokens == null || tokens.isEmpty()) {
+                return false;
+            }
+            for (String token : tokens) {
+                if (!normalizedTitle.contains(token) && !normalizedId.contains(token) && !normalizedUrl.contains(token)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     /**
