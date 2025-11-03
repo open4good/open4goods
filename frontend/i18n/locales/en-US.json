@@ -1278,14 +1278,23 @@
       }
     },
     "results": {
-      "summary": "Displaying {count, plural, one {# result} other {# results}} for \u201c{query}\u201d"
+      "summary": "Displaying {countLabel} for \u201c{query}\u201d",
+      "count": {
+        "one": "{count} result",
+        "other": "{count} results"
+      }
     },
     "notice": {
       "fallback": "We could not match a specific category, so we are showing the most relevant products overall."
     },
     "groups": {
-      "count": "{count, plural, one {# product} other {# products}}",
-      "unknownTitle": "Other products"
+      "count": {
+        "one": "{count} product",
+        "other": "{count} products"
+      },
+      "unknownTitle": "Other products",
+      "viewCategory": "Browse this category",
+      "viewCategoryAria": "Browse the {title} category"
     },
     "seo": {
       "title": "Product search",
