@@ -1412,8 +1412,6 @@
       "title": "Technical specifications",
       "subtitle": "Browse every specification and filter with keywords.",
       "searchPlaceholder": "Search a specification",
-      "features": "Highlights",
-      "unfeatures": "Watchouts",
       "main": {
         "title": "Key specifications",
         "identity": {
@@ -1430,7 +1428,6 @@
           "empty": "Identity information is not yet available for this product."
         },
         "attributes": {
-          "title": "Indexed attributes",
           "empty": "Indexed attributes will appear here when available."
         }
       },
