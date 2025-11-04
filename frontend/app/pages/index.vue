@@ -482,9 +482,7 @@ useHead(() => ({
 
 .home-hero
   padding-block: clamp(4rem, 10vw, 7rem)
-  background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.28), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.25), transparent 60%),
-    rgb(var(--v-theme-surface-default))
+  background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.25), transparent 60%), rgb(var(--v-theme-surface-default))
 
 .home-hero__container
   display: flex
