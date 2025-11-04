@@ -22,6 +22,7 @@
               @clear="handleClear"
               @select-category="handleCategorySuggestion"
               @select-product="handleProductSuggestion"
+              @submit="handleSearchSubmit"
             />
             <v-btn class="search-hero__submit" type="submit" size="large">
               {{ t('search.form.submit') }}

@@ -30,6 +30,11 @@ vi.mock('vue-i18n', () => ({
 }))
 
 mockNuxtImport('useRequestURL', () => () => new URL('https://example.com/'))
+mockNuxtImport('useRuntimeConfig', () => () => ({
+  public: {
+    staticServer: 'https://static.example.com'
+  }
+}))
 
 const VAutocompleteStub = defineComponent({
   name: 'VAutocompleteStub',
@@ -45,12 +50,17 @@ const VAutocompleteStub = defineComponent({
     noDataText: { type: String, default: '' },
     search: { type: String, default: '' },
   },
-  emits: ['update:modelValue', 'update:search', 'click:clear'],
-  setup(props, { slots }) {
+  emits: ['update:modelValue', 'update:search', 'click:clear', 'keydown:enter'],
+  setup(props, { slots, attrs }) {
+    const { class: className, ...restAttrs } = attrs
+
     return () =>
       h(
         'div',
-        { class: 'v-autocomplete-stub' },
+        {
+          ...restAttrs,
+          class: ['v-autocomplete-stub', className as string | undefined],
+        },
         slots['no-data'] ? slots['no-data']() : [],
       )
   },
@@ -72,7 +82,7 @@ const sampleResponse: SearchSuggestResponseDto = {
       verticalId: 'tv',
       verticalHomeTitle: 'Téléviseurs',
       verticalHomeUrl: 'televiseurs',
-      imageSmall: 'https://cdn.example.com/tv.jpg',
+      imageSmall: '/assets/tv.jpg',
     },
   ],
   productMatches: [
@@ -148,6 +158,8 @@ describe('SearchSuggestField', () => {
     expect(items).toHaveLength(2)
     expect(items[0]?.type).toBe('category')
     expect(items[1]?.type).toBe('product')
+    expect((items[0] as Record<string, string>).image).toBe('https://static.example.com/assets/tv.jpg')
+    expect((items[1] as Record<string, string>).image).toBe('https://static.example.com/images/tv.webp')
   })
 
   it('emits events when a suggestion is selected or cleared', async () => {
@@ -171,5 +183,53 @@ describe('SearchSuggestField', () => {
     expect(wrapper.emitted('select-category')?.[0]?.[0]).toEqual(category)
     expect(wrapper.emitted('select-product')?.[0]?.[0]).toEqual(product)
     expect(wrapper.emitted('clear')).toBeTruthy()
+  })
+
+  it('does not show the empty state before reaching the minimum length', async () => {
+    const wrapper = await mountField()
+
+    expect(wrapper.html()).not.toContain('Type at least')
+  })
+
+  it('shows an empty state when no suggestions are available after the minimum length', async () => {
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({
+      categoryMatches: [],
+      productMatches: [],
+    }))
+
+    const wrapper = await mountField()
+    const autocomplete = wrapper.getComponent(VAutocompleteStub)
+
+    autocomplete.vm.$emit('update:search', 'tv')
+    await wrapper.vm.$nextTick()
+    await wrapper.setProps({ modelValue: 'tv' })
+    vi.advanceTimersByTime(350)
+    await flushPromises()
+
+    expect(wrapper.html()).toContain('No suggestions yet.')
+  })
+
+
+
+  it('does not emit submit when a suggestion is selected via the keyboard', async () => {
+    const wrapper = await mountField()
+    const autocomplete = wrapper.getComponent(VAutocompleteStub)
+
+    autocomplete.vm.$emit('update:search', 'tv')
+    await wrapper.vm.$nextTick()
+    await wrapper.setProps({ modelValue: 'tv' })
+    vi.advanceTimersByTime(350)
+    await flushPromises()
+
+    const items = autocomplete.props('items') as Array<Record<string, unknown>>
+    const product = items.find((item) => item.type === 'product')
+
+    autocomplete.vm.$emit('keydown:enter', new KeyboardEvent('keydown', { key: 'Enter' }))
+    autocomplete.vm.$emit('update:modelValue', product)
+    vi.runAllTimers()
+    await flushPromises()
+
+    expect(wrapper.emitted('submit')).toBeUndefined()
+    expect(wrapper.emitted('select-product')).toBeTruthy()
   })
 })
