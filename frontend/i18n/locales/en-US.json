@@ -34,6 +34,172 @@
       "tagTitle": "{tag} articles – Nudger Blog"
     }
   },
+  "home": {
+    "seo": {
+      "title": "Nudger – Responsible shopping made easy",
+      "description": "Compare the environmental impact and prices of over 50 million products with Nudger.",
+      "imageAlt": "Illustration of the Nudger dashboard showing impact scores and price comparisons."
+    },
+    "hero": {
+      "eyebrow": "Responsible shopping",
+      "title": "Responsible choices aren’t a luxury",
+      "subtitle": "Save time, stay true to your values. Compare effortlessly, choose freely.",
+      "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
+      "search": {
+        "label": "Search for a product",
+        "placeholder": "Search a product (e.g. television, smartphone…)",
+        "ariaLabel": "Search for a responsible product",
+        "cta": "Compare",
+        "helper": "Already 50M+ references in open data."
+      }
+    },
+    "problems": {
+      "title": "Too many labels, not enough clarity?",
+      "items": {
+        "labelsOverload": "Lost in the jungle of labels? Hard to truly compare.",
+        "budgetVsEcology": "Ecology versus budget? Tired of choosing between the two.",
+        "tooManyTabs": "Eight tabs open? One place is enough."
+      }
+    },
+    "solution": {
+      "title": "Responsible shopping, minus the headache",
+      "description": "Nudger combines environmental, technical and pricing insights to simplify every decision.",
+      "benefits": {
+        "time": "Save time — we analyse the data for you.",
+        "savings": "Save money — price comparison built in.",
+        "planet": "Shop better — spot the most responsible products.",
+        "trust": "Trustworthy — open data, independent recommendations."
+      }
+    },
+    "features": {
+      "title": "Key features",
+      "subtitle": "See what Nudger puts at your fingertips.",
+      "cards": {
+        "impactScore": {
+          "title": "AI Impact Score",
+          "description": "A clear ecological score (5 criteria, AI used with restraint)."
+        },
+        "priceComparison": {
+          "title": "Price comparison + history",
+          "description": "Pay the right price at the right time."
+        },
+        "openIndependent": {
+          "title": "Open & independent",
+          "description": "Open source, open data, no brand influence."
+        },
+        "noTracking": {
+          "title": "Zero tracking",
+          "description": "We track products, not you. Cookies are for eating 🍪."
+        },
+        "massiveBase": {
+          "title": "Massive dataset",
+          "description": "The largest open-data catalogue on the market: 50 million references."
+        }
+      }
+    },
+    "categories": {
+      "title": "Browse categories",
+      "subtitle": "Start with our most popular universes and refine in one click.",
+      "cta": "Browse products",
+      "items": {
+        "electronics": {
+          "title": "Electronics",
+          "description": "Smartphones, TVs, audio… stay connected without compromising your values."
+        },
+        "appliances": {
+          "title": "Appliances",
+          "description": "Washing machines, dishwashers, fridges… optimise your energy use."
+        }
+      }
+    },
+    "trust": {
+      "title": "Proof & trust",
+      "subtitle": "Demanding partners and open data keep us accountable.",
+      "logos": {
+        "ademe": "ADEME – French Agency for Ecological Transition"
+      },
+      "stats": {
+        "references": "50,000,000+ open-data references",
+        "updates": "Updated on a regular basis"
+      }
+    },
+    "blog": {
+      "title": "From the blog",
+      "cta": "Browse all articles",
+      "readMore": "Read article",
+      "items": {
+        "first": {
+          "title": "How we keep our AI frugal",
+          "date": "15 Jan 2025",
+          "excerpt": "The technical choices that keep Nudger’s computations low-carbon."
+        },
+        "second": {
+          "title": "Prioritising durability and repairability",
+          "date": "8 Jan 2025",
+          "excerpt": "Why repairability weighs more in the Impact Score."
+        },
+        "third": {
+          "title": "Balancing price and impact, step by step",
+          "date": "20 Dec 2024",
+          "excerpt": "Nudger’s method to align ecology and budget without compromise."
+        }
+      }
+    },
+    "objections": {
+      "title": "Straight questions, clear answers",
+      "subtitle": "The topics we hear about the most.",
+      "items": {
+        "aiEnergy": {
+          "question": "Does AI burn too much energy?",
+          "answer": "Frugal AI, optimised computations, net positive impact."
+        },
+        "reuse": {
+          "question": "Is true frugality all about reuse?",
+          "answer": "We promote using less first, then better; durability and refurb when available."
+        },
+        "independence": {
+          "question": "Are you independent?",
+          "answer": "Yes. Results stay neutral, code is open, funding never affects rankings."
+        }
+      }
+    },
+    "faq": {
+      "title": "FAQ",
+      "subtitle": "Quick answers to the most common questions.",
+      "items": {
+        "free": {
+          "question": "Is Nudger free?",
+          "answer": "Yes, searching is free to use."
+        },
+        "account": {
+          "question": "Do I need an account?",
+          "answer": "No for searching; an account is optional if you want lists or alerts."
+        },
+        "categories": {
+          "question": "Which categories are covered?",
+          "answer": "Electronics & Appliances today, more to come."
+        },
+        "impactScore": {
+          "question": "How do you calculate the Impact Score?",
+          "answer": "Five weighted criteria + lean AI, fully open methodology."
+        },
+        "dataFreshness": {
+          "question": "Are the data kept up to date?",
+          "answer": "Yes, refreshed regularly with quality checks."
+        },
+        "suggestProduct": {
+          "question": "How can I suggest a product?",
+          "answer": "Use our dedicated contact form."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to buy better without overspending?",
+      "subtitle": "Restart a search or explore the analysed offers.",
+      "button": "Start a search",
+      "altLink": "Open the search page"
+    }
+  },
   "categories": {
     "navigation": {
       "error": {
