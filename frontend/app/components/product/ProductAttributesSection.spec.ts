@@ -81,6 +81,25 @@ const VTextFieldStub = defineComponent({
   },
 })
 
+const VRowStub = defineComponent({
+  name: 'VRowStub',
+  setup(_, { slots }) {
+    return () => h('div', { class: 'v-row-stub' }, slots.default?.())
+  },
+})
+
+const VColStub = defineComponent({
+  name: 'VColStub',
+  props: {
+    cols: { type: [Number, String], default: 12 },
+    sm: { type: [Number, String], default: undefined },
+    lg: { type: [Number, String], default: undefined },
+  },
+  setup(_, { slots }) {
+    return () => h('div', { class: 'v-col-stub' }, slots.default?.())
+  },
+})
+
 const buildProduct = (): ProductDto => ({
   gtin: 1234567890123,
   base: {
@@ -96,7 +115,7 @@ const buildProduct = (): ProductDto => ({
   },
   attributes: {
     indexedAttributes: {
-      weight: { name: 'Weight', value: '2 kg' },
+      weight: { name: 'Weight', value: '<strong>2 kg</strong>' },
       depth: { name: 'Depth', numericValue: 45 },
       wireless: { name: 'Wireless', booleanValue: true },
     },
@@ -105,7 +124,7 @@ const buildProduct = (): ProductDto => ({
         name: 'Performance',
         features: [{ name: 'Battery life', value: '10 h' }],
         unFeatures: [{ name: 'Noise level', value: 'High' }],
-        attributes: [{ name: 'Power', value: '200 W' }],
+        attributes: [{ name: 'Power', value: '<em>200 W</em>' }],
       },
       {
         name: 'Dimensions',
@@ -127,8 +146,6 @@ const i18n = createI18n({
           title: 'Technical specifications',
           subtitle: 'Browse every specification and filter with keywords.',
           searchPlaceholder: 'Search a specification',
-          features: 'Highlights',
-          unfeatures: 'Watchouts',
           main: {
             title: 'Key specifications',
             identity: {
@@ -145,7 +162,6 @@ const i18n = createI18n({
               empty: 'Identity information is not yet available for this product.',
             },
             attributes: {
-              title: 'Indexed attributes',
               empty: 'Indexed attributes will appear here when available.',
             },
           },
@@ -183,6 +199,8 @@ const mountComponent = async (product: ProductDto) => {
         VChip: VChipStub,
         VImg: VImgStub,
         VTextField: VTextFieldStub,
+        VRow: VRowStub,
+        VCol: VColStub,
       },
     },
   })
@@ -229,6 +247,10 @@ describe('ProductAttributesSection', () => {
     expect(mainText).toContain('45')
     expect(mainText).toContain('Wireless')
     expect(mainText).toContain('Yes')
+
+    const richValue = wrapper.find('.product-attributes__table-value')
+    expect(richValue.exists()).toBe(true)
+    expect(richValue.html()).toContain('<strong>2 kg</strong>')
   })
 
   it('filters detailed groups with the search input', async () => {

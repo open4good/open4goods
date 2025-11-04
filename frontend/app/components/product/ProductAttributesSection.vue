@@ -30,7 +30,23 @@
               class="product-attributes__identity-row"
             >
               <span class="product-attributes__identity-label">{{ row.label }}</span>
-              <span class="product-attributes__identity-value">{{ row.value }}</span>
+              <div class="product-attributes__identity-value">
+                <span>{{ row.value }}</span>
+                <div v-if="row.details?.length" class="product-attributes__identity-details">
+                  <div
+                    v-for="detail in row.details"
+                    :key="detail.key"
+                    class="product-attributes__identity-detail"
+                  >
+                    <span class="product-attributes__identity-detail-label">
+                      {{ detail.label }}
+                    </span>
+                    <ul class="product-attributes__identity-detail-list">
+                      <li v-for="value in detail.values" :key="value">{{ value }}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <p v-else-if="!gtinImageUrl" class="product-attributes__empty product-attributes__identity-empty">
@@ -51,9 +67,6 @@
         </v-card>
 
         <v-card class="product-attributes__main-card" variant="flat">
-          <div class="product-attributes__card-header">
-            <h4>{{ $t('product.attributes.main.attributes.title') }}</h4>
-          </div>
           <v-table
             v-if="mainAttributes.length"
             density="comfortable"
@@ -62,7 +75,10 @@
             <tbody>
               <tr v-for="attribute in mainAttributes" :key="attribute.key">
                 <th scope="row">{{ attribute.label }}</th>
-                <td>{{ attribute.value }}</td>
+                <td>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <span class="product-attributes__table-value" v-html="attribute.value" />
+                </td>
               </tr>
             </tbody>
           </v-table>
@@ -88,66 +104,13 @@
         />
       </div>
 
-      <div v-if="filteredGroups.length" class="product-attributes__details-grid">
-        <v-card
+      <v-row v-if="filteredGroups.length" class="product-attributes__details-grid" dense>
+        <ProductAttributesDetailCard
           v-for="group in filteredGroups"
           :key="group.id"
-          class="product-attributes__detail-card"
-          variant="flat"
-        >
-          <header class="product-attributes__detail-header">
-            <h4>{{ group.name }}</h4>
-            <v-chip size="small" variant="tonal" color="primary">
-              {{ group.totalCount }}
-            </v-chip>
-          </header>
-
-          <div
-            v-if="group.features.length"
-            class="product-attributes__feature-list product-attributes__feature-list--positive"
-          >
-            <p class="product-attributes__feature-title">
-              <v-icon icon="mdi-check-circle-outline" class="product-attributes__feature-icon" />
-              <span>{{ $t('product.attributes.features') }}</span>
-            </p>
-            <ul>
-              <li v-for="feature in group.features" :key="feature.key">
-                <span class="product-attributes__feature-name">{{ feature.name }}</span>
-                <span class="product-attributes__feature-value">{{ feature.value }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <div
-            v-if="group.unFeatures.length"
-            class="product-attributes__feature-list product-attributes__feature-list--negative"
-          >
-            <p class="product-attributes__feature-title">
-              <v-icon icon="mdi-alert-circle-outline" class="product-attributes__feature-icon" />
-              <span>{{ $t('product.attributes.unfeatures') }}</span>
-            </p>
-            <ul>
-              <li v-for="feature in group.unFeatures" :key="feature.key">
-                <span class="product-attributes__feature-name">{{ feature.name }}</span>
-                <span class="product-attributes__feature-value">{{ feature.value }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <v-table
-            v-if="group.attributes.length"
-            density="comfortable"
-            class="product-attributes__table"
-          >
-            <tbody>
-              <tr v-for="attribute in group.attributes" :key="attribute.key">
-                <th scope="row">{{ attribute.name }}</th>
-                <td>{{ attribute.value }}</td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card>
-      </div>
+          :group="group"
+        />
+      </v-row>
 
       <p v-else class="product-attributes__empty product-attributes__empty--detailed">
         {{
@@ -166,6 +129,7 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 import type {
   ProductAttributeDto,
   ProductAttributesDto,
@@ -314,10 +278,17 @@ const toStringList = (input: unknown): string[] => {
   return []
 }
 
+interface IdentityDetail {
+  key: string
+  label: string
+  values: string[]
+}
+
 interface IdentityRow {
   key: string
   label: string
   value: string
+  details?: IdentityDetail[]
 }
 
 const identityRows = computed<IdentityRow[]>(() => {
@@ -333,30 +304,34 @@ const identityRows = computed<IdentityRow[]>(() => {
     })
   }
 
-  const otherBrands = toStringList(identity?.akaBrands)
-  if (otherBrands.length) {
-    rows.push({
-      key: 'akaBrands',
-      label: t('product.attributes.main.identity.akaBrands'),
-      value: otherBrands.join(', '),
-    })
-  }
+  const alternativeBrands = toStringList(identity?.akaBrands)
+  const alternativeModels = toStringList(identity?.akaModels)
 
   const model = firstNonEmptyString(identity?.model, referentialAttributes.value.model)
-  if (model) {
+  if (model || alternativeBrands.length || alternativeModels.length) {
+    const details: IdentityDetail[] = []
+
+    if (alternativeBrands.length) {
+      details.push({
+        key: 'akaBrands',
+        label: t('product.attributes.main.identity.akaBrands'),
+        values: alternativeBrands,
+      })
+    }
+
+    if (alternativeModels.length) {
+      details.push({
+        key: 'akaModels',
+        label: t('product.attributes.main.identity.akaModels'),
+        values: alternativeModels,
+      })
+    }
+
     rows.push({
       key: 'model',
       label: t('product.attributes.main.identity.model'),
-      value: model,
-    })
-  }
-
-  const otherNames = toStringList(identity?.akaModels)
-  if (otherNames.length) {
-    rows.push({
-      key: 'akaModels',
-      label: t('product.attributes.main.identity.akaModels'),
-      value: otherNames.join(', '),
+      value: model ?? '—',
+      details: details.length ? details : undefined,
     })
   }
 
@@ -436,13 +411,13 @@ const mainAttributes = computed<MainAttributeRow[]>(() => {
   }, [])
 })
 
-interface DetailAttributeView {
+export interface DetailAttributeView {
   key: string
   name: string
   value: string
 }
 
-interface DetailGroupView {
+export interface DetailGroupView {
   id: string
   name: string
   attributes: DetailAttributeView[]
@@ -600,8 +575,7 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 }
 
 .product-attributes__identity-card,
-.product-attributes__main-card,
-.product-attributes__detail-card {
+.product-attributes__main-card {
   border-radius: 20px;
   background: rgba(var(--v-theme-surface-glass-strong), 0.96);
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
@@ -642,6 +616,36 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 }
 
 .product-attributes__identity-value {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-attributes__identity-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-attributes__identity-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-attributes__identity-detail-label {
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+}
+
+.product-attributes__identity-detail-list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  list-style: disc;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
@@ -656,18 +660,13 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
   min-height: 160px;
   background: rgb(var(--v-theme-surface-primary-080));
+  width: min(180px, 33%);
+  align-self: center;
 }
 
 .product-attributes__gtin-caption {
   font-size: 0.85rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-}
-
-.product-attributes__card-header h4 {
-  margin: 0;
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-attributes__table {
@@ -708,70 +707,13 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 }
 
 .product-attributes__details-grid {
-  display: grid;
-  gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin: 0 -0.75rem;
 }
 
-.product-attributes__detail-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
 
-.product-attributes__detail-header h4 {
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  font-weight: 600;
-  margin: 0;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-attributes__feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border-radius: 14px;
-  background: rgba(var(--v-theme-surface-primary-080), 0.8);
-}
-
-.product-attributes__feature-list--positive {
-  border-left: 4px solid rgba(var(--v-theme-success), 0.65);
-}
-
-.product-attributes__feature-list--negative {
-  border-left: 4px solid rgba(var(--v-theme-error), 0.65);
-  background: rgba(var(--v-theme-surface-primary-050), 0.6);
-}
-
-.product-attributes__feature-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-attributes__feature-icon {
-  font-size: 1.1rem;
-}
-
-.product-attributes__feature-list ul {
-  margin: 0;
-  padding-left: 1rem;
-  display: grid;
-  gap: 0.35rem;
-}
-
-.product-attributes__feature-name {
-  font-weight: 600;
-}
-
-.product-attributes__feature-value {
-  display: block;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
-  margin-top: 0.15rem;
+.product-attributes__table-value {
+  display: inline-block;
+  max-width: 100%;
 }
 
 .product-attributes__empty {
