@@ -34,6 +34,172 @@
       "tagTitle": "Articles {tag} – Blog Nudger"
     }
   },
+  "home": {
+    "seo": {
+      "title": "Nudger – Consommer responsable n’est pas un luxe",
+      "description": "Comparez l’impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger.",
+      "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
+    },
+    "hero": {
+      "eyebrow": "Consommation responsable",
+      "title": "Consommer responsable n’est pas un luxe",
+      "subtitle": "Gagne du temps, garde tes valeurs. Compare simplement, choisis librement.",
+      "imageAlt": "Illustration d’un comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
+      "search": {
+        "label": "Rechercher un produit",
+        "placeholder": "Recherchez un produit (ex. téléviseur, smartphone…)",
+        "ariaLabel": "Rechercher un produit responsable",
+        "cta": "Comparer",
+        "helper": "Déjà +50 millions de références en open data."
+      }
+    },
+    "problems": {
+      "title": "Trop de labels, pas assez de clarté ?",
+      "items": {
+        "labelsOverload": "Perdu dans la jungle des labels ? Difficile de comparer vraiment.",
+        "budgetVsEcology": "Écologie vs pouvoir d’achat ? Marre de choisir entre les deux.",
+        "tooManyTabs": "8 sites ouverts ? Un seul endroit suffit."
+      }
+    },
+    "solution": {
+      "title": "Acheter responsable, sans prise de tête",
+      "description": "Nudger analyse les données écologiques, techniques et de prix pour simplifier chaque décision.",
+      "benefits": {
+        "time": "Gagnez du temps — on analyse pour vous.",
+        "savings": "Économisez — comparateur de prix intégré.",
+        "planet": "Consommez mieux — repérez les produits les plus responsables.",
+        "trust": "Confiance — données ouvertes, recommandations indépendantes."
+      }
+    },
+    "features": {
+      "title": "Fonctionnalités clés",
+      "subtitle": "Découvrez ce que Nudger met à votre service.",
+      "cards": {
+        "impactScore": {
+          "title": "Impact Score IA",
+          "description": "Un score écologique clair (5 critères, IA utilisée avec sobriété)."
+        },
+        "priceComparison": {
+          "title": "Comparateur de prix + historique",
+          "description": "Payer le juste prix, au bon moment."
+        },
+        "openIndependent": {
+          "title": "Ouvert & indépendant",
+          "description": "Open source, open data, aucune influence de marque."
+        },
+        "noTracking": {
+          "title": "Zéro tracking",
+          "description": "On suit les produits, pas vous. Les cookies, on les mange 🍪."
+        },
+        "massiveBase": {
+          "title": "Base massive",
+          "description": "La plus grande base open data du marché : 50 millions de références."
+        }
+      }
+    },
+    "categories": {
+      "title": "Parcourir les catégories",
+      "subtitle": "Commencez par nos univers les plus demandés et filtrez en un clic.",
+      "cta": "Voir les produits",
+      "items": {
+        "electronics": {
+          "title": "Électronique",
+          "description": "Smartphones, TV, audio… restez connecté sans renoncer à vos valeurs."
+        },
+        "appliances": {
+          "title": "Électroménager",
+          "description": "Lave-linge, lave-vaisselle, frigos… optimisez vos consommations d’énergie."
+        }
+      }
+    },
+    "trust": {
+      "title": "Preuves & confiance",
+      "subtitle": "Des partenaires exigeants et des données ouvertes pour garder le cap.",
+      "logos": {
+        "ademe": "ADEME – Agence de la transition écologique"
+      },
+      "stats": {
+        "references": "50 000 000+ références open data",
+        "updates": "Mises à jour régulières"
+      }
+    },
+    "blog": {
+      "title": "Du blog",
+      "cta": "Voir tous les articles",
+      "readMore": "Lire l’article",
+      "items": {
+        "first": {
+          "title": "Comment nous gardons une IA frugale",
+          "date": "15 janv. 2025",
+          "excerpt": "Nos choix techniques pour limiter l’empreinte carbone des calculs Nudger."
+        },
+        "second": {
+          "title": "Prioriser durabilité et réparabilité",
+          "date": "8 janv. 2025",
+          "excerpt": "Pourquoi les critères de réparabilité ont plus de poids dans l’Impact Score."
+        },
+        "third": {
+          "title": "Comparer prix et impact, mode d’emploi",
+          "date": "20 déc. 2024",
+          "excerpt": "La méthode Nudger pour confronter écologie et budget sans compromis."
+        }
+      }
+    },
+    "objections": {
+      "title": "Questions directes, réponses transparentes",
+      "subtitle": "Les sujets qui reviennent le plus souvent.",
+      "items": {
+        "aiEnergy": {
+          "question": "L’IA consomme beaucoup d’énergie ?",
+          "answer": "IA frugale, calculs optimisés, valeur nette positive."
+        },
+        "reuse": {
+          "question": "La vraie frugalité c’est le réemploi ?",
+          "answer": "On encourage d’abord consommer moins, puis mieux ; durabilité et reconditionné quand disponibles."
+        },
+        "independence": {
+          "question": "Êtes-vous indépendants ?",
+          "answer": "Oui. Résultats neutres, code ouvert, financements sans influence sur le classement."
+        }
+      }
+    },
+    "faq": {
+      "title": "FAQ",
+      "subtitle": "Les réponses rapides aux questions fréquentes.",
+      "items": {
+        "free": {
+          "question": "Nudger est-il gratuit ?",
+          "answer": "Oui, la recherche est libre d’accès."
+        },
+        "account": {
+          "question": "Besoin d’un compte ?",
+          "answer": "Non pour rechercher ; compte optionnel si vous souhaitez listes ou alertes."
+        },
+        "categories": {
+          "question": "Quelles catégories ?",
+          "answer": "Électronique & Électroménager aujourd’hui, extensions à venir."
+        },
+        "impactScore": {
+          "question": "Comment calculez-vous l’Impact Score ?",
+          "answer": "5 critères pondérés + IA sobre, méthode ouverte et auditée."
+        },
+        "dataFreshness": {
+          "question": "Les données sont-elles à jour ?",
+          "answer": "Oui, mises à jour régulières avec contrôles qualité."
+        },
+        "suggestProduct": {
+          "question": "Comment suggérer un produit ?",
+          "answer": "Via notre formulaire de contact dédié."
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à acheter mieux sans vous ruiner ?",
+      "subtitle": "Relancez une recherche ou découvrez les offres analysées.",
+      "button": "Lancer une recherche",
+      "altLink": "Explorer la recherche"
+    }
+  },
   "categories": {
     "navigation": {
       "error": {
