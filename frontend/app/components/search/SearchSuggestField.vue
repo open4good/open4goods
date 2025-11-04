@@ -19,6 +19,7 @@
     class="search-suggest-field"
     @update:model-value="handleSelection"
     @click:clear="handleClear"
+    @keydown.enter="handleEnterKey"
   >
     <template #item="{ item, props: itemProps, index }">
       <div class="search-suggest-field__entry" :data-section="item.raw.type">
@@ -98,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import type {
@@ -146,13 +147,14 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void
-  (event: 'clear'): void
+  (event: 'clear' | 'submit'): void
   (event: 'select-category', value: CategorySuggestionItem): void
   (event: 'select-product', value: ProductSuggestionItem): void
 }>()
 
 const { t } = useI18n()
 const requestURL = useRequestURL()
+const runtimeConfig = useRuntimeConfig()
 
 const internalSearch = ref(props.modelValue ?? '')
 const selectedItem = ref<SuggestionItem | null>(null)
@@ -161,6 +163,7 @@ const hasError = ref(false)
 const categories = ref<CategorySuggestionItem[]>([])
 const products = ref<ProductSuggestionItem[]>([])
 const currentRequest = ref(0)
+const pendingSubmit = ref(false)
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
@@ -169,7 +172,10 @@ const hasMinimumLength = computed(
 )
 
 const showEmptyState = computed(
-  () => !loading.value && (hasError.value || !categories.value.length && !products.value.length),
+  () =>
+    !loading.value &&
+    hasMinimumLength.value &&
+    (hasError.value || (!categories.value.length && !products.value.length)),
 )
 
 const firstProductIndex = computed(() => categories.value.length)
@@ -184,13 +190,27 @@ const suggestionItems = computed<SuggestionItem[]>(() => [
   ...products.value,
 ])
 
+const staticServerBase = computed(() => {
+  const configured = runtimeConfig.public?.staticServer
+
+  if (configured) {
+    try {
+      return new URL(configured).toString()
+    } catch {
+      // Ignore invalid runtime configuration and fall back to the request origin
+    }
+  }
+
+  return requestURL.origin
+})
+
 const toAbsoluteUrl = (value?: string | null): string | null => {
   if (!value) {
     return null
   }
 
   try {
-    return new URL(value, requestURL.origin).toString()
+    return new URL(value, staticServerBase.value).toString()
   } catch {
     return null
   }
@@ -338,10 +358,47 @@ watch(
   { flush: 'sync' },
 )
 
+let submitTimeout: ReturnType<typeof setTimeout> | null = null
+
+const cancelPendingSubmit = () => {
+  pendingSubmit.value = false
+
+  if (submitTimeout !== null) {
+    clearTimeout(submitTimeout)
+    submitTimeout = null
+  }
+}
+
+const handleEnterKey = (event: KeyboardEvent) => {
+  if (event.isComposing) {
+    return
+  }
+
+  pendingSubmit.value = true
+
+  if (submitTimeout !== null) {
+    clearTimeout(submitTimeout)
+  }
+
+  submitTimeout = setTimeout(() => {
+    if (pendingSubmit.value) {
+      emit('submit')
+    }
+
+    cancelPendingSubmit()
+  }, 0)
+}
+
+onBeforeUnmount(() => {
+  cancelPendingSubmit()
+})
+
 const handleSelection = (item: SuggestionItem | null) => {
   if (!item) {
     return
   }
+
+  cancelPendingSubmit()
 
   if (item.type === 'category') {
     emit('select-category', item)
@@ -353,6 +410,7 @@ const handleSelection = (item: SuggestionItem | null) => {
 }
 
 const handleClear = () => {
+  cancelPendingSubmit()
   internalSearch.value = ''
   resetSuggestions()
   hasError.value = false
