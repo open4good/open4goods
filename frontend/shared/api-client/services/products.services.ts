@@ -1,4 +1,4 @@
-import { ProductApi } from '..'
+import { ProductApi, ResponseError } from '..'
 import type {
   AggregationRequestDto,
   FilterRequestDto,
@@ -168,12 +168,51 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
       throw new TypeError('hCaptcha response is required to trigger review generation.')
     }
 
+    const config = createBackendApiConfig()
+    const basePath = (config.basePath ?? '').replace(/\/+$/, '')
+
+    if (!basePath) {
+      throw new Error('Missing backend API base URL; cannot trigger review generation.')
+    }
+
+    const requestUrl = new URL(
+      `${basePath}/products/${encodeURIComponent(String(parsedGtin))}/review`,
+    )
+
+    requestUrl.searchParams.set('hcaptchaResponse', hcaptchaResponse)
+    requestUrl.searchParams.set('domainLanguage', domainLanguage)
+
     try {
-      return await resolveApi().triggerReview({
-        gtin: parsedGtin,
-        hcaptchaResponse,
-        domainLanguage,
+      const response = await fetch(requestUrl.toString(), {
+        method: 'POST',
+        headers: {
+          ...(config.headers ?? {}),
+        },
+        credentials: config.credentials,
       })
+
+      if (!response.ok) {
+        throw new ResponseError(response, 'Response returned an error code')
+      }
+
+      const contentType = response.headers.get('content-type') ?? ''
+
+      if (contentType.includes('application/json')) {
+        try {
+          const payload = await response.json()
+
+          if (typeof payload === 'number' && Number.isFinite(payload)) {
+            return payload
+          }
+        } catch {
+          // fall back to parsing as text below when JSON parsing fails
+        }
+      }
+
+      const textPayload = await response.text().catch(() => null)
+      const scheduledGtin = textPayload ? Number.parseInt(textPayload, 10) : NaN
+
+      return Number.isFinite(scheduledGtin) ? scheduledGtin : parsedGtin
     } catch (error) {
       console.error('Error triggering review generation for product', parsedGtin, error)
       throw error
