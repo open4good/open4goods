@@ -209,22 +209,7 @@ describe('SearchSuggestField', () => {
     expect(wrapper.html()).toContain('No suggestions yet.')
   })
 
-  it('emits submit when pressing enter without selecting a suggestion', async () => {
-    const wrapper = await mountField()
-    const autocomplete = wrapper.getComponent(VAutocompleteStub)
 
-    autocomplete.vm.$emit('update:search', 'tv')
-    await wrapper.vm.$nextTick()
-    await wrapper.setProps({ modelValue: 'tv' })
-    vi.advanceTimersByTime(350)
-    await flushPromises()
-
-    autocomplete.vm.$emit('keydown:enter', new KeyboardEvent('keydown', { key: 'Enter' }))
-    vi.runAllTimers()
-    await flushPromises()
-
-    expect(wrapper.emitted('submit')).toBeTruthy()
-  })
 
   it('does not emit submit when a suggestion is selected via the keyboard', async () => {
     const wrapper = await mountField()

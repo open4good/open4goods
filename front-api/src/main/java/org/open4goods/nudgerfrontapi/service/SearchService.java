@@ -342,9 +342,8 @@ public class SearchService {
                         .gt(0.0))));
                 b.filter(f -> f.term(t -> t.field("excluded").value(false)));
                 b.filter(f -> f.exists(e -> e.field("vertical")));
-                b.must(m -> m.match(mq -> mq.field("offerNames")
-                        .query(sanitizedQuery)
-                        .operator(Operator.And)));
+                b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames")
+                        .query(sanitizedQuery)));
                 return b;
             }));
             if (tokens != null && !tokens.isEmpty()) {
