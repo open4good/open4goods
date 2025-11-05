@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Coordinates catalogue retrieval and indexing into Elasticsearch.
+ * TODO : HealthChecks, metrics
  */
 @Service
 public class EprelCatalogueService

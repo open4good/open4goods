@@ -3,6 +3,7 @@ package org.open4goods.api.controller.api;
 
 import java.io.IOException;
 
+import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.model.RolesConstants;
@@ -43,15 +44,19 @@ public class CompletionController {
 
 	private IcecatCompletionService iceCatService;
 
+	private EprelCompletionService eprelCompletionService;
+
 	public CompletionController(VerticalsConfigService verticalsConfigService,
 			ResourceCompletionService resourceCompletionService,
 //			AmazonCompletionService amazonCompletionService,
-			IcecatCompletionService iceCatService
+			IcecatCompletionService iceCatService,
+			EprelCompletionService eprelCompletionService
 			) {
 		this.verticalConfigService = verticalsConfigService;
 		this.resourceCompletionService = resourceCompletionService;
 //		this.amazonCompletionService = amazonCompletionService;
 		this.iceCatService = iceCatService;
+		this.eprelCompletionService = eprelCompletionService;
 	}
 
 	///////////////////////////////////
@@ -148,5 +153,33 @@ public class CompletionController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 		iceCatService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+	}
+
+	///////////////////////////////////
+	// EPREL  completion
+	///////////////////////////////////
+
+	@GetMapping("/completion/eprel")
+	@Operation(summary = "Launch eprel completion on all verticals")
+	public void eprelCompletionAll() throws InvalidParameterException, IOException {
+		eprelCompletionService.completeAll(true);
+	}
+
+	@GetMapping("/completion/eprel/")
+	@Operation(summary = "Launch eprel completion on the specified vertical")
+	public void eprelCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max) throws InvalidParameterException, IOException {
+		eprelCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max, true);
+	}
+
+	@GetMapping("/completion/eprel/gtin/")
+	@Operation(summary = "Launch eprel completion on the specified vertical")
+	public void eprelCompletionProduct(@RequestParam final Long gtin) {
+		Product data;
+		try {
+			data = repository.getById(gtin);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		eprelCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
 	}
 }

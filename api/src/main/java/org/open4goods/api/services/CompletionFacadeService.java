@@ -4,6 +4,7 @@ package org.open4goods.api.services;
 import java.io.IOException;
 import java.util.Set;
 
+import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -28,10 +29,13 @@ public class CompletionFacadeService {
 //	private AmazonCompletionService amazonCompletionService;
 	private IcecatCompletionService icecatCompletionService;
 
+	private EprelCompletionService eprelCompletionService;
+
 	public CompletionFacadeService(
-			ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService) {
+			ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService) {
 		this.resourceCompletionService = resourceCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
+		this.eprelCompletionService = eprelCompletionService;
 	}
 
 
@@ -46,7 +50,7 @@ public class CompletionFacadeService {
 			// TODO(p2, perf) : should paralellize (on verticals, at upper level)
 			resourceCompletionService.process(vertical, product);
 			icecatCompletionService.process(vertical, product);
-
+			eprelCompletionService.process(vertical, product);
 //			amazonCompletionService.process(vertical, product);
 		});
 
@@ -79,13 +83,20 @@ public class CompletionFacadeService {
 //	}
 
 	///////////////////////////////////
+	// Eprel completion
+	///////////////////////////////////
+	public void eprelCompletionAll() throws InvalidParameterException, IOException {
+		logger.warn("Completing verticals with eprel");
+		eprelCompletionService.completeAll(true);
+	}
+
+	///////////////////////////////////
 	// Icecat completion
 	///////////////////////////////////
 	public void icecatCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with icecat");
 		icecatCompletionService.completeAll(true);
 	}
-
 
 
 }

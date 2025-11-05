@@ -11,6 +11,7 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
+import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.services.feedservice.service.AbstractFeedService;
@@ -196,10 +197,18 @@ public class ApiConfig {
 
 
 	@Bean
-
 	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
 		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
+
+	@Bean
+	EprelCompletionService eprelCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade, EprelSearchService eprelSearchService ) throws TechnicalException {
+		return new EprelCompletionService(verticalConfigService, productRepository, apiProperties, eprelSearchService );
+	}
+
+
+
+
 
 //	@Bean
 //
@@ -213,8 +222,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService) {
-		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService);
+	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService) {
+		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService, eprelCompletionService);
 	}
 
 	@Bean
