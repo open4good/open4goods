@@ -1,13 +1,15 @@
-package org.open4goods.eprelservice.config;
+package org.open4goods.services.eprelservice.config;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for the EPREL integration.
  */
-@ConfigurationProperties(prefix = "open4goods.eprel")
+@ConfigurationProperties(prefix = "eprel")
+@Component
 public class EprelServiceProperties
 {
     /**
@@ -32,7 +34,7 @@ public class EprelServiceProperties
      * Number of products sent to Elasticsearch in a single bulk request.
      */
     @Min(1)
-    private int indexBulkSize = 100;
+    private int indexBulkSize = 250;
 
     public String getApiUrl()
     {

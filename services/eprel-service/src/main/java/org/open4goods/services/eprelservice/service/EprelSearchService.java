@@ -1,18 +1,20 @@
-package org.open4goods.eprelservice.service;
+package org.open4goods.services.eprelservice.service;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
-import org.open4goods.eprelservice.model.EprelProduct;
-import org.open4goods.eprelservice.model.GtinHelper;
+import java.util.stream.Collectors;
+
+import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.model.GtinHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.stereotype.Service;
+
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 /**
@@ -70,6 +72,77 @@ public class EprelSearchService
         return execute(query);
     }
 
+    public List<EprelProduct> search(String gtin, String model)
+    {
+
+    	LOGGER.info("Searching by GTIN : {}", gtin);
+    	List<EprelProduct> results = searchByGtin(gtin);
+
+    	if (null != results && results.size() > 0) {
+        	LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
+    		return results;
+    	}
+
+    	LOGGER.info("Searching by exact model : {}", model);
+    	results = searchByExactModel(model);
+
+    	if (null != results && results.size() > 0) {
+    		LOGGER.info("Found {} result by exact model : {}", results.size(), model);
+    		return results;
+    	}
+
+    	LOGGER.info("Searching by model prefix : {}", model);
+    	results = searchByModelPrefix(model);
+
+    	if (null != results && results.size() > 0) {
+    		LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
+    		return results;
+    	}
+       	LOGGER.info("No eprel match for GTIN : {} , model : {} ", gtin, model);
+    	return List.of();
+
+    }
+
+
+    public List<EprelProduct> search(String gtin, List<String> models)
+    {
+
+    	   List<String> bySizeModels = models.stream()
+    		        .sorted((a, b) -> Integer.compare(b.length(), a.length()))
+    		        .collect(Collectors.toList());
+
+    	LOGGER.info("Searching by GTIN : {}", gtin);
+    	List<EprelProduct> results = searchByGtin(gtin);
+
+    	if (null != results && results.size() > 0) {
+        	LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
+    		return results;
+    	}
+
+
+    	for (String model : bySizeModels) {
+	    	LOGGER.info("Searching by exact model : {}", model);
+	    	results = searchByExactModel(model);
+
+	    	if (null != results && results.size() > 0) {
+	    		LOGGER.info("Found {} result by exact model : {}", results.size(), model);
+	    		return results;
+	    	}
+
+	    	LOGGER.info("Searching by model prefix : {}", model);
+	    	results = searchByModelPrefix(model);
+
+	    	if (null != results && results.size() > 0) {
+	    		LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
+	    		return results;
+	    	}
+    	}
+    	LOGGER.info("No eprel match for GTIN : {} , models : {} ", gtin, bySizeModels);
+    	return List.of();
+
+    }
+
+
     /**
      * Finds products whose model identifier starts with the provided prefix (case insensitive).
      *
@@ -86,6 +159,8 @@ public class EprelSearchService
         Query query = Query.of(q -> q.prefix(p -> p.field("modelIdentifier").value(normalized)));
         return execute(query);
     }
+
+
 
     /**
      * Performs an exact match, falling back to a prefix search.
@@ -107,7 +182,7 @@ public class EprelSearchService
     {
         NativeQuery nativeQuery = NativeQuery.builder().withQuery(query).build();
         SearchHits<EprelProduct> hits = elasticsearchOperations.search(nativeQuery, EprelProduct.class);
-        return hits.stream().map(SearchHit::getContent).filter(Objects::nonNull).toList();
+        return hits.stream().map(SearchHit::getContent).toList();
     }
 
     private String normalize(String value)

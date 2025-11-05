@@ -7,6 +7,7 @@ import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.model.CacheKeyGenerator;
+import org.open4goods.services.eprelservice.repository.EprelProductRepository;
 import org.open4goods.services.productrepository.repository.ElasticProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ import jakarta.annotation.PostConstruct;
 @SpringBootApplication (scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
 
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, EprelProductRepository.class})
 @EnableCaching
 
 public class Api {

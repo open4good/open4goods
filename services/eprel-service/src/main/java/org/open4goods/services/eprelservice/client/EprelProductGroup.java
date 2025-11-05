@@ -1,4 +1,4 @@
-package org.open4goods.eprelservice.client;
+package org.open4goods.services.eprelservice.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

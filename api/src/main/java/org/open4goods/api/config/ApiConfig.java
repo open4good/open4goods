@@ -51,6 +51,13 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
+import org.open4goods.services.eprelservice.client.EprelApiClient;
+import org.open4goods.services.eprelservice.client.RestEprelApiClient;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
+import org.open4goods.services.eprelservice.service.EprelCatalogueParser;
+import org.open4goods.services.eprelservice.service.EprelCatalogueService;
+import org.open4goods.services.eprelservice.service.EprelSearchService;
+import org.open4goods.services.eprelservice.service.JsonZipEprelCatalogueParser;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
@@ -77,10 +84,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.xml.sax.SAXException;
 
@@ -110,6 +119,20 @@ public class ApiConfig {
 	}
 
 
+
+
+	@Bean EprelApiClient apiClient(@Autowired  RestTemplate restTemplate, @Autowired  EprelServiceProperties properties) {
+		return new RestEprelApiClient(restTemplate, properties);
+	}
+	@Bean
+	EprelSearchService eprelSearchService(@Autowired ElasticsearchOperations elasticsearchOperations) {
+		return new EprelSearchService(elasticsearchOperations);
+	}
+	@Bean
+	EprelCatalogueService eprelCatalogueService(@Autowired EprelApiClient apiClient,
+			@Autowired ElasticsearchOperations elasticsearchOperations, @Autowired EprelServiceProperties properties) {
+		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), elasticsearchOperations, properties);
+	}
 
 	@Bean
 	SerialisationService serialisationService() {

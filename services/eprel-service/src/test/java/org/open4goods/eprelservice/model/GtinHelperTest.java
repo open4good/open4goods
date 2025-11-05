@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.open4goods.services.eprelservice.model.GtinHelper;
 
 /**
  * Tests for {@link GtinHelper}.

@@ -1,14 +1,15 @@
-package org.open4goods.eprelservice.service;
+package org.open4goods.services.eprelservice.service;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import org.open4goods.eprelservice.client.EprelApiClient;
-import org.open4goods.eprelservice.client.EprelProductGroup;
-import org.open4goods.eprelservice.config.EprelServiceProperties;
-import org.open4goods.eprelservice.model.EprelProduct;
+
+import org.open4goods.services.eprelservice.client.EprelApiClient;
+import org.open4goods.services.eprelservice.client.EprelProductGroup;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
+import org.open4goods.services.eprelservice.model.EprelProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -107,8 +108,8 @@ public class EprelCatalogueService
         }
         try
         {
-            List<EprelProduct> snapshot = List.copyOf(buffer);
-            elasticsearchOperations.save(snapshot);
+            LOGGER.info("Indexing {} eprel products", buffer.size());
+            elasticsearchOperations.save(buffer);
         }
         catch (Exception e)
         {

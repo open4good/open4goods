@@ -1,4 +1,4 @@
-package org.open4goods.eprelservice.client;
+package org.open4goods.services.eprelservice.client;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 
-import org.open4goods.eprelservice.config.EprelServiceProperties;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;

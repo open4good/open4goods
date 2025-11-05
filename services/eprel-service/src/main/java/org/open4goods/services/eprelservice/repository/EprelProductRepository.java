@@ -1,6 +1,6 @@
-package org.open4goods.eprelservice.repository;
+package org.open4goods.services.eprelservice.repository;
 
-import org.open4goods.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.model.EprelProduct;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**

@@ -1,4 +1,4 @@
-package org.open4goods.eprelservice.model;
+package org.open4goods.services.eprelservice.model;
 
 import java.util.Optional;
 

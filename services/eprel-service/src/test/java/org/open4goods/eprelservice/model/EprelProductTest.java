@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.open4goods.services.eprelservice.model.EprelProduct;
 
 /**
  * Unit tests for {@link EprelProduct}.

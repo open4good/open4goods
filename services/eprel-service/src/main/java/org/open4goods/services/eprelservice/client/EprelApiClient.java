@@ -1,4 +1,4 @@
-package org.open4goods.eprelservice.client;
+package org.open4goods.services.eprelservice.client;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -13,14 +13,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.open4goods.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.service.JsonZipEprelCatalogueParser;
 
 /**
  * Tests for {@link JsonZipEprelCatalogueParser}.
  */
 class JsonZipEprelCatalogueParserTest
 {
-    private final JsonZipEprelCatalogueParser parser = new JsonZipEprelCatalogueParser(new ObjectMapper());
+    private final JsonZipEprelCatalogueParser parser = new JsonZipEprelCatalogueParser();
 
     @Test
     @DisplayName("The parser should convert JSON entries contained in a ZIP archive")

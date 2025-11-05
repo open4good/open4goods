@@ -1,10 +1,5 @@
-package org.open4goods.eprelservice.model;
+package org.open4goods.services.eprelservice.model;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -16,16 +11,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
+
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Elasticsearch document representing a single EPREL product entry.
  */
-@Document(indexName = "eprel-products")
+@Document(indexName = "eprel-products",  writeTypeHint = WriteTypeHint.FALSE)
 @Setting(settingPath = "settings/eprel-product-settings.json")
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class EprelProduct implements Serializable
@@ -290,7 +293,7 @@ public class EprelProduct implements Serializable
      * Attributes not part of the common specification, specific to each category.
      */
     @Field(type = FieldType.Object, enabled = false)
-    private final Map<String, Object> categorySpecificAttributes = new HashMap<>();
+    private Map<String, Object> categorySpecificAttributes = new HashMap<>();
 
     /**
      * Populates the map with unknown attributes during deserialisation.
@@ -298,18 +301,42 @@ public class EprelProduct implements Serializable
      * @param name  attribute name
      * @param value attribute value
      */
-    @JsonAnySetter
-    public void putAdditionalAttribute(String name, Object value)
-    {
-        categorySpecificAttributes.put(name, value);
-    }
+
 
     public String getEprelRegistrationNumber()
     {
         return eprelRegistrationNumber;
     }
 
-    public void setEprelRegistrationNumber(String eprelRegistrationNumber)
+    public void setOnMarketStartDate(Long onMarketStartDate) {
+		this.onMarketStartDate = onMarketStartDate;
+	}
+
+	public void setOnMarketEndDate(Long onMarketEndDate) {
+		this.onMarketEndDate = onMarketEndDate;
+	}
+
+	public void setOnMarketFirstStartDate(Long onMarketFirstStartDate) {
+		this.onMarketFirstStartDate = onMarketFirstStartDate;
+	}
+
+	public void setFirstPublicationDate(Long firstPublicationDate) {
+		this.firstPublicationDate = firstPublicationDate;
+	}
+
+	public void setPublishedOnDate(Long publishedOnDate) {
+		this.publishedOnDate = publishedOnDate;
+	}
+
+	public void setNumericGtin(Long numericGtin) {
+		this.numericGtin = numericGtin;
+	}
+
+	public void setCategorySpecificAttributes(Map<String, Object> categorySpecificAttributes) {
+		this.categorySpecificAttributes = categorySpecificAttributes;
+	}
+
+	public void setEprelRegistrationNumber(String eprelRegistrationNumber)
     {
         this.eprelRegistrationNumber = eprelRegistrationNumber;
     }
@@ -790,10 +817,21 @@ public class EprelProduct implements Serializable
         @Serial
         private static final long serialVersionUID = -2373560316348546888L;
 
-        /** Identifier of the contact entry. */
+
+
+        public ContactDetails() {
+			super();
+		}
+
+		/** Identifier of the contact entry. */
         @JsonProperty("id")
         @Field(type = FieldType.Long, index = false)
         private Long id;
+
+        @JsonProperty("countOfPublishedVersionsUsing")
+        @Field(type = FieldType.Long, index = false)
+        private Long countOfPublishedVersionsUsing;
+
 
         /** Order of the contact entry. */
         @JsonProperty("orderNumber")
@@ -1099,7 +1137,16 @@ public class EprelProduct implements Serializable
         @Serial
         private static final long serialVersionUID = -7273050835204053007L;
 
-        /** Position of the label in the list. */
+        public UploadedLabel() {
+			super();
+		}
+
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        public UploadedLabel(String value) {
+            this.fileName = value;         // orderNumber stays null unless you set it later
+        }
+
+		/** Position of the label in the list. */
         @JsonProperty("orderNumber")
         @Field(type = FieldType.Integer, index = false)
         private Integer orderNumber;
@@ -1138,7 +1185,11 @@ public class EprelProduct implements Serializable
         @Serial
         private static final long serialVersionUID = 8307787449924203331L;
 
-        /** Order number within the placement countries list. */
+        public PlacementCountry() {
+			super();
+		}
+
+		/** Order number within the placement countries list. */
         @JsonProperty("orderNumber")
         @Field(type = FieldType.Integer, index = false)
         private Integer orderNumber;
@@ -1177,7 +1228,11 @@ public class EprelProduct implements Serializable
         @Serial
         private static final long serialVersionUID = 2269515760849171758L;
 
-        /** Organisation title shown publicly. */
+        public Organisation() {
+			super();
+		}
+
+		/** Organisation title shown publicly. */
         @JsonProperty("organisationTitle")
         @Field(type = FieldType.Keyword, index = false)
         private String organisationTitle;
@@ -1186,6 +1241,14 @@ public class EprelProduct implements Serializable
         @JsonProperty("organisationName")
         @Field(type = FieldType.Keyword, index = false)
         private String organisationName;
+
+        @JsonProperty("eprelSuggestedOrgIdentifier")
+        @Field(type = FieldType.Keyword, index = false)
+        private String eprelSuggestedOrgIdentifier;
+
+        @JsonProperty("modelTransferActive")
+        @Field(type = FieldType.Keyword, index = false)
+        private String modelTransferActive;
 
         /** First name of the representative when relevant. */
         @JsonProperty("firstName")
@@ -1444,13 +1507,18 @@ public class EprelProduct implements Serializable
         @Serial
         private static final long serialVersionUID = -5701075728511738931L;
 
-        /** GTIN identifier present in additional details. */
+
+        public AdditionalDetails() {
+			super();
+		}
+
+		/** GTIN identifier present in additional details. */
         @Field(type = FieldType.Keyword, index = false)
         private String gtinIdentifier;
 
         /** Other entries contained within the additional details section. */
-        @JsonIgnore
-        private final Map<String, Object> attributes = new HashMap<>();
+        @Field(type = FieldType.Object, enabled = false)
+        private Map<String, Object> attributes = new HashMap<>();
 
         public String getGtinIdentifier()
         {
@@ -1467,7 +1535,11 @@ public class EprelProduct implements Serializable
             return attributes;
         }
 
-        @JsonAnySetter
+        public void setAttributes(Map<String, Object> attributes) {
+			this.attributes = attributes;
+		}
+
+		@JsonAnySetter
         public void addAttribute(String name, Object value)
         {
             if ("gtinIdentifier".equals(name))

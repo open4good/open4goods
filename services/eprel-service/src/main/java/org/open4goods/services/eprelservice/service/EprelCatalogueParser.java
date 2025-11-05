@@ -1,10 +1,10 @@
-package org.open4goods.eprelservice.service;
+package org.open4goods.services.eprelservice.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-import org.open4goods.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.model.EprelProduct;
 
 /**
  * Contract responsible for turning a downloaded catalogue into {@link EprelProduct} instances.

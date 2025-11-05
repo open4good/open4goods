@@ -1,4 +1,4 @@
-package org.open4goods.eprelservice.service;
+package org.open4goods.services.eprelservice.service;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -13,7 +13,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.open4goods.eprelservice.model.EprelProduct;
+
+import org.open4goods.services.eprelservice.model.EprelProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,16 +27,15 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonZipEprelCatalogueParser.class);
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Creates the parser.
      *
      * @param objectMapper configured Jackson mapper
      */
-    public JsonZipEprelCatalogueParser(ObjectMapper objectMapper)
+    public JsonZipEprelCatalogueParser()
     {
-        this.objectMapper = objectMapper;
     }
 
     @Override

@@ -1,7 +1,7 @@
-package org.open4goods.eprelservice.scheduler;
+package org.open4goods.services.eprelservice.scheduler;
 
-import org.open4goods.eprelservice.config.EprelServiceProperties;
-import org.open4goods.eprelservice.service.EprelCatalogueService;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
+import org.open4goods.services.eprelservice.service.EprelCatalogueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,7 +33,7 @@ public class EprelCatalogueScheduler
     /**
      * Triggers the catalogue refresh job.
      */
-    @Scheduled(fixedDelayString = "#{${open4goods.eprel.scheduling-frequency-days:2} * 24 * 60 * 60 * 1000}")
+    @Scheduled( initialDelayString = "#{${open4goods.eprel.scheduling-frequency-days:2} * 24 * 60 * 60 * 1000}", fixedDelayString = "#{${open4goods.eprel.scheduling-frequency-days:2} * 24 * 60 * 60 * 1000}")
     public void schedule()
     {
         LOGGER.info("Starting scheduled EPREL catalogue synchronisation every {} day(s)", properties.getSchedulingFrequencyDays());

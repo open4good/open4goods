@@ -20,10 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.eprelservice.client.EprelApiClient;
-import org.open4goods.eprelservice.client.EprelProductGroup;
-import org.open4goods.eprelservice.config.EprelServiceProperties;
-import org.open4goods.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.client.EprelApiClient;
+import org.open4goods.services.eprelservice.client.EprelProductGroup;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
+import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.services.eprelservice.service.EprelCatalogueParser;
+import org.open4goods.services.eprelservice.service.EprelCatalogueService;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 /**
