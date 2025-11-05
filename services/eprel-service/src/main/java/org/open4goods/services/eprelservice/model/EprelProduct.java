@@ -295,19 +295,6 @@ public class EprelProduct implements Serializable
     @Field(type = FieldType.Object, enabled = false)
     private Map<String, Object> categorySpecificAttributes = new HashMap<>();
 
-    /**
-     * Populates the map with unknown attributes during deserialisation.
-     *
-     * @param name  attribute name
-     * @param value attribute value
-     */
-
-
-    public String getEprelRegistrationNumber()
-    {
-        return eprelRegistrationNumber;
-    }
-
     public void setOnMarketStartDate(Long onMarketStartDate) {
 		this.onMarketStartDate = onMarketStartDate;
 	}
@@ -336,7 +323,24 @@ public class EprelProduct implements Serializable
 		this.categorySpecificAttributes = categorySpecificAttributes;
 	}
 
-	public void setEprelRegistrationNumber(String eprelRegistrationNumber)
+	/**
+     * Populates the map with unknown attributes during deserialisation.
+     *
+     * @param name  attribute name
+     * @param value attribute value
+     */
+    @JsonAnySetter
+    public void putAdditionalAttribute(String name, Object value)
+    {
+        categorySpecificAttributes.put(name, value);
+    }
+
+    public String getEprelRegistrationNumber()
+    {
+        return eprelRegistrationNumber;
+    }
+
+    public void setEprelRegistrationNumber(String eprelRegistrationNumber)
     {
         this.eprelRegistrationNumber = eprelRegistrationNumber;
     }
@@ -1309,6 +1313,13 @@ public class EprelProduct implements Serializable
         @Field(type = FieldType.Keyword, index = false)
         private String organisationIdentifier;
 
+
+        @JsonProperty("blocked")
+        @Field(type = FieldType.Keyword, index = false)
+        private String blocked;
+
+
+
         public String getOrganisationTitle()
         {
             return organisationTitle;
@@ -1518,7 +1529,7 @@ public class EprelProduct implements Serializable
 
         /** Other entries contained within the additional details section. */
         @Field(type = FieldType.Object, enabled = false)
-        private Map<String, Object> attributes = new HashMap<>();
+        private  Map<String, Object> attributes = new HashMap<>();
 
         public String getGtinIdentifier()
         {
@@ -1535,11 +1546,7 @@ public class EprelProduct implements Serializable
             return attributes;
         }
 
-        public void setAttributes(Map<String, Object> attributes) {
-			this.attributes = attributes;
-		}
-
-		@JsonAnySetter
+        @JsonAnySetter
         public void addAttribute(String name, Object value)
         {
             if ("gtinIdentifier".equals(name))
