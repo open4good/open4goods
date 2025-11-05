@@ -237,6 +237,7 @@ public class SearchService {
      * @param domainLanguage localisation hint for categories
      * @return bundle of category and product suggestions
      */
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public SuggestResult suggest(String query, DomainLanguage domainLanguage) {
         String sanitizedQuery = sanitize(query);
         if (!StringUtils.hasText(sanitizedQuery)) {
