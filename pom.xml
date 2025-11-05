@@ -105,6 +105,7 @@
         <module>services/gtinservice</module>
         <module>services/feedservice</module>
         <module>services/contribution</module>
+        <module>services/eprel-service</module>
 
 
 
