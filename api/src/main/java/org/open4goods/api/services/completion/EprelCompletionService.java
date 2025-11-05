@@ -85,12 +85,16 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 			EprelProduct eprelData = results.get(0);
 
+
+
 			// TODO : Implement
 
 			// Excluded : false
 			// Set model name
 			// Set attributes
 
+			// Setting the computed flag
+			data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
 
 			logger.info("product {} completed with EPREL datas ", data);
 

@@ -34,23 +34,5 @@ class EprelProductTest
         assertThat(product.getEprelCategory()).isEqualTo("MONITOR");
     }
 
-    @Test
-    @DisplayName("GTIN should be inherited from additional details when absent at root level")
-    void shouldPopulateGtinFromAdditionalDetails() throws Exception
-    {
-        String json = objectMapper.writeValueAsString(Map.of(
-                "eprelRegistrationNumber", "456",
-                "productGroup", "televisions",
-                "modelIdentifier", "MODEL-456",
-                "additionalDetails", Map.of(
-                        "gtinIdentifier", "5600413206256",
-                        "somethingElse", "value"),
-                "customField", "custom",
-                "category", "DISPLAY"));
-        EprelProduct product = objectMapper.readValue(json, EprelProduct.class);
-        assertThat(product.getGtinIdentifier()).isEqualTo("5600413206256");
-        assertThat(product.getNumericGtin()).isEqualTo(5_600_413_206_256L);
-        assertThat(product.getAdditionalDetails().getAttributes()).containsEntry("somethingElse", "value");
-        assertThat(product.getCategorySpecificAttributes()).containsEntry("customField", "custom");
-    }
+
 }

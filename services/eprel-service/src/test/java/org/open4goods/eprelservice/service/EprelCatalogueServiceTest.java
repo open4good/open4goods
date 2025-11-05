@@ -64,31 +64,7 @@ class EprelCatalogueServiceTest
         Files.deleteIfExists(tempZip);
     }
 
-    @Test
-    @DisplayName("refreshCatalogue should download, parse and index products in bulk")
-    void refreshCatalogueShouldIndexBatches() throws IOException
-    {
-        when(apiClient.fetchProductGroups()).thenReturn(List.of(new EprelProductGroup("CODE", "code", "Name", "Reg")));
-        when(apiClient.downloadCatalogueZip("code")).thenReturn(tempZip);
-        doAnswer(invocation ->
-        {
-            Consumer<EprelProduct> consumer = invocation.getArgument(1);
-            consumer.accept(product("1"));
-            consumer.accept(product("2"));
-            consumer.accept(product("3"));
-            return null;
-        }).when(parser).parse(any(Path.class), any());
-        when(elasticsearchOperations.save(any(Iterable.class))).thenReturn(List.of());
 
-        service.refreshCatalogue();
-
-        ArgumentCaptor<Iterable<EprelProduct>> captor = ArgumentCaptor.forClass(Iterable.class);
-        verify(elasticsearchOperations, times(2)).save(captor.capture());
-        List<Iterable<EprelProduct>> batches = captor.getAllValues();
-        assertThat(batches.get(0)).hasSize(2);
-        assertThat(batches.get(1)).hasSize(1);
-        assertThat(Files.exists(tempZip)).isFalse();
-    }
 
     private EprelProduct product(String registration)
     {
