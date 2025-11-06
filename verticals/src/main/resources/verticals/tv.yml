@@ -413,7 +413,6 @@ attributesConfig:
      ##################################
      - key: "MINAVAILABILITYSPAREPARTSYEARS"
        betterIs: "GREATER"
-       icecatFeaturesIds:
        
        eprelFeatureNames:
         - diagonalInch
@@ -528,7 +527,6 @@ attributesConfig:
        reverseScore: true    
        faIcon: "mdi-power-plug-off"
      
-       icecatFeaturesIds:      
 
          
        name:
@@ -568,7 +566,6 @@ attributesConfig:
        reverseScore: true    
        faIcon: "mdi-power-plug-off"
      
-       icecatFeaturesIds:      
 
          
        name:
@@ -607,7 +604,6 @@ attributesConfig:
        reverseScore: true    
        faIcon: "mdi-power-plug-off"
      
-       icecatFeaturesIds:      
 
          
        name:
