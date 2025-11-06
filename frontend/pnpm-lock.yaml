@@ -79,7 +79,7 @@ importers:
         version: 2.1.0
       nuxt-mcp:
         specifier: ^0.2.4
-        version: 0.2.5(magicast@0.3.5)(nitropack@2.12.8(@netlify/blobs@9.1.2))(nuxi@3.28.0)(nuxt@4.2.0(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.1)(@types/node@24.9.2)(@vue/compiler-sfc@3.5.22)(db0@0.3.4)(eslint@9.39.1(jiti@2.6.1))(ioredis@5.8.2)(magicast@0.3.5)(meow@13.2.0)(optionator@0.9.4)(rollup@4.52.5)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(vue-tsc@3.1.3(typescript@5.9.2))(yaml@2.8.1))(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
+        version: 0.2.6(magicast@0.3.5)(nitropack@2.12.8(@netlify/blobs@9.1.2))(nuxi@3.28.0)(nuxt@4.2.0(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.1)(@types/node@24.9.2)(@vue/compiler-sfc@3.5.22)(db0@0.3.4)(eslint@9.39.1(jiti@2.6.1))(ioredis@5.8.2)(magicast@0.3.5)(meow@13.2.0)(optionator@0.9.4)(rollup@4.52.5)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(vue-tsc@3.1.3(typescript@5.9.2))(yaml@2.8.1))(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
       pinia:
         specifier: ^3.0.3
         version: 3.0.4(typescript@5.9.2)(vue@3.5.22(typescript@5.9.2))
@@ -1898,9 +1898,14 @@ packages:
     resolution: {integrity: sha512-JvKyB6YwS3quM+88JPR0axeRgvdDu3Pv6mdZUy+w4qVkCzGgumb9bXG/TmtDRQv+671yaofVfXSQmFLlWU5qPQ==}
     engines: {node: '>=18'}
 
-  '@modelcontextprotocol/sdk@1.20.2':
-    resolution: {integrity: sha512-6rqTdFt67AAAzln3NOKsXRmv5ZzPkgbfaebKBqUbts7vK1GZudqnrun5a8d3M/h955cam9RHZ6Jb4Y1XhnmFPg==}
+  '@modelcontextprotocol/sdk@1.21.0':
+    resolution: {integrity: sha512-YFBsXJMFCyI1zP98u7gezMFKX4lgu/XpoZJk7ufI6UlFKXLj2hAMUuRlQX/nrmIPOmhRrG6tw2OQ2ZA/ZlXYpQ==}
     engines: {node: '>=18'}
+    peerDependencies:
+      '@cfworker/json-schema': ^4.1.1
+    peerDependenciesMeta:
+      '@cfworker/json-schema':
+        optional: true
 
   '@napi-rs/canvas-android-arm64@0.1.81':
     resolution: {integrity: sha512-78Lz+AUi+MsWupyZjXwpwQrp1QCwncPvRZrdvrROcZ9Gq9grP7LfQZiGdR8LKyHIq3OR18mDP+JESGT15V1nXw==}
@@ -3829,6 +3834,14 @@ packages:
   aggregate-error@5.0.0:
     resolution: {integrity: sha512-gOsf2YwSlleG6IjRYG2A7k0HmBMEo6qVNk9Bp/EaLgAJT5ngH6PXbqa4ItvnEwCm/velL5jAnQgsHsWnjhGmvw==}
     engines: {node: '>=18'}
+
+  ajv-formats@3.0.1:
+    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
 
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
@@ -6795,8 +6808,8 @@ packages:
   nuxt-link-checker@4.3.2:
     resolution: {integrity: sha512-ehEeoe1OFW2r9ZC7DCneYsk2eupyi5udLpbqbTtJOiqoCddbDZ8/bv7k6kBwbQAAyZPJFptGhwas8n4hUUY3Qg==}
 
-  nuxt-mcp@0.2.5:
-    resolution: {integrity: sha512-c2+NViFRBPcsFo6aOXZpAkyrE0Lo4yvBKBe8HVNICQrW0Y8BiPHeK55G/YJFTxrePljiZVtWWf0OVcrP4Qu7dw==}
+  nuxt-mcp@0.2.6:
+    resolution: {integrity: sha512-br1gySgGxmWOh7/lOXBq8TbCfuabkFNscemsMIHfoahEo5VRnvGSim7lZzQinWJsYeKou/8NTOzMnr8lxvNGIw==}
     peerDependencies:
       nitropack: ^2 || ^3
       nuxi: '>=3'
@@ -8849,8 +8862,8 @@ packages:
       '@nuxt/kit':
         optional: true
 
-  vite-plugin-mcp@0.2.5:
-    resolution: {integrity: sha512-Q/iB3Sg1Bmvq3H6PvdijZowZdvCfr8QiXzr80W/gyGyZaK2oCpFFygMDbUvBzI4q23beZJCMFnu2uTfdf93YNw==}
+  vite-plugin-mcp@0.2.6:
+    resolution: {integrity: sha512-zN076VxMawDCP4DzHnkNot13tpiiCqX56Rwfmg+bdzjG+7Fkk+4EEa1djZRVGL+R28RqrA+HTa6UURwWaTKCeg==}
     peerDependencies:
       vite: '>=6.0.0'
 
@@ -10905,9 +10918,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@modelcontextprotocol/sdk@1.20.2':
+  '@modelcontextprotocol/sdk@1.21.0':
     dependencies:
-      ajv: 6.12.6
+      ajv: 8.17.1
+      ajv-formats: 3.0.1(ajv@8.17.1)
       content-type: 1.0.5
       cors: 2.8.5
       cross-spawn: 7.0.6
@@ -13496,6 +13510,10 @@ snapshots:
     dependencies:
       clean-stack: 5.3.0
       indent-string: 5.0.0
+
+  ajv-formats@3.0.1(ajv@8.17.1):
+    optionalDependencies:
+      ajv: 8.17.1
 
   ajv@6.12.6:
     dependencies:
@@ -16810,9 +16828,9 @@ snapshots:
       - vite
       - vue
 
-  nuxt-mcp@0.2.5(magicast@0.3.5)(nitropack@2.12.8(@netlify/blobs@9.1.2))(nuxi@3.28.0)(nuxt@4.2.0(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.1)(@types/node@24.9.2)(@vue/compiler-sfc@3.5.22)(db0@0.3.4)(eslint@9.39.1(jiti@2.6.1))(ioredis@5.8.2)(magicast@0.3.5)(meow@13.2.0)(optionator@0.9.4)(rollup@4.52.5)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(vue-tsc@3.1.3(typescript@5.9.2))(yaml@2.8.1))(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)):
+  nuxt-mcp@0.2.6(magicast@0.3.5)(nitropack@2.12.8(@netlify/blobs@9.1.2))(nuxi@3.28.0)(nuxt@4.2.0(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.1)(@types/node@24.9.2)(@vue/compiler-sfc@3.5.22)(db0@0.3.4)(eslint@9.39.1(jiti@2.6.1))(ioredis@5.8.2)(magicast@0.3.5)(meow@13.2.0)(optionator@0.9.4)(rollup@4.52.5)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(typescript@5.9.2)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(vue-tsc@3.1.3(typescript@5.9.2))(yaml@2.8.1))(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.20.2
+      '@modelcontextprotocol/sdk': 1.21.0
       '@nuxt/kit': 4.2.0(magicast@0.3.5)
       ansis: 4.2.0
       async-cache-dedupe: 3.3.0
@@ -16824,9 +16842,10 @@ snapshots:
       pathe: 2.0.3
       unimport: 5.5.0
       vite: 7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)
-      vite-plugin-mcp: 0.2.5(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
+      vite-plugin-mcp: 0.2.6(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
       zod: 3.25.76
     transitivePeerDependencies:
+      - '@cfworker/json-schema'
       - magicast
       - supports-color
 
@@ -19388,15 +19407,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vite-plugin-mcp@0.2.5(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)):
+  vite-plugin-mcp@0.2.6(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.20.2
+      '@modelcontextprotocol/sdk': 1.21.0
       ansis: 4.2.0
       debug: 4.4.3
       pathe: 2.0.3
       vite: 7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)
       zod: 3.25.76
     transitivePeerDependencies:
+      - '@cfworker/json-schema'
       - supports-color
 
   vite-plugin-pwa@1.1.0(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(sass@1.93.3)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0):
