@@ -3,8 +3,6 @@
 ## Guardrails
 - Only implement what is explicitly requested; ask for clarification before expanding scope.
 - If you spot a regression risk, pause and ask a question instead of guessing.
-- Keep or translate comments to English rather than deleting them.
-- Briefly explain the reasoning behind non-trivial changes in your summary/PR.
 - Frontend code must respect the existing layering: composables talk to Nuxt server routes, and those routes rely on generated OpenAPI services. Never call downstream services directly from the browser.
 
 ## Stack & Tooling
@@ -14,19 +12,13 @@
 - Generated OpenAPI client lives under `shared/api-client/` and must stay in sync with `front-api`.
   - Doc: [docs/backend-services.md](Doc-services-usage)
 
-## Everyday Commands (no `--offline` flag by default)
+## Everyday Commands (use `--offline` flag by default)
 - `pnpm install`
 - `pnpm dev` – Run the dev server (http://localhost:3000)
-- `pnpm build` / `pnpm build:ssr`
-- `pnpm preview`
+- `pnpm build`
 - `pnpm generate`
 - `pnpm lint`, `pnpm lint:fix`
-- `pnpm format`, `pnpm format:check`
 - `pnpm test`
-- `pnpm generate:api` – Regenerate OpenAPI client when backend contracts change
-- `pnpm preprocess:css` – Refresh XWiki/Bootstrap derived styles
-
-Offline mode is optional troubleshooting; use it only when network access is deliberately disabled.
 
 ## Project Structure Highlights
 - `app/pages/` – File-based routing (kebab-case filenames). Pages may include lightweight structural wrappers (`<div>`, `<v-container>`, `<v-row>`, etc.) but complex UI should live in components under `app/components/`.
@@ -41,17 +33,22 @@ Offline mode is optional troubleshooting; use it only when network access is del
 - Prefer `ref`, `computed`, `watch`, `useState`, `useFetch`, `useAsyncData`, etc. via Nuxt auto-imports.
 - Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
 - Keep code SSR-friendly (guard against `window`/`document`).
-- Utility helpers in `app/utils` or `shared/utils` should start with `_` (e.g., `_sanitizeHtml`).
 - Keep composables thin; delegate heavy logic to server routes or shared utilities.
+- All static texts must be internationalised
+- Also write or update tests (component-level tests) if pertinent
+
 
 ## Vuetify & Styling Guidance
+- Design must be thinked mobile first, and be responsiv 
 - Default to Vuetify props, layout grid (`v-container`, `v-row`, `v-col`), and theme tokens.
 - Scoped SASS/CSS is allowed when Vuetify tokens alone cannot express the design (hero layouts, animations, etc.). Use BEM-style class names and keep selectors minimal.
 - Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.
+- Always mutualize styles when possible
 - When integrating CMS/XWiki content, ensure the preprocess step (`pnpm preprocess:css`) stays current.
 
-### Impact score components
-- Every impact score visualisation must render through `~/components/shared/ui/ImpactScore.vue` to keep the UX consistent across the application. If you need additional behaviour, extend the component via props instead of duplicating markup.
+### components mutualisation
+- Always consider mutualising ui components
+- For example, impact score visualisation must render through `~/components/shared/ui/ImpactScore.vue` to keep the UX consistent across the application. If you need additional behaviour, extend the component via props instead of duplicating markup.
 
 ### Design token glossary
 The theme palette exposes the following generic tokens. Use `rgb(var(--v-theme-<token>))` for solid fills and `rgba(var(--v-theme-<token>), <alpha>)` when translucency is needed.
@@ -85,7 +82,6 @@ The theme palette exposes the following generic tokens. Use `rgb(var(--v-theme-<
 | `accent-primary-highlight` | Brand highlight strokes/glows | `#2196F3` | `#38BDF8` |
 | `accent-supporting` | Secondary accent/CTA highlight | `#4CAF50` | `#22C55E` |
 
-Legacy `team-*` tokens remain for backwards compatibility; prefer the generic names above for new work so contact, blog, and future pages can share a single palette.
 
 ## Naming & Organization
 - Components: prefer PascalCase filenames (`HeroSection.vue`). Existing hyphenated names such as `The-hero-video.vue` are kept as-is; document any rename.
@@ -96,26 +92,19 @@ Legacy `team-*` tokens remain for backwards compatibility; prefer the generic na
 ## Testing & hardening
 Every code that is produced MUST me validated using :
 - `pnpm lint`
-- `pnpm test`
+- `pnpm test` -> Can run partial tests if no shared components are updated
 - `pnpm generate` 
 
 ## Documentation Expectations
-- Update or extend README, AGENTS.md, architectural notes, and comments when behaviour changes.
 - Keep comments in English; translate legacy ones as you touch the file.
 
 ## SEO metadata policy
-- Only include Open Graph meta tags when defining SEO metadata. Twitter-specific tags are not allowed.
-- Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources.
+- Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources.  Twitter-specific tags are not allowed.
 
 ## Backend API authentication and caching guidelines
 - Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent—never call `new Configuration()` directly.
-- Only create backend API instances during SSR/Vitest execution (e.g. inside Nuxt event handlers). Services such as `useBlogService`, `useContentService`, and `useTeamService` must lazily obtain their API via the helper to keep the shared token out of browser bundles.
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
 - Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
-- Before modifying authentication-sensitive code:
-  1. Confirm every outbound call that targets `config.apiUrl` uses the helper-backed configuration or the `api-token.server` plugin so headers are injected server-side only.
-  2. Re-validate the `MACHINE_TOKEN`/`front.security.shared-token` pairing in local and deployment secrets.
-  3. Exercise the affected flows (login, refresh, logout, and generated client calls) to prove headers and cookies remain intact.
 
 ## DomainLanguage injection
 Every downstream call should be wrapped in a thin service that:
@@ -129,11 +118,6 @@ Every downstream call should be wrapped in a thin service that:
 4. Guards against accidental client-side usage to keep secrets such as
    `MACHINE_TOKEN` out of the browser bundle.
 
-
-## MCP & Developer Tooling
-- Ensure the Nuxt MCP server is running on port 3000 when working with Claude Code / Vuetify MCP features (`nuxt dev` already exposes it).
-- Claude-specific shortcuts (e.g., `/css-class-validator`) remain available; keep instructions compatible with Claude’s CLAUDE.md expectations.
-
 ## When Unsure
-- Ask for clarification before introducing new patterns or deviating from these guardrails.
 - Prefer incremental changes aligned with existing code style and project architecture.
+- Ask for clarification before introducing new patterns or deviating from these guardrails.
