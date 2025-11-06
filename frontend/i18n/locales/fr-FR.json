@@ -1550,8 +1550,14 @@
   },
   "product": {
     "admin": {
-      "subtitle": "Aperçu JSON complet du produit.",
-      "title": "Section administration"
+      "subtitle": "Outils réservés à l'équipe Nudger. Affichés uniquement après connexion.",
+      "title": "Outils d'administration",
+      "sections": {
+        "productJson": {
+          "title": "Payload JSON du produit",
+          "helper": "Inspecter le ProductDto brut renvoyé par l'API."
+        }
+      }
     },
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
@@ -1718,6 +1724,13 @@
     },
     "navigation": {
       "admin": "Administration",
+      "adminPanel": {
+        "title": "Outils d'administration",
+        "helper": "Fonctionnalités restreintes visibles uniquement pour les membres authentifiés.",
+        "items": {
+          "productJson": "JSON du produit"
+        }
+      },
       "ai": "Synthèse IA",
       "attributes": "Caractéristiques",
       "docs": "Documentation",

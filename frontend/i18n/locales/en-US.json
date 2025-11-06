@@ -1550,8 +1550,14 @@
   },
   "product": {
     "admin": {
-      "subtitle": "Full JSON payload of the product.",
-      "title": "Admin section"
+      "subtitle": "Tools reserved for Nudger teammates. Visible only when signed in.",
+      "title": "Admin tools",
+      "sections": {
+        "productJson": {
+          "title": "Product JSON payload",
+          "helper": "Inspect the raw ProductDto returned by the API."
+        }
+      }
     },
     "aiReview": {
       "empty": "Summary not requested yet.",
@@ -1718,6 +1724,13 @@
     },
     "navigation": {
       "admin": "Administration",
+      "adminPanel": {
+        "title": "Admin tools",
+        "helper": "Restricted utilities visible only to authenticated teammates.",
+        "items": {
+          "productJson": "Product JSON"
+        }
+      },
       "ai": "AI summary",
       "attributes": "Specifications",
       "docs": "Documentation",

@@ -62,4 +62,26 @@ describe('ProductSummaryNavigation', () => {
 
     await wrapper.unmount()
   })
+
+  it('renders admin panel and reacts to clicks', async () => {
+    const adminSections = [
+      { id: 'admin-json', label: 'Product JSON', icon: 'mdi-code-json' },
+    ]
+
+    const wrapper = await mountComponent({
+      adminSections,
+      adminTitle: 'Admin tools',
+      adminHelper: 'Restricted zone',
+    })
+
+    expect(wrapper.find('.product-summary-navigation__admin-panel').exists()).toBe(true)
+
+    const adminButton = wrapper.find('button.product-summary-navigation__admin-link')
+    await adminButton.trigger('click')
+
+    const emitted = wrapper.emitted('navigate') ?? []
+    expect(emitted[emitted.length - 1]).toEqual(['admin-json'])
+
+    await wrapper.unmount()
+  })
 })

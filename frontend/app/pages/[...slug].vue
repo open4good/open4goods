@@ -20,6 +20,9 @@
       <aside class="product-page__nav" :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }">
         <ProductSummaryNavigation
           :sections="navigableSections"
+          :admin-sections="adminNavigableSections"
+          :admin-title="$t('product.navigation.adminPanel.title')"
+          :admin-helper="$t('product.navigation.adminPanel.helper')"
           :active-section="activeSection"
           :orientation="orientation"
           :aria-label="$t('product.navigation.label')"
@@ -96,10 +99,13 @@
 
         <section
           v-if="showAdminSection"
-          :id="sectionIds.admin"
           class="product-page__section"
         >
-          <ProductAdminSection :product="product" />
+          <ProductAdminSection
+            :product="product"
+            :panel-id="sectionIds.adminPanel"
+            :json-section-id="sectionIds.adminJson"
+          />
         </section>
       </main>
     </div>
@@ -549,36 +555,62 @@ const sectionIds = {
   alternatives: 'alternatives',
   attributes: 'caracteristiques',
   docs: 'documentation',
-  admin: 'admin',
+  adminPanel: 'admin-panel',
+  adminJson: 'admin-json',
 } as const
 
-const sections = computed(() => {
-  const baseSections: Array<{ id: string; label: string; icon: string; condition?: boolean }>
-    = [
-      { id: sectionIds.hero, label: t('product.navigation.overview'), icon: 'mdi-information-outline', condition: true },
-      { id: sectionIds.impact, label: t('product.navigation.impact'), icon: 'mdi-leaf', condition: impactScores.value.length > 0 },
-      { id: sectionIds.ai, label: t('product.navigation.ai'), icon: 'mdi-robot-outline', condition: true },
-      { id: sectionIds.price, label: t('product.navigation.price'), icon: 'mdi-currency-eur', condition: !!product.value?.offers },
-      {
-        id: sectionIds.alternatives,
-        label: t('product.navigation.alternatives'),
-        icon: 'mdi-compare-horizontal',
-        condition: showAlternativesSection.value,
-      },
-      {
-        id: sectionIds.attributes,
-        label: t('product.navigation.attributes'),
-        icon: 'mdi-format-list-bulleted',
-        condition: showAttributesSection.value,
-      },
-      { id: sectionIds.docs, label: t('product.navigation.docs'), icon: 'mdi-file-document-outline', condition: (product.value?.resources?.pdfs?.length ?? 0) > 0 },
-      { id: sectionIds.admin, label: t('product.navigation.admin'), icon: 'mdi-shield-account-outline', condition: showAdminSection.value },
-    ]
+type NavigableSection = { id: string; label: string; icon: string }
+type ConditionalSection = NavigableSection & { condition: boolean }
 
-  return baseSections.filter((section) => section.condition)
+const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
+  { id: sectionIds.hero, label: t('product.navigation.overview'), icon: 'mdi-information-outline', condition: true },
+  { id: sectionIds.impact, label: t('product.navigation.impact'), icon: 'mdi-leaf', condition: impactScores.value.length > 0 },
+  { id: sectionIds.ai, label: t('product.navigation.ai'), icon: 'mdi-robot-outline', condition: true },
+  { id: sectionIds.price, label: t('product.navigation.price'), icon: 'mdi-currency-eur', condition: !!product.value?.offers },
+  {
+    id: sectionIds.alternatives,
+    label: t('product.navigation.alternatives'),
+    icon: 'mdi-compare-horizontal',
+    condition: showAlternativesSection.value,
+  },
+  {
+    id: sectionIds.attributes,
+    label: t('product.navigation.attributes'),
+    icon: 'mdi-format-list-bulleted',
+    condition: showAttributesSection.value,
+  },
+  {
+    id: sectionIds.docs,
+    label: t('product.navigation.docs'),
+    icon: 'mdi-file-document-outline',
+    condition: (product.value?.resources?.pdfs?.length ?? 0) > 0,
+  },
+])
+
+const primarySections = computed<NavigableSection[]>(() =>
+  primarySectionDefinitions.value
+    .filter((section) => section.condition)
+    .map(({ condition: _condition, ...rest }) => rest),
+)
+
+const adminSections = computed<NavigableSection[]>(() => {
+  if (!showAdminSection.value) {
+    return []
+  }
+
+  return [
+    {
+      id: sectionIds.adminJson,
+      label: t('product.navigation.adminPanel.items.productJson'),
+      icon: 'mdi-code-json',
+    },
+  ]
 })
 
-const navigableSections = computed(() => sections.value.map(({ condition, ...rest }) => rest))
+const sections = computed<NavigableSection[]>(() => [...primarySections.value, ...adminSections.value])
+
+const navigableSections = computed(() => primarySections.value)
+const adminNavigableSections = computed(() => adminSections.value)
 
 const orientation = computed<'vertical' | 'horizontal'>(() => (display.mdAndDown.value ? 'horizontal' : 'vertical'))
 
