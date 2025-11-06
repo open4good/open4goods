@@ -9,15 +9,22 @@ import '~/assets/css/text-content.css'
 // Props
 
 const props = withDefaults(
-  defineProps<{ blocId: string; defaultLength?: number; ipsumLength?: number }>(),
+  defineProps<{
+    blocId: string
+    defaultLength?: number
+    ipsumLength?: number
+    fallbackText?: string
+  }>(),
   {
     defaultLength: DEFAULT_LOREM_LENGTH,
     ipsumLength: undefined,
-  }
+    fallbackText: undefined,
+  },
 )
 
 // Composables
 const blocId = toRef(props, 'blocId')
+const fallbackText = toRef(props, 'fallbackText')
 const { htmlContent, editLink, pending, error } = await useContentBloc(blocId)
 const { isLoggedIn, hasRole } = useAuth()
 const config = useRuntimeConfig()
@@ -31,10 +38,32 @@ const canEdit = computed(() => {
 
 const fallbackLoremLength = computed(() => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH)
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+
+const fallbackHtml = computed(() => {
+  const raw = fallbackText.value?.trim()
+
+  if (!raw) {
+    return null
+  }
+
+  return `<p>${escapeHtml(raw)}</p>`
+})
+
 const displayHtml = computed(() => {
   const rawContent = (unref(htmlContent) ?? '').trim()
   if (rawContent) {
     return rawContent
+  }
+
+  if (fallbackHtml.value) {
+    return fallbackHtml.value
   }
 
   return _generateLoremIpsum(fallbackLoremLength.value)
