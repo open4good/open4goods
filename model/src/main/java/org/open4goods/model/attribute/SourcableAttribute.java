@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,16 +38,35 @@ public abstract class SourcableAttribute {
 
 		return ret;
 	}
-	
+
 
 	/**
-	 * 
+	 *
 	 * @return the best value
 	 */
 	public String bestValue() {
 
+		// TODO : (P1) : logic should be externalized, wear mapping of datasourcename from conf
 		// Count values by unique keys... NOTE : Should have a java8+ nice solution here
 		// !
+
+		// TODO : ugly
+		// First check if eprel datasource
+
+
+		Optional<SourcedAttribute> trustedSource = source.stream().filter(e-> "eprel".equals(e.getDataSourcename())).findAny();
+
+		if (trustedSource.isPresent()) {
+			return trustedSource.get().getValue();
+		}
+
+		trustedSource = source.stream().filter(e-> "icecat.biz".equals(e.getDataSourcename())).findAny();
+
+		if (trustedSource.isPresent()) {
+			return trustedSource.get().getValue();
+		}
+
+
 		Map<String, Integer> valueCounter = new HashMap<>();
 
 		for (SourcedAttribute source : source) {
@@ -70,17 +90,17 @@ public abstract class SourcableAttribute {
 
 	/**
 	 * Return the number of distinct values
-	 * 
+	 *
 	 * @return
 	 */
 	public long ponderedvalues() {
 		return source.stream().map(e -> e.getValue()).distinct().count();
 	}
 
-	
+
 	/**
 	 * Number of sources for this attribute
-	 * 
+	 *
 	 * @return
 	 */
 	public int sourcesCount() {
@@ -89,7 +109,7 @@ public abstract class SourcableAttribute {
 
 	/**
 	 * The number of different values for this item
-	 * 
+	 *
 	 * @return
 	 */
 	public long distinctValues() {
@@ -98,7 +118,7 @@ public abstract class SourcableAttribute {
 
 	/**
 	 * For UI, a String representation of all providers names
-	 * 
+	 *
 	 * @return
 	 */
 	public String providersToString() {
@@ -107,7 +127,7 @@ public abstract class SourcableAttribute {
 
 	/**
 	 * For UI, a String representation of all providers names and values
-	 * 
+	 *
 	 * @return
 	 */
 	public String sourcesToString() {
@@ -122,7 +142,7 @@ public abstract class SourcableAttribute {
 	public void setSource(Set<SourcedAttribute> source) {
 		this.source = source;
 	}
-	
-	
+
+
 
 }

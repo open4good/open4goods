@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 public class EprelCompletionService  extends AbstractCompletionService{
 
 
+	public static final String EPREL_DS_NAME = "eprel";
 	private static final int REFRESH_IN_DAYS = 40;
 	private ApiProperties apiProperties;
 	private EprelSearchService eprelSearchService;
@@ -69,7 +70,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	@Override
 	public String getDatasourceName() {
 		// No datasource name for resource completion
-		return "eprel";
+		return EPREL_DS_NAME;
 	}
 
 
@@ -164,8 +165,8 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	private DataFragment initDataFragment( Product data) {
 		DataFragment df = new DataFragment();
 		// TODO(p3,conf) : Constants
-		df.setDatasourceName("eprel");
-		df.setDatasourceConfigName("eprel");
+		df.setDatasourceName(EPREL_DS_NAME);
+		df.setDatasourceConfigName(EPREL_DS_NAME);
 		df.setLastIndexationDate(System.currentTimeMillis());
 		df.setCreationDate(System.currentTimeMillis());
 		df.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()));

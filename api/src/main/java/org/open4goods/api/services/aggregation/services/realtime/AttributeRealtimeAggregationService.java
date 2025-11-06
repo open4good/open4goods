@@ -121,10 +121,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 				try {
 
-					// TODO : Best value election
-					// TODO : short suffix
-					// TODO : Find in icecat
-
 					// Applying parsing rule
 					String cleanedValue =  parseAttributeValue(attr, attrConfig, vConf);
 
