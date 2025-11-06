@@ -23,6 +23,12 @@
       "type": "java.lang.Integer",
       "description": "Number of products sent to Elasticsearch in a single bulk request.",
       "defaultValue": 250
+    },
+    {
+      "name": "eprel.exclude-if-spaces",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of spaces allowed in alternative model identifiers when searching.",
+      "defaultValue": 2
     }
   ]
 }

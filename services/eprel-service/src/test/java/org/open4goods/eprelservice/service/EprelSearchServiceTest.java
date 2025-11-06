@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.PrefixQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
@@ -17,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -32,14 +32,16 @@ class EprelSearchServiceTest
     private ElasticsearchOperations elasticsearchOperations;
 
     private EprelSearchService service;
+    private EprelServiceProperties properties;
     private SearchHits<EprelProduct> emptyHits;
 
     @BeforeEach
     void setUp()
     {
-        service = new EprelSearchService(elasticsearchOperations);
+        properties = new EprelServiceProperties();
+        service = new EprelSearchService(elasticsearchOperations, properties);
         emptyHits = org.mockito.Mockito.mock(SearchHits.class);
-        when(emptyHits.stream()).thenReturn(Stream.empty());
+        when(emptyHits.stream()).thenAnswer(invocation -> Stream.empty());
         when(elasticsearchOperations.search(any(NativeQuery.class), any(Class.class))).thenReturn(emptyHits);
     }
 
@@ -55,14 +57,14 @@ class EprelSearchServiceTest
     }
 
     @Test
-    @DisplayName("searchByExactModel should use a case insensitive match query")
-    void searchByExactModelShouldUseMatchQuery()
+    @DisplayName("searchByExactModel should use a case insensitive term query")
+    void searchByExactModelShouldUseTermQuery()
     {
         service.searchByExactModel("MODEL-123");
         Query query = capturedQuery();
-        MatchQuery matchQuery = query.match();
-        assertThat(matchQuery.field()).isEqualTo("modelIdentifier");
-        assertThat(matchQuery.query().stringValue()).isEqualTo("model-123");
+        TermQuery termQuery = query.term();
+        assertThat(termQuery.field()).isEqualTo("modelIdentifier");
+        assertThat(termQuery.value().stringValue()).isEqualTo("model-123");
     }
 
     @Test
@@ -74,6 +76,39 @@ class EprelSearchServiceTest
         PrefixQuery prefixQuery = query.prefix();
         assertThat(prefixQuery.field()).isEqualTo("modelIdentifier");
         assertThat(prefixQuery.value()).isEqualTo("model");
+    }
+
+    @Test
+    @DisplayName("searchByModel should fall back to keyword prefix bool query when needed")
+    void searchByModelShouldUseBestMatchFallback()
+    {
+        service.searchByModel("MODEL12345XYZ");
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(3)).search(captor.capture(), any(Class.class));
+
+        Query boolQuery = captor.getAllValues().get(2).getQuery();
+        assertThat(boolQuery.isBool()).isTrue();
+        assertThat(boolQuery.bool().should()).isNotEmpty();
+        assertThat(boolQuery.bool().should().getFirst().term().field()).isEqualTo("modelIdentifier");
+        assertThat(boolQuery.bool().should().getFirst().term().value().stringValue()).isEqualTo("model12345xyz");
+        assertThat(boolQuery.bool().minimumShouldMatch()).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("search with model list should skip candidates exceeding space limit")
+    void searchShouldSkipModelsWithTooManySpaces()
+    {
+        properties.setExcludeIfSpaces(0);
+        service.search("INVALID", java.util.List.of("ACCEPTED", "TOO MANY SPACES"));
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(3)).search(captor.capture(), any(Class.class));
+
+        java.util.List<Query> queries = captor.getAllValues().stream().map(NativeQuery::getQuery).toList();
+        assertThat(queries).hasSize(3);
+        TermQuery termQuery = queries.getFirst().term();
+        assertThat(termQuery.value().stringValue()).isEqualTo("accepted");
     }
 
     private Query capturedQuery()

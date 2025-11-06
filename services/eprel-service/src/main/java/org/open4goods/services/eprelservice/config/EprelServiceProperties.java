@@ -36,6 +36,12 @@ public class EprelServiceProperties
     @Min(1)
     private int indexBulkSize = 250;
 
+    /**
+     * Maximum number of spaces allowed in alternative model identifiers when searching.
+     */
+    @Min(0)
+    private int excludeIfSpaces = 2;
+
     public String getApiUrl()
     {
         return apiUrl;
@@ -74,5 +80,15 @@ public class EprelServiceProperties
     public void setIndexBulkSize(int indexBulkSize)
     {
         this.indexBulkSize = indexBulkSize;
+    }
+
+    public int getExcludeIfSpaces()
+    {
+        return excludeIfSpaces;
+    }
+
+    public void setExcludeIfSpaces(int excludeIfSpaces)
+    {
+        this.excludeIfSpaces = excludeIfSpaces;
     }
 }
