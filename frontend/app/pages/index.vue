@@ -34,6 +34,24 @@ const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 10
 
+const toSafeString = (value: unknown) => {
+  if (typeof value === 'string') {
+    return value
+  }
+
+  if (value == null) {
+    return ''
+  }
+
+  return String(value)
+}
+
+const toTrimmedString = (value: unknown) => toSafeString(value).trim()
+
+const stripHtmlComments = (value: string) => value.replace(/<!--[\s\S]*?-->/g, '')
+
+const sanitizeBlogSummary = (value: unknown) => stripHtmlComments(toSafeString(value)).trim()
+
 if (import.meta.server) {
   await fetchCategories(true)
   await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
@@ -288,20 +306,30 @@ const blogListItems = computed<HomeBlogItem[]>(() => {
     return fallbackBlogEntries.value
   }
 
-  return articles.map((article) => ({
-    ...article,
-    summary: article.summary ?? '',
-    formattedDate: article.createdMs
+  return articles.map((article) => {
+    const formattedDate = article.createdMs
       ? blogDateFormatter.value.format(new Date(article.createdMs))
-      : '',
-  }))
+      : ''
+
+    const title = toTrimmedString(article.title)
+    const summary = sanitizeBlogSummary(article.summary)
+    const image = typeof article.image === 'string' ? article.image.trim() : null
+
+    return {
+      ...article,
+      title,
+      summary,
+      image,
+      formattedDate,
+    }
+  })
 })
 
 const resolveBlogArticleLink = (article: BlogPostDto) => {
-  const rawUrl = article.url?.trim()
+  const rawUrl = toTrimmedString(article.url)
 
   if (!rawUrl) {
-    return localePath('blog')
+    return localePath({ name: 'blog' })
   }
 
   if (/^https?:\/\//i.test(rawUrl)) {
@@ -653,7 +681,7 @@ useHead(() => ({
         <div class="home-blog__actions">
           <v-btn
             class="home-blog__cta"
-            :to="localePath('blog')"
+            :to="localePath({ name: 'blog' })"
             color="primary"
             variant="tonal"
             size="large"
