@@ -6,7 +6,7 @@
       aria-describedby="impact-score-hero-intro"
       role="region"
     >
-      <v-container class="py-12">
+      <v-container class="impact-score-page__hero-container">
         <v-row class="impact-score-page__hero-row" align="center" justify="center">
           <v-col cols="12" md="10" lg="8" class="impact-score-page__hero-content">
             <h1 id="impact-score-hero-title" class="impact-score-page__title">
@@ -54,13 +54,13 @@
               </header>
 
               <v-row class="impact-score-section__row impact-score-section__row--balanced" align="stretch">
-                <v-col cols="12" md="6" lg="7">
+                <v-col cols="12" sm="7" md="6" lg="7">
                   <div class="impact-score-section__body">
                     <TextContent bloc-id="ECOSCORE:2:" />
                   </div>
                 </v-col>
 
-                <v-col cols="12" md="6" lg="5" class="impact-score-section__rating">
+                <v-col cols="12" sm="5" md="6" lg="5" class="impact-score-section__rating">
                   <v-card
                     variant="flat"
                     class="impact-score-example"
@@ -479,6 +479,14 @@ function formatCoeff(n: number | null | undefined) {
   overflow: hidden;
 }
 
+.impact-score-page__hero-container {
+  position: relative;
+  width: 100%;
+  margin-inline: auto;
+  padding-block: clamp(5rem, 9vw, 7.5rem);
+  max-width: min(1320px, 92vw);
+}
+
 .impact-score-page__hero::before {
   content: '';
   position: absolute;
@@ -490,7 +498,7 @@ function formatCoeff(n: number | null | undefined) {
 .impact-score-page__hero::after {
   content: '';
   position: absolute;
-  inset: 12% -25% -45% -25%;
+  inset: 10% -25% -18% -25%;
   background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 70%);
   pointer-events: none;
   z-index: 0;
@@ -523,14 +531,14 @@ function formatCoeff(n: number | null | undefined) {
 
 .impact-score-page__content {
   margin-top: 0;
-  padding-top: clamp(2.5rem, 4vw, 4rem);
-  max-width: min(1320px, 96vw);
+  padding-top: clamp(2.75rem, 4vw, 4.5rem);
+  max-width: min(1440px, 95vw);
 }
 
 .impact-score-page__layout {
   display: grid;
-  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
-  gap: clamp(2rem, 3vw, 3rem);
+  grid-template-columns: minmax(200px, min(22vw, 280px)) minmax(0, 1fr);
+  gap: clamp(2.25rem, 3.5vw, 3.5rem);
   align-items: start;
 }
 
@@ -610,8 +618,8 @@ function formatCoeff(n: number | null | undefined) {
 
 .impact-score-section__media {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .impact-score-media,
@@ -628,6 +636,10 @@ function formatCoeff(n: number | null | undefined) {
   margin-inline: auto;
 }
 
+.impact-score-section__body {
+  width: 100%;
+}
+
 .impact-score-media__image {
   width: 100%;
   max-width: 260px;
@@ -637,7 +649,7 @@ function formatCoeff(n: number | null | undefined) {
 
 .impact-score-section__rating {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
 }
 
