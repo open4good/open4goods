@@ -60,6 +60,9 @@ const stripHtmlComments = (value: string) => {
 
 const sanitizeBlogSummary = (value: unknown) => stripHtmlComments(toSafeString(value)).trim()
 
+const hasRenderableImage = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0
+
 if (import.meta.server) {
   await fetchCategories(true)
   await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
@@ -239,6 +242,25 @@ const resolveCategoryHref = (category: VerticalConfigDto) => {
   return searchLandingUrl.value
 }
 
+const resolveCategoryImage = (category: VerticalConfigDto) => {
+  const candidates = [
+    category.imageLarge,
+    category.imageMedium,
+    category.imageSmall,
+  ]
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const trimmed = candidate.trim()
+      if (trimmed.length > 0) {
+        return trimmed
+      }
+    }
+  }
+
+  return null
+}
+
 const categoryCarouselItems = computed(() => {
   const categories = [...rawCategories.value]
     .filter((category) => category.enabled !== false)
@@ -277,7 +299,7 @@ const categoryCarouselItems = computed(() => {
       title,
       description,
       href: resolveCategoryHref(category),
-      image: category.imageLarge ?? category.imageMedium ?? category.imageSmall ?? null,
+      image: resolveCategoryImage(category),
     }
   })
 })
@@ -617,7 +639,7 @@ useHead(() => ({
         </div>
         <div v-else-if="featuredBlogItem || secondaryBlogItems.length" class="home-blog__grid">
           <component
-            :is="featuredBlogItem?.isExternal ? 'a' : NuxtLink"
+            :is="featuredBlogItem?.isExternal ? 'a' : 'NuxtLink'"
             v-if="featuredBlogItem"
             :key="'featured-article'"
             class="home-blog__item home-blog__item--featured"
@@ -629,7 +651,7 @@ useHead(() => ({
             <article class="home-blog__card">
               <div class="home-blog__media" aria-hidden="true">
                 <v-img
-                  v-if="featuredBlogItem.image"
+                  v-if="hasRenderableImage(featuredBlogItem.image)"
                   :src="featuredBlogItem.image"
                   :alt="featuredBlogItem.title ?? ''"
                   cover
@@ -647,7 +669,7 @@ useHead(() => ({
             </article>
           </component>
           <component
-            :is="article.isExternal ? 'a' : NuxtLink"
+            :is="article.isExternal ? 'a' : 'NuxtLink'"
             v-for="article in secondaryBlogItems"
             :key="article.url ?? article.title ?? article.link"
             class="home-blog__item"
@@ -659,7 +681,7 @@ useHead(() => ({
             <article class="home-blog__card">
               <div class="home-blog__media" aria-hidden="true">
                 <v-img
-                  v-if="article.image"
+                  v-if="hasRenderableImage(article.image)"
                   :src="article.image"
                   :alt="article.title ?? ''"
                   cover
