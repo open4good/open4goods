@@ -25,11 +25,11 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.ai.AiDescriptions;
-import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
@@ -99,6 +99,9 @@ public class Product implements Standardisable {
 
 	/** If set that contains cause of exclusion.**/
 	private Set<String> excludedCauses = new HashSet<String>();
+
+	/** If associated eprel product if any **/
+	private EprelProduct eprelDatas = new EprelProduct();
 
 	/** The list of other model's known for this product **/
 	private Set<String> akaModels = new HashSet<>();
@@ -987,6 +990,14 @@ public class Product implements Standardisable {
 
 	public void setReviews(Localisable<String, AiReviewHolder> aiReviews) {
 		this.reviews = aiReviews;
+	}
+
+	public EprelProduct getEprelDatas() {
+		return eprelDatas;
+	}
+
+	public void setEprelDatas(EprelProduct eprelDatas) {
+		this.eprelDatas = eprelDatas;
 	}
 
 

@@ -149,7 +149,14 @@
             "type": "keyword",
             "index": true
         },
+
+
         "externalIds": {
+            "type": "object",
+            "dynamic": "false"
+        },
+
+        "eprelDatas": {
             "type": "object",
             "dynamic": "false"
         },
@@ -164,7 +171,7 @@
         "reviews": {
             "type": "object",
             "enabled": false
-        },        
+        },
 
         "googleTaxonomyId": {
             "type": "integer",
@@ -240,8 +247,8 @@
                     "type": "object",
                     "enabled": false
                 }
-                
-                
+
+
             }
         },
         "ranking": {
@@ -259,7 +266,7 @@
         "worsesScores": {
             "type": "object",
             "enabled": false
-        },               
+        },
         "scores": {
             "dynamic": "true",
             "properties": {
@@ -278,18 +285,18 @@
                 "ranking": {
                     "type": "integer",
                     "index": false
-                },                
-                
+                },
+
                 "highestScoreId": {
                     "type": "long",
                     "index": false
-                },                
-                
+                },
+
                 "lowestScoreId": {
                     "type": "long",
                     "index": false
-                },                
-                
+                },
+
                 "relativ": {
                     "type": "object",
                     "enabled": false
