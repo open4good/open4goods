@@ -41,10 +41,10 @@ export interface ProductAiReviewDto {
     review?: AiReviewDto;
     /**
      * Source weighting for the review content
-     * @type {{ [key: string]: number; }}
+     * @type {string}
      * @memberof ProductAiReviewDto
      */
-    sources?: { [key: string]: number; };
+    sources?: string;
     /**
      * Whether enough data was available to trigger the AI review generation
      * @type {boolean}

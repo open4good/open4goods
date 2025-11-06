@@ -51,10 +51,10 @@ export interface OpenDataDatasetDto {
     downloadUrl?: string;
     /**
      * 
-     * @type {Array<any>}
+     * @type {Array<string>}
      * @memberof OpenDataDatasetDto
      */
-    headers?: Array<any>;
+    headers?: Array<string>;
 }
 
 

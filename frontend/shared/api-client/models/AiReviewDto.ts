@@ -77,25 +77,25 @@ export interface AiReviewDto {
      */
     summary?: string;
     /**
-     * 
-     * @type {Array<any>}
+     * List of pros emphasised by the AI review
+     * @type {Array<string>}
      * @memberof AiReviewDto
      */
-    pros?: Array<any>;
+    pros?: Array<string>;
     /**
-     * 
-     * @type {Array<any>}
+     * List of cons emphasised by the AI review
+     * @type {Array<string>}
      * @memberof AiReviewDto
      */
-    cons?: Array<any>;
+    cons?: Array<string>;
     /**
-     * 
+     * Sources cited to support the AI review
      * @type {Array<AiReviewSourceDto>}
      * @memberof AiReviewDto
      */
     sources?: Array<AiReviewSourceDto>;
     /**
-     * 
+     * Attributes extracted from the sources and referenced inside the review
      * @type {Array<AiReviewAttributeDto>}
      * @memberof AiReviewDto
      */

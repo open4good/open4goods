@@ -35,13 +35,13 @@ import {
  */
 export interface SearchSuggestResponseDto {
     /**
-     * 
+     * Category matches resolved from the in-memory vertical index.
      * @type {Array<SearchSuggestCategoryDto>}
      * @memberof SearchSuggestResponseDto
      */
     categoryMatches?: Array<SearchSuggestCategoryDto>;
     /**
-     * 
+     * Product matches obtained from the classical Elasticsearch search.
      * @type {Array<SearchSuggestProductDto>}
      * @memberof SearchSuggestResponseDto
      */

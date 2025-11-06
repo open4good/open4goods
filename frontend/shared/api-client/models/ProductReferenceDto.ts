@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * Details about the product ranked immediately above
+ * 
  * @export
  * @interface ProductReferenceDto
  */

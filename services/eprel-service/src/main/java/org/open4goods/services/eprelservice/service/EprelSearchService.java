@@ -22,6 +22,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 /**
  * Provides read access to the EPREL Elasticsearch index.
+ * TODO : PErf : restict search on product defined eprelMapping if any
  */
 @Service
 public class EprelSearchService
@@ -109,7 +110,7 @@ public class EprelSearchService
         results = searchByModelBestMatch(model);
         if (!results.isEmpty())
         {
-            LOGGER.info("Found {} result by model best match : {}", results.size(), model);
+            LOGGER.warn("Found {} result by model best match : {}", results.size(), model);
             return results;
         }
 
