@@ -169,6 +169,14 @@ public class EprelProduct implements Serializable
     @Field(type = FieldType.Keyword, index = false)
     private String registrantNature;
 
+
+    @Field(type = FieldType.Keyword, index = false)
+    private String constructedEUID;
+
+
+
+
+
     /**
      * Identifier of the generated energy label.
      */
@@ -321,6 +329,14 @@ public class EprelProduct implements Serializable
 
 	public void setCategorySpecificAttributes(Map<String, Object> categorySpecificAttributes) {
 		this.categorySpecificAttributes = categorySpecificAttributes;
+	}
+
+	public String getConstructedEUID() {
+		return constructedEUID;
+	}
+
+	public void setConstructedEUID(String constructedEUID) {
+		this.constructedEUID = constructedEUID;
 	}
 
 	/**
