@@ -532,7 +532,6 @@ function formatCoeff(n: number | null | undefined) {
 .impact-score-page__content {
   margin-top: 0;
   padding-top: clamp(2.75rem, 4vw, 4.5rem);
-  max-width: min(1440px, 95vw);
 }
 
 .impact-score-page__layout {
