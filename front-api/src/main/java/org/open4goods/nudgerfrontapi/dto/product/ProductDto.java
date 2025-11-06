@@ -34,7 +34,8 @@ public record ProductDto(
         ProductScoresDto scores,
         @Schema(description = "AI generated review resolved for the requested domain language")
         ProductAiReviewDto aiReview,
-
+        @Schema(description = "EPREL product information when available", implementation = ProductEprelDto.class)
+        ProductEprelDto eprel,
         @Schema(description = "Product offers and pricing information")
         ProductOffersDto offers
 ) {
@@ -52,6 +53,7 @@ public record ProductDto(
                 scores,
                 aiReview,
                 aiTexts,
+                eprel,
                 offers
         }
 

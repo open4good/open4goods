@@ -13,6 +13,8 @@ public record ProductIndexedAttributeDto(
         @Schema(description = "Numeric interpretation when available", nullable = true, example = "12.5")
         Double numericValue,
         @Schema(description = "Boolean interpretation when available", nullable = true)
-        Boolean booleanValue
+        Boolean booleanValue,
+        @Schema(description = "Sourcing metadata attached to the indexed attribute")
+        ProductAttributeSourceDto sourcing
 ) {
 }

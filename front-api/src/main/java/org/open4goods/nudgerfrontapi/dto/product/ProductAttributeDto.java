@@ -14,7 +14,7 @@ public record ProductAttributeDto(
         String value,
         @Schema(description = "Icecat taxonomy identifiers associated to the attribute")
         Set<Integer> icecatTaxonomyIds,
-        @Schema(description = "Attributes values contributed by datasources")
-        Set<ProductSourcedAttributeDto> sources
+        @Schema(description = "Sourcing metadata for this attribute, including contributing datasources")
+        ProductAttributeSourceDto sourcing
 ) {
 }
