@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.model.eprel.EprelProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

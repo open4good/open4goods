@@ -55,11 +55,18 @@ public class VerticalConfig{
 	private Integer icecatTaxonomyId;
 
 
-        /** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
-        private boolean enabled = false;
+	/**
+	 * The corresponding eprel taxonomy ID
+	 */
+	private String eprelGroupName;
 
-        /** Flag indicating whether this category should be highlighted as popular. */
-        private boolean popular = false;
+
+
+    /** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
+    private boolean enabled = false;
+
+    /** Flag indicating whether this category should be highlighted as popular. */
+    private boolean popular = false;
 
 
 	/**
@@ -945,6 +952,23 @@ public class VerticalConfig{
 
 	public void setVerticalImage(String verticalImage) {
 		this.verticalImage = verticalImage;
+	}
+
+
+	public Set<String> getCacheTokenNames() {
+		return cacheTokenNames;
+	}
+
+	public void setCacheTokenNames(Set<String> cacheTokenNames) {
+		this.cacheTokenNames = cacheTokenNames;
+	}
+
+	public String getEprelGroupName() {
+		return eprelGroupName;
+	}
+
+	public void setEprelGroupName(String eprelGroupName) {
+		this.eprelGroupName = eprelGroupName;
 	}
 
 

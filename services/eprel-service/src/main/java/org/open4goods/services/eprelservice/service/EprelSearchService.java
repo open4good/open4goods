@@ -5,7 +5,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.services.eprelservice.model.GtinHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

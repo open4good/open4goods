@@ -1,4 +1,4 @@
-package org.open4goods.services.eprelservice.model;
+package org.open4goods.model.eprel;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -750,7 +750,7 @@ public class EprelProduct implements Serializable
     public void setGtinIdentifier(String gtinIdentifier)
     {
         this.gtinIdentifier = gtinIdentifier;
-        this.numericGtin = GtinHelper.toNumeric(gtinIdentifier).orElse(null);
+        this.numericGtin = Long.valueOf(gtinIdentifier);
     }
 
     public Long getNumericGtin()

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;

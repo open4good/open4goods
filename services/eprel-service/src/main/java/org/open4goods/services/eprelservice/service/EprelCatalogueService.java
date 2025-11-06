@@ -6,10 +6,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.eprelservice.client.EprelProductGroup;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
-import org.open4goods.services.eprelservice.model.EprelProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;

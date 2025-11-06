@@ -13,7 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.open4goods.services.eprelservice.model.EprelProduct;
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.services.eprelservice.service.JsonZipEprelCatalogueParser;
 
 /**
