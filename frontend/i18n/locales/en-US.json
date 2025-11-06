@@ -49,7 +49,7 @@
         "label": "Search for a product",
         "placeholder": "Search a product (e.g. television, smartphone…)",
         "ariaLabel": "Search for a responsible product",
-        "cta": "Compare",
+        "cta": "NUDGER",
         "helper": "Already 50M+ references in open data."
       }
     },

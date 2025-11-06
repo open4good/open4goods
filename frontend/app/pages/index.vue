@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import SearchSuggestField, {
+  type CategorySuggestionItem,
+  type ProductSuggestionItem,
+} from '~/components/search/SearchSuggestField.vue'
 
 definePageMeta({
   ssr: true,
@@ -13,7 +17,9 @@ const requestURL = useRequestURL()
 
 const searchQuery = ref('')
 
-const heroImageSrc = '/images/home/hero-placeholder.svg'
+const MIN_SUGGESTION_QUERY_LENGTH = 2
+const heroVideoSrc = '/videos/video-concept1.mp4'
+const heroVideoPoster = '/images/home/hero-placeholder.svg'
 
 const problemItems = computed(() => [
   {
@@ -186,14 +192,55 @@ const alternateLinks = computed(() =>
 const searchLandingUrl = computed(() => localePath({ name: 'search' }))
 const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
 
+const navigateToSearch = (query?: string) => {
+  const normalizedQuery = query?.trim() ?? ''
+
+  router.push(
+    localePath({
+      name: 'search',
+      query: normalizedQuery ? { q: normalizedQuery } : undefined,
+    }),
+  )
+}
+
 const handleSearchSubmit = () => {
   const trimmedQuery = searchQuery.value.trim()
-  const target = localePath({
-    name: 'search',
-    query: trimmedQuery.length > 0 ? { q: trimmedQuery } : undefined,
-  })
 
-  router.push(target)
+  if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_SUGGESTION_QUERY_LENGTH) {
+    return
+  }
+
+  navigateToSearch(trimmedQuery)
+}
+
+const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
+  searchQuery.value = suggestion.title
+
+  const normalizedUrl = suggestion.url?.trim()
+
+  if (normalizedUrl) {
+    router.push(localePath(normalizedUrl))
+    return
+  }
+
+  navigateToSearch(suggestion.title)
+}
+
+const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
+  searchQuery.value = suggestion.title
+  const gtin = suggestion.gtin?.trim()
+
+  if (gtin) {
+    router.push(
+      localePath({
+        name: 'gtin',
+        params: { gtin },
+      }),
+    )
+    return
+  }
+
+  navigateToSearch(suggestion.title)
 }
 
 useSeoMeta({
@@ -237,16 +284,16 @@ useHead(() => ({
             <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
 
             <form class="home-hero__search" role="search" @submit.prevent="handleSearchSubmit">
-              <v-text-field
+              <SearchSuggestField
                 v-model="searchQuery"
                 class="home-hero__search-input"
-                variant="outlined"
-                density="comfortable"
                 :label="t('home.hero.search.label')"
                 :placeholder="t('home.hero.search.placeholder')"
                 :aria-label="t('home.hero.search.ariaLabel')"
-                prepend-inner-icon="mdi-magnify"
-                hide-details="auto"
+                :min-chars="MIN_SUGGESTION_QUERY_LENGTH"
+                @submit="handleSearchSubmit"
+                @select-category="handleCategorySuggestion"
+                @select-product="handleProductSuggestion"
               />
               <v-btn class="home-hero__search-button" type="submit" size="large" color="primary" elevation="2">
                 {{ t('home.hero.search.cta') }}
@@ -261,7 +308,20 @@ useHead(() => ({
 
           <div class="home-hero__media" aria-hidden="true">
             <v-sheet rounded="xl" elevation="6" class="home-hero__media-sheet">
-              <v-img :src="heroImageSrc" :alt="t('home.hero.imageAlt')" cover class="home-hero__image" />
+              <div class="home-hero__video-wrapper">
+                <video
+                  class="home-hero__video"
+                  :poster="heroVideoPoster"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                >
+                  <source :src="heroVideoSrc" type="video/mp4" />
+                </video>
+                <div class="home-hero__video-overlay" />
+              </div>
             </v-sheet>
           </div>
         </div>
@@ -545,12 +605,39 @@ useHead(() => ({
 
 .home-hero__media-sheet
   padding: clamp(1rem, 3vw, 2rem)
-  background: rgba(var(--v-theme-surface-glass-strong), 0.7)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.6)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+  backdrop-filter: blur(14px)
 
-.home-hero__image
-  max-height: 320px
-  border-radius: 1rem
+.home-hero__video-wrapper
+  position: relative
+  overflow: hidden
+  border-radius: clamp(1.25rem, 4vw, 1.75rem)
+  aspect-ratio: 4 / 5
+  min-height: 280px
+  max-height: 360px
+  box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.55)
+
+.home-hero__video
+  width: 100%
+  height: 100%
+  display: block
+  object-fit: cover
+  filter: saturate(1.05)
+
+.home-hero__video-overlay
+  position: absolute
+  inset: 0
+  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.28), rgba(var(--v-theme-hero-gradient-end), 0.26))
+  mix-blend-mode: soft-light
+  pointer-events: none
+
+.home-hero__video-overlay::after
+  content: ''
+  position: absolute
+  inset: 0
+  border-radius: inherit
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
 
 .home-problems__grid
   row-gap: 1.5rem

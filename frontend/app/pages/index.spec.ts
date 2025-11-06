@@ -6,7 +6,7 @@ const messages: Record<string, string> = {
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',
   'home.hero.search.ariaLabel': 'Search input',
-  'home.hero.search.cta': 'Compare',
+  'home.hero.search.cta': 'NUDGER',
   'home.hero.search.helper': '50M references',
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Responsible choices are not a luxury',
@@ -160,6 +160,34 @@ const VTextFieldStub = defineComponent({
   },
 })
 
+const SearchSuggestFieldStub = defineComponent({
+  name: 'SearchSuggestFieldStub',
+  props: {
+    modelValue: { type: String, default: '' },
+  },
+  emits: ['update:modelValue', 'clear', 'select-category', 'select-product', 'submit'],
+  setup(props, { emit, attrs }) {
+    const onInput = (event: Event) => {
+      const target = event.target as HTMLInputElement
+      emit('update:modelValue', target.value)
+    }
+
+    const onKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.isComposing) {
+        emit('submit')
+      }
+    }
+
+    return () =>
+      h('input', {
+        ...attrs,
+        value: props.modelValue,
+        onInput,
+        onKeydown,
+      })
+  },
+})
+
 const VBtnStub = defineComponent({
   name: 'VBtnStub',
   props: {
@@ -215,6 +243,7 @@ const mountHomePage = async () => {
         VIcon: VIconStub,
         VBtn: VBtnStub,
         VTextField: VTextFieldStub,
+        SearchSuggestField: SearchSuggestFieldStub,
         VImg: VImgStub,
         VDivider: simpleStub('hr'),
         VExpansionPanels: simpleStub('div'),
