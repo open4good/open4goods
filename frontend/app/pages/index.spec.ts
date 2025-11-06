@@ -1,6 +1,6 @@
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, string> = {
   'home.hero.search.label': 'Search for a product',
@@ -37,18 +37,20 @@ const messages: Record<string, string> = {
   'home.categories.title': 'Browse categories',
   'home.categories.subtitle': 'Start with our most popular universes and refine in one click.',
   'home.categories.cta': 'Browse products',
+  'home.categories.fallbackTitle': 'Category',
+  'home.categories.fallbackDescription': 'Fallback description for the category.',
+  'home.categories.carouselAriaLabel': 'Categories carousel',
+  'home.categories.emptyState': 'Categories coming soon.',
   'home.categories.items.electronics.title': 'Electronics',
   'home.categories.items.electronics.description': 'Smartphones, TVs, audio…',
   'home.categories.items.appliances.title': 'Appliances',
   'home.categories.items.appliances.description': 'Washing machines, dishwashers, fridges…',
-  'home.trust.title': 'Proof & trust',
-  'home.trust.subtitle': 'Demanding partners and open data keep us accountable.',
-  'home.trust.logos.ademe': 'ADEME logo',
-  'home.trust.stats.references': '50,000,000+ open-data references',
-  'home.trust.stats.updates': 'Updated on a regular basis',
-  'home.blog.title': 'From the blog',
+  'home.blog.title': 'Live from the blog',
+  'home.blog.subtitle': 'Latest stories from the team.',
   'home.blog.cta': 'Browse all articles',
   'home.blog.readMore': 'Read article',
+  'home.blog.emptyState': 'No blog posts yet.',
+  'home.blog.carouselAriaLabel': 'Featured blog posts carousel',
   'home.blog.items.first.title': 'How we keep our AI frugal',
   'home.blog.items.first.date': '15 Jan 2025',
   'home.blog.items.first.excerpt': 'The technical choices that keep Nudger’s computations low-carbon.',
@@ -84,6 +86,8 @@ const messages: Record<string, string> = {
   'home.cta.subtitle': 'Restart a search or explore the analysed offers.',
   'home.cta.button': 'Start a search',
   'home.cta.altLink': 'Open the search page',
+  'home.cta.searchSubmit': 'Launch search',
+  'home.cta.browseTaxonomy': 'Explore categories',
   'home.seo.title': 'Nudger – Responsible shopping made easy',
   'home.seo.description': 'Compare the environmental impact and prices of over 50 million products with Nudger.',
   'home.seo.imageAlt': 'Illustration of the Nudger dashboard',
@@ -116,6 +120,75 @@ function useLocalePathMock() {
   return (to: unknown) => localePathMock(to)
 }
 
+const categoriesMockData = ref([
+  {
+    id: 'category-1',
+    verticalHomeTitle: 'Electronics',
+    verticalHomeDescription: 'Tech products',
+    verticalHomeUrl: 'electronics',
+    popular: true,
+    enabled: true,
+  },
+  {
+    id: 'category-2',
+    verticalHomeTitle: 'Appliances',
+    verticalHomeDescription: 'Home essentials',
+    verticalHomeUrl: 'appliances',
+    popular: false,
+    enabled: true,
+  },
+])
+
+const categoriesLoadingRef = ref(false)
+const fetchCategoriesMock = vi.fn().mockResolvedValue(categoriesMockData.value)
+
+const blogArticlesMock = ref([
+  {
+    url: 'latest-post',
+    title: 'Latest post',
+    summary: 'Fresh content from the blog.',
+    createdMs: 1736899200000,
+  },
+  {
+    url: 'another-post',
+    title: 'Another story',
+    summary: 'Second blog highlight.',
+    createdMs: 1736208000000,
+  },
+])
+
+const blogLoadingRef = ref(false)
+const fetchArticlesMock = vi.fn().mockResolvedValue(blogArticlesMock.value)
+
+const useCategoriesComposable = () => ({
+  categories: computed(() => categoriesMockData.value),
+  fetchCategories: fetchCategoriesMock,
+  loading: categoriesLoadingRef,
+  error: computed(() => null),
+  activeCategoryId: computed(() => null),
+  currentCategory: computed(() => null),
+  clearError: vi.fn(),
+  resetCategorySelection: vi.fn(),
+})
+
+const useBlogComposable = () => ({
+  paginatedArticles: computed(() => blogArticlesMock.value),
+  fetchArticles: fetchArticlesMock,
+  loading: blogLoadingRef,
+  articles: computed(() => blogArticlesMock.value),
+  currentArticle: computed(() => null),
+  tags: computed(() => []),
+  selectedTag: computed(() => null),
+  changePage: vi.fn(),
+  fetchTags: vi.fn(),
+  selectTag: vi.fn(),
+  fetchArticle: vi.fn(),
+  clearCurrentArticle: vi.fn(),
+  clearError: vi.fn(),
+  error: computed(() => null),
+  pagination: computed(() => ({ page: 1, size: 6, totalElements: blogArticlesMock.value.length, totalPages: 1 })),
+})
+
 mockNuxtImport('useI18n', () => () => ({
   t: (key: string) => translate(key),
   locale: localeRef,
@@ -135,6 +208,22 @@ mockNuxtImport('useHead', () => (input: unknown) => {
   headSpy(value)
   return value
 })
+
+vi.mock('~/composables/categories/useCategories', () => ({
+  useCategories: useCategoriesComposable,
+}))
+
+vi.mock('~/composables/categories/useCategories.ts', () => ({
+  useCategories: useCategoriesComposable,
+}))
+
+vi.mock('~/composables/blog/useBlog', () => ({
+  useBlog: useBlogComposable,
+}))
+
+vi.mock('~/composables/blog/useBlog.ts', () => ({
+  useBlog: useBlogComposable,
+}))
 
 const simpleStub = (tag: string) =>
   defineComponent({
@@ -230,6 +319,46 @@ const NuxtLinkStub = defineComponent({
   },
 })
 
+const HomeCategoryCarouselStub = defineComponent({
+  name: 'HomeCategoryCarouselStub',
+  props: {
+    items: { type: Array, default: () => [] },
+  },
+  setup(props) {
+    return () =>
+      h(
+        'div',
+        { class: 'home-category-carousel-stub' },
+        (props.items as Array<{ title?: string }>).map((item) => item.title).join('|'),
+      )
+  },
+})
+
+const HomeBlogCarouselStub = defineComponent({
+  name: 'HomeBlogCarouselStub',
+  props: {
+    items: { type: Array, default: () => [] },
+  },
+  setup(props) {
+    return () =>
+      h(
+        'div',
+        { class: 'home-blog-carousel-stub' },
+        (props.items as Array<{ title?: string }>).map((item) => item.title).join('|'),
+      )
+  },
+})
+
+const TextContentStub = defineComponent({
+  name: 'TextContentStub',
+  props: {
+    fallbackText: { type: String, default: '' },
+  },
+  setup(props) {
+    return () => h('div', { class: 'text-content-stub' }, props.fallbackText)
+  },
+})
+
 const mountHomePage = async () => {
   const component = (await import('./index.vue')).default
   return mountSuspended(component, {
@@ -251,6 +380,9 @@ const mountHomePage = async () => {
         VExpansionPanelTitle: simpleStub('div'),
         VExpansionPanelText: simpleStub('div'),
         NuxtLink: NuxtLinkStub,
+        HomeCategoryCarousel: HomeCategoryCarouselStub,
+        HomeBlogCarousel: HomeBlogCarouselStub,
+        TextContent: TextContentStub,
       },
     },
   })
@@ -262,6 +394,8 @@ describe('Home page', () => {
     routerReplace.mockReset()
     localePathMock.mockClear()
     headSpy.mockReset()
+    fetchCategoriesMock.mockClear()
+    fetchArticlesMock.mockClear()
   })
 
   it('submits the search query using the localized search route', async () => {

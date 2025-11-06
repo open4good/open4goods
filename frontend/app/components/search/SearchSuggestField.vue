@@ -21,6 +21,9 @@
     @click:clear="handleClear"
     @keydown.enter="handleEnterKey"
   >
+    <template v-if="$slots['append-inner']" #append-inner>
+      <slot name="append-inner" />
+    </template>
     <template #item="{ item, props: itemProps, index }">
       <div class="search-suggest-field__entry" :data-section="item.raw.type">
         <p

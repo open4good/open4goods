@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import type { BlogPostDto, VerticalConfigDto } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
+import HomeBlogCarousel from '~/components/home/HomeBlogCarousel.vue'
+import TextContent from '~/components/domains/content/TextContent.vue'
+import { useCategories } from '~/composables/categories/useCategories'
+import { useBlog } from '~/composables/blog/useBlog'
 
 definePageMeta({
   ssr: true,
@@ -20,6 +26,24 @@ const searchQuery = ref('')
 const MIN_SUGGESTION_QUERY_LENGTH = 2
 const heroVideoSrc = '/videos/video-concept1.mp4'
 const heroVideoPoster = '/images/home/hero-placeholder.svg'
+
+type HomeBlogItem = BlogPostDto & { formattedDate?: string }
+
+const { categories: rawCategories, fetchCategories, loading: categoriesLoading } = useCategories()
+const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
+
+if (import.meta.server) {
+  await fetchCategories(true)
+  await fetchArticles(1, 6, null)
+} else {
+  if (rawCategories.value.length === 0) {
+    await fetchCategories(true)
+  }
+
+  if (paginatedArticles.value.length === 0) {
+    await fetchArticles(1, 6, null)
+  }
+}
 
 const problemItems = computed(() => [
   {
@@ -83,42 +107,6 @@ const featureCards = computed(() => [
   },
 ])
 
-const categoryCards = computed(() => [
-  {
-    icon: 'mdi-cellphone',
-    title: String(t('home.categories.items.electronics.title')),
-    description: String(t('home.categories.items.electronics.description')),
-    href: localePath({ name: 'search', query: { q: 'smartphone' } }),
-  },
-  {
-    icon: 'mdi-fridge',
-    title: String(t('home.categories.items.appliances.title')),
-    description: String(t('home.categories.items.appliances.description')),
-    href: localePath({ name: 'search', query: { q: 'lave-linge' } }),
-  },
-])
-
-const blogEntries = computed(() => [
-  {
-    title: String(t('home.blog.items.first.title')),
-    date: String(t('home.blog.items.first.date')),
-    excerpt: String(t('home.blog.items.first.excerpt')),
-    href: '#',
-  },
-  {
-    title: String(t('home.blog.items.second.title')),
-    date: String(t('home.blog.items.second.date')),
-    excerpt: String(t('home.blog.items.second.excerpt')),
-    href: '#',
-  },
-  {
-    title: String(t('home.blog.items.third.title')),
-    date: String(t('home.blog.items.third.date')),
-    excerpt: String(t('home.blog.items.third.excerpt')),
-    href: '#',
-  },
-])
-
 const objectionItems = computed(() => [
   {
     icon: 'mdi-lightning-bolt',
@@ -164,6 +152,13 @@ const faqItems = computed(() => [
   },
 ])
 
+const faqPanels = computed(() =>
+  faqItems.value.map((item, index) => ({
+    ...item,
+    blocId: `HOME:FAQ:${index + 1}`,
+  })),
+)
+
 const faqJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -190,6 +185,116 @@ const alternateLinks = computed(() =>
 )
 
 const searchLandingUrl = computed(() => localePath({ name: 'search' }))
+const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
+
+const resolveCategoryHref = (category: VerticalConfigDto) => {
+  const rawSlug = category.verticalHomeUrl?.trim()
+
+  if (rawSlug) {
+    if (/^https?:\/\//i.test(rawSlug)) {
+      return rawSlug
+    }
+
+    if (rawSlug.startsWith('/')) {
+      return rawSlug
+    }
+
+    return localePath({ name: 'categories-slug', params: { slug: rawSlug } })
+  }
+
+  const normalizedTitle = category.verticalHomeTitle?.trim()
+
+  if (normalizedTitle) {
+    return localePath({ name: 'search', query: { q: normalizedTitle } })
+  }
+
+  return searchLandingUrl.value
+}
+
+const categoryCarouselItems = computed(() => {
+  const categories = [...rawCategories.value]
+    .filter((category) => category.enabled !== false)
+    .sort((a, b) => {
+      if (a.popular !== b.popular) {
+        return (b.popular ? 1 : 0) - (a.popular ? 1 : 0)
+      }
+
+      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
+      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+
+      if (orderA !== orderB) {
+        return orderA - orderB
+      }
+
+      return (a.verticalHomeTitle ?? '').localeCompare(b.verticalHomeTitle ?? '')
+    })
+
+  if (categories.length === 0) {
+    return [] as {
+      id: string
+      title: string
+      description: string
+      href: string
+      image?: string | null
+    }[]
+  }
+
+  return categories.map((category, index) => {
+    const title = category.verticalHomeTitle?.trim() || String(t('home.categories.fallbackTitle'))
+    const description =
+      category.verticalHomeDescription?.trim() || String(t('home.categories.fallbackDescription'))
+
+    return {
+      id: category.id ?? category.verticalHomeUrl ?? `${title}-${index}`,
+      title,
+      description,
+      href: resolveCategoryHref(category),
+      image: category.imageLarge ?? category.imageMedium ?? category.imageSmall ?? null,
+    }
+  })
+})
+
+const blogDateFormatter = computed(
+  () => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }),
+)
+
+const fallbackBlogEntries = computed<HomeBlogItem[]>(() => [
+  {
+    url: localePath({ name: 'blog' }),
+    title: String(t('home.blog.items.first.title')),
+    summary: String(t('home.blog.items.first.excerpt')),
+    formattedDate: String(t('home.blog.items.first.date')),
+  },
+  {
+    url: localePath({ name: 'blog' }),
+    title: String(t('home.blog.items.second.title')),
+    summary: String(t('home.blog.items.second.excerpt')),
+    formattedDate: String(t('home.blog.items.second.date')),
+  },
+  {
+    url: localePath({ name: 'blog' }),
+    title: String(t('home.blog.items.third.title')),
+    summary: String(t('home.blog.items.third.excerpt')),
+    formattedDate: String(t('home.blog.items.third.date')),
+  },
+])
+
+const blogCarouselItems = computed<HomeBlogItem[]>(() => {
+  const articles = paginatedArticles.value.slice(0, 6)
+
+  if (!articles.length) {
+    return fallbackBlogEntries.value
+  }
+
+  return articles.map((article) => ({
+    ...article,
+    summary: article.summary ?? '',
+    formattedDate: article.createdMs
+      ? blogDateFormatter.value.format(new Date(article.createdMs))
+      : '',
+  }))
+})
+
 const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
 
 const navigateToSearch = (query?: string) => {
@@ -294,10 +399,19 @@ useHead(() => ({
                 @submit="handleSearchSubmit"
                 @select-category="handleCategorySuggestion"
                 @select-product="handleProductSuggestion"
-              />
-              <v-btn class="home-hero__search-button" type="submit" size="large" color="primary" elevation="2">
-                {{ t('home.hero.search.cta') }}
-              </v-btn>
+              >
+                <template #append-inner>
+                  <v-btn
+                    class="home-hero__search-submit"
+                    icon="mdi-arrow-right"
+                    variant="flat"
+                    color="primary"
+                    size="small"
+                    type="submit"
+                    :aria-label="t('home.hero.search.cta')"
+                  />
+                </template>
+              </SearchSuggestField>
             </form>
 
             <p class="home-hero__helper">
@@ -333,14 +447,21 @@ useHead(() => ({
         <header class="home-section__header">
           <h2 id="home-problems-title">{{ t('home.problems.title') }}</h2>
         </header>
-        <v-row class="home-problems__grid" dense>
-          <v-col v-for="item in problemItems" :key="item.text" cols="12" md="4">
+        <ul class="home-problems__list">
+          <li
+            v-for="(item, index) in problemItems"
+            :key="item.text"
+            class="home-problems__item"
+            :class="{ 'home-problems__item--reverse': index % 2 === 1 }"
+          >
             <v-card class="home-problems__card" variant="tonal">
-              <v-icon class="home-problems__icon" :icon="item.icon" size="32" />
+              <div class="home-problems__icon-wrapper" aria-hidden="true">
+                <v-icon class="home-problems__icon" :icon="item.icon" size="48" />
+              </div>
               <p class="home-problems__text">{{ item.text }}</p>
             </v-card>
-          </v-col>
-        </v-row>
+          </li>
+        </ul>
       </v-container>
     </section>
 
@@ -350,12 +471,19 @@ useHead(() => ({
           <h2 id="home-solution-title">{{ t('home.solution.title') }}</h2>
           <p class="home-section__subtitle">{{ t('home.solution.description') }}</p>
         </header>
-        <ul class="home-solution__list">
-          <li v-for="item in solutionBenefits" :key="item.label" class="home-solution__item">
-            <span class="home-solution__emoji" aria-hidden="true">{{ item.emoji }}</span>
-            <span class="home-solution__label">{{ item.label }}</span>
-          </li>
-        </ul>
+        <v-row class="home-solution__grid" align="stretch" no-gutters>
+          <v-col
+            v-for="item in solutionBenefits"
+            :key="item.label"
+            cols="12"
+            sm="6"
+          >
+            <v-card class="home-solution__card" variant="outlined">
+              <span class="home-solution__emoji" aria-hidden="true">{{ item.emoji }}</span>
+              <p class="home-solution__label">{{ item.label }}</p>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-container>
     </section>
 
@@ -365,7 +493,7 @@ useHead(() => ({
           <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
           <p class="home-section__subtitle">{{ t('home.features.subtitle') }}</p>
         </header>
-        <v-row class="home-features__grid" dense>
+        <v-row class="home-features__grid" align="stretch">
           <v-col v-for="card in featureCards" :key="card.title" cols="12" sm="6" md="4">
             <v-card class="home-features__card" variant="outlined">
               <v-icon class="home-features__icon" :icon="card.icon" size="32" />
@@ -383,61 +511,27 @@ useHead(() => ({
           <h2 id="home-categories-title">{{ t('home.categories.title') }}</h2>
           <p class="home-section__subtitle">{{ t('home.categories.subtitle') }}</p>
         </header>
-        <v-row class="home-categories__grid" dense>
-          <v-col v-for="card in categoryCards" :key="card.title" cols="12" sm="6">
-            <NuxtLink :to="card.href" class="home-categories__link">
-              <v-card class="home-categories__card" variant="outlined">
-                <div class="home-categories__card-header">
-                  <v-icon class="home-categories__icon" :icon="card.icon" size="32" />
-                  <h3 class="home-categories__card-title">{{ card.title }}</h3>
-                </div>
-                <p class="home-categories__card-description">{{ card.description }}</p>
-                <span class="home-categories__cta">{{ t('home.categories.cta') }}</span>
-              </v-card>
-            </NuxtLink>
-          </v-col>
-        </v-row>
+        <HomeCategoryCarousel :items="categoryCarouselItems" :loading="categoriesLoading" />
       </v-container>
     </section>
 
-    <section class="home-section home-trust" aria-labelledby="home-trust-title">
+    <section class="home-section home-blog" aria-labelledby="home-blog-title">
       <v-container class="home-section__container" max-width="lg">
         <header class="home-section__header">
-          <h2 id="home-trust-title">{{ t('home.trust.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.trust.subtitle') }}</p>
+          <h2 id="home-blog-title">{{ t('home.blog.title') }}</h2>
+          <p class="home-section__subtitle">{{ t('home.blog.subtitle') }}</p>
         </header>
-
-        <div class="home-trust__logos" role="list">
-          <div class="home-trust__logo" role="listitem">
-            <v-img src="/images/ecosystem/ademe.png" :alt="t('home.trust.logos.ademe')" />
-          </div>
-        </div>
-
-        <div class="home-trust__stats">
-          <p class="home-trust__stat">{{ t('home.trust.stats.references') }}</p>
-          <v-divider class="home-trust__divider" vertical />
-          <p class="home-trust__stat">{{ t('home.trust.stats.updates') }}</p>
-        </div>
-
-        <div class="home-trust__blog">
-          <div class="home-trust__blog-header">
-            <h3 class="home-trust__blog-title">{{ t('home.blog.title') }}</h3>
-            <NuxtLink class="home-trust__blog-link" :to="localePath('blog')">
-              {{ t('home.blog.cta') }}
-            </NuxtLink>
-          </div>
-          <v-row class="home-trust__blog-grid" dense>
-            <v-col v-for="entry in blogEntries" :key="entry.title" cols="12" md="4">
-              <v-card class="home-trust__blog-card" variant="tonal">
-                <p class="home-trust__blog-date">{{ entry.date }}</p>
-                <h4 class="home-trust__blog-card-title">{{ entry.title }}</h4>
-                <p class="home-trust__blog-excerpt">{{ entry.excerpt }}</p>
-                <NuxtLink class="home-trust__blog-read" :to="entry.href">
-                  {{ t('home.blog.readMore') }}
-                </NuxtLink>
-              </v-card>
-            </v-col>
-          </v-row>
+        <HomeBlogCarousel :items="blogCarouselItems" :loading="blogLoading" />
+        <div class="home-blog__actions">
+          <v-btn
+            class="home-blog__cta"
+            :to="localePath('blog')"
+            color="primary"
+            variant="tonal"
+            size="large"
+          >
+            {{ t('home.blog.cta') }}
+          </v-btn>
         </div>
       </v-container>
     </section>
@@ -448,7 +542,7 @@ useHead(() => ({
           <h2 id="home-objections-title">{{ t('home.objections.title') }}</h2>
           <p class="home-section__subtitle">{{ t('home.objections.subtitle') }}</p>
         </header>
-        <v-row class="home-objections__grid" dense>
+        <v-row class="home-objections__grid">
           <v-col v-for="item in objectionItems" :key="item.question" cols="12" md="4">
             <v-card class="home-objections__card" variant="outlined">
               <div class="home-objections__card-header">
@@ -469,12 +563,17 @@ useHead(() => ({
           <p class="home-section__subtitle">{{ t('home.faq.subtitle') }}</p>
         </header>
         <v-expansion-panels class="home-faq__panels" multiple variant="accordion">
-          <v-expansion-panel v-for="item in faqItems" :key="item.question">
+          <v-expansion-panel v-for="panel in faqPanels" :key="panel.question">
             <v-expansion-panel-title class="home-faq__panel-title">
-              {{ item.question }}
+              {{ panel.question }}
             </v-expansion-panel-title>
             <v-expansion-panel-text class="home-faq__panel-text">
-              {{ item.answer }}
+              <TextContent
+                class="home-faq__text-content"
+                :bloc-id="panel.blocId"
+                :fallback-text="panel.answer"
+                :ipsum-length="panel.answer.length"
+              />
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -498,14 +597,34 @@ useHead(() => ({
                 :aria-label="t('home.hero.search.ariaLabel')"
                 prepend-inner-icon="mdi-magnify"
                 hide-details="auto"
-              />
-              <v-btn class="home-cta__button" type="submit" size="large" color="primary" elevation="2">
-                {{ t('home.cta.button') }}
-              </v-btn>
+              >
+                <template #append-inner>
+                  <v-btn
+                    class="home-cta__submit"
+                    icon="mdi-arrow-right"
+                    variant="flat"
+                    color="primary"
+                    size="small"
+                    type="submit"
+                    :aria-label="t('home.cta.searchSubmit')"
+                  />
+                </template>
+              </v-text-field>
             </form>
-            <NuxtLink class="home-cta__link" :to="searchLandingUrl">
-              {{ t('home.cta.altLink') }}
-            </NuxtLink>
+            <div class="home-cta__links">
+              <v-btn
+                class="home-cta__browse"
+                :to="categoriesLandingUrl"
+                color="primary"
+                variant="tonal"
+                size="large"
+              >
+                {{ t('home.cta.browseTaxonomy') }}
+              </v-btn>
+              <NuxtLink class="home-cta__link" :to="searchLandingUrl">
+                {{ t('home.cta.altLink') }}
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </v-container>
@@ -586,10 +705,15 @@ useHead(() => ({
 .home-hero__search-input :deep(input)
   font-size: 1.05rem
 
-.home-hero__search-button
-  align-self: flex-start
+.home-hero__search-input :deep(.v-field__append-inner)
+  padding-inline-end: 0.5rem
+
+.home-hero__search-input :deep(.home-hero__search-submit)
   border-radius: 999px
-  padding-inline: clamp(1.5rem, 4vw, 2.5rem)
+  box-shadow: none
+
+.home-hero__search-input :deep(.home-hero__search-submit .v-icon)
+  color: rgb(var(--v-theme-surface-default))
 
 .home-hero__helper
   display: flex
@@ -639,59 +763,88 @@ useHead(() => ({
   border-radius: inherit
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
 
-.home-problems__grid
-  row-gap: 1.5rem
-
-.home-problems__card
-  padding: 1.5rem
+.home-problems__list
+  list-style: none
   display: flex
   flex-direction: column
-  gap: 1rem
-  height: 100%
-  background: rgba(var(--v-theme-surface-primary-080), 0.6)
-
-.home-problems__icon
-  color: rgba(var(--v-theme-accent-primary-highlight), 0.9)
-
-.home-problems__text
-  margin: 0
-  font-size: 1.05rem
-  color: rgb(var(--v-theme-text-neutral-strong))
-
-.home-solution__list
-  list-style: none
-  display: grid
-  gap: 1rem
+  gap: 1.5rem
   padding: 0
   margin: 0
 
-.home-solution__item
+.home-problems__item
   display: flex
-  align-items: flex-start
-  gap: 0.75rem
-  padding: 1rem 1.25rem
-  border-radius: 1rem
-  background: rgba(var(--v-theme-surface-glass), 0.7)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  justify-content: flex-start
 
-.home-solution__emoji
-  font-size: 1.5rem
+.home-problems__item--reverse
+  justify-content: flex-end
 
-.home-solution__label
-  font-size: 1.05rem
+.home-problems__card
+  max-width: 560px
+  width: 100%
+  padding: clamp(1.5rem, 4vw, 2rem)
+  display: flex
+  align-items: center
+  gap: 1.25rem
+  border-radius: clamp(1.25rem, 3vw, 1.75rem)
+  background: rgba(var(--v-theme-surface-primary-080), 0.65)
+  backdrop-filter: blur(12px)
+  box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+.home-problems__icon-wrapper
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 72px
+  height: 72px
+  border-radius: 24px
+  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.25), rgba(var(--v-theme-hero-gradient-end), 0.25))
+
+.home-problems__icon
+  color: rgba(var(--v-theme-hero-gradient-start), 0.95)
+
+.home-problems__text
+  margin: 0
+  font-size: 1.1rem
+  line-height: 1.5
   color: rgb(var(--v-theme-text-neutral-strong))
 
-.home-features__grid
-  row-gap: 1.5rem
+.home-solution__grid
+  gap: 1.5rem
 
-.home-features__card
-  padding: 1.75rem
+.home-solution__card
   height: 100%
+  padding: clamp(1.5rem, 4vw, 2rem)
+  border-radius: clamp(1.25rem, 3vw, 1.75rem)
   display: flex
   flex-direction: column
   gap: 0.75rem
-  border-radius: 1.25rem
-  background: rgba(var(--v-theme-surface-glass-strong), 0.75)
+  align-items: flex-start
+  background: rgba(var(--v-theme-surface-glass-strong), 0.85)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+.home-solution__emoji
+  font-size: 2rem
+
+.home-solution__label
+  margin: 0
+  font-size: 1.1rem
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.home-features__grid
+  row-gap: 2rem
+  column-gap: 1.5rem
+
+.home-features__card
+  padding: clamp(1.75rem, 4vw, 2.25rem)
+  height: 100%
+  display: flex
+  flex-direction: column
+  gap: 1rem
+  border-radius: clamp(1.25rem, 3vw, 1.75rem)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.85)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  box-shadow: 0 16px 28px rgba(var(--v-theme-shadow-primary-600), 0.12)
 
 .home-features__icon
   color: rgba(var(--v-theme-hero-gradient-start), 0.9)
@@ -707,115 +860,23 @@ useHead(() => ({
 .home-categories
   background: rgba(var(--v-theme-surface-primary-050), 0.8)
 
-.home-categories__grid
-  row-gap: 1.5rem
+.home-categories :deep(.home-category-carousel__carousel)
+  margin-top: 1.5rem
 
-.home-categories__link
-  text-decoration: none
+.home-blog
+  background: rgba(var(--v-theme-surface-default), 0.92)
 
-.home-categories__card
-  padding: 1.75rem
-  height: 100%
+.home-blog :deep(.home-blog-carousel__carousel)
+  margin-top: 1.5rem
+
+.home-blog__actions
   display: flex
-  flex-direction: column
-  gap: 0.75rem
-  border-radius: 1.5rem
-  transition: transform 0.25s ease, box-shadow 0.25s ease
+  justify-content: center
+  margin-top: clamp(1.5rem, 4vw, 2.5rem)
 
-.home-categories__card:hover
-  transform: translateY(-4px)
-  box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.18)
-
-.home-categories__card-header
-  display: flex
-  align-items: center
-  gap: 0.75rem
-
-.home-categories__cta
-  font-weight: 600
-  color: rgba(var(--v-theme-hero-gradient-end), 0.9)
-
-.home-trust__logos
-  display: flex
-  flex-wrap: wrap
-  gap: 1.5rem
-  align-items: center
-
-.home-trust__logo
-  padding: 0.75rem 1.5rem
+.home-blog__cta
   border-radius: 999px
-  background: rgba(var(--v-theme-surface-glass-strong), 0.8)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
-  :deep(img)
-    max-height: 48px
-    width: auto
-    display: block
-
-.home-trust__stats
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  gap: 1rem
-  padding: 1.5rem
-  border-radius: 1.25rem
-  background: rgba(var(--v-theme-surface-glass), 0.7)
-  margin-top: 2rem
-
-.home-trust__stat
-  margin: 0
-  font-weight: 600
-
-.home-trust__divider
-  height: 32px
-
-.home-trust__blog
-  margin-top: clamp(2rem, 5vw, 3rem)
-  display: flex
-  flex-direction: column
-  gap: 1.5rem
-
-.home-trust__blog-header
-  display: flex
-  flex-direction: column
-  gap: 0.5rem
-
-.home-trust__blog-title
-  margin: 0
-
-.home-trust__blog-link
-  font-weight: 600
-  color: rgba(var(--v-theme-hero-gradient-start), 0.9)
-  text-decoration: none
-
-.home-trust__blog-grid
-  row-gap: 1.5rem
-
-.home-trust__blog-card
-  padding: 1.5rem
-  height: 100%
-  border-radius: 1.25rem
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-
-.home-trust__blog-date
-  margin: 0
-  font-size: 0.95rem
-  color: rgb(var(--v-theme-text-neutral-soft))
-
-.home-trust__blog-card-title
-  margin: 0
-  font-size: 1.1rem
-
-.home-trust__blog-excerpt
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
-  flex-grow: 1
-
-.home-trust__blog-read
-  font-weight: 600
-  text-decoration: none
-  color: rgba(var(--v-theme-hero-gradient-end), 0.9)
+  padding-inline: clamp(1.75rem, 5vw, 2.5rem)
 
 .home-objections__grid
   row-gap: 1.5rem
@@ -887,6 +948,12 @@ useHead(() => ({
 .home-cta__actions
   display: flex
   flex-direction: column
+  gap: 1.25rem
+  align-items: center
+
+.home-cta__links
+  display: flex
+  flex-direction: column
   gap: 1rem
   align-items: center
 
@@ -899,9 +966,12 @@ useHead(() => ({
 .home-cta__search-input :deep(.v-field)
   border-radius: 999px
 
-.home-cta__button
+.home-cta__submit
   border-radius: 999px
-  align-self: center
+  box-shadow: none
+
+.home-cta__browse
+  border-radius: 999px
   padding-inline: clamp(1.75rem, 5vw, 2.5rem)
 
 .home-cta__link
@@ -918,30 +988,22 @@ useHead(() => ({
     flex-direction: row
     align-items: center
 
-  .home-hero__search-button
-    margin-inline-start: 0.5rem
-
   .home-hero__helper
     font-size: 1rem
 
-  .home-solution__list
-    grid-template-columns: repeat(2, minmax(0, 1fr))
+  .home-solution__grid
+    column-gap: 1.5rem
 
-  .home-trust__blog-header
-    flex-direction: row
-    justify-content: space-between
-    align-items: baseline
+  .home-blog__actions
+    justify-content: flex-end
 
-  .home-cta__actions
+  .home-cta__links
     flex-direction: row
-    justify-content: center
+    align-items: center
     gap: 1.5rem
 
   .home-cta__form
     flex-direction: row
     align-items: center
     max-width: 500px
-
-  .home-cta__button
-    margin: 0
 </style>

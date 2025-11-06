@@ -101,6 +101,10 @@
       "title": "Browse categories",
       "subtitle": "Start with our most popular universes and refine in one click.",
       "cta": "Browse products",
+      "fallbackTitle": "Category",
+      "fallbackDescription": "Explore responsible products in this universe.",
+      "carouselAriaLabel": "Popular categories carousel",
+      "emptyState": "Categories will appear here as soon as they're available.",
       "items": {
         "electronics": {
           "title": "Electronics",
@@ -124,9 +128,12 @@
       }
     },
     "blog": {
-      "title": "From the blog",
+      "title": "Live from the blog",
+      "subtitle": "The latest analyses from our editorial team.",
       "cta": "Browse all articles",
       "readMore": "Read article",
+      "emptyState": "New blog posts will land here shortly.",
+      "carouselAriaLabel": "Featured blog posts carousel",
       "items": {
         "first": {
           "title": "How we keep our AI frugal",
@@ -197,7 +204,9 @@
       "title": "Ready to buy better without overspending?",
       "subtitle": "Restart a search or explore the analysed offers.",
       "button": "Start a search",
-      "altLink": "Open the search page"
+      "altLink": "Open the search page",
+      "searchSubmit": "Launch search",
+      "browseTaxonomy": "Explore categories"
     }
   },
   "categories": {

@@ -101,6 +101,10 @@
       "title": "Parcourir les catégories",
       "subtitle": "Commencez par nos univers les plus demandés et filtrez en un clic.",
       "cta": "Voir les produits",
+      "fallbackTitle": "Catégorie",
+      "fallbackDescription": "Parcourez des produits responsables dans cet univers.",
+      "carouselAriaLabel": "Carrousel des catégories populaires",
+      "emptyState": "Les catégories apparaîtront ici dès qu’elles seront disponibles.",
       "items": {
         "electronics": {
           "title": "Électronique",
@@ -124,9 +128,12 @@
       }
     },
     "blog": {
-      "title": "Du blog",
+      "title": "En direct du blog",
+      "subtitle": "Les derniers éclairages de notre rédaction.",
       "cta": "Voir tous les articles",
       "readMore": "Lire l’article",
+      "emptyState": "Les nouveaux articles seront affichés ici très bientôt.",
+      "carouselAriaLabel": "Carrousel des articles du blog",
       "items": {
         "first": {
           "title": "Comment nous gardons une IA frugale",
@@ -197,7 +204,9 @@
       "title": "Prêt à acheter mieux sans vous ruiner ?",
       "subtitle": "Relancez une recherche ou découvrez les offres analysées.",
       "button": "Lancer une recherche",
-      "altLink": "Explorer la recherche"
+      "altLink": "Explorer la recherche",
+      "searchSubmit": "Lancer la recherche",
+      "browseTaxonomy": "Explorer les catégories"
     }
   },
   "categories": {
