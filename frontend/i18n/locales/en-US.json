@@ -840,6 +840,7 @@
         "eyebrow": "Methodology",
         "intro": "The ecoscore calculation rules are detailed on every product (see the “environmental balance” section). Each product category has its own criteria and weights. These categories are currently covered:",
         "title": "How is the Impact Score calculated?",
+        "verticalCarouselAria": "Browse the ecoscore categories carousel",
         "verticalCardAria": "Open the ecoscore details for the {vertical} category",
         "verticalCta": "Open the ecoscore details",
         "verticalImageAlt": "Illustration for the {vertical} category",

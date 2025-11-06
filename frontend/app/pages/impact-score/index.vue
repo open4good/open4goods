@@ -54,13 +54,13 @@
               </header>
 
               <v-row class="impact-score-section__row impact-score-section__row--balanced" align="stretch">
-                <v-col cols="12" lg="7">
+                <v-col cols="12" md="6" lg="7">
                   <div class="impact-score-section__body">
                     <TextContent bloc-id="ECOSCORE:2:" />
                   </div>
                 </v-col>
 
-                <v-col cols="12" lg="5" class="impact-score-section__rating">
+                <v-col cols="12" md="6" lg="5" class="impact-score-section__rating">
                   <v-card
                     variant="flat"
                     class="impact-score-example"
@@ -112,7 +112,7 @@
                 </h2>
               </header>
 
-              <v-row class="impact-score-section__row impact-score-section__row--media" align="center">
+              <v-row class="impact-score-section__row impact-score-section__row--media" align="stretch">
                 <v-col cols="12" md="5" lg="4" class="impact-score-section__media">
                   <figure class="impact-score-media" role="presentation">
                     <v-img
@@ -152,41 +152,38 @@
                 <p>{{ t('impactScorePage.sections.methodology.intro') }}</p>
               </div>
 
-              <div v-if="verticalCards.length" class="impact-score-verticals" role="list">
-                <v-row class="impact-score-verticals__row" align="stretch" justify="start">
-                  <v-col
-                    v-for="vertical in verticalCards"
-                    :key="vertical.id"
-                    cols="12"
-                    sm="6"
-                    md="4"
-                    role="listitem"
+              <ResponsiveCarousel
+                v-if="verticalCards.length"
+                class="impact-score-verticals"
+                :items="verticalCards"
+                :breakpoints="{ xs: 1, sm: 1, md: 2, lg: 3 }"
+                :aria-label="t('impactScorePage.sections.methodology.verticalCarouselAria')"
+              >
+                <template #item="{ item }">
+                  <NuxtLink
+                    :to="item.href"
+                    class="impact-score-vertical-card"
+                    :aria-label="t('impactScorePage.sections.methodology.verticalCardAria', { vertical: item.displayName })"
                   >
-                    <NuxtLink
-                      :to="vertical.href"
-                      class="impact-score-vertical-card"
-                      :aria-label="t('impactScorePage.sections.methodology.verticalCardAria', { vertical: vertical.displayName })"
-                    >
-                      <v-img
-                        v-if="vertical.image"
-                        :src="vertical.image"
-                        :alt="t('impactScorePage.sections.methodology.verticalImageAlt', { vertical: vertical.displayName })"
-                        class="impact-score-vertical-card__image"
-                        cover
-                      />
-                      <div class="impact-score-vertical-card__content">
-                        <span class="impact-score-vertical-card__eyebrow">
-                          {{ t('impactScorePage.sections.methodology.verticalLabel') }}
-                        </span>
-                        <strong class="impact-score-vertical-card__title">{{ vertical.displayName }}</strong>
-                        <span class="impact-score-vertical-card__cta">
-                          {{ t('impactScorePage.sections.methodology.verticalCta') }}
-                        </span>
-                      </div>
-                    </NuxtLink>
-                  </v-col>
-                </v-row>
-              </div>
+                    <v-img
+                      v-if="item.image"
+                      :src="item.image"
+                      :alt="t('impactScorePage.sections.methodology.verticalImageAlt', { vertical: item.displayName })"
+                      class="impact-score-vertical-card__image"
+                      cover
+                    />
+                    <div class="impact-score-vertical-card__content">
+                      <span class="impact-score-vertical-card__eyebrow">
+                        {{ t('impactScorePage.sections.methodology.verticalLabel') }}
+                      </span>
+                      <strong class="impact-score-vertical-card__title">{{ item.displayName }}</strong>
+                      <span class="impact-score-vertical-card__cta">
+                        {{ t('impactScorePage.sections.methodology.verticalCta') }}
+                      </span>
+                    </div>
+                  </NuxtLink>
+                </template>
+              </ResponsiveCarousel>
               <v-alert
                 v-else
                 type="info"
@@ -270,6 +267,7 @@ import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ResponsiveCarousel from '~/components/shared/ui/ResponsiveCarousel.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 
 const props = defineProps({
@@ -524,13 +522,16 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-page__content {
-  margin-top: -72px;
+  margin-top: 0;
+  padding-top: clamp(2.5rem, 4vw, 4rem);
+  max-width: min(1320px, 96vw);
 }
 
 .impact-score-page__layout {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
-  gap: 2.5rem;
+  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+  gap: clamp(2rem, 3vw, 3rem);
+  align-items: start;
 }
 
 .impact-score-page__nav {
@@ -600,7 +601,7 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-section__row--media {
-  align-items: center;
+  align-items: flex-start;
 }
 
 .impact-score-section__body :deep(p + p) {
@@ -610,12 +611,13 @@ function formatCoeff(n: number | null | undefined) {
 .impact-score-section__media {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .impact-score-media,
 .impact-score-insight__media {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background: rgba(var(--v-theme-surface-primary-100), 0.85);
   border-radius: 24px;
@@ -635,7 +637,7 @@ function formatCoeff(n: number | null | undefined) {
 
 .impact-score-section__rating {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 
@@ -679,11 +681,19 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 .impact-score-verticals {
-  margin: 1.75rem 0;
+  margin: 1.75rem 0 0;
 }
 
-.impact-score-verticals__row {
-  row-gap: 1.5rem;
+.impact-score-verticals :deep(.responsive-carousel__container) {
+  box-shadow: none;
+}
+
+.impact-score-verticals :deep(.responsive-carousel__slide) {
+  padding-block: 0.25rem 0.5rem;
+}
+
+.impact-score-verticals :deep(.responsive-carousel__item) {
+  display: flex;
 }
 
 .impact-score-vertical-card {
@@ -781,7 +791,11 @@ function formatCoeff(n: number | null | undefined) {
   margin-top: 1rem;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1200px) {
+  .impact-score-page__content {
+    padding-top: 3rem;
+  }
+
   .impact-score-page__layout {
     grid-template-columns: 1fr;
   }
@@ -809,7 +823,7 @@ function formatCoeff(n: number | null | undefined) {
 
 @media (max-width: 960px) {
   .impact-score-page__content {
-    margin-top: -36px;
+    padding-top: 2rem;
   }
 
   .impact-score-section__surface {
