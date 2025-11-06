@@ -99,7 +99,7 @@ const shouldCycle = computed(() => props.items.length > slidesPerView.value)
                     :src="category.image"
                     :alt="category.title"
                     cover
-                    height="160"
+                    height="140"
                     class="home-category-carousel__image"
                   />
                   <div v-else class="home-category-carousel__icon" aria-hidden="true">
@@ -173,7 +173,7 @@ const shouldCycle = computed(() => props.items.length > slidesPerView.value)
     display: flex
     align-items: center
     justify-content: center
-    height: 160px
+    height: 140px
     background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.18), rgba(var(--v-theme-hero-gradient-end), 0.18))
     color: rgba(var(--v-theme-hero-gradient-start), 0.95)
 
