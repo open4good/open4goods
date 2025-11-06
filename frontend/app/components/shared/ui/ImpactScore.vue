@@ -9,22 +9,18 @@
         tabindex="0"
         role="img"
       >
-        <div class="impact-score__stars" :style="starStyle">
-          <div class="impact-score__stars-track" aria-hidden="true">
-            <v-icon
-              v-for="index in length"
-              :key="`track-${index}`"
-              icon="mdi-star"
-            />
-          </div>
-          <div class="impact-score__stars-fill" :style="{ width: fillWidth }" aria-hidden="true">
-            <v-icon
-              v-for="index in length"
-              :key="`fill-${index}`"
-              icon="mdi-star"
-            />
-          </div>
-        </div>
+        <v-rating
+          class="impact-score__rating"
+          :model-value="normalizedScore"
+          :length="length"
+          :size="ratingSize"
+          color="accent-supporting"
+          :bg-color="inactiveColor"
+          density="comfortable"
+          half-increments
+          readonly
+          aria-hidden="true"
+        />
         <span v-if="showValue" class="impact-score__value">{{ formattedScore }}</span>
       </div>
     </template>
@@ -68,7 +64,7 @@ const formattedScore = computed(() =>
   `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`,
 )
 
-const starSize = computed(() => {
+const ratingSize = computed(() => {
   switch (props.size) {
     case 'small':
       return 18
@@ -79,23 +75,7 @@ const starSize = computed(() => {
   }
 })
 
-const starGap = computed(() => {
-  switch (props.size) {
-    case 'small':
-      return 4
-    case 'large':
-      return 8
-    default:
-      return 6
-  }
-})
-
-const fillWidth = computed(() => `${(normalizedScore.value / length.value) * 100}%`)
-
-const starStyle = computed(() => ({
-  '--impact-score-star-size': `${starSize.value}px`,
-  '--impact-score-star-gap': `${starGap.value}px`,
-}))
+const inactiveColor = computed(() => 'rgba(var(--v-theme-text-neutral-soft), 0.35)')
 
 const tooltipLabel = computed(() =>
   t('components.impactScore.tooltip', {
@@ -129,33 +109,24 @@ const showValue = computed(() => props.showValue)
   font-size: 1.05rem;
 }
 
-.impact-score__stars {
-  position: relative;
-  display: inline-flex;
+.impact-score__rating :deep(.v-rating__wrapper) {
+  gap: 0.375rem;
 }
 
-.impact-score__stars-track,
-.impact-score__stars-fill {
-  display: inline-flex;
-  gap: var(--impact-score-star-gap);
+.impact-score--small .impact-score__rating :deep(.v-rating__wrapper) {
+  gap: 0.25rem;
 }
 
-.impact-score__stars-track {
+.impact-score--large .impact-score__rating :deep(.v-rating__wrapper) {
+  gap: 0.5rem;
+}
+
+.impact-score__rating :deep(.v-icon) {
   color: rgba(var(--v-theme-text-neutral-soft), 0.35);
 }
 
-.impact-score__stars-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  display: inline-flex;
-  overflow: hidden;
+.impact-score__rating :deep(.v-rating__item--active .v-icon),
+.impact-score__rating :deep(.v-rating__item--hover .v-icon) {
   color: rgb(var(--v-theme-accent-supporting));
-  gap: var(--impact-score-star-gap);
-}
-
-.impact-score__stars-track :deep(.v-icon),
-.impact-score__stars-fill :deep(.v-icon) {
-  font-size: var(--impact-score-star-size);
-  line-height: 1;
 }
 </style>

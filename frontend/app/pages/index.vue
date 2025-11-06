@@ -485,8 +485,8 @@ useHead(() => ({
     <section class="home-hero" aria-labelledby="home-hero-title">
       <v-container class="home-hero__container" fluid>
         <div class="home-hero__inner">
-          <div class="home-hero__layout">
-          <div class="home-hero__content">
+          <v-row class="home-hero__layout" align="stretch" justify="center">
+            <v-col cols="12" lg="6" class="home-hero__content">
             <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
             <h1 id="home-hero-title" class="home-hero__title">
               {{ t('home.hero.title') }}
@@ -523,27 +523,27 @@ useHead(() => ({
               <span aria-hidden="true">⚡</span>
               {{ t('home.hero.search.helper') }}
             </p>
-          </div>
+            </v-col>
 
-          <div class="home-hero__media" aria-hidden="true">
-            <v-sheet rounded="xl" elevation="6" class="home-hero__media-sheet">
-              <div class="home-hero__video-wrapper">
-                <video
-                  class="home-hero__video"
-                  :poster="heroVideoPoster"
-                  autoplay
-                  muted
-                  loop
-                  playsinline
-                  preload="metadata"
-                >
-                  <source :src="heroVideoSrc" type="video/mp4" />
-                </video>
-                <div class="home-hero__video-overlay" />
-              </div>
-            </v-sheet>
-          </div>
-          </div>
+            <v-col cols="12" lg="6" class="home-hero__media" aria-hidden="true">
+              <v-sheet rounded="xl" elevation="6" class="home-hero__media-sheet">
+                <div class="home-hero__video-wrapper">
+                  <video
+                    class="home-hero__video"
+                    :poster="heroVideoPoster"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="metadata"
+                  >
+                    <source :src="heroVideoSrc" type="video/mp4" />
+                  </video>
+                  <div class="home-hero__video-overlay" />
+                </div>
+              </v-sheet>
+            </v-col>
+          </v-row>
         </div>
       </v-container>
     </section>
@@ -563,21 +563,28 @@ useHead(() => ({
         <header class="home-section__header">
           <h2 id="home-problems-title">{{ t('home.problems.title') }}</h2>
         </header>
-        <div class="home-problems__grid">
-          <article
+        <v-row class="home-problems__grid" align="stretch">
+          <v-col
             v-for="(item, index) in problemItems"
             :key="item.text"
-            class="home-problems__card"
-            :class="{ 'home-problems__card--reverse': index % 2 === 1 }"
+            cols="12"
+            md="6"
+            lg="4"
+            class="home-problems__col"
           >
-            <div class="home-problems__card-inner">
-              <div class="home-problems__icon-wrapper" aria-hidden="true">
-                <v-icon class="home-problems__icon" :icon="item.icon" size="56" />
+            <article
+              class="home-problems__card"
+              :class="{ 'home-problems__card--reverse': index % 2 === 1 }"
+            >
+              <div class="home-problems__card-inner">
+                <div class="home-problems__icon-wrapper" aria-hidden="true">
+                  <v-icon class="home-problems__icon" :icon="item.icon" size="56" />
+                </div>
+                <p class="home-problems__text">{{ item.text }}</p>
               </div>
-              <p class="home-problems__text">{{ item.text }}</p>
-            </div>
-          </article>
-        </div>
+            </article>
+          </v-col>
+        </v-row>
       </v-container>
     </section>
 
@@ -588,19 +595,22 @@ useHead(() => ({
             <h2 id="home-solution-title">{{ t('home.solution.title') }}</h2>
             <p class="home-section__subtitle">{{ t('home.solution.description') }}</p>
           </header>
-          <ul class="home-solution__list">
-            <li
-              v-for="(item, index) in solutionBenefits"
+          <v-row class="home-solution__list" tag="ul" align="stretch" justify="center">
+            <v-col
+              v-for="item in solutionBenefits"
               :key="item.label"
+              cols="12"
+              sm="6"
+              md="3"
               class="home-solution__item"
-              :class="{ 'home-solution__item--reverse': index % 2 === 1 }"
+              tag="li"
             >
               <v-card class="home-solution__card" variant="outlined">
                 <span class="home-solution__emoji" aria-hidden="true">{{ item.emoji }}</span>
                 <p class="home-solution__label">{{ item.label }}</p>
               </v-card>
-            </li>
-          </ul>
+            </v-col>
+          </v-row>
         </div>
       </v-container>
     </section>
@@ -637,68 +647,87 @@ useHead(() => ({
             class="home-blog__skeleton"
           />
         </div>
-        <div v-else-if="featuredBlogItem || secondaryBlogItems.length" class="home-blog__grid">
-          <component
-            :is="featuredBlogItem?.isExternal ? 'a' : 'NuxtLink'"
+        <v-row
+          v-else-if="featuredBlogItem || secondaryBlogItems.length"
+          class="home-blog__grid"
+          align="stretch"
+        >
+          <v-col
             v-if="featuredBlogItem"
-            :key="'featured-article'"
-            class="home-blog__item home-blog__item--featured"
-            :href="featuredBlogItem.isExternal ? featuredBlogItem.link : undefined"
-            :to="!featuredBlogItem.isExternal ? featuredBlogItem.link : undefined"
-            :target="featuredBlogItem.isExternal ? '_blank' : undefined"
-            :rel="featuredBlogItem.isExternal ? 'noopener' : undefined"
+            key="featured-article"
+            cols="12"
+            md="7"
+            lg="8"
+            class="home-blog__col home-blog__col--featured"
           >
-            <article class="home-blog__card">
-              <div class="home-blog__media" aria-hidden="true">
-                <v-img
-                  v-if="hasRenderableImage(featuredBlogItem.image)"
-                  :src="featuredBlogItem.image"
-                  :alt="featuredBlogItem.title ?? ''"
-                  cover
-                />
-                <div v-else class="home-blog__placeholder">
-                  <v-icon icon="mdi-post-outline" size="68" />
+            <component
+              :is="featuredBlogItem.isExternal ? 'a' : 'NuxtLink'"
+              class="home-blog__item home-blog__item--featured"
+              :href="featuredBlogItem.isExternal ? featuredBlogItem.link : undefined"
+              :to="!featuredBlogItem.isExternal ? featuredBlogItem.link : undefined"
+              :target="featuredBlogItem.isExternal ? '_blank' : undefined"
+              :rel="featuredBlogItem.isExternal ? 'noopener' : undefined"
+            >
+              <article class="home-blog__card">
+                <div class="home-blog__media" aria-hidden="true">
+                  <v-img
+                    v-if="hasRenderableImage(featuredBlogItem.image)"
+                    :src="featuredBlogItem.image"
+                    :alt="featuredBlogItem.title ?? ''"
+                    cover
+                  />
+                  <div v-else class="home-blog__placeholder">
+                    <v-icon icon="mdi-post-outline" size="68" />
+                  </div>
                 </div>
-              </div>
-              <div class="home-blog__content">
-                <p class="home-blog__date">{{ featuredBlogItem.formattedDate }}</p>
-                <h3 class="home-blog__title">{{ featuredBlogItem.title }}</h3>
-                <p class="home-blog__summary">{{ featuredBlogItem.summary }}</p>
-                <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
-              </div>
-            </article>
-          </component>
-          <component
-            :is="article.isExternal ? 'a' : 'NuxtLink'"
+                <div class="home-blog__content">
+                  <p class="home-blog__date">{{ featuredBlogItem.formattedDate }}</p>
+                  <h3 class="home-blog__title">{{ featuredBlogItem.title }}</h3>
+                  <p class="home-blog__summary">{{ featuredBlogItem.summary }}</p>
+                  <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
+                </div>
+              </article>
+            </component>
+          </v-col>
+          <v-col
             v-for="article in secondaryBlogItems"
             :key="article.url ?? article.title ?? article.link"
-            class="home-blog__item"
-            :href="article.isExternal ? article.link : undefined"
-            :to="!article.isExternal ? article.link : undefined"
-            :target="article.isExternal ? '_blank' : undefined"
-            :rel="article.isExternal ? 'noopener' : undefined"
+            cols="12"
+            sm="6"
+            md="5"
+            lg="4"
+            class="home-blog__col"
           >
-            <article class="home-blog__card">
-              <div class="home-blog__media" aria-hidden="true">
-                <v-img
-                  v-if="hasRenderableImage(article.image)"
-                  :src="article.image"
-                  :alt="article.title ?? ''"
-                  cover
-                />
-                <div v-else class="home-blog__placeholder">
-                  <v-icon icon="mdi-post-outline" size="48" />
+            <component
+              :is="article.isExternal ? 'a' : 'NuxtLink'"
+              class="home-blog__item"
+              :href="article.isExternal ? article.link : undefined"
+              :to="!article.isExternal ? article.link : undefined"
+              :target="article.isExternal ? '_blank' : undefined"
+              :rel="article.isExternal ? 'noopener' : undefined"
+            >
+              <article class="home-blog__card">
+                <div class="home-blog__media" aria-hidden="true">
+                  <v-img
+                    v-if="hasRenderableImage(article.image)"
+                    :src="article.image"
+                    :alt="article.title ?? ''"
+                    cover
+                  />
+                  <div v-else class="home-blog__placeholder">
+                    <v-icon icon="mdi-post-outline" size="48" />
+                  </div>
                 </div>
-              </div>
-              <div class="home-blog__content">
-                <p class="home-blog__date">{{ article.formattedDate }}</p>
-                <h3 class="home-blog__title">{{ article.title }}</h3>
-                <p class="home-blog__summary">{{ article.summary }}</p>
-                <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
-              </div>
-            </article>
-          </component>
-        </div>
+                <div class="home-blog__content">
+                  <p class="home-blog__date">{{ article.formattedDate }}</p>
+                  <h3 class="home-blog__title">{{ article.title }}</h3>
+                  <p class="home-blog__summary">{{ article.summary }}</p>
+                  <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
+                </div>
+              </article>
+            </component>
+          </v-col>
+        </v-row>
         <v-alert
           v-else
           type="info"
@@ -868,8 +897,8 @@ useHead(() => ({
   gap: clamp(2rem, 5vw, 3rem)
 
 .home-hero__layout
-  display: grid
-  gap: clamp(2rem, 5vw, 3rem)
+  --v-gutter-x: clamp(2rem, 5vw, 3.5rem)
+  --v-gutter-y: clamp(2rem, 5vw, 3.5rem)
 
 .home-hero__content
   display: flex
@@ -963,25 +992,28 @@ useHead(() => ({
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
 
 .home-problems__grid
-  display: grid
-  gap: clamp(1.5rem, 4vw, 2.5rem)
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+  --v-gutter-x: clamp(1.5rem, 4vw, 2.5rem)
+  --v-gutter-y: clamp(1.5rem, 4vw, 2.5rem)
+
+.home-problems__col
+  display: flex
 
 @media (min-width: 960px)
-  .home-problems__grid
-    grid-template-columns: repeat(2, minmax(0, 1fr))
-
   .home-problems__card
     max-width: 520px
+    margin-inline: auto
 
   .home-problems__card:not(.home-problems__card--reverse)
     margin-inline-end: auto
+    margin-inline-start: 0
 
   .home-problems__card--reverse
     margin-inline-start: auto
+    margin-inline-end: 0
 
 .home-problems__card
   position: relative
+  width: 100%
   transition: transform 0.25s ease, box-shadow 0.25s ease
 
 .home-problems__card::before
@@ -1033,14 +1065,14 @@ useHead(() => ({
 
 .home-solution__list
   list-style: none
-  display: grid
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr))
-  gap: clamp(1.5rem, 4vw, 2.5rem)
   margin: 0
   padding: 0
+  --v-gutter-x: clamp(1.5rem, 4vw, 2.5rem)
+  --v-gutter-y: clamp(1.5rem, 4vw, 2.5rem)
 
 .home-solution__item
   position: relative
+  display: flex
 
 .home-solution__item::before
   content: ''
@@ -1050,9 +1082,6 @@ useHead(() => ({
   background: rgba(var(--v-theme-surface-primary-050), 0.6)
   z-index: 0
 
-.home-solution__item--reverse::before
-  inset-inline: 16px 10px
-
 @media (max-width: 599px)
   .home-solution__item::before
     display: none
@@ -1061,6 +1090,7 @@ useHead(() => ({
   position: relative
   z-index: 1
   height: 100%
+  width: 100%
   display: flex
   flex-direction: column
   gap: 1rem
@@ -1069,9 +1099,6 @@ useHead(() => ({
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.32)
   background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.92), rgba(var(--v-theme-surface-default), 0.96))
   box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.14)
-
-.home-solution__item--reverse .home-solution__card
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-default), 0.96), rgba(var(--v-theme-surface-primary-080), 0.92))
 
 .home-solution__emoji
   font-size: clamp(2.5rem, 7vw, 3.6rem)
@@ -1129,26 +1156,28 @@ useHead(() => ({
   border-radius: clamp(1.25rem, 3vw, 1.75rem)
 
 .home-blog__grid
-  display: grid
-  gap: clamp(1.5rem, 4vw, 2.5rem)
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+  --v-gutter-x: clamp(1.5rem, 4vw, 2.5rem)
+  --v-gutter-y: clamp(1.5rem, 4vw, 2.5rem)
   margin-top: clamp(1rem, 3vw, 1.75rem)
+
+.home-blog__col
+  display: flex
 
 .home-blog__item
   text-decoration: none
   color: inherit
+  display: flex
+  flex: 1
 
 .home-blog__empty
   border-radius: clamp(1.25rem, 3vw, 1.75rem)
   margin-top: clamp(1rem, 3vw, 1.5rem)
 
-@media (min-width: 960px)
-  .home-blog__item--featured
-    grid-column: span 2
-    grid-row: span 2
+
 
 .home-blog__card
   height: 100%
+  flex: 1
   display: flex
   flex-direction: column
   border-radius: clamp(1.25rem, 3vw, 1.85rem)
