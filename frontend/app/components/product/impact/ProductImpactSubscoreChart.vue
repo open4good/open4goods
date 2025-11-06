@@ -26,38 +26,11 @@ const props = defineProps<{
   label: string
   relativeValue: number | null
   productName: string
-  percent?: number | null
 }>()
-
-const ARROW_SYMBOL = 'path://M12 24L24 8H16V0H8V8H0L12 24Z'
-
-const parseBucketLabel = (label: string): number | null => {
-  const normalised = label.replace(',', '.').trim()
-  if (!normalised) {
-    return null
-  }
-
-  const numericValue = Number(normalised)
-  return Number.isFinite(numericValue) ? numericValue : null
-}
-
-const computeIndicatorColor = (percent?: number | null): string => {
-  if (percent == null || Number.isNaN(percent)) {
-    return '#2563eb'
-  }
-
-  const clamped = Math.min(100, Math.max(0, percent))
-  const hue = (clamped / 100) * 120
-  return `hsl(${hue.toFixed(2)}, 75%, 45%)`
-}
 
 ensureImpactECharts()
 
 const hasData = computed(() => props.distribution.length > 0)
-
-const maxBucketValue = computed(() =>
-  props.distribution.reduce((max, bucket) => Math.max(max, bucket.value), 0)
-)
 
 const chartOption = computed<EChartsOption | null>(() => {
   if (!hasData.value) {
@@ -71,39 +44,34 @@ const chartOption = computed<EChartsOption | null>(() => {
 
     const relativeValue = props.relativeValue
 
-    let closestBucket: DistributionBucket | null = null
-    let smallestDistance = Number.POSITIVE_INFINITY
-
-    for (const bucket of props.distribution) {
-      const labelValue = parseBucketLabel(bucket.label)
-      if (labelValue == null) {
-        continue
+    const closest = props.distribution.reduce<DistributionBucket | null>((candidate, bucket) => {
+      const labelNumber = Number(bucket.label)
+      if (!Number.isFinite(labelNumber)) {
+        return candidate
       }
 
-      const distance = Math.abs(labelValue - relativeValue)
-      if (distance < smallestDistance) {
-        smallestDistance = distance
-        closestBucket = bucket
+      if (!candidate) {
+        return bucket
       }
-    }
 
-    return closestBucket?.label ?? null
+      const candidateDistance = Math.abs(Number(candidate.label) - relativeValue)
+      const currentDistance = Math.abs(labelNumber - relativeValue)
+
+      return candidateDistance < currentDistance ? bucket : candidate
+    }, null)
+
+    return closest?.label ?? null
   })()
 
-  const indicatorColor = computeIndicatorColor(props.percent ?? null)
-
-  const yAxisMax = maxBucketValue.value > 0 ? maxBucketValue.value * 1.12 : undefined
-  const indicatorYAxis = yAxisMax ?? maxBucketValue.value
-
   return {
-    grid: { top: 32, left: 40, right: 20, bottom: 40 },
+    grid: { top: 20, left: 40, right: 20, bottom: 40 },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: {
       type: 'category',
       data: props.distribution.map((bucket) => bucket.label),
       axisLabel: { rotate: 35 },
     },
-    yAxis: { type: 'value', max: yAxisMax },
+    yAxis: { type: 'value' },
     series: [
       {
         type: 'bar',
@@ -115,28 +83,14 @@ const chartOption = computed<EChartsOption | null>(() => {
         markLine:
           props.relativeValue != null && markPointLabel
             ? {
-                symbol: ['none', ARROW_SYMBOL],
-                symbolSize: [24, 24],
-                symbolOffset: [0, -12],
-                lineStyle: {
-                  color: indicatorColor,
-                  width: 2,
-                  type: 'dashed',
-                },
+                symbol: 'none',
                 label: {
                   formatter: props.productName,
-                  color: indicatorColor,
-                  fontWeight: 600,
-                  distance: 18,
-                  position: 'end',
-                  backgroundColor: 'rgba(255, 255, 255, 0.92)',
-                  padding: [4, 10],
-                  borderRadius: 12,
+                  color: '#1f2937',
                 },
                 data: [
                   {
                     xAxis: markPointLabel,
-                    yAxis: indicatorYAxis,
                   },
                 ],
               }

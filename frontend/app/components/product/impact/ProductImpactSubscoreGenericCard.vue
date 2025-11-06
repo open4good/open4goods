@@ -26,7 +26,6 @@
       :label="score.label"
       :relative-value="score.relativeValue"
       :product-name="productName"
-      :percent="score.percent ?? null"
     />
 
     <ProductImpactSubscoreExplanation :score="score" :absolute-value="absoluteValue" />
