@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -137,6 +138,11 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						}
 					} else {
 						 indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
+
+						 // Todo : force value through referenced datasources order
+						 // TO
+
+
 					}
 
 					indexedAttr.getSource().addAll(attr.getSource());
@@ -284,7 +290,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				data.getExcludedCauses().add("missing_attr_" + e);
 			});
 
-			dedicatedLogger.info("Excluded because attributes are missing : {}", data );
+			dedicatedLogger.info("Excluded because required attributes are missing : {}", data );
 			ret =  true;
 
 		}

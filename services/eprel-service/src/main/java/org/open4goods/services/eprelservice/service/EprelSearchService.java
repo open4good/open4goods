@@ -22,7 +22,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 /**
  * Provides read access to the EPREL Elasticsearch index.
- * TODO : PErf : restict search on product defined eprelMapping if any
+ * TODO : PErf : restict search on product defined vertical (against eprel associated categorie)if any
  */
 @Service
 public class EprelSearchService
@@ -140,7 +140,10 @@ public class EprelSearchService
                 LOGGER.info("Found {} result by exact model : {}", results.size(), model);
                 return results;
             }
+        }
 
+        for (String model : candidates)
+        {
             LOGGER.info("Searching by model prefix : {}", model);
             results = searchByModelPrefix(model);
             if (!results.isEmpty())
@@ -148,7 +151,10 @@ public class EprelSearchService
                 LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
                 return results;
             }
+        }
 
+        for (String model : candidates)
+        {
             LOGGER.info("Searching by model best match : {}", model);
             results = searchByModelBestMatch(model);
             if (!results.isEmpty())

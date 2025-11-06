@@ -49,10 +49,16 @@ public class AttributesConfig {
 	private Map<String, String> valueKeyMap = new HashMap<String, String>();
 
 	/**
-	 * Attributes config by feature groups
+	 * icecat Attributes config by feature groups
 	 */
 	private Map<String, AttributeConfig> byIcecatFeatureGroup = new HashMap<String, AttributeConfig>();
-	
+
+
+	/**
+	 * eprel attributes  config by feature name
+	 */
+	private Map<String, AttributeConfig> byEprelFeatureGroup = new HashMap<String, AttributeConfig>();
+
 
 	public AttributesConfig(List<AttributeConfig> configs) {
 		this.configs = configs;
@@ -65,22 +71,22 @@ public class AttributesConfig {
 
 
 	/**
-	 * Return the attribute config key name for an attribute name 
+	 * Return the attribute config key name for an attribute name
 	 * @param value
 	 * @return
 	 */
 	public String getKeyForValue(final String value) {
-		
+
 		if (cacheHashedSynonyms == null) {
 			synonyms();
 		}
         return valueKeyMap.get(value);
     }
-	
-	
-	
-	
-	
+
+
+
+
+
 	/**
 	 * Get all configs synonyms by provider
 	 *
@@ -91,20 +97,24 @@ public class AttributesConfig {
 	public Map<String, Map<String, String>> synonyms() {
 
 		if (cacheHashedSynonyms == null) {
-			
+
 			final Map<String, Map<String, String>> hashedSynonyms = new HashMap<>();
-	
+
 			if (null != configs) {
 				for (final AttributeConfig ac : configs) {
-					
+
 					for (String id : ac.getIcecatFeaturesIds()) {
 						byIcecatFeatureGroup.put(id, ac);
 					}
-					
+
+					for (String id : ac.getEprelFeatureNames()) {
+						byEprelFeatureGroup.put(id, ac);
+					}
+
 					for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
 						if (!hashedSynonyms.containsKey(entry.getKey())) {
 							hashedSynonyms.put(entry.getKey(), new HashMap<>());
-							
+
 						}
 						valueKeyMap.put(ac.getKey(), ac.getKey());
 						for (final String val : entry.getValue()) {
@@ -114,7 +124,7 @@ public class AttributesConfig {
 						}
 					}
 				}
-				
+
 			}
 			cacheHashedSynonyms = hashedSynonyms;
 		}
@@ -123,28 +133,40 @@ public class AttributesConfig {
 
 
 	/**
-	 * Resolve a product attribute against icecat taxonomy or faalback on attributes config 
+	 * Resolve a product attribute against icecat taxonomy or faalback on attributes config
 	 * @param attr
 	 * @return
 	 */
 	public AttributeConfig resolveFromProductAttribute(ProductAttribute attr) {
-	
+
 		AttributeConfig ret = null;
-		
-		
-		// 1 - Checking from icecat forced taxonomy
+
+
+		// 1 - Checking from epred taxonomy
 		for (SourcedAttribute source : attr.getSource()) {
 
 			if (null != source.getIcecatTaxonomyId()) {
-				ret = byIcecatFeatureGroup.get(String.valueOf(source.getIcecatTaxonomyId()));				
+				ret = byIcecatFeatureGroup.get(String.valueOf(source.getIcecatTaxonomyId()));
 			}
-			
+
 			if (null != ret) {
 				break;
 			}
 		}
-		
-		
+
+		// 2 - Checking from icecat forced taxonomy
+		for (SourcedAttribute source : attr.getSource()) {
+
+			if (null != source.getIcecatTaxonomyId()) {
+				ret = byIcecatFeatureGroup.get(String.valueOf(source.getIcecatTaxonomyId()));
+			}
+
+			if (null != ret) {
+				break;
+			}
+		}
+
+
 		// 2 - Looking by specific datasource name
 		if (null == ret) {
 			for (SourcedAttribute source : attr.getSource()) {
@@ -167,13 +189,13 @@ public class AttributesConfig {
 					ret =  getAttributeConfigByKey(specSynonyms.get(attr.getName()));
 				}
 		}
-		
+
 		return ret;
-		
-		
+
+
 	}
-	
-	
+
+
 
 	/**
 	 * Gets an attribute config by it's id
@@ -197,7 +219,7 @@ public class AttributesConfig {
 	}
 
 	private void singletonHashAttrs() {
-		
+
 		// Caching if needed
 		if (null == hashedAttributesByKey) {
 			hashedAttributesByKey = new HashMap<>();
@@ -242,6 +264,16 @@ public class AttributesConfig {
 
 	public void setExclusions(Set<String> exclusions) {
 		this.exclusions = exclusions;
+	}
+
+
+	public Map<String, AttributeConfig> getByEprelFeatureGroup() {
+		return byEprelFeatureGroup;
+	}
+
+
+	public void setByEprelFeatureGroup(Map<String, AttributeConfig> byEprelFeatureGroup) {
+		this.byEprelFeatureGroup = byEprelFeatureGroup;
 	}
 
 

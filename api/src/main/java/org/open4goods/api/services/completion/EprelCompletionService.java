@@ -1,11 +1,20 @@
 package org.open4goods.api.services.completion;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.controller.api.CsvEnrichmentController;
 import org.open4goods.api.services.AbstractCompletionService;
+import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
+import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -26,9 +35,10 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	private EprelSearchService eprelSearchService;
 
 	Logger logger = LoggerFactory.getLogger(CsvEnrichmentController.class);
+	private StandardAggregator aggregator;
 
 
-	public EprelCompletionService(VerticalsConfigService verticalConfigService, ProductRepository dataRepository, ApiProperties apiProperties, EprelSearchService eprelSearchService ) {
+	public EprelCompletionService(VerticalsConfigService verticalConfigService, ProductRepository dataRepository, ApiProperties apiProperties, EprelSearchService eprelSearchService, AggregationFacadeService aggregationFacade ) {
 
 		// TODO(p3,conf) : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
@@ -36,6 +46,9 @@ public class EprelCompletionService  extends AbstractCompletionService{
 		this.apiProperties = apiProperties;
 
 		this.eprelSearchService = eprelSearchService;
+
+		this.aggregator = aggregationFacade.getStandardAggregator("icecat-aggregation");;
+		this.aggregator.beforeStart();
 	}
 
 
@@ -48,6 +61,8 @@ public class EprelCompletionService  extends AbstractCompletionService{
 		} else {
 			return true;
 		}
+
+
 
 	}
 
@@ -77,16 +92,31 @@ public class EprelCompletionService  extends AbstractCompletionService{
 		List<EprelProduct> results = eprelSearchService.search(data.gtin(), models);
 
 		if (null == results || results.size() == 0) {
-			logger.warn("No EPREL results when completing {}", data);
+			logger.warn("No EPREL results when completing {}-{}", data.brand(), data.model());
 		} else if (results.size() > 1) {
 			logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
 		} else {
-			logger.info("Completing product {} with EPREL datas", data);
+			logger.warn("Completing product {} with EPREL datas", data);
+
 
 			EprelProduct eprelData = results.get(0);
 
 			data.setEprelDatas(eprelData);
 			data.getExternalIds().setEprel(eprelData.getEprelRegistrationNumber());
+
+			// Set attributes
+
+			Set<DataFragment> fragments = getEprelAttributesFragments(data, vertical);
+			// Apply aggregation
+			for (DataFragment df : fragments) {
+				try {
+					aggregator.onDatafragment(df, data);
+				} catch (AggregationSkipException e) {
+					logger.error("Error occurs during icecat aggregation",e);
+				}
+			}
+
+
 
 			// TODO : Filter per vertical
 
@@ -109,6 +139,40 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 
 	}
+
+
+	private Set<DataFragment> getEprelAttributesFragments(Product data, VerticalConfig vertical) {
+			Set<DataFragment> fragment = new HashSet<>();
+
+			if (null != data.getEprelDatas()) {
+
+				Map<String, Object> chars = data.getEprelDatas().getCategorySpecificAttributes();
+
+				DataFragment df = initDataFragment(data);
+				for (Entry<String, Object> caracteristic : chars.entrySet()) {
+
+					// TODO : Handle the toString on "object" type, we chould have nested structures
+					df.addAttribute(caracteristic.getKey(), caracteristic.getValue().toString(), getDatasourceName(), getDatasourceName());
+				}
+				fragment.add(df);
+
+			}
+
+		return fragment;
+	}
+
+	private DataFragment initDataFragment( Product data) {
+		DataFragment df = new DataFragment();
+		// TODO(p3,conf) : Constants
+		df.setDatasourceName("eprel");
+		df.setDatasourceConfigName("eprel");
+		df.setLastIndexationDate(System.currentTimeMillis());
+		df.setCreationDate(System.currentTimeMillis());
+		df.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()));
+		return df;
+	}
+
+
 
 
 }

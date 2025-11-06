@@ -23,40 +23,40 @@ public class SourcedString {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String bestValue;
-	
+
 	/**
 	 * History, by datasource name
 	 */
-	
+
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Map<String,List<SourcedStringHistory>> history = new HashMap<>();
 
-	
+
 	@Override
 	public String toString() {
 		return history.size() + " : "+ bestValue ;
 	}
-	
-	
+
+
 	/**
 	 * Shortcut to a unique source
 	 * @return
 	 */
 	public String source() {
-		return history.keySet().stream().findFirst().orElse(null);  
+		return history.keySet().stream().findFirst().orElse(null);
 	}
-	
+
 	/**
 	 * Add a value, with historisation, datasource ventilation and best value computing
 	 * @param value
 	 * @param datasourceName
 	 * @param timestamp
-	 * @return 
+	 * @return
 	 */
 	public void addValue(String value, String datasourceName, Long timestamp) {
 		// Adding to history
 		doVersion(value, datasourceName, timestamp);
-		
+
 		// compute the best attribute
 		doBestValueElection();
 	}
@@ -64,14 +64,14 @@ public class SourcedString {
 
 	private void doVersion(String value, String datasourceName, Long timestamp) {
 		List<SourcedStringHistory> historyItem = history.get(datasourceName);
-		
+
 		// Existing item
 		if (null != historyItem) {
-			
+
 			// Finding history last value
-			Optional<SourcedStringHistory> last = historyItem.stream().findFirst();			
+			Optional<SourcedStringHistory> last = historyItem.stream().findFirst();
 			// update history
-			if (last.isPresent()) {				
+			if (last.isPresent()) {
 				// Not equal to the previous version
 				if (!last.get().getValue().equals(value)) {
 						// Adding a version
@@ -86,50 +86,56 @@ public class SourcedString {
 		}
 
 		// First time wee see this item
-		else {			
+		else {
 			history.get(datasourceName).add(new SourcedStringHistory(value,timestamp));
 		}
 	}
-	
-	
+
+
 	/**
 	 * Determine the best value, terms frequency based
 	 */
-	public void doBestValueElection( ) {		
+	public void doBestValueElection( ) {
 		String bValue = null;
 		int freq = 0;
+		// TODO : Design concern. Export to a dedicated election service
+
+
+
+
+
 		for (SourcedStringHistory value : history.values().stream().findFirst().get() ) {
-			int count = Collections.frequency(new ArrayList<String>(getAsValueMap().values()), value);			
+			int count = Collections.frequency(new ArrayList<String>(getAsValueMap().values()), value);
 			if (count > freq) {
 				freq = count;
 				bValue = value.getValue();
 			}
-		}		
-		this.bestValue = bValue;		
+		}
+		this.bestValue = bValue;
 	}
-	
-	
+
+
 	/**
 	 * Return the last attribute value for a given datasource
 	 * @param datasourceNAme
 	 * @return
 	 */
 	public String getValue(String datasourceName ) {
-		Optional<SourcedStringHistory> item = history.get(datasourceName).stream().findFirst();		
+		Optional<SourcedStringHistory> item = history.get(datasourceName).stream().findFirst();
 		if (item.isEmpty()) {
 			return null;
 		} else {
 			return history.get(datasourceName).stream().findFirst().get().getValue();
-		}		
+		}
 	}
 
 	/**
 	 * Return the versionned implementation to an handy datasource / value vap
-	 * @return 
+	 * @return
 	 */
 	public Map<String, String> getAsValueMap( ) {
 		Map<String,String> byIds = new HashMap<>();
-		
+
 		for (Entry<String, List<SourcedStringHistory>> provider : history.entrySet()) {
 			String val = getValue(provider.getKey());
 			byIds.put(provider.getKey() , val);
@@ -146,6 +152,6 @@ public class SourcedString {
 	public void setBestValue(String bestValue) {
 		this.bestValue = bestValue;
 	}
-	
-	
+
+
 }
