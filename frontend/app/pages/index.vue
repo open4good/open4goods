@@ -48,7 +48,15 @@ const toSafeString = (value: unknown) => {
 
 const toTrimmedString = (value: unknown) => toSafeString(value).trim()
 
-const stripHtmlComments = (value: string) => value.replace(/<!--[\s\S]*?-->/g, '')
+const stripHtmlComments = (value: string) => {
+  let previous;
+  let input = value;
+  do {
+    previous = input;
+    input = input.replace(/<!--[\s\S]*?-->/g, '');
+  } while (input !== previous);
+  return input;
+};
 
 const sanitizeBlogSummary = (value: unknown) => stripHtmlComments(toSafeString(value)).trim()
 
