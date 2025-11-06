@@ -85,6 +85,12 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 			EprelProduct eprelData = results.get(0);
 
+			data.setEprelDatas(eprelData);
+			data.getExternalIds().setEprel(eprelData.getEprelRegistrationNumber());
+
+			// TODO : Filter per vertical
+
+			//
 
 
 			// TODO : Implement

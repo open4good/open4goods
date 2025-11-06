@@ -28,19 +28,19 @@ import {
  */
 export interface ProductFieldOptionsResponse {
     /**
-     * 
+     * Fields that are always available regardless of the vertical.
      * @type {Array<FieldMetadataDto>}
      * @memberof ProductFieldOptionsResponse
      */
     global?: Array<FieldMetadataDto>;
     /**
-     * 
+     * Fields relating to ecological impact scores only.
      * @type {Array<FieldMetadataDto>}
      * @memberof ProductFieldOptionsResponse
      */
     impact?: Array<FieldMetadataDto>;
     /**
-     * 
+     * Fields exposing technical attributes available for the vertical.
      * @type {Array<FieldMetadataDto>}
      * @memberof ProductFieldOptionsResponse
      */

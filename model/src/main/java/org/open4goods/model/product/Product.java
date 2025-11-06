@@ -101,7 +101,7 @@ public class Product implements Standardisable {
 	private Set<String> excludedCauses = new HashSet<String>();
 
 	/** If associated eprel product if any **/
-	private EprelProduct eprelDatas = new EprelProduct();
+	private EprelProduct eprelDatas = null;
 
 	/** The list of other model's known for this product **/
 	private Set<String> akaModels = new HashSet<>();

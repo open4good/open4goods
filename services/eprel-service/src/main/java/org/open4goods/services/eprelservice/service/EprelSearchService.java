@@ -1,11 +1,14 @@
 package org.open4goods.services.eprelservice.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.eprelservice.model.GtinHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,22 +22,27 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 /**
  * Provides read access to the EPREL Elasticsearch index.
+ * TODO : PErf : restict search on product defined eprelMapping if any
  */
 @Service
 public class EprelSearchService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(EprelSearchService.class);
 
+    private static final int MIN_PREFIX_LENGTH = 5;
+
     private final ElasticsearchOperations elasticsearchOperations;
+    private final EprelServiceProperties properties;
 
     /**
      * Creates the search service.
      *
      * @param elasticsearchOperations Elasticsearch template
      */
-    public EprelSearchService(ElasticsearchOperations elasticsearchOperations)
+    public EprelSearchService(ElasticsearchOperations elasticsearchOperations, EprelServiceProperties properties)
     {
         this.elasticsearchOperations = elasticsearchOperations;
+        this.properties = properties;
     }
 
     /**
@@ -68,78 +76,90 @@ public class EprelSearchService
         {
             return List.of();
         }
-        Query query = Query.of(q -> q.match(m -> m.field("modelIdentifier").query(normalized)));
+        Query query = Query.of(q -> q.term(t -> t.field("modelIdentifier").value(normalized)));
         return execute(query);
     }
 
     public List<EprelProduct> search(String gtin, String model)
     {
+        LOGGER.info("Searching by GTIN : {}", gtin);
+        List<EprelProduct> results = searchByGtin(gtin);
+        if (!results.isEmpty())
+        {
+            LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
+            return results;
+        }
 
-    	LOGGER.info("Searching by GTIN : {}", gtin);
-    	List<EprelProduct> results = searchByGtin(gtin);
+        LOGGER.info("Searching by exact model : {}", model);
+        results = searchByExactModel(model);
+        if (!results.isEmpty())
+        {
+            LOGGER.info("Found {} result by exact model : {}", results.size(), model);
+            return results;
+        }
 
-    	if (null != results && results.size() > 0) {
-        	LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
-    		return results;
-    	}
+        LOGGER.info("Searching by model prefix : {}", model);
+        results = searchByModelPrefix(model);
+        if (!results.isEmpty())
+        {
+            LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
+            return results;
+        }
 
-    	LOGGER.info("Searching by exact model : {}", model);
-    	results = searchByExactModel(model);
+        LOGGER.info("Searching by model best match : {}", model);
+        results = searchByModelBestMatch(model);
+        if (!results.isEmpty())
+        {
+            LOGGER.warn("Found {} result by model best match : {}", results.size(), model);
+            return results;
+        }
 
-    	if (null != results && results.size() > 0) {
-    		LOGGER.info("Found {} result by exact model : {}", results.size(), model);
-    		return results;
-    	}
-
-    	LOGGER.info("Searching by model prefix : {}", model);
-    	results = searchByModelPrefix(model);
-
-    	if (null != results && results.size() > 0) {
-    		LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
-    		return results;
-    	}
-       	LOGGER.info("No eprel match for GTIN : {} , model : {} ", gtin, model);
-    	return List.of();
-
+        LOGGER.info("No eprel match for GTIN : {} , model : {}", gtin, model);
+        return List.of();
     }
 
 
     public List<EprelProduct> search(String gtin, List<String> models)
     {
+        List<String> candidates = sanitiseModelCandidates(models);
 
-    	   List<String> bySizeModels = models.stream()
-    		        .sorted((a, b) -> Integer.compare(b.length(), a.length()))
-    		        .collect(Collectors.toList());
+        LOGGER.info("Searching by GTIN : {}", gtin);
+        List<EprelProduct> results = searchByGtin(gtin);
+        if (!results.isEmpty())
+        {
+            LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
+            return results;
+        }
 
-    	LOGGER.info("Searching by GTIN : {}", gtin);
-    	List<EprelProduct> results = searchByGtin(gtin);
+        for (String model : candidates)
+        {
+            LOGGER.info("Searching by exact model : {}", model);
+            results = searchByExactModel(model);
+            if (!results.isEmpty())
+            {
+                LOGGER.info("Found {} result by exact model : {}", results.size(), model);
+                return results;
+            }
 
-    	if (null != results && results.size() > 0) {
-        	LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
-    		return results;
-    	}
+            LOGGER.info("Searching by model prefix : {}", model);
+            results = searchByModelPrefix(model);
+            if (!results.isEmpty())
+            {
+                LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
+                return results;
+            }
 
+            LOGGER.info("Searching by model best match : {}", model);
+            results = searchByModelBestMatch(model);
+            if (!results.isEmpty())
+            {
+                LOGGER.info("Found {} result by model best match : {}", results.size(), model);
+                return results;
+            }
+        }
 
-    	for (String model : bySizeModels) {
-	    	LOGGER.info("Searching by exact model : {}", model);
-	    	results = searchByExactModel(model);
-
-	    	if (null != results && results.size() > 0) {
-	    		LOGGER.info("Found {} result by exact model : {}", results.size(), model);
-	    		return results;
-	    	}
-
-	    	LOGGER.info("Searching by model prefix : {}", model);
-	    	results = searchByModelPrefix(model);
-
-	    	if (null != results && results.size() > 0) {
-	    		LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
-	    		return results;
-	    	}
-    	}
-    	LOGGER.info("No eprel match for GTIN : {} , models : {} ", gtin, bySizeModels);
-    	return List.of();
-
+        LOGGER.info("No eprel match for GTIN : {} , models : {}", gtin, candidates);
+        return List.of();
     }
 
 
@@ -175,7 +195,87 @@ public class EprelSearchService
         {
             return exactMatches;
         }
-        return searchByModelPrefix(model);
+        List<EprelProduct> prefixMatches = searchByModelPrefix(model);
+        if (!prefixMatches.isEmpty())
+        {
+            return prefixMatches;
+        }
+        return searchByModelBestMatch(model);
+    }
+
+    private List<EprelProduct> searchByModelBestMatch(String model)
+    {
+        String normalized = normalize(model);
+        if (normalized == null)
+        {
+            return List.of();
+        }
+
+        List<String> prefixes = buildPrefixes(normalized);
+        if (prefixes.isEmpty())
+        {
+            return List.of();
+        }
+
+        Query query = Query.of(q -> q.bool(b ->
+        {
+            prefixes.stream()
+                .map(prefix -> Query.of(inner -> inner.term(t -> t.field("modelIdentifier").value(prefix))))
+                .forEach(b::should);
+            b.minimumShouldMatch("1");
+            return b;
+        }));
+        return execute(query);
+    }
+
+    private List<String> buildPrefixes(String normalized)
+    {
+        List<String> prefixes = new ArrayList<>();
+        if (normalized == null || normalized.isEmpty())
+        {
+            return prefixes;
+        }
+
+        int lowerBound = Math.min(normalized.length(), Math.max(MIN_PREFIX_LENGTH, 1));
+        for (int length = normalized.length(); length >= lowerBound; length--)
+        {
+            prefixes.add(normalized.substring(0, length));
+        }
+
+        if (prefixes.isEmpty())
+        {
+            prefixes.add(normalized);
+        }
+
+        return prefixes;
+    }
+
+    private List<String> sanitiseModelCandidates(List<String> models)
+    {
+        if (models == null)
+        {
+            return List.of();
+        }
+
+        return models.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .filter(candidate -> !candidate.isEmpty())
+            .filter(candidate -> !shouldExcludeCandidate(candidate))
+            .sorted(Comparator.comparingInt(String::length).reversed())
+            .toList();
+    }
+
+    private boolean shouldExcludeCandidate(String candidate)
+    {
+        long spaceCount = candidate.chars().filter(Character::isWhitespace).count();
+        if (spaceCount > properties.getExcludeIfSpaces())
+        {
+            LOGGER.debug("Skipping model candidate [{}] because it contains {} spaces (limit = {})", candidate, spaceCount,
+                properties.getExcludeIfSpaces());
+            return true;
+        }
+        return false;
     }
 
     private List<EprelProduct> execute(Query query)

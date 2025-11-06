@@ -35,14 +35,14 @@ public class AttributeConfig {
 	 */
 	private String key;
 
-	
-	
+
+
 	/**
 	 * The associated font awesome icon
 	 */
 	private String faIcon = "fa-wrench";
 
-	
+
         /**
          * The localised units
          */
@@ -53,8 +53,8 @@ public class AttributeConfig {
          * Designed for compact units such as symbols or abbreviations (for example the inch symbol).
          */
         private Localisable<String, String> suffix;
-	
-	
+
+
 	/**
 	 * The localised names
 	 */
@@ -68,9 +68,14 @@ public class AttributeConfig {
 	/**
 	 * The icecat features id's this attribute is mapped to
 	 */
-	private Set<String> icecatFeaturesIds = new HashSet<String>(); 
-	
-	
+	private Set<String> icecatFeaturesIds = new HashSet<String>();
+
+	/**
+	 * The associated eprel features names.
+	 */
+	private Set<String> eprelFeatureNames = new HashSet<String>();
+
+
 
 	/**
 	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
@@ -419,6 +424,14 @@ public class AttributeConfig {
         public void setSuffix(Localisable<String, String> suffix) {
                 this.suffix = suffix;
         }
+
+		public Set<String> getEprelFeatureNames() {
+			return eprelFeatureNames;
+		}
+
+		public void setEprelFeatureNames(Set<String> eprelFeatureNames) {
+			this.eprelFeatureNames = eprelFeatureNames;
+		}
 
 
 }

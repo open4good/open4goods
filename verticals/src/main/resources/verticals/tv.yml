@@ -415,6 +415,8 @@ attributesConfig:
        betterIs: "GREATER"
        icecatFeaturesIds:
          - 944       
+       eprelFeatureNames:
+        - 
        faIcon: "mdi-arrow-top-right-bottom-left"
        name:
          default: "Screen size"

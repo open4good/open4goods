@@ -9,26 +9,33 @@ public class ExternalIds {
 	 * The amazon identifier
 	 */
 	private String asin;
-	
+
 	/**
 	 * The icecat identifier
 	 */
 	private String icecat;
-	
+
+
+	/**
+	 * The icecat identifier
+	 */
+	private String eprel;
+
+
 	/**
 	 * Known mpn's
 	 */
 	private Set<String> mpn = new HashSet<>();
-	
+
 	/**
 	 * Known sku's
 	 */
 	private Set<String> sku = new HashSet<>();
-	
-	
-	
-	
-	
+
+
+
+
+
 
 	public String getAsin() {
 		return asin;
@@ -61,7 +68,15 @@ public class ExternalIds {
 	public void setIcecat(String icecat) {
 		this.icecat = icecat;
 	}
-	
-	
-	
+
+	public String getEprel() {
+		return eprel;
+	}
+
+	public void setEprel(String eprel) {
+		this.eprel = eprel;
+	}
+
+
+
 }
