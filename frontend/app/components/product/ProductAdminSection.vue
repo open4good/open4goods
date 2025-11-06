@@ -1,11 +1,31 @@
 <template>
   <ClientOnly>
-    <section v-if="showAdmin" :id="sectionId" class="product-admin">
+    <section v-if="showAdmin" :id="panelId" class="product-admin">
       <header class="product-admin__header">
-        <h2>{{ $t('product.admin.title') }}</h2>
-        <p>{{ $t('product.admin.subtitle') }}</p>
+        <h2 class="product-admin__title">{{ $t('product.admin.title') }}</h2>
+        <p class="product-admin__subtitle">{{ $t('product.admin.subtitle') }}</p>
       </header>
-      <pre class="product-admin__pre">{{ formatted }}</pre>
+
+      <article :id="jsonSectionId" class="product-admin__block" role="region" :aria-label="$t('product.admin.sections.productJson.title')">
+        <header class="product-admin__block-header">
+          <h3 class="product-admin__block-title">
+            {{ $t('product.admin.sections.productJson.title') }}
+          </h3>
+          <p class="product-admin__block-helper">
+            {{ $t('product.admin.sections.productJson.helper') }}
+          </p>
+        </header>
+        <!-- eslint-disable vue/no-v-html -->
+        <pre class="product-admin__code" aria-live="polite">
+          <code
+            v-if="highlightedJson"
+            class="hljs language-json"
+            v-html="highlightedJson"
+          />
+          <code v-else class="product-admin__code-fallback">{{ formatted }}</code>
+        </pre>
+        <!-- eslint-enable vue/no-v-html -->
+      </article>
     </section>
   </ClientOnly>
 </template>
@@ -13,13 +33,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PropType } from 'vue'
+import hljs from 'highlight.js/lib/core'
+import json from 'highlight.js/lib/languages/json'
+import 'highlight.js/styles/github-dark.css'
 import type { ProductDto } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 
 const props = defineProps({
-  sectionId: {
+  panelId: {
     type: String,
     default: 'admin',
+  },
+  jsonSectionId: {
+    type: String,
+    default: 'admin-json',
   },
   product: {
     type: Object as PropType<ProductDto>,
@@ -31,26 +58,115 @@ const { isLoggedIn } = useAuth()
 
 const showAdmin = computed(() => isLoggedIn.value)
 const formatted = computed(() => JSON.stringify(props.product, null, 2))
+
+if (!hljs.getLanguage('json')) {
+  hljs.registerLanguage('json', json)
+}
+
+const highlightedJson = computed(() => {
+  const content = formatted.value
+  if (!content) {
+    return ''
+  }
+
+  return hljs.highlight(content, { language: 'json' }).value
+})
 </script>
 
 <style scoped>
 .product-admin {
-  background: rgba(var(--v-theme-surface-glass-strong), 0.94);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.96);
   border-radius: 24px;
-  padding: 1.5rem;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.product-admin__title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-admin__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.product-admin__subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.product-admin__block {
+  background: rgba(15, 23, 42, 0.92);
+  border-radius: 18px;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.28);
 }
 
-.product-admin__pre {
-  white-space: pre-wrap;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+.product-admin__block-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.product-admin__block-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.product-admin__block-helper {
+  margin: 0;
   font-size: 0.9rem;
-  background: rgba(15, 23, 42, 0.85);
-  color: #e2e8f0;
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.product-admin__code {
+  margin: 0;
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.35);
   overflow-x: auto;
+  max-height: 540px;
+}
+
+.product-admin__code :deep(.hljs) {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+  background: transparent;
+}
+
+.product-admin__code-fallback {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.88rem;
+  color: #e2e8f0;
+}
+
+@media (max-width: 960px) {
+  .product-admin {
+    padding: 1.25rem;
+    border-radius: 18px;
+  }
+
+  .product-admin__block {
+    border-radius: 16px;
+  }
+
+  .product-admin__code {
+    max-height: 320px;
+  }
 }
 </style>

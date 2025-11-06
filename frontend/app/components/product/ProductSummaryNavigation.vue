@@ -28,6 +28,41 @@
         </button>
       </li>
     </ul>
+
+    <section
+      v-if="adminSections.length"
+      class="product-summary-navigation__admin-panel"
+      :aria-label="adminTitle"
+    >
+      <p class="product-summary-navigation__admin-eyebrow">{{ adminTitle }}</p>
+      <p v-if="adminHelper" class="product-summary-navigation__admin-helper">
+        {{ adminHelper }}
+      </p>
+      <ul class="product-summary-navigation__admin-list">
+        <li
+          v-for="admin in adminSections"
+          :key="admin.id"
+          class="product-summary-navigation__admin-item"
+        >
+          <button
+            type="button"
+            class="product-summary-navigation__admin-link"
+            :class="{ 'product-summary-navigation__admin-link--active': admin.id === activeSection }"
+            :aria-current="admin.id === activeSection ? 'true' : undefined"
+            :aria-controls="admin.id"
+            @click="onNavigate(admin.id)"
+          >
+            <v-icon
+              v-if="admin.icon"
+              :icon="admin.icon"
+              size="18"
+              class="product-summary-navigation__admin-icon"
+            />
+            <span class="product-summary-navigation__admin-label">{{ admin.label }}</span>
+          </button>
+        </li>
+      </ul>
+    </section>
   </nav>
 </template>
 
@@ -36,6 +71,10 @@ import type { PropType } from 'vue'
 
 const _props = defineProps({
   sections: {
+    type: Array as PropType<Array<{ id: string; label: string; icon?: string }>>,
+    default: () => [],
+  },
+  adminSections: {
     type: Array as PropType<Array<{ id: string; label: string; icon?: string }>>,
     default: () => [],
   },
@@ -50,6 +89,14 @@ const _props = defineProps({
   ariaLabel: {
     type: String,
     default: 'Product summary navigation',
+  },
+  adminTitle: {
+    type: String,
+    default: '',
+  },
+  adminHelper: {
+    type: String,
+    default: '',
   },
 })
 
@@ -140,8 +187,97 @@ const onNavigate = (sectionId: string) => {
   white-space: nowrap;
 }
 
+.product-summary-navigation__admin-panel {
+  margin-top: 1.5rem;
+  padding: 1rem 0.875rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--v-theme-error), 0.35);
+  background: rgba(var(--v-theme-error), 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-summary-navigation__admin-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgb(var(--v-theme-error));
+}
+
+.product-summary-navigation__admin-helper {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-error), 0.9);
+}
+
+.product-summary-navigation__admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.product-summary-navigation__admin-item {
+  display: contents;
+}
+
+.product-summary-navigation__admin-link {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-error), 0.45);
+  background: rgba(var(--v-theme-error), 0.12);
+  color: rgb(var(--v-theme-error));
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+}
+
+.product-summary-navigation__admin-link:hover,
+.product-summary-navigation__admin-link:focus-visible {
+  background: rgba(var(--v-theme-error), 0.18);
+  border-color: rgba(var(--v-theme-error), 0.6);
+}
+
+.product-summary-navigation__admin-link--active {
+  background: rgba(var(--v-theme-error), 0.28);
+  color: rgb(var(--v-theme-surface-default));
+  border-color: rgba(var(--v-theme-error), 0.9);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-error), 0.35);
+}
+
+.product-summary-navigation__admin-link--active .product-summary-navigation__admin-icon {
+  color: rgb(var(--v-theme-surface-default));
+}
+
+.product-summary-navigation__admin-icon {
+  color: rgba(var(--v-theme-error), 0.95);
+}
+
+.product-summary-navigation__admin-label {
+  white-space: nowrap;
+}
+
 .product-summary-navigation--horizontal .product-summary-navigation__link {
   justify-content: center;
+}
+
+.product-summary-navigation--horizontal .product-summary-navigation__admin-panel {
+  margin-top: 1rem;
+}
+
+.product-summary-navigation--horizontal .product-summary-navigation__admin-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 @media (max-width: 960px) {
@@ -154,6 +290,10 @@ const onNavigate = (sectionId: string) => {
   .product-summary-navigation__link {
     font-size: 0.85rem;
     padding: 0.5rem 0.75rem;
+  }
+
+  .product-summary-navigation__admin-link {
+    font-size: 0.85rem;
   }
 }
 </style>
