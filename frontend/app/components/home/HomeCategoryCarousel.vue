@@ -95,7 +95,7 @@ const shouldCycle = computed(() => props.items.length > slidesPerView.value)
               >
                 <div class="home-category-carousel__media">
                   <v-img
-                    v-if="category.image"
+                    v-if="typeof category.image === 'string' && category.image.length > 0"
                     :src="category.image"
                     :alt="category.title"
                     cover

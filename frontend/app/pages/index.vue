@@ -239,6 +239,25 @@ const resolveCategoryHref = (category: VerticalConfigDto) => {
   return searchLandingUrl.value
 }
 
+const resolveCategoryImage = (category: VerticalConfigDto) => {
+  const candidates = [
+    category.imageLarge,
+    category.imageMedium,
+    category.imageSmall,
+  ]
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const trimmed = candidate.trim()
+      if (trimmed.length > 0) {
+        return trimmed
+      }
+    }
+  }
+
+  return null
+}
+
 const categoryCarouselItems = computed(() => {
   const categories = [...rawCategories.value]
     .filter((category) => category.enabled !== false)
@@ -277,7 +296,7 @@ const categoryCarouselItems = computed(() => {
       title,
       description,
       href: resolveCategoryHref(category),
-      image: category.imageLarge ?? category.imageMedium ?? category.imageSmall ?? null,
+      image: resolveCategoryImage(category),
     }
   })
 })
