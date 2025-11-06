@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
+import { createVuetify } from 'vuetify'
 import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
 
 vi.mock('vue-i18n', () => ({
@@ -24,6 +25,8 @@ interface MountProps {
 }
 
 describe('CategoryHero', () => {
+  const vuetify = createVuetify()
+
   const mountComponent = async (props: MountProps) => {
     const module = await import('./CategoryHero.vue')
     const CategoryHero = module.default
@@ -31,6 +34,7 @@ describe('CategoryHero', () => {
     return mount(CategoryHero, {
       props,
       global: {
+        plugins: [vuetify],
         stubs: {
           VSheet: { template: '<div class="v-sheet"><slot /></div>' },
           VImg: {
