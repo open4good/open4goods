@@ -126,8 +126,8 @@ public class ApiConfig {
 		return new RestEprelApiClient(restTemplate, properties);
 	}
 	@Bean
-	EprelSearchService eprelSearchService(@Autowired ElasticsearchOperations elasticsearchOperations) {
-		return new EprelSearchService(elasticsearchOperations);
+	EprelSearchService eprelSearchService(@Autowired ElasticsearchOperations elasticsearchOperations, @Autowired  EprelServiceProperties properties) {
+		return new EprelSearchService(elasticsearchOperations, properties);
 	}
 	@Bean
 	EprelCatalogueService eprelCatalogueService(@Autowired EprelApiClient apiClient,

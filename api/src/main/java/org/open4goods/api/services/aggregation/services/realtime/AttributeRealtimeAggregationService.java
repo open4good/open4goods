@@ -55,33 +55,43 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			data.getAttributes().getAll().remove(e);
 		});
 
-		
+
 
 		/////////////////////////////////////////////////
 		// Cleaning brands
 		// NOTE : Should be disabled after recovery batch, but need to be run each time to
 		// take in account modifications of configurable brandAlias() and brandExclusions()
 		/////////////////////////////////////////////////
-		
-		String actualBrand = data.brand();
-		Map<String,String> akaBrands = new HashMap<>(data.getAkaBrands());
-		
-		data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
-		data.akaBrands().clear();
-		// NOTE : No datasource for first, cause first will be set as referentiel brand
-		data.addBrand(null, actualBrand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
-		
-		akaBrands.entrySet().forEach(e -> {
-			data.addBrand(e.getKey(), e.getValue(), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
-		});
-		
-		
-		
-		// Adding model from title
-		extractModelFromTitles(data);
 
-		
-		
+		if (null != data.getEprelDatas()) {
+			String supplier = data.getEprelDatas().getSupplierOrTrademark();
+			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, supplier);
+			data.addBrand("eprel", supplier, null, null);
+
+			String model = data.getEprelDatas().getModelIdentifier();
+			data.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, model);
+			data.addModel(model);
+
+
+
+		} else 	{
+			String actualBrand = data.brand();
+			Map<String,String> akaBrands = new HashMap<>(data.getAkaBrands());
+
+			data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
+			data.akaBrands().clear();
+			// NOTE : No datasource for first, cause first will be set as referentiel brand
+			data.addBrand(null, actualBrand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+
+			akaBrands.entrySet().forEach(e -> {
+				data.addBrand(e.getKey(), e.getValue(), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+			});
+			// Adding model from title
+			extractModelFromTitles(data);
+
+		}
+
+
 		// Attributing taxomy to attributes
 		data.getAttributes().getAll().values().forEach(a -> {
 			Set<Integer> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
@@ -95,16 +105,16 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Extracting indexed attributes
 		//////////////////////////////////////////////////
 		AttributesConfig attributesConfig = vConf.getAttributesConfig();
-		
-		
+
+
 		Map<String,IndexedAttribute> indexed = new HashMap<String, IndexedAttribute>();
-		
-		
+
+
 		for (ProductAttribute attr : data.getAttributes().getAll().values()) {
 
 			// Checking if a potential AggregatedAttribute
 			AttributeConfig attrConfig = attributesConfig.resolveFromProductAttribute(attr);
-			
+
 			// We have a "raw" attribute that matches an aggregationconfig
 			if (null != attrConfig) {
 
@@ -117,42 +127,42 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						dedicatedLogger.error("Empty indexed attribute value {}:{}",attrConfig.getKey(),attr.getValue());
 						continue;
 					}
-					
+
 					IndexedAttribute indexedAttr = indexed.get(attrConfig.getKey());
 					if (null != indexedAttr) {
 						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), attrConfig.getKey());
 						if (!cleanedValue.equals(indexedAttr.getValue() )) {
 							// TODO(p3,design) : Means we have multiple attributes matching for indexed . Have a merge strategy
 							dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}",attr.getName(),cleanedValue, indexedAttr.getValue());
-						} 						
+						}
 					} else {
 						 indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
 					}
-					
-					indexedAttr.getSource().addAll(attr.getSource());					
+
+					indexedAttr.getSource().addAll(attr.getSource());
 					indexed.put(attrConfig.getKey(), indexedAttr);
-					
+
 				} catch (Exception e) {
 					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey(),e);
 				}
 			}
 		}
-		
-		
+
+
 		// Replacing all previously indexed
 		data.getAttributes().setIndexed(indexed);
-		
-		
-		
+
+
+
 		///////////////////////////////////////////
 		// Setting excluded state
-		////////////////////////////////////////// 
-		
+		//////////////////////////////////////////
+
 		updateExcludeStatus(data,vConf);
-		
+
 	}
 
-	
+
 	/**
 	 * Extracts a model identifier from a product's offer titles based on the brand and existing model,
 	 * using regex matching. The extracted model must contain at least one letter and one digit,
@@ -237,7 +247,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 	/**
-	 * Set the product in excluded state (will not be exposed through indexation, searchservice,..) 
+	 * Set the product in excluded state (will not be exposed through indexation, searchservice,..)
 	 * @param data
 	 */
 	private void updateExcludeStatus(Product data, VerticalConfig vConf) {
@@ -248,35 +258,43 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			ret =  true;
 			data.getExcludedCauses().add("missing_brand");
 		}
-		
+
 		// On model
 		if (StringUtils.isEmpty(data.model())) {
 			dedicatedLogger.info("Excluded because model is missing : {}", data );
 			ret =  true;
 			data.getExcludedCauses().add("missing_model");
 		}
-		
+
+		// On eprel
+		if (null == data.getEprelDatas()) {
+			dedicatedLogger.info("Excluded because no EPREL association : {}", data );
+			ret =  true;
+			data.getExcludedCauses().add("missing_eprel");
+		}
+
+
 		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
 		if (vConf.getRequiredAttributes() != null && !attrKeys.containsAll(vConf.getRequiredAttributes())) {
-			
+
 			Set<String> missing = new HashSet<>(vConf.getRequiredAttributes());
 			missing.retainAll(attrKeys);
-			
+
 			missing.forEach(e-> {
 				data.getExcludedCauses().add("missing_attr_" + e);
 			});
-			
+
 			dedicatedLogger.info("Excluded because attributes are missing : {}", data );
 			ret =  true;
-			
+
 		}
-		
+
 		data.setExcluded(ret);
-		
+
 	}
 
 
-	
+
 	/**
 	 * On data fragment agg leveln we increment the "all" field, with sourced values
 	 * for new or existing attributes. product
@@ -327,7 +345,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			handleReferentielAttributes(dataFragment, product, vConf);
 			// TODO : Add BRAND / MODEL from matches from attributes
 
-	
+
 		} catch (Exception e) {
 			dedicatedLogger.error("Unexpected error", e);
 		}
@@ -348,31 +366,31 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 //			models.add(string);
 //		}
 //		product.getAlternativeBrands().forEach(e -> models.add(e.getValue()));
-//		
-//		
+//
+//
 //		// Compute the bag of known words
 //		Set<String> words = new HashSet<>();
 //		product.getDescriptions().forEach(e -> {
 //			words.addAll(Arrays.asList(e.getContent().getText().split(" ")));
 //		});
-//		
+//
 //		product.getNames().getOfferNames().forEach(e -> {
 //			words.addAll(Arrays.asList(e.split(" ")));
 //		});
-//		
-//		
+//
+//
 //		String shortest = product.shortestModel();
 //		// Iterating on words to find the one who have matching starts with known model names
 //		for (String w : words) {
 //			w = w.toUpperCase();
 //			if ((w.startsWith(shortest) || shortest.startsWith(w))  && !w.equals(shortest)) {
-//				
+//
 //				if (StringUtils.isAlpha(w.substring(w.length()-1))) {
 //					dedicatedLogger.info("Found a alternate model for {} in texts : {}", shortest, w);
 //					product.addModel(w);
-//					
+//
 //				}
-//				
+//
 //			}
 //		}
 //	}
@@ -387,22 +405,22 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 //	private void  extractFeatures(ProductAttributes attributes) {
 //
 //		attributes.getFeatures().clear();
-//		
-//		
+//
+//
 //		Map<String, ProductAttribute> features = attributes.getAll().entrySet().stream()
 //				.filter(e -> e.getValue().isFeature())
 //			    .collect(Collectors.toMap(
 //			            Map.Entry::getKey,    // key mapper: uses the key from each entry
 //			            Map.Entry::getValue   // value mapper: uses the value from each entry
 //			        ));
-//		
+//
 //		attributes.getFeatures().addAll(features.values());
-//		
+//
 //	}
 
 	/**
 	 * Returns if an attribute is a feature, by comparing "yes" values from config
-	 * 
+	 *
 	 * @param e
 	 * @return
 	 */
@@ -420,7 +438,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 *                 added or updated.
 	 */
 	private void handleReferentielAttributes(DataFragment fragment, Product output, VerticalConfig vConf) {
-		
+
 		///////////////////////
 		// Adding brand
 		///////////////////////
@@ -428,8 +446,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!StringUtils.isEmpty(brand)) {
 			output.addBrand(fragment.getDatasourceName(), brand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 		}
-		
-		
+
+
 		///////////////////////
 		// Adding model
 		///////////////////////
@@ -444,7 +462,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String gtin = fragment.gtin();
 		if (!StringUtils.isEmpty(gtin)) {
 			String existing = output.gtin();
-			
+
 			if (!existing.equals(gtin)) {
 				try {
 					long existingGtin = Long.parseLong(existing);
@@ -452,21 +470,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					if (existingGtin != newGtin) {
 						dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
 						output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
-					} 
+					}
 				} catch (NumberFormatException e) {
 					dedicatedLogger.error("Invalid GTIN format: existing = {}, new = {}", existing, gtin, e);
 				}
 			}
-			
+
 		}
-		
-	
+
+
 	}
 
 	/**
 	 * Type attribute and apply parsing rules. Return null if the Attribute fail to
 	 * exact parsing rules
-	 * @param vConf 
+	 * @param vConf
 	 *
 	 * @param translated
 	 * @param attributeConfigByKey
@@ -480,7 +498,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// To upperCase / lowerCase
 		///////////////////
 		if (attrConf.getParser().getLowerCase()) {
-			
+
 			string = string.toLowerCase();
 		}
 
@@ -545,7 +563,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// FIXED TEXT MAPPING
 		/////////////////////////////////
 		if (!attrConf.getMappings().isEmpty()) {
-			
+
 			string = attrConf.getMappings().get(string);
 		}
 
