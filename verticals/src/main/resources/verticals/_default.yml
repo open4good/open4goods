@@ -390,12 +390,10 @@ attributesConfig:
     synonyms:
       all:
       - "CLASSE ÉNERGÉTIQUE"
-      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
       - "CLASSE ECO"
       - "CLASSE ENERGÉTIQUE"
       - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
       - "CLASSE D'EFFICACITE ENERGETIQUE"
-      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
       - "ENERGY EFFICIENCY CLASS"
       - "CLASSE_ENERGY"
 #      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
@@ -490,6 +488,7 @@ attributesConfig:
       - "ANNÉE DE MODÈLE"
       - "ANNEE DE LANCEMENT"
       - "YEAR"
+      - "ONMARKETSTARTDATETS"
       
     parser:
       normalize: true
@@ -686,6 +685,7 @@ attributesConfig:
            - "CONSOMMATION ELECTRIQUE (ARRET)"
            - "CONSOMMATION D'ENERGIE (MODE VEILLE)"
            - "POWER_CONSUMPTION_OFF"
+           - "POWERSTANDBY"
              
     parser:
          normalize: true

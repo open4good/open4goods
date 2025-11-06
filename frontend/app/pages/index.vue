@@ -7,7 +7,6 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
-import HomeBlogCarousel from '~/components/home/HomeBlogCarousel.vue'
 import TextContent from '~/components/domains/content/TextContent.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
@@ -28,20 +27,49 @@ const heroVideoSrc = '/videos/video-concept1.mp4'
 const heroVideoPoster = '/images/home/hero-placeholder.svg'
 
 type HomeBlogItem = BlogPostDto & { formattedDate?: string }
+type EnrichedBlogItem = HomeBlogItem & { link: string; isExternal: boolean }
 
 const { categories: rawCategories, fetchCategories, loading: categoriesLoading } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
+const BLOG_ARTICLES_LIMIT = 10
+
+const toSafeString = (value: unknown) => {
+  if (typeof value === 'string') {
+    return value
+  }
+
+  if (value == null) {
+    return ''
+  }
+
+  return String(value)
+}
+
+const toTrimmedString = (value: unknown) => toSafeString(value).trim()
+
+const stripHtmlComments = (value: string) => {
+  let previous;
+  let input = value;
+  do {
+    previous = input;
+    input = input.replace(/<!--[\s\S]*?-->/g, '');
+  } while (input !== previous);
+  return input;
+};
+
+const sanitizeBlogSummary = (value: unknown) => stripHtmlComments(toSafeString(value)).trim()
+
 if (import.meta.server) {
   await fetchCategories(true)
-  await fetchArticles(1, 6, null)
+  await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
 } else {
   if (rawCategories.value.length === 0) {
     await fetchCategories(true)
   }
 
   if (paginatedArticles.value.length === 0) {
-    await fetchArticles(1, 6, null)
+    await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
   }
 }
 
@@ -279,21 +307,75 @@ const fallbackBlogEntries = computed<HomeBlogItem[]>(() => [
   },
 ])
 
-const blogCarouselItems = computed<HomeBlogItem[]>(() => {
-  const articles = paginatedArticles.value.slice(0, 6)
+const blogListItems = computed<HomeBlogItem[]>(() => {
+  const articles = paginatedArticles.value.slice(0, BLOG_ARTICLES_LIMIT)
 
   if (!articles.length) {
     return fallbackBlogEntries.value
   }
 
-  return articles.map((article) => ({
-    ...article,
-    summary: article.summary ?? '',
-    formattedDate: article.createdMs
+  return articles.map((article) => {
+    const formattedDate = article.createdMs
       ? blogDateFormatter.value.format(new Date(article.createdMs))
-      : '',
-  }))
+      : ''
+
+    const title = toTrimmedString(article.title)
+    const summary = sanitizeBlogSummary(article.summary)
+    const image = typeof article.image === 'string' ? article.image.trim() : null
+
+    return {
+      ...article,
+      title,
+      summary,
+      image,
+      formattedDate,
+    }
+  })
 })
+
+const resolveBlogArticleLink = (article: BlogPostDto) => {
+  const rawUrl = toTrimmedString(article.url)
+
+  if (!rawUrl) {
+    return localePath({ name: 'blog' })
+  }
+
+  if (/^https?:\/\//i.test(rawUrl)) {
+    try {
+      const parsedUrl = new URL(rawUrl)
+      const slug = parsedUrl.pathname.split('/').filter(Boolean).pop()
+      if (slug) {
+        return localePath({ name: 'blog-slug', params: { slug } })
+      }
+    } catch (error) {
+      console.warn('Failed to parse blog article URL', rawUrl, error)
+    }
+
+    return rawUrl
+  }
+
+  if (rawUrl.startsWith('/')) {
+    return rawUrl
+  }
+
+  return localePath({ name: 'blog-slug', params: { slug: rawUrl } })
+}
+
+const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
+  blogListItems.value.map((item) => {
+    const link = resolveBlogArticleLink(item)
+    const isExternal = /^https?:\/\//i.test(link)
+
+    return {
+      ...item,
+      link,
+      isExternal,
+    }
+  }),
+)
+
+const featuredBlogItem = computed(() => enrichedBlogItems.value[0] ?? null)
+const secondaryBlogItems = computed(() => enrichedBlogItems.value.slice(1))
 
 const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
 
@@ -379,8 +461,9 @@ useHead(() => ({
 <template>
   <div class="home-page">
     <section class="home-hero" aria-labelledby="home-hero-title">
-      <v-container class="home-hero__container" max-width="lg">
-        <div class="home-hero__layout">
+      <v-container class="home-hero__container" fluid>
+        <div class="home-hero__inner">
+          <div class="home-hero__layout">
           <div class="home-hero__content">
             <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
             <h1 id="home-hero-title" class="home-hero__title">
@@ -438,7 +521,18 @@ useHead(() => ({
               </div>
             </v-sheet>
           </div>
+          </div>
         </div>
+      </v-container>
+    </section>
+
+    <section class="home-section home-categories" aria-labelledby="home-categories-title">
+      <v-container class="home-section__container" max-width="lg">
+        <header class="home-section__header">
+          <h2 id="home-categories-title">{{ t('home.categories.title') }}</h2>
+          <p class="home-section__subtitle">{{ t('home.categories.subtitle') }}</p>
+        </header>
+        <HomeCategoryCarousel :items="categoryCarouselItems" :loading="categoriesLoading" />
       </v-container>
     </section>
 
@@ -447,43 +541,45 @@ useHead(() => ({
         <header class="home-section__header">
           <h2 id="home-problems-title">{{ t('home.problems.title') }}</h2>
         </header>
-        <ul class="home-problems__list">
-          <li
+        <div class="home-problems__grid">
+          <article
             v-for="(item, index) in problemItems"
             :key="item.text"
-            class="home-problems__item"
-            :class="{ 'home-problems__item--reverse': index % 2 === 1 }"
+            class="home-problems__card"
+            :class="{ 'home-problems__card--reverse': index % 2 === 1 }"
           >
-            <v-card class="home-problems__card" variant="tonal">
+            <div class="home-problems__card-inner">
               <div class="home-problems__icon-wrapper" aria-hidden="true">
-                <v-icon class="home-problems__icon" :icon="item.icon" size="48" />
+                <v-icon class="home-problems__icon" :icon="item.icon" size="56" />
               </div>
               <p class="home-problems__text">{{ item.text }}</p>
-            </v-card>
-          </li>
-        </ul>
+            </div>
+          </article>
+        </div>
       </v-container>
     </section>
 
     <section class="home-section home-solution" aria-labelledby="home-solution-title">
-      <v-container class="home-section__container" max-width="lg">
-        <header class="home-section__header">
-          <h2 id="home-solution-title">{{ t('home.solution.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.solution.description') }}</p>
-        </header>
-        <v-row class="home-solution__grid" align="stretch" no-gutters>
-          <v-col
-            v-for="item in solutionBenefits"
-            :key="item.label"
-            cols="12"
-            sm="6"
-          >
-            <v-card class="home-solution__card" variant="outlined">
-              <span class="home-solution__emoji" aria-hidden="true">{{ item.emoji }}</span>
-              <p class="home-solution__label">{{ item.label }}</p>
-            </v-card>
-          </v-col>
-        </v-row>
+      <v-container class="home-section__container home-solution__container" fluid>
+        <div class="home-section__inner">
+          <header class="home-section__header">
+            <h2 id="home-solution-title">{{ t('home.solution.title') }}</h2>
+            <p class="home-section__subtitle">{{ t('home.solution.description') }}</p>
+          </header>
+          <ul class="home-solution__list">
+            <li
+              v-for="(item, index) in solutionBenefits"
+              :key="item.label"
+              class="home-solution__item"
+              :class="{ 'home-solution__item--reverse': index % 2 === 1 }"
+            >
+              <v-card class="home-solution__card" variant="outlined">
+                <span class="home-solution__emoji" aria-hidden="true">{{ item.emoji }}</span>
+                <p class="home-solution__label">{{ item.label }}</p>
+              </v-card>
+            </li>
+          </ul>
+        </div>
       </v-container>
     </section>
 
@@ -505,27 +601,95 @@ useHead(() => ({
       </v-container>
     </section>
 
-    <section class="home-section home-categories" aria-labelledby="home-categories-title">
-      <v-container class="home-section__container" max-width="lg">
-        <header class="home-section__header">
-          <h2 id="home-categories-title">{{ t('home.categories.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.categories.subtitle') }}</p>
-        </header>
-        <HomeCategoryCarousel :items="categoryCarouselItems" :loading="categoriesLoading" />
-      </v-container>
-    </section>
-
     <section class="home-section home-blog" aria-labelledby="home-blog-title">
       <v-container class="home-section__container" max-width="lg">
         <header class="home-section__header">
           <h2 id="home-blog-title">{{ t('home.blog.title') }}</h2>
           <p class="home-section__subtitle">{{ t('home.blog.subtitle') }}</p>
         </header>
-        <HomeBlogCarousel :items="blogCarouselItems" :loading="blogLoading" />
+        <div v-if="blogLoading" class="home-blog__skeletons" aria-hidden="true">
+          <v-skeleton-loader
+            v-for="index in 4"
+            :key="`blog-skeleton-${index}`"
+            type="image, list-item"
+            class="home-blog__skeleton"
+          />
+        </div>
+        <div v-else-if="featuredBlogItem || secondaryBlogItems.length" class="home-blog__grid">
+          <component
+            :is="featuredBlogItem?.isExternal ? 'a' : NuxtLink"
+            v-if="featuredBlogItem"
+            :key="'featured-article'"
+            class="home-blog__item home-blog__item--featured"
+            :href="featuredBlogItem.isExternal ? featuredBlogItem.link : undefined"
+            :to="!featuredBlogItem.isExternal ? featuredBlogItem.link : undefined"
+            :target="featuredBlogItem.isExternal ? '_blank' : undefined"
+            :rel="featuredBlogItem.isExternal ? 'noopener' : undefined"
+          >
+            <article class="home-blog__card">
+              <div class="home-blog__media" aria-hidden="true">
+                <v-img
+                  v-if="featuredBlogItem.image"
+                  :src="featuredBlogItem.image"
+                  :alt="featuredBlogItem.title ?? ''"
+                  cover
+                />
+                <div v-else class="home-blog__placeholder">
+                  <v-icon icon="mdi-post-outline" size="68" />
+                </div>
+              </div>
+              <div class="home-blog__content">
+                <p class="home-blog__date">{{ featuredBlogItem.formattedDate }}</p>
+                <h3 class="home-blog__title">{{ featuredBlogItem.title }}</h3>
+                <p class="home-blog__summary">{{ featuredBlogItem.summary }}</p>
+                <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
+              </div>
+            </article>
+          </component>
+          <component
+            :is="article.isExternal ? 'a' : NuxtLink"
+            v-for="article in secondaryBlogItems"
+            :key="article.url ?? article.title ?? article.link"
+            class="home-blog__item"
+            :href="article.isExternal ? article.link : undefined"
+            :to="!article.isExternal ? article.link : undefined"
+            :target="article.isExternal ? '_blank' : undefined"
+            :rel="article.isExternal ? 'noopener' : undefined"
+          >
+            <article class="home-blog__card">
+              <div class="home-blog__media" aria-hidden="true">
+                <v-img
+                  v-if="article.image"
+                  :src="article.image"
+                  :alt="article.title ?? ''"
+                  cover
+                />
+                <div v-else class="home-blog__placeholder">
+                  <v-icon icon="mdi-post-outline" size="48" />
+                </div>
+              </div>
+              <div class="home-blog__content">
+                <p class="home-blog__date">{{ article.formattedDate }}</p>
+                <h3 class="home-blog__title">{{ article.title }}</h3>
+                <p class="home-blog__summary">{{ article.summary }}</p>
+                <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
+              </div>
+            </article>
+          </component>
+        </div>
+        <v-alert
+          v-else
+          type="info"
+          variant="tonal"
+          border="start"
+          class="home-blog__empty"
+        >
+          {{ t('home.blog.emptyState') }}
+        </v-alert>
         <div class="home-blog__actions">
           <v-btn
             class="home-blog__cta"
-            :to="localePath('blog')"
+            :to="localePath({ name: 'blog' })"
             color="primary"
             variant="tonal"
             size="large"
@@ -648,6 +812,14 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: clamp(2rem, 5vw, 3.5rem)
+  padding-inline: clamp(1.5rem, 4vw, 3rem)
+
+.home-section__inner
+  max-width: 1120px
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  gap: clamp(2rem, 5vw, 3.5rem)
 
 .home-section__header
   max-width: 720px
@@ -664,6 +836,11 @@ useHead(() => ({
   background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.25), transparent 60%), rgb(var(--v-theme-surface-default))
 
 .home-hero__container
+  padding-inline: clamp(1.5rem, 4vw, 4rem)
+
+.home-hero__inner
+  max-width: 1120px
+  margin: 0 auto
   display: flex
   flex-direction: column
   gap: clamp(2rem, 5vw, 3rem)
@@ -763,72 +940,125 @@ useHead(() => ({
   border-radius: inherit
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
 
-.home-problems__list
-  list-style: none
-  display: flex
-  flex-direction: column
-  gap: 1.5rem
-  padding: 0
-  margin: 0
+.home-problems__grid
+  display: grid
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
 
-.home-problems__item
-  display: flex
-  justify-content: flex-start
+@media (min-width: 960px)
+  .home-problems__grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
 
-.home-problems__item--reverse
-  justify-content: flex-end
+  .home-problems__card
+    max-width: 520px
+
+  .home-problems__card:not(.home-problems__card--reverse)
+    margin-inline-end: auto
+
+  .home-problems__card--reverse
+    margin-inline-start: auto
 
 .home-problems__card
-  max-width: 560px
-  width: 100%
-  padding: clamp(1.5rem, 4vw, 2rem)
+  position: relative
+  transition: transform 0.25s ease, box-shadow 0.25s ease
+
+.home-problems__card::before
+  content: ''
+  position: absolute
+  inset: 0
+  border-radius: clamp(1.5rem, 4vw, 2.25rem)
+  background: rgba(var(--v-theme-surface-primary-080), 0.52)
+  transform: translate(12px, 12px)
+  z-index: 0
+
+.home-problems__card--reverse::before
+  transform: translate(-12px, 12px)
+
+.home-problems__card-inner
+  position: relative
+  z-index: 1
   display: flex
   align-items: center
-  gap: 1.25rem
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
-  background: rgba(var(--v-theme-surface-primary-080), 0.65)
-  backdrop-filter: blur(12px)
-  box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  gap: 1.5rem
+  padding: clamp(1.75rem, 4vw, 2.5rem)
+  border-radius: clamp(1.5rem, 4vw, 2.25rem)
+  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.18), rgba(var(--v-theme-hero-gradient-end), 0.16))
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
+  box-shadow: 0 20px 36px rgba(var(--v-theme-shadow-primary-600), 0.16)
+
+.home-problems__card:hover
+  transform: translateY(-6px)
+  box-shadow: 0 26px 40px rgba(var(--v-theme-shadow-primary-600), 0.18)
 
 .home-problems__icon-wrapper
   display: flex
   align-items: center
   justify-content: center
-  width: 72px
-  height: 72px
-  border-radius: 24px
-  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.25), rgba(var(--v-theme-hero-gradient-end), 0.25))
+  width: clamp(72px, 12vw, 88px)
+  height: clamp(72px, 12vw, 88px)
+  border-radius: 28px
+  background: radial-gradient(circle at top, rgba(var(--v-theme-hero-gradient-start), 0.38), rgba(var(--v-theme-hero-gradient-end), 0.22))
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4)
 
 .home-problems__icon
   color: rgba(var(--v-theme-hero-gradient-start), 0.95)
 
 .home-problems__text
   margin: 0
-  font-size: 1.1rem
-  line-height: 1.5
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem)
+  line-height: 1.45
   color: rgb(var(--v-theme-text-neutral-strong))
 
-.home-solution__grid
-  gap: 1.5rem
+.home-solution__list
+  list-style: none
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr))
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+  margin: 0
+  padding: 0
+
+.home-solution__item
+  position: relative
+
+.home-solution__item::before
+  content: ''
+  position: absolute
+  inset: 10px 16px 0
+  border-radius: clamp(1.5rem, 4vw, 2.25rem)
+  background: rgba(var(--v-theme-surface-primary-050), 0.6)
+  z-index: 0
+
+.home-solution__item--reverse::before
+  inset-inline: 16px 10px
+
+@media (max-width: 599px)
+  .home-solution__item::before
+    display: none
 
 .home-solution__card
+  position: relative
+  z-index: 1
   height: 100%
-  padding: clamp(1.5rem, 4vw, 2rem)
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
   display: flex
   flex-direction: column
-  gap: 0.75rem
-  align-items: flex-start
-  background: rgba(var(--v-theme-surface-glass-strong), 0.85)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
-  box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  gap: 1rem
+  padding: clamp(1.75rem, 4vw, 2.5rem)
+  border-radius: clamp(1.5rem, 4vw, 2.25rem)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.32)
+  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.92), rgba(var(--v-theme-surface-default), 0.96))
+  box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.14)
+
+.home-solution__item--reverse .home-solution__card
+  background: linear-gradient(135deg, rgba(var(--v-theme-surface-default), 0.96), rgba(var(--v-theme-surface-primary-080), 0.92))
 
 .home-solution__emoji
-  font-size: 2rem
+  font-size: clamp(2.5rem, 7vw, 3.6rem)
+  line-height: 1
 
 .home-solution__label
   margin: 0
-  font-size: 1.1rem
+  font-size: clamp(1.1rem, 2.6vw, 1.45rem)
+  font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .home-features__grid
@@ -863,16 +1093,106 @@ useHead(() => ({
 .home-categories :deep(.home-category-carousel__carousel)
   margin-top: 1.5rem
 
+
 .home-blog
   background: rgba(var(--v-theme-surface-default), 0.92)
 
-.home-blog :deep(.home-blog-carousel__carousel)
-  margin-top: 1.5rem
+.home-blog__skeletons
+  display: grid
+  gap: 1.5rem
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))
+  margin-top: clamp(1rem, 3vw, 1.5rem)
+
+.home-blog__skeleton
+  border-radius: clamp(1.25rem, 3vw, 1.75rem)
+
+.home-blog__grid
+  display: grid
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+  margin-top: clamp(1rem, 3vw, 1.75rem)
+
+.home-blog__item
+  text-decoration: none
+  color: inherit
+
+.home-blog__empty
+  border-radius: clamp(1.25rem, 3vw, 1.75rem)
+  margin-top: clamp(1rem, 3vw, 1.5rem)
+
+@media (min-width: 960px)
+  .home-blog__item--featured
+    grid-column: span 2
+    grid-row: span 2
+
+.home-blog__card
+  height: 100%
+  display: flex
+  flex-direction: column
+  border-radius: clamp(1.25rem, 3vw, 1.85rem)
+  overflow: hidden
+  background: rgba(var(--v-theme-surface-default), 0.96)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.28)
+  box-shadow: 0 18px 28px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  transition: transform 0.25s ease, box-shadow 0.25s ease
+
+.home-blog__card:hover
+  transform: translateY(-6px)
+  box-shadow: 0 26px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
+
+.home-blog__media
+  position: relative
+  aspect-ratio: 16 / 10
+  background: rgba(var(--v-theme-surface-primary-050), 0.8)
+
+.home-blog__media :deep(.v-img)
+  width: 100%
+  height: 100%
+
+.home-blog__media :deep(img)
+  object-fit: cover
+
+.home-blog__placeholder
+  display: flex
+  align-items: center
+  justify-content: center
+  height: 100%
+  color: rgba(var(--v-theme-hero-gradient-start), 0.85)
+
+.home-blog__content
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+  padding: clamp(1.5rem, 4vw, 2.25rem)
+
+.home-blog__date
+  margin: 0
+  font-size: 0.9rem
+  letter-spacing: 0.04em
+  text-transform: uppercase
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+
+.home-blog__title
+  margin: 0
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem)
+  color: rgb(var(--v-theme-text-neutral-strong))
+  font-weight: 600
+
+.home-blog__summary
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: clamp(0.95rem, 2.2vw, 1.05rem)
+  line-height: 1.6
+
+.home-blog__link-label
+  margin-top: auto
+  font-weight: 600
+  color: rgba(var(--v-theme-hero-gradient-end), 0.9)
 
 .home-blog__actions
   display: flex
   justify-content: center
-  margin-top: clamp(1.5rem, 4vw, 2.5rem)
+  margin-top: clamp(1.75rem, 4vw, 2.75rem)
 
 .home-blog__cta
   border-radius: 999px

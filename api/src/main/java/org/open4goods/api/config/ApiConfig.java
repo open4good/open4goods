@@ -202,8 +202,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	EprelCompletionService eprelCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade, EprelSearchService eprelSearchService ) throws TechnicalException {
-		return new EprelCompletionService(verticalConfigService, productRepository, apiProperties, eprelSearchService );
+	EprelCompletionService eprelCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade, EprelSearchService eprelSearchService) throws TechnicalException {
+		return new EprelCompletionService(verticalConfigService, productRepository, apiProperties, eprelSearchService,aggregationFacade );
 	}
 
 

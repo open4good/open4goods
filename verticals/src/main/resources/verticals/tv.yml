@@ -407,6 +407,40 @@ attributesConfig:
   # ATTRIBUTES DEFINITIONS
   # Those attributes will be availlable for all products if one is found.
   ##################################################################################################################      
+
+     ##################################
+     # MINAVAILABILITYSPAREPARTSYEARS
+     ##################################
+     - key: "MINAVAILABILITYSPAREPARTSYEARS"
+       betterIs: "GREATER"
+       icecatFeaturesIds:
+       
+       eprelFeatureNames:
+        - diagonalInch
+       faIcon: "mdi-arrow-top-right-bottom-left"
+       name:
+         default: "Screen size"
+         fr: "Diagonale (en pouces)"
+       suffix:
+         default: "\""
+         fr: "\""
+       filteringType: "NUMERIC"
+   
+       asScore: false
+       synonyms:
+         all:
+           - "minAvailabilitySparePartsYears" 
+
+   
+       parser:
+         normalize: true
+         trim: false
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: false
+   #      deleteTokens:
+
+
   
      ##################################
      # DIAGONALE
@@ -416,7 +450,7 @@ attributesConfig:
        icecatFeaturesIds:
          - 944       
        eprelFeatureNames:
-        - 
+        - diagonalInch
        faIcon: "mdi-arrow-top-right-bottom-left"
        name:
          default: "Screen size"
@@ -430,6 +464,7 @@ attributesConfig:
        synonyms:
          all:
            - "DIAGONALE_POUCES" 
+           - "DIAGONALINCH"
          rakuten.com:      
            - "DIAGONALE"
    
@@ -459,6 +494,7 @@ attributesConfig:
        synonyms:
           all:
             - "DISPLAY_TECHNOLOGY" 
+            - "PANELTECHNOLOGY"
           rakuten.com:      
             - "TYPE DE PRODUIT"
          
@@ -473,8 +509,231 @@ attributesConfig:
            
            
            
-           
+     ################################################################################
+     #                         CONSOMMATION ELECTRIQUE (ARRET / VEILLE / RESEAU)
+     ################################################################################
+     # Generated on 10/12/2024 21:22, coverage was 2% (63/2389) . 
+     # TOP attributes values are :
+   #     - 0.3 (34 items)
+   #     - 0.5 (24 items)
+   #     - 0 (2 items)
+   #     - 0, 3 W (2 items)
+   #   
+     ##################################
+             
+     - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
+       betterIs: "LOWER"
+       filteringType: "NUMERIC"
+       asScore: true
+       reverseScore: true    
+       faIcon: "mdi-power-plug-off"
+     
+       icecatFeaturesIds:      
 
+         
+       name:
+            default: "Power consumption (off)"
+            fr: "Consommation électrique (arrêt/veille)"
+         
+       synonyms:
+            all:
+              - "POWERSTANDBYNETWORKED"
+                
+       parser:
+            normalize: true
+            trim: true
+            lowerCase: false
+            upperCase: true
+            removeParenthesis: false
+            deleteTokens:
+             - "W"
+
+         ################################################################################
+         #                         CONSOMMATION ELECTRIQUE SDR
+         ################################################################################
+         # Generated on 10/12/2024 21:22, coverage was 2% (63/2389) . 
+         # TOP attributes values are :
+       #     - 0.3 (34 items)
+       #     - 0.5 (24 items)
+       #     - 0 (2 items)
+       #     - 0, 3 W (2 items)
+       #   
+         ##################################
+             
+
+     - key: "POWER_CONSUMPTION_SDR"
+       betterIs: "LOWER"
+       filteringType: "NUMERIC"
+       asScore: true
+       reverseScore: true    
+       faIcon: "mdi-power-plug-off"
+     
+       icecatFeaturesIds:      
+
+         
+       name:
+            default: "Power consumption (SDR)"
+            fr: "Consommation électrique (Basse définition)"
+         
+       synonyms:
+            all:
+              - "POWERONMODESDR"
+                
+       parser:
+            normalize: true
+            trim: true
+            lowerCase: false
+            upperCase: true
+            removeParenthesis: false
+            deleteTokens:
+             - "W"
+ ################################################################################
+ #                         CONSOMMATION ELECTRIQUE HDR
+ ################################################################################
+         # Generated on 10/12/2024 21:22, coverage was 2% (63/2389) . 
+         # TOP attributes values are :
+       #     - 0.3 (34 items)
+       #     - 0.5 (24 items)
+       #     - 0 (2 items)
+       #     - 0, 3 W (2 items)
+       #   
+         ##################################
+             
+
+     - key: "POWER_CONSUMPTION_HDR"
+       betterIs: "LOWER"
+       filteringType: "NUMERIC"
+       asScore: true
+       reverseScore: true    
+       faIcon: "mdi-power-plug-off"
+     
+       icecatFeaturesIds:      
+
+         
+       name:
+            default: "Power consumption (HDR)"
+            fr: "Consommation électrique (Hauté définition)"
+         
+       synonyms:
+            all:
+              - "POWERONMODEHDR"
+                
+       parser:
+            normalize: true
+            trim: true
+            lowerCase: false
+            upperCase: true
+            removeParenthesis: false
+            deleteTokens:
+             - "W"
+
+
+
+ ################################################################################
+ #                         CLASS ENERGY HDR
+ ################################################################################
+ 
+     - key: "CLASSE_ENERGY_HDR"
+       betterIs: "GREATER"
+       faIcon: "mdi-flash"
+       name:
+         default: "Energy class HDR"
+         fr: "Classe énergétique (haute résolution)"
+       filteringType: "TEXT"
+       asScore: true
+    
+       attributeValuesOrdering: "MAPPED"
+       synonyms:
+          all:
+          - "ENERGYCLASSHDR"
+          - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
+          
+       parser:
+          normalize: true
+          trim: true
+          lowerCase: false
+          upperCase: true
+          removeParenthesis: false
+          deleteTokens:
+          - "CLASSE"
+          - "(ÉCHELLE A++ À E)"
+          - "NOT AVAILABLE"
+       numericMapping:
+          A+++: 18.0    
+          A++: 18.0
+          A+: 17.0
+          A: 16.0
+          B++: 15.0
+          B+: 14.0
+          B: 13.0
+          C++: 12.0
+          C+: 11.0
+          C: 10.0
+          D++: 9.0
+          D+: 8.0
+          D: 7.0
+          E++: 6.0
+          E+: 5.0
+          E: 4.0
+          F++: 3.0
+          F+: 2.0
+          F: 1.0
+          G: 0.0      
+
+ ################################################################################
+ #                         CLASSE ELECTRIQUE SDR
+ ################################################################################
+ 
+     -  key: "CLASSE_ENERGY_SDR"
+        betterIs: "GREATER"
+        faIcon: "mdi-flash"
+        name:
+          default: "Energy class HDR"
+          fr: "Classe énergétique (haute résolution)"
+        filteringType: "TEXT"
+        asScore: true
+        
+        attributeValuesOrdering: "MAPPED"
+        synonyms:
+          all:
+          - "ENERGYCLASSHDR"
+          - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
+          
+        parser:
+          normalize: true
+          trim: true
+          lowerCase: false
+          upperCase: true
+          removeParenthesis: false
+          deleteTokens:
+          - "CLASSE"
+          - "(ÉCHELLE A++ À E)"
+          - "NOT AVAILABLE"
+        numericMapping:
+          A+++: 18.0    
+          A++: 18.0
+          A+: 17.0
+          A: 16.0
+          B++: 15.0
+          B+: 14.0
+          B: 13.0
+          C++: 12.0
+          C+: 11.0
+          C: 10.0
+          D++: 9.0
+          D+: 8.0
+          D: 7.0
+          E++: 6.0
+          E+: 5.0
+          E: 4.0
+          F++: 3.0
+          F+: 2.0
+          F: 1.0
+          G: 0.0      
+
+
+
+      
 ##############################################################################
 # Product classification from categories
 ##############################################################################
