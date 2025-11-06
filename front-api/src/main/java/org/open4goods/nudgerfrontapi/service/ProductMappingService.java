@@ -26,6 +26,7 @@ import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.attribute.SourcableAttribute;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
@@ -57,6 +58,7 @@ import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeSourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductCardinalityDto;
@@ -82,6 +84,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductEprelDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductVideoDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
@@ -211,6 +214,9 @@ public class ProductMappingService {
         ProductAiReviewDto aiReview = components.contains(ProductDtoComponent.aiReview)
                 ? mapAiReview(product, domainLanguage, locale)
                 : null;
+        ProductEprelDto eprel = components.contains(ProductDtoComponent.eprel)
+                ? mapEprel(product)
+                : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
 
         String slug = null;
@@ -238,6 +244,7 @@ public class ProductMappingService {
                 datasources,
                 scores,
                 aiReview,
+                eprel,
                 offers);
     }
 
@@ -594,6 +601,17 @@ public class ProductMappingService {
                 : new LinkedHashMap<>(product.getDatasourceCodes());
 
         return new ProductDatasourcesDto(datasourceCodes);
+    }
+
+    /**
+     * Map the EPREL metadata attached to the product by cloning the domain entity
+     * while removing heavy sections.
+     */
+    private ProductEprelDto mapEprel(Product product) {
+        if (product == null) {
+            return null;
+        }
+        return ProductEprelDto.from(product.getEprelDatas());
     }
 
     /**
@@ -1033,11 +1051,13 @@ public class ProductMappingService {
             displayName = vConfig.getAttributesConfig().getAttributeConfigByKey(attribute.getName()).getName()
                     .get(domainLanguage.languageTag());
         }
+        ProductAttributeSourceDto sourcing = mapAttributeSourcing(attribute, attribute.getValue());
         return new ProductIndexedAttributeDto(
                 displayName,
                 attribute.getValue(),
                 attribute.getNumericValue(),
-                attribute.getBoolValue());
+                attribute.getBoolValue(),
+                sourcing);
     }
 
     /**
@@ -1047,16 +1067,29 @@ public class ProductMappingService {
         if (attribute == null) {
             return null;
         }
-        Set<ProductSourcedAttributeDto> sources = attribute.getSource() == null
-                ? Collections.emptySet()
-                : attribute.getSource().stream()
-                        .map(this::mapSourcedAttribute)
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
+        ProductAttributeSourceDto sourcing = mapAttributeSourcing(attribute, attribute.getValue());
         return new ProductAttributeDto(
                 attribute.getName(),
                 attribute.getValue(),
                 attribute.getIcecatTaxonomyIds() == null ? Collections.emptySet() : new LinkedHashSet<>(attribute.getIcecatTaxonomyIds()),
-                sources);
+                sourcing);
+    }
+
+    /**
+     * Build the sourcing metadata for an attribute.
+     */
+    private ProductAttributeSourceDto mapAttributeSourcing(SourcableAttribute attribute, String attributeValue) {
+        if (attribute == null) {
+            return new ProductAttributeSourceDto(attributeValue, Collections.emptySet(), false);
+        }
+        Set<ProductSourcedAttributeDto> sources = attribute.getSource() == null
+                ? Collections.emptySet()
+                : attribute.getSource().stream()
+                        .map(this::mapSourcedAttribute)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+        boolean conflicts = attribute.getSource() != null && attribute.hasConflicts();
+        return new ProductAttributeSourceDto(attributeValue, sources, conflicts);
     }
 
     /**
