@@ -143,7 +143,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   padding-inline: clamp(1.5rem, 5vw, 4rem)
 
 .home-hero__inner
-  max-width: 1180px
   margin: 0 auto
   display: flex
   flex-direction: column
