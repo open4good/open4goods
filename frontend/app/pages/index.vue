@@ -229,19 +229,29 @@ const alternateLinks = computed(() =>
 const searchLandingUrl = computed(() => localePath({ name: 'search' }))
 const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
 
+const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
+  if (!raw) {
+    return null
+  }
+
+  const trimmed = raw.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed
+  }
+
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+}
+
 const resolveCategoryHref = (category: VerticalConfigDto) => {
-  const rawSlug = category.verticalHomeUrl?.trim()
+  const normalizedUrl = normalizeVerticalHomeUrl(category.verticalHomeUrl)
 
-  if (rawSlug) {
-    if (/^https?:\/\//i.test(rawSlug)) {
-      return rawSlug
-    }
-
-    if (rawSlug.startsWith('/')) {
-      return rawSlug
-    }
-
-    return localePath({ name: 'categories-slug', params: { slug: rawSlug } })
+  if (normalizedUrl) {
+    return normalizedUrl
   }
 
   const normalizedTitle = category.verticalHomeTitle?.trim()
@@ -456,10 +466,10 @@ const handleSearchSubmit = () => {
 const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
   searchQuery.value = suggestion.title
 
-  const normalizedUrl = suggestion.url?.trim()
+  const normalizedUrl = normalizeVerticalHomeUrl(suggestion.url)
 
   if (normalizedUrl) {
-    router.push(localePath(normalizedUrl))
+    router.push(normalizedUrl)
     return
   }
 
@@ -524,35 +534,45 @@ useHead(() => ({
       @select-category="handleCategorySuggestion"
       @select-product="handleProductSuggestion"
     />
+    <div class="home-page__sections">
+      <HomeProblemsSection :items="problemItems" />
 
-    <HomeProblemsSection :items="problemItems" />
+      <HomeSolutionSection :benefits="solutionBenefits" />
 
-    <HomeSolutionSection :benefits="solutionBenefits" />
+      <HomeFeaturesSection :features="featureCards" />
 
-    <HomeFeaturesSection :features="featureCards" />
+      <HomeBlogSection
+        :loading="blogLoading"
+        :featured-item="featuredBlogItem"
+        :secondary-items="secondaryBlogItems"
+      />
 
-    <HomeBlogSection
-      :loading="blogLoading"
-      :featured-item="featuredBlogItem"
-      :secondary-items="secondaryBlogItems"
-    />
+      <HomeObjectionsSection :items="objectionItems" />
 
-    <HomeObjectionsSection :items="objectionItems" />
+      <HomeFaqSection :items="faqPanels" />
 
-    <HomeFaqSection :items="faqPanels" />
-
-    <HomeCtaSection
-      v-model:search-query="searchQuery"
-      :categories-landing-url="categoriesLandingUrl"
-      @submit="handleSearchSubmit"
-    />
+      <HomeCtaSection
+        v-model:search-query="searchQuery"
+        :categories-landing-url="categoriesLandingUrl"
+        @submit="handleSearchSubmit"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped lang="sass">
 .home-page
+  --cat-h: clamp(200px, 45vh, 420px)
+  --cat-in-hero: calc(var(--cat-h) / 3)
+  --cat-overlap: calc(var(--cat-h) * 2 / 3)
+  display: flex
+  flex-direction: column
+  gap: 0
+  background-color: rgb(var(--v-theme-surface-default))
+
+.home-page__sections
   display: flex
   flex-direction: column
   gap: clamp(3rem, 7vw, 5rem)
-  background-color: rgb(var(--v-theme-surface-default))
+  padding-top: var(--cat-overlap)
 </style>
