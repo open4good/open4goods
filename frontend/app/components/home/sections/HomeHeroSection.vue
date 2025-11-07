@@ -134,13 +134,14 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero
   position: relative
   isolation: isolate
-  --hero-cat-h: var(--cat-h, clamp(240px, 32vh, 360px))
-  --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 3)
+  --hero-cat-h: var(--cat-h, clamp(180px, 28vh, 240px))
+  --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.7)
   --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
   --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
   --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
-  padding-block-start: clamp(4rem, 12vw, 8rem)
-  padding-block-end: calc(clamp(6rem, 16vw, 11rem) + var(--hero-cat-in-hero))
+  min-height: clamp(560px, 75dvh, 880px)
+  padding-block-start: clamp(3rem, 8vw, 5.5rem)
+  padding-block-end: calc(clamp(3.5rem, 10vw, 6rem) + var(--hero-cat-in-hero))
   background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.25), transparent 60%), rgb(var(--v-theme-surface-default))
   overflow: visible
 
@@ -149,8 +150,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 .home-hero__inner
   margin: 0 auto
+  min-height: 100%
   display: flex
   flex-direction: column
+  justify-content: center
   gap: clamp(2rem, 5vw, 3rem)
 
 .home-hero__layout
@@ -244,11 +247,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   width: 100%
 
 .home-hero__categories-inner
-  --cat-h: clamp(240px, 32vh, 360px)
+  --cat-h: clamp(160px, 24vh, 220px)
   position: relative
   width: min(100%, 1200px)
   margin-inline: auto
-  padding: clamp(0.75rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2.5rem)
+  padding: clamp(0.5rem, 2.5vw, 1.25rem) clamp(0.85rem, 3vw, 2rem)
   border-radius: clamp(1.75rem, 4vw, 2.25rem)
   background: linear-gradient(
     180deg,
@@ -286,13 +289,16 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 @media (max-width: 959px)
   .home-hero
-    padding-block-start: clamp(3.5rem, 12vw, 6rem)
-    padding-block-end: calc(clamp(8rem, 20vw, 10rem) + var(--hero-cat-in-hero))
+    min-height: clamp(520px, 72dvh, 760px)
+    padding-block-start: clamp(2.5rem, 12vw, 4.5rem)
+    padding-block-end: calc(clamp(3.5rem, 16vw, 5.5rem) + var(--hero-cat-in-hero))
+    --hero-cat-h: clamp(150px, 36vh, 210px)
+    --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.75)
 
   .home-hero__video
     transform: scale(1.15)
 
   .home-hero__categories-inner
-    --cat-h: clamp(220px, 52vh, 340px)
-    padding: clamp(0.5rem, 5vw, 1rem) clamp(0.75rem, 5vw, 1.5rem)
+    --cat-h: clamp(150px, 42vh, 210px)
+    padding: clamp(0.5rem, 6vw, 1.1rem) clamp(0.75rem, 6vw, 1.5rem)
 </style>
