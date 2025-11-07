@@ -135,7 +135,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   position: relative
   isolation: isolate
   --hero-cat-h: var(--cat-h, clamp(180px, 28vh, 240px))
-  --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.7)
+  --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.35)
   --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
   --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
   --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
@@ -293,7 +293,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     padding-block-start: clamp(2.5rem, 12vw, 4.5rem)
     padding-block-end: calc(clamp(3.5rem, 16vw, 5.5rem) + var(--hero-cat-in-hero))
     --hero-cat-h: clamp(150px, 36vh, 210px)
-    --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.75)
+    --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.4)
 
   .home-hero__video
     transform: scale(1.15)
