@@ -76,8 +76,11 @@
               <tr v-for="attribute in mainAttributes" :key="attribute.key">
                 <th scope="row">{{ attribute.label }}</th>
                 <td>
-                  <!-- eslint-disable-next-line vue/no-v-html -->
-                  <span class="product-attributes__table-value" v-html="attribute.value" />
+                  <ProductAttributeSourcingLabel
+                    class="product-attributes__table-value"
+                    :sourcing="attribute.sourcing"
+                    :value="attribute.value"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -129,9 +132,11 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 import type {
   ProductAttributeDto,
+  ProductAttributeSourceDto,
   ProductAttributesDto,
   ProductDto,
   ProductIndexedAttributeDto,
@@ -368,6 +373,22 @@ interface MainAttributeRow {
   key: string
   label: string
   value: string
+  sourcing?: ProductAttributeSourceDto | null
+}
+
+const resolveDisplayValue = (
+  attribute: ProductIndexedAttributeDto | null | undefined,
+  fallback: string | null,
+) => {
+  const bestValue = attribute?.sourcing?.bestValue
+  if (typeof bestValue === 'string') {
+    const trimmed = bestValue.trim()
+    if (trimmed.length) {
+      return trimmed
+    }
+  }
+
+  return fallback
 }
 
 const formatMainAttributeValue = (
@@ -396,8 +417,10 @@ const mainAttributes = computed<MainAttributeRow[]>(() => {
   const entries = resolvedAttributes.value?.indexedAttributes ?? {}
 
   return Object.entries(entries).reduce<MainAttributeRow[]>((accumulator, [key, attribute]) => {
-    const value = formatMainAttributeValue(attribute)
-    if (!value) {
+    const fallbackValue = formatMainAttributeValue(attribute)
+    const displayValue = resolveDisplayValue(attribute, fallbackValue)
+
+    if (!displayValue) {
       return accumulator
     }
 
@@ -406,7 +429,12 @@ const mainAttributes = computed<MainAttributeRow[]>(() => {
         ? attribute.name.trim()
         : key
 
-    accumulator.push({ key, label, value })
+    accumulator.push({
+      key,
+      label,
+      value: displayValue,
+      sourcing: attribute?.sourcing ?? null,
+    })
     return accumulator
   }, [])
 })
@@ -415,6 +443,7 @@ export interface DetailAttributeView {
   key: string
   name: string
   value: string
+  sourcing?: ProductAttributeSourceDto | null
 }
 
 export interface DetailGroupView {
@@ -449,10 +478,14 @@ const sanitizeAttributeList = (
         ? attribute.name.trim()
         : t('product.attributes.detailed.unknownLabel')
 
+    const bestValue = attribute.sourcing?.bestValue
+    const displayValue = typeof bestValue === 'string' && bestValue.trim().length ? bestValue.trim() : rawValue
+
     accumulator.push({
       key: `${prefix}-${index}`,
       name,
-      value: rawValue,
+      value: displayValue,
+      sourcing: attribute.sourcing ?? null,
     })
 
     return accumulator

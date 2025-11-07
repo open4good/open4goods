@@ -43,32 +43,48 @@
             <template v-if="attribute.tooltip">
               <v-tooltip location="bottom" :text="attribute.tooltip">
                 <template #activator="{ props: tooltipProps }">
-                  <span class="product-hero__attribute-value-content" v-bind="tooltipProps">
-                    <NuxtImg
-                      v-if="attribute.flag"
-                      :src="attribute.flag"
-                      :alt="attribute.value"
-                      width="32"
-                      height="24"
-                      class="product-hero__flag"
-                    />
-                    <span>{{ attribute.value }}</span>
-                  </span>
+                  <ProductAttributeSourcingLabel
+                    class="product-hero__attribute-value-label"
+                    :sourcing="attribute.sourcing"
+                    :value="attribute.value"
+                  >
+                    <template #default="{ displayValue }">
+                      <span class="product-hero__attribute-value-content" v-bind="tooltipProps">
+                        <NuxtImg
+                          v-if="attribute.flag"
+                          :src="attribute.flag"
+                          :alt="displayValue"
+                          width="32"
+                          height="24"
+                          class="product-hero__flag"
+                        />
+                        <span>{{ displayValue }}</span>
+                      </span>
+                    </template>
+                  </ProductAttributeSourcingLabel>
                 </template>
               </v-tooltip>
             </template>
             <template v-else>
-              <span class="product-hero__attribute-value-content">
-                <NuxtImg
-                  v-if="attribute.flag"
-                  :src="attribute.flag"
-                  :alt="attribute.value"
-                  width="32"
-                  height="24"
-                  class="product-hero__flag"
-                />
-                <span>{{ attribute.value }}</span>
-              </span>
+              <ProductAttributeSourcingLabel
+                class="product-hero__attribute-value-label"
+                :sourcing="attribute.sourcing"
+                :value="attribute.value"
+              >
+                <template #default="{ displayValue }">
+                  <span class="product-hero__attribute-value-content">
+                    <NuxtImg
+                      v-if="attribute.flag"
+                      :src="attribute.flag"
+                      :alt="displayValue"
+                      width="32"
+                      height="24"
+                      class="product-hero__flag"
+                    />
+                    <span>{{ displayValue }}</span>
+                  </span>
+                </template>
+              </ProductAttributeSourcingLabel>
             </template>
           </span>
         </li>
@@ -112,8 +128,9 @@ import {
   useProductCompareStore,
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
-import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import type { AttributeConfigDto, ProductAttributeSourceDto, ProductDto } from '~~/shared/api-client'
 
 export interface ProductHeroBreadcrumb {
   title: string
@@ -180,11 +197,33 @@ const brandModelLine = computed(() => {
 
 type DisplayedAttribute = { key: string; label: string; value: string }
 
-type HeroAttribute = DisplayedAttribute & { flag?: string | null; tooltip?: string }
+type HeroAttribute = DisplayedAttribute & {
+  flag?: string | null
+  tooltip?: string
+  sourcing?: ProductAttributeSourceDto | null
+}
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
-const popularAttributes = computed<DisplayedAttribute[]>(() =>
+const resolveIndexedAttributeSourcing = (key: string): ProductAttributeSourceDto | null => {
+  const indexedAttributes = props.product.attributes?.indexedAttributes ?? {}
+
+  if (key in indexedAttributes && indexedAttributes[key]?.sourcing) {
+    return indexedAttributes[key]?.sourcing ?? null
+  }
+
+  if (key.includes('.')) {
+    const segments = key.split('.')
+    const lastSegment = segments[segments.length - 1]
+    if (lastSegment && indexedAttributes[lastSegment]?.sourcing) {
+      return indexedAttributes[lastSegment]?.sourcing ?? null
+    }
+  }
+
+  return null
+}
+
+const popularAttributes = computed<HeroAttribute[]>(() =>
   resolvePopularAttributes(props.product, popularAttributeConfigs.value)
     .map((attribute) => {
       const value = formatAttributeValue(attribute, t, n)
@@ -192,13 +231,16 @@ const popularAttributes = computed<DisplayedAttribute[]>(() =>
         return null
       }
 
+      const sourcing = resolveIndexedAttributeSourcing(attribute.key)
+
       return {
         key: attribute.key,
         label: attribute.label,
         value,
+        sourcing,
       }
     })
-    .filter((attribute): attribute is DisplayedAttribute => attribute != null),
+    .filter((attribute): attribute is HeroAttribute => attribute != null),
 )
 
 const heroAttributes = computed<HeroAttribute[]>(() => {

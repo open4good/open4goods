@@ -31,8 +31,11 @@
           <tr v-for="attribute in group.attributes" :key="attribute.key">
             <th scope="row">{{ attribute.name }}</th>
             <td>
-              <!-- eslint-disable-next-line vue/no-v-html -->
-              <span class="product-attributes__table-value" v-html="attribute.value" />
+              <ProductAttributeSourcingLabel
+                class="product-attributes__table-value"
+                :sourcing="attribute.sourcing"
+                :value="attribute.value"
+              />
             </td>
           </tr>
         </tbody>
@@ -44,6 +47,7 @@
 <script setup lang="ts">
 import { toRefs } from 'vue'
 import type { PropType } from 'vue'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import type { DetailGroupView } from '~/components/product/ProductAttributesSection.vue'
 
 const props = defineProps({

@@ -31,9 +31,23 @@ const VTableStub = defineComponent({
 
 const VIconStub = defineComponent({
   name: 'VIconStub',
-  props: { icon: { type: String, default: '' } },
+  props: {
+    icon: { type: String, default: '' },
+    color: { type: String, default: '' },
+    size: { type: [Number, String], default: 24 },
+  },
   setup(props) {
-    return () => h('i', { class: 'v-icon-stub' }, props.icon)
+    return () =>
+      h(
+        'i',
+        {
+          class: 'v-icon-stub',
+          'data-icon': props.icon,
+          'data-color': props.color,
+          'data-size': props.size,
+        },
+        props.icon,
+      )
   },
 })
 
@@ -41,6 +55,50 @@ const VChipStub = defineComponent({
   name: 'VChipStub',
   setup(_, { slots }) {
     return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
+  },
+})
+
+const VTooltipStub = defineComponent({
+  name: 'VTooltipStub',
+  props: {
+    text: { type: String, default: '' },
+  },
+  setup(props, { slots }) {
+    return () =>
+      h('div', { class: 'v-tooltip-stub', 'data-text': props.text }, [
+        slots.activator?.({ props: {} }),
+        h('div', { class: 'v-tooltip-stub__content' }, slots.default?.()),
+      ])
+  },
+})
+
+const VBtnStub = defineComponent({
+  name: 'VBtnStub',
+  props: {
+    icon: { type: Boolean, default: false },
+    density: { type: String, default: 'default' },
+    variant: { type: String, default: 'text' },
+  },
+  setup(props, { slots }) {
+    return () =>
+      h(
+        'button',
+        {
+          class: 'v-btn-stub',
+          'data-icon': props.icon,
+          'data-density': props.density,
+          'data-variant': props.variant,
+          type: 'button',
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const VDividerStub = defineComponent({
+  name: 'VDividerStub',
+  setup() {
+    return () => h('hr', { class: 'v-divider-stub' })
   },
 })
 
@@ -115,22 +173,91 @@ const buildProduct = (): ProductDto => ({
   },
   attributes: {
     indexedAttributes: {
-      weight: { name: 'Weight', value: '<strong>2 kg</strong>' },
-      depth: { name: 'Depth', numericValue: 45 },
-      wireless: { name: 'Wireless', booleanValue: true },
+      weight: {
+        name: 'Weight',
+        value: '<strong>2 kg</strong>',
+        sourcing: {
+          bestValue: '2 kg',
+          conflicts: false,
+          sources: new Set([
+            {
+              datasourceName: 'datasource-a',
+              value: '2 kg',
+              language: 'fr',
+              icecatTaxonomyId: 1010,
+            },
+          ]),
+        },
+      },
+      depth: {
+        name: 'Depth',
+        numericValue: 45,
+        sourcing: {
+          bestValue: '45 cm',
+          conflicts: true,
+          sources: new Set([
+            {
+              datasourceName: 'datasource-a',
+              value: '45 cm',
+              language: 'fr',
+              icecatTaxonomyId: 2020,
+            },
+            {
+              datasourceName: 'datasource-b',
+              value: '44 cm',
+              language: 'en',
+              icecatTaxonomyId: 2020,
+            },
+          ]),
+        },
+      },
+      wireless: {
+        name: 'Wireless',
+        booleanValue: true,
+        sourcing: {
+          bestValue: 'Yes',
+          conflicts: false,
+          sources: new Set(),
+        },
+      },
     },
     classifiedAttributes: [
       {
         name: 'Performance',
         features: [{ name: 'Battery life', value: '10 h' }],
         unFeatures: [{ name: 'Noise level', value: 'High' }],
-        attributes: [{ name: 'Power', value: '<em>200 W</em>' }],
+        attributes: [
+          {
+            name: 'Power',
+            value: '<em>200 W</em>',
+            sourcing: {
+              bestValue: '200 W',
+              conflicts: false,
+              sources: new Set([
+                {
+                  datasourceName: 'datasource-a',
+                  value: '200 W',
+                },
+              ]),
+            },
+          },
+        ],
       },
       {
         name: 'Dimensions',
         features: [],
         unFeatures: [],
-        attributes: [{ name: 'Height', value: '120 cm' }],
+        attributes: [
+          {
+            name: 'Height',
+            value: '120 cm',
+            sourcing: {
+              bestValue: '120 cm',
+              conflicts: false,
+              sources: new Set(),
+            },
+          },
+        ],
       },
     ],
   },
@@ -172,6 +299,22 @@ const i18n = createI18n({
             empty: 'No detailed specifications are available for this product yet.',
             noResults: 'No specifications match your search.',
           },
+          sourcing: {
+            bestValue: 'Best value',
+            description: 'Details provided by our trusted data sources.',
+            columns: {
+              source: 'Source',
+              value: 'Value',
+              language: 'Lang',
+              taxonomy: 'Taxo.',
+            },
+            empty: 'No sourcing information available.',
+            status: {
+              conflicts: 'Conflicts detected',
+              noConflicts: 'No conflicts detected',
+            },
+            tooltipAriaLabel: 'Show sourcing details',
+          },
         },
       },
       common: {
@@ -197,6 +340,9 @@ const mountComponent = async (product: ProductDto) => {
         VTable: VTableStub,
         VIcon: VIconStub,
         VChip: VChipStub,
+        VTooltip: VTooltipStub,
+        VBtn: VBtnStub,
+        VDivider: VDividerStub,
         VImg: VImgStub,
         VTextField: VTextFieldStub,
         VRow: VRowStub,
@@ -244,13 +390,13 @@ describe('ProductAttributesSection', () => {
     expect(mainText).toContain('Weight')
     expect(mainText).toContain('2 kg')
     expect(mainText).toContain('Depth')
-    expect(mainText).toContain('45')
+    expect(mainText).toContain('45 cm')
     expect(mainText).toContain('Wireless')
     expect(mainText).toContain('Yes')
 
     const richValue = wrapper.find('.product-attributes__table-value')
     expect(richValue.exists()).toBe(true)
-    expect(richValue.html()).toContain('<strong>2 kg</strong>')
+    expect(richValue.text()).toContain('2 kg')
   })
 
   it('filters detailed groups with the search input', async () => {
