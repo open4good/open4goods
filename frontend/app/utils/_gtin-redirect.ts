@@ -29,15 +29,17 @@ export const resolveGtinRedirectTarget = async (
   }
 
   const normalizedFullSlug = product.fullSlug?.trim()
+  const normalizedSlug = product.slug?.trim()
+  const canonicalSlug = normalizedFullSlug || normalizedSlug
 
-  if (!normalizedFullSlug) {
+  if (!canonicalSlug) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Product not found',
     })
   }
 
-  const [maybeBareSlug] = normalizedFullSlug.split(/[?#]/, 1)
+  const [maybeBareSlug] = canonicalSlug.split(/[?#]/, 1)
   const bareFullSlug = (maybeBareSlug ?? '').trim()
 
   if (!bareFullSlug) {
