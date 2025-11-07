@@ -7,7 +7,7 @@ import {
 
 describe('_product-route', () => {
   describe('matchProductRouteFromSegments', () => {
-    it('returns route details when both segments are valid', () => {
+    it('returns route details when both segments are valid (category + combined)', () => {
       const match = matchProductRouteFromSegments([
         'electronique',
         '1234567890123-super-produit',
@@ -32,6 +32,55 @@ describe('_product-route', () => {
       })
     })
 
+    it('supports routes exposing GTIN and slug as separate segments', () => {
+      const match = matchProductRouteFromSegments([
+        '1234567890123',
+        'Super-Produit',
+      ])
+
+      expect(match).toEqual({
+        categorySlug: null,
+        gtin: '1234567890123',
+        slug: 'super-produit',
+      })
+    })
+
+    it('supports category-prefixed routes with split GTIN and slug segments', () => {
+      const match = matchProductRouteFromSegments([
+        'electronique',
+        '1234567890123',
+        'super-produit',
+      ])
+
+      expect(match).toEqual({
+        categorySlug: 'electronique',
+        gtin: '1234567890123',
+        slug: 'super-produit',
+      })
+    })
+
+    it('accepts unicode characters in the slug portion', () => {
+      expect(
+        matchProductRouteFromSegments(['1234567890123-Éco-Produit']),
+      ).toEqual({
+        categorySlug: null,
+        gtin: '1234567890123',
+        slug: 'éco-produit',
+      })
+
+      expect(
+        matchProductRouteFromSegments([
+          'maison-jardin',
+          '1234567890123',
+          'Produit-Éco',
+        ]),
+      ).toEqual({
+        categorySlug: 'maison-jardin',
+        gtin: '1234567890123',
+        slug: 'produit-éco',
+      })
+    })
+
     it('normalises category slug casing', () => {
       const match = matchProductRouteFromSegments([
         'Beaute-Soins',
@@ -45,7 +94,7 @@ describe('_product-route', () => {
       })
     })
 
-    it('returns null when the route is empty or contains more than two segments', () => {
+    it('returns null when the route is empty or contains more than three segments', () => {
       expect(matchProductRouteFromSegments([])).toBeNull()
       expect(matchProductRouteFromSegments(['only-one'])).toBeNull()
       expect(
@@ -53,6 +102,7 @@ describe('_product-route', () => {
           'too',
           'many',
           'segments',
+          'here',
         ])
       ).toBeNull()
     })
