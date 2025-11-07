@@ -126,6 +126,7 @@ import {
   type ProductSearchResponseDto,
 } from '~~/shared/api-client'
 import { matchProductRouteFromSegments, isBackendNotFoundError } from '~~/shared/utils/_product-route'
+import { isValidGtinParam } from '~~/shared/utils/_gtin'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
@@ -140,6 +141,7 @@ import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
+import { resolveGtinRedirectTarget } from '~/utils/_gtin-redirect'
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -149,13 +151,49 @@ const { isLoggedIn } = useAuth()
 const display = useDisplay()
 
 const slugParam = route.params.slug
-const segments = Array.isArray(slugParam)
+let segments = Array.isArray(slugParam)
   ? slugParam.filter((segment): segment is string => typeof segment === 'string')
   : typeof slugParam === 'string'
     ? [slugParam]
     : []
 
-const productRoute = matchProductRouteFromSegments(segments)
+const requestHeaders = import.meta.server
+  ? useRequestHeaders(['host', 'x-forwarded-host'])
+  : undefined
+
+let productRoute = matchProductRouteFromSegments(segments)
+
+if (!productRoute && segments.length === 1) {
+  const [maybeGtin] = segments
+
+  if (maybeGtin && isValidGtinParam(maybeGtin)) {
+    const targetPath = await resolveGtinRedirectTarget(maybeGtin, {
+      fetchProduct: (gtin: string) =>
+        $fetch<ProductDto>(`/api/products/${gtin}`, {
+          headers: requestHeaders,
+        }),
+      createError,
+    })
+
+    const normalizedTargetPath = targetPath.replace(/^\/+/, '')
+    const canonicalSegments = normalizedTargetPath.length
+      ? normalizedTargetPath.split('/').filter(Boolean)
+      : []
+
+    const canonicalRoute = matchProductRouteFromSegments(canonicalSegments)
+
+    if (!canonicalRoute) {
+      throw createError({ statusCode: 404, statusMessage: 'Page not found' })
+    }
+
+    productRoute = canonicalRoute
+    segments = canonicalSegments
+
+    if (targetPath !== requestURL.pathname) {
+      await navigateTo(targetPath, { replace: true, redirectCode: 301 })
+    }
+  }
+}
 
 if (!productRoute) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
