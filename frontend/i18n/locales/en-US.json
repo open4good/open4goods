@@ -98,9 +98,10 @@
       }
     },
     "categories": {
-      "title": "Browse categories",
-      "subtitle": "Start with our most popular universes and refine in one click.",
+      "title": "Popular categories",
+      "subtitle": "",
       "cta": "Browse products",
+      "impactLink": "ImpactScore televisions",
       "fallbackTitle": "Category",
       "fallbackDescription": "Explore responsible products in this universe.",
       "carouselAriaLabel": "Popular categories carousel",
@@ -204,7 +205,6 @@
       "title": "Ready to buy better without overspending?",
       "subtitle": "Restart a search or explore the analysed offers.",
       "button": "Start a search",
-      "altLink": "Open the search page",
       "searchSubmit": "Launch search",
       "browseTaxonomy": "Explore categories"
     }

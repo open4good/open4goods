@@ -98,9 +98,10 @@
       }
     },
     "categories": {
-      "title": "Parcourir les catégories",
-      "subtitle": "Commencez par nos univers les plus demandés et filtrez en un clic.",
+      "title": "Catégories populaires",
+      "subtitle": "",
       "cta": "Voir les produits",
+      "impactLink": "impactscore televiseurs",
       "fallbackTitle": "Catégorie",
       "fallbackDescription": "Parcourez des produits responsables dans cet univers.",
       "carouselAriaLabel": "Carrousel des catégories populaires",
@@ -204,7 +205,6 @@
       "title": "Prêt à acheter mieux sans vous ruiner ?",
       "subtitle": "Relancez une recherche ou découvrez les offres analysées.",
       "button": "Lancer une recherche",
-      "altLink": "Explorer la recherche",
       "searchSubmit": "Lancer la recherche",
       "browseTaxonomy": "Explorer les catégories"
     }
