@@ -80,11 +80,11 @@ i18n:
 # Weight sum MUST BE equals to 1
 ##############################################################################
 
-#ecoscoreConfig:
-#   CLASSE_ENERGY : 0.3
-#   WEIGHT: 0.3
-#   BRAND_SUSTAINABILITY: 0.3
-#   DATA_QUALITY: 0.1
+ecoscoreConfig:
+   CLASSE_ENERGY : 0.3
+   WEIGHT: 0.3
+   BRAND_SUSTAINABILITY: 0.3
+   DATA_QUALITY: 0.1
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -94,15 +94,12 @@ i18n:
 
 
 ecoFilters:
-#    - "REPAIRABILITY_INDEX" 
-#    - "CLASSE_ENERGY"   
-#    - "ENERGY_CONSUMPTION_1000_HOURS"
-#    - "WEIGHT"
+    - "REPAIRABILITY_INDEX" 
+    - "CLASSE_ENERGY"   
+    - "ENERGY_CONSUMPTION_1000_HOURS"
+    - "WEIGHT"
 
 technicalFilters:
-#    - "DIAGONALE_POUCES"
-#    - "DISPLAY_TECHNOLOGY"
-#    - "HDMI_PORTS_QUANTITY"
 
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA_QUALITY"  
