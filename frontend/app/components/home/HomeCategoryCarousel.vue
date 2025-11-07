@@ -5,9 +5,9 @@ import { useDisplay } from 'vuetify'
 interface CategorySlideItem {
   id: string
   title: string
-  description: string
   href: string
   image?: string | null
+  impactScoreHref: string
 }
 
 const props = defineProps<{
@@ -47,6 +47,8 @@ const chunkedItems = computed(() => chunkItems(props.items, slidesPerView.value)
 
 const shouldShowArrows = computed(() => chunkedItems.value.length > 1)
 const shouldCycle = computed(() => props.items.length > slidesPerView.value)
+
+const isExternal = (url: string) => /^https?:\/\//i.test(url)
 </script>
 
 <template>
@@ -98,8 +100,8 @@ const shouldCycle = computed(() => props.items.length > slidesPerView.value)
                     v-if="typeof category.image === 'string' && category.image.length > 0"
                     :src="category.image"
                     :alt="category.title"
-                    cover
-                    height="140"
+                    contain
+                    :aspect-ratio="16 / 10"
                     class="home-category-carousel__image"
                   />
                   <div v-else class="home-category-carousel__icon" aria-hidden="true">
@@ -108,12 +110,20 @@ const shouldCycle = computed(() => props.items.length > slidesPerView.value)
                 </div>
                 <div class="home-category-carousel__content">
                   <h3 class="home-category-carousel__title">{{ category.title }}</h3>
-                  <p class="home-category-carousel__description">
-                    {{ category.description }}
-                  </p>
                   <span class="home-category-carousel__cta">
                     {{ t('home.categories.cta') }}
                   </span>
+                  <component
+                    :is="isExternal(category.impactScoreHref) ? 'a' : 'NuxtLink'"
+                    v-if="category.impactScoreHref"
+                    class="home-category-carousel__impact-link"
+                    :href="isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
+                    :to="!isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
+                    :target="isExternal(category.impactScoreHref) ? '_blank' : undefined"
+                    :rel="isExternal(category.impactScoreHref) ? 'noopener' : undefined"
+                  >
+                    {{ t('home.categories.impactLink') }}
+                  </component>
                 </div>
               </v-card>
             </NuxtLink>
@@ -165,35 +175,52 @@ const shouldCycle = computed(() => props.items.length > slidesPerView.value)
     position: relative
     overflow: hidden
     border-radius: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 1.75rem) 0 0
+    display: flex
+    align-items: center
+    justify-content: center
+    background: rgba(var(--v-theme-surface-primary-050), 0.85)
+    aspect-ratio: 16 / 10
+    padding: clamp(0.75rem, 2vw, 1.25rem)
 
   &__image
-    object-fit: cover
+    width: 100%
+    height: 100%
+    object-fit: contain
 
   &__icon
     display: flex
     align-items: center
     justify-content: center
-    height: 140px
-    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.18), rgba(var(--v-theme-hero-gradient-end), 0.18))
+    width: 100%
+    height: 100%
+    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.15), rgba(var(--v-theme-hero-gradient-end), 0.15))
     color: rgba(var(--v-theme-hero-gradient-start), 0.95)
 
   &__content
     display: flex
     flex-direction: column
-    gap: 0.75rem
+    gap: 0.5rem
     padding: clamp(1.25rem, 3vw, 1.75rem)
 
   &__title
     margin: 0
-    font-size: clamp(1.2rem, 2vw, 1.4rem)
+    font-size: clamp(1.15rem, 2vw, 1.35rem)
     color: rgb(var(--v-theme-text-neutral-strong))
 
-  &__description
-    margin: 0
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
   &__cta
-    margin-top: auto
+    display: inline-flex
+    align-items: center
+    gap: 0.35rem
     font-weight: 600
     color: rgba(var(--v-theme-hero-gradient-end), 0.95)
+
+  &__impact-link
+    margin-top: 0.25rem
+    font-weight: 500
+    font-size: 0.95rem
+    color: rgba(var(--v-theme-hero-gradient-start), 0.9)
+    text-decoration: none
+
+    &:hover
+      text-decoration: underline
 </style>
