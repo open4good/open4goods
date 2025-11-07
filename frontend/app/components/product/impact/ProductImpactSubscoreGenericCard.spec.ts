@@ -27,7 +27,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
             explanationTitle: 'Explanation',
             percentile: 'Percentile',
             weightChip: 'Counts for {value}% of the total score',
-            subscoreEyebrow: 'Impact indicator',
+            subscoreDetailsToggle: 'View indicator details',
             tableHeaders: {
               ranking: 'Rank',
             },
@@ -48,7 +48,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
       { label: '1', value: 5 },
       { label: '2', value: 10 },
     ],
-    percent: 88,
+    coefficient: 0.42,
     ranking: 3,
     on20: 17.3,
     metadatas: {
@@ -69,6 +69,37 @@ describe('ProductImpactSubscoreGenericCard', () => {
               return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
             },
           }),
+          ImpactCoefficientBadge: defineComponent({
+            name: 'ImpactCoefficientBadgeStub',
+            props: ['value'],
+            setup(props) {
+              return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
+            },
+          }),
+          'v-expansion-panels': defineComponent({
+            name: 'VExpansionPanelsStub',
+            setup(_, { slots }) {
+              return () => h('div', { class: 'expansion-panels-stub' }, slots.default?.())
+            },
+          }),
+          'v-expansion-panel': defineComponent({
+            name: 'VExpansionPanelStub',
+            setup(_, { slots }) {
+              return () => h('div', { class: 'expansion-panel-stub' }, slots.default?.())
+            },
+          }),
+          'v-expansion-panel-title': defineComponent({
+            name: 'VExpansionPanelTitleStub',
+            setup(_, { slots }) {
+              return () => h('div', { class: 'expansion-panel-title-stub' }, slots.default?.())
+            },
+          }),
+          'v-expansion-panel-text': defineComponent({
+            name: 'VExpansionPanelTextStub',
+            setup(_, { slots }) {
+              return () => h('div', { class: 'expansion-panel-text-stub' }, slots.default?.())
+            },
+          }),
           ClientOnly: defineComponent({
             name: 'ClientOnlyStub',
             setup(_, { slots }) {
@@ -79,16 +110,15 @@ describe('ProductImpactSubscoreGenericCard', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('Impact indicator')
-    expect(wrapper.text()).toContain('Counts for 88% of the total score')
+    expect(wrapper.text()).toContain('coefficient:0.42')
     expect(wrapper.text()).toContain('17.3')
     expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
     expect(wrapper.text()).toContain('Absolute value')
     expect(wrapper.text()).toContain('42.5')
     expect(wrapper.text()).toContain('Explanation')
     expect(wrapper.text()).toContain('Lower is better')
-    expect(wrapper.text()).toContain('Percentile')
-    expect(wrapper.text()).toContain('88%')
+    expect(wrapper.text()).toContain('View indicator details')
+    expect(wrapper.text()).not.toContain('Percentile')
     expect(wrapper.text()).toContain('Rank')
     expect(wrapper.text()).toContain('3')
     expect(wrapper.text()).toContain('High')

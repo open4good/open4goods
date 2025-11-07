@@ -1711,6 +1711,7 @@
       "methodologyLinkAria": "Open the Impact Score methodology",
       "percentile": "Percentile",
       "weightChip": "Counts for {value}% of the total score",
+      "subscoreDetailsToggle": "View indicator details",
       "subscoreEyebrow": "Impact indicator",
       "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
@@ -1721,6 +1722,7 @@
       "tableHeaders": {
         "percent": "Percentile",
         "ranking": "Rank",
+        "coefficient": "Coefficient",
         "score": "Indicator",
         "value": "Value"
       },

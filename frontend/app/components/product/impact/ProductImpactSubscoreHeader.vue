@@ -1,10 +1,9 @@
 <template>
   <header class="impact-subscore-header">
     <div class="impact-subscore-header__info">
-      <p class="impact-subscore-header__eyebrow">{{ $t('product.impact.subscoreEyebrow') }}</p>
       <h4 class="impact-subscore-header__title">{{ title }}</h4>
       <p v-if="subtitle" class="impact-subscore-header__subtitle">{{ subtitle }}</p>
-      <span v-if="weightText" class="impact-subscore-header__weight">{{ weightText }}</span>
+      <ImpactCoefficientBadge v-if="coefficientValue != null" :value="coefficientValue" />
     </div>
 
     <div v-if="on20Value" class="impact-subscore-header__score" aria-hidden="true">
@@ -17,15 +16,29 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
 
 const props = defineProps<{
   title: string
   subtitle?: string
   on20?: number | null
   percent?: number | null
+  coefficient?: number | null
 }>()
 
-const { n, t } = useI18n()
+const { n } = useI18n()
+const coefficientValue = computed(() => {
+  if (props.coefficient == null) {
+    return null
+  }
+
+  const numeric = typeof props.coefficient === 'number' ? props.coefficient : Number(props.coefficient)
+  if (!Number.isFinite(numeric)) {
+    return null
+  }
+
+  return Math.min(Math.max(numeric, 0), 1)
+})
 
 const on20Value = computed(() => {
   if (typeof props.on20 !== 'number' || Number.isNaN(props.on20)) {
@@ -35,15 +48,6 @@ const on20Value = computed(() => {
   return n(props.on20, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
 })
 
-const weightText = computed(() => {
-  if (typeof props.percent !== 'number' || Number.isNaN(props.percent)) {
-    return null
-  }
-
-  return t('product.impact.weightChip', {
-    value: n(props.percent, { maximumFractionDigits: 0, minimumFractionDigits: 0 }),
-  })
-})
 </script>
 
 <style scoped>
@@ -57,15 +61,7 @@ const weightText = computed(() => {
 .impact-subscore-header__info {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-.impact-subscore-header__eyebrow {
-  margin: 0;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.75);
+  gap: 0.75rem;
 }
 
 .impact-subscore-header__title {
@@ -79,17 +75,6 @@ const weightText = computed(() => {
   margin: 0;
   font-size: 0.95rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-}
-
-.impact-subscore-header__weight {
-  align-self: flex-start;
-  padding: 0.2rem 0.75rem;
-  border-radius: 999px;
-  background: rgba(var(--v-theme-surface-primary-080), 0.8);
-  color: rgb(var(--v-theme-text-neutral-strong));
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
 }
 
 .impact-subscore-header__score {

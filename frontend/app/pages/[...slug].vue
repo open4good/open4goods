@@ -247,6 +247,25 @@ const requestedScoreIds = computed(() => {
   return ids
 })
 
+const scoreCoefficientMap = computed<Record<string, number>>(() => {
+  const raw = categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
+
+  return Object.entries(raw).reduce<Record<string, number>>((acc, [key, value]) => {
+    const normalizedKey = typeof key === 'string' ? key.trim().toUpperCase() : ''
+    if (!normalizedKey.length) {
+      return acc
+    }
+
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    if (!Number.isFinite(numericValue)) {
+      return acc
+    }
+
+    acc[normalizedKey] = Math.min(Math.max(numericValue, 0), 1)
+    return acc
+  }, {})
+})
+
 if (categorySlug) {
   try {
     categoryDetail.value = await selectCategoryBySlug(categorySlug)
@@ -440,6 +459,7 @@ const isRenderableScore = (score: ProductScoreDto | undefined | null): score is 
 const impactScores = computed(() => {
   const scoreMap = (product.value?.scores?.scores ?? {}) as Record<string, ProductScoreDto | undefined>
   const desiredIds = requestedScoreIds.value
+  const coefficients = scoreCoefficientMap.value
 
   return desiredIds
     .map((scoreId) => scoreMap[scoreId])
@@ -460,6 +480,7 @@ const impactScores = computed(() => {
         relativeValue: typeof score.relativ?.value === 'number' ? score.relativ.value : null,
         value: typeof score.value === 'number' ? score.value : null,
         absoluteValue: score.absoluteValue ?? null,
+        coefficient: coefficients[score.id.toUpperCase()] ?? null,
         percent: score.percent ?? null,
         ranking: score.ranking ?? null,
         letter: score.letter ?? null,

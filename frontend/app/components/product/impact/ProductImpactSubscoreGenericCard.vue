@@ -2,18 +2,12 @@
   <article class="impact-subscore">
     <ProductImpactSubscoreHeader
       :title="score.label"
-      :subtitle="score.description ?? undefined"
       :on20="score.on20"
-      :percent="score.percent"
+      :coefficient="score.coefficient ?? null"
     />
 
     <div class="impact-subscore__score">
       <ImpactScore :score="relativeScore" :max="5" show-value size="medium" />
-    </div>
-
-    <div v-if="absoluteValue" class="impact-subscore__absolute">
-      <span class="impact-subscore__absolute-label">{{ $t('product.impact.absoluteValue') }}</span>
-      <span class="impact-subscore__absolute-value">{{ absoluteValue }}</span>
     </div>
 
     <div v-if="score.energyLetter" class="impact-subscore__badge">
@@ -28,7 +22,16 @@
       :product-name="productName"
     />
 
-    <ProductImpactSubscoreExplanation :score="score" :absolute-value="absoluteValue" />
+    <v-expansion-panels v-if="hasDetails" class="impact-subscore__details" variant="accordion">
+      <v-expansion-panel elevation="0" rounded="lg">
+        <v-expansion-panel-title class="impact-subscore__details-title">
+          {{ $t('product.impact.subscoreDetailsToggle') }}
+        </v-expansion-panel-title>
+        <v-expansion-panel-text class="impact-subscore__details-content">
+          <ProductImpactSubscoreExplanation :score="score" :absolute-value="absoluteValue" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </article>
 </template>
 
@@ -64,6 +67,26 @@ const absoluteValue = computed(() => {
 })
 
 const hasDistribution = computed(() => Boolean(props.score.distribution?.length))
+const hasMetadata = computed(() =>
+  Object.values(props.score.metadatas ?? {})
+    .map((value) => (value == null ? null : String(value).trim()))
+    .some((value) => (value?.length ?? 0) > 0),
+)
+
+const hasRanking = computed(() => {
+  const ranking = props.score.ranking
+  if (ranking == null) {
+    return false
+  }
+
+  const numeric = Number(ranking)
+  return Number.isFinite(numeric)
+})
+
+const hasDetails = computed(() => {
+  const hasDescription = typeof props.score.description === 'string' && props.score.description.trim().length > 0
+  return hasDescription || Boolean(absoluteValue.value) || hasRanking.value || hasMetadata.value
+})
 </script>
 
 <style scoped>
@@ -83,27 +106,6 @@ const hasDistribution = computed(() => Boolean(props.score.distribution?.length)
   justify-content: flex-start;
 }
 
-.impact-subscore__absolute {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  background: rgba(var(--v-theme-surface-glass), 0.9);
-  border-radius: 16px;
-  padding: 0.6rem 1rem;
-}
-
-.impact-subscore__absolute-label {
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
-}
-
-.impact-subscore__absolute-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
 .impact-subscore__badge {
   display: flex;
 }
@@ -120,5 +122,32 @@ const hasDistribution = computed(() => Boolean(props.score.distribution?.length)
   background: linear-gradient(135deg, #22c55e, #f97316);
   color: #ffffff;
   text-transform: uppercase;
+}
+
+.impact-subscore__details {
+  border-radius: 18px;
+  background: rgba(var(--v-theme-surface-glass), 0.9);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
+}
+
+.impact-subscore__details-title {
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore__details-content {
+  padding-top: 0;
+}
+
+.impact-subscore__details :deep(.v-expansion-panel-title__overlay) {
+  display: none;
+}
+
+.impact-subscore__details :deep(.v-expansion-panel-title) {
+  padding: 0.75rem 1rem;
+}
+
+.impact-subscore__details :deep(.v-expansion-panel-text__wrapper) {
+  padding: 0 1rem 1rem;
 }
 </style>

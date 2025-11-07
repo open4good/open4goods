@@ -10,6 +10,7 @@ export type ScoreView = {
   relativeValue: number | null
   value?: number | null
   absoluteValue?: string | number | null
+  coefficient?: number | null
   percent?: number | null
   ranking?: number | string | null
   letter?: string | null
