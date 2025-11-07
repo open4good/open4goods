@@ -81,10 +81,10 @@ i18n:
 ##############################################################################
 
 ecoscoreConfig:
-   CLASSE_ENERGY : 0.3
-   WEIGHT: 0.3
-   BRAND_SUSTAINABILITY: 0.3
-   DATA_QUALITY: 0.1
+   CLASSE_ENERGY : 1
+#   WEIGHT: 0.3
+#   BRAND_SUSTAINABILITY: 0.3
+#   DATA_QUALITY: 0.1
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -94,20 +94,14 @@ ecoscoreConfig:
 
 
 ecoFilters:
-    - "REPAIRABILITY_INDEX" 
-    - "CLASSE_ENERGY"   
-    - "ENERGY_CONSUMPTION_1000_HOURS"
-    - "WEIGHT"
+#    - "REPAIRABILITY_INDEX" 
+#    - "CLASSE_ENERGY"   
 
 technicalFilters:
 
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA_QUALITY"  
 #  - "BRAND-SUSTAINABILITY"
-
-
-
-
 
 # If set, all products that do not have this attribute will be marked as excluded
 #requiredAttributes:
@@ -119,25 +113,36 @@ technicalFilters:
 # Will associate to this vertical if one of the following categorie is present for the product  
 
 matchingCategories:
-  all: []
-  Darty Pro - Cashback:
-  - "GROS ELECTROMENAGER | LAVE-LINGE"
-  rueducommerce.fr:
-  - "LAVE-LINGE"
-  darty.com:
-  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER"
-  - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
-  UNDERDOG FR:
-  - "535 | WASHING MACHINES | LAVE-LINGE"
-  manomano.fr:
-  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
-  cdiscount.com:
-  - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
-  e.leclerc:
-  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
-  icecat.biz.yml:
-  - "MACHINES A LAVER"
 
+      Darty Pro - Cashback:
+      - "GROS ELECTROMENAGER | LAVE-LINGE"
+      rueducommerce.fr:
+      - "LAVE-LINGE"
+      darty.com:
+      - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER"
+      - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
+      rakuten.com-csv.yml:
+      - "ELECTROMENAGER | LAVE-LINGE"
+      RueDuCommerce FR:
+      - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-LINGE"
+      - "LAVE-LINGE"
+      Cdiscount FR:
+      - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+      cdiscount.com:
+      - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+      ManoMano FR:
+      - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
+      icecat.biz.yml:
+      - "MACHINES A LAVER"
+      UNDERDOG FR:
+      - "535 | WASHING MACHINES | LAVE-LINGE"
+      R&eacute;f&eacute;rentiel produits - Darty Pro:
+      - "GROS ELECTROMENAGER | LAVE-LINGE"
+      manomano.fr:
+      - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
+      Darty FR:
+      - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
+      - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
 
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
