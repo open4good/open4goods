@@ -3,7 +3,7 @@
     <template #activator="{ props: activatorProps }">
       <div
         class="impact-score"
-        :class="`impact-score--${size}`"
+        :class="[`impact-score--${size}`, { 'impact-score--with-value': showValue }]"
         v-bind="activatorProps"
         :aria-label="tooltipLabel"
         tabindex="0"
@@ -14,9 +14,9 @@
           :model-value="normalizedScore"
           :length="length"
           :size="ratingSize"
-          color="accent-supporting"
-          :bg-color="inactiveColor"
-          density="comfortable"
+          :color="ratingColor"
+          :bg-color="ratingBackgroundColor"
+          :density="ratingDensity"
           half-increments
           readonly
           aria-hidden="true"
@@ -44,6 +44,14 @@ const props = defineProps({
   size: {
     type: String as PropType<'small' | 'medium' | 'large'>,
     default: 'medium',
+  },
+  color: {
+    type: String,
+    default: 'impact-score-active',
+  },
+  inactiveColor: {
+    type: String,
+    default: 'impact-score-inactive',
   },
   showValue: {
     type: Boolean,
@@ -75,7 +83,11 @@ const ratingSize = computed(() => {
   }
 })
 
-const inactiveColor = computed(() => 'rgba(var(--v-theme-text-neutral-soft), 0.35)')
+const ratingDensity = computed(() => (props.size === 'small' ? 'compact' : 'comfortable'))
+
+const ratingColor = computed(() => props.color)
+
+const ratingBackgroundColor = computed(() => props.inactiveColor)
 
 const tooltipLabel = computed(() =>
   t('components.impactScore.tooltip', {
@@ -90,43 +102,38 @@ const showValue = computed(() => props.showValue)
 
 <style scoped>
 .impact-score {
+  --impact-score-gap: 0.5rem;
+  --impact-score-rating-gap: 0.375rem;
+  --impact-score-value-font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--impact-score-gap);
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-score--small {
+  --impact-score-gap: 0.375rem;
+  --impact-score-rating-gap: 0.25rem;
+  --impact-score-value-font-size: 0.85rem;
+}
+
+.impact-score--large {
+  --impact-score-gap: 0.625rem;
+  --impact-score-rating-gap: 0.5rem;
+  --impact-score-value-font-size: 1.05rem;
+}
+
+.impact-score__rating :deep(.v-rating__wrapper) {
+  gap: var(--impact-score-rating-gap);
 }
 
 .impact-score__value {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--impact-score-value-font-size);
+  line-height: 1.1;
 }
 
-.impact-score--small .impact-score__value {
-  font-size: 0.85rem;
-}
-
-.impact-score--large .impact-score__value {
-  font-size: 1.05rem;
-}
-
-.impact-score__rating :deep(.v-rating__wrapper) {
-  gap: 0.375rem;
-}
-
-.impact-score--small .impact-score__rating :deep(.v-rating__wrapper) {
-  gap: 0.25rem;
-}
-
-.impact-score--large .impact-score__rating :deep(.v-rating__wrapper) {
-  gap: 0.5rem;
-}
-
-.impact-score__rating :deep(.v-icon) {
-  color: rgba(var(--v-theme-text-neutral-soft), 0.35);
-}
-
-.impact-score__rating :deep(.v-rating__item--active .v-icon),
-.impact-score__rating :deep(.v-rating__item--hover .v-icon) {
-  color: rgb(var(--v-theme-accent-supporting));
+.impact-score--with-value .impact-score__rating {
+  display: inline-flex;
 }
 </style>

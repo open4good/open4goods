@@ -30,38 +30,51 @@
         <ImpactScore :score="impactScore" :max="5" size="large" :show-value="true" />
       </div>
 
-      <ul v-if="popularAttributes.length" class="product-hero__attributes" role="list">
+      <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
         <li
-          v-for="attribute in popularAttributes"
+          v-for="attribute in heroAttributes"
           :key="attribute.key"
           class="product-hero__attribute"
           role="listitem"
         >
           <span class="product-hero__attribute-label">{{ attribute.label }}</span>
           <span class="product-hero__attribute-separator" aria-hidden="true">:</span>
-          <span class="product-hero__attribute-value">{{ attribute.value }}</span>
-        </li>
-      </ul>
-
-      <div class="product-hero__meta-group">
-        <div class="product-hero__meta-top">
-          <v-tooltip v-if="gtinCountry" location="bottom" :text="t('product.hero.gtinTooltip')">
-            <template #activator="{ props: tooltipProps }">
-              <span v-bind="tooltipProps" class="product-hero__origin">
+          <span class="product-hero__attribute-value">
+            <template v-if="attribute.tooltip">
+              <v-tooltip location="bottom" :text="attribute.tooltip">
+                <template #activator="{ props: tooltipProps }">
+                  <span class="product-hero__attribute-value-content" v-bind="tooltipProps">
+                    <NuxtImg
+                      v-if="attribute.flag"
+                      :src="attribute.flag"
+                      :alt="attribute.value"
+                      width="32"
+                      height="24"
+                      class="product-hero__flag"
+                    />
+                    <span>{{ attribute.value }}</span>
+                  </span>
+                </template>
+              </v-tooltip>
+            </template>
+            <template v-else>
+              <span class="product-hero__attribute-value-content">
                 <NuxtImg
-                  v-if="gtinCountry.flag"
-                  :src="gtinCountry.flag"
-                  :alt="gtinCountry.name"
+                  v-if="attribute.flag"
+                  :src="attribute.flag"
+                  :alt="attribute.value"
                   width="32"
                   height="24"
                   class="product-hero__flag"
                 />
-                <span>{{ gtinCountry.name }}</span>
+                <span>{{ attribute.value }}</span>
               </span>
             </template>
-          </v-tooltip>
-        </div>
+          </span>
+        </li>
+      </ul>
 
+      <div class="product-hero__meta-group">
         <div class="product-hero__meta-bottom">
           <v-btn
             class="product-hero__compare-button"
@@ -167,6 +180,8 @@ const brandModelLine = computed(() => {
 
 type DisplayedAttribute = { key: string; label: string; value: string }
 
+type HeroAttribute = DisplayedAttribute & { flag?: string | null; tooltip?: string }
+
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
 const popularAttributes = computed<DisplayedAttribute[]>(() =>
@@ -185,6 +200,25 @@ const popularAttributes = computed<DisplayedAttribute[]>(() =>
     })
     .filter((attribute): attribute is DisplayedAttribute => attribute != null),
 )
+
+const heroAttributes = computed<HeroAttribute[]>(() => {
+  const baseAttributes: HeroAttribute[] = [...popularAttributes.value]
+
+  if (
+    gtinCountry.value &&
+    !baseAttributes.some((attribute) => attribute.key === 'base.gtinInfo.countryName')
+  ) {
+    baseAttributes.push({
+      key: 'gtin-country',
+      label: t('product.hero.gtinCountryLabel'),
+      value: gtinCountry.value.name,
+      flag: gtinCountry.value.flag,
+      tooltip: t('product.hero.gtinTooltip'),
+    })
+  }
+
+  return baseAttributes
+})
 
 const compareStore = useProductCompareStore()
 
@@ -432,30 +466,10 @@ const impactScore = computed(() => {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
 }
 
-.product-hero__meta-group {
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: clamp(0.75rem, 2vh, 1.25rem);
-  flex: 1 1 auto;
-  min-height: 0;
-  align-content: start;
-}
-
-.product-hero__meta-top,
-.product-hero__meta-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
-.product-hero__origin {
+.product-hero__attribute-value-content {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-  width: fit-content;
 }
 
 .product-hero__flag {
@@ -463,6 +477,7 @@ const impactScore = computed(() => {
   width: 32px;
   height: 24px;
   object-fit: cover;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
 }
 
 .product-hero__impact-overview {
@@ -471,10 +486,24 @@ const impactScore = computed(() => {
   align-items: center;
   gap: 0.75rem;
   color: rgb(var(--v-theme-text-neutral-strong));
+  margin-block-end: clamp(1rem, 2vh, 1.5rem);
+}
+
+.product-hero__meta-group {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-block-start: clamp(1.25rem, 2.5vh, 2rem);
 }
 
 .product-hero__meta-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 @media (max-width: 960px) {

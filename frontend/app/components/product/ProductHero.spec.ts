@@ -81,6 +81,7 @@ describe('ProductHero', () => {
         product: {
           hero: {
             gtin: 'GTIN code',
+            gtinCountryLabel: 'GTIN registration country',
             offersCount: 'Number of offers',
             bestPriceTitle: 'Best price',
             priceMerchantPrefix: 'At',
