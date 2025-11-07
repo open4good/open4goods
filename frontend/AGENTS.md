@@ -39,7 +39,8 @@
 
 
 ## Vuetify & Styling Guidance
-- Design must be thinked mobile first, and be responsiv 
+- Always prefer using vuetify components 
+- Design must be thinked mobile first, and be responsiv.
 - Default to Vuetify props, layout grid (`v-container`, `v-row`, `v-col`), and theme tokens.
 - Scoped SASS/CSS is allowed when Vuetify tokens alone cannot express the design (hero layouts, animations, etc.). Use BEM-style class names and keep selectors minimal.
 - Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.

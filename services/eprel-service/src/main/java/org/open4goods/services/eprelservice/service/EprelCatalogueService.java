@@ -60,6 +60,11 @@ public class EprelCatalogueService
         groups.forEach(group -> processGroup(group));
     }
 
+
+    public List<EprelProductGroup>  getCatalog () {
+
+    	return apiClient.fetchProductGroups();
+    }
     private void processGroup(EprelProductGroup group)
     {
         Path zipPath = null;

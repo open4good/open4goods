@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProductAttributeSourceDto } from './ProductAttributeSourceDto';
+import {
+    ProductAttributeSourceDtoFromJSON,
+    ProductAttributeSourceDtoFromJSONTyped,
+    ProductAttributeSourceDtoToJSON,
+    ProductAttributeSourceDtoToJSONTyped,
+} from './ProductAttributeSourceDto';
+
 /**
  * 
  * @export
@@ -43,6 +51,12 @@ export interface ProductIndexedAttributeDto {
      * @memberof ProductIndexedAttributeDto
      */
     booleanValue?: boolean;
+    /**
+     * Sourcing metadata attached to the indexed attribute
+     * @type {ProductAttributeSourceDto}
+     * @memberof ProductIndexedAttributeDto
+     */
+    sourcing?: ProductAttributeSourceDto;
 }
 
 /**
@@ -66,6 +80,7 @@ export function ProductIndexedAttributeDtoFromJSONTyped(json: any, ignoreDiscrim
         'value': json['value'] == null ? undefined : json['value'],
         'numericValue': json['numericValue'] == null ? undefined : json['numericValue'],
         'booleanValue': json['booleanValue'] == null ? undefined : json['booleanValue'],
+        'sourcing': json['sourcing'] == null ? undefined : ProductAttributeSourceDtoFromJSON(json['sourcing']),
     };
 }
 
@@ -84,6 +99,7 @@ export function ProductIndexedAttributeDtoToJSONTyped(value?: ProductIndexedAttr
         'value': value['value'],
         'numericValue': value['numericValue'],
         'booleanValue': value['booleanValue'],
+        'sourcing': ProductAttributeSourceDtoToJSON(value['sourcing']),
     };
 }
 

@@ -15,6 +15,7 @@ apis/StatsApi.ts
 apis/TeamApi.ts
 apis/index.ts
 index.ts
+models/AdditionalDetails.ts
 models/AffiliationPartnerDto.ts
 models/Agg.ts
 models/AggregationBucketDto.ts
@@ -41,6 +42,7 @@ models/CategoryBreadcrumbItemDto.ts
 models/CategoryNavigationDto.ts
 models/CategoryNavigationDtoChildCategoriesInner.ts
 models/CommercialEvent.ts
+models/ContactDetails.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
@@ -70,19 +72,23 @@ models/Member.ts
 models/OpenDataDatasetDto.ts
 models/OpenDataDownloadLimitsDto.ts
 models/OpenDataOverviewDto.ts
+models/Organisation.ts
 models/PageDto.ts
 models/PageDtoProductDto.ts
 models/PageMetaDto.ts
+models/PlacementCountry.ts
 models/ProblemDetail.ts
 models/ProductAggregatedPriceDto.ts
 models/ProductAiReviewDto.ts
 models/ProductAttributeDto.ts
+models/ProductAttributeSourceDto.ts
 models/ProductAttributesDto.ts
 models/ProductBaseDto.ts
 models/ProductCardinalityDto.ts
 models/ProductClassifiedAttributeGroupDto.ts
 models/ProductDatasourcesDto.ts
 models/ProductDto.ts
+models/ProductEprelDto.ts
 models/ProductExternalIdsDto.ts
 models/ProductFieldOptionsResponse.ts
 models/ProductGtinInfoDto.ts
@@ -118,6 +124,7 @@ models/SortRequestDto.ts
 models/StaticPartnerDto.ts
 models/SubsetCriteria.ts
 models/TeamProperties.ts
+models/UploadedLabel.ts
 models/VerticalConfigDto.ts
 models/VerticalConfigFullDto.ts
 models/VerticalSubsetDto.ts

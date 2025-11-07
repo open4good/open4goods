@@ -69,6 +69,13 @@ import {
     ProductAiReviewDtoToJSON,
     ProductAiReviewDtoToJSONTyped,
 } from './ProductAiReviewDto';
+import type { ProductEprelDto } from './ProductEprelDto';
+import {
+    ProductEprelDtoFromJSON,
+    ProductEprelDtoFromJSONTyped,
+    ProductEprelDtoToJSON,
+    ProductEprelDtoToJSONTyped,
+} from './ProductEprelDto';
 import type { ProductScoresDto } from './ProductScoresDto';
 import {
     ProductScoresDtoFromJSON,
@@ -150,6 +157,12 @@ export interface ProductDto {
      */
     aiReview?: ProductAiReviewDto;
     /**
+     * EPREL product information when available
+     * @type {ProductEprelDto}
+     * @memberof ProductDto
+     */
+    eprel?: ProductEprelDto;
+    /**
      * Product offers and pricing information
      * @type {ProductOffersDto}
      * @memberof ProductDto
@@ -185,6 +198,7 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         'datasources': json['datasources'] == null ? undefined : ProductDatasourcesDtoFromJSON(json['datasources']),
         'scores': json['scores'] == null ? undefined : ProductScoresDtoFromJSON(json['scores']),
         'aiReview': json['aiReview'] == null ? undefined : ProductAiReviewDtoFromJSON(json['aiReview']),
+        'eprel': json['eprel'] == null ? undefined : ProductEprelDtoFromJSON(json['eprel']),
         'offers': json['offers'] == null ? undefined : ProductOffersDtoFromJSON(json['offers']),
     };
 }
@@ -211,6 +225,7 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
         'datasources': ProductDatasourcesDtoToJSON(value['datasources']),
         'scores': ProductScoresDtoToJSON(value['scores']),
         'aiReview': ProductAiReviewDtoToJSON(value['aiReview']),
+        'eprel': ProductEprelDtoToJSON(value['eprel']),
         'offers': ProductOffersDtoToJSON(value['offers']),
     };
 }

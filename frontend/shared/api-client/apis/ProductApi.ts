@@ -670,6 +670,7 @@ export const ProductIncludeEnum = {
     Scores: 'scores',
     AiReview: 'aiReview',
     AiTexts: 'aiTexts',
+    Eprel: 'eprel',
     Offers: 'offers'
 } as const;
 export type ProductIncludeEnum = typeof ProductIncludeEnum[keyof typeof ProductIncludeEnum];
@@ -694,6 +695,7 @@ export const ProductsIncludeEnum = {
     Scores: 'scores',
     AiReview: 'aiReview',
     AiTexts: 'aiTexts',
+    Eprel: 'eprel',
     Offers: 'offers'
 } as const;
 export type ProductsIncludeEnum = typeof ProductsIncludeEnum[keyof typeof ProductsIncludeEnum];

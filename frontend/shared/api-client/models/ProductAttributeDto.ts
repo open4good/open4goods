@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ProductSourcedAttributeDto } from './ProductSourcedAttributeDto';
+import type { ProductAttributeSourceDto } from './ProductAttributeSourceDto';
 import {
-    ProductSourcedAttributeDtoFromJSON,
-    ProductSourcedAttributeDtoFromJSONTyped,
-    ProductSourcedAttributeDtoToJSON,
-    ProductSourcedAttributeDtoToJSONTyped,
-} from './ProductSourcedAttributeDto';
+    ProductAttributeSourceDtoFromJSON,
+    ProductAttributeSourceDtoFromJSONTyped,
+    ProductAttributeSourceDtoToJSON,
+    ProductAttributeSourceDtoToJSONTyped,
+} from './ProductAttributeSourceDto';
 
 /**
  * 
@@ -46,11 +46,11 @@ export interface ProductAttributeDto {
      */
     icecatTaxonomyIds?: Set<number>;
     /**
-     * Attributes values contributed by datasources
-     * @type {Set<ProductSourcedAttributeDto>}
+     * Sourcing metadata for this attribute, including contributing datasources
+     * @type {ProductAttributeSourceDto}
      * @memberof ProductAttributeDto
      */
-    sources?: Set<ProductSourcedAttributeDto>;
+    sourcing?: ProductAttributeSourceDto;
 }
 
 /**
@@ -73,7 +73,7 @@ export function ProductAttributeDtoFromJSONTyped(json: any, ignoreDiscriminator:
         'name': json['name'] == null ? undefined : json['name'],
         'value': json['value'] == null ? undefined : json['value'],
         'icecatTaxonomyIds': json['icecatTaxonomyIds'] == null ? undefined : new Set(json['icecatTaxonomyIds']),
-        'sources': json['sources'] == null ? undefined : (new Set((json['sources'] as Array<any>).map(ProductSourcedAttributeDtoFromJSON))),
+        'sourcing': json['sourcing'] == null ? undefined : ProductAttributeSourceDtoFromJSON(json['sourcing']),
     };
 }
 
@@ -91,7 +91,7 @@ export function ProductAttributeDtoToJSONTyped(value?: ProductAttributeDto | nul
         'name': value['name'],
         'value': value['value'],
         'icecatTaxonomyIds': value['icecatTaxonomyIds'] == null ? undefined : Array.from(value['icecatTaxonomyIds'] as Set<any>),
-        'sources': value['sources'] == null ? undefined : (Array.from(value['sources'] as Set<any>).map(ProductSourcedAttributeDtoToJSON)),
+        'sourcing': ProductAttributeSourceDtoToJSON(value['sourcing']),
     };
 }
 

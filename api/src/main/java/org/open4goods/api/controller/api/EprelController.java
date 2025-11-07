@@ -9,6 +9,7 @@ import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.eprelservice.client.EprelProductGroup;
 import org.open4goods.services.eprelservice.service.EprelCatalogueService;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -57,6 +58,12 @@ public class EprelController {
 
 	}
 
+	@GetMapping("/eprel")
+	@Operation(summary = "catalog")
+	public List<EprelProductGroup> eprel(@RequestParam String gtin, @RequestParam String model) {
+		return eprelCatalogueService.getCatalog();
+
+	}
 
 
 }
