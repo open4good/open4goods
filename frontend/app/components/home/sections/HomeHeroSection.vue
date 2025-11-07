@@ -121,7 +121,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       </div>
     </v-container>
 
-    <div class="home-hero__categories">
+    <div class="home-hero__categories" :aria-label="t('home.categories.bannerAriaLabel')">
       <v-container fluid class="home-hero__categories-container">
         <div class="home-hero__categories-inner">
           <HomeCategoryCarousel :items="categoryItems" :loading="categoriesLoading" />
@@ -134,9 +134,16 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 <style scoped lang="sass">
 .home-hero
   position: relative
-  padding-block: clamp(4rem, 12vw, 8rem) clamp(6rem, 16vw, 11rem)
+  isolation: isolate
+  --hero-cat-h: var(--cat-h, clamp(200px, 45vh, 420px))
+  --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 3)
+  --hero-cat-overlap-base: calc(var(--hero-cat-h) * 2 / 3)
+  --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
+  --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
+  padding-block-start: clamp(4rem, 12vw, 8rem)
+  padding-block-end: calc(clamp(6rem, 16vw, 11rem) + var(--hero-cat-in-hero))
   background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.25), transparent 60%), rgb(var(--v-theme-surface-default))
-  overflow: hidden
+  overflow: visible
 
 .home-hero__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
@@ -226,17 +233,23 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   pointer-events: none
 
 .home-hero__categories
-  position: relative
-  z-index: 3
-  margin-top: clamp(-5.25rem, -12vw, -6.25rem)
+  position: absolute
+  inset-inline: 0
+  bottom: calc(-1 * var(--hero-cat-overlap))
+  display: flex
+  justify-content: center
+  z-index: 4
+  pointer-events: none
 
 .home-hero__categories-container
-  padding-inline: clamp(1rem, 5vw, 4rem)
+  width: 100%
+  padding-inline: clamp(1rem, 5vw, 3rem)
 
 .home-hero__categories-inner
   position: relative
-  max-width: 1180px
-  margin: 0 auto
+  width: min(100%, 1200px)
+  min-height: var(--hero-cat-h)
+  margin-inline: auto
   padding: clamp(0.75rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2.5rem)
   border-radius: clamp(1.75rem, 4vw, 2.25rem)
   background: linear-gradient(
@@ -248,6 +261,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   box-shadow: 0 22px 38px rgba(var(--v-theme-shadow-primary-600), 0.16)
   display: flex
   align-items: center
+  justify-content: center
+  pointer-events: auto
+
+.home-hero__categories-inner :deep(.home-category-carousel)
+  width: 100%
 
 .home-hero__categories-inner::before
   content: ''
@@ -269,14 +287,13 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 @media (max-width: 959px)
   .home-hero
-    padding-block: clamp(3.5rem, 12vw, 6rem) clamp(8rem, 20vw, 10rem)
+    padding-block-start: clamp(3.5rem, 12vw, 6rem)
+    padding-block-end: calc(clamp(8rem, 20vw, 10rem) + var(--hero-cat-in-hero))
 
   .home-hero__video
     transform: scale(1.15)
 
-  .home-hero__categories
-    margin-top: clamp(-4.5rem, -20vw, -5.5rem)
-
   .home-hero__categories-inner
+    min-height: clamp(220px, 52vh, var(--hero-cat-h))
     padding: clamp(0.5rem, 5vw, 1rem) clamp(0.75rem, 5vw, 1.5rem)
 </style>
