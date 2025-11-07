@@ -12,6 +12,15 @@
       @update:technical-expanded="(value) => emit('update:technicalExpanded', value)"
     />
 
+    <CategoryAdminFiltersPanel
+      v-if="shouldShowAdminPanel"
+      :fields="adminFields"
+      :aggregations="props.aggregations"
+      :baseline-aggregations="props.baselineAggregations"
+      :filters="props.filters"
+      @update:filters="(value) => emit('update:filters', value)"
+    />
+
     <div v-if="showMobileActions" class="category-page__filters-actions">
       <v-btn block color="primary" class="mb-2" @click="emit('apply-mobile')">
         {{ t('category.filters.mobileApply') }}
@@ -45,6 +54,7 @@ import { useI18n } from 'vue-i18n'
 import type {
   AggregationResponseDto,
   BlogPostDto,
+  FieldMetadataDto,
   FilterRequestDto,
   ProductFieldOptionsResponse,
   WikiPageConfig,
@@ -53,6 +63,7 @@ import type {
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
 import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
 import CategoryEcoscoreCard from './CategoryEcoscoreCard.vue'
+import CategoryAdminFiltersPanel from './CategoryAdminFiltersPanel.vue'
 const props = withDefaults(
   defineProps<{
     filterOptions: ProductFieldOptionsResponse | null
@@ -66,10 +77,14 @@ const props = withDefaults(
     wikiPages: WikiPageConfig[]
     relatedPosts: BlogPostDto[]
     verticalHomeUrl?: string | null
+    showAdminPanel?: boolean
+    adminFilterFields?: FieldMetadataDto[]
   }>(),
   {
     baselineAggregations: () => [],
     verticalHomeUrl: null,
+    showAdminPanel: false,
+    adminFilterFields: () => [],
   },
 )
 
@@ -88,4 +103,8 @@ const relatedPosts = computed(() => props.relatedPosts ?? [])
 const hasDocumentation = computed(() => props.hasDocumentation)
 const showMobileActions = computed(() => props.showMobileActions)
 const ecoscoreLinkAvailable = computed(() => Boolean(props.verticalHomeUrl))
+const adminFields = computed(() => props.adminFilterFields ?? [])
+const shouldShowAdminPanel = computed(
+  () => props.showAdminPanel && adminFields.value.length > 0,
+)
 </script>
