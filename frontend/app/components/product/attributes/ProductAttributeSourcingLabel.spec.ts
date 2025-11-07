@@ -90,12 +90,13 @@ const i18n = createI18n({
         attributes: {
           sourcing: {
             bestValue: 'Best value',
-            description: 'More about this value.',
+            sourceCount: {
+              one: '{count} source',
+              other: '{count} sources',
+            },
             columns: {
               source: 'Source',
               value: 'Value',
-              language: 'Language',
-              taxonomy: 'Taxonomy',
             },
             empty: 'No sourcing information available.',
             status: {
@@ -111,9 +112,13 @@ const i18n = createI18n({
 })
 
 describe('ProductAttributeSourcingLabel', () => {
-  const mountComponent = (sourcing?: ProductAttributeSourceDto | null, value = 'Fallback') =>
+  const mountComponent = (
+    sourcing?: ProductAttributeSourceDto | null,
+    value = 'Fallback',
+    extraProps: Record<string, unknown> = {},
+  ) =>
     mount(ProductAttributeSourcingLabel, {
-      props: { sourcing, value },
+      props: { sourcing, value, ...extraProps },
       global: {
         plugins: [i18n],
         stubs: {
@@ -152,11 +157,31 @@ describe('ProductAttributeSourcingLabel', () => {
     const tableRows = wrapper.findAll('.v-table-stub tbody tr')
     expect(tableRows).toHaveLength(1)
     expect(tableRows[0].text()).toContain('fnac.com')
+
+    const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
+    expect(countLabel.text()).toContain('1 source')
   })
 
   it('hides tooltip when sourcing is missing', () => {
     const wrapper = mountComponent(null, 'Displayed value')
     expect(wrapper.find('.v-btn-stub').exists()).toBe(false)
     expect(wrapper.text()).toContain('Displayed value')
+  })
+
+  it('can disable tooltip even when sourcing exists', () => {
+    const sourcing: ProductAttributeSourceDto = {
+      bestValue: 'Argent',
+      conflicts: false,
+      sources: [
+        {
+          datasourceName: 'fnac.com',
+          value: 'Argent',
+        },
+      ],
+    }
+
+    const wrapper = mountComponent(sourcing, 'Argent', { enableTooltip: false })
+    expect(wrapper.find('.v-btn-stub').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Argent')
   })
 })

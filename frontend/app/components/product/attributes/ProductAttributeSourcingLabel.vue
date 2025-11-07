@@ -9,11 +9,11 @@
     </span>
 
     <v-tooltip
-      v-if="hasSourcingDetails"
+      v-if="isTooltipEnabled"
       location="top"
       open-delay="150"
       :close-delay="100"
-      :disabled="!hasSourcingDetails"
+      :disabled="!isTooltipEnabled"
     >
       <template #activator="{ props: tooltipProps }">
         <v-btn
@@ -50,8 +50,8 @@
           <v-divider class="product-attribute-sourcing__tooltip-divider" />
 
           <div class="product-attribute-sourcing__tooltip-body">
-            <p class="product-attribute-sourcing__tooltip-description">
-              {{ t('product.attributes.sourcing.description') }}
+            <p class="product-attribute-sourcing__tooltip-count">
+              {{ sourceCountLabel }}
             </p>
 
             <v-table
@@ -63,16 +63,12 @@
                 <tr>
                   <th scope="col">{{ t('product.attributes.sourcing.columns.source') }}</th>
                   <th scope="col">{{ t('product.attributes.sourcing.columns.value') }}</th>
-                  <th scope="col">{{ t('product.attributes.sourcing.columns.language') }}</th>
-                  <th scope="col">{{ t('product.attributes.sourcing.columns.taxonomy') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="source in normalizedSources" :key="sourceKey(source)">
-                  <td>{{ source.datasourceName ?? '—' }}</td>
+                  <td>{{ formatSourceName(source.datasourceName) }}</td>
                   <td>{{ formatSourceValue(source.value) }}</td>
-                  <td>{{ formatLanguage(source.language) }}</td>
-                  <td>{{ formatTaxonomy(source.icecatTaxonomyId) }}</td>
                 </tr>
               </tbody>
             </v-table>
@@ -91,6 +87,7 @@
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import type {
   ProductAttributeSourceDto,
   ProductSourcedAttributeDto,
@@ -105,9 +102,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  enableTooltip: {
+    type: Boolean,
+    default: true,
+  },
 })
 
-const { t } = useI18n()
+const { t, n } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const bestValue = computed(() => {
   const candidate = props.sourcing?.bestValue
@@ -159,6 +161,17 @@ const normalizedSources = computed<ProductSourcedAttributeDto[]>(() => {
   return []
 })
 
+const isTooltipEnabled = computed(
+  () => props.enableTooltip && hasSourcingDetails.value,
+)
+
+const sourceCountLabel = computed(() => {
+  const count = normalizedSources.value.length
+  return translatePlural('product.attributes.sourcing.sourceCount', count, {
+    count: n(count),
+  })
+})
+
 const conflicts = computed(() => Boolean(props.sourcing?.conflicts))
 
 const iconColor = computed(() => (conflicts.value ? 'warning' : 'primary'))
@@ -177,20 +190,13 @@ const tooltipAriaLabel = computed(() =>
   t('product.attributes.sourcing.tooltipAriaLabel'),
 )
 
-const formatLanguage = (language?: string | null) => {
-  if (!language) {
+const formatSourceName = (name?: string | null) => {
+  if (typeof name !== 'string') {
     return '—'
   }
 
-  return language.trim().toUpperCase()
-}
-
-const formatTaxonomy = (taxonomy?: number | null) => {
-  if (typeof taxonomy === 'number' && Number.isFinite(taxonomy)) {
-    return taxonomy.toString()
-  }
-
-  return '—'
+  const trimmed = name.trim()
+  return trimmed.length ? trimmed : '—'
 }
 
 const formatSourceValue = (value?: string | null) => {
@@ -276,7 +282,7 @@ const sourceKey = (source: ProductSourcedAttributeDto) => {
   flex-shrink: 0;
 }
 
-.product-attribute-sourcing__tooltip-description {
+.product-attribute-sourcing__tooltip-count {
   margin: 0;
   font-size: 0.85rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);

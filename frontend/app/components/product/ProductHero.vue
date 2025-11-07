@@ -47,6 +47,7 @@
                     class="product-hero__attribute-value-label"
                     :sourcing="attribute.sourcing"
                     :value="attribute.value"
+                    :enable-tooltip="attribute.enableTooltip !== false"
                   >
                     <template #default="{ displayValue }">
                       <span class="product-hero__attribute-value-content" v-bind="tooltipProps">
@@ -70,6 +71,7 @@
                 class="product-hero__attribute-value-label"
                 :sourcing="attribute.sourcing"
                 :value="attribute.value"
+                :enable-tooltip="attribute.enableTooltip !== false"
               >
                 <template #default="{ displayValue }">
                   <span class="product-hero__attribute-value-content">
@@ -201,6 +203,7 @@ type HeroAttribute = DisplayedAttribute & {
   flag?: string | null
   tooltip?: string
   sourcing?: ProductAttributeSourceDto | null
+  enableTooltip?: boolean
 }
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
@@ -238,6 +241,7 @@ const popularAttributes = computed<HeroAttribute[]>(() =>
         label: attribute.label,
         value,
         sourcing,
+        enableTooltip: false,
       }
     })
     .filter((attribute): attribute is HeroAttribute => attribute != null),

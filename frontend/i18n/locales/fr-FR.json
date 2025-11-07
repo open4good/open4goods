@@ -1642,12 +1642,13 @@
       },
       "sourcing": {
         "bestValue": "Valeur retenue",
-        "description": "Détails fournis par nos sources de données fiables.",
+        "sourceCount": {
+          "one": "{count} source",
+          "other": "{count} sources"
+        },
         "columns": {
           "source": "Source",
-          "value": "Valeur",
-          "language": "Langue",
-          "taxonomy": "Taxonomie"
+          "value": "Valeur"
         },
         "empty": "Aucune information de sourcing disponible pour le moment.",
         "status": {
