@@ -60,7 +60,7 @@ public class EprelController {
 
 	@GetMapping("/eprel")
 	@Operation(summary = "catalog")
-	public List<EprelProductGroup> eprel(@RequestParam String gtin, @RequestParam String model) {
+	public List<EprelProductGroup> eprel() {
 		return eprelCatalogueService.getCatalog();
 
 	}
