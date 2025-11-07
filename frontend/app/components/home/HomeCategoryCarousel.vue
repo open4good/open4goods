@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useDisplay } from 'vuetify'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 interface CategorySlideItem {
   id: string
@@ -16,39 +15,122 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const display = useDisplay()
+const isExternal = (url: string) => /^https?:\/\//i.test(url)
 
-const slidesPerView = computed(() => {
-  if (display.lgAndUp.value) {
-    return 3
-  }
+const scrollerRef = ref<HTMLElement | null>(null)
+const canScrollPrev = ref(false)
+const canScrollNext = ref(false)
 
-  if (display.mdAndUp.value) {
-    return 2
-  }
-
-  return 1
-})
-
-const chunkItems = <T,>(input: readonly T[], size: number) => {
-  if (size <= 0) {
-    return [input.slice()]
-  }
-
-  const chunks: T[][] = []
-  for (let index = 0; index < input.length; index += size) {
-    chunks.push(input.slice(index, index + size))
-  }
-
-  return chunks
+const detachScrollListener = () => {
+  const container = scrollerRef.value
+  container?.removeEventListener('scroll', updateScrollIndicators)
 }
 
-const chunkedItems = computed(() => chunkItems(props.items, slidesPerView.value))
+const attachScrollListener = () => {
+  detachScrollListener()
 
-const shouldShowArrows = computed(() => chunkedItems.value.length > 1)
-const shouldCycle = computed(() => props.items.length > slidesPerView.value)
+  const container = scrollerRef.value
+  if (!container) {
+    return
+  }
 
-const isExternal = (url: string) => /^https?:\/\//i.test(url)
+  container.addEventListener('scroll', updateScrollIndicators, { passive: true })
+}
+
+const updateScrollIndicators = () => {
+  const container = scrollerRef.value
+
+  if (!container) {
+    canScrollPrev.value = false
+    canScrollNext.value = false
+    return
+  }
+
+  const tolerance = 4
+  const { scrollLeft, scrollWidth, clientWidth } = container
+  const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0)
+
+  canScrollPrev.value = scrollLeft > tolerance
+  canScrollNext.value = scrollLeft < maxScrollLeft - tolerance
+}
+
+const getScrollAmount = () => {
+  const container = scrollerRef.value
+
+  if (!container) {
+    return 280
+  }
+
+  return Math.max(container.clientWidth * 0.7, 240)
+}
+
+const scrollToPrevious = () => {
+  const container = scrollerRef.value
+
+  if (!container) {
+    return
+  }
+
+  container.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' })
+}
+
+const scrollToNext = () => {
+  const container = scrollerRef.value
+
+  if (!container) {
+    return
+  }
+
+  container.scrollBy({ left: getScrollAmount(), behavior: 'smooth' })
+}
+
+const handleResize = () => {
+  updateScrollIndicators()
+}
+
+if (import.meta.client) {
+  onMounted(() => {
+    nextTick(() => {
+      attachScrollListener()
+      updateScrollIndicators()
+    })
+
+    window.addEventListener('resize', handleResize, { passive: true })
+  })
+
+  onBeforeUnmount(() => {
+    detachScrollListener()
+    window.removeEventListener('resize', handleResize)
+  })
+}
+
+watch(
+  () => props.items,
+  () => {
+    if (!import.meta.client) {
+      return
+    }
+
+    nextTick(() => {
+      attachScrollListener()
+
+      const container = scrollerRef.value
+      if (container) {
+        const { scrollLeft, scrollWidth, clientWidth } = container
+        const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0)
+
+        if (scrollLeft > maxScrollLeft) {
+          container.scrollTo({ left: maxScrollLeft })
+        }
+      }
+
+      updateScrollIndicators()
+    })
+  },
+  { deep: true },
+)
+
+const shouldShowNavigation = computed(() => props.items.length > 1)
 </script>
 
 <template>
@@ -67,70 +149,78 @@ const isExternal = (url: string) => /^https?:\/\//i.test(url)
     >
       {{ t('home.categories.emptyState') }}
     </v-alert>
-    <v-carousel
+    <nav
       v-else
-      class="home-category-carousel__carousel"
-      :show-arrows="shouldShowArrows"
-      :cycle="shouldCycle"
-      :interval="7000"
-      hide-delimiter-background
-      height="auto"
-      :aria-label="t('home.categories.carouselAriaLabel')"
+      class="home-category-carousel__banner"
+      :class="{ 'home-category-carousel__banner--with-controls': shouldShowNavigation }"
+      :aria-label="t('home.categories.bannerAriaLabel')"
     >
-      <v-carousel-item
-        v-for="(slide, index) in chunkedItems"
-        :key="`category-slide-${index}`"
+      <v-btn
+        v-if="shouldShowNavigation"
+        class="home-category-carousel__nav home-category-carousel__nav--prev"
+        icon="mdi-chevron-left"
+        variant="tonal"
+        size="small"
+        color="primary"
+        :disabled="!canScrollPrev"
+        :aria-label="t('home.categories.scrollPrevious')"
+        @click="scrollToPrevious"
+      />
+
+      <div
+        ref="scrollerRef"
+        class="home-category-carousel__scroller"
+        role="list"
       >
-        <v-row class="home-category-carousel__row" no-gutters>
-          <v-col
-            v-for="category in slide"
-            :key="category.id"
-            cols="12"
-            md="6"
-            lg="4"
+        <div
+          v-for="category in items"
+          :key="category.id"
+          class="home-category-carousel__item"
+          role="listitem"
+        >
+          <NuxtLink :to="category.href" class="home-category-carousel__link">
+            <div class="home-category-carousel__avatar" aria-hidden="true">
+              <v-img
+                v-if="typeof category.image === 'string' && category.image.length > 0"
+                :src="category.image"
+                :alt="''"
+                role="presentation"
+                class="home-category-carousel__image"
+              />
+              <div v-else class="home-category-carousel__placeholder">
+                <v-icon icon="mdi-shape-outline" size="28" />
+              </div>
+            </div>
+            <span class="home-category-carousel__label">{{ category.title }}</span>
+          </NuxtLink>
+
+          <component
+            :is="isExternal(category.impactScoreHref) ? 'a' : 'NuxtLink'"
+            v-if="category.impactScoreHref"
+            class="home-category-carousel__impact-link"
+            :href="isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
+            :to="!isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
+            :target="isExternal(category.impactScoreHref) ? '_blank' : undefined"
+            :rel="isExternal(category.impactScoreHref) ? 'noopener' : undefined"
+            :aria-label="t('home.categories.impactLinkAria', { category: category.title })"
           >
-            <NuxtLink :to="category.href" class="home-category-carousel__link">
-              <v-card
-                class="home-category-carousel__card"
-                variant="elevated"
-                elevation="6"
-              >
-                <div class="home-category-carousel__media">
-                  <v-img
-                    v-if="typeof category.image === 'string' && category.image.length > 0"
-                    :src="category.image"
-                    :alt="category.title"
-                    contain
-                    :aspect-ratio="16 / 10"
-                    class="home-category-carousel__image"
-                  />
-                  <div v-else class="home-category-carousel__icon" aria-hidden="true">
-                    <v-icon icon="mdi-shape-outline" size="56" />
-                  </div>
-                </div>
-                <div class="home-category-carousel__content">
-                  <h3 class="home-category-carousel__title">{{ category.title }}</h3>
-                  <span class="home-category-carousel__cta">
-                    {{ t('home.categories.cta') }}
-                  </span>
-                  <component
-                    :is="isExternal(category.impactScoreHref) ? 'a' : 'NuxtLink'"
-                    v-if="category.impactScoreHref"
-                    class="home-category-carousel__impact-link"
-                    :href="isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
-                    :to="!isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
-                    :target="isExternal(category.impactScoreHref) ? '_blank' : undefined"
-                    :rel="isExternal(category.impactScoreHref) ? 'noopener' : undefined"
-                  >
-                    {{ t('home.categories.impactLink') }}
-                  </component>
-                </div>
-              </v-card>
-            </NuxtLink>
-          </v-col>
-        </v-row>
-      </v-carousel-item>
-    </v-carousel>
+            <v-icon icon="mdi-leaf-circle" size="20" />
+          </component>
+        </div>
+      </div>
+
+      <v-btn
+        v-if="shouldShowNavigation"
+        class="home-category-carousel__nav home-category-carousel__nav--next"
+        icon="mdi-chevron-right"
+        variant="tonal"
+        size="small"
+        color="primary"
+        :disabled="!canScrollNext"
+        :aria-label="t('home.categories.scrollNext')"
+        @click="scrollToNext"
+      />
+    </nav>
   </div>
 </template>
 
@@ -139,88 +229,147 @@ const isExternal = (url: string) => /^https?:\/\//i.test(url)
   position: relative
 
   &__skeleton
-    border-radius: 1.5rem
+    border-radius: clamp(1.5rem, 4vw, 2rem)
     overflow: hidden
 
   &__empty
-    border-radius: 1.5rem
-
-  &__carousel
     border-radius: clamp(1.5rem, 4vw, 2rem)
-    overflow: hidden
-    background: transparent
 
-  &__row
-    gap: 1.5rem
-    padding: clamp(1.5rem, 4vw, 2rem)
+  &__banner
+    width: 100%
+    display: grid
+    grid-template-columns: minmax(0, 1fr)
+    align-items: center
+    gap: clamp(0.5rem, 2vw, 1rem)
+
+  &__banner--with-controls
+    grid-template-columns: auto 1fr auto
+
+  &__nav
+    border-radius: 999px
+    box-shadow: 0 12px 20px rgba(var(--v-theme-shadow-primary-600), 0.12)
+    backdrop-filter: blur(8px)
+
+    &--prev,
+    &--next
+      min-width: 2.5rem
+      min-height: 2.5rem
+
+    &:disabled
+      opacity: 0.4
+      box-shadow: none
+
+  &__scroller
+    position: relative
+    display: flex
+    align-items: stretch
+    gap: clamp(0.75rem, 2vw, 1.25rem)
+    overflow-x: auto
+    overflow-y: hidden
+    padding: clamp(0.25rem, 1vw, 0.5rem) clamp(0.25rem, 1vw, 0.5rem)
+    scroll-snap-type: x proximity
+    scrollbar-width: none
+    -webkit-overflow-scrolling: touch
+    mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%)
+
+    &::-webkit-scrollbar
+      display: none
+
+  &__item
+    display: inline-flex
+    align-items: center
+    gap: clamp(0.5rem, 2vw, 0.75rem)
+    scroll-snap-align: center
 
   &__link
+    display: inline-flex
+    align-items: center
+    gap: clamp(0.5rem, 2vw, 0.75rem)
+    padding: clamp(0.5rem, 1.8vw, 0.75rem) clamp(0.85rem, 2.8vw, 1.25rem)
+    border-radius: 999px
     text-decoration: none
-    display: block
-    height: 100%
-
-  &__card
-    height: 100%
-    display: flex
-    flex-direction: column
-    border-radius: clamp(1.25rem, 3vw, 1.75rem)
     background: rgba(var(--v-theme-surface-default), 0.92)
-    transition: transform 0.25s ease, box-shadow 0.25s ease
+    box-shadow: 0 12px 22px rgba(var(--v-theme-shadow-primary-600), 0.14)
+    color: rgb(var(--v-theme-text-neutral-strong))
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease
 
-    &:hover
-      transform: translateY(-6px)
-      box-shadow: 0 24px 36px rgba(var(--v-theme-shadow-primary-600), 0.18)
+    &:hover,
+    &:focus-visible
+      transform: translateY(-2px)
+      box-shadow: 0 18px 28px rgba(var(--v-theme-shadow-primary-600), 0.18)
+      background: rgba(var(--v-theme-surface-default), 1)
 
-  &__media
-    position: relative
-    overflow: hidden
-    border-radius: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 1.75rem) 0 0
-    display: flex
+  &__avatar
+    width: clamp(2.5rem, 6vw, 3rem)
+    height: clamp(2.5rem, 6vw, 3rem)
+    border-radius: 50%
+    background: rgba(var(--v-theme-surface-primary-080), 0.9)
+    display: inline-flex
     align-items: center
     justify-content: center
-    background: rgba(var(--v-theme-surface-primary-050), 0.85)
-    aspect-ratio: 16 / 10
-    padding: clamp(0.75rem, 2vw, 1.25rem)
+    overflow: hidden
+    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2)
 
   &__image
     width: 100%
     height: 100%
-    object-fit: contain
+    object-fit: cover
 
-  &__icon
+  &__placeholder
     display: flex
     align-items: center
     justify-content: center
     width: 100%
     height: 100%
-    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.15), rgba(var(--v-theme-hero-gradient-end), 0.15))
-    color: rgba(var(--v-theme-hero-gradient-start), 0.95)
+    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.18), rgba(var(--v-theme-hero-gradient-end), 0.16))
+    color: rgba(var(--v-theme-hero-gradient-start), 0.92)
 
-  &__content
-    display: flex
-    flex-direction: column
-    gap: 0.5rem
-    padding: clamp(1.25rem, 3vw, 1.75rem)
-
-  &__title
-    margin: 0
-    font-size: clamp(1.15rem, 2vw, 1.35rem)
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__cta
-    display: inline-flex
-    align-items: center
-    gap: 0.35rem
+  &__label
     font-weight: 600
-    color: rgba(var(--v-theme-hero-gradient-end), 0.95)
+    font-size: clamp(0.95rem, 2.2vw, 1.05rem)
+    white-space: nowrap
 
   &__impact-link
-    margin-top: 0.25rem
-    font-weight: 500
-    font-size: 0.95rem
-    color: rgba(var(--v-theme-hero-gradient-start), 0.9)
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    width: clamp(2.25rem, 5vw, 2.5rem)
+    height: clamp(2.25rem, 5vw, 2.5rem)
+    border-radius: 50%
+    background: rgba(var(--v-theme-hero-gradient-end), 0.14)
+    color: rgba(var(--v-theme-hero-gradient-end), 0.95)
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease
     text-decoration: none
 
-    &:hover
-      text-decoration: underline
+    &:hover,
+    &:focus-visible
+      background: rgba(var(--v-theme-hero-gradient-end), 0.22)
+      transform: translateY(-1px)
+      box-shadow: 0 12px 18px rgba(var(--v-theme-shadow-primary-600), 0.18)
+
+  &__impact-link:focus-visible
+    outline: none
+    box-shadow: 0 0 0 2px rgba(var(--v-theme-hero-gradient-end), 0.35)
+
+@media (max-width: 599px)
+  .home-category-carousel
+    &__banner
+      grid-template-columns: 1fr
+      gap: clamp(0.5rem, 5vw, 0.75rem)
+
+    &__banner--with-controls
+      grid-template-columns: 1fr
+
+    &__nav
+      order: 3
+      justify-self: center
+      width: clamp(3rem, 22vw, 3.5rem)
+      height: clamp(3rem, 22vw, 3.5rem)
+
+    &__scroller
+      order: 2
+      mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)
+
+    &__item
+      scroll-snap-align: start
 </style>
