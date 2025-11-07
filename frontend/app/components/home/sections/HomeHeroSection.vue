@@ -105,9 +105,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                 <video
                   class="home-hero__video"
                   :poster="heroVideoPoster"
-                  autoplay
                   muted
-                  loop
+                  autoplay
                   playsinline
                   preload="metadata"
                 >
