@@ -134,9 +134,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero
   position: relative
   isolation: isolate
-  --hero-cat-h: var(--cat-h, clamp(200px, 45vh, 420px))
+  --hero-cat-h: var(--cat-h, clamp(240px, 32vh, 360px))
   --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 3)
-  --hero-cat-overlap-base: calc(var(--hero-cat-h) * 2 / 3)
+  --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
   --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
   --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
   padding-block-start: clamp(4rem, 12vw, 8rem)
@@ -244,6 +244,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   width: 100%
 
 .home-hero__categories-inner
+  --cat-h: clamp(240px, 32vh, 360px)
   position: relative
   width: min(100%, 1200px)
   margin-inline: auto
@@ -260,6 +261,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   align-items: center
   justify-content: center
   pointer-events: auto
+  min-height: var(--cat-h)
 
 .home-hero__categories-inner :deep(.home-category-carousel)
   width: 100%
@@ -291,6 +293,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     transform: scale(1.15)
 
   .home-hero__categories-inner
-    min-height: clamp(220px, 52vh, var(--hero-cat-h))
+    --cat-h: clamp(220px, 52vh, 340px)
     padding: clamp(0.5rem, 5vw, 1rem) clamp(0.75rem, 5vw, 1.5rem)
 </style>
