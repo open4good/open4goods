@@ -234,17 +234,17 @@
                   </template>
                   <template v-else>
                     <!-- eslint-disable vue/no-v-html -->
-                    <ul
-                      v-if="Array.isArray(row.values[columnIndex]) && row.values[columnIndex]?.length"
-                      class="compare-grid__list compare-grid__list--pros-cons"
-                      role="list"
-                    >
-                      <li
-                        v-for="item in row.values[columnIndex] as string[]"
-                        :key="item"
-                        class="compare-grid__list-item"
-                        role="listitem"
-                        v-html="item"
+                      <ul
+                        v-if="hasListValues(row.values[columnIndex])"
+                        class="compare-grid__list compare-grid__list--pros-cons"
+                        role="list"
+                      >
+                        <li
+                          v-for="item in getListValues(row.values[columnIndex])"
+                          :key="item"
+                          class="compare-grid__list-item"
+                          role="listitem"
+                          v-html="item"
                       />
                     </ul>
                     <!-- eslint-enable vue/no-v-html -->
@@ -1011,6 +1011,14 @@ const hasMeaningfulCellValue = (value: unknown): boolean => {
   }
 
   return true
+}
+
+const hasListValues = (value: TextualRow['values'][number]): boolean => {
+  return Array.isArray(value) && value.length > 0
+}
+
+const getListValues = (value: TextualRow['values'][number]): string[] => {
+  return Array.isArray(value) ? value : []
 }
 
 const computeAvailabilityFromValues = (values: unknown[]): boolean[] => {
