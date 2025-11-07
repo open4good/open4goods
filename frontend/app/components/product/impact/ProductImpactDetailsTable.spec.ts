@@ -17,6 +17,7 @@ describe('ProductImpactDetailsTable', () => {
             tableHeaders: {
               score: 'Indicator',
               value: 'Value',
+              coefficient: 'Coefficient',
             },
             noDetailsAvailable: 'No details available',
             valueOutOf: '{value} / {max}',
@@ -28,7 +29,7 @@ describe('ProductImpactDetailsTable', () => {
 
   const scores: ScoreView[] = [
     { id: 'ECOSCORE', label: 'Eco', relativeValue: 4.5 },
-    { id: 'CO2', label: 'CO2', relativeValue: 3.1, value: 2.8, ranking: 12 },
+    { id: 'CO2', label: 'CO2', relativeValue: 3.1, value: 2.8, ranking: 12, coefficient: 0.3 },
   ]
 
   it('renders details without the ranking column and hides ecoscore', () => {
@@ -37,10 +38,43 @@ describe('ProductImpactDetailsTable', () => {
       global: {
         plugins: [i18n],
         stubs: {
-          'v-table': defineComponent({
-            name: 'VTableStub',
-            setup(_, { slots }) {
-              return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+          'v-data-table': defineComponent({
+            name: 'VDataTableStub',
+            props: ['headers', 'items'],
+            setup(props, { slots }) {
+              return () =>
+                h('table', { class: 'v-data-table-stub' }, [
+                  h(
+                    'thead',
+                    h(
+                      'tr',
+                      (props.headers as Array<{ title: string; key: string }>)?.map((header) =>
+                        h('th', header.title),
+                      ) ?? [],
+                    ),
+                  ),
+                  h(
+                    'tbody',
+                    (props.items as Array<Record<string, unknown>>)?.map((item) =>
+                      h('tr', [
+                        h(
+                          'td',
+                          slots['item.label']?.({ value: item.label, item }) ?? String(item.label ?? ''),
+                        ),
+                        h(
+                          'td',
+                          slots['item.displayValue']?.({ value: item.displayValue, item })
+                            ?? String(item.displayValue ?? ''),
+                        ),
+                        h(
+                          'td',
+                          slots['item.coefficient']?.({ value: item.coefficient, item })
+                            ?? String(item.coefficient ?? ''),
+                        ),
+                      ]),
+                    ) ?? [],
+                  ),
+                ])
             },
           }),
           ProductImpactSubscoreRating: defineComponent({
@@ -48,6 +82,13 @@ describe('ProductImpactDetailsTable', () => {
             props: ['score', 'max', 'size', 'showValue'],
             setup(props) {
               return () => h('div', { class: 'subscore-rating-stub' }, `rating:${props.score}`)
+            },
+          }),
+          ImpactCoefficientBadge: defineComponent({
+            name: 'ImpactCoefficientBadgeStub',
+            props: ['value'],
+            setup(props) {
+              return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
             },
           }),
         },
@@ -57,13 +98,15 @@ describe('ProductImpactDetailsTable', () => {
     const headers = wrapper.findAll('th').map((node) => node.text())
     expect(headers).toContain('Indicator')
     expect(headers).toContain('Value')
-    expect(headers).not.toContain('Rank')
+    expect(headers).toContain('Coefficient')
 
     const rows = wrapper.findAll('tbody tr')
     expect(rows).toHaveLength(1)
-    expect(rows[0]?.text()).toContain('CO2')
-    expect(rows[0]?.text()).toContain('rating:2.8')
-    expect(rows[0]?.text()).toContain('2.8 / 5')
+    const rowText = rows[0]?.text() ?? ''
+    expect(rowText).toContain('CO2')
+    expect(rowText).toContain('rating:3.1')
+    expect(rowText).toContain('3.1 / 5')
+    expect(rowText).toContain('coefficient:0.3')
     expect(wrapper.text()).not.toContain('Eco')
   })
 
@@ -73,10 +116,11 @@ describe('ProductImpactDetailsTable', () => {
       global: {
         plugins: [i18n],
         stubs: {
-          'v-table': defineComponent({
-            name: 'VTableStub',
+          'v-data-table': defineComponent({
+            name: 'VDataTableStub',
+            props: ['headers', 'items'],
             setup(_, { slots }) {
-              return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+              return () => h('table', { class: 'v-data-table-stub' }, slots.default?.())
             },
           }),
           ProductImpactSubscoreRating: defineComponent({
@@ -84,6 +128,13 @@ describe('ProductImpactDetailsTable', () => {
             props: ['score', 'max', 'size', 'showValue'],
             setup(props) {
               return () => h('div', { class: 'subscore-rating-stub' }, `rating:${props.score}`)
+            },
+          }),
+          ImpactCoefficientBadge: defineComponent({
+            name: 'ImpactCoefficientBadgeStub',
+            props: ['value'],
+            setup(props) {
+              return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
             },
           }),
         },

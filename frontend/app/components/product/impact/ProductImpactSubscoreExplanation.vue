@@ -41,13 +41,6 @@ const infoItems = computed(() => {
     })
   }
 
-  if (props.score.percent != null && Number.isFinite(props.score.percent)) {
-    items.push({
-      label: t('product.impact.percentile'),
-      value: `${n(props.score.percent, { maximumFractionDigits: 0, minimumFractionDigits: 0 })}%`,
-    })
-  }
-
   if (props.score.ranking != null && Number.isFinite(Number(props.score.ranking))) {
     items.push({
       label: t('product.impact.tableHeaders.ranking'),
