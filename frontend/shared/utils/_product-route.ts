@@ -1,5 +1,5 @@
 export interface ProductRouteMatch {
-  categorySlug: string
+  categorySlug: string | null
   gtin: string
   slug: string
 }
@@ -8,17 +8,27 @@ const CATEGORY_SLUG_PATTERN = /^[a-z]+(?:-[a-z]+)*$/
 const PRODUCT_SEGMENT_PATTERN = /^(?<gtin>\d{6,})-(?<slug>[a-z0-9-]+)$/i
 
 export const matchProductRouteFromSegments = (
-  segments: readonly string[]
+  segments: readonly string[],
 ): ProductRouteMatch | null => {
-  if (segments.length !== 2) {
+  if (segments.length === 0 || segments.length > 2) {
     return null
   }
 
-  const [rawCategorySlug, rawProductSegment] = segments
-  const categorySlug = rawCategorySlug?.trim().toLowerCase()
+  let rawCategorySlug: string | undefined
+  let rawProductSegment: string | undefined
 
-  if (!categorySlug || !CATEGORY_SLUG_PATTERN.test(categorySlug)) {
-    return null
+  if (segments.length === 1) {
+    ;[rawProductSegment] = segments
+  } else {
+    ;[rawCategorySlug, rawProductSegment] = segments
+  }
+
+  const categorySlug = rawCategorySlug?.trim().toLowerCase() ?? null
+
+  if (rawCategorySlug != null) {
+    if (!categorySlug || !CATEGORY_SLUG_PATTERN.test(categorySlug)) {
+      return null
+    }
   }
 
   const productMatch = rawProductSegment?.trim().match(PRODUCT_SEGMENT_PATTERN)
