@@ -1656,6 +1656,7 @@
         "selected": "Comparé"
       },
       "gtin": "Code GTIN",
+      "gtinCountryLabel": "Pays d'enregistrement du GTIN",
       "gtinTooltip": "Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication.",
       "mediaType": {
         "image": "l’image",
