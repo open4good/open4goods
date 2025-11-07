@@ -5,9 +5,9 @@ export interface ProductRouteMatch {
 }
 
 const CATEGORY_SLUG_PATTERN = /^[a-z]+(?:-[a-z]+)*$/
-const PRODUCT_SEGMENT_PATTERN = /^(?<gtin>\d{6,})-(?<slug>[a-z0-9-]+)$/i
+const PRODUCT_SEGMENT_PATTERN = /^(?<gtin>\d{6,})-(?<slug>[\p{L}0-9-]+)$/u
 const GTIN_ONLY_PATTERN = /^\d{6,}$/
-const SLUG_ONLY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i
+const SLUG_ONLY_PATTERN = /^[\p{L}0-9]+(?:-[\p{L}0-9]+)*$/u
 
 const normaliseCategorySlug = (value: string | undefined): string | null => {
   if (value == null) {

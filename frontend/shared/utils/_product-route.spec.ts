@@ -59,6 +59,28 @@ describe('_product-route', () => {
       })
     })
 
+    it('accepts unicode characters in the slug portion', () => {
+      expect(
+        matchProductRouteFromSegments(['1234567890123-Éco-Produit']),
+      ).toEqual({
+        categorySlug: null,
+        gtin: '1234567890123',
+        slug: 'éco-produit',
+      })
+
+      expect(
+        matchProductRouteFromSegments([
+          'maison-jardin',
+          '1234567890123',
+          'Produit-Éco',
+        ]),
+      ).toEqual({
+        categorySlug: 'maison-jardin',
+        gtin: '1234567890123',
+        slug: 'produit-éco',
+      })
+    })
+
     it('normalises category slug casing', () => {
       const match = matchProductRouteFromSegments([
         'Beaute-Soins',
