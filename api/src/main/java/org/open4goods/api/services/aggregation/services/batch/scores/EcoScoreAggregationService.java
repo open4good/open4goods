@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
@@ -30,16 +31,16 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
-		
+
 		try {
 
 			if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0 ) {
 				// Compute the ecoscore from existing scores
 				Double score = generateEcoScore(data.getScores(),vConf);
-				
+
 				// Processing cardinality
 				incrementCardinality(ECOSCORE_SCORENAME,score);
-				
+
 				// Saving the actual score in the product, it will be relativized after this batch (see super().done())
 				Score s = new Score(ECOSCORE_SCORENAME, score);
 				data.getScores().put(s.getName(),s);
@@ -54,17 +55,17 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 	private Double generateEcoScore(Map<String, Score> scores, VerticalConfig vConf) throws ValidationException {
-		
-		
+
+
 		double ecoscoreVal = 0.0;
 		for (String config :  vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
 			Score score = scores.get(config);
-			
+
 			if (null == score) {
 				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
-			} 			
-			
-		
+			}
+
+
 			// Taking on the relativ
 			ecoscoreVal += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
 		}
@@ -77,6 +78,14 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	public void done(Collection<Product> datas, VerticalConfig vConf) {
 
 		if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0) {
+
+			// FOR ECOSCORE, WE REMOVE THE RELATIV NOTATION, THAT IS A NON SENSE DUE TO THE PONDERATION SYSTEL
+     		// IT WILL AVOIDES TONS OF MISTAKES ON UI / CLIENT SIDE
+
+			for (Product  p : datas) {
+				Cardinality abs = p.ecoscore().getAbsolute();
+				p.ecoscore().setRelativ(abs);
+			}
 
 			super.done(datas, vConf);
 
@@ -100,12 +109,12 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 					}
 
 				}
-	
+
 		} else {
 			dedicatedLogger.error("No ImpactScore defined for vertical",vConf);
 		}
-		
-		
+
+
 	}
 
 
