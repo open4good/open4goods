@@ -373,6 +373,7 @@ import {
 } from '~/utils/_subset-to-filters'
 import type { CategorySubsetClause } from '~/types/category-subset'
 import { resolveFilterFieldTitle, resolveSortFieldTitle } from '~/utils/_field-localization'
+import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const route = useRoute()
 const router = useRouter()
@@ -380,7 +381,7 @@ const { locale, t } = useI18n()
 const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
 
-const isAdmin = computed(() => isLoggedIn.value && roles.value.includes('admin'))
+const isAdmin = computed(() => isLoggedIn.value && hasAdminAccess(roles.value))
 const ADMIN_EXCLUDED_FIELD = 'excluded'
 
 const adminFilterFields = computed<FieldMetadataDto[]>(() => {
