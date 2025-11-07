@@ -243,12 +243,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 .home-hero__categories-container
   width: 100%
-  padding-inline: clamp(1rem, 5vw, 3rem)
 
 .home-hero__categories-inner
   position: relative
   width: min(100%, 1200px)
-  min-height: var(--hero-cat-h)
   margin-inline: auto
   padding: clamp(0.75rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2.5rem)
   border-radius: clamp(1.75rem, 4vw, 2.25rem)

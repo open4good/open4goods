@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.open4goods.model.helper.IdHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -33,6 +36,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class EprelProduct implements Serializable
 {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(EprelProduct.class);
+
+
     @Serial
     private static final long serialVersionUID = -2835057113980761650L;
 
@@ -750,7 +757,11 @@ public class EprelProduct implements Serializable
     public void setGtinIdentifier(String gtinIdentifier)
     {
         this.gtinIdentifier = gtinIdentifier;
-        this.numericGtin = Long.valueOf(gtinIdentifier);
+        try {
+			this.numericGtin = Long.valueOf(gtinIdentifier);
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Non numeric gtinIdentifier {} for {} ",gtinIdentifier,this);
+		}
     }
 
     public Long getNumericGtin()
