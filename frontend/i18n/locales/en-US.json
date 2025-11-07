@@ -105,6 +105,10 @@
       "fallbackTitle": "Category",
       "fallbackDescription": "Explore responsible products in this universe.",
       "carouselAriaLabel": "Popular categories carousel",
+      "bannerAriaLabel": "Highlighted categories navigation",
+      "scrollPrevious": "Scroll to previous categories",
+      "scrollNext": "Scroll to next categories",
+      "impactLinkAria": "Open Impact Score insights for {category}",
       "emptyState": "Categories will appear here as soon as they're available.",
       "items": {
         "electronics": {

@@ -124,7 +124,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     <div class="home-hero__categories">
       <v-container fluid class="home-hero__categories-container">
         <div class="home-hero__categories-inner">
-          <h2 class="home-hero__categories-title">{{ t('home.categories.title') }}</h2>
           <HomeCategoryCarousel :items="categoryItems" :loading="categoriesLoading" />
         </div>
       </v-container>
@@ -228,28 +227,45 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 .home-hero__categories
   position: relative
-  margin-top: clamp(-7rem, -12vw, -8rem)
   z-index: 3
+  margin-top: clamp(-5.25rem, -12vw, -6.25rem)
 
 .home-hero__categories-container
   padding-inline: clamp(1rem, 5vw, 4rem)
 
 .home-hero__categories-inner
+  position: relative
   max-width: 1180px
   margin: 0 auto
-  padding: clamp(1.5rem, 4vw, 2.5rem)
-  border-radius: clamp(1.75rem, 4vw, 2.5rem)
-  background: rgba(var(--v-theme-surface-default), 0.98)
-  box-shadow: 0 26px 42px rgba(var(--v-theme-shadow-primary-600), 0.18)
+  padding: clamp(0.75rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2.5rem)
+  border-radius: clamp(1.75rem, 4vw, 2.25rem)
+  background: linear-gradient(
+    180deg,
+    rgba(var(--v-theme-hero-gradient-start), 0.2) 0%,
+    rgba(var(--v-theme-surface-default), 0.96) 60%,
+    rgb(var(--v-theme-surface-muted)) 100%
+  )
+  box-shadow: 0 22px 38px rgba(var(--v-theme-shadow-primary-600), 0.16)
   display: flex
-  flex-direction: column
-  gap: clamp(1rem, 3vw, 1.5rem)
+  align-items: center
 
-.home-hero__categories-title
-  margin: 0
-  text-align: center
-  font-size: clamp(1.5rem, 3vw, 2rem)
-  font-weight: 600
+.home-hero__categories-inner::before
+  content: ''
+  position: absolute
+  inset: 0
+  border-radius: inherit
+  background: linear-gradient(
+    120deg,
+    rgba(var(--v-theme-hero-gradient-start), 0.1) 0%,
+    rgba(var(--v-theme-hero-gradient-end), 0.12) 45%,
+    rgba(var(--v-theme-surface-default), 0) 100%
+  )
+  pointer-events: none
+  mix-blend-mode: screen
+
+.home-hero__categories-inner > *
+  position: relative
+  z-index: 1
 
 @media (max-width: 959px)
   .home-hero
@@ -257,4 +273,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
   .home-hero__video
     transform: scale(1.15)
+
+  .home-hero__categories
+    margin-top: clamp(-4.5rem, -20vw, -5.5rem)
+
+  .home-hero__categories-inner
+    padding: clamp(0.5rem, 5vw, 1rem) clamp(0.75rem, 5vw, 1.5rem)
 </style>
