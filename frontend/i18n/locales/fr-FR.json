@@ -1639,6 +1639,22 @@
         "untitledGroup": "Détails complémentaires",
         "empty": "Aucune caractéristique détaillée n'est disponible pour ce produit pour le moment.",
         "noResults": "Aucune caractéristique ne correspond à votre recherche."
+      },
+      "sourcing": {
+        "bestValue": "Valeur retenue",
+        "description": "Détails fournis par nos sources de données fiables.",
+        "columns": {
+          "source": "Source",
+          "value": "Valeur",
+          "language": "Langue",
+          "taxonomy": "Taxonomie"
+        },
+        "empty": "Aucune information de sourcing disponible pour le moment.",
+        "status": {
+          "conflicts": "Conflits détectés",
+          "noConflicts": "Aucun conflit détecté"
+        },
+        "tooltipAriaLabel": "Afficher les détails de sourcing"
       }
     },
     "docs": {

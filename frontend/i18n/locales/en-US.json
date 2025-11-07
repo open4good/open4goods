@@ -1639,6 +1639,22 @@
         "untitledGroup": "Additional details",
         "empty": "No detailed specifications are available for this product yet.",
         "noResults": "No specifications match your search."
+      },
+      "sourcing": {
+        "bestValue": "Best value",
+        "description": "Details provided by our trusted data sources.",
+        "columns": {
+          "source": "Source",
+          "value": "Value",
+          "language": "Language",
+          "taxonomy": "Taxonomy"
+        },
+        "empty": "No sourcing information available yet.",
+        "status": {
+          "conflicts": "Conflicts detected",
+          "noConflicts": "No conflicts detected"
+        },
+        "tooltipAriaLabel": "View sourcing details"
       }
     },
     "docs": {
