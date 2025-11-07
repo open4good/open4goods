@@ -394,6 +394,12 @@
       "showMoreImpact": "Show more impact filters",
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",
+      "options": {
+        "excluded": {
+          "true": "Excluded products",
+          "false": "Visible products"
+        }
+      },
       "toggle": {
         "hide": "Hide filters column",
         "show": "Show filters column"
@@ -403,6 +409,16 @@
         "description": "Understand how we evaluate each product's environmental footprint and the indicators we monitor.",
         "cta": "Explore the methodology",
         "ariaLabel": "Open the Eco-score guide"
+      }
+    },
+    "admin": {
+      "title": "Admin filters",
+      "helper": "Restricted tools for Nudger teammates. Inspect excluded catalog entries here.",
+      "filters": {
+        "excluded": {
+          "title": "Product visibility",
+          "helper": "Toggle results excluded from the public catalog."
+        }
       }
     },
     "hero": {

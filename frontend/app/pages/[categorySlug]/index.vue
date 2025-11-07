@@ -85,6 +85,8 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
+              :show-admin-panel="showAdminFilters"
+              :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
@@ -118,6 +120,8 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
+              :show-admin-panel="showAdminFilters"
+              :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
               @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
               @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
@@ -354,6 +358,7 @@ import CategoryProductListView from '~/components/category/products/CategoryProd
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import { CATEGORY_DEFAULT_VIEW_MODE, CATEGORY_PAGE_SIZES } from '~/constants/category'
 import { useCategories } from '~/composables/categories/useCategories'
+import { useAuth } from '~/composables/useAuth'
 import {
   buildCategoryHash,
   deserializeCategoryHashState,
@@ -373,6 +378,27 @@ const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
 const requestURL = useRequestURL()
+const { isLoggedIn, roles } = useAuth()
+
+const isAdmin = computed(() => isLoggedIn.value && roles.value.includes('admin'))
+const ADMIN_EXCLUDED_FIELD = 'excluded'
+
+const adminFilterFields = computed<FieldMetadataDto[]>(() => {
+  if (!isAdmin.value) {
+    return []
+  }
+
+  return [
+    {
+      mapping: ADMIN_EXCLUDED_FIELD,
+      title: t('category.admin.filters.excluded.title'),
+      description: t('category.admin.filters.excluded.helper'),
+      valueType: 'text',
+    },
+  ]
+})
+
+const showAdminFilters = computed(() => adminFilterFields.value.length > 0)
 
 const MOBILE_USER_AGENT_PATTERN =
   /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
@@ -914,13 +940,18 @@ const applyHashPayload = (payload: CategoryHashState | null) => {
   const nextFilters: FilterRequestDto =
     payload?.filters?.filters?.length ? payload.filters : {}
 
-  if (!areFiltersEqual(manualFilters.value, nextFilters)) {
-    manualFilters.value = nextFilters.filters?.length
-      ? {
-          ...nextFilters,
-          filters: nextFilters.filters.map((filter) => ({ ...filter })),
-        }
-      : {}
+  const normalizedFilters = nextFilters.filters?.length
+    ? nextFilters.filters
+        .map((filter) => ({ ...filter }))
+        .filter((filter) => isAdmin.value || filter.field !== ADMIN_EXCLUDED_FIELD)
+    : []
+
+  const filtersPayload: FilterRequestDto = normalizedFilters.length
+    ? { filters: normalizedFilters }
+    : {}
+
+  if (!areFiltersEqual(manualFilters.value, filtersPayload)) {
+    manualFilters.value = filtersPayload
   }
 
   const nextActiveSubsets = normalizeActiveSubsetIds(payload?.activeSubsets ?? [])
@@ -1282,15 +1313,17 @@ const hasDocumentation = computed(() => {
 })
 
 const tableFields = computed<FieldMetadataDto[]>(() => {
-  if (!filterOptions.value) {
-    return []
+  const fields: FieldMetadataDto[] = [
+    ...(filterOptions.value?.global ?? []),
+    ...(filterOptions.value?.impact ?? []),
+    ...(filterOptions.value?.technical ?? []),
+  ]
+
+  if (adminFilterFields.value.length) {
+    fields.push(...adminFilterFields.value)
   }
 
-  return [
-    ...(filterOptions.value.global ?? []),
-    ...(filterOptions.value.impact ?? []),
-    ...(filterOptions.value.technical ?? []),
-  ]
+  return fields
 })
 
 const filterFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
@@ -1367,15 +1400,13 @@ const hasHydrated = ref(false)
 
 const buildAggregationRequest = (
   options: ProductFieldOptionsResponse | null,
+  extraFields: FieldMetadataDto[] = [],
 ): AggregationRequestDto | undefined => {
-  if (!options) {
-    return undefined
-  }
-
   const fields = [
-    ...(options.global ?? []),
-    ...(options.impact ?? []),
-    ...(options.technical ?? []),
+    ...(options?.global ?? []),
+    ...(options?.impact ?? []),
+    ...(options?.technical ?? []),
+    ...extraFields,
   ]
 
   const seen = new Set<string>()
@@ -1426,7 +1457,7 @@ const fetchProducts = async () => {
         query: searchTerm.value || undefined,
         sort: sortRequest.value,
         filters: combinedFilters.value,
-        aggs: buildAggregationRequest(filterOptions.value),
+        aggs: buildAggregationRequest(filterOptions.value, adminFilterFields.value),
       },
     })
 
@@ -1511,6 +1542,27 @@ watch(
   (value) => {
     if (value && hasHydrated.value) {
       fetchProducts()
+    }
+  },
+)
+
+watch(
+  isAdmin,
+  (value) => {
+    if (!value) {
+      const existing = manualFilters.value.filters ?? []
+      const filtered = existing.filter((filter) => filter.field !== ADMIN_EXCLUDED_FIELD)
+
+      if (filtered.length !== existing.length) {
+        manualFilters.value = filtered.length ? { filters: filtered } : {}
+      }
+
+      return
+    }
+
+    if (hasHydrated.value) {
+      pageNumber.value = 0
+      debouncedFetch()
     }
   },
 )

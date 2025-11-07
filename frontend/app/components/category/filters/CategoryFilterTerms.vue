@@ -221,7 +221,23 @@ const onCheckboxChange = (term: string | undefined, selected: boolean | null) =>
   )
 }
 
-const formatOptionLabel = (key?: string) => key ?? t('category.filters.missingLabel')
+const formatOptionLabel = (key?: string) => {
+  if (!key) {
+    return t('category.filters.missingLabel')
+  }
+
+  const mapping = props.field.mapping
+  if (mapping) {
+    const translationKey = `category.filters.options.${mapping}.${key}`
+    const translated = t(translationKey)
+
+    if (translated && translated !== translationKey) {
+      return translated
+    }
+  }
+
+  return key
+}
 </script>
 
 <style scoped lang="sass">
