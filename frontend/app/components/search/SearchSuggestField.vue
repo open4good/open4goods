@@ -10,6 +10,7 @@
     :menu-props="menuProps"
     :hide-no-data="!showEmptyState"
     :no-data-text="''"
+    menu-icon=""
     prepend-inner-icon="mdi-magnify"
     variant="solo"
     density="comfortable"
