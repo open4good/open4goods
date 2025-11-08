@@ -27,7 +27,7 @@
     "@mdi/font": "^7.4.47",
     "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "2.1.0",
-    "@nuxt/image": "1.11.0",
+    "@nuxt/image": "2.0.0",
     "@pinia/nuxt": "^0.11.2",
     "@unhead/vue": "^2.0.14",
     "@vuetify/mcp": "^0.2.0",
