@@ -1,9 +1,12 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, reactive } from 'vue'
 import ProductAttributeSourcingLabel from './ProductAttributeSourcingLabel.vue'
-import type { ProductAttributeSourceDto } from '~~/shared/api-client'
+import type {
+  ProductAttributeSourceDto,
+  ProductSourcedAttributeDto,
+} from '~~/shared/api-client'
 
 const VTooltipStub = defineComponent({
   name: 'VTooltipStub',
@@ -183,5 +186,33 @@ describe('ProductAttributeSourcingLabel', () => {
     const wrapper = mountComponent(sourcing, 'Argent', { enableTooltip: false })
     expect(wrapper.find('.v-btn-stub').exists()).toBe(false)
     expect(wrapper.text()).toContain('Argent')
+  })
+
+  it('renders sources when provided through a proxied Set', () => {
+    const reactiveSources = reactive(
+      new Set<ProductSourcedAttributeDto>([
+        {
+          datasourceName: 'icecat.biz',
+          value: '9',
+          language: null,
+          icecatTaxonomyId: 3566,
+        },
+      ]),
+    )
+
+    const sourcing: ProductAttributeSourceDto = {
+      bestValue: '9',
+      conflicts: false,
+      sources: reactiveSources as unknown as Set<ProductSourcedAttributeDto>,
+    }
+
+    const wrapper = mountComponent(sourcing, '9')
+
+    const rows = wrapper.findAll('.v-table-stub tbody tr')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].text()).toContain('icecat.biz')
+
+    const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
+    expect(countLabel.text()).toContain('1 source')
   })
 })
