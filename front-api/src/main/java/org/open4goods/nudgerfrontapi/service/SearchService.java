@@ -253,6 +253,8 @@ public class SearchService {
         SearchHits<Product> productHits = executeSuggestProductSearch(sanitizedQuery, scriptTokens);
         List<ProductSuggestHit> productMatches = mapSuggestHits(productHits);
 
+
+        LOGGER.info("Suggest for {} : {} categories match, {} product matched", query, categoryMatches.size(), productMatches.size());
         return new SuggestResult(categoryMatches, productMatches);
     }
 
