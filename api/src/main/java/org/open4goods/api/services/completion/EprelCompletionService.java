@@ -57,8 +57,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
 		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
 		if (null != lastProcessed &&  REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed ) {
-			// TODO : return false
-			return true;
+			return false;
 		} else {
 			return true;
 		}
@@ -94,8 +93,10 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 		if (null == results || results.size() == 0) {
 			logger.warn("No EPREL results when completing {}-{}", data.brand(), data.model());
+			return;
 		} else if (results.size() > 1) {
 			logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
+			return;
 		} else {
 			logger.warn("Completing product {} with EPREL datas", data);
 

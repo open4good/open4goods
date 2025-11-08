@@ -164,7 +164,7 @@ public class EprelSearchService
             }
         }
 
-        LOGGER.info("No eprel match for GTIN : {} , models : {}", gtin, candidates);
+        LOGGER.warn("No eprel match for GTIN : {} , models : {}", gtin, candidates);
         return List.of();
     }
 

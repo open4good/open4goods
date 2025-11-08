@@ -26,6 +26,9 @@ eprelGroupName: televisions
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). 
 # Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
+
+# If absolute (starting with http), will be fetched cached and transformed in webp by the nudger resource server
+# If relativ url (starting with /), will be handled as 
 verticalImage: /images/verticals/tv.png
 
 # Indicates if the vertical must be UI / sitemap / search rendered
