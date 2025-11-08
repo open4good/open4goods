@@ -14,6 +14,9 @@
       open-delay="150"
       :close-delay="100"
       :disabled="!isTooltipEnabled"
+      :scrim="false"
+      :content-class="tooltipContentClass"
+      :content-style="tooltipContentStyles"
     >
       <template #activator="{ props: tooltipProps }">
         <v-btn
@@ -55,7 +58,7 @@
             </p>
 
             <v-table
-              v-if="normalizedSources.length"
+              v-if="hasSources"
               density="compact"
               class="product-attribute-sourcing__sources"
             >
@@ -84,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRaw } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
@@ -111,6 +114,13 @@ const props = defineProps({
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
+const tooltipContentClass = 'product-attribute-sourcing__tooltip-overlay' as const
+const tooltipContentStyles = Object.freeze({
+  backgroundColor: 'transparent',
+  boxShadow: 'none',
+  padding: 0,
+}) satisfies Record<string, string | number>
+
 const bestValue = computed(() => {
   const candidate = props.sourcing?.bestValue
   if (typeof candidate !== 'string') {
@@ -123,43 +133,43 @@ const bestValue = computed(() => {
 
 const displayValue = computed(() => bestValue.value ?? props.value)
 
-const hasSourcingDetails = computed(() => {
-  if (!props.sourcing) {
-    return false
-  }
+const isIterable = <T,>(candidate: unknown): candidate is Iterable<T> =>
+  Boolean(candidate && typeof (candidate as Iterable<T>)[Symbol.iterator] === 'function')
 
-  if (bestValue.value) {
-    return true
-  }
-
-  const sources = props.sourcing.sources
-  if (sources instanceof Set) {
-    return sources.size > 0
-  }
-
-  if (Array.isArray(sources)) {
-    return sources.length > 0
-  }
-
-  return false
-})
-
-const normalizedSources = computed<ProductSourcedAttributeDto[]>(() => {
-  const sources = props.sourcing?.sources
-  if (!sources) {
+const normalizeSources = (
+  rawSources: ProductAttributeSourceDto['sources'] | null | undefined,
+): ProductSourcedAttributeDto[] => {
+  if (!rawSources) {
     return []
   }
 
-  if (sources instanceof Set) {
-    return Array.from(sources)
+  const candidate =
+    typeof rawSources === 'object' ? (toRaw(rawSources) as unknown) : (rawSources as unknown)
+
+  if (Array.isArray(candidate)) {
+    return candidate.filter((item): item is ProductSourcedAttributeDto => Boolean(item))
   }
 
-  if (Array.isArray(sources)) {
-    return sources
+  if (isIterable<ProductSourcedAttributeDto>(candidate)) {
+    return Array.from(candidate).filter((item): item is ProductSourcedAttributeDto => Boolean(item))
+  }
+
+  if (typeof candidate === 'object' && candidate !== null) {
+    return Object.values(candidate as Record<string, ProductSourcedAttributeDto | null | undefined>).filter(
+      (item): item is ProductSourcedAttributeDto => Boolean(item),
+    )
   }
 
   return []
-})
+}
+
+const normalizedSources = computed<ProductSourcedAttributeDto[]>(() =>
+  normalizeSources(props.sourcing?.sources ?? null),
+)
+
+const hasSources = computed(() => normalizedSources.value.length > 0)
+
+const hasSourcingDetails = computed(() => Boolean(bestValue.value) || hasSources.value)
 
 const isTooltipEnabled = computed(
   () => props.enableTooltip && hasSourcingDetails.value,
@@ -199,7 +209,15 @@ const formatSourceName = (name?: string | null) => {
   return trimmed.length ? trimmed : '—'
 }
 
-const formatSourceValue = (value?: string | null) => {
+const formatSourceValue = (value?: string | number | boolean | null) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return n(value)
+  }
+
+  if (typeof value === 'boolean') {
+    return t(value ? 'common.boolean.true' : 'common.boolean.false')
+  }
+
   if (typeof value !== 'string') {
     return '—'
   }
@@ -251,6 +269,12 @@ const sourceKey = (source: ProductSourcedAttributeDto) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+:deep(.product-attribute-sourcing__tooltip-overlay) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
 .product-attribute-sourcing__tooltip-header {
