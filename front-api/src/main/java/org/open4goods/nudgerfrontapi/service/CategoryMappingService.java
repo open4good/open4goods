@@ -622,7 +622,14 @@ public class CategoryMappingService {
         if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
             return null;
         }
-        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
+
+        if (verticalConfig.getVerticalImage().startsWith("/")) {
+        	// In case of relativ path, assume the image is weared on the frontend
+        	return verticalConfig.getVerticalImage();
+        } else {
+        	// Else, a ressource handled by the static server
+        	return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
+        }
     }
 
     /**
@@ -632,7 +639,13 @@ public class CategoryMappingService {
         if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
             return null;
         }
-        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
+        if (verticalConfig.getVerticalImage().startsWith("/")) {
+        	// In case of relativ path, assume the image is weared on the frontend
+        	return verticalConfig.getVerticalImage();
+        } else {
+        	// Else, a ressource handled by the static server
+        	return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
+        }
     }
 
     /**
@@ -642,6 +655,12 @@ public class CategoryMappingService {
         if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
             return null;
         }
-        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
+        if (verticalConfig.getVerticalImage().startsWith("/")) {
+        	// In case of relativ path, assume the image is weared on the frontend
+        	return verticalConfig.getVerticalImage();
+        } else {
+        	// Else, a ressource handled by the static server
+        	return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
+        }
     }
 }
