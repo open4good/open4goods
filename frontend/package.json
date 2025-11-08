@@ -97,7 +97,7 @@
     "sass": "^1.92.1",
     "semantic-release": "^25.0.0",
     "vite-plugin-vuetify": "^2.1.2",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.0",
     "vue-tsc": "^3.0.6",
     "vuetify": "^3.9.7"
   },
