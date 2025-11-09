@@ -287,8 +287,8 @@ useSeoMeta({
   :deep(.category-navigation-breadcrumbs__link)
     color: inherit
 
-  :deep(.category-navigation-breadcrumbs__link:hover),
-  :deep(.category-navigation-breadcrumbs__link:focus-visible)
+  :deep(.category-navigation-breadcrumbs__link--interactive:hover),
+  :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible)
     color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
     text-decoration: underline
 
