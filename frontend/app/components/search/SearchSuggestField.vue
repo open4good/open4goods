@@ -1,7 +1,7 @@
 <template>
   <v-autocomplete
     v-model="selectedItem"
-    v-model:search="internalSearch"
+    :search="internalSearch"
     :items="suggestionItems"
     :label="label"
     :placeholder="placeholder"
@@ -21,6 +21,9 @@
     @update:model-value="handleSelection"
     @click:clear="handleClear"
     @keydown.enter="handleEnterKey"
+    @update:search="handleSearchInput"
+    @blur="handleBlur"
+    @focus="handleFocus"
   >
     <template v-if="$slots['append-inner']" #append-inner>
       <slot name="append-inner" />
@@ -103,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import type {
@@ -161,6 +164,7 @@ const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 
 const internalSearch = ref(props.modelValue ?? '')
+const lastCommittedValue = ref(internalSearch.value)
 const selectedItem = ref<SuggestionItem | null>(null)
 const loading = ref(false)
 const hasError = ref(false)
@@ -338,29 +342,86 @@ const debouncedLoad = useDebounceFn((value: string) => {
   return loadSuggestions(value)
 }, 300)
 
+let suppressInternalWatch = false
+const isBlurring = ref(false)
+let blurResetTimeout: ReturnType<typeof setTimeout> | null = null
+
+const setInternalSearchValue = (value: string) => {
+  if (internalSearch.value === value) {
+    return
+  }
+
+  suppressInternalWatch = true
+  internalSearch.value = value
+}
+
+watch(
+  internalSearch,
+  (value) => {
+    if (suppressInternalWatch) {
+      suppressInternalWatch = false
+      return
+    }
+
+    if (value !== props.modelValue) {
+      emit('update:modelValue', value)
+    }
+
+    debouncedLoad(value)
+  },
+  { flush: 'sync' },
+)
+
 watch(
   () => props.modelValue,
   (value) => {
     const normalized = value ?? ''
 
-    if (normalized !== internalSearch.value) {
-      internalSearch.value = normalized
+    lastCommittedValue.value = normalized
+
+    if (normalized === internalSearch.value) {
+      return
     }
 
+    setInternalSearchValue(normalized)
     debouncedLoad(normalized)
   },
   { flush: 'post' },
 )
 
-watch(
-  internalSearch,
-  (value) => {
-    if (value !== props.modelValue) {
-      emit('update:modelValue', value)
-    }
-  },
-  { flush: 'sync' },
-)
+const handleBlur = () => {
+  isBlurring.value = true
+
+  if (blurResetTimeout !== null) {
+    clearTimeout(blurResetTimeout)
+    blurResetTimeout = null
+  }
+
+  nextTick(() => {
+    setInternalSearchValue(lastCommittedValue.value)
+    blurResetTimeout = setTimeout(() => {
+      isBlurring.value = false
+      blurResetTimeout = null
+    }, 0)
+  })
+}
+
+const handleFocus = () => {
+  if (blurResetTimeout !== null) {
+    clearTimeout(blurResetTimeout)
+    blurResetTimeout = null
+  }
+
+  isBlurring.value = false
+}
+
+const handleSearchInput = (value: string) => {
+  if (isBlurring.value) {
+    return
+  }
+
+  internalSearch.value = value
+}
 
 let submitTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -395,6 +456,11 @@ const handleEnterKey = (event: KeyboardEvent) => {
 
 onBeforeUnmount(() => {
   cancelPendingSubmit()
+
+  if (blurResetTimeout !== null) {
+    clearTimeout(blurResetTimeout)
+    blurResetTimeout = null
+  }
 })
 
 const handleSelection = (item: SuggestionItem | null) => {
