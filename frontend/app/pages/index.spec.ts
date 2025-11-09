@@ -2,12 +2,18 @@ import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
-const messages: Record<string, string> = {
+const messages: Record<string, unknown> = {
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',
   'home.hero.search.ariaLabel': 'Search input',
   'home.hero.search.cta': 'NUDGER',
   'home.hero.search.helper': '50M references',
+  'home.hero.search.helpers': [
+    { icon: '🌿', label: 'A unique eco assessment' },
+    { icon: '🏷️', label: 'Best prices' },
+    { icon: '🛡️', label: 'Independent & open' },
+    { icon: '⚡', label: '50M references' },
+  ],
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Responsible choices are not a luxury',
   'home.hero.subtitle': 'Save time, stay true to your values.',
@@ -98,7 +104,10 @@ const messages: Record<string, string> = {
   'siteIdentity.siteName': 'Nudger'
 }
 
-const translate = (key: string) => messages[key] ?? key
+const translate = (key: string) => {
+  const value = messages[key]
+  return typeof value === 'string' ? value : key
+}
 
 const localeRef = ref('fr-FR')
 const headSpy = vi.fn()
@@ -195,6 +204,7 @@ const useBlogComposable = () => ({
 
 mockNuxtImport('useI18n', () => () => ({
   t: (key: string) => translate(key),
+  tm: (key: string) => messages[key],
   locale: localeRef,
   availableLocales: ['fr-FR', 'en-US'],
 }))
