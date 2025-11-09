@@ -774,8 +774,8 @@ public class ProductMappingService {
         return new ProductRankingDto(
                 ranking.getGlobalPosition(),
                 ranking.getGlobalCount(),
-                referencedProducts.get(ranking.getGlobalBest()),
-                referencedProducts.get(ranking.getGlobalBetter()),
+                null == referencedProducts ? null : referencedProducts.get(ranking.getGlobalBest()),
+                null == referencedProducts ? null : referencedProducts.get(ranking.getGlobalBetter()),
                 ranking.getSpecializedPosition(),
                 ranking.getSpecializedCount(),
                 ranking.getSpecializedBest(),

@@ -41,18 +41,6 @@ export interface ProductScoresDto {
      */
     scores?: { [key: string]: ProductScoreDto; };
     /**
-     * Scores computed from real measurements
-     * @type {Array<ProductScoreDto>}
-     * @memberof ProductScoresDto
-     */
-    realScores?: Array<ProductScoreDto>;
-    /**
-     * Scores computed virtually
-     * @type {Array<ProductScoreDto>}
-     * @memberof ProductScoresDto
-     */
-    virtualScores?: Array<ProductScoreDto>;
-    /**
      * Ecoscore when available
      * @type {ProductScoreDto}
      * @memberof ProductScoresDto
@@ -96,8 +84,6 @@ export function ProductScoresDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
     return {
         
         'scores': json['scores'] == null ? undefined : (mapValues(json['scores'], ProductScoreDtoFromJSON)),
-        'realScores': json['realScores'] == null ? undefined : ((json['realScores'] as Array<any>).map(ProductScoreDtoFromJSON)),
-        'virtualScores': json['virtualScores'] == null ? undefined : ((json['virtualScores'] as Array<any>).map(ProductScoreDtoFromJSON)),
         'ecoscore': json['ecoscore'] == null ? undefined : ProductScoreDtoFromJSON(json['ecoscore']),
         'worstScores': json['worstScores'] == null ? undefined : new Set(json['worstScores']),
         'bestScores': json['bestScores'] == null ? undefined : new Set(json['bestScores']),
@@ -117,8 +103,6 @@ export function ProductScoresDtoToJSONTyped(value?: ProductScoresDto | null, ign
     return {
         
         'scores': value['scores'] == null ? undefined : (mapValues(value['scores'], ProductScoreDtoToJSON)),
-        'realScores': value['realScores'] == null ? undefined : ((value['realScores'] as Array<any>).map(ProductScoreDtoToJSON)),
-        'virtualScores': value['virtualScores'] == null ? undefined : ((value['virtualScores'] as Array<any>).map(ProductScoreDtoToJSON)),
         'ecoscore': ProductScoreDtoToJSON(value['ecoscore']),
         'worstScores': value['worstScores'] == null ? undefined : Array.from(value['worstScores'] as Set<any>),
         'bestScores': value['bestScores'] == null ? undefined : Array.from(value['bestScores'] as Set<any>),
