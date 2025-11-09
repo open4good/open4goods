@@ -49,6 +49,12 @@ export interface ProductReferenceDto {
      * @memberof ProductReferenceDto
      */
     model?: string;
+    /**
+     * 
+     * @type {any}
+     * @memberof ProductReferenceDto
+     */
+    scores?: any | null;
 }
 
 /**
@@ -73,6 +79,7 @@ export function ProductReferenceDtoFromJSONTyped(json: any, ignoreDiscriminator:
         'bestName': json['bestName'] == null ? undefined : json['bestName'],
         'brand': json['brand'] == null ? undefined : json['brand'],
         'model': json['model'] == null ? undefined : json['model'],
+        'scores': json['scores'] == null ? undefined : json['scores'],
     };
 }
 
@@ -92,6 +99,7 @@ export function ProductReferenceDtoToJSONTyped(value?: ProductReferenceDto | nul
         'bestName': value['bestName'],
         'brand': value['brand'],
         'model': value['model'],
+        'scores': value['scores'],
     };
 }
 
