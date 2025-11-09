@@ -32,8 +32,8 @@ vi.mock('vue-i18n', () => ({
 mockNuxtImport('useRequestURL', () => () => new URL('https://example.com/'))
 mockNuxtImport('useRuntimeConfig', () => () => ({
   public: {
-    staticServer: 'https://static.example.com'
-  }
+    staticServer: 'https://static.example.com',
+  },
 }))
 
 const VAutocompleteStub = defineComponent({
@@ -50,7 +50,7 @@ const VAutocompleteStub = defineComponent({
     noDataText: { type: String, default: '' },
     search: { type: String, default: '' },
   },
-  emits: ['update:modelValue', 'update:search', 'click:clear', 'keydown:enter'],
+  emits: ['update:modelValue', 'update:search', 'click:clear', 'keydown:enter', 'blur', 'focus'],
   setup(props, { slots, attrs }) {
     const { class: className, ...restAttrs } = attrs
 
@@ -207,6 +207,31 @@ describe('SearchSuggestField', () => {
     await flushPromises()
 
     expect(wrapper.html()).toContain('No suggestions yet.')
+  })
+
+  it('keeps the typed value when the field loses focus', async () => {
+    const wrapper = await mountField()
+    const autocomplete = wrapper.getComponent(VAutocompleteStub)
+
+    autocomplete.vm.$emit('focus')
+    autocomplete.vm.$emit('update:search', 'tv')
+    await wrapper.vm.$nextTick()
+
+    await wrapper.setProps({ modelValue: 'tv' })
+
+    autocomplete.vm.$emit('blur')
+    await wrapper.vm.$nextTick()
+
+    autocomplete.vm.$emit('update:search', '')
+    await wrapper.vm.$nextTick()
+    await flushPromises()
+    vi.runAllTimers()
+
+    const emittedUpdates = wrapper.emitted('update:modelValue') ?? []
+    const lastUpdate = emittedUpdates.at(-1)
+
+    expect(lastUpdate).toEqual(['tv'])
+    expect(autocomplete.props('search')).toBe('tv')
   })
 
 
