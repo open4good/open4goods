@@ -643,7 +643,7 @@ public class ProductMappingService {
                 : new LinkedHashSet<>(product.getBestsScores());
         ProductRankingDto ranking = mapRanking(product, referencedProducts);
 
-        return new ProductScoresDto(scores, realScores, virtualScores, ecoscore, worstScores, bestScores, ranking);
+        return new ProductScoresDto(scores, ecoscore, worstScores, bestScores, ranking);
     }
 
     /**

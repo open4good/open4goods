@@ -16,5 +16,7 @@ public record ProductReferenceDto(
         String brand,
         @Schema(description = "Model identifier exposed by the datasource", example = "FP4", nullable = true)
         String model
+
+
 ) {
 }
