@@ -6,6 +6,7 @@
         :class="[`impact-score--${size}`, { 'impact-score--with-value': showValue }]"
         v-bind="activatorProps"
         :aria-label="tooltipLabel"
+        :style="rootStyle"
         tabindex="0"
         role="img"
       >
@@ -45,6 +46,11 @@ const props = defineProps({
     type: String as PropType<'small' | 'medium' | 'large' | 'xlarge'>,
     default: 'medium',
   },
+  starScale: {
+    type: Number,
+    default: 1,
+    validator: (value: number) => Number.isFinite(value) && value > 0,
+  },
   color: {
     type: String,
     default: 'impact-score-active',
@@ -72,19 +78,6 @@ const formattedScore = computed(() =>
   `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`,
 )
 
-const ratingSize = computed(() => {
-  switch (props.size) {
-    case 'small':
-      return 18
-    case 'large':
-      return 32
-    case 'xlarge':
-      return 40
-    default:
-      return 24
-  }
-})
-
 const ratingDensity = computed(() => (props.size === 'small' ? 'compact' : 'comfortable'))
 
 const ratingColor = computed(() => props.color)
@@ -100,44 +93,71 @@ const tooltipLabel = computed(() =>
 
 const size = computed(() => props.size)
 const showValue = computed(() => props.showValue)
+const normalizedStarScale = computed(() => {
+  const raw = Number(props.starScale)
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return 1
+  }
+
+  return raw
+})
+
+const ratingSize = computed(() => {
+  const scale = normalizedStarScale.value
+  switch (props.size) {
+    case 'small':
+      return 18 * scale
+    case 'large':
+      return 32 * scale
+    case 'xlarge':
+      return 40 * scale
+    default:
+      return 24 * scale
+  }
+})
+
+const rootStyle = computed(() => ({
+  '--impact-score-scale': String(normalizedStarScale.value),
+}))
 </script>
 
 <style scoped>
 .impact-score {
-  --impact-score-gap: 0.5rem;
-  --impact-score-rating-gap: 0.375rem;
-  --impact-score-value-font-size: 0.95rem;
+  --impact-score-scale: 1;
+  --impact-score-gap-base: 0.5rem;
+  --impact-score-rating-gap-base: 0.375rem;
+  --impact-score-value-font-size-base: 0.95rem;
   display: inline-flex;
   align-items: center;
-  gap: var(--impact-score-gap);
+  gap: calc(var(--impact-score-gap-base) * var(--impact-score-scale));
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .impact-score--small {
-  --impact-score-gap: 0.375rem;
-  --impact-score-rating-gap: 0.25rem;
-  --impact-score-value-font-size: 0.85rem;
+  --impact-score-gap-base: 0.375rem;
+  --impact-score-rating-gap-base: 0.25rem;
+  --impact-score-value-font-size-base: 0.85rem;
 }
 
 .impact-score--large {
-  --impact-score-gap: 0.625rem;
-  --impact-score-rating-gap: 0.5rem;
-  --impact-score-value-font-size: 1.05rem;
+  --impact-score-gap-base: 0.625rem;
+  --impact-score-rating-gap-base: 0.5rem;
+  --impact-score-value-font-size-base: 1.05rem;
 }
 
 .impact-score--xlarge {
-  --impact-score-gap: 0.75rem;
-  --impact-score-rating-gap: 0.6rem;
-  --impact-score-value-font-size: 1.2rem;
+  --impact-score-gap-base: 0.75rem;
+  --impact-score-rating-gap-base: 0.6rem;
+  --impact-score-value-font-size-base: 1.2rem;
 }
 
 .impact-score__rating :deep(.v-rating__wrapper) {
-  gap: var(--impact-score-rating-gap);
+  gap: calc(var(--impact-score-rating-gap-base) * var(--impact-score-scale));
 }
 
 .impact-score__value {
   font-weight: 600;
-  font-size: var(--impact-score-value-font-size);
+  font-size: calc(var(--impact-score-value-font-size-base) * var(--impact-score-scale));
   line-height: 1.1;
 }
 

@@ -121,6 +121,7 @@ import {
   type Agg,
   type AggregationBucketDto,
   type AggregationResponseDto,
+  type CategoryBreadcrumbItemDto,
   type CommercialEvent,
   type FilterRequestDto,
   type ProductDto,
@@ -399,9 +400,32 @@ const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
   }
 })
 
+interface CategoryBreadcrumbWithSlug extends CategoryBreadcrumbItemDto {
+  fullSlug?: string | null
+}
+
+const normalizeBreadcrumbLink = (link: string | null | undefined): string | undefined => {
+  if (!link) {
+    return undefined
+  }
+
+  const trimmed = link.toString().trim()
+  if (!trimmed.length) {
+    return undefined
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed
+  }
+
+  const sanitized = trimmed.startsWith('/') ? trimmed : `/${trimmed.replace(/^\/+/, '')}`
+  return sanitized
+}
+
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
-  const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
+  const breadcrumbs = (categoryDetail.value?.breadCrumb ?? []) as CategoryBreadcrumbWithSlug[]
   const categoryFullSlug = (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ?? null
+  const categoryHome = categoryDetail.value?.verticalHomeUrl ?? null
 
   const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, crumb, index, array) => {
     const rawTitle = crumb?.title ?? crumb?.link ?? ''
@@ -410,24 +434,16 @@ const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
       return acc
     }
 
-    const crumbFullSlug = (crumb as { fullSlug?: string | null }).fullSlug ?? null
-    const rawLink =
-      crumbFullSlug ??
-      (index === array.length - 1 ? categoryFullSlug ?? crumb?.link : crumb?.link) ??
-      null
+    const candidateLink =
+      crumb?.fullSlug ??
+      crumb?.link ??
+      (index === array.length - 1 ? categoryFullSlug ?? categoryHome ?? null : null)
 
-    const trimmed = rawLink?.toString().trim() ?? ''
-    const normalized = trimmed
-      ? trimmed.startsWith('http')
-        ? trimmed
-        : trimmed.startsWith('/')
-          ? trimmed
-          : `/${trimmed}`
-      : undefined
+    const normalizedLink = normalizeBreadcrumbLink(candidateLink ?? undefined)
 
     acc.push({
       title,
-      link: normalized ?? undefined,
+      ...(normalizedLink ? { link: normalizedLink } : {}),
     })
 
     return acc

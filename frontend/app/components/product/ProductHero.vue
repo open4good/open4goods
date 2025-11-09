@@ -22,7 +22,7 @@
 
     <div class="product-hero__details">
       <div v-if="impactScore !== null" class="product-hero__impact-overview">
-        <ImpactScore :score="impactScore" :max="5" size="xlarge" :show-value="true" />
+        <ImpactScore :score="impactScore" :max="5" size="xlarge" :star-scale="2" :show-value="true" />
       </div>
 
       <div v-if="hasBrandOrModel" class="product-hero__brand-line">
