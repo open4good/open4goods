@@ -37,7 +37,7 @@ type CategoryCarouselItem = {
   impactScoreHref: string
 }
 
-type HomeBlogItem = BlogPostDto & { formattedDate?: string }
+type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
 type EnrichedBlogItem = HomeBlogItem & { link: string; isExternal: boolean; hasImage: boolean }
 
 const { categories: rawCategories, fetchCategories, loading: categoriesLoading } = useCategories()
@@ -371,22 +371,25 @@ const blogDateFormatter = computed(
 
 const fallbackBlogEntries = computed<HomeBlogItem[]>(() => [
   {
-    url: localePath({ name: 'blog' }),
+    url: localePath({ name: 'blog-slug', params: { slug: 'impact-score-ia' } }),
     title: String(t('home.blog.items.first.title')),
     summary: String(t('home.blog.items.first.excerpt')),
     formattedDate: String(t('home.blog.items.first.date')),
+    slug: 'impact-score-ia',
   },
   {
-    url: localePath({ name: 'blog' }),
+    url: localePath({ name: 'blog-slug', params: { slug: 'prioriser-durabilite' } }),
     title: String(t('home.blog.items.second.title')),
     summary: String(t('home.blog.items.second.excerpt')),
     formattedDate: String(t('home.blog.items.second.date')),
+    slug: 'prioriser-durabilite',
   },
   {
-    url: localePath({ name: 'blog' }),
+    url: localePath({ name: 'blog-slug', params: { slug: 'equilibrer-prix-impact' } }),
     title: String(t('home.blog.items.third.title')),
     summary: String(t('home.blog.items.third.excerpt')),
     formattedDate: String(t('home.blog.items.third.date')),
+    slug: 'equilibrer-prix-impact',
   },
 ])
 
@@ -412,36 +415,61 @@ const blogListItems = computed<HomeBlogItem[]>(() => {
       summary,
       image,
       formattedDate,
+      slug: toTrimmedString((article as { slug?: string }).slug) || undefined,
     }
   })
 })
 
-const resolveBlogArticleLink = (article: BlogPostDto) => {
-  const rawUrl = toTrimmedString(article.url)
+const extractBlogSlug = (article: BlogPostDto): string | null => {
+  const pickSlugSegment = (value: unknown): string | null => {
+    if (typeof value !== 'string') {
+      return null
+    }
 
-  if (!rawUrl) {
+    const trimmed = value.trim()
+
+    if (!trimmed) {
+      return null
+    }
+
+    let working = trimmed
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      try {
+        const parsedUrl = new URL(trimmed)
+        working = parsedUrl.pathname
+      } catch {
+        return null
+      }
+    }
+
+    const sanitized = working.replace(/[?#].*$/, '').replace(/^\/+/, '')
+
+    if (!sanitized) {
+      return null
+    }
+
+    const segments = sanitized.split('/').filter(Boolean)
+    const candidate = segments.pop()
+
+    if (!candidate || candidate.toLowerCase() === 'blog') {
+      return null
+    }
+
+    return candidate
+  }
+
+  return pickSlugSegment((article as { slug?: string }).slug) ?? pickSlugSegment(article.url)
+}
+
+const resolveBlogArticleLink = (article: BlogPostDto) => {
+  const slug = extractBlogSlug(article)
+
+  if (!slug) {
     return localePath({ name: 'blog' })
   }
 
-  if (/^https?:\/\//i.test(rawUrl)) {
-    try {
-      const parsedUrl = new URL(rawUrl)
-      const slug = parsedUrl.pathname.split('/').filter(Boolean).pop()
-      if (slug) {
-        return localePath({ name: 'blog-slug', params: { slug } })
-      }
-    } catch (error) {
-      console.warn('Failed to parse blog article URL', rawUrl, error)
-    }
-
-    return rawUrl
-  }
-
-  if (rawUrl.startsWith('/')) {
-    return rawUrl
-  }
-
-  return localePath({ name: 'blog-slug', params: { slug: rawUrl } })
+  return localePath({ name: 'blog-slug', params: { slug } })
 }
 
 const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
@@ -584,9 +612,9 @@ useHead(() => ({
 
 <style scoped lang="sass">
 .home-page
-  --cat-h: clamp(200px, 45vh, 420px)
-  --cat-in-hero: calc(var(--cat-h) / 3)
-  --cat-overlap: calc(var(--cat-h) * 2 / 3)
+  --cat-height: 150px
+  --cat-in-hero: calc(var(--cat-height) / 2)
+  --cat-overlap: calc(var(--cat-height) - var(--cat-in-hero))
   display: flex
   flex-direction: column
   gap: 0

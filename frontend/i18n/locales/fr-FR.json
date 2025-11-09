@@ -50,7 +50,25 @@
         "placeholder": "Recherchez un produit (ex. téléviseur, smartphone…)",
         "ariaLabel": "Rechercher un produit responsable",
         "cta": "NUDGER",
-        "helper": "Déjà +50 millions de références en open data."
+        "helper": "Déjà +50 millions de références en open data.",
+        "helpers": [
+          {
+            "icon": "🌿",
+            "label": "Une évaluation écologique et environnementale unique"
+          },
+          {
+            "icon": "🏷️",
+            "label": "Les meilleurs prix du marché"
+          },
+          {
+            "icon": "🛡️",
+            "label": "Comparateur indépendant, logiciel libre et données ouvertes"
+          },
+          {
+            "icon": "⚡",
+            "label": "Déjà +50 millions de références en open data"
+          }
+        ]
       }
     },
     "problems": {

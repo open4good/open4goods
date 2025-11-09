@@ -33,6 +33,15 @@ const secondaryFallbackIconSize = 48
         <header class="home-section__header">
           <h2 id="home-blog-title">{{ t('home.blog.title') }}</h2>
           <p class="home-section__subtitle">{{ t('home.blog.subtitle') }}</p>
+          <v-btn
+            class="home-section__cta"
+            :to="localePath({ name: 'blog' })"
+            color="primary"
+            variant="tonal"
+            size="large"
+          >
+            {{ t('home.blog.cta') }}
+          </v-btn>
         </header>
 
         <div v-if="loading" class="home-blog__skeletons">
@@ -131,17 +140,6 @@ const secondaryFallbackIconSize = 48
           </v-alert>
         </template>
 
-        <div class="home-blog__actions">
-          <v-btn
-            class="home-blog__cta"
-            :to="localePath({ name: 'blog' })"
-            color="primary"
-            variant="tonal"
-            size="large"
-          >
-            {{ t('home.blog.cta') }}
-          </v-btn>
-        </div>
       </div>
     </v-container>
   </section>
@@ -167,6 +165,12 @@ const secondaryFallbackIconSize = 48
   display: flex
   flex-direction: column
   gap: 0.75rem
+
+.home-section__cta
+  align-self: flex-start
+  margin-top: 0.35rem
+  border-radius: 999px
+  font-weight: 600
 
 .home-section__subtitle
   margin: 0
@@ -279,13 +283,6 @@ const secondaryFallbackIconSize = 48
 .home-blog__empty
   border-radius: clamp(1.25rem, 3vw, 1.75rem)
 
-.home-blog__actions
-  display: flex
-  justify-content: center
-  padding-top: 0.5rem
-
-.home-blog__cta
-  min-width: 240px
 
 @media (max-width: 959px)
   .home-blog__featured-card

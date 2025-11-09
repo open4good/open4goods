@@ -14,6 +14,11 @@ type CategoryCarouselItem = {
   impactScoreHref: string
 }
 
+type HeroHelperItem = {
+  icon: string
+  label: string
+}
+
 const props = defineProps<{
   searchQuery: string
   minSuggestionQueryLength: number
@@ -30,7 +35,7 @@ const emit = defineEmits<{
   'select-product': [payload: ProductSuggestionItem]
 }>()
 
-const { t } = useI18n()
+const { t, tm } = useI18n()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -40,6 +45,56 @@ const { minSuggestionQueryLength, heroVideoSrc, heroVideoPoster, categoryItems, 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
 }
+
+const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
+  if (!Array.isArray(items)) {
+    return []
+  }
+
+  return items
+    .map((rawItem) => {
+      if (typeof rawItem !== 'object' || rawItem == null) {
+        return null
+      }
+
+      const { icon, label } = rawItem as { icon?: unknown; label?: unknown }
+      const normalizedLabel = typeof label === 'string' ? label.trim() : ''
+
+      if (!normalizedLabel) {
+        return null
+      }
+
+      const normalizedIcon = typeof icon === 'string' && icon.trim().length > 0 ? icon.trim() : '•'
+
+      return {
+        icon: normalizedIcon,
+        label: normalizedLabel,
+      }
+    })
+    .filter((item): item is HeroHelperItem => item != null)
+}
+
+const heroHelperItems = computed<HeroHelperItem[]>(() => {
+  const translatedItems = normalizeHelperItems(tm('home.hero.search.helpers'))
+
+  if (translatedItems.length > 0) {
+    return translatedItems
+  }
+
+  const fallback = String(t('home.hero.search.helper'))
+  const trimmedFallback = fallback.trim()
+
+  if (!trimmedFallback || trimmedFallback === 'home.hero.search.helper') {
+    return []
+  }
+
+  return [
+    {
+      icon: '⚡',
+      label: trimmedFallback,
+    },
+  ]
+})
 
 const handleSubmit = () => {
   emit('submit')
@@ -93,10 +148,12 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
               </SearchSuggestField>
             </form>
 
-            <p class="home-hero__helper">
-              <span aria-hidden="true">⚡</span>
-              {{ t('home.hero.search.helper') }}
-            </p>
+            <ul v-if="heroHelperItems.length" class="home-hero__helpers">
+              <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
+                <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
+                <span class="home-hero__helper-text">{{ item.label }}</span>
+              </li>
+            </ul>
           </v-col>
 
           <v-col cols="12" lg="6" class="home-hero__media" aria-hidden="true">
@@ -134,8 +191,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero
   position: relative
   isolation: isolate
-  --hero-cat-h: var(--cat-h, clamp(180px, 28vh, 240px))
-  --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.35)
+  --hero-cat-h: var(--cat-height, 168px)
+  --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
   --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
   --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
   --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
@@ -195,13 +252,26 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero__search-submit
   box-shadow: none
 
+.home-hero__helpers
+  margin: 0
+  padding: 0
+  display: grid
+  gap: 0.35rem
+  list-style: none
+
 .home-hero__helper
   display: inline-flex
   align-items: center
-  gap: 0.5rem
+  gap: 0.45rem
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
   font-weight: 500
+
+.home-hero__helper-icon
+  font-size: 1.1rem
+
+.home-hero__helper-text
+  line-height: 1.35
 
 .home-hero__media
   display: flex
@@ -247,12 +317,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   width: 100%
 
 .home-hero__categories-inner
-  --cat-h: clamp(160px, 24vh, 220px)
   position: relative
   width: min(100%, 1200px)
   margin-inline: auto
-  padding: clamp(0.5rem, 2.5vw, 1.25rem) clamp(0.85rem, 3vw, 2rem)
-  border-radius: clamp(1.75rem, 4vw, 2.25rem)
+  padding: clamp(0.4rem, 1.5vw, 0.8rem) clamp(0.75rem, 3vw, 1.5rem)
+  border-radius: clamp(1.5rem, 4vw, 2rem)
   background: linear-gradient(
     180deg,
     rgba(var(--v-theme-hero-gradient-start), 0.2) 0%,
@@ -264,10 +333,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   align-items: center
   justify-content: center
   pointer-events: auto
-  min-height: var(--cat-h)
+  height: var(--hero-cat-h)
 
 .home-hero__categories-inner :deep(.home-category-carousel)
-  width: 100%
+  height: 100%
+  display: flex
 
 .home-hero__categories-inner::before
   content: ''
@@ -292,13 +362,12 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     min-height: clamp(520px, 72dvh, 760px)
     padding-block-start: clamp(2.5rem, 12vw, 4.5rem)
     padding-block-end: calc(clamp(3.5rem, 16vw, 5.5rem) + var(--hero-cat-in-hero))
-    --hero-cat-h: clamp(150px, 36vh, 210px)
-    --hero-cat-in-hero-base: calc(var(--hero-cat-h) * 0.4)
+    --hero-cat-h: var(--cat-height, 168px)
+    --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
 
   .home-hero__video
     transform: scale(1.15)
-
+  
   .home-hero__categories-inner
-    --cat-h: clamp(150px, 42vh, 210px)
-    padding: clamp(0.5rem, 6vw, 1.1rem) clamp(0.75rem, 6vw, 1.5rem)
+    padding: clamp(0.4rem, 5vw, 0.75rem) clamp(0.75rem, 5vw, 1.25rem)
 </style>
