@@ -110,13 +110,13 @@ const onUpdateModelValue = (value: string) => {
   color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
 }
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link:hover),
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link:focus-visible) {
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:hover),
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
   color: rgb(var(--v-theme-hero-overlay-strong));
   text-decoration: underline;
 }
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link:focus-visible) {
+.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
   outline: 2px solid rgba(var(--v-theme-hero-overlay-strong), 0.8);
   outline-offset: 2px;
   border-radius: 0.25rem;

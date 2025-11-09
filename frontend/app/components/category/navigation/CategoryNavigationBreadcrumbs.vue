@@ -15,15 +15,23 @@
         itemscope
         itemtype="https://schema.org/ListItem"
       >
-        <component
-          :is="item.component"
-          v-if="item.isLink"
-          v-bind="item.componentProps"
-          class="category-navigation-breadcrumbs__link"
+        <NuxtLink
+          v-if="item.type === 'internal'"
+          :to="item.to"
+          class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
           itemprop="item"
         >
           <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
-        </component>
+        </NuxtLink>
+        <a
+          v-else-if="item.type === 'external'"
+          :href="item.href"
+          rel="noopener noreferrer"
+          class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
+          itemprop="item"
+        >
+          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+        </a>
         <span
           v-else
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
@@ -51,13 +59,17 @@ interface BreadcrumbItem {
 type BreadcrumbRenderItem =
   | {
       title: string
-      isLink: true
-      component: string
-      componentProps: Record<string, unknown>
+      type: 'current'
     }
   | {
       title: string
-      isLink: false
+      type: 'external'
+      href: string
+    }
+  | {
+      title: string
+      type: 'internal'
+      to: string
     }
 
 const props = defineProps<{
@@ -77,27 +89,24 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
     if (!rawLink || isLast) {
       return {
         title: item.title,
-        isLink: false,
+        type: 'current',
       }
     }
 
-    if (/^https?:\/\//i.test(rawLink)) {
+    if (/^https?:\/\//iu.test(rawLink)) {
       return {
         title: item.title,
-        isLink: true,
-        component: 'a',
-        componentProps: {
-          href: rawLink,
-          rel: 'noopener noreferrer',
-        },
+        type: 'external',
+        href: rawLink,
       }
     }
+
+    const normalized = rawLink.startsWith('/') || rawLink.startsWith('#') ? rawLink : `/${rawLink}`
 
     return {
       title: item.title,
-      isLink: true,
-      component: 'NuxtLink',
-      componentProps: { to: rawLink },
+      type: 'internal',
+      to: normalized,
     }
   })
 })
@@ -135,12 +144,17 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   transition: color 0.2s ease;
 }
 
-.category-navigation-breadcrumbs__link--current {
-  cursor: default;
+.category-navigation-breadcrumbs__link--interactive {
+  cursor: pointer;
 }
 
-.category-navigation-breadcrumbs__link:hover,
-.category-navigation-breadcrumbs__link:focus-visible {
+.category-navigation-breadcrumbs__link--current {
+  cursor: default;
+  pointer-events: none;
+}
+
+.category-navigation-breadcrumbs__link--interactive:hover,
+.category-navigation-breadcrumbs__link--interactive:focus-visible {
   color: rgb(var(--v-theme-primary));
   text-decoration: underline;
 }
