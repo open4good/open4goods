@@ -218,6 +218,7 @@ public class VerticalConfig{
 	/**
 	 * The vertical custom subsets
 	 */
+	@JsonMerge
 	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
 
 	/**
