@@ -268,9 +268,6 @@ public class ProductMappingService {
             return Collections.emptySet();
         }
         Set<Long> ids = new LinkedHashSet<>();
-        collectScoreReferences(ids, product.getScores() == null ? null : product.getScores().values());
-        collectScoreReferences(ids, product.realScores());
-        collectScoreReferences(ids, product.virtualScores());
         Score ecoscore = product.ecoscore();
         if (ecoscore != null) {
             collectScoreReferences(ids, List.of(ecoscore));
@@ -369,13 +366,13 @@ public class ProductMappingService {
         }
 
 
+        ProductScoresDto scores = null;
         if (referencedProduct.getScores().size() > 0) {
-
+        	scores = mapScores(referencedProduct, domainLanguage, vConf, null);
         }
-        ProductScoresDto scores = mapScores(referencedProduct, domainLanguage, vConf, null);
 
 
-        return new ProductReferenceDto(
+		return new ProductReferenceDto(
                 referencedProduct.getId(),
                 fullSlug,
                 referencedProduct.bestName(),
