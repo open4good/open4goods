@@ -22,15 +22,16 @@
         class="product-hero__breadcrumbs"
       />
 
-      <p v-if="brandModelLine" class="product-hero__brand-line">
-        {{ brandModelLine }}
-      </p>
 
       <div v-if="impactScore !== null" class="product-hero__impact-overview">
         <ImpactScore :score="impactScore" :max="5" size="large" :show-value="true" />
       </div>
 
-      <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
+      <p v-if="brandModelLine" class="product-hero__brand-line">
+        {{ brandModelLine }}
+      </p>
+
+            <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
         <li
           v-for="attribute in heroAttributes"
           :key="attribute.key"
