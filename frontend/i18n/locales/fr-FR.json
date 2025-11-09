@@ -1825,7 +1825,7 @@
     "viewOffer": "Ouvrir l'offre chez {source}",
     "unknownSource": "Source inconnue"
   },
-  "noHistory": "L'historique des prix n'est pas encore disponible pour ce produit.",
+  "noHistory": "Pas assez de données pour afficher l'historique des prix.",
   "subtitle": "Suivez l’évolution des prix et comparez les offres.",
       "title": "Prix et évolution",
       "trend": {
