@@ -15,15 +15,23 @@
         itemscope
         itemtype="https://schema.org/ListItem"
       >
-        <component
-          :is="item.component"
-          v-if="item.isLink"
-          v-bind="item.componentProps"
+        <NuxtLink
+          v-if="item.type === 'internal'"
+          :to="item.href"
           class="category-navigation-breadcrumbs__link"
           itemprop="item"
         >
           <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
-        </component>
+        </NuxtLink>
+        <a
+          v-else-if="item.type === 'external'"
+          :href="item.href"
+          class="category-navigation-breadcrumbs__link"
+          rel="noopener noreferrer"
+          itemprop="item"
+        >
+          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+        </a>
         <span
           v-else
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
@@ -51,13 +59,17 @@ interface BreadcrumbItem {
 type BreadcrumbRenderItem =
   | {
       title: string
-      isLink: true
-      component: string
-      componentProps: Record<string, unknown>
+      type: 'internal'
+      href: string
     }
   | {
       title: string
-      isLink: false
+      type: 'external'
+      href: string
+    }
+  | {
+      title: string
+      type: 'current'
     }
 
 const props = defineProps<{
@@ -77,27 +89,22 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
     if (!rawLink || isLast) {
       return {
         title: item.title,
-        isLink: false,
+        type: 'current',
       }
     }
 
     if (/^https?:\/\//i.test(rawLink)) {
       return {
         title: item.title,
-        isLink: true,
-        component: 'a',
-        componentProps: {
-          href: rawLink,
-          rel: 'noopener noreferrer',
-        },
+        type: 'external',
+        href: rawLink,
       }
     }
 
     return {
       title: item.title,
-      isLink: true,
-      component: 'NuxtLink',
-      componentProps: { to: rawLink },
+      type: 'internal',
+      href: rawLink.startsWith('/') ? rawLink : `/${rawLink}`,
     }
   })
 })

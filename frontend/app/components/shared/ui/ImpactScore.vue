@@ -75,13 +75,13 @@ const formattedScore = computed(() =>
 const ratingSize = computed(() => {
   switch (props.size) {
     case 'small':
-      return 18
+      return 36
     case 'large':
-      return 32
+      return 64
     case 'xlarge':
-      return 40
+      return 80
     default:
-      return 24
+      return 48
   }
 })
 

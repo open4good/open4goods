@@ -48,6 +48,7 @@ const option = computed<EChartsOption | null>(() => {
   }
 
   const indicator = props.axes.map((entry) => ({ name: entry.name, max: 5 }))
+  const legendLabels = props.series.map((entry) => entry.label)
   const seriesData = props.series.map((entry) => ({
     value: entry.values.map((value) => (typeof value === 'number' && Number.isFinite(value) ? value : null)),
     name: entry.label,
@@ -57,14 +58,38 @@ const option = computed<EChartsOption | null>(() => {
     symbolSize: 6,
   }))
 
+  const legendFormatter = (name: string) => `{pill|${name}}`
+
   return {
     color: props.series.map((entry) => entry.lineColor),
     tooltip: { trigger: 'item' },
     legend: {
-      data: props.series.map((entry) => entry.label),
+      data: legendLabels,
+      top: 0,
+      left: 'center',
+      icon: 'none',
+      itemGap: 16,
+      padding: [0, 0, 18, 0],
+      textStyle: {
+        color: 'rgba(15, 23, 42, 0.92)',
+        fontWeight: 600,
+        fontSize: 13,
+        rich: {
+          pill: {
+            padding: [6, 16],
+            backgroundColor: 'rgba(25, 118, 210, 0.12)',
+            borderColor: 'rgba(25, 118, 210, 0.35)',
+            borderWidth: 1,
+            borderRadius: 999,
+            color: 'rgba(15, 23, 42, 0.92)',
+          },
+        },
+      },
+      formatter: legendFormatter,
     },
     radar: {
       indicator,
+      center: ['50%', '60%'],
       radius: '70%',
       splitArea: {
         areaStyle: {
