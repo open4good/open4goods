@@ -1767,6 +1767,12 @@
       "subscoreEyebrow": "Indicateur d'impact",
       "primaryScoreLabel": "Score global",
       "radarAria": "Radar des scores pour {product}",
+      "radarControls": {
+        "ariaLabel": "Afficher ou masquer les produits à comparer sur le radar",
+        "current": "Ce produit : {product}",
+        "best": "Le mieux : {product}",
+        "worst": "Le pire : {product}"
+      },
       "scoreRanking": "Classement du facteur",
       "scoreValue": "Score relatif",
       "valueOutOf": "{value} / {max}",

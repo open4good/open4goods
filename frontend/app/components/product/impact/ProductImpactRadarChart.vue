@@ -21,7 +21,20 @@ import type { EChartsOption } from 'echarts'
 import { useI18n } from 'vue-i18n'
 import { ensureImpactECharts } from './echarts-setup'
 
-const props = defineProps<{ values: Array<{ name: string; value: number }>; productName: string }>()
+interface RadarAxisEntry {
+  id: string
+  name: string
+}
+
+interface RadarSeriesEntry {
+  label: string
+  values: Array<number | null>
+  lineColor: string
+  areaColor: string
+  symbolColor: string
+}
+
+const props = defineProps<{ axes: RadarAxisEntry[]; series: RadarSeriesEntry[]; productName: string }>()
 
 ensureImpactECharts()
 
@@ -30,14 +43,28 @@ const { t } = useI18n()
 const ariaLabel = computed(() => t('product.impact.radarAria', { product: props.productName }))
 
 const option = computed<EChartsOption | null>(() => {
-  if (!props.values.length) {
+  if (!props.axes.length || !props.series.length) {
     return null
   }
 
+  const indicator = props.axes.map((entry) => ({ name: entry.name, max: 5 }))
+  const seriesData = props.series.map((entry) => ({
+    value: entry.values.map((value) => (typeof value === 'number' && Number.isFinite(value) ? value : null)),
+    name: entry.label,
+    areaStyle: { color: entry.areaColor },
+    lineStyle: { color: entry.lineColor, width: 2 },
+    itemStyle: { color: entry.symbolColor },
+    symbolSize: 6,
+  }))
+
   return {
-    tooltip: {},
+    color: props.series.map((entry) => entry.lineColor),
+    tooltip: { trigger: 'item' },
+    legend: {
+      data: props.series.map((entry) => entry.label),
+    },
     radar: {
-      indicator: props.values.map((entry) => ({ name: entry.name, max: 5 })),
+      indicator,
       radius: '70%',
       splitArea: {
         areaStyle: {
@@ -48,15 +75,7 @@ const option = computed<EChartsOption | null>(() => {
     series: [
       {
         type: 'radar',
-        data: [
-          {
-            value: props.values.map((entry) => entry.value),
-            name: props.productName,
-            areaStyle: { color: 'rgba(33, 150, 243, 0.35)' },
-            lineStyle: { color: 'rgba(33, 150, 243, 0.85)', width: 2 },
-            symbolSize: 6,
-          },
-        ],
+        data: seriesData,
       },
     ],
   }
