@@ -203,7 +203,7 @@ jobs:
       # Restart Applications
       ###########################################
       - name: Start Applications
-        uses: appleboy/ssh-action@v1.2.2
+        uses: appleboy/ssh-action@v1.2.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
