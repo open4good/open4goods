@@ -1,6 +1,21 @@
 <template>
+  <v-tooltip v-if="badgeLabel && tooltipLabel" :text="tooltipLabel" location="top">
+    <template #activator="{ props: tooltipProps }">
+      <v-chip
+        class="impact-coefficient-badge"
+        density="comfortable"
+        rounded="pill"
+        variant="flat"
+        :data-coefficient-decimal="normalizedValue ?? undefined"
+        :data-coefficient-percent="percentValue ?? undefined"
+        v-bind="tooltipProps"
+      >
+        <span class="impact-coefficient-badge__label">{{ badgeLabel }}</span>
+      </v-chip>
+    </template>
+  </v-tooltip>
   <v-chip
-    v-if="badgeLabel"
+    v-else-if="badgeLabel"
     class="impact-coefficient-badge"
     density="comfortable"
     rounded="pill"
@@ -16,7 +31,13 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const props = defineProps<{ value?: number | null }>()
+const props = defineProps<{
+  value?: number | null
+  labelKey?: string
+  labelParams?: Record<string, unknown>
+  tooltipKey?: string
+  tooltipParams?: Record<string, unknown>
+}>()
 
 const { n, t } = useI18n()
 
@@ -42,17 +63,45 @@ const percentValue = computed<number | null>(() => {
   return normalizedValue.value * 100
 })
 
-const badgeLabel = computed<string | null>(() => {
+const percentLabel = computed<string | null>(() => {
   if (percentValue.value == null) {
     return null
   }
 
-  const formatted = n(percentValue.value, {
+  return n(percentValue.value, {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0,
   })
+})
 
-  return t('product.impact.weightChip', { value: formatted })
+const badgeLabel = computed<string | null>(() => {
+  if (percentLabel.value == null) {
+    return null
+  }
+
+  const key = props.labelKey?.trim().length ? props.labelKey : 'product.impact.weightChip'
+  const params = {
+    value: percentLabel.value,
+    percent: percentLabel.value,
+    ...(props.labelParams ?? {}),
+  }
+
+  return t(key as string, params)
+})
+
+const tooltipLabel = computed<string | null>(() => {
+  if (percentLabel.value == null) {
+    return null
+  }
+
+  const key = props.tooltipKey?.trim().length ? props.tooltipKey : 'product.impact.weightTooltip'
+  const params = {
+    value: percentLabel.value,
+    percent: percentLabel.value,
+    ...(props.tooltipParams ?? {}),
+  }
+
+  return t(key as string, params)
 })
 </script>
 

@@ -49,6 +49,7 @@
             :radar-values="radarValues"
             :loading="loadingAggregations"
             :product-name="productTitle"
+            :vertical-home-url="verticalHomeUrl"
           />
         </section>
 
@@ -330,6 +331,7 @@ const productTitle = computed(() => {
 })
 
 const heroPopularAttributes = computed(() => categoryDetail.value?.popularAttributes ?? [])
+const verticalHomeUrl = computed(() => categoryDetail.value?.verticalHomeUrl?.trim() ?? '')
 
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const breadcrumbs = categoryDetail.value?.breadCrumb ?? []

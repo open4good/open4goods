@@ -11,35 +11,35 @@
       <h1 class="product-hero__title" itemprop="name">
         {{ heroTitle }}
       </h1>
-    </header>
-
-    <ProductHeroGallery class="product-hero__gallery" :product="product" :title="heroTitle" />
-
-    <div class="product-hero__details">
       <CategoryNavigationBreadcrumbs
         v-if="heroBreadcrumbs.length"
         v-bind="heroBreadcrumbProps"
         class="product-hero__breadcrumbs"
       />
+    </header>
 
+    <ProductHeroGallery class="product-hero__gallery" :product="product" :title="heroTitle" />
 
+    <div class="product-hero__details">
       <div v-if="impactScore !== null" class="product-hero__impact-overview">
-        <ImpactScore :score="impactScore" :max="5" size="large" :show-value="true" />
+        <ImpactScore :score="impactScore" :max="5" size="xlarge" :show-value="true" />
       </div>
 
       <p v-if="brandModelLine" class="product-hero__brand-line">
         {{ brandModelLine }}
       </p>
 
-            <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
+      <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
         <li
           v-for="attribute in heroAttributes"
           :key="attribute.key"
           class="product-hero__attribute"
           role="listitem"
         >
-          <span class="product-hero__attribute-label">{{ attribute.label }}</span>
-          <span class="product-hero__attribute-separator" aria-hidden="true">:</span>
+          <template v-if="attribute.showLabel !== false">
+            <span class="product-hero__attribute-label">{{ attribute.label }}</span>
+            <span class="product-hero__attribute-separator" aria-hidden="true">:</span>
+          </template>
           <span class="product-hero__attribute-value">
             <template v-if="attribute.tooltip">
               <v-tooltip location="bottom" :text="attribute.tooltip">
@@ -205,6 +205,7 @@ type HeroAttribute = DisplayedAttribute & {
   tooltip?: string
   sourcing?: ProductAttributeSourceDto | null
   enableTooltip?: boolean
+  showLabel?: boolean
 }
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
@@ -257,10 +258,11 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
   ) {
     baseAttributes.push({
       key: 'gtin-country',
-      label: t('product.hero.gtinCountryLabel'),
+      label: '',
       value: gtinCountry.value.name,
       flag: gtinCountry.value.flag,
       tooltip: t('product.hero.gtinTooltip'),
+      showLabel: false,
     })
   }
 
@@ -344,7 +346,7 @@ const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const normalizedProductTitle = heroTitle.value.trim().toLowerCase()
   const normalizedProductSlug = (props.product.fullSlug ?? props.product.slug ?? '').trim().toLowerCase()
 
-  return props.breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, breadcrumb) => {
+  const baseCrumbs = props.breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, breadcrumb) => {
     const rawTitle = breadcrumb?.title ?? breadcrumb?.link ?? ''
     const trimmedTitle = rawTitle.toString().trim()
     const titleValue = trimmedTitle.length ? trimmedTitle : t('product.hero.missingBreadcrumbTitle')
@@ -383,6 +385,22 @@ const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
 
     return acc
   }, [])
+
+  const brandModelTitle = brandModelLine.value?.trim()
+  const finalTitle = brandModelTitle?.length ? brandModelTitle : heroTitle.value.trim()
+
+  if (finalTitle.length) {
+    const normalizedFinal = finalTitle.toLowerCase()
+    const hasDuplicate = baseCrumbs.some((crumb) => crumb.title.trim().toLowerCase() === normalizedFinal)
+
+    if (!hasDuplicate) {
+      baseCrumbs.push({
+        title: finalTitle,
+      })
+    }
+  }
+
+  return baseCrumbs
 })
 
 const heroBreadcrumbProps = computed(() => ({
@@ -428,26 +446,18 @@ const impactScore = computed(() => {
 
 .product-hero__breadcrumbs {
   display: flex;
+  justify-content: center;
+  margin: 0.75rem auto 0;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-}
-
-.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__link) {
-  color: inherit;
-}
-
-.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__link:hover),
-.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__link:focus-visible) {
-  color: rgb(var(--v-theme-primary));
-}
-
-.product-hero__breadcrumbs :deep(.category-navigation-breadcrumbs__current) {
-  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__heading {
   grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .product-hero__title {

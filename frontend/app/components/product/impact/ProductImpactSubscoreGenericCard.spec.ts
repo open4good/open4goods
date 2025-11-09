@@ -71,7 +71,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
           }),
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
-            props: ['value'],
+            props: ['value', 'labelKey', 'labelParams', 'tooltipKey', 'tooltipParams'],
             setup(props) {
               return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
             },

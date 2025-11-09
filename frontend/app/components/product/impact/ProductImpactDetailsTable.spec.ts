@@ -86,7 +86,7 @@ describe('ProductImpactDetailsTable', () => {
           }),
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
-            props: ['value'],
+            props: ['value', 'labelKey', 'labelParams', 'tooltipKey', 'tooltipParams'],
             setup(props) {
               return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
             },
@@ -132,7 +132,7 @@ describe('ProductImpactDetailsTable', () => {
           }),
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
-            props: ['value'],
+            props: ['value', 'labelKey', 'labelParams', 'tooltipKey', 'tooltipParams'],
             setup(props) {
               return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
             },

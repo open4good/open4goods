@@ -34,6 +34,7 @@ import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 const props = defineProps<{
   score: ScoreView | null
+  verticalHomeUrl?: string | null
 }>()
 
 const { locale } = useI18n()
@@ -48,9 +49,26 @@ const normalizedScore = computed(() => {
   return Math.max(0, Math.min(rawValue, 5))
 })
 
+const normalizedVerticalEcoscorePath = computed(() => {
+  const raw = props.verticalHomeUrl?.trim()
+  if (!raw) {
+    return null
+  }
+
+  const sanitized = raw.replace(/^\/+/, '').replace(/\/+$/, '')
+  if (!sanitized.length) {
+    return null
+  }
+
+  return `/${sanitized}/ecoscore`
+})
+
 const methodologyHref = computed(() => {
-  const basePath = resolveLocalizedRoutePath('impact-score', locale.value)
-  return `${basePath}#calculation`
+  if (normalizedVerticalEcoscorePath.value) {
+    return normalizedVerticalEcoscorePath.value
+  }
+
+  return resolveLocalizedRoutePath('impact-score', locale.value)
 })
 </script>
 

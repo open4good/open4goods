@@ -26,7 +26,11 @@
         </div>
       </template>
       <template #[`item.coefficient`]="{ item }">
-        <ImpactCoefficientBadge v-if="item.coefficient != null" :value="item.coefficient" />
+        <ImpactCoefficientBadge
+          v-if="item.coefficient != null"
+          :value="item.coefficient"
+          :tooltip-params="{ scoreName: item.label }"
+        />
         <span v-else class="impact-details__coefficient-empty">—</span>
       </template>
     </v-data-table>

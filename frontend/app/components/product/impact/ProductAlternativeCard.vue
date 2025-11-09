@@ -20,20 +20,42 @@
         </div>
       </div>
       <div class="product-alternative-card__body">
-        <h4 class="product-alternative-card__title">{{ displayName }}</h4>
-        <p v-if="subtitle" class="product-alternative-card__subtitle">{{ subtitle }}</p>
-        <div class="product-alternative-card__meta">
+        <h4 class="product-alternative-card__title">{{ title }}</h4>
+        <div
+          v-if="popularAttributesList.length"
+          class="product-alternative-card__attributes"
+          role="list"
+        >
+          <v-chip
+            v-for="attribute in popularAttributesList"
+            :key="attribute.key"
+            size="small"
+            class="product-alternative-card__attribute"
+            variant="flat"
+            color="surface-primary-080"
+            role="listitem"
+          >
+            <v-icon
+              v-if="attribute.icon"
+              :icon="attribute.icon"
+              size="16"
+              class="product-alternative-card__attribute-icon"
+            />
+            <span class="product-alternative-card__attribute-value">{{ attribute.value }}</span>
+          </v-chip>
+        </div>
+        <div class="product-alternative-card__score">
           <ImpactScore
             v-if="impactScore != null"
             :score="impactScore"
             :max="5"
             size="small"
           />
-          <span class="product-alternative-card__price">{{ bestPrice }}</span>
+          <span v-if="bestPrice" class="product-alternative-card__price">{{ bestPrice }}</span>
         </div>
       </div>
     </NuxtLink>
-    <div class="product-alternative-card__compare">
+    <div class="product-alternative-card__footer">
       <v-tooltip :text="compareButtonTitle" location="top" open-delay="150">
         <template #activator="{ props: tooltipProps }">
           <v-btn
@@ -61,7 +83,7 @@
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { ProductDto } from '~~/shared/api-client'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import {
   MAX_COMPARE_ITEMS,
@@ -70,11 +92,16 @@ import {
 } from '~/stores/useProductCompareStore'
 import { formatBestPrice } from '~/utils/_product-pricing'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
 
 const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     required: true,
+  },
+  popularAttributes: {
+    type: Array as PropType<AttributeConfigDto[]>,
+    default: () => [],
   },
 })
 
@@ -92,31 +119,50 @@ const image = computed(() => {
   return candidate || null
 })
 
+const brand = computed(() => product.value.identity?.brand?.trim() ?? '')
+const model = computed(() => product.value.identity?.model?.trim() ?? '')
+
+const brandModelTitle = computed(() => {
+  const segments = [brand.value, model.value].filter((value) => value.length)
+  return segments.join(' • ')
+})
+
 const displayName = computed(() => {
   return (
-    product.value.identity?.bestName ??
-    product.value.base?.bestName ??
-    product.value.names?.h1Title ??
-    product.value.identity?.model ??
-    product.value.identity?.brand ??
+    brandModelTitle.value ||
+    product.value.identity?.bestName ||
+    product.value.base?.bestName ||
+    product.value.names?.h1Title ||
+    product.value.identity?.model ||
+    product.value.identity?.brand ||
     t('product.impact.alternatives.untitled')
   )
 })
 
-const subtitle = computed(() => {
-  const brand = product.value.identity?.brand ?? null
-  const model = product.value.identity?.model ?? null
-
-  if (brand && model) {
-    return `${brand} • ${model}`
-  }
-
-  return brand ?? model ?? null
-})
+const title = computed(() => brandModelTitle.value || displayName.value)
 
 const bestPrice = computed(() => formatBestPrice(product.value, t, n))
 
 const impactScore = computed(() => resolvePrimaryImpactScore(product.value))
+
+const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
+
+const popularAttributesList = computed(() =>
+  resolvePopularAttributes(product.value, popularAttributeConfigs.value)
+    .map((attribute) => {
+      const value = formatAttributeValue(attribute, t, n)
+      if (!value) {
+        return null
+      }
+
+      return {
+        key: attribute.key,
+        icon: attribute.icon ?? null,
+        value,
+      }
+    })
+    .filter((attribute): attribute is { key: string; icon: string | null; value: string } => Boolean(attribute)),
+)
 
 const productLink = computed(() => {
   return product.value.fullSlug ?? product.value.slug ?? '#'
@@ -212,7 +258,8 @@ const toggleCompare = () => {
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  padding-bottom: 0.75rem;
+  flex: 1 1 auto;
+  gap: 0.75rem;
 }
 
 .product-alternative-card__link:hover,
@@ -257,8 +304,9 @@ const toggleCompare = () => {
 .product-alternative-card__body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 1rem;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+  flex: 1 1 auto;
 }
 
 .product-alternative-card__title {
@@ -269,17 +317,29 @@ const toggleCompare = () => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-alternative-card__subtitle {
-  margin: 0;
-  font-size: 0.85rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.8);
+.product-alternative-card__attributes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.product-alternative-card__meta {
+.product-alternative-card__attribute {
+  font-weight: 500;
+}
+
+.product-alternative-card__attribute-icon {
+  margin-right: 0.35rem;
+}
+
+.product-alternative-card__attribute-value {
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+}
+
+.product-alternative-card__score {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
 }
 
 .product-alternative-card__price {
@@ -288,10 +348,10 @@ const toggleCompare = () => {
   color: rgb(var(--v-theme-primary));
 }
 
-.product-alternative-card__compare {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
+.product-alternative-card__footer {
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem 1rem;
 }
 
 .product-alternative-card__compare-btn {

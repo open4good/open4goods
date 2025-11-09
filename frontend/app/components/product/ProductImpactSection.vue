@@ -10,7 +10,7 @@
     </header>
 
     <div class="product-impact__primary">
-      <ProductImpactEcoScoreCard :score="primaryScore" />
+      <ProductImpactEcoScoreCard :score="primaryScore" :vertical-home-url="verticalHomeUrl" />
     </div>
 
     <div class="product-impact__analysis">
@@ -75,10 +75,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  verticalHomeUrl: {
+    type: String,
+    default: '',
+  },
 })
 
 const radarValues = toRef(props, 'radarValues')
 const productName = toRef(props, 'productName')
+const verticalHomeUrl = toRef(props, 'verticalHomeUrl')
 
 const primaryScore = computed(() => props.scores[0] ?? null)
 const secondaryScores = computed(() => props.scores.slice(1))
@@ -122,7 +127,7 @@ const showRadar = computed(() => filteredRadarValues.value.length >= 3)
 
 .product-impact__analysis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: stretch;
 }
@@ -142,9 +147,9 @@ const showRadar = computed(() => filteredRadarValues.value.length >= 3)
   min-height: 320px;
 }
 
-@media (max-width: 1280px) {
+@media (min-width: 960px) {
   .product-impact__analysis {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   }
 }
 

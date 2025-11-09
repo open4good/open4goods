@@ -1707,7 +1707,6 @@
         "selected": "In comparison"
       },
       "gtin": "GTIN code",
-      "gtinCountryLabel": "GTIN registration country",
       "gtinTooltip": "Based on the product GTIN code, this does not necessarily indicate the manufacturing location.",
       "mediaType": {
         "image": "image",
@@ -1737,7 +1736,7 @@
       "alternatives": {
         "title": "Greener alternatives",
         "subtitle": "Discover similar products with a better impact score or price.",
-        "empty": "No alternatives match the selected filters yet.",
+        "bestProduct": "Voted best product for your criteria!",
         "error": "We couldn't load alternative products. Please try again.",
         "retry": "Retry",
         "untitled": "Unnamed product",
@@ -1762,7 +1761,8 @@
       "methodologyLink": "Access the methodology",
       "methodologyLinkAria": "Open the Impact Score methodology",
       "percentile": "Percentile",
-      "weightChip": "Counts for {value}% of the total score",
+      "weightChip": "{value}% of the total score",
+      "weightTooltip": "The {scoreName} score counts for {value}% of the total score",
       "subscoreDetailsToggle": "View indicator details",
       "subscoreEyebrow": "Impact indicator",
       "primaryScoreLabel": "Overall impact",

@@ -1,30 +1,43 @@
 <template>
-  <v-breadcrumbs
+  <nav
     v-if="breadcrumbItems.length"
     class="category-navigation-breadcrumbs"
     :aria-label="ariaLabel"
-    :items="breadcrumbItems"
-    divider="/"
-    tag="nav"
+    itemscope
+    itemtype="https://schema.org/BreadcrumbList"
   >
-    <template #item="{ item }">
-      <v-breadcrumbs-item
-        :disabled="item.disabled"
-        :href="item.href"
-        :to="item.to"
+    <ol class="category-navigation-breadcrumbs__list">
+      <li
+        v-for="(item, index) in breadcrumbItems"
+        :key="`${item.title}-${index}`"
         class="category-navigation-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
       >
-        <span
-          :class="[
-            'category-navigation-breadcrumbs__label',
-            item.disabled ? 'category-navigation-breadcrumbs__label--current' : 'category-navigation-breadcrumbs__label--link',
-          ]"
+        <component
+          :is="item.component"
+          v-if="item.isLink"
+          v-bind="item.componentProps"
+          class="category-navigation-breadcrumbs__link"
+          itemprop="item"
         >
-          {{ item.title }}
+          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+        </component>
+        <span
+          v-else
+          class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
+          aria-current="page"
+        >
+          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
         </span>
-      </v-breadcrumbs-item>
-    </template>
-  </v-breadcrumbs>
+        <span v-if="index < breadcrumbItems.length - 1" class="category-navigation-breadcrumbs__divider" aria-hidden="true">
+          /
+        </span>
+        <meta itemprop="position" :content="String(index + 1)" />
+      </li>
+    </ol>
+  </nav>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +48,18 @@ interface BreadcrumbItem {
   link?: string
 }
 
+type BreadcrumbRenderItem =
+  | {
+      title: string
+      isLink: true
+      component: string
+      componentProps: Record<string, unknown>
+    }
+  | {
+      title: string
+      isLink: false
+    }
+
 const props = defineProps<{
   items: BreadcrumbItem[]
   ariaLabel: string
@@ -42,7 +67,7 @@ const props = defineProps<{
 
 const visibleItems = computed(() => props.items.filter((item) => item.title?.trim().length))
 
-const breadcrumbItems = computed(() => {
+const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   const items = visibleItems.value
 
   return items.map((item, index) => {
@@ -52,22 +77,27 @@ const breadcrumbItems = computed(() => {
     if (!rawLink || isLast) {
       return {
         title: item.title,
-        disabled: true,
+        isLink: false,
       }
     }
 
     if (/^https?:\/\//i.test(rawLink)) {
       return {
         title: item.title,
-        href: rawLink,
-        disabled: false,
+        isLink: true,
+        component: 'a',
+        componentProps: {
+          href: rawLink,
+          rel: 'noopener noreferrer',
+        },
       }
     }
 
     return {
       title: item.title,
-      to: rawLink,
-      disabled: false,
+      isLink: true,
+      component: 'NuxtLink',
+      componentProps: { to: rawLink },
     }
   })
 })
@@ -76,40 +106,60 @@ const breadcrumbItems = computed(() => {
 <style scoped>
 .category-navigation-breadcrumbs {
   display: inline-flex;
-  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 0.875rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.category-navigation-breadcrumbs__list {
+  display: inline-flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  font-size: 0.875rem;
-  color: rgb(var(--v-theme-text-neutral-secondary));
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .category-navigation-breadcrumbs__item {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
-.category-navigation-breadcrumbs__label {
+.category-navigation-breadcrumbs__link {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.category-navigation-breadcrumbs__label--link {
-  color: inherit;
-  text-decoration: none;
+.category-navigation-breadcrumbs__link--current {
+  cursor: default;
 }
 
-.category-navigation-breadcrumbs__label--link:hover,
-.category-navigation-breadcrumbs__label--link:focus-visible {
+.category-navigation-breadcrumbs__link:hover,
+.category-navigation-breadcrumbs__link:focus-visible {
   color: rgb(var(--v-theme-primary));
   text-decoration: underline;
 }
 
-.category-navigation-breadcrumbs__label--current {
+.category-navigation-breadcrumbs__link:focus-visible {
+  outline: none;
+}
+
+.category-navigation-breadcrumbs__label {
+  font-weight: 500;
+}
+
+.category-navigation-breadcrumbs__item:last-child .category-navigation-breadcrumbs__label {
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.category-navigation-breadcrumbs :deep(.v-breadcrumbs-item__divider) {
+.category-navigation-breadcrumbs__divider {
   opacity: 0.6;
+  color: inherit;
 }
 </style>
