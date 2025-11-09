@@ -46,7 +46,7 @@ excludingTokensFromCategoriesMatching:
             
 subsets:
   ################
-  # Price
+  # Impact Score
   ################
  - id: "impact_high"  # Unique identifier for the subset
    group: "impactscore"
@@ -78,6 +78,7 @@ subsets:
        operator: "LOWER_THAN"
        value: "4"
    image: "example-image.png"
+   url:
      en: "medium-impact"
      fr: "impact-moyen"
    caption:
