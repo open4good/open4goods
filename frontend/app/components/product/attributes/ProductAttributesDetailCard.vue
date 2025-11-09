@@ -20,7 +20,7 @@
       <div v-if="group.unFeatures.length" class="product-attributes__chip-list product-attributes__chip-list--negative">
         <ul>
           <li v-for="feature in group.unFeatures" :key="feature.key">
-            <v-icon icon="mdi-alert-circle" size="18" class="product-attributes__chip-icon product-attributes__chip-icon--negative" />
+            <v-icon icon="mdi-close-octagon-outline" size="18" class="product-attributes__chip-icon product-attributes__chip-icon--negative" />
             <span class="product-attributes__chip-label">{{ feature.name }}</span>
           </li>
         </ul>
