@@ -333,7 +333,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import type { ActiveHeadEntry, UseHeadInput } from '@unhead/vue'
-import { useDebounceFn, useEventListener, useStorage } from '@vueuse/core'
+import {
+  StorageSerializers,
+  useDebounceFn,
+  useEventListener,
+  useStorage,
+} from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
 import type {
@@ -668,7 +673,66 @@ const sortOptions = computed(() => sortOptionsData.value ?? null)
 
 const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value))
 const filtersDrawer = ref(false)
-const filtersCollapsed = ref(true)
+
+const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
+const DEFAULT_FILTERS_COLLAPSED_STATE = true
+
+const filtersVisibilityCookie = useCookie<string | null>(FILTERS_VISIBILITY_STORAGE_KEY, {
+  sameSite: 'lax',
+  path: '/',
+  watch: false,
+})
+
+const resolveCollapsedPreference = (
+  value: string | boolean | null | undefined,
+  fallback: boolean,
+): boolean => {
+  if (typeof value === 'boolean') {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    if (value === 'true') {
+      return true
+    }
+
+    if (value === 'false') {
+      return false
+    }
+  }
+
+  return fallback
+}
+
+const filtersCollapsedState = useStorage<boolean>(
+  FILTERS_VISIBILITY_STORAGE_KEY,
+  resolveCollapsedPreference(filtersVisibilityCookie.value, DEFAULT_FILTERS_COLLAPSED_STATE),
+  undefined,
+  {
+    serializer: StorageSerializers.boolean,
+  },
+)
+
+const syncFiltersCollapsedCookie = (value: boolean) => {
+  const cookieValue = value ? 'true' : 'false'
+
+  if (filtersVisibilityCookie.value !== cookieValue) {
+    filtersVisibilityCookie.value = cookieValue
+  }
+}
+
+syncFiltersCollapsedCookie(filtersCollapsedState.value)
+
+watch(filtersCollapsedState, (value) => {
+  syncFiltersCollapsedCookie(value)
+})
+
+const filtersCollapsed = computed<boolean>({
+  get: () => filtersCollapsedState.value,
+  set: (value) => {
+    filtersCollapsedState.value = value
+  },
+})
 const filtersToggleLabel = computed(() =>
   filtersCollapsed.value
     ? t('category.filters.toggle.show')
@@ -821,17 +885,23 @@ const onResizeHandlePointerDown = (event: PointerEvent) => {
 
 watch(
   isDesktop,
-  (value) => {
-    filtersDrawer.value = value
+  (value, previous) => {
+    if (value) {
+      filtersDrawer.value = false
 
-    if (!value) {
-      filtersCollapsed.value = false
-      removePointerListeners()
-      isResizing.value = false
-      activePointerId = null
-      initialPointerX = 0
-      initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+      if (previous === false) {
+        initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+      }
+
+      return
     }
+
+    filtersDrawer.value = false
+    removePointerListeners()
+    isResizing.value = false
+    activePointerId = null
+    initialPointerX = 0
+    initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
   },
   { immediate: true },
 )
