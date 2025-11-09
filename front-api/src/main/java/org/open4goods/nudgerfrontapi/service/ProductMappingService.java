@@ -206,7 +206,7 @@ public class ProductMappingService {
         ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product) : null;
         ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources) ? mapDatasources(product) : null;
         Map<Long, ProductReferenceDto> referencedProducts = components.contains(ProductDtoComponent.scores) && resolveProductReferences
-                ? resolveReferencedProducts(product, domainLanguage, locale)
+                ? resolveReferencedProducts(product, domainLanguage, locale, vConfig)
                 : Collections.emptyMap();
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
                 ? mapScores(product, domainLanguage, vConfig, referencedProducts)
@@ -252,12 +252,12 @@ public class ProductMappingService {
      * Resolve the products referenced by score extremes or rankings and project them to lightweight DTOs.
      */
     private Map<Long, ProductReferenceDto> resolveReferencedProducts(Product product, DomainLanguage domainLanguage,
-            Locale locale) {
+            Locale locale, VerticalConfig vConf) {
         Set<Long> referencedIds = collectReferencedProductIds(product);
         if (referencedIds.isEmpty()) {
             return Collections.emptyMap();
         }
-        return fetchProductReferences(referencedIds, domainLanguage, locale);
+        return fetchProductReferences(referencedIds, domainLanguage, locale, vConf);
     }
 
     /**
@@ -311,7 +311,7 @@ public class ProductMappingService {
      * Retrieve product references from the cache or repository.
      */
     private Map<Long, ProductReferenceDto> fetchProductReferences(Set<Long> ids, DomainLanguage domainLanguage,
-            Locale locale) {
+            Locale locale,  VerticalConfig vConf) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -335,7 +335,7 @@ public class ProductMappingService {
                 for (Long id : missing) {
                     Product referencedProduct = fetched.get(String.valueOf(id));
                     if (referencedProduct != null) {
-                        ProductReferenceDto referenceDto = mapProductReference(referencedProduct, domainLanguage, locale);
+                        ProductReferenceDto referenceDto = mapProductReference(referencedProduct, domainLanguage, locale, vConf);
                         resolved.put(id, referenceDto);
                         cacheProductReference(id, domainLanguage, locale, referenceDto);
                     }
@@ -351,7 +351,7 @@ public class ProductMappingService {
     /**
      * Project a referenced product to the lightweight DTO used by rankings and extremes.
      */
-    private ProductReferenceDto mapProductReference(Product referencedProduct, DomainLanguage domainLanguage, Locale locale) {
+    private ProductReferenceDto mapProductReference(Product referencedProduct, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConf) {
         if (referencedProduct == null) {
             return null;
         }
@@ -367,12 +367,22 @@ public class ProductMappingService {
                 fullSlug = "/" + verticalHomeUrl + "/" + slug;
             }
         }
+
+
+        if (referencedProduct.getScores().size() > 0) {
+
+        }
+        ProductScoresDto scores = mapScores(referencedProduct, domainLanguage, vConf, null);
+
+
         return new ProductReferenceDto(
                 referencedProduct.getId(),
                 fullSlug,
                 referencedProduct.bestName(),
                 referencedProduct.brand(),
-                referencedProduct.model());
+                referencedProduct.model(),
+                scores
+        		);
     }
 
     /**
@@ -626,12 +636,6 @@ public class ProductMappingService {
                                 entry -> mapScore(entry.getValue(), domainLanguage, vConf, referencedProducts),
                                 (left, right) -> right,
                                 LinkedHashMap::new));
-        List<ProductScoreDto> realScores = product.realScores() == null
-                ? Collections.emptyList()
-                : product.realScores().stream().map(e -> mapScore(e, domainLanguage, vConf, referencedProducts)).toList();
-        List<ProductScoreDto> virtualScores = product.virtualScores() == null
-                ? Collections.emptyList()
-                : product.virtualScores().stream().map(e -> mapScore(e, domainLanguage, vConf, referencedProducts)).toList();
         ProductScoreDto ecoscore = product.ecoscore() == null
                 ? null
                 : mapScore(product.ecoscore(), domainLanguage, vConf, referencedProducts);

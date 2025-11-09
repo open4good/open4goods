@@ -15,7 +15,9 @@ public record ProductReferenceDto(
         @Schema(description = "Brand associated with the product", example = "Fairphone", nullable = true)
         String brand,
         @Schema(description = "Model identifier exposed by the datasource", example = "FP4", nullable = true)
-        String model
+        String model,
+        @Schema(description = "Score and ranking related information")
+        ProductScoresDto scores
 
 
 ) {
