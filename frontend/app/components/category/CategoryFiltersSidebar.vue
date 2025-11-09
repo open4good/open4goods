@@ -34,6 +34,7 @@
       v-if="ecoscoreLinkAvailable"
       class="category-page__ecoscore-entry mt-4"
       :vertical-home-url="props.verticalHomeUrl ?? undefined"
+      :category-name="props.categoryName ?? undefined"
     />
 
     <template v-if="hasDocumentation">
@@ -77,12 +78,14 @@ const props = withDefaults(
     wikiPages: WikiPageConfig[]
     relatedPosts: BlogPostDto[]
     verticalHomeUrl?: string | null
+    categoryName?: string | null
     showAdminPanel?: boolean
     adminFilterFields?: FieldMetadataDto[]
   }>(),
   {
     baselineAggregations: () => [],
     verticalHomeUrl: null,
+    categoryName: null,
     showAdminPanel: false,
     adminFilterFields: () => [],
   },

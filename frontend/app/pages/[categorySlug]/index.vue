@@ -85,6 +85,7 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
+              :category-name="categoryDisplayName"
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
@@ -120,6 +121,7 @@
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
               :vertical-home-url="category?.verticalHomeUrl ?? null"
+              :category-name="categoryDisplayName"
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
@@ -151,7 +153,7 @@
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
 
           <div class="category-page__toolbar">
-            <div class="category-page__toolbar-left">
+            <div class="category-page__toolbar-section category-page__toolbar-section--left">
               <v-btn
                 v-if="!isDesktop"
                 color="primary"
@@ -163,25 +165,6 @@
               </v-btn>
 
               <CategoryResultsCount :count="resultsCount" />
-            </div>
-
-            <div class="category-page__toolbar-actions">
-              <div class="category-page__search">
-                <v-text-field
-                  v-model="searchTerm"
-                  :label="$t('category.products.searchPlaceholder')"
-                  prepend-inner-icon="mdi-magnify"
-                  clearable
-                  hide-details
-                  density="comfortable"
-                  class="category-page__search-input"
-                />
-                <v-tooltip
-                  activator="parent"
-                  :text="$t('category.products.tooltips.search')"
-                  location="bottom"
-                />
-              </div>
 
               <div class="category-page__sort">
                 <div class="category-page__sort-select">
@@ -220,7 +203,28 @@
                   </v-btn>
                 </v-btn-toggle>
               </div>
+            </div>
 
+            <div class="category-page__toolbar-section category-page__toolbar-section--center">
+              <div class="category-page__search">
+                <v-text-field
+                  v-model="searchTerm"
+                  :label="$t('category.products.searchPlaceholder')"
+                  prepend-inner-icon="mdi-magnify"
+                  clearable
+                  hide-details
+                  density="comfortable"
+                  class="category-page__search-input"
+                />
+                <v-tooltip
+                  activator="parent"
+                  :text="$t('category.products.tooltips.search')"
+                  location="bottom"
+                />
+              </div>
+            </div>
+
+            <div class="category-page__toolbar-section category-page__toolbar-section--right">
               <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
                 <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
                   <v-icon icon="mdi-view-grid" />
@@ -329,7 +333,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
 import type { ActiveHeadEntry, UseHeadInput } from '@unhead/vue'
-import { useDebounceFn, useEventListener, useStorage } from '@vueuse/core'
+import {
+  StorageSerializers,
+  useDebounceFn,
+  useEventListener,
+  useStorage,
+} from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { isNavigationFailure } from 'vue-router'
 import type {
@@ -490,6 +499,13 @@ const heroImage = computed(() => {
 })
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
+const categoryDisplayName = computed(
+  () =>
+    category.value?.verticalHomeTitle ??
+    category.value?.verticalMetaTitle ??
+    category.value?.verticalHomeDescription ??
+    siteName.value,
+)
 const canonicalUrl = computed(() => new URL(route.fullPath, requestURL.origin).toString())
 const seoTitle = computed(
   () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle ?? siteName.value,
@@ -657,7 +673,66 @@ const sortOptions = computed(() => sortOptionsData.value ?? null)
 
 const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value))
 const filtersDrawer = ref(false)
-const filtersCollapsed = ref(false)
+
+const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
+const DEFAULT_FILTERS_COLLAPSED_STATE = true
+
+const filtersVisibilityCookie = useCookie<string | null>(FILTERS_VISIBILITY_STORAGE_KEY, {
+  sameSite: 'lax',
+  path: '/',
+  watch: false,
+})
+
+const resolveCollapsedPreference = (
+  value: string | boolean | null | undefined,
+  fallback: boolean,
+): boolean => {
+  if (typeof value === 'boolean') {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    if (value === 'true') {
+      return true
+    }
+
+    if (value === 'false') {
+      return false
+    }
+  }
+
+  return fallback
+}
+
+const filtersCollapsedState = useStorage<boolean>(
+  FILTERS_VISIBILITY_STORAGE_KEY,
+  resolveCollapsedPreference(filtersVisibilityCookie.value, DEFAULT_FILTERS_COLLAPSED_STATE),
+  undefined,
+  {
+    serializer: StorageSerializers.boolean,
+  },
+)
+
+const syncFiltersCollapsedCookie = (value: boolean) => {
+  const cookieValue = value ? 'true' : 'false'
+
+  if (filtersVisibilityCookie.value !== cookieValue) {
+    filtersVisibilityCookie.value = cookieValue
+  }
+}
+
+syncFiltersCollapsedCookie(filtersCollapsedState.value)
+
+watch(filtersCollapsedState, (value) => {
+  syncFiltersCollapsedCookie(value)
+})
+
+const filtersCollapsed = computed<boolean>({
+  get: () => filtersCollapsedState.value,
+  set: (value) => {
+    filtersCollapsedState.value = value
+  },
+})
 const filtersToggleLabel = computed(() =>
   filtersCollapsed.value
     ? t('category.filters.toggle.show')
@@ -810,17 +885,23 @@ const onResizeHandlePointerDown = (event: PointerEvent) => {
 
 watch(
   isDesktop,
-  (value) => {
-    filtersDrawer.value = value
+  (value, previous) => {
+    if (value) {
+      filtersDrawer.value = false
 
-    if (!value) {
-      filtersCollapsed.value = false
-      removePointerListeners()
-      isResizing.value = false
-      activePointerId = null
-      initialPointerX = 0
-      initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+      if (previous === false) {
+        initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
+      }
+
+      return
     }
+
+    filtersDrawer.value = false
+    removePointerListeners()
+    isResizing.value = false
+    activePointerId = null
+    initialPointerX = 0
+    initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
   },
   { immediate: true },
 )
@@ -1780,18 +1861,21 @@ const clearAllFilters = () => {
     margin-bottom: 1.5rem
     width: 100%
 
-  &__toolbar-left
+  &__toolbar-section
     display: flex
     align-items: center
-    gap: 1rem
-    flex-wrap: wrap
-
-  &__toolbar-actions
-    display: flex
-    align-items: center
-    flex-wrap: wrap
     gap: 1rem
     width: 100%
+    flex-wrap: wrap
+
+  &__toolbar-section--left
+    justify-content: flex-start
+
+  &__toolbar-section--center
+    justify-content: center
+
+  &__toolbar-section--right
+    justify-content: flex-end
 
   &__fast-filters
     display: flex
@@ -1863,7 +1947,10 @@ const clearAllFilters = () => {
 
   &__search
     position: relative
-    min-width: 260px
+    min-width: min(260px, 100%)
+    width: 100%
+    max-width: 420px
+    flex: 1 1 100%
 
   &__search-input
     width: 100%
@@ -1883,7 +1970,6 @@ const clearAllFilters = () => {
 
   &__view-toggle
     border-radius: 999px
-    margin-left: auto
 
   &__results-count
     margin: 0
@@ -1998,18 +2084,25 @@ const clearAllFilters = () => {
 
 @media (min-width: 960px)
   .category-page__toolbar
-    flex-direction: row
+    display: grid
+    grid-template-columns: auto minmax(260px, 1fr) auto
     align-items: center
+    gap: 1.5rem
 
-  .category-page__toolbar-left
-    flex: 0 0 auto
+  .category-page__toolbar-section
+    flex-wrap: nowrap
 
-  .category-page__toolbar-actions
-    flex: 1 1 auto
-    width: auto
+  .category-page__toolbar-section--left
+    justify-content: flex-start
 
-  .category-page__view-toggle
-    margin-left: auto
+  .category-page__toolbar-section--center
+    justify-content: center
+
+  .category-page__toolbar-section--right
+    justify-content: flex-end
+
+  .category-page__search
+    flex: 0 1 420px
 
 @media (min-width: 1280px)
   .category-page__layout
@@ -2030,12 +2123,16 @@ const clearAllFilters = () => {
     flex-direction: column
     align-items: stretch
 
-  .category-page__toolbar-actions
-    justify-content: space-between
-
   .category-page__search
     flex: 1 1 100%
     min-width: 0
+    max-width: 100%
+
+  .category-page__toolbar-section--center
+    justify-content: center
+
+  .category-page__toolbar-section--right
+    justify-content: flex-end
 
   .category-page__sort
     width: 100%
