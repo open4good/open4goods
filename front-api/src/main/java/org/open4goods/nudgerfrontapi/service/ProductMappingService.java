@@ -550,12 +550,27 @@ public class ProductMappingService {
             return Collections.emptyList();
         }
         return groups.stream()
-                .map(group -> new ProductClassifiedAttributeGroupDto(
-                        group.getName(),
-                        mapAttributeList(group.getAttributes()),
-                        mapAttributeList(group.features()),
-                        mapAttributeList(group.unFeatures())))
-                .collect(Collectors.toCollection(ArrayList::new));
+        	    .map(group -> {
+        	        var features = group.features();
+        	        var unFeatures = group.unFeatures();
+
+        	        // Assuming Attribute has proper equals/hashCode
+        	        var excluded = new java.util.HashSet<>();
+        	        excluded.addAll(features);
+        	        excluded.addAll(unFeatures);
+
+        	        var filteredAttributes = group.getAttributes().stream()
+        	            .filter(a -> !excluded.contains(a))
+        	            .collect(java.util.stream.Collectors.toList());
+
+        	        return new ProductClassifiedAttributeGroupDto(
+        	            group.getName(),
+        	            mapAttributeList(filteredAttributes),
+        	            mapAttributeList(features),
+        	            mapAttributeList(unFeatures)
+        	        );
+        	    })
+        	    .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
     }
 
     private String resolveIcecatLanguage(DomainLanguage domainLanguage) {
