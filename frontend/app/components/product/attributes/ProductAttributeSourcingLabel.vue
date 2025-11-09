@@ -1,94 +1,95 @@
 <template>
   <span class="product-attribute-sourcing">
-  <v-tooltip
-    v-if="isTooltipEnabled"
-    location="top"
-    open-delay="150"
-    :close-delay="100"
-    :disabled="!isTooltipEnabled"
-    :scrim="false"
-    :content-class="tooltipContentClass"
-    :content-style="tooltipContentStyles"
-  >
-    <template #activator="{ props: tooltipProps }">
-      <v-btn
-        v-bind="tooltipProps"
-        class="product-attribute-sourcing__info"
-        variant="text"
-        density="compact"
-        icon
-        :aria-label="tooltipAriaLabel"
+    <span v-if="isTooltipEnabled" class="product-attribute-sourcing__icon">
+      <v-tooltip
+        location="top"
+        open-delay="150"
+        :close-delay="100"
+        :disabled="!isTooltipEnabled"
+        :scrim="false"
+        :content-class="tooltipContentClass"
+        :content-style="tooltipContentStyles"
       >
-        <v-icon :icon="'mdi-information'" size="18" :color="iconColor" />
-      </v-btn>
-    </template>
-
-    <template #default>
-      <v-card class="product-attribute-sourcing__tooltip" elevation="8">
-        <header class="product-attribute-sourcing__tooltip-header">
-          <div class="product-attribute-sourcing__tooltip-legend">
-            <p class="product-attribute-sourcing__tooltip-title">
-              {{ t('product.attributes.sourcing.bestValue') }}
-            </p>
-            <p class="product-attribute-sourcing__tooltip-highlight">{{ displayValue }}</p>
-          </div>
-          <v-chip
-            size="small"
-            :color="chipColor"
-            variant="tonal"
-            class="product-attribute-sourcing__tooltip-chip"
-          >
-            {{ statusLabel }}
-          </v-chip>
-        </header>
-
-        <v-divider class="product-attribute-sourcing__tooltip-divider" />
-
-        <div class="product-attribute-sourcing__tooltip-body">
-          <p class="product-attribute-sourcing__tooltip-count">
-            {{ sourceCountLabel }}
-          </p>
-
-          <v-table
-            v-if="hasSources"
+        <template #activator="{ props: tooltipProps }">
+          <v-btn
+            v-bind="tooltipProps"
+            class="product-attribute-sourcing__info"
+            variant="text"
             density="compact"
-            class="product-attribute-sourcing__sources"
+            icon
+            :aria-label="tooltipAriaLabel"
           >
-            <thead>
-              <tr>
-                <th scope="col">{{ t('product.attributes.sourcing.columns.source') }}</th>
-                <th scope="col">{{ t('product.attributes.sourcing.columns.value') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="source in normalizedSources" :key="sourceKey(source)">
-                <td>{{ formatSourceName(source.datasourceName) }}</td>
-                <td>{{ formatSourceValue(source.value) }}</td>
-              </tr>
-            </tbody>
-          </v-table>
+            <v-icon :icon="'mdi-information'" size="18" :color="iconColor" />
+          </v-btn>
+        </template>
 
-          <p v-else class="product-attribute-sourcing__tooltip-empty">
-            {{ t('product.attributes.sourcing.empty') }}
-          </p>
-        </div>
-      </v-card>
-    </template>
-  </v-tooltip>
+        <template #default>
+          <v-card class="product-attribute-sourcing__tooltip" elevation="8">
+            <header class="product-attribute-sourcing__tooltip-header">
+              <div class="product-attribute-sourcing__tooltip-legend">
+                <p class="product-attribute-sourcing__tooltip-title">
+                  {{ t('product.attributes.sourcing.bestValue') }}
+                </p>
+                <p class="product-attribute-sourcing__tooltip-highlight">{{ displayValue }}</p>
+              </div>
+              <v-chip
+                size="small"
+                :color="chipColor"
+                variant="tonal"
+                class="product-attribute-sourcing__tooltip-chip"
+              >
+                {{ statusLabel }}
+              </v-chip>
+            </header>
 
-  <span class="product-attribute-sourcing__value">
-    <slot :display-value="displayValue">
-      <span class="product-attribute-sourcing__value-text">
-        {{ displayValue }}
-      </span>
-    </slot>
-  </span>
+            <v-divider class="product-attribute-sourcing__tooltip-divider" />
+
+            <div class="product-attribute-sourcing__tooltip-body">
+              <p class="product-attribute-sourcing__tooltip-count">
+                {{ sourceCountLabel }}
+              </p>
+
+              <v-table
+                v-if="hasSources"
+                density="compact"
+                class="product-attribute-sourcing__sources"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">{{ t('product.attributes.sourcing.columns.source') }}</th>
+                    <th scope="col">{{ t('product.attributes.sourcing.columns.value') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="source in normalizedSources" :key="sourceKey(source)">
+                    <td>{{ formatSourceName(source.datasourceName) }}</td>
+                    <td>{{ formatSourceValue(source.value) }}</td>
+                  </tr>
+                </tbody>
+              </v-table>
+
+              <p v-else class="product-attribute-sourcing__tooltip-empty">
+                {{ t('product.attributes.sourcing.empty') }}
+              </p>
+            </div>
+          </v-card>
+        </template>
+      </v-tooltip>
+    </span>
+
+    <span class="product-attribute-sourcing__value">
+      <slot :display-value="displayValue">
+        <span class="product-attribute-sourcing__value-text">
+          {{ displayValue }}
+        </span>
+      </slot>
+    </span>
   </span>
 </template>
 
 <script setup lang="ts">
-import { computed, toRaw } from 'vue'
-import type { PropType } from 'vue'
+import { computed, toRaw, unref } from 'vue'
+import type { PropType, Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import type {
@@ -140,17 +141,21 @@ const isDefinedSource = (
   item: ProductSourcedAttributeDto | null | undefined,
 ): item is ProductSourcedAttributeDto => Boolean(item)
 
+type MaybeRef<T> = T | Ref<T>
+
 const normalizeSources = (
-  rawSources: ProductAttributeSourceDto['sources'] | null | undefined,
+  rawSources: MaybeRef<ProductAttributeSourceDto['sources'] | null | undefined>,
 ): ProductSourcedAttributeDto[] => {
-  if (!rawSources) {
+  const resolvedSources = unref(rawSources)
+
+  if (!resolvedSources) {
     return []
   }
 
   const candidate =
-    typeof rawSources === 'object' && rawSources !== null
-      ? (toRaw(rawSources) as unknown)
-      : (rawSources as unknown)
+    typeof resolvedSources === 'object' && resolvedSources !== null
+      ? (toRaw(resolvedSources) as unknown)
+      : (resolvedSources as unknown)
 
   if (Array.isArray(candidate)) {
     return candidate.filter(isDefinedSource)
@@ -262,6 +267,11 @@ const sourceKey = (source: ProductSourcedAttributeDto) => {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.product-attribute-sourcing__icon {
+  display: inline-flex;
+  order: -1;
 }
 
 .product-attribute-sourcing__value-text {

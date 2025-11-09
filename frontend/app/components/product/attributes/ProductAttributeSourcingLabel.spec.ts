@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h, reactive } from 'vue'
+import { defineComponent, h, reactive, ref } from 'vue'
 import ProductAttributeSourcingLabel from './ProductAttributeSourcingLabel.vue'
 import type {
   ProductAttributeSourceDto,
@@ -211,6 +211,32 @@ describe('ProductAttributeSourcingLabel', () => {
     const rows = wrapper.findAll('.v-table-stub tbody tr')
     expect(rows).toHaveLength(1)
     expect(rows[0].text()).toContain('icecat.biz')
+
+    const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
+    expect(countLabel.text()).toContain('1 source')
+  })
+
+  it('renders sources when provided through a ref of array values', () => {
+    const sourcesRef = ref<ProductSourcedAttributeDto[]>([
+      {
+        datasourceName: 'eprel',
+        value: '269',
+        language: null,
+        name: 'POWERONMODEHDR',
+      },
+    ])
+
+    const sourcing: ProductAttributeSourceDto = {
+      bestValue: '269',
+      conflicts: false,
+      sources: sourcesRef as unknown as ProductAttributeSourceDto['sources'],
+    }
+
+    const wrapper = mountComponent(sourcing, '269')
+
+    const rows = wrapper.findAll('.v-table-stub tbody tr')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].text()).toContain('eprel')
 
     const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
     expect(countLabel.text()).toContain('1 source')
