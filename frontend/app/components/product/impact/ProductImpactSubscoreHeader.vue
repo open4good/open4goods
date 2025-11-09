@@ -3,7 +3,11 @@
     <div class="impact-subscore-header__info">
       <h4 class="impact-subscore-header__title">{{ title }}</h4>
       <p v-if="subtitle" class="impact-subscore-header__subtitle">{{ subtitle }}</p>
-      <ImpactCoefficientBadge v-if="coefficientValue != null" :value="coefficientValue" />
+      <ImpactCoefficientBadge
+        v-if="coefficientValue != null"
+        :value="coefficientValue"
+        :tooltip-params="{ scoreName: title }"
+      />
     </div>
 
     <div v-if="on20Value" class="impact-subscore-header__score" aria-hidden="true">

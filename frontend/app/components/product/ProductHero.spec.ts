@@ -385,8 +385,10 @@ describe('ProductHero', () => {
     expect(impactOverview.text()).not.toContain('Impact score')
     expect(impactOverview.get('.impact-score-stub').text()).toBe('3.5')
 
+    const brandLine = wrapper.get('.product-hero__brand-line')
     const attributes = wrapper.get('.product-hero__attributes')
-    expect(attributes.element.previousElementSibling).toBe(impactOverview.element)
+    expect(impactOverview.element.nextElementSibling).toBe(brandLine.element)
+    expect(brandLine.element.nextElementSibling).toBe(attributes.element)
 
     await wrapper.unmount()
   })
@@ -433,8 +435,10 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     const breadcrumbLinks = wrapper.findAll('.breadcrumbs-stub__item')
-    expect(breadcrumbLinks).toHaveLength(2)
+    expect(breadcrumbLinks).toHaveLength(3)
     expect(breadcrumbLinks[1]?.attributes('href')).toBe('/appliances')
+    expect(breadcrumbLinks[2]?.text()).toBe('BrandCo - Model X')
+    expect(breadcrumbLinks[2]?.attributes('href')).toBe('#')
 
     const chips = wrapper.findAll('.product-hero__price-chip')
     expect(chips).toHaveLength(2)

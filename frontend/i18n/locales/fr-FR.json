@@ -1707,7 +1707,6 @@
         "selected": "Comparé"
       },
       "gtin": "Code GTIN",
-      "gtinCountryLabel": "Pays d'enregistrement du GTIN",
       "gtinTooltip": "Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication.",
       "mediaType": {
         "image": "l’image",
@@ -1737,7 +1736,7 @@
       "alternatives": {
         "title": "Alternatives plus vertes",
         "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact ou un prix plus accessible.",
-        "empty": "Aucune alternative ne correspond encore aux filtres sélectionnés.",
+        "bestProduct": "Élu meilleur produit par rapport à vos critères !",
         "error": "Impossible de charger les alternatives pour le moment. Réessayez.",
         "retry": "Réessayer",
         "untitled": "Produit sans nom",
@@ -1762,7 +1761,8 @@
       "methodologyLink": "Accéder à la méthodologie",
       "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
       "percentile": "Percentile",
-      "weightChip": "Compte pour {value}% de la note totale",
+      "weightChip": "{value}% de la note totale",
+      "weightTooltip": "Le score {scoreName} compte pour {value}% de la note totale",
       "subscoreDetailsToggle": "Voir les détails de l'indicateur",
       "subscoreEyebrow": "Indicateur d'impact",
       "primaryScoreLabel": "Score global",

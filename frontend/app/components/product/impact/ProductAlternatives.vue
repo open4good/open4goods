@@ -47,7 +47,11 @@
               :key="alternative.gtin ?? alternative.fullSlug ?? alternative.slug ?? JSON.stringify(alternative.identity)"
               class="product-alternatives__slide-item"
             >
-              <ProductAlternativeCard :product="alternative" class="product-alternatives__card" />
+              <ProductAlternativeCard
+                :product="alternative"
+                :popular-attributes="normalizedPopularAttributes"
+                class="product-alternatives__card"
+              />
             </v-slide-group-item>
           </v-slide-group>
         </div>
@@ -57,8 +61,9 @@
             {{ t('product.impact.alternatives.retry') }}
           </v-btn>
         </div>
-        <div v-else class="product-alternatives__empty">
-          <p>{{ t('product.impact.alternatives.empty') }}</p>
+        <div v-else class="product-alternatives__empty-card">
+          <v-icon icon="mdi-emoticon-happy-outline" size="56" class="product-alternatives__empty-icon" aria-hidden="true" />
+          <p class="product-alternatives__empty-message">{{ t('product.impact.alternatives.bestProduct') }}</p>
         </div>
       </template>
     </div>
@@ -598,27 +603,27 @@ const retryFetch = () => {
 .product-alternatives__scroller {
   position: relative;
   display: flex;
+  justify-content: center;
 }
 
 .product-alternatives__slide-group {
   width: 100%;
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.product-alternatives__slide-group :deep(.v-slide-group__content) {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.25rem;
 }
 
 .product-alternatives__slide-item {
-  padding-inline: 0.75rem;
-}
-
-.product-alternatives__slide-item:first-child {
-  padding-left: 0.5rem;
-}
-
-.product-alternatives__slide-item:last-child {
-  padding-right: 0.5rem;
+  padding: 0;
 }
 
 .product-alternatives__card {
-  width: 220px;
+  width: 240px;
   max-width: 100%;
 }
 
@@ -641,13 +646,37 @@ const retryFetch = () => {
   color: rgb(var(--v-theme-error));
 }
 
+.product-alternatives__empty-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.7);
+  color: rgb(var(--v-theme-primary));
+  font-weight: 600;
+  font-size: 1.05rem;
+  justify-content: center;
+  align-self: center;
+  max-width: 520px;
+}
+
+.product-alternatives__empty-icon {
+  color: rgba(var(--v-theme-primary), 0.85);
+}
+
+.product-alternatives__empty-message {
+  margin: 0;
+  color: rgb(var(--v-theme-primary));
+}
+
 @media (max-width: 960px) {
   .product-alternatives {
     padding: 1.25rem;
   }
 
   .product-alternatives__card {
-    width: 200px;
+    width: 220px;
   }
 }
 </style>

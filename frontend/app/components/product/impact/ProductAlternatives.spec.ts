@@ -8,7 +8,7 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('./ProductAlternativeCard.vue', () => ({
   default: {
     name: 'ProductAlternativeCardStub',
-    props: { product: Object },
+    props: { product: Object, popularAttributes: Array },
     template: '<div class="product-alternative-card-stub"></div>',
   },
 }))
@@ -24,7 +24,7 @@ describe('ProductAlternatives', () => {
             alternatives: {
               title: 'Greener alternatives',
               subtitle: 'Discover better options.',
-              empty: 'No alternatives.',
+              bestProduct: 'Best product message.',
               error: 'Error loading alternatives.',
               retry: 'Retry',
               untitled: 'Untitled product',

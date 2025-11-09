@@ -125,8 +125,8 @@ describe('ProductAlternativeCard', () => {
       },
     })
 
-    expect(wrapper.find('.product-alternative-card__title').text()).toBe('EcoCorp X')
-    expect(wrapper.find('.product-alternative-card__subtitle').text()).toContain('EcoCorp')
+    expect(wrapper.find('.product-alternative-card__title').text()).toBe('EcoCorp • X')
+    expect(wrapper.find('.product-alternative-card__attributes').exists()).toBe(false)
 
     const priceText = wrapper.find('.product-alternative-card__price').text()
     expect(priceText).toMatch(/299/)

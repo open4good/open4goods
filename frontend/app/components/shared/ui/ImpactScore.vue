@@ -42,7 +42,7 @@ const props = defineProps({
     default: 5,
   },
   size: {
-    type: String as PropType<'small' | 'medium' | 'large'>,
+    type: String as PropType<'small' | 'medium' | 'large' | 'xlarge'>,
     default: 'medium',
   },
   color: {
@@ -78,6 +78,8 @@ const ratingSize = computed(() => {
       return 18
     case 'large':
       return 32
+    case 'xlarge':
+      return 40
     default:
       return 24
   }
@@ -121,6 +123,12 @@ const showValue = computed(() => props.showValue)
   --impact-score-gap: 0.625rem;
   --impact-score-rating-gap: 0.5rem;
   --impact-score-value-font-size: 1.05rem;
+}
+
+.impact-score--xlarge {
+  --impact-score-gap: 0.75rem;
+  --impact-score-rating-gap: 0.6rem;
+  --impact-score-value-font-size: 1.2rem;
 }
 
 .impact-score__rating :deep(.v-rating__wrapper) {
