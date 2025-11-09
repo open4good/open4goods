@@ -18,7 +18,7 @@
         {{ t('category.filters.ecoscore.title') }}
       </p>
       <p class="category-ecoscore-card__description">
-        {{ t('category.filters.ecoscore.description') }}
+        {{ description }}
       </p>
       <span class="category-ecoscore-card__cta">
         {{ t('category.filters.ecoscore.cta') }}
@@ -31,9 +31,22 @@
 <script setup lang="ts">
 const props = defineProps<{
   verticalHomeUrl?: string | null
+  categoryName?: string | null
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+const normalizedCategoryName = computed(() => {
+  if (!props.categoryName) {
+    return ''
+  }
+
+  return props.categoryName.toLocaleLowerCase(locale.value)
+})
+
+const description = computed(() =>
+  t('category.filters.ecoscore.description', { category: normalizedCategoryName.value }),
+)
 
 const ecoscoreUrl = computed(() => {
   if (!props.verticalHomeUrl) {
@@ -51,9 +64,10 @@ const ecoscoreUrl = computed(() => {
 <style scoped lang="sass">
 .category-ecoscore-card
   display: flex
-  align-items: center
+  align-items: flex-start
   gap: 1rem
-  padding: 1.25rem
+  padding: 1.5rem
+  min-height: 160px
   background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.95), rgba(var(--v-theme-surface-primary-120), 0.9))
   color: rgb(var(--v-theme-text-neutral-strong))
   text-decoration: none
@@ -82,6 +96,8 @@ const ecoscoreUrl = computed(() => {
     display: flex
     flex-direction: column
     gap: 0.35rem
+    flex: 1 1 auto
+    min-height: 0
 
   &__title
     font-size: 1rem
@@ -92,7 +108,7 @@ const ecoscoreUrl = computed(() => {
     margin: 0
     color: rgb(var(--v-theme-text-neutral-secondary))
     font-size: 0.875rem
-    line-height: 1.35
+    line-height: 1.5
 
   &__cta
     display: inline-flex
