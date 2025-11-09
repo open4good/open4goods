@@ -219,7 +219,7 @@ describe('ProductHero', () => {
   const breadcrumbs = [
     { title: 'Home', link: '/' },
     { title: 'Appliances', link: '/appliances' },
-    { title: 'Demo Product', link: '/appliances/demo-product' },
+    { title: 'BrandCo', link: '/appliances#state-brandco' },
   ]
 
   const popularAttributes = [
@@ -365,7 +365,8 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     expect(wrapper.get('.product-hero__title').text()).toBe('Demo Product')
-    expect(wrapper.get('.product-hero__brand-line').text()).toBe('BrandCo - Model X')
+    expect(wrapper.get('.product-hero__brand-name').text()).toBe('BrandCo')
+    expect(wrapper.get('.product-hero__model-name').text()).toBe('Model X')
 
     const attributes = wrapper.findAll('.product-hero__attribute')
     expect(attributes).toHaveLength(2)
@@ -435,10 +436,12 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     const breadcrumbLinks = wrapper.findAll('.breadcrumbs-stub__item')
-    expect(breadcrumbLinks).toHaveLength(3)
+    expect(breadcrumbLinks).toHaveLength(4)
     expect(breadcrumbLinks[1]?.attributes('href')).toBe('/appliances')
-    expect(breadcrumbLinks[2]?.text()).toBe('BrandCo - Model X')
-    expect(breadcrumbLinks[2]?.attributes('href')).toBe('#')
+    expect(breadcrumbLinks[2]?.text()).toBe('BrandCo')
+    expect(breadcrumbLinks[2]?.attributes('href')).toBe('/appliances#state-brandco')
+    expect(breadcrumbLinks[3]?.text()).toBe('Model X')
+    expect(breadcrumbLinks[3]?.attributes('href')).toBe('#')
 
     const chips = wrapper.findAll('.product-hero__price-chip')
     expect(chips).toHaveLength(2)

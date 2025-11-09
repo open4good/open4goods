@@ -46,7 +46,7 @@
         >
           <ProductImpactSection
             :scores="impactScores"
-            :radar-values="radarValues"
+            :radar-data="radarData"
             :loading="loadingAggregations"
             :product-name="productTitle"
             :vertical-home-url="verticalHomeUrl"
@@ -122,7 +122,9 @@ import {
   type AggregationBucketDto,
   type AggregationResponseDto,
   type CommercialEvent,
+  type FilterRequestDto,
   type ProductDto,
+  type ProductReferenceDto,
   type ProductScoreDto,
   type ProductSearchResponseDto,
 } from '~~/shared/api-client'
@@ -141,6 +143,7 @@ import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
+import { buildCategoryHash } from '~/utils/_category-filter-state'
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -333,11 +336,74 @@ const productTitle = computed(() => {
 const heroPopularAttributes = computed(() => categoryDetail.value?.popularAttributes ?? [])
 const verticalHomeUrl = computed(() => categoryDetail.value?.verticalHomeUrl?.trim() ?? '')
 
+const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
+
+const normalizedCategoryPath = computed(() => {
+  const raw =
+    ((categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
+      categoryDetail.value?.verticalHomeUrl ??
+      null) ?? null
+
+  if (!raw) {
+    return null
+  }
+
+  const trimmed = raw.toString().trim()
+  if (!trimmed.length) {
+    return null
+  }
+
+  const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+  const sanitized = withLeadingSlash.split('?')[0]?.split('#')[0]
+
+  return sanitized?.length ? sanitized : withLeadingSlash
+})
+
+const productBrand = computed(() => {
+  const brand = product.value?.identity?.brand
+  return typeof brand === 'string' ? brand.trim() : ''
+})
+
+const productModel = computed(() => {
+  const model = product.value?.identity?.model
+  return typeof model === 'string' ? model.trim() : ''
+})
+
+const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
+  const brand = productBrand.value
+  if (!brand.length) {
+    return null
+  }
+
+  const basePath = normalizedCategoryPath.value
+  if (!basePath) {
+    return { title: brand }
+  }
+
+  const filters: FilterRequestDto = {
+    filters: [
+      {
+        field: BRAND_FILTER_FIELD,
+        operator: 'term',
+        terms: [brand],
+      },
+    ],
+  }
+
+  const hash = buildCategoryHash({ filters })
+  const link = `${basePath}${hash}`
+
+  return {
+    title: brand,
+    link,
+  }
+})
+
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
   const categoryFullSlug = (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ?? null
 
-  return breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, crumb, index, array) => {
+  const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, crumb, index, array) => {
     const rawTitle = crumb?.title ?? crumb?.link ?? ''
     const title = rawTitle.toString().trim()
     if (!title.length) {
@@ -366,14 +432,25 @@ const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
 
     return acc
   }, [])
+
+  const brandCrumb = brandBreadcrumb.value
+  if (brandCrumb) {
+    const duplicateIndex = resolvedCategories.findIndex(
+      (entry) => entry.title.trim().toLowerCase() === brandCrumb.title.trim().toLowerCase(),
+    )
+
+    if (duplicateIndex >= 0) {
+      resolvedCategories.splice(duplicateIndex, 1, brandCrumb)
+    } else {
+      resolvedCategories.push(brandCrumb)
+    }
+  }
+
+  return resolvedCategories
 })
 
 const productSubtitle = computed(() => {
-  if (!product.value?.identity?.brand) {
-    return null
-  }
-
-  return `${product.value.identity.brand}`
+  return productBrand.value.length ? productBrand.value : null
 })
 
 const productMetaDescription = computed(() => {
@@ -454,54 +531,279 @@ useHead(() => ({
   ],
 }))
 
+const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(() => {
+  return (product.value?.scores?.scores ?? {}) as Record<string, ProductScoreDto | undefined>
+})
+
+const resolveProductScoreById = (scoreId: string): ProductScoreDto | null => {
+  const normalized = typeof scoreId === 'string' ? scoreId.trim() : ''
+  if (!normalized.length) {
+    return null
+  }
+
+  const scores = productScoreMap.value
+  if (scores[normalized]) {
+    return scores[normalized] ?? null
+  }
+
+  const upper = normalized.toUpperCase()
+  if (upper !== normalized && scores[upper]) {
+    return scores[upper] ?? null
+  }
+
+  const lower = normalized.toLowerCase()
+  if (lower !== normalized && scores[lower]) {
+    return scores[lower] ?? null
+  }
+
+  return null
+}
+
 const isRenderableScore = (score: ProductScoreDto | undefined | null): score is ProductScoreDto & { id: string; name: string } => {
   return typeof score?.id === 'string' && score.id.length > 0 && typeof score.name === 'string' && score.name.length > 0
 }
 
-const impactScores = computed(() => {
-  const scoreMap = (product.value?.scores?.scores ?? {}) as Record<string, ProductScoreDto | undefined>
-  const desiredIds = requestedScoreIds.value
-  const coefficients = scoreCoefficientMap.value
-
-  return desiredIds
-    .map((scoreId) => scoreMap[scoreId])
+const selectedProductScores = computed(() => {
+  return requestedScoreIds.value
+    .map((scoreId) => resolveProductScoreById(scoreId))
     .filter(isRenderableScore)
-    .map((score) => {
-      const aggregation = aggregations.value[`score_${score.id}`]
-      const distribution = (aggregation?.buckets ?? [])
-        .map((bucket: AggregationBucketDto) => ({
-          label: bucket.key != null ? String(bucket.key) : '',
-          value: Number(bucket.count ?? 0),
-        }))
-        .filter((bucket) => bucket.label.length > 0)
-
-      return {
-        id: score.id,
-        label: score.name,
-        description: score.description ?? null,
-        relativeValue: typeof score.relativ?.value === 'number' ? score.relativ.value : null,
-        value: typeof score.value === 'number' ? score.value : null,
-        absoluteValue: score.absoluteValue ?? null,
-        coefficient: coefficients[score.id.toUpperCase()] ?? null,
-        percent: score.percent ?? null,
-        ranking: score.ranking ?? null,
-        letter: score.letter ?? null,
-        on20: score.on20 ?? null,
-        distribution,
-        energyLetter: score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
-        metadatas: score.metadatas ?? null,
-      }
-    })
 })
 
-const radarValues = computed(() =>
-  impactScores.value
-    .map((score) => ({ id: score.id, name: score.label, value: score.relativeValue ?? 0 }))
+const impactScores = computed(() => {
+  const desiredScores = selectedProductScores.value
+  const coefficients = scoreCoefficientMap.value
+
+  return desiredScores.map((score) => {
+    const aggregation = aggregations.value[`score_${score.id}`]
+    const distribution = (aggregation?.buckets ?? [])
+      .map((bucket: AggregationBucketDto) => ({
+        label: bucket.key != null ? String(bucket.key) : '',
+        value: Number(bucket.count ?? 0),
+      }))
+      .filter((bucket) => bucket.label.length > 0)
+
+    return {
+      id: score.id,
+      label: score.name,
+      description: score.description ?? null,
+      relativeValue: typeof score.relativ?.value === 'number' ? score.relativ.value : null,
+      value: typeof score.value === 'number' ? score.value : null,
+      absoluteValue: score.absoluteValue ?? null,
+      coefficient: coefficients[score.id.toUpperCase()] ?? null,
+      percent: score.percent ?? null,
+      ranking: score.ranking ?? null,
+      letter: score.letter ?? null,
+      on20: score.on20 ?? null,
+      distribution,
+      energyLetter: score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
+      metadatas: score.metadatas ?? null,
+    }
+  })
+})
+
+const formatBrandModelLabel = (brand: string, model: string, fallback: string): string => {
+  const normalizedBrand = brand.trim()
+  const normalizedModel = model.trim()
+  if (normalizedBrand && normalizedModel) {
+    return `${normalizedBrand} - ${normalizedModel}`
+  }
+
+  if (normalizedBrand) {
+    return normalizedBrand
+  }
+
+  if (normalizedModel) {
+    return normalizedModel
+  }
+
+  return fallback.trim()
+}
+
+const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | undefined): string => {
+  if (!reference) {
+    return ''
+  }
+
+  const bestName = typeof reference.bestName === 'string' ? reference.bestName.trim() : ''
+  if (bestName.length) {
+    return bestName
+  }
+
+  const slug = typeof reference.fullSlug === 'string' ? reference.fullSlug.trim() : ''
+  if (slug.length) {
+    const segments = slug.split('/').filter((segment) => segment.trim().length)
+    const lastSegment = segments[segments.length - 1]
+    if (lastSegment?.length) {
+      return lastSegment
+    }
+  }
+
+  return ''
+}
+
+const extractRelativeScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
+  const relative = score?.relativ?.value
+  if (typeof relative === 'number' && Number.isFinite(relative)) {
+    return relative
+  }
+
+  const absolute = score?.value
+  if (typeof absolute === 'number' && Number.isFinite(absolute)) {
+    return absolute
+  }
+
+  return null
+}
+
+const extractReferenceScoreValue = (reference: ProductReferenceDto | null | undefined, scoreId: string): number | null => {
+  if (!reference?.scores) {
+    return null
+  }
+
+  const rawScores = (reference.scores as { scores?: Record<string, unknown> } | Record<string, unknown> | null) ?? null
+  if (!rawScores) {
+    return null
+  }
+
+  const scoreContainer = 'scores' in rawScores && rawScores.scores && typeof rawScores.scores === 'object'
+    ? (rawScores.scores as Record<string, unknown>)
+    : (rawScores as Record<string, unknown>)
+
+  const normalizedId = scoreId.trim()
+  const candidates = [normalizedId, normalizedId.toUpperCase(), normalizedId.toLowerCase()]
+
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue
+    }
+
+    const entry = scoreContainer[candidate]
+    if (entry && typeof entry === 'object') {
+      const relative = (entry as { relativ?: { value?: number } }).relativ?.value
+      if (typeof relative === 'number' && Number.isFinite(relative)) {
+        return relative
+      }
+
+      const absolute = (entry as { value?: number }).value
+      if (typeof absolute === 'number' && Number.isFinite(absolute)) {
+        return absolute
+      }
+    }
+  }
+
+  return null
+}
+
+type RadarSeriesKey = 'current' | 'best' | 'worst'
+
+interface RadarSeriesEntry {
+  key: RadarSeriesKey
+  name: string
+  values: Array<number | null>
+}
+
+interface RadarDataset {
+  axes: Array<{ id: string; name: string }>
+  series: RadarSeriesEntry[]
+}
+
+const ecoscoreScore = computed(() => resolveProductScoreById('ECOSCORE'))
+const bestReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscoreScore.value?.highestScore ?? null)
+const worstReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscoreScore.value?.lowestScore ?? null)
+
+const radarData = computed<RadarDataset>(() => {
+  const scores = selectedProductScores.value
+
+  const axesDetails = scores
+    .map((score) => {
+      const id = score.id?.trim()
+      if (!id) {
+        return null
+      }
+
+      const name = score.name?.trim() ?? id
+      const productValue = extractRelativeScoreValue(score)
+
+      if (!(typeof productValue === 'number' && Number.isFinite(productValue))) {
+        return null
+      }
+
+      return {
+        id,
+        name,
+        productValue,
+        bestValue: extractReferenceScoreValue(bestReferenceProduct.value, id),
+        worstValue: extractReferenceScoreValue(worstReferenceProduct.value, id),
+      }
+    })
     .filter(
-      (entry): entry is { id: string; name: string; value: number } =>
-        Boolean(entry.id) && Boolean(entry.name) && Number.isFinite(entry.value),
-    ),
-)
+      (entry): entry is {
+        id: string
+        name: string
+        productValue: number
+        bestValue: number | null
+        worstValue: number | null
+      } => Boolean(entry),
+    )
+
+  if (!axesDetails.length) {
+    return { axes: [], series: [] }
+  }
+
+  const axes = axesDetails.map(({ id, name }) => ({ id, name }))
+  const productValues = axesDetails.map((entry) => entry.productValue)
+  const bestValues = axesDetails.map((entry) => entry.bestValue ?? null)
+  const worstValues = axesDetails.map((entry) => entry.worstValue ?? null)
+
+  const series: RadarSeriesEntry[] = []
+
+  const productSeriesLabel = formatBrandModelLabel(
+    productBrand.value,
+    productModel.value,
+    productTitle.value,
+  )
+
+  if (productValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+    series.push({
+      key: 'current',
+      name: productSeriesLabel,
+      values: productValues,
+    })
+  }
+
+  const bestLabel = formatBrandModelLabel(
+    typeof bestReferenceProduct.value?.brand === 'string' ? bestReferenceProduct.value.brand : '',
+    typeof bestReferenceProduct.value?.model === 'string' ? bestReferenceProduct.value.model : '',
+    resolveReferenceFallbackName(bestReferenceProduct.value),
+  )
+
+  if (bestValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+    series.push({
+      key: 'best',
+      name: bestLabel,
+      values: bestValues,
+    })
+  }
+
+  const worstLabel = formatBrandModelLabel(
+    typeof worstReferenceProduct.value?.brand === 'string' ? worstReferenceProduct.value.brand : '',
+    typeof worstReferenceProduct.value?.model === 'string' ? worstReferenceProduct.value.model : '',
+    resolveReferenceFallbackName(worstReferenceProduct.value),
+  )
+
+  if (worstValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+    series.push({
+      key: 'worst',
+      name: worstLabel,
+      values: worstValues,
+    })
+  }
+
+  return {
+    axes,
+    series,
+  }
+})
 
 const { data: commercialEventsData } = await useAsyncData<CommercialEvent[] | null>(
   'commercial-events',

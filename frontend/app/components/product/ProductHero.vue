@@ -25,9 +25,10 @@
         <ImpactScore :score="impactScore" :max="5" size="xlarge" :show-value="true" />
       </div>
 
-      <p v-if="brandModelLine" class="product-hero__brand-line">
-        {{ brandModelLine }}
-      </p>
+      <div v-if="hasBrandOrModel" class="product-hero__brand-line">
+        <span v-if="productBrandName" class="product-hero__brand-name">{{ productBrandName }}</span>
+        <span v-if="productModelName" class="product-hero__model-name">{{ productModelName }}</span>
+      </div>
 
       <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
         <li
@@ -50,7 +51,7 @@
                     :value="attribute.value"
                     :enable-tooltip="attribute.enableTooltip !== false"
                   >
-                    <template #default="{ displayValue }">
+                    <template #default="{ displayValue, displayHtml }">
                       <span class="product-hero__attribute-value-content" v-bind="tooltipProps">
                         <NuxtImg
                           v-if="attribute.flag"
@@ -60,7 +61,9 @@
                           height="24"
                           class="product-hero__flag"
                         />
-                        <span>{{ displayValue }}</span>
+                        <!-- eslint-disable-next-line vue/no-v-html -->
+                        <span v-if="displayHtml" v-html="displayHtml" />
+                        <span v-else>{{ displayValue }}</span>
                       </span>
                     </template>
                   </ProductAttributeSourcingLabel>
@@ -74,7 +77,7 @@
                 :value="attribute.value"
                 :enable-tooltip="attribute.enableTooltip !== false"
               >
-                <template #default="{ displayValue }">
+                <template #default="{ displayValue, displayHtml }">
                   <span class="product-hero__attribute-value-content">
                     <NuxtImg
                       v-if="attribute.flag"
@@ -84,7 +87,9 @@
                       height="24"
                       class="product-hero__flag"
                     />
-                    <span>{{ displayValue }}</span>
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <span v-if="displayHtml" v-html="displayHtml" />
+                    <span v-else>{{ displayValue }}</span>
                   </span>
                 </template>
               </ProductAttributeSourcingLabel>
@@ -191,11 +196,13 @@ const heroTitle = computed(() => {
   return fallbackTitle.value || bestName.value
 })
 
-const brandModelLine = computed(() => {
-  const brand = props.product.identity?.brand?.trim()
-  const model = props.product.identity?.model?.trim()
+const productBrandName = computed(() => normalizeString(props.product.identity?.brand))
+const productModelName = computed(() => normalizeString(props.product.identity?.model))
+const hasBrandOrModel = computed(() => productBrandName.value.length > 0 || productModelName.value.length > 0)
 
-  return [brand, model].filter((value) => Boolean(value && value.length)).join(' - ')
+const brandModelLine = computed(() => {
+  const parts = [productBrandName.value, productModelName.value].filter((value) => value.length)
+  return parts.join(' - ')
 })
 
 type DisplayedAttribute = { key: string; label: string; value: string }
@@ -386,8 +393,14 @@ const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
     return acc
   }, [])
 
-  const brandModelTitle = brandModelLine.value?.trim()
-  const finalTitle = brandModelTitle?.length ? brandModelTitle : heroTitle.value.trim()
+  const modelTitle = productModelName.value.trim()
+  const brandModelTitle = brandModelLine.value.trim()
+  const heroFallback = heroTitle.value.trim()
+  const finalTitle = modelTitle.length
+    ? modelTitle
+    : brandModelTitle.length
+      ? brandModelTitle
+      : heroFallback
 
   if (finalTitle.length) {
     const normalizedFinal = finalTitle.toLowerCase()
@@ -480,17 +493,25 @@ const impactScore = computed(() => {
 }
 
 .product-hero__brand-line {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: rgb(var(--v-theme-text-neutral-strong));
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   margin: 0;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-hero__name {
+.product-hero__brand-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.product-hero__model-name {
   font-size: 1.2rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
-  margin: 0;
 }
 
 .product-hero__attributes {

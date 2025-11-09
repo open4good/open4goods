@@ -1767,6 +1767,12 @@
       "subscoreEyebrow": "Impact indicator",
       "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
+      "radarControls": {
+        "ariaLabel": "Toggle radar comparison series",
+        "current": "This product: {product}",
+        "best": "Best: {product}",
+        "worst": "Worst: {product}"
+      },
       "scoreRanking": "Factor ranking",
       "scoreValue": "Relative score",
       "valueOutOf": "{value} / {max}",

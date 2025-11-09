@@ -78,10 +78,9 @@
     </span>
 
     <span class="product-attribute-sourcing__value">
-      <slot :display-value="displayValue">
-        <span class="product-attribute-sourcing__value-text">
-          {{ displayValue }}
-        </span>
+      <slot :display-value="displayValue" :display-html="sanitizedDisplayHtml">
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <span class="product-attribute-sourcing__value-text" v-html="sanitizedDisplayHtml || displayValue" />
       </slot>
     </span>
   </span>
@@ -96,6 +95,7 @@ import type {
   ProductAttributeSourceDto,
   ProductSourcedAttributeDto,
 } from '~~/shared/api-client'
+import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 
 const props = defineProps({
   sourcing: {
@@ -132,7 +132,22 @@ const bestValue = computed(() => {
   return trimmed.length ? trimmed : null
 })
 
-const displayValue = computed(() => bestValue.value ?? props.value)
+const displayValue = computed(() => {
+  const candidate = bestValue.value ?? props.value ?? ''
+  return typeof candidate === 'string' ? candidate : String(candidate ?? '')
+})
+
+const sanitizedDisplayHtml = computed(() => {
+  const raw = displayValue.value
+  if (!raw.length) {
+    return ''
+  }
+
+  const { sanitizedHtml } = _sanitizeHtml(raw)
+  const sanitized = sanitizedHtml.value ?? ''
+
+  return sanitized.length ? sanitized : raw
+})
 
 const isIterable = <T,>(candidate: unknown): candidate is Iterable<T> =>
   Boolean(candidate && typeof (candidate as Iterable<T>)[Symbol.iterator] === 'function')
