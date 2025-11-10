@@ -1,3 +1,4 @@
+import { ofetch } from 'ofetch'
 import { ProductApi } from '..'
 import type {
   AggregationRequestDto,
@@ -168,11 +169,20 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
       throw new TypeError('hCaptcha response is required to trigger review generation.')
     }
 
+    const config = createBackendApiConfig()
+    const basePath = config.basePath?.replace(/\/$/, '') ?? ''
+    const endpoint = `${basePath}/products/${encodeURIComponent(String(parsedGtin))}/review`
+
     try {
-      return await resolveApi().triggerReview({
-        gtin: parsedGtin,
-        hcaptchaResponse,
-        domainLanguage,
+      return await ofetch<number>(endpoint, {
+        method: 'POST',
+        headers: {
+          ...(config.headers ?? {}),
+        },
+        query: {
+          hcaptchaResponse,
+          domainLanguage,
+        },
       })
     } catch (error) {
       console.error('Error triggering review generation for product', parsedGtin, error)

@@ -62,10 +62,19 @@ const option = computed<EChartsOption | null>(() => {
     tooltip: { trigger: 'item' },
     legend: {
       data: props.series.map((entry) => entry.label),
+      bottom: 0,
+      left: 'center',
+      padding: [16, 24, 0, 24],
+      itemGap: 12,
+      icon: 'circle',
     },
     radar: {
       indicator,
-      radius: '70%',
+      radius: '64%',
+      center: ['50%', '45%'],
+      axisName: {
+        fontSize: 13,
+      },
       splitArea: {
         areaStyle: {
           color: ['rgba(33, 150, 243, 0.12)', 'rgba(33, 150, 243, 0.05)'],

@@ -120,7 +120,9 @@ const { t } = useI18n()
 
 const primaryScore = computed(() => props.scores[0] ?? null)
 const secondaryScores = computed(() => props.scores.slice(1))
-const detailScores = computed(() => props.scores.filter((score) => score.id !== 'ECOSCORE'))
+const detailScores = computed(() =>
+  props.scores.filter((score) => score.id?.toUpperCase() !== 'ECOSCORE'),
+)
 const radarAxes = computed<RadarAxisEntry[]>(() => radarData.value.axes ?? [])
 const availableSeries = computed<RadarSeriesEntry[]>(() => radarData.value.series ?? [])
 

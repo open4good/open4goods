@@ -491,6 +491,25 @@ const buildChartOption = (
       {
         type: 'slider',
         height: 18,
+        backgroundColor: 'transparent',
+        fillerColor: 'rgba(37, 99, 235, 0)',
+        borderColor: 'rgba(148, 163, 184, 0.38)',
+        handleStyle: {
+          color: '#ffffff',
+          borderColor: '#2563eb',
+          borderWidth: 2,
+        },
+        moveHandleStyle: {
+          color: '#2563eb',
+        },
+        dataBackground: {
+          lineStyle: {
+            color: 'rgba(59, 130, 246, 0.35)',
+          },
+          areaStyle: {
+            color: 'rgba(59, 130, 246, 0)',
+          },
+        },
       },
     ],
     series: [
