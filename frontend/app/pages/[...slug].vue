@@ -713,8 +713,9 @@ const worstReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscor
 
 const radarData = computed<RadarDataset>(() => {
   const scores = selectedProductScores.value
+  const filteredScores = scores.filter((score) => score.id?.trim().toUpperCase() !== 'ECOSCORE')
 
-  const axesDetails = scores
+  const axesDetails = filteredScores
     .map((score) => {
       const id = score.id?.trim()
       if (!id) {
