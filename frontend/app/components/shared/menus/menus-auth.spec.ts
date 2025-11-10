@@ -81,6 +81,7 @@ vi.mock('~/composables/useAuth', () => ({
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
+    locale: ref('en-US'),
   }),
 }))
 
@@ -165,7 +166,15 @@ beforeAll(async () => {
 
 describe('Shared menu authentication controls', () => {
   let reloadSpy: ReturnType<typeof vi.spyOn> | undefined
-  const heroMountOptions = { attachTo: document.body, global: { stubs: { VMenu: vMenuStub } } }
+  const heroMountOptions = {
+    attachTo: document.body,
+    global: {
+      stubs: {
+        VMenu: vMenuStub,
+        SearchSuggestField: { template: '<div class="search-suggest-field-stub" />' },
+      },
+    },
+  }
   const mobileMountOptions = { global: { stubs: { VMenu: vMenuStub } } }
 
   beforeEach(() => {
