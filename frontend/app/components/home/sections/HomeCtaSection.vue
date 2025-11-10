@@ -1,21 +1,33 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
+import SearchSuggestField, {
+  type CategorySuggestionItem,
+  type ProductSuggestionItem,
+} from '~/components/search/SearchSuggestField.vue'
 
 type Emits = {
   'update:searchQuery': [value: string]
   submit: []
+  'select-category': [payload: CategorySuggestionItem]
+  'select-product': [payload: ProductSuggestionItem]
 }
 
-const props = defineProps<{
-  searchQuery: string
-  categoriesLandingUrl: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    searchQuery: string
+    categoriesLandingUrl: string
+    minSuggestionQueryLength?: number
+  }>(),
+  {
+    minSuggestionQueryLength: 2,
+  },
+)
 
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
 
-const { categoriesLandingUrl } = toRefs(props)
+const { categoriesLandingUrl, minSuggestionQueryLength } = toRefs(props)
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -25,6 +37,14 @@ const handleSubmit = () => {
 
 const handleUpdate = (value: string) => {
   emit('update:searchQuery', value)
+}
+
+const handleCategorySelect = (value: CategorySuggestionItem) => {
+  emit('select-category', value)
+}
+
+const handleProductSelect = (value: ProductSuggestionItem) => {
+  emit('select-product', value)
 }
 </script>
 
@@ -38,17 +58,17 @@ const handleUpdate = (value: string) => {
             <p class="home-cta__subtitle">{{ t('home.cta.subtitle') }}</p>
             <div class="home-cta__actions">
               <form class="home-cta__form" role="search" @submit.prevent="handleSubmit">
-                <v-text-field
+                <SearchSuggestField
                   :model-value="searchQueryValue"
                   class="home-cta__search-input"
-                  variant="outlined"
-                  density="comfortable"
                   :label="t('home.hero.search.label')"
                   :placeholder="t('home.hero.search.placeholder')"
                   :aria-label="t('home.hero.search.ariaLabel')"
-                  prepend-inner-icon="mdi-magnify"
-                  hide-details="auto"
+                  :min-chars="minSuggestionQueryLength"
                   @update:model-value="handleUpdate"
+                  @submit="handleSubmit"
+                  @select-category="handleCategorySelect"
+                  @select-product="handleProductSelect"
                 >
                   <template #append-inner>
                     <v-btn
@@ -61,7 +81,7 @@ const handleUpdate = (value: string) => {
                       :aria-label="t('home.cta.searchSubmit')"
                     />
                   </template>
-                </v-text-field>
+                </SearchSuggestField>
               </form>
               <div class="home-cta__links">
                 <v-btn

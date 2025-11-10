@@ -496,12 +496,20 @@ const handleClear = () => {
     background-color: rgba(var(--v-theme-hero-overlay-soft), 0.94)
     border-radius: 1rem
     box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
+    cursor: text
+
+  :deep(.v-field__overlay)
+    cursor: text
+
+  :deep(.v-field__field)
+    cursor: text
 
   :deep(.v-field__prepend-inner .v-icon)
     color: rgba(var(--v-theme-text-on-accent), 0.7)
 
   :deep(input)
     color: rgb(var(--v-theme-text-on-accent))
+    cursor: text
 
   :deep(.v-overlay__content)
     border-radius: 1rem
