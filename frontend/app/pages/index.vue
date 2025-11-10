@@ -38,7 +38,7 @@ type CategoryCarouselItem = {
 }
 
 type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
-type EnrichedBlogItem = HomeBlogItem & { link: string; isExternal: boolean; hasImage: boolean }
+type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
 
 const { categories: rawCategories, fetchCategories, loading: categoriesLoading } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
@@ -475,13 +475,11 @@ const resolveBlogArticleLink = (article: BlogPostDto) => {
 const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
   blogListItems.value.map((item) => {
     const link = resolveBlogArticleLink(item)
-    const isExternal = /^https?:\/\//i.test(link)
     const hasImage = hasRenderableImage(item.image)
 
     return {
       ...item,
       link,
-      isExternal,
       hasImage,
     }
   }),
@@ -604,7 +602,10 @@ useHead(() => ({
       <HomeCtaSection
         v-model:search-query="searchQuery"
         :categories-landing-url="categoriesLandingUrl"
+        :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
         @submit="handleSearchSubmit"
+        @select-category="handleCategorySuggestion"
+        @select-product="handleProductSuggestion"
       />
     </div>
   </div>
