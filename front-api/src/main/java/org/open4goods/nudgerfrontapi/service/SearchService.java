@@ -20,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.Currency;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.ProductI18nElements;
@@ -99,7 +101,9 @@ public class SearchService {
             "attributes.referentielAttributes.GTIN",
             "coverImagePath",
             "vertical",
-            "scores.ECOSCORE"
+            "scores.ECOSCORE",
+            "price.minPrice.price",
+            "price.minPrice.currency"
     };
     private static final String DEFAULT_LANGUAGE_KEY = "default";
     private static final String OFFER_NAMES_DENSITY_SCRIPT = """
@@ -308,8 +312,11 @@ public class SearchService {
         String gtin = referentiel != null ? referentiel.get(ReferentielKey.GTIN) : null;
         Score ecoscore = product.ecoscore();
         Double ecoscoreValue = ecoscore != null ? ecoscore.getValue() : null;
+        AggregatedPrice bestPrice = product.bestPrice();
+        Double bestPriceValue = bestPrice != null ? bestPrice.getPrice() : null;
+        Currency bestPriceCurrency = bestPrice != null ? bestPrice.getCurrency() : null;
         return new ProductSuggestHit(model, brand, gtin, product.getCoverImagePath(), product.getVertical(), ecoscoreValue,
-                (double) hit.getScore());
+                bestPriceValue, bestPriceCurrency, (double) hit.getScore());
     }
 
     private SearchHits<Product> executeSuggestProductSearch(String sanitizedQuery, List<String> tokens) {
@@ -360,16 +367,24 @@ public class SearchService {
 
     private void rebuildVerticalSuggestions() {
         List<VerticalSuggestionEntry> entries = verticalsConfigService.getConfigsWithoutDefault().stream()
-                .flatMap(config -> {
-                    if (config.getI18n() == null) {
-                        return Stream.<VerticalSuggestionEntry>empty();
-                    }
-                    return config.getI18n().entrySet().stream()
-                            .map(entry -> buildVerticalSuggestion(config, entry.getKey(), entry.getValue()))
-                            .flatMap(Optional::stream);
-                })
+                .flatMap(config -> buildSuggestionsForConfig(config).stream())
                 .toList();
         verticalSuggestions = List.copyOf(entries);
+    }
+
+    private List<VerticalSuggestionEntry> buildSuggestionsForConfig(VerticalConfig config) {
+        if (config == null) {
+            return List.of();
+        }
+        List<VerticalSuggestionEntry> entries = new ArrayList<>();
+        if (config.getI18n() != null) {
+            config.getI18n().forEach((languageKey, elements) -> buildVerticalSuggestion(config, languageKey, elements)
+                    .ifPresent(entries::add));
+        }
+        if (entries.isEmpty()) {
+            buildMinimalVerticalSuggestion(config).ifPresent(entries::add);
+        }
+        return entries;
     }
 
     private Optional<VerticalSuggestionEntry> buildVerticalSuggestion(VerticalConfig config, String languageKey,
@@ -390,6 +405,18 @@ public class SearchService {
         String imageSmall = buildVerticalImageSmall(verticalId);
         VerticalSuggestionEntry entry = new VerticalSuggestionEntry(verticalId, language, imageSmall, title, url,
                 normalizedTitle, normalizedId, normalizedUrl);
+        return Optional.of(entry);
+    }
+
+    private Optional<VerticalSuggestionEntry> buildMinimalVerticalSuggestion(VerticalConfig config) {
+        if (config == null || !StringUtils.hasText(config.getId())) {
+            return Optional.empty();
+        }
+        String verticalId = config.getId().trim();
+        String normalizedId = normalizeForComparison(verticalId);
+        String imageSmall = buildVerticalImageSmall(verticalId);
+        VerticalSuggestionEntry entry = new VerticalSuggestionEntry(verticalId, DEFAULT_LANGUAGE_KEY, imageSmall, verticalId,
+                verticalId, normalizedId, normalizedId, normalizedId);
         return Optional.of(entry);
     }
 
@@ -857,7 +884,7 @@ public class SearchService {
      * Product suggestion built from a lightweight Elasticsearch hit.
      */
     public record ProductSuggestHit(String model, String brand, String gtin, String coverImagePath, String verticalId,
-            Double ecoscoreValue, Double score) {
+            Double ecoscoreValue, Double bestPrice, Currency bestPriceCurrency, Double score) {
     }
 
     private record VerticalSuggestionEntry(String verticalId, String languageKey, String imageSmall, String title,
@@ -878,12 +905,9 @@ public class SearchService {
             if (tokens == null || tokens.isEmpty()) {
                 return false;
             }
-            for (String token : tokens) {
-                if (!normalizedTitle.contains(token) && !normalizedId.contains(token) && !normalizedUrl.contains(token)) {
-                    return false;
-                }
-            }
-            return true;
+            return tokens.stream()
+                    .anyMatch(token -> normalizedTitle.contains(token) || normalizedId.contains(token)
+                            || normalizedUrl.contains(token));
         }
     }
 

@@ -1,5 +1,7 @@
 package org.open4goods.nudgerfrontapi.dto.search;
 
+import org.open4goods.model.price.Currency;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -24,6 +26,12 @@ public record SearchSuggestProductDto(
 
         @Schema(description = "Eco-score value computed for the product when available.", example = "72.5")
         Double ecoscoreValue,
+
+        @Schema(description = "Best price available for the product when indexed.", example = "429.99")
+        Double bestPrice,
+
+        @Schema(description = "Currency associated with the best price when available.", example = "EUR")
+        Currency bestPriceCurrency,
 
         @Schema(description = "Native Elasticsearch score associated with the hit.", example = "1.85")
         Double score
