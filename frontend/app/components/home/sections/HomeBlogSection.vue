@@ -7,7 +7,6 @@ interface BlogItem {
   formattedDate?: string
   image?: string | null
   link: string
-  isExternal: boolean
   hasImage: boolean
 }
 
@@ -54,14 +53,7 @@ const secondaryFallbackIconSize = 48
         </div>
         <template v-else>
           <div v-if="featuredItem" class="home-blog__featured">
-            <component
-              :is="featuredItem.isExternal ? 'a' : 'NuxtLink'"
-              class="home-blog__featured-link"
-              :href="featuredItem.isExternal ? featuredItem.link : undefined"
-              :to="!featuredItem.isExternal ? featuredItem.link : undefined"
-              :target="featuredItem.isExternal ? '_blank' : undefined"
-              :rel="featuredItem.isExternal ? 'noopener' : undefined"
-            >
+            <NuxtLink :to="featuredItem.link" class="home-blog__featured-link">
               <article class="home-blog__featured-card">
                 <div class="home-blog__media" aria-hidden="true">
                   <v-img
@@ -81,7 +73,7 @@ const secondaryFallbackIconSize = 48
                   <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
                 </div>
               </article>
-            </component>
+            </NuxtLink>
           </div>
 
           <v-row
@@ -98,14 +90,7 @@ const secondaryFallbackIconSize = 48
               lg="4"
               class="home-blog__col"
             >
-              <component
-                :is="article.isExternal ? 'a' : 'NuxtLink'"
-                class="home-blog__item"
-                :href="article.isExternal ? article.link : undefined"
-                :to="!article.isExternal ? article.link : undefined"
-                :target="article.isExternal ? '_blank' : undefined"
-                :rel="article.isExternal ? 'noopener' : undefined"
-              >
+              <NuxtLink :to="article.link" class="home-blog__item">
                 <article class="home-blog__card">
                   <div class="home-blog__media" aria-hidden="true">
                     <v-img
@@ -125,7 +110,7 @@ const secondaryFallbackIconSize = 48
                     <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
                   </div>
                 </article>
-              </component>
+              </NuxtLink>
             </v-col>
           </v-row>
 
