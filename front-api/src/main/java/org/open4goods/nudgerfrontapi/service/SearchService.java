@@ -273,7 +273,6 @@ public class SearchService {
 
         if (matches.isEmpty() && StringUtils.hasText(requestedLanguage)) {
             matches = suggestions.stream()
-                    .filter(VerticalSuggestionEntry::isDefaultLanguage)
                     .filter(entry -> entry.matches(tokens))
                     .limit(SUGGEST_RESULT_LIMIT)
                     .map(this::toCategorySuggestion)
