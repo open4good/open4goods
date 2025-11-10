@@ -756,12 +756,15 @@ public class EprelProduct implements Serializable
     @JsonSetter("gtinIdentifier")
     public void setGtinIdentifier(String gtinIdentifier)
     {
-        this.gtinIdentifier = gtinIdentifier;
-        try {
-			this.numericGtin = Long.valueOf(gtinIdentifier);
-		} catch (NumberFormatException e) {
-			LOGGER.warn("Non numeric gtinIdentifier {} for {} ",gtinIdentifier,this);
-		}
+
+    	if (null != gtinIdentifier) {
+	        this.gtinIdentifier = gtinIdentifier;
+	        try {
+				this.numericGtin = Long.valueOf(gtinIdentifier);
+			} catch (NumberFormatException e) {
+				LOGGER.warn("Non numeric gtinIdentifier {} for {} ",gtinIdentifier,this);
+			}
+    	}
     }
 
     public Long getNumericGtin()
