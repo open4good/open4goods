@@ -163,6 +163,6 @@ public class SearchController {
 
     private SearchSuggestProductDto toProductDto(SearchService.ProductSuggestHit hit) {
         return new SearchSuggestProductDto(hit.model(), hit.brand(), hit.gtin(), hit.coverImagePath(), hit.verticalId(),
-                hit.ecoscoreValue(), hit.score());
+                hit.ecoscoreValue(), hit.bestPrice(), hit.bestPriceCurrency(), hit.score());
     }
 }
