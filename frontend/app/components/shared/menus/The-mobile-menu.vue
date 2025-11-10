@@ -20,11 +20,51 @@
         </template>
       </v-list-item>
 
+      <div v-if="showMenuSearch" class="px-6 pt-3 pb-2 mobile-menu__search">
+        <SearchSuggestField
+          v-model="searchQuery"
+          class="mobile-menu__search-field"
+          :label="t('siteIdentity.menu.search.label')"
+          :placeholder="t('siteIdentity.menu.search.placeholder')"
+          :aria-label="t('siteIdentity.menu.search.ariaLabel')"
+          :min-chars="MIN_SEARCH_QUERY_LENGTH"
+          @submit="handleSearchSubmit"
+          @select-category="handleCategorySuggestion"
+          @select-product="handleProductSuggestion"
+          @update:model-value="updateSearchQuery"
+          @clear="handleSearchClear"
+        >
+          <template #append-inner>
+            <div class="mobile-menu__search-actions">
+              <v-btn
+                icon="mdi-arrow-right"
+                variant="flat"
+                color="primary"
+                size="small"
+                :aria-label="t('siteIdentity.menu.search.submitLabel')"
+                @click.prevent="handleSearchSubmit"
+              />
+              <v-btn
+                icon="mdi-close"
+                variant="text"
+                color="text-neutral-secondary"
+                size="small"
+                :aria-label="t('siteIdentity.menu.search.closeLabel')"
+                @click.prevent="handleSearchClear"
+              />
+            </div>
+          </template>
+        </SearchSuggestField>
+      </div>
+
+      <v-divider v-if="showMenuSearch" class="mx-6" />
+
       <v-list-item
         v-for="(item, index) in menuItems"
         :key="index"
         :to="item.to"
         class="px-6 py-4"
+        :class="{ 'mobile-menu__item--active': isActiveRoute(item.to) }"
         @click="emit('close')"
       >
         <template #prepend>
@@ -34,6 +74,78 @@
           {{ item.title }}
         </v-list-item-title>
       </v-list-item>
+
+      <v-list-group
+        v-model="isCommunityExpanded"
+        class="mobile-menu__community"
+      >
+        <template #activator="{ props, isOpen }">
+          <v-list-item
+            v-bind="props"
+            class="px-6 py-4 mobile-menu__community-activator"
+            :class="{ 'mobile-menu__community-activator--active': isCommunityActive }"
+            :append-icon="isOpen ? 'mdi-menu-up' : 'mdi-menu-down'"
+          >
+            <template #prepend>
+              <v-icon icon="mdi-account-group" class="me-4" />
+            </template>
+            <v-list-item-title class="text-body-1">
+              {{ communityLabel }}
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+
+        <div class="mobile-menu__community-content px-6 pb-4">
+          <div
+            v-for="section in communitySections"
+            :key="section.id"
+            class="mobile-menu__community-section"
+          >
+            <p class="mobile-menu__community-section-title">
+              {{ section.title }}
+            </p>
+            <p class="mobile-menu__community-section-description">
+              {{ section.description }}
+            </p>
+
+            <v-list
+              class="mobile-menu__community-links"
+              bg-color="transparent"
+              density="comfortable"
+              nav
+              lines="one"
+            >
+              <v-list-item
+                v-for="link in section.links"
+                :key="link.id"
+                class="mobile-menu__community-link"
+                :href="link.href"
+                :target="link.external ? '_blank' : undefined"
+                :rel="link.external ? 'noopener noreferrer' : undefined"
+                :value="false"
+                @click="handleCommunityNavigation(link)"
+              >
+                <template #prepend>
+                  <v-avatar size="32" class="mobile-menu__community-link-icon">
+                    <v-icon :icon="link.icon" size="18" color="accent-primary-highlight" />
+                  </v-avatar>
+                </template>
+
+                <v-list-item-title class="mobile-menu__community-link-label">
+                  {{ link.label }}
+                </v-list-item-title>
+                <v-list-item-subtitle v-if="link.description" class="mobile-menu__community-link-description">
+                  {{ link.description }}
+                </v-list-item-subtitle>
+
+                <template v-if="link.external" #append>
+                  <v-icon icon="mdi-open-in-new" size="16" />
+                </template>
+              </v-list-item>
+            </v-list>
+          </div>
+        </div>
+      </v-list-group>
 
       <v-list-item class="px-6 py-4">
         <template #prepend>
@@ -111,10 +223,21 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from 'vue-i18n'
 
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import type {
+  CategorySuggestionItem,
+  ProductSuggestionItem,
+} from '~/components/search/SearchSuggestField.vue'
+import { useCommunityMenu, type CommunityMenuLink } from './useCommunityMenu'
+
+const SearchSuggestField = defineAsyncComponent({
+  loader: () => import('~/components/search/SearchSuggestField.vue'),
+  suspensible: false,
+})
 
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
@@ -133,6 +256,61 @@ const { isLoggedIn, logout, username, roles } = useAuth()
 const router = useRouter()
 const route = useRoute()
 const isClearingCache = ref(false)
+
+const MIN_SEARCH_QUERY_LENGTH = 2
+const searchQuery = ref('')
+const homeRoutePath = computed(() => resolveLocalizedRoutePath('index', currentLocale.value))
+const searchRoutePath = computed(() => resolveLocalizedRoutePath('search', currentLocale.value))
+const showMenuSearch = computed(() => route.path !== homeRoutePath.value)
+
+const { sections: communitySections, activePaths: communityActivePaths } = useCommunityMenu(t, currentLocale)
+const communityLabel = computed(() => String(t('siteIdentity.menu.items.contact')))
+const isCommunityExpanded = ref(false)
+
+const isActiveRoute = (path: string): boolean => {
+  if (!path) {
+    return false
+  }
+
+  if (path === '/') {
+    return route.path === path
+  }
+
+  return route.path.startsWith(path)
+}
+
+const isCommunityActive = computed(() => communityActivePaths.value.some((path) => isActiveRoute(path)))
+
+watch(
+  () => route.path,
+  () => {
+    if (route.path === homeRoutePath.value) {
+      searchQuery.value = ''
+    }
+  },
+)
+
+watch(homeRoutePath, (path) => {
+  if (route.path === path) {
+    searchQuery.value = ''
+  }
+})
+
+watch(showMenuSearch, (visible) => {
+  if (!visible) {
+    searchQuery.value = ''
+  }
+})
+
+watch(
+  isCommunityActive,
+  (active) => {
+    if (active) {
+      isCommunityExpanded.value = true
+    }
+  },
+  { immediate: true },
+)
 
 type FetchLike = (input: string, init?: Record<string, unknown>) => Promise<unknown>
 
@@ -158,15 +336,106 @@ const displayName = computed(() => {
 const accountRoles = computed(() => roles.value.map((role) => role.trim()).filter((role) => role.length > 0))
 const hasRoles = computed(() => accountRoles.value.length > 0)
 
-interface MenuItemDefinition {
+interface MenuLinkDefinition {
   titleKey: string
   routeName: string
   icon: string
 }
 
-interface MenuItem extends MenuItemDefinition {
+interface MenuLink extends MenuLinkDefinition {
   title: string
   to: string
+}
+
+const updateSearchQuery = (value: string) => {
+  searchQuery.value = value
+}
+
+const handleSearchClear = () => {
+  searchQuery.value = ''
+}
+
+const navigateToSearch = (query?: string) => {
+  const normalizedQuery = query?.trim() ?? ''
+
+  router.push({
+    path: searchRoutePath.value,
+    query: normalizedQuery ? { q: normalizedQuery } : undefined,
+  })
+
+  emit('close')
+}
+
+const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
+  if (!raw) {
+    return null
+  }
+
+  const trimmed = raw.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  if (/^https?:\/\//iu.test(trimmed)) {
+    return trimmed
+  }
+
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+}
+
+const handleSearchSubmit = () => {
+  const trimmedQuery = searchQuery.value.trim()
+
+  if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
+    return
+  }
+
+  navigateToSearch(trimmedQuery)
+}
+
+const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
+  searchQuery.value = suggestion.title
+
+  const normalizedUrl = normalizeVerticalHomeUrl(suggestion.url)
+
+  if (normalizedUrl) {
+    emit('close')
+    if (/^https?:\/\//iu.test(normalizedUrl) && typeof window !== 'undefined') {
+      window.open(normalizedUrl, '_blank', 'noopener,noreferrer')
+      return
+    }
+
+    router.push(normalizedUrl)
+    return
+  }
+
+  navigateToSearch(suggestion.title)
+}
+
+const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
+  searchQuery.value = suggestion.title
+
+  const gtin = suggestion.gtin?.trim()
+
+  if (gtin) {
+    emit('close')
+    router.push({
+      name: 'gtin',
+      params: { gtin },
+    })
+    return
+  }
+
+  navigateToSearch(suggestion.title)
+}
+
+const handleCommunityNavigation = (link: CommunityMenuLink) => {
+  emit('close')
+
+  if (link.to) {
+    router.push(link.to)
+  }
 }
 
 const handleLogout = async () => {
@@ -226,7 +495,7 @@ const handleClearCache = async () => {
   }
 }
 
-const baseMenuItems: MenuItemDefinition[] = [
+const baseMenuItems: MenuLinkDefinition[] = [
   {
     titleKey: 'siteIdentity.menu.items.impactScore',
     routeName: 'impact-score',
@@ -242,14 +511,9 @@ const baseMenuItems: MenuItemDefinition[] = [
     routeName: 'blog',
     icon: 'mdi-post',
   },
-  {
-    titleKey: 'siteIdentity.menu.items.contact',
-    routeName: 'contact',
-    icon: 'mdi-email',
-  },
 ]
 
-const menuItems = computed<MenuItem[]>(() =>
+const menuItems = computed<MenuLink[]>(() =>
   baseMenuItems.map((item) => ({
     ...item,
     title: t(item.titleKey),
@@ -261,6 +525,80 @@ const menuItems = computed<MenuItem[]>(() =>
 <style scoped lang="sass">
 .mobile-menu
   height: 100%
+
+.mobile-menu__search
+  background-color: rgba(var(--v-theme-surface-primary-080), 0.35)
+
+.mobile-menu__search-field
+  :deep(.v-field)
+    border-radius: 999px
+    background-color: rgb(var(--v-theme-surface-default))
+    box-shadow: 0 10px 24px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+  :deep(.v-field__outline)
+    display: none
+
+  :deep(.v-field__input)
+    min-height: 48px
+    padding-inline-start: 1rem
+
+  :deep(.v-field__append-inner)
+    padding-inline-end: 0.25rem
+
+.mobile-menu__search-actions
+  display: flex
+  align-items: center
+  gap: 0.25rem
+
+.mobile-menu__item--active
+  color: rgb(var(--v-theme-accent-supporting))
+  font-weight: 700
+
+.mobile-menu__community
+  --v-list-group-prepend-width: 36px
+
+.mobile-menu__community-activator
+  transition: color 0.2s ease
+
+.mobile-menu__community-activator--active
+  color: rgb(var(--v-theme-accent-supporting))
+  font-weight: 700
+
+.mobile-menu__community-content
+  background-color: rgba(var(--v-theme-surface-primary-080), 0.25)
+  border-block-start: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+
+.mobile-menu__community-section
+  padding-block: 1rem 0
+
+.mobile-menu__community-section-title
+  margin: 0
+  font-weight: 700
+  font-size: 1rem
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.mobile-menu__community-section-description
+  margin: 0.35rem 0 0.75rem
+  font-size: 0.85rem
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.mobile-menu__community-links
+  :deep(.v-list-item)
+    border-radius: 0.75rem
+    transition: background-color 0.2s ease
+
+  :deep(.v-list-item:hover)
+    background-color: rgba(var(--v-theme-surface-primary-120), 0.35)
+
+.mobile-menu__community-link-icon
+  background-color: rgba(var(--v-theme-surface-primary-120), 0.85)
+
+.mobile-menu__community-link-label
+  font-weight: 600
+
+.mobile-menu__community-link-description
+  font-size: 0.8rem
+  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .border-bottom
   border-bottom: 1px solid rgba(0, 0, 0, 0.12)

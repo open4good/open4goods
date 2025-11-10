@@ -1893,9 +1893,68 @@
       "closeLabel": "Close menu",
       "items": {
         "blog": "Blog",
-        "contact": "Contact",
+        "contact": "Community",
         "impactScore": "Impact Score",
         "products": "Products"
+      },
+      "search": {
+        "label": "Quick search",
+        "placeholder": "Find a product, brand or GTIN",
+        "ariaLabel": "Open the quick catalogue search",
+        "openLabel": "Open quick search",
+        "closeLabel": "Close quick search",
+        "submitLabel": "Search"
+      },
+      "community": {
+        "tagline": "Connect with the people and open resources behind Nudger.",
+        "sections": {
+          "connect": {
+            "title": "Stay in touch",
+            "description": "Share feedback or contact the team directly.",
+            "items": {
+              "feedback": {
+                "label": "Feedback",
+                "description": "Suggest ideas to improve Nudger."
+              },
+              "contact": {
+                "label": "Contact",
+                "description": "Reach out for partnerships or questions."
+              },
+              "follow": {
+                "label": "Follow us",
+                "description": "Get our updates on LinkedIn."
+              }
+            }
+          },
+          "collaborate": {
+            "title": "Collaborate",
+            "description": "Meet the people building Nudger every day.",
+            "items": {
+              "team": {
+                "label": "Team",
+                "description": "Discover who is behind the product."
+              },
+              "partners": {
+                "label": "Partners",
+                "description": "Explore the organisations supporting Nudger."
+              }
+            }
+          },
+          "resources": {
+            "title": "Open resources",
+            "description": "Use our data and contribute to the codebase.",
+            "items": {
+              "opendata": {
+                "label": "Open Data",
+                "description": "Access transparent product datasets."
+              },
+              "opensource": {
+                "label": "Open Source",
+                "description": "Contribute to our GitHub projects."
+              }
+            }
+          }
+        }
       },
       "theme": {
         "darkAriaLabel": "Activate dark theme",

@@ -1892,9 +1892,68 @@
       "closeLabel": "Fermer le menu",
       "items": {
         "blog": "Blog",
-        "contact": "Contact",
-        "impactScore": "Impact-score",
+        "contact": "Communauté",
+        "impactScore": "Impact Score",
         "products": "Les produits"
+      },
+      "search": {
+        "label": "Recherche rapide",
+        "placeholder": "Chercher un produit, une marque ou un GTIN",
+        "ariaLabel": "Ouvrir la recherche rapide du catalogue",
+        "openLabel": "Ouvrir la recherche rapide",
+        "closeLabel": "Fermer la recherche rapide",
+        "submitLabel": "Lancer la recherche"
+      },
+      "community": {
+        "tagline": "Retrouvez l'équipe et nos ressources ouvertes.",
+        "sections": {
+          "connect": {
+            "title": "Rester en lien",
+            "description": "Partagez vos retours ou contactez l'équipe directement.",
+            "items": {
+              "feedback": {
+                "label": "Feedback",
+                "description": "Proposez des idées pour améliorer Nudger."
+              },
+              "contact": {
+                "label": "Contact",
+                "description": "Discutez avec nous pour vos projets ou questions."
+              },
+              "follow": {
+                "label": "Nous suivre",
+                "description": "Recevez nos nouvelles sur LinkedIn."
+              }
+            }
+          },
+          "collaborate": {
+            "title": "Collaborer",
+            "description": "Rencontrez les personnes qui construisent Nudger.",
+            "items": {
+              "team": {
+                "label": "Équipe",
+                "description": "Découvrez qui anime la communauté Nudger."
+              },
+              "partners": {
+                "label": "Partenaires",
+                "description": "Explorez les organisations qui nous soutiennent."
+              }
+            }
+          },
+          "resources": {
+            "title": "Ressources ouvertes",
+            "description": "Utilisez nos données et contribuez au code.",
+            "items": {
+              "opendata": {
+                "label": "Open Data",
+                "description": "Accédez à nos jeux de données transparents."
+              },
+              "opensource": {
+                "label": "Open source",
+                "description": "Participez à notre code ouvert sur GitHub."
+              }
+            }
+          }
+        }
       },
       "theme": {
         "darkAriaLabel": "Activer le thème sombre",
