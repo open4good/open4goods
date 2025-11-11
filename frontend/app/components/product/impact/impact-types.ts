@@ -3,6 +3,14 @@ export type DistributionBucket = {
   value: number
 }
 
+export type ScoreAbsoluteStats = {
+  min?: number | null
+  max?: number | null
+  avg?: number | null
+  count?: number | null
+  value?: number | null
+}
+
 export type ScoreView = {
   id: string
   label: string
@@ -10,6 +18,7 @@ export type ScoreView = {
   relativeValue: number | null
   value?: number | null
   absoluteValue?: string | number | null
+  absolute?: ScoreAbsoluteStats | null
   coefficient?: number | null
   percent?: number | null
   ranking?: number | string | null

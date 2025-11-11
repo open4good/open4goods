@@ -1,5 +1,13 @@
 <template>
-  <component :is="resolvedComponent" :score="score" :product-name="productName" />
+  <component
+    :is="resolvedComponent"
+    :score="score"
+    :product-name="productName"
+    :product-brand="productBrand"
+    :product-model="productModel"
+    :product-image="productImage"
+    :vertical-title="verticalTitle"
+  />
 </template>
 
 <script setup lang="ts">
@@ -17,6 +25,10 @@ import ProductImpactSubscoreDataQualityCard from './subscores/ProductImpactSubsc
 const props = defineProps<{
   score: ScoreView
   productName: string
+  productBrand: string
+  productModel: string
+  productImage: string
+  verticalTitle: string
 }>()
 
 const specializationMap: Record<string, Component> = {

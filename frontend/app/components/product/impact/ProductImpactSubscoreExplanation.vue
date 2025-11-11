@@ -1,7 +1,18 @@
 <template>
   <section v-if="hasContent" class="impact-subscore-explanation">
-    <h5 class="impact-subscore-explanation__title">{{ $t('product.impact.explanationTitle') }}</h5>
-    <p v-if="score.description" class="impact-subscore-explanation__description">{{ score.description }}</p>
+    <p v-if="rankingSummary" class="impact-subscore-explanation__ranking">{{ rankingSummary }}</p>
+
+    <div v-if="readIndicatorParagraphs.length || score.description" class="impact-subscore-explanation__card">
+      <h5 class="impact-subscore-explanation__title">{{ readIndicatorTitle }}</h5>
+      <p
+        v-for="(paragraph, index) in readIndicatorParagraphs"
+        :key="`paragraph-${index}`"
+        class="impact-subscore-explanation__paragraph"
+      >
+        {{ paragraph }}
+      </p>
+      <p v-if="score.description" class="impact-subscore-explanation__description">{{ score.description }}</p>
+    </div>
 
     <dl v-if="infoItems.length" class="impact-subscore-explanation__list">
       <div v-for="item in infoItems" :key="item.label" class="impact-subscore-explanation__row">
@@ -27,9 +38,108 @@ import type { ScoreView } from './impact-types'
 const props = defineProps<{
   score: ScoreView
   absoluteValue: string | null
+  productName: string
+  productBrand: string
+  productModel: string
+  verticalTitle: string
 }>()
 
-const { n, t } = useI18n()
+const { n, t, te, locale } = useI18n()
+
+const normalizedScoreKey = computed(() => {
+  const raw = props.score.id ?? ''
+  const normalized = raw.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return normalized.length ? normalized : 'default'
+})
+
+const translationBaseKey = computed(() => `product.impact.subscores.${normalizedScoreKey.value}`)
+const translationFallbackBase = 'product.impact.subscores.default'
+
+const resolveTranslation = (suffix: string, params: Record<string, unknown>) => {
+  const candidate = `${translationBaseKey.value}.${suffix}`
+  if (te(candidate)) {
+    return t(candidate, params)
+  }
+
+  return t(`${translationFallbackBase}.${suffix}`, params)
+}
+
+const normalizedVerticalTitle = computed(() => {
+  const title = props.verticalTitle?.trim()
+  if (!title?.length) {
+    return ''
+  }
+
+  try {
+    return title.toLocaleLowerCase(locale.value)
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to normalize vertical title.', error)
+    }
+
+    return title.toLowerCase()
+  }
+})
+
+const productDisplayName = computed(() => {
+  const brand = props.productBrand?.trim()
+  const model = props.productModel?.trim()
+  const segments = [brand, model].filter((segment) => segment?.length)
+  if (segments.length) {
+    return segments.join(' ')
+  }
+
+  return props.productName
+})
+
+const absoluteStats = computed(() => props.score.absolute ?? null)
+
+const scoreLabelLower = computed(() => {
+  const label = props.score.label ?? ''
+  if (!label.length) {
+    return ''
+  }
+
+  try {
+    return label.toLocaleLowerCase(locale.value)
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to normalize score label casing.', error)
+    }
+
+    return label.toLowerCase()
+  }
+})
+
+const formatNumber = (value: number | null | undefined, options?: Intl.NumberFormatOptions) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return null
+  }
+
+  return n(value, { maximumFractionDigits: 2, minimumFractionDigits: 0, ...options })
+}
+
+const computeOn20 = (value: number | null | undefined, min: number | null | undefined, max: number | null | undefined) => {
+  if (
+    typeof value !== 'number' ||
+    typeof min !== 'number' ||
+    typeof max !== 'number' ||
+    Number.isNaN(value) ||
+    Number.isNaN(min) ||
+    Number.isNaN(max) ||
+    max <= min
+  ) {
+    return null
+  }
+
+  const ratio = (value - min) / (max - min)
+  const scaled = ratio * 20
+  if (!Number.isFinite(scaled)) {
+    return null
+  }
+
+  return Math.max(0, Math.min(20, scaled))
+}
 
 const infoItems = computed(() => {
   const items: Array<{ label: string; value: string }> = []
@@ -62,8 +172,117 @@ const metadataItems = computed(() => {
   }))
 })
 
+const rankingValue = computed(() => {
+  const ranking = Number(props.score.ranking)
+  if (!Number.isFinite(ranking)) {
+    return null
+  }
+
+  return n(ranking, { maximumFractionDigits: 0, minimumFractionDigits: 0 })
+})
+
+const populationValue = computed(() => {
+  const count = absoluteStats.value?.count
+  if (typeof count !== 'number' || Number.isNaN(count)) {
+    return null
+  }
+
+  return {
+    raw: count,
+    formatted: n(count, { maximumFractionDigits: 0, minimumFractionDigits: 0 }),
+  }
+})
+
+const worstValue = computed(() => formatNumber(absoluteStats.value?.min))
+const bestValue = computed(() => formatNumber(absoluteStats.value?.max))
+const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
+const averageOn20Value = computed(() => {
+  const computedValue = computeOn20(absoluteStats.value?.avg ?? null, absoluteStats.value?.min ?? null, absoluteStats.value?.max ?? null)
+  return formatNumber(computedValue, { maximumFractionDigits: 1 })
+})
+
+const productAbsoluteValue = computed(() => {
+  if (typeof absoluteStats.value?.value === 'number' && Number.isFinite(absoluteStats.value?.value)) {
+    return formatNumber(absoluteStats.value?.value)
+  }
+
+  if (typeof props.score.value === 'number' && Number.isFinite(props.score.value)) {
+    return formatNumber(props.score.value)
+  }
+
+  if (typeof props.score.absoluteValue === 'number' && Number.isFinite(props.score.absoluteValue)) {
+    return formatNumber(props.score.absoluteValue)
+  }
+
+  return typeof props.absoluteValue === 'string' ? props.absoluteValue : null
+})
+
+const productOn20Value = computed(() => {
+  if (typeof props.score.on20 !== 'number' || Number.isNaN(props.score.on20)) {
+    return null
+  }
+
+  return formatNumber(props.score.on20, { maximumFractionDigits: 1 })
+})
+
+const readIndicatorParams = computed(() => ({
+  scoreLabel: props.score.label,
+  scoreLabelLower: scoreLabelLower.value,
+  verticalTitle: normalizedVerticalTitle.value,
+  worst: worstValue.value,
+  best: bestValue.value,
+  average: averageValue.value,
+  averageOn20: averageOn20Value.value,
+  productName: productDisplayName.value,
+  productAbsolute: productAbsoluteValue.value,
+  productOn20: productOn20Value.value,
+  count: populationValue.value?.formatted,
+  ranking: rankingValue.value,
+}))
+
+const readIndicatorTitle = computed(() => resolveTranslation('readIndicator.title', readIndicatorParams.value))
+
+const readIndicatorParagraphs = computed(() => {
+  const paragraphs: string[] = []
+  const params = readIndicatorParams.value
+
+  if (worstValue.value) {
+    paragraphs.push(resolveTranslation('readIndicator.worst', params))
+  }
+
+  if (bestValue.value && populationValue.value) {
+    paragraphs.push(resolveTranslation('readIndicator.best', params))
+  }
+
+  if (averageValue.value && populationValue.value && averageOn20Value.value) {
+    paragraphs.push(resolveTranslation('readIndicator.average', params))
+  }
+
+  if (productAbsoluteValue.value && productOn20Value.value) {
+    paragraphs.push(resolveTranslation('readIndicator.product', params))
+  }
+
+  return paragraphs.filter((paragraph) => paragraph?.toString().trim().length)
+})
+
+const rankingSummary = computed(() => {
+  if (!rankingValue.value || !populationValue.value) {
+    return ''
+  }
+
+  return resolveTranslation('ranking', {
+    ranking: rankingValue.value,
+    count: populationValue.value.formatted,
+  })
+})
+
 const hasContent = computed(
-  () => Boolean(props.score.description) || infoItems.value.length > 0 || metadataItems.value.length > 0,
+  () =>
+    Boolean(rankingSummary.value) ||
+    readIndicatorParagraphs.value.length > 0 ||
+    Boolean(props.score.description) ||
+    infoItems.value.length > 0 ||
+    metadataItems.value.length > 0,
 )
 
 function formatMetadataLabel(rawKey: string): string {
@@ -86,6 +305,19 @@ function formatMetadataLabel(rawKey: string): string {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.impact-subscore-explanation__ranking {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore-explanation__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 1rem 1.25rem;
   border-radius: 18px;
   background: rgba(var(--v-theme-surface-glass), 0.9);
@@ -97,6 +329,13 @@ function formatMetadataLabel(rawKey: string): string {
   font-size: 0.95rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore-explanation__paragraph {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  line-height: 1.6;
 }
 
 .impact-subscore-explanation__description {

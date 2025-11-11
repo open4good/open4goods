@@ -44,6 +44,10 @@
           :key="score.id"
           :score="score"
           :product-name="productName"
+          :product-brand="productBrand"
+          :product-model="productModel"
+          :product-image="productImage"
+          :vertical-title="verticalTitle"
         />
       </template>
     </div>
@@ -103,6 +107,18 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  productBrand: {
+    type: String,
+    default: '',
+  },
+  productModel: {
+    type: String,
+    default: '',
+  },
+  productImage: {
+    type: String,
+    default: '',
+  },
   loading: {
     type: Boolean,
     default: false,
@@ -111,11 +127,19 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  verticalTitle: {
+    type: String,
+    default: '',
+  },
 })
 
 const radarData = toRef(props, 'radarData')
 const productName = toRef(props, 'productName')
+const productBrand = toRef(props, 'productBrand')
+const productModel = toRef(props, 'productModel')
+const productImage = toRef(props, 'productImage')
 const verticalHomeUrl = toRef(props, 'verticalHomeUrl')
+const verticalTitle = toRef(props, 'verticalTitle')
 const { t } = useI18n()
 
 const primaryScore = computed(() => props.scores[0] ?? null)
