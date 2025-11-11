@@ -56,12 +56,36 @@ export interface SearchSuggestProductDto {
      */
     ecoscoreValue?: number;
     /**
+     * Best price available for the product when indexed.
+     * @type {number}
+     * @memberof SearchSuggestProductDto
+     */
+    bestPrice?: number;
+    /**
+     * Currency associated with the best price when available.
+     * @type {string}
+     * @memberof SearchSuggestProductDto
+     */
+    bestPriceCurrency?: SearchSuggestProductDtoBestPriceCurrencyEnum;
+    /**
      * Native Elasticsearch score associated with the hit.
      * @type {number}
      * @memberof SearchSuggestProductDto
      */
     score?: number;
 }
+
+
+/**
+ * @export
+ */
+export const SearchSuggestProductDtoBestPriceCurrencyEnum = {
+    Eur: 'EUR',
+    Usd: 'USD',
+    Cny: 'CNY'
+} as const;
+export type SearchSuggestProductDtoBestPriceCurrencyEnum = typeof SearchSuggestProductDtoBestPriceCurrencyEnum[keyof typeof SearchSuggestProductDtoBestPriceCurrencyEnum];
+
 
 /**
  * Check if a given object implements the SearchSuggestProductDto interface.
@@ -86,6 +110,8 @@ export function SearchSuggestProductDtoFromJSONTyped(json: any, ignoreDiscrimina
         'coverImagePath': json['coverImagePath'] == null ? undefined : json['coverImagePath'],
         'verticalId': json['verticalId'] == null ? undefined : json['verticalId'],
         'ecoscoreValue': json['ecoscoreValue'] == null ? undefined : json['ecoscoreValue'],
+        'bestPrice': json['bestPrice'] == null ? undefined : json['bestPrice'],
+        'bestPriceCurrency': json['bestPriceCurrency'] == null ? undefined : json['bestPriceCurrency'],
         'score': json['score'] == null ? undefined : json['score'],
     };
 }
@@ -107,6 +133,8 @@ export function SearchSuggestProductDtoToJSONTyped(value?: SearchSuggestProductD
         'coverImagePath': value['coverImagePath'],
         'verticalId': value['verticalId'],
         'ecoscoreValue': value['ecoscoreValue'],
+        'bestPrice': value['bestPrice'],
+        'bestPriceCurrency': value['bestPriceCurrency'],
         'score': value['score'],
     };
 }
