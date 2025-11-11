@@ -1753,7 +1753,6 @@
           "attributeEqual": "Afficher les produits où {label} correspond à votre produit."
         }
       },
-      "absoluteValue": "Valeur absolue",
       "explanationTitle": "Comment lire cet indicateur",
       "detailsTitle": "Détails de l'évaluation",
       "noPrimaryScore": "Score indisponible",
@@ -1761,7 +1760,7 @@
       "methodologyLink": "Accéder à la méthodologie",
       "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
       "percentile": "Percentile",
-      "weightChip": "{value}% de la note totale",
+      "weightChip": "Compte pour {value}% de la note totale",
       "weightTooltip": "Le score {scoreName} compte pour {value}% de la note totale",
       "subscoreDetailsToggle": "Voir les détails de l'indicateur",
       "subscoreEyebrow": "Indicateur d'impact",

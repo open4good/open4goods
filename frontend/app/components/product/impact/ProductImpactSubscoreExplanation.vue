@@ -1,7 +1,5 @@
 <template>
   <section v-if="hasContent" class="impact-subscore-explanation">
-    <p v-if="rankingSummary" class="impact-subscore-explanation__ranking">{{ rankingSummary }}</p>
-
     <div v-if="readIndicatorParagraphs.length || score.description" class="impact-subscore-explanation__card">
       <h5 class="impact-subscore-explanation__title">{{ readIndicatorTitle }}</h5>
       <p
@@ -48,7 +46,14 @@ const { n, t, te, locale } = useI18n()
 
 const normalizedScoreKey = computed(() => {
   const raw = props.score.id ?? ''
-  const normalized = raw.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  const normalized = raw
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_')
+    .replace(/[^a-z0-9_]+/g, '')
+    .replace(/^_+|_+$/g, '')
+
   return normalized.length ? normalized : 'default'
 })
 
@@ -143,13 +148,6 @@ const computeOn20 = (value: number | null | undefined, min: number | null | unde
 
 const infoItems = computed(() => {
   const items: Array<{ label: string; value: string }> = []
-
-  if (props.absoluteValue) {
-    items.push({
-      label: t('product.impact.absoluteValue'),
-      value: props.absoluteValue,
-    })
-  }
 
   if (props.score.ranking != null && Number.isFinite(Number(props.score.ranking))) {
     items.push({
@@ -265,20 +263,8 @@ const readIndicatorParagraphs = computed(() => {
   return paragraphs.filter((paragraph) => paragraph?.toString().trim().length)
 })
 
-const rankingSummary = computed(() => {
-  if (!rankingValue.value || !populationValue.value) {
-    return ''
-  }
-
-  return resolveTranslation('ranking', {
-    ranking: rankingValue.value,
-    count: populationValue.value.formatted,
-  })
-})
-
 const hasContent = computed(
   () =>
-    Boolean(rankingSummary.value) ||
     readIndicatorParagraphs.value.length > 0 ||
     Boolean(props.score.description) ||
     infoItems.value.length > 0 ||
@@ -305,13 +291,6 @@ function formatMetadataLabel(rawKey: string): string {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.impact-subscore-explanation__ranking {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .impact-subscore-explanation__card {

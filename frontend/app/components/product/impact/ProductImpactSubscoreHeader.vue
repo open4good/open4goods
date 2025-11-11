@@ -3,11 +3,6 @@
     <div class="impact-subscore-header__info">
       <h4 class="impact-subscore-header__title">{{ title }}</h4>
       <p v-if="subtitle" class="impact-subscore-header__subtitle">{{ subtitle }}</p>
-      <ImpactCoefficientBadge
-        v-if="coefficientValue != null"
-        :value="coefficientValue"
-        :tooltip-params="{ scoreName: title }"
-      />
     </div>
 
     <div v-if="on20Value" class="impact-subscore-header__score" aria-hidden="true">
@@ -20,30 +15,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
-
 const props = defineProps<{
   title: string
   subtitle?: string
   on20?: number | null
   percent?: number | null
-  coefficient?: number | null
 }>()
 
 const { n } = useI18n()
-const coefficientValue = computed(() => {
-  if (props.coefficient == null) {
-    return null
-  }
-
-  const numeric = typeof props.coefficient === 'number' ? props.coefficient : Number(props.coefficient)
-  if (!Number.isFinite(numeric)) {
-    return null
-  }
-
-  return Math.min(Math.max(numeric, 0), 1)
-})
-
 const on20Value = computed(() => {
   if (typeof props.on20 !== 'number' || Number.isNaN(props.on20)) {
     return null
