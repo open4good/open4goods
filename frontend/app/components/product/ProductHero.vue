@@ -118,14 +118,14 @@
       </div>
     </div>
 
-    <aside class="product-hero__pricing">
+    <aside ref="pricingCardElement" class="product-hero__pricing">
       <ProductHeroPricing :product="product" />
     </aside>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, ref, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
@@ -161,6 +161,12 @@ const props = defineProps({
 })
 
 const { t, te, n } = useI18n()
+
+const pricingCardElement = ref<HTMLElement | null>(null)
+
+defineExpose({
+  pricingCardElement,
+})
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''

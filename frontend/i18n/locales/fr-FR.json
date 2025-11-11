@@ -1732,6 +1732,12 @@
       "viewOffersCount": "Voir les {count} offres",
       "viewSingleOffer": "Voir l'offre"
     },
+    "stickyOffers": {
+      "message": "Vous trouvez ça cool ? Soutenez-nous en achetant via Nudger !",
+      "selectAria": "Choisissez une offre {condition}",
+      "buttonLabel": "Voir cette offre",
+      "buttonAria": "Ouvrir l'offre {condition} dans l'onglet courant"
+    },
     "impact": {
       "alternatives": {
         "title": "Alternatives plus vertes",

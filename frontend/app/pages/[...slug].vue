@@ -1,5 +1,10 @@
 <template>
-  <div class="product-page">
+  <div
+    class="product-page"
+    :class="{ 'product-page--sticky-active': stickyOffersVisible }"
+    :style="stickyOffsetStyle"
+    data-testid="product-detail-page"
+  >
     <v-alert
       v-if="errorMessage"
       type="error"
@@ -16,8 +21,16 @@
       class="mb-6"
     />
 
-    <div v-else-if="product" class="product-page__layout">
-      <aside class="product-page__nav" :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }">
+    <div v-else-if="product" class="product-page__loaded">
+      <ProductStickyOffersBar
+        v-if="shouldRenderStickyOffers"
+        ref="stickyOffersRef"
+        :product="product"
+        :visible="stickyOffersVisible"
+      />
+
+      <div class="product-page__layout">
+        <aside class="product-page__nav" :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }">
         <ProductSummaryNavigation
           :sections="navigableSections"
           :admin-sections="adminNavigableSections"
@@ -28,16 +41,17 @@
           :aria-label="$t('product.navigation.label')"
           @navigate="scrollToSection"
         />
-      </aside>
+        </aside>
 
-      <main class="product-page__content">
-        <section :id="sectionIds.hero" class="product-page__section">
-          <ProductHero
-            :product="product"
-            :breadcrumbs="productBreadcrumbs"
-            :popular-attributes="heroPopularAttributes"
-          />
-        </section>
+        <main class="product-page__content">
+          <section :id="sectionIds.hero" class="product-page__section">
+            <ProductHero
+              ref="productHeroRef"
+              :product="product"
+              :breadcrumbs="productBreadcrumbs"
+              :popular-attributes="heroPopularAttributes"
+            />
+          </section>
 
         <section
           v-if="impactScores.length"
@@ -112,7 +126,9 @@
             :json-section-id="sectionIds.adminJson"
           />
         </section>
-      </main>
+
+        </main>
+      </div>
     </div>
   </div>
 </template>
@@ -143,6 +159,7 @@ import ProductAlternatives from '~/components/product/impact/ProductAlternatives
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
 import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
 import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
+import ProductStickyOffersBar from '~/components/product/ProductStickyOffersBar.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -172,6 +189,8 @@ if (!productRoute) {
 const { categorySlug, gtin } = productRoute
 
 const productLoadError = ref<Error | null>(null)
+const productHeroRef = ref<InstanceType<typeof ProductHero> | null>(null)
+const stickyOffersRef = ref<InstanceType<typeof ProductStickyOffersBar> | null>(null)
 
 const {
   data: productData,
@@ -1048,6 +1067,7 @@ watch(
 onBeforeUnmount(() => {
   observer.value?.disconnect()
   visibleSectionRatios.clear()
+  stickyOffersObserver.value?.disconnect()
 })
 
 const scrollToSection = (sectionId: string) => {
@@ -1082,6 +1102,117 @@ const errorMessage = computed(() => {
 
   return null
 })
+
+const shouldRenderStickyOffers = computed(() => (product.value?.offers?.offersCount ?? 0) > 0)
+
+const stickyOffersVisible = ref(false)
+const stickyOffersObserver = ref<IntersectionObserver | null>(null)
+const stickyOffset = ref(0)
+
+const stickyBarElement = computed<HTMLElement | null>(() => {
+  const instance = stickyOffersRef.value
+  if (!instance?.rootElement) {
+    return null
+  }
+
+  const exposed = instance.rootElement as { value?: HTMLElement | null }
+  return exposed?.value ?? null
+})
+
+const stickyOffsetStyle = computed(() =>
+  stickyOffset.value > 0
+    ? { '--product-sticky-offset': `${Math.round(stickyOffset.value)}px` }
+    : undefined,
+)
+
+const heroPricingElement = computed<HTMLElement | null>(() => {
+  const instance = productHeroRef.value
+  if (!instance?.pricingCardElement) {
+    return null
+  }
+
+  const exposed = instance.pricingCardElement as { value?: HTMLElement | null }
+  return exposed?.value ?? null
+})
+
+const measureStickyOffset = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (!stickyOffersVisible.value) {
+    stickyOffset.value = 0
+    return
+  }
+
+  const element = stickyBarElement.value
+  if (!element) {
+    stickyOffset.value = 0
+    return
+  }
+
+  stickyOffset.value = element.getBoundingClientRect().height
+}
+
+const observeStickyOffers = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  stickyOffersObserver.value?.disconnect()
+  stickyOffersObserver.value = null
+  stickyOffersVisible.value = false
+
+  if (!shouldRenderStickyOffers.value) {
+    return
+  }
+
+  const target = heroPricingElement.value
+  if (!target) {
+    return
+  }
+
+  stickyOffersObserver.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (!entry) {
+        return
+      }
+
+      const rootTop = entry.rootBounds?.top ?? 0
+      const isAboveViewport = entry.boundingClientRect.top <= rootTop
+      stickyOffersVisible.value = !entry.isIntersecting && isAboveViewport
+    },
+    { threshold: [0, 0.01] },
+  )
+
+  stickyOffersObserver.value.observe(target)
+}
+
+watch(
+  [heroPricingElement, shouldRenderStickyOffers],
+  () => {
+    observeStickyOffers()
+  },
+  { immediate: true },
+)
+
+watch(
+  stickyOffersVisible,
+  () => {
+    measureStickyOffset()
+  },
+  { immediate: true },
+)
+
+watch(
+  () => display.width.value,
+  () => {
+    if (stickyOffersVisible.value) {
+      measureStickyOffset()
+    }
+  },
+)
 
 const structuredOffers = computed(() => {
   const offersByCondition = product.value?.offers?.offersByCondition ?? {}
@@ -1191,6 +1322,13 @@ useHead(() => {
 <style scoped>
 .product-page {
   padding: 2rem 0;
+  --product-sticky-offset: 0px;
+}
+
+.product-page__loaded {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .product-page__layout {
@@ -1201,7 +1339,7 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 96px;
+  top: calc(96px + var(--product-sticky-offset));
   align-self: start;
   height: fit-content;
 }
@@ -1217,7 +1355,7 @@ useHead(() => {
 }
 
 .product-page__section {
-  scroll-margin-top: 96px;
+  scroll-margin-top: calc(96px + var(--product-sticky-offset));
 }
 
 @media (max-width: 1280px) {
@@ -1227,12 +1365,12 @@ useHead(() => {
 
   .product-page__nav {
     position: sticky;
-    top: 0;
+    top: var(--product-sticky-offset);
     z-index: 20;
   }
 
   .product-page__section {
-    scroll-margin-top: 140px;
+    scroll-margin-top: calc(140px + var(--product-sticky-offset));
   }
 }
 </style>
