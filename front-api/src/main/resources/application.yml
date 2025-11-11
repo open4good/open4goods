@@ -31,10 +31,6 @@ front:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:https://api.open4goods.org}
     api-key: ${FRONT_AFFILIATION_PARTNERS_API_KEY:CHANGE_ME_AFFILIATION_PARTNER_API_KEY}
 
-  review-generation:
-    api-base-url: ${FRONT_REVIEW_GENERATION_API_BASE_URL:https://api.open4goods.org}
-    api-key: ${FRONT_REVIEW_GENERATION_API_KEY:CHANGE_ME_REVIEW_GENERATION_API_KEY}
-    
   rate-limit:
     anonymous: 100
     authenticated: 1000

@@ -1,5 +1,6 @@
 <template>
   <ProductImpactSubscoreGenericCard v-bind="props" />
+
 </template>
 
 <script setup lang="ts">
