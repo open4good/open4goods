@@ -139,7 +139,7 @@ import {
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
 import type { AttributeConfigDto, ProductAttributeSourceDto, ProductDto } from '~~/shared/api-client'
-import { useEventListener } from '@vueuse/core'
+import { useEventListener, useIntersectionObserver } from '@vueuse/core'
 
 const emit = defineEmits<{
   (event: 'pricing-visibility-change', isVisible: boolean): void
@@ -170,6 +170,7 @@ const { t, te, n } = useI18n()
 const pricingCardRef = ref<InstanceType<typeof ProductHeroPricing> | null>(null)
 const pricingCardElement = ref<HTMLElement | null>(null)
 const isPricingCardVisible = ref(true)
+const headerOffset = ref(64)
 
 const computeHeaderOffset = () => (window.innerWidth <= 959 ? 56 : 64)
 
@@ -181,11 +182,23 @@ const updateVisibility = (value: boolean) => {
   isPricingCardVisible.value = value
   emit('pricing-visibility-change', value)
 }
+let stopResize: (() => void) | undefined
+let stopObserver: (() => void) | undefined
 
-const evaluatePricingVisibility = () => {
+const updateHeaderOffset = () => {
   if (!import.meta.client) {
     return
   }
+
+  headerOffset.value = computeHeaderOffset()
+}
+
+const observePricingCard = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  stopObserver?.()
 
   const element = pricingCardElement.value ?? pricingCardRef.value?.rootEl?.value ?? null
 
@@ -194,39 +207,36 @@ const evaluatePricingVisibility = () => {
     return
   }
 
-  const rect = element.getBoundingClientRect()
-  const offset = computeHeaderOffset()
-  const visible = rect.bottom > offset
+  const { stop } = useIntersectionObserver(
+    element,
+    (entries) => {
+      const entry = entries[0]
+      const isVisible = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0)
+      updateVisibility(isVisible)
+    },
+    {
+      rootMargin: `-${headerOffset.value}px 0px 0px 0px`,
+      threshold: [0, 0.05, 0.1, 0.25, 0.5, 0.75, 1],
+    },
+  )
 
-  updateVisibility(visible)
-}
-
-let stopScroll: (() => void) | undefined
-let stopResize: (() => void) | undefined
-
-const scheduleVisibilityCheck = () => {
-  if (!import.meta.client) {
-    return
-  }
-
-  if (typeof window.requestAnimationFrame === 'function') {
-    window.requestAnimationFrame(() => evaluatePricingVisibility())
-  } else {
-    window.setTimeout(() => evaluatePricingVisibility(), 16)
-  }
+  stopObserver = stop
 }
 
 if (import.meta.client) {
-  stopScroll = useEventListener(window, 'scroll', () => evaluatePricingVisibility(), { passive: true })
-  stopResize = useEventListener(window, 'resize', () => evaluatePricingVisibility())
+  updateHeaderOffset()
+  stopResize = useEventListener(window, 'resize', () => {
+    updateHeaderOffset()
+    observePricingCard()
+  })
 
   onMounted(() => {
-    scheduleVisibilityCheck()
+    observePricingCard()
   })
 
   onBeforeUnmount(() => {
-    stopScroll?.()
     stopResize?.()
+    stopObserver?.()
   })
 }
 
@@ -239,7 +249,7 @@ watch(
     }
 
     nextTick(() => {
-      scheduleVisibilityCheck()
+      observePricingCard()
     })
   },
   { immediate: true },
