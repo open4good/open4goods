@@ -3,7 +3,6 @@
     <ProductImpactSubscoreHeader
       :title="score.label"
       :on20="score.on20"
-      :coefficient="score.coefficient ?? null"
     />
 
     <div class="impact-subscore__value">
@@ -12,12 +11,19 @@
         :score="score"
         :absolute-value="absoluteValue"
         :relative-value="relativeScore"
+        :product-absolute-value="productAbsoluteValue"
       >
         <div class="impact-subscore__value-default">
           <span class="impact-subscore__value-number">{{ absoluteValue ?? '—' }}</span>
-          <span class="impact-subscore__value-label">{{ $t('product.impact.absoluteValue') }}</span>
         </div>
       </slot>
+
+      <ImpactCoefficientBadge
+        v-if="coefficientValue != null"
+        class="impact-subscore__coefficient"
+        :value="coefficientValue"
+        :tooltip-params="{ scoreName: score.label }"
+      />
     </div>
 
     <div v-if="score.energyLetter" class="impact-subscore__badge">
@@ -62,6 +68,7 @@ import { useI18n } from 'vue-i18n'
 import ProductImpactSubscoreHeader from './ProductImpactSubscoreHeader.vue'
 import ProductImpactSubscoreChart from './ProductImpactSubscoreChart.vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
+import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
 import type { ScoreView } from './impact-types'
 
 const props = defineProps<{
@@ -135,6 +142,20 @@ const productBrand = computed(() => props.productBrand?.trim() ?? '')
 const productModel = computed(() => props.productModel?.trim() ?? '')
 const productImage = computed(() => props.productImage?.trim() ?? '')
 const verticalTitle = computed(() => props.verticalTitle?.trim() ?? '')
+
+const coefficientValue = computed(() => {
+  const rawCoefficient = props.score.coefficient
+  if (rawCoefficient == null) {
+    return null
+  }
+
+  if (typeof rawCoefficient === 'number') {
+    return Number.isFinite(rawCoefficient) ? rawCoefficient : null
+  }
+
+  const numeric = Number(rawCoefficient)
+  return Number.isFinite(numeric) ? numeric : null
+})
 </script>
 
 <style scoped>
@@ -151,8 +172,9 @@ const verticalTitle = computed(() => props.verticalTitle?.trim() ?? '')
 
 .impact-subscore__value {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
 }
 
 .impact-subscore__value-default {
@@ -168,10 +190,8 @@ const verticalTitle = computed(() => props.verticalTitle?.trim() ?? '')
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.impact-subscore__value-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+.impact-subscore__coefficient {
+  align-self: flex-start;
 }
 
 .impact-subscore__badge {
