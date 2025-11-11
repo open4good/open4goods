@@ -11,6 +11,7 @@ import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
+import { normaliseProductDto } from '../../utils/normalise-product-sourcing'
 
 interface ProductsSearchPayload {
   verticalId?: string
@@ -65,7 +66,7 @@ export default defineEventHandler(
     const searchBody = buildSearchBody(payload)
 
     try {
-      return await productService.searchProducts({
+      const response = await productService.searchProducts({
         verticalId: payload.verticalId,
         pageNumber: payload.pageNumber,
         pageSize: payload.pageSize,
@@ -73,6 +74,11 @@ export default defineEventHandler(
         include: payload.include,
         ...(searchBody ? { body: searchBody } : {}),
       })
+      response.products?.data?.forEach((product) => {
+        normaliseProductDto(product)
+      })
+
+      return response
     } catch (error) {
       const backendError = await extractBackendErrorDetails(error)
       console.error('Error searching products:', backendError.logMessage, backendError)

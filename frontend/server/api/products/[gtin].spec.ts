@@ -1,4 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
+import { defineComponent, h } from 'vue'
+import ProductAttributeSourcingLabel from '~~/app/components/product/attributes/ProductAttributeSourcingLabel.vue'
+import type { ProductDto } from '~~/shared/api-client'
 
 type ProductRouteHandler = typeof import('./[gtin]')['default']
 
@@ -22,6 +27,112 @@ const createErrorMock = vi.hoisted(() =>
     })
   )
 )
+
+const VTooltipStub = defineComponent({
+  name: 'VTooltipStub',
+  props: { text: { type: String, default: '' } },
+  setup(props, { slots }) {
+    return () =>
+      h('div', { class: 'v-tooltip-stub', 'data-text': props.text }, [
+        slots.activator?.({ props: {} }),
+        h('div', { class: 'v-tooltip-stub__content' }, slots.default?.()),
+      ])
+  },
+})
+
+const VBtnStub = defineComponent({
+  name: 'VBtnStub',
+  props: {
+    icon: { type: Boolean, default: false },
+    density: { type: String, default: 'default' },
+    variant: { type: String, default: 'text' },
+    ariaLabel: { type: String, default: '' },
+  },
+  setup(props, { slots }) {
+    return () =>
+      h(
+        'button',
+        {
+          class: 'v-btn-stub',
+          'data-icon': props.icon,
+          'data-density': props.density,
+          'data-variant': props.variant,
+          'aria-label': props.ariaLabel,
+          type: 'button',
+        },
+        slots.default?.(),
+      )
+  },
+})
+
+const VIconStub = defineComponent({
+  name: 'VIconStub',
+  props: {
+    icon: { type: String, default: '' },
+    color: { type: String, default: '' },
+  },
+  setup(props) {
+    return () => h('i', { class: 'v-icon-stub', 'data-color': props.color }, props.icon)
+  },
+})
+
+const VCardStub = defineComponent({
+  name: 'VCardStub',
+  setup(_, { slots }) {
+    return () => h('div', { class: 'v-card-stub' }, slots.default?.())
+  },
+})
+
+const VTableStub = defineComponent({
+  name: 'VTableStub',
+  setup(_, { slots }) {
+    return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+  },
+})
+
+const VDividerStub = defineComponent({
+  name: 'VDividerStub',
+  setup() {
+    return () => h('hr', { class: 'v-divider-stub' })
+  },
+})
+
+const VChipStub = defineComponent({
+  name: 'VChipStub',
+  setup(_, { slots }) {
+    return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
+  },
+})
+
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en',
+  messages: {
+    en: {
+      product: {
+        attributes: {
+          sourcing: {
+            bestValue: 'Best value',
+            sourceCount: {
+              one: '{count} source',
+              other: '{count} sources',
+            },
+            columns: {
+              source: 'Source',
+              value: 'Value',
+            },
+            empty: 'No sourcing information available.',
+            status: {
+              conflicts: 'Conflicts detected',
+              noConflicts: 'No conflicts detected',
+            },
+            tooltipAriaLabel: 'Show sourcing details',
+          },
+        },
+      },
+    },
+  },
+})
 
 vi.mock('h3', () => ({
   defineEventHandler: (fn: ProductRouteHandler) => fn,
@@ -109,6 +220,109 @@ describe('server/api/products/[gtin]', () => {
     expect(useProductServiceMock).toHaveBeenCalledWith('fr')
     expect(getProductByGtinMock).toHaveBeenCalledWith(1234567890123)
     expect(response).toEqual(productResponse)
+  })
+
+  it('serialises sourcing sets to arrays consumable by the UI', async () => {
+    const event = {
+      node: {
+        req: {
+          headers: { host: 'nudger.example' },
+        },
+      },
+      context: { params: { gtin: '9876543210987' } },
+    } as unknown as Parameters<ProductRouteHandler>[0]
+
+    const productResponse: ProductDto = {
+      gtin: 9876543210987,
+      slug: 'sourcing-test-product',
+      attributes: {
+        indexedAttributes: {
+          weight: {
+            name: 'Weight',
+            value: '1 kg',
+            sourcing: {
+              bestValue: '1 kg',
+              conflicts: false,
+              sources: new Set([
+                {
+                  datasourceName: 'icecat.biz',
+                  value: '1 kg',
+                },
+                {
+                  datasourceName: 'eprel',
+                  value: '1 kg',
+                },
+              ]),
+            },
+          },
+        },
+        classifiedAttributes: [
+          {
+            name: 'General',
+            attributes: [
+              {
+                name: 'Colour',
+                value: 'Black',
+                sourcing: {
+                  bestValue: 'Black',
+                  conflicts: false,
+                  sources: new Set([
+                    {
+                      datasourceName: 'icecat.biz',
+                      value: 'Black',
+                    },
+                    {
+                      datasourceName: 'fnac.com',
+                      value: 'Black',
+                    },
+                  ]),
+                },
+              },
+            ],
+          },
+        ],
+      },
+    }
+
+    getProductByGtinMock.mockResolvedValueOnce(productResponse)
+
+    const response = await handler(event)
+
+    const indexedSources = response.attributes?.indexedAttributes?.weight?.sourcing?.sources
+    expect(Array.isArray(indexedSources)).toBe(true)
+    expect(indexedSources).toEqual([
+      expect.objectContaining({ datasourceName: 'icecat.biz', value: '1 kg' }),
+      expect.objectContaining({ datasourceName: 'eprel', value: '1 kg' }),
+    ])
+
+    const groupedSources =
+      response.attributes?.classifiedAttributes?.[0]?.attributes?.[0]?.sourcing?.sources
+    expect(Array.isArray(groupedSources)).toBe(true)
+    expect(groupedSources).toHaveLength(2)
+
+    const wrapper = mount(ProductAttributeSourcingLabel, {
+      props: {
+        sourcing: response.attributes?.indexedAttributes?.weight?.sourcing ?? null,
+        value: '1 kg',
+      },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          VTooltip: VTooltipStub,
+          VBtn: VBtnStub,
+          VIcon: VIconStub,
+          VCard: VCardStub,
+          VTable: VTableStub,
+          VDivider: VDividerStub,
+          VChip: VChipStub,
+        },
+      },
+    })
+
+    const tableRows = wrapper.findAll('.v-table-stub tbody tr')
+    expect(tableRows).toHaveLength(2)
+    expect(tableRows[0].text()).toContain('icecat.biz')
+    expect(tableRows[1].text()).toContain('eprel')
   })
 
   it('throws a 400 error when the GTIN parameter is missing', async () => {
