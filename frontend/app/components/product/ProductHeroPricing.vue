@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootEl"
     class="product-hero__pricing-card"
     itemprop="offers"
     itemscope
@@ -146,6 +147,8 @@ const props = defineProps({
 })
 
 const { n, t } = useI18n()
+
+const rootEl = ref<HTMLElement | null>(null)
 
 type AggregatedOffer = NonNullable<NonNullable<ProductDto['offers']>['bestPrice']>
 
@@ -382,6 +385,10 @@ const scrollToSelector = (selector: string, offset = 120) => {
   const top = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) - offset
   window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
 }
+
+defineExpose({
+  rootEl,
+})
 </script>
 
 <style scoped>

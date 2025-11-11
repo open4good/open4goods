@@ -1732,6 +1732,13 @@
       "viewOffersCount": "View the {count} offers",
       "viewSingleOffer": "View the offer"
     },
+    "stickyOffer": {
+      "support": "Support our mission by purchasing via our partners.",
+      "ariaLabel": "Best offers sticky banner",
+      "selectPlaceholder": "Choose a retailer",
+      "goToOffer": "Open offer",
+      "conditionTitle": "Best {condition} price"
+    },
     "impact": {
       "alternatives": {
         "title": "Greener alternatives",

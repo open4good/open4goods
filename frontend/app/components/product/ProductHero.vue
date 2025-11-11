@@ -119,13 +119,13 @@
     </div>
 
     <aside class="product-hero__pricing">
-      <ProductHeroPricing :product="product" />
+      <ProductHeroPricing ref="pricingCardRef" :product="product" />
     </aside>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, type PropType, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
@@ -139,6 +139,11 @@ import {
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
 import type { AttributeConfigDto, ProductAttributeSourceDto, ProductDto } from '~~/shared/api-client'
+import { useEventListener } from '@vueuse/core'
+
+const emit = defineEmits<{
+  (event: 'pricing-visibility-change', isVisible: boolean): void
+}>()
 
 export interface ProductHeroBreadcrumb {
   title: string
@@ -161,6 +166,84 @@ const props = defineProps({
 })
 
 const { t, te, n } = useI18n()
+
+const pricingCardRef = ref<InstanceType<typeof ProductHeroPricing> | null>(null)
+const pricingCardElement = ref<HTMLElement | null>(null)
+const isPricingCardVisible = ref(true)
+
+const computeHeaderOffset = () => (window.innerWidth <= 959 ? 56 : 64)
+
+const updateVisibility = (value: boolean) => {
+  if (value === isPricingCardVisible.value) {
+    return
+  }
+
+  isPricingCardVisible.value = value
+  emit('pricing-visibility-change', value)
+}
+
+const evaluatePricingVisibility = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const element = pricingCardElement.value ?? pricingCardRef.value?.rootEl?.value ?? null
+
+  if (!element) {
+    updateVisibility(true)
+    return
+  }
+
+  const rect = element.getBoundingClientRect()
+  const offset = computeHeaderOffset()
+  const visible = rect.bottom > offset
+
+  updateVisibility(visible)
+}
+
+let stopScroll: (() => void) | undefined
+let stopResize: (() => void) | undefined
+
+const scheduleVisibilityCheck = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(() => evaluatePricingVisibility())
+  } else {
+    window.setTimeout(() => evaluatePricingVisibility(), 16)
+  }
+}
+
+if (import.meta.client) {
+  stopScroll = useEventListener(window, 'scroll', () => evaluatePricingVisibility(), { passive: true })
+  stopResize = useEventListener(window, 'resize', () => evaluatePricingVisibility())
+
+  onMounted(() => {
+    scheduleVisibilityCheck()
+  })
+
+  onBeforeUnmount(() => {
+    stopScroll?.()
+    stopResize?.()
+  })
+}
+
+watch(
+  () => pricingCardRef.value?.rootEl?.value ?? null,
+  (element) => {
+    pricingCardElement.value = element
+    if (!import.meta.client) {
+      return
+    }
+
+    nextTick(() => {
+      scheduleVisibilityCheck()
+    })
+  },
+  { immediate: true },
+)
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''

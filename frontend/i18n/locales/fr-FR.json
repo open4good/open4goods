@@ -1732,6 +1732,13 @@
       "viewOffersCount": "Voir les {count} offres",
       "viewSingleOffer": "Voir l'offre"
     },
+    "stickyOffer": {
+      "support": "Soutenez notre action en achetant via nos partenaires.",
+      "ariaLabel": "Bandeau des meilleures offres",
+      "selectPlaceholder": "Choisissez une plateforme marchande",
+      "goToOffer": "Voir l'offre",
+      "conditionTitle": "Meilleur prix {condition}"
+    },
     "impact": {
       "alternatives": {
         "title": "Alternatives plus vertes",

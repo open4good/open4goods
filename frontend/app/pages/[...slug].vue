@@ -1,5 +1,15 @@
 <template>
   <div class="product-page">
+    <ClientOnly>
+      <template #default>
+        <ProductStickyOfferBanner
+          v-if="product && hasStickyOffers"
+          :product="product"
+          :active="stickyBannerActive"
+        />
+      </template>
+    </ClientOnly>
+
     <v-alert
       v-if="errorMessage"
       type="error"
@@ -36,6 +46,7 @@
             :product="product"
             :breadcrumbs="productBreadcrumbs"
             :popular-attributes="heroPopularAttributes"
+            @pricing-visibility-change="handlePricingVisibilityChange"
           />
         </section>
 
@@ -132,6 +143,7 @@ import { matchProductRouteFromSegments, isBackendNotFoundError } from '~~/shared
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
+import ProductStickyOfferBanner from '~/components/product/ProductStickyOfferBanner.vue'
 import ProductImpactSection from '~/components/product/ProductImpactSection.vue'
 import ProductAiReviewSection from '~/components/product/ProductAiReviewSection.vue'
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
@@ -209,6 +221,22 @@ const {
 )
 
 const product = computed(() => productData.value)
+const heroPricingInView = ref(true)
+
+const hasStickyOffers = computed(() => {
+  const offersByCondition = product.value?.offers?.offersByCondition ?? null
+  if (!offersByCondition) {
+    return false
+  }
+
+  return Object.values(offersByCondition).some((entries) => Array.isArray(entries) && entries.some((offer) => Boolean(offer?.url ?? offer?.affiliationToken)))
+})
+
+const stickyBannerActive = computed(() => hasStickyOffers.value && !heroPricingInView.value)
+
+const handlePricingVisibilityChange = (isVisible: boolean) => {
+  heroPricingInView.value = isVisible
+}
 
 if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
