@@ -49,7 +49,11 @@
             :radar-data="radarData"
             :loading="loadingAggregations"
             :product-name="productTitle"
+            :product-brand="productBrand"
+            :product-model="productModel"
+            :product-image="resolvedProductImageSource"
             :vertical-home-url="verticalHomeUrl"
+            :vertical-title="normalizedVerticalTitle"
           />
         </section>
 
@@ -148,7 +152,7 @@ import { buildCategoryHash } from '~/utils/_category-filter-state'
 const route = useRoute()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
 
@@ -335,6 +339,36 @@ const productTitle = computed(() => {
 
 const heroPopularAttributes = computed(() => categoryDetail.value?.popularAttributes ?? [])
 const verticalHomeUrl = computed(() => categoryDetail.value?.verticalHomeUrl?.trim() ?? '')
+const verticalTitle = computed(() => {
+  const candidates = [
+    categoryDetail.value?.verticalHomeTitle,
+    categoryDetail.value?.verticalMetaTitle,
+  ]
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim().length) {
+      return candidate.trim()
+    }
+  }
+
+  return ''
+})
+const normalizedVerticalTitle = computed(() => {
+  const title = verticalTitle.value
+  if (!title.length) {
+    return ''
+  }
+
+  try {
+    return title.toLocaleLowerCase(locale.value)
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to localize vertical title casing.', error)
+    }
+
+    return title.toLowerCase()
+  }
+})
 
 const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
 
@@ -589,6 +623,7 @@ const impactScores = computed(() => {
       relativeValue: typeof score.relativ?.value === 'number' ? score.relativ.value : null,
       value: typeof score.value === 'number' ? score.value : null,
       absoluteValue: score.absoluteValue ?? null,
+      absolute: score.absolute ?? null,
       coefficient: coefficients[score.id.toUpperCase()] ?? null,
       percent: score.percent ?? null,
       ranking: score.ranking ?? null,

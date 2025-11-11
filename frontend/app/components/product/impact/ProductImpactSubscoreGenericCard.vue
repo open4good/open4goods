@@ -6,8 +6,18 @@
       :coefficient="score.coefficient ?? null"
     />
 
-    <div class="impact-subscore__score">
-      <ImpactScore :score="relativeScore" :max="5" show-value size="medium" />
+    <div class="impact-subscore__value">
+      <slot
+        name="visual"
+        :score="score"
+        :absolute-value="absoluteValue"
+        :relative-value="relativeScore"
+      >
+        <div class="impact-subscore__value-default">
+          <span class="impact-subscore__value-number">{{ absoluteValue ?? '—' }}</span>
+          <span class="impact-subscore__value-label">{{ $t('product.impact.absoluteValue') }}</span>
+        </div>
+      </slot>
     </div>
 
     <div v-if="score.energyLetter" class="impact-subscore__badge">
@@ -20,6 +30,10 @@
       :label="score.label"
       :relative-value="score.relativeValue"
       :product-name="productName"
+      :product-brand="productBrand"
+      :product-model="productModel"
+      :product-image="productImage"
+      :product-absolute-value="productAbsoluteValue"
     />
 
     <v-expansion-panels v-if="hasDetails" class="impact-subscore__details" variant="accordion">
@@ -28,7 +42,14 @@
           {{ $t('product.impact.subscoreDetailsToggle') }}
         </v-expansion-panel-title>
         <v-expansion-panel-text class="impact-subscore__details-content">
-          <ProductImpactSubscoreExplanation :score="score" :absolute-value="absoluteValue" />
+          <ProductImpactSubscoreExplanation
+            :score="score"
+            :absolute-value="absoluteValue"
+            :product-name="productName"
+            :product-brand="productBrand"
+            :product-model="productModel"
+            :vertical-title="verticalTitle"
+          />
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -38,7 +59,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductImpactSubscoreHeader from './ProductImpactSubscoreHeader.vue'
 import ProductImpactSubscoreChart from './ProductImpactSubscoreChart.vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
@@ -47,6 +67,10 @@ import type { ScoreView } from './impact-types'
 const props = defineProps<{
   score: ScoreView
   productName: string
+  productBrand: string
+  productModel: string
+  productImage: string | null
+  verticalTitle: string
 }>()
 
 const { n } = useI18n()
@@ -87,6 +111,30 @@ const hasDetails = computed(() => {
   const hasDescription = typeof props.score.description === 'string' && props.score.description.trim().length > 0
   return hasDescription || Boolean(absoluteValue.value) || hasRanking.value || hasMetadata.value
 })
+
+const productAbsoluteValue = computed(() => {
+  const absoluteValue = props.score.absolute?.value
+  if (typeof absoluteValue === 'number' && Number.isFinite(absoluteValue)) {
+    return absoluteValue
+  }
+
+  const directValue = props.score.value
+  if (typeof directValue === 'number' && Number.isFinite(directValue)) {
+    return directValue
+  }
+
+  if (typeof props.score.absoluteValue === 'number' && Number.isFinite(props.score.absoluteValue)) {
+    return props.score.absoluteValue
+  }
+
+  const parsed = Number(props.score.absoluteValue)
+  return Number.isFinite(parsed) ? parsed : null
+})
+
+const productBrand = computed(() => props.productBrand?.trim() ?? '')
+const productModel = computed(() => props.productModel?.trim() ?? '')
+const productImage = computed(() => props.productImage?.trim() ?? '')
+const verticalTitle = computed(() => props.verticalTitle?.trim() ?? '')
 </script>
 
 <style scoped>
@@ -101,9 +149,29 @@ const hasDetails = computed(() => {
   min-height: 100%;
 }
 
-.impact-subscore__score {
+.impact-subscore__value {
   display: flex;
+  align-items: flex-start;
   justify-content: flex-start;
+}
+
+.impact-subscore__value-default {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.impact-subscore__value-number {
+  font-size: clamp(2.25rem, 2.2rem + 0.5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore__value-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
 }
 
 .impact-subscore__badge {

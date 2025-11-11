@@ -43,6 +43,10 @@ describe('ProductImpactSubscoreCard', () => {
       props: {
         score: baseScore,
         productName: 'Demo',
+        productBrand: 'EcoCorp',
+        productModel: 'X1',
+        productImage: '/cover.png',
+        verticalTitle: 'televisions',
       },
     })
 
@@ -54,6 +58,10 @@ describe('ProductImpactSubscoreCard', () => {
       props: {
         score: { ...baseScore, id: 'DATA_QUALITY' },
         productName: 'Demo',
+        productBrand: 'EcoCorp',
+        productModel: 'X1',
+        productImage: '/cover.png',
+        verticalTitle: 'televisions',
       },
     })
 

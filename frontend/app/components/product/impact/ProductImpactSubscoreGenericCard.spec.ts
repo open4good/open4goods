@@ -24,12 +24,23 @@ describe('ProductImpactSubscoreGenericCard', () => {
         product: {
           impact: {
             absoluteValue: 'Absolute value',
-            explanationTitle: 'Explanation',
             percentile: 'Percentile',
             weightChip: 'Counts for {value}% of the total score',
             subscoreDetailsToggle: 'View indicator details',
             tableHeaders: {
               ranking: 'Rank',
+            },
+            subscores: {
+              default: {
+                ranking: 'Rank {ranking} out of {count}.',
+                readIndicator: {
+                  title: 'How to read this indicator',
+                  worst: 'Worst indicator is {worst}.',
+                  best: 'Best indicator is {best} across {count} {verticalTitle}.',
+                  average: 'Average is {average}, equivalent to {averageOn20}/20.',
+                  product: '{productName} scores {productOn20}/20.',
+                },
+              },
             },
           },
         },
@@ -43,6 +54,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
     description: 'Lower is better',
     relativeValue: 3.6,
     absoluteValue: 42.5,
+    absolute: { min: 10, max: 100, avg: 55, count: 200, value: 42.5 },
     energyLetter: 'A',
     distribution: [
       { label: '1', value: 5 },
@@ -56,19 +68,19 @@ describe('ProductImpactSubscoreGenericCard', () => {
     },
   }
 
-  it('renders the header, score, chart and explanation details', () => {
+  it('renders the header, value summary, chart and explanation details', () => {
     const wrapper = mount(ProductImpactSubscoreGenericCard, {
-      props: { score, productName: 'Demo Product' },
+      props: {
+        score,
+        productName: 'Demo Product',
+        productBrand: 'EcoCorp',
+        productModel: 'Air 2000',
+        productImage: '/cover.png',
+        verticalTitle: 'televisions',
+      },
       global: {
         plugins: [i18n],
         stubs: {
-          ImpactScore: defineComponent({
-            name: 'ImpactScoreStub',
-            props: ['score'],
-            setup(props) {
-              return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
-            },
-          }),
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: ['value', 'labelKey', 'labelParams', 'tooltipKey', 'tooltipParams'],
@@ -112,15 +124,15 @@ describe('ProductImpactSubscoreGenericCard', () => {
 
     expect(wrapper.text()).toContain('coefficient:0.42')
     expect(wrapper.text()).toContain('17.3')
-    expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
+    expect(wrapper.find('.impact-subscore__value-number').text()).toBe('42.5')
     expect(wrapper.text()).toContain('Absolute value')
-    expect(wrapper.text()).toContain('42.5')
-    expect(wrapper.text()).toContain('Explanation')
+    expect(wrapper.text()).toContain('How to read this indicator')
     expect(wrapper.text()).toContain('Lower is better')
     expect(wrapper.text()).toContain('View indicator details')
     expect(wrapper.text()).not.toContain('Percentile')
     expect(wrapper.text()).toContain('Rank')
     expect(wrapper.text()).toContain('3')
+    expect(wrapper.text()).toContain('Rank 3 out of 200.')
     expect(wrapper.text()).toContain('High')
   })
 })
