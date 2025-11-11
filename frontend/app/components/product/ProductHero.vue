@@ -118,14 +118,15 @@
       </div>
     </div>
 
-    <aside class="product-hero__pricing">
+    <aside ref="pricingSectionRef" class="product-hero__pricing">
       <ProductHeroPricing :product="product" />
+      <div ref="pricingSentinelRef" class="product-hero__pricing-sentinel" aria-hidden="true" />
     </aside>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, ref, type PropType, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
@@ -145,6 +146,11 @@ export interface ProductHeroBreadcrumb {
   link?: string
 }
 
+export type ProductHeroExpose = {
+  pricingElement: Ref<HTMLElement | null>
+  pricingSentinel: Ref<HTMLElement | null>
+}
+
 const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
@@ -161,6 +167,14 @@ const props = defineProps({
 })
 
 const { t, te, n } = useI18n()
+
+const pricingSectionRef = ref<HTMLElement | null>(null)
+const pricingSentinelRef = ref<HTMLElement | null>(null)
+
+defineExpose<ProductHeroExpose>({
+  pricingElement: pricingSectionRef,
+  pricingSentinel: pricingSentinelRef,
+})
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
@@ -630,6 +644,15 @@ const impactScore = computed(() => {
 
 .product-hero__pricing {
   align-self: stretch;
+}
+
+.product-hero__pricing-sentinel {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 1280px) {
