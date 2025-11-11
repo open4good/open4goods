@@ -1732,6 +1732,24 @@
       "viewOffersCount": "View the {count} offers",
       "viewSingleOffer": "View the offer"
     },
+    "stickySupportBar": {
+      "ariaLabel": "Nudger best offers",
+      "ariaLabelOffers": "Offer selection to support Nudger",
+      "message": "Love this? Support us by buying through Nudger!",
+      "conditions": {
+        "occasion": "Pre-owned",
+        "new": "New"
+      },
+      "selectLabels": {
+        "occasion": "Choose a pre-owned offer",
+        "new": "Choose a new offer"
+      },
+      "actions": {
+        "goToOffer": "Open the offer",
+        "openOccasion": "Open the pre-owned offer at {merchant}",
+        "openNew": "Open the new offer at {merchant}"
+      }
+    },
     "impact": {
       "alternatives": {
         "title": "Greener alternatives",

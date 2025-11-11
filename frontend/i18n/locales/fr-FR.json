@@ -1732,6 +1732,24 @@
       "viewOffersCount": "Voir les {count} offres",
       "viewSingleOffer": "Voir l'offre"
     },
+    "stickySupportBar": {
+      "ariaLabel": "Meilleures offres Nudger",
+      "ariaLabelOffers": "Sélection d'offres pour soutenir Nudger",
+      "message": "Vous trouvez ça cool ? Soutenez-nous en achetant à partir de Nudger !",
+      "conditions": {
+        "occasion": "Occasion",
+        "new": "Neuf"
+      },
+      "selectLabels": {
+        "occasion": "Sélectionner une offre d'occasion",
+        "new": "Sélectionner une offre neuve"
+      },
+      "actions": {
+        "goToOffer": "Voir l'offre",
+        "openOccasion": "Ouvrir l'offre d'occasion chez {merchant}",
+        "openNew": "Ouvrir l'offre neuve chez {merchant}"
+      }
+    },
     "impact": {
       "alternatives": {
         "title": "Alternatives plus vertes",

@@ -17,6 +17,13 @@
     />
 
     <div v-else-if="product" class="product-page__layout">
+      <ClientOnly>
+        <ProductStickyOffersBar
+          v-if="product?.offers"
+          :product="product"
+          :sentinel="heroPricingSentinel"
+        />
+      </ClientOnly>
       <aside class="product-page__nav" :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }">
         <ProductSummaryNavigation
           :sections="navigableSections"
@@ -33,6 +40,7 @@
       <main class="product-page__content">
         <section :id="sectionIds.hero" class="product-page__section">
           <ProductHero
+            ref="productHeroRef"
             :product="product"
             :breadcrumbs="productBreadcrumbs"
             :popular-attributes="heroPopularAttributes"
@@ -134,8 +142,10 @@ import {
 } from '~~/shared/api-client'
 import { matchProductRouteFromSegments, isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
-import ProductHero from '~/components/product/ProductHero.vue'
-import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
+import ProductHero, {
+  type ProductHeroBreadcrumb,
+  type ProductHeroExpose,
+} from '~/components/product/ProductHero.vue'
 import ProductImpactSection from '~/components/product/ProductImpactSection.vue'
 import ProductAiReviewSection from '~/components/product/ProductAiReviewSection.vue'
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
@@ -143,6 +153,7 @@ import ProductAlternatives from '~/components/product/impact/ProductAlternatives
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
 import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
 import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
+import ProductStickyOffersBar from '~/components/product/ProductStickyOffersBar.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -155,6 +166,9 @@ const runtimeConfig = useRuntimeConfig()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
+
+const productHeroRef = ref<ProductHeroExpose | null>(null)
+const heroPricingSentinel = computed(() => productHeroRef.value?.pricingSentinel.value ?? null)
 
 const slugParam = route.params.slug
 const segments = Array.isArray(slugParam)
