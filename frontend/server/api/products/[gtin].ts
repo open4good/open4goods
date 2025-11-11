@@ -5,6 +5,7 @@ import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
+import { normaliseProductDto } from '../../utils/normalise-product-sourcing'
 
 export default defineEventHandler(async (event): Promise<ProductDto> => {
   setDomainLanguageCacheHeaders(event, 'public, max-age=300, s-maxage=300')
@@ -34,7 +35,8 @@ export default defineEventHandler(async (event): Promise<ProductDto> => {
   const productService = useProductService(domainLanguage)
 
   try {
-    return await productService.getProductByGtin(parsedGtin)
+    const product = await productService.getProductByGtin(parsedGtin)
+    return normaliseProductDto(product)
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
     console.error(
