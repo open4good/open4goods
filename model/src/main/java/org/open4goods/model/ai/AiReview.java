@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents an AI-generated review of a product, including descriptions, pros and cons, 
+ * Represents an AI-generated review of a product, including descriptions, pros and cons,
  * data quality assessment, and sourced information.
  */
 public class AiReview {

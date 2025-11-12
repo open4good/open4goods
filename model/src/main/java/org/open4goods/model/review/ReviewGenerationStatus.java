@@ -1,11 +1,9 @@
 package org.open4goods.model.review;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.product.AiReviewHolder;
 
 /**
@@ -17,16 +15,16 @@ public class ReviewGenerationStatus {
      * Possible states of a generation process.
      */
     public enum Status {
-        PENDING, 
-        QUEUED, 
-        SEARCHING, 
-        FETCHING, 
-        ANALYSING, 
-        SUCCESS, 
+        PENDING,
+        QUEUED,
+        SEARCHING,
+        FETCHING,
+        ANALYSING,
+        SUCCESS,
         PREPROCESSING,
         FAILED;
     }
-    
+
     private long upc;
     private Status status;
     private Long startTime;
@@ -34,22 +32,22 @@ public class ReviewGenerationStatus {
     private AiReviewHolder result;
     private String errorMessage;
     private Integer percent = 0;
-    
+
     /**
      * List of processing messages that track the internal state.
      */
     private List<String> messages = new ArrayList<>();
-    
+
     /**
      * Duration of the review generation process in milliseconds.
      */
     private long duration;
-    
+
     /**
      * Remaining time (in milliseconds) computed as estimatedTime - duration.
      */
     private long remaining;
-    
+
     /**
      * The product GTIN associated with the generation request.
      */
@@ -115,7 +113,7 @@ public class ReviewGenerationStatus {
     public void setMessages(List<String> messages) {
         this.messages = messages;
     }
-    
+
     /**
      * Appends a new message to the process status messages.
      *
@@ -124,34 +122,34 @@ public class ReviewGenerationStatus {
     public void addMessage(String message) {
         this.messages.add(message);
     }
-    
+
     public long getDuration() {
         return duration;
     }
-    
+
     public void setDuration(long duration) {
         this.duration = duration;
     }
-    
+
     public long getRemaining() {
         return remaining;
     }
-    
+
     public void setRemaining(long remaining) {
         this.remaining = remaining;
     }
-    
+
     public String getGtin() {
         return gtin;
     }
-    
+
     public void setGtin(String gtin) {
         this.gtin = gtin;
     }
 
-    
-    
-    
+
+
+
     // toString, equals, and hashCode
 
     public Integer getPercent() {

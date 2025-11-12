@@ -113,7 +113,6 @@ public class ReviewGenerationService implements HealthIndicator {
     private final File trackingFolder;
     private final ObjectMapper objectMapper;
 
-	private SerialisationService serialisationService;
 
     /**
      * Constructs a new ReviewGenerationService.
@@ -132,8 +131,8 @@ public class ReviewGenerationService implements HealthIndicator {
                                    PromptService genAiService,
                                    BatchPromptService batchAiService,
                                    MeterRegistry meterRegistry,
-                                   ProductRepository productRepository,
-                                   SerialisationService serialisationService
+                                   ProductRepository productRepository
+
     		) {
         this.properties = properties;
         this.googleSearchService = googleSearchService;
@@ -142,7 +141,6 @@ public class ReviewGenerationService implements HealthIndicator {
         this.batchAiService = batchAiService;
         this.meterRegistry = meterRegistry;
         this.productRepository = productRepository;
-        this.serialisationService = serialisationService;
         this.executorService = new ThreadPoolExecutor(
             properties.getThreadPoolSize(),
             properties.getThreadPoolSize(),
