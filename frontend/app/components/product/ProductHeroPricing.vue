@@ -1,11 +1,25 @@
 <template>
   <div
-    class="product-hero__pricing-card"
-    itemprop="offers"
-    itemscope
-    itemtype="https://schema.org/AggregateOffer"
-    v-bind="$attrs"
+    ref="pricingWrapper"
+    class="product-hero__pricing-wrapper"
+    :class="{ 'product-hero__pricing-wrapper--affixed': shouldAffixToViewport }"
   >
+    <div
+      v-if="shouldAffixToViewport && placeholderHeight > 0"
+      class="product-hero__pricing-placeholder"
+      aria-hidden="true"
+      :style="{ height: `${placeholderHeight}px` }"
+    />
+    <div
+      ref="pricingCard"
+      class="product-hero__pricing-card"
+      :class="{ 'product-hero__pricing-card--affixed': shouldAffixToViewport }"
+      :style="affixedStyles"
+      itemprop="offers"
+      itemscope
+      itemtype="https://schema.org/AggregateOffer"
+      v-bind="$attrs"
+    >
     <meta itemprop="offerCount" :content="String(product.offers?.offersCount ?? 0)" />
     <meta itemprop="priceCurrency" :content="priceCurrencyCode" />
     <div
@@ -126,12 +140,15 @@
         {{ viewOffersLabel }}
       </v-btn>
     </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, type PropType } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useEventListener, useResizeObserver } from '@vueuse/core'
+import { useDisplay } from 'vuetify'
 import type { ProductDto } from '~~/shared/api-client'
 
 type OfferCondition = 'occasion' | 'new'
@@ -146,6 +163,127 @@ const props = defineProps({
 })
 
 const { n, t } = useI18n()
+const display = useDisplay()
+
+const pricingWrapper = ref<HTMLElement | null>(null)
+const pricingCard = ref<HTMLElement | null>(null)
+const heroSection = ref<HTMLElement | null>(null)
+const isAffixed = ref(false)
+const placeholderHeight = ref(0)
+const affixInlineStart = ref(0)
+const affixWidth = ref(0)
+
+const isDesktop = computed(() => display.mdAndUp.value)
+
+const DESKTOP_HEADER_OFFSET = 64
+const DESKTOP_GAP_OFFSET = 24
+const STICKY_VIEWPORT_OFFSET = DESKTOP_HEADER_OFFSET + DESKTOP_GAP_OFFSET
+
+const shouldAffixToViewport = computed(
+  () => isDesktop.value && isAffixed.value && affixWidth.value > 0,
+)
+
+const affixedStyles = computed(() => {
+  if (!shouldAffixToViewport.value) {
+    return undefined
+  }
+
+  return {
+    insetInlineStart: `${affixInlineStart.value}px`,
+    width: `${affixWidth.value}px`,
+    maxWidth: `${affixWidth.value}px`,
+  }
+})
+
+const recalculateAffixMetrics = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const wrapperElement = pricingWrapper.value
+  if (!wrapperElement) {
+    return
+  }
+
+  const wrapperRect = wrapperElement.getBoundingClientRect()
+  affixInlineStart.value = wrapperRect.left
+  affixWidth.value = wrapperRect.width
+}
+
+const updateAffixState = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (!isDesktop.value) {
+    isAffixed.value = false
+    return
+  }
+
+  const heroElement = heroSection.value
+  if (!heroElement) {
+    isAffixed.value = false
+    return
+  }
+
+  const { bottom } = heroElement.getBoundingClientRect()
+  isAffixed.value = bottom <= STICKY_VIEWPORT_OFFSET + 16
+}
+
+if (import.meta.client) {
+  useResizeObserver(pricingCard, (entries) => {
+    const [entry] = entries
+    if (entry) {
+      placeholderHeight.value = entry.contentRect.height
+    }
+  })
+
+  useResizeObserver(pricingWrapper, () => {
+    recalculateAffixMetrics()
+  })
+}
+
+let stopScrollListener: (() => void) | undefined
+let stopResizeListener: (() => void) | undefined
+
+onMounted(async () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  heroSection.value = pricingCard.value?.closest('.product-hero') as HTMLElement | null
+
+  await nextTick()
+  recalculateAffixMetrics()
+  updateAffixState()
+
+  stopScrollListener = useEventListener(window, 'scroll', updateAffixState, { passive: true })
+  stopResizeListener = useEventListener(window, 'resize', () => {
+    recalculateAffixMetrics()
+    updateAffixState()
+  })
+})
+
+onBeforeUnmount(() => {
+  stopScrollListener?.()
+  stopResizeListener?.()
+})
+
+watch(isDesktop, (enabled) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (!enabled) {
+    isAffixed.value = false
+    return
+  }
+
+  nextTick().then(() => {
+    recalculateAffixMetrics()
+    updateAffixState()
+  })
+})
 
 type AggregatedOffer = NonNullable<NonNullable<ProductDto['offers']>['bestPrice']>
 
@@ -579,11 +717,29 @@ const scrollToSelector = (selector: string, offset = 120) => {
   margin-top: 0.5rem;
 }
 
+.product-hero__pricing-wrapper {
+  position: relative;
+}
+
+.product-hero__pricing-placeholder {
+  display: none;
+  width: 100%;
+}
+
+.product-hero__pricing-wrapper--affixed .product-hero__pricing-placeholder {
+  display: block;
+}
+
 @media (min-width: 960px) {
   .product-hero__pricing-card {
     position: sticky;
     top: calc(64px + 1.5rem);
     z-index: 2;
+  }
+
+  .product-hero__pricing-card--affixed {
+    position: fixed;
+    z-index: 24;
   }
 }
 </style>
