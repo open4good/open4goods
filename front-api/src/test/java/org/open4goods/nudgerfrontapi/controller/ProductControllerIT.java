@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -44,6 +45,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -469,13 +471,24 @@ class ProductControllerIT {
     @Test
     void postReviewUsesCaptcha() throws Exception {
         long gtin = 123L;
+        given(service.createReview(anyLong(), anyString(), any(HttpServletRequest.class))).willReturn(gtin);
 
-        mockMvc.perform(post("/products/{gtin}/reviews", gtin)
+        mockMvc.perform(post("/products/{gtin}/review", gtin)
                 .param("hcaptchaResponse", "resp")
                 .param("domainLanguage", "FR")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void postReviewRejectsWithoutAuthentication() throws Exception {
+        long gtin = 456L;
+
+        mockMvc.perform(post("/products/{gtin}/review", gtin)
+                .param("hcaptchaResponse", "resp")
+                .param("domainLanguage", "FR"))
+            .andExpect(status().isUnauthorized());
     }
 
     private VerticalConfig verticalConfigWithNumericAttribute(String attributeKey) {
