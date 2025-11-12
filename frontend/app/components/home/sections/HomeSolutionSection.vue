@@ -56,7 +56,6 @@ const { t } = useI18n()
   gap: clamp(2rem, 5vw, 3.25rem)
 
 .home-section__header
-  max-width: 760px
   display: flex
   flex-direction: column
   gap: 0.75rem
