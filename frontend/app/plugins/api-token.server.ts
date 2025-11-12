@@ -17,11 +17,9 @@ export default defineNuxtPlugin(() => {
     return (input as any)?.url ?? ''
   }
   const withToken = (init: RequestInit = {}): RequestInit => {
-    const headers =
-      init.headers instanceof Headers
-        ? Object.fromEntries(init.headers.entries())
-        : { ...(init.headers as Record<string, string> | undefined) }
-    return { ...init, headers: { ...headers, 'X-Shared-Token': token } }
+    const headers = new Headers(init.headers ?? {})
+    headers.set('X-Shared-Token', token)
+    return { ...init, headers }
   }
   globalObj.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = toUrl(input)
