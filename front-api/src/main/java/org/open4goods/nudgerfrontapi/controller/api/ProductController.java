@@ -964,7 +964,6 @@ public class ProductController {
     @Operation(
             summary = "Trigger AI review generation",
             description = "Validate the provided hCaptcha token and forward the request to the back-office API.",
-            security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "gtin",
                             in = ParameterIn.PATH,
