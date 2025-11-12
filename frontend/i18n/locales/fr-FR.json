@@ -41,8 +41,8 @@
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
     },
     "hero": {
-      "eyebrow": "Consommer mieux",
-      "title": "Consommer responsable n’est pas un luxe",
+      "eyebrow": "Nudger, c'est :",
+      "title": "Consommer responsable n’est plus un luxe",
       "subtitle": "Gagne du temps, garde tes valeurs. Compare simplement, choisis librement.",
       "imageAlt": "Illustration d’un comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
       "search": {
@@ -62,7 +62,7 @@
           },
           {
             "icon": "🛡️",
-            "label": "Comparateur indépendant, logiciel libre et données ouvertes"
+            "label": "Un comparateur indépendant, libre et ouvert"
           },
           {
             "icon": "⚡",
