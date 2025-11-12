@@ -115,7 +115,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" lg="6" class="home-hero__content">
-            <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
             <h1 id="home-hero-title" class="home-hero__title">
               {{ t('home.hero.title') }}
             </h1>
@@ -148,7 +147,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
               </SearchSuggestField>
             </form>
 
-            <ul v-if="heroHelperItems.length" class="home-hero__helpers">
+            <p class="mt-4 ms-6 home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+
+            <ul v-if="heroHelperItems.length" class="ms-8 home-hero__helpers">
               <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
                 <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
                 <span class="home-hero__helper-text">{{ item.label }}</span>
@@ -367,7 +368,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
   .home-hero__video
     transform: scale(1.15)
-  
+
   .home-hero__categories-inner
     padding: clamp(0.4rem, 5vw, 0.75rem) clamp(0.75rem, 5vw, 1.25rem)
 </style>
