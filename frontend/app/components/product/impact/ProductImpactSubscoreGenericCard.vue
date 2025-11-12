@@ -34,12 +34,6 @@
       v-if="hasDistribution"
       :distribution="score.distribution ?? []"
       :label="score.label"
-      :relative-value="score.relativeValue"
-      :product-name="productName"
-      :product-brand="productBrand"
-      :product-model="productModel"
-      :product-image="productImage"
-      :product-absolute-value="productAbsoluteValue"
     />
 
     <v-expansion-panels v-if="hasDetails" class="impact-subscore__details" variant="accordion">
@@ -140,7 +134,6 @@ const productAbsoluteValue = computed(() => {
 
 const productBrand = computed(() => props.productBrand?.trim() ?? '')
 const productModel = computed(() => props.productModel?.trim() ?? '')
-const productImage = computed(() => props.productImage?.trim() ?? '')
 const verticalTitle = computed(() => props.verticalTitle?.trim() ?? '')
 
 const coefficientValue = computed(() => {
