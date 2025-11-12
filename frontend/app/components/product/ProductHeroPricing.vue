@@ -578,4 +578,12 @@ const scrollToSelector = (selector: string, offset = 120) => {
 .product-hero__price-actions {
   margin-top: 0.5rem;
 }
+
+@media (min-width: 960px) {
+  .product-hero__pricing-card {
+    position: sticky;
+    top: calc(64px + 1.5rem);
+    z-index: 2;
+  }
+}
 </style>
