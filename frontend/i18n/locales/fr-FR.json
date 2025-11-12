@@ -83,10 +83,22 @@
       "title": "Acheter responsable, sans payer plus cher",
       "description": "Nudger analyse les données écologiques, sociétales, techniques et les prix pour simplifier vos achats.",
       "benefits": {
-        "time": "Gagnez du temps — on analyse pour vous.",
-        "savings": "Économisez — comparateur de prix intégré.",
-        "planet": "Consommez mieux — repérez les produits les plus responsables.",
-        "trust": "Confiance — données ouvertes, recommandations indépendantes."
+        "time": {
+          "title": "Gagnez du temps",
+          "description": "On analyse pour vous."
+        },
+        "savings": {
+          "title": "Économisez",
+          "description": "Comparateur de prix intégré."
+        },
+        "planet": {
+          "title": "Consommez mieux",
+          "description": "Repérez les produits les plus responsables."
+        },
+        "trust": {
+          "title": "Confiance",
+          "description": "Données ouvertes, recommandations indépendantes."
+        }
       }
     },
     "features": {

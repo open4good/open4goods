@@ -2,6 +2,7 @@
 type SolutionBenefit = {
   emoji: string
   label: string
+  description: string
 }
 
 const props = defineProps<{
@@ -21,12 +22,25 @@ const { t } = useI18n()
               <h2 id="home-solution-title">{{ t('home.solution.title') }}</h2>
               <p class="home-section__subtitle">{{ t('home.solution.description') }}</p>
             </header>
-            <ul class="home-solution__list">
-              <li v-for="item in props.benefits" :key="item.label" class="home-solution__item">
-                <span class="home-solution__icon" aria-hidden="true">{{ item.emoji }}</span>
-                <p class="home-solution__label">{{ item.label }}</p>
-              </li>
-            </ul>
+            <v-row class="home-solution__list" dense>
+              <v-col
+                v-for="item in props.benefits"
+                :key="item.label"
+                cols="12"
+                sm="6"
+                class="home-solution__list-col"
+              >
+                <v-sheet class="home-solution__item" rounded="xl" elevation="0">
+                  <v-avatar class="home-solution__icon" size="60" color="surface">
+                    <span aria-hidden="true">{{ item.emoji }}</span>
+                  </v-avatar>
+                  <div class="home-solution__texts">
+                    <p class="home-solution__label">{{ item.label }}</p>
+                    <p class="home-solution__description">{{ item.description }}</p>
+                  </div>
+                </v-sheet>
+              </v-col>
+            </v-row>
           </v-col>
           <v-col cols="12" md="6" class="home-solution__col home-solution__col--visual">
             <div class="home-solution__visual" role="presentation">
@@ -47,7 +61,7 @@ const { t } = useI18n()
 <style scoped lang="sass">
 .home-section
   padding-block: clamp(3rem, 6vw, 5.5rem)
-  background: rgba(var(--v-theme-surface-primary-050), 0.75)
+  background: rgba(var(--v-theme-surface-primary-050), 0.6)
 
 .home-section__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
@@ -79,37 +93,43 @@ const { t } = useI18n()
 .home-solution__list
   margin: 0
   padding: 0
-  display: grid
-  gap: clamp(1.25rem, 3vw, 1.75rem)
+  row-gap: clamp(1rem, 2.5vw, 1.5rem)
+
+.home-solution__list-col
+  display: flex
 
 .home-solution__item
-  list-style: none
+  width: 100%
   display: flex
+  gap: 1rem
   align-items: flex-start
-  gap: clamp(1rem, 2.5vw, 1.5rem)
-  padding: clamp(1.1rem, 3vw, 1.65rem)
-  border-radius: clamp(1.1rem, 3vw, 1.5rem)
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.72), rgba(var(--v-theme-surface-default), 0.95))
-  box-shadow: 0 10px 24px rgba(var(--v-theme-shadow-primary-600), 0.12)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  padding: clamp(1.25rem, 3vw, 1.5rem)
+  background: rgba(var(--v-theme-surface-default), 0.9)
+  border-radius: clamp(1rem, 3vw, 1.5rem)
+  box-shadow: none
+
+.home-solution__item::after
+  display: none
 
 .home-solution__icon
-  display: inline-flex
-  align-items: center
-  justify-content: center
-  flex-shrink: 0
-  width: clamp(3.25rem, 8vw, 3.75rem)
-  aspect-ratio: 1
-  border-radius: 50%
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-120), 0.95), rgba(var(--v-theme-surface-primary-100), 0.85))
-  color: rgb(var(--v-theme-text-on-accent))
-  font-size: clamp(1.75rem, 5vw, 2rem)
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 18px rgba(var(--v-theme-shadow-primary-600), 0.16)
-  line-height: 1
+  font-size: clamp(1.65rem, 5vw, 2rem)
+  background: rgba(var(--v-theme-surface-primary-080), 0.6)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.home-solution__texts
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+
+.home-solution__description
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.95rem
 
 .home-solution__label
   margin: 0
-  font-size: clamp(1.1rem, 2.4vw, 1.35rem)
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem)
   font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
 
@@ -119,20 +139,10 @@ const { t } = useI18n()
 
 .home-solution__visual
   position: relative
-  width: min(100%, 480px)
-  padding: clamp(1.5rem, 4vw, 2.5rem)
-  background: linear-gradient(150deg, rgba(var(--v-theme-surface-primary-100), 0.95), rgba(var(--v-theme-surface-primary-050), 0.85))
-  border-radius: clamp(1.75rem, 5vw, 2.75rem)
-  box-shadow: 0 26px 45px rgba(var(--v-theme-shadow-primary-600), 0.2)
-  overflow: hidden
-
-.home-solution__visual::after
-  content: ''
-  position: absolute
-  inset: 10%
-  border-radius: clamp(1.25rem, 4vw, 2rem)
-  background: radial-gradient(circle at 20% 20%, rgba(var(--v-theme-accent-primary-highlight), 0.18), transparent 55%)
-  pointer-events: none
+  width: min(100%, 460px)
+  display: flex
+  justify-content: center
+  align-items: center
 
 .home-solution__image
   position: relative
@@ -150,6 +160,6 @@ const { t } = useI18n()
     flex-direction: column
     text-align: center
     align-items: center
-  .home-solution__icon
-    margin-bottom: 0.5rem
+  .home-solution__texts
+    align-items: center
 </style>
