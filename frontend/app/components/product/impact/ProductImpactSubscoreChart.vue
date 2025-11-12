@@ -135,7 +135,7 @@ const updateProductGraphic = () => {
 
   const coordinates = chart.convertToPixel({ xAxisIndex: 0, yAxisIndex: 0 }, [
     productBucket.value.label,
-    productBucket.value.value,
+    0,
   ])
 
   if (!Array.isArray(coordinates)) {
