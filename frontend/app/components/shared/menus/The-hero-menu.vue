@@ -84,9 +84,7 @@
                   role="menuitem"
                   :append-icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
                 >
-                  <template #prepend>
-                    <v-icon icon="mdi-account-group-outline" size="18" class="me-1" />
-                  </template>
+
                   <v-list-item-title>{{ item.label }}</v-list-item-title>
                 </v-list-item>
               </template>
