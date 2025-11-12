@@ -102,7 +102,7 @@ const chartOption = computed<EChartsOption | null>(() => {
       data: filteredDistribution.value.map((bucket) => bucket.label),
       axisLabel: { rotate: 35 },
     },
-    yAxis: { type: 'value' },
+    yAxis: { type: 'value', min: 0 },
     series: [
       {
         type: 'bar',
