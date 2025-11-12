@@ -150,6 +150,7 @@ import { useI18n } from 'vue-i18n'
 import { useEventListener, useResizeObserver } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import type { ProductDto } from '~~/shared/api-client'
+import { STICKY_VIEWPORT_OFFSET } from './productHeroSticky.constants'
 
 type OfferCondition = 'occasion' | 'new'
 
@@ -164,6 +165,9 @@ const props = defineProps({
 
 const { n, t } = useI18n()
 const display = useDisplay()
+const emit = defineEmits<{
+  (event: 'affix-change' | 'hero-visibility-change', value: boolean): void
+}>()
 
 const pricingWrapper = ref<HTMLElement | null>(null)
 const pricingCard = ref<HTMLElement | null>(null)
@@ -175,9 +179,7 @@ const affixWidth = ref(0)
 
 const isDesktop = computed(() => display.mdAndUp.value)
 
-const DESKTOP_HEADER_OFFSET = 64
-const DESKTOP_GAP_OFFSET = 24
-const STICKY_VIEWPORT_OFFSET = DESKTOP_HEADER_OFFSET + DESKTOP_GAP_OFFSET
+const heroHasExitedViewport = ref(false)
 
 const shouldAffixToViewport = computed(
   () => isDesktop.value && isAffixed.value && affixWidth.value > 0,
@@ -215,19 +217,23 @@ const updateAffixState = () => {
     return
   }
 
-  if (!isDesktop.value) {
-    isAffixed.value = false
-    return
-  }
-
   const heroElement = heroSection.value
   if (!heroElement) {
+    heroHasExitedViewport.value = false
     isAffixed.value = false
     return
   }
 
   const { bottom } = heroElement.getBoundingClientRect()
-  isAffixed.value = bottom <= STICKY_VIEWPORT_OFFSET + 16
+  const hasExited = bottom <= STICKY_VIEWPORT_OFFSET + 16
+  heroHasExitedViewport.value = hasExited
+
+  if (!isDesktop.value) {
+    isAffixed.value = false
+    return
+  }
+
+  isAffixed.value = hasExited
 }
 
 if (import.meta.client) {
@@ -284,6 +290,22 @@ watch(isDesktop, (enabled) => {
     updateAffixState()
   })
 })
+
+watch(
+  shouldAffixToViewport,
+  (value) => {
+    emit('affix-change', value)
+  },
+  { immediate: true },
+)
+
+watch(
+  heroHasExitedViewport,
+  (value) => {
+    emit('hero-visibility-change', value)
+  },
+  { immediate: true },
+)
 
 type AggregatedOffer = NonNullable<NonNullable<ProductDto['offers']>['bestPrice']>
 

@@ -1718,6 +1718,22 @@
         "occasion": "Second-hand"
       },
       "offerConditionsToggleAria": "Choose which offer condition to highlight",
+      "supportBanner": {
+        "ariaLabel": "Support Nudger by choosing an offer",
+        "message": "Love this? Support us by purchasing via Nudger!",
+        "selectPlaceholder": "Select an offer",
+        "action": "Go to offer",
+        "segment": {
+          "occasion": {
+            "title": "Second-hand offers",
+            "selectAria": "Choose a second-hand offer"
+          },
+          "new": {
+            "title": "New offers",
+            "selectAria": "Choose a new offer"
+          }
+        }
+      },
       "offersCount": "Number of offers",
       "openGalleryFallback": "Open product media gallery",
       "openGalleryImage": "View image \"{label}\" in fullscreen",

@@ -119,18 +119,27 @@
     </div>
 
     <aside class="product-hero__pricing">
-      <ProductHeroPricing :product="product" />
+      <ProductHeroPricing
+        :product="product"
+        @hero-visibility-change="onHeroVisibilityChange"
+      />
     </aside>
+
+    <ProductStickyOffersBanner
+      :product="product"
+      :hero-exited-viewport="heroExitedViewport"
+    />
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, ref, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductHeroGallery from '~/components/product/ProductHeroGallery.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
+import ProductStickyOffersBanner from '~/components/product/ProductStickyOffersBanner.vue'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -161,6 +170,12 @@ const props = defineProps({
 })
 
 const { t, te, n } = useI18n()
+
+const heroExitedViewport = ref(false)
+
+const onHeroVisibilityChange = (value: boolean) => {
+  heroExitedViewport.value = value
+}
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''

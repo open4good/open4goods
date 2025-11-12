@@ -1718,6 +1718,22 @@
         "occasion": "Occasion"
       },
       "offerConditionsToggleAria": "Sélectionner le type d'offre à afficher",
+      "supportBanner": {
+        "ariaLabel": "Soutenez Nudger en sélectionnant une offre",
+        "message": "Vous trouvez ça cool ? Soutenez-nous en achetant à partir de Nudger !",
+        "selectPlaceholder": "Choisir une offre",
+        "action": "Voir l'offre",
+        "segment": {
+          "occasion": {
+            "title": "Offres d'occasion",
+            "selectAria": "Choisir une offre d'occasion"
+          },
+          "new": {
+            "title": "Offres neuves",
+            "selectAria": "Choisir une offre neuve"
+          }
+        }
+      },
       "offersCount": "Nombre d'offres",
       "openGalleryFallback": "Ouvrir la galerie média du produit",
       "openGalleryImage": "Afficher l’image « {label} » en plein écran",
