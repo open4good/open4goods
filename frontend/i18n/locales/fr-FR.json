@@ -41,7 +41,7 @@
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
     },
     "hero": {
-      "eyebrow": "Consommation responsable",
+      "eyebrow": "Consommer mieux",
       "title": "Consommer responsable n’est pas un luxe",
       "subtitle": "Gagne du temps, garde tes valeurs. Compare simplement, choisis librement.",
       "imageAlt": "Illustration d’un comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
@@ -1926,51 +1926,51 @@
         "submitLabel": "Lancer la recherche"
       },
       "community": {
-        "tagline": "Retrouvez l'équipe et nos ressources ouvertes.",
+        "tagline": "Nudger est une aventure collective",
         "sections": {
           "connect": {
             "title": "Rester en lien",
-            "description": "Partagez vos retours ou contactez l'équipe directement.",
+            "description": "Partager vos retours, nous suivre ou nous contacter.",
             "items": {
               "feedback": {
                 "label": "Feedback",
-                "description": "Proposez des idées pour améliorer Nudger."
+                "description": "Un bug ? Une idée ?"
               },
               "contact": {
                 "label": "Contact",
-                "description": "Discutez avec nous pour vos projets ou questions."
+                "description": "Discutez avec nous."
               },
               "follow": {
                 "label": "Nous suivre",
-                "description": "Recevez nos nouvelles sur LinkedIn."
+                "description": "LinkedIn"
               }
             }
           },
           "collaborate": {
-            "title": "Collaborer",
-            "description": "Rencontrez les personnes qui construisent Nudger.",
+            "title": "Eco-système",
+            "description": "Les personnes qui construisent Nudger.",
             "items": {
               "team": {
                 "label": "Équipe",
-                "description": "Découvrez qui anime la communauté Nudger."
+                "description": "Ceux qui oeuvrent en coulisse."
               },
               "partners": {
                 "label": "Partenaires",
-                "description": "Explorez les organisations qui nous soutiennent."
+                "description": "Sans eux, rien n'est possible"
               }
             }
           },
           "resources": {
-            "title": "Ressources ouvertes",
+            "title": "Un modèle de bien commun",
             "description": "Utilisez nos données et contribuez au code.",
             "items": {
               "opendata": {
                 "label": "Open Data",
-                "description": "Accédez à nos jeux de données transparents."
+                "description": "Accédez à nos jeux de données ouverts."
               },
               "opensource": {
                 "label": "Open source",
-                "description": "Participez à notre code ouvert sur GitHub."
+                "description": "Des envies de code ?"
               }
             }
           }

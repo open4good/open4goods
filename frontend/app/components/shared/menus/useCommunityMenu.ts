@@ -43,7 +43,7 @@ export const useCommunityMenu = (
       id: 'contact',
       label: String(t('siteIdentity.menu.community.sections.connect.items.contact.label')),
       description: String(t('siteIdentity.menu.community.sections.connect.items.contact.description')),
-      icon: 'mdi-email-send-outline',
+      icon: 'mdi-email-outline',
       to: resolveLocalizedRoutePath('contact', currentLocale.value),
     }
 

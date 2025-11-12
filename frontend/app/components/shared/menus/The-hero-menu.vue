@@ -109,7 +109,7 @@
                     v-for="section in item.sections"
                     :key="section.id"
                     cols="12"
-                    sm="4"
+                    sm="5"
                     class="community-menu__section"
                   >
                     <p class="community-menu__section-title">{{ section.title }}</p>
