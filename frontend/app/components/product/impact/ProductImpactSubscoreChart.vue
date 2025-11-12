@@ -47,6 +47,69 @@ const filteredDistribution = computed(() =>
   props.distribution.filter((bucket) => bucket.label.toUpperCase() !== 'ES-UNKNOWN'),
 )
 
+type NumericRange = {
+  min: number
+  max: number
+}
+
+const sanitizeNumericLabel = (label: string) =>
+  label
+    .replace(/\u202f/g, ' ')
+    .replace(/(\d)[\s\u00a0]+(\d)/g, '$1$2')
+    .replace(/,/g, '.')
+
+const extractNumericRange = (label: string): NumericRange | null => {
+  const sanitized = sanitizeNumericLabel(label)
+  const matches = sanitized.match(/-?\d+(?:\.\d+)?/g)
+
+  if (!matches?.length) {
+    return null
+  }
+
+  const values = matches
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b)
+
+  if (!values.length) {
+    return null
+  }
+
+  let min = values[0]
+  let max = values[values.length - 1]
+
+  const hasLessToken = /[<≤]/.test(label)
+  const hasGreaterToken = /[>≥]/.test(label)
+  const hasPlusToken = /\+\s*$/.test(label)
+
+  if (values.length === 1) {
+    if (hasLessToken && !hasGreaterToken) {
+      min = Number.NEGATIVE_INFINITY
+      max = values[0]
+    } else if (hasGreaterToken || hasPlusToken) {
+      min = values[0]
+      max = Number.POSITIVE_INFINITY
+    } else {
+      min = values[0]
+      max = values[0]
+    }
+  }
+
+  return { min, max }
+}
+
+const calculateDistanceFromRange = (target: number, range: NumericRange) => {
+  if (target < range.min) {
+    return range.min === Number.NEGATIVE_INFINITY ? 0 : range.min - target
+  }
+
+  if (target > range.max) {
+    return range.max === Number.POSITIVE_INFINITY ? 0 : target - range.max
+  }
+
+  return 0
+}
+
 const hasData = computed(() => filteredDistribution.value.length > 0)
 
 const productImageSource = computed(() => {
@@ -65,24 +128,43 @@ const productLabel = computed(() => {
   return props.productName
 })
 
+const productAnchorValue = computed(() => {
+  if (typeof props.productAbsoluteValue === 'number' && Number.isFinite(props.productAbsoluteValue)) {
+    return props.productAbsoluteValue
+  }
+
+  if (typeof props.relativeValue === 'number' && Number.isFinite(props.relativeValue)) {
+    return props.relativeValue
+  }
+
+  return null
+})
+
 const productBucket = computed(() => {
-  if (props.productAbsoluteValue == null || !hasData.value) {
+  if (!hasData.value) {
     return null
   }
 
-  const targetValue = props.productAbsoluteValue
+  const targetValue = productAnchorValue.value
+  if (targetValue == null) {
+    return null
+  }
 
   let closest: { bucket: DistributionBucket; distance: number } | null = null
 
   for (const bucket of filteredDistribution.value) {
-    const labelValue = Number(bucket.label)
-    if (!Number.isFinite(labelValue)) {
+    const range = extractNumericRange(bucket.label)
+    if (!range) {
       continue
     }
 
-    const distance = Math.abs(labelValue - targetValue)
+    const distance = calculateDistanceFromRange(targetValue, range)
     if (!closest || distance < closest.distance) {
       closest = { bucket, distance }
+
+      if (distance === 0) {
+        break
+      }
     }
   }
 
