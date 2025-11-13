@@ -15,6 +15,9 @@ const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
 const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
 const API_CACHEABLE_ORIGINS = ['https://beta.front-api.nudger.fr', 'https://front-api.nudger.fr']
+const FONT_STYLESHEET_ORIGINS = ['https://fonts.googleapis.com']
+const FONT_FILE_ORIGINS = ['https://fonts.gstatic.com']
+const STATIC_CDN_ORIGINS = ['https://cdn.jsdelivr.net', 'https://unpkg.com']
 const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
 const runtimeCaching = [
@@ -39,6 +42,41 @@ const runtimeCaching = [
       expiration: {
         maxEntries: 80,
         maxAgeSeconds: 60 * 5,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => FONT_STYLESHEET_ORIGINS.includes(url.origin),
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'nudger-font-styles',
+      expiration: {
+        maxEntries: 20,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => FONT_FILE_ORIGINS.includes(url.origin),
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'nudger-font-files',
+      cacheableResponse: { statuses: [0, 200] },
+      expiration: {
+        maxEntries: 40,
+        maxAgeSeconds: 60 * 60 * 24 * 365,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => STATIC_CDN_ORIGINS.includes(url.origin),
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'nudger-static-cdn',
+      cacheableResponse: { statuses: [0, 200] },
+      expiration: {
+        maxEntries: 60,
+        maxAgeSeconds: 60 * 60 * 24 * 7,
       },
     },
   },
