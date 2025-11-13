@@ -239,16 +239,17 @@ describe('ProductHero', () => {
     { key: 'base.gtinInfo.countryName', name: 'Origin' },
   ] as AttributeConfigDto[]
 
-  const setImpactScoreEntry = (entry: Partial<ProductScoreDto>) => {
+  const rewriteImpactScoreEntry = (entry: Partial<ProductScoreDto>) => {
     const score: ProductScoreDto = {
       id: 'ECOSCORE',
       ...entry,
     }
 
     product.scores = {
-      ...(product.scores ?? {}),
-      ecoscore: score,
-      scores: { ECOSCORE: score },
+      ecoscore: { ...score },
+      scores: {
+        ECOSCORE: { ...score },
+      },
     }
   }
 
@@ -423,14 +424,14 @@ describe('ProductHero', () => {
     it.each([
       ['on20 values', { on20: 18 }, '4.5'],
       ['percentages', { percent: 70 }, '3.5'],
-      ['absolute max ranges', { value: 80, absolute: { max: 160 } }, '2.5'],
+      ['absolute max ranges', { absolute: { value: 80, max: 160 } }, '2.5'],
       ['relative fallbacks', { relativ: { value: 4.2 } }, '4.2'],
     ])('normalises %s to a five point scale', async (
       _,
       scoreEntry: Partial<ProductScoreDto>,
       expected: string,
     ) => {
-      setImpactScoreEntry(scoreEntry)
+      rewriteImpactScoreEntry(scoreEntry)
       const wrapper = await mountComponent()
 
       expect(wrapper.get('.impact-score-stub').text()).toBe(expected)
