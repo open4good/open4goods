@@ -79,10 +79,22 @@
       "title": "Responsible shopping, minus the headache",
       "description": "Nudger combines environmental, technical and pricing insights to simplify every decision.",
       "benefits": {
-        "time": "Save time — we analyse the data for you.",
-        "savings": "Save money — price comparison built in.",
-        "planet": "Shop better — spot the most responsible products.",
-        "trust": "Trustworthy — open data, independent recommendations."
+        "time": {
+          "title": "Save time",
+          "description": "We analyse the data for you."
+        },
+        "savings": {
+          "title": "Save money",
+          "description": "Price comparison built in."
+        },
+        "planet": {
+          "title": "Shop better",
+          "description": "Spot the most responsible products."
+        },
+        "trust": {
+          "title": "Trustworthy",
+          "description": "Open data, independent recommendations."
+        }
       }
     },
     "features": {

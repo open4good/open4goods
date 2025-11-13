@@ -33,19 +33,23 @@ const problemItems = computed(() => [
 const solutionBenefits = computed(() => [
   {
     emoji: '⏱️',
-    label: String(t('home.solution.benefits.time')),
+    label: String(t('home.solution.benefits.time.title')),
+    description: String(t('home.solution.benefits.time.description')),
   },
   {
     emoji: '💰',
-    label: String(t('home.solution.benefits.savings')),
+    label: String(t('home.solution.benefits.savings.title')),
+    description: String(t('home.solution.benefits.savings.description')),
   },
   {
     emoji: '🌍',
-    label: String(t('home.solution.benefits.planet')),
+    label: String(t('home.solution.benefits.planet.title')),
+    description: String(t('home.solution.benefits.planet.description')),
   },
   {
     emoji: '🛡️',
-    label: String(t('home.solution.benefits.trust')),
+    label: String(t('home.solution.benefits.trust.title')),
+    description: String(t('home.solution.benefits.trust.description')),
   },
 ])
 
