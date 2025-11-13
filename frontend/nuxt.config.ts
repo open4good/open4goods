@@ -1,6 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { defineNuxtConfig } from 'nuxt/config'
 import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
+
+import type { ManifestOptions } from 'vite-plugin-pwa'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
@@ -9,6 +12,37 @@ import { LOCALIZED_ROUTE_PATHS, LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } fro
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
+const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
+const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
+const API_CACHEABLE_ORIGINS = ['https://beta.front-api.nudger.fr', 'https://front-api.nudger.fr']
+const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
+const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
+const runtimeCaching = [
+  {
+    urlPattern: ({ request }) => request.destination === 'image',
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'nudger-images',
+      expiration: {
+        maxEntries: 120,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => API_CACHEABLE_ORIGINS.includes(url.origin),
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'nudger-api',
+      networkTimeoutSeconds: 5,
+      cacheableResponse: { statuses: [0, 200] },
+      expiration: {
+        maxEntries: 80,
+        maxAgeSeconds: 60 * 5,
+      },
+    },
+  },
+]
 
 const STATIC_MAIN_PAGE_ROUTE_NAMES = Array.from(
   new Set([
@@ -30,11 +64,17 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'icon', type: 'image/png', href: '/favicon-96x96.png', sizes: '96x96' },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/png', href: '/pwa-assets/icons/nudger-standard-96x96.png', sizes: '96x96' },
         { rel: 'shortcut icon', href: '/favicon.ico' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/pwa-assets/icons/nudger-standard-180x180.png' },
+        { rel: 'mask-icon', href: '/pwa-assets/icons-maskable/nudger-maskable-512x512.png', color: '#00DE9F' },
         { rel: 'manifest', href: '/site.webmanifest' },
+      ],
+      meta: [
+        { name: 'theme-color', content: '#00DE9F' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
       ],
     },
   },
@@ -69,6 +109,7 @@ export default defineNuxtConfig({
     //'/articles/**': { static: true },
     // Admin area rendered on the client side
     '/admin/**': { ssr: false },
+    '/offline': { prerender: true },
   },
   modules: [
     "vuetify-nuxt-module",
@@ -79,10 +120,38 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     'nuxt-mcp',
     '@nuxtjs/sitemap',
+    '@vite-pwa/nuxt',
   ],
 
   vueuse: {
     ssrHandlers: true,
+  },
+
+  device: {
+    refreshOnResize: true,
+  },
+
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: nudgerManifest,
+    manifestFilename: 'site.webmanifest',
+    includeAssets: ['pwa-assets/icons/**/*.png', 'pwa-assets/screenshots/*.png', 'resources/**/*'],
+    client: {
+      installPrompt: true,
+    },
+    devOptions: {
+      enabled: true,
+      suppressWarnings: true,
+    },
+    workbox: {
+      cleanupOutdatedCaches: true,
+      globPatterns: [PRECACHE_PATTERN],
+      globIgnores: ['videos/**/*'],
+      navigateFallback: '/offline',
+      navigateFallbackAllowlist: [/^\/[\w-]+(?:\/.*)?$/],
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      runtimeCaching,
+    },
   },
 
   vuetify: {

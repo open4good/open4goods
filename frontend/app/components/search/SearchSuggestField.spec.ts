@@ -1,9 +1,10 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import type { PropType } from 'vue'
 import type { SearchSuggestResponseDto } from '~~/shared/api-client'
+import SearchSuggestField from './SearchSuggestField.vue'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -33,11 +34,7 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-const displayMock = vi.hoisted(() => {
-  const { ref } = require('vue')
-
-  return { smAndDown: ref(false) }
-})
+const displayMock = { smAndDown: ref(false) }
 
 vi.mock('vuetify', () => ({
   useDisplay: () => displayMock,
@@ -55,8 +52,6 @@ mockNuxtImport('useRuntimeConfig', () => () => ({
     staticServer: 'https://static.example.com',
   },
 }))
-
-import SearchSuggestField from './SearchSuggestField.vue'
 
 const VAutocompleteStub = defineComponent({
   name: 'VAutocompleteStub',

@@ -8,9 +8,12 @@
       <v-navigation-drawer
         v-model="drawer"
         location="start"
-        temporary
-        width="300"
+        :temporary="isMobileNavigation"
+        :scrim="isMobileNavigation"
+        :width="drawerWidth"
+        floating
         class="mobile-menu-drawer"
+        :style="drawerInlineStyles"
       >
         <the-mobile-menu @close="drawer = false" />
       </v-navigation-drawer>
@@ -33,13 +36,16 @@
     </TheMainFooter>
 
     <CategoryComparePanel v-if="showComparePanel" />
+    <PwaOfflineNotice />
+    <PwaInstallPrompt />
   </v-app>
 </template>
 
 <script setup lang="ts">
 const drawer = useState('mobileDrawer', () => false)
-const drawerStore = useState("mobileDrawer", () => false);
 const route = useRoute()
+const device = useDevice()
+const display = useDisplay()
 
 const showComparePanel = computed(() => {
   const routeName = route.name?.toString() ?? ''
@@ -47,8 +53,14 @@ const showComparePanel = computed(() => {
 })
 
 const toggleDrawer = () => {
-  drawerStore.value = !drawerStore.value;
-};
+  drawer.value = !drawer.value
+}
+
+const isMobileNavigation = computed(() => device.isMobileOrTablet || display.mdAndDown.value)
+const drawerWidth = computed(() => (isMobileNavigation.value ? 320 : 360))
+const drawerInlineStyles = computed(() => ({
+  paddingBottom: isMobileNavigation.value ? 'calc(env(safe-area-inset-bottom) + 24px)' : '24px',
+}))
 </script>
 
 <style scoped lang="sass">
@@ -57,5 +69,8 @@ const toggleDrawer = () => {
 
   @media (max-width: 959px)
     height: 56px
+
+.mobile-menu-drawer
+  padding-top: calc(env(safe-area-inset-top) + 8px)
 </style>
 

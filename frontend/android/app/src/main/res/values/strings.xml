@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nudger</string>
+    <string name="title_activity_main">Nudger</string>
+    <string name="package_name">fr.nudger.app</string>
+    <string name="custom_url_scheme">fr.nudger.app</string>
+</resources>
