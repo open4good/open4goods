@@ -1,7 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import type { Ref } from 'vue'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 
 import type { ThemeName } from '~~/shared/constants/theme'
@@ -55,6 +55,21 @@ const themeCookiePreference = ref<ThemeName | null>(null)
 const preferredDarkMock = ref(false)
 
 const fetchMock = vi.fn()
+const fetchCategoriesMock = vi.fn().mockResolvedValue([])
+const categoriesLoadingMock = ref(false)
+
+function useCategoriesComposable() {
+  return {
+    categories: computed(() => []),
+    fetchCategories: fetchCategoriesMock,
+    loading: categoriesLoadingMock,
+    error: computed(() => null),
+    activeCategoryId: computed(() => null),
+    currentCategory: computed(() => null),
+    clearError: vi.fn(),
+    resetCategorySelection: vi.fn(),
+  }
+}
 
 const vMenuStub = {
   template:
@@ -103,6 +118,10 @@ vi.mock('@vueuse/core', () => {
     useStorage: localUseStorageMock,
   }
 })
+
+vi.mock('~/composables/categories/useCategories', () => ({
+  useCategories: useCategoriesComposable,
+}))
 
 const useStorageMock = getStorageMockRegistry().__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
 
@@ -197,6 +216,7 @@ describe('Shared menu authentication controls', () => {
     useStorageMock.mockClear()
     useCookieMock.mockClear()
     fetchMock.mockReset()
+    fetchCategoriesMock.mockClear()
     username.value = null
     roles.value = []
 

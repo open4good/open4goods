@@ -69,6 +69,106 @@
             <v-list-item-title>{{ item.label }}</v-list-item-title>
           </v-list-item>
 
+          <div v-else-if="item.type === 'products'" class="main-menu-item main-menu-item--products">
+            <v-menu open-on-hover location="bottom" transition="fade-transition" :offset="[0, 12]">
+              <template #activator="{ props, isActive }">
+                <v-list-item
+                  v-bind="props"
+                  class="main-menu-items main-menu-items--products"
+                  :class="{ active: isMenuItemActive(item) || isActive }"
+                  :append-icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                  role="menuitem"
+                >
+                  <v-list-item-title>{{ item.label }}</v-list-item-title>
+                </v-list-item>
+              </template>
+
+              <v-card class="products-menu" color="surface-default" elevation="8">
+                <div class="products-menu__header">
+                  <div>
+                    <p class="products-menu__title">{{ item.copy.title }}</p>
+                    <p class="products-menu__subtitle">{{ item.copy.subtitle }}</p>
+                  </div>
+                </div>
+
+                <v-row class="products-menu__content" align="stretch">
+                  <v-col cols="12" md="8" class="products-menu__column">
+                    <div class="products-menu__categories">
+                      <template v-if="item.loading">
+                        <v-skeleton-loader
+                          v-for="skeletonIndex in 2"
+                          :key="`products-menu-skeleton-${skeletonIndex}`"
+                          type="image, article"
+                          class="products-menu__skeleton"
+                        />
+                      </template>
+
+                      <template v-else-if="item.categories.length">
+                        <div class="products-menu__category-grid">
+                          <component
+                            :is="isExternalLink(category.href) ? 'a' : 'NuxtLink'"
+                            v-for="category in item.categories"
+                            :key="category.id"
+                            :to="!isExternalLink(category.href) ? category.href : undefined"
+                            :href="isExternalLink(category.href) ? category.href : undefined"
+                            :target="isExternalLink(category.href) ? '_blank' : undefined"
+                            :rel="isExternalLink(category.href) ? 'noopener noreferrer' : undefined"
+                            class="products-menu__category-card"
+                            role="menuitem"
+                            :aria-label="`${category.title} - ${item.copy.categoryLinkLabel}`"
+                            :title="category.title"
+                          >
+                            <div class="products-menu__category-media" aria-hidden="true">
+                              <v-img
+                                v-if="category.image"
+                                :src="category.image"
+                                :alt="category.title"
+                                cover
+                                class="products-menu__category-image"
+                              />
+                              <div v-else class="products-menu__category-placeholder">
+                                <v-icon icon="mdi-shape-outline" size="24" aria-hidden="true" />
+                              </div>
+                            </div>
+
+                            <div class="products-menu__category-body">
+                              <p class="products-menu__category-title">{{ category.title }}</p>
+                              <span class="products-menu__category-link">
+                                <span>{{ item.copy.categoryLinkLabel }}</span>
+                                <v-icon icon="mdi-arrow-right" size="16" aria-hidden="true" />
+                              </span>
+                            </div>
+                          </component>
+                        </div>
+                      </template>
+
+                      <p v-else class="products-menu__empty">{{ item.copy.empty }}</p>
+                    </div>
+                  </v-col>
+
+                  <v-col cols="12" md="4" class="products-menu__column">
+                    <div class="products-menu__cta">
+                      <p class="products-menu__cta-highlight">{{ item.cta.highlight }}</p>
+                      <p class="products-menu__cta-description">{{ item.cta.description }}</p>
+
+                      <component
+                        :is="isExternalLink(item.cta.href) ? 'a' : 'NuxtLink'"
+                        :to="!isExternalLink(item.cta.href) ? item.cta.href : undefined"
+                        :href="isExternalLink(item.cta.href) ? item.cta.href : undefined"
+                        :target="isExternalLink(item.cta.href) ? '_blank' : undefined"
+                        :rel="isExternalLink(item.cta.href) ? 'noopener noreferrer' : undefined"
+                        class="products-menu__cta-action"
+                      >
+                        <span>{{ item.cta.action }}</span>
+                        <v-icon icon="mdi-arrow-right" size="18" aria-hidden="true" />
+                      </component>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-menu>
+          </div>
+
           <div v-else class="main-menu-item main-menu-item--community">
             <v-menu
               open-on-hover
@@ -81,10 +181,9 @@
                   v-bind="props"
                   class="main-menu-items main-menu-items--community"
                   :class="{ active: isMenuItemActive(item) || isActive }"
-                  role="menuitem"
                   :append-icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                  role="menuitem"
                 >
-
                   <v-list-item-title>{{ item.label }}</v-list-item-title>
                 </v-list-item>
               </template>
@@ -264,6 +363,7 @@ import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
 import type { CommunitySection } from './useCommunityMenu'
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import { useCategories } from '~/composables/categories/useCategories'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -276,6 +376,13 @@ const nuxtApp = useNuxtApp()
 const { isLoggedIn, logout, username, roles } = useAuth()
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
+const { categories: availableCategories, fetchCategories, loading: categoriesLoading } = useCategories()
+
+if (import.meta.server) {
+  await fetchCategories(true)
+} else if (availableCategories.value.length === 0) {
+  await fetchCategories(true)
+}
 
 const MIN_SEARCH_QUERY_LENGTH = 2
 
@@ -285,6 +392,7 @@ const searchQuery = ref('')
 
 const homeRoutePath = computed(() => resolveLocalizedRoutePath('index', currentLocale.value))
 const searchRoutePath = computed(() => resolveLocalizedRoutePath('search', currentLocale.value))
+const categoriesRoutePath = computed(() => resolveLocalizedRoutePath('categories', currentLocale.value))
 const showMenuSearch = computed(() => route.path !== homeRoutePath.value)
 
 const focusSearchInput = () => {
@@ -505,11 +613,100 @@ defineEmits<{
   'toggle-drawer': []
 }>()
 
+const MAX_PRODUCTS_MENU_CATEGORIES = 4
+
+const isExternalLink = (value: string): boolean => /^https?:\/\//iu.test(value)
+
+interface ProductsMenuCategory {
+  id: string
+  title: string
+  href: string
+  image: string | null
+}
+
+interface ProductsMenuTexts {
+  title: string
+  subtitle: string
+  empty: string
+  categoryLinkLabel: string
+  ctaHighlight: string
+  ctaDescription: string
+  ctaAction: string
+  fallbackCategoryTitle: string
+}
+
+interface ProductsMenuCta {
+  highlight: string
+  description: string
+  action: string
+  href: string
+}
+
+const productsMenuTexts = computed<ProductsMenuTexts>(() => ({
+  title: String(t('siteIdentity.menu.productsMenu.title')),
+  subtitle: String(t('siteIdentity.menu.productsMenu.subtitle')),
+  empty: String(t('siteIdentity.menu.productsMenu.empty')),
+  categoryLinkLabel: String(t('siteIdentity.menu.productsMenu.categoryLinkLabel')),
+  ctaHighlight: String(t('siteIdentity.menu.productsMenu.cta.highlight')),
+  ctaDescription: String(t('siteIdentity.menu.productsMenu.cta.description')),
+  ctaAction: String(t('siteIdentity.menu.productsMenu.cta.action')),
+  fallbackCategoryTitle: String(t('siteIdentity.menu.productsMenu.untitledCategory')),
+}))
+
+const productsMenuCategories = computed<ProductsMenuCategory[]>(() => {
+  const fallbackHref = categoriesRoutePath.value
+  const fallbackTitle = productsMenuTexts.value.fallbackCategoryTitle
+
+  return availableCategories.value
+    .filter((category) => category && category.enabled !== false && category.popular)
+    .sort((a, b) => {
+      const firstOrder = a?.order ?? Number.MAX_SAFE_INTEGER
+      const secondOrder = b?.order ?? Number.MAX_SAFE_INTEGER
+      return firstOrder - secondOrder
+    })
+    .slice(0, MAX_PRODUCTS_MENU_CATEGORIES)
+    .map((category, index) => {
+      const normalizedImage =
+        category?.imageMedium ?? category?.imageSmall ?? category?.imageLarge ?? null
+      const normalizedHref = normalizeVerticalHomeUrl(category?.verticalHomeUrl) ?? fallbackHref
+      const normalizedTitle = category?.verticalHomeTitle?.trim() || fallbackTitle
+      return {
+        id: category?.id ?? category?.verticalHomeUrl ?? `popular-category-${index}`,
+        title: normalizedTitle,
+        href: normalizedHref,
+        image: normalizedImage,
+      }
+    })
+})
+
+const productsMenuActivePaths = computed(() => {
+  const normalizedPaths = new Set<string>([categoriesRoutePath.value])
+
+  productsMenuCategories.value.forEach((category) => {
+    if (category.href.startsWith('/')) {
+      normalizedPaths.add(category.href)
+    }
+  })
+
+  return Array.from(normalizedPaths)
+})
+
+const isProductsMenuLoading = computed(
+  () => categoriesLoading.value && productsMenuCategories.value.length === 0,
+)
+
 interface LinkMenuItemDefinition {
   id: string
   labelKey: string
   routeName: string
   type: 'link'
+}
+
+interface ProductsMenuItemDefinition {
+  id: string
+  labelKey: string
+  routeName: string
+  type: 'products'
 }
 
 interface CommunityMenuItemDefinition {
@@ -518,13 +715,27 @@ interface CommunityMenuItemDefinition {
   type: 'community'
 }
 
-type MenuItemDefinition = LinkMenuItemDefinition | CommunityMenuItemDefinition
+type MenuItemDefinition =
+  | LinkMenuItemDefinition
+  | CommunityMenuItemDefinition
+  | ProductsMenuItemDefinition
 
 interface LinkMenuItem {
   id: string
   type: 'link'
   label: string
   path: string
+}
+
+interface ProductsMenuItem {
+  id: string
+  type: 'products'
+  label: string
+  categories: ProductsMenuCategory[]
+  copy: ProductsMenuTexts
+  cta: ProductsMenuCta
+  loading: boolean
+  activePaths: string[]
 }
 
 interface CommunityMenuItem {
@@ -535,7 +746,7 @@ interface CommunityMenuItem {
   activePaths: string[]
 }
 
-type MenuItem = LinkMenuItem | CommunityMenuItem
+type MenuItem = LinkMenuItem | CommunityMenuItem | ProductsMenuItem
 const { sections: communitySections, activePaths: communityActivePaths } = useCommunityMenu(t, currentLocale)
 
 const baseMenuItems: MenuItemDefinition[] = [
@@ -545,7 +756,12 @@ const baseMenuItems: MenuItemDefinition[] = [
     labelKey: 'siteIdentity.menu.items.impactScore',
     routeName: 'impact-score',
   },
-  { id: 'products', type: 'link', labelKey: 'siteIdentity.menu.items.products', routeName: 'categories' },
+  {
+    id: 'products',
+    type: 'products',
+    labelKey: 'siteIdentity.menu.items.products',
+    routeName: 'categories',
+  },
   { id: 'blog', type: 'link', labelKey: 'siteIdentity.menu.items.blog', routeName: 'blog' },
   { id: 'community', type: 'community', labelKey: 'siteIdentity.menu.items.contact' },
 ]
@@ -560,6 +776,25 @@ const menuItems = computed<MenuItem[]>(() =>
         type: 'link' as const,
         label,
         path: resolveLocalizedRoutePath(item.routeName, currentLocale.value),
+      }
+    }
+
+    if (item.type === 'products') {
+      const copy = productsMenuTexts.value
+      return {
+        id: item.id,
+        type: 'products' as const,
+        label,
+        categories: productsMenuCategories.value,
+        copy,
+        cta: {
+          highlight: copy.ctaHighlight,
+          description: copy.ctaDescription,
+          action: copy.ctaAction,
+          href: categoriesRoutePath.value,
+        },
+        loading: isProductsMenuLoading.value,
+        activePaths: productsMenuActivePaths.value,
       }
     }
 
@@ -655,7 +890,8 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     color: rgb(var(--v-theme-accent-supporting))
     font-weight: 900
 
-.main-menu-items--community
+.main-menu-items--community,
+.main-menu-items--products
   min-height: 48px
   padding-inline: 0.75rem
   gap: 0.25rem
@@ -738,6 +974,147 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 
   &__external-icon
     color: rgb(var(--v-theme-accent-primary-highlight))
+
+.products-menu
+  width: min(860px, 85vw)
+  padding: 1.5rem
+  border-radius: 1.25rem
+  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.95), rgba(var(--v-theme-surface-glass), 0.95))
+  box-shadow: 0 24px 48px rgba(var(--v-theme-shadow-primary-600), 0.16)
+
+  &__header
+    margin-block-end: 1rem
+
+  &__title
+    margin: 0
+    font-size: 1.1rem
+    font-weight: 700
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__subtitle
+    margin: 0.35rem 0 0
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__content
+    margin: 0
+    gap: 1.25rem
+
+  &__column
+    display: flex
+
+  &__categories
+    width: 100%
+
+  &__category-grid
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
+    gap: 0.65rem
+
+  &__category-card
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+    padding: 0.85rem
+    border-radius: 0.9rem
+    text-decoration: none
+    background: rgba(var(--v-theme-surface-primary-080), 0.85)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+    color: rgb(var(--v-theme-text-neutral-strong))
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease
+
+    &:hover
+      background-color: rgba(var(--v-theme-surface-primary-100), 0.95)
+      transform: translateY(-2px)
+      box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.18)
+
+  &__category-media
+    width: 100%
+    height: clamp(96px, 12vw, 140px)
+    border-radius: 0.65rem
+    overflow: hidden
+    background: rgba(var(--v-theme-surface-primary-120), 0.6)
+    padding: 0.35rem
+
+  &__category-image
+    width: 100%
+    height: 100%
+    border-radius: 0.5rem
+
+  &__category-placeholder
+    width: 100%
+    height: 100%
+    display: flex
+    align-items: center
+    justify-content: center
+    color: rgb(var(--v-theme-accent-primary-highlight))
+
+  &__category-body
+    display: flex
+    flex-direction: column
+    gap: 0.15rem
+
+  &__category-title
+    margin: 0
+    font-weight: 600
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__category-link
+    display: inline-flex
+    align-items: center
+    gap: 0.25rem
+    font-size: 0.85rem
+    font-weight: 600
+    color: rgb(var(--v-theme-accent-primary-highlight))
+    transition: color 0.2s ease
+
+  &__category-card:hover .products-menu__category-link
+    color: rgb(var(--v-theme-accent-supporting))
+
+  &__empty
+    margin: 0
+    font-size: 0.9rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__skeleton
+    margin-block: 0.25rem
+
+  &__cta
+    padding: 1.25rem
+    border-radius: 1rem
+    background: rgba(var(--v-theme-surface-primary-080), 0.85)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+    justify-content: center
+    width: 100%
+
+  &__cta-highlight
+    margin: 0
+    font-size: 1rem
+    font-weight: 700
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__cta-description
+    margin: 0
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__cta-action
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 0.5rem
+    border-radius: 999px
+    padding: 0.6rem 1.25rem
+    font-weight: 600
+    text-decoration: none
+    background-color: rgb(var(--v-theme-accent-primary-highlight))
+    color: rgb(var(--v-theme-text-on-accent))
+    transition: box-shadow 0.2s ease, transform 0.2s ease
+
+    &:hover
+      box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.25)
+      transform: translateY(-1px)
 
 .account-menu-activator
   text-transform: none
