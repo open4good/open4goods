@@ -84,6 +84,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductTimelineDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductEprelDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductVideoDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
@@ -141,6 +142,7 @@ public class ProductMappingService {
     private final Cache referenceCache;
     private final ReviewGenerationClient reviewGenerationClient;
     private final HcaptchaService hcaptchaService;
+    private final ProductTimelineService productTimelineService;
 
 
     public ProductMappingService(ProductRepository repository,
@@ -152,7 +154,8 @@ public class ProductMappingService {
             IcecatService icecatService,
             CacheManager cacheManager,
             ReviewGenerationClient reviewGenerationClient,
-            HcaptchaService hcaptchaService) {
+            HcaptchaService hcaptchaService,
+            ProductTimelineService productTimelineService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -163,6 +166,7 @@ public class ProductMappingService {
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
         this.reviewGenerationClient = reviewGenerationClient;
         this.hcaptchaService = hcaptchaService;
+        this.productTimelineService = productTimelineService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -218,6 +222,9 @@ public class ProductMappingService {
                 ? mapEprel(product)
                 : null;
         ProductOffersDto offers = components.contains(ProductDtoComponent.offers) ? mapOffers(product) : null;
+        ProductTimelineDto timeline = components.contains(ProductDtoComponent.timeline)
+                ? productTimelineService.mapTimeline(product)
+                : null;
 
         String slug = null;
         if (product.getNames() != null) {
@@ -245,7 +252,8 @@ public class ProductMappingService {
                 scores,
                 aiReview,
                 eprel,
-                offers);
+                offers,
+                timeline);
     }
 
     /**

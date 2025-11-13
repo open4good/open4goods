@@ -39,7 +39,7 @@ class SearchControllerTest {
 
     @Test
     void globalSearchReturnsGroupedPayload() throws Exception {
-        ProductDto phone = new ProductDto(1L, null, null, null, null, null, null, null, null, null, null, null, null);
+        ProductDto phone = new ProductDto(1L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         GlobalSearchHit hit = new GlobalSearchHit("phones", phone, 7.2d);
         GlobalSearchVerticalGroup group = new GlobalSearchVerticalGroup("phones", List.of(hit));
         GlobalSearchResult serviceResult = new GlobalSearchResult(List.of(group), List.of(), false);
@@ -57,7 +57,7 @@ class SearchControllerTest {
 
     @Test
     void globalSearchIncludesFallbackResults() throws Exception {
-        ProductDto accessory = new ProductDto(2L, "universal-charger", null, null, null, null, null, null, null, null, null, null, null);
+        ProductDto accessory = new ProductDto(2L, "universal-charger", null, null, null, null, null, null, null, null, null, null, null, null);
         GlobalSearchHit fallbackHit = new GlobalSearchHit(null, accessory, 3.5d);
         GlobalSearchResult serviceResult = new GlobalSearchResult(List.of(), List.of(fallbackHit), true);
         when(searchService.globalSearch("chargeur", DomainLanguage.en)).thenReturn(serviceResult);

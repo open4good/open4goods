@@ -37,7 +37,9 @@ public record ProductDto(
         @Schema(description = "EPREL product information when available", implementation = ProductEprelDto.class)
         ProductEprelDto eprel,
         @Schema(description = "Product offers and pricing information")
-        ProductOffersDto offers
+        ProductOffersDto offers,
+        @Schema(description = "Lifecycle timeline combining price history and EPREL milestones")
+        ProductTimelineDto timeline
 ) {
 
         /**
@@ -54,7 +56,8 @@ public record ProductDto(
                 aiReview,
                 aiTexts,
                 eprel,
-                offers
+                offers,
+                timeline
         }
 
         /**

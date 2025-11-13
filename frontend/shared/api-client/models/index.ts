@@ -94,6 +94,8 @@ export * from './ProductScoresDto';
 export * from './ProductSearchRequestDto';
 export * from './ProductSearchResponseDto';
 export * from './ProductSourcedAttributeDto';
+export * from './ProductTimelineDto';
+export * from './ProductTimelineEventDto';
 export * from './ProductVideoDto';
 export * from './RecommandationChoice';
 export * from './RecommandationCriteria';
