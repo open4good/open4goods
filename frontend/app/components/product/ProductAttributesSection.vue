@@ -90,7 +90,6 @@
           </p>
         </v-card>
 
-        <ProductLifeTimeline v-if="timeline" class="product-attributes__timeline-card" :timeline="timeline" />
       </div>
     </div>
 
@@ -109,23 +108,36 @@
         />
       </div>
 
-      <v-row v-if="filteredGroups.length" class="product-attributes__details-grid" dense>
-        <ProductAttributesDetailCard
-          v-for="group in filteredGroups"
-          :key="group.id"
-          :group="group"
-        />
-      </v-row>
+      <div
+        :class="[
+          'product-attributes__detailed-layout',
+          { 'product-attributes__detailed-layout--with-timeline': Boolean(timeline) },
+        ]"
+      >
+        <div v-if="timeline" class="product-attributes__timeline-column">
+          <ProductLifeTimeline :timeline="timeline" alternate />
+        </div>
 
-      <p v-else class="product-attributes__empty product-attributes__empty--detailed">
-        {{
-          $t(
-            hasSearchTerm
-              ? 'product.attributes.detailed.noResults'
-              : 'product.attributes.detailed.empty',
-          )
-        }}
-      </p>
+        <div class="product-attributes__details-panel">
+          <v-row v-if="filteredGroups.length" class="product-attributes__details-grid" dense>
+            <ProductAttributesDetailCard
+              v-for="group in filteredGroups"
+              :key="group.id"
+              :group="group"
+            />
+          </v-row>
+
+          <p v-else class="product-attributes__empty product-attributes__empty--detailed">
+            {{
+              $t(
+                hasSearchTerm
+                  ? 'product.attributes.detailed.noResults'
+                  : 'product.attributes.detailed.empty',
+              )
+            }}
+          </p>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -613,8 +625,7 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 }
 
 .product-attributes__identity-card,
-.product-attributes__main-card,
-.product-attributes__timeline-card {
+.product-attributes__main-card {
   border-radius: 20px;
   background: rgba(var(--v-theme-surface-glass-strong), 0.96);
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
@@ -623,10 +634,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-}
-
-.product-attributes__timeline-card {
-  padding: 0;
 }
 
 .product-attributes__identity-heading {
@@ -749,6 +756,25 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   max-width: 100%;
 }
 
+.product-attributes__detailed-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.product-attributes__timeline-column {
+  flex: 0 0 100%;
+  display: flex;
+}
+
+.product-attributes__timeline-column :deep(.product-life-timeline) {
+  width: 100%;
+}
+
+.product-attributes__details-panel {
+  flex: 1;
+}
+
 .product-attributes__details-grid {
   margin: 0 -0.75rem;
 }
@@ -779,10 +805,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   }
 
-  .product-attributes__timeline-card {
-    grid-column: span 2;
-  }
-
   .product-attributes__block-header--detailed {
     flex-direction: row;
     align-items: center;
@@ -791,6 +813,24 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 
   .product-attributes__search {
     max-width: 320px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .product-attributes__detailed-layout--with-timeline {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(0, 3fr);
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .product-attributes__timeline-column {
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .product-attributes__details-panel {
+    grid-column: auto;
   }
 }
 </style>

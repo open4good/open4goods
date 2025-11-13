@@ -1,5 +1,5 @@
 <template>
-  <v-card class="product-life-timeline" variant="flat">
+  <v-card :class="['product-life-timeline', `product-life-timeline--${layout}`]" variant="flat">
     <div class="product-life-timeline__header">
       <div>
         <p class="product-life-timeline__eyebrow">
@@ -13,33 +13,62 @@
     </div>
 
     <div v-if="hasEvents" class="product-life-timeline__body">
-      <v-timeline align="start" density="compact" side="end" truncate-line="both" class="product-life-timeline__timeline">
+      <v-timeline
+        :align="timelineAlign"
+        :direction="timelineDirection"
+        :side="timelineSide"
+        density="compact"
+        truncate-line="both"
+        class="product-life-timeline__timeline"
+      >
         <v-timeline-item
-          v-for="event in events"
-          :key="event.key"
-          :dot-color="event.color"
+          v-for="group in groupedEvents"
+          :key="group.key"
+          :dot-color="group.accentColor"
           size="small"
           fill-dot
           class="product-life-timeline__item"
         >
           <template #opposite>
-            <span class="product-life-timeline__date">{{ event.formattedDate }}</span>
+            <span class="product-life-timeline__year-pill">{{ group.year }}</span>
           </template>
 
-          <div class="product-life-timeline__event-card">
-            <div class="product-life-timeline__event-heading">
-              <v-icon :icon="event.icon" :color="event.color" size="22" class="product-life-timeline__event-icon" />
-              <div class="product-life-timeline__event-title-block">
-                <p class="product-life-timeline__event-title">{{ event.label }}</p>
-                <p v-if="event.sourceLabel" class="product-life-timeline__event-source">{{ event.sourceLabel }}</p>
-              </div>
+          <div class="product-life-timeline__year-card">
+            <div class="product-life-timeline__year-heading">
+              <span class="product-life-timeline__year-label">{{ group.year }}</span>
+              <span class="product-life-timeline__year-separator" />
             </div>
 
-            <div class="product-life-timeline__event-meta">
-              <span v-if="event.conditionLabel" class="product-life-timeline__event-chip">
-                {{ event.conditionLabel }}
-              </span>
-            </div>
+            <ul class="product-life-timeline__event-list">
+              <li
+                v-for="event in group.events"
+                :key="event.key"
+                class="product-life-timeline__event-list-item"
+              >
+                <span class="product-life-timeline__event-date-chip">{{ event.formattedDate }}</span>
+
+                <div class="product-life-timeline__event-info">
+                  <div class="product-life-timeline__event-heading">
+                    <v-icon
+                      :icon="event.icon"
+                      :color="event.color"
+                      size="20"
+                      class="product-life-timeline__event-icon"
+                    />
+                    <div class="product-life-timeline__event-title-block">
+                      <p class="product-life-timeline__event-title">{{ event.label }}</p>
+                      <p v-if="event.sourceLabel" class="product-life-timeline__event-source">{{ event.sourceLabel }}</p>
+                    </div>
+                  </div>
+
+                  <div class="product-life-timeline__event-meta">
+                    <span v-if="event.conditionLabel" class="product-life-timeline__event-chip">
+                      {{ event.conditionLabel }}
+                    </span>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </div>
         </v-timeline-item>
       </v-timeline>
@@ -56,11 +85,17 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductTimelineDto, ProductTimelineEventDto } from '~~/shared/api-client'
 
-const props = defineProps<{ timeline: ProductTimelineDto | null }>()
+const props = withDefaults(
+  defineProps<{ timeline: ProductTimelineDto | null; layout?: 'vertical' | 'horizontal'; alternate?: boolean }>(),
+  {
+    layout: 'vertical',
+    alternate: false,
+  },
+)
 
 const { t, locale } = useI18n()
 
-type TimelineViewModel = {
+type TimelineEventViewModel = {
   key: string
   label: string
   formattedDate: string
@@ -68,6 +103,13 @@ type TimelineViewModel = {
   color: string
   conditionLabel: string | null
   sourceLabel: string | null
+}
+
+type TimelineYearGroup = {
+  key: string
+  year: number
+  accentColor: string
+  events: TimelineEventViewModel[]
 }
 
 const eventLabelKeys: Record<string, string> = {
@@ -115,26 +157,54 @@ const sourceColors: Record<string, string> = {
   EPREL: 'success',
 }
 
-const dateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short', year: 'numeric' }))
+const monthYearFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short', year: 'numeric' }))
 
-const events = computed<TimelineViewModel[]>(() => {
+const groupedEvents = computed<TimelineYearGroup[]>(() => {
   const rawEvents = props.timeline?.events ?? []
-  return rawEvents
+  const yearGroups = new Map<number, TimelineYearGroup>()
+
+  rawEvents
     .filter((event): event is ProductTimelineEventDto & { timestamp: number } => typeof event?.timestamp === 'number')
     .sort((a, b) => a.timestamp - b.timestamp)
-    .map((event, index) => {
+    .forEach((event, index) => {
       const type = event.type
       const source = event.source
       const key = `${type ?? 'unknown'}-${event.timestamp}-${index}`
-      const labelKey = type ? eventLabelKeys[type] ?? 'product.attributes.timeline.events.generic' : 'product.attributes.timeline.events.generic'
+      const labelKey = type
+        ? eventLabelKeys[type] ?? 'product.attributes.timeline.events.generic'
+        : 'product.attributes.timeline.events.generic'
       const label = t(labelKey)
-      const formattedDate = dateFormatter.value.format(new Date(event.timestamp))
+      const date = new Date(event.timestamp)
+      const formattedDate = monthYearFormatter.value.format(date)
       const icon = (type && eventIcons[type]) ?? 'mdi-timeline-clock-outline'
       const color = (source && sourceColors[source]) ?? 'primary'
-      const conditionLabel = event.condition ? t(conditionLabelKeys[event.condition] ?? 'product.attributes.timeline.conditions.generic') : null
-      const sourceLabel = source ? t(sourceLabelKeys[source] ?? 'product.attributes.timeline.sources.generic') : null
+      const conditionLabel = event.condition
+        ? t(conditionLabelKeys[event.condition] ?? 'product.attributes.timeline.conditions.generic')
+        : null
+      const sourceLabel = source
+        ? t(sourceLabelKeys[source] ?? 'product.attributes.timeline.sources.generic')
+        : null
+      const year = date.getFullYear()
 
-      return {
+      if (!yearGroups.has(year)) {
+        yearGroups.set(year, {
+          key: `${year}`,
+          year,
+          accentColor: color,
+          events: [],
+        })
+      }
+
+      const group = yearGroups.get(year)
+      if (!group) {
+        return
+      }
+
+      if (!group.accentColor) {
+        group.accentColor = color
+      }
+
+      group.events.push({
         key,
         label,
         formattedDate,
@@ -142,11 +212,17 @@ const events = computed<TimelineViewModel[]>(() => {
         color,
         conditionLabel,
         sourceLabel,
-      }
+      })
     })
+
+  return Array.from(yearGroups.values())
 })
 
-const hasEvents = computed(() => events.value.length > 0)
+const hasEvents = computed(() => groupedEvents.value.length > 0)
+
+const timelineDirection = computed(() => (props.layout === 'horizontal' ? 'horizontal' : 'vertical'))
+const timelineSide = computed(() => (props.alternate ? 'both' : 'end'))
+const timelineAlign = computed(() => (props.layout === 'horizontal' ? 'center' : 'start'))
 </script>
 
 <style scoped>
@@ -188,19 +264,80 @@ const hasEvents = computed(() => events.value.length > 0)
   padding-inline-start: 0.5rem;
 }
 
-.product-life-timeline__date {
-  font-weight: 600;
+.product-life-timeline--horizontal .product-life-timeline__body {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.product-life-timeline__year-pill {
+  font-weight: 700;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
-.product-life-timeline__event-card {
-  background: rgba(var(--v-theme-surface-primary-050), 0.85);
-  border-radius: 16px;
-  padding: 0.9rem 1rem;
+.product-life-timeline__year-card {
+  background: rgba(var(--v-theme-surface-primary-050), 0.9);
+  border-radius: 18px;
+  padding: 1rem 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+  gap: 1rem;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+}
+
+.product-life-timeline__year-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.product-life-timeline__year-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-life-timeline__year-separator {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--v-theme-border-primary-strong), 0.4),
+    rgba(var(--v-theme-border-primary-strong), 0)
+  );
+}
+
+.product-life-timeline__event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.product-life-timeline__event-list-item {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.product-life-timeline__event-date-chip {
+  min-width: 82px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(var(--v-theme-primary), 0.08);
+  color: rgb(var(--v-theme-primary));
+  border: 1px solid rgba(var(--v-theme-primary), 0.35);
+  text-align: center;
+}
+
+.product-life-timeline__event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
 .product-life-timeline__event-heading {
@@ -234,6 +371,11 @@ const hasEvents = computed(() => events.value.length > 0)
   background: rgba(var(--v-theme-primary), 0.08);
   color: rgb(var(--v-theme-primary));
   border: 1px solid rgba(var(--v-theme-primary), 0.35);
+}
+
+.product-life-timeline--horizontal .product-life-timeline__timeline {
+  padding-inline-start: 0;
+  min-width: max-content;
 }
 
 .product-life-timeline__empty {

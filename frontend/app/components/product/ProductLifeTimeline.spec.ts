@@ -53,22 +53,27 @@ const i18n = createI18n({
 
 const VCardStub = defineComponent({
   name: 'VCardStub',
-  setup(_, { slots }) {
-    return () => h('div', { class: 'v-card-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () => h('div', { ...attrs, class: ['v-card-stub', attrs.class] }, slots.default?.())
   },
 })
 
 const VTimelineStub = defineComponent({
   name: 'VTimelineStub',
-  setup(_, { slots }) {
-    return () => h('div', { class: 'v-timeline-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () => h('div', { ...attrs, class: ['v-timeline-stub', attrs.class] }, slots.default?.())
   },
 })
 
 const VTimelineItemStub = defineComponent({
   name: 'VTimelineItemStub',
-  setup(_, { slots }) {
-    return () => h('div', { class: 'v-timeline-item-stub' }, [slots.opposite?.(), slots.default?.()])
+  setup(_, { slots, attrs }) {
+    return () =>
+      h(
+        'div',
+        { ...attrs, class: ['v-timeline-item-stub', attrs.class] },
+        [slots.opposite?.(), slots.default?.()],
+      )
   },
 })
 
@@ -85,6 +90,11 @@ const buildTimeline = (): ProductTimelineDto => ({
     {
       type: ProductTimelineEventType.PriceFirstSeenNew,
       source: ProductTimelineEventSource.PriceHistory,
+      timestamp: Date.UTC(2023, 8, 10),
+    },
+    {
+      type: ProductTimelineEventType.PriceFirstSeenOccasion,
+      source: ProductTimelineEventSource.PriceHistory,
       timestamp: Date.UTC(2024, 0, 5),
     },
     {
@@ -95,12 +105,15 @@ const buildTimeline = (): ProductTimelineDto => ({
   ],
 })
 
-const mountComponent = async (timeline: ProductTimelineDto | null) => {
+const mountComponent = async (
+  timeline: ProductTimelineDto | null,
+  extraProps: Partial<{ layout: 'vertical' | 'horizontal'; alternate: boolean }> = {},
+) => {
   const module = await import('./ProductLifeTimeline.vue')
   const Component = module.default
 
   return mountSuspended(Component, {
-    props: { timeline },
+    props: { timeline, ...extraProps },
     global: {
       plugins: [i18n],
       stubs: {
@@ -120,11 +133,18 @@ describe('ProductLifeTimeline', () => {
     expect(wrapper.text()).toContain('First new offer spotted')
     expect(wrapper.text()).toContain('EPREL on-market start')
     expect(wrapper.text()).toContain('Jan 2024')
+    expect(wrapper.text()).toContain('2023')
   })
 
   it('renders empty state when no events', async () => {
     const wrapper = await mountComponent({ events: [] })
 
     expect(wrapper.text()).toContain('Lifecycle information is not available yet.')
+  })
+
+  it('supports alternate horizontal layout', async () => {
+    const wrapper = await mountComponent(buildTimeline(), { layout: 'horizontal', alternate: true })
+
+    expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(true)
   })
 })
