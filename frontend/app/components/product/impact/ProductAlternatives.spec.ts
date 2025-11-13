@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ProductAlternatives from './ProductAlternatives.vue'
 import { flushPromises } from '@vue/test-utils'
+import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
 vi.mock('./ProductAlternativeCard.vue', () => ({
   default: {
@@ -125,7 +126,7 @@ describe('ProductAlternatives', () => {
     expect(initialFilters).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ field: 'price.minPrice.price', operator: 'range', max: 349.9 }),
-        expect.objectContaining({ field: 'scores.ECOSCORE.value', operator: 'range', min: 15 }),
+        expect.objectContaining({ field: ECOSCORE_RELATIVE_FIELD, operator: 'range', min: 15 }),
         expect.objectContaining({ field: 'attributes.indexed.POWER_CONSUMPTION.numericValue', operator: 'range', max: 55 }),
       ]),
     )
@@ -143,7 +144,7 @@ describe('ProductAlternatives', () => {
     const updatedFilters = updatedBody?.filters?.filters ?? []
     expect(updatedFilters).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ field: 'scores.ECOSCORE.value', operator: 'range', min: 15 }),
+        expect.objectContaining({ field: ECOSCORE_RELATIVE_FIELD, operator: 'range', min: 15 }),
         expect.objectContaining({ field: 'attributes.indexed.POWER_CONSUMPTION.numericValue', operator: 'range', max: 55 }),
       ]),
     )

@@ -83,6 +83,7 @@ import type {
 import { ProductsIncludeEnum } from '~~/shared/api-client'
 import ProductAlternativeCard from './ProductAlternativeCard.vue'
 import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
+import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
 const props = defineProps({
   product: {
@@ -130,20 +131,36 @@ const formatCurrency = (value: number, currency?: string | null) => {
   }
 }
 
-const ecoscoreValue = computed<number | null>(() => {
-  const base = props.product?.base?.ecoscoreValue
-  if (typeof base === 'number' && Number.isFinite(base)) {
-    return base
+const resolveScoreNumericValue = (
+  score: { relativ?: { value?: number | null } | null; value?: number | null } | null | undefined,
+): number | null => {
+  const relative = score?.relativ?.value
+  if (typeof relative === 'number' && Number.isFinite(relative)) {
+    return relative
   }
 
-  const ecoscoreScore = props.product?.scores?.ecoscore?.value
-  if (typeof ecoscoreScore === 'number' && Number.isFinite(ecoscoreScore)) {
+  const absolute = score?.value
+  if (typeof absolute === 'number' && Number.isFinite(absolute)) {
+    return absolute
+  }
+
+  return null
+}
+
+const ecoscoreValue = computed<number | null>(() => {
+  const ecoscoreScore = resolveScoreNumericValue(props.product?.scores?.ecoscore ?? null)
+  if (ecoscoreScore != null) {
     return ecoscoreScore
   }
 
-  const mapValue = props.product?.scores?.scores?.ECOSCORE?.value
-  if (typeof mapValue === 'number' && Number.isFinite(mapValue)) {
+  const mapValue = resolveScoreNumericValue(props.product?.scores?.scores?.ECOSCORE)
+  if (mapValue != null) {
     return mapValue
+  }
+
+  const base = props.product?.base?.ecoscoreValue
+  if (typeof base === 'number' && Number.isFinite(base)) {
+    return base
   }
 
   return null
@@ -252,7 +269,7 @@ const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(()
     defaultSelected: true,
     disabled: false,
     resolveClause: () => ({
-      field: 'scores.ECOSCORE.value',
+      field: ECOSCORE_RELATIVE_FIELD,
       operator: 'range',
       min: value,
     }),
@@ -464,7 +481,7 @@ const fetchAlternatives = async () => {
       ProductsIncludeEnum.Resources,
     ],
     sort: {
-      field: 'scores.ECOSCORE.value',
+      field: ECOSCORE_RELATIVE_FIELD,
       order: 'DESC',
     },
   }
