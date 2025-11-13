@@ -1917,9 +1917,10 @@
         "title": "Catégories populaires",
         "subtitle": "Explorez les univers les plus recherchés du moment.",
         "empty": "Les catégories populaires ne sont pas disponibles pour le moment.",
+        "categoryLinkLabel": "Explorer cette catégorie",
         "untitledCategory": "Catégorie populaire",
         "cta": {
-          "title": "Voir plus de catégories",
+          "highlight": "Nos nombreuses catégories de produits évaluées d'un point de vue environnemental",
           "description": "Parcourez notre catalogue complet classé par usages et besoins.",
           "action": "Explorer toutes les catégories"
         }

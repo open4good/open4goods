@@ -115,6 +115,8 @@
                             :rel="isExternalLink(category.href) ? 'noopener noreferrer' : undefined"
                             class="products-menu__category-card"
                             role="menuitem"
+                            :aria-label="`${category.title} - ${item.copy.categoryLinkLabel}`"
+                            :title="category.title"
                           >
                             <div class="products-menu__category-media" aria-hidden="true">
                               <v-img
@@ -131,12 +133,10 @@
 
                             <div class="products-menu__category-body">
                               <p class="products-menu__category-title">{{ category.title }}</p>
-                              <p
-                                v-if="category.description"
-                                class="products-menu__category-description"
-                              >
-                                {{ category.description }}
-                              </p>
+                              <span class="products-menu__category-link">
+                                <span>{{ item.copy.categoryLinkLabel }}</span>
+                                <v-icon icon="mdi-arrow-right" size="16" aria-hidden="true" />
+                              </span>
                             </div>
                           </component>
                         </div>
@@ -148,7 +148,7 @@
 
                   <v-col cols="12" md="4" class="products-menu__column">
                     <div class="products-menu__cta">
-                      <p class="products-menu__cta-title">{{ item.cta.title }}</p>
+                      <p class="products-menu__cta-highlight">{{ item.cta.highlight }}</p>
                       <p class="products-menu__cta-description">{{ item.cta.description }}</p>
 
                       <component
@@ -620,7 +620,6 @@ const isExternalLink = (value: string): boolean => /^https?:\/\//iu.test(value)
 interface ProductsMenuCategory {
   id: string
   title: string
-  description: string
   href: string
   image: string | null
 }
@@ -629,14 +628,15 @@ interface ProductsMenuTexts {
   title: string
   subtitle: string
   empty: string
-  ctaTitle: string
+  categoryLinkLabel: string
+  ctaHighlight: string
   ctaDescription: string
   ctaAction: string
   fallbackCategoryTitle: string
 }
 
 interface ProductsMenuCta {
-  title: string
+  highlight: string
   description: string
   action: string
   href: string
@@ -646,7 +646,8 @@ const productsMenuTexts = computed<ProductsMenuTexts>(() => ({
   title: String(t('siteIdentity.menu.productsMenu.title')),
   subtitle: String(t('siteIdentity.menu.productsMenu.subtitle')),
   empty: String(t('siteIdentity.menu.productsMenu.empty')),
-  ctaTitle: String(t('siteIdentity.menu.productsMenu.cta.title')),
+  categoryLinkLabel: String(t('siteIdentity.menu.productsMenu.categoryLinkLabel')),
+  ctaHighlight: String(t('siteIdentity.menu.productsMenu.cta.highlight')),
   ctaDescription: String(t('siteIdentity.menu.productsMenu.cta.description')),
   ctaAction: String(t('siteIdentity.menu.productsMenu.cta.action')),
   fallbackCategoryTitle: String(t('siteIdentity.menu.productsMenu.untitledCategory')),
@@ -669,12 +670,9 @@ const productsMenuCategories = computed<ProductsMenuCategory[]>(() => {
         category?.imageMedium ?? category?.imageSmall ?? category?.imageLarge ?? null
       const normalizedHref = normalizeVerticalHomeUrl(category?.verticalHomeUrl) ?? fallbackHref
       const normalizedTitle = category?.verticalHomeTitle?.trim() || fallbackTitle
-      const normalizedDescription = category?.verticalHomeDescription?.trim() ?? ''
-
       return {
         id: category?.id ?? category?.verticalHomeUrl ?? `popular-category-${index}`,
         title: normalizedTitle,
-        description: normalizedDescription,
         href: normalizedHref,
         image: normalizedImage,
       }
@@ -790,7 +788,7 @@ const menuItems = computed<MenuItem[]>(() =>
         categories: productsMenuCategories.value,
         copy,
         cta: {
-          title: copy.ctaTitle,
+          highlight: copy.ctaHighlight,
           description: copy.ctaDescription,
           action: copy.ctaAction,
           href: categoriesRoutePath.value,
@@ -1009,17 +1007,18 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 
   &__category-grid
     display: grid
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
-    gap: 0.75rem
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
+    gap: 0.65rem
 
   &__category-card
     display: flex
     flex-direction: column
-    gap: 0.75rem
-    padding: 1rem
-    border-radius: 1rem
+    gap: 0.5rem
+    padding: 0.85rem
+    border-radius: 0.9rem
     text-decoration: none
-    background: rgba(var(--v-theme-surface-primary-080), 0.9)
+    background: rgba(var(--v-theme-surface-primary-080), 0.85)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
     color: rgb(var(--v-theme-text-neutral-strong))
     transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease
 
@@ -1030,14 +1029,16 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 
   &__category-media
     width: 100%
-    aspect-ratio: 4 / 3
-    border-radius: 0.75rem
+    height: clamp(96px, 12vw, 140px)
+    border-radius: 0.65rem
     overflow: hidden
     background: rgba(var(--v-theme-surface-primary-120), 0.6)
+    padding: 0.35rem
 
   &__category-image
     width: 100%
     height: 100%
+    border-radius: 0.5rem
 
   &__category-placeholder
     width: 100%
@@ -1050,17 +1051,24 @@ const isMenuItemActive = (item: MenuItem): boolean => {
   &__category-body
     display: flex
     flex-direction: column
-    gap: 0.25rem
+    gap: 0.15rem
 
   &__category-title
     margin: 0
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
 
-  &__category-description
-    margin: 0
+  &__category-link
+    display: inline-flex
+    align-items: center
+    gap: 0.25rem
     font-size: 0.85rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
+    font-weight: 600
+    color: rgb(var(--v-theme-accent-primary-highlight))
+    transition: color 0.2s ease
+
+  &__category-card:hover .products-menu__category-link
+    color: rgb(var(--v-theme-accent-supporting))
 
   &__empty
     margin: 0
@@ -1073,14 +1081,15 @@ const isMenuItemActive = (item: MenuItem): boolean => {
   &__cta
     padding: 1.25rem
     border-radius: 1rem
-    background: rgba(var(--v-theme-surface-primary-100), 0.95)
+    background: rgba(var(--v-theme-surface-primary-080), 0.85)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
     display: flex
     flex-direction: column
     gap: 0.75rem
     justify-content: center
     width: 100%
 
-  &__cta-title
+  &__cta-highlight
     margin: 0
     font-size: 1rem
     font-weight: 700
