@@ -48,6 +48,13 @@ import {
     ProductIdentityDtoToJSON,
     ProductIdentityDtoToJSONTyped,
 } from './ProductIdentityDto';
+import type { ProductTimelineDto } from './ProductTimelineDto';
+import {
+    ProductTimelineDtoFromJSON,
+    ProductTimelineDtoFromJSONTyped,
+    ProductTimelineDtoToJSON,
+    ProductTimelineDtoToJSONTyped,
+} from './ProductTimelineDto';
 import type { ProductOffersDto } from './ProductOffersDto';
 import {
     ProductOffersDtoFromJSON,
@@ -83,13 +90,6 @@ import {
     ProductScoresDtoToJSON,
     ProductScoresDtoToJSONTyped,
 } from './ProductScoresDto';
-import type { ProductTimelineDto } from './ProductTimelineDto';
-import {
-    ProductTimelineDtoFromJSON,
-    ProductTimelineDtoFromJSONTyped,
-    ProductTimelineDtoToJSON,
-    ProductTimelineDtoToJSONTyped,
-} from './ProductTimelineDto';
 
 /**
  * 

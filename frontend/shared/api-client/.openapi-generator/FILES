@@ -109,6 +109,10 @@ models/ProductScoresDto.ts
 models/ProductSearchRequestDto.ts
 models/ProductSearchResponseDto.ts
 models/ProductSourcedAttributeDto.ts
+models/ProductTimelineDto.ts
+models/ProductTimelineEventDto.ts
+models/ProductTimelineEventSource.ts
+models/ProductTimelineEventType.ts
 models/ProductVideoDto.ts
 models/RecommandationChoice.ts
 models/RecommandationCriteria.ts
