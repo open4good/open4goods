@@ -43,7 +43,7 @@ type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
 const { categories: rawCategories, fetchCategories, loading: categoriesLoading } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
-const BLOG_ARTICLES_LIMIT = 5
+const BLOG_ARTICLES_LIMIT = 4
 
 const toSafeString = (value: unknown) => {
   if (typeof value === 'string') {

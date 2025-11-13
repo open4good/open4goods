@@ -99,6 +99,11 @@ Every code that is produced MUST me validated using :
 ## Documentation Expectations
 - Keep comments in English; translate legacy ones as you touch the file.
 
+
+## I18n localisation
+- Every static strings  in .vue pages must be loacalized through  the i18n resources.
+
+
 ## SEO metadata policy
 - Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources.  Twitter-specific tags are not allowed.
 
