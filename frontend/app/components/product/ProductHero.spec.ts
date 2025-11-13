@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
-import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import type { AttributeConfigDto, ProductDto, ProductScoreDto } from '~~/shared/api-client'
 import ProductHero from './ProductHero.vue'
 import { useProductCompareStore } from '~/stores/useProductCompareStore'
 
@@ -140,9 +140,10 @@ describe('ProductHero', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     window.localStorage.clear()
+    product = JSON.parse(JSON.stringify(baseProduct)) as ProductDto
   })
 
-  const product = {
+  const baseProduct = {
     gtin: '0123456789012',
     names: { h1Title: 'Demo Product' },
     identity: { brand: 'BrandCo', model: 'Model X', bestName: 'Demo Product' },
@@ -212,9 +213,20 @@ describe('ProductHero', () => {
       pdfs: [],
     },
     scores: {
-      ecoscore: { relativeValue: 3 },
+      ecoscore: {
+        id: 'ECOSCORE',
+        relativeValue: '3',
+        relativ: { value: 3 },
+      },
+      scores: {
+        ECOSCORE: {
+          id: 'ECOSCORE',
+          on20: 14,
+        },
+      },
     },
   } as unknown as ProductDto
+  let product: ProductDto
 
   const breadcrumbs = [
     { title: 'Home', link: '/' },
@@ -226,6 +238,19 @@ describe('ProductHero', () => {
     { key: 'identity.model', name: 'Model' },
     { key: 'base.gtinInfo.countryName', name: 'Origin' },
   ] as AttributeConfigDto[]
+
+  const setImpactScoreEntry = (entry: Partial<ProductScoreDto>) => {
+    const score: ProductScoreDto = {
+      id: 'ECOSCORE',
+      ...entry,
+    }
+
+    product.scores = {
+      ...(product.scores ?? {}),
+      ecoscore: score,
+      scores: { ECOSCORE: score },
+    }
+  }
 
   const mountComponent = async () =>
     await mountSuspended(ProductHero, {
@@ -392,6 +417,26 @@ describe('ProductHero', () => {
     expect(brandLine.element.nextElementSibling).toBe(attributes.element)
 
     await wrapper.unmount()
+  })
+
+  describe('impact score resolution', () => {
+    it.each([
+      ['on20 values', { on20: 18 }, '4.5'],
+      ['percentages', { percent: 70 }, '3.5'],
+      ['absolute max ranges', { value: 80, absolute: { max: 160 } }, '2.5'],
+      ['relative fallbacks', { relativ: { value: 4.2 } }, '4.2'],
+    ])('normalises %s to a five point scale', async (
+      _,
+      scoreEntry: Partial<ProductScoreDto>,
+      expected: string,
+    ) => {
+      setImpactScoreEntry(scoreEntry)
+      const wrapper = await mountComponent()
+
+      expect(wrapper.get('.impact-score-stub').text()).toBe(expected)
+
+      await wrapper.unmount()
+    })
   })
 
   it('toggles compare state with visual feedback', async () => {
