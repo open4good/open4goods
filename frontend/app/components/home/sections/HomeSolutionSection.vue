@@ -48,6 +48,7 @@ const { t } = useI18n()
                 src="/images/home/nudger-screaming.webp"
                 :alt="t('home.solution.title')"
                 class="home-solution__image"
+                sizes="(min-width: 960px) 306px, 60vw"
                 loading="lazy"
               />
             </div>
@@ -147,9 +148,10 @@ const { t } = useI18n()
 .home-solution__image
   position: relative
   z-index: 1
-  width: 100%
+  width: min(66%, 306px)
   height: auto
   display: block
+  margin-inline: auto
 
 @media (max-width: 959px)
   .home-solution__col--visual

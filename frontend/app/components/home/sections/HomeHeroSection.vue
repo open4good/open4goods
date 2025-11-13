@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
+import { useDisplay } from 'vuetify'
 import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -36,11 +37,14 @@ const emit = defineEmits<{
 }>()
 
 const { t, tm } = useI18n()
+const display = useDisplay()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
 const { minSuggestionQueryLength, heroVideoSrc, heroVideoPoster, categoryItems, categoriesLoading } =
   toRefs(props)
+
+const shouldShowHeroVideo = computed(() => display.mdAndUp.value)
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
@@ -157,21 +161,31 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             </ul>
           </v-col>
 
-          <v-col cols="12" lg="6" class="home-hero__media" aria-hidden="true">
+          <v-col
+            cols="12"
+            lg="6"
+            class="home-hero__media"
+            :aria-hidden="!shouldShowHeroVideo"
+          >
             <v-sheet rounded="xl" elevation="8" class="home-hero__media-sheet">
-              <div class="home-hero__video-wrapper">
-                <video
-                  class="home-hero__video"
-                  :poster="heroVideoPoster"
-                  muted
-                  autoplay
-                  playsinline
-                  preload="metadata"
-                >
-                  <source :src="heroVideoSrc" type="video/mp4" />
-                </video>
-                <div class="home-hero__video-overlay" />
-              </div>
+              <ClientOnly>
+                <div v-if="shouldShowHeroVideo" class="home-hero__video-wrapper">
+                  <video
+                    class="home-hero__video"
+                    :poster="heroVideoPoster"
+                    muted
+                    autoplay
+                    playsinline
+                    preload="metadata"
+                  >
+                    <source :src="heroVideoSrc" type="video/mp4" />
+                  </video>
+                  <div class="home-hero__video-overlay" />
+                </div>
+              </ClientOnly>
+              <p v-if="heroVideoSrc" class="home-hero__media-link home-hero__sr-only">
+                <a :href="heroVideoSrc">{{ t('home.hero.video.accessibleLink') }}</a>
+              </p>
             </v-sheet>
           </v-col>
         </v-row>
@@ -280,6 +294,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   padding: clamp(0.5rem, 2vw, 1rem)
   background: rgba(var(--v-theme-surface-glass), 0.85)
   overflow: hidden
+  position: relative
 
 .home-hero__video-wrapper
   position: relative
@@ -300,6 +315,20 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   inset: 0
   background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.1), rgba(var(--v-theme-hero-gradient-end), 0.2))
   pointer-events: none
+
+.home-hero__media-link
+  margin: 0
+
+.home-hero__sr-only
+  position: absolute
+  width: 1px
+  height: 1px
+  padding: 0
+  margin: -1px
+  overflow: hidden
+  clip: rect(0, 0, 0, 0)
+  white-space: nowrap
+  border: 0
 
 .home-hero__categories
   position: absolute
