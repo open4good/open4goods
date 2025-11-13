@@ -5,7 +5,6 @@ import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
-import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
 import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.services.blog.service.BlogService;
@@ -43,15 +42,15 @@ public class AppConfig {
 
 
 
-        @Bean
-        BrandService brandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService) throws Exception {
-                return new BrandService(remoteFileCachingService, serialisationService);
-        }
+    @Bean
+    BrandService brandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService) throws Exception {
+            return new BrandService(remoteFileCachingService, serialisationService);
+    }
 
-        @Bean
-        FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
-                return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(), brandService);
-        }
+    @Bean
+    FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
+            return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(), brandService);
+    }
 
 	@Bean
 	CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader, @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {

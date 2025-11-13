@@ -628,6 +628,8 @@ public class ReviewGenerationService implements HealthIndicator {
 			String source;
 			try {
 				// TODO : i18n, const or deduct  provider name from source
+				// TODO : The add source behaviour should not be weared onfly. Means also shared code with
+
 				source = "openai.com";
 				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr") , source));
 

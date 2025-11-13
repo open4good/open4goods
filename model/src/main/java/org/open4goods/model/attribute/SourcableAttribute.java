@@ -53,7 +53,7 @@ public abstract class SourcableAttribute {
 		// TODO : ugly
 		// First check if eprel datasource
 
-
+		// TODO : Externalize a datasource trustOrder (the old "isReferentiel" is back )
 		Optional<SourcedAttribute> trustedSource = source.stream().filter(e-> "eprel".equals(e.getDataSourcename())).findAny();
 
 		if (trustedSource.isPresent()) {
