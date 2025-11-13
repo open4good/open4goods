@@ -5,8 +5,6 @@ import { defineComponent, h } from 'vue'
 import type { PropType } from 'vue'
 import type { SearchSuggestResponseDto } from '~~/shared/api-client'
 
-import SearchSuggestField from './SearchSuggestField.vue'
-
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string, params: Record<string, unknown> = {}) => {
@@ -20,6 +18,12 @@ vi.mock('vue-i18n', () => ({
         'search.suggestions.unknownProduct': 'Product',
         'search.suggestions.categoryAria': 'Open the {category} category',
         'search.suggestions.productAria': 'View the {product} product detail',
+        'search.suggestions.scanner.openLabel': 'Scan a barcode',
+        'search.suggestions.scanner.closeLabel': 'Close the scanner',
+        'search.suggestions.scanner.title': 'Scan a barcode',
+        'search.suggestions.scanner.helper': 'Align the barcode within the frame.',
+        'search.suggestions.scanner.loading': 'Preparing camera…',
+        'search.suggestions.scanner.error': 'Camera unavailable.',
       }
 
       const template = messages[key] ?? key
@@ -29,12 +33,30 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
+const displayMock = vi.hoisted(() => {
+  const { ref } = require('vue')
+
+  return { smAndDown: ref(false) }
+})
+
+vi.mock('vuetify', () => ({
+  useDisplay: () => displayMock,
+}))
+
+let routerPushMock: ReturnType<typeof vi.fn>
+
+mockNuxtImport('useRouter', () => () => ({
+  push: (...args: unknown[]) => routerPushMock(...args),
+}))
+
 mockNuxtImport('useRequestURL', () => () => new URL('https://example.com/'))
 mockNuxtImport('useRuntimeConfig', () => () => ({
   public: {
     staticServer: 'https://static.example.com',
   },
 }))
+
+import SearchSuggestField from './SearchSuggestField.vue'
 
 const VAutocompleteStub = defineComponent({
   name: 'VAutocompleteStub',
@@ -61,7 +83,10 @@ const VAutocompleteStub = defineComponent({
           ...restAttrs,
           class: ['v-autocomplete-stub', className as string | undefined],
         },
-        slots['no-data'] ? slots['no-data']() : [],
+        [
+          slots['append-inner'] ? h('div', { class: 'append-inner-slot' }, slots['append-inner']()) : null,
+          slots['no-data'] ? h('div', { class: 'no-data-slot' }, slots['no-data']()) : null,
+        ],
       )
   },
 })
@@ -75,6 +100,22 @@ const createStub = (tag: string) =>
         h(tag, { class: props.class, ...attrs }, slots.default ? slots.default() : [])
     },
   })
+
+const VDialogStub = defineComponent({
+  name: 'VDialogStub',
+  props: { modelValue: { type: Boolean, default: false } },
+  emits: ['update:modelValue'],
+  setup(props, { slots }) {
+    return () =>
+      props.modelValue
+        ? h(
+            'div',
+            { class: 'v-dialog-stub', 'data-open': String(props.modelValue) },
+            slots.default ? slots.default() : [],
+          )
+        : null
+  },
+})
 
 const sampleResponse: SearchSuggestResponseDto = {
   categoryMatches: [
@@ -113,7 +154,18 @@ describe('SearchSuggestField', () => {
           VAvatar: createStub('div'),
           VImg: createStub('img'),
           VIcon: createStub('span'),
+          VBtn: createStub('button'),
+          VCard: createStub('div'),
+          VDialog: VDialogStub,
           ImpactScore: createStub('div'),
+        },
+        components: {
+          ClientOnly: defineComponent({
+            name: 'ClientOnlyStub',
+            setup(_, { slots }) {
+              return () => (slots.default ? slots.default() : [])
+            },
+          }),
         },
       },
     })
@@ -121,6 +173,8 @@ describe('SearchSuggestField', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue(sampleResponse))
+    routerPushMock = vi.fn()
+    displayMock.smAndDown.value = false
   })
 
   afterEach(() => {
@@ -256,5 +310,33 @@ describe('SearchSuggestField', () => {
 
     expect(wrapper.emitted('submit')).toBeUndefined()
     expect(wrapper.emitted('select-product')).toBeTruthy()
+  })
+
+  it('renders the scanner button on mobile viewports', async () => {
+    displayMock.smAndDown.value = true
+    const wrapper = await mountField()
+
+    expect(wrapper.find('[data-test="search-scanner-button"]').exists()).toBe(true)
+  })
+
+  it('opens the scanner dialog when the button is clicked', async () => {
+    displayMock.smAndDown.value = true
+    const wrapper = await mountField()
+
+    await wrapper.find('[data-test="search-scanner-button"]').trigger('click')
+
+    expect(wrapper.find('.v-dialog-stub').exists()).toBe(true)
+  })
+
+  it('navigates to the GTIN route when a code is scanned', async () => {
+    const wrapper = await mountField()
+
+    const instance = wrapper.vm as unknown as {
+      handleScannerDecode: (value: string | null) => void
+    }
+
+    instance.handleScannerDecode(' 1234567890123 ')
+
+    expect(routerPushMock).toHaveBeenCalledWith('/1234567890123')
   })
 })

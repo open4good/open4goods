@@ -1520,7 +1520,15 @@
       "unknownCategory": "Category",
       "unknownProduct": "Product",
       "categoryAria": "Open the {category} category",
-      "productAria": "View the {product} product detail"
+      "productAria": "View the {product} product detail",
+      "scanner": {
+        "openLabel": "Scan a barcode",
+        "closeLabel": "Close the barcode scanner",
+        "title": "Scan a barcode",
+        "loading": "Preparing the camera…",
+        "helper": "Align the barcode within the frame to search automatically.",
+        "error": "We couldn't access your camera. Please enter the GTIN manually."
+      }
     },
     "groups": {
       "count": {

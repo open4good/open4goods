@@ -25,8 +25,20 @@
     @blur="handleBlur"
     @focus="handleFocus"
   >
-    <template v-if="$slots['append-inner']" #append-inner>
-      <slot name="append-inner" />
+    <template #append-inner>
+      <slot v-if="$slots['append-inner']" name="append-inner" />
+      <v-btn
+        v-if="shouldShowScannerButton"
+        class="search-suggest-field__scanner-button"
+        density="comfortable"
+        variant="text"
+        icon
+        :aria-label="t('search.suggestions.scanner.openLabel')"
+        data-test="search-scanner-button"
+        @click="openScannerDialog"
+      >
+        <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
+      </v-btn>
     </template>
     <template #item="{ item, props: itemProps, index }">
       <div class="search-suggest-field__entry" :data-section="item.raw.type">
@@ -103,12 +115,58 @@
       </div>
     </template>
   </v-autocomplete>
+  <v-dialog
+    v-model="isScannerDialogOpen"
+    fullscreen
+    transition="dialog-bottom-transition"
+    scrollable
+    content-class="search-suggest-field__scanner-dialog"
+  >
+    <v-card class="search-suggest-field__scanner-card">
+      <div class="search-suggest-field__scanner-header">
+        <p class="search-suggest-field__scanner-title">
+          {{ t('search.suggestions.scanner.title') }}
+        </p>
+        <v-btn
+          icon
+          variant="text"
+          class="search-suggest-field__scanner-close"
+          :aria-label="t('search.suggestions.scanner.closeLabel')"
+          @click="closeScannerDialog"
+        >
+          <v-icon icon="mdi-close" aria-hidden="true" />
+        </v-btn>
+      </div>
+      <div class="search-suggest-field__scanner-body">
+        <ClientOnly>
+          <component
+            :is="scannerComponent"
+            v-if="scannerComponent && !scannerLoadError"
+            class="search-suggest-field__scanner-stream"
+            @decode="handleScannerDecode"
+          />
+          <p v-else class="search-suggest-field__scanner-helper">
+            {{
+              scannerLoadError
+                ? t('search.suggestions.scanner.error')
+                : t('search.suggestions.scanner.loading')
+            }}
+          </p>
+        </ClientOnly>
+        <p class="search-suggest-field__scanner-helper">
+          {{ t('search.suggestions.scanner.helper') }}
+        </p>
+      </div>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
+import type { Component } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
 import type {
   SearchSuggestCategoryMatchDto,
   SearchSuggestProductMatchDto,
@@ -162,6 +220,8 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
+const display = useDisplay()
+const router = useRouter()
 
 const internalSearch = ref(props.modelValue ?? '')
 const lastCommittedValue = ref(internalSearch.value)
@@ -172,6 +232,10 @@ const categories = ref<CategorySuggestionItem[]>([])
 const products = ref<ProductSuggestionItem[]>([])
 const currentRequest = ref(0)
 const pendingSubmit = ref(false)
+const isScannerDialogOpen = ref(false)
+const scannerComponent = shallowRef<Component | null>(null)
+const scannerLoadError = ref(false)
+let isScannerLoading = false
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
@@ -197,6 +261,39 @@ const suggestionItems = computed<SuggestionItem[]>(() => [
   ...categories.value,
   ...products.value,
 ])
+
+const shouldShowScannerButton = computed(() => display.smAndDown.value)
+
+const loadScannerComponent = async () => {
+  if (!import.meta.client || scannerComponent.value || isScannerLoading) {
+    return
+  }
+
+  isScannerLoading = true
+  scannerLoadError.value = false
+
+  try {
+    const module = await import('vue-barcode-reader')
+    scannerComponent.value = module.StreamBarcodeReader
+  } catch (error) {
+    if (import.meta.dev) {
+      console.error('Failed to load barcode scanner', error)
+    }
+
+    scannerLoadError.value = true
+  } finally {
+    isScannerLoading = false
+  }
+}
+
+const openScannerDialog = () => {
+  isScannerDialogOpen.value = true
+  loadScannerComponent()
+}
+
+const closeScannerDialog = () => {
+  isScannerDialogOpen.value = false
+}
 
 const staticServerBase = computed(() => {
   const configured = runtimeConfig.public?.staticServer
@@ -486,6 +583,20 @@ const handleClear = () => {
   hasError.value = false
   emit('clear')
 }
+
+const handleScannerDecode = (rawValue: string | null) => {
+  const normalized = (rawValue ?? '').replace(/\s+/gu, '')
+
+  if (!normalized) {
+    return
+  }
+
+  closeScannerDialog()
+  lastCommittedValue.value = normalized
+  internalSearch.value = normalized
+
+  router.push(`/${encodeURIComponent(normalized)}`)
+}
 </script>
 
 <style scoped lang="sass">
@@ -515,6 +626,56 @@ const handleClear = () => {
     border-radius: 1rem
     box-shadow: 0 20px 40px -24px rgba(15, 23, 42, 0.55)
     overflow: hidden
+
+.search-suggest-field__scanner-button
+  min-width: auto
+  margin-inline-start: 0.35rem
+  color: rgba(var(--v-theme-text-on-accent), 0.9)
+
+  :deep(.v-btn__overlay)
+    display: none
+
+.search-suggest-field__scanner-dialog
+  backdrop-filter: blur(4px)
+
+.search-suggest-field__scanner-card
+  height: 100%
+  display: flex
+  flex-direction: column
+  background-color: rgba(var(--v-theme-surface-default), 0.98)
+
+.search-suggest-field__scanner-header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 0.75rem 1rem
+  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+
+.search-suggest-field__scanner-title
+  margin: 0
+  font-size: 1rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.search-suggest-field__scanner-body
+  flex: 1
+  display: flex
+  flex-direction: column
+  gap: 1rem
+  padding: 1rem
+
+.search-suggest-field__scanner-stream
+  flex: 1
+  border-radius: 1rem
+  overflow: hidden
+  background-color: rgb(7, 12, 24)
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.45)
+
+.search-suggest-field__scanner-helper
+  margin: 0
+  text-align: center
+  font-size: 0.9rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
 .search-suggest-field__entry
   display: flex
