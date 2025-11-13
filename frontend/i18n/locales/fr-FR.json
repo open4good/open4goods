@@ -62,7 +62,7 @@
           },
           {
             "icon": "🛡️",
-            "label": "Un comparateur indépendant, libre et ouvert"
+            "label": "Comparateur indépendant, logiciel libre et données ouvertes"
           },
           {
             "icon": "⚡",
@@ -1525,7 +1525,15 @@
       "unknownCategory": "Catégorie",
       "unknownProduct": "Produit",
       "categoryAria": "Ouvrir la catégorie {category}",
-      "productAria": "Voir la fiche produit {product}"
+      "productAria": "Voir la fiche produit {product}",
+      "scanner": {
+        "openLabel": "Scanner un code-barres",
+        "closeLabel": "Fermer le scanner",
+        "title": "Scanner un code-barres",
+        "loading": "Initialisation de la caméra…",
+        "helper": "Alignez le code-barres dans le cadre pour lancer la recherche automatiquement.",
+        "error": "Impossible d'accéder à votre caméra. Saisissez le GTIN manuellement."
+      }
     },
     "groups": {
       "count": {
