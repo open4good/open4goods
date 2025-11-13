@@ -1,6 +1,5 @@
 <template>
-  <section class="feedback-hero" aria-labelledby="feedback-hero-heading">
-    <div class="feedback-hero__background" aria-hidden="true" />
+  <HeroSurface class="feedback-hero" aria-labelledby="feedback-hero-heading" variant="mesh">
 
     <v-container class="py-16">
       <v-row class="align-center">
@@ -74,7 +73,7 @@
         </v-col>
       </v-row>
     </v-container>
-  </section>
+  </HeroSurface>
 </template>
 
 <script setup lang="ts">
@@ -118,21 +117,7 @@ defineProps<{
 .feedback-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
-      135deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.88),
-      rgba(var(--v-theme-hero-gradient-mid), 0.82)
-    ),
-    radial-gradient(circle at top right, rgba(var(--v-theme-hero-gradient-end), 0.6), transparent 45%);
   color: rgb(var(--v-theme-hero-pill-on-dark));
-
-  &__background {
-    position: absolute;
-    inset: 0;
-    opacity: 0.25;
-    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="none"%3E%3Ccircle cx="200" cy="200" r="180" stroke="white" stroke-width="1" stroke-opacity="0.2"/%3E%3Ccircle cx="200" cy="200" r="140" stroke="white" stroke-width="1" stroke-opacity="0.12" stroke-dasharray="6 12"/%3E%3C/svg%3E');
-    background-size: cover;
-  }
 
   &__content {
     position: relative;

@@ -38,16 +38,15 @@ const handlePrimaryClick = (event: MouseEvent) => {
 </script>
 
 <template>
-  <section class="opendata-hero" aria-labelledby="opendata-hero-heading">
-    <div class="opendata-hero__overlay">
-      <v-container class="py-16" max-width="lg">
-        <v-row align="center" class="g-8">
-          <v-col cols="12" md="7" class="d-flex flex-column gap-6">
-            <div class="opendata-hero__header">
-              <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{ eyebrow }}</span>
-              <h1 id="opendata-hero-heading" class="opendata-hero__title">{{ title }}</h1>
-              <p class="opendata-hero__subtitle">{{ subtitle }}</p>
-            </div>
+  <HeroSurface class="opendata-hero" aria-labelledby="opendata-hero-heading" variant="orbit">
+    <v-container class="py-16" max-width="lg">
+      <v-row align="center" class="g-8">
+        <v-col cols="12" md="7" class="d-flex flex-column gap-6">
+          <div class="opendata-hero__header">
+            <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{ eyebrow }}</span>
+            <h1 id="opendata-hero-heading" class="opendata-hero__title">{{ title }}</h1>
+            <p class="opendata-hero__subtitle">{{ subtitle }}</p>
+          </div>
 
 
             <div class="mt-4 opendata-hero__actions" role="group">
@@ -65,45 +64,27 @@ const handlePrimaryClick = (event: MouseEvent) => {
                 {{ primaryCta.label }}
               </v-btn>
             </div>
-          </v-col>
+        </v-col>
 
-          <v-col cols="12" md="5" class="opendata-hero__visual">
-            <div class="opendata-hero__glow" aria-hidden="true">
-              <div class="opendata-hero__glow-ring" />
-              <div class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary" />
-              <div class="opendata-hero__glow-dots">
-                <span v-for="index in 6" :key="index" class="opendata-hero__glow-dot" />
-              </div>
+        <v-col cols="12" md="5" class="opendata-hero__visual">
+          <div class="opendata-hero__glow" aria-hidden="true">
+            <div class="opendata-hero__glow-ring" />
+            <div class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary" />
+            <div class="opendata-hero__glow-dots">
+              <span v-for="index in 6" :key="index" class="opendata-hero__glow-dot" />
             </div>
-          </v-col>
-        </v-row>
-      </v-container>
-    </div>
-  </section>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </HeroSurface>
 </template>
 
 <style scoped lang="sass">
 .opendata-hero
   position: relative
   overflow: hidden
-  background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.9), rgba(var(--v-theme-hero-gradient-end), 0.85))
   color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
-
-.opendata-hero__overlay
-  position: relative
-  isolation: isolate
-
-.opendata-hero__overlay::after
-  content: ''
-  position: absolute
-  inset: 0
-  background: linear-gradient(135deg, rgba(var(--v-theme-hero-overlay-soft), 0.14) 0%, rgba(var(--v-theme-hero-overlay-soft), 0.05) 60%, rgba(var(--v-theme-hero-overlay-soft), 0.12) 100%)
-  pointer-events: none
-  z-index: 0
-
-.v-container
-  position: relative
-  z-index: 1
 
 .opendata-hero__header
   display: flex

@@ -1,0 +1,92 @@
+.hero-surface
+  position: relative
+  overflow: hidden
+  isolation: isolate
+  background-color: rgb(var(--v-theme-surface-default))
+  color: inherit
+  border-radius: 0
+
+  &::before,
+  &::after
+    content: ''
+    position: absolute
+    inset: 0
+    pointer-events: none
+    z-index: 0
+
+  > :where(*)
+    position: relative
+    z-index: 1
+
+.hero-surface--bleed
+  overflow: visible
+
+.hero-surface--aurora
+  background-image: radial-gradient(circle at 12% 20%, rgba(var(--v-theme-hero-gradient-start), 0.45), transparent 55%), radial-gradient(circle at 82% -10%, rgba(var(--v-theme-hero-gradient-end), 0.35), transparent 48%), linear-gradient(135deg, rgba(var(--v-theme-surface-ice-050), 0.95), rgba(var(--v-theme-surface-muted), 0.78))
+
+.hero-surface--aurora::before
+  background: conic-gradient(from 180deg, rgba(var(--v-theme-hero-gradient-start), 0.2), transparent 45%, rgba(var(--v-theme-hero-gradient-mid), 0.25), transparent 85%)
+  filter: blur(80px)
+  opacity: 0.8
+
+.hero-surface--aurora::after
+  background-image: repeating-linear-gradient(135deg, rgba(var(--v-theme-hero-overlay-soft), 0.14) 0, rgba(var(--v-theme-hero-overlay-soft), 0.14) 2px, transparent 2px, transparent 14px)
+  opacity: 0.35
+
+.hero-surface--halo
+  background-image: radial-gradient(circle at -5% -5%, rgba(var(--v-theme-hero-gradient-start), 0.6), transparent 60%), radial-gradient(circle at 100% 0%, rgba(var(--v-theme-hero-gradient-end), 0.4), transparent 50%), linear-gradient(130deg, rgba(var(--v-theme-surface-callout-end), 0.92), rgba(var(--v-theme-surface-primary-050), 0.9))
+
+.hero-surface--halo::before
+  background: radial-gradient(circle at 20% 30%, rgba(var(--v-theme-hero-overlay-soft), 0.35), transparent 50%)
+  mix-blend-mode: screen
+  opacity: 0.7
+
+.hero-surface--halo::after
+  background: linear-gradient(90deg, rgba(var(--v-theme-border-primary-strong), 0.16) 0%, transparent 55%, rgba(var(--v-theme-border-primary-strong), 0.08) 100%)
+  opacity: 0.7
+
+.hero-surface--pulse
+  background-image: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.92), rgba(var(--v-theme-hero-gradient-mid), 0.85)), radial-gradient(circle at 80% 10%, rgba(var(--v-theme-hero-gradient-end), 0.35), transparent 45%)
+
+.hero-surface--pulse::before
+  background: radial-gradient(circle at 5% 105%, rgba(var(--v-theme-accent-supporting), 0.35), transparent 55%)
+  opacity: 0.9
+
+.hero-surface--pulse::after
+  background-image: repeating-linear-gradient(45deg, rgba(var(--v-theme-hero-overlay-soft), 0.08) 0, rgba(var(--v-theme-hero-overlay-soft), 0.08) 10px, transparent 10px, transparent 22px)
+  opacity: 0.35
+
+.hero-surface--prism
+  background-image: radial-gradient(circle at 10% 15%, rgba(var(--v-theme-hero-gradient-start), 0.55), transparent 60%), radial-gradient(circle at 95% -10%, rgba(var(--v-theme-hero-gradient-end), 0.4), transparent 50%), linear-gradient(160deg, rgba(var(--v-theme-surface-ice-100), 0.95), rgba(var(--v-theme-surface-default), 0.9))
+
+.hero-surface--prism::before
+  background: conic-gradient(from 90deg, rgba(var(--v-theme-accent-primary-highlight), 0.32), transparent 50%, rgba(var(--v-theme-accent-supporting), 0.25))
+  filter: blur(90px)
+  opacity: 0.75
+
+.hero-surface--prism::after
+  background: radial-gradient(circle at 70% 30%, rgba(var(--v-theme-hero-overlay-soft), 0.22), transparent 65%)
+  mix-blend-mode: screen
+  opacity: 0.8
+
+.hero-surface--mesh
+  background-image: linear-gradient(125deg, rgba(var(--v-theme-hero-gradient-start), 0.88), rgba(var(--v-theme-hero-gradient-mid), 0.82)), radial-gradient(circle at 80% 20%, rgba(var(--v-theme-hero-gradient-end), 0.45), transparent 50%)
+
+.hero-surface--mesh::before
+  background-image: repeating-linear-gradient(0deg, rgba(var(--v-theme-hero-overlay-soft), 0.1) 0, rgba(var(--v-theme-hero-overlay-soft), 0.1) 1px, transparent 1px, transparent 18px), repeating-linear-gradient(90deg, rgba(var(--v-theme-hero-overlay-soft), 0.08) 0, rgba(var(--v-theme-hero-overlay-soft), 0.08) 1px, transparent 1px, transparent 18px)
+  opacity: 0.4
+
+.hero-surface--mesh::after
+  background: radial-gradient(circle at 45% 120%, rgba(var(--v-theme-accent-supporting), 0.35), transparent 60%)
+  opacity: 0.6
+
+.hero-surface--orbit
+  background-image: radial-gradient(circle at 35% 20%, rgba(var(--v-theme-hero-gradient-start), 0.72), transparent 60%), linear-gradient(150deg, rgba(var(--v-theme-surface-ice-100), 0.9), rgba(var(--v-theme-surface-muted), 0.7))
+
+.hero-surface--orbit::before
+  background-image: radial-gradient(circle at center, transparent 0, transparent 32%, rgba(var(--v-theme-border-primary-strong), 0.25) 32%, transparent 35%), radial-gradient(circle at center, transparent 0, transparent 45%, rgba(var(--v-theme-border-primary-strong), 0.18) 45%, transparent 48%), radial-gradient(circle at center, transparent 0, transparent 58%, rgba(var(--v-theme-border-primary-strong), 0.12) 58%, transparent 61%)
+  opacity: 0.75
+
+.hero-surface--orbit::after
+  background: radial-gradient(circle at 85% 10%, rgba(var(--v-theme-accent-primary-highlight), 0.4), transparent 55%)
+  opacity: 0.8
