@@ -61,6 +61,7 @@ class ProductMappingServiceTest {
     private CacheManager cacheManager;
     private ReviewGenerationClient reviewGenerationClient;
     private HcaptchaService hcaptchaService;
+    private ProductTimelineService productTimelineService;
     private HttpServletRequest httpServletRequest;
 
     @BeforeEach
@@ -76,12 +77,13 @@ class ProductMappingServiceTest {
         cacheManager = mock(CacheManager.class);
         reviewGenerationClient = mock(ReviewGenerationClient.class);
         hcaptchaService = mock(HcaptchaService.class);
+        productTimelineService = new ProductTimelineService();
         httpServletRequest = mock(HttpServletRequest.class);
         ConcurrentMapCache referenceCache = new ConcurrentMapCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                reviewGenerationClient, hcaptchaService);
+                reviewGenerationClient, hcaptchaService, productTimelineService);
     }
 
     @Test

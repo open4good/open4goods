@@ -1664,6 +1664,36 @@
           "empty": "Les attributs indexés apparaîtront ici dès qu'ils seront disponibles."
         }
       },
+      "timeline": {
+        "title": "Moments clés",
+        "subtitle": "Visualisez les dates importantes de commercialisation et de disponibilité.",
+        "empty": "Aucune information sur le cycle de vie n'est disponible pour le moment.",
+        "sources": {
+          "priceHistory": "Historique des prix",
+          "eprel": "Registre EPREL",
+          "generic": "Événement du cycle de vie"
+        },
+        "conditions": {
+          "new": "Neuf",
+          "occasion": "Occasion",
+          "generic": "État"
+        },
+        "events": {
+          "priceFirstSeenNew": "Première offre neuve détectée",
+          "priceFirstSeenOccasion": "Première offre d'occasion détectée",
+          "priceLastSeenNew": "Dernière offre neuve relevée",
+          "priceLastSeenOccasion": "Dernière offre d'occasion relevée",
+          "eprelOnMarketStart": "Mise sur le marché EPREL",
+          "eprelOnMarketEnd": "Fin de commercialisation EPREL",
+          "eprelOnMarketFirstStart": "Première autorisation en Europe",
+          "eprelFirstPublication": "Première publication EPREL",
+          "eprelLastPublication": "Dernière publication EPREL",
+          "eprelExport": "Export EPREL",
+          "eprelImported": "Importé dans Nudger",
+          "eprelOrganisationClosed": "Organisation fermée",
+          "generic": "Événement du cycle de vie"
+        }
+      },
       "detailed": {
         "title": "Caractéristiques détaillées",
         "unknownLabel": "Spécification",

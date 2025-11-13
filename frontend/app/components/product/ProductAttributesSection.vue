@@ -89,6 +89,8 @@
             {{ $t('product.attributes.main.attributes.empty') }}
           </p>
         </v-card>
+
+        <ProductLifeTimeline v-if="timeline" class="product-attributes__timeline-card" :timeline="timeline" />
       </div>
     </div>
 
@@ -134,6 +136,7 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
+import ProductLifeTimeline from '~/components/product/ProductLifeTimeline.vue'
 import type {
   ProductAttributeDto,
   ProductAttributeSourceDto,
@@ -174,6 +177,8 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
 const referentialAttributes = computed<Record<string, string>>(
   () => resolvedAttributes.value?.referentialAttributes ?? {},
 )
+
+const timeline = computed(() => props.product?.timeline ?? null)
 
 const staticServerBase = computed(() => {
   const fallback = 'https://nudger.fr'
@@ -608,7 +613,8 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 }
 
 .product-attributes__identity-card,
-.product-attributes__main-card {
+.product-attributes__main-card,
+.product-attributes__timeline-card {
   border-radius: 20px;
   background: rgba(var(--v-theme-surface-glass-strong), 0.96);
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
@@ -617,6 +623,10 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.product-attributes__timeline-card {
+  padding: 0;
 }
 
 .product-attributes__identity-heading {
@@ -767,6 +777,10 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 @media (min-width: 960px) {
   .product-attributes__main-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+
+  .product-attributes__timeline-card {
+    grid-column: span 2;
   }
 
   .product-attributes__block-header--detailed {

@@ -1659,6 +1659,36 @@
           "empty": "Indexed attributes will appear here when available."
         }
       },
+      "timeline": {
+        "title": "Lifecycle milestones",
+        "subtitle": "Track when the product appeared on the market and how availability evolved.",
+        "empty": "Lifecycle information is not available yet.",
+        "sources": {
+          "priceHistory": "Price history",
+          "eprel": "EPREL registry",
+          "generic": "Lifecycle event"
+        },
+        "conditions": {
+          "new": "New",
+          "occasion": "Second-hand",
+          "generic": "Condition"
+        },
+        "events": {
+          "priceFirstSeenNew": "First new offer spotted",
+          "priceFirstSeenOccasion": "First second-hand offer spotted",
+          "priceLastSeenNew": "Latest new offer recorded",
+          "priceLastSeenOccasion": "Latest second-hand offer recorded",
+          "eprelOnMarketStart": "EPREL on-market start",
+          "eprelOnMarketEnd": "EPREL on-market end",
+          "eprelOnMarketFirstStart": "First EU market approval",
+          "eprelFirstPublication": "EPREL first publication",
+          "eprelLastPublication": "EPREL last publication",
+          "eprelExport": "EPREL export",
+          "eprelImported": "Imported into Nudger",
+          "eprelOrganisationClosed": "Organisation closed",
+          "generic": "Lifecycle event"
+        }
+      },
       "detailed": {
         "title": "Detailed specifications",
         "unknownLabel": "Specification",
