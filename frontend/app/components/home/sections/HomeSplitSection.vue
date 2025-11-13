@@ -1,0 +1,132 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({ inheritAttrs: false })
+
+const props = withDefaults(
+  defineProps<{
+    id: string
+    title: string
+    description?: string
+    visualPosition?: 'left' | 'right'
+    image?: {
+      src: string
+      alt: string
+      sizes?: string
+      loading?: 'eager' | 'lazy'
+    }
+  }>(),
+  {
+    description: undefined,
+    image: undefined,
+    visualPosition: 'right',
+  },
+)
+
+const titleId = computed(() => `${props.id}-title`)
+const sectionClasses = computed(() => [
+  'home-section',
+  'home-split',
+  props.visualPosition === 'left' ? 'home-split--visual-left' : 'home-split--visual-right',
+])
+</script>
+
+<template>
+  <section :id="props.id" :class="sectionClasses" :aria-labelledby="titleId" v-bind="$attrs">
+    <v-container fluid class="home-section__container">
+      <div class="home-section__inner">
+        <v-row class="home-split__content" align="center" justify="space-between">
+          <v-col cols="12" md="6" class="home-split__col home-split__col--copy">
+            <header class="home-section__header">
+              <slot name="eyebrow" />
+              <h2 :id="titleId">{{ props.title }}</h2>
+              <p v-if="props.description" class="home-section__subtitle">{{ props.description }}</p>
+            </header>
+            <div class="home-section__body">
+              <slot />
+            </div>
+          </v-col>
+          <v-col cols="12" md="6" class="home-split__col home-split__col--visual">
+            <div class="home-split__visual" role="presentation">
+              <slot name="visual">
+                <NuxtImg
+                  v-if="props.image?.src"
+                  :src="props.image.src"
+                  :alt="props.image.alt"
+                  class="home-split__image"
+                  :sizes="props.image.sizes ?? '(min-width: 960px) 320px, 70vw'"
+                  :loading="props.image.loading ?? 'lazy'"
+                />
+              </slot>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
+    </v-container>
+  </section>
+</template>
+
+<style scoped lang="sass">
+.home-section
+  padding-block: clamp(3rem, 6vw, 5.5rem)
+  background: rgba(var(--v-theme-surface-primary-050), 0.6)
+
+.home-section__container
+  padding-inline: clamp(1.5rem, 5vw, 4rem)
+
+.home-section__inner
+  max-width: 1180px
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  gap: clamp(2rem, 5vw, 3.25rem)
+
+.home-section__header
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.home-section__subtitle
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.home-section__body
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+
+.home-split__content
+  row-gap: clamp(2rem, 5vw, 3rem)
+
+.home-split__col--copy
+  display: flex
+  flex-direction: column
+  gap: clamp(1.75rem, 4vw, 2.5rem)
+
+.home-split__col--visual
+  display: flex
+  justify-content: center
+
+.home-split__visual
+  position: relative
+  width: min(100%, 460px)
+  display: flex
+  justify-content: center
+  align-items: center
+
+.home-split__image
+  position: relative
+  z-index: 1
+  width: min(66%, 320px)
+  height: auto
+  display: block
+  margin-inline: auto
+
+.home-split--visual-left .home-split__col--visual
+  order: -1
+
+@media (max-width: 959px)
+  .home-split__col--visual
+    order: -1
+
+</style>
