@@ -90,6 +90,7 @@ public class ProductController {
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
     private static final String KEYWORD_VALUE_SUFFIX = ".value";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
+    private static final String ECOSCORE_RELATIVE_FIELD = "scores.ECOSCORE.relativ.value";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 
@@ -861,7 +862,7 @@ public class ProductController {
 
     private FieldMetadataDto buildEcoscoreField(VerticalConfig config) {
         LOGGER.info("Entering buildEcoscoreField(config={})", config);
-        String mapping = "scores.ECOSCORE.value";
+        String mapping = ECOSCORE_RELATIVE_FIELD;
         FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, "ECOSCORE");
         return new FieldMetadataDto(mapping, "impactscore", null, VALUE_TYPE_NUMERIC, aggregation);
     }
@@ -902,7 +903,7 @@ public class ProductController {
 
         List<FieldMetadataDto> results = new ArrayList<>();
         config.getAvailableImpactScoreCriterias().forEach((key, criteria) -> {
-            String mapping = "scores." + key + ".value";
+            String mapping = "scores." + key + ".relativ.value";
             String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
             String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
             FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, key);

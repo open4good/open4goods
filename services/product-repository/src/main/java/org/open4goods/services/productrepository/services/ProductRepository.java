@@ -333,7 +333,7 @@ public class ProductRepository {
 				;
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
 
-		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
+                initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.relativ.value")));
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 
@@ -365,13 +365,13 @@ public class ProductRepository {
 	        criteria = criteria.and(new Criteria("excluded").is(false));
 	    }
 
-	    // Ensure scores.ECOSCORE.value is present
-	    criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
+            // Ensure scores.ECOSCORE.relativ.value is present
+            criteria = criteria.and(new Criteria("scores.ECOSCORE.relativ.value").exists());
 
 	    // Build sort with unmapped_type to avoid shard-level mapping issues
 	    SortOptions ecoscoreSort = new SortOptions.Builder()
 	        .field(new FieldSort.Builder()
-	            .field("scores.ECOSCORE.value")
+                .field("scores.ECOSCORE.relativ.value")
 	            .order(SortOrder.Desc)
 	            .unmappedType(FieldType.Float)
 	            .missing("_last")
@@ -418,7 +418,7 @@ public class ProductRepository {
 
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
 
-		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
+                initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.relativ.value")));
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 
