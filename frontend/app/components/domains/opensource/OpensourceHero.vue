@@ -42,9 +42,8 @@ withDefaults(
 </script>
 
 <template>
-  <section class="opensource-hero" aria-labelledby="opensource-hero-title">
-    <div class="hero-surface">
-      <v-container class="py-16 position-relative">
+  <HeroSurface class="opensource-hero" aria-labelledby="opensource-hero-title" variant="prism">
+    <v-container class="py-16 position-relative">
         <v-row class="align-center" :no-gutters="false" justify="space-between">
           <v-col cols="12" md="7" class="d-flex flex-column gap-4">
 
@@ -99,31 +98,14 @@ withDefaults(
           </v-col>
         </v-row>
       </v-container>
-    </div>
-  </section>
+  </HeroSurface>
 </template>
 
 <style scoped lang="sass">
 .opensource-hero
   position: relative
-  background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.65), rgba(var(--v-theme-hero-gradient-end), 0.85))
   color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
   overflow: hidden
-
-.hero-surface
-  position: relative
-  isolation: isolate
-
-.hero-surface::after
-  content: ''
-  position: absolute
-  inset: 0
-  background: linear-gradient(135deg, rgba(var(--v-theme-hero-overlay-soft), 0.08) 0%, rgba(var(--v-theme-hero-overlay-soft), 0.2) 50%, rgba(var(--v-theme-hero-overlay-soft), 0.1) 100%)
-  z-index: 0
-
-.hero-surface > .v-container
-  position: relative
-  z-index: 1
 
 .hero-chip
   align-self: flex-start

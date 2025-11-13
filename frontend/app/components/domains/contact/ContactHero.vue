@@ -1,5 +1,5 @@
 <template>
-  <section class="contact-hero" aria-labelledby="contact-hero-heading">
+  <HeroSurface tag="section" class="contact-hero" aria-labelledby="contact-hero-heading" variant="pulse">
     <v-container class="py-12">
       <v-row align="center" class="g-6" justify="space-between">
         <v-col cols="12" md="7" class="contact-hero__content">
@@ -86,7 +86,7 @@
         </v-col>
       </v-row>
     </v-container>
-  </section>
+  </HeroSurface>
 </template>
 
 <script setup lang="ts">
@@ -120,16 +120,8 @@ const { eyebrow, title, subtitle, description, highlights, contactChannels, chan
 <style scoped lang="sass">
 .contact-hero
   position: relative
-  background: linear-gradient(135deg, rgb(var(--v-theme-hero-gradient-start)) 0%, rgba(var(--v-theme-hero-gradient-mid), 0.92) 55%, rgb(var(--v-theme-hero-gradient-end)) 100%)
   color: rgb(255, 255, 255)
   overflow: hidden
-
-  &::after
-    content: ''
-    position: absolute
-    inset: 0
-    background: radial-gradient(circle at 20% 20%, rgba(var(--v-theme-hero-overlay-strong), 0.18), transparent 55%)
-    pointer-events: none
 
   &__content
     position: relative

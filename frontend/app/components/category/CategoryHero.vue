@@ -1,5 +1,11 @@
 <template>
-  <section class="category-hero" :aria-labelledby="headingId" data-testid="category-hero">
+  <HeroSurface
+    tag="section"
+    class="category-hero"
+    :aria-labelledby="headingId"
+    data-testid="category-hero"
+    variant="halo"
+  >
     <v-sheet class="category-hero__wrapper" elevation="0">
       <div v-if="image" class="category-hero__media" aria-hidden="true">
         <v-img :src="image" alt="" class="category-hero__image" cover>
@@ -29,7 +35,7 @@
         </div>
       </div>
     </v-sheet>
-  </section>
+  </HeroSurface>
 </template>
 
 <script setup lang="ts">
@@ -102,10 +108,12 @@ defineExpose({ headingId, t })
     gap: 1.5rem
     overflow: hidden
     min-height: clamp(160px, 26vw, 240px)
-    background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.95), rgba(var(--v-theme-hero-gradient-end), 0.85))
-    color: rgb(var(--v-theme-hero-overlay-strong))
+    background: rgba(var(--v-theme-surface-glass), 0.92)
+    color: rgb(var(--v-theme-text-neutral-strong))
     padding: clamp(1.5rem, 4vw + 1rem, 3rem)
     border-radius: 0
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+    backdrop-filter: blur(18px)
 
   &__content
     display: flex
@@ -116,23 +124,23 @@ defineExpose({ headingId, t })
 
   &__breadcrumbs
     display: inline-flex
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
     :deep(.category-navigation-breadcrumbs)
       color: inherit
 
     :deep(.category-navigation-breadcrumbs__separator)
-      color: rgba(var(--v-theme-hero-overlay-strong), 0.6)
+      color: rgba(var(--v-theme-text-neutral-secondary), 0.6)
 
     :deep(.category-navigation-breadcrumbs__current)
-      color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+      color: rgba(var(--v-theme-text-neutral-strong), 0.95)
 
     :deep(.category-navigation-breadcrumbs__link)
       color: inherit
 
     :deep(.category-navigation-breadcrumbs__link--interactive:hover),
     :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible)
-      color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+      color: rgba(var(--v-theme-text-neutral-strong), 0.95)
       text-decoration: underline
 
   &__eyebrow
@@ -141,8 +149,8 @@ defineExpose({ headingId, t })
     gap: 0.5rem
     padding: 0.25rem 0.75rem
     border-radius: 999px
-    background: rgba(var(--v-theme-hero-overlay-soft), 0.25)
-    color: rgb(var(--v-theme-hero-pill-on-dark))
+    background: rgba(var(--v-theme-accent-supporting), 0.15)
+    color: rgb(var(--v-theme-text-neutral-strong))
     font-size: 0.75rem
     letter-spacing: 0.08em
     text-transform: uppercase
@@ -163,7 +171,7 @@ defineExpose({ headingId, t })
     margin: 0
     font-size: 1.05rem
     line-height: 1.6
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
 
   &__media
     position: relative
