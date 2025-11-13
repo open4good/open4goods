@@ -72,6 +72,7 @@
     },
     "problems": {
       "title": "Too many labels, not enough clarity?",
+      "description": "Comparing impact, price and trust sources across dozens of tabs is exhausting. Nudger brings it back to one place.",
       "items": {
         "labelsOverload": "Lost in the jungle of labels? Hard to truly compare.",
         "budgetVsEcology": "Ecology versus budget? Tired of choosing between the two.",
@@ -1771,6 +1772,7 @@
       "openGalleryFallback": "Open product media gallery",
       "openGalleryImage": "View image \"{label}\" in fullscreen",
       "openGalleryVideo": "Play video \"{label}\"",
+      "openGalleryCta": "Open gallery",
       "impactBadge": {
         "title": "Impact score",
         "learnMore": "Learn more"

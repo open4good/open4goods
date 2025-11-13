@@ -3,40 +3,75 @@
     <ClientOnly>
       <template #default>
         <div v-if="galleryItems.length" class="product-gallery">
-          <button
+          <div
             v-if="heroMedia"
-            type="button"
             class="product-gallery__stage"
-            :class="{ 'product-gallery__stage--video': heroMedia.type === 'video' }"
-            :aria-label="stageAriaLabel"
+            :class="{ 'product-gallery__stage--video': heroMediaIsVideo }"
             data-testid="product-gallery-stage"
-            @click="openGallery(activeMediaIndex)"
-            @keydown.enter.prevent="openGallery(activeMediaIndex)"
-            @keydown.space.prevent="openGallery(activeMediaIndex)"
           >
-            <NuxtImg
-              v-if="heroMedia.type === 'image'"
-              :src="heroMedia.previewUrl"
-              :alt="heroMedia.alt"
-              class="product-gallery__stage-media"
-              format="webp"
-              :width="heroMedia.width"
-              :height="heroMedia.height"
-            />
-            <NuxtImg
-              v-else-if="heroMedia.posterUrl"
-              :src="heroMedia.posterUrl"
-              :alt="heroMedia.alt"
-              class="product-gallery__stage-media"
-              format="webp"
-              :width="heroMedia.width"
-              :height="heroMedia.height"
-            />
-            <div v-if="heroMedia.type === 'video'" class="product-gallery__stage-overlay">
-              <v-icon icon="mdi-play-circle-outline" size="56" class="product-gallery__stage-icon" />
-              <span class="product-gallery__sr-only">{{ $t('product.hero.videoBadge') }}</span>
+            <button
+              v-if="!heroMediaIsVideo"
+              type="button"
+              class="product-gallery__stage-trigger"
+              :aria-label="stageAriaLabel"
+              @click="openGallery(activeMediaIndex)"
+              @keydown.enter.prevent="openGallery(activeMediaIndex)"
+              @keydown.space.prevent="openGallery(activeMediaIndex)"
+            >
+              <NuxtImg
+                v-if="heroMedia.type === 'image'"
+                :src="heroMedia.previewUrl"
+                :alt="heroMedia.alt"
+                class="product-gallery__stage-media"
+                format="webp"
+                :width="heroMedia.width"
+                :height="heroMedia.height"
+              />
+              <NuxtImg
+                v-else-if="heroMedia.posterUrl"
+                :src="heroMedia.posterUrl"
+                :alt="heroMedia.alt"
+                class="product-gallery__stage-media"
+                format="webp"
+                :width="heroMedia.width"
+                :height="heroMedia.height"
+              />
+              <div v-if="heroMedia.type === 'video'" class="product-gallery__stage-overlay">
+                <v-icon icon="mdi-play-circle-outline" size="56" class="product-gallery__stage-icon" />
+                <span class="product-gallery__sr-only">{{ $t('product.hero.videoBadge') }}</span>
+              </div>
+            </button>
+            <div v-else class="product-gallery__stage-video">
+              <video
+                ref="heroVideoElement"
+                class="product-gallery__video"
+                controls
+                playsinline
+                preload="metadata"
+                :poster="heroMedia.posterUrl || heroMedia.previewUrl"
+              >
+                <source :src="heroMedia.videoUrl" />
+              </video>
+              <div class="product-gallery__video-badge">
+                <v-icon icon="mdi-play-circle-outline" size="24" />
+                <span>{{ $t('product.hero.videoBadge') }}</span>
+              </div>
+              <div class="product-gallery__stage-overlay product-gallery__stage-overlay--inline" aria-hidden="true">
+                <span class="product-gallery__sr-only">{{ $t('product.hero.videoBadge') }}</span>
+              </div>
+              <button
+                type="button"
+                class="product-gallery__video-gallery-btn"
+                :aria-label="stageAriaLabel"
+                @click="openGalleryFromVideo(activeMediaIndex)"
+                @keydown.enter.prevent="openGalleryFromVideo(activeMediaIndex)"
+                @keydown.space.prevent="openGalleryFromVideo(activeMediaIndex)"
+              >
+                <v-icon icon="mdi-arrow-expand" size="18" />
+                <span>{{ galleryButtonLabel }}</span>
+              </button>
             </div>
-          </button>
+          </div>
 
           <div
             class="product-gallery__thumbnails"
@@ -184,6 +219,7 @@ type PictureSwipeComponentInstance = ComponentPublicInstance<{ pswp?: LightboxIn
 const pictureSwipeComponent = shallowRef<PictureSwipeComponent | null>(null)
 const pictureSwipeRef = ref<PictureSwipeComponentInstance | null>(null)
 const pictureSwipeContainer = ref<HTMLElement | null>(null)
+const heroVideoElement = ref<HTMLVideoElement | null>(null)
 
 const thumbnailViewport = ref<HTMLDivElement | null>(null)
 const thumbnailList = ref<HTMLUListElement | null>(null)
@@ -516,6 +552,8 @@ watch(
 
 const heroMedia = computed(() => galleryItems.value[activeMediaIndex.value] ?? null)
 
+const heroMediaIsVideo = computed(() => heroMedia.value?.type === 'video' && Boolean(heroMedia.value.videoUrl))
+
 const stageAriaLabel = computed(() => {
   const media = heroMedia.value
   if (!media) {
@@ -743,6 +781,23 @@ const openGallery = async (index: number) => {
   pendingOpenIndex.value = opened ? null : safeIndex
 }
 
+const pauseHeroVideo = () => {
+  const element = heroVideoElement.value
+  if (element) {
+    element.pause()
+    element.currentTime = 0
+  }
+}
+
+const galleryButtonLabel = computed(() =>
+  te('product.hero.openGalleryCta') ? t('product.hero.openGalleryCta') : 'Open gallery',
+)
+
+const openGalleryFromVideo = (index: number) => {
+  pauseHeroVideo()
+  void openGallery(index)
+}
+
 onMounted(async () => {
   await ensureLightbox()
   await nextTick()
@@ -780,6 +835,7 @@ watch(activeMediaIndex, () => {
 onBeforeUnmount(() => {
   thumbnailResizeObserver?.disconnect()
   thumbnailResizeObserver = null
+  pauseHeroVideo()
 })
 </script>
 
@@ -806,17 +862,85 @@ onBeforeUnmount(() => {
 
 .product-gallery__stage {
   position: relative;
-  border: none;
-  padding: 0;
   border-radius: 20px;
   overflow: hidden;
   width: 100%;
   background: rgba(15, 23, 42, 0.04);
-  cursor: zoom-in;
   flex: 1 1 auto;
   aspect-ratio: 4 / 3;
   min-height: 0;
   max-height: none;
+}
+
+.product-gallery__stage-trigger {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  cursor: zoom-in;
+  display: block;
+  position: relative;
+}
+
+.product-gallery__stage-video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #000;
+}
+
+.product-gallery__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+.product-gallery__video-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.product-gallery__video-gallery-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.product-gallery__video-gallery-btn:hover,
+.product-gallery__video-gallery-btn:focus-visible {
+  background: rgba(15, 23, 42, 0.95);
+  transform: translateY(-1px);
+}
+
+.product-gallery__video-gallery-btn:focus-visible {
+  outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.6);
+  outline-offset: 3px;
 }
 
 .product-gallery__stage-media,
@@ -839,6 +963,10 @@ onBeforeUnmount(() => {
 
 .product-gallery__stage--video .product-gallery__stage-overlay {
   background: linear-gradient(0deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.25));
+}
+
+.product-gallery__stage-overlay--inline {
+  background: linear-gradient(0deg, rgba(15, 23, 42, 0.35), rgba(15, 23, 42, 0.05));
 }
 
 .product-gallery__stage-icon {
