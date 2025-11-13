@@ -138,6 +138,7 @@ import {
 } from '~/stores/useProductCompareStore'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import type { AttributeConfigDto, ProductAttributeSourceDto, ProductDto } from '~~/shared/api-client'
 
 export interface ProductHeroBreadcrumb {
@@ -433,15 +434,7 @@ const gtinCountry = computed(() => {
   }
 })
 
-const impactScore = computed(() => {
-  const ecoscore = props.product.base?.ecoscoreValue
-  if (typeof ecoscore === 'number') {
-    return ecoscore
-  }
-
-  const relative = props.product.scores?.ecoscore?.relativeValue
-  return typeof relative === 'number' ? relative : null
-})
+const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 
 </script>
 

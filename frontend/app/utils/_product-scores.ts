@@ -45,6 +45,11 @@ export const resolvePrimaryImpactScore = (product: ProductDto): number | null =>
     return clampScore(impactEntry.value)
   }
 
+  const relativValue = impactEntry.relativ?.value
+  if (relativValue != null && Number.isFinite(relativValue)) {
+    return clampScore(relativValue)
+  }
+
   return null
 }
 
