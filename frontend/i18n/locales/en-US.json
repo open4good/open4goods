@@ -2117,6 +2117,8 @@
     "offline": {
       "title": "You are offline",
       "description": "Some live prices or filters might be unavailable until we reconnect.",
+      "indicatorLabel": "Offline mode",
+      "mobileHelper": "Content stays cached but live data resumes when you're back online.",
       "cta": "Retry",
       "dismiss": "Dismiss"
     }

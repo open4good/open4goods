@@ -96,6 +96,24 @@ const createStub = (tag: string) =>
     },
   })
 
+const PwaBarcodeScannerStub = defineComponent({
+  name: 'PwaBarcodeScannerStub',
+  props: { active: { type: Boolean, default: false } },
+  emits: ['decode', 'error'],
+  setup(props, { emit }) {
+    return () =>
+      h(
+        'div',
+        {
+          class: 'pwa-barcode-scanner-stub',
+          'data-active': String(props.active),
+          onClick: () => emit('decode', '9876543210987'),
+        },
+        [],
+      )
+  },
+})
+
 const VDialogStub = defineComponent({
   name: 'VDialogStub',
   props: { modelValue: { type: Boolean, default: false } },
@@ -153,6 +171,7 @@ describe('SearchSuggestField', () => {
           VCard: createStub('div'),
           VDialog: VDialogStub,
           ImpactScore: createStub('div'),
+          PwaBarcodeScanner: PwaBarcodeScannerStub,
         },
         components: {
           ClientOnly: defineComponent({

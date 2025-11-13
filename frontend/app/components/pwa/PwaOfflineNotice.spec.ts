@@ -5,15 +5,22 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 const messages: Record<string, string> = {
   'pwa.offline.title': 'Connection lost',
   'pwa.offline.description': 'Some features may be unavailable.',
+  'pwa.offline.indicatorLabel': 'Offline mode',
+  'pwa.offline.mobileHelper': 'Content stays cached.',
   'pwa.offline.cta': 'Retry',
   'pwa.offline.dismiss': 'Hide',
 }
 
 const onlineStatus = ref(false)
 const offlineDismissed = ref(false)
+const displayMock = { smAndDown: ref(false) }
 
 vi.mock('@vueuse/core', () => ({
   useOnline: () => onlineStatus,
+}))
+
+vi.mock('vuetify', () => ({
+  useDisplay: () => displayMock,
 }))
 
 let navigatorOnlineSpy: ReturnType<typeof vi.spyOn>
@@ -46,25 +53,15 @@ const ClientOnlyStub = defineComponent({
   },
 })
 
-const VAlertStub = defineComponent({
-  name: 'VAlertStub',
-  props: {
-    title: { type: String, default: '' },
-  },
-  setup(props, { slots, attrs }) {
+const VTooltipStub = defineComponent({
+  name: 'VTooltipStub',
+  props: { modelValue: { type: Boolean, default: false } },
+  setup(props, { slots }) {
     return () =>
-      h(
-        'div',
-        {
-          class: 'v-alert-stub',
-          ...attrs,
-        },
-        [
-          props.title ? h('strong', { class: 'v-alert-stub__title' }, props.title) : null,
-          slots.default ? h('div', { class: 'v-alert-stub__content' }, slots.default()) : null,
-          slots.actions ? h('div', { class: 'v-alert-stub__actions' }, slots.actions()) : null,
-        ],
-      )
+      h('div', { class: 'v-tooltip-stub', 'data-open': String(props.modelValue) }, [
+        slots.activator ? h('div', { class: 'v-tooltip-stub__activator' }, slots.activator({ props: {} })) : null,
+        slots.default ? h('div', { class: 'v-tooltip-stub__content' }, slots.default()) : null,
+      ])
   },
 })
 
@@ -86,12 +83,20 @@ const VBtnStub = defineComponent({
   },
 })
 
+const VIconStub = defineComponent({
+  name: 'VIconStub',
+  setup(_, { slots }) {
+    return () => h('span', { class: 'v-icon-stub' }, slots.default ? slots.default() : [])
+  },
+})
+
 const mountNotice = () =>
   mount(PwaOfflineNotice, {
     global: {
       stubs: {
-        VAlert: VAlertStub,
         VBtn: VBtnStub,
+        VTooltip: VTooltipStub,
+        VIcon: VIconStub,
       },
       components: {
         ClientOnly: ClientOnlyStub,
@@ -102,29 +107,38 @@ const mountNotice = () =>
 describe('PwaOfflineNotice', () => {
   beforeEach(() => {
     resetState()
+    displayMock.smAndDown.value = false
     navigatorOnlineSpy?.mockRestore()
     reloadSpy?.mockRestore()
     navigatorOnlineSpy = vi.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false)
     reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => {})
   })
 
-  it('renders a banner when offline and not dismissed', async () => {
+  it('renders the desktop tooltip indicator when offline', async () => {
     const wrapper = mountNotice()
     await nextTick()
 
-    expect(wrapper.find('[data-test="pwa-offline-banner"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Connection lost')
+    expect(wrapper.find('[data-test="pwa-offline-indicator"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pwa-offline-tooltip"]').text()).toContain('Connection lost')
   })
 
-  it('dismisses the banner and persists the flag', async () => {
+  it('dismisses the indicator and persists the flag', async () => {
     const wrapper = mountNotice()
     await nextTick()
 
     await wrapper.find('[data-test="pwa-offline-dismiss"]').trigger('click')
     await nextTick()
 
-    expect(wrapper.find('[data-test="pwa-offline-banner"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="pwa-offline-indicator"]').exists()).toBe(false)
     expect(offlineDismissed.value).toBe(true)
+  })
+
+  it('renders the compact mobile card when display is small', async () => {
+    displayMock.smAndDown.value = true
+    const wrapper = mountNotice()
+    await nextTick()
+
+    expect(wrapper.find('.pwa-offline-indicator__mobile').exists()).toBe(true)
   })
 
   it('retries loading when online', async () => {

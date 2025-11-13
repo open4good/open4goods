@@ -4,18 +4,20 @@
     <The-main-menu-container @toggle-drawer="toggleDrawer" />
 
     <ClientOnly>
-      <v-navigation-drawer
-        v-model="drawer"
-        location="start"
-        :temporary="isMobileNavigation"
-        :scrim="isMobileNavigation"
-        :width="drawerWidth"
-        floating
-        class="mobile-menu-drawer"
-        :style="drawerInlineStyles"
-      >
-        <the-mobile-menu @close="drawer = false" />
-      </v-navigation-drawer>
+      <template v-if="isMobileNavigation">
+        <v-navigation-drawer
+          v-model="drawer"
+          location="start"
+          :temporary="isMobileNavigation"
+          :scrim="isMobileNavigation"
+          :width="drawerWidth"
+          floating
+          class="mobile-menu-drawer"
+          :style="drawerInlineStyles"
+        >
+          <the-mobile-menu @close="drawer = false" />
+        </v-navigation-drawer>
+      </template>
     </ClientOnly>
 
     <ClientOnly>
@@ -266,6 +268,16 @@ const drawerWidth = computed(() => (isMobileNavigation.value ? 320 : 360))
 const drawerInlineStyles = computed(() => ({
   paddingBottom: isMobileNavigation.value ? 'calc(env(safe-area-inset-bottom) + 24px)' : '24px',
 }))
+
+watch(
+  () => isMobileNavigation.value,
+  (isMobileView) => {
+    if (!isMobileView) {
+      drawer.value = false
+    }
+  },
+  { immediate: true },
+)
 
 const handleGoHome = () => {
   clearError({ redirect: localePath('index') })

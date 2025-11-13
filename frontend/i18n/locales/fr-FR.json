@@ -2123,6 +2123,8 @@
     "offline": {
       "title": "Vous êtes hors ligne",
       "description": "Certaines données (prix en direct, filtres) reviendront dès que la connexion sera rétablie.",
+      "indicatorLabel": "Mode hors ligne",
+      "mobileHelper": "Le cache reste disponible, les données en direct reprendront dès le retour du réseau.",
       "cta": "Réessayer",
       "dismiss": "Fermer"
     }

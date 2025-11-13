@@ -139,19 +139,13 @@
       </div>
       <div class="search-suggest-field__scanner-body">
         <ClientOnly>
-          <component
-            :is="scannerComponent"
-            v-if="scannerComponent && !scannerLoadError"
+          <PwaBarcodeScanner
+            :active="isScannerDialogOpen"
             class="search-suggest-field__scanner-stream"
+            :loading-label="t('search.suggestions.scanner.loading')"
+            :error-label="t('search.suggestions.scanner.error')"
             @decode="handleScannerDecode"
           />
-          <p v-else class="search-suggest-field__scanner-helper">
-            {{
-              scannerLoadError
-                ? t('search.suggestions.scanner.error')
-                : t('search.suggestions.scanner.loading')
-            }}
-          </p>
         </ClientOnly>
         <p class="search-suggest-field__scanner-helper">
           {{ t('search.suggestions.scanner.helper') }}
@@ -162,8 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
-import type { Component } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -173,6 +166,7 @@ import type {
   SearchSuggestResponseDto,
 } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import PwaBarcodeScanner from '~/components/pwa/PwaBarcodeScanner.vue'
 
 interface CategorySuggestionItem {
   type: 'category'
@@ -233,9 +227,6 @@ const products = ref<ProductSuggestionItem[]>([])
 const currentRequest = ref(0)
 const pendingSubmit = ref(false)
 const isScannerDialogOpen = ref(false)
-const scannerComponent = shallowRef<Component | null>(null)
-const scannerLoadError = ref(false)
-let isScannerLoading = false
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
@@ -264,31 +255,8 @@ const suggestionItems = computed<SuggestionItem[]>(() => [
 
 const shouldShowScannerButton = computed(() => display.smAndDown.value)
 
-const loadScannerComponent = async () => {
-  if (!import.meta.client || scannerComponent.value || isScannerLoading) {
-    return
-  }
-
-  isScannerLoading = true
-  scannerLoadError.value = false
-
-  try {
-    const module = await import('vue-barcode-reader')
-    scannerComponent.value = module.StreamBarcodeReader
-  } catch (error) {
-    if (import.meta.dev) {
-      console.error('Failed to load barcode scanner', error)
-    }
-
-    scannerLoadError.value = true
-  } finally {
-    isScannerLoading = false
-  }
-}
-
 const openScannerDialog = () => {
   isScannerDialogOpen.value = true
-  loadScannerComponent()
 }
 
 const closeScannerDialog = () => {

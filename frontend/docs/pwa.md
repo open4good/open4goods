@@ -105,6 +105,37 @@ When touching caching rules adjust the `runtimeCaching` array near the top of `n
 - UI entry points live in `app/components/pwa` and are mounted from the default layout + error layout so all routes share the same UX.
 - All strings belong to `i18n/locales/*` under the `pwa.*` namespace.
 
+### Offline indicator & responsive hints
+
+- `app/components/pwa/PwaOfflineNotice.vue` renders a floating indicator instead of a blocking banner.
+  - Desktop viewports show a permanent tooltip anchored to a warning icon in the top-right corner.
+  - Mobile / PWA shells receive an inline pill with retry/close icons sized for touch.
+- `app/composables/pwa/usePwaOfflineNoticeBridge.ts` still manages the shared dismissal state; the indicator simply consumes it together with `useDisplay()` from `nuxt-device` to react to viewport changes.
+
+### Barcode scanner pipeline
+
+- `app/components/pwa/PwaBarcodeScanner.vue` owns the capture logic.
+  - When supported, it uses the native [`BarcodeDetector`](https://developer.mozilla.org/docs/Web/API/BarcodeDetector) API tied to `useDevice()` to prioritise the rear camera in mobile shells.
+  - If the detector or camera APIs are unavailable, it lazily loads the `vue-barcode-reader` stream component as a fallback and keeps emitting `decode` events with the normalised GTIN/EAN value.
+- `app/components/search/SearchSuggestField.vue` embeds the component inside the search dialog and forwards detections directly to the `/[gtin]` route.
+- This keeps the scanner self-contained and ready for reuse (e.g. in future contribution flows).
+
+### Notifications readiness
+
+- `app/plugins/pwa-capabilities.client.ts` captures whether the browser supports the Notifications + Service Worker combo and stores the registration once it is ready.
+- `app/composables/pwa/usePwaCapabilities.ts` exposes `supportsNotifications`, the cached permission and a `requestNotificationPermission()` helper so future UI can prompt users consistently.
+- The state is SSR-safe and remains accessible from any component or store without leaking browser globals.
+
+### Runtime caching reference
+
+In addition to the default image/API caches, `nuxt.config.ts` now pre-defines the following Workbox strategies:
+
+1. `nudger-font-styles` – `StaleWhileRevalidate` for Google Fonts stylesheets.
+2. `nudger-font-files` – `CacheFirst` for Google Fonts binaries with a one-year TTL.
+3. `nudger-static-cdn` – `StaleWhileRevalidate` for JS/CSS fetched from `cdn.jsdelivr.net` or `unpkg.com`.
+
+These extra caches keep typography and remote UI widgets available offline and reduce layout shifts when the network is flaky.
+
 ## Validation checklist
 
 Before merging PWA-related work run the standard frontend checks:
