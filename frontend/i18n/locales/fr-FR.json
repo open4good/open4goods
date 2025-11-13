@@ -50,7 +50,7 @@
         "placeholder": "Recherchez un produit (ex. téléviseur, smartphone…)",
         "ariaLabel": "Rechercher un produit responsable",
         "cta": "NUDGER",
-        "helper": "Déjà +50 millions de références en open data.",
+        "helper": "Comparateur indépendant et open data.",
         "helpers": [
           {
             "icon": "🌿",
@@ -63,10 +63,6 @@
           {
             "icon": "🛡️",
             "label": "Comparateur indépendant, logiciel libre et données ouvertes"
-          },
-          {
-            "icon": "⚡",
-            "label": "Déjà +50 millions de références en open data"
           }
         ]
       }
@@ -1916,6 +1912,17 @@
         "contact": "Communauté",
         "impactScore": "Impact Score",
         "products": "Les produits"
+      },
+      "productsMenu": {
+        "title": "Catégories populaires",
+        "subtitle": "Explorez les univers les plus recherchés du moment.",
+        "empty": "Les catégories populaires ne sont pas disponibles pour le moment.",
+        "untitledCategory": "Catégorie populaire",
+        "cta": {
+          "title": "Voir plus de catégories",
+          "description": "Parcourez notre catalogue complet classé par usages et besoins.",
+          "action": "Explorer toutes les catégories"
+        }
       },
       "search": {
         "label": "Recherche rapide",

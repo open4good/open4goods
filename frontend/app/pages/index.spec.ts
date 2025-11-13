@@ -173,34 +173,38 @@ const blogArticlesMock = ref([
 const blogLoadingRef = ref(false)
 const fetchArticlesMock = vi.fn().mockResolvedValue(blogArticlesMock.value)
 
-const useCategoriesComposable = () => ({
-  categories: computed(() => categoriesMockData.value),
-  fetchCategories: fetchCategoriesMock,
-  loading: categoriesLoadingRef,
-  error: computed(() => null),
-  activeCategoryId: computed(() => null),
-  currentCategory: computed(() => null),
-  clearError: vi.fn(),
-  resetCategorySelection: vi.fn(),
-})
+function useCategoriesComposable() {
+  return {
+    categories: computed(() => categoriesMockData.value),
+    fetchCategories: fetchCategoriesMock,
+    loading: categoriesLoadingRef,
+    error: computed(() => null),
+    activeCategoryId: computed(() => null),
+    currentCategory: computed(() => null),
+    clearError: vi.fn(),
+    resetCategorySelection: vi.fn(),
+  }
+}
 
-const useBlogComposable = () => ({
-  paginatedArticles: computed(() => blogArticlesMock.value),
-  fetchArticles: fetchArticlesMock,
-  loading: blogLoadingRef,
-  articles: computed(() => blogArticlesMock.value),
-  currentArticle: computed(() => null),
-  tags: computed(() => []),
-  selectedTag: computed(() => null),
-  changePage: vi.fn(),
-  fetchTags: vi.fn(),
-  selectTag: vi.fn(),
-  fetchArticle: vi.fn(),
-  clearCurrentArticle: vi.fn(),
-  clearError: vi.fn(),
-  error: computed(() => null),
-  pagination: computed(() => ({ page: 1, size: 6, totalElements: blogArticlesMock.value.length, totalPages: 1 })),
-})
+function useBlogComposable() {
+  return {
+    paginatedArticles: computed(() => blogArticlesMock.value),
+    fetchArticles: fetchArticlesMock,
+    loading: blogLoadingRef,
+    articles: computed(() => blogArticlesMock.value),
+    currentArticle: computed(() => null),
+    tags: computed(() => []),
+    selectedTag: computed(() => null),
+    changePage: vi.fn(),
+    fetchTags: vi.fn(),
+    selectTag: vi.fn(),
+    fetchArticle: vi.fn(),
+    clearCurrentArticle: vi.fn(),
+    clearError: vi.fn(),
+    error: computed(() => null),
+    pagination: computed(() => ({ page: 1, size: 6, totalElements: blogArticlesMock.value.length, totalPages: 1 })),
+  }
+}
 
 mockNuxtImport('useI18n', () => () => ({
   t: (key: string) => translate(key),

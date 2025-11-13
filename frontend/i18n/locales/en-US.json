@@ -50,7 +50,7 @@
         "placeholder": "Search a product (e.g. television, smartphone…)",
         "ariaLabel": "Search for a responsible product",
         "cta": "NUDGER",
-        "helper": "Already 50M+ references in open data.",
+        "helper": "Independent comparator powered by open data.",
         "helpers": [
           {
             "icon": "🌿",
@@ -63,10 +63,6 @@
           {
             "icon": "🛡️",
             "label": "Independent comparator, open-source software and open data"
-          },
-          {
-            "icon": "⚡",
-            "label": "Already 50M+ references in open data"
           }
         ]
       }
@@ -1917,6 +1913,17 @@
         "contact": "Community",
         "impactScore": "Impact Score",
         "products": "Products"
+      },
+      "productsMenu": {
+        "title": "Popular categories",
+        "subtitle": "Discover the universes our community explores the most.",
+        "empty": "Popular categories are unavailable right now.",
+        "untitledCategory": "Popular category",
+        "cta": {
+          "title": "See more categories",
+          "description": "Browse the full catalogue organised by needs and use cases.",
+          "action": "Explore all categories"
+        }
       },
       "search": {
         "label": "Quick search",
