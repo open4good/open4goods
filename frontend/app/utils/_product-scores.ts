@@ -1,6 +1,8 @@
 import type { ProductDto } from '~~/shared/api-client'
 
 const clampScore = (score: number) => Math.max(0, Math.min(score, 5))
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value)
 
 /**
  * Resolve the primary impact score for a product on a five-point scale.
@@ -25,34 +27,28 @@ export const resolvePrimaryImpactScore = (product: ProductDto): number | null =>
     return null
   }
 
-  const relative = impactEntry.relativ?.value
-  if (typeof relative === 'number' && Number.isFinite(relative)) {
-    return clampScore(relative)
-  }
-
-  if (impactEntry.on20 != null && Number.isFinite(impactEntry.on20)) {
+  if (isFiniteNumber(impactEntry.on20)) {
     return clampScore((impactEntry.on20 / 20) * 5)
   }
 
-  if (impactEntry.percent != null && Number.isFinite(impactEntry.percent)) {
+  if (isFiniteNumber(impactEntry.percent)) {
     return clampScore((impactEntry.percent / 100) * 5)
   }
 
-  if (impactEntry.value != null && impactEntry.absolute?.max) {
-    const max = impactEntry.absolute.max
+  const absoluteValue = impactEntry.absolute?.value
+  const absoluteMax = impactEntry.absolute?.max
 
-    if (Number.isFinite(max) && max > 0) {
-      return clampScore((impactEntry.value / max) * 5)
-    }
+  if (isFiniteNumber(absoluteValue) && isFiniteNumber(absoluteMax) && absoluteMax > 0) {
+    return clampScore((absoluteValue / absoluteMax) * 5)
   }
 
-  if (impactEntry.value != null && Number.isFinite(impactEntry.value)) {
-    return clampScore(impactEntry.value)
+  if (isFiniteNumber(absoluteValue)) {
+    return clampScore(absoluteValue)
   }
 
-  const relativValue = impactEntry.relativ?.value
-  if (relativValue != null && Number.isFinite(relativValue)) {
-    return clampScore(relativValue)
+  const relativeValue = impactEntry.relativ?.value
+  if (isFiniteNumber(relativeValue)) {
+    return clampScore(relativeValue)
   }
 
   return null

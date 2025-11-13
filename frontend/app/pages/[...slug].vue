@@ -1141,8 +1141,8 @@ const productStructuredData = computed(() => {
   }
 
   const aggregateRatingValue =
-    typeof product.value.scores?.ecoscore?.value === 'number'
-      ? product.value.scores.ecoscore.value
+    typeof product.value.scores?.ecoscore?.absolute?.value === 'number'
+      ? product.value.scores.ecoscore.absolute.value
       : null
 
   const offers = structuredOffers.value
