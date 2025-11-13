@@ -45,7 +45,7 @@ const { t } = useI18n()
           <v-col cols="12" md="6" class="home-solution__col home-solution__col--visual">
             <div class="home-solution__visual" role="presentation">
               <NuxtImg
-                src="/images/home/nudgder-pain.png"
+                src="/images/home/nudger-screaming.webp"
                 :alt="t('home.solution.title')"
                 class="home-solution__image"
                 loading="lazy"
