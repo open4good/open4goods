@@ -2099,5 +2099,26 @@
       "title": "Découvrez l'équipe Nudger"
     }
   },
+  "pwa": {
+    "install": {
+      "title": "Installer Nudger",
+      "description": "Ajoutez Nudger à votre écran d’accueil pour garder éco-scores et alertes prix sous la main.",
+      "cta": "Installer l’app",
+      "dismiss": "Plus tard",
+      "updateTitle": "Mise à jour disponible",
+      "updateDescription": "Une nouvelle version de Nudger est prête. Rechargez pour récupérer les derniers indicateurs.",
+      "updateCta": "Recharger",
+      "offlineReady": "Mode hors ligne prêt",
+      "offlineReadyDescription": "Les derniers contenus restent accessibles même sans connexion.",
+      "success": "Nudger est installé. Retrouvez-le sur votre écran d’accueil.",
+      "error": "L’installation a échoué. Merci de réessayer."
+    },
+    "offline": {
+      "title": "Vous êtes hors ligne",
+      "description": "Certaines données (prix en direct, filtres) reviendront dès que la connexion sera rétablie.",
+      "cta": "Réessayer",
+      "dismiss": "Fermer"
+    }
+  },
   "welcome": "Bienvenue"
 }

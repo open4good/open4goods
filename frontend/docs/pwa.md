@@ -1,0 +1,118 @@
+# Progressive Web App reference
+
+This document explains how the Nudger Nuxt frontend is configured as a PWA and what to touch when shipping new capabilities.
+
+## Manifest & metadata
+
+- The manifest lives at `app/public/site.webmanifest`. It contains the product name, categories, shortcuts, screenshots and the link to all generated icons.
+- Nuxt exposes it through `app.head.link` inside `nuxt.config.ts`. Update the `link` + `meta` entries whenever a new icon or theme color ships.
+- The same manifest is injected into `@vite-pwa/nuxt` (see `nuxt.config.ts > pwa.manifest`). Keep both in sync by editing the JSON file only, then re-running `pnpm lint` to ensure type safety.
+
+## Icon & screenshot pipeline
+
+Icons and screenshots live under `app/public/pwa-assets`. Regenerate the set via Pillow whenever branding evolves:
+
+```bash
+pnpm exec python3 scripts/generate_pwa_assets.py
+```
+
+> The script writes transparent + maskable icons and the two store screenshots referenced by the manifest.
+
+After regenerating assets run `pnpm lint` so the manifest import stays type-checked.
+
+### Binary assets to add manually
+
+Repository size guidelines prevent us from committing the generated binaries. When preparing a release, copy the assets below in
+the same order so the manifest and native shells can locate them:
+
+1. `app/public/pwa-assets/icons/nudger-standard-72x72.png`
+2. `app/public/pwa-assets/icons/nudger-standard-96x96.png`
+3. `app/public/pwa-assets/icons/nudger-standard-128x128.png`
+4. `app/public/pwa-assets/icons/nudger-standard-144x144.png`
+5. `app/public/pwa-assets/icons/nudger-standard-152x152.png`
+6. `app/public/pwa-assets/icons/nudger-standard-180x180.png`
+7. `app/public/pwa-assets/icons/nudger-standard-192x192.png`
+8. `app/public/pwa-assets/icons/nudger-standard-256x256.png`
+9. `app/public/pwa-assets/icons/nudger-standard-384x384.png`
+10. `app/public/pwa-assets/icons/nudger-standard-512x512.png`
+11. `app/public/pwa-assets/icons/nudger-standard-1024x1024.png`
+12. `app/public/pwa-assets/icons-maskable/nudger-maskable-72x72.png`
+13. `app/public/pwa-assets/icons-maskable/nudger-maskable-96x96.png`
+14. `app/public/pwa-assets/icons-maskable/nudger-maskable-128x128.png`
+15. `app/public/pwa-assets/icons-maskable/nudger-maskable-144x144.png`
+16. `app/public/pwa-assets/icons-maskable/nudger-maskable-152x152.png`
+17. `app/public/pwa-assets/icons-maskable/nudger-maskable-180x180.png`
+18. `app/public/pwa-assets/icons-maskable/nudger-maskable-192x192.png`
+19. `app/public/pwa-assets/icons-maskable/nudger-maskable-256x256.png`
+20. `app/public/pwa-assets/icons-maskable/nudger-maskable-384x384.png`
+21. `app/public/pwa-assets/icons-maskable/nudger-maskable-512x512.png`
+22. `app/public/pwa-assets/icons-maskable/nudger-maskable-1024x1024.png`
+23. `app/public/pwa-assets/screenshots/desktop-dashboard.png`
+24. `app/public/pwa-assets/screenshots/mobile-search.png`
+
+Android expects the following drawables:
+
+25. `android/app/src/main/res/drawable/splash.png`
+26. `android/app/src/main/res/drawable-land-hdpi/splash.png`
+27. `android/app/src/main/res/drawable-land-mdpi/splash.png`
+28. `android/app/src/main/res/drawable-land-xhdpi/splash.png`
+29. `android/app/src/main/res/drawable-land-xxhdpi/splash.png`
+30. `android/app/src/main/res/drawable-land-xxxhdpi/splash.png`
+31. `android/app/src/main/res/drawable-port-hdpi/splash.png`
+32. `android/app/src/main/res/drawable-port-mdpi/splash.png`
+33. `android/app/src/main/res/drawable-port-xhdpi/splash.png`
+34. `android/app/src/main/res/drawable-port-xxhdpi/splash.png`
+35. `android/app/src/main/res/drawable-port-xxxhdpi/splash.png`
+36. `android/app/src/main/res/mipmap-mdpi/ic_launcher.png`
+37. `android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png`
+38. `android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png`
+39. `android/app/src/main/res/mipmap-hdpi/ic_launcher.png`
+40. `android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png`
+41. `android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png`
+42. `android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`
+43. `android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png`
+44. `android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png`
+45. `android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`
+46. `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png`
+47. `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png`
+48. `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`
+49. `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png`
+50. `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png`
+51. `android/gradle/wrapper/gradle-wrapper.jar` (regenerate via `./gradlew wrapper` on a trusted workstation).
+
+iOS requires these asset-catalog binaries:
+
+52. `ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png`
+53. `ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png`
+54. `ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png`
+55. `ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-2.png`
+
+Keep the filenames intact so CI and the store packs locate the expected resources.
+
+## Service worker & caching
+
+`@vite-pwa/nuxt` is registered in `nuxt.config.ts` with:
+
+- `registerType: 'autoUpdate'` so users see updates as soon as the build is deployed.
+- Workbox runtime caches for API calls (`NetworkFirst`) and media (`StaleWhileRevalidate`).
+- An offline fallback route served from `server/routes/offline.get.ts`.
+
+When touching caching rules adjust the `runtimeCaching` array near the top of `nuxt.config.ts`.
+
+## Install & offline UX
+
+- The composable `app/composables/usePwaPrompt.ts` wraps the `beforeinstallprompt` event and service-worker registration state.
+- UI entry points live in `app/components/pwa` and are mounted from the default layout + error layout so all routes share the same UX.
+- All strings belong to `i18n/locales/*` under the `pwa.*` namespace.
+
+## Validation checklist
+
+Before merging PWA-related work run the standard frontend checks:
+
+```bash
+pnpm lint
+pnpm test
+pnpm generate
+```
+
+Additionally, confirm the PWA plugin output using Lighthouse (Chrome DevTools) or `pnpm build && pnpm preview` followed by a manual install test on desktop + Android.

@@ -7,9 +7,12 @@
       <v-navigation-drawer
         v-model="drawer"
         location="start"
-        temporary
-        width="300"
+        :temporary="isMobileNavigation"
+        :scrim="isMobileNavigation"
+        :width="drawerWidth"
+        floating
         class="mobile-menu-drawer"
+        :style="drawerInlineStyles"
       >
         <the-mobile-menu @close="drawer = false" />
       </v-navigation-drawer>
@@ -113,6 +116,8 @@
         <TheMainFooterContent />
       </template>
     </TheMainFooter>
+    <PwaOfflineNotice />
+    <PwaInstallPrompt />
   </v-app>
 </template>
 
@@ -142,7 +147,8 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 
 const drawer = useState('mobileDrawer', () => false)
-const drawerStore = useState('mobileDrawer', () => false)
+const device = useDevice()
+const display = useDisplay()
 const routeLoading = useState('routeLoading', () => false)
 
 routeLoading.value = false
@@ -252,8 +258,14 @@ useSeoMeta({
 })
 
 const toggleDrawer = () => {
-  drawerStore.value = !drawerStore.value
+  drawer.value = !drawer.value
 }
+
+const isMobileNavigation = computed(() => device.isMobileOrTablet || display.mdAndDown.value)
+const drawerWidth = computed(() => (isMobileNavigation.value ? 320 : 360))
+const drawerInlineStyles = computed(() => ({
+  paddingBottom: isMobileNavigation.value ? 'calc(env(safe-area-inset-bottom) + 24px)' : '24px',
+}))
 
 const handleGoHome = () => {
   clearError({ redirect: localePath('index') })
@@ -420,4 +432,7 @@ const handleContactSupport = () => {
 
   .error-page__action
     justify-content: center
+
+.mobile-menu-drawer
+  padding-top: calc(env(safe-area-inset-top) + 8px)
 </style>
