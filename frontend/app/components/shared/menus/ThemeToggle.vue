@@ -39,6 +39,22 @@
         </v-btn>
       </template>
     </v-tooltip>
+
+    <v-tooltip :text="nudgerTooltip" location="bottom">
+      <template #activator="{ props: tooltipProps }">
+        <v-btn
+          v-bind="tooltipProps"
+          :value="'nudger'"
+          :aria-label="nudgerAriaLabel"
+          :data-testid="`${testId}-nudger`"
+          :size="size"
+          icon
+          variant="plain"
+        >
+          <v-icon icon="mdi-gradient-horizontal" />
+        </v-btn>
+      </template>
+    </v-tooltip>
   </v-btn-toggle>
 </template>
 
@@ -103,14 +119,16 @@ watch(
 )
 
 const selectedTheme = computed<ThemeName>({
-  get: () => (theme.global.name.value === 'dark' ? 'dark' : 'light'),
+  get: () => resolveThemeName(theme.global.name.value),
   set: (value) => applyTheme(value),
 })
 
 const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
 const darkTooltip = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
+const nudgerTooltip = computed(() => t('siteIdentity.menu.theme.nudgerTooltip'))
 const lightAriaLabel = computed(() => t('siteIdentity.menu.theme.lightAriaLabel'))
 const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
+const nudgerAriaLabel = computed(() => t('siteIdentity.menu.theme.nudgerAriaLabel'))
 
 const density = toRef(props, 'density')
 const size = toRef(props, 'size')

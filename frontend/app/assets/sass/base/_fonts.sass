@@ -1,7 +1,10 @@
 @use 'sass:map'
 
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap')
+
 // Variables pour les fonts
-$font-family-primary: 'Poppins', sans-serif
+$font-family-primary: 'Poppins', 'Hanken Grotesk', sans-serif
+$font-family-signature: 'Hanken Grotesk', 'Poppins', sans-serif
 $font-weights: (
   thin: 100,
   light: 300,
@@ -41,8 +44,15 @@ $font-files: (
   @include font-face('Poppins', $weight-value, italic)
 
 // Application des fonts
+:root
+  --font-family-base: #{$font-family-primary}
+  --font-family-signature: #{$font-family-signature}
+
+.v-theme--nudger
+  --font-family-base: #{$font-family-signature}
+
 html, body
-  font-family: $font-family-primary
+  font-family: var(--font-family-base)
 
 // Force Vuetify à utiliser Poppins
 .v-application,
@@ -52,4 +62,4 @@ html, body
 .v-toolbar,
 .v-navigation-drawer,
 .v-text-field
-  font-family: $font-family-primary !important
+  font-family: var(--font-family-base) !important

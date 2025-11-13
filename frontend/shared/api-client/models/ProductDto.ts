@@ -83,6 +83,13 @@ import {
     ProductScoresDtoToJSON,
     ProductScoresDtoToJSONTyped,
 } from './ProductScoresDto';
+import type { ProductTimelineDto } from './ProductTimelineDto';
+import {
+    ProductTimelineDtoFromJSON,
+    ProductTimelineDtoFromJSONTyped,
+    ProductTimelineDtoToJSON,
+    ProductTimelineDtoToJSONTyped,
+} from './ProductTimelineDto';
 
 /**
  * 
@@ -168,6 +175,12 @@ export interface ProductDto {
      * @memberof ProductDto
      */
     offers?: ProductOffersDto;
+    /**
+     * Lifecycle timeline combining price history and EPREL milestones
+     * @type {ProductTimelineDto}
+     * @memberof ProductDto
+     */
+    timeline?: ProductTimelineDto;
 }
 
 /**
@@ -200,6 +213,7 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         'aiReview': json['aiReview'] == null ? undefined : ProductAiReviewDtoFromJSON(json['aiReview']),
         'eprel': json['eprel'] == null ? undefined : ProductEprelDtoFromJSON(json['eprel']),
         'offers': json['offers'] == null ? undefined : ProductOffersDtoFromJSON(json['offers']),
+        'timeline': json['timeline'] == null ? undefined : ProductTimelineDtoFromJSON(json['timeline']),
     };
 }
 
@@ -227,6 +241,7 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
         'aiReview': ProductAiReviewDtoToJSON(value['aiReview']),
         'eprel': ProductEprelDtoToJSON(value['eprel']),
         'offers': ProductOffersDtoToJSON(value['offers']),
+        'timeline': ProductTimelineDtoToJSON(value['timeline']),
     };
 }
 

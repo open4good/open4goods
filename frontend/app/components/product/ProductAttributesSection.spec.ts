@@ -158,6 +158,29 @@ const VColStub = defineComponent({
   },
 })
 
+const VTimelineStub = defineComponent({
+  name: 'VTimelineStub',
+  setup(_, { slots }) {
+    return () => h('div', { class: 'v-timeline-stub' }, slots.default?.())
+  },
+})
+
+const VTimelineItemStub = defineComponent({
+  name: 'VTimelineItemStub',
+  props: {
+    dotColor: { type: String, default: '' },
+    size: { type: [Number, String], default: 'small' },
+    fillDot: { type: Boolean, default: false },
+  },
+  setup(_, { slots }) {
+    return () =>
+      h('div', { class: 'v-timeline-item-stub' }, [
+        slots.opposite?.(),
+        slots.default?.(),
+      ])
+  },
+})
+
 const buildProduct = (): ProductDto => ({
   gtin: 1234567890123,
   base: {
@@ -347,6 +370,8 @@ const mountComponent = async (product: ProductDto) => {
         VTextField: VTextFieldStub,
         VRow: VRowStub,
         VCol: VColStub,
+        VTimeline: VTimelineStub,
+        VTimelineItem: VTimelineItemStub,
       },
     },
   })

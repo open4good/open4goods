@@ -110,7 +110,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 </script>
 
 <template>
-  <section class="home-hero" aria-labelledby="home-hero-title">
+  <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
@@ -185,13 +185,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
         </div>
       </v-container>
     </div>
-  </section>
+  </HeroSurface>
 </template>
 
 <style scoped lang="sass">
 .home-hero
-  position: relative
-  isolation: isolate
   --hero-cat-h: var(--cat-height, 168px)
   --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
   --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
@@ -200,8 +198,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   min-height: clamp(560px, 75dvh, 880px)
   padding-block-start: clamp(3rem, 8vw, 5.5rem)
   padding-block-end: calc(clamp(3.5rem, 10vw, 6rem) + var(--hero-cat-in-hero))
-  background: radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-start), 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.25), transparent 60%), rgb(var(--v-theme-surface-default))
-  overflow: visible
 
 .home-hero__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
