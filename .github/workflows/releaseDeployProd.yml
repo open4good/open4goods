@@ -199,6 +199,18 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
 
+          
+      - name: Deploy font-api to Qualification Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "/front-api/target/front-api-0.0.1-SNAPSHOT.jar"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"  
+      
+                
       ############################################
       # Restart Applications
       ###########################################
