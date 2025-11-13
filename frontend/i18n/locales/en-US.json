@@ -1965,15 +1965,22 @@
         "products": "Products"
       },
       "productsMenu": {
-        "title": "Popular categories",
-        "subtitle": "Discover the universes our community explores the most.",
-        "empty": "Popular categories are unavailable right now.",
-        "categoryLinkLabel": "View category",
+        "title": "Our products",
+        "subtitle": "Each universe comes with an environmental assessment.",
         "untitledCategory": "Popular category",
+        "popular": {
+          "title": "Popular categories",
+          "description": "Discover the universes our community explores the most.",
+          "empty": "Popular categories are unavailable right now."
+        },
+        "taxonomy": {
+          "title": "All categories",
+          "description": "Navigate across the entire Nudger taxonomy.",
+          "empty": "No categories are available right now.",
+          "showMore": "Show more..."
+        },
         "cta": {
-          "highlight": "Our extensive product categories assessed through an environmental lens",
-          "description": "Browse the full catalogue organised by needs and use cases.",
-          "action": "Explore all categories"
+          "label": "Browse every category"
         }
       },
       "search": {

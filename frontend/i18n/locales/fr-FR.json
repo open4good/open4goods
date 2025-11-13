@@ -1969,15 +1969,22 @@
         "products": "Les produits"
       },
       "productsMenu": {
-        "title": "Catégories populaires",
-        "subtitle": "Explorez les univers les plus recherchés du moment.",
-        "empty": "Les catégories populaires ne sont pas disponibles pour le moment.",
-        "categoryLinkLabel": "Explorer cette catégorie",
+        "title": "Nos produits",
+        "subtitle": "Ces produits disposent d'une évaluation environnementale.",
         "untitledCategory": "Catégorie populaire",
+        "popular": {
+          "title": "Catégories populaires",
+          "description": "Explorez les univers les plus recherchés du moment.",
+          "empty": "Les catégories populaires ne sont pas disponibles pour le moment."
+        },
+        "taxonomy": {
+          "title": "Toutes nos catégories",
+          "description": "Naviguez dans l'ensemble de notre taxonomie produits.",
+          "empty": "Aucune catégorie n'est disponible pour le moment.",
+          "showMore": "Voir plus..."
+        },
         "cta": {
-          "highlight": "Nos nombreuses catégories de produits évaluées d'un point de vue environnemental",
-          "description": "Parcourez notre catalogue complet classé par usages et besoins.",
-          "action": "Explorer toutes les catégories"
+          "label": "Explorer toutes nos catégories"
         }
       },
       "search": {
