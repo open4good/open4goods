@@ -148,7 +148,7 @@
                     <p v-else class="products-menu__empty">{{ item.copy.sections.popularEmpty }}</p>
                   </v-col>
 
-                  <v-col cols="12" sm="7" class="products-menu__section">
+                  <v-col cols="12" sm="5" class="products-menu__section">
                     <p class="products-menu__section-title">{{ item.copy.sections.taxonomyTitle }}</p>
                     <p class="products-menu__section-description">
                       {{ item.copy.sections.taxonomyDescription }}
