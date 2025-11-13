@@ -57,6 +57,9 @@ const preferredDarkMock = ref(false)
 const fetchMock = vi.fn()
 const fetchCategoriesMock = vi.fn().mockResolvedValue([])
 const categoriesLoadingMock = ref(false)
+const fetchNavigationMock = vi.fn().mockResolvedValue(null)
+const categoryNavigationMock = ref(null)
+const navigationLoadingMock = ref(false)
 
 function useCategoriesComposable() {
   return {
@@ -68,6 +71,15 @@ function useCategoriesComposable() {
     currentCategory: computed(() => null),
     clearError: vi.fn(),
     resetCategorySelection: vi.fn(),
+  }
+}
+
+function useCategoryNavigationComposable() {
+  return {
+    navigation: categoryNavigationMock,
+    loading: navigationLoadingMock,
+    error: computed(() => null),
+    fetchNavigation: fetchNavigationMock,
   }
 }
 
@@ -121,6 +133,10 @@ vi.mock('@vueuse/core', () => {
 
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: useCategoriesComposable,
+}))
+
+vi.mock('~/composables/categories/useCategoryNavigation', () => ({
+  useCategoryNavigation: useCategoryNavigationComposable,
 }))
 
 const useStorageMock = getStorageMockRegistry().__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
@@ -217,8 +233,11 @@ describe('Shared menu authentication controls', () => {
     useCookieMock.mockClear()
     fetchMock.mockReset()
     fetchCategoriesMock.mockClear()
+    fetchNavigationMock.mockClear()
     username.value = null
     roles.value = []
+    categoryNavigationMock.value = null
+    navigationLoadingMock.value = false
 
     if (reloadSpy) {
       reloadSpy.mockRestore()
