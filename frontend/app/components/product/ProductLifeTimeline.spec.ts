@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import {
-  ProductTimelineEventDtoSourceEnum,
-  ProductTimelineEventDtoTypeEnum,
+  ProductTimelineEventSource,
+  ProductTimelineEventType,
   type ProductTimelineDto,
 } from '~~/shared/api-client'
 
@@ -83,13 +83,13 @@ const VIconStub = defineComponent({
 const buildTimeline = (): ProductTimelineDto => ({
   events: [
     {
-      type: ProductTimelineEventDtoTypeEnum.PriceFirstSeenNew,
-      source: ProductTimelineEventDtoSourceEnum.PriceHistory,
+      type: ProductTimelineEventType.PriceFirstSeenNew,
+      source: ProductTimelineEventSource.PriceHistory,
       timestamp: Date.UTC(2024, 0, 5),
     },
     {
-      type: ProductTimelineEventDtoTypeEnum.EprelOnMarketStart,
-      source: ProductTimelineEventDtoSourceEnum.Eprel,
+      type: ProductTimelineEventType.EprelOnMarketStart,
+      source: ProductTimelineEventSource.Eprel,
       timestamp: Date.UTC(2024, 5, 1),
     },
   ],
