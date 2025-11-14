@@ -84,6 +84,46 @@ jobs:
       - name: Build Maven Site
         run: mvn --batch-mode clean install site site:stage
 
+
+      ############################################
+      # Frontend
+      ###########################################
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.22.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build Nuxt (Node SSR)
+        run: pnpm build
+        working-directory: frontend
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
+          HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
+          
+      - name: Deploy SSR output to Beta server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "frontend/.output"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: "/opt/open4goods/bin/latest/frontend-ssr"
+
+      - name: Publish frontend
+        uses: appleboy/ssh-action@v1.2.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: sh /opt/open4goods/bin/publish-frontend.sh prod
+
       ############################################
       # Create the Release Changelog
       # PR Oriented
@@ -189,7 +229,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
 
-      - name: Deploy UI to Production Server
+      - name: Deploy UI (static server) to Production Server
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -200,7 +240,7 @@ jobs:
           TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
 
           
-      - name: Deploy font-api to Qualification Server
+      - name: Deploy front-api to Qualification Server
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
