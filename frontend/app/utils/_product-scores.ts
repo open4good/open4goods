@@ -27,6 +27,10 @@ export const resolvePrimaryImpactScore = (product: ProductDto): number | null =>
     return null
   }
 
+  if (isFiniteNumber(impactEntry.value)) {
+    return clampScore(impactEntry.value)
+  }
+
   if (isFiniteNumber(impactEntry.on20)) {
     return clampScore((impactEntry.on20 / 20) * 5)
   }
@@ -35,20 +39,18 @@ export const resolvePrimaryImpactScore = (product: ProductDto): number | null =>
     return clampScore((impactEntry.percent / 100) * 5)
   }
 
-  const absoluteValue = impactEntry.absolute?.value
-  const absoluteMax = impactEntry.absolute?.max
+  const isEcoscore = impactEntry.id?.toUpperCase() === 'ECOSCORE'
+  if (!isEcoscore) {
+    const absoluteValue = impactEntry.absolute?.value
+    const absoluteMax = impactEntry.absolute?.max
 
-  if (isFiniteNumber(absoluteValue) && isFiniteNumber(absoluteMax) && absoluteMax > 0) {
-    return clampScore((absoluteValue / absoluteMax) * 5)
-  }
+    if (isFiniteNumber(absoluteValue) && isFiniteNumber(absoluteMax) && absoluteMax > 0) {
+      return clampScore((absoluteValue / absoluteMax) * 5)
+    }
 
-  if (isFiniteNumber(absoluteValue)) {
-    return clampScore(absoluteValue)
-  }
-
-  const relativeValue = impactEntry.relativ?.value
-  if (isFiniteNumber(relativeValue)) {
-    return clampScore(relativeValue)
+    if (isFiniteNumber(absoluteValue)) {
+      return clampScore(absoluteValue)
+    }
   }
 
   return null

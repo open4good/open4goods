@@ -83,7 +83,7 @@ import type {
 import { ProductsIncludeEnum } from '~~/shared/api-client'
 import ProductAlternativeCard from './ProductAlternativeCard.vue'
 import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
-import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { ECOSCORE_VALUE_FIELD } from '~/constants/scores'
 
 const props = defineProps({
   product: {
@@ -131,17 +131,10 @@ const formatCurrency = (value: number, currency?: string | null) => {
   }
 }
 
-const resolveScoreNumericValue = (
-  score: { relativ?: { value?: number | null } | null; value?: number | null } | null | undefined,
-): number | null => {
-  const relative = score?.relativ?.value
-  if (typeof relative === 'number' && Number.isFinite(relative)) {
-    return relative
-  }
-
-  const absolute = score?.value
-  if (typeof absolute === 'number' && Number.isFinite(absolute)) {
-    return absolute
+const resolveScoreNumericValue = (score: { value?: number | null } | null | undefined): number | null => {
+  const numericValue = score?.value
+  if (typeof numericValue === 'number' && Number.isFinite(numericValue)) {
+    return numericValue
   }
 
   return null
@@ -269,7 +262,7 @@ const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(()
     defaultSelected: true,
     disabled: false,
     resolveClause: () => ({
-      field: ECOSCORE_RELATIVE_FIELD,
+      field: ECOSCORE_VALUE_FIELD,
       operator: 'range',
       min: value,
     }),
@@ -481,7 +474,7 @@ const fetchAlternatives = async () => {
       ProductsIncludeEnum.Resources,
     ],
     sort: {
-      field: ECOSCORE_RELATIVE_FIELD,
+      field: ECOSCORE_VALUE_FIELD,
       order: 'DESC',
     },
   }

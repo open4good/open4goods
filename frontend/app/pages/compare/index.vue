@@ -1071,22 +1071,32 @@ const resolveScoreValue = (score: ProductScoreDto | null | undefined): { display
     return { display: null, numeric: null }
   }
 
-  const relativeValueCandidates: Array<number | null> = [
-    typeof score.relativ?.value === 'number' && Number.isFinite(score.relativ.value)
-      ? score.relativ.value
-      : null,
-    (() => {
-      const legacyRelative = (score as { relative?: { value?: number | null } }).relative?.value
-      return typeof legacyRelative === 'number' && Number.isFinite(legacyRelative) ? legacyRelative : null
-    })(),
-  ]
-
-  const relativeValue = relativeValueCandidates.find((value): value is number => value != null) ?? null
-
-  if (relativeValue != null) {
+  if (typeof score.value === 'number' && Number.isFinite(score.value)) {
     return {
-      display: n(relativeValue, { maximumFractionDigits: 2 }),
-      numeric: relativeValue,
+      display: n(score.value, { maximumFractionDigits: 2 }),
+      numeric: score.value,
+    }
+  }
+
+  const parsedRelativeValue = (() => {
+    const relative = score.relativeValue
+    if (typeof relative === 'number' && Number.isFinite(relative)) {
+      return relative
+    }
+
+    if (typeof relative === 'string') {
+      const parsed = Number.parseFloat(relative)
+      return Number.isFinite(parsed) ? parsed : null
+    }
+
+    const legacyRelative = (score as { relative?: { value?: number | null } }).relative?.value
+    return typeof legacyRelative === 'number' && Number.isFinite(legacyRelative) ? legacyRelative : null
+  })()
+
+  if (parsedRelativeValue != null) {
+    return {
+      display: n(parsedRelativeValue, { maximumFractionDigits: 2 }),
+      numeric: parsedRelativeValue,
     }
   }
 

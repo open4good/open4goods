@@ -76,7 +76,14 @@ const props = defineProps<{
 
 const { n } = useI18n()
 
-const relativeScore = computed(() => (props.score.relativeValue ?? 0) || 0)
+const relativeScore = computed(() => {
+  if (typeof props.score.value === 'number' && Number.isFinite(props.score.value)) {
+    return props.score.value
+  }
+
+  const fallback = props.score.relativeValue
+  return (typeof fallback === 'number' && Number.isFinite(fallback) ? fallback : 0) || 0
+})
 
 const absoluteValue = computed(() => {
   const value = props.score.absoluteValue
@@ -114,14 +121,14 @@ const hasDetails = computed(() => {
 })
 
 const productAbsoluteValue = computed(() => {
-  const absoluteValue = props.score.absolute?.value
-  if (typeof absoluteValue === 'number' && Number.isFinite(absoluteValue)) {
-    return absoluteValue
-  }
-
   const directValue = props.score.value
   if (typeof directValue === 'number' && Number.isFinite(directValue)) {
     return directValue
+  }
+
+  const absoluteValue = props.score.absolute?.value
+  if (typeof absoluteValue === 'number' && Number.isFinite(absoluteValue)) {
+    return absoluteValue
   }
 
   if (typeof props.score.absoluteValue === 'number' && Number.isFinite(props.score.absoluteValue)) {

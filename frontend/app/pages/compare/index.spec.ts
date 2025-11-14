@@ -337,10 +337,10 @@ describe('Ecological scores', () => {
           base: {},
           offers: {},
           scores: {
-            ecoscore: { relativ: { value: 3.456 } },
+            ecoscore: { value: 3.456 },
             scores: {
-              BRAND_SUSTAINABILITY: { relativ: { value: 2.1 } },
-              DATA_QUALITY: { relativ: { value: 4.789 } },
+              BRAND_SUSTAINABILITY: { value: 2.1 },
+              DATA_QUALITY: { value: 4.789 },
             },
           },
           attributes: {},
@@ -356,10 +356,10 @@ describe('Ecological scores', () => {
           base: {},
           offers: {},
           scores: {
-            ecoscore: { relativ: { value: 2.1 } },
+            ecoscore: { value: 2.1 },
             scores: {
-              BRAND_SUSTAINABILITY: { relativ: { value: 4.123 } },
-              DATA_QUALITY: { relativ: { value: 3.5 } },
+              BRAND_SUSTAINABILITY: { value: 4.123 },
+              DATA_QUALITY: { value: 3.5 },
             },
           },
           attributes: {},

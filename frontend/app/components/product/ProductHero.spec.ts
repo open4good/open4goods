@@ -215,13 +215,14 @@ describe('ProductHero', () => {
     scores: {
       ecoscore: {
         id: 'ECOSCORE',
-        relativeValue: '3',
-        relativ: { value: 3 },
+        relativeValue: '3.5',
+        value: 3.5,
       },
       scores: {
         ECOSCORE: {
           id: 'ECOSCORE',
           on20: 14,
+          value: 3.5,
         },
       },
     },
@@ -424,8 +425,7 @@ describe('ProductHero', () => {
     it.each([
       ['on20 values', { on20: 18 }, '4.5'],
       ['percentages', { percent: 70 }, '3.5'],
-      ['absolute max ranges', { absolute: { value: 80, max: 160 } }, '2.5'],
-      ['relative fallbacks', { relativ: { value: 4.2 } }, '4.2'],
+      ['value fallbacks', { value: 4.2 }, '4.2'],
     ])('normalises %s to a five point scale', async (
       _,
       scoreEntry: Partial<ProductScoreDto>,

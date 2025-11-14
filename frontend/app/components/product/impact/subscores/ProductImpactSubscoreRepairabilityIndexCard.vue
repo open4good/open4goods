@@ -39,8 +39,8 @@ const numericAbsoluteValue = computed<number | null>(() => {
   const { score } = props
 
   const candidates = [
-    score.absolute?.value,
     score.value,
+    score.absolute?.value,
     typeof score.absoluteValue === 'number' ? score.absoluteValue : parseLocalizedNumber(score.absoluteValue),
   ]
 

@@ -1,5 +1,5 @@
 import type { FieldMetadataDto } from '~~/shared/api-client'
-import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { ECOSCORE_VALUE_FIELD } from '~/constants/scores'
 
 type TranslateFn = (key: string, ...args: unknown[]) => string
 
@@ -18,7 +18,7 @@ const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   offersCount: 'category.products.sort.fields.offersCount',
   'attributes.referentielAttributes.BRAND': 'category.products.sort.fields.brand',
   'attributes.referentielAttributes.MODEL': 'category.products.sort.fields.model',
-  [ECOSCORE_RELATIVE_FIELD]: 'category.products.sort.fields.impactScore',
+  [ECOSCORE_VALUE_FIELD]: 'category.products.sort.fields.impactScore',
 }
 
 const resolveTranslation = (mapping: string, t: TranslateFn, keys: Record<string, string>): string | null => {

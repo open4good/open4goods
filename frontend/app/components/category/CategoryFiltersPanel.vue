@@ -121,7 +121,7 @@ import type {
 } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
 
-import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { ECOSCORE_VALUE_FIELD } from '~/constants/scores'
 
 import CategoryFilterList from './filters/CategoryFilterList.vue'
 const props = withDefaults(
@@ -170,7 +170,7 @@ const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(
 
 const impactPrimary = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.impact ?? []
-  const ecoscore = entries.filter((item) => item.mapping === ECOSCORE_RELATIVE_FIELD)
+  const ecoscore = entries.filter((item) => item.mapping === ECOSCORE_VALUE_FIELD)
   return ecoscore.length ? ecoscore : entries.slice(0, 1)
 })
 

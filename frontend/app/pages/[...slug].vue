@@ -616,12 +616,26 @@ const impactScores = computed(() => {
       }))
       .filter((bucket) => bucket.label.length > 0)
 
+    const normalizedValue = (() => {
+      if (typeof score.value === 'number' && Number.isFinite(score.value)) {
+        return score.value
+      }
+
+      const fallback = (score as { relativeValue?: number | string | null }).relativeValue
+      if (typeof fallback === 'number' && Number.isFinite(fallback)) {
+        return fallback
+      }
+
+      const parsed = typeof fallback === 'string' ? Number.parseFloat(fallback) : NaN
+      return Number.isFinite(parsed) ? parsed : null
+    })()
+
     return {
       id: score.id,
       label: score.name,
       description: score.description ?? null,
-      relativeValue: typeof score.relativ?.value === 'number' ? score.relativ.value : null,
-      value: typeof score.value === 'number' ? score.value : null,
+      relativeValue: normalizedValue,
+      value: typeof score.value === 'number' && Number.isFinite(score.value) ? score.value : null,
       absoluteValue: score.absoluteValue ?? null,
       absolute: score.absolute ?? null,
       coefficient: coefficients[score.id.toUpperCase()] ?? null,
@@ -677,17 +691,18 @@ const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | un
 }
 
 const extractRelativeScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
-  const relative = score?.relativ?.value
-  if (typeof relative === 'number' && Number.isFinite(relative)) {
-    return relative
-  }
-
   const absolute = score?.value
   if (typeof absolute === 'number' && Number.isFinite(absolute)) {
     return absolute
   }
 
-  return null
+  const fallback = (score as { relativeValue?: number | string | null } | null)?.relativeValue
+  if (typeof fallback === 'number' && Number.isFinite(fallback)) {
+    return fallback
+  }
+
+  const parsed = typeof fallback === 'string' ? Number.parseFloat(fallback) : NaN
+  return Number.isFinite(parsed) ? parsed : null
 }
 
 const extractReferenceScoreValue = (reference: ProductReferenceDto | null | undefined, scoreId: string): number | null => {
@@ -714,14 +729,19 @@ const extractReferenceScoreValue = (reference: ProductReferenceDto | null | unde
 
     const entry = scoreContainer[candidate]
     if (entry && typeof entry === 'object') {
-      const relative = (entry as { relativ?: { value?: number } }).relativ?.value
-      if (typeof relative === 'number' && Number.isFinite(relative)) {
-        return relative
-      }
-
-      const absolute = (entry as { value?: number }).value
+      const absolute = (entry as { value?: number | null }).value
       if (typeof absolute === 'number' && Number.isFinite(absolute)) {
         return absolute
+      }
+
+      const fallback = (entry as { relativeValue?: number | string | null }).relativeValue
+      if (typeof fallback === 'number' && Number.isFinite(fallback)) {
+        return fallback
+      }
+
+      const parsed = typeof fallback === 'string' ? Number.parseFloat(fallback) : NaN
+      if (Number.isFinite(parsed)) {
+        return parsed
       }
     }
   }
@@ -1141,8 +1161,8 @@ const productStructuredData = computed(() => {
   }
 
   const aggregateRatingValue =
-    typeof product.value.scores?.ecoscore?.absolute?.value === 'number'
-      ? product.value.scores.ecoscore.absolute.value
+    typeof product.value.scores?.ecoscore?.value === 'number'
+      ? product.value.scores.ecoscore.value
       : null
 
   const offers = structuredOffers.value

@@ -68,7 +68,7 @@ import {
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
-import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { ECOSCORE_VALUE_FIELD } from '~/constants/scores'
 
 type AttributeCellValue = string | null
 
@@ -226,7 +226,7 @@ const headers = computed(() => [
 const staticSortHeaderToFieldMapping: Record<string, string> = {
   brand: 'attributes.referentielAttributes.BRAND',
   model: 'attributes.referentielAttributes.MODEL',
-  impactScore: ECOSCORE_RELATIVE_FIELD,
+  impactScore: ECOSCORE_VALUE_FIELD,
   bestPrice: 'price.minPrice.price',
   offersCount: 'offersCount',
 }

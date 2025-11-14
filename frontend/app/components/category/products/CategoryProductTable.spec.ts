@@ -5,7 +5,7 @@ import { createVuetify } from 'vuetify'
 import { defineComponent, h } from 'vue'
 import type { Component } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
-import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { ECOSCORE_VALUE_FIELD } from '~/constants/scores'
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -230,7 +230,7 @@ describe('CategoryProductTable', () => {
     expect(wrapper.emitted('update:sort-order')?.[1]?.[0]).toBe('desc')
 
     table.vm.$emit('update:sort-by', [{ key: 'impactScore' }])
-    expect(wrapper.emitted('update:sort-field')?.[2]?.[0]).toBe(ECOSCORE_RELATIVE_FIELD)
+    expect(wrapper.emitted('update:sort-field')?.[2]?.[0]).toBe(ECOSCORE_VALUE_FIELD)
     expect(wrapper.emitted('update:sort-order')?.[2]?.[0]).toBe('asc')
   })
 })

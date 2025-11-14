@@ -6,7 +6,7 @@ import {
   serializeCategoryHashState,
   type CategoryHashState,
 } from './_category-filter-state'
-import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { ECOSCORE_VALUE_FIELD } from '~/constants/scores'
 
 describe('category filter hash serialisation', () => {
   it('serialises and deserialises state payloads', () => {
@@ -19,7 +19,7 @@ describe('category filter hash serialisation', () => {
       filters: {
         filters: [
           {
-            field: ECOSCORE_RELATIVE_FIELD,
+            field: ECOSCORE_VALUE_FIELD,
             operator: 'range',
             min: 80,
             max: 100,
