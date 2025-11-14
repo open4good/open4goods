@@ -28,6 +28,8 @@ const sectionDescription = computed(() => t('home.solution.description'))
       src: '/images/home/nudger-screaming.webp',
       alt: sectionTitle,
       sizes: '(min-width: 960px) 306px, 60vw',
+      width: 1024,
+      height: 1536,
     }"
     visual-position="right"
   >

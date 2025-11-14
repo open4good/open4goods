@@ -14,6 +14,8 @@ const props = withDefaults(
       alt: string
       sizes?: string
       loading?: 'eager' | 'lazy'
+      width?: number
+      height?: number
     }
   }>(),
   {
@@ -49,13 +51,15 @@ const sectionClasses = computed(() => [
           <v-col cols="12" md="6" class="home-split__col home-split__col--visual">
             <div class="home-split__visual" role="presentation">
               <slot name="visual">
-                <NuxtImg
+                <img
                   v-if="props.image?.src"
                   :src="props.image.src"
                   :alt="props.image.alt"
                   class="home-split__image"
-                  :sizes="props.image.sizes ?? '(min-width: 960px) 320px, 70vw'"
                   :loading="props.image.loading ?? 'lazy'"
+                  :width="props.image.width"
+                  :height="props.image.height"
+                  decoding="async"
                 />
               </slot>
             </div>
