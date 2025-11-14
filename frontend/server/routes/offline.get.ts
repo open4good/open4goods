@@ -38,13 +38,67 @@ export default defineEventHandler((event) => {
           margin: 0.65rem 0;
           line-height: 1.5;
         }
+        button {
+          font-size: 1rem;
+          border: none;
+          border-radius: 999px;
+          padding: 0.75rem 1.5rem;
+          background: #00de9f;
+          color: #052320;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 10px 35px rgba(0, 222, 159, 0.35);
+        }
+        button:focus-visible {
+          outline: 3px solid rgba(0, 222, 159, 0.5);
+          outline-offset: 2px;
+        }
+        button:active {
+          transform: translateY(1px);
+        }
       </style>
     </head>
     <body>
       <div class="card">
         <h1>You are offline</h1>
-        <p>The latest comparison you opened stays available, but live prices need a connection. Please reconnect and refresh Nudger.</p>
+        <p id="offline-status">The latest comparison you opened stays available, but live prices need a connection. Please reconnect and refresh Nudger.</p>
+        <p>
+          <button id="retry-button" type="button">Retry now</button>
+        </p>
       </div>
+      <script>
+        (() => {
+          const statusEl = document.getElementById('offline-status')
+          const retryButton = document.getElementById('retry-button')
+          const reload = () => window.location.reload()
+
+          const showStatus = (message) => {
+            if (statusEl) {
+              statusEl.textContent = message
+            }
+          }
+
+          if (navigator.onLine) {
+            showStatus('Connection restored. Reloading…')
+            reload()
+            return
+          }
+
+          window.addEventListener('online', () => {
+            showStatus('Connection restored. Reloading…')
+            setTimeout(reload, 300)
+          })
+
+          window.addEventListener('offline', () => {
+            showStatus('Still offline. We will reload as soon as the connection is back.')
+          })
+
+          retryButton?.addEventListener('click', () => {
+            showStatus('Checking your connection…')
+            reload()
+          })
+        })()
+      </script>
     </body>
   </html>`
 })
