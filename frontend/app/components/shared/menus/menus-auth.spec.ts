@@ -139,6 +139,20 @@ vi.mock('~/composables/categories/useCategoryNavigation', () => ({
   useCategoryNavigation: useCategoryNavigationComposable,
 }))
 
+const installPromptVisible = ref(false)
+const isInstallSupported = ref(false)
+const installInProgress = ref(false)
+const requestInstallMock = vi.fn()
+
+vi.mock('~/composables/pwa/usePwaInstallPromptBridge', () => ({
+  usePwaInstallPromptBridge: () => ({
+    installPromptVisible,
+    isInstallSupported,
+    installInProgress,
+    requestInstall: requestInstallMock,
+  }),
+}))
+
 const useStorageMock = getStorageMockRegistry().__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
 
 type NuxtImports = typeof import('#imports')
@@ -238,6 +252,10 @@ describe('Shared menu authentication controls', () => {
     roles.value = []
     categoryNavigationMock.value = null
     navigationLoadingMock.value = false
+    installPromptVisible.value = false
+    isInstallSupported.value = false
+    installInProgress.value = false
+    requestInstallMock.mockReset()
 
     if (reloadSpy) {
       reloadSpy.mockRestore()
@@ -275,6 +293,20 @@ describe('Shared menu authentication controls', () => {
     expect(heroWrapper.find('[data-testid="hero-account-menu-activator"]').exists()).toBe(false)
     expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(false)
     expect(mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()).toBe(false)
+  })
+
+  it('renders the mobile install CTA when available', async () => {
+    installPromptVisible.value = true
+    isInstallSupported.value = true
+
+    const wrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    const installButton = wrapper.get('[data-testid="mobile-install-cta"]')
+
+    await installButton.trigger('click')
+    await flushPromises()
+
+    expect(requestInstallMock).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('close')).toBeTruthy()
   })
 
   it('logs out and redirects from the hero menu when clicked', async () => {

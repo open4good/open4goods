@@ -75,6 +75,37 @@
         </v-list-item-title>
       </v-list-item>
 
+      <v-divider v-if="showInstallMenuItem" class="mx-6" />
+
+      <v-list-item
+        v-if="showInstallMenuItem"
+        class="px-6 py-4 mobile-menu__install"
+      >
+        <template #prepend>
+          <v-icon icon="mdi-cellphone-arrow-down" class="me-4" />
+        </template>
+
+        <v-list-item-title class="mobile-menu__install-title">
+          {{ t('pwa.install.cta') }}
+        </v-list-item-title>
+        <v-list-item-subtitle class="mobile-menu__install-subtitle">
+          {{ t('pwa.install.description') }}
+        </v-list-item-subtitle>
+
+        <template #append>
+          <v-btn
+            color="primary"
+            variant="flat"
+            size="small"
+            :loading="installInProgress"
+            data-testid="mobile-install-cta"
+            @click.stop.prevent="handleInstallFromMenu"
+          >
+            {{ t('pwa.install.title') }}
+          </v-btn>
+        </template>
+      </v-list-item>
+
       <v-list-group
         v-model="isCommunityExpanded"
         class="mobile-menu__community"
@@ -233,6 +264,7 @@ import type {
   ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import { useCommunityMenu, type CommunityMenuLink } from './useCommunityMenu'
+import { usePwaInstallPromptBridge } from '~/composables/pwa/usePwaInstallPromptBridge'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -240,6 +272,12 @@ const SearchSuggestField = defineAsyncComponent({
 })
 
 const { t, locale } = useI18n()
+const {
+  installPromptVisible,
+  isInstallSupported,
+  installInProgress,
+  requestInstall,
+} = usePwaInstallPromptBridge()
 const currentLocale = computed(() => normalizeLocale(locale.value))
 
 const themeToggleLabel = computed(() => {
@@ -262,6 +300,7 @@ const searchQuery = ref('')
 const homeRoutePath = computed(() => resolveLocalizedRoutePath('index', currentLocale.value))
 const searchRoutePath = computed(() => resolveLocalizedRoutePath('search', currentLocale.value))
 const showMenuSearch = computed(() => route.path !== homeRoutePath.value)
+const showInstallMenuItem = computed(() => installPromptVisible.value && isInstallSupported.value)
 
 const { sections: communitySections, activePaths: communityActivePaths } = useCommunityMenu(t, currentLocale)
 const communityLabel = computed(() => String(t('siteIdentity.menu.items.contact')))
@@ -428,6 +467,15 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
   }
 
   navigateToSearch(suggestion.title)
+}
+
+const handleInstallFromMenu = async () => {
+  if (!showInstallMenuItem.value || installInProgress.value) {
+    return
+  }
+
+  await requestInstall()
+  emit('close')
 }
 
 const handleCommunityNavigation = (link: CommunityMenuLink) => {
@@ -613,4 +661,21 @@ const menuItems = computed<MenuLink[]>(() =>
 
 .text-neutral-soft
   color: rgb(var(--v-theme-text-neutral-soft))
+
+.mobile-menu__install
+  background-color: rgba(var(--v-theme-surface-primary-080), 0.35)
+  border-radius: 1rem
+
+.mobile-menu__install-title
+  font-weight: 700
+  margin-bottom: 0.15rem
+
+.mobile-menu__install-subtitle
+  font-size: 0.85rem
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.mobile-menu__install :deep(.v-btn)
+  text-transform: none
+  font-weight: 600
+
 </style>
