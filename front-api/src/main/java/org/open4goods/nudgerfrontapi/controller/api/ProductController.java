@@ -90,7 +90,7 @@ public class ProductController {
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
     private static final String KEYWORD_VALUE_SUFFIX = ".value";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
-    private static final String ECOSCORE_RELATIVE_FIELD = "scores.ECOSCORE.relativ.value";
+    private static final String ECOSCORE_RELATIVE_FIELD = "scores.ECOSCORE.value";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 

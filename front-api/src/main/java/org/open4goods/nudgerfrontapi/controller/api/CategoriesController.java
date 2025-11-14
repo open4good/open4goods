@@ -66,7 +66,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class CategoriesController {
 
     private static final int TOP_PRODUCTS_LIMIT = 5;
-    private static final String SORT_FIELD_IMPACT_SCORE = "scores.ECOSCORE.relativ.value";
+    private static final String SORT_FIELD_IMPACT_SCORE = "scores.ECOSCORE.value";
     private static final String CONDITION_NEW = "NEW";
     private static final String CONDITION_OCCASION = "OCCASION";
 
