@@ -23,6 +23,7 @@ const installError = ref<string | null>(null)
 const installInProgress = ref(false)
 const offlineReady = ref(false)
 const updateAvailable = ref(false)
+const mobileBreakpoint = ref(false)
 
 const dismissInstall = vi.fn()
 const requestInstall = vi.fn()
@@ -36,6 +37,7 @@ const resetState = () => {
   installInProgress.value = false
   offlineReady.value = false
   updateAvailable.value = false
+  mobileBreakpoint.value = false
   dismissInstall.mockReset()
   requestInstall.mockReset()
   applyUpdate.mockReset()
@@ -54,6 +56,12 @@ vi.mock('~~/app/composables/pwa/usePwaInstallPromptBridge', () => ({
     dismissInstall,
     requestInstall,
     applyUpdate,
+  }),
+}))
+
+vi.mock('vuetify', () => ({
+  useDisplay: () => ({
+    smAndDown: mobileBreakpoint,
   }),
 }))
 
@@ -137,6 +145,16 @@ describe('PwaInstallPrompt', () => {
 
     expect(wrapper.find('[data-test="pwa-install-banner"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('Install Nudger')
+  })
+
+  it('hides the install banner on mobile displays', async () => {
+    mobileBreakpoint.value = true
+    const wrapper = mountPrompt()
+    installPromptVisible.value = true
+    isInstallSupported.value = true
+    await nextTick()
+
+    expect(wrapper.find('[data-test="pwa-install-banner"]').exists()).toBe(false)
   })
 
   it('triggers install actions from the CTA and dismiss buttons', async () => {

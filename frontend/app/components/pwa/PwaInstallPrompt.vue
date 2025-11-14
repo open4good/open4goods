@@ -3,7 +3,7 @@
     <div class="pwa-prompts" aria-live="polite">
       <Transition name="slide-up">
         <v-alert
-          v-if="showInstallBanner"
+          v-if="shouldRenderInstallBanner"
           class="pwa-prompts__alert"
           border="start"
           color="primary"
@@ -105,6 +105,7 @@
 
 <script setup lang="ts">
 import { usePwaInstallPromptBridge } from '~/composables/pwa/usePwaInstallPromptBridge'
+import { useDisplay } from 'vuetify'
 
 const {
   t,
@@ -120,7 +121,10 @@ const {
   applyUpdate,
 } = usePwaInstallPromptBridge()
 
+const display = useDisplay()
+
 const showInstallBanner = computed(() => isInstallSupported.value && installPromptVisible.value)
+const shouldRenderInstallBanner = computed(() => showInstallBanner.value && !display.smAndDown.value)
 const showUpdateBanner = computed(() => updateAvailable.value)
 const installTitle = computed(() => String(t('pwa.install.title')))
 const installDescription = computed(() => String(t('pwa.install.description')))
