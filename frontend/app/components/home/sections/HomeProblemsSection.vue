@@ -16,7 +16,7 @@ const { t } = useI18n()
 const sectionTitle = computed(() => t('home.problems.title'))
 const sectionDescription = computed(() => t('home.problems.description'))
 const visualImage = computed(() => ({
-  src: '/images/home/problems-visual.svg',
+  src: '/images/home/nudger-screaming.png',
   alt: sectionTitle.value,
   sizes: '(min-width: 960px) 360px, 70vw',
 }))
