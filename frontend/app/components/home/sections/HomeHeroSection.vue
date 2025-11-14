@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
-import { useDisplay } from 'vuetify'
 import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -37,14 +36,13 @@ const emit = defineEmits<{
 }>()
 
 const { t, tm } = useI18n()
-const display = useDisplay()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
 const { minSuggestionQueryLength, heroVideoSrc, heroVideoPoster, categoryItems, categoriesLoading } =
   toRefs(props)
 
-const shouldShowHeroVideo = computed(() => display.mdAndUp.value)
+const shouldShowHeroVideo = computed(() => Boolean(heroVideoSrc.value))
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
@@ -390,6 +388,16 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     padding-block-end: calc(clamp(3.5rem, 16vw, 5.5rem) + var(--hero-cat-in-hero))
     --hero-cat-h: var(--cat-height, 168px)
     --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
+
+  .home-hero__media
+    order: 1
+
+  .home-hero__content
+    order: 2
+
+  .home-hero__video-wrapper
+    aspect-ratio: 4 / 5
+    min-height: 320px
 
   .home-hero__video
     transform: scale(1.15)
