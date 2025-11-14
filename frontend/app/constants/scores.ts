@@ -1,2 +1,2 @@
-export const ECOSCORE_RELATIVE_FIELD = 'scores.ECOSCORE.relativ.value'
+export const ECOSCORE_RELATIVE_FIELD = 'scores.ECOSCORE.value'
 

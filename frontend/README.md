@@ -56,7 +56,7 @@ To get the project up and running locally, follow these steps:
 5. **Run the Dev Server**:
 
    ```bash
-   pnpm --offline dev
+   pnpm dev
    ```
 
    Access it at [http://localhost:3000](http://localhost:3000)
