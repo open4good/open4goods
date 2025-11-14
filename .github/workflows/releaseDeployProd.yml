@@ -102,9 +102,9 @@ jobs:
         run: pnpm build
         working-directory: frontend
         env:
-          API_URL: ${{ secrets.API_URL }}
-          MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
-          HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
+          API_URL: ${{ secrets.BETA_API_URL }}
+          MACHINE_TOKEN: ${{ secrets.BETA_MACHINE_TOKEN }}
+          HCAPTCHA_SITE_KEY: ${{ secrets.BETA_HCAPTCHA_SITE_KEY }}
           
       - name: Deploy SSR output to Beta server
         uses: easingthemes/ssh-deploy@main
