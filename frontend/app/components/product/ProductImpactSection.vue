@@ -10,46 +10,21 @@
     </header>
 
     <div class="product-impact__primary">
-      <ProductImpactEcoScoreCard :score="primaryScore" :vertical-home-url="verticalHomeUrl" />
-    </div>
-
-    <div class="product-impact__analysis">
-      <div
-        v-if="showRadar"
-        class="product-impact__analysis-radar"
-      >
-        <ProductImpactRadarChart
-          class="product-impact__analysis-radar-chart"
-          :axes="radarAxes"
-          :series="chartSeries"
-          :product-name="productName"
-        />
-      </div>
-      <ProductImpactDetailsTable
-        class="product-impact__analysis-details"
-        :class="{ 'product-impact__analysis-details--full': !showRadar }"
-        :scores="detailScores"
+      <ProductImpactEcoScoreCard
+        :score="primaryScore"
+        :vertical-home-url="verticalHomeUrl"
+        :detail-scores="detailScores"
+        :show-radar="showRadar"
+        :radar-axes="radarAxes"
+        :chart-series="chartSeries"
+        :product-name="productName"
+        :loading="loading"
+        :secondary-scores="secondaryScores"
+        :product-brand="productBrand"
+        :product-model="productModel"
+        :product-image="productImage"
+        :vertical-title="verticalTitle"
       />
-    </div>
-
-    <div class="product-impact__subscores">
-      <v-skeleton-loader
-        v-if="loading"
-        type="image, article"
-        class="product-impact__skeleton"
-      />
-      <template v-else>
-        <ProductImpactSubscoreCard
-          v-for="score in secondaryScores"
-          :key="score.id"
-          :score="score"
-          :product-name="productName"
-          :product-brand="productBrand"
-          :product-model="productModel"
-          :product-image="productImage"
-          :vertical-title="verticalTitle"
-        />
-      </template>
     </div>
   </section>
 </template>
@@ -59,9 +34,6 @@ import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
-import ProductImpactRadarChart from './impact/ProductImpactRadarChart.vue'
-import ProductImpactDetailsTable from './impact/ProductImpactDetailsTable.vue'
-import ProductImpactSubscoreCard from './impact/ProductImpactSubscoreCard.vue'
 import type { ScoreView } from './impact/impact-types'
 
 type RadarSeriesKey = 'current' | 'best' | 'worst'
@@ -239,53 +211,4 @@ const showRadar = computed(() => radarAxes.value.length >= 3 && chartSeries.valu
   flex-direction: column;
 }
 
-.product-impact__analysis {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: stretch;
-}
-
-.product-impact__analysis-radar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.product-impact__analysis-radar-chart {
-  flex: 1 1 auto;
-}
-
-.product-impact__analysis-details--full {
-  grid-column: 1 / -1;
-}
-
-.product-impact__subscores {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-.product-impact__skeleton {
-  grid-column: 1 / -1;
-  min-height: 320px;
-}
-
-@media (min-width: 960px) {
-  .product-impact__analysis {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  }
-}
-
-@media (min-width: 640px) {
-  .product-impact__subscores {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1280px) {
-  .product-impact__subscores {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
 </style>

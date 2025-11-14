@@ -19,6 +19,58 @@
     <div class="impact-ecoscore__score">
       <ImpactScore :score="normalizedScore" :max="5" size="large" show-value />
     </div>
+
+    <div v-if="hasDetailContent" class="impact-ecoscore__analysis">
+      <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
+        <ProductImpactRadarChart
+          class="impact-ecoscore__analysis-radar-chart"
+          :axes="radarAxes"
+          :series="chartSeries"
+          :product-name="productName"
+        />
+      </div>
+      <ProductImpactDetailsTable
+        v-if="detailScores.length"
+        class="impact-ecoscore__analysis-details"
+        :class="{ 'impact-ecoscore__analysis-details--full': !shouldDisplayRadar }"
+        :scores="detailScores"
+      />
+    </div>
+
+    <div v-if="showAccordion" class="impact-ecoscore__accordion">
+      <v-btn
+        class="impact-ecoscore__accordion-btn"
+        color="primary"
+        variant="text"
+        block
+        :append-icon="isSubscoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+        @click="toggleSubscores"
+      >
+        {{ isSubscoreExpanded ? $t('product.impact.hideDetails') : $t('product.impact.showDetails') }}
+      </v-btn>
+    </div>
+
+    <v-expand-transition v-if="showAccordion">
+      <div v-show="isSubscoreExpanded" class="impact-ecoscore__subscores">
+        <v-skeleton-loader
+          v-if="loading"
+          type="image, article"
+          class="impact-ecoscore__skeleton"
+        />
+        <template v-else>
+          <ProductImpactSubscoreCard
+            v-for="subScore in secondaryScores"
+            :key="subScore.id"
+            :score="subScore"
+            :product-name="productName"
+            :product-brand="productBrand"
+            :product-model="productModel"
+            :product-image="productImage"
+            :vertical-title="verticalTitle"
+          />
+        </template>
+      </div>
+    </v-expand-transition>
   </article>
   <article v-else class="impact-ecoscore impact-ecoscore--empty">
     <span class="impact-ecoscore__placeholder">{{ $t('product.impact.noPrimaryScore') }}</span>
@@ -26,18 +78,66 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ProductImpactDetailsTable from './ProductImpactDetailsTable.vue'
+import ProductImpactRadarChart from './ProductImpactRadarChart.vue'
+import ProductImpactSubscoreCard from './ProductImpactSubscoreCard.vue'
 import type { ScoreView } from './impact-types'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
+interface RadarAxisEntry {
+  id: string
+  name: string
+}
+
+interface RadarSeriesEntry {
+  label: string
+  values: Array<number | null>
+  lineColor: string
+  areaColor: string
+  symbolColor: string
+}
 
 const props = defineProps<{
   score: ScoreView | null
   verticalHomeUrl?: string | null
+  detailScores?: ScoreView[]
+  showRadar?: boolean
+  radarAxes?: RadarAxisEntry[]
+  chartSeries?: RadarSeriesEntry[]
+  productName?: string
+  loading?: boolean
+  secondaryScores?: ScoreView[]
+  productBrand?: string
+  productModel?: string
+  productImage?: string
+  verticalTitle?: string
 }>()
 
 const { locale } = useI18n()
+const isSubscoreExpanded = ref(false)
+
+const detailScores = computed(() => props.detailScores ?? [])
+const radarAxes = computed(() => props.radarAxes ?? [])
+const chartSeries = computed(() => props.chartSeries ?? [])
+const productName = computed(() => props.productName ?? '')
+const productBrand = computed(() => props.productBrand ?? '')
+const productModel = computed(() => props.productModel ?? '')
+const productImage = computed(() => props.productImage ?? '')
+const verticalTitle = computed(() => props.verticalTitle ?? '')
+const secondaryScores = computed(() => props.secondaryScores ?? [])
+const loading = computed(() => props.loading ?? false)
+const shouldDisplayRadar = computed(
+  () => Boolean(props.showRadar && radarAxes.value.length >= 3 && chartSeries.value.length > 0),
+)
+const hasDetailContent = computed(() => shouldDisplayRadar.value || detailScores.value.length > 0)
+const showAccordion = computed(() => loading.value || secondaryScores.value.length > 0)
+
+const toggleSubscores = () => {
+  isSubscoreExpanded.value = !isSubscoreExpanded.value
+}
 
 const normalizedScore = computed(() => {
   const rawValue = Number.isFinite(props.score?.value)
@@ -126,6 +226,48 @@ const methodologyHref = computed(() => {
   justify-content: flex-start;
 }
 
+.impact-ecoscore__analysis {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.impact-ecoscore__analysis-radar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.impact-ecoscore__analysis-radar-chart {
+  flex: 1 1 auto;
+}
+
+.impact-ecoscore__analysis-details--full {
+  grid-column: 1 / -1;
+}
+
+.impact-ecoscore__accordion {
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+}
+
+.impact-ecoscore__accordion-btn {
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.impact-ecoscore__subscores {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.impact-ecoscore__skeleton {
+  grid-column: 1 / -1;
+  min-height: 320px;
+}
+
 .impact-ecoscore__cta {
   display: inline-flex;
   align-items: center;
@@ -172,6 +314,24 @@ const methodologyHref = computed(() => {
   .impact-ecoscore__cta {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (min-width: 960px) {
+  .impact-ecoscore__analysis {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+}
+
+@media (min-width: 640px) {
+  .impact-ecoscore__subscores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .impact-ecoscore__subscores {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 </style>

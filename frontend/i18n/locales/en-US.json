@@ -1856,6 +1856,8 @@
         "score": "Indicator",
         "value": "Value"
       },
+      "showDetails": "Show detailed indicators",
+      "hideDetails": "Hide detailed indicators",
       "title": "Environmental impact"
     },
     "navigation": {
