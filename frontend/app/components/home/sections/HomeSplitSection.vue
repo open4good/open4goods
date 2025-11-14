@@ -14,6 +14,8 @@ const props = withDefaults(
       alt: string
       sizes?: string
       loading?: 'eager' | 'lazy'
+      width?: number
+      height?: number
     }
   }>(),
   {
@@ -56,6 +58,8 @@ const sectionClasses = computed(() => [
                   class="home-split__image"
                   :sizes="props.image.sizes ?? '(min-width: 960px) 320px, 70vw'"
                   :loading="props.image.loading ?? 'lazy'"
+                  :width="props.image.width"
+                  :height="props.image.height"
                 />
               </slot>
             </div>

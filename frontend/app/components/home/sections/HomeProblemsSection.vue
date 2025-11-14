@@ -19,6 +19,8 @@ const visualImage = computed(() => ({
   src: '/images/home/nudger-screaming.png',
   alt: sectionTitle.value,
   sizes: '(min-width: 960px) 360px, 70vw',
+  width: 1024,
+  height: 1536,
 }))
 </script>
 
