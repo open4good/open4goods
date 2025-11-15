@@ -78,26 +78,12 @@ if (import.meta.server) {
   await fetchCategories(true)
   await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
 
-  try {
-    const [{ readdir }, { join }] = await Promise.all([
-      import('node:fs/promises'),
-      import('node:path'),
-    ])
+  const { getHeroVideoSources } = await import('~~/server/utils/hero-videos')
+  const videoCandidates = await getHeroVideoSources()
 
-    const heroVideosDirectory = join(process.cwd(), 'app/public/videos')
-    const entries = await readdir(heroVideosDirectory, { withFileTypes: true })
-    const videoCandidates = entries
-      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.mp4'))
-      .map((entry) => `/videos/${entry.name}`)
-
-    if (videoCandidates.length > 0) {
-      const randomIndex = Math.floor(Math.random() * videoCandidates.length)
-      heroVideoSrc.value = videoCandidates[randomIndex]
-    }
-  } catch (error) {
-    if (import.meta.dev) {
-      console.warn('Unable to select hero video from directory', error)
-    }
+  if (videoCandidates.length > 0) {
+    const randomIndex = Math.floor(Math.random() * videoCandidates.length)
+    heroVideoSrc.value = videoCandidates[randomIndex]
   }
 } else {
   if (rawCategories.value.length === 0) {
