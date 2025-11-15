@@ -152,74 +152,75 @@ const shouldShowNavigation = computed(() => props.items.length > 1)
     <nav
       v-else
       class="home-category-carousel__banner"
-      :class="{ 'home-category-carousel__banner--with-controls': shouldShowNavigation }"
       :aria-label="t('home.categories.bannerAriaLabel')"
     >
-      <v-btn
-        v-if="shouldShowNavigation"
-        class="home-category-carousel__nav home-category-carousel__nav--prev"
-        icon="mdi-chevron-left"
-        variant="tonal"
-        size="small"
-        color="primary"
-        :disabled="!canScrollPrev"
-        :aria-label="t('home.categories.scrollPrevious')"
-        @click="scrollToPrevious"
-      />
-
-      <div
-        ref="scrollerRef"
-        class="home-category-carousel__scroller"
-        role="list"
-      >
+      <div class="home-category-carousel__viewport">
         <div
-          v-for="category in items"
-          :key="category.id"
-          class="home-category-carousel__item"
-          role="listitem"
+          ref="scrollerRef"
+          class="home-category-carousel__scroller"
+          role="list"
         >
-          <NuxtLink :to="category.href" class="home-category-carousel__link">
-            <div class="home-category-carousel__avatar" aria-hidden="true">
-              <v-img
-                v-if="typeof category.image === 'string' && category.image.length > 0"
-                :src="category.image"
-                :alt="''"
-                role="presentation"
-                class="home-category-carousel__image"
-              />
-              <div v-else class="home-category-carousel__placeholder">
-                <v-icon icon="mdi-shape-outline" size="28" />
-              </div>
-            </div>
-            <span class="home-category-carousel__label">{{ category.title }}</span>
-          </NuxtLink>
-
-          <component
-            :is="isExternal(category.impactScoreHref) ? 'a' : 'NuxtLink'"
-            v-if="category.impactScoreHref"
-            class="home-category-carousel__impact-link"
-            :href="isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
-            :to="!isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
-            :target="isExternal(category.impactScoreHref) ? '_blank' : undefined"
-            :rel="isExternal(category.impactScoreHref) ? 'noopener' : undefined"
-            :aria-label="t('home.categories.impactLinkAria', { category: category.title })"
+          <div
+            v-for="category in items"
+            :key="category.id"
+            class="home-category-carousel__item"
+            role="listitem"
           >
-            <v-icon icon="mdi-leaf-circle" size="20" />
-          </component>
-        </div>
-      </div>
+            <NuxtLink :to="category.href" class="home-category-carousel__link">
+              <div class="home-category-carousel__avatar" aria-hidden="true">
+                <v-img
+                  v-if="typeof category.image === 'string' && category.image.length > 0"
+                  :src="category.image"
+                  :alt="''"
+                  role="presentation"
+                  class="home-category-carousel__image"
+                />
+                <div v-else class="home-category-carousel__placeholder">
+                  <v-icon icon="mdi-shape-outline" size="28" />
+                </div>
+              </div>
+              <span class="home-category-carousel__label">{{ category.title }}</span>
+            </NuxtLink>
 
-      <v-btn
-        v-if="shouldShowNavigation"
-        class="home-category-carousel__nav home-category-carousel__nav--next"
-        icon="mdi-chevron-right"
-        variant="tonal"
-        size="small"
-        color="primary"
-        :disabled="!canScrollNext"
-        :aria-label="t('home.categories.scrollNext')"
-        @click="scrollToNext"
-      />
+            <component
+              :is="isExternal(category.impactScoreHref) ? 'a' : 'NuxtLink'"
+              v-if="category.impactScoreHref"
+              class="home-category-carousel__impact-link"
+              :href="isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
+              :to="!isExternal(category.impactScoreHref) ? category.impactScoreHref : undefined"
+              :target="isExternal(category.impactScoreHref) ? '_blank' : undefined"
+              :rel="isExternal(category.impactScoreHref) ? 'noopener' : undefined"
+              :aria-label="t('home.categories.impactLinkAria', { category: category.title })"
+            >
+              <v-icon icon="mdi-leaf-circle" size="20" />
+            </component>
+          </div>
+        </div>
+
+        <v-btn
+          v-if="shouldShowNavigation"
+          class="home-category-carousel__nav home-category-carousel__nav--prev"
+          icon="mdi-chevron-left"
+          variant="tonal"
+          size="small"
+          color="primary"
+          :disabled="!canScrollPrev"
+          :aria-label="t('home.categories.scrollPrevious')"
+          @click="scrollToPrevious"
+        />
+
+        <v-btn
+          v-if="shouldShowNavigation"
+          class="home-category-carousel__nav home-category-carousel__nav--next"
+          icon="mdi-chevron-right"
+          variant="tonal"
+          size="small"
+          color="primary"
+          :disabled="!canScrollNext"
+          :aria-label="t('home.categories.scrollNext')"
+          @click="scrollToNext"
+        />
+      </div>
     </nav>
   </div>
 </template>
@@ -237,23 +238,30 @@ const shouldShowNavigation = computed(() => props.items.length > 1)
 
   &__banner
     width: 100%
-    display: grid
-    grid-template-columns: minmax(0, 1fr)
-    align-items: center
-    gap: clamp(0.5rem, 2vw, 1rem)
+    position: relative
 
-  &__banner--with-controls
-    grid-template-columns: auto 1fr auto
+  &__viewport
+    position: relative
+    display: flex
+    align-items: stretch
+    width: 100%
 
   &__nav
+    position: absolute
+    top: 50%
+    transform: translateY(-50%)
     border-radius: 999px
     box-shadow: 0 12px 20px rgba(var(--v-theme-shadow-primary-600), 0.12)
     backdrop-filter: blur(8px)
+    min-width: 2.75rem
+    min-height: 2.75rem
+    z-index: 2
 
-    &--prev,
+    &--prev
+      left: clamp(0.25rem, 3vw, 0.75rem)
+
     &--next
-      min-width: 2.5rem
-      min-height: 2.5rem
+      right: clamp(0.25rem, 3vw, 0.75rem)
 
     &:disabled
       opacity: 0.4
@@ -266,7 +274,7 @@ const shouldShowNavigation = computed(() => props.items.length > 1)
     gap: clamp(0.75rem, 2vw, 1.25rem)
     overflow-x: auto
     overflow-y: hidden
-    padding: clamp(0.25rem, 1vw, 0.5rem) clamp(0.25rem, 1vw, 0.5rem)
+    padding: clamp(0.35rem, 2vw, 0.5rem) clamp(2.5rem, 8vw, 3.25rem)
     scroll-snap-type: x proximity
     scrollbar-width: none
     -webkit-overflow-scrolling: touch
@@ -353,22 +361,19 @@ const shouldShowNavigation = computed(() => props.items.length > 1)
 
 @media (max-width: 599px)
   .home-category-carousel
-    &__banner
-      grid-template-columns: 1fr
-      gap: clamp(0.5rem, 5vw, 0.75rem)
-
-    &__banner--with-controls
-      grid-template-columns: 1fr
-
     &__nav
-      order: 3
-      justify-self: center
-      width: clamp(3rem, 22vw, 3.5rem)
-      height: clamp(3rem, 22vw, 3.5rem)
+      min-width: clamp(2.4rem, 16vw, 2.75rem)
+      min-height: clamp(2.4rem, 16vw, 2.75rem)
+
+    &__nav--prev
+      left: clamp(0.25rem, 4vw, 0.5rem)
+
+    &__nav--next
+      right: clamp(0.25rem, 4vw, 0.5rem)
 
     &__scroller
-      order: 2
-      mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%)
+      padding-inline: clamp(2.25rem, 15vw, 3rem)
+      mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%)
 
     &__item
       scroll-snap-align: start
