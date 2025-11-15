@@ -122,25 +122,20 @@
                       <NuxtLink
                         v-for="category in item.popularCategories"
                         :key="category.id"
-                      :to="category.href"
-                      class="products-menu__popular-card"
-                      role="menuitem"
-                    >
-                      <v-avatar class="products-menu__popular-avatar" size="36">
-                        <v-img
-                          v-if="category.image"
-                          :src="category.image"
-                          :alt="category.title"
+                        :to="category.href"
+                        class="products-menu__popular-card"
+                        role="menuitem"
+                      >
+                        <v-avatar class="products-menu__popular-avatar" size="36">
+                          <v-img
+                            v-if="category.image"
+                            :src="category.image"
+                            :alt="category.title"
                             cover
                           />
                           <v-icon v-else icon="mdi-image-outline" size="28" />
                         </v-avatar>
-                        <div class="products-menu__popular-body">
-                          <p class="products-menu__popular-title">{{ category.title }}</p>
-                          <p v-if="category.description" class="products-menu__popular-description">
-                            {{ category.description }}
-                          </p>
-                        </div>
+                        <p class="products-menu__popular-title">{{ category.title }}</p>
                         <v-icon icon="mdi-arrow-top-right" size="18" class="products-menu__popular-icon" />
                       </NuxtLink>
                     </div>
@@ -696,7 +691,6 @@ interface ProductsMenuPopularCategory {
   title: string
   href: string
   image: string | null
-  description: string
 }
 
 interface ProductsMenuTaxonomyEntry {
@@ -759,7 +753,6 @@ const productsMenuPopularCategories = computed<ProductsMenuPopularCategory[]>(()
         title: normalizeNavigationCategoryTitle(category, fallbackTitle),
         href,
         image,
-        description: category.vertical?.verticalHomeDescription ?? '',
         order: category.vertical?.order ?? Number.MAX_SAFE_INTEGER,
       }
     })
@@ -1054,14 +1047,20 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 .main-menu-items--community,
 .main-menu-items--products
   min-height: 48px
-  padding-inline: 0.75rem
+  padding-inline-start: 0.75rem
+  padding-inline-end: 0.625rem
   gap: 0.25rem
 
   :deep(.v-list-item__append)
-    margin-inline-start: 0
+    margin-inline-start: 0.25rem
+    padding-inline: 0
+    min-width: auto
+    display: flex
+    align-items: center
 
 .main-menu-items__toggle-icon
-  margin-inline-start: 10px
+  margin-inline-start: 0.25rem
+  margin-inline-end: 0
   color: currentColor
   opacity: 0.9
   transition: transform 0.2s ease
@@ -1211,7 +1210,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
   &__popular-card
     display: flex
     align-items: center
-    gap: 0.75rem
+    gap: 0.5rem
     padding: 0.75rem 0.9rem
     border-radius: 1rem
     text-decoration: none
@@ -1232,19 +1231,17 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     min-width: clamp(28px, 4vw, 36px)
     min-height: clamp(28px, 4vw, 36px)
 
-  &__popular-body
-    flex: 1
-    min-width: 0
-
   &__popular-title
     margin: 0
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__popular-description
-    margin: 0.15rem 0 0
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    font-size: 0.85rem
+    flex: 1
+    min-width: 0
+    font-size: 0.95rem
+    line-height: 1.3
+    text-overflow: ellipsis
+    overflow: hidden
+    white-space: nowrap
 
   &__popular-icon
     color: rgb(var(--v-theme-accent-primary-highlight))
