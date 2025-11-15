@@ -1,4 +1,5 @@
-import { cachedEventHandler, getQuery } from 'h3'
+import { cachedEventHandler } from 'nitropack/runtime/internal/cache'
+import { getQuery } from 'h3'
 import type { H3Event } from 'h3'
 import { useCategoriesService } from '~~/shared/api-client/services/categories.services'
 import type { VerticalConfigDto } from '~~/shared/api-client'

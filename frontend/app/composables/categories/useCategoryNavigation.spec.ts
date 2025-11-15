@@ -66,47 +66,48 @@ describe('useCategoryNavigation composable', () => {
       useCategoriesService: () => ({ getNavigation: getNavigationMock }),
     }))
 
-    vi.doMock('h3', () => {
-      const caches = new Map<string, { payload: unknown; expiresAt: number }>()
+    const caches = new Map<string, { payload: unknown; expiresAt: number }>()
 
-      return {
-        getQuery: (event: { context?: { query?: Record<string, unknown> } }) =>
-          event.context?.query ?? {},
-        cachedEventHandler: (
-          handler: (event: unknown) => unknown | Promise<unknown>,
-          options?: { name?: string; maxAge?: number; getKey?: (event: unknown) => string },
-        ) => {
-          const name = options?.name ?? 'default'
-          const maxAgeMs = (options?.maxAge ?? 0) * 1000
+    vi.doMock('nitropack/runtime/internal/cache', () => ({
+      cachedEventHandler: (
+        handler: (event: unknown) => unknown | Promise<unknown>,
+        options?: { name?: string; maxAge?: number; getKey?: (event: unknown) => string },
+      ) => {
+        const name = options?.name ?? 'default'
+        const maxAgeMs = (options?.maxAge ?? 0) * 1000
 
-          return async (event: unknown) => {
-            const keySegment = options?.getKey?.(event) ?? ''
-            const cacheKey = `${name}:${keySegment}`
-            const now = Date.now()
-            const cached = caches.get(cacheKey)
+        return async (event: unknown) => {
+          const keySegment = options?.getKey?.(event) ?? ''
+          const cacheKey = `${name}:${keySegment}`
+          const now = Date.now()
+          const cached = caches.get(cacheKey)
 
-            if (cached && cached.expiresAt > now) {
-              return cached.payload
-            }
-
-            const payload = await handler(event)
-            caches.set(cacheKey, { payload, expiresAt: now + maxAgeMs })
-            return payload
+          if (cached && cached.expiresAt > now) {
+            return cached.payload
           }
-        },
-        setResponseHeader: (
-          event: { node: { res: { headers: Record<string, string> } } },
-          name: string,
-          value: string,
-        ) => {
-          event.node.res.headers[name.toLowerCase()] = value
-        },
-        createError: (input: unknown) => ({
-          ...(typeof input === 'object' && input ? input : {}),
-          isCreateError: true,
-        }),
-      }
-    })
+
+          const payload = await handler(event)
+          caches.set(cacheKey, { payload, expiresAt: now + maxAgeMs })
+          return payload
+        }
+      },
+    }))
+
+    vi.doMock('h3', () => ({
+      getQuery: (event: { context?: { query?: Record<string, unknown> } }) =>
+        event.context?.query ?? {},
+      setResponseHeader: (
+        event: { node: { res: { headers: Record<string, string> } } },
+        name: string,
+        value: string,
+      ) => {
+        event.node.res.headers[name.toLowerCase()] = value
+      },
+      createError: (input: unknown) => ({
+        ...(typeof input === 'object' && input ? input : {}),
+        isCreateError: true,
+      }),
+    }))
 
     const { default: handler } = await import('../../../server/api/categories/navigation.get')
 
@@ -129,6 +130,7 @@ describe('useCategoryNavigation composable', () => {
     expect(getNavigationMock).toHaveBeenCalledTimes(1)
 
     vi.doUnmock('~~/shared/api-client/services/categories.services')
+    vi.doUnmock('nitropack/runtime/internal/cache')
     vi.doUnmock('h3')
     vi.resetModules()
 
