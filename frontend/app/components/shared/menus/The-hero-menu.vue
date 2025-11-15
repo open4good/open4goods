@@ -392,10 +392,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
-import type {
-  CategorySuggestionItem,
-  ProductSuggestionItem,
-} from '~/components/search/SearchSuggestField.vue'
 import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
@@ -403,6 +399,7 @@ import type { CommunitySection } from './useCommunityMenu'
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import { useCategoryNavigation } from '~/composables/categories/useCategoryNavigation'
 import type { CategoryNavigationDto, CategoryNavigationDtoChildCategoriesInner } from '~~/shared/api-client'
+import { MIN_SEARCH_QUERY_LENGTH, useMenuSearchControls } from '~/composables/menus/useMenuSearchControls'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -423,18 +420,23 @@ if (import.meta.server) {
   await fetchNavigation()
 }
 
-const MIN_SEARCH_QUERY_LENGTH = 2
 const MAX_PRODUCTS_MENU_POPULAR = 4
 const MAX_TAXONOMY_GROUP_ITEMS = 3
 
 const menuSearchRef = ref<HTMLElement | null>(null)
-const isSearchOpen = ref(false)
-const searchQuery = ref('')
-
-const homeRoutePath = computed(() => resolveLocalizedRoutePath('index', currentLocale.value))
-const searchRoutePath = computed(() => resolveLocalizedRoutePath('search', currentLocale.value))
 const categoriesRoutePath = computed(() => resolveLocalizedRoutePath('categories', currentLocale.value))
-const showMenuSearch = computed(() => route.path !== homeRoutePath.value)
+
+const {
+  searchQuery,
+  isSearchOpen,
+  showMenuSearch,
+  openSearch: activateSearch,
+  closeSearch,
+  handleSearchClear,
+  handleSearchSubmit,
+  handleCategorySuggestion,
+  handleProductSuggestion,
+} = useMenuSearchControls()
 
 const focusSearchInput = () => {
   const root = menuSearchRef.value
@@ -457,55 +459,13 @@ const openSearch = async () => {
     return
   }
 
-  isSearchOpen.value = true
+  activateSearch()
   await nextTick()
   focusSearchInput()
 }
 
-const closeSearch = () => {
-  isSearchOpen.value = false
-}
-
 const updateSearchQuery = (value: string) => {
   searchQuery.value = value
-}
-
-const handleSearchClear = () => {
-  searchQuery.value = ''
-}
-
-watch(
-  () => route.path,
-  (path) => {
-    if (path === homeRoutePath.value) {
-      closeSearch()
-      handleSearchClear()
-    }
-  },
-)
-
-watch(homeRoutePath, (path) => {
-  if (route.path === path) {
-    closeSearch()
-    handleSearchClear()
-  }
-})
-
-watch(showMenuSearch, (visible) => {
-  if (!visible) {
-    closeSearch()
-  }
-})
-
-const navigateToSearch = (query?: string) => {
-  const normalizedQuery = query?.trim() ?? ''
-
-  router.push({
-    path: searchRoutePath.value,
-    query: normalizedQuery ? { q: normalizedQuery } : undefined,
-  })
-
-  closeSearch()
 }
 
 const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
@@ -526,46 +486,6 @@ const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
 }
 
-const handleSearchSubmit = () => {
-  const trimmedQuery = searchQuery.value.trim()
-
-  if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
-    return
-  }
-
-  navigateToSearch(trimmedQuery)
-}
-
-const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
-  searchQuery.value = suggestion.title
-
-  const normalizedUrl = normalizeVerticalHomeUrl(suggestion.url)
-
-  if (normalizedUrl) {
-    closeSearch()
-    router.push(normalizedUrl)
-    return
-  }
-
-  navigateToSearch(suggestion.title)
-}
-
-const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
-  searchQuery.value = suggestion.title
-
-  const gtin = suggestion.gtin?.trim()
-
-  if (gtin) {
-    closeSearch()
-    router.push({
-      name: 'gtin',
-      params: { gtin },
-    })
-    return
-  }
-
-  navigateToSearch(suggestion.title)
-}
 
 type FetchLike = (input: string, init?: Record<string, unknown>) => Promise<unknown>
 
