@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, ref, toRefs, watch } from 'vue'
+import { useIntersectionObserver, usePreferredReducedData } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
 import SearchSuggestField, {
@@ -23,7 +24,7 @@ type HeroHelperItem = {
 const props = defineProps<{
   searchQuery: string
   minSuggestionQueryLength: number
-  heroVideoSrc: string
+  heroVideoSrc: string | null
   heroVideoPoster: string
   categoryItems: CategoryCarouselItem[]
   categoriesLoading: boolean
@@ -47,6 +48,94 @@ const display = useDisplay()
 
 const shouldShowHeroVideo = computed(() => Boolean(heroVideoSrc.value))
 const shouldRenderHeroMedia = computed(() => display.mdAndUp.value && shouldShowHeroVideo.value)
+
+const heroMediaWrapperRef = ref<HTMLElement | null>(null)
+const heroVideoElementRef = ref<HTMLVideoElement | null>(null)
+const shouldLoadVideo = ref(false)
+const shouldPlayVideo = ref(false)
+const isHeroMediaNearViewport = ref(false)
+const prefersReducedData = usePreferredReducedData()
+const shouldRespectReducedData = computed(() => prefersReducedData.value === true)
+
+const updateVideoPlaybackIntent = () => {
+  if (isHeroMediaNearViewport.value && !shouldRespectReducedData.value) {
+    shouldLoadVideo.value = true
+    shouldPlayVideo.value = true
+    return
+  }
+
+  shouldPlayVideo.value = false
+}
+
+if (import.meta.client) {
+  useIntersectionObserver(
+    heroMediaWrapperRef,
+    ([entry]) => {
+      const isIntersecting = Boolean(entry?.isIntersecting)
+      isHeroMediaNearViewport.value = isIntersecting
+
+      if (!isIntersecting && heroVideoElementRef.value) {
+        heroVideoElementRef.value.pause()
+      }
+
+      updateVideoPlaybackIntent()
+    },
+    {
+      threshold: 0.2,
+      rootMargin: '200px 0px',
+    },
+  )
+
+  watch(shouldRespectReducedData, () => {
+    updateVideoPlaybackIntent()
+    if (shouldRespectReducedData.value && heroVideoElementRef.value) {
+      heroVideoElementRef.value.pause()
+    }
+  })
+}
+
+const tryPlayHeroVideo = async () => {
+  const videoElement = heroVideoElementRef.value
+  if (!videoElement || !shouldPlayVideo.value) {
+    return
+  }
+
+  try {
+    await videoElement.play()
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Home hero video autoplay prevented', error)
+    }
+  }
+}
+
+const handleVideoCanPlay = () => {
+  if (shouldPlayVideo.value) {
+    void tryPlayHeroVideo()
+  }
+}
+
+if (import.meta.client) {
+  watch(
+    shouldPlayVideo,
+    (value) => {
+      const videoElement = heroVideoElementRef.value
+      if (!videoElement) {
+        return
+      }
+
+      if (value) {
+        if (videoElement.readyState >= videoElement.HAVE_CURRENT_DATA) {
+          void tryPlayHeroVideo()
+        }
+        return
+      }
+
+      videoElement.pause()
+    },
+    { flush: 'post' },
+  )
+}
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
@@ -172,14 +261,29 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
           >
             <v-sheet rounded="xl" elevation="8" class="home-hero__media-sheet">
               <ClientOnly>
-                <div v-if="shouldShowHeroVideo" class="home-hero__video-wrapper">
+                <div
+                  v-if="shouldShowHeroVideo"
+                  ref="heroMediaWrapperRef"
+                  class="home-hero__video-wrapper"
+                >
+                  <div v-if="!shouldLoadVideo" class="home-hero__video-placeholder" aria-hidden="true">
+                    <img
+                      class="home-hero__video-placeholder-image"
+                      :src="heroVideoPoster"
+                      alt=""
+                      role="presentation"
+                      loading="lazy"
+                    />
+                  </div>
                   <video
+                    v-else
+                    ref="heroVideoElementRef"
                     class="home-hero__video"
                     :poster="heroVideoPoster"
                     muted
-                    autoplay
                     playsinline
-                    preload="metadata"
+                    preload="none"
+                    @canplay="handleVideoCanPlay"
                   >
                     <source :src="heroVideoSrc" type="video/mp4" />
                   </video>
@@ -305,6 +409,21 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   aspect-ratio: 16 / 9
   border-radius: clamp(1.75rem, 4vw, 2.5rem)
   overflow: hidden
+
+.home-hero__video-placeholder
+  position: absolute
+  inset: 0
+  width: 100%
+  height: 100%
+  display: flex
+  align-items: center
+  justify-content: center
+  background: rgba(var(--v-theme-surface-glass), 0.85)
+
+.home-hero__video-placeholder-image
+  width: 100%
+  height: 100%
+  object-fit: cover
 
 .home-hero__video
   width: 100%

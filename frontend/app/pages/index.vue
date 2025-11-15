@@ -26,7 +26,8 @@ const requestURL = useRequestURL()
 const searchQuery = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
-const heroVideoSrc = useState<string>('home-hero-video-src', () => '/videos/video-concept1.mp4')
+const heroVideoSrc = useState<string | null>('home-hero-video-src', () => null)
+const heroVideoCandidates = useState<string[]>('home-hero-video-candidates', () => [])
 const heroVideoPoster = '/images/home/hero-placeholder.svg'
 
 type CategoryCarouselItem = {
@@ -82,8 +83,7 @@ if (import.meta.server) {
   const videoCandidates = await getHeroVideoSources()
 
   if (videoCandidates.length > 0) {
-    const randomIndex = Math.floor(Math.random() * videoCandidates.length)
-    heroVideoSrc.value = videoCandidates[randomIndex]
+    heroVideoCandidates.value = videoCandidates
   }
 } else {
   if (rawCategories.value.length === 0) {
@@ -92,6 +92,11 @@ if (import.meta.server) {
 
   if (paginatedArticles.value.length === 0) {
     await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
+  }
+
+  if (!heroVideoSrc.value && heroVideoCandidates.value.length > 0) {
+    const randomIndex = Math.floor(Math.random() * heroVideoCandidates.value.length)
+    heroVideoSrc.value = heroVideoCandidates.value[randomIndex]
   }
 }
 
