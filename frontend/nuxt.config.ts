@@ -16,6 +16,13 @@ const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
 const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
 const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
+const navigationOfflineFallbackPlugin = {
+  handlerDidError: async () => {
+    const offlineResponse = await globalThis.caches?.match('/offline')
+    return offlineResponse ?? Response.error()
+  },
+}
+
 const runtimeCaching = [
   {
     urlPattern: ({ request }) => request.destination === 'image',
@@ -74,6 +81,14 @@ const runtimeCaching = [
         maxEntries: 60,
         maxAgeSeconds: 60 * 60 * 24 * 7,
       },
+    },
+  },
+  {
+    urlPattern: ({ request }) => request.mode === 'navigate',
+    handler: 'NetworkOnly',
+    options: {
+      cacheName: 'nudger-pages',
+      plugins: [navigationOfflineFallbackPlugin],
     },
   },
 ]
@@ -181,8 +196,6 @@ export default defineNuxtConfig({
       cleanupOutdatedCaches: true,
       globPatterns: [PRECACHE_PATTERN],
       globIgnores: ['videos/**/*'],
-      navigateFallback: '/offline',
-      navigateFallbackAllowlist: [/^\/[\w-]+(?:\/.*)?$/],
       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       runtimeCaching,
     },
