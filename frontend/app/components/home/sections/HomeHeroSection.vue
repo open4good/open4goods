@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRefs, watch } from 'vue'
-import { useIntersectionObserver, usePreferredReducedData } from '@vueuse/core'
+import { useIntersectionObserver, useMediaQuery } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
 import SearchSuggestField, {
@@ -54,7 +54,9 @@ const heroVideoElementRef = ref<HTMLVideoElement | null>(null)
 const shouldLoadVideo = ref(false)
 const shouldPlayVideo = ref(false)
 const isHeroMediaNearViewport = ref(false)
-const prefersReducedData = usePreferredReducedData()
+const prefersReducedData = import.meta.client
+  ? useMediaQuery('(prefers-reduced-data: reduce)')
+  : ref(false)
 const shouldRespectReducedData = computed(() => prefersReducedData.value === true)
 
 const updateVideoPlaybackIntent = () => {
