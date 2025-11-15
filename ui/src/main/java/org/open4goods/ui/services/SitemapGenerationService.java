@@ -22,7 +22,6 @@ import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
-import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
@@ -48,7 +47,6 @@ public class SitemapGenerationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
-	private static final String SITEMAP_NAME_ROOT_PAGES = "main-pages.xml";
 	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-pages.xml";
 	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-posts.xml";
 	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
@@ -69,16 +67,14 @@ public class SitemapGenerationService {
 	private final XwikiFacadeService xwikiService;
 
 
-	private Map<String, SitemapExposedController> annotatedControllers;
 
-	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, VerticalsConfigService verticalConfigService,  BlogService blogService, XwikiFacadeService xwikiService, ApplicationContext context) {
+	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, VerticalsConfigService verticalConfigService,  BlogService blogService, XwikiFacadeService xwikiService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.verticalsConfigService = verticalConfigService;
 		this.blogService = blogService;
 		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder());
 		this.xwikiService = xwikiService;
 		this.uiConfig = uiConfig;
-		this.annotatedControllers =  context.getBeansOfType(SitemapExposedController.class);
 	}
 
 	/**
@@ -108,9 +104,6 @@ public class SitemapGenerationService {
 
 			String baseUrl = uiConfig.getNamings().getBaseUrls().get(lang) ;
 
-			// Adding contoller based pages
-			addControllerPages(baseUrl, lang);
-
 
 			// Adding blog posts
 			addBlogPost(blogService.getPosts(),  baseUrl, lang );
@@ -129,7 +122,6 @@ public class SitemapGenerationService {
 
 			SitemapIndexGenerator index = SitemapIndexGenerator.of(baseUrl+"sitemap/" );
 			index = index
-				.addPage(SITEMAP_NAME_ROOT_PAGES)
 				.addPage(SITEMAP_NAME_BLOG_PAGES)
 				.addPage(SITEMAP_NAME_WIKI_PAGES)
 				.addPage(SITEMAP_NAME_VERTICAL_PAGES)
@@ -150,41 +142,7 @@ public class SitemapGenerationService {
 	}
 
 
-	/**
-	 * Generate a sitemap in a language for controller exposed pages
-	 * @param sitemap
-	 * @param baseUrl
-	 */
-	private void addControllerPages(String baseUrl, String language) {
 
-		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
-
-		// Adding the home page
-		sitemap = sitemap.addPage(getWebPage("/", ChangeFreq.WEEKLY, 0.8));
-
-		for (Entry<String, SitemapExposedController> e : annotatedControllers.entrySet()) {
-
-			try {
-				for (SitemapEntry value : e.getValue().getMultipleExposedUrls())
-				{
-					// .substrint : remove the //
-					String url =  baseUrl+value.i18n(language).substring(1);
-					LOGGER.info("Adding controller page to {} sitemap : {}",language, url);
-
-					sitemap = sitemap.addPage(getWebPage(url, value.getFrequency(), value.getPriority()));
-				}
-			} catch (Exception e1) {
-				LOGGER.error("Cannot add controller to sitemap : {}",e,e1);
-			}
-		}
-
-		// Writing sitemap
-		try {
-			sitemap.toFile(getSitemapFile(SITEMAP_NAME_ROOT_PAGES, language));
-		} catch (IOException e1) {
-			LOGGER.error("Error while writing controller sitemap",e1);
-		}
-	}
 
 
 
@@ -304,9 +262,15 @@ public class SitemapGenerationService {
 
 		for (VerticalConfig v : verticalsConfigService.getConfigsWithoutDefault(true) )
 		{
-
 			ProductI18nElements i18n = v.i18n(language) ;
+
+			// Adding vertical root
 			sitemap = sitemap.addPage(getWebPage( baseUrl+ i18n.getVerticalHomeUrl(), ChangeFreq.WEEKLY, 1.0));
+
+			// Adding Impactscore page
+			String url = baseUrl+ i18n.getVerticalHomeUrl()+"/ecoscore";
+			sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.9 ));
+
 			//  >> Vertical home page
 
 
@@ -317,7 +281,7 @@ public class SitemapGenerationService {
 					// TODO : Temp : default language for now
 					page = xwikiService.getFullPage(e.getWikiUrl(),"en");
 
-					String url = baseUrl+ i18n.getVerticalHomeUrl()+"/" + e.getVerticalUrl();
+					url = baseUrl+ i18n.getVerticalHomeUrl()+"/" + e.getVerticalUrl();
 					LOGGER.info("Adding to sitemap : {}",url);
 					sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.9 ));
 				} catch (Exception ex) {

@@ -1,6 +1,0 @@
-<img th:fragment="icon(offer, size)"
-     th:if="${datasourceImageService.hasIcon(offer.datasourceName)}"
-     th:with="id = ${datasourceImageService.cleanName(offer.datasourceName)}"
-     th:src="'/icon/'+${id}"
-     th:width="${size}"
-     th:alt="'Favicon de ' + ${offer.datasourceName}" />

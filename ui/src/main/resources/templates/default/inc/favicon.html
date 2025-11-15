@@ -1,6 +1,0 @@
-<img th:fragment="favicon(url, size)"
-     th:if="${faviconService.hasFavicon(url)}"
-     th:src="@{/favicon(url=${url})}"
-     th:width="${size}"
-     th:height="${size}"
-     th:alt="'Favicon for ' + ${url}" />

@@ -296,7 +296,7 @@ public class UrlCheckService implements HealthIndicator {
         List<CheckedUrl> updatedList = new ArrayList<>();
         for (Future<CheckedUrl> f : futures) {
             try {
-                CheckedUrl updated = f.get(); 
+                CheckedUrl updated = f.get();
                 updatedList.add(updated);
             } catch (InterruptedException | ExecutionException e) {
                 logger.error("Error in checkAllUrls tasks: {}", e.getMessage());
@@ -365,7 +365,7 @@ public class UrlCheckService implements HealthIndicator {
                 logger.warn("URL {} returned HTTP 500", cu.getUrl());
             } else if (status != 200) {
                 totalOtherStatus.incrementAndGet();
-                healthOk = false; 
+                healthOk = false;
                 logger.warn("URL {} returned non-200 status: {}", cu.getUrl(), status);
             }
 

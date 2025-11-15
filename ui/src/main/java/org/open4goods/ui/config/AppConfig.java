@@ -2,25 +2,26 @@
 package org.open4goods.ui.config;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
-import org.open4goods.commons.services.SearchService;
-import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.price.Currency;
-import org.open4goods.model.price.Price;
 import org.open4goods.services.blog.service.BlogService;
-import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.service.AbstractFeedService;
+import org.open4goods.services.feedservice.service.AwinFeedService;
+import org.open4goods.services.feedservice.service.EffiliationFeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -33,25 +34,22 @@ import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
-import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.util.UrlPathHelper;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -79,6 +77,37 @@ public class AppConfig {
 
 
 
+    @Bean
+    public AwinFeedService awinFeedService(
+                                           RemoteFileCachingService remoteFileCachingService,
+                                           DataSourceConfigService dataSourceConfigService,
+                                           SerialisationService serialisationService,
+                                           UiConfig uiConfig
+
+    		) {
+        // Retrieve Awin-specific feed configuration from the fetcher properties
+        FeedConfiguration awinConfig = uiConfig.getFeedConfigs().get("awin");
+        return new AwinFeedService(awinConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getAwinAdvertiserId(), uiConfig.getAffiliationConfig().getAwinAccessToken());
+    }
+
+    @Bean
+    public EffiliationFeedService effiliationFeedService(
+                                                         RemoteFileCachingService remoteFileCachingService,
+                                                         DataSourceConfigService dataSourceConfigService,
+                                                         SerialisationService serialisationService,
+                                                         UiConfig uiConfig) {
+        // Retrieve Effiliation-specific feed configuration from the fetcher properties
+        FeedConfiguration effiliationConfig = uiConfig.getFeedConfigs().get("effiliation");
+        return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getEffiliationApiKey());
+    }
+
+    @Bean
+    public FeedService feedService(List<AbstractFeedService> feedServices,
+                                   DataSourceConfigService dataSourceConfigService) {
+        // The FeedService aggregates all concrete feed implementations.
+        return new FeedService(feedServices, dataSourceConfigService);
+    }
+
 
 
 	@Bean
@@ -87,8 +116,8 @@ public class AppConfig {
 	}
 
 	@Bean
-	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService, ApplicationContext context ) {
-		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService, context);
+	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService) {
+		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService);
 	}
 
 	@Bean
@@ -121,32 +150,32 @@ public class AppConfig {
 
 
 
-    @Bean
-    public ResourceBundle messageSource() {
-        ResourceBundle messageSource = new ResourceBundle();
+//    @Bean
+//    public ResourceBundle messageSource() {
+//        ResourceBundle messageSource = new ResourceBundle();
+//
+//        // Set multiple base names for properties files
+//        messageSource.setBasenames(
+//            "classpath:i18n/messages",  // default.properties
+//            "classpath:i18n/metas",      // metas.properties
+//            "classpath:i18n/product"      // metas.properties
+//        );
+//
+//        messageSource.setDefaultEncoding("UTF-8");
+//        messageSource.setCacheSeconds(3600);  // Refresh every hour
+//        return messageSource;
+//    }
 
-        // Set multiple base names for properties files
-        messageSource.setBasenames(
-            "classpath:i18n/messages",  // default.properties
-            "classpath:i18n/metas",      // metas.properties
-            "classpath:i18n/product"      // metas.properties
-        );
-
-        messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setCacheSeconds(3600);  // Refresh every hour
-        return messageSource;
-    }
 
 
-
-    /** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
-    @Bean
-    RestClientCustomizer restClientCustomizer() {
-		return restClientBuilder -> restClientBuilder
-				.requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
-						.withConnectTimeout(Duration.ofSeconds(60))
-						.withReadTimeout(Duration.ofSeconds(60))));
-	}
+//    /** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
+//    @Bean
+//    RestClientCustomizer restClientCustomizer() {
+//		return restClientBuilder -> restClientBuilder
+//				.requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
+//						.withConnectTimeout(Duration.ofSeconds(60))
+//						.withReadTimeout(Duration.ofSeconds(60))));
+//	}
 
 	@Bean
         BrandService brandService(@Autowired RemoteFileCachingService rfc, SerialisationService serialisationService) throws Exception {
@@ -182,24 +211,24 @@ public class AppConfig {
 	}
 
 
-	@Bean
-	StandardiserService standardiserService() {
-		return new StandardiserService() {
-			@Override
-			public void standarise(final Price price, final Currency currency) {
-			}
-		};
-	}
+//	@Bean
+//	StandardiserService standardiserService() {
+//		return new StandardiserService() {
+//			@Override
+//			public void standarise(final Price price, final Currency currency) {
+//			}
+//		};
+//	}
 
 	/**
 	 * The service that hot evaluates thymeleaf / spel expressions
 	 *
 	 * @return
 	 */
-	@Bean
-	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
-		return new EvaluationService(evalConfig);
-	}
+//	@Bean
+//	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
+//		return new EvaluationService(evalConfig);
+//	}
 
 
 
@@ -230,20 +259,6 @@ public class AppConfig {
 		return new VerticalsConfigService( serialisationService, googleTaxonomyService, resourceResolver);
 	}
 
-	////////////////////////////////////
-	// Locale resolution
-	////////////////////////////////////
-
-	@Bean
-	LocaleResolver localeResolver() {
-		return new AcceptHeaderLocaleResolver();
-	}
-
-	static LocaleChangeInterceptor localeChangeInterceptor() {
-		final LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
-		lci.setParamName("lang");
-		return lci;
-	}
 
 	@Bean
 	HttpFirewall allowUrlEncodedSlashHttpFirewall() {
@@ -312,7 +327,7 @@ public class AppConfig {
 //				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
 //				registry.addInterceptor(AppConfig.localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
-                                registry.addInterceptor(new ImageResizeInterceptor(resourceService(), config.getAllowedImagesSizeSuffixes(), config.getImageBaseUrl()));
+                registry.addInterceptor(new ImageResizeInterceptor(resourceService(), config.getAllowedImagesSizeSuffixes(), config.getImageBaseUrl()));
 
 			}
 
@@ -324,5 +339,18 @@ public class AppConfig {
 			}
 		};
 	}
+
+
+
+	// TODO : Should be removed
+
+
+	@Bean
+	@Qualifier("openAiCustomApi")
+	OpenAiApi openAiCustomApi(@Autowired PromptServiceConfig genAiConfig) {
+		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
+	}
+
+
 
 }
