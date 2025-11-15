@@ -1,5 +1,7 @@
-import { decompressFromBase64, compressToBase64 } from 'lz-string'
+import LZString from 'lz-string'
 import type { FilterRequestDto, SortRequestDto } from '~~/shared/api-client'
+
+const { decompressFromBase64, compressToBase64 } = LZString
 
 export type CategoryViewMode = 'cards' | 'list' | 'table'
 
