@@ -124,42 +124,61 @@
       scrollable
       content-class="search-suggest-field__scanner-dialog"
     >
-      <v-card class="search-suggest-field__scanner-card">
-        <div class="search-suggest-field__scanner-header">
-          <p class="search-suggest-field__scanner-title">
-            {{ t('search.suggestions.scanner.title') }}
-          </p>
-          <v-btn
-            icon
-            variant="text"
-            class="search-suggest-field__scanner-close"
-            :aria-label="t('search.suggestions.scanner.closeLabel')"
-            @click="closeScannerDialog"
-          >
-            <v-icon icon="mdi-close" aria-hidden="true" />
-          </v-btn>
-        </div>
-        <div class="search-suggest-field__scanner-body">
-          <ClientOnly>
-            <PwaBarcodeScanner
-              :active="isScannerDialogOpen"
-              class="search-suggest-field__scanner-stream"
-              :loading-label="t('search.suggestions.scanner.loading')"
-              :error-label="t('search.suggestions.scanner.error')"
-              @decode="handleScannerDecode"
-            />
-          </ClientOnly>
-          <p class="search-suggest-field__scanner-helper">
-            {{ t('search.suggestions.scanner.helper') }}
-          </p>
-        </div>
-      </v-card>
+      <template v-if="isScannerDialogOpen">
+        <v-card class="search-suggest-field__scanner-card">
+          <div class="search-suggest-field__scanner-header">
+            <p class="search-suggest-field__scanner-title">
+              {{ t('search.suggestions.scanner.title') }}
+            </p>
+            <v-btn
+              icon
+              variant="text"
+              class="search-suggest-field__scanner-close"
+              :aria-label="t('search.suggestions.scanner.closeLabel')"
+              @click="closeScannerDialog"
+            >
+              <v-icon icon="mdi-close" aria-hidden="true" />
+            </v-btn>
+          </div>
+          <div class="search-suggest-field__scanner-body">
+            <ClientOnly>
+              <PwaBarcodeScanner
+                v-if="isScannerComponentReady"
+                :active="isScannerActive"
+                class="search-suggest-field__scanner-stream"
+                :loading-label="t('search.suggestions.scanner.loading')"
+                :error-label="t('search.suggestions.scanner.error')"
+                @decode="handleScannerDecode"
+              />
+            </ClientOnly>
+            <p
+              v-if="isScannerDialogOpen && !isScannerComponentReady"
+              class="search-suggest-field__scanner-loading"
+            >
+              {{ t('search.suggestions.scanner.loading') }}
+            </p>
+            <p class="search-suggest-field__scanner-helper">
+              {{ t('search.suggestions.scanner.helper') }}
+            </p>
+          </div>
+        </v-card>
+      </template>
     </v-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, reactive, ref, useAttrs, watch } from 'vue'
+import type { Component } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  useAttrs,
+  watch,
+} from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -169,7 +188,6 @@ import type {
   SearchSuggestResponseDto,
 } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import PwaBarcodeScanner from '~/components/pwa/PwaBarcodeScanner.vue'
 
 interface CategorySuggestionItem {
   type: 'category'
@@ -234,6 +252,8 @@ const products = ref<ProductSuggestionItem[]>([])
 const currentRequest = ref(0)
 const pendingSubmit = ref(false)
 const isScannerDialogOpen = ref(false)
+const isScannerActive = ref(false)
+const isScannerComponentReady = ref(false)
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
@@ -262,13 +282,64 @@ const suggestionItems = computed<SuggestionItem[]>(() => [
 
 const shouldShowScannerButton = computed(() => display.smAndDown.value)
 
-const openScannerDialog = () => {
+let cachedScannerComponent: Component | null = null
+let scannerLoadPromise: Promise<Component> | null = null
+
+const loadScannerComponent = async (): Promise<Component> => {
+  if (cachedScannerComponent) {
+    return cachedScannerComponent
+  }
+
+  if (!scannerLoadPromise) {
+    scannerLoadPromise = import('~/components/pwa/PwaBarcodeScanner.vue')
+      .then((module) => {
+        cachedScannerComponent = module.default
+        isScannerComponentReady.value = true
+        return cachedScannerComponent
+      })
+      .catch((error) => {
+        scannerLoadPromise = null
+        throw error
+      })
+  }
+
+  return scannerLoadPromise
+}
+
+const PwaBarcodeScanner = defineAsyncComponent(loadScannerComponent)
+
+const openScannerDialog = async () => {
+  if (isScannerDialogOpen.value) {
+    return
+  }
+
   isScannerDialogOpen.value = true
+
+  try {
+    await loadScannerComponent()
+    if (isScannerDialogOpen.value) {
+      isScannerActive.value = true
+    }
+  } catch (error) {
+    if (import.meta.dev) {
+      console.error('Failed to load barcode scanner component', error)
+    }
+  }
 }
 
 const closeScannerDialog = () => {
+  isScannerActive.value = false
   isScannerDialogOpen.value = false
 }
+
+watch(
+  isScannerDialogOpen,
+  (isOpen) => {
+    if (!isOpen) {
+      isScannerActive.value = false
+    }
+  },
+)
 
 const staticServerBase = computed(() => {
   const configured = runtimeConfig.public?.staticServer
@@ -654,6 +725,13 @@ const handleScannerDecode = (rawValue: string | null) => {
   text-align: center
   font-size: 0.9rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+
+.search-suggest-field__scanner-loading
+  margin: 0
+  text-align: center
+  font-size: 0.95rem
+  font-weight: 600
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
 
 .search-suggest-field__entry
   display: flex
