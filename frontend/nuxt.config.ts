@@ -14,10 +14,6 @@ import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
 const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
-const API_CACHEABLE_ORIGINS = ['https://beta.front-api.nudger.fr', 'https://front-api.nudger.fr']
-const FONT_STYLESHEET_ORIGINS = ['https://fonts.googleapis.com']
-const FONT_FILE_ORIGINS = ['https://fonts.gstatic.com']
-const STATIC_CDN_ORIGINS = ['https://cdn.jsdelivr.net', 'https://unpkg.com']
 const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
 const runtimeCaching = [
@@ -33,7 +29,7 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => API_CACHEABLE_ORIGINS.includes(url.origin),
+    urlPattern: ({ url }) => ['https://beta.front-api.nudger.fr', 'https://front-api.nudger.fr'].includes(url.origin),
     handler: 'NetworkFirst',
     options: {
       cacheName: 'nudger-api',
@@ -46,7 +42,7 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => FONT_STYLESHEET_ORIGINS.includes(url.origin),
+    urlPattern: ({ url }) => ['https://fonts.googleapis.com'].includes(url.origin),
     handler: 'StaleWhileRevalidate',
     options: {
       cacheName: 'nudger-font-styles',
@@ -57,7 +53,7 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => FONT_FILE_ORIGINS.includes(url.origin),
+    urlPattern: ({ url }) => ['https://fonts.gstatic.com'].includes(url.origin),
     handler: 'CacheFirst',
     options: {
       cacheName: 'nudger-font-files',
@@ -69,7 +65,7 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => STATIC_CDN_ORIGINS.includes(url.origin),
+    urlPattern: ({ url }) => ['https://cdn.jsdelivr.net', 'https://unpkg.com'].includes(url.origin),
     handler: 'StaleWhileRevalidate',
     options: {
       cacheName: 'nudger-static-cdn',
