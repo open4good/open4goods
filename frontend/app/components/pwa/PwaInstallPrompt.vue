@@ -124,7 +124,7 @@ const {
 const display = useDisplay()
 
 const showInstallBanner = computed(() => isInstallSupported.value && installPromptVisible.value)
-const shouldRenderInstallBanner = computed(() => showInstallBanner.value && !display.smAndDown.value)
+const shouldRenderInstallBanner = computed(() => showInstallBanner.value && display.smAndDown.value)
 const showUpdateBanner = computed(() => updateAvailable.value)
 const installTitle = computed(() => String(t('pwa.install.title')))
 const installDescription = computed(() => String(t('pwa.install.description')))
