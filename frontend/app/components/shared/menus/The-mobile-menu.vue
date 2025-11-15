@@ -153,7 +153,7 @@
                 :href="link.href"
                 :target="link.external ? '_blank' : undefined"
                 :rel="link.external ? 'noopener noreferrer' : undefined"
-                :value="false"
+                :value="link.id"
                 @click="handleCommunityNavigation(link)"
               >
                 <template #prepend>
