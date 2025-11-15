@@ -19,6 +19,7 @@ verticalImage: /images/verticals/washing-machines.png
 
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: true
+popular: true
 
 # GenAiConfig for this vertical
 genAiConfig:
