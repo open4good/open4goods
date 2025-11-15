@@ -387,7 +387,8 @@
       "groups": {
         "default": "Other quick filters",
         "price": "Price",
-        "screen_size": "Screen size"
+        "screen_size": "Screen size",
+        "impactscore": "Ecological impact"
       },
       "navigation": {
         "next": "Scroll next quick filters",
