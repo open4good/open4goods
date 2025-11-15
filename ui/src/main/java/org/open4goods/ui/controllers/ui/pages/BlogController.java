@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class BlogController  implements SitemapExposedController{
+public class BlogController  {
 
 	public static final String DEFAULT_PATH="/blog";
 
@@ -35,83 +35,13 @@ public class BlogController  implements SitemapExposedController{
 	private final XwikiFacadeService xwikiFacadeService;
 	private BlogService blogService;
 	private UiService uiService;
-	
+
 	public BlogController( BlogService blogService, XwikiFacadeService xwikiFacadeService, UiService uiService) {
 		this.blogService = blogService;
 		this.xwikiFacadeService = xwikiFacadeService;
 		this.uiService = uiService;
 	}
 
-	@Override
-	public SitemapEntry getExposedUrls() {
-		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.5, ChangeFreq.WEEKLY);
-	}
-	
-	/**
-	 * Blog entry page
-	 * @param request
-	 * @param tag
-	 * @return
-	 */
-	@GetMapping(DEFAULT_PATH)
-	public ModelAndView blogIndex(final HttpServletRequest request) {
-		ModelAndView model = uiService.defaultModelAndView("blog", request);
-		model.addObject("url",  "/");
-		List<BlogPost> posts = blogService.getPosts();
-		
-		model.addObject("posts", posts);
-		model.addObject("tags",blogService.getTags());
-		return model;
-	}
-
-
-	/**
-	 * Blog entry page
-	 * @param request
-	 * @param tag
-	 * @return
-	 */
-	@GetMapping(DEFAULT_PATH +  "/tag/{tag}")
-	public ModelAndView blogIndexByCat(final HttpServletRequest request, @PathVariable String tag) {
-		ModelAndView model = uiService.defaultModelAndView("blog", request);
-		model.addObject("url",  "/");
-		List<BlogPost> posts = blogService.getPosts();
-		
-		// Filtering by tag
-		if (null != tag) {
-			posts = posts.stream().filter(e->e.getCategory().contains(tag)).toList();
-		}
-		
-		model.addObject("posts", posts);	
-		model.addObject("tags",blogService.getTags());
-		model.addObject("currentTag", tag);
-		return model;
-	}
-
-	
-	
-	
-	
-	/**
-	 * Blog post page
-	 * @param post
-	 * @param request
-	 * @return
-	 */
-	@GetMapping(DEFAULT_PATH + "/{post}")
-	public ModelAndView post(@PathVariable String post, final HttpServletRequest request) {
-		ModelAndView model = uiService.defaultModelAndView("blog-post", request);
-
-		BlogPost blogPost = blogService.getPostsByUrl().get(post);
-		
-		if (null == blogPost) {
-			LOGGER.info("Blog post not found : {}", post);
-			throw new ResponseStatusException( HttpStatus.NOT_FOUND, "Unable to find blog post");
-		} else {
-			model.addObject("post", blogPost);	
-			return model;			
-		}
-	}
 
 	/**
 	 * Retrieve the cover image for a blog post
@@ -121,7 +51,7 @@ public class BlogController  implements SitemapExposedController{
 	 * @param response
 	 * @throws IOException
 	 */
-	@GetMapping(DEFAULT_PATH + "/{page}/{filename}")	
+	@GetMapping(DEFAULT_PATH + "/{page}/{filename}")
 	// TODO(p3,perf) : Caching
 	public void attachment( @PathVariable(name = "page") String page, @PathVariable(name = "filename") String filename, final HttpServletRequest request, HttpServletResponse response) throws IOException  {
 		byte[] bytes = xwikiFacadeService.downloadAttachment("Blog", page, filename);
@@ -129,9 +59,9 @@ public class BlogController  implements SitemapExposedController{
 		// TODO(p3,perf) : Have a streamed version
 		response.getOutputStream().write(bytes);
 	}
-	
-	
-	@GetMapping(XWikiHtmlService.PROXYFIED_FOLDER+ "/**")	
+
+
+	@GetMapping(XWikiHtmlService.PROXYFIED_FOLDER+ "/**")
 	// TODO(p3,design) : classical xwiki download content is served here and it shouldn't, because of XwikiController not being @nnotated
 	// TODO(p3,perf) : Caching
 	public void attachment( final HttpServletRequest request, HttpServletResponse response) throws IOException  {
@@ -141,8 +71,8 @@ public class BlogController  implements SitemapExposedController{
 		// TODO(p3,perf) : Have a streamed version
 		response.getOutputStream().write(bytes);
 	}
-	
-	
+
+
 	/**
 	 * RSS Feed url
 	 * @param response
@@ -157,8 +87,8 @@ public class BlogController  implements SitemapExposedController{
 		response.setHeader("Cache-Control", "no-cache");
 		response.setHeader("Pragma", "no-cache");
 		response.setDateHeader("Expires", -1);
-		response.getWriter().write(blogService.rss(uiService.getSiteLanguage(request)));		
+		response.getWriter().write(blogService.rss(uiService.getSiteLanguage(request)));
 	}
-	
-	
+
+
 }

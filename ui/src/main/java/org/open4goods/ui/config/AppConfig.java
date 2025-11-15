@@ -4,24 +4,14 @@ package org.open4goods.ui.config;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.services.feedservice.service.AbstractFeedService;
-import org.open4goods.services.feedservice.service.AwinFeedService;
-import org.open4goods.services.feedservice.service.EffiliationFeedService;
-import org.open4goods.services.feedservice.config.FeedConfiguration;
-import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.icecat.services.IcecatService;
-import org.open4goods.icecat.services.loader.CategoryLoader;
-import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.Currency;
@@ -31,29 +21,19 @@ import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.services.urlfetching.config.UrlFetcherConfig;
-import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
-import org.open4goods.services.contribution.repository.ContributionVoteRepository;
-import org.open4goods.services.contribution.service.ContributionService;
 import org.open4goods.ui.services.GoogleIndexationService;
-import org.open4goods.services.gtinservice.service.GtinService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.web.client.RestClientCustomizer;
@@ -64,12 +44,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -78,7 +54,6 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.util.UrlPathHelper;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
@@ -100,39 +75,10 @@ public class AppConfig {
 		this.config = config;
 	}
 
-	@Bean
-	@Qualifier("perplexityChatModel")
-	OpenAiApi perplexityApi(@Autowired PromptServiceConfig genAiConfig) {
-		return new OpenAiApi(genAiConfig.getPerplexityBaseUrl(),
-							 genAiConfig.getPerplexityApiKey(),
-							 genAiConfig.getPerplexityCompletionsPath(),
-							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
-							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
-	}
-
-	@Bean
-	@Qualifier("openAiCustomApi")
-	OpenAiApi openAiCustomApi(@Autowired PromptServiceConfig genAiConfig) {
-		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
-	}
-
-
-	@Bean
-	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi,
-								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
-								@Autowired  EvaluationService spelEvaluationService,
-								@Autowired  SerialisationService serialisationService,
-								@Autowired PromptServiceConfig genAiConfig,
-								@Autowired MeterRegistry meterRegistry) {
-		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService, meterRegistry);
-	}
 
 
 
-	@Bean
-	UrlFetchingService urlFetchingService (@Autowired UrlFetcherConfig fetchingConfig, @Autowired MeterRegistry registry) {
-		return new UrlFetchingService(fetchingConfig, registry);
-	}
+
 
 
 	@Bean
@@ -176,39 +122,6 @@ public class AppConfig {
 
 
     @Bean
-    public AwinFeedService awinFeedService(
-                                           RemoteFileCachingService remoteFileCachingService,
-                                           DataSourceConfigService dataSourceConfigService,
-                                           SerialisationService serialisationService,
-                                           UiConfig uiConfig
-
-    		) {
-        // Retrieve Awin-specific feed configuration from the fetcher properties
-        FeedConfiguration awinConfig = uiConfig.getFeedConfigs().get("awin");
-        return new AwinFeedService(awinConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getAwinAdvertiserId(), uiConfig.getAffiliationConfig().getAwinAccessToken());
-    }
-
-    @Bean
-    public EffiliationFeedService effiliationFeedService(
-                                                         RemoteFileCachingService remoteFileCachingService,
-                                                         DataSourceConfigService dataSourceConfigService,
-                                                         SerialisationService serialisationService,
-                                                         UiConfig uiConfig) {
-        // Retrieve Effiliation-specific feed configuration from the fetcher properties
-        FeedConfiguration effiliationConfig = uiConfig.getFeedConfigs().get("effiliation");
-        return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getEffiliationApiKey());
-    }
-
-    @Bean
-    public FeedService feedService(List<AbstractFeedService> feedServices,
-                                   DataSourceConfigService dataSourceConfigService) {
-        // The FeedService aggregates all concrete feed implementations.
-        return new FeedService(feedServices, dataSourceConfigService);
-    }
-
-
-
-    @Bean
     public ResourceBundle messageSource() {
         ResourceBundle messageSource = new ResourceBundle();
 
@@ -222,11 +135,6 @@ public class AppConfig {
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(3600);  // Refresh every hour
         return messageSource;
-    }
-
-    @Bean
-    ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig, ElasticsearchOperations esOps) {
-    	return new ContributionService(cacheManager, serialisationService, repository, uiConfig.getReversementConfig(), esOps);
     }
 
 
@@ -245,40 +153,6 @@ public class AppConfig {
                 return new BrandService(rfc, serialisationService);
         }
 
-	@Bean
-    FeatureLoader featureLoader(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService) {
-                return new FeatureLoader(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService);
-        }
-
-    @Bean
-    CategoryLoader categoryLoader(UiConfig properties, RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
-                return new CategoryLoader(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), verticalConfigService, featureLoader);
-        }
-
-    @Bean
-    IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
-                // TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
-                return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), featureLoader, categoryLoader);
-        }
-
-
-	// TODO(note) : DISABLING SITE MAP GENERATION
-	//	@Bean
-	//	public SitemapGenerationService sitemapGenerationService (@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props ) {
-	//		return new SitemapGenerationService(aggregatedDataRepository, props);
-	//	}
-	//
-
-
-//	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
-//		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
-//	}
-
-//	@Bean
-//	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
-//		return new XWikiReadService(mappingService, props.getWikiConfig());
-//	}
-
 
 
 
@@ -288,10 +162,6 @@ public class AppConfig {
 	}
 
 
-
-	@Bean MailService mailService(@Autowired final JavaMailSender sender) {
-		return new MailService(sender);
-	}
 
 	@Bean
 	ImageMagickService imageMagickService() {
@@ -309,12 +179,6 @@ public class AppConfig {
 	@Bean
 	ProductRepository aggregatedDataRepo() {
 		return new ProductRepository();
-	}
-
-
-	@Bean
-	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
-		return new SearchService(aggregatedDataRepository, uiconfig.logsFolder());
 	}
 
 

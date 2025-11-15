@@ -32,13 +32,12 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class OpenDataController  implements SitemapExposedController{
+public class OpenDataController {
 
 	public static final String DEFAULT_PATH="/opendata";
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
     private final OpenDataService openDataService;
-    private @Autowired UiService uiService;
     private final OpenDataConfig openDataConfig;
 
     public OpenDataController(OpenDataService openDataService, OpenDataConfig openDataConfig) {
@@ -46,53 +45,6 @@ public class OpenDataController  implements SitemapExposedController{
         this.openDataConfig = openDataConfig;
     }
 
-	@Override
-	public SitemapEntry getExposedUrls() {
-		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY);
-	}
-
-	@Override
-	public List<SitemapEntry> getMultipleExposedUrls() {
-		return Arrays.asList(
-				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY),
-				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/gtin", 0.3, ChangeFreq.YEARLY),
-				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/isbn", 0.3, ChangeFreq.YEARLY)
-		);
-	}
-
-	@GetMapping(value = {DEFAULT_PATH})
-	public ModelAndView opendata(final HttpServletRequest request) {
-		final ModelAndView ret = uiService.defaultModelAndView("opendata", request);
-		ret.addObject("count", openDataService.totalItems());
-		ret.addObject("countGTIN", openDataService.totalItemsGTIN());
-		ret.addObject("countISBN", openDataService.totalItemsISBN());
-		ret.addObject("isbnLastUpdated", openDataService.isbnLastUpdate());
-		ret.addObject("isbnFileSize", openDataService.isbnFileSize());
-		ret.addObject("gtinLastUpdated", openDataService.gtinLastUpdate());
-		ret.addObject("gtinFileSize", openDataService.gtinFileSize());
-		ret.addObject("page", "open data");
-		return ret;
-	}
-
-	@GetMapping(value = {DEFAULT_PATH + "/gtin"})
-	public ModelAndView opendataGtin(final HttpServletRequest request) {
-		final ModelAndView ret = uiService.defaultModelAndView("opendata-gtin", request);
-		ret.addObject("lastUpdated", openDataService.gtinLastUpdate());
-		ret.addObject("countGTIN", openDataService.totalItemsGTIN());
-		ret.addObject("fileSize", openDataService.gtinFileSize());
-		ret.addObject("page", "gtin data");
-		return ret;
-	}
-
-	@GetMapping(value = {DEFAULT_PATH + "/isbn"})
-	public ModelAndView opendataIsbn(final HttpServletRequest request) {
-		final ModelAndView ret = uiService.defaultModelAndView("opendata-isbn", request);
-		ret.addObject("lastUpdated", openDataService.isbnLastUpdate());
-		ret.addObject("countISBN", openDataService.totalItemsISBN());
-		ret.addObject("fileSize", openDataService.isbnFileSize());
-		ret.addObject("page", "isbn data");
-		return ret;
-	}
 
 	@GetMapping(path = "/opendata/gtin-open-data.zip")
 	public void downloadGtinData(final HttpServletResponse response) throws IOException, TechnicalException {

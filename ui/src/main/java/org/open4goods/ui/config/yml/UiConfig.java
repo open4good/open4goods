@@ -7,18 +7,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.services.contribution.config.yml.ReversementConfig;
-import org.open4goods.services.feedservice.config.AffiliationConfig;
-import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.commons.config.yml.BanCheckerConfig;
-import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.ui.OpenSearchConfig;
 import org.open4goods.commons.config.yml.ui.WebConfig;
-import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.priceevents.PriceRestitutionConfig;
 import org.open4goods.model.vertical.SiteNaming;
+import org.open4goods.services.blog.config.BlogConfiguration;
+import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,10 +141,6 @@ public class UiConfig {
 	private UrlCheckConfig urlcheck;
 
 
-	private AffiliationConfig affiliationConfig = new AffiliationConfig();
-
-
-	private Map<String, FeedConfiguration> feedConfigs = new HashMap<>();
 
 	/***
 	 * Config for IP and UA banChecking
@@ -158,8 +151,6 @@ public class UiConfig {
 	 * The configuration for icecat features
 
 	 */
-	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
-
 
 
 	/**
@@ -207,15 +198,6 @@ public class UiConfig {
 		return resourceTemplateFolder+"i18n"+File.separator+"messages";
 	}
 
-	/**
-	 * Configuration for the brand service
-	 */
-
-
-	/**
-	 * Configuration for the reversements
-	 */
-	private ReversementConfig reversementConfig = new ReversementConfig();
 
 	/**
 	 * Configuration for Amazon Links & Tags
@@ -371,17 +353,6 @@ public class UiConfig {
 
 
 
-
-	public ReversementConfig getReversementConfig() {
-		return reversementConfig;
-	}
-
-
-	public void setReversementConfig(ReversementConfig reversementConfig) {
-		this.reversementConfig = reversementConfig;
-	}
-
-
 	public DevModeConfiguration getDevModeConfig() {
 		return devModeConfig;
 	}
@@ -433,16 +404,6 @@ public class UiConfig {
 
 	public void setTagListUrl(String tagListUrl) {
 		this.tagListUrl = tagListUrl;
-	}
-
-
-	public IcecatConfiguration getIcecatFeatureConfig() {
-		return icecatFeatureConfig;
-	}
-
-
-	public void setIcecatFeatureConfig(IcecatConfiguration icecatFeatureConfig) {
-		this.icecatFeatureConfig = icecatFeatureConfig;
 	}
 
 
@@ -519,27 +480,6 @@ public class UiConfig {
 	public void setPriceConfig(PriceRestitutionConfig priceConfig) {
 		this.priceConfig = priceConfig;
 	}
-
-
-	public AffiliationConfig getAffiliationConfig() {
-		return affiliationConfig;
-	}
-
-
-	public void setAffiliationConfig(AffiliationConfig affiliationConfig) {
-		this.affiliationConfig = affiliationConfig;
-	}
-
-
-	public Map<String, FeedConfiguration> getFeedConfigs() {
-		return feedConfigs;
-	}
-
-
-	public void setFeedConfigs(Map<String, FeedConfiguration> feedConfigs) {
-		this.feedConfigs = feedConfigs;
-	}
-
 
 
 	public Localisable<String, FunFactsConfig> getFunFacts() {

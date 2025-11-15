@@ -40,12 +40,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.crawler-commons</groupId>
-            <artifactId>crawler-commons</artifactId>
-            <version>1.5</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
@@ -78,22 +72,14 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>xwiki-spring-boot-starter</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>blog</artifactId>
-            <version>${global.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>5.12.0</version>
         </dependency>
+
+
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-indexing</artifactId>
@@ -122,13 +108,6 @@
 
         <dependency>
             <groupId>org.open4goods</groupId>
-            <artifactId>captcha</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
             <artifactId>product-repository</artifactId>
             <version>${global.version}</version>
         </dependency>
@@ -139,27 +118,9 @@
             <version>${global.version}</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>reviewgeneration</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>github-feedback</artifactId>
-            <version>${global.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>opendata</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>feedservice</artifactId>
             <version>${global.version}</version>
         </dependency>
 
@@ -168,13 +129,6 @@
             <artifactId>brand</artifactId>
             <version>${global.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>contribution</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-
 
 
         <!-- Commons  -->
@@ -188,12 +142,6 @@
             <groupId>org.open4goods</groupId>
             <artifactId>image-processing</artifactId>
             <version>${global.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.talanlabs</groupId>
-            <artifactId>avatar-generator</artifactId>
-            <version>1.1.0</version>
         </dependency>
 
         <dependency>
@@ -229,24 +177,6 @@
 		</dependency>
 -->
 
-        <dependency>
-            <groupId>jakarta.mail</groupId>
-            <artifactId>jakarta.mail-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.angus</groupId>
-            <artifactId>jakarta.mail</artifactId>
-
-        </dependency>
-
-        <dependency>
-            <groupId>com.talanlabs</groupId>
-            <artifactId>avatar-generator-8bit</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-
         <!--
 		https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
         <dependency>
@@ -255,57 +185,12 @@
             <version>4.5</version>
         </dependency>
 
-
-        <!-- Webjars-->
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>webjars-locator</artifactId>
-            <version>0.52</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>bootstrap</artifactId>
-            <version>5.3.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-            <version>3.7.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>datatables</artifactId>
-            <version>2.3.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>datatables-responsive</artifactId>
-            <version>2.2.7</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>mustache</artifactId>
-            <version>4.2.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>chartjs</artifactId>
-            <version>4.4.3</version>
-        </dependency>
-
-
         <dependency>
             <groupId>org.open4goods</groupId>
-            <artifactId>icecat</artifactId>
+            <artifactId>blog</artifactId>
             <version>${global.version}</version>
         </dependency>
+
     </dependencies>
 
     <build>
