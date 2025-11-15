@@ -119,7 +119,7 @@ const problemItems = computed(() => [
     text: String(t('home.problems.items.budgetVsEcology')),
   },
   {
-    icon: 'mdi-tab-multiple',
+    icon: 'mdi-table-multiple',
     text: String(t('home.problems.items.tooManyTabs')),
   },
 ])

@@ -105,7 +105,7 @@ jobs:
           API_URL: ${{ secrets.BETA_API_URL }}
           MACHINE_TOKEN: ${{ secrets.BETA_MACHINE_TOKEN }}
           HCAPTCHA_SITE_KEY: ${{ secrets.BETA_HCAPTCHA_SITE_KEY }}
-          
+          APP_ENV: production
       - name: Deploy SSR output to Beta server
         uses: easingthemes/ssh-deploy@main
         env:
