@@ -1,0 +1,13 @@
+<span th:if="${attribute}" th:with="conflicts = ${attribute.hasConflicts()}, sourcesCount=${attribute.sourcesCount()}, distinctValues=${attribute.distinctValues()}">
+	
+	<!-- /** Conflicts  **/ -->
+	<img  th:if="${conflicts}" class="help-pointer" height="16" src="/icons/ko.png" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing.conflict(${attribute.sourcesCount()}, ${disctinctValues})}">	
+	<!-- /** No conflicts, 1 source  **/ -->
+	<img th:unless="${conflicts}"  class="help-pointer" height="16" src="/icons/ok.png" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing.noconflict(${attribute.sourcesCount()}, ${disctinctValues})}">
+
+	
+	<!-- /**  1 source  **/ -->
+	<span th:if="${sourcesCount == 1}" class="help-pointer badge rounded-pill bg-info" th:text="${sourcesCount}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing.list(${attribute.sourcesCount()}, ${disctinctValues}, ${attribute.providersToString()})}"></span>
+	<!-- /**  multiple source  **/ -->
+	<span th:unless="${sourcesCount == 1}" class="help-pointer badge rounded-pill bg-success" th:text="${sourcesCount}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing.list(${attribute.sourcesCount()}, ${disctinctValues}, ${attribute.sourcesToString()})}"></span>
+</span>

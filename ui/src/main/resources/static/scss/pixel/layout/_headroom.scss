@@ -1,0 +1,70 @@
+.headroom {
+    will-change     : transform;
+    background-color: inherit;
+    @include transition($transition-base);
+}
+
+.headroom--pinned {
+    @extend .position-fixed;
+    transform: translateY(0%);
+}
+
+.headroom--unpinned {
+    @extend .position-fixed;
+    transform: translateY(-100%);
+}
+
+.headroom--not-top {
+    padding-top   : 1rem;
+    padding-bottom: 1rem;
+
+    @each $color,
+    $value in $theme-colors {
+        &.navbar-theme-#{$color} {
+            background-color: $value;
+
+            .navbar-brand-light {
+                display: none;
+            }
+
+            .navbar-brand-dark {
+                display: block;
+            }
+
+            .nav-link {
+                color: $navbar-dark-color;
+
+                .nav-link-arrow {
+                    color: $navbar-dark-color;
+                }
+
+                &:hover,
+                &:focus {
+                    color: $navbar-dark-hover-color;
+                }
+            }
+        }
+    }
+
+    &.headroom--pinned {
+
+        @include media-breakpoint-down(lg) {
+            .nav-link {
+                color: $navbar-light-color;
+    
+                .nav-link-arrow {
+                    color: $navbar-light-color;
+                }
+    
+                &:hover,
+                &:focus {
+                    color: $navbar-light-hover-color;
+                }
+            }
+    
+            .navbar-toggler-icon {
+                background-image: $navbar-dark-toggler-icon-bg;
+            }
+        }
+    }
+}

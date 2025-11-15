@@ -1,0 +1,29 @@
+.ct-bar {
+    stroke-linecap: round;
+}
+
+.ct-label {
+    fill       : $body-color;
+    color      : $body-color;
+    font-size  : 0.75rem;
+    margin-top : 7px;
+    font-weight: $font-weight-bold;
+}
+
+.ct-slice-pie {
+    stroke      : $white;
+    stroke-width: 3px;
+}
+
+.ct-chart-donut .ct-series {
+    stroke      : $white;
+    stroke-width: 3px;
+}
+
+.ct-chart-pie .ct-label,
+.ct-chart-donut .ct-label {
+    font-size  : 0.75rem;
+    font-weight: $font-weight-bold;
+    color      : $white;
+    fill       : $white;
+}
