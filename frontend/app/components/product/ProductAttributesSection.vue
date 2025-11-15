@@ -193,7 +193,7 @@ const referentialAttributes = computed<Record<string, string>>(
 const timeline = computed(() => props.product?.timeline ?? null)
 
 const staticServerBase = computed(() => {
-  const fallback = 'https://nudger.fr'
+  const fallback = 'https://static.nudger.fr'
   const base = runtimeConfig.public?.staticServer ?? fallback
   return base.endsWith('/') ? base.slice(0, -1) : base
 })
