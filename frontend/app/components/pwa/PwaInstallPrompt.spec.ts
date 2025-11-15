@@ -137,7 +137,8 @@ describe('PwaInstallPrompt', () => {
     resetState()
   })
 
-  it('renders the install banner when installation is supported and prompted', async () => {
+  it('renders the install banner on mobile when installation is supported and prompted', async () => {
+    mobileBreakpoint.value = true
     const wrapper = mountPrompt()
     installPromptVisible.value = true
     isInstallSupported.value = true
@@ -147,8 +148,7 @@ describe('PwaInstallPrompt', () => {
     expect(wrapper.text()).toContain('Install Nudger')
   })
 
-  it('hides the install banner on mobile displays', async () => {
-    mobileBreakpoint.value = true
+  it('hides the install banner on desktop displays', async () => {
     const wrapper = mountPrompt()
     installPromptVisible.value = true
     isInstallSupported.value = true
@@ -158,6 +158,7 @@ describe('PwaInstallPrompt', () => {
   })
 
   it('triggers install actions from the CTA and dismiss buttons', async () => {
+    mobileBreakpoint.value = true
     const wrapper = mountPrompt()
     installPromptVisible.value = true
     isInstallSupported.value = true
