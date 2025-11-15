@@ -1,7 +1,5 @@
 @use 'sass:map'
 
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap')
-
 // Variables pour les fonts
 $font-family-primary: 'Poppins', 'Hanken Grotesk', sans-serif
 $font-family-signature: 'Hanken Grotesk', 'Poppins', sans-serif
@@ -30,18 +28,49 @@ $font-files: (
 )
 
 // Mixin pour les @font-face
-@mixin font-face($name, $weight, $style: normal)
+@mixin font-face(
+  $name,
+  $weight,
+  $style: normal,
+  $font-folder: 'Poppins',
+  $file-map: $font-files,
+  $file-name: null,
+  $extension: 'ttf',
+  $format: 'truetype'
+)
   @font-face
     font-family: $name
     font-style: $style
     font-weight: $weight
     font-display: swap
-    src: url('~/assets/fonts/Poppins/Poppins-#{map.get($font-files, $weight)}.ttf') format('truetype')
+    $resolved-file: if($file-name, $file-name, '#{$name}-#{map.get($file-map, $weight)}')
+    @if $file-name == null and $style == italic
+      $resolved-file: '#{$resolved-file}Italic'
+    src: url('~/assets/fonts/#{$font-folder}/#{$resolved-file}.#{$extension}') format($format)
 
 // Génération automatique des @font-face
 @each $weight-name, $weight-value in $font-weights
   @include font-face('Poppins', $weight-value)
   @include font-face('Poppins', $weight-value, italic)
+
+@include font-face(
+  'Hanken Grotesk',
+  map.get($font-weights, regular),
+  normal,
+  $font-folder: 'HankenGrotesk',
+  $file-name: 'HankenGrotesk-Regular',
+  $extension: 'woff2',
+  $format: 'woff2'
+)
+@include font-face(
+  'Hanken Grotesk',
+  map.get($font-weights, regular),
+  italic,
+  $font-folder: 'HankenGrotesk',
+  $file-name: 'HankenGrotesk-Italic',
+  $extension: 'woff2',
+  $format: 'woff2'
+)
 
 // Application des fonts
 :root
