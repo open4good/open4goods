@@ -60,6 +60,8 @@ const categoriesLoadingMock = ref(false)
 const fetchNavigationMock = vi.fn().mockResolvedValue(null)
 const categoryNavigationMock = ref(null)
 const navigationLoadingMock = ref(false)
+const useMenuSearchControlsSpy = vi.fn()
+const menuSearchControlsInstances: Record<string, unknown>[] = []
 
 function useCategoriesComposable() {
   return {
@@ -95,6 +97,9 @@ function useRouteMock() {
 function useRouterMock() {
   return routerInstance
 }
+
+;(globalThis as { useRoute?: typeof useRouteMock }).useRoute = useRouteMock
+;(globalThis as { useRouter?: typeof useRouterMock }).useRouter = useRouterMock
 
 vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({
@@ -198,6 +203,24 @@ vi.mock('nuxt/app', () => {
   }
 })
 
+vi.mock('~/composables/menus/useMenuSearchControls', async () => {
+  const actual = await vi.importActual<typeof import('~/composables/menus/useMenuSearchControls')>(
+    '~/composables/menus/useMenuSearchControls',
+  )
+
+  const useMenuSearchControlsMock = vi.fn((...args) => {
+    useMenuSearchControlsSpy(...args)
+    const result = actual.useMenuSearchControls(...args)
+    menuSearchControlsInstances.push(result)
+    return result
+  })
+
+  return {
+    ...actual,
+    useMenuSearchControls: useMenuSearchControlsMock,
+  }
+})
+
 const useCookieMock = ensureCookieMock()
 
 vi.mock('vue-router', () => ({
@@ -256,6 +279,10 @@ describe('Shared menu authentication controls', () => {
     isInstallSupported.value = false
     installInProgress.value = false
     requestInstallMock.mockReset()
+    useMenuSearchControlsSpy.mockClear()
+    menuSearchControlsInstances.length = 0
+    currentRoute.path = '/'
+    currentRoute.fullPath = '/'
 
     if (reloadSpy) {
       reloadSpy.mockRestore()
@@ -309,6 +336,20 @@ describe('Shared menu authentication controls', () => {
     expect(wrapper.emitted('close')).toBeTruthy()
   })
 
+  it('reuses the shared menu search composable in hero and mobile menus', async () => {
+    const heroWrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
+    expect(heroWrapper.exists()).toBe(true)
+
+    const mobileWrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    expect(mobileWrapper.exists()).toBe(true)
+
+    expect(useMenuSearchControlsSpy).toHaveBeenCalledTimes(2)
+    expect(useMenuSearchControlsSpy.mock.calls[0]?.[0]).toBeUndefined()
+    expect(useMenuSearchControlsSpy.mock.calls[1]?.[0]).toMatchObject({
+      onNavigate: expect.any(Function),
+    })
+  })
+
   it('logs out and redirects from the hero menu when clicked', async () => {
     isLoggedIn.value = true
     username.value = 'Jane Doe'
@@ -336,6 +377,41 @@ describe('Shared menu authentication controls', () => {
 
     expect(logoutMock).toHaveBeenCalledTimes(1)
     expect(wrapper.emitted('close')).toBeTruthy()
+  })
+
+  it('hides the hero search when navigating back to the home route', async () => {
+    currentRoute.path = '/products'
+    currentRoute.fullPath = '/products'
+
+    const startIndex = menuSearchControlsInstances.length
+    await mountSuspended(TheHeroMenu, heroMountOptions)
+    const heroControls = menuSearchControlsInstances[startIndex] as { showMenuSearch: Ref<boolean> }
+
+    currentRoute.path = '/'
+    currentRoute.fullPath = '/'
+    await flushPromises()
+    await flushPromises()
+
+    expect(heroControls?.showMenuSearch.value).toBe(false)
+  })
+
+  it('clears the mobile search query through the shared handler', async () => {
+    currentRoute.path = '/products'
+    currentRoute.fullPath = '/products'
+
+    const startIndex = menuSearchControlsInstances.length
+    await mountSuspended(TheMobileMenu, mobileMountOptions)
+    const mobileControls = menuSearchControlsInstances[startIndex] as {
+      searchQuery: Ref<string>
+      handleSearchClear: () => void
+    }
+
+    expect(mobileControls).toBeTruthy()
+
+    mobileControls.searchQuery.value = 'impact score'
+    mobileControls.handleSearchClear()
+
+    expect(mobileControls.searchQuery.value).toBe('')
   })
 
   it('clears the caches from the hero menu and reloads the page', async () => {

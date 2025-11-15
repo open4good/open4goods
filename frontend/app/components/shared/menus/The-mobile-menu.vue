@@ -259,12 +259,9 @@ import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from 'vue-i18n'
 
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import type {
-  CategorySuggestionItem,
-  ProductSuggestionItem,
-} from '~/components/search/SearchSuggestField.vue'
 import { useCommunityMenu, type CommunityMenuLink } from './useCommunityMenu'
 import { usePwaInstallPromptBridge } from '~/composables/pwa/usePwaInstallPromptBridge'
+import { MIN_SEARCH_QUERY_LENGTH, useMenuSearchControls } from '~/composables/menus/useMenuSearchControls'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -294,13 +291,18 @@ const { isLoggedIn, logout, username, roles } = useAuth()
 const router = useRouter()
 const route = useRoute()
 const isClearingCache = ref(false)
-
-const MIN_SEARCH_QUERY_LENGTH = 2
-const searchQuery = ref('')
-const homeRoutePath = computed(() => resolveLocalizedRoutePath('index', currentLocale.value))
-const searchRoutePath = computed(() => resolveLocalizedRoutePath('search', currentLocale.value))
-const showMenuSearch = computed(() => route.path !== homeRoutePath.value)
 const showInstallMenuItem = computed(() => installPromptVisible.value && isInstallSupported.value)
+
+const {
+  searchQuery,
+  showMenuSearch,
+  handleSearchClear,
+  handleSearchSubmit,
+  handleCategorySuggestion,
+  handleProductSuggestion,
+} = useMenuSearchControls({
+  onNavigate: () => emit('close'),
+})
 
 const { sections: communitySections, activePaths: communityActivePaths } = useCommunityMenu(t, currentLocale)
 const communityLabel = computed(() => String(t('siteIdentity.menu.items.contact')))
@@ -319,27 +321,6 @@ const isActiveRoute = (path: string): boolean => {
 }
 
 const isCommunityActive = computed(() => communityActivePaths.value.some((path) => isActiveRoute(path)))
-
-watch(
-  () => route.path,
-  () => {
-    if (route.path === homeRoutePath.value) {
-      searchQuery.value = ''
-    }
-  },
-)
-
-watch(homeRoutePath, (path) => {
-  if (route.path === path) {
-    searchQuery.value = ''
-  }
-})
-
-watch(showMenuSearch, (visible) => {
-  if (!visible) {
-    searchQuery.value = ''
-  }
-})
 
 watch(
   isCommunityActive,
@@ -390,84 +371,6 @@ const updateSearchQuery = (value: string) => {
   searchQuery.value = value
 }
 
-const handleSearchClear = () => {
-  searchQuery.value = ''
-}
-
-const navigateToSearch = (query?: string) => {
-  const normalizedQuery = query?.trim() ?? ''
-
-  router.push({
-    path: searchRoutePath.value,
-    query: normalizedQuery ? { q: normalizedQuery } : undefined,
-  })
-
-  emit('close')
-}
-
-const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
-  if (!raw) {
-    return null
-  }
-
-  const trimmed = raw.trim()
-
-  if (!trimmed) {
-    return null
-  }
-
-  if (/^https?:\/\//iu.test(trimmed)) {
-    return trimmed
-  }
-
-  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
-}
-
-const handleSearchSubmit = () => {
-  const trimmedQuery = searchQuery.value.trim()
-
-  if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
-    return
-  }
-
-  navigateToSearch(trimmedQuery)
-}
-
-const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
-  searchQuery.value = suggestion.title
-
-  const normalizedUrl = normalizeVerticalHomeUrl(suggestion.url)
-
-  if (normalizedUrl) {
-    emit('close')
-    if (/^https?:\/\//iu.test(normalizedUrl) && typeof window !== 'undefined') {
-      window.open(normalizedUrl, '_blank', 'noopener,noreferrer')
-      return
-    }
-
-    router.push(normalizedUrl)
-    return
-  }
-
-  navigateToSearch(suggestion.title)
-}
-
-const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
-  searchQuery.value = suggestion.title
-
-  const gtin = suggestion.gtin?.trim()
-
-  if (gtin) {
-    emit('close')
-    router.push({
-      name: 'gtin',
-      params: { gtin },
-    })
-    return
-  }
-
-  navigateToSearch(suggestion.title)
-}
 
 const handleInstallFromMenu = async () => {
   if (!showInstallMenuItem.value || installInProgress.value) {
