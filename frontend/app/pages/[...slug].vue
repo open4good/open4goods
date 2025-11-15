@@ -296,7 +296,7 @@ const scoreAggregations = async () => {
 
   const aggs: Agg[] = scores.map((scoreId) => ({
     name: `score_${scoreId}`,
-    field: `scores.${scoreId}.value`,
+    field: `scores.${scoreId}.relativ.value`,
     type: AggTypeEnum.Range,
     step: 0.5,
   }))
