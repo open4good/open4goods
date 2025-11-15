@@ -1,30 +1,32 @@
 <template>
-  <v-autocomplete
-    v-model="selectedItem"
-    :search="internalSearch"
-    :items="suggestionItems"
-    :label="label"
-    :placeholder="placeholder"
-    :aria-label="ariaLabel"
-    :loading="loading"
-    :menu-props="menuProps"
-    :hide-no-data="!showEmptyState"
-    :no-data-text="''"
-    menu-icon=""
-    prepend-inner-icon="mdi-magnify"
-    variant="solo"
-    density="comfortable"
-    clearable
-    hide-details
-    return-object
-    class="search-suggest-field"
-    @update:model-value="handleSelection"
-    @click:clear="handleClear"
-    @keydown.enter="handleEnterKey"
-    @update:search="handleSearchInput"
-    @blur="handleBlur"
-    @focus="handleFocus"
-  >
+  <div class="search-suggest-field__wrapper" v-bind="attrs">
+    <v-autocomplete
+      v-model="selectedItem"
+      :search="internalSearch"
+      :items="suggestionItems"
+      item-value="id"
+      :label="label"
+      :placeholder="placeholder"
+      :aria-label="ariaLabel"
+      :loading="loading"
+      :menu-props="menuProps"
+      :hide-no-data="!showEmptyState"
+      :no-data-text="''"
+      menu-icon=""
+      prepend-inner-icon="mdi-magnify"
+      variant="solo"
+      density="comfortable"
+      clearable
+      hide-details
+      return-object
+      class="search-suggest-field"
+      @update:model-value="handleSelection"
+      @click:clear="handleClear"
+      @keydown.enter="handleEnterKey"
+      @update:search="handleSearchInput"
+      @blur="handleBlur"
+      @focus="handleFocus"
+    >
     <template #append-inner>
       <slot v-if="$slots['append-inner']" name="append-inner" />
       <v-btn
@@ -114,49 +116,50 @@
         </p>
       </div>
     </template>
-  </v-autocomplete>
-  <v-dialog
-    v-model="isScannerDialogOpen"
-    fullscreen
-    transition="dialog-bottom-transition"
-    scrollable
-    content-class="search-suggest-field__scanner-dialog"
-  >
-    <v-card class="search-suggest-field__scanner-card">
-      <div class="search-suggest-field__scanner-header">
-        <p class="search-suggest-field__scanner-title">
-          {{ t('search.suggestions.scanner.title') }}
-        </p>
-        <v-btn
-          icon
-          variant="text"
-          class="search-suggest-field__scanner-close"
-          :aria-label="t('search.suggestions.scanner.closeLabel')"
-          @click="closeScannerDialog"
-        >
-          <v-icon icon="mdi-close" aria-hidden="true" />
-        </v-btn>
-      </div>
-      <div class="search-suggest-field__scanner-body">
-        <ClientOnly>
-          <PwaBarcodeScanner
-            :active="isScannerDialogOpen"
-            class="search-suggest-field__scanner-stream"
-            :loading-label="t('search.suggestions.scanner.loading')"
-            :error-label="t('search.suggestions.scanner.error')"
-            @decode="handleScannerDecode"
-          />
-        </ClientOnly>
-        <p class="search-suggest-field__scanner-helper">
-          {{ t('search.suggestions.scanner.helper') }}
-        </p>
-      </div>
-    </v-card>
-  </v-dialog>
+    </v-autocomplete>
+    <v-dialog
+      v-model="isScannerDialogOpen"
+      fullscreen
+      transition="dialog-bottom-transition"
+      scrollable
+      content-class="search-suggest-field__scanner-dialog"
+    >
+      <v-card class="search-suggest-field__scanner-card">
+        <div class="search-suggest-field__scanner-header">
+          <p class="search-suggest-field__scanner-title">
+            {{ t('search.suggestions.scanner.title') }}
+          </p>
+          <v-btn
+            icon
+            variant="text"
+            class="search-suggest-field__scanner-close"
+            :aria-label="t('search.suggestions.scanner.closeLabel')"
+            @click="closeScannerDialog"
+          >
+            <v-icon icon="mdi-close" aria-hidden="true" />
+          </v-btn>
+        </div>
+        <div class="search-suggest-field__scanner-body">
+          <ClientOnly>
+            <PwaBarcodeScanner
+              :active="isScannerDialogOpen"
+              class="search-suggest-field__scanner-stream"
+              :loading-label="t('search.suggestions.scanner.loading')"
+              :error-label="t('search.suggestions.scanner.error')"
+              @decode="handleScannerDecode"
+            />
+          </ClientOnly>
+          <p class="search-suggest-field__scanner-helper">
+            {{ t('search.suggestions.scanner.helper') }}
+          </p>
+        </div>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, useAttrs, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -190,6 +193,10 @@ interface ProductSuggestionItem {
 type SuggestionItem = CategorySuggestionItem | ProductSuggestionItem
 
 export type { CategorySuggestionItem, ProductSuggestionItem }
+
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs()
 
 const props = withDefaults(
   defineProps<{
@@ -568,6 +575,9 @@ const handleScannerDecode = (rawValue: string | null) => {
 </script>
 
 <style scoped lang="sass">
+.search-suggest-field__wrapper
+  width: 100%
+
 .search-suggest-field
   width: 100%
 
