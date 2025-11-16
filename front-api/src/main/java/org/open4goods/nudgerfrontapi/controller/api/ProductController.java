@@ -629,7 +629,8 @@ public class ProductController {
                 return Validation.error(badRequest("Invalid aggregation parameter", "Aggregation field is mandatory"));
             }
             String mapping = aggregation.field().trim();
-            if (!allowedAggregationMappings.contains(mapping)) {
+            // TODO : The hardcoded excluded is not nice
+            if (!mapping.equals("excluded") && !allowedAggregationMappings.contains(mapping)) {
                 LOGGER.warn("Aggregation field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid aggregation parameter",
                         "Aggregation not permitted for field: " + mapping));
