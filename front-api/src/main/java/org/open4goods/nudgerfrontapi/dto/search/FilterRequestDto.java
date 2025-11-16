@@ -54,7 +54,9 @@ public record FilterRequestDto(
         @Schema(description = "Filter on the country resolved from the GTIN prefix", example = "country")
         country("gtinInfos.country", FilterValueType.keyword),
         @Schema(description = "Filter on the datasources contributing to the aggregation", example = "datasource")
-        datasource("datasourceCodes", FilterValueType.keyword);
+        datasource("datasourceCodes", FilterValueType.keyword),
+        @Schema(description = "Filter on the exclusion flag to include or hide moderated products", example = "excluded")
+        excluded("excluded", FilterValueType.keyword);
 
         private final String fieldPath;
         private final FilterValueType valueType;
