@@ -150,11 +150,47 @@ availableImpactScoreCriterias:
       description:
         fr: "L'évaluation ESG de l'entreprise (filiale ou société mère, suivant la finesse des données) qui fabrique le produit, d'après le score de performance ESG de Sustainalytics"
     DATA_QUALITY:
-      key: DATA_QUALITY      
+      key: DATA_QUALITY
       title:
-        fr: "Qualité de la donnée"      
+        fr: "Qualité de la donnée"
       description:
         fr: "La qualité de la donnée pour le produit. Quand un facteur manque pour un produit, on lui associe la moyenne de ce facteur pour sa catégorie, mais on dégrade le facteur DATA_QUALITY. Cela permet de pénaliser sans exclure les produits pour lequel un facteur est absent. "
+    DIAGONALE_POUCES:
+      key: DIAGONALE_POUCES
+      title:
+        fr: "Diagonale (en pouces)"
+      description:
+        fr: "La taille de l'écran mesurée en pouces"
+    POWER_CONSUMPTION_STANDBY_NETWORKD:
+      key: POWER_CONSUMPTION_STANDBY_NETWORKD
+      title:
+        fr: "Consommation électrique (arrêt/veille)"
+      description:
+        fr: "La consommation électrique de l'appareil en mode veille ou réseau"
+    POWER_CONSUMPTION_SDR:
+      key: POWER_CONSUMPTION_SDR
+      title:
+        fr: "Consommation électrique (SDR)"
+      description:
+        fr: "La consommation électrique du téléviseur en mode SDR (basse définition)"
+    POWER_CONSUMPTION_HDR:
+      key: POWER_CONSUMPTION_HDR
+      title:
+        fr: "Consommation électrique (HDR)"
+      description:
+        fr: "La consommation électrique du téléviseur en mode HDR (haute définition)"
+    CLASSE_ENERGY_HDR:
+      key: CLASSE_ENERGY_HDR
+      title:
+        fr: "Classe énergétique (HDR)"
+      description:
+        fr: "La classe énergétique du téléviseur en mode HDR"
+    CLASSE_ENERGY_SDR:
+      key: CLASSE_ENERGY_SDR
+      title:
+        fr: "Classe énergétique (SDR)"
+      description:
+        fr: "La classe énergétique du téléviseur en mode SDR"
               
                 
       
