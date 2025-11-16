@@ -33,6 +33,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
@@ -58,6 +59,7 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
 /**
@@ -163,6 +165,51 @@ class SearchServiceTest {
         Criteria overriddenCriteria = ((CriteriaQuery) capturedQueries.get(1).getSpringDataQuery()).getCriteria();
         assertThat(hasExcludedClauseWithValue(overriddenCriteria, false)).isFalse();
         assertThat(hasExcludedClauseWithValue(overriddenCriteria, true)).isTrue();
+    }
+
+    @Test
+    void termsAggregationOnBooleanFieldUsesDedicatedMissingBucket() {
+        Pageable pageable = PageRequest.of(0, 5);
+        when(repository.getRecentPriceQuery()).thenReturn(new Criteria("offersCount").greaterThan(0));
+
+        Product product = new Product(3L);
+        SearchHit<Product> hit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "3", null, 1f, null,
+                Map.of(), Map.of(), null, null, List.of(), product);
+
+        Aggregate termsAggregate = Aggregate.of(a -> a.lterms(lt -> lt.buckets(b -> b.array(List.of(
+                LongTermsBucket.of(bucket -> bucket.key(1L).docCount(2L)),
+                LongTermsBucket.of(bucket -> bucket.key(0L).docCount(3L))
+        )))));
+        Aggregate missingAggregate = Aggregate.of(a -> a.missing(m -> m.docCount(1L)));
+        ElasticsearchAggregations aggregations = new ElasticsearchAggregations(Map.of(
+                "excludedStats", termsAggregate,
+                "excludedStats_missing", missingAggregate));
+
+        SearchHits<Product> hits = new SearchHitsImpl<>(1L, TotalHitsRelation.EQUAL_TO, 1f, Duration.ZERO, null, null,
+                List.of(hit), aggregations, null, null);
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(hits);
+
+        Agg aggregation = new Agg("excludedStats", FilterField.excluded.fieldPath(), AggType.terms, null, null, null, null);
+        AggregationRequestDto aggregationRequest = new AggregationRequestDto(List.of(aggregation));
+
+        SearchService.SearchResult result = searchService.search(pageable, null, null, aggregationRequest, null);
+
+        assertThat(result.aggregations()).hasSize(1);
+        List<AggregationBucketDto> buckets = result.aggregations().get(0).buckets();
+        assertThat(buckets).extracting(AggregationBucketDto::key)
+                .contains("true", "false", "ES-UNKNOWN");
+        assertThat(buckets).anySatisfy(bucket -> {
+            if ("ES-UNKNOWN".equals(bucket.key())) {
+                assertThat(bucket.missing()).isTrue();
+                assertThat(bucket.count()).isEqualTo(1L);
+            }
+        });
+        assertThat(buckets).anySatisfy(bucket -> {
+            if ("false".equals(bucket.key())) {
+                assertThat(bucket.missing()).isFalse();
+                assertThat(bucket.count()).isEqualTo(3L);
+            }
+        });
     }
 
     private SearchHits<Product> buildSearchHits(List<Product> products) {

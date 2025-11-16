@@ -126,6 +126,9 @@ public class SearchService {
             return _score * (1.0 + density);
             """;
 
+    private static final Set<String> BOOLEAN_AGGREGATION_FIELDS = Set
+            .of(FilterField.excluded.fieldPath());
+
     private final ProductRepository repository;
     private final VerticalsConfigService verticalsConfigService;
     private final ProductMappingService productMappingService;
@@ -580,13 +583,37 @@ public class SearchService {
         return FilterValueType.keyword;
     }
 
+    private boolean isBooleanAggregationField(String fieldPath) {
+        if (!StringUtils.hasText(fieldPath)) {
+            return false;
+        }
+        return BOOLEAN_AGGREGATION_FIELDS.contains(fieldPath);
+    }
+
     private AggregationDescriptor configureTermsAggregation(org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder,
             Agg agg) {
         int size = agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_TERMS_SIZE;
-        builder.withAggregation(agg.name(), Aggregation.of(a -> a.terms(t -> t.field(agg.field())
-                .size(size)
-                .missing(MISSING_BUCKET))));
-        return AggregationDescriptor.forTerms(agg);
+        boolean booleanField = isBooleanAggregationField(agg.field());
+        String missingAggregationName = booleanField ? agg.name() + "_missing" : null;
+
+        builder.withAggregation(agg.name(), Aggregation.of(a -> {
+            a.terms(t -> {
+                t.field(agg.field())
+                        .size(size);
+                if (!booleanField) {
+                    t.missing(MISSING_BUCKET);
+                }
+                return t;
+            });
+            return a;
+        }));
+
+        if (booleanField) {
+            builder.withAggregation(missingAggregationName,
+                    Aggregation.of(a -> a.missing(m -> m.field(agg.field()))));
+        }
+
+        return AggregationDescriptor.forTerms(agg, missingAggregationName);
     }
 
     private AggregationDescriptor configureRangeAggregation(org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder,
@@ -793,20 +820,57 @@ public class SearchService {
 
         var aggregate = aggregation.aggregation().getAggregate();
         List<AggregationBucketDto> buckets = new ArrayList<>();
+        boolean booleanField = isBooleanAggregationField(descriptor.request.field());
         if (aggregate.isSterms()) {
             StringTermsAggregate terms = aggregate.sterms();
             for (StringTermsBucket bucket : terms.buckets().array()) {
-                buckets.add(new AggregationBucketDto(bucket.key().stringValue(), null, bucket.docCount(), Objects.equals(bucket.key().stringValue(), MISSING_BUCKET)));
+                String key = normalizeTermsKey(bucket.key().stringValue(), booleanField);
+                buckets.add(new AggregationBucketDto(key, null, bucket.docCount(), Objects.equals(key, MISSING_BUCKET)));
             }
         } else if (aggregate.isLterms()) {
             LongTermsAggregate terms = aggregate.lterms();
             for (LongTermsBucket bucket : terms.buckets().array()) {
-                String key = Long.toString(bucket.key());
+                String key = normalizeTermsKey(bucket.key(), booleanField);
                 buckets.add(new AggregationBucketDto(key, null, bucket.docCount(), Objects.equals(key, MISSING_BUCKET)));
+            }
+        }
+        if (descriptor.missingName != null) {
+            var missingAggregation = aggregations.get(descriptor.missingName);
+            if (missingAggregation != null && missingAggregation.aggregation().getAggregate().isMissing()) {
+                MissingAggregate missing = missingAggregation.aggregation().getAggregate().missing();
+                if (missing.docCount() > 0) {
+                    buckets.add(new AggregationBucketDto(MISSING_BUCKET, null, missing.docCount(), true));
+                }
             }
         }
         buckets.sort((a, b) -> Long.compare(b.count(), a.count()));
         return new AggregationResponseDto(descriptor.request.name(), descriptor.request.field(), descriptor.type, buckets, null, null);
+    }
+
+    private String normalizeTermsKey(String key, boolean booleanField) {
+        if (!booleanField || !StringUtils.hasText(key)) {
+            return key;
+        }
+        if ("1".equals(key) || Boolean.TRUE.toString().equalsIgnoreCase(key)) {
+            return Boolean.TRUE.toString();
+        }
+        if ("0".equals(key) || Boolean.FALSE.toString().equalsIgnoreCase(key)) {
+            return Boolean.FALSE.toString();
+        }
+        return key;
+    }
+
+    private String normalizeTermsKey(long key, boolean booleanField) {
+        if (!booleanField) {
+            return Long.toString(key);
+        }
+        if (key == 1L) {
+            return Boolean.TRUE.toString();
+        }
+        if (key == 0L) {
+            return Boolean.FALSE.toString();
+        }
+        return Long.toString(key);
     }
 
     private AggregationResponseDto extractRangeAggregation(ElasticsearchAggregations aggregations, AggregationDescriptor descriptor) {
@@ -936,8 +1000,8 @@ public class SearchService {
     private record AggregationDescriptor(Agg request, AggType type, double interval, String histogramName, String missingName,
             String statsName) {
 
-        private static AggregationDescriptor forTerms(Agg request) {
-            return new AggregationDescriptor(request, request.type(), 0d, request.name(), null, null);
+        private static AggregationDescriptor forTerms(Agg request, String missingName) {
+            return new AggregationDescriptor(request, request.type(), 0d, request.name(), missingName, null);
         }
 
         private static AggregationDescriptor forRange(Agg request, double interval, String histogramName, String missingName,
