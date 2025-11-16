@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -161,28 +162,22 @@ public class SearchService {
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public SearchResult search(Pageable pageable, String verticalId, String query, AggregationRequestDto aggregationQuery,
             FilterRequestDto filters) {
-        Criteria criteria = repository.getRecentPriceQuery();
+        String sanitizedQuery = sanitize(query);
+        String normalizedVerticalId = normalizeVerticalId(verticalId);
+
+        Criteria criteria = buildBaseCriteria(normalizedVerticalId, sanitizedQuery, filters);
 
         boolean hasExcludedOverride = hasExcludedOverride(filters);
+        List<Agg> excludedAggregations = extractExcludedAggregations(aggregationQuery);
+        boolean requiresAdminExcludedAggregation = !hasExcludedOverride && !excludedAggregations.isEmpty();
+        Criteria adminAggregationCriteria = requiresAdminExcludedAggregation
+                ? buildBaseCriteria(normalizedVerticalId, sanitizedQuery, filters)
+                : null;
 
         // Remove excluded articles unless the caller explicitly overrides the flag
         if (!hasExcludedOverride) {
             criteria = criteria.and(new Criteria("excluded").is(false));
         }
-
-        if (StringUtils.hasText(verticalId) && verticalsConfigService.getConfigById(verticalId) != null) {
-            criteria = criteria.and(new Criteria("vertical").is(verticalId));
-        } else if (StringUtils.hasText(verticalId)) {
-            LOGGER.warn("Requested vertical {} not found. Returning empty result set.", verticalId);
-            criteria = criteria.and(new Criteria("vertical").is("__unknown__"));
-        }
-
-        String sanitizedQuery = sanitize(query);
-        if (StringUtils.hasText(sanitizedQuery)) {
-            criteria = criteria.and(new Criteria("offerNames").matches(sanitizedQuery));
-        }
-
-        criteria = applyFilters(criteria, filters);
 
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
         criteriaQuery.setPageable(pageable);
@@ -213,7 +208,37 @@ public class SearchService {
             throw e;
         }
         List<AggregationResponseDto> aggregations = extractAggregationResults(hits, descriptors);
+        if (requiresAdminExcludedAggregation) {
+            List<AggregationResponseDto> overrides = computeExcludedAggregations(adminAggregationCriteria,
+                    excludedAggregations);
+            aggregations = mergeAggregationOverrides(aggregations, overrides);
+        }
         return new SearchResult(hits, List.copyOf(aggregations));
+    }
+
+    private Criteria buildBaseCriteria(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters) {
+        Criteria criteria = repository.getRecentPriceQuery();
+
+        if (StringUtils.hasText(normalizedVerticalId)) {
+            criteria = criteria.and(new Criteria("vertical").is(normalizedVerticalId));
+        }
+
+        if (StringUtils.hasText(sanitizedQuery)) {
+            criteria = criteria.and(new Criteria("offerNames").matches(sanitizedQuery));
+        }
+
+        return applyFilters(criteria, filters);
+    }
+
+    private String normalizeVerticalId(String verticalId) {
+        if (!StringUtils.hasText(verticalId)) {
+            return null;
+        }
+        if (verticalsConfigService.getConfigById(verticalId) != null) {
+            return verticalId;
+        }
+        LOGGER.warn("Requested vertical {} not found. Returning empty result set.", verticalId);
+        return "__unknown__";
     }
 
     /**
@@ -904,6 +929,66 @@ public class SearchService {
         }
 
         return new AggregationResponseDto(descriptor.request.name(), descriptor.request.field(), descriptor.type, buckets, min, max);
+    }
+
+    private List<Agg> extractExcludedAggregations(AggregationRequestDto aggregationQuery) {
+        if (aggregationQuery == null || aggregationQuery.aggs() == null) {
+            return List.of();
+        }
+        return aggregationQuery.aggs().stream()
+                .filter(Objects::nonNull)
+                .filter(agg -> StringUtils.hasText(agg.field()))
+                .filter(agg -> FilterField.excluded.fieldPath().equals(agg.field().trim()))
+                .toList();
+    }
+
+    private List<AggregationResponseDto> computeExcludedAggregations(Criteria criteria, List<Agg> aggregations) {
+        if (criteria == null || aggregations == null || aggregations.isEmpty()) {
+            return List.of();
+        }
+        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
+        criteriaQuery.setPageable(Pageable.unpaged());
+
+        var builder = new NativeQueryBuilder()
+                .withQuery(criteriaQuery)
+                .withPageable(Pageable.unpaged());
+
+        List<AggregationDescriptor> descriptors = new ArrayList<>();
+        for (Agg agg : aggregations) {
+            descriptors.add(configureTermsAggregation(builder, agg));
+        }
+
+        SearchHits<Product> hits;
+        try {
+            hits = repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+        return extractAggregationResults(hits, descriptors);
+    }
+
+    private List<AggregationResponseDto> mergeAggregationOverrides(List<AggregationResponseDto> original,
+            List<AggregationResponseDto> overrides) {
+        if (overrides == null || overrides.isEmpty()) {
+            return original;
+        }
+        Map<String, AggregationResponseDto> overrideByName = overrides.stream()
+                .collect(Collectors.toMap(AggregationResponseDto::name, Function.identity(), (left, right) -> right,
+                        LinkedHashMap::new));
+
+        List<AggregationResponseDto> merged = new ArrayList<>(original.size() + overrides.size());
+        for (AggregationResponseDto response : original) {
+            merged.add(overrideByName.getOrDefault(response.name(), response));
+        }
+
+        for (AggregationResponseDto response : overrides) {
+            boolean alreadyPresent = original.stream().anyMatch(existing -> existing.name().equals(response.name()));
+            if (!alreadyPresent) {
+                merged.add(response);
+            }
+        }
+        return List.copyOf(merged);
     }
 
     private String sanitize(String value) {
