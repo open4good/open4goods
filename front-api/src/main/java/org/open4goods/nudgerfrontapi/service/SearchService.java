@@ -160,8 +160,12 @@ public class SearchService {
             FilterRequestDto filters) {
         Criteria criteria = repository.getRecentPriceQuery();
 
-        // Remove excluded articles
-        criteria = criteria.and(new Criteria("excluded").is(false));
+        boolean hasExcludedOverride = hasExcludedOverride(filters);
+
+        // Remove excluded articles unless the caller explicitly overrides the flag
+        if (!hasExcludedOverride) {
+            criteria = criteria.and(new Criteria("excluded").is(false));
+        }
 
         if (StringUtils.hasText(verticalId) && verticalsConfigService.getConfigById(verticalId) != null) {
             criteria = criteria.and(new Criteria("vertical").is(verticalId));
@@ -199,12 +203,12 @@ public class SearchService {
         }
 
         SearchHits<Product> hits;
-		try {
-			hits = repository.search(nativeQueryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
-		} catch (Exception e) {
-			elasticLog(e);
-			throw e;
-		}
+        try {
+            hits = repository.search(nativeQueryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
         List<AggregationResponseDto> aggregations = extractAggregationResults(hits, descriptors);
         return new SearchResult(hits, List.copyOf(aggregations));
     }
@@ -478,6 +482,18 @@ public class SearchService {
             }
         }
         return combined;
+    }
+
+    private boolean hasExcludedOverride(FilterRequestDto filters) {
+        if (filters == null || filters.filters() == null) {
+            return false;
+        }
+        return filters.filters().stream()
+                .filter(Objects::nonNull)
+                .map(Filter::field)
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .anyMatch(field -> field.equals(FilterField.excluded.fieldPath()));
     }
 
     private Criteria buildFilterCriteria(Filter filter) {

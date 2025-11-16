@@ -5,15 +5,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +53,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
 import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.Criteria.CriteriaEntry;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
@@ -120,6 +128,98 @@ class SearchServiceTest {
                 .collect(Collectors.toSet());
         assertThat(fieldNames).contains("price.minPrice.price");
         assertThat(fieldNames).contains("price.conditions");
+    }
+
+    @Test
+    void searchAllowsExplicitExcludedFilterToOverrideDefaultBehaviour() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.getRecentPriceQuery()).thenAnswer(invocation -> new Criteria("offersCount").greaterThan(0));
+
+        SearchHits<Product> emptyHits = buildSearchHits(List.of());
+        Product excludedProduct = new Product(2L);
+        excludedProduct.setExcluded(true);
+        excludedProduct.setId(2L);
+        SearchHits<Product> excludedHits = buildSearchHits(List.of(excludedProduct));
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(emptyHits, excludedHits);
+
+        SearchService.SearchResult defaultResult = searchService.search(pageable, null, null, null, null);
+        assertThat(defaultResult.hits().getSearchHits()).isEmpty();
+
+        Filter excludedFilter = new Filter(FilterField.excluded.fieldPath(), FilterOperator.term, List.of("true"), null, null);
+        FilterRequestDto adminFilters = new FilterRequestDto(List.of(excludedFilter));
+
+        SearchService.SearchResult overriddenResult = searchService.search(pageable, null, null, null, adminFilters);
+        assertThat(overriddenResult.hits().getSearchHits()).hasSize(1);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        org.mockito.Mockito.verify(repository, times(2)).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+
+        List<NativeQuery> capturedQueries = queryCaptor.getAllValues();
+        Criteria defaultCriteria = ((CriteriaQuery) capturedQueries.get(0).getSpringDataQuery()).getCriteria();
+        assertThat(hasExcludedClauseWithValue(defaultCriteria, false)).isTrue();
+
+        Criteria overriddenCriteria = ((CriteriaQuery) capturedQueries.get(1).getSpringDataQuery()).getCriteria();
+        assertThat(hasExcludedClauseWithValue(overriddenCriteria, false)).isFalse();
+        assertThat(hasExcludedClauseWithValue(overriddenCriteria, true)).isTrue();
+    }
+
+    private SearchHits<Product> buildSearchHits(List<Product> products) {
+        List<SearchHit<Product>> hits = new ArrayList<>();
+        for (Product product : products) {
+            String documentId = product.getId() == null ? "0" : product.getId().toString();
+            hits.add(new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, documentId, null, 1f, null,
+                    Map.of(), Map.of(), null, null, List.of(), product));
+        }
+        return new SearchHitsImpl<>(hits.size(), TotalHitsRelation.EQUAL_TO, 1f, Duration.ZERO,
+                null, null, hits, null, null, null);
+    }
+
+    private boolean hasExcludedClauseWithValue(Criteria criteria, boolean expectedValue) {
+        return expandCriteria(criteria)
+                .filter(entry -> entry.getField() != null && "excluded".equals(entry.getField().getName()))
+                .flatMap(entry -> entry.getQueryCriteriaEntries().stream())
+                .map(CriteriaEntry::getValue)
+                .flatMap(this::flattenCriteriaValue)
+                .anyMatch(value -> matchesExpectedValue(value, expectedValue));
+    }
+
+    private boolean matchesExpectedValue(Object value, boolean expectedValue) {
+        if (value instanceof Boolean booleanValue) {
+            return booleanValue == expectedValue;
+        }
+        if (value instanceof String stringValue) {
+            return Boolean.parseBoolean(stringValue) == expectedValue;
+        }
+        return Objects.equals(value, expectedValue);
+    }
+
+    private Stream<Criteria> expandCriteria(Criteria root) {
+        if (root == null) {
+            return Stream.empty();
+        }
+        Deque<Criteria> toVisit = new ArrayDeque<>();
+        Set<Criteria> visited = new HashSet<>();
+        List<Criteria> collected = new ArrayList<>();
+        toVisit.push(root);
+        while (!toVisit.isEmpty()) {
+            Criteria current = toVisit.pop();
+            if (!visited.add(current)) {
+                continue;
+            }
+            collected.add(current);
+            current.getCriteriaChain().forEach(toVisit::push);
+            current.getSubCriteria().forEach(toVisit::push);
+        }
+        return collected.stream();
+    }
+
+    private Stream<?> flattenCriteriaValue(Object value) {
+        if (value instanceof Collection<?> collection) {
+            return collection.stream();
+        }
+        return Stream.ofNullable(value);
     }
 
 
