@@ -13,65 +13,57 @@
     </div>
 
     <div v-if="hasEvents" class="product-life-timeline__body">
-      <v-timeline
-        :align="timelineAlign"
-        :direction="timelineDirection"
-        :side="timelineSide"
-        density="compact"
-        truncate-line="both"
-        class="product-life-timeline__timeline"
-      >
-        <v-timeline-item
+      <div class="product-life-timeline__rail" role="list">
+        <div
           v-for="group in groupedEvents"
           :key="group.key"
-          :dot-color="group.accentColor"
-          size="small"
-          fill-dot
-          class="product-life-timeline__item"
+          class="product-life-timeline__year-group"
+          role="group"
+          :aria-label="t('product.attributes.timeline.ariaYear', { year: group.year })"
         >
-          <template #opposite>
-            <span class="product-life-timeline__year-pill">{{ group.year }}</span>
-          </template>
+          <div class="product-life-timeline__year-label">{{ group.year }}</div>
 
-          <div class="product-life-timeline__year-card">
-            <div class="product-life-timeline__year-heading">
-              <span class="product-life-timeline__year-label">{{ group.year }}</span>
-              <span class="product-life-timeline__year-separator" />
-            </div>
+          <div class="product-life-timeline__year-track">
+            <div class="product-life-timeline__rail-line" />
 
-            <ul class="product-life-timeline__event-list">
-              <li
-                v-for="event in group.events"
-                :key="event.key"
-                class="product-life-timeline__event-list-item"
-              >
-                <span class="product-life-timeline__event-date-chip">{{ event.formattedDate }}</span>
+            <div
+              v-for="event in group.events"
+              :key="event.key"
+              class="product-life-timeline__event"
+              role="listitem"
+            >
+              <v-tooltip location="top" max-width="320">
+                <template #activator="{ props: tooltipProps }">
+                  <button
+                    type="button"
+                    class="product-life-timeline__event-point"
+                    :style="{ '--timeline-event-color': `rgb(var(--v-theme-${event.color}))` }"
+                    v-bind="tooltipProps"
+                    :aria-label="event.ariaLabel"
+                  >
+                    <span class="product-life-timeline__event-dot" />
+                    <v-icon :icon="event.icon" size="18" class="product-life-timeline__event-icon" />
+                  </button>
+                </template>
 
-                <div class="product-life-timeline__event-info">
-                  <div class="product-life-timeline__event-heading">
-                    <v-icon
-                      :icon="event.icon"
-                      :color="event.color"
-                      size="20"
-                      class="product-life-timeline__event-icon"
-                    />
-                    <div class="product-life-timeline__event-title-block">
-                      <p class="product-life-timeline__event-title">{{ event.label }}</p>
-                      <p v-if="event.sourceLabel" class="product-life-timeline__event-source">{{ event.sourceLabel }}</p>
-                    </div>
-                  </div>
+                <div class="product-life-timeline__tooltip">
+                  <p class="product-life-timeline__tooltip-title">{{ event.label }}</p>
+                  <p class="product-life-timeline__tooltip-description">{{ event.description }}</p>
 
-                  <div class="product-life-timeline__event-meta">
-                    <span v-if="event.conditionLabel" class="product-life-timeline__event-chip">
-                      {{ event.conditionLabel }}
+                  <div class="product-life-timeline__tooltip-meta">
+                    <span>{{ t('product.attributes.timeline.tooltip.date') }} · {{ event.fullDateLabel }}</span>
+                    <span v-if="event.sourceLabel">
+                      {{ t('product.attributes.timeline.tooltip.source') }} · {{ event.sourceLabel }}
                     </span>
                   </div>
                 </div>
-              </li>
-            </ul>
+              </v-tooltip>
+
+              <span class="product-life-timeline__event-month">{{ event.monthLabel }}</span>
+            </div>
           </div>
-        </v-timeline-item>
-      </v-timeline>
+        </div>
+      </div>
     </div>
 
     <p v-else class="product-life-timeline__empty">
@@ -88,7 +80,7 @@ import type { ProductTimelineDto, ProductTimelineEventDto } from '~~/shared/api-
 const props = withDefaults(
   defineProps<{ timeline: ProductTimelineDto | null; layout?: 'vertical' | 'horizontal'; alternate?: boolean }>(),
   {
-    layout: 'vertical',
+    layout: 'horizontal',
     alternate: false,
   },
 )
@@ -98,17 +90,19 @@ const { t, locale } = useI18n()
 type TimelineEventViewModel = {
   key: string
   label: string
-  formattedDate: string
+  description: string
+  timestamp: number
+  monthLabel: string
+  fullDateLabel: string
   icon: string
   color: string
-  conditionLabel: string | null
   sourceLabel: string | null
+  ariaLabel: string
 }
 
 type TimelineYearGroup = {
   key: string
   year: number
-  accentColor: string
   events: TimelineEventViewModel[]
 }
 
@@ -132,11 +126,6 @@ const sourceLabelKeys: Record<string, string> = {
   EPREL: 'product.attributes.timeline.sources.eprel',
 }
 
-const conditionLabelKeys: Record<string, string> = {
-  NEW: 'product.attributes.timeline.conditions.new',
-  OCCASION: 'product.attributes.timeline.conditions.occasion',
-}
-
 const eventIcons: Record<string, string> = {
   PRICE_FIRST_SEEN_NEW: 'mdi-star-four-points-outline',
   PRICE_FIRST_SEEN_OCCASION: 'mdi-recycle-variant',
@@ -157,7 +146,22 @@ const sourceColors: Record<string, string> = {
   EPREL: 'success',
 }
 
-const monthYearFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short', year: 'numeric' }))
+const monthFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short' }))
+const fullDateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }))
+const eventDescriptionKeys: Record<string, string> = {
+  PRICE_FIRST_SEEN_NEW: 'product.attributes.timeline.descriptions.priceFirstSeenNew',
+  PRICE_FIRST_SEEN_OCCASION: 'product.attributes.timeline.descriptions.priceFirstSeenOccasion',
+  PRICE_LAST_SEEN_NEW: 'product.attributes.timeline.descriptions.priceLastSeenNew',
+  PRICE_LAST_SEEN_OCCASION: 'product.attributes.timeline.descriptions.priceLastSeenOccasion',
+  EPREL_ON_MARKET_START: 'product.attributes.timeline.descriptions.eprelOnMarketStart',
+  EPREL_ON_MARKET_END: 'product.attributes.timeline.descriptions.eprelOnMarketEnd',
+  EPREL_ON_MARKET_FIRST_START: 'product.attributes.timeline.descriptions.eprelOnMarketFirstStart',
+  EPREL_FIRST_PUBLICATION: 'product.attributes.timeline.descriptions.eprelFirstPublication',
+  EPREL_LAST_PUBLICATION: 'product.attributes.timeline.descriptions.eprelLastPublication',
+  EPREL_EXPORT: 'product.attributes.timeline.descriptions.eprelExport',
+  EPREL_IMPORTED: 'product.attributes.timeline.descriptions.eprelImported',
+  EPREL_ORGANISATION_CLOSED: 'product.attributes.timeline.descriptions.eprelOrganisationClosed',
+}
 
 const groupedEvents = computed<TimelineYearGroup[]>(() => {
   const rawEvents = props.timeline?.events ?? []
@@ -174,23 +178,29 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
         ? eventLabelKeys[type] ?? 'product.attributes.timeline.events.generic'
         : 'product.attributes.timeline.events.generic'
       const label = t(labelKey)
+      const descriptionKey = type
+        ? eventDescriptionKeys[type] ?? 'product.attributes.timeline.descriptions.generic'
+        : 'product.attributes.timeline.descriptions.generic'
+      const description = t(descriptionKey)
       const date = new Date(event.timestamp)
-      const formattedDate = monthYearFormatter.value.format(date)
+      const monthLabel = monthFormatter.value.format(date)
+      const fullDateLabel = fullDateFormatter.value.format(date)
       const icon = (type && eventIcons[type]) ?? 'mdi-timeline-clock-outline'
       const color = (source && sourceColors[source]) ?? 'primary'
-      const conditionLabel = event.condition
-        ? t(conditionLabelKeys[event.condition] ?? 'product.attributes.timeline.conditions.generic')
-        : null
       const sourceLabel = source
         ? t(sourceLabelKeys[source] ?? 'product.attributes.timeline.sources.generic')
         : null
       const year = date.getFullYear()
+      const ariaLabel = t('product.attributes.timeline.tooltip.ariaLabel', {
+        label,
+        date: fullDateLabel,
+        source: sourceLabel ?? t('product.attributes.timeline.sources.generic'),
+      })
 
       if (!yearGroups.has(year)) {
         yearGroups.set(year, {
           key: `${year}`,
           year,
-          accentColor: color,
           events: [],
         })
       }
@@ -200,29 +210,29 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
         return
       }
 
-      if (!group.accentColor) {
-        group.accentColor = color
-      }
-
       group.events.push({
         key,
         label,
-        formattedDate,
+        description,
+        timestamp: event.timestamp,
+        monthLabel,
+        fullDateLabel,
         icon,
         color,
-        conditionLabel,
         sourceLabel,
+        ariaLabel,
       })
     })
 
   return Array.from(yearGroups.values())
+    .sort((a, b) => a.year - b.year)
+    .map((group) => ({
+      ...group,
+      events: group.events.sort((a, b) => a.timestamp - b.timestamp),
+    }))
 })
 
 const hasEvents = computed(() => groupedEvents.value.length > 0)
-
-const timelineDirection = computed(() => (props.layout === 'horizontal' ? 'horizontal' : 'vertical'))
-const timelineSide = computed(() => (props.alternate ? 'both' : 'end'))
-const timelineAlign = computed(() => (props.layout === 'horizontal' ? 'center' : 'start'))
 </script>
 
 <style scoped>
@@ -260,122 +270,149 @@ const timelineAlign = computed(() => (props.layout === 'horizontal' ? 'center' :
   color: rgb(var(--v-theme-primary));
 }
 
-.product-life-timeline__timeline {
-  padding-inline-start: 0.5rem;
-}
-
-.product-life-timeline--horizontal .product-life-timeline__body {
+.product-life-timeline__body {
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
 }
 
-.product-life-timeline__year-pill {
-  font-weight: 700;
-  color: rgb(var(--v-theme-text-neutral-secondary));
+.product-life-timeline__rail {
+  display: flex;
+  gap: 1.75rem;
+  align-items: flex-start;
+  min-width: max-content;
+  padding: 0.25rem 0.5rem;
+  scroll-snap-type: x mandatory;
 }
 
-.product-life-timeline__year-card {
-  background: rgba(var(--v-theme-surface-primary-050), 0.9);
-  border-radius: 18px;
-  padding: 1rem 1.2rem;
+.product-life-timeline--vertical .product-life-timeline__rail {
+  flex-direction: column;
+  min-width: 100%;
+}
+
+.product-life-timeline__year-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
-}
-
-.product-life-timeline__year-heading {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  min-width: 240px;
+  scroll-snap-align: start;
 }
 
 .product-life-timeline__year-label {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-strong));
+  letter-spacing: 0.01em;
+}
+
+.product-life-timeline__year-track {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 0.75rem 0.25rem 0.35rem;
+}
+
+.product-life-timeline--vertical .product-life-timeline__year-track {
+  flex-wrap: wrap;
+}
+
+.product-life-timeline__rail-line {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--v-theme-border-primary-strong), 0.65),
+    rgba(var(--v-theme-border-primary-strong), 0.08)
+  );
+  border-radius: 999px;
+}
+
+.product-life-timeline__event {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+  position: relative;
+  min-width: 42px;
+}
+
+.product-life-timeline__event-point {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.55);
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.product-life-timeline__event-point::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--timeline-event-color, rgba(var(--v-theme-primary), 1));
+  opacity: 0.28;
+}
+
+.product-life-timeline__event-point:hover,
+.product-life-timeline__event-point:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -18px rgba(15, 23, 42, 0.35);
+}
+
+.product-life-timeline__event-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--timeline-event-color, rgba(var(--v-theme-primary), 1));
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.75);
+}
+
+.product-life-timeline__event-icon {
+  position: relative;
+  color: rgb(var(--v-theme-text-on-accent));
+  z-index: 1;
+}
+
+.product-life-timeline__event-month {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  font-weight: 600;
+}
+
+.product-life-timeline__tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 300px;
+}
+
+.product-life-timeline__tooltip-title {
+  margin: 0;
   font-weight: 700;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-life-timeline__year-separator {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    rgba(var(--v-theme-border-primary-strong), 0.4),
-    rgba(var(--v-theme-border-primary-strong), 0)
-  );
-}
-
-.product-life-timeline__event-list {
-  list-style: none;
-  padding: 0;
+.product-life-timeline__tooltip-description {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.product-life-timeline__event-list-item {
-  display: flex;
-  gap: 0.9rem;
-  align-items: flex-start;
-}
-
-.product-life-timeline__event-date-chip {
-  min-width: 82px;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: rgba(var(--v-theme-primary), 0.08);
-  color: rgb(var(--v-theme-primary));
-  border: 1px solid rgba(var(--v-theme-primary), 0.35);
-  text-align: center;
-}
-
-.product-life-timeline__event-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.product-life-timeline__event-heading {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
-.product-life-timeline__event-title {
-  margin: 0;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-life-timeline__event-source {
-  margin: 0.15rem 0 0;
-  font-size: 0.85rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  line-height: 1.4;
 }
 
-.product-life-timeline__event-meta {
+.product-life-timeline__tooltip-meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.product-life-timeline__event-chip {
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  background: rgba(var(--v-theme-primary), 0.08);
-  color: rgb(var(--v-theme-primary));
-  border: 1px solid rgba(var(--v-theme-primary), 0.35);
-}
-
-.product-life-timeline--horizontal .product-life-timeline__timeline {
-  padding-inline-start: 0;
-  min-width: max-content;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.95);
 }
 
 .product-life-timeline__empty {

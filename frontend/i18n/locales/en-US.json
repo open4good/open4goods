@@ -1674,31 +1674,47 @@
       },
       "timeline": {
         "title": "Lifecycle milestones",
-        "subtitle": "Track when the product appeared on the market and how availability evolved.",
+        "subtitle": "Key market dates at a glance.",
         "empty": "Lifecycle information is not available yet.",
+        "ariaYear": "Milestones for {year}",
         "sources": {
           "priceHistory": "Price history",
           "eprel": "EPREL registry",
           "generic": "Lifecycle event"
         },
-        "conditions": {
-          "new": "New",
-          "occasion": "Second-hand",
-          "generic": "Condition"
+        "tooltip": {
+          "date": "Date",
+          "source": "Source",
+          "ariaLabel": "{label} on {date} · {source}"
         },
         "events": {
-          "priceFirstSeenNew": "First new offer spotted",
-          "priceFirstSeenOccasion": "First second-hand offer spotted",
-          "priceLastSeenNew": "Latest new offer recorded",
-          "priceLastSeenOccasion": "Latest second-hand offer recorded",
-          "eprelOnMarketStart": "EPREL on-market start",
-          "eprelOnMarketEnd": "EPREL on-market end",
-          "eprelOnMarketFirstStart": "First EU market approval",
-          "eprelFirstPublication": "EPREL first publication",
-          "eprelLastPublication": "EPREL last publication",
+          "priceFirstSeenNew": "First new offer",
+          "priceFirstSeenOccasion": "First second-hand offer",
+          "priceLastSeenNew": "Latest new offer",
+          "priceLastSeenOccasion": "Latest second-hand offer",
+          "eprelOnMarketStart": "Market start (EPREL)",
+          "eprelOnMarketEnd": "Market end (EPREL)",
+          "eprelOnMarketFirstStart": "First EU market start",
+          "eprelFirstPublication": "First EPREL publication",
+          "eprelLastPublication": "Latest EPREL publication",
           "eprelExport": "EPREL export",
           "eprelImported": "Imported into Nudger",
           "eprelOrganisationClosed": "Organisation closed",
+          "generic": "Lifecycle event"
+        },
+        "descriptions": {
+          "priceFirstSeenNew": "First new offer detected in the price history.",
+          "priceFirstSeenOccasion": "First second-hand offer detected in the price history.",
+          "priceLastSeenNew": "Most recent new offer recorded in the price history.",
+          "priceLastSeenOccasion": "Most recent second-hand offer recorded in the price history.",
+          "eprelOnMarketStart": "EPREL declared on-market start date.",
+          "eprelOnMarketEnd": "EPREL declared on-market end date.",
+          "eprelOnMarketFirstStart": "EPREL first on-market start date.",
+          "eprelFirstPublication": "EPREL first publication date.",
+          "eprelLastPublication": "EPREL most recent publication date.",
+          "eprelExport": "EPREL export timestamp.",
+          "eprelImported": "Date when the EPREL entry was imported.",
+          "eprelOrganisationClosed": "EPREL organisation close date.",
           "generic": "Lifecycle event"
         }
       },

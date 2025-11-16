@@ -2,11 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
-import {
-  ProductTimelineEventSource,
-  ProductTimelineEventType,
-  type ProductTimelineDto,
-} from '~~/shared/api-client'
+import { ProductTimelineEventSource, ProductTimelineEventType, type ProductTimelineDto } from '~~/shared/api-client'
 
 const i18n = createI18n({
   legacy: false,
@@ -19,23 +15,24 @@ const i18n = createI18n({
             title: 'Lifecycle',
             subtitle: 'Milestones',
             empty: 'Lifecycle information is not available yet.',
+            ariaYear: 'Year {year}',
             sources: {
               priceHistory: 'Price history',
               eprel: 'EPREL registry',
               generic: 'Timeline event',
             },
-            conditions: {
-              new: 'New',
-              occasion: 'Second-hand',
-              generic: 'Condition',
+            tooltip: {
+              date: 'Date',
+              source: 'Source',
+              ariaLabel: '{label} on {date} · {source}',
             },
             events: {
-              priceFirstSeenNew: 'First new offer spotted',
-              priceFirstSeenOccasion: 'First second-hand offer spotted',
+              priceFirstSeenNew: 'First new offer',
+              priceFirstSeenOccasion: 'First second-hand offer',
               priceLastSeenNew: 'Latest new offer',
               priceLastSeenOccasion: 'Latest second-hand offer',
-              eprelOnMarketStart: 'EPREL on-market start',
-              eprelOnMarketEnd: 'EPREL on-market end',
+              eprelOnMarketStart: 'Market start (EPREL)',
+              eprelOnMarketEnd: 'Market end (EPREL)',
               eprelOnMarketFirstStart: 'EPREL first entry',
               eprelFirstPublication: 'EPREL first publication',
               eprelLastPublication: 'EPREL last publication',
@@ -43,6 +40,21 @@ const i18n = createI18n({
               eprelImported: 'Imported',
               eprelOrganisationClosed: 'Organisation closed',
               generic: 'Lifecycle event',
+            },
+            descriptions: {
+              priceFirstSeenNew: 'First new offer detected.',
+              priceFirstSeenOccasion: 'First second-hand offer detected.',
+              priceLastSeenNew: 'Most recent new offer recorded.',
+              priceLastSeenOccasion: 'Most recent second-hand offer recorded.',
+              eprelOnMarketStart: 'EPREL start date.',
+              eprelOnMarketEnd: 'EPREL end date.',
+              eprelOnMarketFirstStart: 'EPREL first entry.',
+              eprelFirstPublication: 'EPREL first publication.',
+              eprelLastPublication: 'EPREL last publication.',
+              eprelExport: 'EPREL export timestamp.',
+              eprelImported: 'EPREL import timestamp.',
+              eprelOrganisationClosed: 'Organisation closed.',
+              generic: 'Lifecycle event.',
             },
           },
         },
@@ -58,30 +70,23 @@ const VCardStub = defineComponent({
   },
 })
 
-const VTimelineStub = defineComponent({
-  name: 'VTimelineStub',
-  setup(_, { slots, attrs }) {
-    return () => h('div', { ...attrs, class: ['v-timeline-stub', attrs.class] }, slots.default?.())
-  },
-})
-
-const VTimelineItemStub = defineComponent({
-  name: 'VTimelineItemStub',
-  setup(_, { slots, attrs }) {
-    return () =>
-      h(
-        'div',
-        { ...attrs, class: ['v-timeline-item-stub', attrs.class] },
-        [slots.opposite?.(), slots.default?.()],
-      )
-  },
-})
-
 const VIconStub = defineComponent({
   name: 'VIconStub',
   props: { icon: { type: String, default: '' } },
   setup(props) {
     return () => h('i', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
+  },
+})
+
+const VTooltipStub = defineComponent({
+  name: 'VTooltipStub',
+  props: { text: { type: String, default: '' } },
+  setup(props, { slots }) {
+    return () =>
+      h('div', { class: 'v-tooltip-stub', 'data-text': props.text }, [
+        slots.activator?.({ props: {} }),
+        slots.default?.(),
+      ])
   },
 })
 
@@ -118,22 +123,23 @@ const mountComponent = async (
       plugins: [i18n],
       stubs: {
         VCard: VCardStub,
-        VTimeline: VTimelineStub,
-        VTimelineItem: VTimelineItemStub,
         VIcon: VIconStub,
+        VTooltip: VTooltipStub,
       },
     },
   })
 }
 
 describe('ProductLifeTimeline', () => {
-  it('renders timeline events with formatted dates', async () => {
+  it('renders timeline events with compact month labels and tooltips', async () => {
     const wrapper = await mountComponent(buildTimeline())
 
-    expect(wrapper.text()).toContain('First new offer spotted')
-    expect(wrapper.text()).toContain('EPREL on-market start')
-    expect(wrapper.text()).toContain('Jan 2024')
-    expect(wrapper.text()).toContain('2023')
+    const monthLabels = wrapper.findAll('.product-life-timeline__event-month').map((node) => node.text())
+
+    expect(monthLabels).toEqual(['Sep', 'Jan', 'Jun'])
+    expect(wrapper.text()).toContain('First new offer')
+    expect(wrapper.text()).toContain('Market start (EPREL)')
+    expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(true)
   })
 
   it('renders empty state when no events', async () => {
@@ -142,9 +148,9 @@ describe('ProductLifeTimeline', () => {
     expect(wrapper.text()).toContain('Lifecycle information is not available yet.')
   })
 
-  it('supports alternate horizontal layout', async () => {
-    const wrapper = await mountComponent(buildTimeline(), { layout: 'horizontal', alternate: true })
+  it('supports vertical layout option', async () => {
+    const wrapper = await mountComponent(buildTimeline(), { layout: 'vertical', alternate: true })
 
-    expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(true)
+    expect(wrapper.find('.product-life-timeline--vertical').exists()).toBe(true)
   })
 })
