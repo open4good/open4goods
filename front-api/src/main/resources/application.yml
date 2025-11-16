@@ -84,10 +84,18 @@ xwiki:
     baseUrl: https://dummy.fr
     
 management:
+  health:
+    diskspace:
+      threshold: 100GB  
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include:
+          - "*"          
+  endpoint:
+    health:      
+      enabled: true
+      show-details: always
 
 open-data-config:
   generation-enabled: false
