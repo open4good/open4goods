@@ -820,15 +820,17 @@ public class SearchService {
 
         var aggregate = aggregation.aggregation().getAggregate();
         List<AggregationBucketDto> buckets = new ArrayList<>();
+        boolean booleanField = isBooleanAggregationField(descriptor.request.field());
         if (aggregate.isSterms()) {
             StringTermsAggregate terms = aggregate.sterms();
             for (StringTermsBucket bucket : terms.buckets().array()) {
-                buckets.add(new AggregationBucketDto(bucket.key().stringValue(), null, bucket.docCount(), Objects.equals(bucket.key().stringValue(), MISSING_BUCKET)));
+                String key = normalizeTermsKey(bucket.key().stringValue(), booleanField);
+                buckets.add(new AggregationBucketDto(key, null, bucket.docCount(), Objects.equals(key, MISSING_BUCKET)));
             }
         } else if (aggregate.isLterms()) {
             LongTermsAggregate terms = aggregate.lterms();
             for (LongTermsBucket bucket : terms.buckets().array()) {
-                String key = Long.toString(bucket.key());
+                String key = normalizeTermsKey(bucket.key(), booleanField);
                 buckets.add(new AggregationBucketDto(key, null, bucket.docCount(), Objects.equals(key, MISSING_BUCKET)));
             }
         }
@@ -843,6 +845,32 @@ public class SearchService {
         }
         buckets.sort((a, b) -> Long.compare(b.count(), a.count()));
         return new AggregationResponseDto(descriptor.request.name(), descriptor.request.field(), descriptor.type, buckets, null, null);
+    }
+
+    private String normalizeTermsKey(String key, boolean booleanField) {
+        if (!booleanField || !StringUtils.hasText(key)) {
+            return key;
+        }
+        if ("1".equals(key) || Boolean.TRUE.toString().equalsIgnoreCase(key)) {
+            return Boolean.TRUE.toString();
+        }
+        if ("0".equals(key) || Boolean.FALSE.toString().equalsIgnoreCase(key)) {
+            return Boolean.FALSE.toString();
+        }
+        return key;
+    }
+
+    private String normalizeTermsKey(long key, boolean booleanField) {
+        if (!booleanField) {
+            return Long.toString(key);
+        }
+        if (key == 1L) {
+            return Boolean.TRUE.toString();
+        }
+        if (key == 0L) {
+            return Boolean.FALSE.toString();
+        }
+        return Long.toString(key);
     }
 
     private AggregationResponseDto extractRangeAggregation(ElasticsearchAggregations aggregations, AggregationDescriptor descriptor) {
