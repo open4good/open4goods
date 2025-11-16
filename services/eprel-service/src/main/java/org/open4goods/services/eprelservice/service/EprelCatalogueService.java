@@ -48,8 +48,9 @@ public class EprelCatalogueService
 
     /**
      * Downloads the latest catalogues and re-indexes the EPREL data set.
+     * @throws IOException
      */
-    public void refreshCatalogue()
+    public void refreshCatalogue() throws IOException
     {
         List<EprelProductGroup> groups = apiClient.fetchProductGroups();
         if (groups.isEmpty())
@@ -57,7 +58,17 @@ public class EprelCatalogueService
             LOGGER.warn("No EPREL product groups returned by the API");
             return;
         }
-        groups.forEach(group -> processGroup(group));
+
+        for (EprelProductGroup group : groups) {
+        	try {
+        		processGroup(group);
+        	} catch (IOException e) {
+        		LOGGER.error("Failed to process EPREL catalogue for group {} : {}", group.urlCode(), e.getMessage());
+        		throw e;
+        	}
+
+        }
+
     }
 
 
@@ -65,7 +76,7 @@ public class EprelCatalogueService
 
     	return apiClient.fetchProductGroups();
     }
-    private void processGroup(EprelProductGroup group)
+    private void processGroup(EprelProductGroup group) throws IOException
     {
         Path zipPath = null;
         try
@@ -89,6 +100,7 @@ public class EprelCatalogueService
         catch (IOException e)
         {
             LOGGER.error("Failed to process EPREL catalogue for group {}", group.urlCode(), e);
+            throw e;
         }
         finally
         {

@@ -1,5 +1,7 @@
 package org.open4goods.services.eprelservice.scheduler;
 
+import java.io.IOException;
+
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.eprelservice.service.EprelCatalogueService;
 import org.slf4j.Logger;
@@ -32,9 +34,10 @@ public class EprelCatalogueScheduler
 
     /**
      * Triggers the catalogue refresh job.
+     * @throws IOException
      */
     @Scheduled( initialDelayString = "#{${open4goods.eprel.scheduling-frequency-days:2} * 24 * 60 * 60 * 1000}", fixedDelayString = "#{${open4goods.eprel.scheduling-frequency-days:2} * 24 * 60 * 60 * 1000}")
-    public void schedule()
+    public void schedule() throws IOException
     {
         LOGGER.info("Starting scheduled EPREL catalogue synchronisation every {} day(s)", properties.getSchedulingFrequencyDays());
         catalogueService.refreshCatalogue();

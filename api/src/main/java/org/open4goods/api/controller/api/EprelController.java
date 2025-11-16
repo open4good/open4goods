@@ -1,6 +1,7 @@
 
 package org.open4goods.api.controller.api;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public class EprelController {
 
 	@GetMapping("/eprel/index")
 	@Operation(summary = "Launch the eprel catalogue indexation")
-	public void eprelIndex() {
+	public void eprelIndex() throws IOException {
 		eprelCatalogueService.refreshCatalogue();
 
 	}
