@@ -74,7 +74,7 @@
               <template #activator="{ props, isActive }">
                 <v-list-item
                   v-bind="props"
-                  class="main-menu-items main-menu-items--products"
+                  class="main-menu-items main-menu-items--products main-menu-items--toggle"
                   :class="{ active: isMenuItemActive(item) || isActive }"
                   role="menuitem"
                 >
@@ -83,6 +83,7 @@
                     <v-icon
                       class="main-menu-items__toggle-icon"
                       :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                      size="18"
                       aria-hidden="true"
                     />
                   </template>
@@ -211,7 +212,7 @@
               <template #activator="{ props, isActive }">
                 <v-list-item
                   v-bind="props"
-                  class="main-menu-items main-menu-items--community"
+                  class="main-menu-items main-menu-items--community main-menu-items--toggle"
                   :class="{ active: isMenuItemActive(item) || isActive }"
                   role="menuitem"
                 >
@@ -220,6 +221,7 @@
                     <v-icon
                       class="main-menu-items__toggle-icon"
                       :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                      size="18"
                       aria-hidden="true"
                     />
                   </template>
@@ -964,23 +966,26 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     color: rgb(var(--v-theme-accent-supporting))
     font-weight: 900
 
-.main-menu-items--community,
-.main-menu-items--products
+.main-menu-items--toggle
   min-height: 48px
-  padding-inline-start: 0.75rem
-  padding-inline-end: 0.625rem
-  gap: 0.25rem
+  padding-inline-start: 0.625rem
+  padding-inline-end: 0.5rem
+  gap: 0.125rem
 
   :deep(.v-list-item__append)
-    margin-inline-start: 0.25rem
+    margin-inline-start: 0.125rem
     padding-inline: 0
     min-width: auto
     display: flex
     align-items: center
 
+  :deep(.v-list-item__content)
+    padding-inline-end: 0.125rem
+
 .main-menu-items__toggle-icon
-  margin-inline-start: 0.25rem
+  margin-inline-start: 0.125rem
   margin-inline-end: 0
+  font-size: 1.125rem
   color: currentColor
   opacity: 0.9
   transition: transform 0.2s ease
