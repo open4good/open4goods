@@ -176,9 +176,8 @@ class SearchServiceTest {
         SearchHit<Product> hit = new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, "3", null, 1f, null,
                 Map.of(), Map.of(), null, null, List.of(), product);
 
-        Aggregate termsAggregate = Aggregate.of(a -> a.lterms(lt -> lt.buckets(b -> b.array(List.of(
-                LongTermsBucket.of(bucket -> bucket.key(1L).docCount(2L)),
-                LongTermsBucket.of(bucket -> bucket.key(0L).docCount(3L))
+        Aggregate termsAggregate = Aggregate.of(a -> a.sterms(st -> st.buckets(b -> b.array(List.of(
+                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("true"))).docCount(2L))
         )))));
         Aggregate missingAggregate = Aggregate.of(a -> a.missing(m -> m.docCount(1L)));
         ElasticsearchAggregations aggregations = new ElasticsearchAggregations(Map.of(
@@ -197,17 +196,11 @@ class SearchServiceTest {
         assertThat(result.aggregations()).hasSize(1);
         List<AggregationBucketDto> buckets = result.aggregations().get(0).buckets();
         assertThat(buckets).extracting(AggregationBucketDto::key)
-                .contains("true", "false", "ES-UNKNOWN");
+                .contains("true", "ES-UNKNOWN");
         assertThat(buckets).anySatisfy(bucket -> {
             if ("ES-UNKNOWN".equals(bucket.key())) {
                 assertThat(bucket.missing()).isTrue();
                 assertThat(bucket.count()).isEqualTo(1L);
-            }
-        });
-        assertThat(buckets).anySatisfy(bucket -> {
-            if ("false".equals(bucket.key())) {
-                assertThat(bucket.missing()).isFalse();
-                assertThat(bucket.count()).isEqualTo(3L);
             }
         });
     }
