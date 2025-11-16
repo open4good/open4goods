@@ -124,6 +124,14 @@ Every downstream call should be wrapped in a thin service that:
 4. Guards against accidental client-side usage to keep secrets such as
    `MACHINE_TOKEN` out of the browser bundle.
 
+## Admin access helpers
+- Admin-only UI such as the category filters rely on `hasAdminAccess` from
+  `shared/utils/_roles.ts`.
+- `hasAdminAccess` compares the authenticated user's roles with
+  `config.public.editRoles` (defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`).
+- Update the `EDITOR_ROLES` environment variable if new roles must be allowed;
+  avoid hardcoding role names anywhere else.
+
 ## When Unsure
 - Prefer incremental changes aligned with existing code style and project architecture.
 - Ask for clarification before introducing new patterns or deviating from these guardrails.

@@ -8,20 +8,21 @@ describe('hasAdminAccess', () => {
     expect(hasAdminAccess([])).toBe(false)
   })
 
-  it('matches lowercase admin role', () => {
-    expect(hasAdminAccess(['admin'])).toBe(true)
+  it('matches configured roles regardless of casing', () => {
+    expect(hasAdminAccess(['content_editor'], { allowedRoles: ['CONTENT_EDITOR'] })).toBe(true)
   })
 
-  it('matches uppercase admin role', () => {
-    expect(hasAdminAccess(['ADMIN'])).toBe(true)
-  })
-
-  it('matches prefixed admin role', () => {
-    expect(hasAdminAccess(['ROLE_ADMIN'])).toBe(true)
+  it('allows XWIKIADMINGROUP by default', () => {
+    expect(hasAdminAccess(['XWIKIADMINGROUP'])).toBe(true)
+    expect(hasAdminAccess(['xwikiadmingroup'])).toBe(true)
   })
 
   it('ignores roles without admin privileges', () => {
-    expect(hasAdminAccess(['user'])).toBe(false)
-    expect(hasAdminAccess(['domain'])).toBe(false)
+    expect(hasAdminAccess(['user'], { allowedRoles: ['ROLE_SITEEDITOR'] })).toBe(false)
+    expect(hasAdminAccess(['domain'], { allowedRoles: ['ROLE_SITEEDITOR'] })).toBe(false)
+  })
+
+  it('rejects users without configured admin roles', () => {
+    expect(hasAdminAccess(['content-editor'], { allowedRoles: ['ROLE_SITEEDITOR'] })).toBe(false)
   })
 })
