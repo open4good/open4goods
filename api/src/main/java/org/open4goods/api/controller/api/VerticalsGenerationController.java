@@ -36,7 +36,7 @@ public class VerticalsGenerationController {
 
 	private  VerticalsGenerationService verticalsGenService;
 	private  VerticalsConfigService verticalsConfigService;
-	
+
 	public VerticalsGenerationController(VerticalsGenerationService verticalsGenService, VerticalsConfigService verticalsConfigService) {
 		super();
 		this.verticalsGenService = verticalsGenService;
@@ -63,8 +63,8 @@ public class VerticalsGenerationController {
 //	public void importMapping() throws ResourceNotFoundException, IOException {
 //		verticalsGenService.importMappingFile();
 //	}
-	
-	
+
+
 //	@GetMapping(path="/mappings/clean/threshold")
 //	@Operation(summary="Clean the mappings by configured threshold (percent of totalhits an associated category must have to be retained)")
 //	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
@@ -78,15 +78,15 @@ public class VerticalsGenerationController {
 //	public void cleanCrossLinked() throws ResourceNotFoundException, IOException {
 //		verticalsGenService.removeCrossReferencedMappings();
 //	}
-	
-	
+
+
 
 //	@GetMapping(path="/mappings")
 //	@Operation(summary="Show the mappings")
 //	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 //	public Map<String, VerticalCategoryMapping> get() throws ResourceNotFoundException {
 //		return verticalsGenService.getMappings();
-//		
+//
 //	}
 //
 //	@GetMapping(path="/mappings/export")
@@ -94,29 +94,29 @@ public class VerticalsGenerationController {
 //	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 //	public void exportMapping() throws ResourceNotFoundException, IOException {
 //		 verticalsGenService.exportMappingFile();
-//		
+//
 //	}
-	
 
-	
-	
+
+
+
 	@GetMapping(path="/misc/vertical")
 	@Operation(summary="Generate the vertical files. Please, use https://docs.google.com/spreadsheets/d/1AyBdagWbn_rst2xZvUH9dVF7G2y_Wm_Xrq0IxDGkXoc/edit?gid=0#gid=0")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	// Respond to https://docs.google.com/spreadsheets/d/1AyBdagWbn_rst2xZvUH9dVF7G2y_Wm_Xrq0IxDGkXoc/edit?gid=0#gid=0
-	public void generateCategoryMappingsFragment( 
+	public void generateCategoryMappingsFragment(
 			@RequestParam String googleTaxonomyId,
 			@RequestParam										 String matchingCategories,
 			@RequestParam										 String urlPrefix,
 			@RequestParam										 String h1Prefix,
 			@RequestParam										 String verticalHomeUrl,
 			@RequestParam										 String verticalHomeTitle) throws ResourceNotFoundException, IOException {
-		
+
 		  verticalsGenService.verticalTemplatetoFile(googleTaxonomyId, matchingCategories, urlPrefix, h1Prefix, verticalHomeUrl, verticalHomeTitle);
-		
+
 	}
-	
-	
+
+
 	@GetMapping(path="/{vertical}/attributes/")
 	@Operation(summary="Generate attributes coverage for a vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
@@ -124,7 +124,7 @@ public class VerticalsGenerationController {
 	public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
 		 return verticalsGenService.attributesStats(vertical);
 	}
-	
+
 
 //	@GetMapping(path="/misc/categories/gtin")
 //	@Operation(summary="Generate the categories yaml fragment for a given match")
@@ -132,10 +132,10 @@ public class VerticalsGenerationController {
 //	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 //	public String generateCategoryMappingsFragment(@RequestParam String gtins) throws ResourceNotFoundException, IOException {
 //		 return verticalsGenService.generateCategoryMappingFragmentForGtin(Arrays.asList(gtins.split(",")), null );
-//		
+//
 //	}
-	
-	
+
+
 	@GetMapping(path="/{vertical}/categories/")
 	@Operation(summary="Generate the categories yaml fragment for a given vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
@@ -144,10 +144,10 @@ public class VerticalsGenerationController {
 
 		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
 		return verticalsGenService.generateMapping(vc,minOffersCount);
-		
+
 	}
-	
-	
+
+
 	@GetMapping(path="/{vertical}/ecoscore/")
 	@Operation(summary="Generate the ecoscore yaml fragment for a given vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
@@ -156,77 +156,77 @@ public class VerticalsGenerationController {
 
 		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
 		return verticalsGenService.generateEcoscoreYamlConfig(vc);
-		
+
 	}
-	
-	
 
-	
-	
 
-	
+
+
+
+
+
 //	@GetMapping(path="/update/verticals/categoriesmapping")
 //	@Operation(summary="Update the categories mapping directly in the files !")
 //	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void updateVerticalsWithMappings( 
+//	public void updateVerticalsWithMappings(
 //			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
-//		
+//
 //		//TODO(p2,conf) : from conf
 // 		  verticalsGenService.updateAllVerticalFileWithCategories("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/",minOffers);
-//		
+//
 //	}
-	
+
 	@GetMapping(path="/update/{vertical}")
 	@Operation(summary="Update the vertical with attributes, mappings and ecoscore directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithAll( 
+	public void updateVerticalWithAll(
 			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
-		
+
 		// TODO(p2,conf) : from conf
 		verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml");
-		verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml", 3, null); 	
+		verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml", 3, null);
 		verticalsGenService.updateVerticalFileWithCategories(2, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
-			
-		
+
+
 	}
-	
+
 	@GetMapping(path="/update/{vertical}/impactscore/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithImpactScore( 
+	public void updateVerticalWithImpactScore(
 			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
-		
+
 		//TODO(p2,conf) : from conf
  		  verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
-		
+
 	}
-	
-	
+
+
 	@GetMapping(path="/update/{vertical}/categories/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithMappings( 
+	public void updateVerticalWithMappings(
 			@PathVariable															 String vertical,
 			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
-		
+
 		//TODO(p2,conf) : from conf
  		  verticalsGenService.updateVerticalFileWithCategories(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
-		
+
 	}
-	
+
 	@GetMapping(path="/update/{vertical}/attributes/")
 	@Operation(summary="Update the suggested attributes for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithAttributes( 
+	public void updateVerticalWithAttributes(
 			@PathVariable										 String vertical,
 			@RequestParam	(defaultValue = "10")									 Integer minCoverage,
 			@RequestParam	(defaultValue = "")									 String containing
 			) throws ResourceNotFoundException, IOException {
-		
+
 		//TODO(p2,conf) : from conf
  		  verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage, containing);
-		
+
 	}
 
-	
+
 }

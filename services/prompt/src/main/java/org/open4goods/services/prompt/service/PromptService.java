@@ -120,7 +120,7 @@ public class PromptService implements HealthIndicator {
      * @param promptKey The key identifying the prompt configuration.
      * @param variables The variables to resolve within the prompt templates.
      * @param jsonSchema Optional jsonschema we must conform on
-     * @param instructions 
+     * @param instructions
      * @return A {@link PromptResponse} containing the AI call response and additional metadata.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
      * @throws SerialisationException    if a serialization error occurs.
@@ -133,7 +133,7 @@ public class PromptService implements HealthIndicator {
             logger.error("PromptConfig {} does not exist", promptKey);
             throw new ResourceNotFoundException("Prompt not found");
         }
-        
+
         // Increment request metric
         meterRegistry.counter("prompt.requests", "model", promptKey).increment();
 
@@ -164,7 +164,7 @@ public class PromptService implements HealthIndicator {
         ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
                 .prompt()
                 .user(userPromptEvaluated);
-      
+
                 if (!org.apache.commons.lang3.StringUtils.isEmpty(jsonSchema)) {
                 	OpenAiChatOptions opts = serialisationService.clone(pConf.getOptions());
                 	opts.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema));
@@ -173,18 +173,18 @@ public class PromptService implements HealthIndicator {
                 	chatRequest.options(pConf.getOptions());
                 }
 
-                
-                
+
+
         // Adding the instructions at the end of system prompt if presents
-                
-        if (instructions.size() > 0) {
+
+        if (null != instructions && instructions.size() > 0) {
         	systemPromptEvaluated +="\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
         	for (Entry<String, String> entry : instructions.entrySet()) {
         		systemPromptEvaluated+=entry.getKey() + " : " + entry.getValue()+"\n";
         	}
         }
-                
-                
+
+
         if (StringUtils.hasText(systemPromptEvaluated)) {
             chatRequest = chatRequest.system(systemPromptEvaluated);
         }
@@ -194,7 +194,7 @@ public class PromptService implements HealthIndicator {
         PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
         updatedConfig.setSystemPrompt(systemPromptEvaluated);
         updatedConfig.setUserPrompt(userPromptEvaluated);
-        
+
         ret.setPrompt(updatedConfig);
         logger.info("Resolved prompt config for {} is : {} \n", promptKey, serialisationService.toYamLiteral(updatedConfig));
 
@@ -283,43 +283,43 @@ public class PromptService implements HealthIndicator {
 
     public PromptResponse<String> prompt(String promptKey, Map<String, Object> variables)
             throws ResourceNotFoundException, SerialisationException {
-        
+
         PromptResponse<String> ret = new PromptResponse<String>();
-        
+
         PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, null, null);
         ret.setBody(nativ.getRaw());
         ret.setRaw(nativ.getRaw());
         ret.setDuration(nativ.getDuration());
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
-        
+
         return ret;
     }
 
-    
+
     public <T> PromptResponse<T> objectPrompt(String promptKey, Map<String, Object> variables, Class<T> type)
             throws ResourceNotFoundException, SerialisationException {
-        
+
         PromptResponse<T> ret = new PromptResponse<T>();
-        
+
         // TODO(p2, perf) : should cache instructions scanner and bean output converter
         var outputConverter = new BeanOutputConverter<>(type);
-        var jsonSchema = outputConverter.getJsonSchema();        
+        var jsonSchema = outputConverter.getJsonSchema();
         logger.info("Deducted json schema for prompt {} with type {} is {}", promptKey, type, jsonSchema);
-        
+
        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
-        
-        
+
+
         PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);
         ret.setBody(outputConverter.convert(nativ.getRaw()));
         ret.setRaw(nativ.getRaw());
         ret.setDuration(nativ.getDuration());
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
-        
+
         return ret;
     }
-    
+
     /**
      * Executes a prompt and converts the response into a JSON map.
      *
@@ -428,19 +428,19 @@ public class PromptService implements HealthIndicator {
             return null;
         }
     }
-    
+
     /**
      * Protected getter for the GenAi configuration.
-     * 
+     *
      * @return the PromptServiceConfig
      */
     protected PromptServiceConfig getGenAiConfig() {
         return genAiConfig;
     }
-    
+
     /**
      * Protected getter for the SerialisationService.
-     * 
+     *
      * @return the SerialisationService
      */
     protected SerialisationService getSerialisationService() {
@@ -461,7 +461,7 @@ public class PromptService implements HealthIndicator {
         int words = text.split("\\s+").length;
         return (int) Math.ceil(words * 1.3);
     }
-    
+
     /**
      * Estimate the number of tokens for a given prompt config.
      *
@@ -470,10 +470,10 @@ public class PromptService implements HealthIndicator {
      */
     public int estimateTokens(PromptConfig promptConfig) {
     	return estimateTokens(promptConfig.getSystemPrompt()) + estimateTokens(promptConfig.getUserPrompt());
-    
+
     }
-    
-    
+
+
     /**
      * Health check for the Prompt Service.
      * <p>
