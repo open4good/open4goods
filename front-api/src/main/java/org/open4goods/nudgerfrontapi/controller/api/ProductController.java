@@ -663,7 +663,8 @@ public class ProductController {
                 return Validation.error(badRequest("Invalid filters parameter", "Filter field is mandatory"));
             }
             String mapping = filter.field().trim();
-            if (!allowedFilterMappings.contains(mapping)) {
+            // TODO : The hardcoded excluded is not nice
+            if (!"excluded".equals(mapping) && !allowedFilterMappings.contains(mapping)) {
                 LOGGER.warn("Filter field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid filters parameter",
                         "Filter not permitted for field: " + mapping));
