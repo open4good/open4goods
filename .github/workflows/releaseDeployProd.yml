@@ -88,7 +88,17 @@ jobs:
       ############################################
       # Frontend
       ###########################################
-
+      - name: Debug prod env
+        run: |
+            echo "API_URL: '${API_URL}'"
+            echo "MACHINE_TOKEN is ${#MACHINE_TOKEN} characters long"
+            echo "HCAPTCHA_SITE_KEY is ${#HCAPTCHA_SITE_KEY} characters long"
+        working-directory: frontend
+        env:
+            API_URL: ${{ secrets.API_URL }}
+            MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
+            HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
+            
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
