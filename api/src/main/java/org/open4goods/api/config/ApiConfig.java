@@ -14,18 +14,15 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.services.feedservice.service.AbstractFeedService;
-import org.open4goods.services.feedservice.service.AwinFeedService;
-import org.open4goods.services.feedservice.service.EffiliationFeedService;
-import org.open4goods.services.feedservice.config.FeedConfiguration;
-import org.open4goods.services.feedservice.service.FeedService;
+import org.open4goods.api.services.completion.image.DjlImageEmbeddingService;
+import org.open4goods.api.services.completion.image.ImageEmbeddingService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.commons.helper.DevModeService;
-import org.open4goods.commons.model.constants.TimeConstants;
-import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandScoreService;
 import org.open4goods.brand.service.BrandService;
+import org.open4goods.commons.helper.DevModeService;
+import org.open4goods.commons.model.constants.TimeConstants;
+import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
@@ -55,12 +52,16 @@ import org.open4goods.model.vertical.LegacyPromptConfig;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.eprelservice.client.RestEprelApiClient;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
-import org.open4goods.services.eprelservice.service.EprelCatalogueParser;
 import org.open4goods.services.eprelservice.service.EprelCatalogueService;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.open4goods.services.eprelservice.service.JsonZipEprelCatalogueParser;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.service.AbstractFeedService;
+import org.open4goods.services.feedservice.service.AwinFeedService;
+import org.open4goods.services.feedservice.service.EffiliationFeedService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.service.PromptService;
@@ -298,9 +299,14 @@ public class ApiConfig {
 		return new LegacyPromptConfig();
 	}
 
+
 	@Bean
-	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
-		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties);
+	ImageEmbeddingService imageEmbeddingService () {
+		return new DjlImageEmbeddingService();
+	}
+	@Bean
+	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, ImageEmbeddingService imageEmbeddingService) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties,  imageEmbeddingService);
 
 	}
 

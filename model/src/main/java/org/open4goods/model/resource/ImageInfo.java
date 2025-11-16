@@ -8,12 +8,12 @@ public class ImageInfo {
 
 	/**
 	 * Hash value representation
-	 * 
+	 *
 	 * Hashes are constructed by left shifting BigIntegers with either Zero or One
 	 * depending on the condition found in the image. Preceding 0's will be
 	 * truncated therefore it is the algorithms responsibility to add a 1 padding
 	 * bit at the beginning new BigInteger("011011) new BigInteger("000101) 1xxxxx
-	 * 
+	 *
 	 */
 	private Long pHashValue;
 
@@ -22,37 +22,31 @@ public class ImageInfo {
 	 * beginning dropped.
 	 */
 	private int pHashLength;
-	
-	
-	
+
+	// similarity to main cluster centroid
+	private Double consistencyScore;
+	// per-product cluster
+	private Integer clusterId;
+    private float[] embedding;
+
 	public ImageInfo() {
 		super();
 	}
-	
+
 	@Override
 	public String toString() {
 		return height+"*"+width ;
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the number of pixels this image contains
 	 */
 	public Integer pixels() {
 		return height*width;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	public Integer getHeight() {
 		return height;
 	}
@@ -83,6 +77,30 @@ public class ImageInfo {
 
 	public void setpHashValue(Long pHashValue) {
 		this.pHashValue = pHashValue;
+	}
+
+	public Double getConsistencyScore() {
+		return consistencyScore;
+	}
+
+	public void setConsistencyScore(Double consistencyScore) {
+		this.consistencyScore = consistencyScore;
+	}
+
+	public Integer getClusterId() {
+		return clusterId;
+	}
+
+	public void setClusterId(Integer clusterId) {
+		this.clusterId = clusterId;
+	}
+
+	public float[] getEmbedding() {
+		return embedding;
+	}
+
+	public void setEmbedding(float[] embedding) {
+		this.embedding = embedding;
 	}
 
 
