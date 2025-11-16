@@ -31,6 +31,7 @@ import org.apache.tika.language.detect.LanguageResult;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
+import org.open4goods.api.services.completion.image.ImageEmbeddingService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.exceptions.TechnicalException;
