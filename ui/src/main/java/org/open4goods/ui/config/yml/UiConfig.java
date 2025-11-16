@@ -15,6 +15,8 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.priceevents.PriceRestitutionConfig;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.services.blog.config.BlogConfiguration;
+import org.open4goods.services.feedservice.config.AffiliationConfig;
+import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
@@ -141,17 +143,15 @@ public class UiConfig {
 	private UrlCheckConfig urlcheck;
 
 
+	private AffiliationConfig affiliationConfig = new AffiliationConfig();
+
+
+	private Map<String, FeedConfiguration> feedConfigs = new HashMap<>();
 
 	/***
 	 * Config for IP and UA banChecking
 	 */
 	private BanCheckerConfig bancheckerConfig = new BanCheckerConfig();
-
-	/**
-	 * The configuration for icecat features
-
-	 */
-
 
 	/**
 	 * The Xwiki instance configuration
@@ -197,6 +197,10 @@ public class UiConfig {
 
 		return resourceTemplateFolder+"i18n"+File.separator+"messages";
 	}
+
+	/**
+	 * Configuration for the brand service
+	 */
 
 
 	/**
@@ -353,6 +357,7 @@ public class UiConfig {
 
 
 
+
 	public DevModeConfiguration getDevModeConfig() {
 		return devModeConfig;
 	}
@@ -405,6 +410,7 @@ public class UiConfig {
 	public void setTagListUrl(String tagListUrl) {
 		this.tagListUrl = tagListUrl;
 	}
+
 
 
 	public String getGoogleApiJson() {
@@ -480,6 +486,27 @@ public class UiConfig {
 	public void setPriceConfig(PriceRestitutionConfig priceConfig) {
 		this.priceConfig = priceConfig;
 	}
+
+
+	public AffiliationConfig getAffiliationConfig() {
+		return affiliationConfig;
+	}
+
+
+	public void setAffiliationConfig(AffiliationConfig affiliationConfig) {
+		this.affiliationConfig = affiliationConfig;
+	}
+
+
+	public Map<String, FeedConfiguration> getFeedConfigs() {
+		return feedConfigs;
+	}
+
+
+	public void setFeedConfigs(Map<String, FeedConfiguration> feedConfigs) {
+		this.feedConfigs = feedConfigs;
+	}
+
 
 
 	public Localisable<String, FunFactsConfig> getFunFacts() {

@@ -14,6 +14,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>feedservice</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
         <!-- servlet container -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,6 +51,13 @@
             <optional>true</optional>
         </dependency>
 
+	 <dependency>
+            <groupId>com.github.crawler-commons</groupId>
+            <artifactId>crawler-commons</artifactId>
+            <version>1.5</version>
+        </dependency>
+
+
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -73,11 +86,6 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>5.12.0</version>
-        </dependency>
 
 
         <dependency>
@@ -131,12 +139,7 @@
         </dependency>
 
 
-        <!-- Commons  -->
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>commons</artifactId>
-            <version>${global.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>org.open4goods</groupId>
@@ -162,33 +165,17 @@
         </dependency>
 
 
-        <!--
-
-		<dependency>
-			<groupId>com.talanlabs</groupId>
-			<artifactId>avatar-generator-cat</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.talanlabs</groupId>
-			<artifactId>avatar-generator-smiley</artifactId>
-			<version>1.1.0</version>
-		</dependency>
--->
-
-        <!--
-		https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
-        <dependency>
-            <groupId>cz.jiripinkas</groupId>
-            <artifactId>jsitemapgenerator</artifactId>
-            <version>4.5</version>
-        </dependency>
 
         <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>blog</artifactId>
             <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cz.jiripinkas</groupId>
+            <artifactId>jsitemapgenerator</artifactId>
+            <version>4.5</version>
         </dependency>
 
     </dependencies>
