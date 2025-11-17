@@ -347,25 +347,25 @@ aggregationConfiguration:
   "scores.ECOSCORE.value":
     interval: 5
     buckets: 20
-  "scores.REPAIRABILITY_INDEX.relativ.value":
+  "scores.REPAIRABILITY_INDEX.value":
     interval: 1
     buckets: 10
-  "scores.POWER_CONSUMPTION_TYPICAL.relativ.value":
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
     interval: 25
     buckets: 12
-  "scores.POWER_CONSUMPTION_OFF.relativ.value":
+  "scores.POWER_CONSUMPTION_OFF.value":
     interval: 0.1
     buckets: 10
-  "scores.WEIGHT.relativ.value":
+  "scores.WEIGHT.value":
     interval: 1
     buckets: 5
-  "scores.BRAND_SUSTAINABILITY.relativ.value":
+  "scores.BRAND_SUSTAINABILITY.value":
     interval: 1
     buckets: 5
-  "scores.CLASSE_ENERGY.relativ.value":
+  "scores.CLASSE_ENERGY.value":
     interval: 1
     buckets: 5
-  "scores.DATA_QUALITY.relativ.value":
+  "scores.DATA_QUALITY.value":
     interval: 1
     buckets: 5
   "attributes.indexed.REPAIRABILITY_INDEX":
