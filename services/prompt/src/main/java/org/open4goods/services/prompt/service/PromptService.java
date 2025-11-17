@@ -246,8 +246,12 @@ public class PromptService implements HealthIndicator {
 
         // Execute the API call and record response if successful.
         CallResponseSpec genAiResponse;
+        String responseContent = null;
         try {
             genAiResponse = chatRequest.call();
+            if (genAiResponse != null) {
+                responseContent = genAiResponse.content();
+            }
             externalApiHealthy = true; // API call succeeded, mark healthy.
             // --- Recording Response AFTER API call ---
             if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
@@ -258,10 +262,13 @@ public class PromptService implements HealthIndicator {
                     }
                     // Instead of serializing the whole CallResponseSpec (which cannot be done),
                     // record only its raw string content.
-                    String responseContent = genAiResponse.content();
-                    File responseFile = new File(recordDir, promptKey + "-response.txt");
-                    FileUtils.writeStringToFile(responseFile, responseContent, Charset.defaultCharset());
-                    logger.info("Recorded prompt response content to file: {}", responseFile.getAbsolutePath());
+                    if (responseContent != null) {
+                        File responseFile = new File(recordDir, promptKey + "-response.txt");
+                        FileUtils.writeStringToFile(responseFile, responseContent, Charset.defaultCharset());
+                        logger.info("Recorded prompt response content to file: {}", responseFile.getAbsolutePath());
+                    } else {
+                        logger.warn("Prompt response for key {} was null; skipping response recording.", promptKey);
+                    }
                 } catch (Exception e) {
                     logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
                 }
@@ -275,7 +282,11 @@ public class PromptService implements HealthIndicator {
 
         // Populate the response object
         ret.setBody(genAiResponse);
-        ret.setRaw(genAiResponse.content());
+        if (responseContent != null) {
+            ret.setRaw(responseContent);
+        } else if (genAiResponse != null) {
+            ret.setRaw(genAiResponse.content());
+        }
         ret.setDuration(System.currentTimeMillis() - ret.getStart());
 
         return ret;
