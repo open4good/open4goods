@@ -121,8 +121,6 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createError } from 'h3'
 import {
-  AggTypeEnum,
-  type Agg,
   type AggregationBucketDto,
   type AggregationResponseDto,
   type CommercialEvent,
@@ -148,6 +146,7 @@ import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
+import { buildScoreAggregations } from '~/utils/_score-aggregations'
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -294,12 +293,7 @@ const scoreAggregations = async () => {
 
   loadingAggregations.value = true
 
-  const aggs: Agg[] = scores.map((scoreId) => ({
-    name: `score_${scoreId}`,
-    field: `scores.${scoreId}.relativ.value`,
-    type: AggTypeEnum.Range,
-    step: 0.5,
-  }))
+  const aggs = buildScoreAggregations(scores)
 
   try {
     const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
