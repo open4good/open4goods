@@ -1,18 +1,15 @@
 package org.open4goods.api.services.completion.image;
 
 import ai.djl.modality.cv.Image;
-import ai.djl.modality.cv.transform.CenterCrop;
-import ai.djl.modality.cv.transform.Normalize;
-import ai.djl.modality.cv.transform.Resize;
-import ai.djl.modality.cv.transform.ToTensor;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
-import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.Shape;
 import ai.djl.translate.Batchifier;
-import ai.djl.translate.Pipeline;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 /**
  * Translator that converts an {@link Image} into a normalized embedding vector
@@ -21,51 +18,26 @@ import ai.djl.translate.TranslatorContext;
 public class EmbeddingTranslator implements Translator<Image, float[]> {
 
     private final int imageSize;
-    private final Pipeline pipeline;
+
+    private static final float[] MEAN = {0.485f, 0.456f, 0.406f};
+    private static final float[] STD = {0.229f, 0.224f, 0.225f};
 
     public EmbeddingTranslator(int imageSize) {
         this.imageSize = imageSize;
-
-        this.pipeline = new Pipeline()
-                .add(new Resize(imageSize))
-                .add(new CenterCrop(imageSize, imageSize))
-                .add(new ToTensor())
-                .add(new Normalize(
-                        new float[]{0.485f, 0.456f, 0.406f}, // mean
-                        new float[]{0.229f, 0.224f, 0.225f}  // std
-                ));
     }
 
     @Override
     public NDList processInput(TranslatorContext ctx, Image input) {
-        // Use a *separate* manager for preprocessing so we can use full NDArray ops
-        try (NDManager tmp = NDManager.newBaseManager()) {
+        Image processed = preprocess(input);
+        BufferedImage buffered = toBufferedImage(processed);
+        float[] data = toNormalizedCHW(buffered);
 
-            // 1. Image -> NDArray on tmp manager
-            NDArray array = input.toNDArray(tmp); // shape: [H, W, C] uint8
+        NDArray modelInput = ctx.getNDManager().create(
+                data,
+                new Shape(1, 3, imageSize, imageSize)
+        );
 
-            // 2. Run pipeline (resize, crop, ToTensor, Normalize)
-            NDList processed = pipeline.transform(new NDList(array));
-            NDArray img = processed.singletonOrThrow(); // [C, H, W] float
-
-            // 3. Add batch dimension in *Java*, then create NDArray on model's manager
-            Shape s = img.getShape();           // [C, H, W]
-            long c = s.get(0);
-            long h = s.get(1);
-            long w = s.get(2);
-
-            // Flatten data
-            float[] data = img.toFloatArray();  // length = C*H*W
-
-            // New shape [1, C, H, W]
-            Shape batchedShape = new Shape(1, c, h, w);
-
-            // 4. Create final NDArray in the model engine manager
-            NDManager modelManager = ctx.getNDManager();
-            NDArray modelInput = modelManager.create(data, batchedShape);
-
-            return new NDList(modelInput);
-        }
+        return new NDList(modelInput);
     }
 
     @Override
@@ -93,5 +65,75 @@ public class EmbeddingTranslator implements Translator<Image, float[]> {
     public Batchifier getBatchifier() {
         // Single image at a time; we handle batch dim ourselves.
         return null;
+}
+
+    private Image preprocess(Image input) {
+        int width = input.getWidth();
+        int height = input.getHeight();
+
+        Image working = input;
+
+        if (width != imageSize || height != imageSize) {
+            float scale = (float) imageSize / Math.min(width, height);
+            int newWidth = Math.max(1, Math.round(width * scale));
+            int newHeight = Math.max(1, Math.round(height * scale));
+            working = input.resize(newWidth, newHeight, true);
+        }
+
+        int cropX = Math.max(0, (working.getWidth() - imageSize) / 2);
+        int cropY = Math.max(0, (working.getHeight() - imageSize) / 2);
+
+        if (working.getWidth() != imageSize || working.getHeight() != imageSize || cropX != 0 || cropY != 0) {
+            working = working.getSubImage(cropX, cropY, imageSize, imageSize);
+        }
+
+        return working;
+    }
+
+    private BufferedImage toBufferedImage(Image image) {
+        Object wrapped = image.getWrappedImage();
+        if (wrapped instanceof BufferedImage bufferedImage) {
+            return bufferedImage;
+        }
+
+        if (wrapped instanceof java.awt.Image awtImage) {
+            BufferedImage converted = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = converted.createGraphics();
+            try {
+                graphics.drawImage(awtImage, 0, 0, null);
+            } finally {
+                graphics.dispose();
+            }
+            return converted;
+        }
+
+        throw new IllegalArgumentException("Unsupported image wrapper: " + Objects.toString(wrapped));
+    }
+
+    private float[] toNormalizedCHW(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int channelArea = width * height;
+        float[] data = new float[3 * channelArea];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int rgb = image.getRGB(x, y);
+                float r = ((rgb >> 16) & 0xFF) / 255f;
+                float g = ((rgb >> 8) & 0xFF) / 255f;
+                float b = (rgb & 0xFF) / 255f;
+
+                int offset = y * width + x;
+                data[offset] = normalize(r, 0);
+                data[channelArea + offset] = normalize(g, 1);
+                data[2 * channelArea + offset] = normalize(b, 2);
+            }
+        }
+
+        return data;
+    }
+
+    private float normalize(float value, int channel) {
+        return (value - MEAN[channel]) / STD[channel];
     }
 }
