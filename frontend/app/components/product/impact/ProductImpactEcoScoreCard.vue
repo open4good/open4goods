@@ -17,7 +17,7 @@
     </header>
 
     <div class="impact-ecoscore__score">
-      <ImpactScore :score="normalizedScore" :max="5" size="large" show-value />
+      <ImpactScore :score="impactScoreValue" :max="5" size="large" show-value />
     </div>
 
     <div v-if="hasDetailContent" class="impact-ecoscore__analysis">
@@ -139,15 +139,9 @@ const toggleSubscores = () => {
   isSubscoreExpanded.value = !isSubscoreExpanded.value
 }
 
-const normalizedScore = computed(() => {
-  const rawValue = Number.isFinite(props.score?.value)
-    ? Number(props.score?.value)
-    : Number.isFinite(props.score?.relativeValue)
-      ? Number(props.score?.relativeValue)
-      : 0
-
-  return Math.max(0, Math.min(rawValue, 5))
-})
+const impactScoreValue = computed(() =>
+  Number.isFinite(props.score?.value) ? Number(props.score?.value) : 0,
+)
 
 const normalizedVerticalEcoscorePath = computed(() => {
   const raw = props.verticalHomeUrl?.trim()
