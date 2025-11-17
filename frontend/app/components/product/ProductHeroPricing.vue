@@ -62,6 +62,7 @@
                 :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
                 :rel="bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'"
                 :prefetch="false"
+                @click="handleMerchantClick"
               >
                 <img
                   v-if="bestPriceMerchant.favicon"
@@ -95,6 +96,7 @@
             :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
             :rel="bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'"
             :prefetch="false"
+            @click="handleMerchantClick"
           >
             <img
               v-if="bestPriceMerchant.favicon"
@@ -132,6 +134,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAnalytics } from '~/composables/useAnalytics'
 import type { ProductDto } from '~~/shared/api-client'
 
 type OfferCondition = 'occasion' | 'new'
@@ -146,6 +149,7 @@ const props = defineProps({
 })
 
 const { n, t } = useI18n()
+const { trackProductRedirect, isClientContribLink, extractTokenFromLink } = useAnalytics()
 
 type AggregatedOffer = NonNullable<NonNullable<ProductDto['offers']>['bestPrice']>
 
@@ -301,6 +305,22 @@ const bestPriceMerchant = computed(() => {
     clientOnly: isSingleOffer.value && Boolean(affiliationLink.value),
   }
 })
+
+const handleMerchantClick = () => {
+  const merchant = bestPriceMerchant.value
+  const link = merchant?.url
+
+  if (!isClientContribLink(link)) {
+    return
+  }
+
+  trackProductRedirect({
+    token: extractTokenFromLink(link),
+    placement: 'product-hero',
+    source: merchant?.name ?? null,
+    url: link,
+  })
+}
 
 const priceTrend = computed(() => {
   const offers = props.product.offers

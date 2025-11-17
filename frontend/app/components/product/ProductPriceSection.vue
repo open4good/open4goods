@@ -47,6 +47,7 @@
               :aria-label="$t('product.price.metrics.viewOffer', {
                 source: bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
               })"
+              @click="handleOfferRedirectClick(bestNewOffer, 'best-new-offer', bestNewOfferLink)"
             >
               <span class="product-price__metrics-label">
                 {{ $t('product.price.metrics.bestOffer') }}
@@ -154,6 +155,7 @@
               :aria-label="$t('product.price.metrics.viewOffer', {
                 source: bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
               })"
+              @click="handleOfferRedirectClick(bestOccasionOffer, 'best-occasion-offer', bestOccasionOfferLink)"
             >
               <span class="product-price__metrics-label">
                 {{ $t('product.price.metrics.bestOffer') }}
@@ -285,6 +287,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { useI18n } from 'vue-i18n'
 import { formatDistanceToNow, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
+import { useAnalytics } from '~/composables/useAnalytics'
 import type { ProductDto, CommercialEvent, ProductAggregatedPriceDto } from '~~/shared/api-client'
 
 use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, TitleComponent, CanvasRenderer])
@@ -305,6 +308,7 @@ const props = defineProps({
 })
 
 const { locale, n, t } = useI18n()
+const { trackProductRedirect, extractTokenFromLink, isClientContribLink } = useAnalytics()
 
 type HistoryEntry = { timestamp: number; price: number }
 
@@ -385,6 +389,23 @@ const resolveOfferLink = (offer: ProductAggregatedPriceDto | null | undefined): 
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
 const bestOccasionOfferLink = computed(() => resolveOfferLink(bestOccasionOffer.value))
+
+const handleOfferRedirectClick = (
+  offer: ProductAggregatedPriceDto | null,
+  placement: string,
+  link?: string | null,
+) => {
+  if (!isClientContribLink(link)) {
+    return
+  }
+
+  trackProductRedirect({
+    token: extractTokenFromLink(link),
+    placement,
+    source: offer?.datasourceName ?? null,
+    url: link,
+  })
+}
 
 const formatStat = (value?: number | null, currency: string = 'EUR') =>
   value == null || Number.isNaN(value) ? '—' : n(value, { style: 'currency', currency, maximumFractionDigits: 2 })
