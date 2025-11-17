@@ -344,7 +344,7 @@ subsets:
 
 
 aggregationConfiguration:
-  "scores.ECOSCORE.relativ.value":
+  "scores.ECOSCORE.value":
     interval: 5
     buckets: 20
   "scores.REPAIRABILITY_INDEX.relativ.value":
