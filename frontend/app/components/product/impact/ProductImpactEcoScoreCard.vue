@@ -139,9 +139,19 @@ const toggleSubscores = () => {
   isSubscoreExpanded.value = !isSubscoreExpanded.value
 }
 
-const impactScoreValue = computed(() =>
-  Number.isFinite(props.score?.value) ? Number(props.score?.value) : 0,
-)
+const normalizedScore = computed(() => {
+  const rawValue = Number.isFinite(props.score?.value)
+    ? Number(props.score?.value)
+    : Number.isFinite(props.score?.relativeValue)
+      ? Number(props.score?.relativeValue)
+      : null
+
+  if (rawValue == null) {
+    return 0
+  }
+
+  return Math.max(0, Math.min(rawValue, 5))
+})
 
 const normalizedVerticalEcoscorePath = computed(() => {
   const raw = props.verticalHomeUrl?.trim()

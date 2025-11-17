@@ -337,9 +337,9 @@ describe('Ecological scores', () => {
           base: {},
           offers: {},
           scores: {
-            ecoscore: { relativ: { value: 3.456 } },
+            ecoscore: { value: 4.5, relativ: { value: 3.456 } },
             scores: {
-              BRAND_SUSTAINABILITY: { relativ: { value: 2.1 } },
+              BRAND_SUSTAINABILITY: { value: 1.5, relativ: { value: 2.1 } },
               DATA_QUALITY: { relativ: { value: 4.789 } },
             },
           },
@@ -356,9 +356,9 @@ describe('Ecological scores', () => {
           base: {},
           offers: {},
           scores: {
-            ecoscore: { relativ: { value: 2.1 } },
+            ecoscore: { value: 2.1, relativ: { value: 4.3 } },
             scores: {
-              BRAND_SUSTAINABILITY: { relativ: { value: 4.123 } },
+              BRAND_SUSTAINABILITY: { value: 4.0, relativ: { value: 4.123 } },
               DATA_QUALITY: { relativ: { value: 3.5 } },
             },
           },
@@ -391,7 +391,7 @@ describe('Ecological scores', () => {
 
     const ecoscoreCells = ecoscoreRow!.findAll('.compare-grid__value')
     expect(ecoscoreCells).toHaveLength(2)
-    expect(ecoscoreCells[0].text()).toContain('3,46')
+    expect(ecoscoreCells[0].text()).toContain('4,5')
     expect(ecoscoreCells[1].text()).toContain('2,1')
     expect(ecoscoreCells[0].classes()).toContain('compare-grid__value--highlight')
     expect(ecoscoreCells[1].classes()).not.toContain('compare-grid__value--highlight')
@@ -403,8 +403,8 @@ describe('Ecological scores', () => {
     expect(brandRow).toBeTruthy()
 
     const brandCells = brandRow!.findAll('.compare-grid__value')
-    expect(brandCells[0].text()).toContain('2,1')
-    expect(brandCells[1].text()).toContain('4,12')
+    expect(brandCells[0].text()).toContain('1,5')
+    expect(brandCells[1].text()).toContain('4')
     expect(brandCells[1].classes()).toContain('compare-grid__value--highlight')
   })
 })

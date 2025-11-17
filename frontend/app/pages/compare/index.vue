@@ -807,6 +807,7 @@ import {
   resolveAttributeRawValueByKey,
   type ResolvedProductAttribute,
 } from '~/utils/_product-attributes'
+import { resolveScoreNumericValue } from '~/utils/score-values'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
@@ -1067,51 +1068,23 @@ const formatPrice = (offer: ProductAggregatedPriceDto | undefined, product: Prod
 }
 
 const resolveScoreValue = (score: ProductScoreDto | null | undefined): { display: string | null; numeric: number | null } => {
-  if (!score) {
-    return { display: null, numeric: null }
-  }
+  const resolved = resolveScoreNumericValue(score)
 
-  const relativeValueCandidates: Array<number | null> = [
-    typeof score.relativ?.value === 'number' && Number.isFinite(score.relativ.value)
-      ? score.relativ.value
-      : null,
-    (() => {
-      const legacyRelative = (score as { relative?: { value?: number | null } }).relative?.value
-      return typeof legacyRelative === 'number' && Number.isFinite(legacyRelative) ? legacyRelative : null
-    })(),
-  ]
+  if (resolved) {
+    const formatOptions =
+      resolved.source === 'percent'
+        ? { maximumFractionDigits: 0 }
+        : resolved.source === 'relative' || resolved.source === 'legacyRelative'
+          ? { maximumFractionDigits: 2 }
+          : { maximumFractionDigits: 1 }
 
-  const relativeValue = relativeValueCandidates.find((value): value is number => value != null) ?? null
-
-  if (relativeValue != null) {
     return {
-      display: n(relativeValue, { maximumFractionDigits: 2 }),
-      numeric: relativeValue,
+      display: n(resolved.value, formatOptions),
+      numeric: resolved.value,
     }
   }
 
-  if (score.percent != null && Number.isFinite(score.percent)) {
-    return {
-      display: n(score.percent, { maximumFractionDigits: 0 }),
-      numeric: score.percent,
-    }
-  }
-
-  if (score.on20 != null && Number.isFinite(score.on20)) {
-    return {
-      display: n(score.on20, { maximumFractionDigits: 1 }),
-      numeric: score.on20,
-    }
-  }
-
-  if (score.value != null && Number.isFinite(score.value)) {
-    return {
-      display: n(score.value, { maximumFractionDigits: 1 }),
-      numeric: score.value,
-    }
-  }
-
-  return { display: score.absoluteValue ?? score.relativeValue ?? null, numeric: null }
+  return { display: score?.absoluteValue ?? score?.relativeValue ?? null, numeric: null }
 }
 
 const syncHash = async (hash: string) => {

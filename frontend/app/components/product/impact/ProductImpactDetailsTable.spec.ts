@@ -104,8 +104,8 @@ describe('ProductImpactDetailsTable', () => {
     expect(rows).toHaveLength(1)
     const rowText = rows[0]?.text() ?? ''
     expect(rowText).toContain('CO2')
-    expect(rowText).toContain('rating:3.1')
-    expect(rowText).toContain('3.1 / 5')
+    expect(rowText).toContain('rating:2.8')
+    expect(rowText).toContain('2.8 / 5')
     expect(rowText).toContain('coefficient:0.3')
     expect(wrapper.text()).not.toContain('Eco')
   })
