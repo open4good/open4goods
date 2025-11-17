@@ -144,7 +144,11 @@ const normalizedScore = computed(() => {
     ? Number(props.score?.value)
     : Number.isFinite(props.score?.relativeValue)
       ? Number(props.score?.relativeValue)
-      : 0
+      : null
+
+  if (rawValue == null) {
+    return 0
+  }
 
   return Math.max(0, Math.min(rawValue, 5))
 })
