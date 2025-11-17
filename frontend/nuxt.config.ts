@@ -159,6 +159,8 @@ export default defineNuxtConfig({
     // Admin area rendered on the client side
     '/admin/**': { ssr: false },
     '/offline': { prerender: true },
+    '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
+    '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
   },
   modules: [
     "vuetify-nuxt-module",
