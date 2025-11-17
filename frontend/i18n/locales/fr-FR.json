@@ -1674,31 +1674,47 @@
       },
       "timeline": {
         "title": "Moments clés",
-        "subtitle": "Visualisez les dates importantes de commercialisation et de disponibilité.",
+        "subtitle": "Dates clés du marché en un clin d'œil.",
         "empty": "Aucune information sur le cycle de vie n'est disponible pour le moment.",
+        "ariaYear": "Événements de l'année {year}",
         "sources": {
           "priceHistory": "Historique des prix",
           "eprel": "Registre EPREL",
           "generic": "Événement du cycle de vie"
         },
-        "conditions": {
-          "new": "Neuf",
-          "occasion": "Occasion",
-          "generic": "État"
+        "tooltip": {
+          "date": "Date",
+          "source": "Source",
+          "ariaLabel": "Événement {label} le {date} · {source}"
         },
         "events": {
-          "priceFirstSeenNew": "Première offre neuve détectée",
-          "priceFirstSeenOccasion": "Première offre d'occasion détectée",
-          "priceLastSeenNew": "Dernière offre neuve relevée",
-          "priceLastSeenOccasion": "Dernière offre d'occasion relevée",
-          "eprelOnMarketStart": "Mise sur le marché EPREL",
-          "eprelOnMarketEnd": "Fin de commercialisation EPREL",
-          "eprelOnMarketFirstStart": "Première autorisation en Europe",
+          "priceFirstSeenNew": "Première offre neuve",
+          "priceFirstSeenOccasion": "Première offre d'occasion",
+          "priceLastSeenNew": "Dernière offre neuve",
+          "priceLastSeenOccasion": "Dernière offre d'occasion",
+          "eprelOnMarketStart": "Début commercialisation (EPREL)",
+          "eprelOnMarketEnd": "Fin commercialisation (EPREL)",
+          "eprelOnMarketFirstStart": "Première mise sur le marché UE",
           "eprelFirstPublication": "Première publication EPREL",
           "eprelLastPublication": "Dernière publication EPREL",
           "eprelExport": "Export EPREL",
           "eprelImported": "Importé dans Nudger",
           "eprelOrganisationClosed": "Organisation fermée",
+          "generic": "Événement du cycle de vie"
+        },
+        "descriptions": {
+          "priceFirstSeenNew": "Première offre neuve détectée dans l'historique des prix.",
+          "priceFirstSeenOccasion": "Première offre d'occasion détectée dans l'historique des prix.",
+          "priceLastSeenNew": "Dernière offre neuve enregistrée dans l'historique des prix.",
+          "priceLastSeenOccasion": "Dernière offre d'occasion enregistrée dans l'historique des prix.",
+          "eprelOnMarketStart": "Date de début de commercialisation déclarée sur EPREL.",
+          "eprelOnMarketEnd": "Date de fin de commercialisation déclarée sur EPREL.",
+          "eprelOnMarketFirstStart": "Première date de mise sur le marché déclarée sur EPREL.",
+          "eprelFirstPublication": "Date de première publication EPREL.",
+          "eprelLastPublication": "Date de dernière publication EPREL.",
+          "eprelExport": "Horodatage d'export EPREL.",
+          "eprelImported": "Date d'import de l'entrée EPREL.",
+          "eprelOrganisationClosed": "Date de fermeture de l'organisation EPREL.",
           "generic": "Événement du cycle de vie"
         }
       },
