@@ -905,7 +905,7 @@ public class ProductController {
 
         List<FieldMetadataDto> results = new ArrayList<>();
         config.getAvailableImpactScoreCriterias().forEach((key, criteria) -> {
-            String mapping = "scores." + key + ".relativ.value";
+            String mapping = "scores." + key + ".value";
             String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
             String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
             FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, key);
