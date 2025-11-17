@@ -16,6 +16,10 @@ const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
 const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
 const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
+const PLAUSIBLE_DOMAIN = process.env.PLAUSIBLE_DOMAIN || 'nudger.fr'
+const PLAUSIBLE_API_HOST = process.env.PLAUSIBLE_API_HOST || 'https://plausible.nudger.fr'
+const PLAUSIBLE_ENABLED = process.env.NODE_ENV === 'production'
+const PLAUSIBLE_IGNORED_HOSTNAMES = ['localhost', '127.0.0.1']
 const navigationOfflineFallbackPlugin = {
   handlerDidError: async () => {
     const offlineResponse = await globalThis.caches?.match('/offline')
@@ -170,6 +174,7 @@ export default defineNuxtConfig({
     'nuxt-mcp',
     '@nuxtjs/sitemap',
     '@vite-pwa/nuxt',
+    '@nuxtjs/plausible',
   ],
 
   vueuse: {
@@ -178,6 +183,15 @@ export default defineNuxtConfig({
 
   device: {
     refreshOnResize: true,
+  },
+
+  plausible: {
+    domain: PLAUSIBLE_DOMAIN,
+    apiHost: PLAUSIBLE_API_HOST,
+    enabled: PLAUSIBLE_ENABLED,
+    autoPageviews: true,
+    autoOutboundTracking: true,
+    ignoredHostnames: PLAUSIBLE_IGNORED_HOSTNAMES,
   },
 
   pwa: {
@@ -436,6 +450,14 @@ export default defineNuxtConfig({
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
       hcaptchaSiteKey: process.env.HCAPTCHA_SITE_KEY || '',
       staticServer: process.env.STATIC_SERVER || 'https://static.nudger.fr',
+      plausible: {
+        domain: PLAUSIBLE_DOMAIN,
+        apiHost: PLAUSIBLE_API_HOST,
+        enabled: PLAUSIBLE_ENABLED,
+        autoPageviews: true,
+        autoOutboundTracking: true,
+        ignoredHostnames: PLAUSIBLE_IGNORED_HOSTNAMES,
+      },
     }
   },
   hooks: {

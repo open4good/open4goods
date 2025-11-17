@@ -117,6 +117,7 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
+import { useAnalytics } from '~/composables/useAnalytics'
 
 const MIN_QUERY_LENGTH = 2
 
@@ -126,6 +127,7 @@ definePageMeta({
 
 const { t, locale, availableLocales } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+const { trackSearch } = useAnalytics()
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
@@ -345,6 +347,8 @@ const handleSearchSubmit = () => {
     return
   }
 
+  trackSearch({ query: value, source: 'form' })
+
   router.push({
     path: route.path,
     query: value ? { q: value } : {},
@@ -371,6 +375,8 @@ const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
     return
   }
 
+  trackSearch({ query: suggestion.title, source: 'suggestion' })
+
   router.push(verticalUrl)
 }
 
@@ -380,6 +386,8 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
   if (!gtin) {
     return
   }
+
+  trackSearch({ query: suggestion.title ?? gtin, source: 'suggestion' })
 
   router.push(
     localePath({

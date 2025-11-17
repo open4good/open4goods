@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useAnalytics } from '~/composables/useAnalytics'
+
 interface DownloadHighlight {
   icon?: string
   text: string
@@ -29,6 +31,20 @@ defineProps<{
   subtitle?: string
   options: DownloadOption[]
 }>()
+
+const { trackOpenDataDownload } = useAnalytics()
+
+const handleDownloadClick = (option: DownloadOption) => {
+  if (!option.cta) {
+    return
+  }
+
+  trackOpenDataDownload({
+    datasetId: option.id,
+    method: option.cta.label,
+    href: option.cta.href,
+  })
+}
 </script>
 
 <template>
@@ -71,6 +87,7 @@ defineProps<{
               append-icon="mdi-arrow-down"
               :disabled="option.cta.disabled"
               class="dataset-download__cta"
+              @click="handleDownloadClick(option)"
             >
               {{ option.cta.label }}
             </v-btn>
