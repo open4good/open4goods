@@ -115,7 +115,7 @@
         ]"
       >
         <div v-if="timeline" class="product-attributes__timeline-column">
-          <ProductLifeTimeline :timeline="timeline" alternate />
+          <ProductLifeTimeline :timeline="timeline" />
         </div>
 
         <div class="product-attributes__details-panel">
@@ -822,11 +822,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
     grid-template-columns: minmax(240px, 1fr) minmax(0, 3fr);
     gap: 1.5rem;
     align-items: flex-start;
-  }
-
-  .product-attributes__timeline-column {
-    position: sticky;
-    top: 1.5rem;
   }
 
   .product-attributes__details-panel {
