@@ -760,9 +760,9 @@ public class EprelProduct implements Serializable
     	if (null != gtinIdentifier) {
 	        this.gtinIdentifier = gtinIdentifier;
 	        try {
-				this.numericGtin = Long.valueOf(gtinIdentifier);
+				this.numericGtin = Long.valueOf(gtinIdentifier.trim());
 			} catch (NumberFormatException e) {
-				LOGGER.warn("Non numeric gtinIdentifier {} for {} ",gtinIdentifier,this);
+				LOGGER.warn("Non numeric gtinIdentifier {}",gtinIdentifier);
 			}
     	}
     }

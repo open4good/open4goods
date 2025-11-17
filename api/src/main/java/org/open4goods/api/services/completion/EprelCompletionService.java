@@ -31,8 +31,8 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 
 	public static final String EPREL_DS_NAME = "eprel";
-	private static final int REFRESH_IN_DAYS = 40;
-	private ApiProperties apiProperties;
+	// TODO : From conf, not every one days.
+	private static final int REFRESH_IN_DAYS = 1;
 	private EprelSearchService eprelSearchService;
 
 	Logger logger = LoggerFactory.getLogger(CsvEnrichmentController.class);
@@ -44,7 +44,6 @@ public class EprelCompletionService  extends AbstractCompletionService{
 		// TODO(p3,conf) : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
 
-		this.apiProperties = apiProperties;
 
 		this.eprelSearchService = eprelSearchService;
 
