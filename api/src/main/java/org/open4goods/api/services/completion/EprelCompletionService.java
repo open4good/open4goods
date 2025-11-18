@@ -47,7 +47,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 		this.eprelSearchService = eprelSearchService;
 
-		this.aggregator = aggregationFacade.getStandardAggregator("icecat-aggregation");;
+		this.aggregator = aggregationFacade.getStandardAggregator("eprel-aggregation");;
 		this.aggregator.beforeStart();
 	}
 
@@ -97,7 +97,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
 			logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
 			return;
 		} else {
-			logger.warn("Completing product {} with EPREL datas", data);
+			logger.info("Completing product {} with EPREL datas", data);
 
 
 			EprelProduct eprelData = results.get(0);
@@ -153,7 +153,8 @@ public class EprelCompletionService  extends AbstractCompletionService{
 				for (Entry<String, Object> caracteristic : chars.entrySet()) {
 
 					// TODO : Handle the toString on "object" type, we chould have nested structures
-					df.addAttribute(caracteristic.getKey(), caracteristic.getValue().toString(), getDatasourceName(), getDatasourceName());
+					// TODO : Correct language injection
+					df.addAttribute(caracteristic.getKey(), caracteristic.getValue().toString(), "fr", null);
 				}
 				fragment.add(df);
 
