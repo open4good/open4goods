@@ -1,0 +1,39 @@
+name: Vertical config validation
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'verticals/src/main/resources/**/*.yml'
+      - 'verticals/src/main/resources/**/*.yaml'
+      - 'verticals/src/test/resources/**/*.yml'
+      - 'verticals/src/test/resources/**/*.yaml'
+      - 'verticals/src/test/java/**/*.java'
+      - '.github/workflows/vertical-config-validation.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'verticals/src/main/resources/**/*.yml'
+      - 'verticals/src/main/resources/**/*.yaml'
+      - 'verticals/src/test/resources/**/*.yml'
+      - 'verticals/src/test/resources/**/*.yaml'
+      - 'verticals/src/test/java/**/*.java'
+      - '.github/workflows/vertical-config-validation.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-config:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run vertical YAML validation tests
+        run: mvn -B -pl verticals -am -Dtest=VerticalYamlValidationTest test
