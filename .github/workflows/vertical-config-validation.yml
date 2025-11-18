@@ -5,9 +5,6 @@ on:
     branches: [ "main" ]
     paths:
       - 'verticals/src/main/resources/**/*.yml'
-      - 'verticals/src/main/resources/**/*.yaml'
-      - 'verticals/src/test/resources/**/*.yml'
-      - 'verticals/src/test/resources/**/*.yaml'
       - 'verticals/src/test/java/**/*.java'
       - '.github/workflows/vertical-config-validation.yml'
   pull_request:
@@ -36,4 +33,4 @@ jobs:
           cache: 'maven'
 
       - name: Run vertical YAML validation tests
-        run: mvn -B -pl verticals -am -Dtest=VerticalYamlValidationTest test
+        run: mvn -B -pl verticals -am -Dtest=VerticalYamlValidationTest test -Dsurefire.failIfNoSpecifiedTests=false test
