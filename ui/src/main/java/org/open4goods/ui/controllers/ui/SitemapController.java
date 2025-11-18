@@ -30,16 +30,16 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class CommonsPagesController  {
+public class SitemapController  {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CommonsPagesController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapController.class);
 	private @Autowired UiService uiService;
 
 
 	// The siteConfig
 	private final UiConfig config;
 
-	public CommonsPagesController(UiConfig config, UiService uiService) {
+	public SitemapController(UiConfig config, UiService uiService) {
 		this.config = config;
 		this.uiService = uiService;
 	}

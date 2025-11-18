@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.controllers.webextention.WebExtensionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,7 @@ public class WebSecurityConfig {
 
 
 	private final AuthenticationProvider  authProvider;
-	
+
 	private @Autowired UiConfig config;
 
 	public WebSecurityConfig(AuthenticationProvider authProvider) {
@@ -43,7 +42,7 @@ public class WebSecurityConfig {
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		
+
 		///////////////////////////
 		// Shared configuration
 		//////////////////////////
@@ -62,7 +61,7 @@ public class WebSecurityConfig {
 				// CSRF is disabled for actuator endpoints
 				.and().csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable());
 
-		
+
 		if (config.getWebConfig().getWebAuthentication().booleanValue()) {
 			///////////////////////////
 			// If a full protected  webapp configuration
@@ -76,9 +75,9 @@ public class WebSecurityConfig {
 		}
 		return http.build();
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Cors configuration
 	 * @return
@@ -86,7 +85,7 @@ public class WebSecurityConfig {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		
+
 
 		// Specific CORS configuration for webextension endpoints
 		CorsConfiguration webExtConfig = new CorsConfiguration();
@@ -94,8 +93,6 @@ public class WebSecurityConfig {
 		webExtConfig.setAllowedMethods(Arrays.asList("*"));
 		webExtConfig.setAllowedHeaders(Arrays.asList("*"));
 		webExtConfig.setAllowCredentials(true);
-		source.registerCorsConfiguration(WebExtensionController.WEBEXTENSION_ENDPOINT, webExtConfig);
-		source.registerCorsConfiguration(WebExtensionController.WEBEXTENSION_EXISTS_ENDPOINT, webExtConfig);
 
 		// Global cors configuration, with specific allowed hosts
 	    CorsConfiguration globalConfiguration = new CorsConfiguration();
@@ -105,7 +102,7 @@ public class WebSecurityConfig {
 	    globalConfiguration.setAllowCredentials(true);
 	    source.registerCorsConfiguration("/**", globalConfiguration);
 
-	    
+
 	    return source;
 	}
 
@@ -127,6 +124,6 @@ public class WebSecurityConfig {
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
-	
+
+
 }
