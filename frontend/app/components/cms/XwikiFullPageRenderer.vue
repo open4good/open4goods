@@ -167,6 +167,8 @@ const isWideLayout = computed(() => (props.layoutVariant ?? 'default') === 'wide
 const heroImage = computed(() => props.heroImage?.trim() ?? '')
 const hasHeroImage = computed(() => heroImage.value.length > 0)
 
+const canonicalUrl = useCanonicalUrl()
+
 const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])
 const canEdit = computed(() => {
@@ -204,7 +206,19 @@ useSeoMeta({
   description: () => effectiveMetaDescription.value || undefined,
   ogTitle: () => metaTitle.value || effectivePageTitle.value,
   ogDescription: () => effectiveMetaDescription.value || undefined,
+  ogUrl: () => canonicalUrl.value || undefined,
 })
+
+useHead(() => ({
+  link: canonicalUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalUrl.value,
+        },
+      ]
+    : [],
+}))
 </script>
 
 <style scoped lang="sass">

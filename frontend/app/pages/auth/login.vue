@@ -43,6 +43,23 @@ const valid = ref(true)
 const router = useRouter()
 const route = useRoute()
 
+const canonicalUrl = useCanonicalUrl()
+
+useHead(() => ({
+  link: canonicalUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalUrl.value,
+        },
+      ]
+    : [],
+}))
+
+useSeoMeta({
+  ogUrl: () => canonicalUrl.value || undefined,
+})
+
 const isSafeRedirectTarget = (target: unknown): target is string => typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')
 
 const resolveRedirectTarget = () => {

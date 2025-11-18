@@ -52,8 +52,14 @@ vi.mock('#app', () => ({
   useRuntimeConfig: () => ({ public: { editRoles: [] } }),
 }))
 
+const useSeoMetaMock = vi.fn()
+const useHeadMock = vi.fn()
+const useCanonicalUrlMock = vi.fn(() => ref('https://example.com/cms/page'))
+
 vi.mock('#imports', () => ({
-  useSeoMeta: vi.fn(),
+  useSeoMeta: (...args: unknown[]) => useSeoMetaMock(...args),
+  useHead: (...args: unknown[]) => useHeadMock(...args),
+  useCanonicalUrl: (...args: unknown[]) => useCanonicalUrlMock(...args),
   useI18n: () => ({
     t: (key: string) => {
       const dictionary: Record<string, string> = {

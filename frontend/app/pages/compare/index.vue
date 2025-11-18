@@ -849,6 +849,23 @@ const router = useRouter()
 const route = useRoute()
 const heroId = useId()
 
+const canonicalUrl = useCanonicalUrl()
+
+useHead(() => ({
+  link: canonicalUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalUrl.value,
+        },
+      ]
+    : [],
+}))
+
+useSeoMeta({
+  ogUrl: () => canonicalUrl.value || undefined,
+})
+
 definePageMeta({
   name: 'compare',
   ssr: false,

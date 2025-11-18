@@ -277,6 +277,23 @@ const props = defineProps({
 const { t, locale } = useI18n()
 const display = useDisplay()
 
+const canonicalUrl = useCanonicalUrl()
+
+useHead(() => ({
+  link: canonicalUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalUrl.value,
+        },
+      ]
+    : [],
+}))
+
+useSeoMeta({
+  ogUrl: () => canonicalUrl.value || undefined,
+})
+
 const { data: fetchedVerticals } = await useAsyncData<VerticalConfigDto[]>(
   'impact-score-verticals',
   () =>
