@@ -127,8 +127,9 @@ public class SearchService {
             return _score * (1.0 + density);
             """;
 
-    private static final Set<String> BOOLEAN_AGGREGATION_FIELDS = Set
-            .of(FilterField.excluded.fieldPath());
+    private static final String EXCLUDED_FIELD = "excluded";
+    private static final String EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
+    private static final Set<String> BOOLEAN_AGGREGATION_FIELDS = Set.of();
 
     private final ProductRepository repository;
     private final VerticalsConfigService verticalsConfigService;
@@ -176,7 +177,7 @@ public class SearchService {
 
         // Remove excluded articles unless the caller explicitly overrides the flag
         if (!hasExcludedOverride) {
-            criteria = criteria.and(new Criteria("excluded").is(false));
+            criteria = criteria.and(new Criteria(EXCLUDED_FIELD).is(false));
         }
 
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
@@ -381,7 +382,7 @@ public class SearchService {
                 b.filter(f -> f.range(r -> r.number(n -> n
                         .field("offersCount")
                         .gt(0.0))));
-                b.filter(f -> f.term(t -> t.field("excluded").value(false)));
+                b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
                 b.filter(f -> f.exists(e -> e.field("vertical")));
                 b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames")
                         .query(sanitizedQuery)));
@@ -521,7 +522,7 @@ public class SearchService {
                 .map(Filter::field)
                 .filter(StringUtils::hasText)
                 .map(String::trim)
-                .anyMatch(field -> field.equals(FilterField.excluded.fieldPath()));
+                .anyMatch(field -> field.equals(EXCLUDED_CAUSES_FIELD));
     }
 
     private Criteria buildFilterCriteria(Filter filter) {
@@ -752,7 +753,7 @@ public class SearchService {
                         .field("offersCount")
                         .gt(0.0)
                 )));
-                b.filter(f -> f.term(t -> t.field("excluded").value(false)));
+                b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
                 if (requireVertical) {
                     b.filter(f -> f.exists(e -> e.field("vertical")));
                 }
@@ -938,7 +939,7 @@ public class SearchService {
         return aggregationQuery.aggs().stream()
                 .filter(Objects::nonNull)
                 .filter(agg -> StringUtils.hasText(agg.field()))
-                .filter(agg -> FilterField.excluded.fieldPath().equals(agg.field().trim()))
+                .filter(agg -> EXCLUDED_CAUSES_FIELD.equals(agg.field().trim()))
                 .toList();
     }
 

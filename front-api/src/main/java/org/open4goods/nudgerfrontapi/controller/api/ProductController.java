@@ -26,6 +26,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
@@ -91,6 +92,7 @@ public class ProductController {
     private static final String KEYWORD_VALUE_SUFFIX = ".value";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
     private static final String ECOSCORE_RELATIVE_FIELD = "scores.ECOSCORE.value";
+    private static final String ADMIN_EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 
@@ -629,8 +631,8 @@ public class ProductController {
                 return Validation.error(badRequest("Invalid aggregation parameter", "Aggregation field is mandatory"));
             }
             String mapping = aggregation.field().trim();
-            // TODO : The hardcoded excluded is not nice
-            if (!mapping.equals("excluded") && !allowedAggregationMappings.contains(mapping)) {
+            // Allow aggregation on admin-only exclusion causes field regardless of vertical configuration
+            if (!mapping.equals(ADMIN_EXCLUDED_CAUSES_FIELD) && !allowedAggregationMappings.contains(mapping)) {
                 LOGGER.warn("Aggregation field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid aggregation parameter",
                         "Aggregation not permitted for field: " + mapping));
@@ -663,8 +665,8 @@ public class ProductController {
                 return Validation.error(badRequest("Invalid filters parameter", "Filter field is mandatory"));
             }
             String mapping = filter.field().trim();
-            // TODO : The hardcoded excluded is not nice
-            if (!"excluded".equals(mapping) && !allowedFilterMappings.contains(mapping)) {
+            // Allow filtering on admin-only exclusion causes field regardless of vertical configuration
+            if (!ADMIN_EXCLUDED_CAUSES_FIELD.equals(mapping) && !allowedFilterMappings.contains(mapping)) {
                 LOGGER.warn("Filter field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid filters parameter",
                         "Filter not permitted for field: " + mapping));

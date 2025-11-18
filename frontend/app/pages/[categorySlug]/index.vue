@@ -391,7 +391,7 @@ const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
 
 const isAdmin = computed(() => isLoggedIn.value && hasAdminAccess(roles.value))
-const ADMIN_EXCLUDED_FIELD = 'excluded'
+const ADMIN_EXCLUDED_FIELD = 'excludedCauses'
 
 const adminFilterFields = computed<FieldMetadataDto[]>(() => {
   if (!isAdmin.value) {
@@ -401,8 +401,8 @@ const adminFilterFields = computed<FieldMetadataDto[]>(() => {
   return [
     {
       mapping: ADMIN_EXCLUDED_FIELD,
-      title: t('category.admin.filters.excluded.title'),
-      description: t('category.admin.filters.excluded.helper'),
+      title: t('category.admin.filters.excludedCauses.title'),
+      description: t('category.admin.filters.excludedCauses.helper'),
       valueType: 'text',
     },
   ]

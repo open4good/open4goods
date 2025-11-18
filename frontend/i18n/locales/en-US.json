@@ -426,9 +426,8 @@
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",
       "options": {
-        "excluded": {
-          "true": "Excluded products",
-          "false": "Visible products"
+        "excludedCauses": {
+          "ES-UNKNOWN": "Unknown cause"
         }
       },
       "toggle": {
@@ -444,11 +443,11 @@
     },
     "admin": {
       "title": "Admin filters",
-      "helper": "Restricted tools for Nudger teammates. Inspect excluded catalog entries here.",
+      "helper": "Restricted tools for Nudger teammates. Inspect exclusion causes for catalog entries here.",
       "filters": {
-        "excluded": {
-          "title": "Product visibility",
-          "helper": "Toggle results excluded from the public catalog."
+        "excludedCauses": {
+          "title": "Exclusion causes",
+          "helper": "Group results by the moderation or legal reasons that hid them from the public catalog."
         }
       }
     },
