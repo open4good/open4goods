@@ -23,7 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * One batch to rule them all
- * 
+ *
  * @author Goulven.Furet
  *
  *
@@ -37,16 +37,16 @@ public class BatchService {
 	private CompletionFacadeService completionFacadeService;
 
 	private AggregationFacadeService aggregationFacadeService;
-	
+
 	private CsvDatasourceFetchingService csvDatasourceFetchingService;
-	
+
 	private FeedService feedService;
 
 	private ProductRepository dataRepository;
 
 	private SerialisationService serialisationService;
-	
-	
+
+
 	public BatchService(AggregationFacadeService aggregationFacadeService,
 			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService) {
 		super();
@@ -67,18 +67,18 @@ public class BatchService {
 	 * > Save
 	 */
 //	public void cleanVerticals() {
-//		
+//
 ////		1 - Get all products having vertical
-//		
+//
 //		dataRepository.getAllHavingVertical().forEach(e -> {
 //			VerticalConfig v = verticalsConfigService.getVerticalForCategories(e.getDatasourceCategories());
-//			
+//
 //			// Unassociating items where we have no mapped categories
 //			if (e.getCategoriesByDatasources().size() == 0) {
 //				logger.info("Unassociating vertical, no mapped categories for {}", e);
-//				e.setVertical(null); 
+//				e.setVertical(null);
 //				dataRepository.index(e);
-//				
+//
 //			} else {
 //				if (null != v && v.getId().equals(e.getVertical())) {
 //					logger.info("No vertical change for {}", e);
@@ -90,18 +90,18 @@ public class BatchService {
 //			}
 //		});
 //	}
-	
+
 	// TODO(p3,conf) : schedule from conf
 	@Scheduled(cron = "0 0 13 * * ?")
 	public void batch() {
-		
+
 		/////////////////////////////////////////////
 		// On each vertical, products are in memory loaded
 		/////////////////////////////////////////////
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
 			batch(vertical);
 		}
-		
+
 
 		logger.info("End of batch");
 	}
@@ -112,28 +112,28 @@ public class BatchService {
 	 */
 	public void batch(VerticalConfig vertical) {
 		Set<Product> allProducts = new HashSet<>();
-		
+
 		logger.info("Loading products in memory for vertical {}", vertical);
-		
+
 		// We take all products that are typed with the given vertical
 		allProducts = 	dataRepository.getProductsMatchingVerticalId(vertical).collect(Collectors.toSet());
-		
+
 		logger.info("Sanitisation of {} products", allProducts);
 
-		////////////////////			
+		////////////////////
 		// We apply simple classification to unmatch products from verticals if needed
-		////////////////////			
+		////////////////////
 		aggregationFacadeService.classificationAggregator(vertical, allProducts);
-		
-		// We filter the products into the "living one" (that have not been unmatched from caegories matching, and that have a valid price			
+
+		// We filter the products into the "living one" (that have not been unmatched from caegories matching, and that have a valid price
 		Set<Product> products = allProducts.stream()
 				.filter(e -> e.getOffersCount().intValue() > 0)
 				.filter(e-> null != e.getVertical())
 				.collect(Collectors.toSet());
-		
+
 		logger.info("Will complete {} products of {}", products.size(), allProducts.size() );
-		
-		////////////////////		
+
+		////////////////////
 		//  Launch completion on this products
 		////////////////////
 		completionFacadeService.processAll(products, vertical);
@@ -143,13 +143,13 @@ public class BatchService {
 		// Launch aggregation, (now will complete on more Datas (eg API ones)
 		/////////////////////////////////
 		aggregationFacadeService.aggregateProducts(vertical, allProducts);
-		
-		
-		////////////////////		
+
+
+		////////////////////
 		//  Scoring
-		////////////////////	
-		
-		
+		////////////////////
+
+
 		try {
 			// Scoring
 			// We only score the products that are not excluded
@@ -159,44 +159,44 @@ public class BatchService {
 		} catch (Exception e) {
 			logger.error("Error in batch : scoring fail", e);
 		}
-		
-		
-		////////////////////		
+
+
+		////////////////////
 		//  Persisting
-		////////////////////	
-		
-		logger.info("Adding {} ({} completed) products to indexation",allProducts.size(), products.size());			
+		////////////////////
+
+		logger.info("Adding {} ({} completed) products to indexation",allProducts.size(), products.size());
 		// We flush the queue, no matter the previous fragments, we want to be sure there are no erasure on completed items
 		dataRepository.getFullProductQueue().clear();
 		dataRepository.addToFullindexationQueue(allProducts);
 	}
 
-	
-	
-	
+
+
+
 
 	///////////////////////
 	///// Feeds retrieving
 	///////////////////////
 	///
 
-	
-	
-	
-	
+
+
+
+
 	/**
      * Fetches all feeds by aggregating datasource properties from all feed services and orphan configurations,
      * then starting the fetching process for each datasource.
      */
-    @Scheduled(cron = "19 13 1 * * ?") // For example, schedule daily at 1 AM.
+    @Scheduled(cron = "19 13 23 * * ?") // For example, schedule daily at 1 AM.
     public void fetchFeeds() {
         logger.info("Initiating full feed fetching process.");
         Set<DataSourceProperties> datasources = feedService.getFeedsUrl();
-        
+
         List<DataSourceProperties> datasourceList = new ArrayList<>(datasources);
         long seed = System.nanoTime();
         java.util.Collections.shuffle(datasourceList, new java.util.Random(seed));
-        
+
         logger.info("Total feeds to fetch: {}", datasourceList.size());
         for (DataSourceProperties ds : datasourceList) {
             try {
@@ -207,9 +207,9 @@ public class BatchService {
             }
         }
     }
-	
-	
-    
+
+
+
     /**
      * Fetches feeds that match the specified feed URL.
      *
@@ -219,7 +219,7 @@ public class BatchService {
         logger.info("Fetching feeds with URL: {}", url);
         Set<DataSourceProperties> datasources =  feedService.getFeedsUrl();
         logger.info("Found {} feeds for processing.", datasources.size());
-        
+
         for (DataSourceProperties ds : datasources) {
             try {
                 if (ds.getCsvDatasource().getDatasourceUrls().contains(url)) {
@@ -233,7 +233,7 @@ public class BatchService {
             }
         }
     }
-    
+
     /**
      * Fetches feeds that match the specified feed key.
      *
@@ -251,8 +251,8 @@ public class BatchService {
             }
         }
     }
-    
-    
+
+
 
     /**
      * Filters and returns datasource properties that match the provided feed key.
@@ -278,7 +278,7 @@ public class BatchService {
         return result;
     }
 
-    
+
     // TODO(p3,design) : remove
 	public void clean() {
 		AtomicInteger counter = new AtomicInteger();
@@ -293,17 +293,17 @@ public class BatchService {
 				if (textVersion.contains("openfoodfacts")) {
 					logger.error("Will remove {}", p);
 					dataRepository.delete(p);
-				} 
-				
+				}
+
 			} catch (SerialisationException e) {
 				e.printStackTrace();
 			}
-			
+
 		});
-		
-		
+
+
 	}
-    
-    
-	
+
+
+
 }
