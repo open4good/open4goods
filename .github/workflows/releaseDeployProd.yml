@@ -262,22 +262,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: sh /opt/open4goods/bin/publish-jars.sh prod
 
-          ############################################
-          # GitHub Pages Deployment
-          ###########################################
-          - name: Setup GitHub Pages
-            uses: actions/configure-pages@v5    
+      ############################################
+      # GitHub Pages Deployment
+      ###########################################
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5    
 
-          - name: Merge Site
-            run: cp -r target/staging/* src/main/site/maven/
-                            
-          - name: Upload Custom Site to GitHub Pages
-            uses: actions/upload-pages-artifact@v4
-            with:
-              path: './src/main/site/'
+      - name: Merge Site
+        run: cp -r target/staging/* src/main/site/maven/
+                        
+      - name: Upload Custom Site to GitHub Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: './src/main/site/'
 
-          - name: Deploy to GitHub Pages
-            id: deployment
-            uses: actions/deploy-pages@v4
-          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
 
