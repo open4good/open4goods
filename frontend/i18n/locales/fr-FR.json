@@ -426,9 +426,8 @@
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "Filtres techniques",
       "options": {
-        "excluded": {
-          "true": "Produits exclus",
-          "false": "Produits visibles"
+        "excludedCauses": {
+          "ES-UNKNOWN": "Cause inconnue"
         }
       },
       "toggle": {
@@ -444,11 +443,11 @@
     },
     "admin": {
       "title": "Filtres admin",
-      "helper": "Outils réservés aux coéquipiers Nudger connectés pour examiner les fiches exclues.",
+      "helper": "Outils réservés aux coéquipiers Nudger pour analyser les causes d'exclusion des fiches.",
       "filters": {
-        "excluded": {
-          "title": "Visibilité des produits",
-          "helper": "Inclure ou non les produits retirés du catalogue public."
+        "excludedCauses": {
+          "title": "Causes d'exclusion",
+          "helper": "Regroupez les résultats par motif de modération ou raison légale."
         }
       }
     },

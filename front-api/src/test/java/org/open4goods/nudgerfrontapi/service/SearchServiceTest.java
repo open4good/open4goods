@@ -68,6 +68,8 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 @ExtendWith(MockitoExtension.class)
 class SearchServiceTest {
 
+    private static final String EXCLUDED_FIELD = "excluded";
+
     @Mock
     private ProductRepository repository;
 
@@ -148,7 +150,8 @@ class SearchServiceTest {
         SearchService.SearchResult defaultResult = searchService.search(pageable, null, null, null, null);
         assertThat(defaultResult.hits().getSearchHits()).isEmpty();
 
-        Filter excludedFilter = new Filter(FilterField.excluded.fieldPath(), FilterOperator.term, List.of("true"), null, null);
+        Filter excludedFilter = new Filter(FilterField.excludedCauses.fieldPath(), FilterOperator.term,
+                List.of("MODERATION"), null, null);
         FilterRequestDto adminFilters = new FilterRequestDto(List.of(excludedFilter));
 
         SearchService.SearchResult overriddenResult = searchService.search(pageable, null, null, null, adminFilters);
@@ -163,11 +166,12 @@ class SearchServiceTest {
 
         Criteria overriddenCriteria = ((CriteriaQuery) capturedQueries.get(1).getSpringDataQuery()).getCriteria();
         assertThat(hasExcludedClauseWithValue(overriddenCriteria, false)).isFalse();
-        assertThat(hasExcludedClauseWithValue(overriddenCriteria, true)).isTrue();
+        assertThat(hasFieldClauseWithValue(overriddenCriteria, FilterField.excludedCauses.fieldPath(), "MODERATION"))
+                .isTrue();
     }
 
     @Test
-    void termsAggregationOnBooleanFieldUsesDedicatedMissingBucket() {
+    void termsAggregationOnExcludedCausesIncludesMissingBucket() {
         Pageable pageable = PageRequest.of(0, 5);
 
         Product product = new Product(3L);
@@ -175,18 +179,18 @@ class SearchServiceTest {
                 Map.of(), Map.of(), null, null, List.of(), product);
 
         Aggregate termsAggregate = Aggregate.of(a -> a.sterms(st -> st.buckets(b -> b.array(List.of(
-                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("true"))).docCount(2L))
+                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("MODERATION"))).docCount(2L)),
+                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("ES-UNKNOWN"))).docCount(1L))
         )))));
-        Aggregate missingAggregate = Aggregate.of(a -> a.missing(m -> m.docCount(1L)));
         ElasticsearchAggregations aggregations = new ElasticsearchAggregations(Map.of(
-                "excludedStats", termsAggregate,
-                "excludedStats_missing", missingAggregate));
+                "excludedStats", termsAggregate));
 
         SearchHits<Product> hits = new SearchHitsImpl<>(1L, TotalHitsRelation.EQUAL_TO, 1f, Duration.ZERO, null, null,
                 List.of(hit), aggregations, null, null);
         when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(hits, hits);
 
-        Agg aggregation = new Agg("excludedStats", FilterField.excluded.fieldPath(), AggType.terms, null, null, null, null);
+        Agg aggregation = new Agg("excludedStats", FilterField.excludedCauses.fieldPath(), AggType.terms, null, null, null,
+                null);
         AggregationRequestDto aggregationRequest = new AggregationRequestDto(List.of(aggregation));
 
         SearchService.SearchResult result = searchService.search(pageable, null, null, aggregationRequest, null);
@@ -194,7 +198,7 @@ class SearchServiceTest {
         assertThat(result.aggregations()).hasSize(1);
         List<AggregationBucketDto> buckets = result.aggregations().get(0).buckets();
         assertThat(buckets).extracting(AggregationBucketDto::key)
-                .contains("true", "ES-UNKNOWN");
+                .contains("MODERATION", "ES-UNKNOWN");
         assertThat(buckets).anySatisfy(bucket -> {
             if ("ES-UNKNOWN".equals(bucket.key())) {
                 assertThat(bucket.missing()).isTrue();
@@ -207,33 +211,31 @@ class SearchServiceTest {
     void excludedAggregationIgnoresDefaultVisibilityFilter() {
         Pageable pageable = PageRequest.of(0, 5);
 
-        Aggregate visibleAggregate = Aggregate.of(a -> a.sterms(st -> st.buckets(b -> b.array(List.of(
-                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("false"))).docCount(5L))
-        )))));
+        Aggregate visibleAggregate = Aggregate.of(a -> a.sterms(st -> st.buckets(b -> b.array(List.of()))));
         Aggregate overrideAggregate = Aggregate.of(a -> a.sterms(st -> st.buckets(b -> b.array(List.of(
-                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("true"))).docCount(2L)),
-                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("false"))).docCount(3L))
+                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("MODERATION"))).docCount(2L)),
+                StringTermsBucket.of(bucket -> bucket.key(FieldValue.of(fv -> fv.stringValue("LEGAL"))).docCount(3L))
         )))));
-        Aggregate missingAggregate = Aggregate.of(a -> a.missing(m -> m.docCount(0L)));
 
         SearchHits<Product> mainHits = buildSearchHits(List.of(new Product(5L)),
-                Map.of("excludedStats", visibleAggregate, "excludedStats_missing", missingAggregate));
+                Map.of("excludedStats", visibleAggregate));
         SearchHits<Product> overrideHits = buildSearchHits(List.of(),
-                Map.of("excludedStats", overrideAggregate, "excludedStats_missing", missingAggregate));
+                Map.of("excludedStats", overrideAggregate));
 
         when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
                 .thenReturn(mainHits, overrideHits);
 
-        Agg aggregation = new Agg("excludedStats", FilterField.excluded.fieldPath(), AggType.terms, null, null, null, null);
+        Agg aggregation = new Agg("excludedStats", FilterField.excludedCauses.fieldPath(), AggType.terms, null, null, null,
+                null);
         AggregationRequestDto aggregationRequest = new AggregationRequestDto(List.of(aggregation));
 
         SearchService.SearchResult result = searchService.search(pageable, null, null, aggregationRequest, null);
 
         assertThat(result.aggregations()).hasSize(1);
         List<AggregationBucketDto> buckets = result.aggregations().get(0).buckets();
-        assertThat(buckets).extracting(AggregationBucketDto::key).contains("true", "false");
+        assertThat(buckets).extracting(AggregationBucketDto::key).contains("MODERATION", "LEGAL");
         assertThat(buckets).anySatisfy(bucket -> {
-            if ("true".equals(bucket.key())) {
+            if ("MODERATION".equals(bucket.key())) {
                 assertThat(bucket.count()).isEqualTo(2L);
             }
         });
@@ -267,20 +269,27 @@ class SearchServiceTest {
     }
 
     private boolean hasExcludedClauseWithValue(Criteria criteria, boolean expectedValue) {
+        return hasFieldClauseWithValue(criteria, EXCLUDED_FIELD, expectedValue);
+    }
+
+    private boolean hasFieldClauseWithValue(Criteria criteria, String fieldName, Object expectedValue) {
         return expandCriteria(criteria)
-                .filter(entry -> entry.getField() != null && "excluded".equals(entry.getField().getName()))
+                .filter(entry -> entry.getField() != null && fieldName.equals(entry.getField().getName()))
                 .flatMap(entry -> entry.getQueryCriteriaEntries().stream())
                 .map(CriteriaEntry::getValue)
                 .flatMap(this::flattenCriteriaValue)
                 .anyMatch(value -> matchesExpectedValue(value, expectedValue));
     }
 
-    private boolean matchesExpectedValue(Object value, boolean expectedValue) {
-        if (value instanceof Boolean booleanValue) {
-            return booleanValue == expectedValue;
-        }
-        if (value instanceof String stringValue) {
-            return Boolean.parseBoolean(stringValue) == expectedValue;
+    private boolean matchesExpectedValue(Object value, Object expectedValue) {
+        if (expectedValue instanceof Boolean booleanExpected) {
+            if (value instanceof Boolean booleanValue) {
+                return booleanValue == booleanExpected;
+            }
+            if (value instanceof String stringValue) {
+                return Boolean.parseBoolean(stringValue) == booleanExpected;
+            }
+            return Objects.equals(value, booleanExpected);
         }
         return Objects.equals(value, expectedValue);
     }
