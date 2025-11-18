@@ -55,6 +55,23 @@ import { useBlog } from '~/composables/blog/useBlog'
 
 const { articles, loading, error, fetchArticles } = useBlog()
 
+const canonicalUrl = useCanonicalUrl()
+
+useHead(() => ({
+  link: canonicalUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalUrl.value,
+        },
+      ]
+    : [],
+}))
+
+useSeoMeta({
+  ogUrl: () => canonicalUrl.value || undefined,
+})
+
 // Fetch articles on component mount
 onMounted(() => {
   fetchArticles()
