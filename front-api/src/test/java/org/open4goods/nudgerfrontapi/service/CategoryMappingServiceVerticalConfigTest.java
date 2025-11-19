@@ -15,6 +15,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
+import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.verticals.GoogleTaxonomyService;
@@ -45,6 +46,23 @@ class CategoryMappingServiceVerticalConfigTest {
         CategoryBreadcrumbItemDto terminal = dto.breadCrumb().get(dto.breadCrumb().size() - 1);
         assertThat(terminal.title()).isEqualTo("Téléviseurs");
         assertThat(terminal.link()).isEqualTo("/televisions-url");
+    }
+
+    @Test
+    void toVerticalConfigDtoIgnoresMissingVerticalImages() {
+        ApiProperties properties = new ApiProperties();
+        properties.setResourceRootPath("https://static.example");
+
+        CategoryMappingService serviceWithResources = new CategoryMappingService(properties, googleTaxonomyService);
+        VerticalConfig config = createVerticalConfig("washing-machines", 3);
+        config.setVerticalImage("   ");
+
+        VerticalConfigDto dto = serviceWithResources.toVerticalConfigDto(config, DomainLanguage.fr);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.imageSmall()).isNull();
+        assertThat(dto.imageMedium()).isNull();
+        assertThat(dto.imageLarge()).isNull();
     }
 
     private VerticalConfig createVerticalConfig(String id, int googleTaxonomyId) {

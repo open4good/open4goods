@@ -619,48 +619,43 @@ public class CategoryMappingService {
      * Build the URL to the medium sized vertical illustration.
      */
     private String mapVerticalImageMedium(VerticalConfig verticalConfig) {
-        if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
-            return null;
-        }
-
-        if (verticalConfig.getVerticalImage().startsWith("/")) {
-        	// In case of relativ path, assume the image is weared on the frontend
-        	return verticalConfig.getVerticalImage();
-        } else {
-        	// Else, a ressource handled by the static server
-        	return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-360.webp";
-        }
+        return mapVerticalImage(verticalConfig, "-360.webp");
     }
 
     /**
      * Build the URL to the small sized vertical illustration.
      */
     private String mapVerticalImageSmall(VerticalConfig verticalConfig) {
-        if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
-            return null;
-        }
-        if (verticalConfig.getVerticalImage().startsWith("/")) {
-        	// In case of relativ path, assume the image is weared on the frontend
-        	return verticalConfig.getVerticalImage();
-        } else {
-        	// Else, a ressource handled by the static server
-        	return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + "-100.webp";
-        }
+        return mapVerticalImage(verticalConfig, "-100.webp");
     }
 
     /**
      * Build the URL to the large vertical illustration used on landing pages.
      */
     private String mapVerticalImageLarge(VerticalConfig verticalConfig) {
-        if (verticalConfig == null || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
+        return mapVerticalImage(verticalConfig, ".webp");
+    }
+
+    private String mapVerticalImage(VerticalConfig verticalConfig, String suffix) {
+        if (verticalConfig == null) {
             return null;
         }
-        if (verticalConfig.getVerticalImage().startsWith("/")) {
-        	// In case of relativ path, assume the image is weared on the frontend
-        	return verticalConfig.getVerticalImage();
-        } else {
-        	// Else, a ressource handled by the static server
-        	return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + ".webp";
+
+        String configuredImage = verticalConfig.getVerticalImage();
+        if (!StringUtils.hasText(configuredImage)) {
+            return null;
         }
+
+        if (configuredImage.startsWith("/")) {
+            // In case of relative path, assume the image is served by the frontend.
+            return configuredImage;
+        }
+
+        if (!StringUtils.hasText(apiProperties.getResourceRootPath())) {
+            return null;
+        }
+
+        // Else, a resource handled by the static server
+        return apiProperties.getResourceRootPath() + IMAGE_PREFIX + verticalConfig.getId() + suffix;
     }
 }
