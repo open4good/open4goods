@@ -26,6 +26,7 @@ import org.springframework.cache.annotation.Cacheable;
 import com.fasterxml.jackson.annotation.JsonMerge;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 
@@ -72,8 +73,9 @@ public class VerticalConfig{
 	/**
 	 * Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
 	 */
-	@JsonMerge
-	private String verticalImage ;
+        @JsonMerge
+        @NotBlank
+        private String verticalImage ;
 
 
 	/**
