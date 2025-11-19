@@ -8,11 +8,16 @@ import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
+/**
+ * Aggregates product attributes into {@link Score} instances and prepares the
+ * statistics required for relativisation.
+ */
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
 
@@ -97,41 +102,59 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 	}
 	
-	@Override
-	public void done(Collection<Product> datas, VerticalConfig vConf) {
+        /**
+         * Reverses the configured scores (so that "lower is better" criteria can be
+         * compared) and recalculates the batch cardinalities before delegating to the
+         * standard relativisation process.
+         */
+        @Override
+        public void done(Collection<Product> datas, VerticalConfig vConf) {
 
-		/////////////////////////////////////////////////
-		//  Reversing the scores that need to be (ie. weight, electric consumption : lower values are the best scored)
-		// To reverse a score, we substract max absolute score from item absolute score 
-		/////////////////////////////////////////////////
-		
-		// Selecting the scores to reverse
-		List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e->e.isReverseScore()).map(e->e.getKey()).toList();
-		
-		// For each score to reverse
-		for (String key : scoresToReverse) {
-			
-			// TODO : Check all cardinality are equivalent
-			// We iterate on every score, and we update score abs value and batchdatas abs cardinality
-			for (Product p : datas) {
-				if (!p.getScores().containsKey(key)) {
-					dedicatedLogger.info("No score {} for {}",key,p);
-				} else {
-					Double value = p.getScores().get(key).getValue();
-					Double max = batchDatas.get(key).getMax();
-					Double reversed = max - value;
-					
-					p.getScores().get(key).setValue(reversed);				
-					batchDatas.get(key).setValue(reversed);
-					
-					dedicatedLogger.info("Score {} reversed for {}. Original was {}, max is {}. New value is {}",key, p, value,max, reversed );
-				}
-				
-			}
-		}
-		
-		// SUPER important : Score relativisation is operated in the AbstactScoreAggService
-		super.done(datas, vConf);
-	}
+                /////////////////////////////////////////////////
+                //  Reversing the scores that need to be (ie. weight, electric consumption : lower values are the best scored)
+                // To reverse a score, we substract max absolute score from item absolute score
+                /////////////////////////////////////////////////
+
+                // Selecting the scores to reverse
+                List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e->e.isReverseScore()).map(e->e.getKey()).toList();
+
+                // For each score to reverse
+                for (String key : scoresToReverse) {
+
+                        Cardinality sourceCardinality = batchDatas.get(key);
+                        if (null == sourceCardinality) {
+                                dedicatedLogger.warn("Cannot reverse score {} – no cardinality available", key);
+                                continue;
+                        }
+
+                        Double max = sourceCardinality.getMax();
+                        if (null == max) {
+                                dedicatedLogger.warn("Cannot reverse score {} – no max value available", key);
+                                continue;
+                        }
+
+                        // Recompute the global cardinality with the reversed values so that
+                        // subsequent relativisation and frontend explanations rely on the same extrema.
+                        Cardinality reversedCardinality = new Cardinality();
+
+                        for (Product p : datas) {
+                                Score score = p.getScores().get(key);
+                                if (score == null) {
+                                        dedicatedLogger.info("No score {} for {}", key, p);
+                                        continue;
+                                }
+                                Double originalValue = score.getValue();
+                                Double reversed = max - originalValue;
+                                score.setValue(reversed);
+                                reversedCardinality.increment(reversed);
+                                dedicatedLogger.info("Score {} reversed for {}. Original was {}, max is {}. New value is {}", key, p, originalValue, max, reversed);
+                        }
+
+                        batchDatas.put(key, reversedCardinality);
+                }
+
+                // SUPER important : Score relativisation is operated in the AbstactScoreAggService
+                super.done(datas, vConf);
+        }
 
 }
