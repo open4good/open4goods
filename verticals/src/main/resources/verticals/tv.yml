@@ -442,8 +442,8 @@ attributesConfig:
          default: "Screen size"
          fr: "Diagonale (en pouces)"
        suffix:
-         default: "\""
-         fr: "\""
+         default: "Year(s)"
+         fr: "An(s)"
        filteringType: "NUMERIC"
    
        asScore: false

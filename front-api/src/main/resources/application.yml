@@ -19,6 +19,7 @@ springdoc:
 
 front:
   resourceRootPath: "https://static.nudger.fr"
+  max-page-size: 50
   cache:
     path: ./cache
   contact:
@@ -32,6 +33,16 @@ front:
   affiliation-partners:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:https://api.open4goods.org}
     api-key: ${FRONT_AFFILIATION_PARTNERS_API_KEY:CHANGE_ME_AFFILIATION_PARTNER_API_KEY}
+
+  google-taxonomy:
+    french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
+    english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
+
+  blog:
+    base-urls:
+      default: "https://nudger.fr"
+      fr: "https://nudger.fr"
+      en: "https://nudger.fr/en"
 
   rate-limit:
     anonymous: 100
