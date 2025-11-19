@@ -618,12 +618,23 @@ const impactScores = computed(() => {
       }))
       .filter((bucket) => bucket.label.length > 0)
 
+    // For ECOSCORE, use the absolute value; for subscores, use relative value
+    const isEcoscore = score.id?.toUpperCase() === 'ECOSCORE'
+    const absoluteScoreValue = typeof score.value === 'number' && Number.isFinite(score.value)
+      ? score.value
+      : null
+    const relativeScoreValue = typeof score.relativ?.value === 'number' && Number.isFinite(score.relativ.value)
+      ? score.relativ.value
+      : null
+
     return {
       id: score.id,
       label: score.name,
       description: score.description ?? null,
-      relativeValue: resolvedValue?.value ?? null,
-      value: resolvedValue?.value ?? null,
+      // For subscores, relativeValue should contain relativ.value for radar/table display
+      relativeValue: isEcoscore ? absoluteScoreValue : relativeScoreValue,
+      // For ECOSCORE, value should be the absolute value; for subscores, use relative
+      value: isEcoscore ? absoluteScoreValue : relativeScoreValue,
       absoluteValue: score.absoluteValue ?? null,
       absolute: score.absolute ?? null,
       coefficient: coefficients[score.id.toUpperCase()] ?? null,
@@ -679,6 +690,10 @@ const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | un
 }
 
 const extractRelativeScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
+  if (typeof score?.relativ?.value === 'number' && Number.isFinite(score.relativ.value)) {
+    return score.relativ.value
+  }
+
   return resolveScoreNumericValue(score)?.value ?? null
 }
 

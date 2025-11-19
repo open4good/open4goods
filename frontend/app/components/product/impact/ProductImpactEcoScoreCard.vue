@@ -142,9 +142,7 @@ const toggleSubscores = () => {
 const normalizedScore = computed(() => {
   const rawValue = Number.isFinite(props.score?.value)
     ? Number(props.score?.value)
-    : Number.isFinite(props.score?.relativeValue)
-      ? Number(props.score?.relativeValue)
-      : null
+    : null
 
   if (rawValue == null) {
     return 0

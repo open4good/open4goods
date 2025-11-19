@@ -52,12 +52,12 @@ const props = defineProps<{
 type DetailedScore = ScoreView & { displayValue: number | null; coefficient: number | null }
 
 const resolveScoreValue = (score: ScoreView): number | null => {
-  if (score.value != null && Number.isFinite(score.value)) {
-    return Number(score.value)
-  }
-
   if (score.relativeValue != null && Number.isFinite(score.relativeValue)) {
     return Number(score.relativeValue)
+  }
+
+  if (score.value != null && Number.isFinite(score.value)) {
+    return Number(score.value)
   }
 
   return null
