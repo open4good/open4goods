@@ -42,28 +42,25 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 		// Virtual scores computing
 		// Operated on absolute values
 		//////////////////////////
-		for (Product p : datas) {
-			for (String scoreName : batchDatas.keySet()) {
-				Score s = p.getScores().get(scoreName);
-				Cardinality source = batchDatas.get(scoreName);
-				Cardinality virtual = new Cardinality(source);
-				if (null == s) {
+                for (Product p : datas) {
+                        for (String scoreName : batchDatas.keySet()) {
+                                Score s = p.getScores().get(scoreName);
+                                Cardinality source = batchDatas.get(scoreName);
+                                Cardinality virtual = new Cardinality(source);
+                                if (null == s) {
 
 
-					// Need a virtual score
-					s = new Score(scoreName, source.getAvg());
-					s.setName(scoreName);
-					s.setVirtual(true);
+                                        // Need a virtual score
+                                        s = new Score(scoreName, source.getAvg());
+                                        s.setName(scoreName);
+                                        s.setVirtual(true);
 
-					s.setAbsolute(virtual);
-					
-				} else {
-					virtual.setValue(s.getValue());
-					s.setAbsolute(virtual);				
-				}
-				p.getScores().put(scoreName, s);
-			}
-		}
+                                }
+                                virtual.setValue(s.getValue());
+                                s.setAbsolute(virtual);
+                                p.getScores().put(scoreName, s);
+                        }
+                }
 
 		
 		
