@@ -7,12 +7,14 @@ on:
       - 'verticals/src/main/resources/**/*.yml'
       - 'verticals/src/test/java/**/*.java'
       - '.github/workflows/vertical-config-validation.yml'
+      - 'model/src/main/java/org/open4goods/model/vertical/**/*.java'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'verticals/src/main/resources/**/*.yml'
       - 'verticals/src/test/java/**/*.java'
       - '.github/workflows/vertical-config-validation.yml'
+      - 'model/src/main/java/org/open4goods/model/vertical/**/*.java'      
   workflow_dispatch:
 
 jobs:
