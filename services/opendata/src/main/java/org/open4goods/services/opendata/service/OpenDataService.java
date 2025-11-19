@@ -11,10 +11,17 @@ import java.io.OutputStreamWriter;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -132,6 +139,8 @@ public class OpenDataService implements HealthIndicator {
      */
     public InputStream limitedRateStream(String file) throws TechnicalException, FileNotFoundException {
 
+        // The limiter enforces a maximum bandwidth per download so that a single
+        // client cannot saturate the outbound network interface.
         RateLimiter rateLimiter = RateLimiter.create(openDataConfig.getDownloadSpeedKb() * FileUtils.ONE_KB);
 
         if (concurrentDownloadsCounter.get() >= openDataConfig.getConcurrentDownloads()) {
@@ -203,13 +212,41 @@ public class OpenDataService implements HealthIndicator {
 
     /**
      * Processes and creates the ZIP files for the opendata.
+     * ISBN and GTIN generations are executed in parallel to minimize overall runtime.
      */
-    private void processDataFiles() throws IOException {
+    void processDataFiles() throws IOException {
         LOGGER.info("Starting process for ISBN_13");
-        processAndCreateZip(ISBN_DATASET_FILENAME, BarcodeType.ISBN_13, openDataConfig.tmpIsbnZipFile());
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            // ISBN and GTIN exports run concurrently to significantly reduce the
+            // overall generation time on multi-core hosts.
+            CompletableFuture<Void> isbnFuture = CompletableFuture.runAsync(() -> {
+                try {
+                    processAndCreateZip(ISBN_DATASET_FILENAME, openDataConfig.tmpIsbnZipFile(), ISBN_HEADER, BarcodeType.ISBN_13);
+                } catch (IOException e) {
+                    throw new CompletionException(e);
+                }
+            }, executor);
 
-        LOGGER.info("Starting process for GTIN/EAN");
-        processAndCreateZip(GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, openDataConfig.tmpGtinZipFile(), true);
+            LOGGER.info("Starting process for GTIN/EAN");
+            CompletableFuture<Void> gtinFuture = CompletableFuture.runAsync(() -> {
+                try {
+                    processAndCreateZip(GTIN_DATASET_FILENAME, openDataConfig.tmpGtinZipFile(), GTIN_HEADER,
+                            BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
+                } catch (IOException e) {
+                    throw new CompletionException(e);
+                }
+            }, executor);
+
+            try {
+                CompletableFuture.allOf(isbnFuture, gtinFuture).join();
+            } catch (CompletionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof IOException ioException) {
+                    throw ioException;
+                }
+                throw new IOException("Unexpected error while generating OpenData exports", cause);
+            }
+        }
     }
 
     /**
@@ -230,43 +267,33 @@ public class OpenDataService implements HealthIndicator {
         FileUtils.moveFile(src, dest);
     }
 
-    private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile) throws IOException {
-        processAndCreateZip(filename, barcodeType, zipFile, false);
-    }
-
     /**
-     * Processes the data and creates a ZIP file for the specified barcode type.
+     * Processes the data and creates a ZIP file for the specified barcode type set.
      *
-     * @param filename    The name of the file to be created.
-     * @param barcodeType The type of barcode being processed.
-     * @param zipFile     The file object representing the ZIP file to be created.
-     * @param isGtinFile  Indicates if the file is a GTIN file.
+     * @param filename     The name of the file to be created inside the ZIP.
+     * @param zipFile      The file object representing the ZIP file to be created.
+     * @param header       The CSV header to write.
+     * @param barcodeTypes The type of barcodes being processed.
      * @throws IOException If there is an error during file creation or writing.
      */
-    private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile, boolean isGtinFile) throws IOException {
+    private void processAndCreateZip(String filename, File zipFile, String[] header, BarcodeType... barcodeTypes) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(zipFile);
              ZipOutputStream zos = new ZipOutputStream(fos);
              CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos))) {
 
             ZipEntry entry = new ZipEntry(filename);
             zos.putNextEntry(entry);
-
-            BarcodeType[] types;
-            if (isGtinFile) {
-                writer.writeNext(GTIN_HEADER);
-                types = new BarcodeType[]{BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14};
-            } else {
-                writer.writeNext(ISBN_HEADER);
-                types = new BarcodeType[]{BarcodeType.ISBN_13};
-            }
+            writer.writeNext(header);
+            boolean isGtinFile = header == GTIN_HEADER;
 
             AtomicLong count = new AtomicLong();
 
-            aggregatedDataRepository.exportAll(types)
-                    .forEach(e -> {
-                        count.incrementAndGet();
-                        writer.writeNext(isGtinFile ? toGtinEntry(e) : toIsbnEntry(e));
-                    });
+            try (Stream<Product> stream = aggregatedDataRepository.exportAll(barcodeTypes)) {
+                stream.forEach(e -> {
+                    count.incrementAndGet();
+                    writer.writeNext(isGtinFile ? toGtinEntry(e) : toIsbnEntry(e));
+                });
+            }
 
             writer.flush();
             zos.closeEntry();
@@ -274,7 +301,12 @@ public class OpenDataService implements HealthIndicator {
             LOGGER.info("{} rows exported in {}.", count.get(), filename);
 
         } catch (Exception e) {
-            LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
+            FileUtils.deleteQuietly(zipFile);
+            LOGGER.error("Error during processing of {}: {}", filename, e.getMessage(), e);
+            if (e instanceof IOException ioException) {
+                throw ioException;
+            }
+            throw new IOException("Error during processing of " + filename, e);
         }
     }
 
@@ -283,27 +315,45 @@ public class OpenDataService implements HealthIndicator {
      */
     private String[] toGtinEntry(Product data) {
         String[] line = new String[GTIN_HEADER.length];
+        Arrays.fill(line, "");
 
-        line[0] = data.gtin();
-        line[1] = data.brand();
-        line[2] = data.model();
-        line[3] = data.shortestOfferName();
+        line[0] = StringUtils.defaultString(data.gtin());
+        line[1] = StringUtils.defaultString(data.brand());
+        line[2] = StringUtils.defaultString(data.model());
+        line[3] = StringUtils.defaultString(data.shortestOfferName());
 
         line[4] = String.valueOf(data.getLastChange());
-        line[5] = data.getGtinInfos().getCountry();
-        line[6] = data.getGtinInfos().getUpcType().toString();
-        line[7] = String.valueOf(data.getOffersCount());
+
+        if (data.getGtinInfos() != null) {
+            line[5] = StringUtils.defaultString(data.getGtinInfos().getCountry());
+            if (data.getGtinInfos().getUpcType() != null) {
+                line[6] = data.getGtinInfos().getUpcType().toString();
+            }
+        }
+        if (data.getOffersCount() != null) {
+            line[7] = String.valueOf(data.getOffersCount());
+        }
 
         if (null != data.bestPrice()) {
-            line[8] = String.valueOf(data.bestPrice().getPrice());
-            line[9] = String.valueOf(data.bestPrice().getCompensation());
-            line[10] = data.bestPrice().getCurrency().toString();
+            if (data.bestPrice().getPrice() != null) {
+                line[8] = String.valueOf(data.bestPrice().getPrice());
+            }
+            if (data.bestPrice().getCompensation() != null) {
+                line[9] = String.valueOf(data.bestPrice().getCompensation());
+            }
+            if (data.bestPrice().getCurrency() != null) {
+                line[10] = data.bestPrice().getCurrency().toString();
+            }
         }
-        line[11] = StringUtils.join(data.getDatasourceCategories(), " ; ");
+
+        Collection<String> categories = data.getDatasourceCategories();
+        if (categories != null && !categories.isEmpty()) {
+            line[11] = StringUtils.join(categories, " ; ");
+        }
 
         try {
-        	// TODO : Point to international website + internationalized URL
-            String url = "https://nudger.fr/"+data.gtin();
+            // TODO : Point to international website + internationalized URL
+            String url = "https://nudger.fr/" + StringUtils.defaultString(data.gtin());
             line[12] = url;
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for GTIN {}", data.getId(), e);
@@ -317,33 +367,42 @@ public class OpenDataService implements HealthIndicator {
      */
     private String[] toIsbnEntry(Product data) {
         String[] line = new String[ISBN_HEADER.length];
+        Arrays.fill(line, "");
 
-        line[0] = data.gtin();
-        line[1] = data.shortestOfferName();
+        line[0] = StringUtils.defaultString(data.gtin());
+        line[1] = StringUtils.defaultString(data.shortestOfferName());
         line[2] = String.valueOf(data.getLastChange());
-        line[3] = String.valueOf(data.getOffersCount());
+        if (data.getOffersCount() != null) {
+            line[3] = String.valueOf(data.getOffersCount());
+        }
 
         if (null != data.bestPrice()) {
-            line[4] = String.valueOf(data.bestPrice().getPrice());
-            line[5] = String.valueOf(data.bestPrice().getCompensation());
-            line[6] = data.bestPrice().getCurrency().toString();
+            if (data.bestPrice().getPrice() != null) {
+                line[4] = String.valueOf(data.bestPrice().getPrice());
+            }
+            if (data.bestPrice().getCompensation() != null) {
+                line[5] = String.valueOf(data.bestPrice().getCompensation());
+            }
+            if (data.bestPrice().getCurrency() != null) {
+                line[6] = data.bestPrice().getCurrency().toString();
+            }
         }
         try {
-        	// TODO : Point to international website + internationalized URL
-            String url = "https://nudger.fr/"+data.gtin();
+            // TODO : Point to international website + internationalized URL
+            String url = "https://nudger.fr/" + StringUtils.defaultString(data.gtin());
             line[7] = url;
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for ISBN {}", data.getId(), e);
         }
 
-        line[8] = getAttribute(data, "EDITEUR");
-        line[9] = getAttribute(data, "FORMAT");
-        line[10] = getAttribute(data, "NB DE PAGES");
-        line[11] = getAttribute(data, "CLASSIFICATION DECITRE 1");
-        line[12] = getAttribute(data, "CLASSIFICATION DECITRE 2");
-        line[13] = getAttribute(data, "CLASSIFICATION DECITRE 3");
-        line[14] = getAttribute(data, "SOUSCATEGORIE");
-        line[15] = getAttribute(data, "SOUSCATEGORIE2");
+        line[8] = StringUtils.defaultString(getAttribute(data, "EDITEUR"));
+        line[9] = StringUtils.defaultString(getAttribute(data, "FORMAT"));
+        line[10] = StringUtils.defaultString(getAttribute(data, "NB DE PAGES"));
+        line[11] = StringUtils.defaultString(getAttribute(data, "CLASSIFICATION DECITRE 1"));
+        line[12] = StringUtils.defaultString(getAttribute(data, "CLASSIFICATION DECITRE 2"));
+        line[13] = StringUtils.defaultString(getAttribute(data, "CLASSIFICATION DECITRE 3"));
+        line[14] = StringUtils.defaultString(getAttribute(data, "SOUSCATEGORIE"));
+        line[15] = StringUtils.defaultString(getAttribute(data, "SOUSCATEGORIE2"));
 
         return line;
     }
@@ -355,11 +414,18 @@ public class OpenDataService implements HealthIndicator {
 
         String value = null;
 
-        IndexedAttribute indexedAttr = data.getAttributes().getIndexed().get(key);
+        if (data.getAttributes() == null) {
+            return null;
+        }
 
-        if (null != indexedAttr) {
-            value = indexedAttr.getValue();
-        } else {
+        if (data.getAttributes().getIndexed() != null) {
+            IndexedAttribute indexedAttr = data.getAttributes().getIndexed().get(key);
+            if (null != indexedAttr) {
+                value = indexedAttr.getValue();
+            }
+        }
+
+        if (value == null && data.getAttributes().getAll() != null) {
             ProductAttribute pAttr = data.getAttributes().getAll().get(key);
             if (null != pAttr) {
                 value = pAttr.getValue();
@@ -376,31 +442,61 @@ public class OpenDataService implements HealthIndicator {
         concurrentDownloadsCounter.decrementAndGet();
     }
 
+    /**
+     * Provides the latest cached ISBN ZIP file size.
+     *
+     * @return the formatted size string.
+     */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public String isbnFileSize() {
         return humanReadableByteCountBin(openDataConfig.isbnZipFile().length());
     }
 
+    /**
+     * Provides the latest cached GTIN ZIP file size.
+     *
+     * @return the formatted size string.
+     */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public String gtinFileSize() {
         return humanReadableByteCountBin(openDataConfig.gtinZipFile().length());
     }
 
+    /**
+     * Returns the last update timestamp of the ISBN ZIP file.
+     *
+     * @return the update timestamp.
+     */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public Date isbnLastUpdate() {
         return Date.from(Instant.ofEpochMilli(openDataConfig.isbnZipFile().lastModified()));
     }
 
+    /**
+     * Returns the last update timestamp of the GTIN ZIP file.
+     *
+     * @return the update timestamp.
+     */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public Date gtinLastUpdate() {
         return Date.from(Instant.ofEpochMilli(openDataConfig.gtinZipFile().lastModified()));
     }
 
+    /**
+     * Counts the number of ISBN entries currently available in the repository.
+     *
+     * @return the entry count.
+     */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public long totalItemsISBN() {
         return aggregatedDataRepository.countItemsByBarcodeType(BarcodeType.ISBN_13);
     }
 
+    /**
+     * Counts the number of GTIN entries currently available in the repository.
+     *
+     * @return the entry count.
+     */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public long totalItemsGTIN() {
         return aggregatedDataRepository.countItemsByBarcodeType(
