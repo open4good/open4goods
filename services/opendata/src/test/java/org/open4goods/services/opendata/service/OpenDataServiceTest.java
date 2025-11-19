@@ -160,7 +160,7 @@ class OpenDataServiceTest {
     @Test
     void humanReadableByteCountShouldFormatValues() {
         assertThat(OpenDataService.humanReadableByteCountBin(999)).isEqualTo("999 B");
-        assertThat(OpenDataService.humanReadableByteCountBin(1_500)).isEqualTo("1.5 kB");
+        assertThat(OpenDataService.humanReadableByteCountBin(1_500).replace("," , ".")) .isEqualTo("1.5 kB");
     }
 
     @Test
