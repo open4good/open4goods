@@ -2,13 +2,13 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -77,45 +77,71 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	@Override
 	public void done(Collection<Product> datas, VerticalConfig vConf) {
 
-		if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0) {
+                if (null == vConf.getImpactScoreConfig() || vConf.getImpactScoreConfig().getCriteriasPonderation().isEmpty()) {
+                        dedicatedLogger.error("No ImpactScore defined for vertical", vConf);
+                        return;
+                }
 
-			// FOR ECOSCORE, WE REMOVE THE RELATIV NOTATION, THAT IS A NON SENSE DUE TO THE PONDERATION SYSTEL
-     		// IT WILL AVOIDES TONS OF MISTAKES ON UI / CLIENT SIDE
+                super.done(datas, vConf);
 
-			for (Product  p : datas) {
-				Cardinality abs = p.ecoscore().getAbsolute();
-				p.ecoscore().setRelativ(abs);
-			}
+                List<Product> productsWithRealEcoScore = datas.stream()
+                                .filter(this::hasRealEcoScore)
+                                .toList();
 
-			super.done(datas, vConf);
+                if (productsWithRealEcoScore.isEmpty()) {
+                        dedicatedLogger.warn("{} -> No real ecoscore computed, skipping ranking", this.getClass().getSimpleName());
+                        return;
+                }
 
-			///////////////////////
-			// EcoScore ranking and "best alternativ" reach
-			///////////////////////
-			List<Product> sorted = new ArrayList<>();
-			sorted.addAll(datas);
+                // EcoScore stays on its absolute value (no relativisation)
+                for (Product product : productsWithRealEcoScore) {
+                        Cardinality absolute = product.ecoscore().getAbsolute();
+                        product.ecoscore().setRelativ(new Cardinality(absolute));
+                }
 
-				Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue(), o2.ecoscore().getRelativ().getValue()));
+                ///////////////////////
+                // EcoScore ranking and "best alternativ" reach
+                ///////////////////////
+                List<Product> sorted = new ArrayList<>(productsWithRealEcoScore);
+                sorted.sort(Comparator.comparingDouble(p -> p.ecoscore().getRelativ().getValue()));
 
-				int count = sorted.size();
-				for (int i = 0; i < count; i++) {
-					Product p = sorted.get(i);
-					p.getRanking().setGlobalCount(count);
-					p.getRanking().setGlobalPosition(count - i);
-					p.getRanking().setGlobalBest(sorted.getLast().getId());
+                int count = sorted.size();
+                Long bestProductId = sorted.get(count - 1).getId();
 
-					if (i < count - 1) {
-						p.getRanking().setGlobalBetter(sorted.get(i + 1).getId());
-					}
+                for (int i = 0; i < count; i++) {
+                        Product product = sorted.get(i);
+                        EcoScoreRanking ranking = ensureRanking(product);
+                        ranking.setGlobalCount(count);
+                        ranking.setGlobalPosition(count - i);
+                        ranking.setGlobalBest(bestProductId);
 
-				}
+                        if (i < count - 1) {
+                                ranking.setGlobalBetter(sorted.get(i + 1).getId());
+                        } else {
+                                ranking.setGlobalBetter(null);
+                        }
 
-		} else {
-			dedicatedLogger.error("No ImpactScore defined for vertical",vConf);
-		}
+                }
 
 
-	}
+        }
 
+
+        private EcoScoreRanking ensureRanking(Product product) {
+                EcoScoreRanking ranking = product.getRanking();
+                if (null == ranking) {
+                        ranking = new EcoScoreRanking();
+                        product.setRanking(ranking);
+                }
+                return ranking;
+        }
+
+        private boolean hasRealEcoScore(Product product) {
+                Score ecoscore = product.ecoscore();
+                return ecoscore != null
+                                && !Boolean.TRUE.equals(ecoscore.getVirtual())
+                                && ecoscore.getAbsolute() != null
+                                && ecoscore.getAbsolute().getValue() != null;
+        }
 
 }
