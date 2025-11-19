@@ -2,6 +2,8 @@ package org.open4goods.services.opendata.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -19,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -108,23 +112,25 @@ class OpenDataServiceTest {
     }
 
     @Test
-    void processDataFilesShouldExportIsbnAndGtinConcurrently() throws Exception {
-        lenient().when(productRepository.exportAll(Mockito.<BarcodeType[]>any())).thenAnswer(invocation -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(400);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return Stream.empty();
-        });
+    void processDataFilesShouldExportAllBarcodesInSinglePass() throws Exception {
+        when(productRepository.exportAll(anyCollection(), any(String[].class))).thenReturn(Stream.empty());
 
-        long start = System.nanoTime();
         service.processDataFiles();
-        long elapsedMillis = java.time.Duration.ofNanos(System.nanoTime() - start).toMillis();
 
-        org.mockito.Mockito.verify(productRepository).exportAll(BarcodeType.ISBN_13);
-        org.mockito.Mockito.verify(productRepository).exportAll(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
-        assertThat(elapsedMillis).isLessThan(700);
+        ArgumentCaptor<Collection<BarcodeType>> typesCaptor = ArgumentCaptor.forClass(Collection.class);
+        ArgumentCaptor<String[]> fieldsCaptor = ArgumentCaptor.forClass(String[].class);
+        verify(productRepository).exportAll(typesCaptor.capture(), fieldsCaptor.capture());
+
+        assertThat(typesCaptor.getValue()).containsExactlyInAnyOrder(
+                BarcodeType.ISBN_13,
+                BarcodeType.GTIN_8,
+                BarcodeType.GTIN_12,
+                BarcodeType.GTIN_13,
+                BarcodeType.GTIN_14);
+        assertThat(fieldsCaptor.getValue()).contains(
+                "datasourceCategories",
+                "attributes",
+                "offerNames");
         assertThat(tmpIsbn).exists();
         assertThat(tmpGtin).exists();
     }
@@ -140,13 +146,7 @@ class OpenDataServiceTest {
             return null;
         }).when(stream).close();
 
-        lenient().when(productRepository.exportAll(Mockito.<BarcodeType[]>any())).thenAnswer(invocation -> {
-            BarcodeType[] types = extractBarcodeTypes(invocation.getArguments());
-            if (isIsbnTypes(types)) {
-                return stream;
-            }
-            return Stream.empty();
-        });
+        lenient().when(productRepository.exportAll(anyCollection(), any(String[].class))).thenReturn(stream);
 
         service.processDataFiles();
 
@@ -159,9 +159,7 @@ class OpenDataServiceTest {
         Product isbnProduct = buildProduct("9781234567890", BarcodeType.ISBN_13);
         Product gtinProduct = buildProduct("1234567890123", BarcodeType.GTIN_13);
 
-        when(productRepository.exportAll(BarcodeType.ISBN_13)).thenReturn(Stream.of(isbnProduct));
-        when(productRepository.exportAll(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14))
-                .thenReturn(Stream.of(gtinProduct));
+        when(productRepository.exportAll(anyCollection(), any(String[].class))).thenReturn(Stream.of(isbnProduct, gtinProduct));
 
         service.processDataFiles();
 
@@ -174,8 +172,7 @@ class OpenDataServiceTest {
         assertThat(gtinLines.get(1)).contains("TestBrand", "https://nudger.fr/1234567890123");
         assertThat(gtinLines.get(1)).contains("electronics").contains("gaming");
 
-        verify(productRepository).exportAll(BarcodeType.ISBN_13);
-        verify(productRepository).exportAll(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
+        verify(productRepository).exportAll(anyCollection(), any(String[].class));
     }
 
     @Test
@@ -183,13 +180,8 @@ class OpenDataServiceTest {
         FileUtils.writeStringToFile(finalIsbn, "existing", StandardCharsets.UTF_8);
         FileUtils.writeStringToFile(finalGtin, "existing", StandardCharsets.UTF_8);
 
-        lenient().when(productRepository.exportAll(Mockito.<BarcodeType[]>any())).thenAnswer(invocation -> {
-            BarcodeType[] types = extractBarcodeTypes(invocation.getArguments());
-            if (isIsbnTypes(types)) {
-                throw new RuntimeException("boom");
-            }
-            return Stream.empty();
-        });
+        lenient().when(productRepository.exportAll(anyCollection(), any(String[].class)))
+                .thenThrow(new RuntimeException("boom"));
 
         service.generateOpendata();
 
@@ -216,25 +208,10 @@ class OpenDataServiceTest {
         assertThat(isbnEntry).doesNotContainNull();
     }
 
-    private boolean isIsbnTypes(BarcodeType[] types) {
-        return types.length == 1 && types[0] == BarcodeType.ISBN_13;
-    }
-
     private String[] invokeMapper(String methodName, Product product) throws Exception {
         Method method = OpenDataService.class.getDeclaredMethod(methodName, Product.class);
         method.setAccessible(true);
         return (String[]) method.invoke(service, product);
-    }
-
-    private BarcodeType[] extractBarcodeTypes(Object[] args) {
-        if (args.length == 1 && args[0] instanceof BarcodeType[]) {
-            return (BarcodeType[]) args[0];
-        }
-        BarcodeType[] result = new BarcodeType[args.length];
-        for (int i = 0; i < args.length; i++) {
-            result[i] = (BarcodeType) args[i];
-        }
-        return result;
     }
 
     private Product buildProduct(String gtin, BarcodeType barcodeType) {
