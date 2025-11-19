@@ -1100,6 +1100,10 @@
           },
           "title": "Barcode data for consumer products"
         },
+        "breadcrumb": {
+          "ariaLabel": "Back to the open data overview for the GTIN dataset",
+          "label": "Open data / GTIN dataset"
+        },
         "seo": {
           "description": "Access Nudger's GTIN dataset with weekly updates, download options and schema details for your barcode data projects.",
           "title": "GTIN open data – download the barcode catalogue"
@@ -1235,6 +1239,10 @@
             "updated": "Last updated"
           },
           "title": "Comprehensive metadata for books"
+        },
+        "breadcrumb": {
+          "ariaLabel": "Back to the open data overview for the ISBN dataset",
+          "label": "Open data / ISBN dataset"
         },
         "seo": {
           "description": "Retrieve Nudger's ISBN dataset with weekly refreshes, download mirrors and schema information for publishing analytics.",

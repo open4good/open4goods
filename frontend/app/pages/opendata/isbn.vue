@@ -4,11 +4,7 @@
       :eyebrow="t('opendata.datasets.isbn.hero.eyebrow')"
       :title="t('opendata.datasets.isbn.hero.title')"
       description-bloc-id="webpages:opendata:isbn-hero-overview"
-      :breadcrumb="{
-        label: String(t('opendata.datasets.common.breadcrumb.label')),
-        ariaLabel: String(t('opendata.datasets.common.breadcrumb.ariaLabel')),
-        href: localePath('opendata'),
-      }"
+      :breadcrumb="datasetBreadcrumb"
     />
 
     <v-progress-linear
@@ -143,6 +139,13 @@ const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>('op
 
 const dataset = computed(() => data.value?.dataset)
 const overview = computed(() => data.value?.overview)
+
+const datasetBreadcrumb = computed(() => ({
+  label: String(t('opendata.datasets.isbn.breadcrumb.label')),
+  ariaLabel: String(t('opendata.datasets.isbn.breadcrumb.ariaLabel')),
+  href: localePath('opendata'),
+}))
+
 const placeholder = computed(() => String(t('opendata.datasets.common.placeholder')))
 
 const summaryItems = computed(() => [

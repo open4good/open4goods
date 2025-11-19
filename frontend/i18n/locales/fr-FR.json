@@ -1100,6 +1100,10 @@
           },
           "title": "Base de données de codes-barres"
         },
+        "breadcrumb": {
+          "ariaLabel": "Retour à la page open data depuis le dataset GTIN",
+          "label": "Open data / base GTIN"
+        },
         "seo": {
           "description": "Accédez à la base GTIN de Nudger, mise à jour chaque semaine, avec les options de téléchargement et le schéma détaillé pour vos projets data sur les codes-barres.",
           "title": "Données ouvertes GTIN – télécharger le catalogue de codes-barres"
@@ -1235,6 +1239,10 @@
             "updated": "Dernière mise à jour"
           },
           "title": "Base de données livres (ISBN)"
+        },
+        "breadcrumb": {
+          "ariaLabel": "Retour à la page open data depuis le dataset ISBN",
+          "label": "Open data / base ISBN"
         },
         "seo": {
           "description": "Téléchargez la base ISBN de Nudger, actualisée chaque semaine, avec les miroirs de téléchargement et le schéma détaillé pour vos analyses du secteur du livre.",
