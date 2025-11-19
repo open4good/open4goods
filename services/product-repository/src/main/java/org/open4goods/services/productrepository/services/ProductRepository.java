@@ -65,9 +65,34 @@ import co.elastic.clients.elasticsearch._types.mapping.FieldType;
  */
 public class ProductRepository {
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductRepository.class);
+        private static final Logger logger = LoggerFactory.getLogger(ProductRepository.class);
 
-	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
+        public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
+
+        /**
+         * Default page size used when streaming large exports.
+         */
+        private static final int EXPORT_STREAM_PAGE_SIZE = 10_000;
+
+        /**
+         * Lazily created {@link PageRequest} that avoids instantiating a new object for each export.
+         */
+        private static final PageRequest EXPORT_STREAM_PAGE = PageRequest.of(0, EXPORT_STREAM_PAGE_SIZE);
+
+        /**
+         * Fields required when building the public OpenData CSVs. Fetching only these fields keeps
+         * the Elasticsearch payload lean, which considerably lowers the CPU pressure of bulk exports.
+         */
+        private static final String[] OPEN_DATA_EXPORT_FIELDS = {
+                        "id",
+                        "attributes",
+                        "gtinInfos",
+                        "offersCount",
+                        "price",
+                        "datasourceCategories",
+                        "offerNames",
+                        "lastChange"
+        };
 
 
 	// The file queue implementation for Full products (no partial updates)
@@ -140,8 +165,7 @@ public class ProductRepository {
 	 */
         public Stream<Product> exportAll() {
             Query query = Query.findAll();
-            // TODO : From conf, apply to other
-            query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
+            query.setPageable(EXPORT_STREAM_PAGE); // Fetch larger batches
             // Stream sequentially to avoid parallel overhead
             return elasticsearchOperations
                     .searchForStream(query, Product.class, CURRENT_INDEX)
@@ -208,14 +232,20 @@ public class ProductRepository {
 	 *
 	 * @return
 	 */
-	public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
+        public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
 
-		Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
-		CriteriaQuery query = new CriteriaQuery(criteria);
+                Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+                CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
+                criteriaQuery.setPageable(EXPORT_STREAM_PAGE);
 
-		return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
-				.map(SearchHit::getContent);
-	}
+                NativeQuery query = new NativeQueryBuilder()
+                                .withQuery(criteriaQuery)
+                                .withSourceFilter(new FetchSourceFilter(true, OPEN_DATA_EXPORT_FIELDS, null))
+                                .build();
+
+                return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
+                                .map(SearchHit::getContent);
+        }
 
 
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {

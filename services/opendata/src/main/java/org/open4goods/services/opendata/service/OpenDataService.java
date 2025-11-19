@@ -1,6 +1,8 @@
 package org.open4goods.services.opendata.service;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.time.Instant;
@@ -278,8 +281,10 @@ public class OpenDataService implements HealthIndicator {
      */
     private void processAndCreateZip(String filename, File zipFile, String[] header, BarcodeType... barcodeTypes) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(zipFile);
-             ZipOutputStream zos = new ZipOutputStream(fos);
-             CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos))) {
+             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fos);
+             ZipOutputStream zos = new ZipOutputStream(bufferedOutputStream);
+             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zos, StandardCharsets.UTF_8));
+             CSVWriter writer = new CSVWriter(bufferedWriter)) {
 
             ZipEntry entry = new ZipEntry(filename);
             zos.putNextEntry(entry);
@@ -289,6 +294,7 @@ public class OpenDataService implements HealthIndicator {
             AtomicLong count = new AtomicLong();
 
             try (Stream<Product> stream = aggregatedDataRepository.exportAll(barcodeTypes)) {
+                // Elasticsearch streams are consumed sequentially to avoid overwhelming the cluster.
                 stream.forEach(e -> {
                     count.incrementAndGet();
                     writer.writeNext(isGtinFile ? toGtinEntry(e) : toIsbnEntry(e));

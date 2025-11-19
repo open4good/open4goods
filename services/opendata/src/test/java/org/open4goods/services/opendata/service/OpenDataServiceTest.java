@@ -8,15 +8,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +35,17 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.model.product.BarcodeType;
-import org.open4goods.model.product.Product;
+import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.attribute.ProductAttributes;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.open4goods.model.exceptions.TechnicalException;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.AggregatedPrices;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.product.BarcodeType;
+import org.open4goods.model.product.GtinInfo;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 
@@ -138,6 +155,30 @@ class OpenDataServiceTest {
     }
 
     @Test
+    void processDataFilesShouldWriteCsvRows() throws Exception {
+        Product isbnProduct = buildProduct("9781234567890", BarcodeType.ISBN_13);
+        Product gtinProduct = buildProduct("1234567890123", BarcodeType.GTIN_13);
+
+        when(productRepository.exportAll(BarcodeType.ISBN_13)).thenReturn(Stream.of(isbnProduct));
+        when(productRepository.exportAll(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14))
+                .thenReturn(Stream.of(gtinProduct));
+
+        service.processDataFiles();
+
+        List<String> isbnLines = readZipLines(tmpIsbn, "open4goods-isbn-dataset.csv");
+        List<String> gtinLines = readZipLines(tmpGtin, "open4goods-gtin-dataset.csv");
+
+        assertThat(isbnLines).hasSize(2);
+        assertThat(isbnLines.get(1)).contains("Test Editor", "https://nudger.fr/9781234567890");
+        assertThat(gtinLines).hasSize(2);
+        assertThat(gtinLines.get(1)).contains("TestBrand", "https://nudger.fr/1234567890123");
+        assertThat(gtinLines.get(1)).contains("electronics").contains("gaming");
+
+        verify(productRepository).exportAll(BarcodeType.ISBN_13);
+        verify(productRepository).exportAll(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
+    }
+
+    @Test
     void generateOpendataShouldNotMoveFilesWhenProcessingFails() throws Exception {
         FileUtils.writeStringToFile(finalIsbn, "existing", StandardCharsets.UTF_8);
         FileUtils.writeStringToFile(finalGtin, "existing", StandardCharsets.UTF_8);
@@ -194,6 +235,67 @@ class OpenDataServiceTest {
             result[i] = (BarcodeType) args[i];
         }
         return result;
+    }
+
+    private Product buildProduct(String gtin, BarcodeType barcodeType) {
+        Product product = new Product();
+        product.setId(Long.parseLong(gtin));
+        product.setOffersCount(3);
+        product.setLastChange(Instant.parse("2024-01-01T00:00:00Z").toEpochMilli());
+        product.setOfferNames(new HashSet<>(Set.of("short name", "a longer offer name")));
+        product.setDatasourceCategories(new HashSet<>(Set.of("electronics", "gaming")));
+
+        ProductAttributes attributes = new ProductAttributes();
+        attributes.addReferentielAttribute(ReferentielKey.BRAND, "TestBrand");
+        attributes.addReferentielAttribute(ReferentielKey.MODEL, "ModelX");
+        addIndexedAttribute(attributes, "EDITEUR", "Test Editor");
+        addIndexedAttribute(attributes, "FORMAT", "Broché");
+        addIndexedAttribute(attributes, "NB DE PAGES", "320");
+        addIndexedAttribute(attributes, "CLASSIFICATION DECITRE 1", "Class1");
+        addIndexedAttribute(attributes, "CLASSIFICATION DECITRE 2", "Class2");
+        addIndexedAttribute(attributes, "CLASSIFICATION DECITRE 3", "Class3");
+        addIndexedAttribute(attributes, "SOUSCATEGORIE", "SousCat1");
+        addIndexedAttribute(attributes, "SOUSCATEGORIE2", "SousCat2");
+        product.setAttributes(attributes);
+
+        AggregatedPrice aggregatedPrice = new AggregatedPrice();
+        aggregatedPrice.setPrice(42.42d);
+        aggregatedPrice.setCompensation(0.5d);
+        aggregatedPrice.setCurrency(Currency.EUR);
+
+        AggregatedPrices aggregatedPrices = new AggregatedPrices();
+        aggregatedPrices.setMinPrice(aggregatedPrice);
+        product.setPrice(aggregatedPrices);
+
+        GtinInfo gtinInfo = new GtinInfo();
+        gtinInfo.setCountry("FR");
+        gtinInfo.setUpcType(barcodeType);
+        product.setGtinInfos(gtinInfo);
+
+        return product;
+    }
+
+    private void addIndexedAttribute(ProductAttributes attributes, String key, String value) {
+        attributes.getIndexed().put(key, new IndexedAttribute(key, value));
+    }
+
+    private List<String> readZipLines(File file, String entryName) throws Exception {
+        try (ZipInputStream inputStream = new ZipInputStream(new FileInputStream(file))) {
+            ZipEntry entry;
+            while ((entry = inputStream.getNextEntry()) != null) {
+                if (entryName.equals(entry.getName())) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                        List<String> lines = new ArrayList<>();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            lines.add(line);
+                        }
+                        return lines;
+                    }
+                }
+            }
+        }
+        throw new IllegalStateException("Unable to locate entry " + entryName + " in " + file);
     }
 }
 
