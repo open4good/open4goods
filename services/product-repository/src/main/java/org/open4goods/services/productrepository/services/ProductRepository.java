@@ -1,5 +1,6 @@
 package org.open4goods.services.productrepository.services;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -233,15 +234,25 @@ public class ProductRepository {
 	 * @return
 	 */
         public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
+                return exportAll(Arrays.asList(barcodeTypes), OPEN_DATA_EXPORT_FIELDS);
+        }
 
-                Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+        public Stream<Product> exportAll(Collection<BarcodeType> barcodeTypes, String[] includeFields) {
+
+                if (barcodeTypes == null || barcodeTypes.isEmpty()) {
+                        throw new IllegalArgumentException("At least one barcode type must be provided");
+                }
+
+                Criteria criteria = new Criteria("gtinInfos.upcType").in(barcodeTypes.toArray());
                 CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
                 criteriaQuery.setPageable(EXPORT_STREAM_PAGE);
 
-                NativeQuery query = new NativeQueryBuilder()
-                                .withQuery(criteriaQuery)
-                                .withSourceFilter(new FetchSourceFilter(true, OPEN_DATA_EXPORT_FIELDS, null))
-                                .build();
+                NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(criteriaQuery);
+                if (includeFields != null && includeFields.length > 0) {
+                        queryBuilder = queryBuilder.withSourceFilter(new FetchSourceFilter(true, includeFields, null));
+                }
+
+                NativeQuery query = queryBuilder.build();
 
                 return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
                                 .map(SearchHit::getContent);

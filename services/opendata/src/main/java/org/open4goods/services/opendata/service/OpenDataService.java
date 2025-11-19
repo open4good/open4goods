@@ -14,16 +14,22 @@ import java.nio.charset.StandardCharsets;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -32,8 +38,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.TechnicalException;
+import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.opendata.ThrottlingInputStream;
@@ -100,6 +108,38 @@ public class OpenDataService implements HealthIndicator {
             "souscategorie",
             "souscategorie2"
     };
+
+    private static final Set<String> ISBN_REQUIRED_FIELDS = Set.of(
+            "id",
+            "attributes",
+            "gtinInfos",
+            "offersCount",
+            "price",
+            "offerNames",
+            "lastChange"
+    );
+
+    private static final Set<String> GTIN_REQUIRED_FIELDS = Set.of(
+            "id",
+            "attributes",
+            "gtinInfos",
+            "offersCount",
+            "price",
+            "offerNames",
+            "lastChange",
+            "datasourceCategories"
+    );
+
+    private static final List<String> ISBN_ATTRIBUTE_KEYS = List.of(
+            "EDITEUR",
+            "FORMAT",
+            "NB DE PAGES",
+            "CLASSIFICATION DECITRE 1",
+            "CLASSIFICATION DECITRE 2",
+            "CLASSIFICATION DECITRE 3",
+            "SOUSCATEGORIE",
+            "SOUSCATEGORIE2"
+    );
 
     private final ProductRepository aggregatedDataRepository;
     private final OpenDataConfig openDataConfig;
@@ -218,38 +258,25 @@ public class OpenDataService implements HealthIndicator {
      * ISBN and GTIN generations are executed in parallel to minimize overall runtime.
      */
     void processDataFiles() throws IOException {
-        LOGGER.info("Starting process for ISBN_13");
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            // ISBN and GTIN exports run concurrently to significantly reduce the
-            // overall generation time on multi-core hosts.
-            CompletableFuture<Void> isbnFuture = CompletableFuture.runAsync(() -> {
-                try {
-                    processAndCreateZip(ISBN_DATASET_FILENAME, openDataConfig.tmpIsbnZipFile(), ISBN_HEADER, BarcodeType.ISBN_13);
-                } catch (IOException e) {
-                    throw new CompletionException(e);
-                }
-            }, executor);
+        DatasetDefinition isbnDataset = new DatasetDefinition(
+                ISBN_DATASET_FILENAME,
+                openDataConfig.tmpIsbnZipFile(),
+                ISBN_HEADER,
+                Set.of(BarcodeType.ISBN_13),
+                ISBN_REQUIRED_FIELDS,
+                this::toIsbnEntry
+        );
 
-            LOGGER.info("Starting process for GTIN/EAN");
-            CompletableFuture<Void> gtinFuture = CompletableFuture.runAsync(() -> {
-                try {
-                    processAndCreateZip(GTIN_DATASET_FILENAME, openDataConfig.tmpGtinZipFile(), GTIN_HEADER,
-                            BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
-                } catch (IOException e) {
-                    throw new CompletionException(e);
-                }
-            }, executor);
+        DatasetDefinition gtinDataset = new DatasetDefinition(
+                GTIN_DATASET_FILENAME,
+                openDataConfig.tmpGtinZipFile(),
+                GTIN_HEADER,
+                Set.of(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14),
+                GTIN_REQUIRED_FIELDS,
+                this::toGtinEntry
+        );
 
-            try {
-                CompletableFuture.allOf(isbnFuture, gtinFuture).join();
-            } catch (CompletionException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException ioException) {
-                    throw ioException;
-                }
-                throw new IOException("Unexpected error while generating OpenData exports", cause);
-            }
-        }
+        processDatasets(List.of(isbnDataset, gtinDataset));
     }
 
     /**
@@ -270,50 +297,103 @@ public class OpenDataService implements HealthIndicator {
         FileUtils.moveFile(src, dest);
     }
 
-    /**
-     * Processes the data and creates a ZIP file for the specified barcode type set.
-     *
-     * @param filename     The name of the file to be created inside the ZIP.
-     * @param zipFile      The file object representing the ZIP file to be created.
-     * @param header       The CSV header to write.
-     * @param barcodeTypes The type of barcodes being processed.
-     * @throws IOException If there is an error during file creation or writing.
-     */
-    private void processAndCreateZip(String filename, File zipFile, String[] header, BarcodeType... barcodeTypes) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(zipFile);
-             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fos);
-             ZipOutputStream zos = new ZipOutputStream(bufferedOutputStream);
-             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zos, StandardCharsets.UTF_8));
-             CSVWriter writer = new CSVWriter(bufferedWriter)) {
-
-            ZipEntry entry = new ZipEntry(filename);
-            zos.putNextEntry(entry);
-            writer.writeNext(header);
-            boolean isGtinFile = header == GTIN_HEADER;
-
-            AtomicLong count = new AtomicLong();
-
-            try (Stream<Product> stream = aggregatedDataRepository.exportAll(barcodeTypes)) {
-                // Elasticsearch streams are consumed sequentially to avoid overwhelming the cluster.
-                stream.forEach(e -> {
-                    count.incrementAndGet();
-                    writer.writeNext(isGtinFile ? toGtinEntry(e) : toIsbnEntry(e));
-                });
-            }
-
-            writer.flush();
-            zos.closeEntry();
-
-            LOGGER.info("{} rows exported in {}.", count.get(), filename);
-
+    private void processDatasets(List<DatasetDefinition> datasetDefinitions) throws IOException {
+        try (DatasetWriterManager manager = new DatasetWriterManager(datasetDefinitions)) {
+            writeDatasets(manager.writers(), datasetDefinitions);
+            manager.writers().forEach(writer ->
+                    LOGGER.info("{} rows exported in {}.", writer.count(), writer.definition().filename()));
         } catch (Exception e) {
-            FileUtils.deleteQuietly(zipFile);
-            LOGGER.error("Error during processing of {}: {}", filename, e.getMessage(), e);
+            datasetDefinitions.forEach(definition -> FileUtils.deleteQuietly(definition.zipFile()));
+            LOGGER.error("Error during processing of OpenData exports", e);
             if (e instanceof IOException ioException) {
                 throw ioException;
             }
-            throw new IOException("Error during processing of " + filename, e);
+            throw new IOException("Unexpected error while generating OpenData exports", e);
         }
+    }
+
+    private void writeDatasets(List<DatasetWriter> writers, List<DatasetDefinition> datasetDefinitions) throws IOException {
+        EnumSet<BarcodeType> barcodeFilters = EnumSet.noneOf(BarcodeType.class);
+        datasetDefinitions.forEach(definition -> barcodeFilters.addAll(definition.barcodeTypes()));
+
+        String[] includeFields = resolveIncludeFields(datasetDefinitions);
+        EnumMap<BarcodeType, DatasetWriter> writerByType = mapWritersByType(writers);
+
+        try (Stream<Product> stream = aggregatedDataRepository.exportAll(barcodeFilters, includeFields)) {
+            stream.forEach(product -> {
+                BarcodeType barcodeType = resolveBarcodeType(product);
+                if (barcodeType == null) {
+                    return;
+                }
+                DatasetWriter writer = writerByType.get(barcodeType);
+                if (writer != null) {
+                    writer.write(product);
+                }
+            });
+        }
+    }
+
+    private EnumMap<BarcodeType, DatasetWriter> mapWritersByType(List<DatasetWriter> writers) {
+        EnumMap<BarcodeType, DatasetWriter> writerByType = new EnumMap<>(BarcodeType.class);
+        for (DatasetWriter writer : writers) {
+            for (BarcodeType barcodeType : writer.definition().barcodeTypes()) {
+                DatasetWriter existing = writerByType.put(barcodeType, writer);
+                if (existing != null && existing != writer) {
+                    throw new IllegalStateException("Barcode type " + barcodeType + " is mapped to multiple datasets");
+                }
+            }
+        }
+        return writerByType;
+    }
+
+    private String[] resolveIncludeFields(List<DatasetDefinition> datasetDefinitions) {
+        LinkedHashSet<String> includes = new LinkedHashSet<>();
+        datasetDefinitions.forEach(definition -> includes.addAll(definition.requiredFields()));
+        return includes.toArray(new String[0]);
+    }
+
+    private BarcodeType resolveBarcodeType(Product product) {
+        if (product.getGtinInfos() == null) {
+            return null;
+        }
+        return product.getGtinInfos().getUpcType();
+    }
+
+    private Map<String, String> extractAttributes(Product data, Collection<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        ProductAttributes attributes = data.getAttributes();
+        if (attributes == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, IndexedAttribute> indexed = attributes.getIndexed();
+        Map<String, ProductAttribute> all = attributes.getAll();
+        if ((indexed == null || indexed.isEmpty()) && (all == null || all.isEmpty())) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> values = new HashMap<>();
+        for (String key : keys) {
+            String value = null;
+            if (indexed != null) {
+                IndexedAttribute indexedAttribute = indexed.get(key);
+                if (indexedAttribute != null) {
+                    value = indexedAttribute.getValue();
+                }
+            }
+            if (value == null && all != null) {
+                ProductAttribute productAttribute = all.get(key);
+                if (productAttribute != null) {
+                    value = productAttribute.getValue();
+                }
+            }
+            if (value != null) {
+                values.put(key, value);
+            }
+        }
+        return values;
     }
 
     /**
@@ -340,15 +420,16 @@ public class OpenDataService implements HealthIndicator {
             line[7] = String.valueOf(data.getOffersCount());
         }
 
-        if (null != data.bestPrice()) {
-            if (data.bestPrice().getPrice() != null) {
-                line[8] = String.valueOf(data.bestPrice().getPrice());
+        AggregatedPrice bestPrice = data.bestPrice();
+        if (bestPrice != null) {
+            if (bestPrice.getPrice() != null) {
+                line[8] = String.valueOf(bestPrice.getPrice());
             }
-            if (data.bestPrice().getCompensation() != null) {
-                line[9] = String.valueOf(data.bestPrice().getCompensation());
+            if (bestPrice.getCompensation() != null) {
+                line[9] = String.valueOf(bestPrice.getCompensation());
             }
-            if (data.bestPrice().getCurrency() != null) {
-                line[10] = data.bestPrice().getCurrency().toString();
+            if (bestPrice.getCurrency() != null) {
+                line[10] = bestPrice.getCurrency().toString();
             }
         }
 
@@ -382,15 +463,16 @@ public class OpenDataService implements HealthIndicator {
             line[3] = String.valueOf(data.getOffersCount());
         }
 
-        if (null != data.bestPrice()) {
-            if (data.bestPrice().getPrice() != null) {
-                line[4] = String.valueOf(data.bestPrice().getPrice());
+        AggregatedPrice bestPrice = data.bestPrice();
+        if (bestPrice != null) {
+            if (bestPrice.getPrice() != null) {
+                line[4] = String.valueOf(bestPrice.getPrice());
             }
-            if (data.bestPrice().getCompensation() != null) {
-                line[5] = String.valueOf(data.bestPrice().getCompensation());
+            if (bestPrice.getCompensation() != null) {
+                line[5] = String.valueOf(bestPrice.getCompensation());
             }
-            if (data.bestPrice().getCurrency() != null) {
-                line[6] = data.bestPrice().getCurrency().toString();
+            if (bestPrice.getCurrency() != null) {
+                line[6] = bestPrice.getCurrency().toString();
             }
         }
         try {
@@ -401,44 +483,17 @@ public class OpenDataService implements HealthIndicator {
             LOGGER.error("Error while extracting URL for ISBN {}", data.getId(), e);
         }
 
-        line[8] = StringUtils.defaultString(getAttribute(data, "EDITEUR"));
-        line[9] = StringUtils.defaultString(getAttribute(data, "FORMAT"));
-        line[10] = StringUtils.defaultString(getAttribute(data, "NB DE PAGES"));
-        line[11] = StringUtils.defaultString(getAttribute(data, "CLASSIFICATION DECITRE 1"));
-        line[12] = StringUtils.defaultString(getAttribute(data, "CLASSIFICATION DECITRE 2"));
-        line[13] = StringUtils.defaultString(getAttribute(data, "CLASSIFICATION DECITRE 3"));
-        line[14] = StringUtils.defaultString(getAttribute(data, "SOUSCATEGORIE"));
-        line[15] = StringUtils.defaultString(getAttribute(data, "SOUSCATEGORIE2"));
+        Map<String, String> isbnAttributes = extractAttributes(data, ISBN_ATTRIBUTE_KEYS);
+        line[8] = StringUtils.defaultString(isbnAttributes.get("EDITEUR"));
+        line[9] = StringUtils.defaultString(isbnAttributes.get("FORMAT"));
+        line[10] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
+        line[11] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 1"));
+        line[12] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 2"));
+        line[13] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 3"));
+        line[14] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
+        line[15] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
 
         return line;
-    }
-
-    /**
-     * Retrieves a specific attribute from the product data.
-     */
-    private String getAttribute(Product data, String key) {
-
-        String value = null;
-
-        if (data.getAttributes() == null) {
-            return null;
-        }
-
-        if (data.getAttributes().getIndexed() != null) {
-            IndexedAttribute indexedAttr = data.getAttributes().getIndexed().get(key);
-            if (null != indexedAttr) {
-                value = indexedAttr.getValue();
-            }
-        }
-
-        if (value == null && data.getAttributes().getAll() != null) {
-            ProductAttribute pAttr = data.getAttributes().getAll().get(key);
-            if (null != pAttr) {
-                value = pAttr.getValue();
-            }
-        }
-
-        return value;
     }
 
     /**
@@ -535,5 +590,116 @@ public class OpenDataService implements HealthIndicator {
             ci.next();
         }
         return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+    }
+
+    private record DatasetDefinition(
+            String filename,
+            File zipFile,
+            String[] header,
+            Set<BarcodeType> barcodeTypes,
+            Set<String> requiredFields,
+            Function<Product, String[]> rowMapper) {
+    }
+
+    private static final class DatasetWriter implements AutoCloseable {
+        private final DatasetDefinition definition;
+        private final CSVWriter writer;
+        private final ZipOutputStream zipOutputStream;
+        private final AtomicLong count = new AtomicLong();
+
+        private DatasetWriter(DatasetDefinition definition) throws IOException {
+            this.definition = definition;
+            FileOutputStream fos = new FileOutputStream(definition.zipFile());
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fos);
+            this.zipOutputStream = new ZipOutputStream(bufferedOutputStream);
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zipOutputStream, StandardCharsets.UTF_8));
+            this.writer = new CSVWriter(bufferedWriter);
+            ZipEntry entry = new ZipEntry(definition.filename());
+            zipOutputStream.putNextEntry(entry);
+            writer.writeNext(definition.header());
+        }
+
+        private void write(Product product) {
+            writer.writeNext(definition.rowMapper().apply(product));
+            count.incrementAndGet();
+        }
+
+        private long count() {
+            return count.get();
+        }
+
+        private DatasetDefinition definition() {
+            return definition;
+        }
+
+        @Override
+        public void close() throws IOException {
+            IOException first = null;
+            try {
+                writer.flush();
+                zipOutputStream.closeEntry();
+            } catch (IOException e) {
+                first = e;
+            }
+            try {
+                writer.close();
+            } catch (IOException closeException) {
+                if (first != null) {
+                    closeException.addSuppressed(first);
+                }
+                throw closeException;
+            }
+            if (first != null) {
+                throw first;
+            }
+        }
+    }
+
+    private static final class DatasetWriterManager implements AutoCloseable {
+        private final List<DatasetWriter> writers = new ArrayList<>();
+
+        private DatasetWriterManager(List<DatasetDefinition> datasetDefinitions) throws IOException {
+            try {
+                for (DatasetDefinition definition : datasetDefinitions) {
+                    writers.add(new DatasetWriter(definition));
+                }
+            } catch (IOException e) {
+                closeQuietly();
+                throw e;
+            }
+        }
+
+        private List<DatasetWriter> writers() {
+            return writers;
+        }
+
+        @Override
+        public void close() throws IOException {
+            IOException first = null;
+            for (DatasetWriter writer : writers) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    if (first == null) {
+                        first = e;
+                    } else {
+                        first.addSuppressed(e);
+                    }
+                }
+            }
+            if (first != null) {
+                throw first;
+            }
+        }
+
+        private void closeQuietly() {
+            for (DatasetWriter writer : writers) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    LOGGER.warn("Unable to close dataset {}", writer.definition().filename(), e);
+                }
+            }
+        }
     }
 }
