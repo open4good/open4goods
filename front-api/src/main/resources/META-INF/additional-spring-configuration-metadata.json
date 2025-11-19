@@ -114,6 +114,12 @@
       "defaultValue": 1000
     },
     {
+      "name": "front.rate-limit.counter-ttl",
+      "type": "java.time.Duration",
+      "description": "Duration before idle rate-limit counters are purged from memory.",
+      "defaultValue": "PT1M15S"
+    },
+    {
       "name": "front.affiliation-partners.api-base-url",
       "type": "java.lang.String",
       "description": "Base URL of the affiliation partner back-office API."
