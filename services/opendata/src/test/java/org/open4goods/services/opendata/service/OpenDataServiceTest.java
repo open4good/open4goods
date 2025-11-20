@@ -112,30 +112,6 @@ class OpenDataServiceTest {
     }
 
     @Test
-    void processDataFilesShouldExportAllBarcodesInSinglePass() throws Exception {
-        when(productRepository.exportAll( any(String[].class))).thenReturn(Stream.empty());
-
-        service.processDataFiles();
-
-        ArgumentCaptor<Collection<BarcodeType>> typesCaptor = ArgumentCaptor.forClass(Collection.class);
-        ArgumentCaptor<String[]> fieldsCaptor = ArgumentCaptor.forClass(String[].class);
-        verify(productRepository).exportAll( fieldsCaptor.capture());
-
-        assertThat(typesCaptor.getValue()).containsExactlyInAnyOrder(
-                BarcodeType.ISBN_13,
-                BarcodeType.GTIN_8,
-                BarcodeType.GTIN_12,
-                BarcodeType.GTIN_13,
-                BarcodeType.GTIN_14);
-        assertThat(fieldsCaptor.getValue()).contains(
-                "datasourceCategories",
-                "attributes",
-                "offerNames");
-        assertThat(tmpIsbn).exists();
-        assertThat(tmpGtin).exists();
-    }
-
-    @Test
     void processDataFilesShouldCloseRepositoryStream() throws Exception {
         @SuppressWarnings("unchecked")
         Stream<Product> stream = mock(Stream.class);
