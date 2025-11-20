@@ -609,7 +609,6 @@ const impactScores = computed(() => {
   const coefficients = scoreCoefficientMap.value
 
   return desiredScores.map((score) => {
-    const resolvedValue = resolveScoreNumericValue(score)
     const aggregation = aggregations.value[`score_${score.id}`]
     const distribution = (aggregation?.buckets ?? [])
       .map((bucket: AggregationBucketDto) => ({
