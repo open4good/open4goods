@@ -113,13 +113,13 @@ class OpenDataServiceTest {
 
     @Test
     void processDataFilesShouldExportAllBarcodesInSinglePass() throws Exception {
-        when(productRepository.exportAll(anyCollection(), any(String[].class))).thenReturn(Stream.empty());
+        when(productRepository.exportAll( any(String[].class))).thenReturn(Stream.empty());
 
         service.processDataFiles();
 
         ArgumentCaptor<Collection<BarcodeType>> typesCaptor = ArgumentCaptor.forClass(Collection.class);
         ArgumentCaptor<String[]> fieldsCaptor = ArgumentCaptor.forClass(String[].class);
-        verify(productRepository).exportAll(typesCaptor.capture(), fieldsCaptor.capture());
+        verify(productRepository).exportAll( fieldsCaptor.capture());
 
         assertThat(typesCaptor.getValue()).containsExactlyInAnyOrder(
                 BarcodeType.ISBN_13,
@@ -146,7 +146,7 @@ class OpenDataServiceTest {
             return null;
         }).when(stream).close();
 
-        lenient().when(productRepository.exportAll(anyCollection(), any(String[].class))).thenReturn(stream);
+        lenient().when(productRepository.exportAll(any(String[].class))).thenReturn(stream);
 
         service.processDataFiles();
 
@@ -159,7 +159,7 @@ class OpenDataServiceTest {
         Product isbnProduct = buildProduct("9781234567890", BarcodeType.ISBN_13);
         Product gtinProduct = buildProduct("1234567890123", BarcodeType.GTIN_13);
 
-        when(productRepository.exportAll(anyCollection(), any(String[].class))).thenReturn(Stream.of(isbnProduct, gtinProduct));
+        when(productRepository.exportAll(any(String[].class))).thenReturn(Stream.of(isbnProduct, gtinProduct));
 
         service.processDataFiles();
 
@@ -172,7 +172,7 @@ class OpenDataServiceTest {
         assertThat(gtinLines.get(1)).contains("TestBrand", "https://nudger.fr/1234567890123");
         assertThat(gtinLines.get(1)).contains("electronics").contains("gaming");
 
-        verify(productRepository).exportAll(anyCollection(), any(String[].class));
+        verify(productRepository).exportAll( any(String[].class));
     }
 
     @Test
@@ -180,7 +180,7 @@ class OpenDataServiceTest {
         FileUtils.writeStringToFile(finalIsbn, "existing", StandardCharsets.UTF_8);
         FileUtils.writeStringToFile(finalGtin, "existing", StandardCharsets.UTF_8);
 
-        lenient().when(productRepository.exportAll(anyCollection(), any(String[].class)))
+        lenient().when(productRepository.exportAll(any(String[].class)))
                 .thenThrow(new RuntimeException("boom"));
 
         service.generateOpendata();
