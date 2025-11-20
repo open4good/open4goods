@@ -438,6 +438,17 @@ describe('ProductHero', () => {
 
       await wrapper.unmount()
     })
+
+    it('renders the impact score stub when only relative values are available', async () => {
+      rewriteImpactScoreEntry({ relativ: { value: 6.2 } })
+
+      const wrapper = await mountComponent()
+
+      expect(wrapper.get('.impact-score-stub').text()).toBe('5')
+      expect(wrapper.get('.product-hero__impact-overview').exists()).toBe(true)
+
+      await wrapper.unmount()
+    })
   })
 
   it('toggles compare state with visual feedback', async () => {
