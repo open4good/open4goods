@@ -158,17 +158,7 @@ public class Product implements Standardisable {
 	 */
 	private Map<String,String> categoriesByDatasources = new HashMap<String, String>();
 
-	private Map<String, Score> scores = new HashMap<>();
-
-	/**
-	 * A bag containg the scorenames for which this product matches the N worth scores (--> tag on "ugly" scores)
-	 */
-	private Set<String> worsesScores = new HashSet<String>();
-
-	/**
-	 * A bag containg the scorenames for which this product matches the N bestsScores (--> tag on "top" scores)
-	 */
-	private Set<String> bestsScores = new HashSet<String>();
+        private Map<String, Score> scores = new HashMap<>();
 
 	/**
 	 * The ai generated review for this product
@@ -968,25 +958,9 @@ public class Product implements Standardisable {
 		this.excludedCauses = excludedCauses;
 	}
 
-	public Set<String> getWorsesScores() {
-		return worsesScores;
-	}
-
-	public void setWorsesScores(Set<String> worses) {
-		this.worsesScores = worses;
-	}
-
-	public Set<String> getBestsScores() {
-		return bestsScores;
-	}
-
-	public void setBestsScores(Set<String> betters) {
-		this.bestsScores = betters;
-	}
-
-	public Localisable<String, AiReviewHolder> getReviews() {
-		return reviews;
-	}
+        public Localisable<String, AiReviewHolder> getReviews() {
+                return reviews;
+        }
 
 	public void setReviews(Localisable<String, AiReviewHolder> aiReviews) {
 		this.reviews = aiReviews;

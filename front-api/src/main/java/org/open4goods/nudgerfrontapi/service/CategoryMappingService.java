@@ -153,9 +153,7 @@ public class CategoryMappingService {
                 verticalConfig.getRecommandationsConfig(),
                 verticalConfig.getDescriptionsAggregationConfig(),
                 verticalConfig.getScoringAggregationConfig(),
-                mapFeatureGroups(verticalConfig.getFeatureGroups(), domainLanguage),
-                verticalConfig.getWorseLimit(),
-                verticalConfig.getBettersLimit());
+                mapFeatureGroups(verticalConfig.getFeatureGroups(), domainLanguage));
     }
 
     /**

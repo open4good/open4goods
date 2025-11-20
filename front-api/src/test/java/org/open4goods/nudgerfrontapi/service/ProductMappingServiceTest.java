@@ -125,8 +125,6 @@ class ProductMappingServiceTest {
         product.setVertical("phones");
 
         Score score = new Score("ENERGY", 10.0);
-        score.setLowestScoreId(111L);
-        score.setHighestScoreId(222L);
         HashMap<String, Score> scores = new HashMap<>();
         scores.put("ENERGY", score);
         product.setScores(scores);
@@ -175,14 +173,10 @@ class ProductMappingServiceTest {
         assertThat(dto.scores()).isNotNull();
         ProductScoreDto mappedScore = dto.scores().scores().get("ENERGY");
         assertThat(mappedScore).isNotNull();
-        assertThat(mappedScore.lowestScore()).isNotNull();
-        assertThat(mappedScore.lowestScore().id()).isEqualTo(111L);
-        assertThat(mappedScore.lowestScore().fullSlug()).isEqualTo("/phones/lowest");
-        assertThat(mappedScore.highestScore()).isNotNull();
-        assertThat(mappedScore.highestScore().id()).isEqualTo(222L);
         assertThat(dto.scores().ranking()).isNotNull();
         assertThat(dto.scores().ranking().globalBest()).isNotNull();
         assertThat(dto.scores().ranking().globalBest().id()).isEqualTo(111L);
+        assertThat(dto.scores().ranking().globalBest().fullSlug()).isEqualTo("/phones/lowest");
     }
 
     @Test

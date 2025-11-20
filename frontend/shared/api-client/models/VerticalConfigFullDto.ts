@@ -383,18 +383,6 @@ export interface VerticalConfigFullDto {
      * @memberof VerticalConfigFullDto
      */
     featureGroups?: Array<FeatureGroupDto>;
-    /**
-     * Threshold defining how many low scores are considered worsts.
-     * @type {number}
-     * @memberof VerticalConfigFullDto
-     */
-    worseLimit?: number;
-    /**
-     * Threshold defining how many high scores are considered bests.
-     * @type {number}
-     * @memberof VerticalConfigFullDto
-     */
-    bettersLimit?: number;
 }
 
 /**
@@ -457,8 +445,6 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'descriptionsAggregationConfig': json['descriptionsAggregationConfig'] == null ? undefined : DescriptionsAggregationConfigFromJSON(json['descriptionsAggregationConfig']),
         'scoringAggregationConfig': json['scoringAggregationConfig'] == null ? undefined : ScoringAggregationConfigFromJSON(json['scoringAggregationConfig']),
         'featureGroups': json['featureGroups'] == null ? undefined : ((json['featureGroups'] as Array<any>).map(FeatureGroupDtoFromJSON)),
-        'worseLimit': json['worseLimit'] == null ? undefined : json['worseLimit'],
-        'bettersLimit': json['bettersLimit'] == null ? undefined : json['bettersLimit'],
     };
 }
 
@@ -516,8 +502,6 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'descriptionsAggregationConfig': DescriptionsAggregationConfigToJSON(value['descriptionsAggregationConfig']),
         'scoringAggregationConfig': ScoringAggregationConfigToJSON(value['scoringAggregationConfig']),
         'featureGroups': value['featureGroups'] == null ? undefined : ((value['featureGroups'] as Array<any>).map(FeatureGroupDtoToJSON)),
-        'worseLimit': value['worseLimit'],
-        'bettersLimit': value['bettersLimit'],
     };
 }
 

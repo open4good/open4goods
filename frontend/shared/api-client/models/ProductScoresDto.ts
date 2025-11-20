@@ -47,18 +47,6 @@ export interface ProductScoresDto {
      */
     ecoscore?: ProductScoreDto;
     /**
-     * Score identifiers where the product ranks amongst the worst
-     * @type {Set<string>}
-     * @memberof ProductScoresDto
-     */
-    worstScores?: Set<string>;
-    /**
-     * Score identifiers where the product ranks amongst the best
-     * @type {Set<string>}
-     * @memberof ProductScoresDto
-     */
-    bestScores?: Set<string>;
-    /**
      * Ecoscore derived rankings
      * @type {ProductRankingDto}
      * @memberof ProductScoresDto
@@ -82,11 +70,9 @@ export function ProductScoresDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         return json;
     }
     return {
-        
+
         'scores': json['scores'] == null ? undefined : (mapValues(json['scores'], ProductScoreDtoFromJSON)),
         'ecoscore': json['ecoscore'] == null ? undefined : ProductScoreDtoFromJSON(json['ecoscore']),
-        'worstScores': json['worstScores'] == null ? undefined : new Set(json['worstScores']),
-        'bestScores': json['bestScores'] == null ? undefined : new Set(json['bestScores']),
         'ranking': json['ranking'] == null ? undefined : ProductRankingDtoFromJSON(json['ranking']),
     };
 }
@@ -101,11 +87,9 @@ export function ProductScoresDtoToJSONTyped(value?: ProductScoresDto | null, ign
     }
 
     return {
-        
+
         'scores': value['scores'] == null ? undefined : (mapValues(value['scores'], ProductScoreDtoToJSON)),
         'ecoscore': ProductScoreDtoToJSON(value['ecoscore']),
-        'worstScores': value['worstScores'] == null ? undefined : Array.from(value['worstScores'] as Set<any>),
-        'bestScores': value['bestScores'] == null ? undefined : Array.from(value['bestScores'] as Set<any>),
         'ranking': ProductRankingDtoToJSON(value['ranking']),
     };
 }

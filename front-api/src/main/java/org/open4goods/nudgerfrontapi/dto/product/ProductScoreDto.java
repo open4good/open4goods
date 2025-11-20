@@ -26,10 +26,6 @@ public record ProductScoreDto(
         Map<String, String> metadatas,
         @Schema(description = "Ranking of the product for this score", nullable = true)
         Integer ranking,
-        @Schema(description = "Details for the product with the lowest score", implementation = ProductReferenceDto.class, nullable = true)
-        ProductReferenceDto lowestScore,
-        @Schema(description = "Details for the product with the highest score", implementation = ProductReferenceDto.class, nullable = true)
-        ProductReferenceDto highestScore,
         @Schema(description = "Percentage representation of the score on a 0-100 scale", nullable = true)
         Long percent,
         @Schema(description = "Score scaled on 0-20", nullable = true)

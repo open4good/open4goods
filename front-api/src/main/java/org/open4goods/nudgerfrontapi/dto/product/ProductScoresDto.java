@@ -1,8 +1,6 @@
 package org.open4goods.nudgerfrontapi.dto.product;
 
 import java.util.Map;
-import java.util.Set;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -13,10 +11,6 @@ public record ProductScoresDto(
         Map<String, ProductScoreDto> scores,
         @Schema(description = "Ecoscore when available", nullable = true)
         ProductScoreDto ecoscore,
-        @Schema(description = "Score identifiers where the product ranks amongst the worst")
-        Set<String> worstScores,
-        @Schema(description = "Score identifiers where the product ranks amongst the best")
-        Set<String> bestScores,
         @Schema(description = "Ecoscore derived rankings", nullable = true)
         ProductRankingDto ranking
 ) {

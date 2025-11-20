@@ -259,14 +259,6 @@
             "type": "object",
             "enabled": false
         },
-         "bestsScores": {
-            "type": "object",
-            "enabled": false
-        },
-        "worsesScores": {
-            "type": "object",
-            "enabled": false
-        },
         "scores": {
             "dynamic": "true",
             "properties": {
@@ -284,16 +276,6 @@
                 },
                 "ranking": {
                     "type": "integer",
-                    "index": false
-                },
-
-                "highestScoreId": {
-                    "type": "long",
-                    "index": false
-                },
-
-                "lowestScoreId": {
-                    "type": "long",
                     "index": false
                 },
 

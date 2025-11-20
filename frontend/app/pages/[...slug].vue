@@ -128,7 +128,6 @@ import {
   type CommercialEvent,
   type FilterRequestDto,
   type ProductDto,
-  type ProductReferenceDto,
   type ProductScoreDto,
   type ProductSearchResponseDto,
 } from '~~/shared/api-client'
@@ -667,28 +666,6 @@ const formatBrandModelLabel = (brand: string, model: string, fallback: string): 
   return fallback.trim()
 }
 
-const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | undefined): string => {
-  if (!reference) {
-    return ''
-  }
-
-  const bestName = typeof reference.bestName === 'string' ? reference.bestName.trim() : ''
-  if (bestName.length) {
-    return bestName
-  }
-
-  const slug = typeof reference.fullSlug === 'string' ? reference.fullSlug.trim() : ''
-  if (slug.length) {
-    const segments = slug.split('/').filter((segment) => segment.trim().length)
-    const lastSegment = segments[segments.length - 1]
-    if (lastSegment?.length) {
-      return lastSegment
-    }
-  }
-
-  return ''
-}
-
 const extractRelativeScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
   if (typeof score?.relativ?.value === 'number' && Number.isFinite(score.relativ.value)) {
     return score.relativ.value
@@ -697,41 +674,7 @@ const extractRelativeScoreValue = (score: ProductScoreDto | null | undefined): n
   return resolveScoreNumericValue(score)?.value ?? null
 }
 
-const extractReferenceScoreValue = (reference: ProductReferenceDto | null | undefined, scoreId: string): number | null => {
-  if (!reference?.scores) {
-    return null
-  }
-
-  const rawScores = (reference.scores as { scores?: Record<string, unknown> } | Record<string, unknown> | null) ?? null
-  if (!rawScores) {
-    return null
-  }
-
-  const scoreContainer = 'scores' in rawScores && rawScores.scores && typeof rawScores.scores === 'object'
-    ? (rawScores.scores as Record<string, unknown>)
-    : (rawScores as Record<string, unknown>)
-
-  const normalizedId = scoreId.trim()
-  const candidates = [normalizedId, normalizedId.toUpperCase(), normalizedId.toLowerCase()]
-
-  for (const candidate of candidates) {
-    if (!candidate) {
-      continue
-    }
-
-    const entry = scoreContainer[candidate]
-    if (entry && typeof entry === 'object') {
-      const resolved = resolveScoreNumericValue(entry as ProductScoreDto)
-      if (resolved) {
-        return resolved.value
-      }
-    }
-  }
-
-  return null
-}
-
-type RadarSeriesKey = 'current' | 'best' | 'worst'
+type RadarSeriesKey = 'current'
 
 interface RadarSeriesEntry {
   key: RadarSeriesKey
@@ -745,8 +688,6 @@ interface RadarDataset {
 }
 
 const ecoscoreScore = computed(() => resolveProductScoreById('ECOSCORE'))
-const bestReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscoreScore.value?.highestScore ?? null)
-const worstReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscoreScore.value?.lowestScore ?? null)
 
 const radarData = computed<RadarDataset>(() => {
   const scores = selectedProductScores.value
@@ -770,8 +711,6 @@ const radarData = computed<RadarDataset>(() => {
         id,
         name,
         productValue,
-        bestValue: extractReferenceScoreValue(bestReferenceProduct.value, id),
-        worstValue: extractReferenceScoreValue(worstReferenceProduct.value, id),
       }
     })
     .filter(
@@ -779,8 +718,6 @@ const radarData = computed<RadarDataset>(() => {
         id: string
         name: string
         productValue: number
-        bestValue: number | null
-        worstValue: number | null
       } => Boolean(entry),
     )
 
@@ -790,8 +727,6 @@ const radarData = computed<RadarDataset>(() => {
 
   const axes = axesDetails.map(({ id, name }) => ({ id, name }))
   const productValues = axesDetails.map((entry) => entry.productValue)
-  const bestValues = axesDetails.map((entry) => entry.bestValue ?? null)
-  const worstValues = axesDetails.map((entry) => entry.worstValue ?? null)
 
   const series: RadarSeriesEntry[] = []
 
@@ -806,34 +741,6 @@ const radarData = computed<RadarDataset>(() => {
       key: 'current',
       name: productSeriesLabel,
       values: productValues,
-    })
-  }
-
-  const bestLabel = formatBrandModelLabel(
-    typeof bestReferenceProduct.value?.brand === 'string' ? bestReferenceProduct.value.brand : '',
-    typeof bestReferenceProduct.value?.model === 'string' ? bestReferenceProduct.value.model : '',
-    resolveReferenceFallbackName(bestReferenceProduct.value),
-  )
-
-  if (bestValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
-    series.push({
-      key: 'best',
-      name: bestLabel,
-      values: bestValues,
-    })
-  }
-
-  const worstLabel = formatBrandModelLabel(
-    typeof worstReferenceProduct.value?.brand === 'string' ? worstReferenceProduct.value.brand : '',
-    typeof worstReferenceProduct.value?.model === 'string' ? worstReferenceProduct.value.model : '',
-    resolveReferenceFallbackName(worstReferenceProduct.value),
-  )
-
-  if (worstValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
-    series.push({
-      key: 'worst',
-      name: worstLabel,
-      values: worstValues,
     })
   }
 

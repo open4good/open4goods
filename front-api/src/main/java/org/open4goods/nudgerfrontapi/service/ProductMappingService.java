@@ -257,7 +257,7 @@ public class ProductMappingService {
     }
 
     /**
-     * Resolve the products referenced by score extremes or rankings and project them to lightweight DTOs.
+     * Resolve the products referenced by rankings and project them to lightweight DTOs.
      */
     private Map<Long, ProductReferenceDto> resolveReferencedProducts(Product product, DomainLanguage domainLanguage,
             Locale locale, VerticalConfig vConf) {
@@ -269,17 +269,13 @@ public class ProductMappingService {
     }
 
     /**
-     * Collect all product identifiers referenced by score extremes or rankings.
+     * Collect all product identifiers referenced by rankings.
      */
     private Set<Long> collectReferencedProductIds(Product product) {
         if (product == null) {
             return Collections.emptySet();
         }
         Set<Long> ids = new LinkedHashSet<>();
-        Score ecoscore = product.ecoscore();
-        if (ecoscore != null) {
-            collectScoreReferences(ids, List.of(ecoscore));
-        }
         EcoScoreRanking ranking = product.getRanking();
         if (ranking != null) {
             if (ranking.getGlobalBest() != null) {
@@ -290,26 +286,6 @@ public class ProductMappingService {
             }
         }
         return ids;
-    }
-
-    /**
-     * Append score extreme identifiers to the provided set.
-     */
-    private void collectScoreReferences(Set<Long> ids, Collection<Score> scores) {
-        if (ids == null || scores == null) {
-            return;
-        }
-        for (Score score : scores) {
-            if (score == null) {
-                continue;
-            }
-            if (score.getLowestScoreId() != null) {
-                ids.add(score.getLowestScoreId());
-            }
-            if (score.getHighestScoreId() != null) {
-                ids.add(score.getHighestScoreId());
-            }
-        }
     }
 
     /**
@@ -653,21 +629,15 @@ public class ProductMappingService {
                 ? Collections.emptyMap()
                 : product.getScores().entrySet().stream()
                         .collect(Collectors.toMap(Entry::getKey,
-                                entry -> mapScore(entry.getValue(), domainLanguage, vConf, referencedProducts),
+                                entry -> mapScore(entry.getValue(), domainLanguage, vConf),
                                 (left, right) -> right,
                                 LinkedHashMap::new));
         ProductScoreDto ecoscore = product.ecoscore() == null
                 ? null
-                : mapScore(product.ecoscore(), domainLanguage, vConf, referencedProducts);
-        Set<String> worstScores = product.getWorsesScores() == null
-                ? Collections.emptySet()
-                : new LinkedHashSet<>(product.getWorsesScores());
-        Set<String> bestScores = product.getBestsScores() == null
-                ? Collections.emptySet()
-                : new LinkedHashSet<>(product.getBestsScores());
+                : mapScore(product.ecoscore(), domainLanguage, vConf);
         ProductRankingDto ranking = mapRanking(product, referencedProducts);
 
-        return new ProductScoresDto(scores, ecoscore, worstScores, bestScores, ranking);
+        return new ProductScoresDto(scores, ecoscore, ranking);
     }
 
     /**
@@ -1396,8 +1366,7 @@ public class ProductMappingService {
     /**
      * Map a score into its DTO, including localisation of impact criteria when possible.
      */
-    private ProductScoreDto mapScore(Score score, DomainLanguage domainLanguage, VerticalConfig vConf,
-            Map<Long, ProductReferenceDto> referencedProducts) {
+    private ProductScoreDto mapScore(Score score, DomainLanguage domainLanguage, VerticalConfig vConf) {
         if (score == null) {
             return null;
         }
@@ -1419,8 +1388,6 @@ public class ProductMappingService {
         }
 
 
-        Map<Long, ProductReferenceDto> references = referencedProducts == null ? Collections.emptyMap() : referencedProducts;
-
         return new ProductScoreDto(
                 score.getName(),
                 title,
@@ -1431,8 +1398,6 @@ public class ProductMappingService {
                 mapCardinality(score.getRelativ()),
                 score.getMetadatas(),
                 score.getRanking(),
-                references.get(score.getLowestScoreId()),
-                references.get(score.getHighestScoreId()),
                 safeCall(score::percent),
                 safeCall(score::on20),
                 safeCall(score::absValue),

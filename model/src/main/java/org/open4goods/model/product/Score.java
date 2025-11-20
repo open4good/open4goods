@@ -41,21 +41,6 @@ public class Score  implements Validable {
 	 */
 	private Integer ranking;
 	
-	/**
-	 * The GTIN id of the prouct having the lowest score
-	 */
-	private Long lowestScoreId;
-	
-	
-	/**
-	 * The GTIN id of the product having the highest score
-	 */
-	private Long highestScoreId;
-	
-	
-	
-	
-	
 	
 	////////////////////////////////////////
 	// Contracts
@@ -312,27 +297,6 @@ public class Score  implements Validable {
 	public void setRanking(Integer ranking) {
 		this.ranking = ranking;
 	}
-
-
-	public Long getLowestScoreId() {
-		return lowestScoreId;
-	}
-
-
-	public void setLowestScoreId(Long lowestScoreId) {
-		this.lowestScoreId = lowestScoreId;
-	}
-
-
-	public Long getHighestScoreId() {
-		return highestScoreId;
-	}
-
-
-	public void setHighestScoreId(Long highestScoreId) {
-		this.highestScoreId = highestScoreId;
-	}
-
 
 
 }
