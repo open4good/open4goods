@@ -233,21 +233,11 @@ public class ProductRepository {
 	 *
 	 * @return
 	 */
-        public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
-                return exportAll(Arrays.asList(barcodeTypes), OPEN_DATA_EXPORT_FIELDS);
-        }
 
-        public Stream<Product> exportAll(Collection<BarcodeType> barcodeTypes, String[] includeFields) {
 
-                if (barcodeTypes == null || barcodeTypes.isEmpty()) {
-                        throw new IllegalArgumentException("At least one barcode type must be provided");
-                }
+        public Stream<Product> exportAll( String[] includeFields) {
 
-                Criteria criteria = new Criteria("gtinInfos.upcType").in(barcodeTypes.toArray());
-                CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
-                criteriaQuery.setPageable(EXPORT_STREAM_PAGE);
-
-                NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(criteriaQuery);
+                NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(Query.findAll());
                 if (includeFields != null && includeFields.length > 0) {
                         queryBuilder = queryBuilder.withSourceFilter(new FetchSourceFilter(true, includeFields, null));
                 }

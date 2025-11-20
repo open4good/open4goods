@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -305,13 +304,11 @@ public class OpenDataService implements HealthIndicator {
     }
 
     private void writeDatasets(List<DatasetWriter> writers, List<DatasetDefinition> datasetDefinitions) throws IOException {
-        EnumSet<BarcodeType> barcodeFilters = EnumSet.noneOf(BarcodeType.class);
-        datasetDefinitions.forEach(definition -> barcodeFilters.addAll(definition.barcodeTypes()));
 
         String[] includeFields = resolveIncludeFields(datasetDefinitions);
         EnumMap<BarcodeType, DatasetWriter> writerByType = mapWritersByType(writers);
 
-        try (Stream<Product> stream = aggregatedDataRepository.exportAll(barcodeFilters, includeFields)) {
+        try (Stream<Product> stream = aggregatedDataRepository.exportAll(includeFields)) {
             stream.forEach(product -> {
                 BarcodeType barcodeType = resolveBarcodeType(product);
                 if (barcodeType == null) {
