@@ -7,7 +7,25 @@
       :image="heroImage"
       :breadcrumbs="category.breadCrumb ?? []"
       :eyebrow="category.verticalMetaTitle"
-    />
+    >
+      <template v-if="isGuidedWizardAvailable" #actions>
+        <div class="category-page__guided-actions">
+          <v-btn
+            color="primary"
+            size="large"
+            class="category-page__guided-cta"
+            prepend-icon="mdi-auto-fix"
+            :aria-label="$t('category.guidedFilters.ctaAria', { category: categoryDisplayName })"
+            @click="guidedWizardOpen = true"
+          >
+            {{ $t('category.guidedFilters.cta') }}
+          </v-btn>
+          <p class="category-page__guided-helper">
+            {{ $t('category.guidedFilters.heroHelper', { category: categoryDisplayName }) }}
+          </p>
+        </div>
+      </template>
+    </CategoryHero>
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
       <div
@@ -327,6 +345,23 @@
     >
       {{ errorMessage }}
     </v-alert>
+
+    <CategoryGuidedFiltersWizard
+      v-if="isGuidedWizardAvailable"
+      v-model="guidedWizardOpen"
+      :wizard="guidedWizard"
+      :product-count="guidedWizardPreviewCount"
+      :loading-count="guidedWizardPreviewLoading"
+      :category-name="categoryDisplayName"
+      @filters-change="onGuidedFiltersChange"
+      @apply="applyGuidedFilters"
+    />
+
+    <CategoryGuidedFiltersFab
+      v-if="isGuidedWizardAvailable && !isDesktop"
+      class="category-page__guided-fab"
+      @open="guidedWizardOpen = true"
+    />
   </div>
 </template>
 
@@ -362,6 +397,8 @@ import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
 import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
+import CategoryGuidedFiltersFab from '~/components/category/guided-filters/CategoryGuidedFiltersFab.vue'
+import CategoryGuidedFiltersWizard from '~/components/category/guided-filters/CategoryGuidedFiltersWizard.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
@@ -484,6 +521,9 @@ const category = computed<VerticalConfigFullDto | null>(() => {
 })
 const errorMessage = computed(() => categoriesError.value)
 const hasFastFilters = computed(() => (category.value?.subsets?.length ?? 0) > 0)
+
+const guidedWizard = computed(() => category.value?.modalFilterWizard ?? null)
+const isGuidedWizardAvailable = computed(() => Boolean(guidedWizard.value?.questions?.length))
 
 const heroImage = computed(() => {
   if (!category.value) {
@@ -929,6 +969,11 @@ const manualFilters = ref<FilterRequestDto>({})
 const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
 const lastAppliedDefaultSort = ref<string | null>(null)
+const guidedWizardOpen = ref(false)
+const guidedWizardFilters = ref<FilterRequestDto | null>(null)
+const guidedWizardPreviewLoading = ref(false)
+const guidedWizardPreviewCount = ref<number | null>(null)
+let guidedWizardAbort: AbortController | null = null
 
 const areFiltersEqual = (left: FilterRequestDto, right: FilterRequestDto): boolean => {
   const leftFilters = left.filters ?? []
@@ -1125,6 +1170,66 @@ const combinedFilters = computed<FilterRequestDto | undefined>(() => {
   return filters.length ? { filters } : undefined
 })
 
+const resetGuidedPreview = () => {
+  guidedWizardPreviewCount.value = null
+  guidedWizardPreviewLoading.value = false
+  if (guidedWizardAbort) {
+    guidedWizardAbort.abort()
+    guidedWizardAbort = null
+  }
+}
+
+const buildGuidedPreviewRequest = (filters: FilterRequestDto | null): FilterRequestDto | undefined => {
+  const subsetClauses = subsetFilters.value.filters ?? []
+  const wizardClauses = filters?.filters ?? []
+  const combined = [...subsetClauses, ...wizardClauses]
+  return combined.length ? { filters: combined } : undefined
+}
+
+const fetchGuidedPreview = async (filters: FilterRequestDto | null) => {
+  if (!verticalId.value) {
+    guidedWizardPreviewCount.value = null
+    guidedWizardPreviewLoading.value = false
+    return
+  }
+
+  guidedWizardPreviewLoading.value = true
+  if (guidedWizardAbort) {
+    guidedWizardAbort.abort()
+  }
+  const controller = new AbortController()
+  guidedWizardAbort = controller
+
+  try {
+    const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
+      method: 'POST',
+      signal: controller.signal,
+      body: {
+        verticalId: verticalId.value,
+        pageNumber: 0,
+        pageSize: 1,
+        filters: buildGuidedPreviewRequest(filters),
+      },
+    })
+
+    guidedWizardPreviewCount.value = response.products?.page?.totalElements ?? 0
+  } catch (error) {
+    if (!controller.signal.aborted) {
+      console.error('Error computing guided filters preview', error)
+      guidedWizardPreviewCount.value = null
+    }
+  } finally {
+    if (guidedWizardAbort === controller) {
+      guidedWizardAbort = null
+    }
+    guidedWizardPreviewLoading.value = false
+  }
+}
+
+const debouncedGuidedPreview = useDebounceFn((filters: FilterRequestDto | null) => {
+  void fetchGuidedPreview(filters)
+}, 250)
+
 const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])
 
 const defaultSortField = computed<string | null>(() => {
@@ -1146,6 +1251,15 @@ const applyDefaultSort = () => {
   sortOrder.value = 'desc'
   lastAppliedDefaultSort.value = defaultSortField.value
   return true
+}
+
+const onGuidedFiltersChange = (filters: FilterRequestDto | null) => {
+  guidedWizardFilters.value = filters
+}
+
+const applyGuidedFilters = (filters: FilterRequestDto | null) => {
+  manualFilters.value = filters?.filters?.length ? filters : {}
+  guidedWizardOpen.value = false
 }
 
 const sortItems = computed(() => {
@@ -1597,6 +1711,54 @@ watch(
 )
 
 watch(
+  () => guidedWizardFilters.value,
+  (filters) => {
+    if (!guidedWizardOpen.value) {
+      return
+    }
+
+    debouncedGuidedPreview(filters ?? null)
+  },
+  { deep: true },
+)
+
+watch(
+  () => subsetFilters.value,
+  () => {
+    if (!guidedWizardOpen.value) {
+      return
+    }
+
+    debouncedGuidedPreview(guidedWizardFilters.value ?? null)
+  },
+  { deep: true },
+)
+
+watch(
+  () => guidedWizardOpen.value,
+  (open) => {
+    if (open) {
+      debouncedGuidedPreview(guidedWizardFilters.value ?? null)
+      return
+    }
+
+    guidedWizardFilters.value = null
+    resetGuidedPreview()
+  },
+)
+
+watch(
+  guidedWizard,
+  (definition) => {
+    if (!definition) {
+      guidedWizardOpen.value = false
+    }
+    guidedWizardFilters.value = null
+    resetGuidedPreview()
+  },
+)
+
+watch(
   () => searchTerm.value,
   () => {
     if (!hasHydrated.value) {
@@ -1729,6 +1891,10 @@ onBeforeUnmount(() => {
   structuredDataHeadEntry?.dispose?.()
   structuredDataHeadEntry = null
   removePointerListeners()
+  if (guidedWizardAbort) {
+    guidedWizardAbort.abort()
+    guidedWizardAbort = null
+  }
 })
 
 watch(
@@ -1860,6 +2026,20 @@ const clearAllFilters = () => {
     gap: 1rem
     margin-bottom: 1.5rem
     width: 100%
+
+  &__guided-actions
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 0.75rem
+
+  &__guided-helper
+    margin: 0
+    font-size: 0.95rem
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+  &__guided-fab
+    z-index: 20
 
   &__toolbar-section
     display: flex

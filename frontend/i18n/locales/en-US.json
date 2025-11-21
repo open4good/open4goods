@@ -441,6 +441,23 @@
         "ariaLabel": "Open the Eco-score guide"
       }
     },
+    "guidedFilters": {
+      "cta": "Guided assistant",
+      "ctaAria": "Open the guided filters for {category}",
+      "heroHelper": "Answer a few quick questions to surface the best products in {category}.",
+      "fabAriaLabel": "Open the guided filters assistant",
+      "progressLabel": "Step {current} of {total}",
+      "close": "Close the guided assistant",
+      "stepTitle": "Step {current}/{total}",
+      "skip": "No preference",
+      "previous": "Previous",
+      "next": "Next",
+      "apply": "Apply filters",
+      "resultsLoading": "Calculating matching products…",
+      "resultsLabel": "{count} products match so far in {category}",
+      "resultsFallback": "Select an option to preview matching products.",
+      "defaultCategory": "this category"
+    },
     "admin": {
       "title": "Admin filters",
       "helper": "Restricted tools for Nudger teammates. Inspect exclusion causes for catalog entries here.",

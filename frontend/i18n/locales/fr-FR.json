@@ -441,6 +441,23 @@
         "ariaLabel": "Ouvrir le guide Eco-score"
       }
     },
+    "guidedFilters": {
+      "cta": "Assistant guidé",
+      "ctaAria": "Ouvrir les filtres guidés pour {category}",
+      "heroHelper": "Répondez à quelques questions pour mettre en avant les meilleurs produits de {category}.",
+      "fabAriaLabel": "Ouvrir l'assistant de filtres guidés",
+      "progressLabel": "Étape {current} sur {total}",
+      "close": "Fermer l'assistant guidé",
+      "stepTitle": "Étape {current}/{total}",
+      "skip": "Peu importe",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "apply": "Appliquer les filtres",
+      "resultsLoading": "Calcul des produits correspondants…",
+      "resultsLabel": "{count} produits correspondent pour {category}",
+      "resultsFallback": "Choisissez une option pour afficher un aperçu des résultats.",
+      "defaultCategory": "cette catégorie"
+    },
     "admin": {
       "title": "Filtres admin",
       "helper": "Outils réservés aux coéquipiers Nudger pour analyser les causes d'exclusion des fiches.",
