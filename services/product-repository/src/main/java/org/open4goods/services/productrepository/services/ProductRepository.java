@@ -73,7 +73,7 @@ public class ProductRepository {
         /**
          * Default page size used when streaming large exports.
          */
-        private static final int EXPORT_STREAM_PAGE_SIZE = 10_000;
+        private static final int EXPORT_STREAM_PAGE_SIZE = 5000;
 
         /**
          * Lazily created {@link PageRequest} that avoids instantiating a new object for each export.
@@ -117,8 +117,6 @@ public class ProductRepository {
 
 	private @Autowired ElasticsearchOperations elasticsearchOperations;
 
-
-	private @Autowired SerialisationService serialisationService;
 
 //	private @Autowired RedisProductRepository redisRepository;
 
@@ -242,7 +240,9 @@ public class ProductRepository {
                         queryBuilder = queryBuilder.withSourceFilter(new FetchSourceFilter(true, includeFields, null));
                 }
 
-                NativeQuery query = queryBuilder.build();
+                NativeQuery query = queryBuilder
+                		.withPageable(EXPORT_STREAM_PAGE)
+                		.build();
 
                 return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
                                 .map(SearchHit::getContent);
