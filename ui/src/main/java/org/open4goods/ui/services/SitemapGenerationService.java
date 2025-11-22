@@ -102,7 +102,8 @@ public class SitemapGenerationService {
 
 			String lang = e.getKey();
 
-			String baseUrl = uiConfig.getNamings().getBaseUrls().get(lang) ;
+			// TODO : I18n
+			String baseUrl = "https://nudger.fr/" ;
 
 
 			// Adding blog posts
