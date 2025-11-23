@@ -23,7 +23,7 @@ defineProps<{
       <v-expansion-panels variant="accordion" class="opendata-faq__panels">
         <v-expansion-panel v-for="item in items" :key="item.id" eager>
           <v-expansion-panel-title expand-icon="mdi-chevron-down">
-            <span class="opendata-faq__question">{{ item.question }}</span>
+            <h3 class="opendata-faq__question">{{ item.question }}</h3>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <!-- eslint-disable-next-line vue/no-v-html -->
