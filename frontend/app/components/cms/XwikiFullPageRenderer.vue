@@ -283,8 +283,8 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 1rem
-  align-items: flex-start
-  text-align: left
+  align-items: center
+  text-align: center
 
 .cms-page__hero-breadcrumbs
   color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
@@ -310,7 +310,7 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 0.75rem
-  align-items: flex-start
+  align-items: center
 
 .cms-page__hero-title
   margin: 0
@@ -328,6 +328,7 @@ useHead(() => ({
   gap: 0.75rem
   flex-wrap: wrap
   margin-top: 0.5rem
+  justify-content: center
 
 .cms-page__edit-button
   color: rgb(var(--v-theme-hero-overlay-strong))
