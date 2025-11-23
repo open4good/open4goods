@@ -42,12 +42,18 @@ export default defineEventHandler(async (event) => {
     upstreamUrl.search = searchParams.toString()
   }
 
+  const forwardHeaders = new Headers(event.node.req.headers as HeadersInit)
+  forwardHeaders.set('accept-encoding', 'identity')
+  forwardHeaders.delete('connection')
+  forwardHeaders.delete('content-length')
+  forwardHeaders.delete('transfer-encoding')
+
   let upstreamResponse: Response
 
   try {
     upstreamResponse = await fetch(upstreamUrl, {
       method,
-      headers: event.node.req.headers as HeadersInit,
+      headers: forwardHeaders,
     })
   } catch (error) {
     throw createError({
@@ -59,8 +65,12 @@ export default defineEventHandler(async (event) => {
 
   setResponseStatus(event, upstreamResponse.status)
 
+  const excludedResponseHeaders = new Set(['content-encoding', 'content-length', 'transfer-encoding', 'connection'])
+
   upstreamResponse.headers.forEach((value, key) => {
-    setHeader(event, key, value)
+    if (!excludedResponseHeaders.has(key.toLowerCase())) {
+      setHeader(event, key, value)
+    }
   })
 
   if (method === 'HEAD') {
