@@ -24,8 +24,8 @@ const { t } = useI18n()
         </header>
         <v-expansion-panels class="home-faq__panels" multiple variant="accordion">
           <v-expansion-panel v-for="panel in props.items" :key="panel.blocId">
-            <v-expansion-panel-title class="home-faq__panel-title">
-              {{ panel.question }}
+            <v-expansion-panel-title >
+              <h3 class="home-faq__panel-title">{{ panel.question }}</h3>
             </v-expansion-panel-title>
             <v-expansion-panel-text class="home-faq__panel-text">
               <TextContent
