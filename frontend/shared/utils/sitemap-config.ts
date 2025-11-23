@@ -10,10 +10,10 @@ export const SITEMAP_PATH_PREFIX = '/sitemap'
 export const APP_ROUTES_SITEMAP_KEY = 'main-pages'
 
 const DEFAULT_ADDITIONAL_SITEMAP_PATHS = [
-  'https://static.nudger.fr/sitemap/blog-posts.xml',
-  'https://static.nudger.fr/sitemap/category-pages.xml',
-  'https://static.nudger.fr/sitemap/product-pages.xml',
-  'https://static.nudger.fr/sitemap/wiki-pages.xml',
+  'https://nudger.fr/sitemap_legacy/blog-posts.xml',
+  'https://nudger.fr/sitemap_legacy/category-pages.xml',
+  'https://nudger.fr/sitemap_legacy/product-pages.xml',
+  'https://nudger.fr/sitemap_legacy/wiki-pages.xml',
 ] as const
 
 export interface DomainLanguageSitemapConfig {
