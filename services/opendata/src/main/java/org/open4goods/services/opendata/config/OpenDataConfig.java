@@ -23,7 +23,7 @@ public class OpenDataConfig {
     /**
      * Maximum download speed per client in kilobytes.
      */
-    private int downloadSpeedKb = 256;
+    private int downloadSpeedKb = 512;
 
     /**
      * Maximum concurrent downloads allowed.
