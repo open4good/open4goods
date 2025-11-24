@@ -29,7 +29,9 @@ const parseRouteNames = (value: unknown): string[] => {
 const EXCLUDED_STATIC_ROUTE_NAMES = new Set(['offline'])
 
 const isExcludedStaticRouteName = (routeName: string): boolean => {
-  const normalizedName = routeName.replace(/^\/+/, '')
+  const normalizedName = routeName
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')
 
   return EXCLUDED_STATIC_ROUTE_NAMES.has(normalizedName)
 }

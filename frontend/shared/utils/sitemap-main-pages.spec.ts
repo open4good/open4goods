@@ -1,9 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-import { getMainPagePathsForDomainLanguage } from './sitemap-main-pages'
+const loadModule = async () => {
+  // Ensure module-level caches are rebuilt for each scenario
+  vi.resetModules()
+
+  return import('./sitemap-main-pages')
+}
 
 describe('getMainPagePathsForDomainLanguage', () => {
-  it('returns unique english paths', () => {
+  it('returns unique english paths', async () => {
+    const { getMainPagePathsForDomainLanguage } = await loadModule()
     const paths = getMainPagePathsForDomainLanguage('en')
     const unique = new Set(paths)
 
@@ -20,7 +26,8 @@ describe('getMainPagePathsForDomainLanguage', () => {
     expect(paths).not.toContain('/offline')
   })
 
-  it('returns localized french paths', () => {
+  it('returns localized french paths', async () => {
+    const { getMainPagePathsForDomainLanguage } = await loadModule()
     const paths = getMainPagePathsForDomainLanguage('fr')
 
     expect(paths).toContain('/')
@@ -34,5 +41,19 @@ describe('getMainPagePathsForDomainLanguage', () => {
     expect(paths).toContain('/opendata/isbn')
     expect(paths).toContain('/opensource')
     expect(paths).not.toContain('/offline')
+  })
+
+  it('drops excluded runtime routes even when configured with trailing slashes', async () => {
+    const previousStaticRoutes = process.env.NUXT_STATIC_MAIN_PAGE_ROUTES
+    process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify(['/offline/', '/team'])
+
+    const { getMainPagePathsForDomainLanguage } = await loadModule()
+    const paths = getMainPagePathsForDomainLanguage('en')
+
+    expect(paths).toContain('/team')
+    expect(paths).not.toContain('/offline')
+    expect(paths).not.toContain('/offline/')
+
+    process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = previousStaticRoutes
   })
 })
