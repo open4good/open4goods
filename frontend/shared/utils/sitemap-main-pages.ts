@@ -26,16 +26,6 @@ const parseRouteNames = (value: unknown): string[] => {
   return []
 }
 
-const EXCLUDED_STATIC_ROUTE_NAMES = new Set(['offline'])
-
-const isExcludedStaticRouteName = (routeName: string): boolean => {
-  const normalizedName = routeName
-    .replace(/^\/+/, '')
-    .replace(/\/+$/, '')
-
-  return EXCLUDED_STATIC_ROUTE_NAMES.has(normalizedName)
-}
-
 const getRuntimeConfiguredRouteNames = (): string[] => {
   try {
     const { staticMainPageRoutes, public: publicConfig } = useRuntimeConfig()
@@ -67,15 +57,11 @@ const resolveStaticRouteNames = (): string[] => {
   const routeNames = new Set<string>()
 
   for (const routeName of getRuntimeConfiguredRouteNames()) {
-    if (routeName && !isExcludedStaticRouteName(routeName)) {
-      routeNames.add(routeName)
-    }
+    routeNames.add(routeName)
   }
 
   for (const routeName of Object.keys(LOCALIZED_ROUTE_PATHS)) {
-    if (!isExcludedStaticRouteName(routeName)) {
-      routeNames.add(routeName)
-    }
+    routeNames.add(routeName)
   }
 
   staticRouteNamesCache = Array.from(routeNames).sort((a, b) => a.localeCompare(b))
