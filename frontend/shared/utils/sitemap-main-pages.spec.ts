@@ -17,6 +17,7 @@ describe('getMainPagePathsForDomainLanguage', () => {
     expect(paths).toContain('/opendata/gtin')
     expect(paths).toContain('/opendata/isbn')
     expect(paths).toContain('/opensource')
+    expect(paths).not.toContain('/offline')
   })
 
   it('returns localized french paths', () => {
@@ -32,5 +33,6 @@ describe('getMainPagePathsForDomainLanguage', () => {
     expect(paths).toContain('/opendata/gtin')
     expect(paths).toContain('/opendata/isbn')
     expect(paths).toContain('/opensource')
+    expect(paths).not.toContain('/offline')
   })
 })
