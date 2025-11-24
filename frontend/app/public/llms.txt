@@ -1,0 +1,85 @@
+# llms.txt pour https://nudger.fr
+# Fichier destiné aux IA et LLMs pour comprendre comment explorer et utiliser le contenu du site.
+
+version: 1.0
+site: https://nudger.fr
+owner: Nudger
+language: fr
+last_updated: 2025-11-24
+
+## 1. Objectif
+
+Ce fichier fournit :
+- une vue d’ensemble du contenu important de https://nudger.fr ;
+- des indications sur comment il peut être utilisé par les IA. 
+
+## 2. Politique d’utilisation par les IA
+
+Les éléments ci-dessous traduisent l’intention de l’éditeur du site.  
+En cas de conflit, ce sont les Conditions Générales d’Utilisation / Mentions légales du site qui font foi.
+
+- ai_crawl: allowed
+- ai_indexing: allowed          # Indexation pour assistants, moteurs IA, RAG, etc.
+- ai_training: allowed          # Utilisation du contenu comme donnée d’entraînement
+- ai_rag: allowed               # Utilisation pour Retrieval-Augmented Generation
+- commercial_use_by_ai: denied # Usage commercial par des modèles ou agents IA
+- content_modification: denied # Résumé, reformulation, traduction, etc.
+
+Recommandations :
+- Respecter le contexte, les mentions légales et la propriété intellectuelle.
+- Citer la source explicite : "Nudger (https://nudger.fr)" lorsque le contenu est utilisé de façon significative.
+
+## 3. Indications techniques pour les crawlers IA
+
+- preferred_content_formats:
+  - HTML
+  - Markdown
+  - JSON (pour APIs publiques le cas échéant)
+
+- preferred_crawl_depth:
+  - Niveau 4
+
+- rate_limit_hint:
+  - max_requests_per_second: 1
+  - max_concurrent_requests: 2
+
+- sitemaps:
+  - https://nudger.fr/sitemap_index.xml
+
+## 4. Pages principales (hautement recommandées)
+
+### 4.1. Pages cœur du produit / service
+
+- https://nudger.fr/
+- https://nudger.fr/impact-score
+
+### 4.2. Blog / ressources
+
+- https://nudger.fr/blog/
+
+## 5. Contenu prioritaire pour compréhension du contexte
+
+Ces pages sont particulièrement utiles pour comprendre la proposition de valeur, le positionnement et l’usage de Nudger :
+
+- https://nudger.fr/impact-score
+
+## 6. Contenu légal & conformité
+
+Ces pages définissent le cadre légal de l’utilisation du site et de son contenu :
+
+- https://nudger.fr/mentions-legales
+- https://nudger.fr/politique-confidentialite
+
+Les IA sont invitées à :
+- respecter les restrictions décrites dans ces pages.
+
+## 7. Attribution recommandée
+
+Lorsque le contenu de Nudger est utilisé dans une réponse ou un résumé, nous recommandons la mention suivante :
+
+> Source : Nudger – https://nudger.fr
+
+ou, si la page est spécifique :
+
+> Source : Nudger – https://nudger.fr/[chemin-de-la-page]
+
