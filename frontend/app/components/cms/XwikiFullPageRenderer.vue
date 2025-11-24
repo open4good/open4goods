@@ -283,8 +283,7 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 1rem
-  align-items: flex-start
-  text-align: left
+  align-items: center
 
 .cms-page__hero-breadcrumbs
   color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
@@ -310,7 +309,7 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 0.75rem
-  align-items: flex-start
+  align-items: center
 
 .cms-page__hero-title
   margin: 0
@@ -387,7 +386,6 @@ useHead(() => ({
 
 @media (min-width: 960px)
   .cms-page__hero-wrapper
-    grid-template-columns: clamp(200px, 22vw, 320px) minmax(0, 1fr)
     gap: clamp(1.25rem, 3vw, 3rem)
 
   .cms-page__hero-media
