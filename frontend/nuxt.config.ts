@@ -444,6 +444,22 @@ export default defineNuxtConfig({
     machineToken: process.env.MACHINE_TOKEN || '',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
+    sitemapLocalFiles: {
+      fr: [
+        '/opt/open4goods/sitemap/fr/blog-posts.xml',
+        '/opt/open4goods/sitemap/fr/category-pages.xml',
+        '/opt/open4goods/sitemap/fr/product-pages.xml',
+        '/opt/open4goods/sitemap/fr/verticals-pages.xml',
+        '/opt/open4goods/sitemap/fr/wiki-pages.xml',
+      ],
+      en: [
+        '/opt/open4goods/sitemap/default/blog-posts.xml',
+        '/opt/open4goods/sitemap/default/category-pages.xml',
+        '/opt/open4goods/sitemap/default/product-pages.xml',
+        '/opt/open4goods/sitemap/default/verticals-pages.xml',
+        '/opt/open4goods/sitemap/default/wiki-pages.xml',
+      ],
+    },
 
     // Public keys (exposed to the client side)
     public: {

@@ -44,8 +44,8 @@ import com.google.common.collect.Lists;
  *
  */
 public class GoogleIndexationService  {
-	
-	
+
+
     private static final String GOOGLE_API_SCOPE = "https://www.googleapis.com/auth/indexing";
 	public static List<HttpResponse> addedCalendarsUsingBatch = Lists.newArrayList();
     // TODO : const
@@ -57,23 +57,23 @@ public class GoogleIndexationService  {
 	private ProductRepository productRepository;
 	private VerticalsConfigService verticalsConfigService;
 	private String markerFileName;
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
-	@Autowired Environment env;	
+	@Autowired Environment env;
 
-	
-	
+
+
 //    private static com.google.api.services.calendar.Calendar client;
-	
+
 	public GoogleIndexationService(String googleJsonConfig, String markerFileName, ProductRepository productRepository, VerticalsConfigService verticalsConfigService) {
-		
+
 		this.productRepository = productRepository;
 		this.markerFileName = markerFileName;
-		
-		
+
+
 		String scopes = GOOGLE_API_SCOPE;
-		
+
 		if (null == googleJsonConfig) {
 			LOGGER.error("No google json config provided");
 		} else {
@@ -87,18 +87,18 @@ public class GoogleIndexationService  {
 
 	@Scheduled(fixedRate = 1000 * 60 * 60 * 12)
 	// TODO : Timing from conf
-	public void indexNewProducts() {	
+	public void indexNewProducts() {
 		if (!ArrayUtils.contains(env.getActiveProfiles(), "dev") && !ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
 			indexAllSince(readLastTimeStamp());
-			
+
 		}
 	}
-	
-	
+
+
 
 	/**
 	 * Read the last indexation timestamp
-	 * 
+	 *
 	 * @return
 	 */
 	private long readLastTimeStamp() {
@@ -108,14 +108,14 @@ public class GoogleIndexationService  {
 		} catch (Exception e) {
 			LOGGER.error("Error while reading last indexation timestamp, will default it ({})", e.getMessage());
 			ret = System.currentTimeMillis();
-			
+
 			// Writing the file
 			writeFileTimestamp();
 		}
 		return ret;
-	}	
-	
-	/** 
+	}
+
+	/**
 	 * update the indexation timestamp
 	 */
     private void writeFileTimestamp() {
@@ -133,8 +133,8 @@ public class GoogleIndexationService  {
      * @param baseUrl
      * @return
      */
-    private List<String> getVerticalUrls( String verticalId, String baseUrl) {	
-		
+    private List<String> getVerticalUrls( String verticalId, String baseUrl) {
+
 			try {
 				return productRepository.exportVerticalWithValidDateOrderByEcoscore(verticalId,false)
 				// Filtering on products having genAI content
@@ -149,8 +149,8 @@ public class GoogleIndexationService  {
 			}
 			return new ArrayList<String>();
 	}
-    
-    
+
+
     /**
      * Index a vertical
      * @param verticalId
@@ -166,7 +166,7 @@ public class GoogleIndexationService  {
 			LOGGER.error("Error while pushing verticals urls to google indexation", e);
 		}
 	}
-    
+
 
     /**
      * Index all new products having texts since a given epoch
@@ -182,17 +182,17 @@ public class GoogleIndexationService  {
 				.filter(e -> e.getGenaiTexts().size() > 1)
 				// TODO : I18n
 				.map(e -> e.url("fr"))
-				
+
 				.toList();
 		LOGGER.warn("Starting Indexation of all products since epoch {} : {} urls", epoch, urls.size());
-		
+
 		try {
 			requestBatchIndex(urls);
 		} catch (IOException e1) {
 			LOGGER.error("Error while pushing new urls to google indexation", e1);
 		}
 	}
-	
+
 	/**
 	 * Index a single page
 	 * @param redircectUrl
@@ -206,13 +206,13 @@ public class GoogleIndexationService  {
             LOGGER.error("Error while pushing url {} to google indexation", url, e);
         }
     }
-	
-	
-	
+
+
+
     /**
      * Index a list or URL's to google indexation service
      * @param urls
-     * @throws IOException 
+     * @throws IOException
      */
     public  void requestBatchIndex(List<String> urls) throws IOException {
 
@@ -222,12 +222,12 @@ public class GoogleIndexationService  {
 			            LOGGER.info("Google indexation success : " + res.getUrlNotificationMetadata().getUrl());
 			    }
 			    public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
-			    	
+
 		        	try {
 						LOGGER.error("Error while pushing url to google indexation : {}", e.toPrettyString());
 					} catch (IOException e1) {
 						LOGGER.error("Error while pushing url to google indexation", e);
-					}                        
+					}
 			    }
 			};
 
@@ -244,4 +244,4 @@ public class GoogleIndexationService  {
 			batch.execute();
     }
 }
-	
+

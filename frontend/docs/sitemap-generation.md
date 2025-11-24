@@ -26,12 +26,13 @@ locale or section needs to be published.
    listens to the `sitemap:index-resolved` hook. For each request it
    determines the domain language via
    [`getDomainLanguageFromHostname`](../shared/utils/domain-language.ts) and
-   appends any configured extra sitemap URLs for that language to the index.
-3. The helper in
-   [`shared/utils/sitemap-config.ts`](../shared/utils/sitemap-config.ts)
-   resolves the correct origin (production host, custom preview domain, or a
-   local hostname) and merges the configured paths with the entries generated
-   by Nuxt.
+   appends any configured extra sitemap file paths for that language to the
+   index. The plugin reads a server-only runtime configuration map so the
+   additional file list never leaks to the client bundle.
+3. Server-side helpers in
+   [`server/utils/sitemap-local-files.ts`](../server/utils/sitemap-local-files.ts)
+   normalise the runtime configuration and return the deduplicated list of
+   local sitemap files to append.
 
 ## Configuring domain languages and hosts
 
@@ -52,31 +53,40 @@ eligible for sitemap generation.
 
 ## Additional sitemap files per language
 
-The default additional sitemap entries live in
-`DEFAULT_ADDITIONAL_SITEMAP_PATHS` within
-[`shared/utils/sitemap-config.ts`](../shared/utils/sitemap-config.ts). These are
-merged into the index for every host unless you override them per language.
-
-To customise the list for a given domain language, edit the
-`CONFIGURED_DOMAIN_LANGUAGE_SITEMAPS` object in the same file. Each language can
-expose its own `additionalPaths` array. For example, both English and French
-currently publish the same set of XML files:
+Additional sitemap entries are declared in the server-only `runtimeConfig`
+under the `sitemapLocalFiles` key defined in
+[`nuxt.config.ts`](../nuxt.config.ts). Each domain language maps to an explicit
+list of XML files on disk. For example, the defaults currently ship with:
 
 ```ts
-const CONFIGURED_DOMAIN_LANGUAGE_SITEMAPS = {
-  en: {
-    additionalPaths: DEFAULT_ADDITIONAL_SITEMAP_PATHS,
+runtimeConfig: {
+  // ...
+  sitemapLocalFiles: {
+    fr: [
+      '/opt/open4goods/sitemap/fr/blog-posts.xml',
+      '/opt/open4goods/sitemap/fr/category-pages.xml',
+      '/opt/open4goods/sitemap/fr/product-pages.xml',
+      '/opt/open4goods/sitemap/fr/verticals-pages.xml',
+      '/opt/open4goods/sitemap/fr/wiki-pages.xml',
+    ],
+    en: [
+      '/opt/open4goods/sitemap/en/blog-posts.xml',
+      '/opt/open4goods/sitemap/en/category-pages.xml',
+      '/opt/open4goods/sitemap/en/product-pages.xml',
+      '/opt/open4goods/sitemap/en/verticals-pages.xml',
+      '/opt/open4goods/sitemap/en/wiki-pages.xml',
+    ],
   },
-  fr: {
-    additionalPaths: DEFAULT_ADDITIONAL_SITEMAP_PATHS,
-  },
+  // ...
 }
 ```
 
-To add a language-specific sitemap (for example `/sitemap/nl-blog.xml` for
-Dutch), create a new entry pointing to that file. Paths are automatically
-resolved relative to the incoming request origin, or you can provide absolute
-URLs if the file is hosted elsewhere.
+To add or override entries for another language, extend this map with the new
+domain language key and provide the list of file paths. Because the configuration
+is server-only, the paths remain private while still being appended to the
+rendered sitemap index. Requests for these entries are served through the Nitro
+route at `/sitemap/<domainLanguage>/<fileName>.xml`, which streams the matching
+local file without exposing the underlying filesystem path.
 
 ## Testing changes
 
