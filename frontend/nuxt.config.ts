@@ -453,11 +453,11 @@ export default defineNuxtConfig({
         '/opt/open4goods/sitemap/fr/wiki-pages.xml',
       ],
       en: [
-        '/opt/open4goods/sitemap/en/blog-posts.xml',
-        '/opt/open4goods/sitemap/en/category-pages.xml',
-        '/opt/open4goods/sitemap/en/product-pages.xml',
-        '/opt/open4goods/sitemap/en/verticals-pages.xml',
-        '/opt/open4goods/sitemap/en/wiki-pages.xml',
+        '/opt/open4goods/sitemap/default/blog-posts.xml',
+        '/opt/open4goods/sitemap/default/category-pages.xml',
+        '/opt/open4goods/sitemap/default/product-pages.xml',
+        '/opt/open4goods/sitemap/default/verticals-pages.xml',
+        '/opt/open4goods/sitemap/default/wiki-pages.xml',
       ],
     },
 

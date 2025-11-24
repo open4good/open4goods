@@ -397,12 +397,12 @@ public class ProductRepository {
 	    }
 
             // Ensure scores.ECOSCORE.relativ.value is present
-            criteria = criteria.and(new Criteria("scores.ECOSCORE.relativ.value").exists());
+            criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
 
 	    // Build sort with unmapped_type to avoid shard-level mapping issues
 	    SortOptions ecoscoreSort = new SortOptions.Builder()
 	        .field(new FieldSort.Builder()
-                .field("scores.ECOSCORE.relativ.value")
+                .field("scores.ECOSCORE.value")
 	            .order(SortOrder.Desc)
 	            .unmappedType(FieldType.Float)
 	            .missing("_last")
