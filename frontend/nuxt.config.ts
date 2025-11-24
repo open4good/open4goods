@@ -388,6 +388,7 @@ export default defineNuxtConfig({
       [APP_ROUTES_SITEMAP_KEY]: {
         sitemapName: `${APP_ROUTES_SITEMAP_KEY}.xml`,
         includeAppSources: true,
+        exclude: ['/offline'],
       },
     },
   },
