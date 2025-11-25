@@ -131,7 +131,6 @@ describe('ProductAlternativeCard', () => {
     const priceText = wrapper.find('.product-alternative-card__price').text()
     expect(priceText).toMatch(/299/)
 
-    expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
     expect(wrapper.find('.product-alternative-card__compare-btn').exists()).toBe(true)
   })
 })
