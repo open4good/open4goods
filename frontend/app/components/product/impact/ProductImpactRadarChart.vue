@@ -24,6 +24,7 @@ import { ensureImpactECharts } from './echarts-setup'
 interface RadarAxisEntry {
   id: string
   name: string
+  attributeValue: string | null
 }
 
 interface RadarSeriesEntry {
@@ -47,7 +48,14 @@ const option = computed<EChartsOption | null>(() => {
     return null
   }
 
-  const indicator = props.axes.map((entry) => ({ name: entry.name, max: 5 }))
+  const finiteValues = props.series
+    .flatMap((entry) => entry.values)
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+
+  const maxObservedValue = finiteValues.length ? Math.max(...finiteValues) : 5
+  const paddedMax = maxObservedValue > 0 ? maxObservedValue * 1.1 : 5
+
+  const indicator = props.axes.map((entry) => ({ name: entry.name, max: paddedMax }))
   const seriesData = props.series.map((entry) => ({
     value: entry.values.map((value) => (typeof value === 'number' && Number.isFinite(value) ? value : null)),
     name: entry.label,
@@ -59,7 +67,31 @@ const option = computed<EChartsOption | null>(() => {
 
   return {
     color: props.series.map((entry) => entry.lineColor),
-    tooltip: { trigger: 'item' },
+    tooltip: {
+      trigger: 'item',
+      formatter: (params) => {
+        if (!params || typeof params !== 'object' || !Array.isArray((params as { value?: unknown }).value)) {
+          return ''
+        }
+
+        const value = (params as { value: unknown[] }).value
+        const seriesName = (params as { seriesName?: string }).seriesName ?? ''
+
+        const lines = [`<strong>${seriesName}</strong>`]
+        value.forEach((entryValue, index) => {
+          const axis = props.axes[index]
+          const numericValue = typeof entryValue === 'number' && Number.isFinite(entryValue)
+            ? entryValue
+            : null
+          const renderedValue = numericValue != null ? numericValue : '–'
+          const attributeLabel = axis?.attributeValue ? ` (${axis.attributeValue})` : ''
+
+          lines.push(`${axis?.name ?? ''}: ${renderedValue}${attributeLabel}`)
+        })
+
+        return lines.join('<br/>')
+      },
+    },
     legend: {
       data: props.series.map((entry) => entry.label),
       bottom: 0,

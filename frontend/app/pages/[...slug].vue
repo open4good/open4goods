@@ -688,9 +688,36 @@ const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | un
   return ''
 }
 
-const extractRelativeScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
-  if (typeof score?.relativ?.value === 'number' && Number.isFinite(score.relativ.value)) {
-    return score.relativ.value
+const findIndexedAttributeValue = (attributeId: string): string | null => {
+  const attributes = product.value?.attributes?.indexedAttributes ?? {}
+  const normalizedId = attributeId.trim()
+  const candidates = [normalizedId, normalizedId.toUpperCase(), normalizedId.toLowerCase()]
+
+  for (const candidate of candidates) {
+    const attribute = attributes[candidate]
+    if (!attribute) {
+      continue
+    }
+
+    if (typeof attribute.value === 'string' && attribute.value.trim().length > 0) {
+      return attribute.value
+    }
+
+    if (typeof attribute.numericValue === 'number' && Number.isFinite(attribute.numericValue)) {
+      return String(attribute.numericValue)
+    }
+
+    if (typeof attribute.booleanValue === 'boolean') {
+      return attribute.booleanValue ? 'true' : 'false'
+    }
+  }
+
+  return null
+}
+
+const extractAbsoluteScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
+  if (typeof score?.absolute?.value === 'number' && Number.isFinite(score.absolute.value)) {
+    return score.absolute.value
   }
 
   return resolveScoreNumericValue(score)?.value ?? null
@@ -720,7 +747,16 @@ const extractReferenceScoreValue = (reference: ProductReferenceDto | null | unde
 
     const entry = scoreContainer[candidate]
     if (entry && typeof entry === 'object') {
-      const resolved = resolveScoreNumericValue(entry as ProductScoreDto)
+      const asScore = entry as ProductScoreDto
+      const absoluteValue = typeof asScore?.absolute?.value === 'number' && Number.isFinite(asScore.absolute.value)
+        ? asScore.absolute.value
+        : null
+      const resolved = resolveScoreNumericValue(asScore)
+
+      if (absoluteValue != null) {
+        return absoluteValue
+      }
+
       if (resolved) {
         return resolved.value
       }
@@ -739,7 +775,7 @@ interface RadarSeriesEntry {
 }
 
 interface RadarDataset {
-  axes: Array<{ id: string; name: string }>
+  axes: Array<{ id: string; name: string; attributeValue: string | null }>
   series: RadarSeriesEntry[]
 }
 
@@ -759,16 +795,19 @@ const radarData = computed<RadarDataset>(() => {
       }
 
       const name = score.name?.trim() ?? id
-      const productValue = extractRelativeScoreValue(score)
+      const productValue = extractAbsoluteScoreValue(score)
 
       if (!(typeof productValue === 'number' && Number.isFinite(productValue))) {
         return null
       }
 
+      const attributeValue = findIndexedAttributeValue(id)
+
       return {
         id,
         name,
         productValue,
+        attributeValue,
         bestValue: extractReferenceScoreValue(bestReferenceProduct.value, id),
         worstValue: extractReferenceScoreValue(worstReferenceProduct.value, id),
       }
@@ -778,6 +817,7 @@ const radarData = computed<RadarDataset>(() => {
         id: string
         name: string
         productValue: number
+        attributeValue: string | null
         bestValue: number | null
         worstValue: number | null
       } => Boolean(entry),
@@ -787,7 +827,7 @@ const radarData = computed<RadarDataset>(() => {
     return { axes: [], series: [] }
   }
 
-  const axes = axesDetails.map(({ id, name }) => ({ id, name }))
+  const axes = axesDetails.map(({ id, name, attributeValue }) => ({ id, name, attributeValue }))
   const productValues = axesDetails.map((entry) => entry.productValue)
   const bestValues = axesDetails.map((entry) => entry.bestValue ?? null)
   const worstValues = axesDetails.map((entry) => entry.worstValue ?? null)
