@@ -3,6 +3,7 @@
 // Variables pour les fonts
 $font-family-primary: 'Poppins', 'Hanken Grotesk', sans-serif
 $font-family-signature: 'Hanken Grotesk', 'Poppins', sans-serif
+
 $font-weights: (
   thin: 100,
   light: 300,
@@ -38,33 +39,38 @@ $font-files: (
   $extension: 'ttf',
   $format: 'truetype'
 )
+  // Résolution du nom de fichier AVANT le bloc @font-face
+  $resolved-file: if($file-name, $file-name, '#{$name}-#{map.get($file-map, $weight)}')
+
+  @if $file-name == null and $style == italic
+    $resolved-file: '#{$resolved-file}Italic'
+
   @font-face
     font-family: $name
     font-style: $style
     font-weight: $weight
     font-display: swap
-    $resolved-file: if($file-name, $file-name, '#{$name}-#{map.get($file-map, $weight)}')
-    @if $file-name == null and $style == italic
-      $resolved-file: '#{$resolved-file}Italic'
     src: url('~/assets/fonts/#{$font-folder}/#{$resolved-file}.#{$extension}') format($format)
 
-// Génération automatique des @font-face
+// Génération automatique des @font-face pour Poppins (ttf)
 @each $weight-name, $weight-value in $font-weights
   @include font-face('Poppins', $weight-value)
   @include font-face('Poppins', $weight-value, italic)
 
+// Hanken Grotesk en woff2 (poids regular normal + italic)
 @include font-face(
   'Hanken Grotesk',
-  map.get($font-weights, regular),
+  map.get($font-weights, 'regular'),
   normal,
   $font-folder: 'HankenGrotesk',
   $file-name: 'HankenGrotesk-Regular',
   $extension: 'woff2',
   $format: 'woff2'
 )
+
 @include font-face(
   'Hanken Grotesk',
-  map.get($font-weights, regular),
+  map.get($font-weights, 'regular'),
   italic,
   $font-folder: 'HankenGrotesk',
   $file-name: 'HankenGrotesk-Italic',
@@ -72,23 +78,19 @@ $font-files: (
   $format: 'woff2'
 )
 
-// Application des fonts
+// Application des fonts via variables CSS
 :root
   --font-family-base: #{$font-family-primary}
   --font-family-signature: #{$font-family-signature}
 
+// Thème spécifique (ex : nudger)
 .v-theme--nudger
-  --font-family-base: #{$font-family-signature}
+  --font-family-base: #{$font-family-primary}
 
 html, body
   font-family: var(--font-family-base)
 
-// Force Vuetify à utiliser Poppins
-.v-application,
-.v-btn,
-.v-card,
-.v-list-item,
-.v-toolbar,
-.v-navigation-drawer,
-.v-text-field
+// Force Vuetify à utiliser la font de base
+.v-application
   font-family: var(--font-family-base) !important
+
