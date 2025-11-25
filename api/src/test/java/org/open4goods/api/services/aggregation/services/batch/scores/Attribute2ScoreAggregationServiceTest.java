@@ -2,7 +2,10 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +70,27 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(missingScore.getAbsolute().getMin()).isEqualTo(8.0);
     }
 
+    @Test
+    void reverseScoresUseCanonicalKeyForSynonyms() {
+        String canonicalKey = "POWER_CONSUMPTION_TYPICAL";
+        String synonymKey = "CONSO_PLEINE_PUISSANCE";
+        VerticalConfig verticalConfig = buildVerticalConfig(canonicalKey, synonymKey, true);
+
+        Product efficient = productWithAttribute(1L, synonymKey, "50.0");
+        Product inefficient = productWithAttribute(2L, synonymKey, "100.0");
+        List<Product> products = List.of(efficient, inefficient);
+
+        aggregate(products, verticalConfig);
+
+        Score efficientScore = efficient.getScores().get(canonicalKey);
+        Score inefficientScore = inefficient.getScores().get(canonicalKey);
+
+        assertThat(efficient.getScores()).doesNotContainKey(synonymKey);
+        assertThat(efficientScore.getValue()).isEqualTo(50.0);
+        assertThat(inefficientScore.getValue()).isEqualTo(0.0);
+        assertThat(efficientScore.getValue()).isGreaterThan(inefficientScore.getValue());
+    }
+
     private void aggregate(List<Product> products, VerticalConfig verticalConfig) {
         service.init(products);
         products.forEach(product -> service.onProduct(product, verticalConfig));
@@ -80,11 +104,20 @@ class Attribute2ScoreAggregationServiceTest {
     }
 
     private static VerticalConfig buildVerticalConfig(boolean reverse) {
+        return buildVerticalConfig("REPAIR", null, reverse);
+    }
+
+    private static VerticalConfig buildVerticalConfig(String key, String synonym, boolean reverse) {
         AttributeConfig attributeConfig = new AttributeConfig();
-        attributeConfig.setKey("REPAIR");
+        attributeConfig.setKey(key);
         attributeConfig.setAsScore(true);
         attributeConfig.setReverseScore(reverse);
         attributeConfig.setFilteringType(AttributeType.NUMERIC);
+        if (synonym != null) {
+            Map<String, Set<String>> synonyms = new HashMap<>();
+            synonyms.put("all", Set.of(synonym));
+            attributeConfig.setSynonyms(synonyms);
+        }
 
         AttributesConfig attributesConfig = new AttributesConfig();
         attributesConfig.setConfigs(List.of(attributeConfig));

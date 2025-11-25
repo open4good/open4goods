@@ -39,20 +39,25 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
                 AttributesConfig attributesConfig = vConf.getAttributesConfig();
                 // Resolve the attribute configuration directly using the provided name
                 // to leverage synonym mapping in {@link AttributesConfig}
-                AttributeConfig attrConfig = attributesConfig.getConfigFor(aga.getName());
-				if (null == attrConfig) {
+                String attributeKey = attributesConfig.getKeyForValue(aga.getName());
+                if (attributeKey == null) {
+                    attributeKey = aga.getName();
+                }
+
+                AttributeConfig attrConfig = attributesConfig.getConfigFor(attributeKey);
+                                if (null == attrConfig) {
                     dedicatedLogger.error("No attribute config for {}",aga);
                     continue;
                 }
-				
-				if (attrConfig.isAsScore()) {
-						try {
-							Double score = generateScoresFromAttribute(aga.getName() ,aga, vConf.getAttributesConfig());
 
-							// Processing cardinality
-							incrementCardinality(aga.getName(),score);
-							
-							Score s = new Score(aga.getName(), score);
+                                if (attrConfig.isAsScore()) {
+                                                try {
+                                                        Double score = generateScoresFromAttribute(attrConfig.getKey() ,aga, vConf.getAttributesConfig());
+
+                                                        // Processing cardinality
+                                                        incrementCardinality(attrConfig.getKey(),score);
+
+                                                        Score s = new Score(attrConfig.getKey(), score);
 							// Saving in product
 							data.getScores().put(s.getName(),s);
 						} catch (ValidationException e) {
