@@ -42,8 +42,9 @@ import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.caffeine.CaffeineCache;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -79,7 +80,8 @@ class ProductMappingServiceTest {
         hcaptchaService = mock(HcaptchaService.class);
         productTimelineService = new ProductTimelineService();
         httpServletRequest = mock(HttpServletRequest.class);
-        ConcurrentMapCache referenceCache = new ConcurrentMapCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
+        CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
+                Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
