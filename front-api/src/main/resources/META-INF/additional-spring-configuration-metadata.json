@@ -102,6 +102,18 @@
       "defaultValue": "./cache"
     },
     {
+      "name": "front.cache.one-hour-ttl",
+      "type": "java.time.Duration",
+      "description": "Time to live applied to the ONE_HOUR_LOCAL_CACHE_NAME cache.",
+      "defaultValue": "PT1H"
+    },
+    {
+      "name": "front.cache.one-hour-maximum-size",
+      "type": "java.lang.Long",
+      "description": "Maximum number of entries stored in the ONE_HOUR_LOCAL_CACHE_NAME cache.",
+      "defaultValue": 5000
+    },
+    {
       "name": "front.rate-limit.anonymous",
       "type": "java.lang.Integer",
       "description": "Maximum requests per minute for anonymous users.",
