@@ -8,8 +8,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -21,10 +19,8 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingInterceptor.class);
 
-    private final MeterRegistry meterRegistry;
 
-    public LoggingInterceptor(MeterRegistry meterRegistry) {
-        this.meterRegistry = meterRegistry;
+    public LoggingInterceptor() {
     }
 
     @Override
@@ -33,10 +29,6 @@ public class LoggingInterceptor implements HandlerInterceptor {
         String ip = request.getRemoteAddr();
         String user = resolveUser();
         LOG.info("Entering endpoint={} ip={} user={}", uri, ip, user);
-        Counter.builder("front.api.requests")
-                .tag("uri", uri)
-                .register(meterRegistry)
-                .increment();
         return true;
     }
 
@@ -47,13 +39,6 @@ public class LoggingInterceptor implements HandlerInterceptor {
         String user = resolveUser();
         int status = response.getStatus();
         LOG.info("Exiting endpoint={} status={} ip={} user={}", uri, status, ip, user);
-        if (status >= 400) {
-            Counter.builder("front.api.errors")
-                    .tag("uri", uri)
-                    .tag("status", String.valueOf(status))
-                    .register(meterRegistry)
-                    .increment();
-        }
     }
 
     private String resolveUser() {
