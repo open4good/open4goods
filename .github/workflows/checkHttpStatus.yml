@@ -22,7 +22,7 @@ jobs:
                     "https://nudger.fr/mentions-legales",
                     "https://nudger.fr/blog/ouverture-du-prototype",
                     "https://nudger.fr/sitemap_index.xml",
-                    "https://plausible.nudger.fr/"
+                    "https://plausible.nudger.fr/",
                     "https://front-api.nudger.fr/"
                   ]' 
           expected: '[200, 
