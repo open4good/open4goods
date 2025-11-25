@@ -41,6 +41,7 @@ type RadarSeriesKey = 'current' | 'best' | 'worst'
 interface RadarAxisEntry {
   id: string
   name: string
+  attributeValue: string | null
 }
 
 interface RadarSeriesEntry {

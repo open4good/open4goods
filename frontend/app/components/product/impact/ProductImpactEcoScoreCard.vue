@@ -90,6 +90,7 @@ import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 interface RadarAxisEntry {
   id: string
   name: string
+  attributeValue: string | null
 }
 
 interface RadarSeriesEntry {
