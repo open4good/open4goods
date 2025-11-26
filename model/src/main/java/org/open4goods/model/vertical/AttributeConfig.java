@@ -83,11 +83,6 @@ public class AttributeConfig {
 	private boolean asScore = false;
 
         /**
-         * If true, attribute value to score will be reversed (ie : for weight, the better score is the lowest weight)
-         */
-        private boolean reverseScore = false;
-
-        /**
          * Indicates which comparison rule should be applied to determine the most
          * desirable value when comparing products.
          */
@@ -370,14 +365,6 @@ public class AttributeConfig {
 	public void setIcecatFeaturesIds(Set<String> icecatFeaturesIds) {
 		this.icecatFeaturesIds = icecatFeaturesIds;
 	}
-
-        public boolean isReverseScore() {
-                return reverseScore;
-        }
-
-        public void setReverseScore(boolean reverseScore) {
-                this.reverseScore = reverseScore;
-        }
 
         /**
          * Gets the comparison rule describing which values are considered better for

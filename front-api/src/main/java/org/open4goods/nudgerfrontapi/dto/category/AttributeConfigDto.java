@@ -30,8 +30,6 @@ public record AttributeConfigDto(
         Set<String> icecatFeaturesIds,
         @Schema(description = "Indicates whether this attribute is exposed as a score.")
         boolean asScore,
-        @Schema(description = "Indicates whether lower values should yield higher scores.")
-        boolean reverseScore,
         @Schema(description = "Comparison rule applied to determine which values are considered better.")
         AttributeComparisonRule betterIs,
         @Schema(description = "Ordering applied when displaying attribute values.")

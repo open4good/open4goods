@@ -440,7 +440,6 @@ public class CategoryMappingService {
                 attributeConfig.getFilteringType(),
                 defaultSet(attributeConfig.getIcecatFeaturesIds()),
                 attributeConfig.isAsScore(),
-                attributeConfig.isReverseScore(),
                 attributeConfig.getBetterIs(),
                 attributeConfig.getAttributeValuesOrdering(),
                 attributeConfig.getAttributeValuesReverseOrder(),

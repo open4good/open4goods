@@ -9,6 +9,7 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -118,7 +119,11 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		/////////////////////////////////////////////////
 
 		// Selecting the scores to reverse
-		List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e -> e.isReverseScore()).map(e -> e.getKey()).toList();
+                List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream()
+                                .filter(AttributeConfig::isAsScore)
+                                .filter(config -> AttributeComparisonRule.LOWER.equals(config.getBetterIs()))
+                                .map(AttributeConfig::getKey)
+                                .toList();
 
 		// For each score to reverse
 		for (String key : scoresToReverse) {
