@@ -102,6 +102,18 @@
       "defaultValue": "./cache"
     },
     {
+      "name": "front.cache.one-minute-ttl",
+      "type": "java.time.Duration",
+      "description": "Time to live applied to the ONE_MINUTE_LOCAL_CACHE_NAME cache.",
+      "defaultValue": "PT1M"
+    },
+    {
+      "name": "front.cache.one-minute-maximum-size",
+      "type": "java.lang.Long",
+      "description": "Maximum number of entries stored in the ONE_MINUTE_LOCAL_CACHE_NAME cache.",
+      "defaultValue": 2000
+    },
+    {
       "name": "front.cache.one-hour-ttl",
       "type": "java.time.Duration",
       "description": "Time to live applied to the ONE_HOUR_LOCAL_CACHE_NAME cache.",
@@ -112,6 +124,24 @@
       "type": "java.lang.Long",
       "description": "Maximum number of entries stored in the ONE_HOUR_LOCAL_CACHE_NAME cache.",
       "defaultValue": 5000
+    },
+    {
+      "name": "front.cache.one-day-ttl",
+      "type": "java.time.Duration",
+      "description": "Time to live applied to the ONE_DAY_LOCAL_CACHE_NAME cache.",
+      "defaultValue": "PT24H"
+    },
+    {
+      "name": "front.cache.one-day-maximum-size",
+      "type": "java.lang.Long",
+      "description": "Maximum number of entries stored in the ONE_DAY_LOCAL_CACHE_NAME cache.",
+      "defaultValue": 10000
+    },
+    {
+      "name": "front.cache.forever-maximum-size",
+      "type": "java.lang.Long",
+      "description": "Maximum number of entries stored in the FOREVER_LOCAL_CACHE_NAME cache.",
+      "defaultValue": 20000
     },
     {
       "name": "front.rate-limit.anonymous",
