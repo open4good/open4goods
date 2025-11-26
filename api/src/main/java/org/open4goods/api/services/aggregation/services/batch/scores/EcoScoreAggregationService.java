@@ -122,6 +122,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		for (Product product : productsWithRealEcoScore) {
 			Cardinality absolute = product.ecoscore().getAbsolute();
 			product.ecoscore().setRelativ(new Cardinality(absolute));
+			product.ecoscore().setValue(absolute.getValue());
 		}
 
 		///////////////////////
