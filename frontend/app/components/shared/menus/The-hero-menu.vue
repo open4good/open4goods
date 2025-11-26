@@ -78,14 +78,16 @@
                   :class="{ active: isMenuItemActive(item) || isActive }"
                   role="menuitem"
                 >
-                  <v-list-item-title>{{ item.label }}</v-list-item-title>
-                  <template #append>
-                    <v-icon
-                      class="main-menu-items__toggle-icon"
-                      :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
-                      aria-hidden="true"
-                    />
-                  </template>
+                  <v-list-item-title>
+                    <span class="main-menu-items__label">
+                      <span>{{ item.label }}</span>
+                      <v-icon
+                        class="main-menu-items__toggle-icon"
+                        :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </v-list-item-title>
                 </v-list-item>
               </template>
 
@@ -215,14 +217,16 @@
                   :class="{ active: isMenuItemActive(item) || isActive }"
                   role="menuitem"
                 >
-                  <v-list-item-title>{{ item.label }}</v-list-item-title>
-                  <template #append>
-                    <v-icon
-                      class="main-menu-items__toggle-icon"
-                      :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
-                      aria-hidden="true"
-                    />
-                  </template>
+                  <v-list-item-title>
+                    <span class="main-menu-items__label">
+                      <span>{{ item.label }}</span>
+                      <v-icon
+                        class="main-menu-items__toggle-icon"
+                        :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </v-list-item-title>
                 </v-list-item>
               </template>
 
@@ -978,9 +982,12 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     display: flex
     align-items: center
 
+.main-menu-items__label
+  display: inline-flex
+  align-items: center
+  gap: 0.5rem
+
 .main-menu-items__toggle-icon
-  margin-inline-start: 0.25rem
-  margin-inline-end: 0
   color: currentColor
   opacity: 0.9
   transition: transform 0.2s ease
