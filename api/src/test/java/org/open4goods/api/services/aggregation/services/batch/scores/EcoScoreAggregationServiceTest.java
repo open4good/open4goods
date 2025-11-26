@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.LoggerFactory;
@@ -47,5 +48,36 @@ class EcoScoreAggregationServiceTest {
         assertThat(ecoscore.getRelativ()).isNotNull();
         assertThat(ecoscore.getRelativ().getValue())
                 .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue());
+    }
+
+    @Test
+    void ecoscoreFallsBackToAbsoluteWhenRelativizationMissing() {
+        Product product = new Product(3L);
+        Score baseScore = new Score("CRITERIA", 4.0);
+        Cardinality absolute = new Cardinality();
+        absolute.setMin(0d);
+        absolute.setMax(10d);
+        absolute.setAvg(5d);
+        absolute.setValue(4d);
+        baseScore.setAbsolute(absolute);
+        product.getScores().put("CRITERIA", baseScore);
+
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("CRITERIA", 1.0));
+        VerticalConfig vConf = new VerticalConfig();
+        vConf.setImpactScoreConfig(impactScoreConfig);
+
+        EcoScoreAggregationService ecoScoreService =
+                new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
+
+        List<Product> dataset = List.of(product);
+        ecoScoreService.init(dataset);
+        ecoScoreService.onProduct(product, vConf);
+        ecoScoreService.done(dataset, vConf);
+
+        Score ecoscore = product.ecoscore();
+
+        assertThat(ecoscore).isNotNull();
+        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(2.0);
     }
 }

@@ -93,26 +93,32 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 	 * @param brandResult the result object containing the score value
 	 * @return the risk level as a lowercase single word (e.g., negligible, low, medium, high, severe)
 	 */
-	private String getRiskLevel(BrandScore brandResult) {
-	    Double sustainalyticsRating = Double.valueOf(brandResult.getScoreValue());
+        String getRiskLevel(BrandScore brandResult) {
+            if (brandResult == null || StringUtils.isBlank(brandResult.getScoreValue())) {
+                return "unknown";
+            }
 
-	    if (sustainalyticsRating == null) {
-	        return "unknown";
-	    }
+            Double sustainalyticsRating;
+            try {
+                sustainalyticsRating = Double.valueOf(brandResult.getScoreValue());
+            } catch (NumberFormatException e) {
+                dedicatedLogger.warn("Unable to parse sustainalytics rating {}", brandResult.getScoreValue());
+                return "unknown";
+            }
 
-	    if (sustainalyticsRating >= 0 && sustainalyticsRating <= 9.9) {
-	        return "negligible";
-	    } else if (sustainalyticsRating >= 10 && sustainalyticsRating <= 19.9) {
-	        return "low";
-	    } else if (sustainalyticsRating >= 20 && sustainalyticsRating <= 29.9) {
-	        return "medium";
-	    } else if (sustainalyticsRating >= 30 && sustainalyticsRating <= 39.9) {
-	        return "high";
-	    } else if (sustainalyticsRating >= 40) {
-	        return "severe";
-	    }
+            if (sustainalyticsRating >= 0 && sustainalyticsRating <= 9.9) {
+                return "negligible";
+            } else if (sustainalyticsRating >= 10 && sustainalyticsRating <= 19.9) {
+                return "low";
+            } else if (sustainalyticsRating >= 20 && sustainalyticsRating <= 29.9) {
+                return "medium";
+            } else if (sustainalyticsRating >= 30 && sustainalyticsRating <= 39.9) {
+                return "high";
+            } else if (sustainalyticsRating >= 40) {
+                return "severe";
+            }
 
-	    return "unknown";
-	}
+            return "unknown";
+        }
 
 }

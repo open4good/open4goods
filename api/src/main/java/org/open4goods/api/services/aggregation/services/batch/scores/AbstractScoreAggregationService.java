@@ -189,13 +189,13 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 		// Standardizing Score based on real max
 		final Double max = abs.getMax();
 		
-		if (minBorn == max) {
-			return value.doubleValue() == max.doubleValue()  ? StandardiserService.DEFAULT_MAX_RATING : (value -minBorn) * StandardiserService.DEFAULT_MAX_RATING ;
-		} else {
-			
-			return (value -minBorn) * StandardiserService.DEFAULT_MAX_RATING / (max -minBorn);
-		}
-	}
+                if (Double.compare(minBorn, max) == 0) {
+                        return StandardiserService.DEFAULT_MAX_RATING;
+                } else {
+
+                        return (value -minBorn) * StandardiserService.DEFAULT_MAX_RATING / (max -minBorn);
+                }
+        }
 	
 	/**
 	 * Computes and maintains cardinality
