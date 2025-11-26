@@ -1,14 +1,21 @@
 package org.open4goods.nudgerfrontapi.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Ticker;
+
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Cache configuration backed by a bounded {@link Caffeine} cache to avoid
@@ -18,22 +25,26 @@ import java.util.List;
 @Configuration
 public class CacheConfig {
 
-    /**
-     * Configures the {@link CacheManager} to use Caffeine with explicit TTL and
-     * maximum size limits driven by {@link CacheProperties}. The configuration is
-     * shared by all caches, with {@link CacheConstants#ONE_HOUR_LOCAL_CACHE_NAME}
-     * pre-registered for search and product reference usage.
-     *
-     * @param cacheProperties cache tuning properties read from {@code front.cache.*}
-     * @return a cache manager backed by bounded Caffeine caches
-     */
-    @Bean
-    public CacheManager cacheManager(CacheProperties cacheProperties) {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCacheNames(List.of(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME));
-        cacheManager.setCaffeine(Caffeine.newBuilder()
-                .expireAfterWrite(cacheProperties.getOneHourTtl())
-                .maximumSize(cacheProperties.getOneHourMaximumSize()));
-        return cacheManager;
-    }
+
+
+
+	@Bean
+	CacheManager cacheManager(@Autowired final Ticker ticker) {
+		final CaffeineCache fCache = buildExpiryCache(CacheConstants.FOREVER_LOCAL_CACHE_NAME, ticker, 30000000);
+		final CaffeineCache hCache = buildExpiryCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, ticker, 60);
+		final CaffeineCache mCache = buildExpiryCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);
+		final CaffeineCache dCache = buildExpiryCache(CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, ticker, 60 * 24);
+		final SimpleCacheManager manager = new SimpleCacheManager();
+		manager.setCaches(Arrays.asList(fCache, dCache, hCache, mCache));
+		return manager;
+	}
+
+	private CaffeineCache buildExpiryCache(final String name, final Ticker ticker, final int minutesToExpire) {
+		return new CaffeineCache(name, Caffeine.newBuilder().recordStats().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
+	}
+
+	@Bean
+	Ticker ticker() {
+		return Ticker.systemTicker();
+	}
 }
