@@ -76,12 +76,6 @@ export interface AttributeConfigDto {
      */
     asScore?: boolean;
     /**
-     * Indicates whether lower values should yield higher scores.
-     * @type {boolean}
-     * @memberof AttributeConfigDto
-     */
-    reverseScore?: boolean;
-    /**
      * Comparison rule applied to determine which values are considered better.
      * @type {string}
      * @memberof AttributeConfigDto
@@ -181,7 +175,6 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'filteringType': json['filteringType'] == null ? undefined : json['filteringType'],
         'icecatFeaturesIds': json['icecatFeaturesIds'] == null ? undefined : new Set(json['icecatFeaturesIds']),
         'asScore': json['asScore'] == null ? undefined : json['asScore'],
-        'reverseScore': json['reverseScore'] == null ? undefined : json['reverseScore'],
         'betterIs': json['betterIs'] == null ? undefined : json['betterIs'],
         'attributeValuesOrdering': json['attributeValuesOrdering'] == null ? undefined : json['attributeValuesOrdering'],
         'attributeValuesReverseOrder': json['attributeValuesReverseOrder'] == null ? undefined : json['attributeValuesReverseOrder'],
@@ -211,7 +204,6 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'filteringType': value['filteringType'],
         'icecatFeaturesIds': value['icecatFeaturesIds'] == null ? undefined : Array.from(value['icecatFeaturesIds'] as Set<any>),
         'asScore': value['asScore'],
-        'reverseScore': value['reverseScore'],
         'betterIs': value['betterIs'],
         'attributeValuesOrdering': value['attributeValuesOrdering'],
         'attributeValuesReverseOrder': value['attributeValuesReverseOrder'],

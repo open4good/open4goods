@@ -693,8 +693,7 @@ attributesConfig:
       fr: "kg"
     filteringType: "NUMERIC"
     asScore: true
-    reverseScore: true
-    
+
     synonyms:
       all:
       - "POIDS"
@@ -733,7 +732,6 @@ attributesConfig:
     betterIs: "LOWER"
     filteringType: "NUMERIC"
     asScore: true
-    reverseScore: true    
     faIcon: "mdi-power-plug"
   
     icecatFeaturesIds:      
@@ -773,7 +771,6 @@ attributesConfig:
     betterIs: "LOWER"
     filteringType: "NUMERIC"
     asScore: true
-    reverseScore: true    
     faIcon: "mdi-power-plug-off"
   
     icecatFeaturesIds:      

@@ -545,14 +545,13 @@ attributesConfig:
        betterIs: "LOWER"
        filteringType: "NUMERIC"
        asScore: true
-       reverseScore: true    
        faIcon: "mdi-power-plug-off"
      
 
          
        name:
-            default: "Power consumption (off)"
-            fr: "Consommation électrique (arrêt/veille)"
+             default: "Power consumption (standby networked)"
+             fr: "Consommation électrique (arrêt/veille/réseau)"
          
        synonyms:
             all:
@@ -584,14 +583,13 @@ attributesConfig:
        betterIs: "LOWER"
        filteringType: "NUMERIC"
        asScore: true
-       reverseScore: true    
        faIcon: "mdi-power-plug-off"
      
 
          
        name:
-            default: "Power consumption (SDR)"
-            fr: "Consommation électrique (Basse définition)"
+             default: "Power consumption (SDR)"
+             fr: "Consommation électrique (basse définition)"
          
        synonyms:
             all:
@@ -622,14 +620,13 @@ attributesConfig:
        betterIs: "LOWER"
        filteringType: "NUMERIC"
        asScore: true
-       reverseScore: true    
        faIcon: "mdi-power-plug-off"
      
 
          
        name:
-            default: "Power consumption (HDR)"
-            fr: "Consommation électrique (Hauté définition)"
+             default: "Power consumption (HDR)"
+             fr: "Consommation électrique (haute définition)"
          
        synonyms:
             all:

@@ -13,6 +13,7 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -31,7 +32,7 @@ class Attribute2ScoreAggregationServiceTest {
     }
 
     @Test
-    void reverseScoresUseRecomputedCardinality() {
+    void lowerScoresUseRecomputedCardinality() {
         VerticalConfig verticalConfig = buildVerticalConfig(true);
 
         Product better = productWithAttribute(1L, "REPAIR", "4.0");
@@ -71,7 +72,7 @@ class Attribute2ScoreAggregationServiceTest {
     }
 
     @Test
-    void reverseScoresUseCanonicalKeyForSynonyms() {
+    void lowerScoresUseCanonicalKeyForSynonyms() {
         String canonicalKey = "POWER_CONSUMPTION_TYPICAL";
         String synonymKey = "CONSO_PLEINE_PUISSANCE";
         VerticalConfig verticalConfig = buildVerticalConfig(canonicalKey, synonymKey, true);
@@ -103,15 +104,15 @@ class Attribute2ScoreAggregationServiceTest {
         return product;
     }
 
-    private static VerticalConfig buildVerticalConfig(boolean reverse) {
-        return buildVerticalConfig("REPAIR", null, reverse);
+    private static VerticalConfig buildVerticalConfig(boolean lowerIsBetter) {
+        return buildVerticalConfig("REPAIR", null, lowerIsBetter);
     }
 
-    private static VerticalConfig buildVerticalConfig(String key, String synonym, boolean reverse) {
+    private static VerticalConfig buildVerticalConfig(String key, String synonym, boolean lowerIsBetter) {
         AttributeConfig attributeConfig = new AttributeConfig();
         attributeConfig.setKey(key);
         attributeConfig.setAsScore(true);
-        attributeConfig.setReverseScore(reverse);
+        attributeConfig.setBetterIs(lowerIsBetter ? AttributeComparisonRule.LOWER : AttributeComparisonRule.GREATER);
         attributeConfig.setFilteringType(AttributeType.NUMERIC);
         if (synonym != null) {
             Map<String, Set<String>> synonyms = new HashMap<>();
