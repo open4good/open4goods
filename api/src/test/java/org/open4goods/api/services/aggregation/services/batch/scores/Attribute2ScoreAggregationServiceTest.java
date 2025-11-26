@@ -91,6 +91,31 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(efficientScore.getValue()).isGreaterThan(inefficientScore.getValue());
     }
 
+    @Test
+    void reverseScoresRebuildMissingCardinality() {
+        String key = "POWER_CONSUMPTION_HDR";
+        VerticalConfig verticalConfig = buildVerticalConfig(key, null, true);
+
+        Product efficient = productWithAttribute(1L, key, "200.0");
+        Product inefficient = productWithAttribute(2L, key, "500.0");
+        List<Product> products = List.of(efficient, inefficient);
+
+        service.init(products);
+        products.forEach(product -> service.onProduct(product, verticalConfig));
+        service.batchDatas.clear();
+
+        service.done(products, verticalConfig);
+
+        Score efficientScore = efficient.getScores().get(key);
+        Score inefficientScore = inefficient.getScores().get(key);
+
+        assertThat(efficientScore.getValue()).isEqualTo(300.0);
+        assertThat(efficientScore.getAbsolute().getValue()).isEqualTo(300.0);
+        assertThat(efficientScore.getAbsolute().getMax()).isEqualTo(300.0);
+        assertThat(inefficientScore.getValue()).isEqualTo(0.0);
+        assertThat(inefficientScore.getAbsolute().getMin()).isEqualTo(0.0);
+    }
+
     private void aggregate(List<Product> products, VerticalConfig verticalConfig) {
         service.init(products);
         products.forEach(product -> service.onProduct(product, verticalConfig));

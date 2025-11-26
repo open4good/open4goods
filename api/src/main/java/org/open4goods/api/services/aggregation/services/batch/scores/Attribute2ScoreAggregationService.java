@@ -2,6 +2,7 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
@@ -118,46 +119,74 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		/////////////////////////////////////////////////
 
 		// Selecting the scores to reverse
-		List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e -> e.isReverseScore()).map(e -> e.getKey()).toList();
+                List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e -> e.isReverseScore()).map(e -> e.getKey()).toList();
 
-		// For each score to reverse
-		for (String key : scoresToReverse) {
+                // For each score to reverse
+                for (String key : scoresToReverse) {
 
-			Cardinality sourceCardinality = batchDatas.get(key);
-			if (null == sourceCardinality) {
-				dedicatedLogger.warn("Cannot reverse score {} – no cardinality available", key);
-				continue;
-			}
+                        Cardinality sourceCardinality = ensureCardinality(key, datas);
 
-			Double max = sourceCardinality.getMax();
-			if (null == max) {
-				dedicatedLogger.warn("Cannot reverse score {} – no max value available", key);
-				continue;
-			}
+                        Double max = sourceCardinality.getMax();
+                        if (null == max) {
+                                throw new IllegalStateException("Cannot reverse score %s – no max value available".formatted(key));
+                        }
 
 			// Recompute the global cardinality with the reversed values so that
 			// subsequent relativisation and frontend explanations rely on the same extrema.
 			Cardinality reversedCardinality = new Cardinality();
 
 			for (Product p : datas) {
-				Score score = p.getScores().get(key);
-				if (score == null) {
-					dedicatedLogger.info("No score {} for {}", key, p);
-					continue;
-				}
-				Double originalValue = score.getValue();
-				Double reversed = max - originalValue;
-				score.setValue(reversed);
-				reversedCardinality.increment(reversed);
-				dedicatedLogger.info("Score {} reversed for {}. Original was {}, max is {}. New value is {}", key, p, originalValue, max, reversed);
-			}
+                                Score score = p.getScores().get(key);
+                                if (score == null) {
+                                        dedicatedLogger.info("No score {} for {}", key, p);
+                                        continue;
+                                }
+                                Double originalValue = score.getValue();
+                                if (originalValue == null) {
+                                        throw new IllegalStateException("Cannot reverse score %s – product %s has a null value".formatted(key, p.getId()));
+                                }
+                                Double reversed = max - originalValue;
+                                score.setValue(reversed);
+                                reversedCardinality.increment(reversed);
+                                dedicatedLogger.info("Score {} reversed for {}. Original was {}, max is {}. New value is {}", key, p, originalValue, max, reversed);
+                        }
 
 			batchDatas.put(key, reversedCardinality);
 		}
 
 		// SUPER important : Score relativisation is operated in the
 		// AbstactScoreAggService
-		super.done(datas, vConf);
-	}
+                super.done(datas, vConf);
+        }
+
+        private Cardinality ensureCardinality(String key, Collection<Product> datas) {
+
+                Cardinality existing = batchDatas.get(key);
+                if (null != existing && Objects.nonNull(existing.getMax())) {
+                        return existing;
+                }
+
+                Cardinality rebuilt = rebuildCardinality(key, datas);
+                batchDatas.put(key, rebuilt);
+                return rebuilt;
+        }
+
+        private Cardinality rebuildCardinality(String key, Collection<Product> datas) {
+                Cardinality rebuilt = new Cardinality();
+
+                for (Product product : datas) {
+                        Score score = product.getScores().get(key);
+                        if (score == null || score.getValue() == null) {
+                                continue;
+                        }
+                        rebuilt.increment(score.getValue());
+                }
+
+                if (rebuilt.getMax() == null) {
+                        throw new IllegalStateException("Cannot reverse score %s – no values available to rebuild cardinality".formatted(key));
+                }
+
+                return rebuilt;
+        }
 
 }
