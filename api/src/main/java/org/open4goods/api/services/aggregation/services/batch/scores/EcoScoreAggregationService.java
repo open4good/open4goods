@@ -30,16 +30,20 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) {
+        public void onProduct(Product data, VerticalConfig vConf) {
 
-		try {
+                try {
 
-			if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0 ) {
-				// Compute the ecoscore from existing scores
-				Double score = generateEcoScore(data.getScores(),vConf);
+                        if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0 ) {
+                                // Compute the ecoscore from existing scores
+                                Double score = generateEcoScore(data.getScores(),vConf);
+                                if (score == null) {
+                                        dedicatedLogger.warn("EcoScore rating skipped for {} due to missing sub-scores", data.getId());
+                                        return;
+                                }
 
-				// Processing cardinality
-				incrementCardinality(ECOSCORE_SCORENAME,score);
+                                // Processing cardinality
+                                incrementCardinality(ECOSCORE_SCORENAME,score);
 
 				// Saving the actual score in the product, it will be relativized after this batch (see super().done())
 				Score s = new Score(ECOSCORE_SCORENAME, score);
@@ -54,24 +58,53 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 
-	private Double generateEcoScore(Map<String, Score> scores, VerticalConfig vConf) throws ValidationException {
+        private Double generateEcoScore(Map<String, Score> scores, VerticalConfig vConf) throws ValidationException {
 
 
-		double ecoscoreVal = 0.0;
-		for (String config :  vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
-			Score score = scores.get(config);
+                double ecoscoreVal = 0.0;
+                for (String config :  vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
+                        Score score = scores.get(config);
 
-			if (null == score) {
-				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
-			}
+                        if (null == score) {
+                                dedicatedLogger.warn("EcoScore rating cannot proceed, missing subscore : {}", config);
+                                return null;
+                        }
 
 
-			// Taking on the relativ
-			ecoscoreVal += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
-		}
+                        Double value = resolveRelativeValue(config, score);
+                        if (value == null) {
+                                return null;
+                        }
 
-		return ecoscoreVal;
-	}
+                        ecoscoreVal += value * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
+                }
+
+                return ecoscoreVal;
+        }
+
+
+        private Double resolveRelativeValue(String config, Score score) {
+                if (score.getRelativ() != null && score.getRelativ().getValue() != null) {
+                        return score.getRelativ().getValue();
+                }
+
+                if (score.getAbsolute() != null && score.getAbsolute().getValue() != null) {
+                        try {
+                                return relativize(score.getAbsolute().getValue(), score.getAbsolute());
+                        } catch (ValidationException e) {
+                                dedicatedLogger.warn("EcoScore relativization failed for {} : {}", config, e.getMessage());
+                                return null;
+                        }
+                }
+
+                if (score.getValue() != null) {
+                        dedicatedLogger.warn("EcoScore using raw value for {} due to missing cardinalities", config);
+                        return score.getValue();
+                }
+
+                dedicatedLogger.warn("EcoScore rating cannot proceed, missing value for {}", config);
+                return null;
+        }
 
 
 	@Override
