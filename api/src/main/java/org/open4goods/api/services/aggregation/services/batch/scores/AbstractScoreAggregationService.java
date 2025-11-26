@@ -14,6 +14,11 @@ import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
+/**
+ * Base class for batch score aggregation services. It manages lifecycle hooks,
+ * cardinality accumulation, virtual score generation and relativisation for a
+ * collection of products handled in a batch.
+ */
 public abstract class AbstractScoreAggregationService extends  AbstractAggregationService{
 
 
@@ -122,12 +127,16 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 	/////////////////////////////////////////
 	// Private methods
 	/////////////////////////////////////////
-	/**
-	 * Computes relativ values
-	 * @param score
-	 * @throws ValidationException 
-	 */
-	protected void relativize(Score score) throws ValidationException {
+        /**
+         * Computes relativ values for the provided score while preserving
+         * absolute count/sum statistics. Relative scale is only applied to value,
+         * min, max and average to ensure comparisons remain meaningful without
+         * mutating occurrence information.
+         *
+         * @param score the score to relativize
+         * @throws ValidationException if required absolute values are missing
+         */
+        protected void relativize(Score score) throws ValidationException {
 
 		// Substracting unused min
 
@@ -147,9 +156,11 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 		ret.setMax(relativize(cardinality.getMax(),score.getAbsolute()));
 		ret.setMin(relativize(cardinality.getMin(),score.getAbsolute()));
 		ret.setAvg(relativize(cardinality.getAvg(),score.getAbsolute()));
-		ret.setCount(relativize(cardinality.getCount(),score.getAbsolute()));
-		ret.setSum(relativize(cardinality.getSum(),score.getAbsolute()));
-		ret.setValue(relativize(score.getValue(),score.getAbsolute()));
+                // Keep occurrence statistics absolute to avoid distorting
+                // aggregation insights while still scaling comparable values.
+                ret.setCount(cardinality.getCount());
+                ret.setSum(cardinality.getSum());
+                ret.setValue(relativize(score.getValue(),score.getAbsolute()));
 
 		score.setRelativ(ret);
 		

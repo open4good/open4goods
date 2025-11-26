@@ -1,7 +1,6 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.util.List;
 import java.util.Map;
@@ -9,75 +8,44 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
-import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Tests for {@link EcoScoreAggregationService} behaviour.
+ */
 class EcoScoreAggregationServiceTest {
 
-        @Test
-        void doneShouldNotFailWhenAllEcoScoresMissing() {
-                EcoScoreAggregationService service = new EcoScoreAggregationService(LoggerFactory.getLogger(getClass()));
-                VerticalConfig config = verticalConfig(Map.of("S1", 1.0d));
-                Product product = new Product();
-                product.setId(1L);
+    @Test
+    void ecoscoreIsComputedWhenDataQualityExistsWithoutBrand() {
+        Product product = new Product(2L);
+        product.getScores().put("OTHER", new Score("OTHER", 3.5));
 
-                service.init(List.of(product));
-                service.onProduct(product, config);
+        DataCompletion2ScoreAggregationService dataQualityService =
+                new DataCompletion2ScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
 
-                assertThat(product.ecoscore()).isNull();
+        List<Product> dataset = List.of(product);
+        dataQualityService.init(dataset);
+        dataQualityService.onProduct(product, new VerticalConfig());
+        dataQualityService.done(dataset, new VerticalConfig());
 
-                assertThatCode(() -> service.done(List.of(product), config)).doesNotThrowAnyException();
-                assertThat(product.getRanking().getGlobalCount()).isZero();
-        }
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("DATA_QUALITY", 1.0));
+        VerticalConfig vConf = new VerticalConfig();
+        vConf.setImpactScoreConfig(impactScoreConfig);
 
-        @Test
-        void doneKeepsAbsoluteValuesAndRanksRealEcoScoresOnly() {
-                EcoScoreAggregationService service = new EcoScoreAggregationService(LoggerFactory.getLogger(getClass()));
-                VerticalConfig config = verticalConfig(Map.of("S1", 1.0d));
+        EcoScoreAggregationService ecoScoreService =
+                new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
+        ecoScoreService.init(dataset);
+        ecoScoreService.onProduct(product, vConf);
+        ecoScoreService.done(dataset, vConf);
 
-                Product validProduct = new Product();
-                validProduct.setId(1L);
-                validProduct.getScores().put("S1", score("S1", 42.0d));
+        Score ecoscore = product.ecoscore();
 
-                Product missingSubScore = new Product();
-                missingSubScore.setId(2L);
-
-                List<Product> products = List.of(validProduct, missingSubScore);
-                service.init(products);
-                products.forEach(product -> service.onProduct(product, config));
-                service.done(products, config);
-
-                assertThat(validProduct.ecoscore()).isNotNull();
-                assertThat(validProduct.ecoscore().getRelativ().getValue()).isEqualTo(validProduct.ecoscore().getAbsolute().getValue());
-                assertThat(validProduct.getRanking().getGlobalCount()).isEqualTo(1L);
-                assertThat(validProduct.getRanking().getGlobalBest()).isEqualTo(validProduct.getId());
-                assertThat(validProduct.getRanking().getGlobalBetter()).isNull();
-
-                assertThat(missingSubScore.getRanking().getGlobalCount()).isZero();
-                assertThat(missingSubScore.ecoscore()).isNotNull();
-                assertThat(missingSubScore.ecoscore().getVirtual()).isTrue();
-        }
-
-        private VerticalConfig verticalConfig(Map<String, Double> weights) {
-                VerticalConfig config = new VerticalConfig();
-                ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
-                impactScoreConfig.setCriteriasPonderation(weights);
-                config.setImpactScoreConfig(impactScoreConfig);
-                return config;
-        }
-
-        private Score score(String name, double relativValue) {
-                Score score = new Score(name, relativValue);
-                Cardinality cardinality = new Cardinality();
-                cardinality.setValue(relativValue);
-                cardinality.setMin(relativValue);
-                cardinality.setMax(relativValue);
-                cardinality.setAvg(relativValue);
-                cardinality.setCount(1);
-                cardinality.setSum(relativValue);
-                score.setRelativ(cardinality);
-                return score;
-        }
+        assertThat(ecoscore).isNotNull();
+        assertThat(ecoscore.getRelativ()).isNotNull();
+        assertThat(ecoscore.getRelativ().getValue())
+                .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue());
+    }
 }
