@@ -9,6 +9,7 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -107,8 +108,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	 * compared) and recalculates the batch cardinalities before delegating to the
 	 * standard relativisation process.
 	 */
-	@Override
-	public void done(Collection<Product> datas, VerticalConfig vConf) {
+        @Override
+        public void done(Collection<Product> datas, VerticalConfig vConf) {
 
 		/////////////////////////////////////////////////
 		// Reversing the scores that need to be (ie. weight, electric consumption :
@@ -118,7 +119,10 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		/////////////////////////////////////////////////
 
 		// Selecting the scores to reverse
-		List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e -> e.isReverseScore()).map(e -> e.getKey()).toList();
+                List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream()
+                                .filter(config -> config.isReverseScore() || config.getBetterIs() == AttributeComparisonRule.LOWER)
+                                .map(AttributeConfig::getKey)
+                                .toList();
 
 		// For each score to reverse
 		for (String key : scoresToReverse) {

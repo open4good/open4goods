@@ -9,10 +9,12 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.StandardiserService;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -74,7 +76,7 @@ class Attribute2ScoreAggregationServiceTest {
     void reverseScoresUseCanonicalKeyForSynonyms() {
         String canonicalKey = "POWER_CONSUMPTION_TYPICAL";
         String synonymKey = "CONSO_PLEINE_PUISSANCE";
-        VerticalConfig verticalConfig = buildVerticalConfig(canonicalKey, synonymKey, true);
+        VerticalConfig verticalConfig = buildVerticalConfig(canonicalKey, synonymKey, true, AttributeType.NUMERIC);
 
         Product efficient = productWithAttribute(1L, synonymKey, "50.0");
         Product inefficient = productWithAttribute(2L, synonymKey, "100.0");
@@ -91,6 +93,25 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(efficientScore.getValue()).isGreaterThan(inefficientScore.getValue());
     }
 
+    @Test
+    void lowerIsBetterAttributesAreReversedEvenWithoutReverseFlag() {
+        String key = "POWER_CONSUMPTION_HDR";
+        VerticalConfig verticalConfig = buildVerticalConfig(key, null, false, AttributeType.NUMERIC, AttributeComparisonRule.LOWER);
+
+        Product efficient = productWithAttribute(1L, key, "50.0");
+        Product inefficient = productWithAttribute(2L, key, "100.0");
+        List<Product> products = List.of(efficient, inefficient);
+
+        aggregate(products, verticalConfig);
+
+        Score efficientScore = efficient.getScores().get(key);
+        Score inefficientScore = inefficient.getScores().get(key);
+
+        assertThat(efficientScore.getValue()).isGreaterThan(inefficientScore.getValue());
+        assertThat(efficientScore.getRelativ().getValue()).isEqualTo(StandardiserService.DEFAULT_MAX_RATING);
+        assertThat(inefficientScore.getRelativ().getValue()).isZero();
+    }
+
     private void aggregate(List<Product> products, VerticalConfig verticalConfig) {
         service.init(products);
         products.forEach(product -> service.onProduct(product, verticalConfig));
@@ -104,15 +125,20 @@ class Attribute2ScoreAggregationServiceTest {
     }
 
     private static VerticalConfig buildVerticalConfig(boolean reverse) {
-        return buildVerticalConfig("REPAIR", null, reverse);
+        return buildVerticalConfig("REPAIR", null, reverse, AttributeType.NUMERIC);
     }
 
-    private static VerticalConfig buildVerticalConfig(String key, String synonym, boolean reverse) {
+    private static VerticalConfig buildVerticalConfig(String key, String synonym, boolean reverse, AttributeType type) {
+        return buildVerticalConfig(key, synonym, reverse, type, AttributeComparisonRule.GREATER);
+    }
+
+    private static VerticalConfig buildVerticalConfig(String key, String synonym, boolean reverse, AttributeType type, AttributeComparisonRule betterIs) {
         AttributeConfig attributeConfig = new AttributeConfig();
         attributeConfig.setKey(key);
         attributeConfig.setAsScore(true);
         attributeConfig.setReverseScore(reverse);
-        attributeConfig.setFilteringType(AttributeType.NUMERIC);
+        attributeConfig.setFilteringType(type);
+        attributeConfig.setBetterIs(betterIs);
         if (synonym != null) {
             Map<String, Set<String>> synonyms = new HashMap<>();
             synonyms.put("all", Set.of(synonym));
