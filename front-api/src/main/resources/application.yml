@@ -22,8 +22,13 @@ front:
   max-page-size: 50
   cache:
     path: ./cache
+    one-minute-ttl: 1m
+    one-minute-maximum-size: 2000
     one-hour-ttl: 60m
     one-hour-maximum-size: 5000
+    one-day-ttl: 24h
+    one-day-maximum-size: 10000
+    forever-maximum-size: 20000
   contact:
     email: ${FRONT_CONTACT_EMAIL}
   security:
