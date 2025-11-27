@@ -56,7 +56,8 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
 		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
 		if (null != lastProcessed &&  REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed ) {
-			return false;
+			// TODO : Remove systematic rehandling
+			return true;
 		} else {
 			return true;
 		}
@@ -152,7 +153,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
 				DataFragment df = initDataFragment(data);
 				for (Entry<String, Object> caracteristic : chars.entrySet()) {
 
-					// TODO : Handle the toString on "object" type, we chould have nested structures
+					// TODO : Handle the toString on "object" type, we should have nested structures
 					// TODO : Correct language injection
 					df.addAttribute(caracteristic.getKey(), caracteristic.getValue().toString(), "fr", null);
 				}
