@@ -19,38 +19,41 @@ import org.slf4j.Logger;
  * cardinality accumulation, virtual score generation and relativisation for a
  * collection of products handled in a batch.
  */
-public abstract class AbstractScoreAggregationService extends  AbstractAggregationService{
+public abstract class AbstractScoreAggregationService extends AbstractAggregationService {
 
 
-	protected Map<String, Cardinality>  batchDatas = new HashMap<>();
-	
-	
-	public AbstractScoreAggregationService(Logger logger) {
-		super(logger);
-	}
+        protected Map<String, Cardinality> batchDatas = new HashMap<>();
+
+        protected Map<String, Cardinality> absoluteCardinalities = new HashMap<>();
 
 
-	@Override
-	public void init(Collection<Product> datas) {
-		super.init(datas);
-		batchDatas.clear();
-	}
+        public AbstractScoreAggregationService(Logger logger) {
+                super(logger);
+        }
 
-	
-	@Override
-	public void done(Collection<Product> datas, VerticalConfig vConf) {
-		super.done(datas,vConf);
 
-		dedicatedLogger.info("{} -> Scores relativisation for {} products", this.getClass().getSimpleName(), datas.size());
+        @Override
+        public void init(Collection<Product> datas) {
+                super.init(datas);
+                batchDatas.clear();
+                absoluteCardinalities.clear();
+        }
 
-		//////////////////////////
-		// Virtual scores computing
-		// Operated on absolute values
-		//////////////////////////
+
+        @Override
+        public void done(Collection<Product> datas, VerticalConfig vConf) {
+                super.done(datas, vConf);
+
+                dedicatedLogger.info("{} -> Scores relativisation for {} products", this.getClass().getSimpleName(), datas.size());
+
+                //////////////////////////
+                // Virtual scores computing
+                // Operated on absolute values
+                //////////////////////////
                 for (Product p : datas) {
-                        for (String scoreName : batchDatas.keySet()) {
+                        for (String scoreName : absoluteCardinalities.keySet()) {
                                 Score s = p.getScores().get(scoreName);
-                                Cardinality source = batchDatas.get(scoreName);
+                                Cardinality source = absoluteCardinalities.get(scoreName);
                                 Cardinality virtual = new Cardinality(source);
                                 if (null == s) {
 
@@ -61,7 +64,7 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
                                         s.setVirtual(true);
 
                                 }
-                                virtual.setValue(s.getValue());
+                                virtual.setValue(resolveAbsoluteValue(p, scoreName, s));
                                 s.setAbsolute(virtual);
                                 p.getScores().put(scoreName, s);
                         }
@@ -69,13 +72,13 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 
 		
 		
-		////////////////////////
-		// Scores relativisation 
-		// Create a relativized cardinality in each product
-		////////////////////////
-		for (Product p : datas) {			
-			for (String scoreName : batchDatas.keySet()) {
-				Score s = p.getScores().get(scoreName);
+                ////////////////////////
+                // Scores relativisation
+                // Create a relativized cardinality in each product
+                ////////////////////////
+                for (Product p : datas) {
+                        for (String scoreName : batchDatas.keySet()) {
+                                Score s = p.getScores().get(scoreName);
 				if (null != s) {
 					try {
 						relativize(s);
@@ -145,7 +148,7 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 			return ;
 		}
 		
-		Cardinality cardinality =  batchDatas.get(score.getName());
+                Cardinality cardinality =  batchDatas.get(score.getName());
 
 		if (null == cardinality) {
 			dedicatedLogger.warn("No source cardinality found for score {}",score);
@@ -167,10 +170,17 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 	}
 
 
-	private Integer relativize(Integer count, Cardinality absolute) throws ValidationException{
+        private Integer relativize(Integer count, Cardinality absolute) throws ValidationException{
 		
-		return relativize(Double.valueOf(count), absolute).intValue();
-	}
+                return relativize(Double.valueOf(count), absolute).intValue();
+        }
+
+        /**
+         * Hook used to let subclasses override the absolute value stored for a score.
+         */
+        protected Double resolveAbsoluteValue(Product product, String scoreName, Score score) {
+                return score.getValue();
+        }
 
 
 	/**
@@ -197,29 +207,34 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
                 }
         }
 	
-	/**
-	 * Computes and maintains cardinality
-	 * @param Scores
-	 * @param batchDatas
-	 */
-	protected void incrementCardinality(String scoreName, Double value) throws ValidationException{
+        /**
+         * Computes and maintains cardinality for both absolute and relative views.
+         * @param scoreName the score identifier
+         * @param value the value to register
+         */
+        protected void incrementCardinality(String scoreName, Double value) throws ValidationException {
 
 
-		if (null == value) {
-			throw new ValidationException("Empty value for Score "+scoreName+" ! Consider normalizing in a futur export/import phase");
-		}
+                if (null == value) {
+                        throw new ValidationException("Empty value for Score " + scoreName + " ! Consider normalizing in a futur export/import phase");
+                }
 
-		// Retrieving cardinality
-		Cardinality c =  batchDatas.get(scoreName);
-		if (null == c) {
-			c = new Cardinality();
-		}
+                Cardinality absolute = absoluteCardinalities.get(scoreName);
+                if (null == absolute) {
+                        absolute = new Cardinality();
+                }
 
-		// Incrementing
-		c.increment(value);
+                Cardinality relative = batchDatas.get(scoreName);
+                if (null == relative) {
+                        relative = new Cardinality();
+                }
 
-		batchDatas.put(scoreName,c);
-	}
+                absolute.increment(value);
+                relative.increment(value);
+
+                absoluteCardinalities.put(scoreName, absolute);
+                batchDatas.put(scoreName, relative);
+        }
 
 
 
