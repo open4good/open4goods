@@ -137,9 +137,6 @@ public class EprelCompletionService  extends AbstractCompletionService{
 			logger.info("product {} completed with EPREL datas ", data);
 
 		}
-
-
-
 	}
 
 

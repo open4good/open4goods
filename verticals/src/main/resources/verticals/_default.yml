@@ -644,7 +644,6 @@ attributesConfig:
   ##################################
   
   - key: "COLOR"
-    betterIs: "GREATER"
     faIcon: "mdi-water"
     name:
       default: "Color"
