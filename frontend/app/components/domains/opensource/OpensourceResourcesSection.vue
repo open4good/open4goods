@@ -95,7 +95,7 @@ withDefaults(
       >
         <div class="opendata-content">
           <div class="opendata-text">
-            <h3 class="opendata-title">{{ opendataCallout.title }}</h3>
+            <h2 class="opendata-title">{{ opendataCallout.title }}</h2>
             <p class="opendata-description">{{ opendataCallout.description }}</p>
           </div>
           <v-btn
@@ -114,7 +114,7 @@ withDefaults(
       <v-card class="contact-card" rounded="xl" elevation="8">
         <div class="contact-content">
           <div class="contact-text">
-            <h3 class="contact-title">{{ contact.title }}</h3>
+            <h2 class="contact-title">{{ contact.title }}</h2>
             <TextContent :bloc-id="contact.descriptionBlocId" :ipsum-length="180" />
           </div>
           <v-btn
