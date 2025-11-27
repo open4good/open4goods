@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.offset;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,10 +45,12 @@ class Attribute2ScoreAggregationServiceTest {
         Score betterScore = better.getScores().get("REPAIR");
         Score worseScore = worse.getScores().get("REPAIR");
 
-        assertThat(betterScore.getAbsolute().getMax()).isEqualTo(5.0);
-        assertThat(betterScore.getAbsolute().getMin()).isEqualTo(0.0);
-        assertThat(betterScore.getAbsolute().getValue()).isEqualTo(5.0);
-        assertThat(worseScore.getAbsolute().getValue()).isEqualTo(0.0);
+        assertThat(betterScore.getAbsolute().getMax()).isEqualTo(9.0);
+        assertThat(betterScore.getAbsolute().getMin()).isEqualTo(4.0);
+        assertThat(betterScore.getAbsolute().getValue()).isEqualTo(4.0);
+        assertThat(worseScore.getAbsolute().getValue()).isEqualTo(9.0);
+        assertThat(betterScore.getValue()).isEqualTo(9.0);
+        assertThat(worseScore.getValue()).isEqualTo(4.0);
         assertThat(betterScore.getRelativ().getValue()).isEqualTo(5.0);
         assertThat(worseScore.getRelativ().getValue()).isEqualTo(0.0);
         assertThat(betterScore.on20()).isEqualTo(20L);
@@ -87,9 +90,34 @@ class Attribute2ScoreAggregationServiceTest {
         Score inefficientScore = inefficient.getScores().get(canonicalKey);
 
         assertThat(efficient.getScores()).doesNotContainKey(synonymKey);
-        assertThat(efficientScore.getValue()).isEqualTo(50.0);
-        assertThat(inefficientScore.getValue()).isEqualTo(0.0);
+        assertThat(efficientScore.getAbsolute().getValue()).isEqualTo(50.0);
+        assertThat(inefficientScore.getAbsolute().getValue()).isEqualTo(100.0);
+        assertThat(efficientScore.getValue()).isEqualTo(100.0);
+        assertThat(inefficientScore.getValue()).isEqualTo(50.0);
         assertThat(efficientScore.getValue()).isGreaterThan(inefficientScore.getValue());
+    }
+
+    @Test
+    void lowerScoresKeepAbsoluteValuesWithNonZeroMinimum() {
+        VerticalConfig verticalConfig = buildVerticalConfig(true);
+
+        Product lighter = productWithAttribute(1L, "REPAIR", "3.1");
+        Product heavier = productWithAttribute(2L, "REPAIR", "10.0");
+        List<Product> products = List.of(lighter, heavier);
+
+        aggregate(products, verticalConfig);
+
+        Score lighterScore = lighter.getScores().get("REPAIR");
+        Score heavierScore = heavier.getScores().get("REPAIR");
+
+        assertThat(lighterScore.getAbsolute().getMin()).isCloseTo(3.1, offset(1e-9));
+        assertThat(lighterScore.getAbsolute().getMax()).isCloseTo(10.0, offset(1e-9));
+        assertThat(lighterScore.getAbsolute().getValue()).isCloseTo(3.1, offset(1e-9));
+        assertThat(heavierScore.getAbsolute().getValue()).isCloseTo(10.0, offset(1e-9));
+        assertThat(lighterScore.getValue()).isCloseTo(10.0, offset(1e-9));
+        assertThat(heavierScore.getValue()).isCloseTo(3.1, offset(1e-9));
+        assertThat(lighterScore.getRelativ().getValue()).isCloseTo(5.0, offset(1e-9));
+        assertThat(heavierScore.getRelativ().getValue()).isCloseTo(0.0, offset(1e-9));
     }
 
     private void aggregate(List<Product> products, VerticalConfig verticalConfig) {

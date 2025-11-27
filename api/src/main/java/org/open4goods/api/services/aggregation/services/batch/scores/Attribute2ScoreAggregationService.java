@@ -1,7 +1,9 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
@@ -21,9 +23,17 @@ import org.slf4j.Logger;
  */
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
-	public Attribute2ScoreAggregationService(final Logger logger) {
-		super(logger);
-	}
+        private final Map<Long, Map<String, Double>> absoluteValuesOverrides = new HashMap<>();
+
+        public Attribute2ScoreAggregationService(final Logger logger) {
+                super(logger);
+        }
+
+        @Override
+        public void init(Collection<Product> datas) {
+                super.init(datas);
+                absoluteValuesOverrides.clear();
+        }
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
@@ -108,8 +118,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	 * compared) and recalculates the batch cardinalities before delegating to the
 	 * standard relativisation process.
 	 */
-	@Override
-	public void done(Collection<Product> datas, VerticalConfig vConf) {
+        @Override
+        public void done(Collection<Product> datas, VerticalConfig vConf) {
 
 		/////////////////////////////////////////////////
 		// Reversing the scores that need to be (ie. weight, electric consumption :
@@ -118,7 +128,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		// To reverse a score, we substract max absolute score from item absolute score
 		/////////////////////////////////////////////////
 
-		// Selecting the scores to reverse
+                // Selecting the scores to reverse
                 List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream()
                                 .filter(AttributeConfig::isAsScore)
                                 .filter(config -> AttributeComparisonRule.LOWER.equals(config.getBetterIs()))
@@ -128,41 +138,54 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		// For each score to reverse
 		for (String key : scoresToReverse) {
 
-			Cardinality sourceCardinality = batchDatas.get(key);
-			if (null == sourceCardinality) {
-				dedicatedLogger.warn("Cannot reverse score {} – no cardinality available", key);
-				continue;
-			}
+                        Cardinality sourceCardinality = absoluteCardinalities.get(key);
+                        if (null == sourceCardinality) {
+                                dedicatedLogger.warn("Cannot reverse score {} – no cardinality available", key);
+                                continue;
+                        }
 
-			Double max = sourceCardinality.getMax();
-			if (null == max) {
-				dedicatedLogger.warn("Cannot reverse score {} – no max value available", key);
-				continue;
-			}
+                        Double max = sourceCardinality.getMax();
+                        Double min = sourceCardinality.getMin();
+                        if (null == max || null == min) {
+                                dedicatedLogger.warn("Cannot reverse score {} – no min/max value available", key);
+                                continue;
+                        }
 
 			// Recompute the global cardinality with the reversed values so that
 			// subsequent relativisation and frontend explanations rely on the same extrema.
 			Cardinality reversedCardinality = new Cardinality();
 
-			for (Product p : datas) {
-				Score score = p.getScores().get(key);
-				if (score == null) {
-					dedicatedLogger.info("No score {} for {}", key, p);
-					continue;
-				}
-				Double originalValue = score.getValue();
-				Double reversed = max - originalValue;
-				score.setValue(reversed);
-				reversedCardinality.increment(reversed);
-				dedicatedLogger.info("Score {} reversed for {}. Original was {}, max is {}. New value is {}", key, p, originalValue, max, reversed);
-			}
+                        for (Product p : datas) {
+                                Score score = p.getScores().get(key);
+                                if (score == null) {
+                                        dedicatedLogger.info("No score {} for {}", key, p);
+                                        continue;
+                                }
+                                Double originalValue = score.getValue();
+                                absoluteValuesOverrides.computeIfAbsent(p.getId(), ignored -> new HashMap<>()).put(key, originalValue);
+                                Double reversed = (max + min) - originalValue;
+                                score.setValue(reversed);
+                                reversedCardinality.increment(reversed);
+                                dedicatedLogger.info("Score {} reversed for {}. Original was {}, min is {}, max is {}. New value is {}", key, p, originalValue, min, max, reversed);
+                        }
 
-			batchDatas.put(key, reversedCardinality);
+                        batchDatas.put(key, reversedCardinality);
 		}
 
-		// SUPER important : Score relativisation is operated in the
-		// AbstactScoreAggService
-		super.done(datas, vConf);
-	}
+                // SUPER important : Score relativisation is operated in the
+                // AbstactScoreAggService
+                super.done(datas, vConf);
+                absoluteValuesOverrides.clear();
+        }
+
+        @Override
+        protected Double resolveAbsoluteValue(Product product, String scoreName, Score score) {
+                Map<String, Double> overrides = absoluteValuesOverrides.get(product.getId());
+                if (overrides != null && overrides.containsKey(scoreName)) {
+                        return overrides.get(scoreName);
+                }
+
+                return super.resolveAbsoluteValue(product, scoreName, score);
+        }
 
 }
