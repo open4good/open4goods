@@ -238,6 +238,42 @@ const alternateLinks = computed(() =>
   })),
 )
 
+const siteName = computed(() => String(t('siteIdentity.siteName')))
+const logoUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+
+const localizedHomeUrls = computed(() =>
+  Array.from(new Set([canonicalUrl.value, ...alternateLinks.value.map((link) => link.href)])),
+)
+
+const linkedinUrl = computed(() => toTrimmedString(t('siteIdentity.links.linkedin')))
+
+const organizationJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: siteName.value,
+  url: canonicalUrl.value,
+  logo: logoUrl.value,
+  sameAs: Array.from(new Set([linkedinUrl.value, ...localizedHomeUrls.value].filter(Boolean))),
+}))
+
+const searchPageUrl = computed(
+  () => new URL(resolveLocalizedRoutePath('search', locale.value), requestURL.origin).toString(),
+)
+
+const websiteJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteName.value,
+  url: canonicalUrl.value,
+  inLanguage: locale.value,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${searchPageUrl.value}?q={search_term_string}`,
+    'query-input': 'required name=q',
+  },
+  sameAs: localizedHomeUrls.value,
+}))
+
 const searchLandingUrl = computed(() => localePath({ name: 'search' }))
 const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
 
@@ -478,7 +514,7 @@ const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
 const featuredBlogItem = computed(() => enrichedBlogItems.value[0] ?? null)
 const secondaryBlogItems = computed(() => enrichedBlogItems.value.slice(1))
 
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() => logoUrl.value)
 
 const navigateToSearch = (query?: string) => {
   const normalizedQuery = query?.trim() ?? ''
@@ -539,7 +575,7 @@ useSeoMeta({
   ogUrl: () => canonicalUrl.value,
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
-  ogSiteName: () => String(t('siteIdentity.siteName')),
+  ogSiteName: () => siteName.value,
   ogLocale: () => locale.value.replace('-', '_'),
   ogImageAlt: () => String(t('home.seo.imageAlt')),
 })
@@ -554,6 +590,16 @@ useHead(() => ({
       key: 'home-faq-jsonld',
       type: 'application/ld+json',
       children: JSON.stringify(faqJsonLd.value),
+    },
+    {
+      key: 'home-organization-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(organizationJsonLd.value),
+    },
+    {
+      key: 'home-website-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(websiteJsonLd.value),
     },
   ],
 }))
