@@ -45,7 +45,8 @@ const handlePrimaryClick = (event: MouseEvent) => {
           <div class="opendata-hero__header">
             <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{ eyebrow }}</span>
             <h1 id="opendata-hero-heading" class="opendata-hero__title">{{ title }}</h1>
-            <p class="opendata-hero__subtitle">{{ subtitle }}</p>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <p class="opendata-hero__subtitle" v-html="subtitle" />
           </div>
 
 
