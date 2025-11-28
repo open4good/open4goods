@@ -6,9 +6,8 @@
         <h2 id="contact-details-heading" class="contact-details__title">
           {{ title }}
         </h2>
-        <p class="contact-details__subtitle">
-          {{ subtitle }}
-        </p>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <p class="contact-details__subtitle subtitle-text" v-html="subtitle" />
       </div>
 
       <v-row class="contact-details__cards" align="stretch" justify="center" role="list">
@@ -142,8 +141,7 @@ const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
     margin: 0
 
   &__subtitle
-    font-size: 1.05rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
+    --subtitle-size: 1.05rem
     margin: 0
 
   &__cards

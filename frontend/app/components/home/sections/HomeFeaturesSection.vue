@@ -18,7 +18,8 @@ const { t } = useI18n()
       <div class="home-section__inner">
         <header class="home-section__header">
           <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.features.subtitle') }}</p>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <p class="home-section__subtitle subtitle-text" v-html="t('home.features.subtitle')" />
         </header>
         <v-row class="home-features__grid" align="stretch">
           <v-col
@@ -63,7 +64,6 @@ const { t } = useI18n()
 
 .home-section__subtitle
   margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-features__grid
   --v-gutter-x: clamp(1.5rem, 4vw, 2.5rem)

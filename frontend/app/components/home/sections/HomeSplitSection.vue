@@ -42,7 +42,13 @@ const sectionClasses = computed(() => [
             <header class="home-section__header">
               <slot name="eyebrow" />
               <h2 :id="titleId">{{ props.title }}</h2>
-              <p v-if="props.description" class="home-section__subtitle">{{ props.description }}</p>
+              <!-- eslint-disable vue/no-v-html -->
+              <p
+                v-if="props.description"
+                class="home-section__subtitle subtitle-text"
+                v-html="props.description"
+              ></p>
+              <!-- eslint-enable vue/no-v-html -->
             </header>
             <div class="home-section__body">
               <slot />
@@ -92,7 +98,6 @@ const sectionClasses = computed(() => [
 
 .home-section__subtitle
   margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-section__body
   display: flex

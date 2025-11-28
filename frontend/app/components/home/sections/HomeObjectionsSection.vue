@@ -18,7 +18,8 @@ const { t } = useI18n()
       <div class="home-section__inner">
         <header class="home-section__header">
           <h2 id="home-objections-title">{{ t('home.objections.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.objections.subtitle') }}</p>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <p class="home-section__subtitle subtitle-text" v-html="t('home.objections.subtitle')" />
         </header>
         <v-row class="home-objections__grid">
           <v-col v-for="item in props.items" :key="item.question" cols="12" md="4">
@@ -59,7 +60,6 @@ const { t } = useI18n()
 
 .home-section__subtitle
   margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-objections__grid
   --v-gutter-x: clamp(1.5rem, 4vw, 2.5rem)

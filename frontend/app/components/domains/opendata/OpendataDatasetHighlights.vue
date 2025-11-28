@@ -27,7 +27,13 @@ defineProps<{
     <v-container max-width="lg">
       <div class="opendata-datasets__header">
         <h2 id="opendata-datasets-heading" class="opendata-datasets__title">{{ title }}</h2>
-        <p v-if="subtitle" class="opendata-datasets__subtitle">{{ subtitle }}</p>
+        <!-- eslint-disable vue/no-v-html -->
+        <p
+          v-if="subtitle"
+          class="opendata-datasets__subtitle subtitle-text"
+          v-html="subtitle"
+        ></p>
+        <!-- eslint-enable vue/no-v-html -->
       </div>
 
       <v-row class="g-6" align="stretch" justify="center">
@@ -89,8 +95,7 @@ defineProps<{
 .opendata-datasets__subtitle
   margin-top: 1rem
   margin-bottom: 0
-  font-size: 1.05rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+  --subtitle-size: 1.05rem
 
 .opendata-dataset-card
   display: flex
