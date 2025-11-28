@@ -124,7 +124,7 @@ team-config:
   cores:
     - name: Goulven Furet
       blocId: 'pages:team:goulven-furet:'
-      linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/
+      linkedInUrl: https://www.linkedin.com/in/goulven-furet/
       imageUrl: /images/team/Goulven.jpeg
 
     - name: Bérangère Leven
