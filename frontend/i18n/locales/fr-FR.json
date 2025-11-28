@@ -927,11 +927,11 @@
             "ariaLabel": "Ouvrir la page open data GTIN",
             "label": "Voir le dataset GTIN"
           },
-          "description": "Tous les produits indexés par Nudger avec marque, modèle, prix et catégories.",
+          "description": "Tous les produits référencés sur Nudger avec marque, modèle, prix, catégories...",
           "features": {
-            "coverage": "Inclut les métadonnées EAN13, UPC et préfixes GS1",
-            "refresh": "Instantané mis à jour chaque semaine",
-            "uses": "Idéal pour la veille prix, l'analyse d'assortiment et le suivi catégoriel"
+            "coverage": "Codes barres EAN13, UPC, GTIN et préfixes GS1",
+            "refresh": "Mise à jour chaque semaine",
+            "uses": "Idéal pour la veille prix, l'analyse académique et la constitution de catalogues"
           },
           "title": "Base GTIN"
         },
@@ -940,10 +940,10 @@
             "ariaLabel": "Ouvrir la page open data ISBN",
             "label": "Voir le dataset ISBN"
           },
-          "description": "Export dédié aux livres avec informations de prix, disponibilité et classifications.",
+          "description": "Export dédié aux livres avec informations de prix, de catégories, de classifications, ...",
           "features": {
             "catalogue": "Inclut éditeur, format et classifications Decitre",
-            "refresh": "Instantané mis à jour chaque semaine",
+            "refresh": "Mise à jour chaque semaine",
             "research": "Parfait pour l'enrichissement de catalogue, la recherche et les analyses culturelles"
           },
           "title": "Base ISBN"
@@ -1244,8 +1244,8 @@
           "title": "Vue d'ensemble du dataset ISBN"
         }
       },
-      "subtitle": "Choisissez l'extraction adaptée à votre besoin. Les deux exports sont mis à jour chaque semaine et publiés sous licence ODbL.",
-      "title": "Deux jeux de données complémentaires"
+      "subtitle": "Les deux exports sont mis à jour chaque semaine et publiés sous licence ODbL.",
+      "title": "Deux jeux de données"
     },
     "errors": {
       "datasetFailed": "Impossible de charger les détails du jeu de données. Merci de réessayer.",
@@ -1274,13 +1274,13 @@
       "title": "Questions fréquentes"
     },
     "hero": {
-      "eyebrow": "Open data",
+      "eyebrow": "Libérez les données !",
       "primaryCta": {
         "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data",
-        "label": "Découvre nos produits à nu(dger)"
+        "label": "Découvre nos jeux de données"
       },
-      "subtitle": "On est des geeks mais on t'explique sans jargon technique. Nos données produits ? Open bar. Nos bases : Téléchargeables (c’est l'happy hour, c'est cadeau). Nos secrets : On en a pas !",
-      "title": "#FreeLesDonnées"
+      "subtitle": "On est des geeks et on partage, pas de secrets chez nous.<br/> Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
+      "title": "Open Data"
     },
     "license": {
       "cta": {
@@ -1301,24 +1301,24 @@
       "title": "Nudger est aussi open source"
     },
     "seo": {
-      "description": "Découvrez les jeux de données GTIN et ISBN mis à disposition par Nudger, leurs mises à jour hebdomadaires et les modalités de téléchargement.",
-      "title": "Portail open data Nudger"
+      "description": "Découvrez les jeux de données GTIN et ISBN à télécharger sur Nudger. La plus grande base de données de codes barres d'europe !",
+      "title": "Open Data - Base de données de codes-barres"
     },
     "stats": {
       "accessibilityTitle": "Indicateurs clés de l'open data",
       "datasets": {
-        "description": "Paquets de données actuellement disponibles.",
+        "description": "Catalogues actuellement disponibles.",
         "label": "Jeux de données publiés"
       },
       "placeholder": "—",
       "totalProducts": {
-        "description": "Produits uniques recensés dans l'ensemble des exports.",
-        "label": "Produits couverts",
+        "description": "Produits uniques mis à disposition.",
+        "label": "Produits accessibles",
         "millions": "+{value} millions"
       },
       "totalSize": {
-        "description": "Volume compressé total des exports hebdomadaires.",
-        "label": "Taille cumulée"
+        "description": "On est pas des petits joueurs !",
+        "label": "Taille cumulée des fichiers"
       }
     }
   },
