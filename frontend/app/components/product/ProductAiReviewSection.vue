@@ -478,16 +478,35 @@ const triggerGeneration = async () => {
 const pollStatus = async () => {
   try {
     const response = await $fetch<ReviewGenerationStatus>(`/api/products/${props.gtin}/review`)
+    if (!response || !response.status) {
+      stopPolling()
+      errorMessage.value = t('product.aiReview.errors.generic')
+      return
+    }
+
     status.value = response
 
     if (response.status === 'FAILED') {
       stopPolling()
-      errorMessage.value = response.errorMessage ?? t('product.aiReview.errors.generic')
+      errorMessage.value =
+        response.result?.enoughData === false
+          ? t('product.aiReview.errors.notEnoughData')
+          : response.errorMessage ?? t('product.aiReview.errors.generic')
       return
     }
 
-    if (response.status === 'SUCCESS' && response.result?.review) {
+    if (response.status === 'SUCCESS') {
+      const hasReview = Boolean(response.result?.review)
       stopPolling()
+
+      if (!hasReview) {
+        errorMessage.value =
+          response.result?.enoughData === false
+            ? t('product.aiReview.errors.notEnoughData')
+            : t('product.aiReview.errors.generic')
+        return
+      }
+
       review.value = normalizeReview(response.result.review)
       createdMs.value = response.result.createdMs ?? Date.now()
     }
