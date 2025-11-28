@@ -129,24 +129,24 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						continue;
 					}
 
-					IndexedAttribute indexedAttr = indexed.get(attrConfig.getKey());
-					if (null != indexedAttr) {
-						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), attrConfig.getKey());
-						if (!cleanedValue.equals(indexedAttr.getValue() )) {
-							// TODO(p3,design) : Means we have multiple attributes matching for indexed . Have a merge strategy
-							dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}",attr.getName(),cleanedValue, indexedAttr.getValue());
-						}
-					} else {
-						 indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
+                                        IndexedAttribute indexedAttr = indexed.get(attrConfig.getKey());
+                                        if (null != indexedAttr) {
+                                                dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), attrConfig.getKey());
+                                                if (!cleanedValue.equals(indexedAttr.getValue() )) {
+                                                        // TODO(p3,design) : Means we have multiple attributes matching for indexed . Have a merge strategy
+                                                        dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}",attr.getName(),cleanedValue, indexedAttr.getValue());
+                                                }
+                                        } else {
+                                                 indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
 
-						 // Todo : force value through referenced datasources order
-						 // TO
+                                                 // Todo : force value through referenced datasources order
+                                                 // TO
 
 
-					}
+                                        }
 
-					indexedAttr.getSource().addAll(attr.getSource());
-					indexed.put(attrConfig.getKey(), indexedAttr);
+                                        mergeSourcesAndRefreshValue(indexedAttr, attr);
+                                        indexed.put(attrConfig.getKey(), indexedAttr);
 
 				} catch (Exception e) {
 					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey(),e);
@@ -161,17 +161,36 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 		///////////////////////////////////////////
-		// Setting excluded state
-		//////////////////////////////////////////
+                // Setting excluded state
+                //////////////////////////////////////////
 
-		updateExcludeStatus(data,vConf);
+                updateExcludeStatus(data,vConf);
 
-	}
+        }
+
+        private void mergeSourcesAndRefreshValue(IndexedAttribute indexedAttr, ProductAttribute attr)
+        {
+                indexedAttr.getSource().addAll(attr.getSource());
+
+                String bestValue = indexedAttr.bestValue();
+                if (null == bestValue) {
+                        return;
+                }
+
+                indexedAttr.setValue(bestValue);
+                indexedAttr.setBoolValue(IndexedAttribute.getBool(bestValue));
+
+                try {
+                        indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
+                } catch (NumberFormatException e) {
+                        indexedAttr.setNumericValue(null);
+                }
+        }
 
 
-	/**
-	 * Extracts a model identifier from a product's offer titles based on the brand and existing model,
-	 * using regex matching. The extracted model must contain at least one letter and one digit,
+        /**
+         * Extracts a model identifier from a product's offer titles based on the brand and existing model,
+         * using regex matching. The extracted model must contain at least one letter and one digit,
 	 * or consist only of digits.
 	 * <p>
 	 * If a matching model different from the current one is found, it will update the model using {@code forceModel}.
