@@ -78,6 +78,10 @@ impactScoreConfig:
         WEIGHT: "WEIGHT représente la masse totale du téléviseur. C’est un proxy des impacts de fabrication, de transport et de fin de vie, car plus un produit est lourd, plus il incorpore de matériaux (plastiques, métaux, verre, cartes électroniques) dont l’extraction et la transformation sont génératrices d’impacts environnementaux (émissions, consommation d’eau, pollutions locales). À diagonale d’écran comparable, un téléviseur plus léger est souvent plus sobre en matériaux, même si cela dépend aussi de la nature des matériaux (par exemple, des alliages d’aluminium peuvent être plus légers mais plus énergivores à produire que certains plastiques). Faute de données détaillées sur la composition, le poids est une approximation acceptable pour représenter la pression matérielle dans le score. La pondération de 0,08 traduit une importance réelle mais maîtrisée: l’impact de production d’un téléviseur n’est pas négligeable, mais reste souvent inférieur à celui de l’usage sur la durée de vie. Ce facteur permet aussi de ne pas favoriser systématiquement des appareils très grands et très lourds, en introduisant une contrainte implicite sur l’optimisation des matériaux."
         CLASSE_ENERGY: "CLASSE_ENERGY est la classe énergétique générique du téléviseur, généralement basée sur des scénarios d’utilisation normalisés et sur la consommation globale de l’appareil. Elle recoupe largement CLASSE_ENERGY_SDR et les facteurs de puissance. Dans la pondération globale, pour éviter une double ou triple prise en compte, CLASSE_ENERGY n’est pas utilisée directement: la priorité est donnée à CLASSE_ENERGY_SDR (représentative de la performance d’affichage standard) et aux consommations détaillées (typique, SDR, HDR, veille). Dans un cadre idéal, CLASSE_ENERGY pourrait servir de facteur de secours en cas de manque de données énergétiques fines, mais la présence du mécanisme de virtualisation (moyenne de la catégorie) réduit cette nécessité. Ainsi, CLASSE_ENERGY n’est pas pondérée explicitement dans ce score, ce qui limite la redondance et clarifie la contribution de chaque composante énergétique."
         POWER_CONSUMPTION_SDR: "POWER_CONSUMPTION_SDR mesure la consommation en mode SDR, qui reste encore aujourd’hui le mode le plus couramment utilisé pour de nombreux contenus TV (chaînes hertziennes, câble, une partie du streaming). Ce facteur est très pertinent pour la phase d’usage, car le téléviseur passe encore une grande partie de son temps dans ce mode, surtout dans les foyers qui ne consomment pas majoritairement de contenus HDR. Il vient compléter POWER_CONSUMPTION_TYPICAL en distinguant les performances en SDR des performances globales, et permet de mieux discriminer les téléviseurs optimisés pour un usage courant. Sa pondération de 0,14 est importante, légèrement inférieure à POWER_CONSUMPTION_TYPICAL mais supérieure à POWER_CONSUMPTION_HDR, ce qui reflète l’importance encore prépondérante du SDR dans les usages actuels. L’ensemble formé par POWER_CONSUMPTION_TYPICAL, SDR et HDR offre ainsi une vision équilibrée de la sobriété énergétique du téléviseur dans différents scénarios d’utilisation."
+        MINAVAILABILITYSPAREPARTSYEARS: "MINAVAILABILITYSPAREPARTSYEARS mesure le nombre d’années pendant lesquelles les pièces détachées sont disponibles. Plus la durée est longue, plus le produit peut être réparé plutôt que remplacé, ce qui réduit les déchets et l’impact de fabrication."
+        MINGUARANTEEDSUPPORTYEARS: "MINGUARANTEEDSUPPORTYEARS indique le nombre d’années de support garanti (service et assistance). Un support long encourage la réparation et la longévité, limitant les renouvellements précoces."
+        MINAVAILABILITYSOFTWAREUPDATESYEARS: "MINAVAILABILITYSOFTWAREUPDATESYEARS signale combien d’années les mises à jour logicielles sont fournies. Des mises à jour prolongées améliorent la sécurité, la compatibilité et la durée de vie perçue du téléviseur."
+        WARRANTY: "WARRANTY reflète la durée de garantie légale ou commerciale. Une garantie plus longue couvre davantage de pannes, incite à des conceptions plus robustes et réduit le risque de remplacement anticipé."
       purpose: "L’objectif de cet éco-score est de synthétiser, sous la forme d’un indicateur unique, les principaux impacts environnementaux et sociétaux associés à l’usage et à la conception des téléviseurs. La démarche s’inspire de l’analyse de cycle de vie (ACV) en identifiant les étapes et postes d’impact dominants : consommation énergétique en phase d’utilisation, fabrication (matières et masse), réparabilité/durabilité et performance ESG du fabricant. Chaque facteur disponible est converti sur une échelle relative (0 à 100) au sein de la catégorie, en comparant les produits entre eux. Les meilleures performances environnementales obtiennent 100, les pires 0, les autres produits étant interpolés entre ces extrêmes. Les scores manquants sont remplacés par la moyenne de la catégorie pour le facteur concerné ; le facteur DATA_QUALITY permet alors de pénaliser légèrement les fiches incomplètes. La somme pondérée des facteurs (dont les poids totalisent 1) donne l’Impact Score global, permettant de distinguer les téléviseurs les moins impactants, tout en restant robuste face aux données partielles."
       criticalReview: "La méthodologie met logiquement l’accent sur la consommation énergétique en phase d’utilisation, qui domine l’empreinte carbone d’un téléviseur sur sa durée de vie, tout en intégrant des éléments de durabilité (réparabilité) et de responsabilité du fabricant (ESG). L’approche relative (meilleur = 100, pire = 0) est pertinente pour comparer des produits similaires disponibles sur le marché au même moment, car elle évite de figer des seuils absolus vite obsolètes. Toutefois, elle rend le score dépendant du périmètre de comparaison: l’arrivée de produits très performants ou très mauvais peut étirer artificiellement l’échelle. Il est donc important de définir des segments cohérents (par exemple par taille d’écran ou technologie d’affichage) pour éviter de pénaliser mécaniquement les grands téléviseurs.\nL’utilisation de consommations électriques détaillées (typique, SDR, HDR, veille réseau, off) est une force, car elle reflète différents usages réels (visionnage SDR, contenus HDR, connexions réseau permanentes). Néanmoins, l’absence d’information sur les profils d’usage (heures/an, part HDR vs SDR, temps en veille réseau) oblige à faire des hypothèses implicites; le score reste donc un comparatif de performances techniques plutôt qu’une ACV complète. Les classes énergétiques (CLASSE_ENERGY_SDR, CLASSE_ENERGY) doublonnent partiellement les données de puissance. Pour éviter une surpondération de l’énergie, on limite fortement le poids de ces classes, en privilégiant les valeurs chiffrées de consommation, plus discriminantes.\nLa prise en compte du poids comme proxy de l’impact de fabrication est utile mais imparfaite: elle ne distingue pas les matériaux (ex. aluminium vs plastiques recyclés) ni l’intensité carbone de la fabrication. C’est une approximation acceptable dans un contexte de données limitées, à condition de ne pas surpondérer ce facteur. L’indice de réparabilité est un point très positif, car la prolongation de la durée de vie est un levier majeur mais souvent négligé. Il faut néanmoins garder en tête que cet indice mesure la potentiel réparabilité et non la réparation effectivement réalisée ni la disponibilité des pièces dans le temps.\nLe score ESG de la marque ajoute une dimension sociétale utile, mais reste indirect par rapport à l’impact du produit lui-même et dépend de méthodologies externes (Sustainalytics) qui ont leurs propres biais (poids des controverses, couverture géographique, etc.). Son poids est donc limité. Le facteur DATA_QUALITY est crucial pour ne pas « récompenser » les fiches incomplètes: la virtualisation des valeurs manquantes par la moyenne évite d’exclure des produits, mais tend à les rendre artificiellement « moyens » sur ces facteurs. Le fait de pénaliser légèrement la qualité de donnée rééquilibre ce biais.\nParmi les limites de la démarche, on peut citer l’absence d’informations sur la composition précise des matériaux, les taux de matières recyclées, la logistique (transport), l’usage réel (profils utilisateurs) et la fin de vie effective (taux de collecte et de recyclage). Certains facteurs disponibles sont proches ou redondants (consommation typique vs SDR) et nécessitent un arbitrage fin pour ne pas compter deux fois le même effet. Malgré ces limites, la combinaison proposée reste cohérente pour une comparaison environnementale relative des téléviseurs, en mettant en avant la sobriété énergétique en usage et la durabilité par la réparabilité, tout en intégrant un signal sur les pratiques globales du fabricant."
       availlableDatas: "Les données disponibles couvrent principalement la phase d’utilisation (consommations électriques en modes SDR, HDR, typique, veille/réseau et arrêt), quelques aspects de conception (poids du produit), la réparabilité et un indicateur ESG de l’entreprise. Pour un téléviseur, la phase d’usage est majoritaire dans le bilan carbone sur la durée de vie, ce qui rend les indicateurs de puissance particulièrement pertinents. Les classes énergétiques (CLASSE_ENERGY_SDR, CLASSE_ENERGY) apportent un signal normalisé réglementaire, mais doublonnent partiellement l’information de consommation; elles sont utiles pour relativiser les produits au sein d’une même génération, tout en restant moins fines que les valeurs de puissance. Le poids (WEIGHT) est un proxy des impacts de fabrication (matières, transport, fin de vie) : plus l’appareil est lourd à diagonale équivalente, plus la quantité de matériaux est élevée, ce qui tend à augmenter l’impact de production. L’indice de réparabilité (REPAIRABILITY_INDEX) fournit une information clé sur le potentiel d’allongement de la durée de vie, donc de réduction des impacts liés au renouvellement des appareils. La performance ESG de la marque (BRAND_SUSTAINABILITY) permet d’intégrer un volet sociétal et de gouvernance, avec un lien indirect mais réel aux pratiques environnementales globales du fabricant. Enfin, DATA_QUALITY est indispensable pour refléter la complétude des données, sachant que les valeurs manquantes sont remplacées par la moyenne : il limite les biais liés aux fiches techniques peu détaillées. Globalement, le jeu de données est cohérent pour un score orienté usage et durabilité des téléviseurs, même si certains aspects du cycle de vie (composition précise des matériaux, procédés de fabrication, logistique, fin de vie réelle) ne sont pas directement capturés."
@@ -434,34 +438,177 @@ attributesConfig:
      ##################################
      - key: "MINAVAILABILITYSPAREPARTSYEARS"
        betterIs: "GREATER"
-       
        eprelFeatureNames:
-        - diagonalInch
-       faIcon: "mdi-arrow-top-right-bottom-left"
+        - minAvailabilitySparePartsYears
+       faIcon: "mdi-tools"
        name:
-         default: "Screen size"
-         fr: "Diagonale (en pouces)"
+         default: "Spare parts availability"
+         fr: "Disponibilité des pièces détachées"
        suffix:
          default: "Year(s)"
          fr: "An(s)"
        filteringType: "NUMERIC"
-   
-       asScore: false
+
+       asScore: true
        synonyms:
          all:
-           - "minAvailabilitySparePartsYears" 
+           - "minAvailabilitySparePartsYears"
+           - "SPARE_PARTS_YEARS"
 
-   
        parser:
          normalize: true
          trim: false
          lowerCase: false
          upperCase: true
          removeParenthesis: false
-   #      deleteTokens:
+
+
+     ##################################
+     # MINGUARANTEEDSUPPORTYEARS
+     ##################################
+     - key: "MINGUARANTEEDSUPPORTYEARS"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - minGuaranteedSupportYears
+       faIcon: "mdi-lifebuoy"
+       name:
+         default: "Guaranteed support duration"
+         fr: "Durée garantie du support"
+       suffix:
+         default: "Year(s)"
+         fr: "An(s)"
+       filteringType: "NUMERIC"
+
+       asScore: true
+       synonyms:
+         all:
+           - "minGuaranteedSupportYears"
+
+       parser:
+         normalize: true
+         trim: false
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: false
+
+
+     ##################################
+     # MINAVAILABILITYSOFTWAREUPDATESYEARS
+     ##################################
+     - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - minAvailabilitySoftwareUpdatesYears
+       faIcon: "mdi-update"
+       name:
+         default: "Software update availability"
+         fr: "Disponibilité des mises à jour logicielles"
+       suffix:
+         default: "Year(s)"
+         fr: "An(s)"
+       filteringType: "NUMERIC"
+
+       asScore: true
+       synonyms:
+         all:
+           - "minAvailabilitySoftwareUpdatesYears"
+           - "SOFTWARE_UPDATES_YEARS"
+
+       parser:
+         normalize: true
+         trim: false
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: false
+
+
+     ##################################
+     # WARRANTY
+     ##################################
+     - key: "WARRANTY"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - minGuaranteedGuarantee
+       faIcon: "mdi-shield-check"
+       name:
+         default: "Warranty duration"
+         fr: "Durée de garantie"
+       suffix:
+         default: "Year(s)"
+         fr: "An(s)"
+       filteringType: "NUMERIC"
+
+       asScore: true
+       synonyms:
+         all:
+           - "GARANTIE"
+           - "WARRANTY"
+           - "minGuaranteedGuarantee"
+
+       parser:
+         normalize: true
+         trim: false
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: false
 
 
   
+     ##################################
+     # DIAGONALE_CM
+     ##################################
+     - key: "DIAGONALE_CM"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - diagonalCm
+       faIcon: "mdi-arrow-top-right-bottom-left"
+       name:
+         default: "Screen size"
+         fr: "Diagonale (en centimètres)"
+       suffix:
+         default: "cm"
+         fr: "cm"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "diagonalCm"
+
+       parser:
+         normalize: true
+         trim: false
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: false
+
+
+     ##################################
+     # CALCULATED_DIAGONALINCH
+     ##################################
+     - key: "CALCULATED_DIAGONALINCH"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - calculatedDiagonalInch
+       faIcon: "mdi-ruler"
+       name:
+         default: "Calculated diagonal"
+         fr: "Diagonale calculée"
+       filteringType: "TEXT"
+
+       asScore: false
+       synonyms:
+         all:
+           - "calculatedDiagonalInch"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: true
+         upperCase: false
+         removeParenthesis: true
+
+
      ##################################
      # DIAGONALE
      ##################################
@@ -501,8 +648,10 @@ attributesConfig:
      # TYPE TV
      ##################################
      - key: "DISPLAY_TECHNOLOGY"
+       eprelFeatureNames:
+        - panelTechnology
        icecatFeaturesIds:
-         - 9713          
+         - 9713
        faIcon: "mdi-television"
        name:
          default: "Display technology"
@@ -524,11 +673,364 @@ attributesConfig:
          lowerCase: false
          upperCase: true    
          removeParenthesis: false
-         deleteTokens:   
-           - "TV"
-           
-           
-           
+       deleteTokens:
+         - "TV"
+
+
+
+     ##################################
+     # POWER_SUPPLY_TYPE
+     ##################################
+     - key: "POWER_SUPPLY_TYPE"
+       eprelFeatureNames:
+        - powerSupplyType
+       faIcon: "mdi-power-plug"
+       name:
+         default: "Power supply type"
+         fr: "Type d'alimentation"
+       filteringType: "TEXT"
+
+       asScore: false
+       synonyms:
+         all:
+           - "powerSupplyType"
+           - "POWER_SUPPLY_TYPE"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: true
+         upperCase: false
+         removeParenthesis: true
+
+
+     ##################################
+     # POWER_CONSUMPTION_STANDBY
+     ##################################
+     - key: "POWER_CONSUMPTION_STANDBY"
+       betterIs: "LOWER"
+       eprelFeatureNames:
+        - powerStandby
+       faIcon: "mdi-power-standby"
+       name:
+         default: "Power consumption (standby)"
+         fr: "Consommation en veille"
+       suffix:
+         default: "W"
+         fr: "W"
+       filteringType: "NUMERIC"
+
+       asScore: true
+       synonyms:
+         all:
+           - "powerStandby"
+           - "POWERSTANDBY"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+         deleteTokens:
+           - "W"
+
+
+     ##################################
+     # EXPORT_DATE_TS
+     ##################################
+     - key: "EXPORT_DATE_TS"
+       eprelFeatureNames:
+        - exportDateTS
+       faIcon: "mdi-calendar-clock"
+       name:
+         default: "Export date timestamp"
+         fr: "Horodatage d'export"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "exportDateTS"
+
+       parser:
+         normalize: true
+         trim: true
+        lowerCase: false
+        upperCase: true
+        removeParenthesis: true
+
+
+     ##################################
+     # ENERGY_CLASS_RANGE
+     ##################################
+     - key: "ENERGY_CLASS_RANGE"
+       eprelFeatureNames:
+        - energyClassRange
+        - energyClassImageWithScale
+       faIcon: "mdi-format-list-bulleted"
+       name:
+         default: "Energy class range"
+         fr: "Plage de classes énergétiques"
+       filteringType: "TEXT"
+
+       asScore: false
+       synonyms:
+         all:
+           - "energyClassRange"
+           - "energyClassImageWithScale"
+
+       parser:
+        normalize: true
+        trim: true
+        lowerCase: true
+        upperCase: false
+        removeParenthesis: true
+
+
+     ##################################
+     # RESOLUTION_HORIZONTAL_PIXELS
+     ##################################
+     - key: "RESOLUTION_HORIZONTAL_PIXELS"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - resolutionHorizontalPixels
+       faIcon: "mdi-monitor"
+       name:
+         default: "Horizontal resolution"
+         fr: "Résolution horizontale"
+       suffix:
+         default: "px"
+         fr: "px"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "resolutionHorizontalPixels"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+
+
+     ##################################
+     # RESOLUTION_VERTICAL_PIXELS
+     ##################################
+     - key: "RESOLUTION_VERTICAL_PIXELS"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - resolutionVerticalPixels
+       faIcon: "mdi-monitor"
+       name:
+         default: "Vertical resolution"
+         fr: "Résolution verticale"
+       suffix:
+         default: "px"
+         fr: "px"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "resolutionVerticalPixels"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+
+
+     ##################################
+     # ROOM_PRESENCE_AVAILABLE
+     ##################################
+     - key: "ROOM_PRESENCE_AVAILABLE"
+       eprelFeatureNames:
+        - roomPresenceAvailable
+       faIcon: "mdi-motion-sensor"
+       name:
+         default: "Room presence detection"
+         fr: "Détection de présence"
+       filteringType: "TEXT"
+
+       asScore: false
+       synonyms:
+         all:
+           - "roomPresenceAvailable"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: true
+         upperCase: false
+         removeParenthesis: true
+
+
+     ##################################
+     # FREQUENCY_RATE
+     ##################################
+     - key: "FREQUENCY_RATE"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - frequencyRate
+       faIcon: "mdi-refresh-auto"
+       name:
+         default: "Refresh rate"
+         fr: "Taux de rafraîchissement"
+       suffix:
+         default: "Hz"
+         fr: "Hz"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "frequencyRate"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+
+
+     ##################################
+     # SIZE_RATIO_X
+     ##################################
+     - key: "SIZE_RATIO_X"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - sizeRatioX
+       faIcon: "mdi-aspect-ratio"
+       name:
+         default: "Aspect ratio width"
+         fr: "Rapport largeur"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "sizeRatioX"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+
+
+     ##################################
+     # SIZE_RATIO_Y
+     ##################################
+     - key: "SIZE_RATIO_Y"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - sizeRatioY
+       faIcon: "mdi-aspect-ratio"
+       name:
+         default: "Aspect ratio height"
+         fr: "Rapport hauteur"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "sizeRatioY"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+
+
+     ##################################
+     # VISIBLE_AREA_V2
+     ##################################
+     - key: "VISIBLE_AREA_V2"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - visibleAreaV2
+       faIcon: "mdi-television-classic"
+       name:
+         default: "Visible area"
+         fr: "Surface visible"
+       suffix:
+         default: "cm²"
+         fr: "cm²"
+       filteringType: "NUMERIC"
+
+       asScore: false
+       synonyms:
+         all:
+           - "visibleAreaV2"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: true
+
+
+     ##################################
+     # VOICE_AVAILABLE
+     ##################################
+     - key: "VOICE_AVAILABLE"
+       eprelFeatureNames:
+        - voiceAvailable
+       faIcon: "mdi-microphone"
+       name:
+         default: "Voice control available"
+         fr: "Commande vocale disponible"
+       filteringType: "TEXT"
+
+       asScore: false
+       synonyms:
+         all:
+           - "voiceAvailable"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: true
+         upperCase: false
+         removeParenthesis: true
+
+
+     ##################################
+     # AUTO_BRIGHTNESS_CONTROL_AVAILABLE
+     ##################################
+     - key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"
+       eprelFeatureNames:
+        - autoBrightnessControlAvailable
+       faIcon: "mdi-brightness-auto"
+       name:
+         default: "Automatic brightness control"
+         fr: "Contrôle automatique de la luminosité"
+       filteringType: "TEXT"
+
+       asScore: false
+       synonyms:
+         all:
+           - "autoBrightnessControlAvailable"
+
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: true
+         upperCase: false
+         removeParenthesis: true
+
+
      ################################################################################
      #                         CONSOMMATION ELECTRIQUE (ARRET / VEILLE / RESEAU)
      ################################################################################
@@ -543,6 +1045,8 @@ attributesConfig:
              
      - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
        betterIs: "LOWER"
+       eprelFeatureNames:
+        - powerStandbyNetworked
        filteringType: "NUMERIC"
        asScore: true
        faIcon: "mdi-power-plug-off"
@@ -552,9 +1056,14 @@ attributesConfig:
        name:
              default: "Power consumption (standby networked)"
              fr: "Consommation électrique (arrêt/veille/réseau)"
-         
+
+       suffix:
+             default: "W"
+             fr: "W"
+
        synonyms:
             all:
+              - "powerStandbyNetworked"
               - "POWERSTANDBYNETWORKED"
                 
        parser:
@@ -579,8 +1088,10 @@ attributesConfig:
          ##################################
              
 
-     - key: "POWER_CONSUMPTION_SDR"
-       betterIs: "LOWER"
+    - key: "POWER_CONSUMPTION_SDR"
+      betterIs: "LOWER"
+       eprelFeatureNames:
+        - powerOnModeSDR
        filteringType: "NUMERIC"
        asScore: true
        faIcon: "mdi-power-plug-off"
@@ -590,9 +1101,14 @@ attributesConfig:
        name:
              default: "Power consumption (SDR)"
              fr: "Consommation électrique (basse définition)"
-         
+
+       suffix:
+             default: "W"
+             fr: "W"
+
        synonyms:
             all:
+              - "powerOnModeSDR"
               - "POWERONMODESDR"
                 
        parser:
@@ -616,8 +1132,10 @@ attributesConfig:
          ##################################
              
 
-     - key: "POWER_CONSUMPTION_HDR"
-       betterIs: "LOWER"
+    - key: "POWER_CONSUMPTION_HDR"
+      betterIs: "LOWER"
+       eprelFeatureNames:
+        - powerOnModeHDR
        filteringType: "NUMERIC"
        asScore: true
        faIcon: "mdi-power-plug-off"
@@ -627,9 +1145,14 @@ attributesConfig:
        name:
              default: "Power consumption (HDR)"
              fr: "Consommation électrique (haute définition)"
-         
+
+       suffix:
+             default: "W"
+             fr: "W"
+
        synonyms:
             all:
+              - "powerOnModeHDR"
               - "POWERONMODEHDR"
                 
        parser:
@@ -692,24 +1215,81 @@ attributesConfig:
           F++: 3.0
           F+: 2.0
           F: 1.0
-          G: 0.0      
+          G: 0.0
+
+ ################################################################################
+ #                         CLASSE ELECTRIQUE HDR
+ ################################################################################
+
+     -  key: "CLASSE_ENERGY_HDR"
+        betterIs: "GREATER"
+        eprelFeatureNames:
+         - energyClassHDR
+        faIcon: "mdi-flash"
+        name:
+          default: "Energy class HDR"
+          fr: "Classe énergétique (HDR)"
+        filteringType: "TEXT"
+        asScore: true
+
+        attributeValuesOrdering: "MAPPED"
+        synonyms:
+          all:
+          - "energyClassHDR"
+          - "ENERGYCLASSHDR"
+          - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
+
+        parser:
+          normalize: true
+          trim: true
+          lowerCase: false
+          upperCase: true
+          removeParenthesis: false
+          deleteTokens:
+          - "CLASSE"
+          - "(ÉCHELLE A++ À E)"
+          - "NOT AVAILABLE"
+        numericMapping:
+          A+++: 18.0
+          A++: 18.0
+          A+: 17.0
+          A: 16.0
+          B++: 15.0
+          B+: 14.0
+          B: 13.0
+          C++: 12.0
+          C+: 11.0
+          C: 10.0
+          D++: 9.0
+          D+: 8.0
+          D: 7.0
+          E++: 6.0
+          E+: 5.0
+          E: 4.0
+          F++: 3.0
+          F+: 2.0
+          F: 1.0
+          G: 0.0
 
  ################################################################################
  #                         CLASSE ELECTRIQUE SDR
  ################################################################################
  
-     -  key: "CLASSE_ENERGY_SDR"
-        betterIs: "GREATER"
-        faIcon: "mdi-flash"
-        name:
-          default: "Energy class HDR"
-          fr: "Classe énergétique (haute résolution)"
-        filteringType: "TEXT"
-        asScore: true
+    -  key: "CLASSE_ENERGY_SDR"
+       betterIs: "GREATER"
+       eprelFeatureNames:
+        - energyClassSDR
+       faIcon: "mdi-flash"
+       name:
+          default: "Energy class SDR"
+          fr: "Classe énergétique (SDR)"
+       filteringType: "TEXT"
+       asScore: true
         
         attributeValuesOrdering: "MAPPED"
         synonyms:
           all:
+          - "energyClassSDR"
           - "ENERGYCLASSHDR"
           - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
           
