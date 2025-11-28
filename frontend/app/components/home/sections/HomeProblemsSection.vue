@@ -38,8 +38,7 @@ const visualImage = computed(() => ({
         v-for="item in props.items"
         :key="item.text"
         cols="12"
-        sm="6"
-        class="home-problems__list-item"
+        class="home-problems__list-item card__nudger card__nudger--border card__nudger--radius_top-right_0 card__nudger--radius_bottom-right_50px"
       >
         <v-sheet class="home-problems__card" rounded="xl" elevation="0">
           <v-avatar class="home-problems__icon" color="surface" size="64">
@@ -53,8 +52,21 @@ const visualImage = computed(() => ({
 </template>
 
 <style scoped lang="sass">
+.home-section
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
+  
+.home-split__content
+  position: relative    
+
 .home-problems
-  background: rgba(var(--v-theme-surface-default), 0.98)
+  //background: rgba(var(--v-theme-surface-default), 0.98)
+
+  .card__nudger
+    margin-bottom: 1rem
+
+    &:last-of-type
+      margin-bottom: 0
 
 .home-problems__list
   --v-gutter-y: clamp(1rem, 3vw, 1.5rem)
@@ -67,16 +79,11 @@ const visualImage = computed(() => ({
   display: flex
   gap: 1rem
   align-items: center
-  padding: clamp(1.25rem, 3vw, 1.75rem)
-  background: rgba(var(--v-theme-surface-default), 1)
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
-  box-shadow: 0 18px 28px rgba(var(--v-theme-shadow-primary-600), 0.08)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+  background: transparent!important
 
 .home-problems__icon
-  background: rgba(var(--v-theme-surface-primary-080), 0.7)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
-  color: rgba(var(--v-theme-hero-gradient-start), 0.95)
+  border: 1px solid rgb(var(--v-theme-secondary))
+  color: rgb(var(--v-theme-secondary))
 
 .home-problems__text
   margin: 0

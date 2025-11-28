@@ -16,18 +16,22 @@ const { t } = useI18n()
   <section class="home-section home-objections" aria-labelledby="home-objections-title">
     <v-container fluid class="home-section__container">
       <div class="home-section__inner">
-        <header class="home-section__header">
-          <h2 id="home-objections-title">{{ t('home.objections.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.objections.subtitle') }}</p>
-        </header>
-        <v-row class="home-objections__grid">
-          <v-col v-for="item in props.items" :key="item.question" cols="12" md="4">
-            <v-card class="home-objections__card" variant="outlined">
-              <div class="home-objections__card-header">
-                <v-icon class="home-objections__icon" :icon="item.icon" size="28" />
-                <h3 class="home-objections__question">{{ item.question }}</h3>
+        <p id="home-objections-title" class="home-hero__subtitle">{{ t('home.objections.title') }}</p>
+        <p class="home-section__subtitle text-center">{{ t('home.objections.subtitle') }}</p>
+        <v-row class="home-features__grid mt-5 home-objections__grid" align="stretch" justify="center">
+          <v-col 
+            v-for="item in props.items" 
+            :key="item.question" 
+            cols="12" 
+            sm="6" 
+            lg="4"
+          >
+            <v-card class="home-features__card card__nudger" variant="flat">
+              <div class="text-center">
+                <v-icon class="home-features__icon _home-objections__icon_" :icon="item.icon" size="100" />
               </div>
-              <p class="home-objections__answer">{{ item.answer }}</p>
+              <h3 class="home-hero__subtitle home-features__card-title _home-objections__question_">{{ item.question }}</h3>
+              <p class="home-features__card-description text-center mt-auto">{{ item.answer }}</p>
             </v-card>
           </v-col>
         </v-row>
@@ -38,8 +42,8 @@ const { t } = useI18n()
 
 <style scoped lang="sass">
 .home-section
-  padding-block: clamp(3rem, 6vw, 5rem)
-  background: rgba(var(--v-theme-surface-default), 0.98)
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
 
 .home-section__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
@@ -49,7 +53,7 @@ const { t } = useI18n()
   margin: 0 auto
   display: flex
   flex-direction: column
-  gap: clamp(2rem, 5vw, 3rem)
+  gap: clamp(0.875rem, 2vw, 1.25rem);
 
 .home-section__header
   max-width: 760px
@@ -91,6 +95,30 @@ const { t } = useI18n()
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .home-objections__answer
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.home-features__card
+  height: 100%
+  display: flex
+  flex-direction: column
+  gap: 1rem
+  //padding: clamp(1.75rem, 4vw, 2.25rem)
+  //border-radius: clamp(1.25rem, 3vw, 1.75rem)
+  //background: rgba(var(--v-theme-surface-glass-strong), 0.9)
+  //border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
+  box-shadow: 0 16px 28px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+.home-features__icon
+  color: rgb(var(--v-theme-secondary))
+  text-align: center
+
+.home-features__card-title
+  margin: 0
+  font-size: 1.2rem
+  font-weight: 600
+
+.home-features__card-description
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
 </style>

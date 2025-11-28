@@ -39,16 +39,14 @@ const sectionClasses = computed(() => [
       <div class="home-section__inner">
         <v-row class="home-split__content" align="center" justify="space-between">
           <v-col cols="12" md="6" class="home-split__col home-split__col--copy">
-            <header class="home-section__header">
               <slot name="eyebrow" />
-              <h2 :id="titleId">{{ props.title }}</h2>
+              <p class="home-hero__subtitle" :id="titleId">{{ props.title }}</p>
               <p v-if="props.description" class="home-section__subtitle">{{ props.description }}</p>
-            </header>
-            <div class="home-section__body">
-              <slot />
-            </div>
+              <div class="home-section__body">
+                <slot />
+              </div>
           </v-col>
-          <v-col cols="12" md="6" class="home-split__col home-split__col--visual">
+          <v-col cols="12" md="6" class="home-split__col home-split__col--visual card__nudger">
             <div class="home-split__visual" role="presentation">
               <slot name="visual">
                 <img
@@ -72,11 +70,14 @@ const sectionClasses = computed(() => [
 
 <style scoped lang="sass">
 .home-section
-  padding-block: clamp(3rem, 6vw, 5.5rem)
-  background: rgba(var(--v-theme-surface-primary-050), 0.6)
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
 
 .home-section__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
+
+.home-hero__subtitle
+  text-align: left
 
 .home-section__inner
   max-width: 1180px
@@ -101,15 +102,18 @@ const sectionClasses = computed(() => [
 
 .home-split__content
   row-gap: clamp(2rem, 5vw, 3rem)
+  //background: rgb(var(--v-theme-hero-overlay-strong))
 
 .home-split__col--copy
   display: flex
   flex-direction: column
-  gap: clamp(1.75rem, 4vw, 2.5rem)
+  gap: clamp(0.875rem, 2vw, 1.25rem)
 
 .home-split__col--visual
   display: flex
   justify-content: center
+  position: sticky;
+  top: 64px // hauteur header menu
 
 .home-split__visual
   position: relative

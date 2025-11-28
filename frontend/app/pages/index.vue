@@ -609,11 +609,12 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 0
-  background-color: rgb(var(--v-theme-surface-default))
+  background-color: transparent
 
 .home-page__sections
   display: flex
   flex-direction: column
-  gap: clamp(3rem, 7vw, 5rem)
+  gap: clamp(1.5rem, 3.5vw, 2.5rem)
   padding-top: var(--cat-overlap)
+  background: rgb(var(--v-theme-surface-default))
 </style>

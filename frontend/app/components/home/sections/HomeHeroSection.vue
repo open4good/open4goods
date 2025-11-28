@@ -116,57 +116,65 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 </script>
 
 <template>
-  <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
+  <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title">
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
-          <v-col cols="12" lg="6" class="home-hero__content">
+          <v-col cols="12" class="home-hero__content">
             <h1 id="home-hero-title" class="home-hero__title">
               {{ t('home.hero.title') }}
             </h1>
-            <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
-
-            <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
-              <SearchSuggestField
-                :model-value="searchQueryValue"
-                class="home-hero__search-input"
-                :label="t('home.hero.search.label')"
-                :placeholder="t('home.hero.search.placeholder')"
-                :aria-label="t('home.hero.search.ariaLabel')"
-                :min-chars="minSuggestionQueryLength"
-                @update:model-value="updateSearchQuery"
-                @submit="handleSubmit"
-                @select-category="handleCategorySelect"
-                @select-product="handleProductSelect"
-              >
-                <template #append-inner>
-                  <v-btn
-                    class="home-hero__search-submit"
-                    icon="mdi-arrow-right"
-                    variant="flat"
-                    color="primary"
-                    size="small"
-                    type="submit"
-                    :aria-label="t('home.hero.search.cta')"
-                  />
-                </template>
-              </SearchSuggestField>
-            </form>
-
-            <p class="mt-4 ms-6 home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
-
-            <ul v-if="heroHelperItems.length" class="ms-8 home-hero__helpers">
-              <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
-                <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
-                <span class="home-hero__helper-text">{{ item.label }}</span>
-              </li>
-            </ul>
+          </v-col>
+        </v-row>
+        <v-row justify="center">
+          <v-col cols="12" lg="6" class="home-hero__content">
+            <div class="card__nudger">
+              <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
+              <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
+                <SearchSuggestField
+                  :model-value="searchQueryValue"
+                  class="home-hero__search-input"
+                  :label="t('home.hero.search.label')"
+                  :placeholder="t('home.hero.search.placeholder')"
+                  :aria-label="t('home.hero.search.ariaLabel')"
+                  :min-chars="minSuggestionQueryLength"
+                  @update:model-value="updateSearchQuery"
+                  @submit="handleSubmit"
+                  @select-category="handleCategorySelect"
+                  @select-product="handleProductSelect"
+                >
+                  <template #append-inner>
+                    <v-btn
+                      class="home-hero__search-submit nudger_degrade-defaut"
+                      icon="mdi-arrow-right"
+                      variant="flat"
+                      color="primary"
+                      size="small"
+                      type="submit"
+                      :aria-label="t('home.hero.search.cta')"
+                    />
+                  </template>
+                </SearchSuggestField>
+              </form>
+              <v-row class="mt-5" align="center">
+                <v-col cols="12" lg="4">
+                  <p class="mt-4 ms-6 home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                </v-col>
+                <v-col cols="12" lg="8">
+                  <ul v-if="heroHelperItems.length" class="ms-8 home-hero__helpers">
+                    <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
+                      <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
+                      <span class="home-hero__helper-text">{{ item.label }}</span>
+                    </li>
+                  </ul>
+                </v-col>
+              </v-row>
+            </div>
           </v-col>
 
-          <v-col
+          <!--v-col
             v-if="shouldRenderHeroMedia"
             cols="12"
-            lg="6"
             class="home-hero__media"
             :aria-hidden="!shouldRenderHeroMedia"
           >
@@ -190,7 +198,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                 <a :href="heroVideoSrc">{{ t('home.hero.video.accessibleLink') }}</a>
               </p>
             </v-sheet>
-          </v-col>
+          </v-col-->
         </v-row>
       </div>
     </v-container>
@@ -215,6 +223,13 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   min-height: clamp(560px, 75dvh, 880px)
   padding-block-start: clamp(3rem, 8vw, 5.5rem)
   padding-block-end: calc(clamp(3.5rem, 10vw, 6rem) + var(--hero-cat-in-hero))
+
+.v-theme--nudger
+  .home-hero
+    background-image: url('/images/home/home-hero_background.webp')
+    background-size: cover
+    background-position: center
+    background-repeat: no-repeat
 
 .home-hero__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
@@ -247,11 +262,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   font-size: clamp(2.2rem, 5vw, 3.8rem)
   line-height: 1.05
   margin: 0
-
-.home-hero__subtitle
-  font-size: clamp(1.05rem, 2.6vw, 1.35rem)
-  color: rgb(var(--v-theme-text-neutral-secondary))
-  margin: 0
+  color: #ffffff
+  text-align: center
+  text-shadow: rgb(var(--v-theme-primary)) 1px 0 10px
 
 .home-hero__search
   display: flex

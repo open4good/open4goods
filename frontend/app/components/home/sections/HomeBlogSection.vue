@@ -1,39 +1,38 @@
 <script setup lang="ts">
-import { toRefs } from 'vue'
+  import { toRefs } from 'vue'
 
-interface BlogItem {
-  title?: string | null
-  summary?: string | null
-  formattedDate?: string
-  image?: string | null
-  link: string
-  hasImage: boolean
-}
+  interface BlogItem {
+    title?: string | null
+    summary?: string | null
+    formattedDate?: string
+    image?: string | null
+    link: string
+    hasImage: boolean
+  }
 
-const props = defineProps<{
-  loading: boolean
-  featuredItem: BlogItem | null
-  secondaryItems: BlogItem[]
-}>()
+  const props = defineProps<{
+    loading: boolean
+    featuredItem: BlogItem | null
+    secondaryItems: BlogItem[]
+  }>()
 
-const { loading, featuredItem, secondaryItems } = toRefs(props)
+  const { loading, featuredItem, secondaryItems } = toRefs(props)
 
-const { t } = useI18n()
-const localePath = useLocalePath()
+  const { t } = useI18n()
+  const localePath = useLocalePath()
 
-const featuredFallbackIconSize = 68
-const secondaryFallbackIconSize = 48
+  const featuredFallbackIconSize = 68
+  const secondaryFallbackIconSize = 48
 </script>
 
 <template>
   <section class="home-section home-blog" aria-labelledby="home-blog-title">
     <v-container fluid class="home-section__container">
       <div class="home-section__inner">
-        <header class="home-section__header">
-          <h2 id="home-blog-title">{{ t('home.blog.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.blog.subtitle') }}</p>
+          <p id="home-blog-title" class="home-hero__subtitle">{{ t('home.blog.title') }}</p>
+          <p class="home-section__subtitle text-center">{{ t('home.blog.subtitle') }}</p>
           <v-btn
-            class="home-section__cta"
+            class="home-section__cta  nudger_degrade-defaut mx-auto"
             :to="localePath({ name: 'blog' })"
             color="primary"
             variant="tonal"
@@ -41,7 +40,6 @@ const secondaryFallbackIconSize = 48
           >
             {{ t('home.blog.cta') }}
           </v-btn>
-        </header>
 
         <div v-if="loading" class="home-blog__skeletons">
           <v-skeleton-loader
@@ -68,7 +66,7 @@ const secondaryFallbackIconSize = 48
                 </div>
                 <div class="home-blog__content">
                   <p class="home-blog__date">{{ featuredItem.formattedDate }}</p>
-                  <h3 class="home-blog__title">{{ featuredItem.title }}</h3>
+                  <h3 class="home-blog__title home-hero__subtitle text-left">{{ featuredItem.title }}</h3>
                   <p class="home-blog__summary">{{ featuredItem.summary }}</p>
                   <span class="home-blog__link-label">{{ t('home.blog.readMore') }}</span>
                 </div>
@@ -132,18 +130,18 @@ const secondaryFallbackIconSize = 48
 
 <style scoped lang="sass">
 .home-section
-  padding-block: clamp(3rem, 6vw, 5.5rem)
-  background: rgba(var(--v-theme-surface-default), 0.96)
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
 
 .home-section__container
-  padding-inline: clamp(1.5rem, 5vw, 4rem)
+  padding-inline: 0
 
 .home-section__inner
   max-width: 1180px
   margin: 0 auto
   display: flex
   flex-direction: column
-  gap: clamp(2rem, 5vw, 3rem)
+  gap: clamp(0.875rem, 2vw, 1.25rem);
 
 .home-section__header
   max-width: 760px

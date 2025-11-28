@@ -650,13 +650,13 @@ const handleScannerDecode = (rawValue: string | null) => {
   width: 100%
 
 .search-suggest-field
-  width: 100%
+  width: 100%   
 
   :deep(.v-field)
     background-color: rgba(var(--v-theme-hero-overlay-soft), 0.94)
     border-radius: 1rem
     box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
-    cursor: text
+    cursor: text    
 
   :deep(.v-field__overlay)
     cursor: text
@@ -674,7 +674,7 @@ const handleScannerDecode = (rawValue: string | null) => {
   :deep(.v-overlay__content)
     border-radius: 1rem
     box-shadow: 0 20px 40px -24px rgba(15, 23, 42, 0.55)
-    overflow: hidden
+    overflow: hidden    
 
 .search-suggest-field__scanner-button
   min-width: auto
@@ -719,6 +719,7 @@ const handleScannerDecode = (rawValue: string | null) => {
   overflow: hidden
   background-color: rgb(7, 12, 24)
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.45)
+  
 
 .search-suggest-field__scanner-helper
   margin: 0
@@ -753,6 +754,7 @@ const handleScannerDecode = (rawValue: string | null) => {
   border-radius: 0.9rem
   margin: 0 0.5rem
   transition: background-color 0.2s ease, transform 0.2s ease
+  
 
   &:hover,
   &:focus-visible
