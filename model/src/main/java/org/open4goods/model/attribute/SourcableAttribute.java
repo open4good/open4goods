@@ -1,148 +1,203 @@
 package org.open4goods.model.attribute;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Base class for attributes that track multiple sourced values.
+ */
 public abstract class SourcableAttribute {
 
-	protected Set<SourcedAttribute> source = new HashSet<>();
+        private static final List<String> DEFAULT_TRUSTED_SOURCE_PRIORITY = List.of("eprel", "icecat.biz");
 
-	public boolean hasConflicts() {
-		return distinctValues() > 1;
-	}
+        private static List<String> trustedSourcePriority = new ArrayList<>(DEFAULT_TRUSTED_SOURCE_PRIORITY);
 
-	public String bgRow() {
-		String ret = "table-default";
-		int sCount = sourcesCount();
-		long dValues = distinctValues();
+        protected Set<SourcedAttribute> source = new HashSet<>();
 
-		if (sCount == 0) {
-			ret = "table-danger";
-		} else if (sCount == 1) {
-			ret = "table-default";
-		} else {
-			ret = "table-info";
-		}
+        public boolean hasConflicts() {
+                return distinctValues() > 1;
+        }
 
-		if (dValues > 1) {
-			ret = "table-danger";
-		}
+        public String bgRow() {
+                String ret = "table-default";
+                int sCount = sourcesCount();
+                long dValues = distinctValues();
 
-		return ret;
-	}
+                if (sCount == 0) {
+                        ret = "table-danger";
+                } else if (sCount == 1) {
+                        ret = "table-default";
+                } else {
+                        ret = "table-info";
+                }
 
+                if (dValues > 1) {
+                        ret = "table-danger";
+                }
 
-	/**
-	 *
-	 * @return the best value
-	 */
-	public String bestValue() {
-
-		// TODO : (P1) : logic should be externalized, wear mapping of datasourcename from conf
-		// Count values by unique keys... NOTE : Should have a java8+ nice solution here
-		// !
-
-		// TODO : ugly
-		// First check if eprel datasource
-
-		// TODO : Externalize a datasource trustOrder (the old "isReferentiel" is back )
-		Optional<SourcedAttribute> trustedSource = source.stream().filter(e-> "eprel".equals(e.getDataSourcename())).findAny();
-
-		if (trustedSource.isPresent()) {
-			return trustedSource.get().getValue();
-		}
-
-		trustedSource = source.stream().filter(e-> "icecat.biz".equals(e.getDataSourcename())).findAny();
-
-		if (trustedSource.isPresent()) {
-			return trustedSource.get().getValue();
-		}
+                return ret;
+        }
 
 
-		Map<String, Integer> valueCounter = new HashMap<>();
+        /**
+         * Returns the most reliable value based on datasource priority, vote count and
+         * lexical order. Values are normalized (trimmed, whitespace condensed and
+         * lowercased) before counting so that variations such as "Noir" and "noir"
+         * are considered equivalent. Tie-breaking is deterministic: datasource
+         * priority wins first, then highest vote count, then lexical order of the
+         * normalized value.
+         *
+         * @return the elected value, or {@code null} when no source provided a
+         *         non-blank value
+         */
+        public String bestValue() {
 
-		for (SourcedAttribute source : source) {
+                if (source.isEmpty()) {
+                        return null;
+                }
 
-			valueCounter.merge(source.getValue(), 1, Integer::sum);
-		}
+                Map<String, ValueStats> valueCounter = new HashMap<>();
 
-		// sort this map by values
+                for (SourcedAttribute sourcedAttribute : source) {
+                        if (StringUtils.isBlank(sourcedAttribute.getValue())) {
+                                continue;
+                        }
 
-		Map<String, Integer> result = valueCounter.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                        String normalizedValue = normalizeValue(sourcedAttribute.getValue());
+                        int priorityIndex = trustedSourcePriorityIndex(sourcedAttribute.getDataSourcename());
 
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue,
-						LinkedHashMap::new));
+                        valueCounter.computeIfAbsent(normalizedValue, ignored -> new ValueStats())
+                                        .accept(priorityIndex, sourcedAttribute.getValue());
+                }
 
-		// Take the first one : will be the "most recommanded" if discriminant number of
-		// datasources, a random value otherwise
+                if (valueCounter.isEmpty()) {
+                        return null;
+                }
 
-		return result.entrySet().stream().findFirst().get().getKey();
-	}
+                Comparator<Map.Entry<String, ValueStats>> comparator = Comparator
+                                .<Map.Entry<String, ValueStats>>comparingInt(entry -> entry.getValue().bestPriority)
+                                .thenComparing(entry -> entry.getValue().count, Comparator.reverseOrder())
+                                .thenComparing(Map.Entry::getKey);
 
-	/**
-	 * Return the number of distinct values
-	 *
-	 * @return
-	 */
-	public long ponderedvalues() {
-		return source.stream().map(e -> e.getValue()).distinct().count();
-	}
+                return valueCounter.entrySet().stream()
+                                .min(comparator)
+                                .map(entry -> entry.getValue().bestOriginalValue)
+                                .orElse(null);
+        }
 
-
-	/**
-	 * Number of sources for this attribute
-	 *
-	 * @return
-	 */
-	public int sourcesCount() {
-		return source.size();
-	}
-
-	/**
-	 * The number of different values for this item
-	 *
-	 * @return
-	 */
-	public long distinctValues() {
-		return source.stream().map(e->e.getValue()).distinct().count();
-	}
-
-	/**
-	 * For UI, a String representation of all providers names
-	 *
-	 * @return
-	 */
-	public String providersToString() {
-		return StringUtils.join(source.stream().map(e->e.getDataSourcename()).toArray(), ", ");
-	}
-
-	/**
-	 * For UI, a String representation of all providers names and values
-	 *
-	 * @return
-	 */
-	public String sourcesToString() {
-		return StringUtils.join(source.stream().map(e -> e.getDataSourcename() + ":" + e.getValue()).toArray(), ", ");
-
-	}
-
-	public Set<SourcedAttribute> getSource() {
-		return source;
-	}
-
-	public void setSource(Set<SourcedAttribute> source) {
-		this.source = source;
-	}
+        /**
+         * Return the number of distinct values
+         *
+         * @return
+         */
+        public long ponderedvalues() {
+                return source.stream().map(e -> e.getValue()).distinct().count();
+        }
 
 
+        /**
+         * Number of sources for this attribute
+         *
+         * @return
+         */
+        public int sourcesCount() {
+                return source.size();
+        }
 
+        /**
+         * The number of different values for this item
+         *
+         * @return
+         */
+        public long distinctValues() {
+                return source.stream().map(e->e.getValue()).distinct().count();
+        }
+
+        /**
+         * For UI, a String representation of all providers names
+         *
+         * @return
+         */
+        public String providersToString() {
+                return StringUtils.join(source.stream().map(e->e.getDataSourcename()).toArray(), ", ");
+        }
+
+        /**
+         * For UI, a String representation of all providers names and values
+         *
+         * @return
+         */
+        public String sourcesToString() {
+                return StringUtils.join(source.stream().map(e -> e.getDataSourcename() + ":" + e.getValue()).toArray(), ", ");
+
+        }
+
+        public Set<SourcedAttribute> getSource() {
+                return source;
+        }
+
+        public void setSource(Set<SourcedAttribute> source) {
+                this.source = source;
+        }
+
+        /**
+         * Overrides the trusted source priority list. The order of the provided list
+         * defines the priority (index 0 is the most trusted).
+         *
+         * @param priority ordered list of datasource names
+         */
+        public static void setTrustedSourcePriority(List<String> priority) {
+                if (priority == null) {
+                        trustedSourcePriority = new ArrayList<>();
+                        return;
+                }
+                trustedSourcePriority = new ArrayList<>(priority);
+        }
+
+        /**
+         * Resets the trusted source priority to the module default.
+         */
+        public static void resetTrustedSourcePriority() {
+                trustedSourcePriority = new ArrayList<>(DEFAULT_TRUSTED_SOURCE_PRIORITY);
+        }
+
+        private int trustedSourcePriorityIndex(String datasource) {
+                if (datasource == null) {
+                        return Integer.MAX_VALUE;
+                }
+                Optional<Integer> index = java.util.stream.IntStream.range(0, trustedSourcePriority.size())
+                                .filter(i -> datasource.equalsIgnoreCase(trustedSourcePriority.get(i)))
+                                .boxed()
+                                .findFirst();
+                return index.orElse(Integer.MAX_VALUE);
+        }
+
+        private String normalizeValue(String value) {
+                return StringUtils.normalizeSpace(value).trim().toLowerCase(Locale.ROOT);
+        }
+
+        private static final class ValueStats {
+                private int count = 0;
+                private int bestPriority = Integer.MAX_VALUE;
+                private String bestOriginalValue = null;
+
+                private void accept(int priority, String originalValue) {
+                        count++;
+                        String cleanedOriginal = StringUtils.normalizeSpace(originalValue);
+                        if (bestOriginalValue == null || priority < bestPriority
+                                        || (priority == bestPriority && cleanedOriginal.compareTo(bestOriginalValue) < 0)) {
+                                bestPriority = priority;
+                                bestOriginalValue = cleanedOriginal;
+                        }
+                }
+        }
 }
