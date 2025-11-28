@@ -20,7 +20,8 @@ const { t } = useI18n()
       <div class="home-section__inner">
         <header class="home-section__header">
           <h2 id="home-faq-title">{{ t('home.faq.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.faq.subtitle') }}</p>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <p class="home-section__subtitle subtitle-text" v-html="t('home.faq.subtitle')" />
         </header>
         <v-expansion-panels class="home-faq__panels" multiple variant="accordion">
           <v-expansion-panel v-for="panel in props.items" :key="panel.blocId">
@@ -65,7 +66,6 @@ const { t } = useI18n()
 
 .home-section__subtitle
   margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-faq__panels
   border-radius: clamp(1.25rem, 3vw, 1.75rem)

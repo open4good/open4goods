@@ -31,7 +31,8 @@ const secondaryFallbackIconSize = 48
       <div class="home-section__inner">
         <header class="home-section__header">
           <h2 id="home-blog-title">{{ t('home.blog.title') }}</h2>
-          <p class="home-section__subtitle">{{ t('home.blog.subtitle') }}</p>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <p class="home-section__subtitle subtitle-text" v-html="t('home.blog.subtitle')" />
           <v-btn
             class="home-section__cta"
             :to="localePath({ name: 'blog' })"
@@ -159,7 +160,6 @@ const secondaryFallbackIconSize = 48
 
 .home-section__subtitle
   margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-blog__skeletons
   display: grid

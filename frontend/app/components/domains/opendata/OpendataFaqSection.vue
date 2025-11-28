@@ -17,7 +17,8 @@ defineProps<{
     <v-container max-width="lg">
       <div class="opendata-faq__header">
         <h2 id="opendata-faq-heading" class="opendata-faq__title">{{ title }}</h2>
-        <p v-if="subtitle" class="opendata-faq__subtitle">{{ subtitle }}</p>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <p v-if="subtitle" class="opendata-faq__subtitle subtitle-text" v-html="subtitle" />
       </div>
 
       <v-expansion-panels variant="accordion" class="opendata-faq__panels">
@@ -53,8 +54,7 @@ defineProps<{
 .opendata-faq__subtitle
   margin-top: 1rem
   margin-bottom: 0
-  font-size: 1.05rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+  --subtitle-size: 1.05rem
 
 .opendata-faq__panels
   border-radius: 20px

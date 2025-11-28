@@ -8,7 +8,8 @@
             <h1 id="search-hero-heading" class="search-hero__title">
               {{ t('search.hero.title') }}
             </h1>
-            <p class="search-hero__subtitle">{{ t('search.hero.subtitle') }}</p>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <p class="search-hero__subtitle subtitle-text" v-html="t('search.hero.subtitle')" />
           </div>
 
           <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
@@ -570,9 +571,9 @@ function formatFallbackVerticalTitle(verticalId: string): string {
 
   &__subtitle
     margin: 0
-    font-size: clamp(1rem, 2.2vw, 1.2rem)
+    --subtitle-size: clamp(1rem, 2.2vw, 1.2rem)
+    --subtitle-color: rgba(var(--v-theme-hero-overlay-soft), 0.85)
     line-height: 1.55
-    color: rgba(var(--v-theme-hero-overlay-soft), 0.85)
 
   &__form
     display: flex

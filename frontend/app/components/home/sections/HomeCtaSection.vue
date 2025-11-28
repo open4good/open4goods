@@ -55,7 +55,8 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
         <v-col cols="12" lg="8">
           <div class="home-cta__content">
             <h2 id="home-cta-title" class="home-cta__title">{{ t('home.cta.title') }}</h2>
-            <p class="home-cta__subtitle">{{ t('home.cta.subtitle') }}</p>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <p class="home-cta__subtitle subtitle-text" v-html="t('home.cta.subtitle')" />
             <div class="home-cta__actions">
               <form class="home-cta__form" role="search" @submit.prevent="handleSubmit">
                 <SearchSuggestField
@@ -126,7 +127,6 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
 
 .home-cta__subtitle
   margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-cta__actions
   display: flex
