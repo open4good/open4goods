@@ -2,6 +2,7 @@ import { BlogApi } from '..'
 import type { BlogPostDto, BlogTagDto, PageDto } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
+import { withRetry } from './withRetry'
 
 /**
  * Blog service for handling blog-related API calls
@@ -24,7 +25,7 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
   }
 
   /**
-   * Fetch paginated blog articles
+   * Fetch paginated blog articles with retry logic
    * @returns Promise<PageDto>
    */
   const getArticles = async (
@@ -34,40 +35,41 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
       pageSize?: number
     } = {}
   ): Promise<PageDto> => {
-    try {
-      return await resolveApi().posts({ ...params, domainLanguage })
-    } catch (error) {
-      console.error('Error fetching blog articles:', error)
-      // Rethrow original error so callers can access status and message
+    return withRetry(
+      () => resolveApi().posts({ ...params, domainLanguage }),
+      2
+    ).catch(error => {
+      console.error('Error fetching blog articles after retries:', error)
       throw error
-    }
+    })
   }
 
   /**
-   * Fetch a single blog article by slug
+   * Fetch a single blog article by slug with retry logic
    * @param slug - Article slug
    * @returns Promise<BlogPostDto>
    */
   const getArticleBySlug = async (slug: string): Promise<BlogPostDto> => {
-    try {
-      return await resolveApi().post({ slug, domainLanguage })
-    } catch (error) {
-      console.error(`Error fetching blog article ${slug}:`, error)
-      // Preserve original error details for upstream handlers
+    return withRetry(
+      () => resolveApi().post({ slug, domainLanguage }),
+      2
+    ).catch(error => {
+      console.error(`Error fetching blog article ${slug} after retries:`, error)
       throw error
-    }
+    })
   }
 
   /**
-   * Fetch available blog tags with post counts
+   * Fetch available blog tags with post counts and retry logic
    */
   const getTags = async (): Promise<BlogTagDto[]> => {
-    try {
-      return await resolveApi().tags({ domainLanguage })
-    } catch (error) {
-      console.error('Error fetching blog tags:', error)
+    return withRetry(
+      () => resolveApi().tags({ domainLanguage }),
+      2
+    ).catch(error => {
+      console.error('Error fetching blog tags after retries:', error)
       throw error
-    }
+    })
   }
 
   return { getArticles, getArticleBySlug, getTags }

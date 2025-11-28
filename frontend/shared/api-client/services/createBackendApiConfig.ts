@@ -1,4 +1,29 @@
 import { Configuration } from '..'
+import { createHttpAgent, createHttpsAgent } from './http-agents'
+
+/**
+ * Custom fetch implementation with timeout support and connection pooling
+ * @param url - URL to fetch
+ * @param init - Fetch options
+ * @param timeoutMs - Timeout in milliseconds (default: 30000)
+ */
+async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = 30000): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+  const isHttps = url.startsWith('https')
+
+  try {
+    const agent = isHttps ? createHttpsAgent() : createHttpAgent()
+    const response = await fetch(url, {
+      ...init,
+      agent,
+      signal: controller.signal,
+    })
+    return response
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
 
 /**
  * Factory that builds a backend API configuration seeded with the runtime configuration.
@@ -25,5 +50,6 @@ export const createBackendApiConfig = (): Configuration => {
     headers: {
       'X-Shared-Token': machineToken,
     },
+    fetchApi: fetchWithTimeout as any,
   })
 }

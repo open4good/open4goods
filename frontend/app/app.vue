@@ -11,7 +11,8 @@ try {
 }
 
 const documentLanguage = computed(
-  () => getDomainLanguageFromHostname(requestURL?.hostname ?? null).domainLanguage,
+  () =>
+    getDomainLanguageFromHostname(requestURL?.hostname ?? null).domainLanguage
 )
 
 useHead(() => ({

@@ -412,7 +412,12 @@ export default defineNuxtConfig({
     publicAssets: [{ dir: 'app/public' }],
     experimental: {
       wasm: true
-    }
+    },
+    // Improve HTTP connection pooling and keep-alive
+    timing: true,
+    headers: {
+      'Connection': 'keep-alive',
+    },
   },
   image: {
     dir: fileURLToPath(new URL('./app/public', import.meta.url)),
