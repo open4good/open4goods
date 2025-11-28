@@ -124,8 +124,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             <h1 id="home-hero-title" class="home-hero__title">
               {{ t('home.hero.title') }}
             </h1>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="home-hero__subtitle subtitle-text" v-html="t('home.hero.subtitle')" />
+            <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
 
             <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
               <SearchSuggestField
@@ -250,7 +249,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   margin: 0
 
 .home-hero__subtitle
-  --subtitle-size: clamp(1.05rem, 2.6vw, 1.35rem)
+  font-size: clamp(1.05rem, 2.6vw, 1.35rem)
+  color: rgb(var(--v-theme-text-neutral-secondary))
   margin: 0
 
 .home-hero__search

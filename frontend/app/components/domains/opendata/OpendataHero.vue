@@ -45,8 +45,7 @@ const handlePrimaryClick = (event: MouseEvent) => {
           <div class="opendata-hero__header">
             <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{ eyebrow }}</span>
             <h1 id="opendata-hero-heading" class="opendata-hero__title">{{ title }}</h1>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="opendata-hero__subtitle subtitle-text" v-html="subtitle" />
+            <p class="opendata-hero__subtitle">{{ subtitle }}</p>
           </div>
 
 
@@ -86,8 +85,6 @@ const handlePrimaryClick = (event: MouseEvent) => {
   position: relative
   overflow: hidden
   color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
-  --subtitle-color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
-  --subtitle-size: 1.2rem
 
 .opendata-hero__header
   display: flex
@@ -110,6 +107,8 @@ const handlePrimaryClick = (event: MouseEvent) => {
 
 .opendata-hero__subtitle
   margin: 0
+  font-size: 1.2rem
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
 
 .opendata-hero__actions
   display: flex
