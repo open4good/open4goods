@@ -26,6 +26,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
             percentile: 'Percentile',
             weightChip: 'Counts for {value}% of the total score',
             subscoreDetailsToggle: 'View indicator details',
+            importanceTitle: 'Why it matters',
             tableHeaders: {
               ranking: 'Rank',
             },
@@ -34,20 +35,36 @@ describe('ProductImpactSubscoreGenericCard', () => {
                 ranking: 'Rank {ranking} out of {count}.',
                 readIndicator: {
                   title: 'How to read this indicator',
-                  worst: 'Worst indicator is {worst}.',
-                  best: 'Best indicator is {best} across {count} {verticalTitle}.',
-                  average: 'Average is {average}, equivalent to {averageOn20}/20.',
-                  product: '{productName} scores {productOn20}/20.',
+                  higher: {
+                    worst: 'Worst indicator is {worst}.',
+                    best: 'Best indicator is {best} across {count} {verticalTitle}.',
+                    average: 'Average is {average}, equivalent to {averageOn20}/20.',
+                    product: '{productName} scores {productOn20}/20.',
+                  },
+                  lower: {
+                    worst: 'Highest indicator is {worst}.',
+                    best: 'Lowest indicator is {best} across {count} {verticalTitle}.',
+                    average: 'Average is {average}, equivalent to {averageOn20}/20.',
+                    product: '{productName} scores {productOn20}/20.',
+                  },
                 },
               },
               repairability_index: {
                 ranking: 'Rank {ranking} out of {count}.',
                 readIndicator: {
                   title: 'Repairability indicator guidance',
-                  worst: 'Worst repairability indicator is {worst}.',
-                  best: 'Best repairability indicator is {best} across {count} {verticalTitle}.',
-                  average: 'Average repairability is {average}, equivalent to {averageOn20}/20.',
-                  product: '{productName} repairability is {productOn20}/20.',
+                  higher: {
+                    worst: 'Worst repairability indicator is {worst}.',
+                    best: 'Best repairability indicator is {best} across {count} {verticalTitle}.',
+                    average: 'Average repairability is {average}, equivalent to {averageOn20}/20.',
+                    product: '{productName} repairability is {productOn20}/20.',
+                  },
+                  lower: {
+                    worst: 'Highest repairability indicator is {worst}.',
+                    best: 'Lowest repairability indicator is {best} across {count} {verticalTitle}.',
+                    average: 'Average repairability is {average}, equivalent to {averageOn20}/20.',
+                    product: '{productName} repairability is {productOn20}/20.',
+                  },
                 },
               },
             },
