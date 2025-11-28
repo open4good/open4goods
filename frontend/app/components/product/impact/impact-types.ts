@@ -27,6 +27,9 @@ export type ScoreView = {
   distribution?: DistributionBucket[]
   energyLetter?: string | null
   metadatas?: Record<string, string> | null
+  unit?: string | null
+  betterIs?: 'GREATER' | 'LOWER' | null
+  importanceDescription?: string | null
 }
 
 export type RankingInfo = {

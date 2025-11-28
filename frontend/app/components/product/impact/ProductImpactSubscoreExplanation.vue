@@ -1,5 +1,10 @@
 <template>
   <section v-if="hasContent" class="impact-subscore-explanation">
+    <div v-if="hasImportance" class="impact-subscore-explanation__card impact-subscore-explanation__card--importance">
+      <h5 class="impact-subscore-explanation__title">{{ t('product.impact.importanceTitle') }}</h5>
+      <p class="impact-subscore-explanation__paragraph">{{ importanceDescription }}</p>
+    </div>
+
     <div v-if="readIndicatorParagraphs.length || score.description" class="impact-subscore-explanation__card">
       <h5 class="impact-subscore-explanation__title">{{ readIndicatorTitle }}</h5>
       <p
@@ -40,6 +45,7 @@ const props = defineProps<{
   productBrand: string
   productModel: string
   verticalTitle: string
+  importanceDescription?: string | null
 }>()
 
 const { n, t, te, locale } = useI18n()
@@ -60,6 +66,8 @@ const normalizedScoreKey = computed(() => {
 const translationBaseKey = computed(() => `product.impact.subscores.${normalizedScoreKey.value}`)
 const translationFallbackBase = 'product.impact.subscores.default'
 
+const betterIsLower = computed(() => props.score.betterIs === 'LOWER')
+
 const resolveTranslation = (suffix: string, params: Record<string, unknown>) => {
   const candidate = `${translationBaseKey.value}.${suffix}`
   if (te(candidate)) {
@@ -67,6 +75,22 @@ const resolveTranslation = (suffix: string, params: Record<string, unknown>) => 
   }
 
   return t(`${translationFallbackBase}.${suffix}`, params)
+}
+
+const readIndicatorOrientationKey = computed(() => (betterIsLower.value ? 'lower' : 'higher'))
+
+const resolveReadIndicatorTranslation = (suffix: string, params: Record<string, unknown>) => {
+  const orientedKey = `${translationBaseKey.value}.readIndicator.${readIndicatorOrientationKey.value}.${suffix}`
+  if (te(orientedKey)) {
+    return t(orientedKey, params)
+  }
+
+  const fallbackOrientedKey = `${translationFallbackBase}.readIndicator.${readIndicatorOrientationKey.value}.${suffix}`
+  if (te(fallbackOrientedKey)) {
+    return t(fallbackOrientedKey, params)
+  }
+
+  return resolveTranslation(`readIndicator.${suffix}`, params)
 }
 
 const normalizedVerticalTitle = computed(() => {
@@ -99,6 +123,15 @@ const productDisplayName = computed(() => {
 
 const absoluteStats = computed(() => props.score.absolute ?? null)
 
+const importanceDescription = computed(() => {
+  const scoreDescription = props.score.importanceDescription?.toString().trim() ?? ''
+  const explicitDescription = props.importanceDescription?.toString().trim() ?? ''
+
+  return explicitDescription || scoreDescription
+})
+
+const hasImportance = computed(() => importanceDescription.value.length > 0)
+
 const scoreLabelLower = computed(() => {
   const label = props.score.label ?? ''
   if (!label.length) {
@@ -124,20 +157,24 @@ const formatNumber = (value: number | null | undefined, options?: Intl.NumberFor
   return n(value, { maximumFractionDigits: 2, minimumFractionDigits: 0, ...options })
 }
 
-const computeOn20 = (value: number | null | undefined, min: number | null | undefined, max: number | null | undefined) => {
+const computeOn20 = (
+  value: number | null | undefined,
+  worst: number | null | undefined,
+  best: number | null | undefined,
+) => {
   if (
     typeof value !== 'number' ||
-    typeof min !== 'number' ||
-    typeof max !== 'number' ||
+    typeof worst !== 'number' ||
+    typeof best !== 'number' ||
     Number.isNaN(value) ||
-    Number.isNaN(min) ||
-    Number.isNaN(max) ||
-    max <= min
+    Number.isNaN(worst) ||
+    Number.isNaN(best) ||
+    worst === best
   ) {
     return null
   }
 
-  const ratio = (value - min) / (max - min)
+  const ratio = (value - worst) / (best - worst)
   const scaled = ratio * 20
   if (!Number.isFinite(scaled)) {
     return null
@@ -191,11 +228,15 @@ const populationValue = computed(() => {
   }
 })
 
-const worstValue = computed(() => formatNumber(absoluteStats.value?.min))
-const bestValue = computed(() => formatNumber(absoluteStats.value?.max))
+const worstRawValue = computed(() => (betterIsLower.value ? absoluteStats.value?.max : absoluteStats.value?.min))
+const bestRawValue = computed(() => (betterIsLower.value ? absoluteStats.value?.min : absoluteStats.value?.max))
+
+const worstValue = computed(() => formatNumber(worstRawValue.value))
+
+const bestValue = computed(() => formatNumber(bestRawValue.value))
 const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
 const averageOn20Value = computed(() => {
-  const computedValue = computeOn20(absoluteStats.value?.avg ?? null, absoluteStats.value?.min ?? null, absoluteStats.value?.max ?? null)
+  const computedValue = computeOn20(absoluteStats.value?.avg ?? null, worstRawValue.value, bestRawValue.value)
   return formatNumber(computedValue, { maximumFractionDigits: 1 })
 })
 
@@ -245,19 +286,19 @@ const readIndicatorParagraphs = computed(() => {
   const params = readIndicatorParams.value
 
   if (worstValue.value) {
-    paragraphs.push(resolveTranslation('readIndicator.worst', params))
+    paragraphs.push(resolveReadIndicatorTranslation('worst', params))
   }
 
   if (bestValue.value && populationValue.value) {
-    paragraphs.push(resolveTranslation('readIndicator.best', params))
+    paragraphs.push(resolveReadIndicatorTranslation('best', params))
   }
 
   if (averageValue.value && populationValue.value && averageOn20Value.value) {
-    paragraphs.push(resolveTranslation('readIndicator.average', params))
+    paragraphs.push(resolveReadIndicatorTranslation('average', params))
   }
 
   if (productAbsoluteValue.value && productOn20Value.value) {
-    paragraphs.push(resolveTranslation('readIndicator.product', params))
+    paragraphs.push(resolveReadIndicatorTranslation('product', params))
   }
 
   return paragraphs.filter((paragraph) => paragraph?.toString().trim().length)
@@ -268,7 +309,8 @@ const hasContent = computed(
     readIndicatorParagraphs.value.length > 0 ||
     Boolean(props.score.description) ||
     infoItems.value.length > 0 ||
-    metadataItems.value.length > 0,
+    metadataItems.value.length > 0 ||
+    hasImportance.value,
 )
 
 function formatMetadataLabel(rawKey: string): string {

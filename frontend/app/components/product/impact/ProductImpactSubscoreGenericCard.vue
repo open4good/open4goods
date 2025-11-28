@@ -6,17 +6,23 @@
     />
 
     <div class="impact-subscore__value">
-      <slot
-        name="visual"
-        :score="score"
-        :absolute-value="absoluteValue"
-        :relative-value="relativeScore"
-        :product-absolute-value="productAbsoluteValue"
-      >
-        <div class="impact-subscore__value-default">
-          <span class="impact-subscore__value-number">{{ absoluteValue ?? '—' }}</span>
-        </div>
-      </slot>
+      <div class="impact-subscore__value-primary">
+        <slot
+          name="visual"
+          :score="score"
+          :absolute-value="absoluteValue"
+          :relative-value="relativeScore"
+          :product-absolute-value="productAbsoluteValue"
+          :unit="absoluteUnit"
+        >
+          <div class="impact-subscore__value-default">
+            <span class="impact-subscore__value-number">
+              {{ absoluteValue ?? '—' }}
+              <span v-if="absoluteUnit" class="impact-subscore__value-unit">{{ absoluteUnit }}</span>
+            </span>
+          </div>
+        </slot>
+      </div>
 
       <ImpactCoefficientBadge
         v-if="coefficientValue != null"
@@ -49,6 +55,7 @@
             :product-brand="productBrand"
             :product-model="productModel"
             :vertical-title="verticalTitle"
+            :importance-description="importanceDescription"
           />
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -91,6 +98,8 @@ const absoluteValue = computed(() => {
   return String(value)
 })
 
+const absoluteUnit = computed(() => props.score.unit?.toString().trim() || null)
+
 const hasDistribution = computed(() => Boolean(props.score.distribution?.length))
 const hasMetadata = computed(() =>
   Object.values(props.score.metadatas ?? {})
@@ -110,8 +119,11 @@ const hasRanking = computed(() => {
 
 const hasDetails = computed(() => {
   const hasDescription = typeof props.score.description === 'string' && props.score.description.trim().length > 0
-  return hasDescription || Boolean(absoluteValue.value) || hasRanking.value || hasMetadata.value
+  return hasDescription || Boolean(absoluteValue.value) || hasRanking.value || hasMetadata.value || hasImportance.value
 })
+
+const importanceDescription = computed(() => props.score.importanceDescription?.toString().trim() || '')
+const hasImportance = computed(() => importanceDescription.value.length > 0)
 
 const productAbsoluteValue = computed(() => {
   const absoluteValue = props.score.absolute?.value
@@ -165,15 +177,22 @@ const coefficientValue = computed(() => {
 
 .impact-subscore__value {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.impact-subscore__value-primary {
+  display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.75rem 1rem;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
 }
 
 .impact-subscore__value-default {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.15rem;
 }
 
 .impact-subscore__value-number {
@@ -181,6 +200,15 @@ const coefficientValue = computed(() => {
   font-weight: 700;
   line-height: 1.1;
   color: rgb(var(--v-theme-text-neutral-strong));
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.impact-subscore__value-unit {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
 }
 
 .impact-subscore__coefficient {

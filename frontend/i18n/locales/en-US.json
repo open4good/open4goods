@@ -1831,25 +1831,42 @@
       "weightTooltip": "The {scoreName} score counts for {value}% of the total score",
       "subscoreDetailsToggle": "View indicator details",
       "subscoreEyebrow": "Impact indicator",
+      "importanceTitle": "Why it matters",
       "subscores": {
         "default": {
           "ranking": "Rank {ranking} out of {count}.",
           "readIndicator": {
             "title": "How to read this indicator",
-            "worst": "The lowest {scoreLabelLower} recorded is {worst}, which corresponds to a 0/20 score.",
-            "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}, worth 20/20.",
-            "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, equivalent to {averageOn20}/20.",
-            "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
+            "higher": {
+              "worst": "The lowest {scoreLabelLower} recorded is {worst}, which corresponds to a 0/20 score.",
+              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}, worth 20/20.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, equivalent to {averageOn20}/20.",
+              "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
+            },
+            "lower": {
+              "worst": "The highest {scoreLabelLower} recorded is {worst}, which corresponds to a 0/20 score.",
+              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}, worth 20/20.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, equivalent to {averageOn20}/20.",
+              "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
+            }
           }
         },
         "repairability_index": {
           "ranking": "Rank {ranking} out of {count}.",
           "readIndicator": {
             "title": "How to read this repairability indicator",
-            "worst": "The worst repairability index observed is {worst}, which yields a 0/20 score.",
-            "best": "The best repairability index among the {count} {verticalTitle} reaches {best}, worth 20/20.",
-            "average": "On average, the {count} {verticalTitle} with available data score {average}, i.e. {averageOn20}/20.",
-            "product": "{productName}, with a repairability index of {productAbsolute}, earns {productOn20}/20."
+            "higher": {
+              "worst": "The worst repairability index observed is {worst}, which yields a 0/20 score.",
+              "best": "The best repairability index among the {count} {verticalTitle} reaches {best}, worth 20/20.",
+              "average": "On average, the {count} {verticalTitle} with available data score {average}, i.e. {averageOn20}/20.",
+              "product": "{productName}, with a repairability index of {productAbsolute}, earns {productOn20}/20."
+            },
+            "lower": {
+              "worst": "The highest repairability index recorded is {worst}, which yields a 0/20 score.",
+              "best": "The lowest repairability index among the {count} {verticalTitle} reaches {best}, worth 20/20.",
+              "average": "On average, the {count} {verticalTitle} with available data score {average}, i.e. {averageOn20}/20.",
+              "product": "{productName}, with a repairability index of {productAbsolute}, earns {productOn20}/20."
+            }
           }
         }
       },

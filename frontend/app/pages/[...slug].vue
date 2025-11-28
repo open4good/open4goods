@@ -125,8 +125,10 @@ import {
   type Agg,
   type AggregationBucketDto,
   type AggregationResponseDto,
+  type AttributeConfigDto,
   type CommercialEvent,
   type FilterRequestDto,
+  type ImpactScoreCriteriaDto,
   type ProductDto,
   type ProductReferenceDto,
   type ProductScoreDto,
@@ -273,6 +275,32 @@ const scoreCoefficientMap = computed<Record<string, number>>(() => {
     acc[normalizedKey] = Math.min(Math.max(numericValue, 0), 1)
     return acc
   }, {})
+})
+
+const attributeConfigMap = computed(() => {
+  const configs = categoryDetail.value?.attributesConfig?.configs ?? []
+
+  return configs.reduce((map, attribute) => {
+    const normalizedKey = attribute.key?.toString().trim().toUpperCase()
+    if (normalizedKey?.length) {
+      map.set(normalizedKey, attribute as AttributeConfigDto)
+    }
+
+    return map
+  }, new Map<string, AttributeConfigDto>())
+})
+
+const availableImpactCriteriaMap = computed(() => {
+  const criterias = categoryDetail.value?.availableImpactScoreCriterias ?? {}
+
+  return Object.entries(criterias).reduce((map, [key, criterion]) => {
+    const normalizedKey = key?.toString().trim().toUpperCase()
+    if (normalizedKey?.length) {
+      map.set(normalizedKey, criterion as ImpactScoreCriteriaDto)
+    }
+
+    return map
+  }, new Map<string, ImpactScoreCriteriaDto>())
 })
 
 if (categorySlug) {
@@ -609,6 +637,9 @@ const impactScores = computed(() => {
   const coefficients = scoreCoefficientMap.value
 
   return desiredScores.map((score) => {
+    const normalizedScoreId = score.id?.toString().trim().toUpperCase() ?? ''
+    const attributeConfig = normalizedScoreId ? attributeConfigMap.value.get(normalizedScoreId) : undefined
+    const criterion = normalizedScoreId ? availableImpactCriteriaMap.value.get(normalizedScoreId) : undefined
     const aggregation = aggregations.value[`score_${score.id}`]
     const distribution = (aggregation?.buckets ?? [])
       .map((bucket: AggregationBucketDto) => ({
@@ -636,7 +667,7 @@ const impactScores = computed(() => {
       value: isEcoscore ? absoluteScoreValue : relativeScoreValue,
       absoluteValue: score.absoluteValue ?? null,
       absolute: score.absolute ?? null,
-      coefficient: coefficients[score.id.toUpperCase()] ?? null,
+      coefficient: coefficients[normalizedScoreId] ?? null,
       percent: score.percent ?? null,
       ranking: score.ranking ?? null,
       letter: score.letter ?? null,
@@ -644,6 +675,9 @@ const impactScores = computed(() => {
       distribution,
       energyLetter: score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
       metadatas: score.metadatas ?? null,
+      unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
+      betterIs: attributeConfig?.betterIs ?? null,
+      importanceDescription: criterion?.description ?? null,
     }
   })
 })
