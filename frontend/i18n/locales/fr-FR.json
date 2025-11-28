@@ -1621,7 +1621,8 @@
       "empty": "Synthèse non encore demandée.",
       "errors": {
         "captcha": "Merci de valider le captcha avant de continuer.",
-        "generic": "Une erreur est survenue lors de la génération."
+        "generic": "Une erreur est survenue lors de la génération.",
+        "notEnoughData": "Pas assez de données fiables pour générer une synthèse."
       },
       "generatedAt": "Synthèse générée le {date}",
       "requestButton": "Demander la synthèse",

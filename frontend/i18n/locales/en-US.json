@@ -1621,7 +1621,8 @@
       "empty": "Summary not requested yet.",
       "errors": {
         "captcha": "Please validate the captcha before continuing.",
-        "generic": "An error occurred while generating the summary."
+        "generic": "An error occurred while generating the summary.",
+        "notEnoughData": "Not enough reliable data was found to generate a summary."
       },
       "generatedAt": "Summary generated on {date}",
       "requestButton": "Request the summary",

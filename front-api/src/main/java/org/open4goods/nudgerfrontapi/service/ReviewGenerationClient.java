@@ -3,10 +3,14 @@ package org.open4goods.nudgerfrontapi.service;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -74,11 +78,20 @@ public class ReviewGenerationClient {
 
             return response;
 
+        } catch (RestClientResponseException e) {
+            HttpStatusCode statusCode = e.getStatusCode();
+            String detail = String.format("Back-office responded with status %s while retrieving review status for UPC %d.",
+                    statusCode, upc);
+            LOGGER.error("{} Response body: {}", detail, e.getResponseBodyAsString(), e);
+            throw new ReviewGenerationClientException(detail, statusCode, e);
+        } catch (RestClientException e) {
+            String detail = String.format("HTTP error while retrieving review status for UPC %d: %s", upc, e.getMessage());
+            LOGGER.error(detail, e);
+            throw new ReviewGenerationClientException(detail, e);
         } catch (Exception e) {
-
-            LOGGER.error("Error while retrieving ReviewGenerationStatus ", e);
+            String detail = String.format("Failed to parse review status for UPC %d", upc);
+            LOGGER.error(detail, e);
+            throw new ReviewGenerationClientException(detail, e);
         }
-
-        return null;
     }
 }

@@ -33,6 +33,7 @@ import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -1040,11 +1042,19 @@ public class ProductController {
     public ResponseEntity<ReviewGenerationStatus> reviewStatus(@PathVariable Long gtin,
                                                                @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         LOGGER.info("Entering reviewStatus(gtin={}, domainLanguage={})", gtin, domainLanguage);
-        ReviewGenerationStatus status = service.getReviewStatus(gtin);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noCache())
-                .header("X-Locale", domainLanguage.languageTag())
-                .body(status);
+        try {
+            ReviewGenerationStatus status = service.getReviewStatus(gtin);
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .header("X-Locale", domainLanguage.languageTag())
+                    .body(status);
+        } catch (ReviewGenerationClientException e) {
+            HttpStatus resolvedStatus = e.getStatusCode() != null
+                    ? HttpStatus.valueOf(e.getStatusCode().value())
+                    : HttpStatus.BAD_GATEWAY;
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(resolvedStatus, e.getMessage());
+            throw new ResponseStatusException(resolvedStatus, detail.getDetail(), e);
+        }
     }
 
     /**
