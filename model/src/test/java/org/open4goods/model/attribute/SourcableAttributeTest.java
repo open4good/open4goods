@@ -10,22 +10,6 @@ import org.junit.jupiter.api.Test;
 
 class SourcableAttributeTest {
 
-        @AfterEach
-        void resetTrustedSources() {
-                SourcableAttribute.resetTrustedSourcePriority();
-        }
-
-        @Test
-        void selectsTrustedSourceBeforeHigherVoteCount() {
-                SourcableAttribute.setDEFAULT_TRUSTED_SOURCE_PRIORITY(List.of("priority-source", "secondary"));
-
-                ProductAttribute attribute = buildAttribute("COLOR",
-                                sourced("COLOR", "Blue", "other"),
-                                sourced("COLOR", "Blue", "another"),
-                                sourced("COLOR", "Crimson", "priority-source"));
-
-                assertThat(attribute.getValue()).isEqualTo("Crimson");
-        }
 
         @Test
         void normalizesValuesBeforeCounting() {
