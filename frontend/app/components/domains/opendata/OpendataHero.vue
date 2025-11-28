@@ -70,9 +70,7 @@ const handlePrimaryClick = (event: MouseEvent) => {
           <div class="opendata-hero__glow" aria-hidden="true">
             <div class="opendata-hero__glow-ring" />
             <div class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary" />
-            <div class="opendata-hero__glow-dots">
-              <span v-for="index in 6" :key="index" class="opendata-hero__glow-dot" />
-            </div>
+              <span v-for="index in 6" :key="index" />
           </div>
         </v-col>
       </v-row>
@@ -140,20 +138,6 @@ const handlePrimaryClick = (event: MouseEvent) => {
   border-color: rgba(var(--v-theme-accent-supporting), 0.3)
   box-shadow: 0 0 40px rgba(var(--v-theme-accent-supporting), 0.22)
 
-.opendata-hero__glow-dots
-  position: absolute
-  inset: 0
-  display: grid
-  place-items: center
-  grid-template-columns: repeat(3, 1fr)
-  grid-template-rows: repeat(3, 1fr)
-
-.opendata-hero__glow-dot
-  width: 10px
-  height: 10px
-  border-radius: 50%
-  background: rgba(var(--v-theme-hero-overlay-strong), 0.6)
-  box-shadow: 0 0 18px rgba(var(--v-theme-hero-overlay-strong), 0.45)
 
 @media (max-width: 959px)
   .opendata-hero__visual

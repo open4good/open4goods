@@ -1317,7 +1317,7 @@
         "millions": "+{value} millions"
       },
       "totalSize": {
-        "description": "On est pas des petits joueurs !",
+        "description": "On est pas des petits joueurs.",
         "label": "Taille cumulée des fichiers"
       }
     }

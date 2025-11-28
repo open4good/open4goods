@@ -17,7 +17,7 @@ class SourcableAttributeTest {
 
         @Test
         void selectsTrustedSourceBeforeHigherVoteCount() {
-                SourcableAttribute.setTrustedSourcePriority(List.of("priority-source", "secondary"));
+                SourcableAttribute.setDEFAULT_TRUSTED_SOURCE_PRIORITY(List.of("priority-source", "secondary"));
 
                 ProductAttribute attribute = buildAttribute("COLOR",
                                 sourced("COLOR", "Blue", "other"),
