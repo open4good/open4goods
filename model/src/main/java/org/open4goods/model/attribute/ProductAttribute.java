@@ -46,19 +46,21 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 		return false;
 	}
 
-	/**
-	 * Add a "matched" attribute, with dynamic type detection
-	 * 
-	 * @param parsed Should handle language ?
-	 */
-	public void addSourceAttribute(SourcedAttribute attr)
-			throws NumberFormatException {
+        /**
+         * Add a "matched" attribute, with dynamic type detection
+         *
+         * @param parsed Should handle language ?
+         */
+        public void addSourceAttribute(SourcedAttribute attr)
+                        throws NumberFormatException {
 
-		// Guard
-		if (this.name != null && !name.equals(this.name)) {
-			// TODO
-			System.out.println("ERROR : Name mismatch in add attribute");
-		}
+                // Guard
+                if (this.name == null) {
+                        this.name = attr.getName();
+                } else if (attr.getName() != null && !attr.getName().equals(this.name)) {
+                        throw new IllegalArgumentException(
+                                        "Attribute name mismatch : expected " + this.name + " but received " + attr.getName());
+                }
 
 		source.remove(attr);
 		source.add(attr);
