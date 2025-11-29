@@ -117,7 +117,7 @@ jobs:
           TARGET: "/opt/open4goods/bin/latest/frontend-ssr"
 
       - name: Publish frontend
-        uses: appleboy/ssh-action@v1.2.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -255,7 +255,7 @@ jobs:
       # Restart Applications
       ###########################################
       - name: Start Applications
-        uses: appleboy/ssh-action@v1.2.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
