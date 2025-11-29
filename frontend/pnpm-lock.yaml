@@ -188,7 +188,7 @@ importers:
         version: 8.48.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       '@vite-pwa/nuxt':
         specifier: ^1.0.4
-        version: 1.0.7(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
+        version: 1.1.0(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
       '@vue/compiler-dom':
         specifier: 3.5.25
         version: 3.5.25
@@ -3657,8 +3657,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@vite-pwa/nuxt@1.0.7':
-    resolution: {integrity: sha512-AA6E2M6Nr9eZqE371R7LYPmfhZ9H/MxWt8GAR65hUQLdBzIAJtDmGoLB52tVdto8RXj5C3tYkr8XQdIY4+mr6w==}
+  '@vite-pwa/nuxt@1.1.0':
+    resolution: {integrity: sha512-OKrqHg9PHCqp9dlrtCaLlh55V0xEG/zkXjvpl2nE+6IB3xW8mqnH0hXYc1pjN7qv0JzB+lbCfWxFsg5EZvAjWA==}
     peerDependencies:
       '@vite-pwa/assets-generator': ^1.0.0
     peerDependenciesMeta:
@@ -6329,6 +6329,9 @@ packages:
 
   knitwork@1.2.0:
     resolution: {integrity: sha512-xYSH7AvuQ6nXkq42x0v5S8/Iry+cfulBz/DJQzhIyESdLD7425jXsPy4vn5cCXU+HhRN2kVw51Vd1K6/By4BQg==}
+
+  knitwork@1.3.0:
+    resolution: {integrity: sha512-4LqMNoONzR43B1W0ek0fhXMsDNW/zxa1NdFAVMY+k28pgZLovR4G3PB5MrpTxCy1QaZCqNoiaKPr5w5qZHfSNw==}
 
   koa-compose@4.1.0:
     resolution: {integrity: sha512-8ODW8TrDuMYvXRwra/Kh7/rJo9BtOfPc6qO8eAfC80CnCvSjSl0bkRM24X6/XBBEyj0v1nRUQ1LyOy3dbqOWXw==}
@@ -9134,14 +9137,14 @@ packages:
     peerDependencies:
       vite: '>=6.0.0'
 
-  vite-plugin-pwa@1.1.0:
-    resolution: {integrity: sha512-VsSpdubPzXhHWVINcSx6uHRMpOHVHQcHsef1QgkOlEoaIDAlssFEW88LBq1a59BuokAhsh2kUDJbaX1bZv4Bjw==}
+  vite-plugin-pwa@1.2.0:
+    resolution: {integrity: sha512-a2xld+SJshT9Lgcv8Ji4+srFJL4k/1bVbd1x06JIkvecpQkwkvCncD1+gSzcdm3s+owWLpMJerG3aN5jupJEVw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@vite-pwa/assets-generator': ^1.0.0
       vite: ^3.1.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
-      workbox-build: ^7.3.0
-      workbox-window: ^7.3.0
+      workbox-build: ^7.4.0
+      workbox-window: ^7.4.0
     peerDependenciesMeta:
       '@vite-pwa/assets-generator':
         optional: true
@@ -11680,16 +11683,16 @@ snapshots:
 
   '@nuxt/kit@3.19.3(magicast@0.5.1)':
     dependencies:
-      c12: 3.3.1(magicast@0.5.1)
+      c12: 3.3.2(magicast@0.5.1)
       consola: 3.4.2
       defu: 6.1.4
       destr: 2.0.5
       errx: 0.1.0
-      exsolve: 1.0.7
+      exsolve: 1.0.8
       ignore: 7.0.5
       jiti: 2.6.1
       klona: 2.0.6
-      knitwork: 1.2.0
+      knitwork: 1.3.0
       mlly: 1.8.0
       ohash: 2.0.11
       pathe: 2.0.3
@@ -11717,7 +11720,7 @@ snapshots:
       ignore: 7.0.5
       jiti: 2.6.1
       klona: 2.0.6
-      knitwork: 1.2.0
+      knitwork: 1.3.0
       mlly: 1.8.0
       ohash: 2.0.11
       pathe: 2.0.3
@@ -13531,12 +13534,12 @@ snapshots:
       - rollup
       - supports-color
 
-  '@vite-pwa/nuxt@1.0.7(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0)':
+  '@vite-pwa/nuxt@1.1.0(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0)':
     dependencies:
-      '@nuxt/kit': 3.19.3(magicast@0.5.1)
+      '@nuxt/kit': 3.20.1(magicast@0.5.1)
       pathe: 1.1.2
       ufo: 1.6.1
-      vite-plugin-pwa: 1.1.0(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
+      vite-plugin-pwa: 1.2.0(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
     transitivePeerDependencies:
       - magicast
       - supports-color
@@ -16630,6 +16633,8 @@ snapshots:
 
   knitwork@1.2.0: {}
 
+  knitwork@1.3.0: {}
+
   koa-compose@4.1.0: {}
 
   koa-convert@2.0.0:
@@ -17281,7 +17286,7 @@ snapshots:
   nuxt-link-checker@4.3.2(@netlify/blobs@9.1.2)(db0@0.3.4)(h3@1.15.4)(ioredis@5.8.2)(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(vue@3.5.25(typescript@5.9.3)):
     dependencies:
       '@nuxt/devtools-kit': 2.7.0(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       '@vueuse/core': 13.9.0(vue@3.5.25(typescript@5.9.3))
       consola: 3.4.2
       diff: 8.0.2
@@ -17346,7 +17351,7 @@ snapshots:
   nuxt-og-image@5.1.11(@unhead/vue@2.0.19(vue@3.5.25(typescript@5.9.3)))(h3@1.15.4)(magicast@0.5.1)(unstorage@1.17.2(@netlify/blobs@9.1.2)(db0@0.3.4)(ioredis@5.8.2))(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(vue@3.5.25(typescript@5.9.3)):
     dependencies:
       '@nuxt/devtools-kit': 2.7.0(magicast@0.5.1)(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       '@resvg/resvg-js': 2.6.2
       '@resvg/resvg-wasm': 2.6.2
       '@unhead/vue': 2.0.19(vue@3.5.25(typescript@5.9.3))
@@ -17386,7 +17391,7 @@ snapshots:
 
   nuxt-schema-org@5.0.9(@unhead/vue@2.0.19(vue@3.5.25(typescript@5.9.3)))(h3@1.15.4)(magicast@0.5.1)(unhead@2.0.19)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       '@unhead/schema-org': 2.0.17(@unhead/vue@2.0.19(vue@3.5.25(typescript@5.9.3)))
       defu: 6.1.4
       nuxt-site-config: 3.2.9(h3@1.15.4)(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3))
@@ -17406,7 +17411,7 @@ snapshots:
 
   nuxt-seo-utils@7.0.17(h3@1.15.4)(magicast@0.5.1)(rollup@4.52.5)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       '@unhead/addons': 2.0.17(rollup@4.52.5)
       defu: 6.1.4
       escape-string-regexp: 5.0.0
@@ -17426,7 +17431,7 @@ snapshots:
 
   nuxt-site-config-kit@3.2.10(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.3(magicast@0.5.1)
       pkg-types: 2.3.0
       site-config-stack: 3.2.10(vue@3.5.25(typescript@5.9.3))
       std-env: 3.10.0
@@ -17437,7 +17442,7 @@ snapshots:
 
   nuxt-site-config-kit@3.2.8(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       pkg-types: 2.3.0
       site-config-stack: 3.2.8(vue@3.5.25(typescript@5.9.3))
       std-env: 3.10.0
@@ -17448,7 +17453,7 @@ snapshots:
 
   nuxt-site-config-kit@3.2.9(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       pkg-types: 2.3.0
       site-config-stack: 3.2.9(vue@3.5.25(typescript@5.9.3))
       std-env: 3.10.0
@@ -17459,7 +17464,7 @@ snapshots:
 
   nuxt-site-config@3.2.10(h3@1.15.4)(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.3(magicast@0.5.1)
       h3: 1.15.4
       nuxt-site-config-kit: 3.2.10(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3))
       pathe: 2.0.3
@@ -17473,7 +17478,7 @@ snapshots:
 
   nuxt-site-config@3.2.8(h3@1.15.4)(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       h3: 1.15.4
       nuxt-site-config-kit: 3.2.8(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3))
       pathe: 2.0.3
@@ -17487,7 +17492,7 @@ snapshots:
 
   nuxt-site-config@3.2.9(h3@1.15.4)(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.1.2(magicast@0.5.1)
       h3: 1.15.4
       nuxt-site-config-kit: 3.2.9(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3))
       pathe: 2.0.3
@@ -19829,7 +19834,7 @@ snapshots:
 
   unwasm@0.3.11:
     dependencies:
-      knitwork: 1.2.0
+      knitwork: 1.3.0
       magic-string: 0.30.21
       mlly: 1.8.0
       pathe: 2.0.3
@@ -19984,7 +19989,7 @@ snapshots:
       - '@cfworker/json-schema'
       - supports-color
 
-  vite-plugin-pwa@1.1.0(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0):
+  vite-plugin-pwa@1.2.0(vite@7.2.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.94.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:
       debug: 4.4.3
       pretty-bytes: 6.1.1
