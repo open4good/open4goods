@@ -324,13 +324,13 @@ class ProductMappingServiceTest {
         when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
         Product product = new Product(gtin);
         when(repository.getById(gtin)).thenReturn(product);
-        when(reviewGenerationClient.triggerGeneration(gtin)).thenReturn(gtin);
+        when(reviewGenerationClient.triggerGeneration(gtin, "127.0.0.1")).thenReturn(gtin);
 
         long scheduled = service.createReview(gtin, "token", httpServletRequest);
 
         verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
         verify(repository).getById(gtin);
-        verify(reviewGenerationClient).triggerGeneration(gtin);
+        verify(reviewGenerationClient).triggerGeneration(gtin, "127.0.0.1");
         assertThat(scheduled).isEqualTo(gtin);
     }
 

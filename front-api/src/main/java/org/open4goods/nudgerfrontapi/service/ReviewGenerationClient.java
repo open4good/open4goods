@@ -6,7 +6,6 @@ import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationPropertie
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,6 +36,7 @@ public class ReviewGenerationClient {
             .build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewGenerationClient.class);
+    private static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 
     private final RestClient restClient;
     private final ReviewGenerationProperties properties;
@@ -60,7 +60,7 @@ public class ReviewGenerationClient {
                     .uri(builder -> builder.path(properties.getReviewPath()).path("/{id}").build(upc));
 
             if (StringUtils.hasText(clientIp)) {
-                requestSpec = requestSpec.header(HttpHeaders.X_FORWARDED_FOR, clientIp);
+                requestSpec = requestSpec.header(X_FORWARDED_FOR_HEADER, clientIp);
             }
 
             Long response = requestSpec.retrieve().body(Long.class);
