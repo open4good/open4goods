@@ -6,10 +6,12 @@ import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationPropertie
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -52,12 +54,28 @@ public class ReviewGenerationClient {
      * @param upc product identifier forwarded to the back-office API
      * @return echoed UPC once the job is scheduled
      */
-    public long triggerGeneration(long upc) {
-        Long response = restClient.post()
-                .uri(builder -> builder.path(properties.getReviewPath()).path("/{id}").build(upc))
-                .retrieve()
-                .body(Long.class);
-        return response == null ? upc : response;
+    public long triggerGeneration(long upc, String clientIp) {
+        try {
+            RestClient.RequestHeadersSpec<?> requestSpec = restClient.post()
+                    .uri(builder -> builder.path(properties.getReviewPath()).path("/{id}").build(upc));
+
+            if (StringUtils.hasText(clientIp)) {
+                requestSpec = requestSpec.header(HttpHeaders.X_FORWARDED_FOR, clientIp);
+            }
+
+            Long response = requestSpec.retrieve().body(Long.class);
+            return response == null ? upc : response;
+        } catch (RestClientResponseException e) {
+            HttpStatusCode statusCode = e.getStatusCode();
+            String detail = String.format("Back-office responded with status %s while triggering review for UPC %d.",
+                    statusCode, upc);
+            LOGGER.error("{} Response body: {}", detail, e.getResponseBodyAsString(), e);
+            throw new ReviewGenerationClientException(detail, statusCode, e);
+        } catch (RestClientException e) {
+            String detail = String.format("HTTP error while triggering review for UPC %d: %s", upc, e.getMessage());
+            LOGGER.error(detail, e);
+            throw new ReviewGenerationClientException(detail, e);
+        }
     }
 
     /**

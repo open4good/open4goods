@@ -35,6 +35,7 @@ import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
@@ -63,6 +64,7 @@ class ProductMappingServiceTest {
     private ReviewGenerationClient reviewGenerationClient;
     private HcaptchaService hcaptchaService;
     private ProductTimelineService productTimelineService;
+    private ReviewGenerationProperties reviewGenerationProperties;
     private HttpServletRequest httpServletRequest;
 
     @BeforeEach
@@ -70,6 +72,7 @@ class ProductMappingServiceTest {
         repository = mock(ProductRepository.class);
         apiProperties = new ApiProperties();
         apiProperties.setResourceRootPath("https://static.example");
+        reviewGenerationProperties = new ReviewGenerationProperties();
         categoryMappingService = mock(CategoryMappingService.class);
         verticalsConfigService = mock(VerticalsConfigService.class);
         affiliationService = mock(AffiliationService.class);
@@ -85,7 +88,7 @@ class ProductMappingServiceTest {
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                reviewGenerationClient, hcaptchaService, productTimelineService);
+                reviewGenerationClient, hcaptchaService, productTimelineService, reviewGenerationProperties);
     }
 
     @Test

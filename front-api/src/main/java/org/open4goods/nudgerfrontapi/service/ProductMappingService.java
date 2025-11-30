@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +16,9 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -48,6 +52,7 @@ import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -92,6 +97,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationQuotaExceededException;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -134,6 +140,7 @@ public class ProductMappingService {
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
+    private final ReviewGenerationProperties reviewGenerationProperties;
     private final CategoryMappingService categoryMappingService;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
@@ -143,6 +150,10 @@ public class ProductMappingService {
     private final ReviewGenerationClient reviewGenerationClient;
     private final HcaptchaService hcaptchaService;
     private final ProductTimelineService productTimelineService;
+
+    private final ConcurrentMap<String, AtomicInteger> ipGenerationCounts = new ConcurrentHashMap<>();
+    private LocalDate ipGenerationCountDate = LocalDate.now();
+    private final Object generationQuotaLock = new Object();
 
 
     public ProductMappingService(ProductRepository repository,
@@ -155,9 +166,11 @@ public class ProductMappingService {
             CacheManager cacheManager,
             ReviewGenerationClient reviewGenerationClient,
             HcaptchaService hcaptchaService,
-            ProductTimelineService productTimelineService) {
+            ProductTimelineService productTimelineService,
+            ReviewGenerationProperties reviewGenerationProperties) {
         this.repository = repository;
         this.apiProperties = apiProperties;
+        this.reviewGenerationProperties = reviewGenerationProperties;
         this.categoryMappingService = categoryMappingService;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
@@ -901,6 +914,28 @@ public class ProductMappingService {
         return new PageImpl<>(reviews, pageable, 0);
     }
 
+    private void resetIpGenerationCountersIfNeeded() {
+        LocalDate today = LocalDate.now();
+        if (!ipGenerationCountDate.isEqual(today)) {
+            ipGenerationCounts.clear();
+            ipGenerationCountDate = today;
+        }
+    }
+
+    private void enforceGenerationQuota(String clientIp) {
+        String ipKey = StringUtils.hasText(clientIp) ? clientIp : "unknown";
+        synchronized (generationQuotaLock) {
+            resetIpGenerationCountersIfNeeded();
+            int used = ipGenerationCounts.getOrDefault(ipKey, new AtomicInteger(0)).get();
+            int maxDaily = reviewGenerationProperties.getMaxGenerationsPerIpPerDay();
+            if (used >= maxDaily) {
+                logger.warn("IP {} reached AI review generation daily limit ({}).", ipKey, maxDaily);
+                throw new ReviewGenerationQuotaExceededException(maxDaily);
+            }
+            ipGenerationCounts.computeIfAbsent(ipKey, key -> new AtomicInteger(0)).incrementAndGet();
+        }
+    }
+
     /**
      * Request AI review generation for the product after verifying captcha and product existence.
      *
@@ -914,10 +949,11 @@ public class ProductMappingService {
     public long createReview(long gtin, String captchaResponse, HttpServletRequest request)
             throws ResourceNotFoundException, SecurityException {
         String clientIp = IpUtils.getIp(request);
+        enforceGenerationQuota(clientIp);
         hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
         Product product = repository.getById(gtin);
-        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId());
-        logger.info("AI review generation requested for product {}", gtin);
+        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId(), clientIp);
+        logger.info("AI review generation requested for product {} by {}", gtin, clientIp);
         return scheduledUpc;
     }
 

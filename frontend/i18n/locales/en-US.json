@@ -1622,7 +1622,8 @@
       "errors": {
         "captcha": "Please validate the captcha before continuing.",
         "generic": "An error occurred while generating the summary.",
-        "notEnoughData": "Not enough reliable data was found to generate a summary."
+        "notEnoughData": "Not enough reliable data was found to generate a summary.",
+        "quotaExceeded": "Daily AI review limit reached. Please try again tomorrow."
       },
       "generatedAt": "Summary generated on {date}",
       "requestButton": "Request the summary",

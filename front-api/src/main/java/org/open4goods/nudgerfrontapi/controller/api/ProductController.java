@@ -34,6 +34,7 @@ import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationQuotaExceededException;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -993,6 +994,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "400", description = "Captcha verification failed"),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "429", description = "Daily generation limit reached"),
                     @ApiResponse(responseCode = "404", description = "Product not found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
@@ -1004,11 +1006,23 @@ public class ProductController {
             throws ResourceNotFoundException {
         LOGGER.info("Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, remoteAddr={})", gtin,
                 domainLanguage, StringUtils.hasText(hcaptchaResponse), request != null ? request.getRemoteAddr() : null);
-        long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noCache())
-                .header("X-Locale", domainLanguage.languageTag())
-                .body(scheduledUpc);
+        try {
+            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .header("X-Locale", domainLanguage.languageTag())
+                    .body(scheduledUpc);
+        } catch (ReviewGenerationQuotaExceededException e) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS,
+                    String.format("Maximum %d AI reviews per day reached.", e.getDailyLimit()));
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, detail.getDetail(), e);
+        } catch (ReviewGenerationClientException e) {
+            HttpStatus resolvedStatus = e.getStatusCode() != null
+                    ? HttpStatus.valueOf(e.getStatusCode().value())
+                    : HttpStatus.BAD_GATEWAY;
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(resolvedStatus, e.getMessage());
+            throw new ResponseStatusException(resolvedStatus, detail.getDetail(), e);
+        }
     }
 
     /**

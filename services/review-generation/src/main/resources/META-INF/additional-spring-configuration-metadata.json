@@ -20,6 +20,12 @@
       "defaultValue": 100
     },
     {
+      "name": "review.generation.max-per-ip-per-day",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of AI review generations allowed per IP each day.",
+      "defaultValue": 3
+    },
+    {
       "name": "review.generation.preferred-domains",
       "type": "java.util.List<java.lang.String>",
       "description": "List of preferred domains to fetch content from.",

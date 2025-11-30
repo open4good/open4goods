@@ -55,6 +55,9 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  review-generation:
+    max-generations-per-ip-per-day: ${FRONT_REVIEW_GENERATION_MAX_PER_IP_PER_DAY:3}
+
   partners:
     ecosystem:
       partners:

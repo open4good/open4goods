@@ -1622,7 +1622,8 @@
       "errors": {
         "captcha": "Merci de valider le captcha avant de continuer.",
         "generic": "Une erreur est survenue lors de la génération.",
-        "notEnoughData": "Pas assez de données fiables pour générer une synthèse."
+        "notEnoughData": "Pas assez de données fiables pour générer une synthèse.",
+        "quotaExceeded": "Limite quotidienne atteinte. Réessayez demain."
       },
       "generatedAt": "Synthèse générée le {date}",
       "requestButton": "Demander la synthèse",

@@ -250,6 +250,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
+import { FetchError } from 'ofetch'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 import { format } from 'date-fns'
@@ -469,6 +470,17 @@ const triggerGeneration = async () => {
     startPolling()
   } catch (error) {
     console.error('Failed to trigger AI review', error)
+    if (error instanceof FetchError) {
+      const statusCode = error.statusCode ?? error.response?.status
+      if (statusCode === 429) {
+        errorMessage.value = t('product.aiReview.errors.quotaExceeded')
+        return
+      }
+      const backendMessage = typeof error.data?.message === 'string' ? error.data.message : null
+      errorMessage.value = backendMessage ?? error.message ?? t('product.aiReview.errors.generic')
+      return
+    }
+
     errorMessage.value = error instanceof Error ? error.message : t('product.aiReview.errors.generic')
   } finally {
     requesting.value = false
