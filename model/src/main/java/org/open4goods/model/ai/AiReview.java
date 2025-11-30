@@ -215,13 +215,13 @@ public class AiReview {
      * Represents an attribute of the product.
      */
     public static record AiAttribute(
-            @JsonProperty(required = true, value = "name")
+            @JsonProperty(value = "name")
             @AiGeneratedField(instruction = "Le nom de l'attribut")
             String name,
-            @JsonProperty(required = true, value = "value")
+            @JsonProperty(value = "value")
             @AiGeneratedField(instruction = "La valeur de l'attribut")
             String value,
-            @JsonProperty(required = true, value = "number")
+            @JsonProperty(value = "number")
             @AiGeneratedField(instruction = "La référence de la source qui indique cet attribut")
             Integer number) {
 

@@ -24,15 +24,16 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 public class ReviewGenerationClient {
 
     /**
-     * JsonMapper configured to allow missing creator properties.
-     * This is intentional and necessary because the ReviewGenerationStatus response
-     * may contain optional fields that are not always present. Setting
-     * FAIL_ON_MISSING_CREATOR_PROPERTIES to false ensures deserialization succeeds
-     * even when some properties are absent in the JSON response.
-     * This configuration is working as expected and should not be changed.
+     * JsonMapper configured to allow missing/nullable creator properties.
+     * <p>
+     * The review generation response may omit optional fields (e.g. AI attributes
+     * without a populated {@code value}). Disabling the missing/null creator
+     * failure guards prevents Jackson from aborting parsing when the upstream
+     * payload is partially filled.
      */
     private static JsonMapper jsonBuilder = JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false)
             .build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewGenerationClient.class);
