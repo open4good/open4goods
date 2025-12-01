@@ -3,6 +3,7 @@ package org.open4goods.api.services.completion;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,13 +83,14 @@ public class IcecatCompletionService extends AbstractCompletionService {
 
 	@Override
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
-		// TODO(p2,perf) : should adda check on unprocessed resources
-		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
-		if (null != lastProcessed &&  REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed ) {
-			return false;
-		} else {
-			return true;
-		}
+			// TODO(p2,perf) : should adda check on unprocessed resources
+			Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
+			if (null == lastProcessed) {
+				return true;
+			}
+
+			long refreshWindowMs = Duration.ofDays(REFRESH_IN_DAYS).toMillis();
+			return System.currentTimeMillis() - lastProcessed >= refreshWindowMs;
 	}
 
 	@Override
@@ -223,7 +225,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 				if (!f.rawValue.equals(f.value)) {
 					logger.error("VALUE MISMATCH for {}", df.gtin());
 				}
-				df.addAttribute(f.featureDetail.name.value, f.rawValue,  f.featureDetail.name.language, f.featureDetail.id);
+						df.addAttribute(f.featureDetail.name.value, f.rawValue,  f.featureDetail.name.language, f.featureDetail.id, getDatasourceName());
 			});
 			
 			
@@ -308,15 +310,15 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	private void completeGeneralInfos(GeneralInfo e, DataFragment df, Product p) {
 		
 		// TODO(p3, feature) : HAndle end of year / end of year
-		if (null != e.releaseDate) {			
+		if (null != e.releaseDate) {
 			// TODO : i18n
 			try {
-				df.addAttribute("YEAR",  e.releaseDate.substring(e.releaseDate.lastIndexOf("-")+1) , "fr", null);
+				df.addAttribute("YEAR",  e.releaseDate.substring(e.releaseDate.lastIndexOf("-")+1) , "fr", null, getDatasourceName());
 			} catch (Exception e1) {
 				logger.error("Parsing year failed ! ",e);
 			}
 		}
-		
+
 		df.addName(e.title);
 		df.addName(e.titleInfo.generatedIntTitle);
 		df.addName(e.productName);

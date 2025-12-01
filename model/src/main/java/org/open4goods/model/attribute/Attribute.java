@@ -35,16 +35,21 @@ public class Attribute implements Validable,IAttribute {
 	 */
 	private String language;
 
-	/**
-	 * The attribute raw rawValue
-	 */
-	private String rawValue;
+/**
+ * The attribute raw rawValue
+ */
+private String rawValue;
 
 
-	/***
-	 * The optionl icecat feature id 
-	 */
-	private Integer icecatFeatureId;
+/**
+ * The datasource that provided this attribute.
+ */
+private String source;
+
+/***
+ * The optionl icecat feature id
+ */
+private Integer icecatFeatureId;
 	
 	public Attribute() {
 
@@ -281,18 +286,26 @@ public class Attribute implements Validable,IAttribute {
 		this.name = name;
 	}
 
-	public String getRawValue() {
-		return rawValue;
-	}
+    public String getRawValue() {
+            return rawValue;
+    }
 
-	public void setRawValue(final String rawValue) {
-		this.rawValue = rawValue;
-	}
+    public void setRawValue(final String rawValue) {
+            this.rawValue = rawValue;
+    }
 
-	@Override
-	public String getLanguage() {
-		return language;
-	}
+    public String getSource() {
+            return source;
+    }
+
+    public void setSource(final String source) {
+            this.source = source;
+    }
+
+    @Override
+    public String getLanguage() {
+            return language;
+    }
 
 	public void setLanguage(final String language) {
 		this.language = language;

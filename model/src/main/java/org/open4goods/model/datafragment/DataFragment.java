@@ -545,7 +545,16 @@ public class DataFragment implements Standardisable, Validable {
 	 * @return
 	 */
 	public void addAttribute(final String name, final String value, final String language, String  categoryFeatureId ) {
-		if (null == value || value.isBlank()) {
+
+		addAttribute(name, value, language, categoryFeatureId, null);
+
+
+	}
+
+	public void addAttribute(final String name, final String value, final String language, String  categoryFeatureId, String source ) {
+
+
+		if (StringUtils.isBlank(name) || null == value || value.isBlank()) {
 			logger.debug("Cannot add null or empty values for attribute " + name);
 			return ;
 		}
@@ -556,7 +565,7 @@ public class DataFragment implements Standardisable, Validable {
 			logger.warn("Evicting a too big value for attribute {}:{}", name,value);
 			return;
 		}
-		
+
 		final Attribute attr = new Attribute();
 
 		// Attributye name normalisation
@@ -566,15 +575,16 @@ public class DataFragment implements Standardisable, Validable {
 			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
 		}
 
-		
+
 		attr.setName(sanitizedName);
 		attr.setLanguage(language);
 		attr.setRawValue(value);
-		
+		attr.setSource(source);
+
 		try {
 			if (null != categoryFeatureId) {
 				attr.setIcecatFeatureId(Integer.valueOf(  categoryFeatureId));
-				
+
 			}
 		} catch (NumberFormatException e) {
 			logger.error("Error while converting icecatFeatureID : {}",categoryFeatureId);
@@ -590,7 +600,7 @@ public class DataFragment implements Standardisable, Validable {
 		attr.normalize();
 
 		attributes.add(attr);
-	
+
 
 	}
 
