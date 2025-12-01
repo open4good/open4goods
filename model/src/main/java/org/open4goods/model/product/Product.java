@@ -716,37 +716,39 @@ public class Product implements Standardisable {
 	 * Add the brand referentiel attribute, applying some sanitisation mechanism
 	 * @param value
 	 */
-	public void addBrand(String datasource, String value, Set<String> brandExclusions, Map<String,String> brandsMappings) {
+        public String addBrand(String datasource, String value, Set<String> brandExclusions, Map<String,String> brandsMappings) {
 
-		if (StringUtils.isEmpty(value)) {
-			return;
-		}
+                if (StringUtils.isEmpty(value)) {
+                        return null;
+                }
 
-		String brand = StringUtils.stripAccents(StringUtils.normalizeSpace(value)).toUpperCase();
+                String brand = StringUtils.stripAccents(StringUtils.normalizeSpace(value)).toUpperCase();
 
-		if (null != brandExclusions && brandExclusions.contains(brand)) {
-			logger.info("Excluding brand {}", brand);
-			return;
-		}
+                if (null != brandExclusions && brandExclusions.contains(brand)) {
+                        logger.info("Excluding brand {}", brand);
+                        return null;
+                }
 
-		if (null != brandsMappings) {
-			String replacement = brandsMappings.get(brand);
-			if (null != replacement) {
-				brand = replacement;
-				logger.info("replacing brand {} with {}", brand, replacement);
-			}
-		}
+                if (null != brandsMappings) {
+                        String replacement = brandsMappings.get(brand);
+                        if (null != replacement) {
+                                logger.info("replacing brand {} with {}", brand, replacement);
+                                brand = replacement;
+                        }
+                }
 
 
-		if (StringUtils.isEmpty(brand()) ) {
-			attributes.addReferentielAttribute(ReferentielKey.BRAND, brand);
-		} else {
-			if (!akaBrands.values().contains(brand)) {
-				akaBrands.put(datasource, brand);
-			}
+                if (StringUtils.isEmpty(brand()) ) {
+                        attributes.addReferentielAttribute(ReferentielKey.BRAND, brand);
+                } else {
+                        if (!akaBrands.values().contains(brand)) {
+                                akaBrands.put(datasource, brand);
+                        }
 
-		}
-	}
+                }
+
+                return brand;
+        }
 
 	/**
 	 *

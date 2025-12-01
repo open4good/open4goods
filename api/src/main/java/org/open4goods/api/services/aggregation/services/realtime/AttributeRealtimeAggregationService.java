@@ -64,10 +64,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// take in account modifications of configurable brandAlias() and brandExclusions()
 		/////////////////////////////////////////////////
 
-		if (null != data.getEprelDatas()) {
-			String supplier = data.getEprelDatas().getSupplierOrTrademark();
-			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, supplier);
-			data.addBrand("eprel", supplier, null, null);
+                if (null != data.getEprelDatas()) {
+                        String supplier = data.getEprelDatas().getSupplierOrTrademark();
+                        String cleanedBrand = data.addBrand("eprel", supplier, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+                        if (!StringUtils.isEmpty(cleanedBrand)) {
+                                data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, cleanedBrand);
+                        } else {
+                                data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
+                        }
 
 			String model = data.getEprelDatas().getModelIdentifier();
 			data.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, model);
