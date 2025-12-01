@@ -1,50 +1,88 @@
 package org.open4goods.commons.services.textgen;
 
-import org.junit.jupiter.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.exceptions.InvalidParameterException;
-import org.open4goods.model.product.Product;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.mockito.Mockito;
 
 class BlablaServiceTest {
 
-    private final EvaluationService evaluationService = Mockito.mock(EvaluationService.class);
-    private final BlablaService blablaService = new BlablaService(evaluationService);
+    private EvaluationService evaluationService;
+    private BlablaService blablaService;
 
-    @Test
-    void generateBlablaShouldBeDeterministicForSameHash() throws InvalidParameterException {
-        // Mock thymeleafEval to behave as an identity function for the template text
-        Mockito.when(evaluationService.thymeleafEval(Mockito.any(Product.class), Mockito.anyString()))
-                .thenAnswer(invocation -> invocation.getArgument(1));
-
-        Product product = new Product();
-        product.setId(42L);
-        String template = "Hello ||Alice|Bob||!";
-
-        String firstResult = blablaService.generateBlabla(template, product);
-        String secondResult = blablaService.generateBlabla(template, product);
-
-        Assertions.assertEquals(firstResult, secondResult);
-        Assertions.assertTrue(firstResult.startsWith("Hello "));
+    @BeforeEach
+    void setUp() {
+        evaluationService = mock(EvaluationService.class);
+        blablaService = new BlablaService(evaluationService);
     }
 
     @Test
-    void fastOrUsesSameGeneratorSeedConsistently() {
-        String template = "Pick ||Yes|No|| option.";
+    void fastOrIsDeterministicAndVariedAcrossSeeds() {
+        final String template = "Start ||red|blue|| and ||small|large|| end";
 
-        // Use the same seed to ensure deterministic choices across generator instances
-        String resultWithFirstGenerator = blablaService.fastOr(template, new BlaBlaSecGenerator(12345));
-        String resultWithSecondGenerator = blablaService.fastOr(template, new BlaBlaSecGenerator(12345));
+        final String deterministic = blablaService.fastOr(template, new BlaBlaSecGenerator(42));
+        final String deterministicAgain = blablaService.fastOr(template, new BlaBlaSecGenerator(42));
 
-        Assertions.assertEquals(resultWithFirstGenerator, resultWithSecondGenerator);
-        Assertions.assertTrue(resultWithFirstGenerator.startsWith("Pick "));
+        assertThat(deterministic).isEqualTo(deterministicAgain);
+        assertThat(deterministic).containsAnyOf("red", "blue");
+        assertThat(deterministic).containsAnyOf("small", "large");
+
+        final String differentSeed = blablaService.fastOr(template, new BlaBlaSecGenerator(43));
+        assertThat(differentSeed).isNotEqualTo(deterministic);
     }
 
     @Test
-    void generateBlablaShouldRejectEmptyInput() {
-        Product product = new Product();
+    void fastOrOptionalSegmentsCoverBothBranchesDeterministically() {
+        final String template = "Hello|| world||!";
 
-        Assertions.assertThrows(InvalidParameterException.class, () -> blablaService.generateBlabla("", product));
+        String included = null;
+        Integer includedSeed = null;
+        String excluded = null;
+        Integer excludedSeed = null;
+        int seed = 0;
+        while (seed < 100 && (included == null || excluded == null)) {
+            final BlaBlaSecGenerator generator = new BlaBlaSecGenerator(seed);
+            final String result = blablaService.fastOr(template, generator);
+
+            if (result.contains("world")) {
+                included = result;
+                includedSeed = seed;
+            } else {
+                excluded = result;
+                excludedSeed = seed;
+            }
+            seed++;
+        }
+
+        assertThat(included).isNotNull();
+        assertThat(excluded).isNotNull();
+        assertThat(included)
+                .isEqualTo(blablaService.fastOr(template, new BlaBlaSecGenerator(includedSeed)));
+        assertThat(excluded)
+                .isEqualTo(blablaService.fastOr(template, new BlaBlaSecGenerator(excludedSeed)));
+    }
+
+    @Test
+    void generateBlablaReturnsEmptyWhenTemplateEvaluationFails() throws InvalidParameterException {
+        final String template = "text";
+        when(evaluationService.thymeleafEval((org.open4goods.model.product.Product) null, template)).thenReturn(null);
+
+        final String result = blablaService.generateBlabla(template, null);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void generatorRejectsNonPositiveBounds() {
+        final BlaBlaSecGenerator generator = new BlaBlaSecGenerator(12);
+
+        assertThatThrownBy(() -> generator.getNextAlea(0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("positive");
     }
 }

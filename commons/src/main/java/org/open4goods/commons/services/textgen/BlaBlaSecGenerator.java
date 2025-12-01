@@ -1,32 +1,30 @@
 package org.open4goods.commons.services.textgen;
 
+import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Allows to get constant randomized aleas from a string identifier
- * @author goulven
- *
+ * Allows to get constant randomized aleas from a string identifier.
  */
 public class BlaBlaSecGenerator {
 
-	private final Integer sourceHashCode;
-	private final AtomicInteger counter = new AtomicInteger(1);
+    private final AtomicInteger counter = new AtomicInteger(0);
+    private final SplittableRandom random;
 
+    public BlaBlaSecGenerator(final Integer sourceHashCode) {
+        this.random = new SplittableRandom(Integer.toUnsignedLong(sourceHashCode));
+    }
 
-	public BlaBlaSecGenerator(final Integer sourceHashCode) {
-		super();
-		this.sourceHashCode = sourceHashCode;
-	}
+    public int getNextAlea(final int boundExclusive) {
+        if (boundExclusive <= 0) {
+            throw new IllegalArgumentException("boundExclusive must be positive");
+        }
+        counter.incrementAndGet();
+        return random.nextInt(boundExclusive);
+    }
 
-
-	public int getNextAlea(final int max) {
-		final Integer alea = (sourceHashCode+max) / counter.getAndIncrement();
-		return Math.abs(alea % (max+1));
-	}
-
-
-	public int getSequenceCount() {
-		return counter.intValue();
-	}
+    public int getSequenceCount() {
+        return counter.intValue();
+    }
 
 }
