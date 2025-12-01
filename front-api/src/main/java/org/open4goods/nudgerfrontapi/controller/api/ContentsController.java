@@ -3,12 +3,14 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.util.Locale;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.xwiki.FullPageDto;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.nudgerfrontapi.service.XwikiFullPageService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -71,6 +73,7 @@ public class ContentsController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<XwikiContentBlocDto> contentBloc(@PathVariable String blocId,
                                                            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                                            Locale locale,
@@ -106,6 +109,7 @@ public class ContentsController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<FullPageDto> page(@PathVariable String xwikiPageId,
                                             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                             Locale locale) {
