@@ -50,7 +50,7 @@
       },
       "search": {
         "label": "Rechercher un produit",
-        "placeholder": "Recherchez un produit (ex. téléviseur, smartphone…)",
+        "placeholder": "Recherchez un produit ou une catégorie",
         "ariaLabel": "Rechercher un produit responsable",
         "cta": "NUDGER",
         "helper": "Comparateur indépendant et open data.",
