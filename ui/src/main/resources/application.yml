@@ -70,7 +70,7 @@ allowedImagesSizeSuffixes:
   - 100
   - 360
   - 1000
-imageBaseUrl: https://nudger.fr
+imageBaseUrl: https://static.nudger.fr
 googleTaxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt

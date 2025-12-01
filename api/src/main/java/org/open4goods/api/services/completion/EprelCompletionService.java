@@ -56,7 +56,8 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
 		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
 		if (null != lastProcessed &&  REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed ) {
-			return false;
+			// TODO : do not process each time
+			return true;
 		} else {
 			return true;
 		}

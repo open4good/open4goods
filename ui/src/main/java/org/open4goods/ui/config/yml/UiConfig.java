@@ -77,7 +77,7 @@ public class UiConfig {
         /**
          * Base URL used by the {@link ImageResizeInterceptor} to fetch source images.
          */
-        private String imageBaseUrl = "https://nudger.fr";
+        private String imageBaseUrl = "https://static.nudger.fr";
 
         /** Map of language code to Google taxonomy URL */
         private Map<String, String> googleTaxonomy = new HashMap<>();
