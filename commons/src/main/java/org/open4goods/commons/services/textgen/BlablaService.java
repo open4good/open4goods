@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
  */
 public class BlablaService {
 
-    private static final String REGEX_ESCAPED_SPLIT_TOKEN = "\\|";
     private static final String RANDOM_START_TOKEN = "||";
     private static final String RANDOM_END_TOKEN = "||";
 
@@ -78,7 +77,8 @@ public class BlablaService {
         logger.info("generating thymeleaf version {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
 
         if (null == xmlBlabla) {
-            logger.error("Empty blabla (invalid expressions in template ?) generated for {} : {} > {}",data.gtin(), input, xmlBlabla);
+            logger.error("Empty blabla (invalid expressions in template ?) generated for {} : {} > {}",
+                    data != null ? data.gtin() : "<null>", input, xmlBlabla);
             return "";
         }
         return StringUtils.normalizeSpace(xmlBlabla);
@@ -97,41 +97,67 @@ public class BlablaService {
      */
     public String fastOr(final String text, final BlaBlaSecGenerator seqGen) {
 
-        // Choose the text from the alea
-        String raw = text;
+        if (StringUtils.isEmpty(text)) {
+            return text;
+        }
 
-        // Compute the possible "inline" replacements
-        int indexStart = raw.indexOf(RANDOM_START_TOKEN);
+        final StringBuilder result = new StringBuilder(text.length());
+        int cursor = 0;
 
-        while (indexStart != -1) {
-            final StringBuilder ret = new StringBuilder(raw.length());
-            final int indexStop = raw.indexOf(RANDOM_END_TOKEN, indexStart + RANDOM_END_TOKEN.length());
-            if (-1 == indexStop) {
-                logger.error("Was expecting an ending {} in BlablaExpression {}", RANDOM_END_TOKEN, raw);
-                return raw;
+        while (cursor < text.length()) {
+            final int start = text.indexOf(RANDOM_START_TOKEN, cursor);
+            if (start < 0) {
+                result.append(text, cursor, text.length());
+                break;
             }
 
-            ret.append(raw.substring(0, indexStart));
+            result.append(text, cursor, start);
+            final int end = text.indexOf(RANDOM_END_TOKEN, start + RANDOM_START_TOKEN.length());
+            if (end < 0) {
+                logger.error("Was expecting an ending {} in BlablaExpression {}", RANDOM_END_TOKEN, text);
+                result.append(text.substring(start));
+                break;
+            }
 
-            final String[] choices = raw.substring(indexStart + RANDOM_START_TOKEN.length(), indexStop)
-                            .split(REGEX_ESCAPED_SPLIT_TOKEN);
-
-            // case no split char : Yes / no mode
-            if (1 == choices.length) {
-                // append
-                if (1 == seqGen.getNextAlea(1)) {
-                    ret.append(choices[0]);
+            final String[] choices = splitChoices(text.substring(start + RANDOM_START_TOKEN.length(), end));
+            if (choices.length == 1) {
+                if (seqGen.getNextAlea(2) == 1) {
+                    result.append(choices[0]);
                 }
             } else {
-                ret.append(choices[seqGen.getNextAlea(choices.length - 1)]);
+                result.append(choices[seqGen.getNextAlea(choices.length)]);
             }
 
-            ret.append(raw.substring(indexStop + RANDOM_END_TOKEN.length()));
-
-            raw = ret.toString();
-
-            indexStart = raw.indexOf(RANDOM_START_TOKEN);
+            cursor = end + RANDOM_END_TOKEN.length();
         }
-        return raw;
+        return result.toString();
+    }
+
+    private String[] splitChoices(final String segment) {
+        int start = 0;
+        int index = segment.indexOf('|');
+        if (index < 0) {
+            return new String[]{segment};
+        }
+
+        final String[] buffer = new String[countSeparators(segment) + 1];
+        int bufferIndex = 0;
+        while (index >= 0) {
+            buffer[bufferIndex++] = segment.substring(start, index);
+            start = index + 1;
+            index = segment.indexOf('|', start);
+        }
+        buffer[bufferIndex] = segment.substring(start);
+        return buffer;
+    }
+
+    private int countSeparators(final String segment) {
+        int count = 0;
+        int idx = segment.indexOf('|');
+        while (idx >= 0) {
+            count++;
+            idx = segment.indexOf('|', idx + 1);
+        }
+        return count;
     }
 }
