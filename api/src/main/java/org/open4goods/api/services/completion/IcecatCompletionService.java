@@ -3,6 +3,7 @@ package org.open4goods.api.services.completion;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,16 +81,17 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 	}
 
-	@Override
-	public boolean shouldProcess(VerticalConfig vertical, Product data) {
-		// TODO(p2,perf) : should adda check on unprocessed resources
-		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
-		if (null != lastProcessed &&  REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed ) {
-			return false;
-		} else {
-			return true;
-		}
-	}
+        @Override
+        public boolean shouldProcess(VerticalConfig vertical, Product data) {
+                // TODO(p2,perf) : should adda check on unprocessed resources
+                Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
+                if (null == lastProcessed) {
+                        return true;
+                }
+
+                long refreshIntervalMs = Duration.ofDays(REFRESH_IN_DAYS).toMillis();
+                return System.currentTimeMillis() - lastProcessed >= refreshIntervalMs;
+        }
 
 	@Override
 	public String getDatasourceName() {
