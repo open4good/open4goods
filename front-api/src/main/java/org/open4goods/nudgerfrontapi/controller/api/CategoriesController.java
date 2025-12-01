@@ -113,7 +113,7 @@ public class CategoriesController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    @Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<List<VerticalConfigDto>> categories(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "onlyEnabled", defaultValue = "true") boolean onlyEnabled) {
@@ -148,7 +148,7 @@ public class CategoriesController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    @Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<VerticalConfigFullDto> category(@PathVariable("categoryId") String categoryId,
                                                           @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         VerticalConfig config = verticalsConfigService.getConfigById(categoryId);
@@ -191,7 +191,7 @@ public class CategoriesController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    @Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<CategoryNavigationDto> navigation(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "googleCategoryId", required = false) Integer googleCategoryId,

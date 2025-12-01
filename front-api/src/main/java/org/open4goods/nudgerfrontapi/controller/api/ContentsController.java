@@ -73,7 +73,7 @@ public class ContentsController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    @Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<XwikiContentBlocDto> contentBloc(@PathVariable String blocId,
                                                            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                                            Locale locale,
@@ -109,7 +109,7 @@ public class ContentsController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    @Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<FullPageDto> page(@PathVariable String xwikiPageId,
                                             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                             Locale locale) {

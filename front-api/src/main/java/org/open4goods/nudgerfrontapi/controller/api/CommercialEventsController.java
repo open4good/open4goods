@@ -70,7 +70,7 @@ public class CommercialEventsController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    @Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<List<CommercialEventDto>> commercialEvents(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         List<CommercialEventDto> events = commercialEventService.commercialEvents(domainLanguage);
