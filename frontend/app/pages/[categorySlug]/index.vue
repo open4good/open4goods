@@ -1482,6 +1482,31 @@ const loadingProducts = ref(false)
 const productError = ref<string | null>(null)
 const hasHydrated = ref(false)
 
+const isDefaultQueryState = computed(() => {
+  const hasDefaultFilters = !(manualFilters.value.filters?.length)
+  const hasDefaultSubsets = activeSubsetIds.value.length === 0
+  const hasDefaultSearch = searchTerm.value === ''
+  const hasDefaultPaging =
+    pageNumber.value === 0 && viewMode.value === CATEGORY_DEFAULT_VIEW_MODE
+  const hasDefaultSort = !sortField.value && sortOrder.value === 'desc'
+
+  return (
+    hasDefaultFilters &&
+    hasDefaultSubsets &&
+    hasDefaultSearch &&
+    hasDefaultPaging &&
+    hasDefaultSort
+  )
+})
+
+const isUsingInitialProductsData = computed(() => {
+  if (!initialProductsData.value) {
+    return false
+  }
+
+  return productsData.value === initialProductsData.value && isDefaultQueryState.value
+})
+
 const buildAggregationRequest = (
   options: ProductFieldOptionsResponse | null,
   extraFields: FieldMetadataDto[] = [],
@@ -1718,7 +1743,7 @@ onMounted(async () => {
 
   hasHydrated.value = true
 
-  if (verticalId.value) {
+  if (verticalId.value && !isUsingInitialProductsData.value) {
     await fetchProducts()
   }
 })
