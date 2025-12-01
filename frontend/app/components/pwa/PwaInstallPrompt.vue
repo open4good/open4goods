@@ -105,12 +105,9 @@
 
 <script setup lang="ts">
 import { usePwaInstallPromptBridge } from '~/composables/pwa/usePwaInstallPromptBridge'
-import { useDisplay } from 'vuetify'
 
 const {
   t,
-  installPromptVisible,
-  isInstallSupported,
   installOutcome,
   installError,
   installInProgress,
@@ -121,10 +118,7 @@ const {
   applyUpdate,
 } = usePwaInstallPromptBridge()
 
-const display = useDisplay()
-
-const showInstallBanner = computed(() => isInstallSupported.value && installPromptVisible.value)
-const shouldRenderInstallBanner = computed(() => showInstallBanner.value && display.smAndDown.value)
+const shouldRenderInstallBanner = computed(() => false)
 const showUpdateBanner = computed(() => updateAvailable.value)
 const installTitle = computed(() => String(t('pwa.install.title')))
 const installDescription = computed(() => String(t('pwa.install.description')))
