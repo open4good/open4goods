@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.open4goods.model.RolesConstants;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -32,6 +33,7 @@ import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
@@ -111,6 +113,7 @@ public class CategoriesController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<List<VerticalConfigDto>> categories(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "onlyEnabled", defaultValue = "true") boolean onlyEnabled) {
@@ -145,6 +148,7 @@ public class CategoriesController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<VerticalConfigFullDto> category(@PathVariable("categoryId") String categoryId,
                                                           @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         VerticalConfig config = verticalsConfigService.getConfigById(categoryId);
@@ -187,6 +191,7 @@ public class CategoriesController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<CategoryNavigationDto> navigation(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "googleCategoryId", required = false) Integer googleCategoryId,

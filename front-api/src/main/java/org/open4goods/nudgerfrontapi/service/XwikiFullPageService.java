@@ -9,9 +9,11 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.nudgerfrontapi.dto.xwiki.FullPageDto;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.xwiki.rest.model.jaxb.Page;
 
@@ -38,6 +40,7 @@ public class XwikiFullPageService {
      * @param languageTag language tag used to retrieve the localised page
      * @return flattened DTO representation of the XWiki page
      */
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public FullPageDto getFullPage(String pageId, String languageTag) {
         FullPage fullPage = xwikiFacadeService.getFullPage(pageId, languageTag);
         return mapToDto(fullPage);
