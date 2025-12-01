@@ -1,5 +1,7 @@
 package org.open4goods.ui.interceptors;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +49,9 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
     /** Base URL for fetching source images. Configured via application properties. */
     private final String imageBaseUrl;
 
+    /** Header used internally to prevent interceptor recursion when requesting original WebP files. */
+    static final String BYPASS_HEADER = "X-Bypass-Image-Resize";
+
     /** Regex pattern for parsing dimensions from the request URI. */
     private static final Pattern DIMENSION_PATTERN = Pattern.compile(
             "^(?:.*-)?(\\d+)(?:x(\\d+))?\\.webp$"
@@ -54,7 +59,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     private final ResourceService resourceService;
 
-	private Set<String> allowedResize;
+        private final Set<String> allowedResize;
 
     /**
      * Constructs an {@code ImageResizeInterceptor} with the specified resource service.
@@ -83,6 +88,11 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         String requestURI = request.getRequestURI();
         logger.debug("Intercepting request URI: {}", requestURI);
+
+        if (request.getHeader(BYPASS_HEADER) != null) {
+            logger.debug("Bypassing interceptor for URI: {} due to internal header", requestURI);
+            return true;
+        }
 
         if (requestURI.endsWith(".webp")) {
             Resource resource = buildResource(requestURI);
@@ -140,7 +150,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
      * @param requestURI the URI of the image request
      * @return a {@code Resource} representing the requested image
      */
-    private Resource buildResource(String requestURI) {
+    Resource buildResource(String requestURI) {
         Resource resource = new Resource();
         resource.setFileName(requestURI);
         // Suffix in cache key to allow mass deletions / handlings
@@ -151,11 +161,16 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
     /**
      * Parses dimensions (width and height) from the given file name.
      *
+     * <p>Supported patterns:
+     * <ul>
+     *     <li>{@code name-200x300.webp} → width=200, height=300</li>
+     *     <li>{@code name-200.webp} → width=200, height defaults to width to maintain aspect ratio</li>
+     * </ul>
+     *
      * @param fileName the file name to parse
-     * @param dimensions
-     * @return an array with width and height, or {@code null} if dimensions are not specified
+     * @return an array with width and height, or {@code null} if dimensions are not specified or invalid
      */
-    private int[] parseDimensions(String fileName) {
+    int[] parseDimensions(String fileName) {
         Matcher matcher = DIMENSION_PATTERN.matcher(fileName);
         if (matcher.matches()) {
             try {
@@ -177,7 +192,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
      * @return a {@link BufferedImage} of the source image, or {@code null} if not found
      * @throws IOException if an error occurs during image fetching
      */
-    private BufferedImage findSourceImage(String baseImageName, boolean hasDimensionsArgument) throws IOException {
+    BufferedImage findSourceImage(String baseImageName, boolean hasDimensionsArgument) throws IOException {
         String baseName = baseImageName.substring(0, baseImageName.lastIndexOf("."));
 
         // If dimensions argument, trim to original
@@ -186,7 +201,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
         }
 
         // TODO(p1,feature) : Enable original webp handling, (infinite loop cause re intercepted)
-        String[] extensions = { "png", "jpg", "jpeg"};
+        String[] extensions = { "png", "jpg", "jpeg", "webp"};
         for (String ext : extensions) {
             String url = imageBaseUrl + baseName + "." + ext;
             logger.info("Testing image url  {} for basename {} (hasDimensions:{})",url,baseName, hasDimensionsArgument);
@@ -207,22 +222,36 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
      * @param urlString the URL of the image
      * @return a {@link BufferedImage} of the fetched image, or {@code null} if the image could not be fetched
      */
-    private BufferedImage fetchImageFromURL(String urlString) {
+    BufferedImage fetchImageFromURL(String urlString) {
+        HttpURLConnection connection = null;
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection = openConnection(urlString);
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
+            connection.setRequestProperty(BYPASS_HEADER, BYPASS_HEADER);
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 logger.info("Successfully fetched image from URL: {}", urlString);
-                return ImageIO.read(connection.getInputStream());
+                try (var inputStream = connection.getInputStream()) {
+                    return ImageIO.read(inputStream);
+                }
             }
+            logger.info("Unexpected HTTP {} fetching image from {}", responseCode, urlString);
         } catch (IOException e) {
             logger.info("Failed to fetch image from  {} : {}", urlString, e.getMessage());
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
         return null;
+    }
+
+    HttpURLConnection openConnection(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        return (HttpURLConnection) url.openConnection();
     }
 
     /**
@@ -233,7 +262,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
      * @param height the target height
      * @return the resized {@code BufferedImage}
      */
-    private BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
+    BufferedImage resizeImage(BufferedImage originalImage, int width, int height) {
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
         double aspectRatio = (double) originalWidth / originalHeight;
@@ -245,7 +274,15 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
         }
 
         BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        resizedImage.getGraphics().drawImage(originalImage.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH), 0, 0, null);
+        Graphics2D graphics = resizedImage.createGraphics();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics.drawImage(originalImage, 0, 0, width, height, null);
+        } finally {
+            graphics.dispose();
+        }
         return resizedImage;
     }
 
