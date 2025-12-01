@@ -12,7 +12,6 @@ import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.services.blog.service.BlogService;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.feedservice.service.AbstractFeedService;
 import org.open4goods.services.feedservice.service.AwinFeedService;
@@ -21,12 +20,10 @@ import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.SitemapGenerationService;
@@ -35,7 +32,6 @@ import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
@@ -46,7 +42,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -326,7 +321,6 @@ public class AppConfig {
 			public void addInterceptors(final InterceptorRegistry registry) {
 //				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
 //				registry.addInterceptor(AppConfig.localeChangeInterceptor());
-				registry.addInterceptor(new GenericTemplateInterceptor());
                 registry.addInterceptor(new ImageResizeInterceptor(resourceService(), config.getAllowedImagesSizeSuffixes(), config.getImageBaseUrl()));
 
 			}
