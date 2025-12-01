@@ -147,7 +147,49 @@ const resultSummary = computed(() =>
   ),
 )
 
-const canonicalUrl = computed(() => new URL(route.fullPath, requestURL.origin).toString())
+const httpsOrigin = computed(() => {
+  const url = new URL(requestURL.origin)
+  url.protocol = 'https:'
+  return url.origin
+})
+
+const canonicalUrl = computed(() => {
+  const url = new URL(route.fullPath, httpsOrigin.value)
+  url.protocol = 'https:'
+  return url.toString()
+})
+
+const buildAbsoluteUrl = (path?: string) => {
+  if (!path) {
+    return canonicalUrl.value
+  }
+
+  const url = new URL(path, httpsOrigin.value)
+  url.protocol = 'https:'
+  return url.toString()
+}
+
+const breadcrumbJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbs.value.map((breadcrumb, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: breadcrumb.title,
+    item: buildAbsoluteUrl(breadcrumb.link),
+  })),
+}))
+
+const itemListJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: filteredCategories.value.map((category, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: category.title ?? '',
+    url: buildAbsoluteUrl(category.path ? `/categories/${category.path}` : undefined),
+  })),
+}))
 const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
 
 useSeoMeta({
@@ -159,6 +201,24 @@ useSeoMeta({
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
 })
+
+useHead(() => ({
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
+  ],
+  script: [
+    {
+      key: 'categories-index-breadcrumb-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(breadcrumbJsonLd.value),
+    },
+    {
+      key: 'categories-index-itemlist-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(itemListJsonLd.value),
+    },
+  ],
+}))
 </script>
 
 <style scoped>
