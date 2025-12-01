@@ -506,7 +506,7 @@ const categoryDisplayName = computed(
     category.value?.verticalHomeDescription ??
     siteName.value,
 )
-const canonicalUrl = computed(() => new URL(route.fullPath, requestURL.origin).toString())
+const canonicalUrl = computed(() => new URL(route.path, requestURL.origin).toString())
 const seoTitle = computed(
   () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle ?? siteName.value,
 )
@@ -1286,6 +1286,8 @@ const productListJsonLd = computed(() => {
     '@type': 'ItemList',
     name: seoTitle.value,
     numberOfItems: resultsCount.value,
+    itemListOrder: 'https://schema.org/ItemListUnordered',
+    url: canonicalUrl.value,
     itemListElement: filteredItems,
   }
 })
