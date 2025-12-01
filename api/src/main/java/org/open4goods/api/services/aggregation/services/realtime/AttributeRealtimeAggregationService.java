@@ -67,7 +67,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (null != data.getEprelDatas()) {
 			String supplier = data.getEprelDatas().getSupplierOrTrademark();
 			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, supplier);
-			data.addBrand("eprel", supplier, null, null);
+			data.addBrand("eprel", supplier, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 
 			String model = data.getEprelDatas().getModelIdentifier();
 			data.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, model);
