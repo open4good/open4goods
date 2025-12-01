@@ -1,5 +1,7 @@
 package org.open4goods.commons.services.textgen;
 
+import static org.assertj.core.api.Assertions.fail;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -20,13 +22,31 @@ class BlablaServiceTest {
 
         Product product = new Product();
         product.setId(42L);
-        String template = "Hello ||Alice|Bob||!";
+        String template = "Hello ||Alice|Bob|John|Toto|| !";
 
-        String firstResult = blablaService.generateBlabla(template, product);
-        String secondResult = blablaService.generateBlabla(template, product);
+        for (int i = 0; i < 100; i++) {
 
-        Assertions.assertEquals(firstResult, secondResult);
-        Assertions.assertTrue(firstResult.startsWith("Hello "));
+        	String firstResult = blablaService.generateBlabla(template, product);
+        	String secondResult = blablaService.generateBlabla(template, product);
+        	Assertions.assertEquals(firstResult, secondResult);
+            Assertions.assertTrue(firstResult.startsWith("Hello "));
+        }
+
+        try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			fail(e);
+		}
+
+        product.setId(100L);
+
+        for (int i = 0; i < 100; i++) {
+        	String firstResult = blablaService.generateBlabla(template, product);
+        	String secondResult = blablaService.generateBlabla(template, product);
+        	Assertions.assertEquals(firstResult, secondResult);
+            Assertions.assertTrue(firstResult.startsWith("Hello "));
+        }
+
     }
 
     @Test
