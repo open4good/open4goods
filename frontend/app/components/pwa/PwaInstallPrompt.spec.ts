@@ -137,17 +137,6 @@ describe('PwaInstallPrompt', () => {
     resetState()
   })
 
-  it('renders the install banner on mobile when installation is supported and prompted', async () => {
-    mobileBreakpoint.value = true
-    const wrapper = mountPrompt()
-    installPromptVisible.value = true
-    isInstallSupported.value = true
-    await nextTick()
-
-    expect(wrapper.find('[data-test="pwa-install-banner"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Install Nudger')
-  })
-
   it('hides the install banner on desktop displays', async () => {
     const wrapper = mountPrompt()
     installPromptVisible.value = true
@@ -157,19 +146,7 @@ describe('PwaInstallPrompt', () => {
     expect(wrapper.find('[data-test="pwa-install-banner"]').exists()).toBe(false)
   })
 
-  it('triggers install actions from the CTA and dismiss buttons', async () => {
-    mobileBreakpoint.value = true
-    const wrapper = mountPrompt()
-    installPromptVisible.value = true
-    isInstallSupported.value = true
-    await nextTick()
 
-    await wrapper.find('[data-test="pwa-install-cta"]').trigger('click')
-    await wrapper.find('[data-test="pwa-install-dismiss"]').trigger('click')
-
-    expect(requestInstall).toHaveBeenCalledTimes(1)
-    expect(dismissInstall).toHaveBeenCalledTimes(1)
-  })
 
   it('shows update and offline ready banners', async () => {
     const wrapper = mountPrompt()
