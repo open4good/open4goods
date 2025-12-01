@@ -7,7 +7,8 @@ export interface ResolveGtinRedirectDependencies {
 
 export const resolveGtinRedirectTarget = async (
   gtin: string,
-  { fetchProduct, createError }: ResolveGtinRedirectDependencies
+  { fetchProduct, createError }: ResolveGtinRedirectDependencies,
+  currentPath?: string
 ): Promise<string> => {
   let product: ProductDto
   try {
@@ -32,22 +33,22 @@ export const resolveGtinRedirectTarget = async (
   const normalizedSlug = product.slug?.trim()
   const canonicalSlug = normalizedFullSlug || normalizedSlug
 
-  if (!canonicalSlug) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Product not found',
-    })
+  if (canonicalSlug) {
+    const [maybeBareSlug] = canonicalSlug.split(/[?#]/, 1)
+    const bareFullSlug = (maybeBareSlug ?? '').trim()
+
+    if (!bareFullSlug) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Product not found',
+      })
+    }
+
+    return bareFullSlug.startsWith('/') ? bareFullSlug : `/${bareFullSlug}`
   }
 
-  const [maybeBareSlug] = canonicalSlug.split(/[?#]/, 1)
-  const bareFullSlug = (maybeBareSlug ?? '').trim()
+  const normalizedCurrentPath = currentPath?.trim()
+  const fallbackPath = normalizedCurrentPath || `/${gtin}`
 
-  if (!bareFullSlug) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Product not found',
-    })
-  }
-
-  return bareFullSlug.startsWith('/') ? bareFullSlug : `/${bareFullSlug}`
+  return fallbackPath.startsWith('/') ? fallbackPath : `/${fallbackPath}`
 }

@@ -73,20 +73,25 @@ describe('app/utils/_gtin-redirect', () => {
     expect(target).toBe('/123456-example-product')
   })
 
-  it('throws a 404 when the product does not expose a navigable slug', async () => {
+  it('returns the current path when the product does not expose a navigable slug but the request path is known', async () => {
     const dependencies = createDependencies({
       fetchProduct: vi.fn().mockResolvedValue({ fullSlug: '   ', slug: null }),
     })
 
-    await expect(resolveGtinRedirectTarget('123456', dependencies)).rejects.toMatchObject({
-      statusCode: 404,
-      statusMessage: 'Product not found',
-      isCreateError: true,
+    const target = await resolveGtinRedirectTarget('123456', dependencies, '/123456')
+
+    expect(target).toBe('/123456')
+    expect(dependencies.createError).not.toHaveBeenCalled()
+  })
+
+  it('falls back to a GTIN-only path when no slug or current path is available', async () => {
+    const dependencies = createDependencies({
+      fetchProduct: vi.fn().mockResolvedValue({ fullSlug: null, slug: null }),
     })
 
-    expect(dependencies.createError).toHaveBeenCalledWith({
-      statusCode: 404,
-      statusMessage: 'Product not found',
-    })
+    const target = await resolveGtinRedirectTarget('123456', dependencies)
+
+    expect(target).toBe('/123456')
+    expect(dependencies.createError).not.toHaveBeenCalled()
   })
 })

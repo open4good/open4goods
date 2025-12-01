@@ -20,13 +20,17 @@ if (!rawGtin) {
 
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
-const targetPath = await resolveGtinRedirectTarget(rawGtin, {
-  fetchProduct: (gtin: string) =>
-    $fetch<ProductDto>(`/api/products/${gtin}`, {
-      headers: requestHeaders,
-    }),
-  createError,
-})
+const targetPath = await resolveGtinRedirectTarget(
+  rawGtin,
+  {
+    fetchProduct: (gtin: string) =>
+      $fetch<ProductDto>(`/api/products/${gtin}`, {
+        headers: requestHeaders,
+      }),
+    createError,
+  },
+  route.path
+)
 
 await navigateTo(targetPath, { replace: true, redirectCode: 301 })
 </script>
