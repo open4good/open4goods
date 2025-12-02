@@ -4,7 +4,7 @@ import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
 import { DEFAULT_LOREM_LENGTH, _generateLoremIpsum } from '~/utils/content/_loremIpsum'
-import '~/assets/sass/components/text-content.scss'
+import '~/assets/css/text-content.css'
 
 // Props
 
@@ -93,23 +93,21 @@ const displayHtml = computed(() => {
   </div>
 </template>
 
-<style scoped lang="scss">
-$text-content-border: rgb(var(--v-theme-border-primary-strong));
-
+<style scoped>
 .text-content {
   padding: 1rem 0;
   position: relative;
+}
 
-  &.editable {
-    border: 1px solid $text-content-border;
-  }
+.text-content.editable {
+  border: 1px solid #ccc;
+}
 
-  .edit-link {
-    position: absolute;
-    bottom: 0.25rem;
-    right: 0.25rem;
-    font-size: 0.875rem;
-  }
+.edit-link {
+  position: absolute;
+  bottom: 0.25rem;
+  right: 0.25rem;
+  font-size: 0.875rem;
 }
 
 /* Scoped sandbox to contain Bootstrap + XWiki styles */

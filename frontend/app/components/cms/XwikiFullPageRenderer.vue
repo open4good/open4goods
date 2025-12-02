@@ -92,7 +92,7 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
-import '~/assets/sass/components/text-content.scss'
+import '~/assets/css/text-content.css'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import { useFullPage } from '~/composables/cms/useFullPage'
 import { useAuth } from '~/composables/useAuth'
