@@ -22,7 +22,7 @@ jobs:
       # 1. Checkout the Main Repository
       ############################################
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       ############################################
       # 2. Set up JDK 21 (avec cache Maven intégré)
