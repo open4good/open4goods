@@ -32,7 +32,7 @@
               class="product-life-timeline__event"
               role="listitem"
             >
-              <v-tooltip location="top" max-width="320">
+              <v-tooltip location="top" max-width="320" content-class="product-life-timeline__tooltip-surface">
                 <template #activator="{ props: tooltipProps }">
                   <button
                     type="button"
@@ -59,6 +59,7 @@
                 </div>
               </v-tooltip>
 
+              <span class="product-life-timeline__event-title">{{ event.label }}</span>
               <span class="product-life-timeline__event-month">{{ event.monthLabel }}</span>
             </div>
           </div>
@@ -146,6 +147,10 @@ const sourceColors: Record<string, string> = {
   EPREL: 'success',
 }
 
+const sourceOverrideByType: Record<string, string> = {
+  EPREL_IMPORTED: 'PRICE_HISTORY',
+}
+
 const monthFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short' }))
 const fullDateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }))
 const eventDescriptionKeys: Record<string, string> = {
@@ -186,9 +191,10 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
       const monthLabel = monthFormatter.value.format(date)
       const fullDateLabel = fullDateFormatter.value.format(date)
       const icon = (type && eventIcons[type]) ?? 'mdi-timeline-clock-outline'
-      const color = (source && sourceColors[source]) ?? 'primary'
-      const sourceLabel = source
-        ? t(sourceLabelKeys[source] ?? 'product.attributes.timeline.sources.generic')
+      const resolvedSource = (type && sourceOverrideByType[type]) ?? source
+      const color = (resolvedSource && sourceColors[resolvedSource]) ?? 'primary'
+      const sourceLabel = resolvedSource
+        ? t(sourceLabelKeys[resolvedSource] ?? 'product.attributes.timeline.sources.generic')
         : null
       const year = date.getFullYear()
       const ariaLabel = t('product.attributes.timeline.tooltip.ariaLabel', {
@@ -245,6 +251,7 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   flex-direction: column;
   gap: 1.25rem;
   box-shadow: 0 14px 35px -20px rgba(15, 23, 42, 0.25);
+  width: 100%;
 }
 
 .product-life-timeline__header {
@@ -337,6 +344,7 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   align-items: center;
   position: relative;
   min-width: 42px;
+  text-align: center;
 }
 
 .product-life-timeline__event-point {
@@ -388,11 +396,28 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   font-weight: 600;
 }
 
+.product-life-timeline__event-title {
+  font-size: 0.9rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 12ch;
+}
+
 .product-life-timeline__tooltip {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   max-width: 300px;
+}
+
+:global(.product-life-timeline__tooltip-surface) {
+  background-color: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-text-neutral-strong));
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+  box-shadow: 0 18px 40px -22px rgba(15, 23, 42, 0.35);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
 }
 
 .product-life-timeline__tooltip-title {

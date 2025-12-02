@@ -1678,7 +1678,7 @@
         "empty": "Aucune information sur le cycle de vie n'est disponible pour le moment.",
         "ariaYear": "Événements de l'année {year}",
         "sources": {
-          "priceHistory": "Historique des prix",
+          "priceHistory": "Nudger",
           "eprel": "Registre EPREL",
           "generic": "Événement du cycle de vie"
         },
@@ -1692,8 +1692,8 @@
           "priceFirstSeenOccasion": "Première offre d'occasion",
           "priceLastSeenNew": "Dernière offre neuve",
           "priceLastSeenOccasion": "Dernière offre d'occasion",
-          "eprelOnMarketStart": "Début commercialisation (EPREL)",
-          "eprelOnMarketEnd": "Fin commercialisation (EPREL)",
+          "eprelOnMarketStart": "Début commercialisation",
+          "eprelOnMarketEnd": "Fin commercialisation",
           "eprelOnMarketFirstStart": "Première mise sur le marché UE",
           "eprelFirstPublication": "Première publication EPREL",
           "eprelLastPublication": "Dernière publication EPREL",
