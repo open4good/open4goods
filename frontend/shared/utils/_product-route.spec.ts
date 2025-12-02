@@ -97,6 +97,8 @@ describe('_product-route', () => {
     it('returns null when the route is empty or contains more than three segments', () => {
       expect(matchProductRouteFromSegments([])).toBeNull()
       expect(matchProductRouteFromSegments(['only-one'])).toBeNull()
+      expect(matchProductRouteFromSegments(['123456'])).toBeNull()
+      expect(matchProductRouteFromSegments(['electronique'])).toBeNull()
       expect(
         matchProductRouteFromSegments([
           'too',

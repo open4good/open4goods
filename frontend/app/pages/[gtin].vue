@@ -4,15 +4,18 @@
 
 <script setup lang="ts">
 import type { ProductDto } from '~~/shared/api-client'
-import { extractGtinParam, isValidGtinParam } from '~~/shared/utils/_gtin'
+import {
+  extractRawGtinParam,
+  isValidRawGtin,
+} from '~~/shared/utils/_gtin'
 import { resolveGtinRedirectTarget } from '~/utils/_gtin-redirect'
 
 definePageMeta({
-  validate: (route) => isValidGtinParam(route.params.gtin),
+  validate: (route) => isValidRawGtin(route.params.gtin),
 })
 
 const route = useRoute()
-const rawGtin = extractGtinParam(route.params.gtin)
+const rawGtin = extractRawGtinParam(route.params.gtin)
 
 if (!rawGtin) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
