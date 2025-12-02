@@ -1507,6 +1507,10 @@ const isUsingInitialProductsData = computed(() => {
   return productsData.value === initialProductsData.value && isDefaultQueryState.value
 })
 
+const shouldFetchFreshProducts = computed(() =>
+  hasHydrated.value && !isUsingInitialProductsData.value,
+)
+
 const buildAggregationRequest = (
   options: ProductFieldOptionsResponse | null,
   extraFields: FieldMetadataDto[] = [],
@@ -1588,7 +1592,7 @@ const debouncedFetch = useDebounceFn(() => {
 watch(
   () => [viewMode.value, sortField.value, sortOrder.value],
   () => {
-    if (!hasHydrated.value) {
+    if (!shouldFetchFreshProducts.value) {
       return
     }
 
@@ -1600,7 +1604,7 @@ watch(
 watch(
   () => manualFilters.value,
   () => {
-    if (!hasHydrated.value) {
+    if (!shouldFetchFreshProducts.value) {
       return
     }
 
@@ -1613,7 +1617,7 @@ watch(
 watch(
   () => activeSubsetIds.value,
   () => {
-    if (!hasHydrated.value) {
+    if (!shouldFetchFreshProducts.value) {
       return
     }
 
@@ -1626,7 +1630,7 @@ watch(
 watch(
   () => searchTerm.value,
   () => {
-    if (!hasHydrated.value) {
+    if (!shouldFetchFreshProducts.value) {
       return
     }
 
@@ -1638,7 +1642,7 @@ watch(
 watch(
   () => pageNumber.value,
   () => {
-    if (!hasHydrated.value) {
+    if (!shouldFetchFreshProducts.value) {
       return
     }
 
@@ -1649,7 +1653,7 @@ watch(
 watch(
   () => filterOptions.value,
   (value) => {
-    if (value && hasHydrated.value) {
+    if (value && shouldFetchFreshProducts.value) {
       fetchProducts()
     }
   },
@@ -1669,7 +1673,7 @@ watch(
       return
     }
 
-    if (hasHydrated.value) {
+    if (shouldFetchFreshProducts.value) {
       pageNumber.value = 0
       debouncedFetch()
     }
