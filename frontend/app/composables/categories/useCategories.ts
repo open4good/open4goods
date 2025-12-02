@@ -1,13 +1,42 @@
-import type { VerticalConfigDto, VerticalConfigFullDto } from '~~/shared/api-client'
+import type {
+  VerticalConfigDto,
+  VerticalConfigFullDto,
+} from '~~/shared/api-client'
 
 /**
  * Composable for categories-related functionality
  */
 export const useCategories = () => {
+  const TWO_HOURS_MS = 2 * 60 * 60 * 1000
+
+  type CacheEntry<T> = {
+    data: T
+    timestamp: number
+  }
+
+  const getGlobalCacheStore = <T>(key: string) => {
+    const globalObject = globalThis as unknown as Record<string, T>
+
+    if (!globalObject[key]) {
+      globalObject[key] = {} as T
+    }
+
+    return globalObject[key]
+  }
+
   // Reactive state
   const categories = useState<VerticalConfigDto[]>(
     'categories-list',
     () => [],
+  )
+  const categoriesListCache = useState<
+    Record<string, CacheEntry<VerticalConfigDto[]>>
+  >('categories-list-cache', () => getGlobalCacheStore('categories-list-cache'))
+  const categoryDetailCache = useState<
+    Record<string, CacheEntry<VerticalConfigFullDto>>
+  >(
+    'category-detail-cache',
+    () => getGlobalCacheStore('category-detail-cache'),
   )
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
@@ -58,6 +87,14 @@ export const useCategories = () => {
   const fetchCategories = async (
     onlyEnabled: boolean = true,
   ): Promise<VerticalConfigDto[]> => {
+    const cacheKey = `list-${onlyEnabled}`
+    const cachedCategories = categoriesListCache.value[cacheKey]
+
+    if (cachedCategories && Date.now() - cachedCategories.timestamp < TWO_HOURS_MS) {
+      categories.value = cachedCategories.data
+      return categories.value
+    }
+
     loading.value = true
     error.value = null
 
@@ -69,6 +106,10 @@ export const useCategories = () => {
       })
 
       categories.value = response ?? []
+      categoriesListCache.value[cacheKey] = {
+        data: categories.value,
+        timestamp: Date.now(),
+      }
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : 'Failed to fetch categories'
@@ -126,6 +167,15 @@ export const useCategories = () => {
 
       activeCategoryId.value = matchingCategory.id
 
+      const cachedDetail =
+        categoryDetailCache.value[matchingCategory.id] ??
+        categoryDetailCache.value[slug]
+
+      if (cachedDetail && Date.now() - cachedDetail.timestamp < TWO_HOURS_MS) {
+        currentCategory.value = cachedDetail.data
+        return cachedDetail.data
+      }
+
       const detailHeaders = buildRequestHeaders()
       const detail = await $fetch<VerticalConfigFullDto>(
         `/api/categories/${encodeURIComponent(matchingCategory.id)}`,
@@ -133,6 +183,11 @@ export const useCategories = () => {
       )
 
       currentCategory.value = detail
+      categoryDetailCache.value[matchingCategory.id] = {
+        data: detail,
+        timestamp: Date.now(),
+      }
+      categoryDetailCache.value[slug] = categoryDetailCache.value[matchingCategory.id]
       return detail
     } catch (err) {
       error.value =
