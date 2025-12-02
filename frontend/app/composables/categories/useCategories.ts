@@ -14,6 +14,16 @@ export const useCategories = () => {
     timestamp: number
   }
 
+  const getGlobalCacheStore = <T>(key: string) => {
+    const globalObject = globalThis as unknown as Record<string, T>
+
+    if (!globalObject[key]) {
+      globalObject[key] = {} as T
+    }
+
+    return globalObject[key]
+  }
+
   // Reactive state
   const categories = useState<VerticalConfigDto[]>(
     'categories-list',
@@ -21,10 +31,13 @@ export const useCategories = () => {
   )
   const categoriesListCache = useState<
     Record<string, CacheEntry<VerticalConfigDto[]>>
-  >('categories-list-cache', () => ({}))
+  >('categories-list-cache', () => getGlobalCacheStore('categories-list-cache'))
   const categoryDetailCache = useState<
     Record<string, CacheEntry<VerticalConfigFullDto>>
-  >('category-detail-cache', () => ({}))
+  >(
+    'category-detail-cache',
+    () => getGlobalCacheStore('category-detail-cache'),
+  )
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
   const buildRequestHeaders = () => {
