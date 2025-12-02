@@ -1,0 +1,27 @@
+key: "YEAR"
+betterIs: "GREATER"
+faIcon: "mdi-calendar"
+name:
+  default: "Year"
+  fr: "Année de mise en service"
+filteringType: "NUMERIC"
+asScore: false
+
+synonyms:
+  all:
+  - "ANNÉE DE LANCEMENT"
+  - "ANNÉE DE SORTIE"
+  - "ANNEE DE SORTIE"                
+  - "ANNÉE DE MODÈLE"
+  - "ANNEE DE LANCEMENT"
+  - "YEAR"
+  - "ONMARKETSTARTDATETS"
+  
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"

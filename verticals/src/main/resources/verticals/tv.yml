@@ -413,498 +413,95 @@ attributesConfig:
   # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
   ##################################################################################################################      
   configs:
-
- 
-
-  ###################################################################################################################
-  # ATTRIBUTES DEFINITIONS
-  # Those attributes will be availlable for all products if one is found.
-  ##################################################################################################################
-
-    ##################################
-    # MINAVAILABILITYSPAREPARTSYEARS
-    ##################################
     - key: "MINAVAILABILITYSPAREPARTSYEARS"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - minAvailabilitySparePartsYears
-      faIcon: "mdi-tools"
-      name:
-        default: "Spare parts availability"
-        fr: "Disponibilité des pièces détachées"
-      suffix:
-        default: "Year(s)"
-        fr: "An(s)"
-      filteringType: "NUMERIC"
-      asScore: true
-      synonyms:
-        all:
-          - "MINAVAILABILITYSPAREPARTSYEARS"
-          - "SPARE_PARTS_YEARS"
-      parser:
-        normalize: true
-        trim: false
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-
-
-    ##################################
-    # MINGUARANTEEDSUPPORTYEARS
-    ##################################
     - key: "MINGUARANTEEDSUPPORTYEARS"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - minGuaranteedSupportYears
-      faIcon: "mdi-lifebuoy"
-      name:
-        default: "Guaranteed support duration"
-        fr: "Durée garantie du support"
-      suffix:
-        default: "Year(s)"
-        fr: "An(s)"
-      filteringType: "NUMERIC"
-      asScore: true
-      synonyms:
-        all:
-          - "MINGUARANTEEDSUPPORTYEARS"
-      parser:
-        normalize: true
-        trim: false
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-
-
-    ##################################
-    # MINAVAILABILITYSOFTWAREUPDATESYEARS
-    ##################################
     - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - minAvailabilitySoftwareUpdatesYears
-      faIcon: "mdi-update"
-      name:
-        default: "Software update availability"
-        fr: "Disponibilité des mises à jour logicielles"
-      suffix:
-        default: "Year(s)"
-        fr: "An(s)"
-      filteringType: "NUMERIC"
-      asScore: true
-      synonyms:
-        all:
-          - "MINAVAILABILITYSOFTWAREUPDATESYEARS"
-          - "SOFTWARE_UPDATES_YEARS"
-      parser:
-        normalize: true
-        trim: false
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-
-
-    ##################################
-    # WARRANTY
-    ##################################
     - key: "WARRANTY"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - minGuaranteedGuarantee
-      faIcon: "mdi-shield-check"
-      name:
-        default: "Warranty duration"
-        fr: "Durée de garantie"
-      suffix:
-        default: "Year(s)"
-        fr: "An(s)"
-      filteringType: "NUMERIC"
-      asScore: true
-      synonyms:
-        all:
-          - "GARANTIE"
-          - "WARRANTY"
-          - "MINGUARANTEEDGUARANTEE"
-      parser:
-        normalize: true
-        trim: false
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-
-
-    ##################################
-    # DIAGONALE
-    ##################################
     - key: "DIAGONALE_POUCES"
-      betterIs: "GREATER"
-      icecatFeaturesIds:
-        - 944
-      eprelFeatureNames:
-        - diagonalInch
-      faIcon: "mdi-arrow-top-right-bottom-left"
-      name:
-        default: "Screen size"
-        fr: "Diagonale (en pouces)"
-      suffix:
-        default: "\""
-        fr: "\""
-      filteringType: "NUMERIC"
-      asScore: false
-      synonyms:
-        all:
-          - "DIAGONALE_POUCES"
-          - "DIAGONALINCH"
-          - "CALCULATEDDIAGONALINCH"
-        rakuten.com:
-          - "DIAGONALE"
-      parser:
-        normalize: true
-        trim: false
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-   #      deleteTokens:
-
-   
-    ##################################
-    # TYPE TV
-    ##################################
     - key: "DISPLAY_TECHNOLOGY"
-      eprelFeatureNames:
-        - panelTechnology
-      icecatFeaturesIds:
-        - 9713
-      faIcon: "mdi-television"
-      name:
-        default: "Display technology"
-        fr: "Technologie d'affichage"
-      filteringType: "TEXT"
-      asScore: false
-      synonyms:
-        all:
-          - "DISPLAY_TECHNOLOGY"
-          - "PANELTECHNOLOGY"
-        rakuten.com:
-          - "TYPE DE PRODUIT"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-      deleteTokens:
-        - "TV"
-
-
-    ##################################
-    # POWER_CONSUMPTION_STANDBY
-    ##################################
     - key: "POWER_CONSUMPTION_STANDBY"
-      betterIs: "LOWER"
-      eprelFeatureNames:
-        - powerStandby
-      faIcon: "mdi-power-standby"
-      name:
-        default: "Power consumption (standby)"
-        fr: "Consommation en veille"
-      suffix:
-        default: "W"
-        fr: "W"
-      filteringType: "NUMERIC"
-      asScore: true
-      synonyms:
-        all:
-          - "POWERSTANDBY"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: true
-        deleteTokens:
-          - "W"
-
-
-    ##################################
-    # FREQUENCY_RATE
-    ##################################
     - key: "FREQUENCY_RATE"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - frequencyRate
-      faIcon: "mdi-refresh-auto"
-      name:
-        default: "Refresh rate"
-        fr: "Taux de rafraîchissement"
-      suffix:
-        default: "Hz"
-        fr: "Hz"
-      filteringType: "NUMERIC"
-      asScore: false
-      synonyms:
-        all:
-          - "FREQUENCYRATE"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: true
-
-
-    ##################################
-    # VOICE_AVAILABLE
-    ##################################
     - key: "VOICE_AVAILABLE"
-      eprelFeatureNames:
-        - voiceAvailable
-      faIcon: "mdi-microphone"
-      name:
-        default: "Voice control available"
-        fr: "Commande vocale disponible"
-      filteringType: "TEXT"
-      asScore: false
-      synonyms:
-        all:
-          - "VOICEAVAILABLE"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: true
-
-
-    ##################################
-    # AUTO_BRIGHTNESS_CONTROL_AVAILABLE
-    ##################################
     - key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"
-      eprelFeatureNames:
-        - autoBrightnessControlAvailable
-      faIcon: "mdi-brightness-auto"
-      name:
-        default: "Automatic brightness control"
-        fr: "Contrôle automatique de la luminosité"
-      filteringType: "TEXT"
-      asScore: false
-      synonyms:
-        all:
-          - "AUTOBRIGHTNESSCONTROLAVAILABLE"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: true
-
-
-    ################################################################################
-    #                         CONSOMMATION ELECTRIQUE (ARRET / VEILLE / RESEAU)
-    ################################################################################
-    # Generated on 10/12/2024 21:22, coverage was 2% (63/2389) .
-    # TOP attributes values are :
-    #     - 0.3 (34 items)
-    #     - 0.5 (24 items)
-    #     - 0 (2 items)
-    #     - 0, 3 W (2 items)
-    ##################################
     - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
-      betterIs: "LOWER"
-      eprelFeatureNames:
-        - powerStandbyNetworked
-      filteringType: "NUMERIC"
-      asScore: true
-      faIcon: "mdi-power-plug-off"
-      name:
-        default: "Power consumption (standby networked)"
-        fr: "Consommation électrique (arrêt/veille/réseau)"
-      suffix:
-        default: "W"
-        fr: "W"
-      synonyms:
-        all:
-          - "POWERSTANDBYNETWORKED"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-        deleteTokens:
-          - "W"
-
-    ################################################################################
-    #                         CONSOMMATION ELECTRIQUE SDR
-    ################################################################################
-    # Generated on 10/12/2024 21:22, coverage was 2% (63/2389) .
-    # TOP attributes values are :
-    #     - 0.3 (34 items)
-    #     - 0.5 (24 items)
-    #     - 0 (2 items)
-    #     - 0, 3 W (2 items)
-    ##################################
     - key: "POWER_CONSUMPTION_SDR"
-      betterIs: "LOWER"
-      eprelFeatureNames:
-        - powerOnModeSDR
-      filteringType: "NUMERIC"
-      asScore: true
-      faIcon: "mdi-power-plug-off"
-      name:
-        default: "Power consumption (SDR)"
-        fr: "Consommation électrique (basse définition)"
-      suffix:
-        default: "W"
-        fr: "W"
-      synonyms:
-        all:
-          - "POWERONMODESDR"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-        deleteTokens:
-          - "W"
-
-    ################################################################################
-    #                         CONSOMMATION ELECTRIQUE HDR
-    ################################################################################
-    # Generated on 10/12/2024 21:22, coverage was 2% (63/2389) .
-    # TOP attributes values are :
-    #     - 0.3 (34 items)
-    #     - 0.5 (24 items)
-    #     - 0 (2 items)
-    #     - 0, 3 W (2 items)
-    ##################################
     - key: "POWER_CONSUMPTION_HDR"
-      betterIs: "LOWER"
-      eprelFeatureNames:
-        - powerOnModeHDR
-      filteringType: "NUMERIC"
-      asScore: true
-      faIcon: "mdi-power-plug-off"
-      name:
-        default: "Power consumption (HDR)"
-        fr: "Consommation électrique (haute définition)"
-      suffix:
-        default: "W"
-        fr: "W"
-      synonyms:
-        all:
-          - "POWERONMODEHDR"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-        deleteTokens:
-          - "W"
-
- 
-    ################################################################################
-    #                         CLASSE ELECTRIQUE HDR
-    ################################################################################
     - key: "CLASSE_ENERGY_HDR"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - energyClassHDR
-      faIcon: "mdi-flash"
-      name:
-        default: "Energy class HDR"
-        fr: "Classe énergétique (HDR)"
-      filteringType: "TEXT"
-      asScore: true
-      attributeValuesOrdering: "MAPPED"
-      synonyms:
-        all:
-          - "ENERGYCLASSHDR"
-          - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-        deleteTokens:
-          - "CLASSE"
-          - "(ÉCHELLE A++ À E)"
-          - "NOT AVAILABLE"
-      numericMapping:
-        A+++: 18.0
-        A++: 18.0
-        A+: 17.0
-        A: 16.0
-        B++: 15.0
-        B+: 14.0
-        B: 13.0
-        C++: 12.0
-        C+: 11.0
-        C: 10.0
-        D++: 9.0
-        D+: 8.0
-        D: 7.0
-        E++: 6.0
-        E+: 5.0
-        E: 4.0
-        F++: 3.0
-        F+: 2.0
-        F: 1.0
-        G: 0.0
-
-    ################################################################################
-    #                         CLASSE ELECTRIQUE SDR
-    ################################################################################
     - key: "CLASSE_ENERGY_SDR"
-      betterIs: "GREATER"
-      eprelFeatureNames:
-        - energyClassSDR
-      faIcon: "mdi-flash"
-      name:
-        default: "Energy class SDR"
-        fr: "Classe énergétique (SDR)"
-      filteringType: "TEXT"
-      asScore: true
-      attributeValuesOrdering: "MAPPED"
-      synonyms:
-        all:
-          - "ENERGYCLASSSDR"
-          - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (SDR)"
-      parser:
-        normalize: true
-        trim: true
-        lowerCase: false
-        upperCase: true
-        removeParenthesis: false
-        deleteTokens:
-          - "CLASSE"
-          - "(ÉCHELLE A++ À E)"
-          - "NOT AVAILABLE"
-      numericMapping:
-        A+++: 18.0
-        A++: 18.0
-        A+: 17.0
-        A: 16.0
-        B++: 15.0
-        B+: 14.0
-        B: 13.0
-        C++: 12.0
-        C+: 11.0
-        C: 10.0
-        D++: 9.0
-        D+: 8.0
-        D: 7.0
-        E++: 6.0
-        E+: 5.0
-        E: 4.0
-        F++: 3.0
-        F+: 2.0
-        F: 1.0
-        G: 0.0
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
 
+
+
+
+  aggregationConfiguration:
+      "scores.ECOSCORE.value":
+        interval: 5
+        buckets: 20
+      "scores.REPAIRABILITY_INDEX.value":
+        interval: 1
+        buckets: 10
+      "scores.POWER_CONSUMPTION_TYPICAL.value":
+        interval: 25
+        buckets: 12
+      "scores.POWER_CONSUMPTION_OFF.value":
+        interval: 0.1
+        buckets: 10
+      "scores.WEIGHT.value":
+        interval: 1
+        buckets: 5
+      "scores.BRAND_SUSTAINABILITY.value":
+        interval: 1
+        buckets: 5
+      "scores.CLASSE_ENERGY.value":
+        interval: 1
+        buckets: 5
+      "scores.DATA_QUALITY.value":
+        interval: 1
+        buckets: 5
+      "attributes.indexed.REPAIRABILITY_INDEX":
+        interval: 1
+        buckets: 10
+      "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+        interval: 25
+        buckets: 12
+      "attributes.indexed.POWER_CONSUMPTION_OFF":
+        interval: 0.1
+        buckets: 10
+      "attributes.indexed.WEIGHT":
+        interval: 2
+        buckets: 12
+      "attributes.indexed.ENERGY_CONSUMPTION_1000_HOURS":
+        interval: 20
+        buckets: 12
+      "attributes.indexed.DIAGONALE_POUCES":
+        interval: 5
+        buckets: 12
+      "attributes.indexed.HDMI_PORTS_QUANTITY":
+        interval: 1
+        buckets: 6
+      "price.minPrice.price":
+        interval: 100
+        buckets: 20
+
+  ecoFilters:
+    - "REPAIRABILITY_INDEX" 
+    - "CLASSE_ENERGY"   
+
+  technicalFilters:
+    - "DIAGONALE_POUCES"
+    - "DISPLAY_TECHNOLOGY"
+    - "HDMI_PORTS_QUANTITY"
+  
+#  - "PARTS_AVAILLABILITY"
+#  - "DATA_QUALITY"  
+#  - "BRAND-SUSTAINABILITY"
+
+# If thos attributes are not present, the product will be defined as excluded 
+  requiredAttributes:
+    - DIAGONALE_POUCES
 
 
       

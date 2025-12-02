@@ -1,0 +1,40 @@
+##################################
+key: "POWER_CONSUMPTION_OFF"
+betterIs: "LOWER"
+filteringType: "NUMERIC"
+asScore: true
+faIcon: "mdi-power-plug-off"
+
+icecatFeaturesIds:      
+     - 2034
+     - 2036 
+  
+name:
+     default: "Power consumption (off)"
+     fr: "Consommation électrique (arrêt/veille)"
+  
+synonyms:
+     all:
+       - "CONSOMMATION ELECTRIQUE (ARRET)"
+       - "CONSOMMATION D'ENERGIE (MODE VEILLE)"
+       - "POWER_CONSUMPTION_OFF"
+       - "POWERSTANDBY"
+         
+parser:
+     normalize: true
+     trim: true
+     lowerCase: false
+     upperCase: true
+     removeParenthesis: false
+     deleteTokens:
+      - "W"
+
+
+  
+#################################################
+# UI / Scores Oriented attributes
+#################################################
+
+##################################
+# FEATURES
+# Note : not associated with any vals, features of parsed base on yes or no values

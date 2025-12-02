@@ -1,10 +1,13 @@
 package org.open4goods.verticals;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
+import java.lang.reflect.Field;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
@@ -70,6 +74,48 @@ class VerticalYamlValidationTest {
         }
     }
 
+    @Test
+    void shouldResolveAttributesFromExternalCatalog() {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        assertThat(tvConfig).isNotNull();
+
+        AttributeConfig hdrClass = tvConfig.getAttributesConfig().getConfigs().stream()
+            .filter(config -> "CLASSE_ENERGY_HDR".equals(config.getKey()))
+            .findFirst()
+            .orElse(null);
+
+        assertThat(hdrClass)
+            .as("HDR energy class must be loaded from the shared attribute catalog")
+            .isNotNull();
+
+        assertThat(hdrClass.getSynonyms().get("all"))
+            .as("External attribute definitions must populate synonyms")
+            .isNotEmpty();
+
+        assertThat(hdrClass.getEprelFeatureNames())
+            .as("External attribute definitions must retain EPREL mapping")
+            .contains("energyClassHDR");
+    }
+
+    @Test
+    void shouldFailWhenAttributeDefinitionIsMissing() throws Exception {
+        Resource tvResource = verticalResources.stream()
+            .filter(resource -> "tv.yml".equals(resource.getFilename()))
+            .findFirst()
+            .orElseThrow();
+
+        Map<String, AttributeConfig> originalCatalog = snapshotAttributeCatalog();
+        try (InputStream inputStream = tvResource.getInputStream()) {
+            setAttributeCatalog(Map.of());
+
+            assertThatThrownBy(() -> verticalsConfigService.getConfig(inputStream, verticalsConfigService.getDefaultConfig()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Missing attribute definition for key");
+        } finally {
+            setAttributeCatalog(originalCatalog);
+        }
+    }
+
     private static void assertVerticalConfig(VerticalConfig config, String sourceName) {
         assertThat(config).as("Vertical config should not be null for %s", sourceName).isNotNull();
         assertThat(config.getId()).as("Each vertical needs an ID (%s)", sourceName).isNotBlank();
@@ -98,5 +144,18 @@ class VerticalYamlValidationTest {
         assertThat(total)
             .as("Impact score weights must sum to 1 (%s)", sourceName)
             .isCloseTo(1.0d, within(1e-6));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, AttributeConfig> snapshotAttributeCatalog() throws Exception {
+        Field field = VerticalsConfigService.class.getDeclaredField("attributeCatalog");
+        field.setAccessible(true);
+        return new HashMap<>((Map<String, AttributeConfig>) field.get(verticalsConfigService));
+    }
+
+    private static void setAttributeCatalog(Map<String, AttributeConfig> catalog) throws Exception {
+        Field field = VerticalsConfigService.class.getDeclaredField("attributeCatalog");
+        field.setAccessible(true);
+        field.set(verticalsConfigService, catalog);
     }
 }

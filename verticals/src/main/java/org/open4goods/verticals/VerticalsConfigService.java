@@ -13,7 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
+import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.vertical.AttributeComparisonRule;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeParserConfig;
+import org.open4goods.model.vertical.Order;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -37,10 +43,11 @@ public class VerticalsConfigService {
 
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
-	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
+        private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
 
-	private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
-	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
+        private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
+        private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
+        private static final String CLASSPATH_ATTRIBUTES = "classpath:/attributes/*.yml";
 
 	private SerialisationService serialisationService;
 
@@ -49,11 +56,13 @@ public class VerticalsConfigService {
 	// The cache of categories to verticalconfig association. datasource (or all) -> category -> VerticalConfig
 	private final Map<String,Map<String, VerticalConfig>> categoriesToVertical = new ConcurrentHashMap<>();
 
-	private Map<String,VerticalConfig> byUrl = new HashMap<>();
+        private Map<String,VerticalConfig> byUrl = new HashMap<>();
 
-	private Map<String,String> toLang = new HashMap<>();
+        private Map<String,String> toLang = new HashMap<>();
 
-	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
+        private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
+
+        private Map<String, AttributeConfig> attributeCatalog = new HashMap<>();
 
 
 
@@ -90,17 +99,23 @@ public class VerticalsConfigService {
 	 * operation, so can be used in refresh
 	 */
 //	@Scheduled(fixedDelay = 1000 * 60 * 10, initialDelay = 1000 * 60 * 10)
-	public synchronized void loadConfigs() {
+        public synchronized void loadConfigs() {
 
-		Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
+                Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
 
-		// Setting the default config
-		try {
-			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
-			defaultConfig =  serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
-		} catch (Exception e) {
-			logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
-		}
+                attributeCatalog = loadAttributeCatalog();
+                byUrl.clear();
+                toLang.clear();
+                byTaxonomy.clear();
+
+                // Setting the default config
+                try {
+                        Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
+                        defaultConfig =  serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
+                        resolveAttributeConfigs(defaultConfig);
+                } catch (Exception e) {
+                        logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
+                }
 
 		/////////////////////////////////////////
 		// Load configurations from classpath
@@ -155,11 +170,11 @@ public class VerticalsConfigService {
 	 *
 	 * @return the available verticals configurations from classpath
 	 */
-	private List<VerticalConfig> loadFromClasspath() {
-		List<VerticalConfig> ret = new ArrayList<>();
-		Resource[] resources = null;
-		try {
-			resources = resourceResolver.getResources(CLASSPATH_VERTICALS);
+        private List<VerticalConfig> loadFromClasspath() {
+                List<VerticalConfig> ret = new ArrayList<>();
+                Resource[] resources = null;
+                try {
+                        resources = resourceResolver.getResources(CLASSPATH_VERTICALS);
 		} catch (IOException e) {
 			logger.error("Cannot load  verticals from {} : {}", CLASSPATH_VERTICALS, e.getMessage());
 			return ret;
@@ -174,10 +189,39 @@ public class VerticalsConfigService {
 			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}",r.getFilename(), e);
 			}
-		}
+                }
 
-		return ret;
-	}
+                return ret;
+        }
+
+        private Map<String, AttributeConfig> loadAttributeCatalog() {
+                Map<String, AttributeConfig> attributes = new HashMap<>();
+                Resource[] resources;
+                try {
+                        resources = resourceResolver.getResources(CLASSPATH_ATTRIBUTES);
+                } catch (IOException e) {
+                        throw new IllegalStateException("Cannot load attributes from " + CLASSPATH_ATTRIBUTES, e);
+                }
+
+                for (Resource resource : resources) {
+                        try (InputStream inputStream = resource.getInputStream()) {
+                                AttributeConfig attributeConfig = serialisationService.fromYaml(inputStream, AttributeConfig.class);
+                                if (attributeConfig == null || attributeConfig.getKey() == null) {
+                                        throw new IllegalStateException("Attribute config defined in " + resource.getFilename() + " has no key");
+                                }
+
+                                if (attributes.containsKey(attributeConfig.getKey())) {
+                                        logger.warn("Duplicate attribute config detected for key {}. Keeping last declared instance.", attributeConfig.getKey());
+                                }
+
+                                attributes.put(attributeConfig.getKey(), attributeConfig);
+                        } catch (Exception e) {
+                                throw new IllegalStateException("Cannot load attribute config from " + resource.getFilename(), e);
+                        }
+                }
+
+                return attributes;
+        }
 
 
 
@@ -189,15 +233,84 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws SerialisationException, IOException {
+        public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws SerialisationException, IOException {
 
-		// TODO(p3,perf) : chould be cached
-		VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul),VerticalConfig.class);
-		ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
-		VerticalConfig ret = objectReader.readValue(inputStream);
-		inputStream.close();
-		return ret;
-	}
+                // TODO(p3,perf) : chould be cached
+                VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul),VerticalConfig.class);
+                ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
+                VerticalConfig ret = objectReader.readValue(inputStream);
+                inputStream.close();
+                return resolveAttributeConfigs(ret);
+        }
+
+        private VerticalConfig resolveAttributeConfigs(VerticalConfig config) {
+                if (config == null || config.getAttributesConfig() == null || config.getAttributesConfig().getConfigs() == null) {
+                        return config;
+                }
+
+                List<AttributeConfig> resolved = new ArrayList<>();
+                for (AttributeConfig attributeConfig : config.getAttributesConfig().getConfigs()) {
+                        resolved.add(resolveAttributeConfig(attributeConfig));
+                }
+                config.getAttributesConfig().setConfigs(resolved);
+                return config;
+        }
+
+        private AttributeConfig resolveAttributeConfig(AttributeConfig attributeConfig) {
+                if (attributeConfig == null) {
+                        return null;
+                }
+
+                if (!isKeyOnly(attributeConfig)) {
+                        return attributeConfig;
+                }
+
+                AttributeConfig catalogConfig = attributeCatalog.get(attributeConfig.getKey());
+                if (catalogConfig == null) {
+                        throw new IllegalStateException("Missing attribute definition for key " + attributeConfig.getKey());
+                }
+
+                return serialisationService.getYamlMapper().convertValue(catalogConfig, AttributeConfig.class);
+        }
+
+        private boolean isKeyOnly(AttributeConfig attributeConfig) {
+                if (attributeConfig == null || attributeConfig.getKey() == null) {
+                        return false;
+                }
+
+                AttributeParserConfig parser = attributeConfig.getParser();
+                return attributeConfig.getName() == null
+                                && attributeConfig.getUnit() == null
+                                && attributeConfig.getSuffix() == null
+                                && (attributeConfig.getSynonyms() == null || attributeConfig.getSynonyms().isEmpty())
+                                && attributeConfig.getIcecatFeaturesIds().isEmpty()
+                                && attributeConfig.getEprelFeatureNames().isEmpty()
+                                && attributeConfig.getNumericMapping().isEmpty()
+                                && attributeConfig.getMappings().isEmpty()
+                                && (attributeConfig.getFaIcon() == null || "fa-wrench".equals(attributeConfig.getFaIcon()))
+                                && (attributeConfig.getBetterIs() == null || AttributeComparisonRule.GREATER.equals(attributeConfig.getBetterIs()))
+                                && (attributeConfig.getFilteringType() == null || AttributeType.TEXT.equals(attributeConfig.getFilteringType()))
+                                && !attributeConfig.isAsScore()
+                                && (attributeConfig.getAttributeValuesOrdering() == null || Order.COUNT.equals(attributeConfig.getAttributeValuesOrdering()))
+                                && (attributeConfig.getAttributeValuesReverseOrder() == null || Boolean.FALSE.equals(attributeConfig.getAttributeValuesReverseOrder()))
+                                && hasDefaultParser(parser);
+        }
+
+        private boolean hasDefaultParser(AttributeParserConfig parser) {
+                AttributeParserConfig defaults = new AttributeParserConfig();
+                if (parser == null) {
+                        return true;
+                }
+
+                return Objects.equals(parser.getNormalize(), defaults.getNormalize())
+                                && Objects.equals(parser.getTrim(), defaults.getTrim())
+                                && Objects.equals(parser.getLowerCase(), defaults.getLowerCase())
+                                && Objects.equals(parser.getUpperCase(), defaults.getUpperCase())
+                                && parser.isRemoveParenthesis() == defaults.isRemoveParenthesis()
+                                && Objects.equals(parser.getClazz(), defaults.getClazz())
+                                && (parser.getDeleteTokens() == null || parser.getDeleteTokens().isEmpty())
+                                && (parser.getTokenMatch() == null || parser.getTokenMatch().isEmpty());
+        }
 
 	/**
 	 * Instanciate a vertical config for a given categories bag

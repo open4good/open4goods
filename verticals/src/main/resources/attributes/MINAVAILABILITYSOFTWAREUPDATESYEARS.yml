@@ -1,0 +1,26 @@
+##################################
+# MINAVAILABILITYSOFTWAREUPDATESYEARS
+##################################
+key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+betterIs: "GREATER"
+eprelFeatureNames:
+  - minAvailabilitySoftwareUpdatesYears
+faIcon: "mdi-update"
+name:
+  default: "Software update availability"
+  fr: "Disponibilité des mises à jour logicielles"
+suffix:
+  default: "Year(s)"
+  fr: "An(s)"
+filteringType: "NUMERIC"
+asScore: true
+synonyms:
+  all:
+    - "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+    - "SOFTWARE_UPDATES_YEARS"
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

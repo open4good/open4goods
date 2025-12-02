@@ -1,0 +1,27 @@
+##################################
+# POWER_CONSUMPTION_STANDBY
+##################################
+key: "POWER_CONSUMPTION_STANDBY"
+betterIs: "LOWER"
+eprelFeatureNames:
+  - powerStandby
+faIcon: "mdi-power-standby"
+name:
+  default: "Power consumption (standby)"
+  fr: "Consommation en veille"
+suffix:
+  default: "W"
+  fr: "W"
+filteringType: "NUMERIC"
+asScore: true
+synonyms:
+  all:
+    - "POWERSTANDBY"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true
+  deleteTokens:
+    - "W"

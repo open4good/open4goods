@@ -1,0 +1,29 @@
+key: "COLOR"
+faIcon: "mdi-water"
+name:
+  default: "Color"
+  fr: "Couleur"
+filteringType: "TEXT"
+asScore: false
+
+synonyms:
+  all:
+  - "COULEUR"
+  - "COULEUR DU PRODUIT"
+  - "CATÉGORIE DE COULEUR"
+  - "CATEGORIE DE COULEUR"
+  - "COULEUR DU PRODUIT"
+  - "COULEUR GÉNÉRIQUE"
+  - "COULEUR GENÉRIQUE"
+  - "COLOUR"
+  - "COLOR"
+  
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  
+  removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"

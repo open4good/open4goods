@@ -1,0 +1,27 @@
+##################################
+# WARRANTY
+##################################
+key: "WARRANTY"
+betterIs: "GREATER"
+eprelFeatureNames:
+  - minGuaranteedGuarantee
+faIcon: "mdi-shield-check"
+name:
+  default: "Warranty duration"
+  fr: "Durée de garantie"
+suffix:
+  default: "Year(s)"
+  fr: "An(s)"
+filteringType: "NUMERIC"
+asScore: true
+synonyms:
+  all:
+    - "GARANTIE"
+    - "WARRANTY"
+    - "MINGUARANTEEDGUARANTEE"
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
