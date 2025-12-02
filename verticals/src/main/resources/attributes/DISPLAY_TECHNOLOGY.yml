@@ -26,3 +26,4 @@ parser:
   removeParenthesis: false
 deleteTokens:
   - "TV"
+  - "_LCD"

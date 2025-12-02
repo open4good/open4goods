@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonMerge;
 public class ImpactScoreCriteria {
 
 	private String key;
-	
-	
+
+
 
 	@JsonMerge
 	private Localisable<String, String> description = new Localisable<>();
 
-	
+
 	@JsonMerge
 	private Localisable<String, String> title = new Localisable<>();
 
@@ -40,7 +40,5 @@ public class ImpactScoreCriteria {
 	public void setTitle(Localisable<String, String> title) {
 		this.title = title;
 	}
-	
-	
-	
+
 }

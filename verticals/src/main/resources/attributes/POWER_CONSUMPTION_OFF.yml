@@ -28,13 +28,3 @@ parser:
      removeParenthesis: false
      deleteTokens:
       - "W"
-
-
-  
-#################################################
-# UI / Scores Oriented attributes
-#################################################
-
-##################################
-# FEATURES
-# Note : not associated with any vals, features of parsed base on yes or no values

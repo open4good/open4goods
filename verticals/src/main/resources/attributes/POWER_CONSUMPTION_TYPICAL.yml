@@ -27,13 +27,3 @@ parser:
     upperCase: true
     removeParenthesis: false
     
-################################################################################
-#                         CONSOMMATION ELECTRIQUE (ARRET / VEILLE)
-################################################################################
-# Generated on 10/12/2024 21:22, coverage was 2% (63/2389) . 
-# TOP attributes values are :
-#     - 0.3 (34 items)
-#     - 0.5 (24 items)
-#     - 0 (2 items)
-#     - 0, 3 W (2 items)
-#
