@@ -1,0 +1,26 @@
+##################################
+# MINAVAILABILITYSPAREPARTSYEARS
+##################################
+key: "MINAVAILABILITYSPAREPARTSYEARS"
+betterIs: "GREATER"
+eprelFeatureNames:
+  - minAvailabilitySparePartsYears
+faIcon: "mdi-tools"
+name:
+  default: "Spare parts availability"
+  fr: "Disponibilité des pièces détachées"
+suffix:
+  default: "Year(s)"
+  fr: "An(s)"
+filteringType: "NUMERIC"
+asScore: true
+synonyms:
+  all:
+    - "MINAVAILABILITYSPAREPARTSYEARS"
+    - "SPARE_PARTS_YEARS"
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

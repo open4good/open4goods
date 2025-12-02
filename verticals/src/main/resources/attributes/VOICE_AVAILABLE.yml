@@ -1,0 +1,21 @@
+##################################
+# VOICE_AVAILABLE
+##################################
+key: "VOICE_AVAILABLE"
+eprelFeatureNames:
+  - voiceAvailable
+faIcon: "mdi-microphone"
+name:
+  default: "Voice control available"
+  fr: "Commande vocale disponible"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "VOICEAVAILABLE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true

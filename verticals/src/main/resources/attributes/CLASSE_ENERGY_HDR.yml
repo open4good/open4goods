@@ -1,0 +1,49 @@
+################################################################################
+#                         CLASSE ELECTRIQUE HDR
+################################################################################
+key: "CLASSE_ENERGY_HDR"
+betterIs: "GREATER"
+eprelFeatureNames:
+  - energyClassHDR
+faIcon: "mdi-flash"
+name:
+  default: "Energy class HDR"
+  fr: "Classe énergétique (HDR)"
+filteringType: "TEXT"
+asScore: true
+attributeValuesOrdering: "MAPPED"
+synonyms:
+  all:
+    - "ENERGYCLASSHDR"
+    - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "CLASSE"
+    - "(ÉCHELLE A++ À E)"
+    - "NOT AVAILABLE"
+numericMapping:
+  A+++: 18.0
+  A++: 18.0
+  A+: 17.0
+  A: 16.0
+  B++: 15.0
+  B+: 14.0
+  B: 13.0
+  C++: 12.0
+  C+: 11.0
+  C: 10.0
+  D++: 9.0
+  D+: 8.0
+  D: 7.0
+  E++: 6.0
+  E+: 5.0
+  E: 4.0
+  F++: 3.0
+  F+: 2.0
+  F: 1.0
+  G: 0.0

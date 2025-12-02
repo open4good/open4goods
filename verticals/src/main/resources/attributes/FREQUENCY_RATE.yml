@@ -1,0 +1,25 @@
+##################################
+# FREQUENCY_RATE
+##################################
+key: "FREQUENCY_RATE"
+betterIs: "GREATER"
+eprelFeatureNames:
+  - frequencyRate
+faIcon: "mdi-refresh-auto"
+name:
+  default: "Refresh rate"
+  fr: "Taux de rafraîchissement"
+suffix:
+  default: "Hz"
+  fr: "Hz"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "FREQUENCYRATE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true

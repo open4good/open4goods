@@ -1,0 +1,21 @@
+##################################
+# AUTO_BRIGHTNESS_CONTROL_AVAILABLE
+##################################
+key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"
+eprelFeatureNames:
+  - autoBrightnessControlAvailable
+faIcon: "mdi-brightness-auto"
+name:
+  default: "Automatic brightness control"
+  fr: "Contrôle automatique de la luminosité"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "AUTOBRIGHTNESSCONTROLAVAILABLE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true

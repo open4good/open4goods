@@ -1,0 +1,25 @@
+##################################
+# MINGUARANTEEDSUPPORTYEARS
+##################################
+key: "MINGUARANTEEDSUPPORTYEARS"
+betterIs: "GREATER"
+eprelFeatureNames:
+  - minGuaranteedSupportYears
+faIcon: "mdi-lifebuoy"
+name:
+  default: "Guaranteed support duration"
+  fr: "Durée garantie du support"
+suffix:
+  default: "Year(s)"
+  fr: "An(s)"
+filteringType: "NUMERIC"
+asScore: true
+synonyms:
+  all:
+    - "MINGUARANTEEDSUPPORTYEARS"
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

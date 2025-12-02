@@ -1,0 +1,25 @@
+key: "HDMI_PORTS_QUANTITY"
+betterIs: "GREATER"
+faIcon: "mdi-sitemap"
+icecatFeaturesIds: 
+  - 3566      
+name:
+  default: "HDMI ports quantity"
+  fr: "Quantité de ports HDMI"
+filteringType: "NUMERIC"
+asScore: false
+
+synonyms:
+  all:
+  - "QTE DE PORTS HDMI"
+  - "QUANTITE DE PORTS HDMI"   
+  - "HDMI_PORTS_QUANTITY"
+  
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"

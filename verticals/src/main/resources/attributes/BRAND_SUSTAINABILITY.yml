@@ -1,0 +1,7 @@
+key: "BRAND_SUSTAINABILITY"
+betterIs: "GREATER"
+faIcon: "mdi-web"
+#    attributePath: attributes.features
+name:
+  default: "Evaluation ESG (Sustainalytics) de la marque"
+  fr: "Evaluation ESG de la marque (Sustainalytics)"

@@ -1,0 +1,7 @@
+key: "FEATURES"
+betterIs: "GREATER"
+faIcon: "mdi-format-list-bulleted"
+attributePath: attributes.features
+name:
+  default: "Features"
+  fr: "Fonctionnalités"

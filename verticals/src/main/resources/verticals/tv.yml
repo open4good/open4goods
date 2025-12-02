@@ -413,6 +413,107 @@ attributesConfig:
   # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
   ##################################################################################################################      
   configs:
+    - key: "MINAVAILABILITYSPAREPARTSYEARS"
+    - key: "MINGUARANTEEDSUPPORTYEARS"
+    - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+    - key: "WARRANTY"
+    - key: "DIAGONALE_POUCES"
+    - key: "DISPLAY_TECHNOLOGY"
+    - key: "POWER_CONSUMPTION_STANDBY"
+    - key: "FREQUENCY_RATE"
+    - key: "VOICE_AVAILABLE"
+    - key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"
+    - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
+    - key: "POWER_CONSUMPTION_SDR"
+    - key: "POWER_CONSUMPTION_HDR"
+    - key: "CLASSE_ENERGY_HDR"
+    - key: "CLASSE_ENERGY_SDR"
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+
+
+
+
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.REPAIRABILITY_INDEX.value":
+    interval: 1
+    buckets: 10
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 25
+    buckets: 12
+  "scores.POWER_CONSUMPTION_OFF.value":
+    interval: 0.1
+    buckets: 10
+  "scores.WEIGHT.value":
+    interval: 1
+    buckets: 5
+  "scores.BRAND_SUSTAINABILITY.value":
+    interval: 1
+    buckets: 5
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "scores.DATA_QUALITY.value":
+    interval: 1
+    buckets: 5
+  "attributes.indexed.REPAIRABILITY_INDEX":
+    interval: 1
+    buckets: 10
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 25
+    buckets: 12
+  "attributes.indexed.POWER_CONSUMPTION_OFF":
+    interval: 0.1
+    buckets: 10
+  "attributes.indexed.WEIGHT":
+    interval: 2
+    buckets: 12
+  "attributes.indexed.ENERGY_CONSUMPTION_1000_HOURS":
+    interval: 20
+    buckets: 12
+  "attributes.indexed.DIAGONALE_POUCES":
+    interval: 5
+    buckets: 12
+  "attributes.indexed.HDMI_PORTS_QUANTITY":
+    interval: 1
+    buckets: 6
+  "price.minPrice.price":
+    interval: 100
+    buckets: 20
+
+ecoFilters:
+    - "REPAIRABILITY_INDEX" 
+    - "CLASSE_ENERGY"   
+
+technicalFilters:
+    - "DIAGONALE_POUCES"
+    - "DISPLAY_TECHNOLOGY"
+    - "HDMI_PORTS_QUANTITY"
+  
+#  - "PARTS_AVAILLABILITY"
+#  - "DATA_QUALITY"  
+#  - "BRAND-SUSTAINABILITY"
+
+# If thos attributes are not present, the product will be defined as excluded 
+requiredAttributes:
+  - DIAGONALE_POUCES
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES DEFINITIONS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs:
 
  
 

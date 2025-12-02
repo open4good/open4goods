@@ -1,0 +1,27 @@
+key: "REPAIRABILITY_INDEX"
+betterIs: "GREATER"
+faIcon: "mdi-tools"
+name:
+  default: "Repairability index"
+  fr: "Indice de réparabilité"
+filteringType: "NUMERIC"
+asScore: true
+
+
+attributeValuesOrdering: "MAPPED"
+
+synonyms:
+  all:
+  - "REPAIRABILITY INDEX"
+  - "INDICE DE RÉPARABILITÉ (NOTE SUR 10)"
+  - "INDICE DE RÉPARABILITÉ"
+  - "L’INDICE DE RÉPARABILITÉ"
+  - "REPAIRABILITY_INDEX"
+parser:
+  normalize: true
+  trim: false
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+  - "/10"

@@ -1,0 +1,7 @@
+key: "DATA_QUALITY"
+betterIs: "GREATER"
+faIcon: "mdi-file-shield-outline"
+#    attributePath: attributes.features
+name:
+  default: "Data quality"
+  fr: "Qualité de la donnée"

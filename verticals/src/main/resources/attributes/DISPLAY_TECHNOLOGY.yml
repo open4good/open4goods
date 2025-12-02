@@ -1,0 +1,28 @@
+##################################
+# TYPE TV
+##################################
+key: "DISPLAY_TECHNOLOGY"
+eprelFeatureNames:
+  - panelTechnology
+icecatFeaturesIds:
+  - 9713
+faIcon: "mdi-television"
+name:
+  default: "Display technology"
+  fr: "Technologie d'affichage"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "DISPLAY_TECHNOLOGY"
+    - "PANELTECHNOLOGY"
+  rakuten.com:
+    - "TYPE DE PRODUIT"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+deleteTokens:
+  - "TV"
