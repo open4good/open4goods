@@ -3,6 +3,17 @@ key: "POWER_CONSUMPTION_TYPICAL"
 betterIs: "LOWER"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Consommation électrique (en marche)"
+scoreDescription:
+  fr: "La consommation électrique de l'objet en fonctionnement"
+scoreUtility:
+  fr: "Mesure directe de l’énergie consommée en usage réel, principale source d’émissions pendant la phase d’utilisation."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 faIcon: "mdi-power-plug"
 
 icecatFeaturesIds:      

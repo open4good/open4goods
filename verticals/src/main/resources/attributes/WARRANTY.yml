@@ -14,6 +14,18 @@ suffix:
   fr: "An(s)"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Garantie"
+scoreDescription:
+  fr: "Durée de garantie du produit"
+scoreUtility:
+  fr: "Une garantie longue encourage la durabilité en incitant les fabricants à concevoir des produits plus fiables et réparables."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - MANUFACTURING
+  - USE
 synonyms:
   all:
     - "GARANTIE"

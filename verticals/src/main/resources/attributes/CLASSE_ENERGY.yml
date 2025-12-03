@@ -6,6 +6,17 @@ name:
   fr: "Classe énergétique"
 filteringType: "TEXT"
 asScore: true
+scoreTitle:
+  fr: "Classe énergétique"
+scoreDescription:
+  fr: "La classe énergétique"
+scoreUtility:
+  fr: "Offre un repère immédiat sur l’efficacité globale de l’appareil pendant son utilisation quotidienne."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 
 attributeValuesOrdering: "MAPPED"
 synonyms:

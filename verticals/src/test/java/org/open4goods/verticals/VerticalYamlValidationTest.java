@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.within;
 import java.lang.reflect.Field;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Arrays;
 import java.util.List;
@@ -116,6 +117,31 @@ class VerticalYamlValidationTest {
         }
     }
 
+    @Test
+    void shouldNotExposeScoreMetadataWhenAsScoreIsFalse() throws Exception {
+        Map<String, AttributeConfig> catalog = snapshotAttributeCatalog();
+
+        catalog.values().forEach(attribute -> {
+            if (!attribute.isAsScore()) {
+                assertThat(isLocalisableDefined(attribute.getScoreTitle()))
+                    .as("scoreTitle must be absent when asScore is false for %s", attribute.getKey())
+                    .isFalse();
+                assertThat(isLocalisableDefined(attribute.getScoreDescription()))
+                    .as("scoreDescription must be absent when asScore is false for %s", attribute.getKey())
+                    .isFalse();
+                assertThat(isLocalisableDefined(attribute.getScoreUtility()))
+                    .as("scoreUtility must be absent when asScore is false for %s", attribute.getKey())
+                    .isFalse();
+                assertThat(isCollectionDefined(attribute.getParticipateInScores()))
+                    .as("participateInScores must be empty when asScore is false for %s", attribute.getKey())
+                    .isFalse();
+                assertThat(isCollectionDefined(attribute.getParticipateInACV()))
+                    .as("participateInACV must be empty when asScore is false for %s", attribute.getKey())
+                    .isFalse();
+            }
+        });
+    }
+
     private static void assertVerticalConfig(VerticalConfig config, String sourceName) {
         assertThat(config).as("Vertical config should not be null for %s", sourceName).isNotNull();
         assertThat(config.getId()).as("Each vertical needs an ID (%s)", sourceName).isNotBlank();
@@ -157,5 +183,13 @@ class VerticalYamlValidationTest {
         Field field = VerticalsConfigService.class.getDeclaredField("attributeCatalog");
         field.setAccessible(true);
         field.set(verticalsConfigService, catalog);
+    }
+
+    private static boolean isLocalisableDefined(org.open4goods.model.Localisable<String, String> value) {
+        return value != null && !value.isEmpty();
+    }
+
+    private static boolean isCollectionDefined(Collection<?> values) {
+        return values != null && !values.isEmpty();
     }
 }

@@ -7,6 +7,7 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.Order;
+import org.open4goods.model.vertical.lifecycle.LifecycleStage;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -30,6 +31,16 @@ public record AttributeConfigDto(
         Set<String> icecatFeaturesIds,
         @Schema(description = "Indicates whether this attribute is exposed as a score.")
         boolean asScore,
+        @Schema(description = "Localised label used when the attribute is rendered as a score.")
+        String scoreTitle,
+        @Schema(description = "Localised description of what the score represents.")
+        String scoreDescription,
+        @Schema(description = "Localised explanation of why this score is important.")
+        String scoreUtility,
+        @Schema(description = "Composite scores in which this attribute participates.")
+        Set<String> participateInScores,
+        @Schema(description = "Lifecycle stages (ACV) represented by this score.")
+        Set<LifecycleStage> participateInACV,
         @Schema(description = "Comparison rule applied to determine which values are considered better.")
         AttributeComparisonRule betterIs,
         @Schema(description = "Ordering applied when displaying attribute values.")

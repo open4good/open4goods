@@ -14,6 +14,17 @@ eprelFeatureNames:
   - powerStandbyNetworked
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Consommation électrique (arrêt/veille)"
+scoreDescription:
+  fr: "La consommation électrique de l'appareil en mode veille ou réseau"
+scoreUtility:
+  fr: "Capture l’énergie consommée en veille réseau, souvent continue, pour réduire l’impact cumulé sur toute la durée de vie."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 faIcon: "mdi-power-plug-off"
 name:
   default: "Power consumption (standby networked)"

@@ -14,6 +14,17 @@ suffix:
   fr: "W"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Consommation électrique (arrêt/veille)"
+scoreDescription:
+  fr: "La consommation électrique de l'appareil en mode veille"
+scoreUtility:
+  fr: "Quantifie la consommation continue en veille et met en évidence les gains possibles en limitant l’énergie passive."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 synonyms:
   all:
     - "POWERSTANDBY"

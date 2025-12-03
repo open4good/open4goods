@@ -11,6 +11,17 @@ name:
   fr: "Classe énergétique (SDR)"
 filteringType: "TEXT"
 asScore: true
+scoreTitle:
+  fr: "Classe énergétique (SDR)"
+scoreDescription:
+  fr: "La classe énergétique du téléviseur en mode SDR"
+scoreUtility:
+  fr: "Ce score illustre l’efficacité énergétique en mode SDR, phase la plus fréquente d’usage d’un téléviseur, et oriente vers des modèles moins énergivores pendant toute leur durée de vie."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 attributeValuesOrdering: "MAPPED"
 synonyms:
   all:
