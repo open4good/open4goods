@@ -91,6 +91,12 @@
         </v-card>
 
       </div>
+
+      <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
+        <v-col cols="12">
+          <ProductLifeTimeline :timeline="timeline" />
+        </v-col>
+      </v-row>
     </div>
 
     <div class="product-attributes__block product-attributes__block--detailed">
@@ -108,16 +114,7 @@
         />
       </div>
 
-      <div
-        :class="[
-          'product-attributes__detailed-layout',
-          { 'product-attributes__detailed-layout--with-timeline': Boolean(timeline) },
-        ]"
-      >
-        <div v-if="timeline" class="product-attributes__timeline-column">
-          <ProductLifeTimeline :timeline="timeline" />
-        </div>
-
+      <div class="product-attributes__detailed-layout">
         <div class="product-attributes__details-panel">
           <v-row v-if="filteredGroups.length" class="product-attributes__details-grid" dense>
             <ProductAttributesDetailCard
@@ -762,15 +759,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   gap: 1.5rem;
 }
 
-.product-attributes__timeline-column {
-  flex: 0 0 100%;
-  display: flex;
-}
-
-.product-attributes__timeline-column :deep(.product-life-timeline) {
-  width: 100%;
-}
-
 .product-attributes__details-panel {
   flex: 1;
 }
@@ -800,6 +788,10 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   background: rgba(var(--v-theme-surface-primary-050), 0.7);
 }
 
+.product-attributes__timeline-row {
+  margin-top: 1.5rem;
+}
+
 @media (min-width: 960px) {
   .product-attributes__main-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -813,19 +805,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 
   .product-attributes__search {
     max-width: 320px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .product-attributes__detailed-layout--with-timeline {
-    display: grid;
-    grid-template-columns: minmax(240px, 1fr) minmax(0, 3fr);
-    gap: 1.5rem;
-    align-items: flex-start;
-  }
-
-  .product-attributes__details-panel {
-    grid-column: auto;
   }
 }
 </style>

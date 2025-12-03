@@ -1678,7 +1678,7 @@
         "empty": "Lifecycle information is not available yet.",
         "ariaYear": "Milestones for {year}",
         "sources": {
-          "priceHistory": "Price history",
+          "priceHistory": "Nudger",
           "eprel": "EPREL registry",
           "generic": "Lifecycle event"
         },
@@ -1692,8 +1692,8 @@
           "priceFirstSeenOccasion": "First second-hand offer",
           "priceLastSeenNew": "Latest new offer",
           "priceLastSeenOccasion": "Latest second-hand offer",
-          "eprelOnMarketStart": "Market start (EPREL)",
-          "eprelOnMarketEnd": "Market end (EPREL)",
+          "eprelOnMarketStart": "Market start",
+          "eprelOnMarketEnd": "Market end",
           "eprelOnMarketFirstStart": "First EU market start",
           "eprelFirstPublication": "First EPREL publication",
           "eprelLastPublication": "Latest EPREL publication",

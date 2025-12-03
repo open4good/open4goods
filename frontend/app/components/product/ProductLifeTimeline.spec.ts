@@ -17,7 +17,7 @@ const i18n = createI18n({
             empty: 'Lifecycle information is not available yet.',
             ariaYear: 'Year {year}',
             sources: {
-              priceHistory: 'Price history',
+              priceHistory: 'Nudger',
               eprel: 'EPREL registry',
               generic: 'Timeline event',
             },
@@ -31,8 +31,8 @@ const i18n = createI18n({
               priceFirstSeenOccasion: 'First second-hand offer',
               priceLastSeenNew: 'Latest new offer',
               priceLastSeenOccasion: 'Latest second-hand offer',
-              eprelOnMarketStart: 'Market start (EPREL)',
-              eprelOnMarketEnd: 'Market end (EPREL)',
+              eprelOnMarketStart: 'Market start',
+              eprelOnMarketEnd: 'Market end',
               eprelOnMarketFirstStart: 'EPREL first entry',
               eprelFirstPublication: 'EPREL first publication',
               eprelLastPublication: 'EPREL last publication',
@@ -135,10 +135,12 @@ describe('ProductLifeTimeline', () => {
     const wrapper = await mountComponent(buildTimeline())
 
     const monthLabels = wrapper.findAll('.product-life-timeline__event-month').map((node) => node.text())
+    const titles = wrapper.findAll('.product-life-timeline__event-title').map((node) => node.text())
 
     expect(monthLabels).toEqual(['Sep', 'Jan', 'Jun'])
+    expect(titles).toContain('Market start')
     expect(wrapper.text()).toContain('First new offer')
-    expect(wrapper.text()).toContain('Market start (EPREL)')
+    expect(wrapper.text()).toContain('Market start')
     expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(true)
   })
 
