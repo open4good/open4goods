@@ -6,6 +6,19 @@ name:
   fr: "Indice de réparabilité"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Indice de réparabilité"
+scoreDescription:
+  fr: "L'indice de réparabilité de l'objet"
+scoreUtility:
+  fr: "Un indice élevé prolonge la durée de vie, limite les remplacements et réduit les impacts de fabrication et de fin de vie."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - MANUFACTURING
+  - USE
+  - END_OF_LIFE
 
 
 attributeValuesOrdering: "MAPPED"

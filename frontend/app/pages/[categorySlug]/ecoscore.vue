@@ -540,8 +540,9 @@ const availableCriteria = computed(() => {
     const attribute = attributeMap.value.get(key)
     return {
       key,
-      label: attribute?.name ?? criterion.title ?? key,
-      description: criterion.description ?? '',
+      label: attribute?.scoreTitle ?? attribute?.name ?? criterion.title ?? key,
+      description: attribute?.scoreDescription ?? criterion.description ?? '',
+      utility: attribute?.scoreUtility ?? null,
     }
   })
 })
@@ -558,14 +559,17 @@ const criteriaCards = computed(() => {
 
   return Array.from(keys).map((key) => {
     const attribute = attributeMap.value.get(key)
-    const fallbackTitle = available?.[key]?.title ?? key
-    const description = analysis?.[key]?.trim() || available?.[key]?.description || ''
+    const fallbackTitle = attribute?.scoreTitle ?? available?.[key]?.title ?? key
+    const description =
+      attribute?.scoreDescription || analysis?.[key]?.trim() || available?.[key]?.description || ''
+    const utility = attribute?.scoreUtility || availableCriteria.value.find((item) => item.key === key)?.utility || ''
     const coefficient = typeof weights?.[key] === 'number' ? Number(weights?.[key]) : null
 
     return {
       key,
-      label: attribute?.name ?? fallbackTitle,
+      label: attribute?.scoreTitle ?? attribute?.name ?? fallbackTitle,
       description,
+      utility,
       coefficient,
       icon: attribute?.icon ?? null,
       fallback: fallbackTitle.charAt(0).toUpperCase(),

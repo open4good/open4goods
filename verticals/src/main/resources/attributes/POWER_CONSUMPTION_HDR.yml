@@ -14,6 +14,17 @@ eprelFeatureNames:
   - powerOnModeHDR
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Consommation électrique (HDR)"
+scoreDescription:
+  fr: "La consommation électrique du téléviseur en mode HDR (haute définition)"
+scoreUtility:
+  fr: "Prend en compte l’énergie dépensée dans le mode HDR plus exigeant, important pour les usages intensifs."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 faIcon: "mdi-power-plug-off"
 name:
   default: "Power consumption (HDR)"

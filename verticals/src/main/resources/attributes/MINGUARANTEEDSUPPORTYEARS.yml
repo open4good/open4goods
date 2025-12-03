@@ -14,6 +14,18 @@ suffix:
   fr: "An(s)"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Support garanti"
+scoreDescription:
+  fr: "Durée minimale du support garanti"
+scoreUtility:
+  fr: "Assure la maintenance et les correctifs nécessaires pour maintenir l’appareil sûr et fonctionnel sur la durée."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
+  - END_OF_LIFE
 synonyms:
   all:
     - "MINGUARANTEEDSUPPORTYEARS"

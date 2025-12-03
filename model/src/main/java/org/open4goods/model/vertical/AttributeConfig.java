@@ -13,6 +13,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.vertical.lifecycle.LifecycleStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,10 +78,35 @@ public class AttributeConfig {
 
 
 
-	/**
-	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
-	 */
-	private boolean asScore = false;
+        /**
+         * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
+         */
+        private boolean asScore = false;
+
+        /**
+         * Localised label used when the attribute is displayed as a score title.
+         */
+        private Localisable<String, String> scoreTitle;
+
+        /**
+         * Localised description explaining what the score measures.
+         */
+        private Localisable<String, String> scoreDescription;
+
+        /**
+         * Localised text describing why this score matters to the impact calculation.
+         */
+        private Localisable<String, String> scoreUtility;
+
+        /**
+         * Names of the composite scores this attribute participates in.
+         */
+        private Set<String> participateInScores = new HashSet<>();
+
+        /**
+         * Lifecycle stages (ACV) represented by this attribute when used as a score.
+         */
+        private Set<LifecycleStage> participateInACV = new HashSet<>();
 
         /**
          * Indicates which comparison rule should be applied to determine the most
@@ -333,17 +359,107 @@ public class AttributeConfig {
 		this.numericMapping = numericMapping;
 	}
 
-	public boolean isAsScore() {
-		return asScore;
-	}
+        public boolean isAsScore() {
+                return asScore;
+        }
 
-	public void setAsScore(boolean asRating) {
-		this.asScore = asRating;
-	}
+        public void setAsScore(boolean asRating) {
+                this.asScore = asRating;
+        }
 
-	public Localisable<String, String> getName() {
-		return name;
-	}
+        /**
+         * Gets the localised score title used when rendering impact components.
+         *
+         * @return translated score title or {@code null} when not defined.
+         */
+        public Localisable<String, String> getScoreTitle() {
+                return scoreTitle;
+        }
+
+        /**
+         * Sets the localised score title used when rendering impact components.
+         *
+         * @param scoreTitle localised value to persist
+         */
+        public void setScoreTitle(Localisable<String, String> scoreTitle) {
+                this.scoreTitle = scoreTitle;
+        }
+
+        /**
+         * Gets the localised description for this score.
+         *
+         * @return translated description or {@code null}.
+         */
+        public Localisable<String, String> getScoreDescription() {
+                return scoreDescription;
+        }
+
+        /**
+         * Sets the localised description for this score.
+         *
+         * @param scoreDescription localised value to set
+         */
+        public void setScoreDescription(Localisable<String, String> scoreDescription) {
+                this.scoreDescription = scoreDescription;
+        }
+
+        /**
+         * Gets the localised utility text describing why the score matters.
+         *
+         * @return translated utility text or {@code null}.
+         */
+        public Localisable<String, String> getScoreUtility() {
+                return scoreUtility;
+        }
+
+        /**
+         * Sets the localised utility text describing why the score matters.
+         *
+         * @param scoreUtility localised value to set
+         */
+        public void setScoreUtility(Localisable<String, String> scoreUtility) {
+                this.scoreUtility = scoreUtility;
+        }
+
+        /**
+         * Names the composite scores this attribute participates in.
+         *
+         * @return set of parent score identifiers
+         */
+        public Set<String> getParticipateInScores() {
+                return participateInScores;
+        }
+
+        /**
+         * Sets the composite scores this attribute participates in.
+         *
+         * @param participateInScores list of score identifiers
+         */
+        public void setParticipateInScores(Set<String> participateInScores) {
+                this.participateInScores = participateInScores;
+        }
+
+        /**
+         * Lifecycle stages covered by this attribute when it acts as a score.
+         *
+         * @return lifecycle stages set
+         */
+        public Set<LifecycleStage> getParticipateInACV() {
+                return participateInACV;
+        }
+
+        /**
+         * Sets the lifecycle stages covered by this attribute when it acts as a score.
+         *
+         * @param participateInACV lifecycle stages to assign
+         */
+        public void setParticipateInACV(Set<LifecycleStage> participateInACV) {
+                this.participateInACV = participateInACV;
+        }
+
+        public Localisable<String, String> getName() {
+                return name;
+        }
 
 	public void setName(Localisable<String, String> name) {
 		this.name = name;

@@ -3,6 +3,17 @@ key: "POWER_CONSUMPTION_OFF"
 betterIs: "LOWER"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Consommation électrique (arret)"
+scoreDescription:
+  fr: "La consommation électrique à l'arrêt, ou en veille"
+scoreUtility:
+  fr: "Met en lumière les pertes résiduelles quand l’appareil est éteint pour réduire le gaspillage permanent."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 faIcon: "mdi-power-plug-off"
 
 icecatFeaturesIds:      

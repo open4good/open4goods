@@ -76,6 +76,36 @@ export interface AttributeConfigDto {
      */
     asScore?: boolean;
     /**
+     * Localised label used when the attribute is rendered as a score.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    scoreTitle?: string;
+    /**
+     * Localised description of what the score represents.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    scoreDescription?: string;
+    /**
+     * Localised explanation of why this score is important.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    scoreUtility?: string;
+    /**
+     * Composite scores in which this attribute participates.
+     * @type {Array<string>}
+     * @memberof AttributeConfigDto
+     */
+    participateInScores?: Array<string>;
+    /**
+     * Lifecycle stages (ACV) represented by this score.
+     * @type {Array<AttributeConfigDtoParticipateInACVEnum>}
+     * @memberof AttributeConfigDto
+     */
+    participateInACV?: Array<AttributeConfigDtoParticipateInACVEnum>;
+    /**
      * Comparison rule applied to determine which values are considered better.
      * @type {string}
      * @memberof AttributeConfigDto
@@ -149,6 +179,18 @@ export const AttributeConfigDtoAttributeValuesOrderingEnum = {
 } as const;
 export type AttributeConfigDtoAttributeValuesOrderingEnum = typeof AttributeConfigDtoAttributeValuesOrderingEnum[keyof typeof AttributeConfigDtoAttributeValuesOrderingEnum];
 
+/**
+ * @export
+ */
+export const AttributeConfigDtoParticipateInACVEnum = {
+    Extraction: 'EXTRACTION',
+    Manufacturing: 'MANUFACTURING',
+    Transportation: 'TRANSPORTATION',
+    Use: 'USE',
+    EndOfLife: 'END_OF_LIFE'
+} as const;
+export type AttributeConfigDtoParticipateInACVEnum = typeof AttributeConfigDtoParticipateInACVEnum[keyof typeof AttributeConfigDtoParticipateInACVEnum];
+
 
 /**
  * Check if a given object implements the AttributeConfigDto interface.
@@ -175,6 +217,11 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'filteringType': json['filteringType'] == null ? undefined : json['filteringType'],
         'icecatFeaturesIds': json['icecatFeaturesIds'] == null ? undefined : new Set(json['icecatFeaturesIds']),
         'asScore': json['asScore'] == null ? undefined : json['asScore'],
+        'scoreTitle': json['scoreTitle'] == null ? undefined : json['scoreTitle'],
+        'scoreDescription': json['scoreDescription'] == null ? undefined : json['scoreDescription'],
+        'scoreUtility': json['scoreUtility'] == null ? undefined : json['scoreUtility'],
+        'participateInScores': json['participateInScores'] == null ? undefined : json['participateInScores'],
+        'participateInACV': json['participateInACV'] == null ? undefined : json['participateInACV'],
         'betterIs': json['betterIs'] == null ? undefined : json['betterIs'],
         'attributeValuesOrdering': json['attributeValuesOrdering'] == null ? undefined : json['attributeValuesOrdering'],
         'attributeValuesReverseOrder': json['attributeValuesReverseOrder'] == null ? undefined : json['attributeValuesReverseOrder'],
@@ -204,6 +251,11 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'filteringType': value['filteringType'],
         'icecatFeaturesIds': value['icecatFeaturesIds'] == null ? undefined : Array.from(value['icecatFeaturesIds'] as Set<any>),
         'asScore': value['asScore'],
+        'scoreTitle': value['scoreTitle'],
+        'scoreDescription': value['scoreDescription'],
+        'scoreUtility': value['scoreUtility'],
+        'participateInScores': value['participateInScores'],
+        'participateInACV': value['participateInACV'],
         'betterIs': value['betterIs'],
         'attributeValuesOrdering': value['attributeValuesOrdering'],
         'attributeValuesReverseOrder': value['attributeValuesReverseOrder'],

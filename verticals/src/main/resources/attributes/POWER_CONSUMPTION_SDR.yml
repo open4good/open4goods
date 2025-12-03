@@ -14,6 +14,17 @@ eprelFeatureNames:
   - powerOnModeSDR
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Consommation électrique (SDR)"
+scoreDescription:
+  fr: "La consommation électrique du téléviseur en mode SDR (basse définition)"
+scoreUtility:
+  fr: "Reflète la dépense énergétique sur le mode SDR majoritaire, clé pour réduire l’impact d’usage quotidien."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 faIcon: "mdi-power-plug-off"
 name:
   default: "Power consumption (SDR)"

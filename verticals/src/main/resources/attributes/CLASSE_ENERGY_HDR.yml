@@ -11,6 +11,17 @@ name:
   fr: "Classe énergétique (HDR)"
 filteringType: "TEXT"
 asScore: true
+scoreTitle:
+  fr: "Classe énergétique (HDR)"
+scoreDescription:
+  fr: "La classe énergétique du téléviseur en mode HDR"
+scoreUtility:
+  fr: "Met en avant la performance énergétique en HDR, un mode énergivore qui pèse sur l’empreinte d’usage des téléviseurs modernes."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
 attributeValuesOrdering: "MAPPED"
 synonyms:
   all:

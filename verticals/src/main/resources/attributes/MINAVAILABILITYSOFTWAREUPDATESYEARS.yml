@@ -14,6 +14,18 @@ suffix:
   fr: "An(s)"
 filteringType: "NUMERIC"
 asScore: true
+scoreTitle:
+  fr: "Mises à jour logicielles"
+scoreDescription:
+  fr: "Durée minimale de disponibilité des mises à jour logicielles"
+scoreUtility:
+  fr: "Garantit la sécurité et la compatibilité du produit sur le long terme, prolongeant son usage et évitant un renouvellement prématuré."
+participateInScores:
+  - OTHERSCORE1
+  - OTHERSCORE2
+participateInACV:
+  - USE
+  - END_OF_LIFE
 synonyms:
   all:
     - "MINAVAILABILITYSOFTWAREUPDATESYEARS"
