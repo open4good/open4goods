@@ -1,18 +1,12 @@
 import { defineSiteConfig } from 'nuxt-site-config'
 
-import { HOST_DOMAIN_LANGUAGE_MAP } from './shared/utils/domain-language'
-
-const defaultUrl = 'https://nudger.fr'
-
-const alternateUrls = Object.values(HOST_DOMAIN_LANGUAGE_MAP).includes('fr')
-  ? { fr: 'https://nudger.fr' }
-  : {}
+const urls = {
+  en: 'https://nudger.com',
+  fr: 'https://nudger.fr',
+} as const
 
 export default defineSiteConfig({
   name: 'Nudger',
-  url: defaultUrl,
-  urls: {
-    en: defaultUrl,
-    ...alternateUrls,
-  },
+  url: urls.fr,
+  urls,
 })
