@@ -31,10 +31,16 @@ public class Score  implements Validable {
 	/** The relativised cardinalities, relativ mode.**/
 	private Cardinality relativ;
 	
-	/**
-	 * Optional metadatas this score could have
-	 */
-	private Map<String,String> metadatas = new HashMap<>();
+        /**
+         * Optional metadatas this score could have
+         */
+        private Map<String,String> metadatas = new HashMap<>();
+
+        /**
+         * Participating scores (with scaled ponderation) when this score is the result
+         * of an aggregation.
+         */
+        private Map<String, Double> aggregates = new HashMap<>();
 	
 	/**
 	 * The ranking of this score in the pool. Cooresponds to the ranking of the relativValue, items count is given through cardinality.count
@@ -294,14 +300,22 @@ public class Score  implements Validable {
 	}
 
 
-	public Map<String, String> getMetadatas() {
-		return metadatas;
-	}
+        public Map<String, String> getMetadatas() {
+                return metadatas;
+        }
 
 
-	public void setMetadatas(Map<String, String> metadatas) {
-		this.metadatas = metadatas;
-	}
+        public void setMetadatas(Map<String, String> metadatas) {
+                this.metadatas = metadatas;
+        }
+
+        public Map<String, Double> getAggregates() {
+                return aggregates;
+        }
+
+        public void setAggregates(Map<String, Double> aggregates) {
+                this.aggregates = aggregates;
+        }
 
 
 	public Integer getRanking() {

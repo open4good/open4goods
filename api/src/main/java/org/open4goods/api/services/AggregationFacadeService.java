@@ -13,6 +13,7 @@ import org.open4goods.api.services.aggregation.services.batch.scores.Attribute2S
 import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.ParticipatingScoresAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.SustainalyticsAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.IdentityAggregationService;
@@ -397,10 +398,11 @@ public class AggregationFacadeService {
 		Logger logger = GenericFileLogger.initLogger("score", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
 
 		services.add(new CleanScoreAggregationService(logger));
-		services.add(new Attribute2ScoreAggregationService(logger));
-		services.add(new SustainalyticsAggregationService( logger, brandService, verticalConfigService,brandScoreService));
-		services.add(new DataCompletion2ScoreAggregationService(logger));
-		services.add(new EcoScoreAggregationService( logger));
+                services.add(new Attribute2ScoreAggregationService(logger));
+                services.add(new SustainalyticsAggregationService( logger, brandService, verticalConfigService,brandScoreService));
+                services.add(new DataCompletion2ScoreAggregationService(logger));
+                services.add(new EcoScoreAggregationService( logger));
+                services.add(new ParticipatingScoresAggregationService(logger));
 
 		final ScoringBatchedAggregator ret = new ScoringBatchedAggregator(services);
 		autowireBeanFactory.autowireBean(ret);
