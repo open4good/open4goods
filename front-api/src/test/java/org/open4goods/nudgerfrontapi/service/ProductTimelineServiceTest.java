@@ -84,10 +84,7 @@ class ProductTimelineServiceTest {
                 .contains(
                         ProductTimelineEventType.EPREL_ON_MARKET_START,
                         ProductTimelineEventType.EPREL_ON_MARKET_END,
-                        ProductTimelineEventType.EPREL_FIRST_PUBLICATION,
-                        ProductTimelineEventType.EPREL_LAST_PUBLICATION,
                         ProductTimelineEventType.EPREL_EXPORT,
-                        ProductTimelineEventType.EPREL_IMPORTED,
                         ProductTimelineEventType.EPREL_ORGANISATION_CLOSED);
         assertThat(dto.events())
                 .isSortedAccordingTo(Comparator.comparing(ProductTimelineEventDto::timestamp));
