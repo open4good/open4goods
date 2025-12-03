@@ -5,3 +5,4 @@ faIcon: "mdi-web"
 name:
   default: "Evaluation ESG (Sustainalytics) de la marque"
   fr: "Evaluation ESG de la marque (Sustainalytics)"
+asScore: true

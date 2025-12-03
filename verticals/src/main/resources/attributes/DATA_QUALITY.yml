@@ -5,3 +5,4 @@ faIcon: "mdi-file-shield-outline"
 name:
   default: "Data quality"
   fr: "Qualité de la donnée"
+asScore: true

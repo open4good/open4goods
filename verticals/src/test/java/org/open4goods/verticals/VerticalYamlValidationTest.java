@@ -7,12 +7,13 @@ import static org.assertj.core.api.Assertions.within;
 import java.lang.reflect.Field;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -140,6 +141,57 @@ class VerticalYamlValidationTest {
                     .isFalse();
             }
         });
+    }
+
+    @Test
+    void shouldReferenceExistingAttributesInTvConfiguration() {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        assertThat(tvConfig).as("TV vertical must be available").isNotNull();
+
+        Map<String, AttributeConfig> attributeConfigByKey = tvConfig.getAttributesConfig()
+            .getConfigs()
+            .stream()
+            .collect(Collectors.toMap(AttributeConfig::getKey, attribute -> attribute));
+        Set<String> attributeKeys = attributeConfigByKey.keySet();
+
+        assertAttributeReferences(tvConfig.getPopularAttributes(), attributeKeys, "popularAttributes");
+        assertAttributeReferences(tvConfig.getEcoFilters(), attributeKeys, "ecoFilters");
+        assertAttributeReferences(tvConfig.getTechnicalFilters(), attributeKeys, "technicalFilters");
+        assertAttributeReferences(tvConfig.getRequiredAttributes(), attributeKeys, "requiredAttributes");
+
+        assertImpactScoreCriterias(attributeConfigByKey, tvConfig.getAvailableImpactScoreCriterias());
+    }
+
+    private static void assertAttributeReferences(Collection<String> attributes, Set<String> definedKeys, String section) {
+        List<String> missing = attributes == null ? List.of() : attributes.stream()
+            .filter(key -> !definedKeys.contains(key))
+            .collect(Collectors.toList());
+
+        assertThat(missing)
+            .as("All attributes referenced in %s must be defined in attributesConfig", section)
+            .isEmpty();
+    }
+
+    private static void assertImpactScoreCriterias(Map<String, AttributeConfig> attributesByKey, Collection<String> criterias) {
+        if (criterias == null) {
+            return;
+        }
+
+        List<String> missingAttributes = criterias.stream()
+            .filter(key -> !attributesByKey.containsKey(key))
+            .collect(Collectors.toList());
+
+        assertThat(missingAttributes)
+            .as("All availableImpactScoreCriterias must reference existing attributes")
+            .isEmpty();
+
+        List<String> nonScoreable = criterias.stream()
+            .filter(key -> attributesByKey.containsKey(key) && !attributesByKey.get(key).isAsScore())
+            .collect(Collectors.toList());
+
+        assertThat(nonScoreable)
+            .as("availableImpactScoreCriterias must reference attributes with asScore=true")
+            .isEmpty();
     }
 
     private static void assertVerticalConfig(VerticalConfig config, String sourceName) {

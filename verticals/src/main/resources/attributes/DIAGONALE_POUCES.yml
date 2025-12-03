@@ -15,7 +15,7 @@ suffix:
   default: "\""
   fr: "\""
 filteringType: "NUMERIC"
-asScore: false
+asScore: true
 synonyms:
   all:
     - "DIAGONALE_POUCES"
