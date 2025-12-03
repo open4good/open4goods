@@ -1,6 +1,8 @@
 package org.open4goods.api.services.completion;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -140,29 +142,76 @@ public class EprelCompletionService  extends AbstractCompletionService{
 	}
 
 
-	private Set<DataFragment> getEprelAttributesFragments(Product data, VerticalConfig vertical) {
-			Set<DataFragment> fragment = new HashSet<>();
+        private Set<DataFragment> getEprelAttributesFragments(Product data, VerticalConfig vertical) {
+                        Set<DataFragment> fragment = new HashSet<>();
 
-			if (null != data.getEprelDatas()) {
+                        if (null != data.getEprelDatas()) {
 
-				Map<String, Object> chars = data.getEprelDatas().getCategorySpecificAttributes();
+                                Map<String, Object> chars = data.getEprelDatas().getCategorySpecificAttributes();
 
-				DataFragment df = initDataFragment(data);
-				for (Entry<String, Object> caracteristic : chars.entrySet()) {
+                                DataFragment df = initDataFragment(data);
+                                addCategoryAttributes(df, chars, "");
+                                addCoreEprelAttributes(df, data.getEprelDatas());
+                                fragment.add(df);
 
-					// TODO : Handle the toString on "object" type, we should have nested structures
-					// TODO : Correct language injection
-					df.addAttribute(caracteristic.getKey(), caracteristic.getValue().toString(), "fr", null);
-				}
-				fragment.add(df);
+                        }
 
-			}
+                return fragment;
+        }
 
-		return fragment;
-	}
+        private void addCategoryAttributes(DataFragment df, Map<String, Object> attributes, String prefix) {
+                if (attributes == null) {
+                        return;
+                }
+                for (Entry<String, Object> caracteristic : attributes.entrySet()) {
+                        String attributeKey = prefix.isEmpty() ? caracteristic.getKey() : prefix + "." + caracteristic.getKey();
+                        addAttributeValue(df, attributeKey, caracteristic.getValue());
+                }
+        }
 
-	private DataFragment initDataFragment( Product data) {
-		DataFragment df = new DataFragment();
+        private void addAttributeValue(DataFragment df, String attributeKey, Object value) {
+                if (value == null) {
+                        return;
+                }
+                if (value instanceof Map<?, ?> mapValue) {
+                        for (Entry<?, ?> entry : mapValue.entrySet()) {
+                                Object entryKey = entry.getKey();
+                                if (entryKey != null) {
+                                        String childKey = attributeKey + "." + entryKey.toString();
+                                        addAttributeValue(df, childKey, entry.getValue());
+                                }
+                        }
+                } else if (value instanceof Collection<?> collectionValue) {
+                        int index = 0;
+                        for (Object element : collectionValue) {
+                                addAttributeValue(df, attributeKey + "[" + index + "]", element);
+                                index++;
+                        }
+                } else if (value.getClass().isArray()) {
+                        int length = Array.getLength(value);
+                        for (int index = 0; index < length; index++) {
+                                addAttributeValue(df, attributeKey + "[" + index + "]", Array.get(value, index));
+                        }
+                } else {
+                        df.addAttribute(attributeKey, value.toString(), "fr", null);
+                }
+        }
+
+        private void addCoreEprelAttributes(DataFragment dataFragment, EprelProduct eprelProduct) {
+                addAttributeValue(dataFragment, "eprelRegistrationNumber", eprelProduct.getEprelRegistrationNumber());
+                addAttributeValue(dataFragment, "productGroup", eprelProduct.getProductGroup());
+                addAttributeValue(dataFragment, "implementingAct", eprelProduct.getImplementingAct());
+                addAttributeValue(dataFragment, "supplierOrTrademark", eprelProduct.getSupplierOrTrademark());
+                addAttributeValue(dataFragment, "modelIdentifier", eprelProduct.getModelIdentifier());
+                addAttributeValue(dataFragment, "eprelCategory", eprelProduct.getEprelCategory());
+                addAttributeValue(dataFragment, "energyClass", eprelProduct.getEnergyClass());
+                addAttributeValue(dataFragment, "energyClassImage", eprelProduct.getEnergyClassImage());
+                addAttributeValue(dataFragment, "status", eprelProduct.getStatus());
+                addAttributeValue(dataFragment, "gtinIdentifier", eprelProduct.getGtinIdentifier());
+        }
+
+        private DataFragment initDataFragment( Product data) {
+                DataFragment df = new DataFragment();
 		// TODO(p3,conf) : Constants
 		df.setDatasourceName(EPREL_DS_NAME);
 		df.setDatasourceConfigName(EPREL_DS_NAME);
