@@ -20,6 +20,15 @@
             }
         },
         {
+            "disable_score_aggregates": {
+                "path_match": "scores.*.aggregates",
+                "mapping": {
+                    "enabled": false,
+                    "type": "object"
+                }
+            }
+        },
+        {
             "scorename_as_keyword": {
                 "path_match": "scores.*.name",
                 "mapping": {
