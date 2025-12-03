@@ -45,6 +45,7 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
@@ -1456,6 +1457,13 @@ public class ProductMappingService {
                 cardinality.getCount(),
                 cardinality.getSum(),
                 cardinality.getValue());
+    }
+
+    /**
+     * Convenience overload to localise string attributes when no display locale is available.
+     */
+    private String localise(Localisable<String, String> localisable, DomainLanguage domainLanguage) {
+        return resolveLocalisedString(localisable, domainLanguage, null);
     }
 
     /**
