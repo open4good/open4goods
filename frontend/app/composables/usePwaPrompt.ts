@@ -23,10 +23,12 @@ export function usePwaPrompt() {
   const installInProgress = useState('pwa-installing', () => false)
   const offlineReady = useState('pwa-offline-ready', () => false)
   const updateAvailable = useState('pwa-update-available', () => false)
-  const installDismissed = useCookie<boolean>(INSTALL_DISMISS_COOKIE, {
-    default: () => false,
+  const installCookieDefaultsAllowed = import.meta.client && typeof window !== 'undefined'
+
+  const installDismissed = useCookie<boolean | undefined>(INSTALL_DISMISS_COOKIE, {
     maxAge: 60 * 60 * 24 * 30, // 30 days
     sameSite: 'lax',
+    ...(installCookieDefaultsAllowed ? { default: () => false } : {}),
   })
 
   const swState: RegisterSWState = import.meta.client
