@@ -63,9 +63,6 @@ public class EprelCompletionService  extends AbstractCompletionService{
 		} else {
 			return true;
 		}
-
-
-
 	}
 
 	@Override
@@ -124,14 +121,6 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
 			// TODO : Filter per vertical
 
-			//
-
-
-			// TODO : Implement
-
-			// Excluded : false
-			// Set model name
-			// Set attributes
 
 			// Setting the computed flag
 			data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
@@ -164,7 +153,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
                         return;
                 }
                 for (Entry<String, Object> caracteristic : attributes.entrySet()) {
-                        String attributeKey = prefix.isEmpty() ? caracteristic.getKey() : prefix + "." + caracteristic.getKey();
+                        String attributeKey = prefix.isEmpty() ? caracteristic.getKey() : prefix + "-" + caracteristic.getKey();
                         addAttributeValue(df, attributeKey, caracteristic.getValue());
                 }
         }
@@ -177,7 +166,7 @@ public class EprelCompletionService  extends AbstractCompletionService{
                         for (Entry<?, ?> entry : mapValue.entrySet()) {
                                 Object entryKey = entry.getKey();
                                 if (entryKey != null) {
-                                        String childKey = attributeKey + "." + entryKey.toString();
+                                        String childKey = attributeKey + "-" + entryKey.toString();
                                         addAttributeValue(df, childKey, entry.getValue());
                                 }
                         }
@@ -198,21 +187,12 @@ public class EprelCompletionService  extends AbstractCompletionService{
         }
 
         private void addCoreEprelAttributes(DataFragment dataFragment, EprelProduct eprelProduct) {
-                addAttributeValue(dataFragment, "eprelRegistrationNumber", eprelProduct.getEprelRegistrationNumber());
-                addAttributeValue(dataFragment, "productGroup", eprelProduct.getProductGroup());
-                addAttributeValue(dataFragment, "implementingAct", eprelProduct.getImplementingAct());
-                addAttributeValue(dataFragment, "supplierOrTrademark", eprelProduct.getSupplierOrTrademark());
-                addAttributeValue(dataFragment, "modelIdentifier", eprelProduct.getModelIdentifier());
-                addAttributeValue(dataFragment, "eprelCategory", eprelProduct.getEprelCategory());
                 addAttributeValue(dataFragment, "energyClass", eprelProduct.getEnergyClass());
                 addAttributeValue(dataFragment, "energyClassImage", eprelProduct.getEnergyClassImage());
-                addAttributeValue(dataFragment, "status", eprelProduct.getStatus());
-                addAttributeValue(dataFragment, "gtinIdentifier", eprelProduct.getGtinIdentifier());
         }
 
         private DataFragment initDataFragment( Product data) {
                 DataFragment df = new DataFragment();
-		// TODO(p3,conf) : Constants
 		df.setDatasourceName(EPREL_DS_NAME);
 		df.setDatasourceConfigName(EPREL_DS_NAME);
 		df.setLastIndexationDate(System.currentTimeMillis());
