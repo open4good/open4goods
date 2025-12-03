@@ -25,6 +25,7 @@ import org.open4goods.api.model.VerticalCategoryMapping;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
@@ -449,12 +450,17 @@ public class VerticalsGenerationService {
 
 			StringBuilder ret = new StringBuilder();
 
-			criterias.entrySet().forEach(score -> {
-				ret.append("  ").append(score.getKey()).append(" : " );
-				// NOTE : Spank me if NPE...
-				ret.append(vConf.getAvailableImpactScoreCriterias().get(score.getKey()).getDescription().get("fr"));
-				ret.append("\n");
-			});
+                        criterias.entrySet().forEach(score -> {
+                                ret.append("  ").append(score.getKey()).append(" : ");
+
+                                Optional.ofNullable(vConf.getAttributesConfig())
+                                        .map(config -> config.getAttributeConfigByKey(score.getKey()))
+                                        .map(AttributeConfig::getScoreDescription)
+                                        .map(description -> description.get("fr"))
+                                        .ifPresentOrElse(ret::append, () -> ret.append(score.getKey()));
+
+                                ret.append("\n");
+                        });
 
 			return ret.toString();
 		}

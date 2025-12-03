@@ -89,12 +89,7 @@ impactScoreConfig:
 
 
 availableImpactScoreCriterias:
-  DIAGONALE_POUCES:
-    key: DIAGONALE_POUCES
-    title:
-      fr: "Diagonale (en pouces)"
-    description:
-      fr: "La taille de l'écran mesurée en pouces"
+  - DIAGONALE_POUCES
 
 
 #####################################################################################################################################

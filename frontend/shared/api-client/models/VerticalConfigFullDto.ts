@@ -12,7 +12,6 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
 import type { BlogPostDto } from './BlogPostDto';
 import {
     BlogPostDtoFromJSON,
@@ -41,13 +40,6 @@ import {
     VerticalSubsetDtoToJSON,
     VerticalSubsetDtoToJSONTyped,
 } from './VerticalSubsetDto';
-import type { ImpactScoreCriteriaDto } from './ImpactScoreCriteriaDto';
-import {
-    ImpactScoreCriteriaDtoFromJSON,
-    ImpactScoreCriteriaDtoFromJSONTyped,
-    ImpactScoreCriteriaDtoToJSON,
-    ImpactScoreCriteriaDtoToJSONTyped,
-} from './ImpactScoreCriteriaDto';
 import type { AttributesConfigDto } from './AttributesConfigDto';
 import {
     AttributesConfigDtoFromJSON,
@@ -330,11 +322,11 @@ export interface VerticalConfigFullDto {
      */
     popularAttributes?: Array<AttributeConfigDto>;
     /**
-     * Impact score criteria available for this vertical with localised metadata.
-     * @type {{ [key: string]: ImpactScoreCriteriaDto; }}
+     * Identifiers of impact score criteria available for this vertical.
+     * @type {Array<string>}
      * @memberof VerticalConfigFullDto
      */
-    availableImpactScoreCriterias?: { [key: string]: ImpactScoreCriteriaDto; };
+    availableImpactScoreCriterias?: Array<string>;
     /**
      * Impact score configuration balancing each criterion, with localised texts.
      * @type {ImpactScoreConfigDto}
@@ -448,7 +440,7 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'resourcesConfig': json['resourcesConfig'] == null ? undefined : ResourcesAggregationConfigFromJSON(json['resourcesConfig']),
         'attributesConfig': json['attributesConfig'] == null ? undefined : AttributesConfigDtoFromJSON(json['attributesConfig']),
         'popularAttributes': json['popularAttributes'] == null ? undefined : ((json['popularAttributes'] as Array<any>).map(AttributeConfigDtoFromJSON)),
-        'availableImpactScoreCriterias': json['availableImpactScoreCriterias'] == null ? undefined : (mapValues(json['availableImpactScoreCriterias'], ImpactScoreCriteriaDtoFromJSON)),
+        'availableImpactScoreCriterias': json['availableImpactScoreCriterias'] == null ? undefined : json['availableImpactScoreCriterias'],
         'impactScoreConfig': json['impactScoreConfig'] == null ? undefined : ImpactScoreConfigDtoFromJSON(json['impactScoreConfig']),
         'subsets': json['subsets'] == null ? undefined : ((json['subsets'] as Array<any>).map(VerticalSubsetDtoFromJSON)),
         'brandsSubset': json['brandsSubset'] == null ? undefined : VerticalSubsetDtoFromJSON(json['brandsSubset']),
@@ -507,7 +499,7 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'resourcesConfig': ResourcesAggregationConfigToJSON(value['resourcesConfig']),
         'attributesConfig': AttributesConfigDtoToJSON(value['attributesConfig']),
         'popularAttributes': value['popularAttributes'] == null ? undefined : ((value['popularAttributes'] as Array<any>).map(AttributeConfigDtoToJSON)),
-        'availableImpactScoreCriterias': value['availableImpactScoreCriterias'] == null ? undefined : (mapValues(value['availableImpactScoreCriterias'], ImpactScoreCriteriaDtoToJSON)),
+        'availableImpactScoreCriterias': value['availableImpactScoreCriterias'],
         'impactScoreConfig': ImpactScoreConfigDtoToJSON(value['impactScoreConfig']),
         'subsets': value['subsets'] == null ? undefined : ((value['subsets'] as Array<any>).map(VerticalSubsetDtoToJSON)),
         'brandsSubset': VerticalSubsetDtoToJSON(value['brandsSubset']),

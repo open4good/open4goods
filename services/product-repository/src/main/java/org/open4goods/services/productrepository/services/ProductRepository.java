@@ -272,19 +272,24 @@ public class ProductRepository {
 	 */
 	public Map<String,Long> scoresCoverage(VerticalConfig vConf) {
 
-		Map<String, Long> ret = new HashMap<>();
+                Map<String, Long> ret = new HashMap<>();
 
-		vConf.getAvailableImpactScoreCriterias().entrySet().forEach(criteria -> {
+                if (vConf.getAvailableImpactScoreCriterias() == null) {
+                        logger.debug("No available impact score criteria configured for vertical {}", vConf.getId());
+                        return ret;
+                }
 
-			Long count = countMainIndexHavingScore(criteria.getKey(),vConf.getId());
+                vConf.getAvailableImpactScoreCriterias().forEach(criteriaKey -> {
 
-			// TODO(p2, conf) : threshold from conf
-			if (count > 10) {
-				ret.put(criteria.getKey() ,  count);
-			} else {
-				logger.info("Excluded from score mapping : {}", criteria );
-			}
-		});
+                        Long count = countMainIndexHavingScore(criteriaKey,vConf.getId());
+
+                        // TODO(p2, conf) : threshold from conf
+                        if (count > 10) {
+                                ret.put(criteriaKey ,  count);
+                        } else {
+                                logger.info("Excluded from score mapping : {}", criteriaKey );
+                        }
+                });
 
 
 		return ret;

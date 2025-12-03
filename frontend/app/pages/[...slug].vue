@@ -128,7 +128,6 @@ import {
   type AttributeConfigDto,
   type CommercialEvent,
   type FilterRequestDto,
-  type ImpactScoreCriteriaDto,
   type ProductDto,
   type ProductReferenceDto,
   type ProductScoreDto,
@@ -291,16 +290,20 @@ const attributeConfigMap = computed(() => {
 })
 
 const availableImpactCriteriaMap = computed(() => {
-  const criterias = categoryDetail.value?.availableImpactScoreCriterias ?? {}
+  const criterias = categoryDetail.value?.availableImpactScoreCriterias ?? []
 
-  return Object.entries(criterias).reduce((map, [key, criterion]) => {
+  return criterias.reduce((map, key) => {
     const normalizedKey = key?.toString().trim().toUpperCase()
     if (normalizedKey?.length) {
-      map.set(normalizedKey, criterion as ImpactScoreCriteriaDto)
+      const attribute = attributeConfigMap.value.get(normalizedKey)
+      map.set(normalizedKey, {
+        title: attribute?.scoreTitle ?? attribute?.name ?? normalizedKey,
+        description: attribute?.scoreDescription ?? null,
+      })
     }
 
     return map
-  }, new Map<string, ImpactScoreCriteriaDto>())
+  }, new Map<string, { title: string; description: string | null }>())
 })
 
 if (categorySlug) {

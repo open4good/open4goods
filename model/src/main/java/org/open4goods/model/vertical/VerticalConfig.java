@@ -197,11 +197,13 @@ public class VerticalConfig {
 	@JsonMerge
 	private Map<String, AggregationConfiguration> aggregationConfiguration = new HashMap<>();
 
-	/**
-	 * The scores that are eligible to participate to the impact score construction
-	 */
-	@JsonMerge
-	private Map<String, ImpactScoreCriteria> availableImpactScoreCriterias = new HashMap<>();
+        /**
+         * Keys identifying the scores that are eligible to participate to the impact score construction.
+         * Titles and descriptions were previously embedded here but are now resolved elsewhere to keep the
+         * configuration lightweight and focused on selectable criteria identifiers.
+         */
+        @JsonMerge
+        private List<String> availableImpactScoreCriterias = new ArrayList<>();
 
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName
@@ -856,13 +858,13 @@ public class VerticalConfig {
 		this.generationExcludedFromAttributesMatching = generationExcludedFromAttributesMatching;
 	}
 
-	public Map<String, ImpactScoreCriteria> getAvailableImpactScoreCriterias() {
-		return availableImpactScoreCriterias;
-	}
+        public List<String> getAvailableImpactScoreCriterias() {
+                return availableImpactScoreCriterias;
+        }
 
-	public void setAvailableImpactScoreCriterias(Map<String, ImpactScoreCriteria> availableImpactScoreCriterias) {
-		this.availableImpactScoreCriterias = availableImpactScoreCriterias;
-	}
+        public void setAvailableImpactScoreCriterias(List<String> availableImpactScoreCriterias) {
+                this.availableImpactScoreCriterias = availableImpactScoreCriterias;
+        }
 
 	public Integer getWorseLimit() {
 		return worseLimit;

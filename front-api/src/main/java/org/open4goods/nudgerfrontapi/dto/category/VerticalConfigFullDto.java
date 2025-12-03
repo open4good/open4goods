@@ -88,8 +88,8 @@ public record VerticalConfigFullDto(
         AttributesConfigDto attributesConfig,
         @Schema(description = "Popular attributes resolved to their full configuration metadata.")
         List<AttributeConfigDto> popularAttributes,
-        @Schema(description = "Impact score criteria available for this vertical with localised metadata.")
-        Map<String, ImpactScoreCriteriaDto> availableImpactScoreCriterias,
+        @Schema(description = "Identifiers of impact score criteria available for this vertical.")
+        List<String> availableImpactScoreCriterias,
         @Schema(description = "Impact score configuration balancing each criterion, with localised texts.")
         ImpactScoreConfigDto impactScoreConfig,
         @Schema(description = "Custom subsets defined for this vertical with localised labels.")
