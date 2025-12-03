@@ -45,7 +45,7 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
-import org.open4goods.model.vertical.ImpactScoreCriteria;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
@@ -1402,20 +1402,23 @@ public class ProductMappingService {
             return null;
         }
 
-        ImpactScoreCriteria criteria = null;
-        if (vConf != null && vConf.getAvailableImpactScoreCriterias() != null) {
-            criteria = vConf.getAvailableImpactScoreCriterias().get(score.getName());
-        }
+        AttributeConfig attributeConfig = vConf == null || vConf.getAttributesConfig() == null
+                ? null
+                : vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
 
         String description = null;
         String title = null;
-        if (criteria == null) {
-            logger.debug("No ImpactScoreCriteria found for {}", score.getName());
+        if (attributeConfig == null) {
+            // With criteria metadata removed from the configuration, fall back to the score identifier when no attribute metadata exists.
+            logger.debug("No attribute-backed metadata found for score {}", score.getName());
             title = score.getName();
         }
         else {
-            title = criteria.getTitle().i18n(domainLanguage.languageTag());
-            description = criteria.getDescription().i18n(domainLanguage.languageTag());
+            title = localise(attributeConfig.getScoreTitle(), domainLanguage);
+            if (!StringUtils.hasText(title)) {
+                title = localise(attributeConfig.getName(), domainLanguage);
+            }
+            description = localise(attributeConfig.getScoreDescription(), domainLanguage);
         }
 
 
@@ -1454,6 +1457,13 @@ public class ProductMappingService {
                 cardinality.getCount(),
                 cardinality.getSum(),
                 cardinality.getValue());
+    }
+
+    /**
+     * Convenience overload to localise string attributes when no display locale is available.
+     */
+    private String localise(Localisable<String, String> localisable, DomainLanguage domainLanguage) {
+        return resolveLocalisedString(localisable, domainLanguage, null);
     }
 
     /**

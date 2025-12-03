@@ -215,10 +215,7 @@ const categoryFixture = {
       },
     }),
   },
-  availableImpactScoreCriterias: {
-    POWER: { key: 'POWER', title: 'Energy', description: 'Energy consumption.' },
-    REPAIRABILITY: { key: 'REPAIRABILITY', title: 'Repairability', description: 'Repair score.' },
-  },
+  availableImpactScoreCriterias: ['POWER', 'REPAIRABILITY'],
   attributesConfig: {
     configs: [
       { key: 'POWER', name: 'Energy efficiency', icon: 'mdi-flash' },

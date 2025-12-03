@@ -113,84 +113,19 @@ subsets:
 
 # The scores that are available to build the impact score
 availableImpactScoreCriterias:
-    CLASSE_ENERGY:
-      key: CLASSE_ENERGY
-      title:
-        fr: "Classe énergétique"
-      description:
-        fr: "La classe énergétique"
-    REPAIRABILITY_INDEX:
-      key: REPAIRABILITY_INDEX
-      title:
-        fr: "Indice de réparabilité"      
-      description:
-        fr: "L'indice de réparabilité de l'objet"
-    WEIGHT:
-      key: WEIGHT
-      title:
-        fr: "Poids de l'objet"      
-      description:
-        fr: "Le poids de l'objet"
-    POWER_CONSUMPTION_TYPICAL:
-      key: POWER_CONSUMPTION_TYPICAL
-      title:
-        fr: "Consommation électrique (en marche)"      
-      description:
-        fr: "La consommation électrique de l'objet en fonctionnement"
-    POWER_CONSUMPTION_OFF:
-      key: POWER_CONSUMPTION_OFF
-      title:
-        fr: "Consommation électrique (arret)"      
-      description:
-        fr: "La consommation électrique à l'arrêt, ou en veille"
-    BRAND_SUSTAINABILITY:
-      key: BRAND_SUSTAINABILITY
-      title:
-        fr: "Evaluation ESG de la marque"      
-      description:
-        fr: "L'évaluation ESG de l'entreprise (filiale ou société mère, suivant la finesse des données) qui fabrique le produit, d'après le score de performance ESG de Sustainalytics"
-    DATA_QUALITY:
-      key: DATA_QUALITY
-      title:
-        fr: "Qualité de la donnée"
-      description:
-        fr: "La qualité de la donnée pour le produit. Quand un facteur manque pour un produit, on lui associe la moyenne de ce facteur pour sa catégorie, mais on dégrade le facteur DATA_QUALITY. Cela permet de pénaliser sans exclure les produits pour lequel un facteur est absent. "
-    DIAGONALE_POUCES:
-      key: DIAGONALE_POUCES
-      title:
-        fr: "Diagonale (en pouces)"
-      description:
-        fr: "La taille de l'écran mesurée en pouces"
-    POWER_CONSUMPTION_STANDBY_NETWORKD:
-      key: POWER_CONSUMPTION_STANDBY_NETWORKD
-      title:
-        fr: "Consommation électrique (arrêt/veille)"
-      description:
-        fr: "La consommation électrique de l'appareil en mode veille ou réseau"
-    POWER_CONSUMPTION_SDR:
-      key: POWER_CONSUMPTION_SDR
-      title:
-        fr: "Consommation électrique (SDR)"
-      description:
-        fr: "La consommation électrique du téléviseur en mode SDR (basse définition)"
-    POWER_CONSUMPTION_HDR:
-      key: POWER_CONSUMPTION_HDR
-      title:
-        fr: "Consommation électrique (HDR)"
-      description:
-        fr: "La consommation électrique du téléviseur en mode HDR (haute définition)"
-    CLASSE_ENERGY_HDR:
-      key: CLASSE_ENERGY_HDR
-      title:
-        fr: "Classe énergétique (HDR)"
-      description:
-        fr: "La classe énergétique du téléviseur en mode HDR"
-    CLASSE_ENERGY_SDR:
-      key: CLASSE_ENERGY_SDR
-      title:
-        fr: "Classe énergétique (SDR)"
-      description:
-        fr: "La classe énergétique du téléviseur en mode SDR"
+    - CLASSE_ENERGY
+    - REPAIRABILITY_INDEX
+    - WEIGHT
+    - POWER_CONSUMPTION_TYPICAL
+    - POWER_CONSUMPTION_OFF
+    - BRAND_SUSTAINABILITY
+    - DATA_QUALITY
+    - DIAGONALE_POUCES
+    - POWER_CONSUMPTION_STANDBY_NETWORKD
+    - POWER_CONSUMPTION_SDR
+    - POWER_CONSUMPTION_HDR
+    - CLASSE_ENERGY_HDR
+    - CLASSE_ENERGY_SDR
               
                 
       

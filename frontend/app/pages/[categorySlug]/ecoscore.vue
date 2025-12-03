@@ -432,7 +432,6 @@ import { useI18n } from 'vue-i18n'
 import type {
   AttributeConfigDto,
   CategoryBreadcrumbItemDto,
-  ImpactScoreCriteriaDto,
   ImpactScoreConfigDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
@@ -518,8 +517,8 @@ const purposeText = computed(() => impactScoreTexts.value?.purpose?.trim() || nu
 const availableDataText = computed(() => impactScoreTexts.value?.availlableDatas?.trim() || null)
 const criticalReviewText = computed(() => impactScoreTexts.value?.criticalReview?.trim() || null)
 
-const availableImpactScoreCriterias = computed<Record<string, ImpactScoreCriteriaDto>>(
-  () => category.value?.availableImpactScoreCriterias ?? {},
+const availableImpactScoreCriterias = computed<string[]>(
+  () => category.value?.availableImpactScoreCriterias ?? [],
 )
 
 const attributeConfigs = computed<AttributeConfigDto[]>(
@@ -536,15 +535,22 @@ const attributeMap = computed(() => {
 })
 
 const availableCriteria = computed(() => {
-  return Object.entries(availableImpactScoreCriterias.value).map(([key, criterion]) => {
+  return availableImpactScoreCriterias.value.map((key) => {
     const attribute = attributeMap.value.get(key)
     return {
       key,
-      label: attribute?.scoreTitle ?? attribute?.name ?? criterion.title ?? key,
-      description: attribute?.scoreDescription ?? criterion.description ?? '',
+      label: attribute?.scoreTitle ?? attribute?.name ?? key,
+      description: attribute?.scoreDescription ?? '',
       utility: attribute?.scoreUtility ?? null,
     }
   })
+})
+
+const availableCriteriaMap = computed(() => {
+  return availableCriteria.value.reduce((map, criterion) => {
+    map.set(criterion.key, criterion)
+    return map
+  }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
 })
 
 const criteriaCards = computed(() => {
@@ -554,15 +560,15 @@ const criteriaCards = computed(() => {
   const keys = new Set<string>([
     ...Object.keys(weights),
     ...Object.keys(analysis),
-    ...Object.keys(available ?? {}),
+    ...available,
   ])
 
   return Array.from(keys).map((key) => {
     const attribute = attributeMap.value.get(key)
-    const fallbackTitle = attribute?.scoreTitle ?? available?.[key]?.title ?? key
+    const fallbackTitle = attribute?.scoreTitle ?? availableCriteriaMap.value.get(key)?.label ?? key
     const description =
-      attribute?.scoreDescription || analysis?.[key]?.trim() || available?.[key]?.description || ''
-    const utility = attribute?.scoreUtility || availableCriteria.value.find((item) => item.key === key)?.utility || ''
+      attribute?.scoreDescription || analysis?.[key]?.trim() || availableCriteriaMap.value.get(key)?.description || ''
+    const utility = attribute?.scoreUtility || availableCriteriaMap.value.get(key)?.utility || ''
     const coefficient = typeof weights?.[key] === 'number' ? Number(weights?.[key]) : null
 
     return {

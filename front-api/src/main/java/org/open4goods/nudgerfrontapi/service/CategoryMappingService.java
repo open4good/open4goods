@@ -16,7 +16,6 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.ImpactScoreConfig;
-import org.open4goods.model.vertical.ImpactScoreCriteria;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
@@ -31,7 +30,6 @@ import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
 import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
-import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreCriteriaDto;
 import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
@@ -145,7 +143,7 @@ public class CategoryMappingService {
                 verticalConfig.getResourcesConfig(),
                 mapAttributesConfig(verticalConfig.getAttributesConfig(), domainLanguage),
                 mapPopularAttributes(verticalConfig, domainLanguage),
-                mapImpactScoreCriterias(verticalConfig.getAvailableImpactScoreCriterias(), domainLanguage),
+                defaultList(verticalConfig.getAvailableImpactScoreCriterias()),
                 mapImpactScoreConfig(verticalConfig.getImpactScoreConfig(), domainLanguage),
                 mapVerticalSubsets(verticalConfig.getSubsets(), domainLanguage),
                 mapVerticalSubset(verticalConfig.getBrandsSubset(), domainLanguage),
@@ -452,35 +450,6 @@ public class CategoryMappingService {
                 attributeConfig.getParser(),
                 defaultMap(attributeConfig.getNumericMapping()),
                 defaultMap(attributeConfig.getMappings()));
-    }
-
-    /**
-     * Map impact score criteria definitions keyed by their identifier.
-     */
-    private Map<String, ImpactScoreCriteriaDto> mapImpactScoreCriterias(Map<String, ImpactScoreCriteria> criterias,
-                                                                         DomainLanguage domainLanguage) {
-        if (criterias == null || criterias.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return criterias.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        entry -> mapImpactScoreCriteria(entry.getValue(), domainLanguage),
-                        (left, right) -> right,
-                        LinkedHashMap::new));
-    }
-
-    /**
-     * Map a single impact score criterion.
-     */
-    private ImpactScoreCriteriaDto mapImpactScoreCriteria(ImpactScoreCriteria criteria, DomainLanguage domainLanguage) {
-        if (criteria == null) {
-            return null;
-        }
-        return new ImpactScoreCriteriaDto(
-                criteria.getKey(),
-                localise(criteria.getTitle(), domainLanguage),
-                localise(criteria.getDescription(), domainLanguage));
     }
 
     /**

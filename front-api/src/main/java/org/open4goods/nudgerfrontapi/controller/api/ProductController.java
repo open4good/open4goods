@@ -908,14 +908,41 @@ public class ProductController {
         }
 
         List<FieldMetadataDto> results = new ArrayList<>();
-        config.getAvailableImpactScoreCriterias().forEach((key, criteria) -> {
-            String mapping = "scores." + key + ".value";
-            String title = criteria.getTitle() != null ? localise(criteria.getTitle(), domainLanguage) : null;
-            String description = criteria.getDescription() != null ? localise(criteria.getDescription(), domainLanguage) : null;
-            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, key);
+        for (String key : config.getAvailableImpactScoreCriterias()) {
+            if (!StringUtils.hasText(key)) {
+                continue;
+            }
+
+            String normalizedKey = key.trim();
+            AttributeConfig attributeConfig = config.getAttributesConfig() == null
+                    ? null
+                    : config.getAttributesConfig().getAttributeConfigByKey(normalizedKey);
+
+            // Titles and descriptions now rely on attribute metadata when available.
+            String title = resolveImpactScoreTitle(attributeConfig, normalizedKey, domainLanguage);
+            String description = resolveImpactScoreDescription(attributeConfig, domainLanguage);
+
+            String mapping = "scores." + normalizedKey + ".value";
+            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedKey);
             results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC, aggregation));
-        });
+        }
         return List.copyOf(results);
+    }
+
+    private String resolveImpactScoreTitle(AttributeConfig attributeConfig, String key, DomainLanguage domainLanguage) {
+        String localizedTitle = attributeConfig == null ? null : localise(attributeConfig.getScoreTitle(), domainLanguage);
+        if (!StringUtils.hasText(localizedTitle) && attributeConfig != null) {
+            localizedTitle = localise(attributeConfig.getName(), domainLanguage);
+        }
+        return StringUtils.hasText(localizedTitle) ? localizedTitle : key;
+    }
+
+    private String resolveImpactScoreDescription(AttributeConfig attributeConfig, DomainLanguage domainLanguage) {
+        if (attributeConfig == null) {
+            return null;
+        }
+        String localizedDescription = localise(attributeConfig.getScoreDescription(), domainLanguage);
+        return StringUtils.hasText(localizedDescription) ? localizedDescription : null;
     }
 
     private String resolveAttributeValueType(VerticalConfig config, String attributeKey) {
