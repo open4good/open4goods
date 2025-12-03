@@ -131,13 +131,13 @@ const mountComponent = async (
 }
 
 describe('ProductLifeTimeline', () => {
-  it('renders timeline events with compact month labels and tooltips', async () => {
+  it('renders timeline events with full month labels and tooltips', async () => {
     const wrapper = await mountComponent(buildTimeline())
 
     const monthLabels = wrapper.findAll('.product-life-timeline__event-month').map((node) => node.text())
     const titles = wrapper.findAll('.product-life-timeline__event-title').map((node) => node.text())
 
-    expect(monthLabels).toEqual(['Sep', 'Jan', 'Jun'])
+    expect(monthLabels).toEqual(['September', 'January', 'June'])
     expect(titles).toContain('Market start')
     expect(wrapper.text()).toContain('First new offer')
     expect(wrapper.text()).toContain('Market start')
