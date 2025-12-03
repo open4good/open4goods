@@ -222,6 +222,8 @@ class VerticalYamlValidationTest {
         assertThat(total)
             .as("Impact score weights must sum to 1 (%s)", sourceName)
             .isCloseTo(1.0d, within(1e-6));
+
+        assertParticipatingScoresAreWeighted(config, sourceName, weights.keySet());
     }
 
     @SuppressWarnings("unchecked")
@@ -243,5 +245,18 @@ class VerticalYamlValidationTest {
 
     private static boolean isCollectionDefined(Collection<?> values) {
         return values != null && !values.isEmpty();
+    }
+
+    private static void assertParticipatingScoresAreWeighted(VerticalConfig config, String sourceName, Set<String> weights) {
+        List<String> missing = config.getAttributesConfig().getConfigs().stream()
+            .filter(AttributeConfig::isAsScore)
+            .filter(attribute -> attribute.getParticipateInScores() != null && !attribute.getParticipateInScores().isEmpty())
+            .map(AttributeConfig::getKey)
+            .filter(key -> !weights.contains(key))
+            .toList();
+
+        assertThat(missing)
+            .as("Participating scores must have ponderation defined in impactScoreConfig (%s)", sourceName)
+            .isEmpty();
     }
 }
