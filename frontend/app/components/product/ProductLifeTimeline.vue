@@ -32,7 +32,7 @@
               class="product-life-timeline__event"
               role="listitem"
             >
-              <v-tooltip location="top" max-width="320" content-class="product-life-timeline__tooltip-surface">
+              <v-tooltip location="top" max-width="320">
                 <template #activator="{ props: tooltipProps }">
                   <button
                     type="button"
@@ -59,8 +59,8 @@
                 </div>
               </v-tooltip>
 
-              <span class="product-life-timeline__event-title">{{ event.label }}</span>
               <span class="product-life-timeline__event-month">{{ event.monthLabel }}</span>
+              <span class="product-life-timeline__event-title">{{ event.label }}</span>
             </div>
           </div>
         </div>
@@ -151,8 +151,10 @@ const sourceOverrideByType: Record<string, string> = {
   EPREL_IMPORTED: 'PRICE_HISTORY',
 }
 
-const monthFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short' }))
-const fullDateFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }))
+const monthFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'long' }))
+const fullDateFormatter = computed(
+  () => new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long', year: 'numeric' }),
+)
 const eventDescriptionKeys: Record<string, string> = {
   PRICE_FIRST_SEEN_NEW: 'product.attributes.timeline.descriptions.priceFirstSeenNew',
   PRICE_FIRST_SEEN_OCCASION: 'product.attributes.timeline.descriptions.priceFirstSeenOccasion',
@@ -173,7 +175,11 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
   const yearGroups = new Map<number, TimelineYearGroup>()
 
   rawEvents
-    .filter((event): event is ProductTimelineEventDto & { timestamp: number } => typeof event?.timestamp === 'number')
+    .filter(
+      (event): event is ProductTimelineEventDto & { timestamp: number } =>
+        typeof event?.timestamp === 'number' &&
+        !['EPREL_FIRST_PUBLICATION', 'EPREL_LAST_PUBLICATION'].includes(event.type ?? ''),
+    )
     .sort((a, b) => a.timestamp - b.timestamp)
     .forEach((event, index) => {
       const type = event.type
@@ -280,15 +286,20 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
 .product-life-timeline__body {
   overflow-x: auto;
   padding-bottom: 0.25rem;
+  display: flex;
+  justify-content: center;
 }
 
 .product-life-timeline__rail {
   display: flex;
   gap: 1.75rem;
   align-items: flex-start;
-  min-width: max-content;
+  justify-content: center;
+  width: max-content;
+  min-width: 100%;
   padding: 0.25rem 0.5rem;
   scroll-snap-type: x mandatory;
+  margin: 0 auto;
 }
 
 .product-life-timeline--vertical .product-life-timeline__rail {
@@ -315,8 +326,10 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 1.25rem;
+  gap: 1.5rem;
   padding: 0.75rem 0.25rem 0.35rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .product-life-timeline--vertical .product-life-timeline__year-track {
@@ -343,7 +356,7 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   gap: 0.4rem;
   align-items: center;
   position: relative;
-  min-width: 42px;
+  min-width: 72px;
   text-align: center;
 }
 
@@ -401,7 +414,7 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   color: rgb(var(--v-theme-text-neutral-strong));
   font-weight: 600;
   line-height: 1.2;
-  max-width: 12ch;
+  max-width: 16ch;
 }
 
 .product-life-timeline__tooltip {
@@ -409,15 +422,6 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   flex-direction: column;
   gap: 0.35rem;
   max-width: 300px;
-}
-
-:global(.product-life-timeline__tooltip-surface) {
-  background-color: rgb(var(--v-theme-surface));
-  color: rgb(var(--v-theme-text-neutral-strong));
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
-  box-shadow: 0 18px 40px -22px rgba(15, 23, 42, 0.35);
-  border-radius: 12px;
-  padding: 0.75rem 0.9rem;
 }
 
 .product-life-timeline__tooltip-title {
