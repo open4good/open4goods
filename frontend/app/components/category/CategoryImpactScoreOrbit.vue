@@ -3,131 +3,138 @@
     class="impact-orbit"
     elevation="2"
     rounded="xl"
-    :class="{ 'impact-orbit--stacked': isStacked }"
     data-test="impact-score-orbit"
   >
+    <!-- HEADER -->
     <div class="impact-orbit__header">
-      <div class="impact-orbit__eyebrow">{{ t('category.ecoscorePage.sections.overview.visualization.eyebrow') }}</div>
-      <div class="impact-orbit__title">{{ t('category.ecoscorePage.sections.overview.visualization.title') }}</div>
+      <div class="impact-orbit__eyebrow">
+        {{ t('category.ecoscorePage.sections.overview.visualization.eyebrow') }}
+      </div>
+
+      <div class="impact-orbit__title">
+        {{ t('category.ecoscorePage.sections.overview.visualization.title') }}
+      </div>
+
       <p class="impact-orbit__subtitle">
         {{ t('category.ecoscorePage.sections.overview.visualization.subtitle', { category: categoryName }) }}
       </p>
     </div>
 
-    <div class="impact-orbit__body">
-      <div class="impact-orbit__diagram">
-        <div class="impact-orbit__halo" aria-hidden="true" />
-        <div class="impact-orbit__ring" aria-hidden="true" />
+    <!-- BODY -->
+    <div class="impact-orbit__layout">
+      <!-- CENTER BLOCK -->
+      <section class="impact-orbit__center-wrapper" aria-label="Impact score global">
+        <div class="impact-orbit__center-orbit" aria-hidden="true">
+          <div class="impact-orbit__ring impact-orbit__ring--outer" />
+          <div class="impact-orbit__ring impact-orbit__ring--inner" />
+        </div>
 
-        <div class="impact-orbit__center" role="presentation">
+        <div class="impact-orbit__center-content">
           <div class="impact-orbit__center-badge">
             <div class="impact-orbit__center-icon" aria-hidden="true">
-              <v-avatar v-if="categoryIcon" size="68" rounded>
+              <v-avatar v-if="categoryIcon" size="52" rounded>
                 <v-img :src="categoryIcon" :alt="categoryName" cover />
               </v-avatar>
-              <v-icon v-else icon="mdi-leaf" size="44" />
+              <v-icon v-else icon="mdi-leaf" size="40" />
             </div>
+
             <div class="impact-orbit__center-meta">
-              <div class="impact-orbit__center-name">{{ categoryName }}</div>
+              <div class="impact-orbit__center-name">
+                {{ categoryName }}
+              </div>
               <p class="impact-orbit__center-label">
                 {{ t('category.ecoscorePage.sections.overview.visualization.centerLabel', { category: categoryName }) }}
               </p>
             </div>
           </div>
 
-          <ImpactScore
-            :score="score"
-            :max="max"
-            size="xlarge"
-            color="primary"
-            inactive-color="surface-primary-080"
-            show-value
-            class="impact-orbit__center-score"
-          />
-        </div>
+          <div class="impact-orbit__center-score">
+            <div class="impact-orbit__center-score-label">
+              {{ t('category.ecoscorePage.sections.overview.visualization.centerLabel', { category: categoryName }) }}
+            </div>
 
-        <div v-if="!isStacked" class="impact-orbit__nodes">
-          <div
-            v-for="(criterion, index) in criteria"
-            :key="criterion.key"
-            class="impact-orbit__node"
-            :style="getOrbitStyle(index, criteria.length)"
-          >
-            <div class="impact-orbit__connector" aria-hidden="true" />
-            <article class="impact-orbit__node-card" :aria-label="criterion.label">
-              <div class="impact-orbit__node-head">
-                <div class="impact-orbit__node-icon" aria-hidden="true">
-                  <v-icon v-if="criterion.icon" :icon="criterion.icon" size="22" />
-                  <span v-else>{{ criterion.fallback }}</span>
-                </div>
-                <div class="impact-orbit__node-title">{{ criterion.label }}</div>
-              </div>
-
-              <p v-if="criterion.description" class="impact-orbit__node-description">
-                {{ criterion.description }}
-              </p>
-
-              <div class="impact-orbit__node-meta">
-                <v-chip
-                  class="impact-orbit__chip"
-                  color="primary"
-                  size="small"
-                  variant="tonal"
-                >
-                  {{ weightLabel(criterion.weight) }}
-                </v-chip>
-                <v-chip
-                  v-for="stage in criterion.lifecycles"
-                  :key="`${criterion.key}-${stage.code}`"
-                  class="impact-orbit__chip"
-                  color="secondary"
-                  size="small"
-                  variant="outlined"
-                >
-                  {{ stage.label }}
-                </v-chip>
-              </div>
-            </article>
+            <ImpactScore
+              :score="score"
+              :max="max"
+              size="xlarge"
+              color="primary"
+              inactive-color="surface-primary-080"
+              show-value
+              class="impact-orbit__center-score-gauge"
+            />
           </div>
         </div>
+      </section>
 
-        <div v-else class="impact-orbit__stacked">
-          <article v-for="criterion in criteria" :key="criterion.key" class="impact-orbit__stacked-card">
-            <header class="impact-orbit__stacked-header">
-              <div class="impact-orbit__node-icon" aria-hidden="true">
-                <v-icon v-if="criterion.icon" :icon="criterion.icon" size="22" />
-                <span v-else>{{ criterion.fallback }}</span>
-              </div>
-              <div>
-                <div class="impact-orbit__node-title">{{ criterion.label }}</div>
-                <div class="impact-orbit__stacked-weight">{{ weightLabel(criterion.weight) }}</div>
-              </div>
-            </header>
-            <p v-if="criterion.description" class="impact-orbit__node-description">
-              {{ criterion.description }}
-            </p>
-            <div class="impact-orbit__node-meta">
-              <v-chip
-                v-for="stage in criterion.lifecycles"
-                :key="`${criterion.key}-${stage.code}`"
-                class="impact-orbit__chip"
-                color="secondary"
-                size="small"
-                variant="tonal"
-              >
-                {{ stage.label }}
-              </v-chip>
+      <!-- CRITERIA LIST -->
+      <section class="impact-orbit__criteria" aria-label="Répartition par critère">
+        <article
+          v-for="criterion in criteria"
+          :key="criterion.key"
+          class="impact-orbit__criterion-card"
+        >
+          <header class="impact-orbit__criterion-header">
+            <div class="impact-orbit__criterion-icon" aria-hidden="true">
+              <v-icon v-if="criterion.icon" :icon="criterion.icon" size="22" />
+              <span v-else>{{ criterion.fallback }}</span>
             </div>
-          </article>
-        </div>
-      </div>
+
+            <div class="impact-orbit__criterion-header-main">
+              <div class="impact-orbit__criterion-title">
+                {{ criterion.label }}
+              </div>
+
+              <div class="impact-orbit__criterion-topline">
+                <span class="impact-orbit__criterion-weight">
+                  {{ weightLabel(criterion.weight) }}
+                </span>
+
+                <span
+                  v-if="criterion.score != null"
+                  class="impact-orbit__criterion-score"
+                >
+                  {{ formatCriterionScore(criterion.score, criterion.maxScore) }}
+                </span>
+              </div>
+
+              <div
+                v-if="criterion.score != null"
+                class="impact-orbit__criterion-score-bar"
+              >
+                <div
+                  class="impact-orbit__criterion-score-bar-fill"
+                  :style="{ '--score-ratio': getCriterionRatio(criterion.score, criterion.maxScore) }"
+                />
+              </div>
+            </div>
+          </header>
+
+          <p
+            v-if="criterion.description"
+            class="impact-orbit__criterion-description"
+          >
+            {{ criterion.description }}
+          </p>
+
+          <div class="impact-orbit__criterion-meta">
+            <v-chip
+              v-for="stage in criterion.lifecycles"
+              :key="`${criterion.key}-${stage.code}`"
+              class="impact-orbit__chip"
+              color="secondary"
+              size="small"
+              variant="tonal"
+            >
+              {{ stage.label }}
+            </v-chip>
+          </div>
+        </article>
+      </section>
     </div>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 
@@ -144,6 +151,9 @@ type OrbitCriterion = {
   icon?: string | null
   fallback: string
   lifecycles: LifecycleStage[]
+  // optionnel : score par critère
+  score?: number | null
+  maxScore?: number | null
 }
 
 const _props = defineProps({
@@ -170,9 +180,6 @@ const _props = defineProps({
 })
 
 const { t } = useI18n()
-const display = useDisplay()
-
-const isStacked = computed(() => display.smAndDown.value)
 
 const weightLabel = (value?: number | null) => {
   if (value == null || Number.isNaN(value)) {
@@ -184,12 +191,38 @@ const weightLabel = (value?: number | null) => {
   })
 }
 
-const getOrbitStyle = (index: number, total: number) => {
-  const angle = total > 0 ? (index / total) * 360 : 0
-  return {
-    '--orbit-angle': `${angle}deg`,
-    '--orbit-radius': '46%'
+const formatCriterionScore = (
+  value?: number | null,
+  maxValue?: number | null,
+) => {
+  if (value == null || Number.isNaN(value)) {
+    return '–'
   }
+
+  const formatter = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 1,
+  })
+
+  const effectiveMax = maxValue ?? _props.max
+
+  return `${formatter.format(value)} / ${formatter.format(effectiveMax)}`
+}
+
+const getCriterionRatio = (
+  value?: number | null,
+  maxValue?: number | null,
+) => {
+  if (value == null || Number.isNaN(value)) {
+    return 0
+  }
+
+  const effectiveMax = maxValue ?? _props.max
+  if (!effectiveMax || Number.isNaN(effectiveMax)) {
+    return 0
+  }
+
+  const ratio = value / effectiveMax
+  return Math.max(0, Math.min(1, ratio))
 }
 </script>
 
@@ -229,64 +262,80 @@ const getOrbitStyle = (index: number, total: number) => {
   color: rgb(var(--v-theme-text-neutral-secondary))
   margin: 0
 
-.impact-orbit__body
-  position: relative
+/* LAYOUT */
 
-.impact-orbit__diagram
+.impact-orbit__layout
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+
+@media (min-width: 960px)
+  .impact-orbit__layout
+    flex-direction: row
+    align-items: stretch
+    gap: 2rem
+
+/* CENTER BLOCK */
+
+.impact-orbit__center-wrapper
   position: relative
-  min-height: 420px
   display: flex
   align-items: center
   justify-content: center
+  padding: 1rem 0
+  flex: 0 0 100%
 
-.impact-orbit__halo
+@media (min-width: 960px)
+  .impact-orbit__center-wrapper
+    flex: 0 0 40%
+
+.impact-orbit__center-orbit
   position: absolute
-  inset: 20% 18%
-  background: radial-gradient(circle, rgba(var(--v-theme-primary), 0.08), rgba(var(--v-theme-surface-default), 0))
-  filter: blur(30px)
+  inset: 0
+  display: grid
+  place-items: center
   pointer-events: none
 
 .impact-orbit__ring
-  position: relative
-  width: 78%
-  max-width: 560px
-  aspect-ratio: 1
   border-radius: 50%
-  border: 1px dashed rgba(var(--v-theme-primary), 0.35)
-  background: radial-gradient(circle, rgba(var(--v-theme-surface-glass), 0.92), rgba(var(--v-theme-surface-default), 0.94))
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.15)
+  aspect-ratio: 1
+  border: 1px dashed rgba(var(--v-theme-primary), 0.25)
+  width: min(70vw, 260px)
 
-.impact-orbit__center
-  position: absolute
-  top: 50%
-  left: 50%
-  transform: translate(-50%, -50%)
+.impact-orbit__ring--inner
+  width: min(48vw, 190px)
+  border-style: solid
+  border-color: rgba(var(--v-theme-primary), 0.15)
+
+.impact-orbit__center-content
+  position: relative
   display: grid
   place-items: center
-  text-align: center
-  gap: 1rem
-  z-index: 2
+  gap: 0.9rem
+  z-index: 1
 
 .impact-orbit__center-badge
   display: inline-flex
   align-items: center
-  gap: 0.85rem
-  padding: 0.75rem 1rem
+  gap: 0.75rem
+  padding: 0.6rem 0.9rem
   border-radius: 999px
-  background: rgba(var(--v-theme-surface-default), 0.95)
+  background: rgba(var(--v-theme-surface-default), 0.98)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08)
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08)
+  max-width: min(100%, 320px)
 
 .impact-orbit__center-icon
   display: inline-flex
   align-items: center
   justify-content: center
-  width: 70px
-  height: 70px
+  width: 56px
+  height: 56px
   border-radius: 18px
-  background: rgba(var(--v-theme-surface-primary-120), 0.8)
+  background: rgba(var(--v-theme-surface-primary-120), 0.85)
   color: rgb(var(--v-theme-primary))
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08)
+  flex-shrink: 0
 
 .impact-orbit__center-meta
   text-align: left
@@ -294,64 +343,67 @@ const getOrbitStyle = (index: number, total: number) => {
 .impact-orbit__center-name
   font-weight: 700
   color: rgb(var(--v-theme-text-neutral-strong))
-  font-size: 1.1rem
+  font-size: 1.05rem
 
 .impact-orbit__center-label
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
-  font-size: 0.95rem
+  font-size: 0.9rem
 
 .impact-orbit__center-score
-  width: 240px
-  height: 240px
+  width: 210px
+  height: 210px
   display: grid
+  grid-template-rows: auto 1fr
   place-items: center
-  padding: 0.5rem
+  padding: 0.9rem
   border-radius: 50%
-  background: rgba(var(--v-theme-surface-default), 0.85)
+  background: rgba(var(--v-theme-surface-default), 0.95)
   box-shadow: inset 0 0 0 2px rgba(var(--v-theme-border-primary-strong), 0.18), 0 16px 40px rgba(0, 0, 0, 0.08)
 
-.impact-orbit__nodes
-  position: relative
+.impact-orbit__center-score-label
+  font-size: 0.8rem
+  font-weight: 600
+  text-transform: uppercase
+  letter-spacing: 0.06em
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.impact-orbit__center-score-gauge
   width: 100%
   height: 100%
-  min-height: 420px
+  display: grid
+  place-items: center
 
-.impact-orbit__node
-  position: absolute
-  top: 50%
-  left: 50%
-  transform: rotate(var(--orbit-angle)) translate(var(--orbit-radius)) rotate(calc(-1 * var(--orbit-angle)))
-  transform-origin: center
-  transition: transform 350ms ease, opacity 350ms ease
-  opacity: 0.98
+@media (max-width: 599px)
+  .impact-orbit__center-score
+    width: 180px
+    height: 180px
 
-.impact-orbit__node-card
-  width: 215px
-  background: rgba(var(--v-theme-surface-default), 0.96)
-  border-radius: 14px
-  padding: 0.85rem
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
-  backdrop-filter: blur(4px)
+/* CRITERIA LIST */
 
-.impact-orbit__connector
-  position: absolute
-  top: 50%
-  left: calc(-1 * var(--orbit-radius))
-  width: calc(var(--orbit-radius) + 40px)
-  height: 2px
-  background: linear-gradient(90deg, rgba(var(--v-theme-primary), 0.65), rgba(var(--v-theme-primary), 0))
-  transform: translate(-30px, -50%)
-  transform-origin: right center
-
-.impact-orbit__node-head
+.impact-orbit__criteria
   display: flex
-  align-items: center
-  gap: 0.65rem
-  margin-bottom: 0.35rem
+  flex-direction: column
+  gap: 0.75rem
+  flex: 1
 
-.impact-orbit__node-icon
+.impact-orbit__criterion-card
+  padding: 0.9rem 1rem
+  border-radius: 16px
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+  background: rgba(var(--v-theme-surface-default), 0.98)
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04)
+
+.impact-orbit__criterion-header
+  display: flex
+  align-items: flex-start
+  gap: 0.75rem
+
+.impact-orbit__criterion-header-main
+  flex: 1
+  min-width: 0
+
+.impact-orbit__criterion-icon
   display: inline-flex
   align-items: center
   justify-content: center
@@ -361,56 +413,65 @@ const getOrbitStyle = (index: number, total: number) => {
   background: rgba(var(--v-theme-surface-primary-120), 0.75)
   color: rgb(var(--v-theme-primary))
   font-weight: 700
+  flex-shrink: 0
 
-.impact-orbit__node-title
+.impact-orbit__criterion-title
   font-weight: 700
   color: rgb(var(--v-theme-text-neutral-strong))
-
-.impact-orbit__node-description
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
   font-size: 0.95rem
+  margin-bottom: 0.15rem
 
-.impact-orbit__node-meta
+.impact-orbit__criterion-topline
   display: flex
   flex-wrap: wrap
   gap: 0.5rem
+  align-items: baseline
+  margin-bottom: 0.2rem
+
+.impact-orbit__criterion-weight
+  font-size: 0.8rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.impact-orbit__criterion-score
+  font-size: 0.8rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.impact-orbit__criterion-score-bar
+  position: relative
+  width: 100%
+  height: 4px
+  border-radius: 999px
+  background: rgba(var(--v-theme-surface-primary-120), 0.8)
+  overflow: hidden
+
+.impact-orbit__criterion-score-bar-fill
+  position: absolute
+  inset: 0
+  transform-origin: left center
+  transform: scaleX(var(--score-ratio))
+  background: rgba(var(--v-theme-primary), 0.9)
+
+.impact-orbit__criterion-description
+  margin: 0.45rem 0 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.9rem
+
+.impact-orbit__criterion-meta
+  display: flex
+  flex-wrap: wrap
+  gap: 0.4rem
   margin-top: 0.5rem
 
 .impact-orbit__chip
   font-weight: 600
+  font-size: 0.8rem
 
-.impact-orbit__stacked
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-  margin-top: 1rem
-
-.impact-orbit__stacked-card
-  padding: 0.95rem 1rem
-  border-radius: 16px
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
-  background: rgba(var(--v-theme-surface-default), 0.95)
-
-.impact-orbit__stacked-header
-  display: flex
-  align-items: center
-  gap: 0.75rem
-  justify-content: space-between
-  margin-bottom: 0.35rem
-
-.impact-orbit__stacked-weight
-  color: rgb(var(--v-theme-text-neutral-secondary))
-  font-weight: 600
-
-@media (max-width: 960px)
+@media (max-width: 959px)
   .impact-orbit
     padding: 1.25rem
 
-  .impact-orbit__nodes
-    display: none
-
-@media (prefers-reduced-motion: reduce)
-  .impact-orbit__node
-    transition: none
+  .impact-orbit__header
+    margin-bottom: 0.9rem
 </style>
