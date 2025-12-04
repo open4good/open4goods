@@ -501,8 +501,8 @@ const startPriceCountdown = (condition: OfferCondition) => {
     return
   }
 
-  const duration = 1200
-  const easing = (progress: number) => 1 - Math.pow(1 - progress, 3)
+  const duration = 4000
+  const easing = (progress: number) => 1 - Math.pow(1 - progress, 2.6)
   const startedAt = performance.now()
 
   if (animationFrameId.value != null) {
