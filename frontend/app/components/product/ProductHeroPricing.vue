@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, type PropType } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAnalytics } from '~/composables/useAnalytics'
 import type { ProductDto } from '~~/shared/api-client'
@@ -235,8 +235,76 @@ const priceCurrencyCode = computed(
   () => activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR',
 )
 
+const bestPriceValue = computed(() => (typeof activeOffer.value?.price === 'number' ? activeOffer.value.price : null))
+
+const animatedPrice = ref<number | null>(null)
+
+const priceRangesByCondition = computed<
+  Record<
+    OfferCondition,
+    | {
+        min: number
+        max: number
+        currency: string
+      }
+    | null
+  >
+>(() => {
+  const ranges: Record<OfferCondition, { min: number; max: number; currency: string } | null> = {
+    occasion: null,
+    new: null,
+  }
+
+  const offersByCondition = props.product.offers?.offersByCondition ?? {}
+
+  for (const [conditionKey, offers] of Object.entries(offersByCondition)) {
+    const normalizedCondition = conditionKey.toLowerCase()
+    if (normalizedCondition !== 'new' && normalizedCondition !== 'occasion') {
+      continue
+    }
+
+    const numericPrices = (offers ?? [])
+      .map((offer) => ({
+        value: typeof offer?.price === 'number' ? offer.price : null,
+        currency: offer?.currency ?? priceCurrencyCode.value,
+      }))
+      .filter((entry): entry is { value: number; currency: string } => typeof entry.value === 'number')
+
+    if (!numericPrices.length) {
+      continue
+    }
+
+    const values = numericPrices.map((entry) => entry.value)
+    ranges[normalizedCondition as OfferCondition] = {
+      min: Math.min(...values),
+      max: Math.max(...values),
+      currency: numericPrices[0]?.currency ?? priceCurrencyCode.value,
+    }
+  }
+
+  ;['occasion', 'new'].forEach((condition) => {
+    const typedCondition = condition as OfferCondition
+    if (ranges[typedCondition]) {
+      return
+    }
+
+    const fallbackPrice = bestOffersByCondition.value[typedCondition]?.price
+    if (typeof fallbackPrice === 'number') {
+      ranges[typedCondition] = {
+        min: fallbackPrice,
+        max: fallbackPrice,
+        currency: bestOffersByCondition.value[typedCondition]?.currency ?? priceCurrencyCode.value,
+      }
+    }
+  })
+
+  return ranges
+})
+
+const displayedPriceValue = computed(() => animatedPrice.value ?? bestPriceValue.value)
+
 const bestPriceLabel = computed(() => {
-  const price = activeOffer.value?.price
+  const price = displayedPriceValue.value
   if (typeof price !== 'number') {
     return '—'
   }
@@ -402,6 +470,82 @@ const scrollToSelector = (selector: string, offset = 120) => {
   const top = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) - offset
   window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
 }
+
+const animatedConditions = ref<Record<OfferCondition, boolean>>({ occasion: false, new: false })
+const animationFrameId = ref<number | null>(null)
+
+const startPriceCountdown = (condition: OfferCondition) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (animatedConditions.value[condition]) {
+    animatedPrice.value = null
+    return
+  }
+
+  const range = priceRangesByCondition.value[condition]
+  const targetPrice = bestOffersByCondition.value[condition]?.price
+
+  if (!range || typeof targetPrice !== 'number') {
+    animatedPrice.value = null
+    return
+  }
+
+  const startValue = Number.isFinite(range.max) ? range.max : targetPrice
+  const endValue = Number.isFinite(range.min) ? range.min : targetPrice
+
+  if (!Number.isFinite(startValue) || !Number.isFinite(endValue) || startValue === endValue) {
+    animatedPrice.value = null
+    animatedConditions.value[condition] = true
+    return
+  }
+
+  const duration = 1200
+  const easing = (progress: number) => 1 - Math.pow(1 - progress, 3)
+  const startedAt = performance.now()
+
+  if (animationFrameId.value != null) {
+    cancelAnimationFrame(animationFrameId.value)
+  }
+
+  const tick = (timestamp: number) => {
+    const elapsed = timestamp - startedAt
+    const progress = Math.min(Math.max(elapsed / duration, 0), 1)
+    const eased = easing(progress)
+    animatedPrice.value = startValue + (endValue - startValue) * eased
+
+    if (progress < 1) {
+      animationFrameId.value = requestAnimationFrame(tick)
+      return
+    }
+
+    animatedPrice.value = null
+    animationFrameId.value = null
+    animatedConditions.value[condition] = true
+  }
+
+  animatedPrice.value = startValue
+  animationFrameId.value = requestAnimationFrame(tick)
+}
+
+watch(
+  activeCondition,
+  (condition) => {
+    if (!import.meta.client) {
+      return
+    }
+
+    startPriceCountdown(condition)
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  if (animationFrameId.value != null) {
+    cancelAnimationFrame(animationFrameId.value)
+  }
+})
 </script>
 
 <style scoped>
