@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -108,6 +110,10 @@ public class ReviewGenerationService implements HealthIndicator {
     private final AtomicInteger failedCount = new AtomicInteger(0);
     // Health flag.
     private volatile boolean lastGenerationFailed = false;
+
+    private final ConcurrentMap<String, AtomicInteger> ipGenerationCounts = new ConcurrentHashMap<>();
+    private LocalDate generationCountDate = LocalDate.now();
+    private final Object ipQuotaLock = new Object();
 
     // New fields for batch tracking.
     private final File trackingFolder;
@@ -379,7 +385,30 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param preProcessingFuture an optional external preprocessing future.
      * @return the product UPC used to track generation status.
      */
-    public long generateReviewAsync(Product product, VerticalConfig verticalConfig, CompletableFuture<Void> preProcessingFuture) {
+    private void resetIpGenerationCountersIfNeeded() {
+        LocalDate today = LocalDate.now();
+        if (!generationCountDate.isEqual(today)) {
+            ipGenerationCounts.clear();
+            generationCountDate = today;
+        }
+    }
+
+    private void enforceIpQuota(String clientIp) {
+        String ipKey = StringUtils.hasText(clientIp) ? clientIp : "unknown";
+        synchronized (ipQuotaLock) {
+            resetIpGenerationCountersIfNeeded();
+            int used = ipGenerationCounts.getOrDefault(ipKey, new AtomicInteger(0)).get();
+            int maxDaily = properties.getMaxPerIpPerDay();
+            if (used >= maxDaily) {
+                logger.warn("IP {} reached daily AI review generation limit ({}).", ipKey, maxDaily);
+                throw new ReviewGenerationQuotaExceededException(ipKey, maxDaily);
+            }
+            ipGenerationCounts.computeIfAbsent(ipKey, key -> new AtomicInteger(0)).incrementAndGet();
+        }
+    }
+
+    public long generateReviewAsync(Product product, VerticalConfig verticalConfig, CompletableFuture<Void> preProcessingFuture,
+            String clientIp) {
         long upc = product.getId();
         if (!shouldGenerateReview(product)) {
             logger.info("Skipping asynchronous AI review generation for UPC {} because an up-to-date review already exists.", upc);
@@ -397,6 +426,7 @@ public class ReviewGenerationService implements HealthIndicator {
         if (isActiveForGtin(product.gtin())) {
             throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
         }
+        enforceIpQuota(clientIp);
         processStatusMap.compute(upc, (key, existingStatus) -> {
             if (existingStatus != null && (existingStatus.getStatus() == ReviewGenerationStatus.Status.PENDING ||
                     existingStatus.getStatus() == ReviewGenerationStatus.Status.QUEUED ||
