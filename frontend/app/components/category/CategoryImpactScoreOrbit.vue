@@ -185,10 +185,17 @@ const weightLabel = (value?: number | null) => {
 }
 
 const getOrbitStyle = (index: number, total: number) => {
-  const angle = total > 0 ? (index / total) * 360 : 0
+  if (total <= 0) {
+    return {}
+  }
+
+  const step = 360 / total
+  const angle = -90 + step * index
+  const radius = total > 6 ? '52%' : '46%'
+
   return {
     '--orbit-angle': `${angle}deg`,
-    '--orbit-radius': '46%'
+    '--orbit-radius': radius,
   }
 }
 </script>
@@ -321,10 +328,11 @@ const getOrbitStyle = (index: number, total: number) => {
   position: absolute
   top: 50%
   left: 50%
-  transform: rotate(var(--orbit-angle)) translate(var(--orbit-radius)) rotate(calc(-1 * var(--orbit-angle)))
+  transform: translate(-50%, -50%) rotate(var(--orbit-angle)) translateX(var(--orbit-radius)) rotate(calc(-1 * var(--orbit-angle)))
   transform-origin: center
   transition: transform 350ms ease, opacity 350ms ease
   opacity: 0.98
+  z-index: 1
 
 .impact-orbit__node-card
   width: 215px
@@ -338,11 +346,11 @@ const getOrbitStyle = (index: number, total: number) => {
 .impact-orbit__connector
   position: absolute
   top: 50%
-  left: calc(-1 * var(--orbit-radius))
-  width: calc(var(--orbit-radius) + 40px)
+  left: 50%
+  width: calc(var(--orbit-radius) + 48px)
   height: 2px
   background: linear-gradient(90deg, rgba(var(--v-theme-primary), 0.65), rgba(var(--v-theme-primary), 0))
-  transform: translate(-30px, -50%)
+  transform: translate(-100%, -50%) rotate(var(--orbit-angle))
   transform-origin: right center
 
 .impact-orbit__node-head
