@@ -333,6 +333,14 @@
             "scoreLabel": "Sample Impact Score",
             "title": "Nudger Impact Score"
           },
+          "visualization": {
+            "centerLabel": "Impact Score {category}",
+            "eyebrow": "Impact breakdown",
+            "subtitle": "How the {category} Impact Score is distributed across the criteria.",
+            "title": "Score composition",
+            "weight": "{value}% weight",
+            "weightFallback": "Weight pending"
+          },
           "title": "Impact Score for {category}"
         },
         "purpose": {
@@ -374,6 +382,13 @@
             }
           }
         }
+      },
+      "lifecycle": {
+        "END_OF_LIFE": "End of life & recycling",
+        "EXTRACTION": "Raw material extraction",
+        "MANUFACTURING": "Manufacturing & assembly",
+        "TRANSPORTATION": "Transport & logistics",
+        "USE": "Product use"
       },
       "seo": {
         "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",

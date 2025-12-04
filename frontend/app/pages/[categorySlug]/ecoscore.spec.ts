@@ -25,6 +25,13 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.sections.overview.card.aria': 'Learn more about the global Impact Score methodology',
   'category.ecoscorePage.sections.overview.card.cta': 'Understand the global methodology',
   'category.ecoscorePage.sections.overview.card.scoreLabel': 'Sample Impact Score',
+  'category.ecoscorePage.sections.overview.visualization.eyebrow': 'Impact breakdown',
+  'category.ecoscorePage.sections.overview.visualization.title': 'Score composition',
+  'category.ecoscorePage.sections.overview.visualization.subtitle':
+    'How the {category} Impact Score is distributed across the criteria.',
+  'category.ecoscorePage.sections.overview.visualization.centerLabel': 'Impact Score {category}',
+  'category.ecoscorePage.sections.overview.visualization.weight': '{value}% weight',
+  'category.ecoscorePage.sections.overview.visualization.weightFallback': 'Weight pending',
   'category.ecoscorePage.sections.purpose.title': 'Why and how we score {category}',
   'category.ecoscorePage.sections.purpose.objectiveTitle': 'Objective',
   'category.ecoscorePage.sections.purpose.objectiveFallback': 'The objective description will be available soon.',
@@ -75,6 +82,11 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.sections.aiAudit.jsonUnavailable': 'AI response unavailable.',
   'category.ecoscorePage.seo.title': 'Impact Score for {category}',
   'category.ecoscorePage.seo.description': 'Impact Score insights for {category}.',
+  'category.ecoscorePage.lifecycle.EXTRACTION': 'Extraction',
+  'category.ecoscorePage.lifecycle.MANUFACTURING': 'Manufacturing',
+  'category.ecoscorePage.lifecycle.TRANSPORTATION': 'Transportation',
+  'category.ecoscorePage.lifecycle.USE': 'Use',
+  'category.ecoscorePage.lifecycle.END_OF_LIFE': 'End of life',
 }
 
 const translate = (key: string, params: Record<string, unknown> = {}) => {
@@ -218,8 +230,13 @@ const categoryFixture = {
   availableImpactScoreCriterias: ['POWER', 'REPAIRABILITY'],
   attributesConfig: {
     configs: [
-      { key: 'POWER', name: 'Energy efficiency', icon: 'mdi-flash' },
-      { key: 'REPAIRABILITY', name: 'Repairability index', icon: 'mdi-tools' },
+      { key: 'POWER', name: 'Energy efficiency', icon: 'mdi-flash', participateInACV: new Set(['USE', 'TRANSPORTATION']) },
+      {
+        key: 'REPAIRABILITY',
+        name: 'Repairability index',
+        icon: 'mdi-tools',
+        participateInACV: new Set(['MANUFACTURING', 'END_OF_LIFE']),
+      },
     ],
   },
 } as unknown as VerticalConfigFullDto
@@ -329,6 +346,11 @@ describe('Category ecosystem Impact Score page', () => {
 
     const sampleScore = wrapper.get('.impact-score-stub').text()
     expect(sampleScore).toContain('score:4.3')
+
+    const orbit = wrapper.get('[data-test="impact-score-orbit"]')
+    expect(orbit.text()).toContain('Impact Score Televisions')
+    expect(orbit.text()).toContain('Transportation')
+    expect(orbit.text()).toContain('End of life')
 
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')
