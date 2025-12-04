@@ -55,15 +55,16 @@
                   variant="elevated"
                 >
                   <v-row align="stretch" class="ga-6" justify="space-between">
-                    <v-col cols="12" md="4" class="d-flex justify-center align-center">
-                      <div class="category-ecoscore__intro-score">
-                        <ImpactScore :score="4.3" size="large" show-value />
-                        <p class="category-ecoscore__intro-score-label">
-                          {{ t('category.ecoscorePage.sections.overview.card.scoreLabel') }}
-                        </p>
-                      </div>
+                    <v-col cols="12" lg="7">
+                      <CategoryImpactScoreOrbit
+                        :score="impactScoreValue"
+                        :max="impactScoreMax"
+                        :category-name="categoryLabel"
+                        :category-icon="heroImage || undefined"
+                        :criteria="impactScoreOrbitCriteria"
+                      />
                     </v-col>
-                    <v-col cols="12" md="7" class="d-flex flex-column justify-center">
+                    <v-col cols="12" lg="5" class="d-flex flex-column justify-center">
                       <div class="category-ecoscore__intro-copy">
                         <h3 class="category-ecoscore__intro-title">
                           {{ t('category.ecoscorePage.sections.overview.card.title') }}
@@ -436,9 +437,9 @@ import type {
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
 import CategoryHero from '~/components/category/CategoryHero.vue'
+import CategoryImpactScoreOrbit from '~/components/category/CategoryImpactScoreOrbit.vue'
 import TextContent from '~/components/domains/content/TextContent.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
-import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import hljs from 'highlight.js/lib/core'
 import json from 'highlight.js/lib/languages/json'
 import yaml from 'highlight.js/lib/languages/yaml'
@@ -551,6 +552,39 @@ const availableCriteriaMap = computed(() => {
     map.set(criterion.key, criterion)
     return map
   }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
+})
+
+const lifecycleLabels = computed<Record<string, string>>(() => ({
+  EXTRACTION: t('category.ecoscorePage.lifecycle.EXTRACTION'),
+  MANUFACTURING: t('category.ecoscorePage.lifecycle.MANUFACTURING'),
+  TRANSPORTATION: t('category.ecoscorePage.lifecycle.TRANSPORTATION'),
+  USE: t('category.ecoscorePage.lifecycle.USE'),
+  END_OF_LIFE: t('category.ecoscorePage.lifecycle.END_OF_LIFE'),
+}))
+
+const impactScoreValue = computed(() => 4.3)
+const impactScoreMax = 5
+
+const impactScoreOrbitCriteria = computed(() => {
+  const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
+
+  return availableImpactScoreCriterias.value.map((key) => {
+    const attribute = attributeMap.value.get(key)
+    const fallbackTitle = attribute?.scoreTitle ?? attribute?.name ?? key
+
+    return {
+      key,
+      label: fallbackTitle,
+      description: attribute?.scoreDescription ?? availableCriteriaMap.value.get(key)?.description ?? '',
+      weight: typeof weights?.[key] === 'number' ? Number(weights[key]) : null,
+      icon: attribute?.icon ?? null,
+      fallback: fallbackTitle.charAt(0).toUpperCase(),
+      lifecycles: Array.from(attribute?.participateInACV ?? []).map((stage) => ({
+        code: stage,
+        label: lifecycleLabels.value[stage] ?? stage,
+      })),
+    }
+  })
 })
 
 const criteriaCards = computed(() => {

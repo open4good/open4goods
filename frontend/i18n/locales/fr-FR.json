@@ -333,6 +333,14 @@
             "scoreLabel": "Exemple d'Impact Score",
             "title": "Impact Score Nudger"
           },
+          "visualization": {
+            "centerLabel": "Impact Score {category}",
+            "eyebrow": "Décomposition de l'impact",
+            "subtitle": "Répartition de l'Impact Score des {category} entre les critères.",
+            "title": "Composition de la note",
+            "weight": "{value}% du poids",
+            "weightFallback": "Pondération en cours"
+          },
           "title": "Impact Score des {category}"
         },
         "purpose": {
@@ -374,6 +382,13 @@
             }
           }
         }
+      },
+      "lifecycle": {
+        "END_OF_LIFE": "Fin de vie et recyclage",
+        "EXTRACTION": "Extraction des matières premières",
+        "MANUFACTURING": "Fabrication et assemblage",
+        "TRANSPORTATION": "Transport et logistique",
+        "USE": "Usage du produit"
       },
       "seo": {
         "description": "Découvrez comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
