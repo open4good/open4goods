@@ -16,24 +16,31 @@
         'product-price__charts--empty': visibleChartsCount === 0,
       }"
     >
-      <article v-if="hasNewHistory" class="product-price__chart-card">
+      <article v-if="hasNewHistory" ref="newChartCardRef" class="product-price__chart-card">
         <header class="product-price__chart-header">
           <div class="product-price__chart-heading">
             <h3>{{ $t('product.price.newOffers') }}</h3>
             <p v-if="newTrendLabel" class="product-price__trend">{{ newTrendLabel }}</p>
           </div>
         </header>
-        <ClientOnly>
-          <VueECharts
-            v-if="newChartOption"
-            :option="newChartOption"
-            :autoresize="true"
-            class="product-price__chart"
-          />
+        <ClientOnly v-if="!isTestEnvironment">
+          <template #default>
+            <VueECharts
+              v-if="newChartOption && chartVisibility.new"
+              :option="newChartOption"
+              :autoresize="true"
+              class="product-price__chart"
+            />
+            <div v-else class="product-price__chart-placeholder" />
+          </template>
           <template #fallback>
             <div class="product-price__chart-placeholder" />
           </template>
         </ClientOnly>
+        <template v-else>
+          <div v-if="newChartOption" class="echart-stub" :data-option="JSON.stringify(newChartOption)"></div>
+          <div v-else class="product-price__chart-placeholder" />
+        </template>
         <footer
           v-if="newStats"
           class="product-price__metrics"
@@ -125,23 +132,34 @@
         </footer>
       </article>
 
-      <article v-if="hasOccasionHistory" class="product-price__chart-card">
+      <article v-if="hasOccasionHistory" ref="occasionChartCardRef" class="product-price__chart-card">
         <header class="product-price__chart-header">
           <div class="product-price__chart-heading">
             <h3>{{ $t('product.price.occasionOffers') }}</h3>
           </div>
         </header>
-        <ClientOnly>
-          <VueECharts
-            v-if="occasionChartOption"
-            :option="occasionChartOption"
-            :autoresize="true"
-            class="product-price__chart"
-          />
+        <ClientOnly v-if="!isTestEnvironment">
+          <template #default>
+            <VueECharts
+              v-if="occasionChartOption && chartVisibility.occasion"
+              :option="occasionChartOption"
+              :autoresize="true"
+              class="product-price__chart"
+            />
+            <div v-else class="product-price__chart-placeholder" />
+          </template>
           <template #fallback>
             <div class="product-price__chart-placeholder" />
           </template>
         </ClientOnly>
+        <template v-else>
+          <div
+            v-if="occasionChartOption"
+            class="echart-stub"
+            :data-option="JSON.stringify(occasionChartOption)"
+          ></div>
+          <div v-else class="product-price__chart-placeholder" />
+        </template>
         <footer
           v-if="occasionStats"
           class="product-price__metrics"
@@ -272,7 +290,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { PropType } from 'vue'
 import VueECharts from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -312,6 +330,14 @@ const { trackProductRedirect, extractTokenFromLink, isClientContribLink } = useA
 
 type HistoryEntry = { timestamp: number; price: number }
 
+const newChartCardRef = ref<HTMLElement | null>(null)
+const occasionChartCardRef = ref<HTMLElement | null>(null)
+
+const isTestEnvironment = Boolean(import.meta.vitest ?? process.env.VITEST)
+
+const chartVisibility = ref({ new: isTestEnvironment, occasion: isTestEnvironment })
+let chartObserver: IntersectionObserver | null = null
+
 const normalizeHistoryEntries = (
   entries?: Array<{ timestamp?: number | null; price?: number | null }>,
 ): HistoryEntry[] =>
@@ -348,6 +374,61 @@ const occasionChartOption = computed(() =>
 )
 
 const visibleChartsCount = computed(() => [hasNewHistory.value, hasOccasionHistory.value].filter(Boolean).length)
+
+const observeCharts = () => {
+  if (chartObserver || (!hasNewHistory.value && !hasOccasionHistory.value)) {
+    return
+  }
+
+  if (isTestEnvironment) {
+    chartVisibility.value.new = hasNewHistory.value
+    chartVisibility.value.occasion = hasOccasionHistory.value
+    return
+  }
+
+  if (!import.meta.client) {
+    return
+  }
+
+  if (typeof IntersectionObserver === 'undefined') {
+    chartVisibility.value.new = hasNewHistory.value
+    chartVisibility.value.occasion = hasOccasionHistory.value
+    return
+  }
+
+  chartObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.3) {
+          return
+        }
+
+        if (entry.target === newChartCardRef.value) {
+          chartVisibility.value.new = true
+          chartObserver?.unobserve(entry.target)
+        }
+
+        if (entry.target === occasionChartCardRef.value) {
+          chartVisibility.value.occasion = true
+          chartObserver?.unobserve(entry.target)
+        }
+      })
+    },
+    { threshold: 0.3 },
+  )
+
+  if (newChartCardRef.value) {
+    chartObserver.observe(newChartCardRef.value)
+  }
+
+  if (occasionChartCardRef.value) {
+    chartObserver.observe(occasionChartCardRef.value)
+  }
+}
+
+onMounted(() => {
+  observeCharts()
+})
 
 type HistoryStats = {
   average: number
@@ -572,6 +653,10 @@ const formatUpdated = (timestamp?: number | null) => {
     locale: locale.value.startsWith('fr') ? fr : enUS,
   })
 }
+
+onBeforeUnmount(() => {
+  chartObserver?.disconnect()
+})
 </script>
 
 <style scoped>
