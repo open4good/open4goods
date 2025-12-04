@@ -48,7 +48,7 @@
         <dependency>
             <groupId>ai.djl.onnxruntime</groupId>
             <artifactId>onnxruntime-engine</artifactId>
-            <version>0.28.0</version>
+            <version>0.35.1</version>
         </dependency>
 
         <!-- web -->
