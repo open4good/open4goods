@@ -63,7 +63,6 @@ models/GlobalSearchResultDto.ts
 models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/ImpactScoreConfigDto.ts
-models/ImpactScoreCriteriaDto.ts
 models/ImpactScoreTexts.ts
 models/LegacyPromptConfig.ts
 models/LoginRequest.ts

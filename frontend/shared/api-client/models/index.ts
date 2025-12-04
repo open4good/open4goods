@@ -48,7 +48,6 @@ export * from './GlobalSearchResultDto';
 export * from './GlobalSearchVerticalGroupDto';
 export * from './GoogleCategoryDto';
 export * from './ImpactScoreConfigDto';
-export * from './ImpactScoreCriteriaDto';
 export * from './ImpactScoreTexts';
 export * from './LegacyPromptConfig';
 export * from './LoginRequest';

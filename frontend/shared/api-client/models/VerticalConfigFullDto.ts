@@ -12,6 +12,7 @@
  * Do not edit the class manually.
  */
 
+import { mapValues } from '../runtime';
 import type { BlogPostDto } from './BlogPostDto';
 import {
     BlogPostDtoFromJSON,

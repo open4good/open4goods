@@ -95,16 +95,16 @@ export interface AttributeConfigDto {
     scoreUtility?: string;
     /**
      * Composite scores in which this attribute participates.
-     * @type {Array<string>}
+     * @type {Set<string>}
      * @memberof AttributeConfigDto
      */
-    participateInScores?: Array<string>;
+    participateInScores?: Set<string>;
     /**
      * Lifecycle stages (ACV) represented by this score.
-     * @type {Array<AttributeConfigDtoParticipateInACVEnum>}
+     * @type {Set<string>}
      * @memberof AttributeConfigDto
      */
-    participateInACV?: Array<AttributeConfigDtoParticipateInACVEnum>;
+    participateInACV?: Set<AttributeConfigDtoParticipateInACVEnum>;
     /**
      * Comparison rule applied to determine which values are considered better.
      * @type {string}
@@ -163,6 +163,18 @@ export type AttributeConfigDtoFilteringTypeEnum = typeof AttributeConfigDtoFilte
 /**
  * @export
  */
+export const AttributeConfigDtoParticipateInACVEnum = {
+    Extraction: 'EXTRACTION',
+    Manufacturing: 'MANUFACTURING',
+    Transportation: 'TRANSPORTATION',
+    Use: 'USE',
+    EndOfLife: 'END_OF_LIFE'
+} as const;
+export type AttributeConfigDtoParticipateInACVEnum = typeof AttributeConfigDtoParticipateInACVEnum[keyof typeof AttributeConfigDtoParticipateInACVEnum];
+
+/**
+ * @export
+ */
 export const AttributeConfigDtoBetterIsEnum = {
     Greater: 'GREATER',
     Lower: 'LOWER'
@@ -178,18 +190,6 @@ export const AttributeConfigDtoAttributeValuesOrderingEnum = {
     Mapped: 'MAPPED'
 } as const;
 export type AttributeConfigDtoAttributeValuesOrderingEnum = typeof AttributeConfigDtoAttributeValuesOrderingEnum[keyof typeof AttributeConfigDtoAttributeValuesOrderingEnum];
-
-/**
- * @export
- */
-export const AttributeConfigDtoParticipateInACVEnum = {
-    Extraction: 'EXTRACTION',
-    Manufacturing: 'MANUFACTURING',
-    Transportation: 'TRANSPORTATION',
-    Use: 'USE',
-    EndOfLife: 'END_OF_LIFE'
-} as const;
-export type AttributeConfigDtoParticipateInACVEnum = typeof AttributeConfigDtoParticipateInACVEnum[keyof typeof AttributeConfigDtoParticipateInACVEnum];
 
 
 /**
@@ -220,8 +220,8 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'scoreTitle': json['scoreTitle'] == null ? undefined : json['scoreTitle'],
         'scoreDescription': json['scoreDescription'] == null ? undefined : json['scoreDescription'],
         'scoreUtility': json['scoreUtility'] == null ? undefined : json['scoreUtility'],
-        'participateInScores': json['participateInScores'] == null ? undefined : json['participateInScores'],
-        'participateInACV': json['participateInACV'] == null ? undefined : json['participateInACV'],
+        'participateInScores': json['participateInScores'] == null ? undefined : new Set(json['participateInScores']),
+        'participateInACV': json['participateInACV'] == null ? undefined : new Set(json['participateInACV']),
         'betterIs': json['betterIs'] == null ? undefined : json['betterIs'],
         'attributeValuesOrdering': json['attributeValuesOrdering'] == null ? undefined : json['attributeValuesOrdering'],
         'attributeValuesReverseOrder': json['attributeValuesReverseOrder'] == null ? undefined : json['attributeValuesReverseOrder'],
@@ -254,8 +254,8 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'scoreTitle': value['scoreTitle'],
         'scoreDescription': value['scoreDescription'],
         'scoreUtility': value['scoreUtility'],
-        'participateInScores': value['participateInScores'],
-        'participateInACV': value['participateInACV'],
+        'participateInScores': value['participateInScores'] == null ? undefined : Array.from(value['participateInScores'] as Set<any>),
+        'participateInACV': value['participateInACV'] == null ? undefined : Array.from(value['participateInACV'] as Set<any>),
         'betterIs': value['betterIs'],
         'attributeValuesOrdering': value['attributeValuesOrdering'],
         'attributeValuesReverseOrder': value['attributeValuesReverseOrder'],
