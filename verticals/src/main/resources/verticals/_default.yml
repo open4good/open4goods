@@ -111,21 +111,6 @@ subsets:
      en: "Products with an ImpactScore greater than 4/5"
      fr: "Produits avec un ImpactScore supérieur à 4/5"  
 
-# The scores that are available to build the impact score
-availableImpactScoreCriterias:
-    - CLASSE_ENERGY
-    - REPAIRABILITY_INDEX
-    - WEIGHT
-    - POWER_CONSUMPTION_TYPICAL
-    - POWER_CONSUMPTION_OFF
-    - BRAND_SUSTAINABILITY
-    - DATA_QUALITY
-    - DIAGONALE_POUCES
-    - POWER_CONSUMPTION_STANDBY_NETWORKD
-    - POWER_CONSUMPTION_SDR
-    - POWER_CONSUMPTION_HDR
-    - CLASSE_ENERGY_HDR
-    - CLASSE_ENERGY_SDR
               
                 
       

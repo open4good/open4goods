@@ -13,8 +13,7 @@ scoreDescription:
 scoreUtility:
   fr: "Offre un repère immédiat sur l’efficacité globale de l’appareil pendant son utilisation quotidienne."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - ENERGY_CONSUMPTION
 participateInACV:
   - USE
 
@@ -28,8 +27,6 @@ synonyms:
   - "CLASSE D'EFFICACITE ENERGETIQUE"
   - "ENERGY EFFICIENCY CLASS"
   - "CLASSE_ENERGY"
-#      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
-#      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (SDR)"
   
 parser:
   normalize: true

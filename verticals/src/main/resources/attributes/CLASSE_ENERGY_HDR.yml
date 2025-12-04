@@ -18,8 +18,7 @@ scoreDescription:
 scoreUtility:
   fr: "Met en avant la performance énergétique en HDR, un mode énergivore qui pèse sur l’empreinte d’usage des téléviseurs modernes."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - ENERGY_CONSUMPTION
 participateInACV:
   - USE
 attributeValuesOrdering: "MAPPED"

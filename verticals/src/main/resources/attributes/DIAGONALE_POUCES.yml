@@ -16,6 +16,14 @@ suffix:
   fr: "\""
 filteringType: "NUMERIC"
 asScore: true
+participateInACV:
+  - MANUFACTURING
+  - TRANSPORTATION
+  - USE
+  - EXTRACTION
+  - END_OF_LIFE 
+
+
 synonyms:
   all:
     - "DIAGONALE_POUCES"

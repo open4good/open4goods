@@ -21,8 +21,7 @@ scoreDescription:
 scoreUtility:
   fr: "Reflète la dépense énergétique sur le mode SDR majoritaire, clé pour réduire l’impact d’usage quotidien."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - ENERGY_CONSUMPTION
 participateInACV:
   - USE
 faIcon: "mdi-power-plug-off"

@@ -21,8 +21,7 @@ scoreDescription:
 scoreUtility:
   fr: "Une garantie longue encourage la durabilité en incitant les fabricants à concevoir des produits plus fiables et réparables."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - DURABILITY
 participateInACV:
   - MANUFACTURING
   - USE

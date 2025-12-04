@@ -21,8 +21,7 @@ scoreDescription:
 scoreUtility:
   fr: "Assure la maintenance et les correctifs nécessaires pour maintenir l’appareil sûr et fonctionnel sur la durée."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - DURABILITY
 participateInACV:
   - USE
   - END_OF_LIFE

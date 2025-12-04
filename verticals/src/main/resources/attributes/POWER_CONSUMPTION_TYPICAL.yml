@@ -10,8 +10,7 @@ scoreDescription:
 scoreUtility:
   fr: "Mesure directe de l’énergie consommée en usage réel, principale source d’émissions pendant la phase d’utilisation."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - ENERGY_CONSUMPTION
 participateInACV:
   - USE
 faIcon: "mdi-power-plug"

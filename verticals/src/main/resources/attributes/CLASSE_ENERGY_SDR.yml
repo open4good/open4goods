@@ -18,8 +18,7 @@ scoreDescription:
 scoreUtility:
   fr: "Ce score illustre l’efficacité énergétique en mode SDR, phase la plus fréquente d’usage d’un téléviseur, et oriente vers des modèles moins énergivores pendant toute leur durée de vie."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - ENERGY_CONSUMPTION
 participateInACV:
   - USE
 attributeValuesOrdering: "MAPPED"

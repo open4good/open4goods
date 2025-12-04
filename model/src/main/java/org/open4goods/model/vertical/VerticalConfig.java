@@ -202,7 +202,6 @@ public class VerticalConfig {
          * Titles and descriptions were previously embedded here but are now resolved elsewhere to keep the
          * configuration lightweight and focused on selectable criteria identifiers.
          */
-        @JsonMerge
         private List<String> availableImpactScoreCriterias = new ArrayList<>();
 
 	/**

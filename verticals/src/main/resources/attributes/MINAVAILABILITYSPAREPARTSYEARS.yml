@@ -21,8 +21,7 @@ scoreDescription:
 scoreUtility:
   fr: "Une longue disponibilité des pièces prolonge la réparabilité, évite le remplacement prématuré et limite les déchets en fin de vie."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - REPARABILITY
 participateInACV:
   - USE
   - END_OF_LIFE

@@ -69,7 +69,7 @@ describe('GET /api/team Nitro endpoint', () => {
       node: {
         req: {
           headers: {
-            host: 'nudger.com',
+            host: 'nudger.fr',
           },
         },
         res: {},

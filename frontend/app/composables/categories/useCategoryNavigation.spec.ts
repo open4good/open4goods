@@ -114,7 +114,7 @@ describe('useCategoryNavigation composable', () => {
     const event = {
       context: { query: {} },
       node: {
-        req: { headers: { host: 'nudger.com' } },
+        req: { headers: { host: 'nudger.fr' } },
         res: { headers: {} as Record<string, string> },
       },
     }

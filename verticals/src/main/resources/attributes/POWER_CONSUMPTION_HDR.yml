@@ -21,8 +21,7 @@ scoreDescription:
 scoreUtility:
   fr: "Prend en compte l’énergie dépensée dans le mode HDR plus exigeant, important pour les usages intensifs."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - ENERGY_CONSUMPTION
 participateInACV:
   - USE
 faIcon: "mdi-power-plug-off"

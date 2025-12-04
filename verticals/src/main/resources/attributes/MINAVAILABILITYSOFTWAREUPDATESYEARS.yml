@@ -21,8 +21,7 @@ scoreDescription:
 scoreUtility:
   fr: "Garantit la sécurité et la compatibilité du produit sur le long terme, prolongeant son usage et évitant un renouvellement prématuré."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - DURABILITY
 participateInACV:
   - USE
   - END_OF_LIFE

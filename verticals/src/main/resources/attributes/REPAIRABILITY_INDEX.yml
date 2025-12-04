@@ -13,8 +13,7 @@ scoreDescription:
 scoreUtility:
   fr: "Un indice élevé prolonge la durée de vie, limite les remplacements et réduit les impacts de fabrication et de fin de vie."
 participateInScores:
-  - OTHERSCORE1
-  - OTHERSCORE2
+  - REPARABILITY
 participateInACV:
   - MANUFACTURING
   - USE
