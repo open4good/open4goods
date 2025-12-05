@@ -362,7 +362,7 @@ export default defineNuxtConfig({
       },
     },
   i18n: {
-    defaultLocale: 'en-US',
+    defaultLocale: 'fr-FR',
     langDir: '../i18n/locales',
     locales: [
       { code: 'fr-FR', name: 'Français', file: 'fr-FR.ts', ...(localeDomains['fr-FR'] ?? {}) },
