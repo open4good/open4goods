@@ -190,35 +190,6 @@ genAiConfig:
    enabled: false
 
    
-##############################################################################
-# Eco score configuration 
-# Specify here the specific ecoscore for this vertical. Format : 
-# >> EXISTING_SCORE: WEIGHT
-# Weight sum MUST BE equals to 1
-##############################################################################
-# Sum of weight(values) must be equals to 1
-impactScoreConfig:
-  purpose: "Élaborer un score d'impact environnemental pour les lave-linges en utilisant des facteurs disponibles et coefficientés pour refléter leur impact relatif sur l'environnement."
-  availlableDatas: "Les données disponibles incluent le poids de l'objet, la consommation électrique en marche, l'évaluation ESG de la marque, et la qualité des données. Ces facteurs sont pertinents car ils couvrent des aspects clés de l'impact environnemental : l'empreinte matérielle, l'efficacité énergétique, la responsabilité sociale de l'entreprise, et la fiabilité des données."
-  criticalReview: "La démarche actuelle se concentre sur des facteurs mesurables et disponibles, mais pourrait être enrichie en incluant des critères tels que la durabilité des matériaux, la recyclabilité, et l'impact du cycle de vie complet. De plus, l'impact du transport et de la distribution pourrait être considéré pour une évaluation plus complète."
-  criteriasAnalysis:
-    WEIGHT: "Le poids est un indicateur de l'empreinte matérielle du produit. Un poids plus élevé peut indiquer une utilisation accrue de matériaux, ce qui peut avoir un impact environnemental plus important en termes de ressources et de transport."
-    POWER_CONSUMPTION: "La consommation électrique est cruciale car elle détermine l'efficacité énergétique du produit. Une consommation plus faible est préférable car elle réduit l'empreinte carbone liée à l'utilisation du produit."
-    BRAND_SUSTAINABILITY: "L'évaluation ESG de la marque reflète l'engagement de l'entreprise envers des pratiques durables. Une meilleure évaluation indique que la marque est plus susceptible de minimiser son impact environnemental global."
-    DATA_QUALITY: "La qualité des données est essentielle pour garantir la fiabilité de l'évaluation. Des données complètes et précises permettent une meilleure estimation de l'impact environnemental."
-  criteriasPonderation:
-    WEIGHT: 0.25
-    POWER_CONSUMPTION: 0.35
-    BRAND_SUSTAINABILITY: 0.25
-    DATA_QUALITY: 0.15
-    CLASSE_ENERGY: 0
-    REPAIRABILITY_INDEX: 0
-    POWER_CONSUMPTION_TYPICAL: 0
-    POWER_CONSUMPTION_OFF: 0
-    MINAVAILABILITYSPAREPARTSYEARS: 0
-    MINGUARANTEEDSUPPORTYEARS: 0
-    MINAVAILABILITYSOFTWAREUPDATESYEARS: 0
-    WARRANTY: 0
         
 requiredAttributes:
 #  - WEIGHT
