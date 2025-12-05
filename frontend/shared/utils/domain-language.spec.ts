@@ -38,8 +38,8 @@ describe('domain-language helpers', () => {
   it('falls back to default mapping when hostname is missing', () => {
     const resolution = getDomainLanguageFromHostname(null)
 
-    expect(resolution.domainLanguage).toBe('en')
-    expect(resolution.locale).toBe('en-US')
+    expect(resolution.domainLanguage).toBe('fr')
+    expect(resolution.locale).toBe('fr-FR')
     expect(resolution.matched).toBe(false)
   })
 })

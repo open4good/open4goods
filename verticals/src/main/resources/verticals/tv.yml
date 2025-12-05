@@ -164,7 +164,7 @@ i18n:
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Téléviseurs"
       # Text displaid as title for the vertical
-      verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement 🌏 ! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."  
+      verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."
       # The image used as a logo
 
 
