@@ -1899,12 +1899,20 @@
       "valueOutOf": "{value} / {max}",
       "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",
       "tableHeaders": {
-        "percent": "Percentile",
-        "ranking": "Rang",
+        "scoreName": "Indicateur",
+        "attributeValue": "Valeur brute",
+        "scoreValue": "Score",
         "coefficient": "Coefficient",
-        "score": "Indicateur",
-        "value": "Valeur"
+        "lifecycle": "Cycle de vie"
       },
+      "lifecycle": {
+        "END_OF_LIFE": "Fin de vie & recyclage",
+        "EXTRACTION": "Extraction des matières premières",
+        "MANUFACTURING": "Fabrication & assemblage",
+        "TRANSPORTATION": "Transport & logistique",
+        "USE": "Usage du produit"
+      },
+      "aggregateScores": {},
       "showDetails": "Afficher les indicateurs détaillés",
       "hideDetails": "Masquer les indicateurs détaillés",
       "title": "Impact écologique"

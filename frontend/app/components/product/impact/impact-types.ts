@@ -17,6 +17,10 @@ export type ScoreView = {
   description?: string | null
   relativeValue: number | null
   value?: number | null
+  participateInScores?: string[] | null
+  participateInACV?: string[] | null
+  attributeValue?: string | null
+  attributeSuffix?: string | null
   absoluteValue?: string | number | null
   absolute?: ScoreAbsoluteStats | null
   coefficient?: number | null

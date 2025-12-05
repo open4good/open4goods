@@ -660,6 +660,15 @@ const impactScores = computed(() => {
       ? score.relativ.value
       : null
 
+    const participateInScores = attributeConfig?.participateInScores
+      ? Array.from(attributeConfig.participateInScores)
+      : []
+    const participateInACV = attributeConfig?.participateInACV
+      ? Array.from(attributeConfig.participateInACV)
+      : []
+    const attributeValue = normalizedScoreId ? findIndexedAttributeValue(normalizedScoreId) : null
+    const attributeSuffix = attributeConfig?.suffix ?? null
+
     return {
       id: score.id,
       label: score.name,
@@ -668,6 +677,10 @@ const impactScores = computed(() => {
       relativeValue: isEcoscore ? absoluteScoreValue : relativeScoreValue,
       // For ECOSCORE, value should be the absolute value; for subscores, use relative
       value: isEcoscore ? absoluteScoreValue : relativeScoreValue,
+      participateInScores,
+      participateInACV,
+      attributeValue,
+      attributeSuffix,
       absoluteValue: score.absoluteValue ?? null,
       absolute: score.absolute ?? null,
       coefficient: coefficients[normalizedScoreId] ?? null,

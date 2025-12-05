@@ -4,17 +4,51 @@
     <v-data-table
       v-if="hasRows"
       :headers="headers"
-      :items="displayScores"
-      :items-per-page="displayScores.length"
+      :items="tableItems"
+      :items-per-page="itemsPerPage"
       class="impact-details__table"
       density="compact"
       hide-default-footer
     >
-      <template #[`item.label`]="{ value }">
-        <span class="impact-details__indicator">{{ value }}</span>
+      <template #[`item.label`]="{ item }">
+        <div
+          class="impact-details__label"
+          :class="{
+            'impact-details__label--child': item.rowType === 'subscore',
+            'impact-details__label--aggregate': item.rowType === 'aggregate',
+          }"
+        >
+          <v-btn
+            v-if="item.rowType === 'aggregate'"
+            class="impact-details__toggle"
+            icon
+            density="comfortable"
+            variant="text"
+            :aria-label="
+              isGroupExpanded(item.id)
+                ? $t('product.impact.hideDetails')
+                : $t('product.impact.subscoreDetailsToggle')
+            "
+            @click="toggleGroup(item.id)"
+          >
+            <v-icon :icon="isGroupExpanded(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="18" />
+          </v-btn>
+          <span class="impact-details__indicator">{{ item.label }}</span>
+        </div>
+      </template>
+      <template #[`item.attributeValue`]="{ item }">
+        <span
+          class="impact-details__attribute"
+          :class="{ 'impact-details__cell--child': item.rowType === 'subscore' }"
+        >
+          {{ item.attributeValue }}
+        </span>
       </template>
       <template #[`item.displayValue`]="{ item }">
-        <div class="impact-details__value">
+        <div
+          class="impact-details__value"
+          :class="{ 'impact-details__cell--child': item.rowType === 'subscore' }"
+        >
           <ProductImpactSubscoreRating
             v-if="item.displayValue != null"
             :score="item.displayValue"
@@ -26,12 +60,30 @@
         </div>
       </template>
       <template #[`item.coefficient`]="{ item }">
-        <ImpactCoefficientBadge
-          v-if="item.coefficient != null"
-          :value="item.coefficient"
-          :tooltip-params="{ scoreName: item.label }"
-        />
-        <span v-else class="impact-details__coefficient-empty">—</span>
+        <div class="impact-details__coefficient" :class="{ 'impact-details__cell--child': item.rowType === 'subscore' }">
+          <ImpactCoefficientBadge
+            v-if="item.coefficient != null"
+            :value="item.coefficient"
+            :tooltip-params="{ scoreName: item.label }"
+          />
+          <span v-else class="impact-details__coefficient-empty">—</span>
+        </div>
+      </template>
+      <template #[`item.lifecycle`]="{ item }">
+        <div class="impact-details__lifecycle" :class="{ 'impact-details__cell--child': item.rowType === 'subscore' }">
+          <template v-if="item.lifecycle?.length">
+            <v-chip
+              v-for="stage in item.lifecycle"
+              :key="`${item.id}-${stage}`"
+              :color="lifecycleColors[stage] ?? 'surface-ice-100'"
+              size="x-small"
+              variant="tonal"
+            >
+              {{ lifecycleLabels[stage] ?? stage }}
+            </v-chip>
+          </template>
+          <span v-else class="impact-details__coefficient-empty">—</span>
+        </div>
       </template>
     </v-data-table>
     <p v-else class="impact-details__empty">{{ $t('product.impact.noDetailsAvailable') }}</p>
@@ -39,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
 import ProductImpactSubscoreRating from './ProductImpactSubscoreRating.vue'
@@ -50,8 +102,26 @@ const props = defineProps<{
 }>()
 
 type DetailedScore = ScoreView & { displayValue: number | null; coefficient: number | null }
+type GroupedRows = {
+  groups: Array<{ id: string; aggregate: DetailedScore | null; subscores: DetailedScore[] }>
+  standalone: DetailedScore[]
+}
+type TableRow = {
+  id: string
+  label: string
+  attributeValue: string
+  displayValue: number | null
+  coefficient: number | null
+  lifecycle: string[]
+  rowType: 'aggregate' | 'subscore' | 'standalone'
+  parentId?: string
+}
 
-const resolveScoreValue = (score: ScoreView): number | null => {
+const resolveScoreValue = (score: ScoreView | null): number | null => {
+  if (!score) {
+    return null
+  }
+
   if (score.relativeValue != null && Number.isFinite(score.relativeValue)) {
     return Number(score.relativeValue)
   }
@@ -77,6 +147,47 @@ const resolveCoefficientValue = (value: number | null | undefined): number | nul
 }
 
 const { t } = useI18n()
+const expandedGroups = ref<Set<string>>(new Set())
+
+const lifecycleLabels = computed<Record<string, string>>(() => ({
+  EXTRACTION: t('product.impact.lifecycle.EXTRACTION'),
+  MANUFACTURING: t('product.impact.lifecycle.MANUFACTURING'),
+  TRANSPORTATION: t('product.impact.lifecycle.TRANSPORTATION'),
+  USE: t('product.impact.lifecycle.USE'),
+  END_OF_LIFE: t('product.impact.lifecycle.END_OF_LIFE'),
+}))
+
+const lifecycleColors: Record<string, string> = {
+  EXTRACTION: 'warning',
+  MANUFACTURING: 'secondary',
+  TRANSPORTATION: 'info',
+  USE: 'primary',
+  END_OF_LIFE: 'success',
+}
+
+const normalizeParticipations = (participations?: string[] | null): string[] =>
+  (participations ?? [])
+    .map((entry) => entry?.toString().trim().toUpperCase())
+    .filter((entry): entry is string => Boolean(entry))
+
+const formatAttributeValue = (score: ScoreView) => {
+  const raw = score.attributeValue?.toString().trim()
+  if (!raw) {
+    return '—'
+  }
+
+  const suffix = score.attributeSuffix?.toString().trim() || score.unit?.toString().trim() || ''
+  return suffix.length ? `${raw} ${suffix}` : raw
+}
+
+const resolveAggregateLabel = (aggregateId: string, aggregateScore: DetailedScore | null) => {
+  const translationKey = `product.impact.aggregateScores.${aggregateId}`
+  if (t(translationKey) !== translationKey) {
+    return t(translationKey)
+  }
+
+  return aggregateScore?.label ?? aggregateId
+}
 
 const displayScores = computed<DetailedScore[]>(() =>
   props.scores
@@ -88,13 +199,118 @@ const displayScores = computed<DetailedScore[]>(() =>
     })),
 )
 
+const groupedScores = computed<GroupedRows>(() => {
+  const scoreMap = displayScores.value.reduce<Map<string, DetailedScore>>((map, score) => {
+    const normalizedId = score.id?.toString().trim().toUpperCase()
+    if (normalizedId) {
+      map.set(normalizedId, score)
+    }
+
+    return map
+  }, new Map())
+
+  const aggregateSet = new Set<string>()
+  const participationMap = new Map<string, DetailedScore[]>()
+  const standalone: DetailedScore[] = []
+
+  displayScores.value.forEach((score) => {
+    const participations = normalizeParticipations(score.participateInScores)
+
+    if (!participations.length) {
+      standalone.push(score)
+      return
+    }
+
+    participations.forEach((aggregateId) => {
+      aggregateSet.add(aggregateId)
+
+      if (!participationMap.has(aggregateId)) {
+        participationMap.set(aggregateId, [])
+      }
+
+      participationMap.get(aggregateId)?.push(score)
+    })
+  })
+
+  const groups = Array.from(participationMap.entries()).map(([id, subscores]) => ({
+    id,
+    aggregate: scoreMap.get(id) ?? null,
+    subscores,
+  }))
+
+  const filteredStandalone = standalone.filter((score) => {
+    const normalizedId = score.id?.toString().trim().toUpperCase()
+    return normalizedId && !aggregateSet.has(normalizedId)
+  })
+
+  return { groups, standalone: filteredStandalone }
+})
+
 const headers = computed(() => [
-  { key: 'label', title: t('product.impact.tableHeaders.score'), sortable: true },
-  { key: 'displayValue', title: t('product.impact.tableHeaders.value'), sortable: true },
-  { key: 'coefficient', title: t('product.impact.tableHeaders.coefficient'), sortable: true },
+  { key: 'label', title: t('product.impact.tableHeaders.scoreName'), sortable: false },
+  { key: 'attributeValue', title: t('product.impact.tableHeaders.attributeValue'), sortable: false },
+  { key: 'displayValue', title: t('product.impact.tableHeaders.scoreValue'), sortable: false },
+  { key: 'coefficient', title: t('product.impact.tableHeaders.coefficient'), sortable: false },
+  { key: 'lifecycle', title: t('product.impact.tableHeaders.lifecycle'), sortable: false },
 ])
 
-const hasRows = computed(() => displayScores.value.length > 0)
+const buildTableRow = (
+  score: DetailedScore,
+  rowType: TableRow['rowType'],
+  parentId?: string,
+): TableRow => ({
+  id: score.id,
+  label: score.label,
+  attributeValue: formatAttributeValue(score),
+  displayValue: score.displayValue,
+  coefficient: score.coefficient,
+  lifecycle: score.participateInACV ?? [],
+  rowType,
+  parentId,
+})
+
+const buildAggregateRow = (aggregateId: string, aggregateScore: DetailedScore | null): TableRow => ({
+  id: aggregateId,
+  label: resolveAggregateLabel(aggregateId, aggregateScore),
+  attributeValue: '—',
+  displayValue: resolveScoreValue(aggregateScore),
+  coefficient: aggregateScore?.coefficient ?? null,
+  lifecycle: aggregateScore?.participateInACV ?? [],
+  rowType: 'aggregate',
+})
+
+const tableItems = computed<TableRow[]>(() => {
+  const rows: TableRow[] = []
+  const expanded = new Set(expandedGroups.value)
+
+  groupedScores.value.groups.forEach((group) => {
+    rows.push(buildAggregateRow(group.id, group.aggregate))
+
+    if (expanded.has(group.id)) {
+      rows.push(...group.subscores.map((score) => buildTableRow(score, 'subscore', group.id)))
+    }
+  })
+
+  rows.push(...groupedScores.value.standalone.map((score) => buildTableRow(score, 'standalone')))
+
+  return rows
+})
+
+const hasRows = computed(() => tableItems.value.length > 0)
+const itemsPerPage = computed(() => Math.max(tableItems.value.length, 1))
+
+const toggleGroup = (groupId: string) => {
+  const next = new Set(expandedGroups.value)
+  if (next.has(groupId)) {
+    next.delete(groupId)
+  } else {
+    next.add(groupId)
+  }
+
+  expandedGroups.value = next
+}
+
+const isGroupExpanded = (groupId: string) => expandedGroups.value.has(groupId)
 
 const formatScore = (value: number | null) => {
   if (value == null || Number.isNaN(value)) {
@@ -153,6 +369,29 @@ const formatScoreLabel = (value: number | null) => {
   font-weight: 600;
 }
 
+.impact-details__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.impact-details__label--aggregate {
+  font-weight: 700;
+}
+
+.impact-details__label--child {
+  padding-left: 1.75rem;
+}
+
+.impact-details__toggle {
+  margin-left: -0.25rem;
+}
+
+.impact-details__attribute {
+  display: inline-flex;
+  align-items: center;
+}
+
 .impact-details__value {
   display: inline-flex;
   align-items: center;
@@ -166,6 +405,22 @@ const formatScoreLabel = (value: number | null) => {
 
 .impact-details__coefficient-empty {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.6);
+}
+
+.impact-details__coefficient {
+  display: inline-flex;
+  align-items: center;
+}
+
+.impact-details__lifecycle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.impact-details__cell--child {
+  padding-left: 1.75rem;
 }
 
 .impact-details__empty {
