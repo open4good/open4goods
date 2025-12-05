@@ -5,6 +5,7 @@
  * You must ask for any clarifications in design or coding directions if needed.
  * You can propose UI / UX enhancements to match a best user perception
  * You must think mobile first and responsiv
+ * All static texts must be i18n localised
  * You will heavily respect coding guidelines defined in the AGENTS.md
 
 # SCOPE
