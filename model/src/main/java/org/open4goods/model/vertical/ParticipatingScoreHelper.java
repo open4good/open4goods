@@ -1,9 +1,11 @@
 package org.open4goods.model.vertical;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Utility methods to derive aggregated score definitions from vertical
@@ -35,10 +37,15 @@ public final class ParticipatingScoreHelper {
         Objects.requireNonNull(verticalConfig.getImpactScoreConfig(), "impactScoreConfig is required");
 
         Map<String, Double> criteriasPonderation = verticalConfig.getImpactScoreConfig().getCriteriasPonderation();
+        Set<String> availableImpactScoreCriterias = resolveAvailableImpactScoreCriterias(verticalConfig);
         Map<String, Map<String, Double>> aggregates = new HashMap<>();
 
         for (AttributeConfig attribute : verticalConfig.getAttributesConfig().getConfigs()) {
             if (!attribute.isAsScore()) {
+                continue;
+            }
+
+            if (!availableImpactScoreCriterias.contains(attribute.getKey())) {
                 continue;
             }
 
@@ -60,6 +67,19 @@ public final class ParticipatingScoreHelper {
 
         aggregates.replaceAll((aggregate, weights) -> normalize(aggregate, weights));
         return aggregates;
+    }
+
+    private static Set<String> resolveAvailableImpactScoreCriterias(VerticalConfig verticalConfig) {
+        Set<String> availableImpactScoreCriterias = verticalConfig.getAvailableImpactScoreCriterias() == null
+                ? null
+                : new HashSet<>(verticalConfig.getAvailableImpactScoreCriterias());
+        if (availableImpactScoreCriterias == null) {
+            return Set.of();
+        }
+
+        return availableImpactScoreCriterias.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     private static Map<String, Double> normalize(String aggregateName, Map<String, Double> weights) {

@@ -248,10 +248,16 @@ class VerticalYamlValidationTest {
     }
 
     private static void assertParticipatingScoresAreWeighted(VerticalConfig config, String sourceName, Set<String> weights) {
+        Collection<String> availableImpactScoreCriterias = config.getAvailableImpactScoreCriterias();
+        if (availableImpactScoreCriterias == null || availableImpactScoreCriterias.isEmpty()) {
+            return;
+        }
+
         List<String> missing = config.getAttributesConfig().getConfigs().stream()
             .filter(AttributeConfig::isAsScore)
             .filter(attribute -> attribute.getParticipateInScores() != null && !attribute.getParticipateInScores().isEmpty())
             .map(AttributeConfig::getKey)
+            .filter(availableImpactScoreCriterias::contains)
             .filter(key -> !weights.contains(key))
             .toList();
 

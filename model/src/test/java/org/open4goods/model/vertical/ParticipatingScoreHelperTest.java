@@ -30,6 +30,7 @@ class ParticipatingScoreHelperTest {
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setImpactScoreConfig(impactScoreConfig);
         verticalConfig.setAttributesConfig(attributesConfig);
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("SCORE_A", "SCORE_B"));
 
         Map<String, Map<String, Double>> aggregates = ParticipatingScoreHelper
                 .buildNormalizedParticipatingScores(verticalConfig);
@@ -54,9 +55,33 @@ class ParticipatingScoreHelperTest {
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setImpactScoreConfig(impactScoreConfig);
         verticalConfig.setAttributesConfig(attributesConfig);
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("UNWEIGHTED"));
 
         assertThatThrownBy(() -> ParticipatingScoreHelper.buildNormalizedParticipatingScores(verticalConfig))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("UNWEIGHTED");
+    }
+
+    @Test
+    void shouldIgnoreParticipatingScoreNotDeclaredInAvailableImpactScoreCriterias() {
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("IGNORED");
+        attributeConfig.setAsScore(true);
+        attributeConfig.setParticipateInScores(Set.of("AGG"));
+
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("IGNORED", 0.5));
+
+        AttributesConfig attributesConfig = new AttributesConfig(List.of(attributeConfig));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        verticalConfig.setAttributesConfig(attributesConfig);
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("OTHER"));
+
+        Map<String, Map<String, Double>> aggregates = ParticipatingScoreHelper
+                .buildNormalizedParticipatingScores(verticalConfig);
+
+        assertThat(aggregates).isEmpty();
     }
 }
