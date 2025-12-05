@@ -77,6 +77,7 @@ class ParticipatingScoresAggregationServiceTest {
         verticalConfig.setId("v-test");
         verticalConfig.setAttributesConfig(attributesConfig);
         verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("SCORE_A", "SCORE_B"));
         return verticalConfig;
     }
 
