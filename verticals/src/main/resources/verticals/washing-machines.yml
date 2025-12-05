@@ -69,7 +69,7 @@ i18n:
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Machines à laver"
       # Text displaid as jumbotron for the vertical
-      # verticalHomeDescription: ""  
+      verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le plus responsable, tout en répondant parfaitement à vos besoins du quotidien."
 
      # A mapping beetween custom page names behind this vertical and wiki pages
      # Copy and paste the wiki wiew url, without the "bin/view" prefix
