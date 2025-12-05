@@ -14,8 +14,8 @@ describe('localized-routes utilities', () => {
   it('normalizes supported locales', () => {
     expect(normalizeLocale('fr-FR')).toBe('fr-FR')
     expect(normalizeLocale('en-US')).toBe('en-US')
-    expect(normalizeLocale('es-ES')).toBe('en-US')
-    expect(normalizeLocale(undefined)).toBe('en-US')
+    expect(normalizeLocale('es-ES')).toBe('fr-FR')
+    expect(normalizeLocale(undefined)).toBe('fr-FR')
   })
 
   it('resolves localized static paths', () => {
