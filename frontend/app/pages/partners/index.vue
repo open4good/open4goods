@@ -1,23 +1,12 @@
 <template>
   <div class="partners-page">
-    <section class="partners-hero" :aria-labelledby="heroHeadingId">
-      <v-container class="py-16 px-4" max-width="xl">
-        <div >
-          <p class="text-overline text-uppercase mb-2 text-neutral-soft">
-            {{ t('partners.hero.eyebrow') }}
-          </p>
-          <h1 :id="heroHeadingId" class="text-h3 text-sm-h2 font-weight-bold mb-4">
-            {{ t('partners.hero.title') }}
-          </h1>
-          <p class="text-body-1 text-lg-h6">
-            {{ t('partners.hero.subtitle') }}
-          </p>
-          <p class="text-body-2 text-neutral-secondary mb-0">
-            {{ t('partners.hero.description') }}
-          </p>
-        </div>
-      </v-container>
-    </section>
+    <PartnersHero
+      :eyebrow="t('partners.hero.eyebrow')"
+      :title="t('partners.hero.title')"
+      :subtitle="t('partners.hero.subtitle')"
+      :description="t('partners.hero.description')"
+      description-bloc-id="webpages:partners:hero-overview"
+    />
 
     <v-progress-linear
       v-if="pending"
@@ -44,56 +33,84 @@
       </v-btn>
     </v-container>
 
-    <PartnersAffiliationSection
-      :title="t('partners.affiliation.title')"
-      :subtitle="t('partners.affiliation.subtitle')"
-      :partners="affiliationPartners"
-      :search-label="t('partners.affiliation.search.label')"
-      :search-placeholder="t('partners.affiliation.search.placeholder')"
-      :empty-state-label="t('partners.affiliation.empty')"
-      :carousel-aria-label="t('partners.affiliation.carouselAriaLabel')"
-      :link-label="t('partners.affiliation.linkLabel')"
-    />
+    <v-sheet
+      tag="section"
+      class="partners-strip partners-strip--default"
+      color="transparent"
+    >
+      <PartnersAffiliationSection
+        :title="t('partners.affiliation.title')"
+        :subtitle="t('partners.affiliation.subtitle')"
+        :partners="affiliationPartners"
+        :search-label="t('partners.affiliation.search.label')"
+        :search-placeholder="t('partners.affiliation.search.placeholder')"
+        :empty-state-label="t('partners.affiliation.empty')"
+        :carousel-aria-label="t('partners.affiliation.carouselAriaLabel')"
+        :link-label="t('partners.affiliation.linkLabel')"
+      />
+    </v-sheet>
 
-    <PartnersStaticCarouselSection
-      :title="t('partners.ecosystem.title')"
-      :subtitle="t('partners.ecosystem.subtitle')"
-      :partners="ecosystemPartners"
-      :carousel-aria-label="t('partners.ecosystem.carouselAriaLabel')"
-      :empty-state-label="t('partners.ecosystem.empty')"
-      :link-label="t('partners.ecosystem.linkLabel')"
-      :fallback-description="t('partners.ecosystem.fallbackDescription')"
-    />
+    <v-sheet
+      tag="section"
+      class="partners-strip partners-strip--muted"
+      color="transparent"
+    >
+      <PartnersStaticCarouselSection
+        :title="t('partners.ecosystem.title')"
+        :subtitle="t('partners.ecosystem.subtitle')"
+        :partners="ecosystemPartners"
+        :carousel-aria-label="t('partners.ecosystem.carouselAriaLabel')"
+        :empty-state-label="t('partners.ecosystem.empty')"
+        :link-label="t('partners.ecosystem.linkLabel')"
+        :fallback-description="t('partners.ecosystem.fallbackDescription')"
+      />
+    </v-sheet>
 
-    <PartnersStaticCarouselSection
-      tone="muted"
-      :title="t('partners.mentors.title')"
-      :subtitle="t('partners.mentors.subtitle')"
-      :partners="mentorPartners"
-      :carousel-aria-label="t('partners.mentors.carouselAriaLabel')"
-      :empty-state-label="t('partners.mentors.empty')"
-      :link-label="t('partners.mentors.linkLabel')"
-      :fallback-description="t('partners.mentors.fallbackDescription')"
-    />
+    <v-sheet
+      tag="section"
+      class="partners-strip partners-strip--alt"
+      color="transparent"
+    >
+      <PartnersStaticCarouselSection
+        tone="muted"
+        :title="t('partners.mentors.title')"
+        :subtitle="t('partners.mentors.subtitle')"
+        :partners="mentorPartners"
+        :carousel-aria-label="t('partners.mentors.carouselAriaLabel')"
+        :empty-state-label="t('partners.mentors.empty')"
+        :link-label="t('partners.mentors.linkLabel')"
+        :fallback-description="t('partners.mentors.fallbackDescription')"
+      />
+    </v-sheet>
 
-    <PartnersContactCta
-      :title="t('partners.cta.title')"
-      :description="t('partners.cta.description')"
-      :cta-label="t('partners.cta.ctaLabel')"
-      :cta-to="contactLink"
-      :eyebrow="t('partners.cta.eyebrow')"
-    />
+    <v-sheet
+      tag="section"
+      class="partners-strip partners-strip--cta"
+      color="transparent"
+    >
+      <PartnersContactCta
+        :title="t('partners.cta.title')"
+        :description="t('partners.cta.description')"
+        :cta-label="t('partners.cta.ctaLabel')"
+        :cta-to="contactLink"
+        :eyebrow="t('partners.cta.eyebrow')"
+      />
+    </v-sheet>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, useId } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { AffiliationPartnerDto, StaticPartnerDto } from '~~/shared/api-client'
+import type {
+  AffiliationPartnerDto,
+  StaticPartnerDto,
+} from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import PartnersAffiliationSection from '~/components/domains/partners/PartnersAffiliationSection.vue'
 import PartnersStaticCarouselSection from '~/components/domains/partners/PartnersStaticCarouselSection.vue'
 import PartnersContactCta from '~/components/domains/partners/PartnersContactCta.vue'
+import PartnersHero from '../../components/domains/partners/PartnersHero.vue'
 
 interface PartnersPageData {
   affiliation: AffiliationPartnerDto[]
@@ -109,7 +126,6 @@ definePageMeta({
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
-const heroHeadingId = useId()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const { data, pending, error, refresh } = await useAsyncData<PartnersPageData>(
@@ -136,7 +152,7 @@ const { data, pending, error, refresh } = await useAsyncData<PartnersPageData>(
   {
     server: false,
     lazy: false,
-  },
+  }
 )
 
 const affiliationPartners = computed(() => data.value?.affiliation ?? [])
@@ -146,9 +162,14 @@ const mentorPartners = computed(() => data.value?.mentors ?? [])
 const contactLink = computed(() => localePath('contact'))
 
 const canonicalUrl = computed(() =>
-  new URL(resolveLocalizedRoutePath('partners', locale.value), requestURL.origin).toString(),
+  new URL(
+    resolveLocalizedRoutePath('partners', locale.value),
+    requestURL.origin
+  ).toString()
 )
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 
 useSeoMeta({
   title: () => String(t('partners.seo.title')),
@@ -161,9 +182,7 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 </script>
 
@@ -178,21 +197,33 @@ useHead(() => ({
   }
 }
 
-.partners-hero {
-  background: radial-gradient(
-      circle at top left,
-      rgba(var(--v-theme-hero-gradient-start), 0.25),
-      transparent 45%
-    ),
-    radial-gradient(circle at bottom right, rgba(var(--v-theme-hero-gradient-end), 0.2), transparent 50%),
-    rgba(var(--v-theme-surface-default), 1);
+.partners-strip {
+  padding: clamp(3.25rem, 6vw, 5.5rem) 0;
+  background-color: rgb(var(--v-theme-surface-default));
+}
 
+.partners-strip--muted {
+  background-color: rgb(var(--v-theme-surface-muted));
+}
+
+.partners-strip--alt {
+  background: linear-gradient(
+    140deg,
+    rgba(var(--v-theme-surface-primary-080), 0.9),
+    rgba(var(--v-theme-surface-default), 1)
+  );
+}
+
+.partners-strip--cta {
+  background-color: rgb(var(--v-theme-surface-ice-050));
+}
+
+.partners-hero {
   &__content {
     max-width: 780px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
-
 }
 </style>

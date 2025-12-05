@@ -1,6 +1,6 @@
 <template>
   <section class="partners-cta" :aria-labelledby="headingId">
-    <v-container class="py-12 px-4" max-width="lg">
+    <v-container class="partners-cta__container" max-width="lg">
       <v-sheet elevation="6" class="partners-cta__sheet" rounded="xl">
         <v-row class="align-center" no-gutters>
           <v-col cols="12" md="8" class="partners-cta__content">
@@ -14,7 +14,11 @@
               {{ description }}
             </p>
           </v-col>
-          <v-col cols="12" md="4" class="partners-cta__actions d-flex justify-md-end justify-center">
+          <v-col
+            cols="12"
+            md="4"
+            class="partners-cta__actions d-flex justify-md-end justify-center"
+          >
             <v-btn
               :to="ctaTo"
               color="accent-supporting"
@@ -47,14 +51,14 @@ const headingId = useId()
 
 <style scoped lang="scss">
 .partners-cta {
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-surface-callout-start), 0.9),
-    rgba(var(--v-theme-surface-callout-end), 0.9)
-  );
+  color: rgb(var(--v-theme-text-neutral-strong));
+
+  &__container {
+    padding-inline: clamp(1.25rem, 3vw, 1.75rem);
+  }
 
   &__sheet {
-    background: rgba(var(--v-theme-surface-default), 0.95);
+    background: rgb(var(--v-theme-surface-default));
     padding: clamp(1.5rem, 2vw + 1rem, 3rem);
   }
 
