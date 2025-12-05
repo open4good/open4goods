@@ -21,6 +21,13 @@ verticalImage: /images/verticals/washing-machines.png
 enabled: true
 popular: true
 
+impactScoreConfig:
+  criteriasPonderation:
+    CLASSE_ENERGY: 1.0
+
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation  
@@ -149,13 +156,15 @@ matchingCategories:
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
 attributesConfig:
-   
+
   ###################################################################################################################
   # ATTRIBUTES MAPPINGS
   # Those attributes will be availlable for all products if one is found.
-  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
-  ##################################################################################################################      
-  configs: [] 
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes
+  ##################################################################################################################
+  configs:
+    - key: CLASSE_ENERGY
+      asScore: true
   
 
 
