@@ -535,8 +535,10 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
     .map((item, index) => ({ item, index }))
     .filter(({ item }) => Boolean(item.originalUrl))
     .sort((a, b) => {
-      const groupA = a.item.group?.toLowerCase() ?? ''
-      const groupB = b.item.group?.toLowerCase() ?? ''
+      const normaliseGroup = (value: unknown) => (value == null ? '' : String(value).toLowerCase())
+
+      const groupA = normaliseGroup(a.item.group)
+      const groupB = normaliseGroup(b.item.group)
 
       if (groupA === groupB) {
         return a.index - b.index
