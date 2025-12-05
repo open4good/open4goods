@@ -23,6 +23,7 @@
                 :src="heroMedia.previewUrl"
                 :alt="heroMedia.alt"
                 class="product-gallery__stage-media"
+                @error="handleImageError"
                 format="webp"
                 :width="heroMedia.width"
                 :height="heroMedia.height"
@@ -32,6 +33,7 @@
                 :src="heroMedia.posterUrl"
                 :alt="heroMedia.alt"
                 class="product-gallery__stage-media"
+                @error="handleImageError"
                 format="webp"
                 :width="heroMedia.width"
                 :height="heroMedia.height"
@@ -117,6 +119,7 @@
                       :src="item.thumbnailUrl"
                       :alt="item.alt"
                       class="product-gallery__thumbnail-image"
+                      @error="handleImageError"
                       format="webp"
                       :width="item.thumbnailWidth"
                       :height="item.thumbnailHeight"
@@ -159,6 +162,7 @@
             :src="heroFallbackImage"
             :alt="title"
             class="product-hero__fallback"
+            @error="handleImageError"
             format="webp"
             :width="600"
             :height="600"
@@ -171,6 +175,7 @@
           :src="heroFallbackImage"
           :alt="title"
           class="product-hero__fallback"
+          @error="handleImageError"
           format="webp"
           :width="600"
           :height="600"
@@ -229,6 +234,7 @@ const canScrollThumbnailsRight = ref(false)
 
 const { t, te } = useI18n()
 const nuxtImage = useImage()
+const FALLBACK_IMAGE_SRC = '/images/no-image.png'
 
 const thumbnailGroupLabel = computed(() =>
   te('product.hero.thumbnails.groupLabel')
@@ -356,6 +362,21 @@ const resolveImageUrl = (src: string | null | undefined, modifiers?: ImageModifi
 const fallbackDimension = (value: number | null | undefined, fallback: number) =>
   typeof value === 'number' && value > 0 ? value : fallback
 
+const handleImageError = (event: Event) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const target = event.target as HTMLImageElement | null
+  if (!target || target.dataset.fallbackApplied === 'true') {
+    return
+  }
+
+  target.dataset.fallbackApplied = 'true'
+  target.src = FALLBACK_IMAGE_SRC
+  target.srcset = ''
+}
+
 const DEFAULT_IMAGE_WIDTH = 1600
 const DEFAULT_IMAGE_HEIGHT = 1200
 const DEFAULT_THUMBNAIL_SIZE = 200
@@ -382,6 +403,7 @@ interface ProductGalleryItem {
   height: number
   alt: string
   caption: string
+  group?: string | null
   videoUrl?: string
   posterUrl?: string
 }
@@ -461,6 +483,7 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
       height,
       alt: image.fileName ?? caption,
       caption,
+      group: image.group,
       posterUrl: preview,
     })
   })
@@ -502,12 +525,28 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
       height: DEFAULT_VIDEO_HEIGHT,
       alt: video.fileName ?? caption,
       caption,
+      group: video.group,
       videoUrl: url,
       posterUrl: poster || thumbnail || url,
     })
   })
 
-  return [...videoItems, ...imageItems].filter((item) => Boolean(item.originalUrl))
+  const orderedItems = [...videoItems, ...imageItems]
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => Boolean(item.originalUrl))
+    .sort((a, b) => {
+      const groupA = a.item.group?.toLowerCase() ?? ''
+      const groupB = b.item.group?.toLowerCase() ?? ''
+
+      if (groupA === groupB) {
+        return a.index - b.index
+      }
+
+      return groupA.localeCompare(groupB)
+    })
+    .map(({ item }) => item)
+
+  return orderedItems
 })
 
 const heroFallbackImage = computed(() => {
@@ -865,11 +904,12 @@ onBeforeUnmount(() => {
   border-radius: 20px;
   overflow: hidden;
   width: 100%;
+  max-width: 100%;
   background: rgba(15, 23, 42, 0.04);
   flex: 1 1 auto;
   aspect-ratio: 4 / 3;
   min-height: 0;
-  max-height: none;
+  max-height: min(70vh, 720px);
 }
 
 .product-gallery__stage-trigger {
@@ -1133,6 +1173,20 @@ onBeforeUnmount(() => {
   overflow: hidden;
   aspect-ratio: 4 / 3;
   background: rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 768px) {
+  .product-gallery__stage {
+    aspect-ratio: 1 / 1;
+    max-height: 65vh;
+  }
+
+  .product-gallery__stage-media,
+  .product-gallery__video,
+  .product-hero__fallback {
+    object-fit: contain;
+    background: rgba(15, 23, 42, 0.02);
+  }
 }
 
 @media (max-width: 1280px) {
