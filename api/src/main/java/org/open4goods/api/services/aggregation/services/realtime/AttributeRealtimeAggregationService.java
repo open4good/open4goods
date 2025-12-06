@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -17,6 +19,7 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -145,12 +148,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
                                         }
 
-                                        mergeSourcesAndRefreshValue(indexedAttr, attr);
+                                        mergeSourcesAndRefreshValue(indexedAttr, attr, attrConfig);
                                         indexed.put(attrConfig.getKey(), indexedAttr);
 
-				} catch (Exception e) {
-					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey(),e);
-				}
+                                } catch (Exception e) {
+                                        dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey(),e);
+                                }
 			}
 		}
 
@@ -168,7 +171,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
         }
 
-        private void mergeSourcesAndRefreshValue(IndexedAttribute indexedAttr, ProductAttribute attr)
+        private void mergeSourcesAndRefreshValue(IndexedAttribute indexedAttr, ProductAttribute attr, AttributeConfig attrConf) throws ValidationException
         {
                 indexedAttr.getSource().addAll(attr.getSource());
 
@@ -177,13 +180,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
                         return;
                 }
 
+                if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
+                        bestValue = sanitizeNumericValue(bestValue);
+                }
+
                 indexedAttr.setValue(bestValue);
                 indexedAttr.setBoolValue(IndexedAttribute.getBool(bestValue));
 
-                try {
+                if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
                         indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
-                } catch (NumberFormatException e) {
-                        indexedAttr.setNumericValue(null);
+                } else {
+                        try {
+                                indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
+                        } catch (NumberFormatException e) {
+                                indexedAttr.setNumericValue(null);
+                        }
                 }
         }
 
@@ -617,8 +628,43 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			}
 		}
 
-		return string;
+                if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
+                        string = sanitizeNumericValue(string);
+                }
 
-	}
+                return string;
+
+        }
+
+        private String sanitizeNumericValue(String value) throws ValidationException {
+                if (StringUtils.isBlank(value)) {
+                        throw new ValidationException("Empty numeric attribute");
+                }
+
+                String stripped = value.replace("\"", "");
+                stripped = stripped.replace("”", "");
+                stripped = stripped.replace("“", "");
+                stripped = stripped.replace("''", "");
+                stripped = stripped.replace("´´", "");
+                stripped = stripped.replace("´", "");
+                stripped = stripped.replace("’", "");
+
+                String normalized = StringUtils.normalizeSpace(stripped);
+                Matcher matcher = Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?").matcher(normalized);
+
+                if (!matcher.find()) {
+                        throw new ValidationException("Attribute is expected to be numeric : " + value);
+                }
+
+                String numericCandidate = matcher.group().replace(",", ".");
+
+                try {
+                        Double.parseDouble(numericCandidate);
+                } catch (NumberFormatException e) {
+                        throw new ValidationException("Attribute is expected to be numeric : " + value);
+                }
+
+                return numericCandidate;
+        }
 
 }
