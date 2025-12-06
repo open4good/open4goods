@@ -1,3 +1,5 @@
+import type { ProductAttributeSourceDto } from '~~/shared/api-client'
+
 export type DistributionBucket = {
   label: string
   value: number
@@ -21,6 +23,7 @@ export type ScoreView = {
   participateInACV?: string[] | null
   attributeValue?: string | null
   attributeSuffix?: string | null
+  attributeSourcing?: ProductAttributeSourceDto | null
   absoluteValue?: string | number | null
   absolute?: ScoreAbsoluteStats | null
   coefficient?: number | null
@@ -32,6 +35,7 @@ export type ScoreView = {
   energyLetter?: string | null
   metadatas?: Record<string, string> | null
   unit?: string | null
+  aggregates?: Record<string, number> | null
   betterIs?: 'GREATER' | 'LOWER' | null
   importanceDescription?: string | null
 }

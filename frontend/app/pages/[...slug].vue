@@ -128,6 +128,7 @@ import {
   type AttributeConfigDto,
   type CommercialEvent,
   type FilterRequestDto,
+  type ProductIndexedAttributeDto,
   type ProductDto,
   type ProductReferenceDto,
   type ProductScoreDto,
@@ -666,8 +667,11 @@ const impactScores = computed(() => {
     const participateInACV = attributeConfig?.participateInACV
       ? Array.from(attributeConfig.participateInACV)
       : []
-    const attributeValue = normalizedScoreId ? findIndexedAttributeValue(normalizedScoreId) : null
+    const attribute = normalizedScoreId ? findIndexedAttribute(normalizedScoreId) : null
+    const attributeValue = attribute ? resolveIndexedAttributeValue(attribute) : null
+    const attributeSourcing = attribute?.sourcing ?? null
     const attributeSuffix = attributeConfig?.suffix ?? null
+    const aggregates = (score as ProductScoreDto & { aggregates?: Record<string, number> | null }).aggregates ?? null
 
     return {
       id: score.id,
@@ -680,6 +684,7 @@ const impactScores = computed(() => {
       participateInScores,
       participateInACV,
       attributeValue,
+      attributeSourcing,
       attributeSuffix,
       absoluteValue: score.absoluteValue ?? null,
       absolute: score.absolute ?? null,
@@ -692,6 +697,7 @@ const impactScores = computed(() => {
       energyLetter: score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
       metadatas: score.metadatas ?? null,
       unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
+      aggregates,
       betterIs: attributeConfig?.betterIs ?? null,
       importanceDescription: criterion?.description ?? null,
     }
@@ -738,32 +744,43 @@ const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | un
   return ''
 }
 
-const findIndexedAttributeValue = (attributeId: string): string | null => {
+const findIndexedAttribute = (attributeId: string): ProductIndexedAttributeDto | null => {
   const attributes = product.value?.attributes?.indexedAttributes ?? {}
   const normalizedId = attributeId.trim()
   const candidates = [normalizedId, normalizedId.toUpperCase(), normalizedId.toLowerCase()]
 
   for (const candidate of candidates) {
     const attribute = attributes[candidate]
-    if (!attribute) {
-      continue
-    }
-
-    if (typeof attribute.value === 'string' && attribute.value.trim().length > 0) {
-      return attribute.value
-    }
-
-    if (typeof attribute.numericValue === 'number' && Number.isFinite(attribute.numericValue)) {
-      return String(attribute.numericValue)
-    }
-
-    if (typeof attribute.booleanValue === 'boolean') {
-      return attribute.booleanValue ? 'true' : 'false'
+    if (attribute) {
+      return attribute
     }
   }
 
   return null
 }
+
+const resolveIndexedAttributeValue = (attribute?: ProductIndexedAttributeDto | null): string | null => {
+  if (!attribute) {
+    return null
+  }
+
+  if (typeof attribute.value === 'string' && attribute.value.trim().length > 0) {
+    return attribute.value
+  }
+
+  if (typeof attribute.numericValue === 'number' && Number.isFinite(attribute.numericValue)) {
+    return String(attribute.numericValue)
+  }
+
+  if (typeof attribute.booleanValue === 'boolean') {
+    return attribute.booleanValue ? 'true' : 'false'
+  }
+
+  return null
+}
+
+const findIndexedAttributeValue = (attributeId: string): string | null =>
+  resolveIndexedAttributeValue(findIndexedAttribute(attributeId))
 
 const extractAbsoluteScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
   if (typeof score?.absolute?.value === 'number' && Number.isFinite(score.absolute.value)) {
