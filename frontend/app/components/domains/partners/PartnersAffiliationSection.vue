@@ -1,9 +1,6 @@
 <template>
-  <section
-    class="partners-affiliation"
-    :aria-labelledby="headingId"
-  >
-    <v-container class="py-12 px-4" max-width="xl">
+  <section class="partners-affiliation" :aria-labelledby="headingId">
+    <v-container class="partners-affiliation__container" max-width="xl">
       <header class="partners-affiliation__header d-flex flex-column gap-4">
         <div class="partners-affiliation__titles">
           <div class="d-flex flex-column gap-2">
@@ -61,7 +58,9 @@
                     rounded="lg"
                     :href="partner.affiliationLink ?? undefined"
                     :target="partner.affiliationLink ? '_blank' : undefined"
-                    :rel="partner.affiliationLink ? 'noopener nofollow' : undefined"
+                    :rel="
+                      partner.affiliationLink ? 'noopener nofollow' : undefined
+                    "
                     :aria-label="linkAriaLabel(partner)"
                   >
                     <div class="partners-affiliation__card-media">
@@ -75,7 +74,9 @@
                       />
                     </div>
                     <div class="partners-affiliation__card-content">
-                      <h3 class="text-subtitle-1 font-weight-medium mb-1 text-center">
+                      <h3
+                        class="text-subtitle-1 font-weight-medium mb-1 text-center"
+                      >
                         {{ partner.name }}
                       </h3>
                       <div class="partners-affiliation__cta" aria-hidden="true">
@@ -135,8 +136,8 @@ const filteredPartners = computed(() => {
     return normalizedPartners.value
   }
 
-  return normalizedPartners.value.filter((partner) =>
-    (partner.name ?? '').toLowerCase().includes(query),
+  return normalizedPartners.value.filter(partner =>
+    (partner.name ?? '').toLowerCase().includes(query)
   )
 })
 
@@ -191,11 +192,11 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
 
 <style scoped lang="scss">
 .partners-affiliation {
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-surface-primary-050), 0.85),
-    rgba(var(--v-theme-surface-alt), 0.9)
-  );
+  color: rgb(var(--v-theme-text-neutral-strong));
+
+  &__container {
+    padding-inline: clamp(1.25rem, 3vw, 1.75rem);
+  }
 
   &__header {
     max-width: 720px;
@@ -245,7 +246,9 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
-    transition: transform 200ms ease, box-shadow 200ms ease;
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease;
     cursor: pointer;
     color: inherit;
     text-decoration: none;
@@ -282,6 +285,7 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
     gap: 0.25rem;
     text-transform: none;
     font-weight: 600;
+    color: rgb(var(--v-theme-text-neutral-secondary));
   }
 }
 </style>

@@ -1,6 +1,9 @@
 <template>
-  <section :class="['partners-static', `partners-static--${toneClass}`]" :aria-labelledby="headingId">
-    <v-container class="py-12 px-4" max-width="xl">
+  <section
+    :class="['partners-static', `partners-static--${toneClass}`]"
+    :aria-labelledby="headingId"
+  >
+    <v-container class="partners-static__container" max-width="xl">
       <header class="partners-static__header">
         <h2 :id="headingId" class="text-h4 text-wrap font-weight-bold mb-3">
           {{ title }}
@@ -32,8 +35,15 @@
                 :key="partner.name ?? partner.blocId ?? slideIndex"
                 class="partners-static__card"
               >
-                <v-card class="partners-static__card-surface" elevation="0" rounded="xl">
-                  <div v-if="partner.imageUrl" class="partners-static__card-media">
+                <v-card
+                  class="partners-static__card-surface"
+                  elevation="0"
+                  rounded="xl"
+                >
+                  <div
+                    v-if="partner.imageUrl"
+                    class="partners-static__card-media"
+                  >
                     <div class="partners-static__logo-frame">
                       <v-img
                         :src="partner.imageUrl"
@@ -110,7 +120,7 @@ const props = withDefaults(
   }>(),
   {
     tone: 'default',
-  },
+  }
 )
 
 const display = useDisplay()
@@ -157,14 +167,10 @@ const imageAlt = (partner: StaticPartnerDto) =>
 
 <style scoped lang="scss">
 .partners-static {
-  background-color: rgba(var(--v-theme-surface-muted), 1);
+  color: rgb(var(--v-theme-text-neutral-strong));
 
-  &--muted {
-    background: linear-gradient(
-      135deg,
-      rgba(var(--v-theme-surface-ice-050), 0.9),
-      rgba(var(--v-theme-surface-default), 0.95)
-    );
+  &__container {
+    padding-inline: clamp(1.25rem, 3vw, 1.75rem);
   }
 
   &__header {
@@ -256,6 +262,16 @@ const imageAlt = (partner: StaticPartnerDto) =>
   &__cta {
     text-transform: none;
     font-weight: 600;
+  }
+
+  &--muted {
+    .partners-static__card-surface {
+      background: rgba(var(--v-theme-surface-alt), 0.96);
+    }
+
+    .partners-static__card-media {
+      background: rgba(var(--v-theme-surface-muted), 0.9);
+    }
   }
 }
 </style>
