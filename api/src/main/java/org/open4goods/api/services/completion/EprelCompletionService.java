@@ -90,14 +90,16 @@ public class EprelCompletionService  extends AbstractCompletionService{
 
                 List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupName());
 
-		if (null == results || results.size() == 0) {
-			logger.warn("No EPREL results when completing {}-{}", data.brand(), data.model());
-			return;
-		} else if (results.size() > 1) {
-			logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
-			return;
-		} else {
-			logger.info("Completing product {} with EPREL datas", data);
+                if (null == results || results.size() == 0) {
+                        logger.warn("No EPREL results when completing {}-{}", data.brand(), data.model());
+                        data.removeDatasourceData(getDatasourceName());
+                        return;
+                } else if (results.size() > 1) {
+                        logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
+                        data.removeDatasourceData(getDatasourceName());
+                        return;
+                } else {
+                        logger.info("Completing product {} with EPREL datas", data);
 
 
 			EprelProduct eprelData = results.get(0);

@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -219,8 +220,102 @@ public class Product implements Standardisable {
 
 	@Override
 	public String toString() {
-		return "id:" + id;
-	}
+                return "id:" + id;
+        }
+
+        /**
+         * Removes all data coming from the given datasource. This includes datasource
+         * bookkeeping, category markers and attribute sources. Datasource-specific
+         * payloads (such as EPREL external ids and cached product data) are also
+         * cleared when the datasource matches.
+         *
+         * @param datasourceName the datasource identifier (case-insensitive)
+         */
+        public void removeDatasourceData(String datasourceName)
+        {
+                if (StringUtils.isBlank(datasourceName)) {
+                        return;
+                }
+
+                removeDatasourceFromIndexedAttributes(attributes.getIndexed(), datasourceName);
+                removeDatasourceFromProductAttributes(attributes.getAll(), datasourceName);
+
+                datasourceCodes.remove(datasourceName);
+
+                String removedCategory = categoriesByDatasources.remove(datasourceName);
+                if (removedCategory != null) {
+                        datasourceCategories.remove(removedCategory);
+                }
+                datasourceCategories.remove(datasourceName);
+
+                if ("eprel".equalsIgnoreCase(datasourceName)) {
+                        externalIds.setEprel(null);
+                        eprelDatas = null;
+                }
+        }
+
+        private void removeDatasourceFromIndexedAttributes(Map<String, IndexedAttribute> attributesByKey, String datasourceName)
+        {
+                Iterator<Entry<String, IndexedAttribute>> iterator = attributesByKey.entrySet().iterator();
+                while (iterator.hasNext()) {
+                        Entry<String, IndexedAttribute> entry = iterator.next();
+                        IndexedAttribute attribute = entry.getValue();
+
+                        boolean removed = attribute.getSource()
+                                        .removeIf(source -> datasourceName.equalsIgnoreCase(source.getDataSourcename()));
+
+                        if (!removed) {
+                                continue;
+                        }
+
+                        if (attribute.getSource().isEmpty()) {
+                                iterator.remove();
+                                continue;
+                        }
+
+                        String bestValue = attribute.bestValue();
+                        attribute.setValue(bestValue);
+                        attribute.setNumericValue(parseNumericOrNull(bestValue));
+                        attribute.setBoolValue(IndexedAttribute.getBool(bestValue));
+                }
+        }
+
+        private void removeDatasourceFromProductAttributes(Map<String, ProductAttribute> attributesByKey, String datasourceName)
+        {
+                Iterator<Entry<String, ProductAttribute>> iterator = attributesByKey.entrySet().iterator();
+                while (iterator.hasNext()) {
+                        Entry<String, ProductAttribute> entry = iterator.next();
+                        ProductAttribute attribute = entry.getValue();
+
+                        boolean removed = attribute.getSource()
+                                        .removeIf(source -> datasourceName.equalsIgnoreCase(source.getDataSourcename()));
+
+                        if (!removed) {
+                                continue;
+                        }
+
+                        if (attribute.getSource().isEmpty()) {
+                                iterator.remove();
+                                continue;
+                        }
+
+                        String bestValue = attribute.bestValue();
+                        attribute.setValue(bestValue);
+                }
+        }
+
+        private Double parseNumericOrNull(String rawValue)
+        {
+                if (rawValue == null) {
+                        return null;
+                }
+                try {
+                        return Double.valueOf(rawValue.trim().replace(",", "."));
+                }
+                catch (NumberFormatException e) {
+                        return null;
+                }
+        }
 
 	@Override
 	public boolean equals(final Object obj) {
