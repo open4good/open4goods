@@ -13,8 +13,8 @@
                 <github.global.server>github</github.global.server>
                 <springboot.version>3.5.8</springboot.version>
                 <java.version>25</java.version>
-                <maven.compiler.source>25</maven.compiler.source>
-                <maven.compiler.target>25</maven.compiler.target>
+                <maven.compiler.source>21</maven.compiler.source>
+                <maven.compiler.target>21</maven.compiler.target>
                 <global.version>0.0.1-SNAPSHOT</global.version>
                 <swagger.version>2.9.2</swagger.version>
                 <swagger.core.v3.version>2.2.41</swagger.core.v3.version>
