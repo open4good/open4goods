@@ -311,19 +311,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
-		if (vConf.getRequiredAttributes() != null && !attrKeys.containsAll(vConf.getRequiredAttributes())) {
+                if (vConf.getRequiredAttributes() != null) {
 
-			Set<String> missing = new HashSet<>(vConf.getRequiredAttributes());
-			missing.retainAll(attrKeys);
+                        Set<String> missing = new HashSet<>(vConf.getRequiredAttributes());
+                        missing.removeAll(attrKeys);
 
-			missing.forEach(e-> {
-				data.getExcludedCauses().add("missing_attr_" + e);
-			});
+                        if (!missing.isEmpty()) {
+                                missing.forEach(e-> {
+                                        data.getExcludedCauses().add("missing_attr_" + e);
+                                });
 
-			dedicatedLogger.info("Excluded because required attributes are missing : {}", data );
-			ret =  true;
+                                dedicatedLogger.info("Excluded because required attributes are missing : {}", data );
+                                ret =  true;
+                        }
 
-		}
+                }
 
 		data.setExcluded(ret);
 
