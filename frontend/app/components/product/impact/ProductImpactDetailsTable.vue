@@ -31,7 +31,7 @@
               >
                 <v-icon :icon="isGroupExpanded(item.raw.id) ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="18" />
               </v-btn>
-              <span class="impact-details__indicator">{{ item.raw.label }}</span>
+              <span class="impact-details__indicator">{{ item.raw?.label ?? '—' }}</span>
             </div>
           </td>
           <td class="impact-details__value impact-details__value--aggregate">
@@ -56,7 +56,7 @@
                 class="impact-details__label"
                 :class="{ 'impact-details__label--child': item.raw?.rowType === 'subscore' }"
               >
-                <span class="impact-details__indicator">{{ item.raw.label }}</span>
+                <span class="impact-details__indicator">{{ item.raw?.label ?? '—' }}</span>
               </div>
             </template>
             <template v-else-if="column.key === 'attributeValue'">
@@ -90,7 +90,7 @@
                 <ImpactCoefficientBadge
                   v-if="item.raw.coefficient != null"
                   :value="item.raw.coefficient"
-                  :tooltip-params="{ scoreName: item.raw.label }"
+                  :tooltip-params="{ scoreName: item.raw?.label ?? '—' }"
                 />
                 <span v-else class="impact-details__coefficient-empty">—</span>
               </div>
@@ -357,7 +357,7 @@ const buildTableRow = (
   parentId?: string,
 ): TableRow => ({
   id: normalizeId(score.id) || score.id,
-  label: score.label,
+  label: score.label ?? score.id,
   attributeValue: formatAttributeValue(score),
   attributeSourcing: score.attributeSourcing ?? null,
   displayValue: score.displayValue,
