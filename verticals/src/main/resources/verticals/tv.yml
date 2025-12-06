@@ -22,7 +22,7 @@ googleTaxonomyId: 404
 
 icecatTaxonomyId: 1584
 
-eprelGroupName: televisions
+eprelGroupName: TELEVISION
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). 
 # Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG

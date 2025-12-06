@@ -47,11 +47,9 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 @Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = true, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
-@Setting( settingPath = "/product-settings.json")
+@Setting(settingPath = "/product-settings.json")
 @Mapping(mappingPath = "/product-mappings.json")
 public class Product implements Standardisable {
-
-
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
@@ -66,7 +64,8 @@ public class Product implements Standardisable {
 	private static final String ECOSCORE_NAME = "ECOSCORE";
 
 	// Should not be used
-	// If true, the referentiel attribute will be updated if a shortest version exists in akaModels
+	// If true, the referentiel attribute will be updated if a shortest version
+	// exists in akaModels
 	private static final boolean FORCE = false;
 
 	/**
@@ -74,7 +73,6 @@ public class Product implements Standardisable {
 	 */
 	@Id
 	private Long id;
-
 
 	/**
 	 * The list of external id's for this product
@@ -87,18 +85,20 @@ public class Product implements Standardisable {
 	private long creationDate;
 
 	/**
-	 * The last date this product has changed (new data, new comment,	 * so on...)
+	 * The last date this product has changed (new data, new comment, * so on...)
 	 */
 	private long lastChange;
 
-	/** The associated vertical, if any**/
+	/** The associated vertical, if any **/
 	private String vertical;
 
-
-	/** If true, means the item is excluded from vertical representation (because not enough data, ....)**/
+	/**
+	 * If true, means the item is excluded from vertical representation (because not
+	 * enough data, ....)
+	 **/
 	private boolean excluded = false;
 
-	/** If set that contains cause of exclusion.**/
+	/** If set that contains cause of exclusion. **/
 	private Set<String> excludedCauses = new HashSet<String>();
 
 	/** If associated eprel product if any **/
@@ -107,10 +107,8 @@ public class Product implements Standardisable {
 	/** The list of other model's known for this product **/
 	private Set<String> akaModels = new HashSet<>();
 
-
 	/** The list of other brands known for this product **/
-	private Map<String,String> akaBrands = new HashMap<String, String>();
-
+	private Map<String, String> akaBrands = new HashMap<String, String>();
 
 	/** Namings informations for this product **/
 	private ProductTexts names = new ProductTexts();
@@ -122,9 +120,10 @@ public class Product implements Standardisable {
 	private AggregatedPrices price = new AggregatedPrices();
 
 	/**
-	 * The datasources participating to this product, with a hashcode used for fastening data processing (by skipping already processed items)
+	 * The datasources participating to this product, with a hashcode used for
+	 * fastening data processing (by skipping already processed items)
 	 */
-	private Map<String,Long> datasourceCodes = new HashMap<>();
+	private Map<String, Long> datasourceCodes = new HashMap<>();
 
 	/**
 	 * The media resources for this data
@@ -133,10 +132,9 @@ public class Product implements Standardisable {
 
 	private String coverImagePath;
 
-
-	/** The ai generated texts, keyed by language**/
+	/** The ai generated texts, keyed by language **/
 	// TODO : Deprecated
-	private Localisable<String,AiDescriptions> genaiTexts = new Localisable<>();
+	private Localisable<String, AiDescriptions> genaiTexts = new Localisable<>();
 
 	/**
 	 * Informations and resources related to the gtin
@@ -157,17 +155,19 @@ public class Product implements Standardisable {
 	/**
 	 * The product category path by datasources
 	 */
-	private Map<String,String> categoriesByDatasources = new HashMap<String, String>();
+	private Map<String, String> categoriesByDatasources = new HashMap<String, String>();
 
 	private Map<String, Score> scores = new HashMap<>();
 
 	/**
-	 * A bag containg the scorenames for which this product matches the N worth scores (--> tag on "ugly" scores)
+	 * A bag containg the scorenames for which this product matches the N worth
+	 * scores (--> tag on "ugly" scores)
 	 */
 	private Set<String> worsesScores = new HashSet<String>();
 
 	/**
-	 * A bag containg the scorenames for which this product matches the N bestsScores (--> tag on "top" scores)
+	 * A bag containg the scorenames for which this product matches the N
+	 * bestsScores (--> tag on "top" scores)
 	 */
 	private Set<String> bestsScores = new HashSet<String>();
 
@@ -176,9 +176,7 @@ public class Product implements Standardisable {
 	 */
 	private Localisable<String, AiReviewHolder> reviews = new Localisable<String, AiReviewHolder>();
 
-
 	private EcoScoreRanking ranking = new EcoScoreRanking();
-
 
 	//////////////////// :
 	// Stored (and computed) to help elastic querying / sorting
@@ -186,12 +184,11 @@ public class Product implements Standardisable {
 	/** number of commercial offers **/
 	private Integer offersCount = 0;
 
-
-	//	/**
-	//	 * Informations about participant datas and aggegation process
-	//	 */
-	//	@Field(index = false, store = false, type = FieldType.Object)
-	//	private AggregationResult aggregationResult = new AggregationResult();
+	// /**
+	// * Informations about participant datas and aggegation process
+	// */
+	// @Field(index = false, store = false, type = FieldType.Object)
+	// private AggregationResult aggregationResult = new AggregationResult();
 
 	public Product() {
 		super();
@@ -205,7 +202,7 @@ public class Product implements Standardisable {
 
 	@Override
 	public Set<Standardisable> standardisableChildren() {
-        final Set<Standardisable> ret = new HashSet<>(price.standardisableChildren());
+		final Set<Standardisable> ret = new HashSet<>(price.standardisableChildren());
 		return ret;
 	}
 
@@ -220,102 +217,97 @@ public class Product implements Standardisable {
 
 	@Override
 	public String toString() {
-                return "id:" + id;
-        }
+		return "id:" + id;
+	}
 
-        /**
-         * Removes all data coming from the given datasource. This includes datasource
-         * bookkeeping, category markers and attribute sources. Datasource-specific
-         * payloads (such as EPREL external ids and cached product data) are also
-         * cleared when the datasource matches.
-         *
-         * @param datasourceName the datasource identifier (case-insensitive)
-         */
-        public void removeDatasourceData(String datasourceName)
-        {
-                if (StringUtils.isBlank(datasourceName)) {
-                        return;
-                }
+	/**
+	 * Removes all data coming from the given datasource. This includes datasource
+	 * bookkeeping, category markers and attribute sources. Datasource-specific
+	 * payloads (such as EPREL external ids and cached product data) are also
+	 * cleared when the datasource matches.
+	 *
+	 * @param datasourceName the datasource identifier (case-insensitive)
+	 */
+	public void removeDatasourceData(String datasourceName) {
+		if (StringUtils.isBlank(datasourceName)) {
+			return;
+		}
 
-                removeDatasourceFromIndexedAttributes(attributes.getIndexed(), datasourceName);
-                removeDatasourceFromProductAttributes(attributes.getAll(), datasourceName);
+		akaBrands.remove(datasourceName);
 
-                datasourceCodes.remove(datasourceName);
+		removeDatasourceFromIndexedAttributes(attributes.getIndexed(), datasourceName);
+		removeDatasourceFromProductAttributes(attributes.getAll(), datasourceName);
 
-                String removedCategory = categoriesByDatasources.remove(datasourceName);
-                if (removedCategory != null) {
-                        datasourceCategories.remove(removedCategory);
-                }
-                datasourceCategories.remove(datasourceName);
+		datasourceCodes.remove(datasourceName);
 
-                if ("eprel".equalsIgnoreCase(datasourceName)) {
-                        externalIds.setEprel(null);
-                        eprelDatas = null;
-                }
-        }
+		String removedCategory = categoriesByDatasources.remove(datasourceName);
+		if (removedCategory != null) {
+			datasourceCategories.remove(removedCategory);
+		}
+		datasourceCategories.remove(datasourceName);
 
-        private void removeDatasourceFromIndexedAttributes(Map<String, IndexedAttribute> attributesByKey, String datasourceName)
-        {
-                Iterator<Entry<String, IndexedAttribute>> iterator = attributesByKey.entrySet().iterator();
-                while (iterator.hasNext()) {
-                        Entry<String, IndexedAttribute> entry = iterator.next();
-                        IndexedAttribute attribute = entry.getValue();
+		if ("eprel".equalsIgnoreCase(datasourceName)) {
+			externalIds.setEprel(null);
+			eprelDatas = null;
+		}
+	}
 
-                        boolean removed = attribute.getSource()
-                                        .removeIf(source -> datasourceName.equalsIgnoreCase(source.getDataSourcename()));
+	private void removeDatasourceFromIndexedAttributes(Map<String, IndexedAttribute> attributesByKey, String datasourceName) {
+		Iterator<Entry<String, IndexedAttribute>> iterator = attributesByKey.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Entry<String, IndexedAttribute> entry = iterator.next();
+			IndexedAttribute attribute = entry.getValue();
 
-                        if (!removed) {
-                                continue;
-                        }
+			boolean removed = attribute.getSource().removeIf(source -> datasourceName.equalsIgnoreCase(source.getDataSourcename()));
 
-                        if (attribute.getSource().isEmpty()) {
-                                iterator.remove();
-                                continue;
-                        }
+			if (!removed) {
+				continue;
+			}
 
-                        String bestValue = attribute.bestValue();
-                        attribute.setValue(bestValue);
-                        attribute.setNumericValue(parseNumericOrNull(bestValue));
-                        attribute.setBoolValue(IndexedAttribute.getBool(bestValue));
-                }
-        }
+			if (attribute.getSource().isEmpty()) {
+				iterator.remove();
+				continue;
+			}
 
-        private void removeDatasourceFromProductAttributes(Map<String, ProductAttribute> attributesByKey, String datasourceName)
-        {
-                Iterator<Entry<String, ProductAttribute>> iterator = attributesByKey.entrySet().iterator();
-                while (iterator.hasNext()) {
-                        Entry<String, ProductAttribute> entry = iterator.next();
-                        ProductAttribute attribute = entry.getValue();
+			String bestValue = attribute.bestValue();
+			attribute.setValue(bestValue);
+			attribute.setNumericValue(parseNumericOrNull(bestValue));
+			attribute.setBoolValue(IndexedAttribute.getBool(bestValue));
+		}
+	}
 
-                        boolean removed = attribute.getSource()
-                                        .removeIf(source -> datasourceName.equalsIgnoreCase(source.getDataSourcename()));
+	private void removeDatasourceFromProductAttributes(Map<String, ProductAttribute> attributesByKey, String datasourceName) {
+		Iterator<Entry<String, ProductAttribute>> iterator = attributesByKey.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Entry<String, ProductAttribute> entry = iterator.next();
+			ProductAttribute attribute = entry.getValue();
 
-                        if (!removed) {
-                                continue;
-                        }
+			boolean removed = attribute.getSource().removeIf(source -> datasourceName.equalsIgnoreCase(source.getDataSourcename()));
 
-                        if (attribute.getSource().isEmpty()) {
-                                iterator.remove();
-                                continue;
-                        }
+			if (!removed) {
+				continue;
+			}
 
-                        String bestValue = attribute.bestValue();
-                        attribute.setValue(bestValue);
-                }
-        }
+			if (attribute.getSource().isEmpty()) {
+				iterator.remove();
+				continue;
+			}
 
-        private Double parseNumericOrNull(String rawValue)
-        {
-                if (rawValue == null) {
-                        return null;
-                }
-                try {
-                        return Double.valueOf(rawValue.trim().replace(",", "."));
-                }
-                catch (NumberFormatException e) {
-                        return null;
-                }
-        }
+			String bestValue = attribute.bestValue();
+			attribute.setValue(bestValue);
+		}
+	}
+
+	private Double parseNumericOrNull(String rawValue) {
+		if (rawValue == null) {
+			return null;
+		}
+		try {
+			return Double.valueOf(rawValue.trim().replace(",", "."));
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
 	@Override
 	public boolean equals(final Object obj) {
@@ -327,24 +319,23 @@ public class Product implements Standardisable {
 		return super.equals(obj);
 	}
 
-
 	/**
 	 * Return a set containing AKA brands if not matching the set brand
+	 *
 	 * @return
 	 */
-	public Set<String> akaBrands () {
-		return akaBrands.values().stream().filter(e-> !e.equals(brand())).collect(Collectors.toSet());
+	public Set<String> akaBrands() {
+		return akaBrands.values().stream().filter(e -> !e.equals(brand())).collect(Collectors.toSet());
 
 	}
 
 	public String longestOfferName() {
-		return offerNames.stream().max (Comparator.comparingInt(String::length)).get();
+		return offerNames.stream().max(Comparator.comparingInt(String::length)).get();
 	}
 
 	public String shortestOfferName() {
-		return offerNames.stream().min (Comparator.comparingInt(String::length)).orElse(null);
+		return offerNames.stream().min(Comparator.comparingInt(String::length)).orElse(null);
 	}
-
 
 	/**
 	 *
@@ -356,32 +347,21 @@ public class Product implements Standardisable {
 		ret.addAll(getOfferNames());
 		ret.remove(shortestOfferName());
 
-        List<String> list = new ArrayList<>(ret);
+		List<String> list = new ArrayList<>(ret);
 
 		list.sort(Comparator.naturalOrder());
 
 		return list;
 	}
 
-
-
 	public List<Score> virtualScores() {
-		List<Score> ret = scores.values().stream()
-				.filter(e -> e.getVirtual())
-				.filter(e -> !e.getName().equals(ECOSCORE_NAME))
-				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
-				.toList();
+		List<Score> ret = scores.values().stream().filter(e -> e.getVirtual()).filter(e -> !e.getName().equals(ECOSCORE_NAME)).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
 
 		return ret;
 	}
 
-
 	public List<Score> realScores() {
-		List<Score> ret = scores.values().stream()
-				.filter(e -> !e.getVirtual())
-				.filter(e -> !e.getName().equals(ECOSCORE_NAME))
-				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
-				.toList();
+		List<Score> ret = scores.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals(ECOSCORE_NAME)).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
 
 		return ret;
 	}
@@ -394,7 +374,6 @@ public class Product implements Standardisable {
 		return scores.get(ECOSCORE_NAME);
 	}
 
-
 	public String caracteristics() {
 
 		StringBuilder sb = new StringBuilder();
@@ -404,9 +383,8 @@ public class Product implements Standardisable {
 		}
 
 		for (IndexedAttribute attr : attributes.getIndexed().values()) {
-				sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
+			sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
-
 
 		for (ProductAttribute attr : attributes.getAll().values()) {
 			if (attr.getIcecatTaxonomyIds().size() > 0) {
@@ -414,36 +392,32 @@ public class Product implements Standardisable {
 			}
 		}
 
-
-
 		/**
-
-		for (Entry<String, AggregatedAttribute> attr : attributes.getAggregatedAttributes().entrySet()) {
-			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue().getValue()).append("\n");
-		}
-
-		for (AggregatedFeature attr : attributes.getFeatures()) {
-			sb.append(" - ").append(attr.getName().toString()).append("\n");
-		}
-
-		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
-			sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
-		}
+		 *
+		 * for (Entry<String, AggregatedAttribute> attr :
+		 * attributes.getAggregatedAttributes().entrySet()) { sb.append(" -
+		 * ").append(attr.getKey().toString()).append(" :
+		 * ").append(attr.getValue().getValue()).append("\n"); }
+		 *
+		 * for (AggregatedFeature attr : attributes.getFeatures()) { sb.append(" -
+		 * ").append(attr.getName().toString()).append("\n"); }
+		 *
+		 * for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
+		 * sb.append(" - ").append(attr.getName().toString()).append(" :
+		 * ").append(attr.getValue()).append("\n"); }
 		 */
 
 		return sb.toString();
 
 	}
 
-
-	public List<Resource> pdfs () {
-		List<Resource> ret = resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
+	public List<Resource> pdfs() {
+		List<Resource> ret = resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.PDF)).toList();
 		return ret;
 	}
 
-
 	public String externalCover() {
-		String coverPath="/icons/no-image.png";
+		String coverPath = "/icons/no-image.png";
 
 		List<Resource> images = unprocessedimages();
 		if (images != null && images.size() > 0) {
@@ -455,86 +429,80 @@ public class Product implements Standardisable {
 		return coverPath;
 	}
 
-
 	public List<Resource> unprocessedimages() {
-		return resources.stream()
-				.filter(e-> e.getUrl() != null)
+		return resources.stream().filter(e -> e.getUrl() != null)
 				// TODO : Extension from conf
-				.filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg") || e.getUrl().endsWith(".webp" ))
-				.toList();
+				.filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg") || e.getUrl().endsWith(".webp")).toList();
 	}
 
 	// Helper for ui
 	public List<String> unprocessedImagesUrl() {
-		List<String> ret = unprocessedimages().stream().map(e->e.getUrl()).toList();
+		List<String> ret = unprocessedimages().stream().map(e -> e.getUrl()).toList();
 		return ret;
 	}
 
-        // TODO(p2,perf) : Should be cached
-        public List<Resource> images() {
-            Map<Integer, List<Resource>> imagesByGroup = new HashMap<>();
-            Map<Integer, Resource> bestByGroup = new HashMap<>();
-            Set<Integer> coverGroups = new HashSet<>();
-            List<Resource> coverNoGroup = new ArrayList<>();
-            List<Resource> otherNoGroup = new ArrayList<>();
+	// TODO(p2,perf) : Should be cached
+	public List<Resource> images() {
+		Map<Integer, List<Resource>> imagesByGroup = new HashMap<>();
+		Map<Integer, Resource> bestByGroup = new HashMap<>();
+		Set<Integer> coverGroups = new HashSet<>();
+		List<Resource> coverNoGroup = new ArrayList<>();
+		List<Resource> otherNoGroup = new ArrayList<>();
 
-            for (Resource r : resources) {
-                if (r.getResourceType() != null && r.getResourceType().equals(ResourceType.IMAGE)) {
-                    Integer groupId = r.getGroup();
-                    boolean cover = r.getTags().contains("cover");
+		for (Resource r : resources) {
+			if (r.getResourceType() != null && r.getResourceType().equals(ResourceType.IMAGE)) {
+				Integer groupId = r.getGroup();
+				boolean cover = r.getTags().contains("cover");
 
-                    if (groupId != null) {
-                        imagesByGroup.computeIfAbsent(groupId, g -> new ArrayList<>()).add(r);
+				if (groupId != null) {
+					imagesByGroup.computeIfAbsent(groupId, g -> new ArrayList<>()).add(r);
 
-                        Resource best = bestByGroup.get(groupId);
-                        if (best == null || pixels(r) > pixels(best)) {
-                            bestByGroup.put(groupId, r);
-                        }
+					Resource best = bestByGroup.get(groupId);
+					if (best == null || pixels(r) > pixels(best)) {
+						bestByGroup.put(groupId, r);
+					}
 
-                        if (cover) {
-                            coverGroups.add(groupId);
-                        }
-                    } else {
-                        if (cover) {
-                            coverNoGroup.add(r);
-                        } else {
-                            otherNoGroup.add(r);
-                        }
-                    }
-                }
-            }
+					if (cover) {
+						coverGroups.add(groupId);
+					}
+				} else {
+					if (cover) {
+						coverNoGroup.add(r);
+					} else {
+						otherNoGroup.add(r);
+					}
+				}
+			}
+		}
 
-            List<Resource> ret = new ArrayList<>();
+		List<Resource> ret = new ArrayList<>();
 
-            coverGroups.forEach(g -> {
-                Resource r = bestByGroup.get(g);
-                if (r != null) {
-                    ret.add(r);
-                }
-            });
+		coverGroups.forEach(g -> {
+			Resource r = bestByGroup.get(g);
+			if (r != null) {
+				ret.add(r);
+			}
+		});
 
-            ret.addAll(coverNoGroup);
+		ret.addAll(coverNoGroup);
 
-            bestByGroup.forEach((g, r) -> {
-                if (!coverGroups.contains(g)) {
-                    ret.add(r);
-                }
-            });
+		bestByGroup.forEach((g, r) -> {
+			if (!coverGroups.contains(g)) {
+				ret.add(r);
+			}
+		});
 
-            ret.addAll(otherNoGroup);
+		ret.addAll(otherNoGroup);
 
-            return ret;
-        }
+		return ret;
+	}
 
-        private int pixels(Resource resource) {
-            return resource.getImageInfo() == null ? 0 : resource.getImageInfo().pixels();
-        }
+	private int pixels(Resource resource) {
+		return resource.getImageInfo() == null ? 0 : resource.getImageInfo().pixels();
+	}
 
-
-
-
-	public List<Resource> videos () {
-		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.VIDEO)).toList();
+	public List<Resource> videos() {
+		return resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.VIDEO)).toList();
 	}
 
 	public AggregatedPrice bestPrice() {
@@ -549,11 +517,9 @@ public class Product implements Standardisable {
 		return akaModels.size() > 0;
 	}
 
-
 	public boolean hasOccasions() {
 		return price.getConditions().contains(ProductCondition.OCCASION);
 	}
-
 
 	public String alternateIdsAsText() {
 		return StringUtils.join(akaModels, ", ");
@@ -581,9 +547,6 @@ public class Product implements Standardisable {
 		}
 	}
 
-
-
-
 	/**
 	 *
 	 * @return the brandUid, if availlable from referentiel attributes
@@ -592,9 +555,8 @@ public class Product implements Standardisable {
 		return attributes.getReferentielAttributes().get(ReferentielKey.MODEL);
 	}
 
-
 	public String randomModel() {
-		List<String> names =  new ArrayList<>();
+		List<String> names = new ArrayList<>();
 		names.add(model());
 		akaModels.forEach(e -> names.add(e));
 		Random rand = new Random();
@@ -602,14 +564,12 @@ public class Product implements Standardisable {
 
 	}
 
-
-
-	//	/**
-	//	 * Returns the name (brand - model)
-	//	 */
-	//	public String name() {
-	//		return id();
-	//	}
+	// /**
+	// * Returns the name (brand - model)
+	// */
+	// public String name() {
+	// return id();
+	// }
 	//
 	/**
 	 * Returns the best human readable name
@@ -619,7 +579,7 @@ public class Product implements Standardisable {
 		if (StringUtils.isEmpty(brand()) || StringUtils.isEmpty(model())) {
 			ret = shortestOfferName();
 		} else {
-			ret =  brandAndModel();
+			ret = brandAndModel();
 		}
 
 		if (null == ret) {
@@ -635,18 +595,17 @@ public class Product implements Standardisable {
 	 */
 	public List<String> datasourceCategoriesWithoutShortest() {
 
-        Set<String> ret = new HashSet<>(datasourceCategories.stream().toList());
+		Set<String> ret = new HashSet<>(datasourceCategories.stream().toList());
 
 		ret.remove(shortestCategory());
 
-        List<String> list = new ArrayList<>(ret);
+		List<String> list = new ArrayList<>(ret);
 
 		list.sort(Comparator.comparingInt(String::length));
 
 		return list;
 
 	}
-
 
 	public String ecoscoreAsString() {
 		Score s = ecoscore();
@@ -656,10 +615,11 @@ public class Product implements Standardisable {
 			return s.getRelativ().getValue() + "/" + StandardiserService.DEFAULT_MAX_RATING;
 		}
 	}
+
 	public String brandAndModel() {
 		String ret = "";
 		if (!StringUtils.isEmpty(brand())) {
-			ret += brand() +"-";
+			ret += brand() + "-";
 		}
 
 		ret += model();
@@ -667,30 +627,28 @@ public class Product implements Standardisable {
 		return ret;
 	}
 
+	public String compensation() {
 
-	public String compensation () {
-
-		Double c = bestPrice() == null ? 0.0 :  bestPrice().getCompensation();
+		Double c = bestPrice() == null ? 0.0 : bestPrice().getCompensation();
 		return String.format("%.2f", c);
 	}
+
 	/**
 	 *
 	 * @return The shortest category for this product
 	 */
 	public String shortestCategory() {
-		return datasourceCategories.stream().min (Comparator.comparingInt(String::length)).orElse(null);
+		return datasourceCategories.stream().min(Comparator.comparingInt(String::length)).orElse(null);
 	}
-
 
 	/**
 	 * TODO : merge with the one on price()
+	 *
 	 * @return a localised formated duration of when the product was last indexed
 	 */
 	public String ago(Locale locale) {
 
 		long duration = System.currentTimeMillis() - lastChange;
-
-
 
 		Period period;
 		if (duration < 3600000) {
@@ -704,14 +662,14 @@ public class Product implements Standardisable {
 
 		PeriodFormatter formatter = PeriodFormat.wordBased();
 
-		String ret = (formatter. print(period));
-
+		String ret = (formatter.print(period));
 
 		return ret;
 	}
 
 	/**
 	 * Return text version of the creation date
+	 *
 	 * @param locale
 	 * @return
 	 */
@@ -721,10 +679,7 @@ public class Product implements Standardisable {
 		return date;
 	}
 
-
-
 	public void addResource(final Resource resource) throws ValidationException {
-
 
 		if (null == resource) {
 			return;
@@ -737,10 +692,10 @@ public class Product implements Standardisable {
 		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
 
 		if (null == existing) {
-			logger.info("Adding new resource : {}",resource);
+			logger.info("Adding new resource : {}", resource);
 			resources.add(resource);
 		} else {
-			logger.info("Updating existing resource : {}",resource);
+			logger.info("Updating existing resource : {}", resource);
 			// Smart update
 			existing.setTags(resource.getTags());
 			existing.setHardTags(resource.getHardTags());
@@ -752,11 +707,9 @@ public class Product implements Standardisable {
 
 	}
 
-
-	public String url (String language) {
+	public String url(String language) {
 		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
 	}
-
 
 	public void forceModel(String extractedModel) {
 		String oldModel = model();
@@ -766,9 +719,10 @@ public class Product implements Standardisable {
 
 	}
 
-
 	/**
-	 * Add the model referentiel attribute, applying some spliting mechanism and cleaning pass
+	 * Add the model referentiel attribute, applying some spliting mechanism and
+	 * cleaning pass
+	 *
 	 * @param value
 	 */
 	public void addModel(String value) {
@@ -781,8 +735,7 @@ public class Product implements Standardisable {
 		}
 		// Splitting on conventionnal suffixes (/ - .)
 		// TODO(conf,p2) : splitters from Const / conf
-		String[]frags = model.split("/|\\|.|-");
-
+		String[] frags = model.split("/|\\|.|-");
 
 		if (!model.equals(model())) {
 			akaModels.add(model);
@@ -793,10 +746,11 @@ public class Product implements Standardisable {
 			akaModels.add(frags[0]);
 		}
 
-		// Case ref attribute is already set, we keep as it and we remove the elected one from alternativeModels
+		// Case ref attribute is already set, we keep as it and we remove the elected
+		// one from alternativeModels
 		String existing = model();
 
-		if ( StringUtils.isEmpty(existing) || FORCE) {
+		if (StringUtils.isEmpty(existing) || FORCE) {
 			String shortest = shortestModel();
 			if (null != shortest) {
 				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
@@ -809,9 +763,10 @@ public class Product implements Standardisable {
 
 	/**
 	 * Add the brand referentiel attribute, applying some sanitisation mechanism
+	 *
 	 * @param value
 	 */
-	public void addBrand(String datasource, String value, Set<String> brandExclusions, Map<String,String> brandsMappings) {
+	public void addBrand(String datasource, String value, Set<String> brandExclusions, Map<String, String> brandsMappings) {
 
 		if (StringUtils.isEmpty(value)) {
 			return;
@@ -832,8 +787,7 @@ public class Product implements Standardisable {
 			}
 		}
 
-
-		if (StringUtils.isEmpty(brand()) ) {
+		if (StringUtils.isEmpty(brand())) {
 			attributes.addReferentielAttribute(ReferentielKey.BRAND, brand);
 		} else {
 			if (!akaBrands.values().contains(brand)) {
@@ -854,16 +808,13 @@ public class Product implements Standardisable {
 		if (names.size() == 0) {
 			return null;
 		} else {
-			return names.stream().filter(e-> e != null). min(Comparator.comparingInt(String::length)).orElse(null);
+			return names.stream().filter(e -> e != null).min(Comparator.comparingInt(String::length)).orElse(null);
 		}
 	}
 
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
-
-
-
 
 	public Long getId() {
 		return id;
@@ -872,7 +823,6 @@ public class Product implements Standardisable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 
 	public String getVertical() {
 		return vertical;
@@ -954,8 +904,6 @@ public class Product implements Standardisable {
 		this.datasourceCategories = datasourceCategories;
 	}
 
-
-
 	public Map<String, Score> getScores() {
 		return scores;
 	}
@@ -972,7 +920,6 @@ public class Product implements Standardisable {
 		this.offersCount = offersCount;
 	}
 
-
 	public Localisable<String, AiDescriptions> getGenaiTexts() {
 		return genaiTexts;
 	}
@@ -988,7 +935,6 @@ public class Product implements Standardisable {
 	public void setGoogleTaxonomyId(Integer googleTaxonomyId) {
 		this.googleTaxonomyId = googleTaxonomyId;
 	}
-
 
 	public ExternalIds getExternalIds() {
 		return externalIds;
@@ -1029,7 +975,6 @@ public class Product implements Standardisable {
 	public void setCategoriesByDatasources(Map<String, String> categoriesByDatasources) {
 		this.categoriesByDatasources = categoriesByDatasources;
 	}
-
 
 	public Map<String, Long> getDatasourceCodes() {
 		return datasourceCodes;
@@ -1094,8 +1039,5 @@ public class Product implements Standardisable {
 	public void setEprelDatas(EprelProduct eprelDatas) {
 		this.eprelDatas = eprelDatas;
 	}
-
-
-
 
 }
