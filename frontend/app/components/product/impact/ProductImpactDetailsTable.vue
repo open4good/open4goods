@@ -37,12 +37,12 @@
         </div>
       </template>
       <template #[`item.attributeValue`]="{ item }">
-        <span
+        <ProductAttributeSourcingLabel
           class="impact-details__attribute"
           :class="{ 'impact-details__cell--child': item.rowType === 'subscore' }"
-        >
-          {{ item.attributeValue }}
-        </span>
+          :sourcing="item.attributeSourcing"
+          :value="item.attributeValue"
+        />
       </template>
       <template #[`item.displayValue`]="{ item }">
         <div
@@ -93,6 +93,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
 import ProductImpactSubscoreRating from './ProductImpactSubscoreRating.vue'
 import type { ScoreView } from './impact-types'
@@ -110,6 +111,7 @@ type TableRow = {
   id: string
   label: string
   attributeValue: string
+  attributeSourcing: ScoreView['attributeSourcing'] | null
   displayValue: number | null
   coefficient: number | null
   lifecycle: string[]
@@ -165,6 +167,8 @@ const lifecycleColors: Record<string, string> = {
   END_OF_LIFE: 'success',
 }
 
+const normalizeId = (value?: string | null): string => value?.toString().trim().toUpperCase() ?? ''
+
 const normalizeParticipations = (participations?: string[] | null): string[] =>
   (participations ?? [])
     .map((entry) => entry?.toString().trim().toUpperCase())
@@ -201,7 +205,7 @@ const displayScores = computed<DetailedScore[]>(() =>
 
 const groupedScores = computed<GroupedRows>(() => {
   const scoreMap = displayScores.value.reduce<Map<string, DetailedScore>>((map, score) => {
-    const normalizedId = score.id?.toString().trim().toUpperCase()
+    const normalizedId = normalizeId(score.id)
     if (normalizedId) {
       map.set(normalizedId, score)
     }
@@ -209,41 +213,74 @@ const groupedScores = computed<GroupedRows>(() => {
     return map
   }, new Map())
 
-  const aggregateSet = new Set<string>()
-  const participationMap = new Map<string, DetailedScore[]>()
-  const standalone: DetailedScore[] = []
+  const groupMap = new Map<string, { id: string; aggregate: DetailedScore | null; subscores: DetailedScore[] }>()
+  const consumedSubscores = new Set<string>()
+
+  const resolveAggregateSubscores = (score: DetailedScore): DetailedScore[] => {
+    const aggregateEntries = Object.keys(score.aggregates ?? {})
+      .map((aggregateId) => normalizeId(aggregateId))
+      .filter((aggregateId) => aggregateId.length > 0)
+
+    if (!aggregateEntries.length) {
+      return []
+    }
+
+    const subscores = aggregateEntries
+      .map((aggregateId) => scoreMap.get(aggregateId))
+      .filter((entry): entry is DetailedScore => Boolean(entry))
+
+    return subscores
+  }
+
+  const upsertGroup = (aggregateId: string, aggregateScore: DetailedScore | null, subscore: DetailedScore) => {
+    const existing = groupMap.get(aggregateId)
+    const currentSubscores = existing?.subscores ?? []
+    const normalizedSubscoreId = normalizeId(subscore.id)
+
+    if (!currentSubscores.some((entry) => normalizeId(entry.id) === normalizedSubscoreId)) {
+      currentSubscores.push(subscore)
+    }
+
+    groupMap.set(aggregateId, {
+      id: aggregateId,
+      aggregate: aggregateScore ?? existing?.aggregate ?? null,
+      subscores: currentSubscores,
+    })
+    consumedSubscores.add(normalizedSubscoreId)
+  }
 
   displayScores.value.forEach((score) => {
-    const participations = normalizeParticipations(score.participateInScores)
-
-    if (!participations.length) {
-      standalone.push(score)
+    const normalizedId = normalizeId(score.id)
+    if (!normalizedId) {
       return
     }
 
-    participations.forEach((aggregateId) => {
-      aggregateSet.add(aggregateId)
+    const aggregateSubscores = resolveAggregateSubscores(score)
+    if (aggregateSubscores.length) {
+      aggregateSubscores.forEach((subscore) => upsertGroup(normalizedId, score, subscore))
+      return
+    }
 
-      if (!participationMap.has(aggregateId)) {
-        participationMap.set(aggregateId, [])
+    const participations = normalizeParticipations(score.participateInScores)
+    participations.forEach((aggregateId) => {
+      const normalizedAggregateId = normalizeId(aggregateId)
+      if (!normalizedAggregateId) {
+        return
       }
 
-      participationMap.get(aggregateId)?.push(score)
+      const aggregateScore = scoreMap.get(normalizedAggregateId) ?? null
+      upsertGroup(normalizedAggregateId, aggregateScore, score)
     })
   })
 
-  const groups = Array.from(participationMap.entries()).map(([id, subscores]) => ({
-    id,
-    aggregate: scoreMap.get(id) ?? null,
-    subscores,
-  }))
+  const groups = Array.from(groupMap.values())
 
-  const filteredStandalone = standalone.filter((score) => {
-    const normalizedId = score.id?.toString().trim().toUpperCase()
-    return normalizedId && !aggregateSet.has(normalizedId)
+  const standalone = displayScores.value.filter((score) => {
+    const normalizedId = normalizeId(score.id)
+    return normalizedId && !consumedSubscores.has(normalizedId) && !groupMap.has(normalizedId)
   })
 
-  return { groups, standalone: filteredStandalone }
+  return { groups, standalone }
 })
 
 const headers = computed(() => [
@@ -259,23 +296,25 @@ const buildTableRow = (
   rowType: TableRow['rowType'],
   parentId?: string,
 ): TableRow => ({
-  id: score.id,
+  id: normalizeId(score.id) || score.id,
   label: score.label,
   attributeValue: formatAttributeValue(score),
+  attributeSourcing: score.attributeSourcing ?? null,
   displayValue: score.displayValue,
   coefficient: score.coefficient,
-  lifecycle: score.participateInACV ?? [],
+  lifecycle: normalizeParticipations(score.participateInACV),
   rowType,
   parentId,
 })
 
 const buildAggregateRow = (aggregateId: string, aggregateScore: DetailedScore | null): TableRow => ({
-  id: aggregateId,
+  id: normalizeId(aggregateScore?.id ?? aggregateId) || aggregateId,
   label: resolveAggregateLabel(aggregateId, aggregateScore),
   attributeValue: '—',
+  attributeSourcing: aggregateScore?.attributeSourcing ?? null,
   displayValue: resolveScoreValue(aggregateScore),
   coefficient: aggregateScore?.coefficient ?? null,
-  lifecycle: aggregateScore?.participateInACV ?? [],
+  lifecycle: normalizeParticipations(aggregateScore?.participateInACV),
   rowType: 'aggregate',
 })
 
