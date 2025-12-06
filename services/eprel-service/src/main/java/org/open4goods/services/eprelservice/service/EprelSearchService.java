@@ -53,6 +53,11 @@ public class EprelSearchService
      */
     public List<EprelProduct> searchByGtin(String gtin)
     {
+        return searchByGtin(gtin, null);
+    }
+
+    private List<EprelProduct> searchByGtin(String gtin, String eprelCategory)
+    {
         Optional<Long> numericGtin = GtinHelper.toNumeric(gtin);
         if (numericGtin.isEmpty())
         {
@@ -60,7 +65,7 @@ public class EprelSearchService
             return List.of();
         }
         Query query = Query.of(q -> q.term(t -> t.field("numericGtin").value(numericGtin.get())));
-        return execute(query);
+        return execute(query, eprelCategory);
     }
 
     /**
@@ -71,19 +76,29 @@ public class EprelSearchService
      */
     public List<EprelProduct> searchByExactModel(String model)
     {
+        return searchByExactModel(model, null);
+    }
+
+    private List<EprelProduct> searchByExactModel(String model, String eprelCategory)
+    {
         String normalized = normalize(model);
         if (normalized == null)
         {
             return List.of();
         }
         Query query = Query.of(q -> q.term(t -> t.field("modelIdentifier").value(normalized)));
-        return execute(query);
+        return execute(query, eprelCategory);
     }
 
     public List<EprelProduct> search(String gtin, String model)
     {
+        return search(gtin, model, null);
+    }
+
+    public List<EprelProduct> search(String gtin, String model, String eprelCategory)
+    {
         LOGGER.info("Searching by GTIN : {}", gtin);
-        List<EprelProduct> results = searchByGtin(gtin);
+        List<EprelProduct> results = searchByGtin(gtin, eprelCategory);
         if (!results.isEmpty())
         {
             LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
@@ -91,7 +106,7 @@ public class EprelSearchService
         }
 
         LOGGER.info("Searching by exact model : {}", model);
-        results = searchByExactModel(model);
+        results = searchByExactModel(model, eprelCategory);
         if (!results.isEmpty())
         {
             LOGGER.info("Found {} result by exact model : {}", results.size(), model);
@@ -99,7 +114,7 @@ public class EprelSearchService
         }
 
         LOGGER.info("Searching by model prefix : {}", model);
-        results = searchByModelPrefix(model);
+        results = searchByModelPrefix(model, eprelCategory);
         if (!results.isEmpty())
         {
             LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
@@ -107,7 +122,7 @@ public class EprelSearchService
         }
 
         LOGGER.info("Searching by model best match : {}", model);
-        results = searchByModelBestMatch(model);
+        results = searchByModelBestMatch(model, eprelCategory);
         if (!results.isEmpty())
         {
             LOGGER.warn("Found {} result by model best match : {}", results.size(), model);
@@ -121,10 +136,15 @@ public class EprelSearchService
 
     public List<EprelProduct> search(String gtin, List<String> models)
     {
+        return search(gtin, models, null);
+    }
+
+    public List<EprelProduct> search(String gtin, List<String> models, String eprelCategory)
+    {
         List<String> candidates = sanitiseModelCandidates(models);
 
         LOGGER.info("Searching by GTIN : {}", gtin);
-        List<EprelProduct> results = searchByGtin(gtin);
+        List<EprelProduct> results = searchByGtin(gtin, eprelCategory);
         if (!results.isEmpty())
         {
             LOGGER.info("Found {} result for GTIN : {}", results.size(), gtin);
@@ -134,7 +154,7 @@ public class EprelSearchService
         for (String model : candidates)
         {
             LOGGER.info("Searching by exact model : {}", model);
-            results = searchByExactModel(model);
+            results = searchByExactModel(model, eprelCategory);
             if (!results.isEmpty())
             {
                 LOGGER.info("Found {} result by exact model : {}", results.size(), model);
@@ -145,7 +165,7 @@ public class EprelSearchService
         for (String model : candidates)
         {
             LOGGER.info("Searching by model prefix : {}", model);
-            results = searchByModelPrefix(model);
+            results = searchByModelPrefix(model, eprelCategory);
             if (!results.isEmpty())
             {
                 LOGGER.info("Found {} result by model prefix : {}", results.size(), model);
@@ -156,7 +176,7 @@ public class EprelSearchService
         for (String model : candidates)
         {
             LOGGER.info("Searching by model best match : {}", model);
-            results = searchByModelBestMatch(model);
+            results = searchByModelBestMatch(model, eprelCategory);
             if (!results.isEmpty())
             {
                 LOGGER.info("Found {} result by model best match : {}", results.size(), model);
@@ -177,13 +197,18 @@ public class EprelSearchService
      */
     public List<EprelProduct> searchByModelPrefix(String modelPrefix)
     {
+        return searchByModelPrefix(modelPrefix, null);
+    }
+
+    private List<EprelProduct> searchByModelPrefix(String modelPrefix, String eprelCategory)
+    {
         String normalized = normalize(modelPrefix);
         if (normalized == null)
         {
             return List.of();
         }
         Query query = Query.of(q -> q.prefix(p -> p.field("modelIdentifier").value(normalized)));
-        return execute(query);
+        return execute(query, eprelCategory);
     }
 
 
@@ -211,6 +236,11 @@ public class EprelSearchService
 
     private List<EprelProduct> searchByModelBestMatch(String model)
     {
+        return searchByModelBestMatch(model, null);
+    }
+
+    private List<EprelProduct> searchByModelBestMatch(String model, String eprelCategory)
+    {
         String normalized = normalize(model);
         if (normalized == null)
         {
@@ -231,7 +261,7 @@ public class EprelSearchService
             b.minimumShouldMatch("1");
             return b;
         }));
-        return execute(query);
+        return execute(query, eprelCategory);
     }
 
     private List<String> buildPrefixes(String normalized)
@@ -286,9 +316,29 @@ public class EprelSearchService
 
     private List<EprelProduct> execute(Query query)
     {
-        NativeQuery nativeQuery = NativeQuery.builder().withQuery(query).build();
+        return execute(query, null);
+    }
+
+    private List<EprelProduct> execute(Query query, String eprelCategory)
+    {
+        Query finalQuery = query;
+        if (hasCategory(eprelCategory))
+        {
+            finalQuery = Query.of(q -> q.bool(b ->
+            {
+                b.must(query);
+                b.filter(f -> f.term(t -> t.field("eprelCategory").value(eprelCategory)));
+                return b;
+            }));
+        }
+        NativeQuery nativeQuery = NativeQuery.builder().withQuery(finalQuery).build();
         SearchHits<EprelProduct> hits = elasticsearchOperations.search(nativeQuery, EprelProduct.class);
         return hits.stream().map(SearchHit::getContent).toList();
+    }
+
+    private boolean hasCategory(String eprelCategory)
+    {
+        return eprelCategory != null && !eprelCategory.isBlank();
     }
 
     private String normalize(String value)
