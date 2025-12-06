@@ -11,7 +11,10 @@
       hide-default-footer
     >
       <template #item="{ item, columns }">
-        <tr v-if="item.raw.rowType === 'aggregate'" class="impact-details__row impact-details__row--aggregate">
+        <tr
+          v-if="item.raw?.rowType === 'aggregate'"
+          class="impact-details__row impact-details__row--aggregate"
+        >
           <td :colspan="aggregateLabelColspan" class="impact-details__aggregate">
             <div class="impact-details__label impact-details__label--aggregate">
               <v-btn
@@ -42,17 +45,24 @@
             <span class="impact-details__value-text">{{ formatScoreLabel(item.raw.displayValue) }}</span>
           </td>
         </tr>
-        <tr v-else class="impact-details__row" :class="{ 'impact-details__row--child': item.raw.rowType === 'subscore' }">
+        <tr
+          v-else
+          class="impact-details__row"
+          :class="{ 'impact-details__row--child': item.raw?.rowType === 'subscore' }"
+        >
           <td v-for="column in columns" :key="column.key">
             <template v-if="column.key === 'label'">
-              <div class="impact-details__label" :class="{ 'impact-details__label--child': item.raw.rowType === 'subscore' }">
+              <div
+                class="impact-details__label"
+                :class="{ 'impact-details__label--child': item.raw?.rowType === 'subscore' }"
+              >
                 <span class="impact-details__indicator">{{ item.raw.label }}</span>
               </div>
             </template>
             <template v-else-if="column.key === 'attributeValue'">
               <ProductAttributeSourcingLabel
                 class="impact-details__attribute"
-                :class="{ 'impact-details__cell--child': item.raw.rowType === 'subscore' }"
+                :class="{ 'impact-details__cell--child': item.raw?.rowType === 'subscore' }"
                 :sourcing="item.raw.attributeSourcing"
                 :value="item.raw.attributeValue"
               />
@@ -60,7 +70,7 @@
             <template v-else-if="column.key === 'displayValue'">
               <div
                 class="impact-details__value"
-                :class="{ 'impact-details__cell--child': item.raw.rowType === 'subscore' }"
+                :class="{ 'impact-details__cell--child': item.raw?.rowType === 'subscore' }"
               >
                 <ProductImpactSubscoreRating
                   v-if="item.raw.displayValue != null"
@@ -75,7 +85,7 @@
             <template v-else-if="column.key === 'coefficient'">
               <div
                 class="impact-details__coefficient"
-                :class="{ 'impact-details__cell--child': item.raw.rowType === 'subscore' }"
+                :class="{ 'impact-details__cell--child': item.raw?.rowType === 'subscore' }"
               >
                 <ImpactCoefficientBadge
                   v-if="item.raw.coefficient != null"
@@ -88,7 +98,7 @@
             <template v-else-if="column.key === 'lifecycle'">
               <div
                 class="impact-details__lifecycle"
-                :class="{ 'impact-details__cell--child': item.raw.rowType === 'subscore' }"
+                :class="{ 'impact-details__cell--child': item.raw?.rowType === 'subscore' }"
               >
                 <template v-if="item.raw.lifecycle?.length">
                   <v-chip
@@ -216,13 +226,8 @@ const attributeLifecycleMap = computed<Map<string, string[]>>(() => {
   }, new Map<string, string[]>())
 })
 
-const resolveLifecycleStages = (scoreId: string, lifecycle?: string[] | null) => {
+const resolveLifecycleStages = (scoreId: string) => {
   const normalizedId = normalizeId(scoreId)
-  const normalizedLifecycle = normalizeParticipations(lifecycle)
-
-  if (normalizedLifecycle.length) {
-    return normalizedLifecycle
-  }
 
   return normalizedId ? attributeLifecycleMap.value.get(normalizedId) ?? [] : []
 }
@@ -357,7 +362,7 @@ const buildTableRow = (
   attributeSourcing: score.attributeSourcing ?? null,
   displayValue: score.displayValue,
   coefficient: score.coefficient,
-  lifecycle: resolveLifecycleStages(score.id, score.participateInACV),
+  lifecycle: resolveLifecycleStages(score.id),
   rowType,
   parentId,
 })
@@ -369,7 +374,7 @@ const buildAggregateRow = (aggregateId: string, aggregateScore: DetailedScore | 
   attributeSourcing: aggregateScore?.attributeSourcing ?? null,
   displayValue: resolveScoreValue(aggregateScore),
   coefficient: aggregateScore?.coefficient ?? null,
-  lifecycle: resolveLifecycleStages(aggregateId, aggregateScore?.participateInACV),
+  lifecycle: resolveLifecycleStages(aggregateId),
   rowType: 'aggregate',
 })
 
