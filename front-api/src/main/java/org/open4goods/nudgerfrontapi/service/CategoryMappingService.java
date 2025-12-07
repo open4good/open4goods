@@ -89,7 +89,8 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalHomeTitle(),
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
                 i18n == null ? null : i18n.getVerticalHomeUrl(),
-                mapPopularAttributes(verticalConfig, domainLanguage));
+                mapPopularAttributes(verticalConfig, domainLanguage),
+                defaultSet(verticalConfig.getAggregatedScores()));
     }
 
     /**
@@ -146,6 +147,7 @@ public class CategoryMappingService {
                 mapAttributesConfig(verticalConfig.getAttributesConfig(), domainLanguage),
                 mapPopularAttributes(verticalConfig, domainLanguage),
                 defaultList(verticalConfig.getAvailableImpactScoreCriterias()),
+                defaultSet(verticalConfig.getAggregatedScores()),
                 mapImpactScoreConfig(verticalConfig.getImpactScoreConfig(), domainLanguage),
                 mapVerticalSubsets(verticalConfig.getSubsets(), domainLanguage),
                 mapVerticalSubset(verticalConfig.getBrandsSubset(), domainLanguage),

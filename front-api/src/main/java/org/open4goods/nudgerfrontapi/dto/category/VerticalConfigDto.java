@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.dto.category;
 
 import java.util.List;
+import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -35,6 +36,8 @@ public record VerticalConfigDto(
         @Schema(description = "Localised home URL slug for the vertical.", example = "televiseurs")
         String verticalHomeUrl,
         @Schema(description = "Popular attributes resolved to their full configuration metadata.")
-        List<AttributeConfigDto> popularAttributes
+        List<AttributeConfigDto> popularAttributes,
+        @Schema(description = "Identifiers of composite scores aggregating score attributes for the vertical.")
+        Set<String> aggregatedScores
 ) {
 }

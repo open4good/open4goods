@@ -7,9 +7,12 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -63,6 +66,27 @@ class CategoryMappingServiceVerticalConfigTest {
         assertThat(dto.imageSmall()).isNull();
         assertThat(dto.imageMedium()).isNull();
         assertThat(dto.imageLarge()).isNull();
+    }
+
+    @Test
+    void toVerticalConfigDtoExposesAggregatedScores() {
+        VerticalConfig config = createVerticalConfig("washing-machines", 3);
+
+        AttributeConfig efficiency = new AttributeConfig();
+        efficiency.setKey("EFFICIENCY");
+        efficiency.setAsScore(true);
+        efficiency.setParticipateInScores(Set.of("GLOBAL", "ECO"));
+
+        AttributeConfig noise = new AttributeConfig();
+        noise.setKey("NOISE");
+        noise.setAsScore(true);
+        noise.setParticipateInScores(Set.of("GLOBAL"));
+
+        config.setAttributesConfig(new AttributesConfig(List.of(efficiency, noise)));
+
+        VerticalConfigDto dto = service.toVerticalConfigDto(config, DomainLanguage.fr);
+
+        assertThat(dto.aggregatedScores()).containsExactly("ECO", "GLOBAL");
     }
 
     private VerticalConfig createVerticalConfig(String id, int googleTaxonomyId) {

@@ -92,6 +92,8 @@ public record VerticalConfigFullDto(
         List<AttributeConfigDto> popularAttributes,
         @Schema(description = "Identifiers of impact score criteria available for this vertical.")
         List<String> availableImpactScoreCriterias,
+        @Schema(description = "Identifiers of composite scores aggregating score attributes for the vertical.")
+        Set<String> aggregatedScores,
         @Schema(description = "Impact score configuration balancing each criterion, with localised texts.")
         ImpactScoreConfigDto impactScoreConfig,
         @Schema(description = "Custom subsets defined for this vertical with localised labels.")
