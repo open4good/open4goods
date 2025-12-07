@@ -68,6 +68,8 @@ models/LegacyPromptConfig.ts
 models/LoginRequest.ts
 models/LogoutResponse.ts
 models/Member.ts
+models/NudgeToolConfigDto.ts
+models/NudgeToolScoreDto.ts
 models/OpenDataDatasetDto.ts
 models/OpenDataDownloadLimitsDto.ts
 models/OpenDataOverviewDto.ts

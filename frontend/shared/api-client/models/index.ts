@@ -53,6 +53,8 @@ export * from './LegacyPromptConfig';
 export * from './LoginRequest';
 export * from './LogoutResponse';
 export * from './Member';
+export * from './NudgeToolConfigDto';
+export * from './NudgeToolScoreDto';
 export * from './OpenDataDatasetDto';
 export * from './OpenDataDownloadLimitsDto';
 export * from './OpenDataOverviewDto';

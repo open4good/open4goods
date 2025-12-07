@@ -20,6 +20,13 @@ import {
     AttributeConfigDtoToJSON,
     AttributeConfigDtoToJSONTyped,
 } from './AttributeConfigDto';
+import type { NudgeToolConfigDto } from './NudgeToolConfigDto';
+import {
+    NudgeToolConfigDtoFromJSON,
+    NudgeToolConfigDtoFromJSONTyped,
+    NudgeToolConfigDtoToJSON,
+    NudgeToolConfigDtoToJSONTyped,
+} from './NudgeToolConfigDto';
 
 /**
  * 
@@ -64,6 +71,12 @@ export interface VerticalConfigDto {
      */
     order?: number;
     /**
+     * Material Design icon name representing the vertical.
+     * @type {string}
+     * @memberof VerticalConfigDto
+     */
+    mdiIcon?: string;
+    /**
      * Thumbnail image representing the vertical.
      * @type {string}
      * @memberof VerticalConfigDto
@@ -105,6 +118,18 @@ export interface VerticalConfigDto {
      * @memberof VerticalConfigDto
      */
     popularAttributes?: Array<AttributeConfigDto>;
+    /**
+     * Identifiers of composite scores aggregating score attributes for the vertical.
+     * @type {Set<string>}
+     * @memberof VerticalConfigDto
+     */
+    aggregatedScores?: Set<string>;
+    /**
+     * Configuration supporting the guided nudge tool for this vertical.
+     * @type {NudgeToolConfigDto}
+     * @memberof VerticalConfigDto
+     */
+    nudgeToolConfig?: NudgeToolConfigDto;
 }
 
 /**
@@ -130,6 +155,7 @@ export function VerticalConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
+        'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
         'imageSmall': json['imageSmall'] == null ? undefined : json['imageSmall'],
         'imageMedium': json['imageMedium'] == null ? undefined : json['imageMedium'],
         'imageLarge': json['imageLarge'] == null ? undefined : json['imageLarge'],
@@ -137,6 +163,8 @@ export function VerticalConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'verticalHomeDescription': json['verticalHomeDescription'] == null ? undefined : json['verticalHomeDescription'],
         'verticalHomeUrl': json['verticalHomeUrl'] == null ? undefined : json['verticalHomeUrl'],
         'popularAttributes': json['popularAttributes'] == null ? undefined : ((json['popularAttributes'] as Array<any>).map(AttributeConfigDtoFromJSON)),
+        'aggregatedScores': json['aggregatedScores'] == null ? undefined : new Set(json['aggregatedScores']),
+        'nudgeToolConfig': json['nudgeToolConfig'] == null ? undefined : NudgeToolConfigDtoFromJSON(json['nudgeToolConfig']),
     };
 }
 
@@ -157,6 +185,7 @@ export function VerticalConfigDtoToJSONTyped(value?: VerticalConfigDto | null, i
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
+        'mdiIcon': value['mdiIcon'],
         'imageSmall': value['imageSmall'],
         'imageMedium': value['imageMedium'],
         'imageLarge': value['imageLarge'],
@@ -164,6 +193,8 @@ export function VerticalConfigDtoToJSONTyped(value?: VerticalConfigDto | null, i
         'verticalHomeDescription': value['verticalHomeDescription'],
         'verticalHomeUrl': value['verticalHomeUrl'],
         'popularAttributes': value['popularAttributes'] == null ? undefined : ((value['popularAttributes'] as Array<any>).map(AttributeConfigDtoToJSON)),
+        'aggregatedScores': value['aggregatedScores'] == null ? undefined : Array.from(value['aggregatedScores'] as Set<any>),
+        'nudgeToolConfig': NudgeToolConfigDtoToJSON(value['nudgeToolConfig']),
     };
 }
 

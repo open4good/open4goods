@@ -41,6 +41,13 @@ import {
     VerticalSubsetDtoToJSON,
     VerticalSubsetDtoToJSONTyped,
 } from './VerticalSubsetDto';
+import type { NudgeToolConfigDto } from './NudgeToolConfigDto';
+import {
+    NudgeToolConfigDtoFromJSON,
+    NudgeToolConfigDtoFromJSONTyped,
+    NudgeToolConfigDtoToJSON,
+    NudgeToolConfigDtoToJSONTyped,
+} from './NudgeToolConfigDto';
 import type { AttributesConfigDto } from './AttributesConfigDto';
 import {
     AttributesConfigDtoFromJSON,
@@ -154,6 +161,12 @@ export interface VerticalConfigFullDto {
      * @memberof VerticalConfigFullDto
      */
     order?: number;
+    /**
+     * Material Design icon name representing the vertical.
+     * @type {string}
+     * @memberof VerticalConfigFullDto
+     */
+    mdiIcon?: string;
     /**
      * Thumbnail image representing the vertical.
      * @type {string}
@@ -329,6 +342,12 @@ export interface VerticalConfigFullDto {
      */
     availableImpactScoreCriterias?: Array<string>;
     /**
+     * Identifiers of composite scores aggregating score attributes for the vertical.
+     * @type {Set<string>}
+     * @memberof VerticalConfigFullDto
+     */
+    aggregatedScores?: Set<string>;
+    /**
      * Impact score configuration balancing each criterion, with localised texts.
      * @type {ImpactScoreConfigDto}
      * @memberof VerticalConfigFullDto
@@ -340,6 +359,12 @@ export interface VerticalConfigFullDto {
      * @memberof VerticalConfigFullDto
      */
     subsets?: Array<VerticalSubsetDto>;
+    /**
+     * Configuration supporting the guided nudge tool for this vertical.
+     * @type {NudgeToolConfigDto}
+     * @memberof VerticalConfigFullDto
+     */
+    nudgeToolConfig?: NudgeToolConfigDto;
     /**
      * Subset dedicated to brand exploration with localised labels.
      * @type {VerticalSubsetDto}
@@ -413,6 +438,7 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
+        'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
         'imageSmall': json['imageSmall'] == null ? undefined : json['imageSmall'],
         'imageMedium': json['imageMedium'] == null ? undefined : json['imageMedium'],
         'imageLarge': json['imageLarge'] == null ? undefined : json['imageLarge'],
@@ -442,8 +468,10 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'attributesConfig': json['attributesConfig'] == null ? undefined : AttributesConfigDtoFromJSON(json['attributesConfig']),
         'popularAttributes': json['popularAttributes'] == null ? undefined : ((json['popularAttributes'] as Array<any>).map(AttributeConfigDtoFromJSON)),
         'availableImpactScoreCriterias': json['availableImpactScoreCriterias'] == null ? undefined : json['availableImpactScoreCriterias'],
+        'aggregatedScores': json['aggregatedScores'] == null ? undefined : new Set(json['aggregatedScores']),
         'impactScoreConfig': json['impactScoreConfig'] == null ? undefined : ImpactScoreConfigDtoFromJSON(json['impactScoreConfig']),
         'subsets': json['subsets'] == null ? undefined : ((json['subsets'] as Array<any>).map(VerticalSubsetDtoFromJSON)),
+        'nudgeToolConfig': json['nudgeToolConfig'] == null ? undefined : NudgeToolConfigDtoFromJSON(json['nudgeToolConfig']),
         'brandsSubset': json['brandsSubset'] == null ? undefined : VerticalSubsetDtoFromJSON(json['brandsSubset']),
         'barcodeConfig': json['barcodeConfig'] == null ? undefined : BarcodeAggregationPropertiesFromJSON(json['barcodeConfig']),
         'recommandationsConfig': json['recommandationsConfig'] == null ? undefined : RecommandationsConfigFromJSON(json['recommandationsConfig']),
@@ -472,6 +500,7 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
+        'mdiIcon': value['mdiIcon'],
         'imageSmall': value['imageSmall'],
         'imageMedium': value['imageMedium'],
         'imageLarge': value['imageLarge'],
@@ -501,8 +530,10 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'attributesConfig': AttributesConfigDtoToJSON(value['attributesConfig']),
         'popularAttributes': value['popularAttributes'] == null ? undefined : ((value['popularAttributes'] as Array<any>).map(AttributeConfigDtoToJSON)),
         'availableImpactScoreCriterias': value['availableImpactScoreCriterias'],
+        'aggregatedScores': value['aggregatedScores'] == null ? undefined : Array.from(value['aggregatedScores'] as Set<any>),
         'impactScoreConfig': ImpactScoreConfigDtoToJSON(value['impactScoreConfig']),
         'subsets': value['subsets'] == null ? undefined : ((value['subsets'] as Array<any>).map(VerticalSubsetDtoToJSON)),
+        'nudgeToolConfig': NudgeToolConfigDtoToJSON(value['nudgeToolConfig']),
         'brandsSubset': VerticalSubsetDtoToJSON(value['brandsSubset']),
         'barcodeConfig': BarcodeAggregationPropertiesToJSON(value['barcodeConfig']),
         'recommandationsConfig': RecommandationsConfigToJSON(value['recommandationsConfig']),
