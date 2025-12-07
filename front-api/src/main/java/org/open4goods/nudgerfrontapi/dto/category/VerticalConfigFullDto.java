@@ -13,6 +13,7 @@ import org.open4goods.model.vertical.ResourcesAggregationConfig;
 import org.open4goods.model.vertical.ScoringAggregationConfig;
 import org.open4goods.model.vertical.WikiPageConfig;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
+import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -98,6 +99,8 @@ public record VerticalConfigFullDto(
         ImpactScoreConfigDto impactScoreConfig,
         @Schema(description = "Custom subsets defined for this vertical with localised labels.")
         List<VerticalSubsetDto> subsets,
+        @Schema(description = "Configuration supporting the guided nudge tool for this vertical.")
+        NudgeToolConfigDto nudgeToolConfig,
         @Schema(description = "Subset dedicated to brand exploration with localised labels.")
         VerticalSubsetDto brandsSubset,
         @Schema(description = "Barcode aggregation configuration.")

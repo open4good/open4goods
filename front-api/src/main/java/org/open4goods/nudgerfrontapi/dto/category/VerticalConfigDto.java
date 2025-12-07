@@ -38,6 +38,8 @@ public record VerticalConfigDto(
         @Schema(description = "Popular attributes resolved to their full configuration metadata.")
         List<AttributeConfigDto> popularAttributes,
         @Schema(description = "Identifiers of composite scores aggregating score attributes for the vertical.")
-        Set<String> aggregatedScores
+        Set<String> aggregatedScores,
+        @Schema(description = "Configuration supporting the guided nudge tool for this vertical.")
+        NudgeToolConfigDto nudgeToolConfig
 ) {
 }
