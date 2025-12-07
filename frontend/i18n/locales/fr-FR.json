@@ -2185,5 +2185,39 @@
       "dismiss": "Fermer"
     }
   },
+  "nudge-tool": {
+    "actions": {
+      "continue": "Continuer",
+      "seeAll": "Voir toutes les recommandations"
+    },
+    "meta": {
+      "matches": "{count} produits correspondent à vos choix"
+    },
+    "steps": {
+      "category": {
+        "title": "Choisissez une catégorie",
+        "subtitle": "Sélectionnez le type de produit à explorer"
+      },
+      "condition": {
+        "title": "État du produit",
+        "subtitle": "Neuf, reconditionné ou les deux ?",
+        "options": {
+          "new": "Neuf",
+          "occasion": "Reconditionné",
+          "any": "Peu importe"
+        }
+      },
+      "scores": {
+        "title": "Priorités écologiques",
+        "subtitle": "Choisissez les thèmes qui comptent pour vous"
+      },
+      "recommendations": {
+        "title": "Nos propositions",
+        "subtitle": "Les meilleurs résultats selon vos filtres",
+        "empty": "Aucun produit ne correspond à ces filtres pour le moment.",
+        "total": "{count} résultats disponibles"
+      }
+    }
+  },
   "welcome": "Bienvenue"
 }

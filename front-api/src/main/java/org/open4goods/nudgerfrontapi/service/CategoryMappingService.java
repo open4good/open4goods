@@ -19,6 +19,7 @@ import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.NudgeToolConfig;
 import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.NudgeToolSubsetGroup;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -34,6 +35,7 @@ import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolScoreDto;
+import org.open4goods.nudgerfrontapi.dto.category.NudgeToolSubsetGroupDto;
 import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
@@ -490,7 +492,9 @@ public class CategoryMappingService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        return new NudgeToolConfigDto(scores, mapVerticalSubsets(nudgeToolConfig.getSubsets(), domainLanguage));
+        return new NudgeToolConfigDto(scores,
+                mapVerticalSubsets(nudgeToolConfig.getSubsets(), domainLanguage),
+                mapNudgeToolSubsetGroups(nudgeToolConfig.getSubsetGroups(), domainLanguage));
     }
 
     private NudgeToolScoreDto mapNudgeToolScore(NudgeToolScore score, DomainLanguage domainLanguage) {
@@ -504,6 +508,27 @@ public class CategoryMappingService {
                 score.getMdiIcon(),
                 localise(score.getTitle(), domainLanguage),
                 localise(score.getDescription(), domainLanguage));
+    }
+
+    private List<NudgeToolSubsetGroupDto> mapNudgeToolSubsetGroups(List<NudgeToolSubsetGroup> subsetGroups,
+            DomainLanguage domainLanguage) {
+        return defaultList(subsetGroups).stream()
+                .map(group -> mapNudgeToolSubsetGroup(group, domainLanguage))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private NudgeToolSubsetGroupDto mapNudgeToolSubsetGroup(NudgeToolSubsetGroup group, DomainLanguage domainLanguage) {
+        if (group == null) {
+            return null;
+        }
+        return new NudgeToolSubsetGroupDto(
+                group.getId(),
+                localise(group.getTitle(), domainLanguage),
+                localise(group.getDescription(), domainLanguage),
+                group.getMdiIcon(),
+                group.getLayout(),
+                localise(group.getCtaLabel(), domainLanguage));
     }
 
 

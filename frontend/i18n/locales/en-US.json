@@ -2184,5 +2184,39 @@
       "dismiss": "Dismiss"
     }
   },
+  "nudge-tool": {
+    "actions": {
+      "continue": "Continue",
+      "seeAll": "See all recommendations"
+    },
+    "meta": {
+      "matches": "{count} products match your choices"
+    },
+    "steps": {
+      "category": {
+        "title": "Choose a category",
+        "subtitle": "Pick the type of product you want to browse"
+      },
+      "condition": {
+        "title": "Product condition",
+        "subtitle": "Prefer new, refurbished, or both?",
+        "options": {
+          "new": "New",
+          "occasion": "Refurbished",
+          "any": "No preference"
+        }
+      },
+      "scores": {
+        "title": "Ecological priorities",
+        "subtitle": "Select the eco topics that matter most"
+      },
+      "recommendations": {
+        "title": "Our picks for you",
+        "subtitle": "Top results based on your filters",
+        "empty": "No products match these filters yet.",
+        "total": "{count} results available"
+      }
+    }
+  },
   "welcome": "Welcome"
 }
