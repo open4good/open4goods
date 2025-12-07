@@ -55,10 +55,7 @@ public class XWikiHtmlService {
 //	}
 
 
-	public String html( String xwikiPath, String language) {
 
-		return getWebPage(xwikiPath, false, language);
-	}
 
 	@Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME, key = "#root.methodName + ':' + #xwikiPath + ':' + #plain + ':' + #language "  )
 	public String htmlWithProxifiedResource( String xwikiPath, Boolean plain, String language) {

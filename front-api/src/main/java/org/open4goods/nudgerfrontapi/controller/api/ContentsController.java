@@ -8,8 +8,8 @@ import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.xwiki.FullPageDto;
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.nudgerfrontapi.service.XwikiFullPageService;
+import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,7 +81,7 @@ public class ContentsController {
 
     	String convertedBlocId = blocId.replace(":", "/");
 
-        String htmlContent = xwikiHtmlService.html(convertedBlocId, domainLanguage.languageTag());
+        String htmlContent = xwikiHtmlService.htmlWithProxifiedResource(convertedBlocId, false, domainLanguage.languageTag());
         String editLink = xwikiHtmlService.getEditPageUrl(convertedBlocId, domainLanguage.languageTag());
         XwikiContentBlocDto body = new XwikiContentBlocDto(convertedBlocId, htmlContent, editLink);
 

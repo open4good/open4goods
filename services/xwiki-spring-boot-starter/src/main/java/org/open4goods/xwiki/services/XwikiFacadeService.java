@@ -20,7 +20,7 @@ import org.springframework.web.util.UriUtils;
 
 /**
  * An Xwiki facade service, which encapsulates xwiki unitary services to deliver
- * high level  wiki content to spring boot web translation
+ * high level wiki content to spring boot web translation
  */
 public class XwikiFacadeService {
 
@@ -38,32 +38,27 @@ public class XwikiFacadeService {
 
 	private XWikiConstantsResourcesPath pathHelper;
 
-
-        public XwikiFacadeService(XwikiMappingService mappingService,
-                        XWikiObjectService objectService,
-                        XWikiHtmlService htmlService,
-                        XWikiReadService readService,
-                        XWikiServiceProperties properties) {
-                this.mappingService = mappingService;
-                this.xWikiObjectService = objectService;
-                this.xWikiHtmlService = htmlService;
-                this.xWikiReadService = readService;
-                this.properties = properties;
-                this.urlHelper = new UrlManagementHelper(properties);
-                this.pathHelper = new XWikiConstantsResourcesPath(properties.getBaseUrl(), properties.getApiEntrypoint(), properties.getApiWiki());
-        }
+	public XwikiFacadeService(XwikiMappingService mappingService, XWikiObjectService objectService, XWikiHtmlService htmlService, XWikiReadService readService, XWikiServiceProperties properties) {
+		this.mappingService = mappingService;
+		this.xWikiObjectService = objectService;
+		this.xWikiHtmlService = htmlService;
+		this.xWikiReadService = readService;
+		this.properties = properties;
+		this.urlHelper = new UrlManagementHelper(properties);
+		this.pathHelper = new XWikiConstantsResourcesPath(properties.getBaseUrl(), properties.getApiEntrypoint(), properties.getApiWiki());
+	}
 
 	// TODO : I18n
 	// @Cacheable(cacheNames = XWikiServiceProperties.SPRING_CACHE_NAME)
-	public FullPage getFullPage (String restPath, String language) {
+	public FullPage getFullPage(String restPath, String language) {
 		FullPage ret = new FullPage();
 
-                String normalizedPath = restPath.replaceAll("\\.|:", "/");
-                String htmlContent = xWikiHtmlService.html(normalizedPath, language);
+		String normalizedPath = restPath.replaceAll("\\.|:", "/");
+		String htmlContent = xWikiHtmlService.htmlWithProxifiedResource(normalizedPath, false, language);
 		// TODO : When xwiki jakarta compliant
 //		String htmlContent = xWikiHtmlService.renderXWiki20SyntaxAsXHTML(wikiPage.getContent());
 
-		Page wikiPage  = xWikiReadService.getPage(restPath);
+		Page wikiPage = xWikiReadService.getPage(restPath);
 		// TODO : Seems useless
 //		Objects objects = mappingService.getPageObjects(wikiPage);
 		Map<String, String> properties = xWikiObjectService.getProperties(wikiPage);
@@ -71,60 +66,48 @@ public class XwikiFacadeService {
 		ret.setHtmlContent(htmlContent);
 		ret.setWikiPage(wikiPage);
 //		ret.setObjects(objects);
-                ret.setProperties(properties);
-                ret.setEditLink(pathHelper.getEditpath(normalizedPath));
-
+		ret.setProperties(properties);
+		ret.setEditLink(pathHelper.getEditpath(normalizedPath));
 
 		return ret;
 	}
 
-
-
-
 	/**
 	 *
-	 * @param url
-	 * TODO : Should provide a streamed version
+	 * @param url TODO : Should provide a streamed version
 	 * @return
 	 */
-	public byte[] downloadAttachment( String space, String page, String attachmentName) {
+	public byte[] downloadAttachment(String space, String page, String attachmentName) {
 		String url = pathHelper.getDownloadAttachlmentUrl(space, page, attachmentName);
 		return mappingService.downloadAttachment(url);
 	}
 
+	public byte[] downloadAttachment(String attachmentPath) {
+		if (attachmentPath.contains("..")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid attachment path");
+		}
+		String encodedPath = UriUtils.encodePath(attachmentPath, StandardCharsets.UTF_8);
+		String url = pathHelper.getDownloadpath() + encodedPath;
+		return mappingService.downloadAttachment(url);
+	}
 
-
-    public byte[] downloadAttachment(String attachmentPath) {
-            if (attachmentPath.contains("..")) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid attachment path");
-            }
-            String encodedPath = UriUtils.encodePath(attachmentPath, StandardCharsets.UTF_8);
-            String url = pathHelper.getDownloadpath() + encodedPath;
-            return mappingService.downloadAttachment(url);
-    }
-
-
-	public String detectMimeType (String filename) {
-        // TODO : ugly, should fetch the meta (mime type is availlable in xwiki service), but does not work for the blog image, special class and not appears in attachments list
+	public String detectMimeType(String filename) {
+		// TODO : ugly, should fetch the meta (mime type is availlable in xwiki
+		// service), but does not work for the blog image, special class and not appears
+		// in attachments list
 		if (filename.endsWith(".pdf")) {
-			return("application/pdf");
+			return ("application/pdf");
 		} else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-			return("image/jpeg");
+			return ("image/jpeg");
 		} else if (filename.endsWith(".png")) {
-			return("image/png");
+			return ("image/png");
 		} else if (filename.endsWith(".gif")) {
-			return("image/gif");
-		}else {
-			LOGGER.error("Unknown mime type mapping in XwikiFacadeService for : {}",filename);
+			return ("image/gif");
+		} else {
+			LOGGER.error("Unknown mime type mapping in XwikiFacadeService for : {}", filename);
 			return "";
 		}
 	}
-
-
-
-
-
-
 
 	// TODO : Remove, or be more exaustiv
 	public Pages getPages(String path) {
@@ -170,10 +153,5 @@ public class XwikiFacadeService {
 	public void setPathHelper(XWikiConstantsResourcesPath pathHelper) {
 		this.pathHelper = pathHelper;
 	}
-
-
-
-
-
 
 }
