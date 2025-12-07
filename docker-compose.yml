@@ -73,7 +73,7 @@ services:
       - o4g-network
 
   frontend-ssr:
-    image: node:22
+    image: node:24
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:
