@@ -168,7 +168,7 @@ class ProductMappingServiceTest {
         when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
         when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
 
-        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,null, "Phones", "Phones description", "phones", List.of(), null);
+        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,null, "Phones", "Phones description", "phones", List.of(), null, null);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(verticalDto);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("scores"), DomainLanguage.en);
@@ -263,7 +263,7 @@ class ProductMappingServiceTest {
         when(repository.getById(gtin)).thenReturn(product);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
-        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1,null, null, null, null, null, null, "telephones-reconditionnes", List.of(), null);
+        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1,null, null, null, null, null, null, "telephones-reconditionnes", List.of(), null, null);
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(verticalConfig);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(configDto);
 
