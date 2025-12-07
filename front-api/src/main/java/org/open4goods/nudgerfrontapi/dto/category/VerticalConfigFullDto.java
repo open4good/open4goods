@@ -32,6 +32,8 @@ public record VerticalConfigFullDto(
         Integer icecatTaxonomyId,
         @Schema(description = "Display order used to render the category list.", example = "1")
         Integer order,
+        @Schema(description = "Material Design icon name representing the vertical.", example = "television")
+        String mdiIcon,
         @Schema(description = "Thumbnail image representing the vertical.")
         String imageSmall,
         @Schema(description = "Medium image for the vertical ")

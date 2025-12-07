@@ -71,20 +71,25 @@ public class VerticalConfig {
 	/** Flag indicating whether this category should be highlighted as popular. */
 	private boolean popular = false;
 
-	/**
-	 * Absolute path to the vertical image (should be hosted on nudger to avoid
-	 * recaching failures). Provide a large one, thumnails will be generated
-	 * automaticaly. MUST be PNG or JPG
-	 */
-	@JsonMerge
-	@NotBlank
-	private String verticalImage;
+        /**
+         * Absolute path to the vertical image (should be hosted on nudger to avoid
+         * recaching failures). Provide a large one, thumnails will be generated
+         * automaticaly. MUST be PNG or JPG
+         */
+        @JsonMerge
+        @NotBlank
+        private String verticalImage;
 
-	/**
-	 * The product url, metas title, description, ....
-	 */
-	@JsonMerge
-	private Map<String, ProductI18nElements> i18n = new HashMap<>();
+        /**
+         * Name of the Material Design Icon representing the vertical.
+         */
+        private String mdiIcon;
+
+        /**
+         * The product url, metas title, description, ....
+         */
+        @JsonMerge
+        private Map<String, ProductI18nElements> i18n = new HashMap<>();
 
 //	@JsonMerge
 //	private GenAiConfig genAiConfig = new GenAiConfig();
@@ -936,13 +941,21 @@ public class VerticalConfig {
 		return verticalImage;
 	}
 
-	public void setVerticalImage(String verticalImage) {
-		this.verticalImage = verticalImage;
-	}
+        public void setVerticalImage(String verticalImage) {
+                this.verticalImage = verticalImage;
+        }
 
-	public Set<String> getCacheTokenNames() {
-		return cacheTokenNames;
-	}
+        public String getMdiIcon() {
+                return mdiIcon;
+        }
+
+        public void setMdiIcon(String mdiIcon) {
+                this.mdiIcon = mdiIcon;
+        }
+
+        public Set<String> getCacheTokenNames() {
+                return cacheTokenNames;
+        }
 
 	public void setCacheTokenNames(Set<String> cacheTokenNames) {
 		this.cacheTokenNames = cacheTokenNames;
