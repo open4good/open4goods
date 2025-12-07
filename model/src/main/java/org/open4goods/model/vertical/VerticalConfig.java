@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -388,15 +389,41 @@ public class VerticalConfig {
 	 * @param scoreName
 	 * @return
 	 */
-	public Double ecoscoreParticipationMaxPointsOf20(String scoreName) {
-		return Double.valueOf(ecoscorePercentOf(scoreName)) / 5;
-	}
+        public Double ecoscoreParticipationMaxPointsOf20(String scoreName) {
+                return Double.valueOf(ecoscorePercentOf(scoreName)) / 5;
+        }
 
-	/**
-	 *
-	 * @return the specific attributes config for this vertical
-	 */
-	public List<AttributeConfig> verticalFilters() {
+        /**
+         * Collects the identifiers of composite scores that aggregate at least one
+         * attribute marked as a score. Aggregations are derived from
+         * {@link AttributeConfig#getParticipateInScores()} and returned as a distinct
+         * set to avoid duplicates when multiple attributes contribute to the same
+         * aggregate.
+         *
+         * @return distinct aggregate score identifiers, or an empty set when no
+         *         score attributes are configured
+         */
+        public Set<String> getAggregatedScores() {
+                if (attributesConfig == null || attributesConfig.getConfigs() == null) {
+                        return Set.of();
+                }
+
+                return attributesConfig.getConfigs().stream()
+                                .filter(AttributeConfig::isAsScore)
+                                .map(AttributeConfig::getParticipateInScores)
+                                .filter(Objects::nonNull)
+                                .flatMap(Collection::stream)
+                                .filter(Objects::nonNull)
+                                .filter(s -> !s.isBlank())
+                                .sorted()
+                                .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+
+        /**
+         *
+         * @return the specific attributes config for this vertical
+         */
+        public List<AttributeConfig> verticalFilters() {
 
 		return getVerticalFilters().stream()
 
