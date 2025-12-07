@@ -17,6 +17,8 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ProductCategory;
+import org.open4goods.model.vertical.NudgeToolConfig;
+import org.open4goods.model.vertical.NudgeToolScore;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -30,6 +32,8 @@ import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
 import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
+import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
+import org.open4goods.nudgerfrontapi.dto.category.NudgeToolScoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
@@ -90,7 +94,8 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalHomeDescription(),
                 i18n == null ? null : i18n.getVerticalHomeUrl(),
                 mapPopularAttributes(verticalConfig, domainLanguage),
-                defaultSet(verticalConfig.getAggregatedScores()));
+                defaultSet(verticalConfig.getAggregatedScores()),
+                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), domainLanguage));
     }
 
     /**
@@ -150,6 +155,7 @@ public class CategoryMappingService {
                 defaultSet(verticalConfig.getAggregatedScores()),
                 mapImpactScoreConfig(verticalConfig.getImpactScoreConfig(), domainLanguage),
                 mapVerticalSubsets(verticalConfig.getSubsets(), domainLanguage),
+                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), domainLanguage),
                 mapVerticalSubset(verticalConfig.getBrandsSubset(), domainLanguage),
                 verticalConfig.getBarcodeConfig(),
                 verticalConfig.getRecommandationsConfig(),
@@ -468,6 +474,36 @@ public class CategoryMappingService {
                 localise(impactScoreConfig.getTexts(), domainLanguage),
                 impactScoreConfig.getYamlPrompt(),
                 impactScoreConfig.getAiJsonResponse());
+    }
+
+
+    /**
+     * Map the nudge tool configuration to its DTO representation.
+     */
+    private NudgeToolConfigDto mapNudgeToolConfig(NudgeToolConfig nudgeToolConfig, DomainLanguage domainLanguage) {
+        if (nudgeToolConfig == null) {
+            return null;
+        }
+
+        List<NudgeToolScoreDto> scores = defaultList(nudgeToolConfig.getScores()).stream()
+                .map(score -> mapNudgeToolScore(score, domainLanguage))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return new NudgeToolConfigDto(scores, mapVerticalSubsets(nudgeToolConfig.getSubsets(), domainLanguage));
+    }
+
+    private NudgeToolScoreDto mapNudgeToolScore(NudgeToolScore score, DomainLanguage domainLanguage) {
+        if (score == null) {
+            return null;
+        }
+
+        return new NudgeToolScoreDto(
+                score.getScoreName(),
+                score.getScoreMinValue(),
+                score.getMdiIcon(),
+                localise(score.getTitle(), domainLanguage),
+                localise(score.getDescription(), domainLanguage));
     }
 
 

@@ -217,15 +217,21 @@ public class VerticalConfig {
 	 */
 	private ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 
-	////////////////////
-	// The subsets for this vertical
-	////////////////////
+        ////////////////////
+        // The subsets for this vertical
+        ////////////////////
 
 	/**
 	 * The vertical custom subsets
 	 */
-	@JsonMerge
-	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
+        @JsonMerge
+        private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
+
+        /**
+         * The nudge tool configuration displayed to guide user selection.
+         */
+        @JsonMerge
+        private NudgeToolConfig nudgeToolConfig = new NudgeToolConfig();
 
 	/**
 	 * The subset dedicated to brands; Technical, no yaml def needed TODO(p2,
@@ -917,12 +923,20 @@ public class VerticalConfig {
 		return subsets;
 	}
 
-	public void setSubsets(List<VerticalSubset> subsets) {
-		this.subsets = subsets;
-	}
+        public void setSubsets(List<VerticalSubset> subsets) {
+                this.subsets = subsets;
+        }
 
-	public VerticalSubset getBrandsSubset() {
-		return brandsSubset;
+        public NudgeToolConfig getNudgeToolConfig() {
+                return nudgeToolConfig;
+        }
+
+        public void setNudgeToolConfig(NudgeToolConfig nudgeToolConfig) {
+                this.nudgeToolConfig = nudgeToolConfig;
+        }
+
+        public VerticalSubset getBrandsSubset() {
+                return brandsSubset;
 	}
 
 	public void setBrandsSubset(VerticalSubset brandsSubset) {
