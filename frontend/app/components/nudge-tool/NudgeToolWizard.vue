@@ -1,6 +1,6 @@
 <template>
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
-    <div class="nudge-wizard__progress" v-if="loading">
+    <div v-if="loading" class="nudge-wizard__progress">
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
@@ -37,6 +37,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import type { Component } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import {
   buildCategoryHash,
@@ -153,13 +154,15 @@ const hashState = computed<CategoryHashState>(() => ({
 
 const canNavigate = computed(() => Boolean(selectedCategory?.value))
 
-const steps = computed(() => {
-  const sequence: Array<{
-    key: string
-    component: any
-    props: Record<string, unknown>
-    onUpdate?: (...args: any[]) => void
-  }> = []
+type WizardStep = {
+  key: string
+  component: Component
+  props: Record<string, unknown>
+  onUpdate?: (value: unknown) => void
+}
+
+const steps = computed<WizardStep[]>(() => {
+  const sequence: WizardStep[] = []
 
   if (!props.initialCategoryId) {
     sequence.push({
