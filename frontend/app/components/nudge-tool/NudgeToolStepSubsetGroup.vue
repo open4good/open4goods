@@ -2,7 +2,7 @@
   <div class="nudge-step-subset">
     <div class="nudge-step-subset__header">
       <div>
-        <div class="nudge-step-subset__eyebrow" v-if="group.mdiIcon || group.title">
+        <div v-if="group.mdiIcon || group.title" class="nudge-step-subset__eyebrow">
           <v-icon v-if="group.mdiIcon" :icon="group.mdiIcon" size="18" class="me-1" />
           <span>{{ group.title }}</span>
         </div>
@@ -30,7 +30,7 @@
           :aria-pressed="modelValue.includes(subset.id ?? '')"
           @click="toggle(subset.id ?? '')"
         >
-          <div class="nudge-step-subset__media" v-if="subset.image">
+          <div v-if="subset.image" class="nudge-step-subset__media">
             <v-img :src="subset.image" height="120" cover />
           </div>
           <div class="nudge-step-subset__body">
