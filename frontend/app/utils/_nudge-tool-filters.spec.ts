@@ -13,8 +13,8 @@ describe('nudge tool filters', () => {
   it('builds condition filters according to the choice', () => {
     const cases: Record<ProductConditionChoice, Filter | null> = {
       any: null,
-      new: { field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] },
-      occasion: { field: 'price.minPrice.productState', operator: 'term', terms: ['OCCASION'] },
+      new: { field: 'price.conditions', operator: 'term', terms: ['NEW'] },
+      occasion: { field: 'price.conditions', operator: 'term', terms: ['OCCASION'] },
     }
 
     Object.entries(cases).forEach(([choice, expected]) => {
