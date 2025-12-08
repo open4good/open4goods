@@ -237,6 +237,31 @@ nudgeToolConfig:
       description:
         en: "Models with a repairability index of 7 or more."
         fr: "Modèles dont l'indice de réparabilité est d'au moins 7."
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "cash"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Pick a price comfort zone."
+        fr: "Choisissez une zone de prix confortable."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+    - id: "screen_size"
+      mdiIcon: "television-classic"
+      layout: "grid"
+      title:
+        en: "Screen size"
+        fr: "Taille d'écran"
+      description:
+        en: "Find the diagonale that fits your space."
+        fr: "Trouvez la diagonale adaptée à votre espace."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
   subsets:
 ################
 # Price

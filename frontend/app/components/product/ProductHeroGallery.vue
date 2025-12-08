@@ -22,21 +22,21 @@
                 v-if="heroMedia.type === 'image'"
                 :src="heroMedia.previewUrl"
                 :alt="heroMedia.alt"
-                class="product-gallery__stage-media"
-                @error="handleImageError"
                 format="webp"
                 :width="heroMedia.width"
                 :height="heroMedia.height"
+                class="product-gallery__stage-media"
+                @error="handleImageError"
               />
               <NuxtImg
                 v-else-if="heroMedia.posterUrl"
                 :src="heroMedia.posterUrl"
                 :alt="heroMedia.alt"
-                class="product-gallery__stage-media"
-                @error="handleImageError"
                 format="webp"
                 :width="heroMedia.width"
                 :height="heroMedia.height"
+                class="product-gallery__stage-media"
+                @error="handleImageError"
               />
               <div v-if="heroMedia.type === 'video'" class="product-gallery__stage-overlay">
                 <v-icon icon="mdi-play-circle-outline" size="56" class="product-gallery__stage-icon" />
@@ -118,11 +118,11 @@
                     <NuxtImg
                       :src="item.thumbnailUrl"
                       :alt="item.alt"
-                      class="product-gallery__thumbnail-image"
-                      @error="handleImageError"
                       format="webp"
                       :width="item.thumbnailWidth"
                       :height="item.thumbnailHeight"
+                      class="product-gallery__thumbnail-image"
+                      @error="handleImageError"
                     />
                     <span
                       v-if="item.type === 'video'"
@@ -161,11 +161,11 @@
           <NuxtImg
             :src="heroFallbackImage"
             :alt="title"
-            class="product-hero__fallback"
-            @error="handleImageError"
             format="webp"
             :width="600"
             :height="600"
+            class="product-hero__fallback"
+            @error="handleImageError"
           />
         </div>
       </template>
@@ -174,11 +174,11 @@
           v-if="heroFallbackImage"
           :src="heroFallbackImage"
           :alt="title"
-          class="product-hero__fallback"
-          @error="handleImageError"
           format="webp"
           :width="600"
           :height="600"
+          class="product-hero__fallback"
+          @error="handleImageError"
         />
       </template>
     </ClientOnly>

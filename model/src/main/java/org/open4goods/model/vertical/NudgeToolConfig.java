@@ -19,6 +19,9 @@ public class NudgeToolConfig {
     @JsonMerge
     private List<VerticalSubset> subsets = new ArrayList<>();
 
+    @JsonMerge
+    private List<NudgeToolSubsetGroup> subsetGroups = new ArrayList<>();
+
     public List<NudgeToolScore> getScores() {
         return scores;
     }
@@ -35,6 +38,14 @@ public class NudgeToolConfig {
         this.subsets = subsets;
     }
 
+    public List<NudgeToolSubsetGroup> getSubsetGroups() {
+        return subsetGroups;
+    }
+
+    public void setSubsetGroups(List<NudgeToolSubsetGroup> subsetGroups) {
+        this.subsetGroups = subsetGroups;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -44,11 +55,12 @@ public class NudgeToolConfig {
             return false;
         }
         NudgeToolConfig that = (NudgeToolConfig) o;
-        return Objects.equals(scores, that.scores) && Objects.equals(subsets, that.subsets);
+        return Objects.equals(scores, that.scores) && Objects.equals(subsets, that.subsets)
+                && Objects.equals(subsetGroups, that.subsetGroups);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(scores, subsets);
+        return Objects.hash(scores, subsets, subsetGroups);
     }
 }
