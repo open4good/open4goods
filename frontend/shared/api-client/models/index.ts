@@ -55,6 +55,7 @@ export * from './LogoutResponse';
 export * from './Member';
 export * from './NudgeToolConfigDto';
 export * from './NudgeToolScoreDto';
+export * from './NudgeToolSubsetGroupDto';
 export * from './OpenDataDatasetDto';
 export * from './OpenDataDownloadLimitsDto';
 export * from './OpenDataOverviewDto';

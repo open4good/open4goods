@@ -27,6 +27,13 @@ import {
     VerticalSubsetDtoToJSON,
     VerticalSubsetDtoToJSONTyped,
 } from './VerticalSubsetDto';
+import type { NudgeToolSubsetGroupDto } from './NudgeToolSubsetGroupDto';
+import {
+    NudgeToolSubsetGroupDtoFromJSON,
+    NudgeToolSubsetGroupDtoFromJSONTyped,
+    NudgeToolSubsetGroupDtoToJSON,
+    NudgeToolSubsetGroupDtoToJSONTyped,
+} from './NudgeToolSubsetGroupDto';
 
 /**
  * 
@@ -46,6 +53,12 @@ export interface NudgeToolConfigDto {
      * @memberof NudgeToolConfigDto
      */
     subsets?: Array<VerticalSubsetDto>;
+    /**
+     * Group metadata to organise subset screens.
+     * @type {Array<NudgeToolSubsetGroupDto>}
+     * @memberof NudgeToolConfigDto
+     */
+    subsetGroups?: Array<NudgeToolSubsetGroupDto>;
 }
 
 /**
@@ -67,6 +80,7 @@ export function NudgeToolConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'scores': json['scores'] == null ? undefined : ((json['scores'] as Array<any>).map(NudgeToolScoreDtoFromJSON)),
         'subsets': json['subsets'] == null ? undefined : ((json['subsets'] as Array<any>).map(VerticalSubsetDtoFromJSON)),
+        'subsetGroups': json['subsetGroups'] == null ? undefined : ((json['subsetGroups'] as Array<any>).map(NudgeToolSubsetGroupDtoFromJSON)),
     };
 }
 
@@ -83,6 +97,7 @@ export function NudgeToolConfigDtoToJSONTyped(value?: NudgeToolConfigDto | null,
         
         'scores': value['scores'] == null ? undefined : ((value['scores'] as Array<any>).map(NudgeToolScoreDtoToJSON)),
         'subsets': value['subsets'] == null ? undefined : ((value['subsets'] as Array<any>).map(VerticalSubsetDtoToJSON)),
+        'subsetGroups': value['subsetGroups'] == null ? undefined : ((value['subsetGroups'] as Array<any>).map(NudgeToolSubsetGroupDtoToJSON)),
     };
 }
 
