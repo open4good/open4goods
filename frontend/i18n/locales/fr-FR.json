@@ -474,7 +474,12 @@
     "hero": {
       "breadcrumbAriaLabel": "Fil d'Ariane des catégories",
       "breadcrumbDivider": "/",
-      "missingBreadcrumbTitle": "Catégorie"
+      "missingBreadcrumbTitle": "Catégorie",
+      "nudge": {
+        "cta": "Trouver les bons produits",
+        "subtitle": "Passez directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
+        "eyebrow": "Assistant intelligent"
+      }
     },
     "products": {
       "compare": {
@@ -2046,6 +2051,11 @@
           "description": "Naviguez dans l'ensemble de notre taxonomie produits.",
           "empty": "Aucune catégorie n'est disponible pour le moment.",
           "showMore": "Voir plus..."
+        },
+        "nudge": {
+          "title": "Envie d'un raccourci ?",
+          "description": "Répondez à quelques questions pour pré-filtrer cette catégorie automatiquement.",
+          "button": "Lancer l'outil Nudge"
         },
         "cta": {
           "label": "Explorer toutes nos catégories"

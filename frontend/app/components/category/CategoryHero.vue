@@ -32,6 +32,10 @@
           <p v-if="description" class="category-hero__description">
             {{ description }}
           </p>
+
+          <div v-if="$slots.actions" class="category-hero__actions">
+            <slot name="actions" />
+          </div>
         </div>
       </div>
     </v-sheet>
@@ -172,6 +176,12 @@ defineExpose({ headingId, t })
     font-size: 1.05rem
     line-height: 1.6
     color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+  &__actions
+    display: flex
+    flex-wrap: wrap
+    gap: 0.75rem
+    align-items: center
 
   &__media
     position: relative
