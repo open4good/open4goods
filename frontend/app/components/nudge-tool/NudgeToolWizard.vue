@@ -256,7 +256,7 @@ const fetchRecommendations = async () => {
         verticalId: selectedCategoryId.value,
         pageNumber: 0,
         pageSize: 3,
-        sort: { sorts: [{ field: 'impactScore.global', order: 'desc' }] },
+        sort: { sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }] },
         filters: filterRequest.value.filters?.length ? filterRequest.value : undefined,
       },
     })
