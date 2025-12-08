@@ -219,24 +219,43 @@ i18n:
 
 nudgeToolConfig:
   scores:
-    - scoreName: "IMPACT_SCORE"
-      scoreMinValue: 70
+    - scoreName: "ENERGY_CONSUMPTION"
+      scoreMinValue: 3
       mdiIcon: "leaf"
       title:
-        en: "Great eco score"
-        fr: "Excellent score éco"
+        en: "Low energy consumption"
+        fr: "Consommation énergétique"
       description:
-        en: "Televisions with an eco score of 70 or above."
-        fr: "Téléviseurs avec un score écologique supérieur ou égal à 70."
-    - scoreName: "REPAIRABILITY_INDEX"
-      scoreMinValue: 7
+        en: "Televisions with a low energy consumption"
+        fr: "Téléviseurs avec une faible consommation énergétique"
+    - scoreName: "DURABILITY"
+      scoreMinValue: 3
+      mdiIcon: "leaf"
+      title:
+        en: "Great durability"
+        fr: "Bonne durabilité"
+      description:
+        en: "Televisions with a good durability"
+        fr: "Téléviseurs avec une bonne durabilité"
+                
+    - scoreName: "REPARABILITY"
+      scoreMinValue: 3
+      mdiIcon: "leaf"
+      title:
+        en: "Great reparability"
+        fr: "Bonne réparabilité"
+      description:
+        en: "Televisions with a good reparability"
+        fr: "Téléviseurs avec une bonne réparabilité"
+    - scoreName: "BRAND_SUSTAINABILITY"
+      scoreMinValue: 3
       mdiIcon: "wrench"
       title:
-        en: "Repairable choices"
-        fr: "Choix réparables"
+        en: "ESG criterias"
+        fr: "Critères ESG"
       description:
-        en: "Models with a repairability index of 7 or more."
-        fr: "Modèles dont l'indice de réparabilité est d'au moins 7."
+        en: "Models with a brand having good ESG rating"
+        fr: "Modèles dont la marque dispose d'un bon indice ESG"
   subsetGroups:
     - id: "price"
       mdiIcon: "cash"
@@ -246,7 +265,7 @@ nudgeToolConfig:
         fr: "Budget"
       description:
         en: "Pick a price comfort zone."
-        fr: "Choisissez une zone de prix confortable."
+        fr: "Votre budget"
       ctaLabel:
         en: "Continue"
         fr: "Continuer"
@@ -397,6 +416,18 @@ nudgeToolConfig:
      description:
        en: "TVs with a screen size greater than 55 inches."
        fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
+
+
+
+
+
+
+
+
+
+
+
+
 
 subsets:
 ################
