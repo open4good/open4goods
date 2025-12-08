@@ -341,21 +341,6 @@ const NuxtLinkStub = defineComponent({
   },
 })
 
-const HomeCategoryCarouselStub = defineComponent({
-  name: 'HomeCategoryCarouselStub',
-  props: {
-    items: { type: Array, default: () => [] },
-  },
-  setup(props) {
-    return () =>
-      h(
-        'div',
-        { class: 'home-category-carousel-stub' },
-        (props.items as Array<{ title?: string }>).map((item) => item.title).join('|'),
-      )
-  },
-})
-
 const HomeBlogCarouselStub = defineComponent({
   name: 'HomeBlogCarouselStub',
   props: {
@@ -404,7 +389,6 @@ const mountHomePage = async () => {
         VExpansionPanelTitle: simpleStub('div'),
         VExpansionPanelText: simpleStub('div'),
         NuxtLink: NuxtLinkStub,
-        HomeCategoryCarousel: HomeCategoryCarouselStub,
         HomeBlogCarousel: HomeBlogCarouselStub,
         TextContent: TextContentStub,
       },

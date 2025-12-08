@@ -1,19 +1,10 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 import { useDisplay } from 'vuetify'
-import HomeCategoryCarousel from '~/components/home/HomeCategoryCarousel.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
-
-type CategoryCarouselItem = {
-  id: string
-  title: string
-  href: string
-  image?: string | null
-  impactScoreHref: string
-}
 
 type HeroHelperItem = {
   icon: string
@@ -25,8 +16,6 @@ const props = defineProps<{
   minSuggestionQueryLength: number
   heroVideoSrc: string
   heroVideoPoster: string
-  categoryItems: CategoryCarouselItem[]
-  categoriesLoading: boolean
 }>()
 
 const emit = defineEmits<{
@@ -40,8 +29,7 @@ const { t, tm } = useI18n()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
-const { minSuggestionQueryLength, heroVideoSrc, heroVideoPoster, categoryItems, categoriesLoading } =
-  toRefs(props)
+const { minSuggestionQueryLength, heroVideoSrc, heroVideoPoster } = toRefs(props)
 
 const display = useDisplay()
 
@@ -195,26 +183,14 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       </div>
     </v-container>
 
-    <div class="home-hero__categories" :aria-label="t('home.categories.bannerAriaLabel')">
-      <v-container fluid class="home-hero__categories-container">
-        <div class="home-hero__categories-inner">
-          <HomeCategoryCarousel :items="categoryItems" :loading="categoriesLoading" />
-        </div>
-      </v-container>
-    </div>
   </HeroSurface>
 </template>
 
 <style scoped lang="sass">
 .home-hero
-  --hero-cat-h: var(--cat-height, 168px)
-  --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
-  --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
-  --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
-  --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
   min-height: clamp(560px, 75dvh, 880px)
   padding-block-start: clamp(3rem, 8vw, 5.5rem)
-  padding-block-end: calc(clamp(3.5rem, 10vw, 6rem) + var(--hero-cat-in-hero))
+  padding-block-end: clamp(3.5rem, 10vw, 6rem)
 
 .home-hero__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
@@ -333,66 +309,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   white-space: nowrap
   border: 0
 
-.home-hero__categories
-  position: absolute
-  inset-inline: 0
-  bottom: calc(-1 * var(--hero-cat-overlap))
-  display: flex
-  justify-content: center
-  z-index: 4
-  pointer-events: none
-
-.home-hero__categories-container
-  width: 100%
-
-.home-hero__categories-inner
-  position: relative
-  width: min(100%, 1200px)
-  margin-inline: auto
-  padding: clamp(0.4rem, 1.5vw, 0.8rem) clamp(0.75rem, 3vw, 1.5rem)
-  border-radius: clamp(1.5rem, 4vw, 2rem)
-  background: linear-gradient(
-    180deg,
-    rgba(var(--v-theme-hero-gradient-start), 0.2) 0%,
-    rgba(var(--v-theme-surface-default), 0.96) 60%,
-    rgb(var(--v-theme-surface-muted)) 100%
-  )
-  box-shadow: 0 22px 38px rgba(var(--v-theme-shadow-primary-600), 0.16)
-  display: flex
-  align-items: center
-  justify-content: center
-  pointer-events: auto
-  height: var(--hero-cat-h)
-
-.home-hero__categories-inner :deep(.home-category-carousel)
-  height: 100%
-  display: flex
-
-.home-hero__categories-inner::before
-  content: ''
-  position: absolute
-  inset: 0
-  border-radius: inherit
-  background: linear-gradient(
-    120deg,
-    rgba(var(--v-theme-hero-gradient-start), 0.1) 0%,
-    rgba(var(--v-theme-hero-gradient-end), 0.12) 45%,
-    rgba(var(--v-theme-surface-default), 0) 100%
-  )
-  pointer-events: none
-  mix-blend-mode: screen
-
-.home-hero__categories-inner > *
-  position: relative
-  z-index: 1
-
 @media (max-width: 959px)
   .home-hero
     min-height: clamp(520px, 72dvh, 760px)
     padding-block-start: clamp(2.5rem, 12vw, 4.5rem)
-    padding-block-end: calc(clamp(3.5rem, 16vw, 5.5rem) + var(--hero-cat-in-hero))
-    --hero-cat-h: var(--cat-height, 168px)
-    --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
+    padding-block-end: clamp(3.5rem, 16vw, 5.5rem)
 
   .home-hero__media
     order: 1
