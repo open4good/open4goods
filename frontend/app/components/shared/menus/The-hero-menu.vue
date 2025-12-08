@@ -143,6 +143,23 @@
                     </div>
 
                     <p v-else class="products-menu__empty">{{ item.copy.sections.popularEmpty }}</p>
+
+                    <div class="products-menu__nudge">
+                      <div class="products-menu__nudge-copy">
+                        <p class="products-menu__nudge-title">{{ item.copy.nudgeCtaTitle }}</p>
+                        <p class="products-menu__nudge-description">{{ item.copy.nudgeCtaDescription }}</p>
+                      </div>
+                      <v-btn
+                        color="primary"
+                        variant="flat"
+                        prepend-icon="mdi-robot-love"
+                        size="small"
+                        class="products-menu__nudge-button"
+                        @click.stop="isNudgeWizardOpen = true"
+                      >
+                        {{ item.copy.nudgeCtaButton }}
+                      </v-btn>
+                    </div>
                   </v-col>
 
                   <v-col cols="12" sm="5" class="products-menu__section">
@@ -386,6 +403,15 @@
     </div>
   </menu>
 
+  <v-dialog
+    v-model="isNudgeWizardOpen"
+    max-width="980"
+    scrollable
+    transition="dialog-bottom-transition"
+  >
+    <NudgeToolWizard @navigate="isNudgeWizardOpen = false" />
+  </v-dialog>
+
   <!-- Mobile menu command -->
   <div class="d-flex justify-end d-md-none">
     <v-btn icon aria-label="Ouvrir le menu" @click="$emit('toggle-drawer')">
@@ -407,6 +433,11 @@ import { MIN_SEARCH_QUERY_LENGTH, useMenuSearchControls } from '~/composables/me
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
+  suspensible: false,
+})
+
+const NudgeToolWizard = defineAsyncComponent({
+  loader: () => import('~/components/nudge-tool/NudgeToolWizard.vue'),
   suspensible: false,
 })
 
@@ -507,6 +538,7 @@ const resolveFetch = (): FetchLike | undefined => {
   return undefined
 }
 
+const isNudgeWizardOpen = ref(false)
 const isAccountMenuOpen = ref(false)
 const isClearingCache = ref(false)
 
@@ -592,6 +624,9 @@ interface ProductsMenuTexts {
     taxonomyShowMore: string
   }
   ctaLabel: string
+  nudgeCtaTitle: string
+  nudgeCtaDescription: string
+  nudgeCtaButton: string
 }
 
 const productsMenuTexts = computed(() => ({
@@ -608,6 +643,9 @@ const productsMenuTexts = computed(() => ({
     taxonomyShowMore: String(t('siteIdentity.menu.productsMenu.taxonomy.showMore')),
   },
   ctaLabel: String(t('siteIdentity.menu.productsMenu.cta.label')),
+  nudgeCtaTitle: String(t('siteIdentity.menu.productsMenu.nudge.title')),
+  nudgeCtaDescription: String(t('siteIdentity.menu.productsMenu.nudge.description')),
+  nudgeCtaButton: String(t('siteIdentity.menu.productsMenu.nudge.button')),
 }))
 
 interface ProductsMenuPopularCategory {
@@ -1216,6 +1254,37 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     margin: 0
     font-size: 0.9rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__nudge
+    margin-top: 0.75rem
+    padding: 0.85rem
+    border-radius: 1rem
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18)
+    background: rgba(var(--v-theme-surface-primary-080), 0.65)
+    display: flex
+    flex-direction: column
+    gap: 0.5rem
+
+  &__nudge-copy
+    display: flex
+    flex-direction: column
+    gap: 0.25rem
+
+  &__nudge-title
+    margin: 0
+    font-weight: 700
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__nudge-description
+    margin: 0
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    font-size: 0.95rem
+    line-height: 1.45
+
+  &__nudge-button
+    align-self: flex-start
+    box-shadow: 0 10px 24px rgba(var(--v-theme-shadow-primary-600), 0.16)
+    text-transform: none
 
   &__cta-wrapper
     display: flex

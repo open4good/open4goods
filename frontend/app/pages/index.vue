@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import type { BlogPostDto, VerticalConfigDto } from '~~/shared/api-client'
+import type { BlogPostDto } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
@@ -30,18 +30,10 @@ const MIN_SUGGESTION_QUERY_LENGTH = 2
 const heroVideoSrc = useState<string>('home-hero-video-src', () => '/videos/video-concept1.mp4')
 const heroVideoPoster = '/images/home/hero-placeholder.svg'
 
-type CategoryCarouselItem = {
-  id: string
-  title: string
-  href: string
-  image?: string | null
-  impactScoreHref: string
-}
-
 type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
 type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
 
-const { categories: rawCategories, fetchCategories, loading: categoriesLoading } = useCategories()
+const { categories: rawCategories, fetchCategories } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
@@ -275,7 +267,6 @@ const websiteJsonLd = computed(() => ({
   sameAs: localizedHomeUrls.value,
 }))
 
-const searchLandingUrl = computed(() => localePath({ name: 'search' }))
 const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
 
 const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
@@ -295,102 +286,6 @@ const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null
 
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
 }
-
-const resolveCategoryHref = (category: VerticalConfigDto) => {
-  const normalizedUrl = normalizeVerticalHomeUrl(category.verticalHomeUrl)
-
-  if (normalizedUrl) {
-    return normalizedUrl
-  }
-
-  const normalizedTitle = category.verticalHomeTitle?.trim()
-
-  if (normalizedTitle) {
-    return localePath({ name: 'search', query: { q: normalizedTitle } })
-  }
-
-  return searchLandingUrl.value
-}
-
-const resolveCategoryImage = (category: VerticalConfigDto) => {
-  const candidates = [
-    category.imageLarge,
-    category.imageMedium,
-    category.imageSmall,
-  ]
-
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string') {
-      const trimmed = candidate.trim()
-      if (trimmed.length > 0) {
-        return trimmed
-      }
-    }
-  }
-
-  return null
-}
-
-const resolveImpactScoreHref = (href: string) => {
-  const trimmed = href?.trim?.() ?? ''
-
-  if (!trimmed) {
-    return ''
-  }
-
-  if (trimmed.includes('?')) {
-    return ''
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    try {
-      const url = new URL(trimmed)
-      url.pathname = `${url.pathname.replace(/\/?$/, '')}/ecoscore`
-      return url.toString()
-    } catch {
-      return ''
-    }
-  }
-
-  const normalized = trimmed.replace(/\/?$/, '')
-  return `${normalized}/ecoscore`
-}
-
-const categoryCarouselItems = computed<CategoryCarouselItem[]>(() => {
-  const categories = [...rawCategories.value]
-    .filter((category) => category.enabled !== false)
-    .sort((a, b) => {
-      if (a.popular !== b.popular) {
-        return (b.popular ? 1 : 0) - (a.popular ? 1 : 0)
-      }
-
-      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
-      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
-
-      if (orderA !== orderB) {
-        return orderA - orderB
-      }
-
-      return (a.verticalHomeTitle ?? '').localeCompare(b.verticalHomeTitle ?? '')
-    })
-
-  if (categories.length === 0) {
-    return []
-  }
-
-  return categories.map((category, index) => {
-    const title = category.verticalHomeTitle?.trim() || String(t('home.categories.fallbackTitle'))
-    const href = resolveCategoryHref(category)
-
-    return {
-      id: category.id ?? category.verticalHomeUrl ?? `${title}-${index}`,
-      title,
-      href,
-      image: resolveCategoryImage(category),
-      impactScoreHref: resolveImpactScoreHref(href),
-    }
-  })
-})
 
 const blogDateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }),
@@ -613,8 +508,6 @@ useHead(() => ({
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       :hero-video-src="heroVideoSrc"
       :hero-video-poster="heroVideoPoster"
-      :category-items="categoryCarouselItems"
-      :categories-loading="categoriesLoading"
       @submit="handleSearchSubmit"
       @select-category="handleCategorySuggestion"
       @select-product="handleProductSuggestion"

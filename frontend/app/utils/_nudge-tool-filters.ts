@@ -4,7 +4,7 @@ import { mergeFiltersWithoutDuplicates } from './_subset-to-filters'
 
 export type ProductConditionChoice = 'new' | 'occasion' | 'any'
 
-const PRODUCT_STATE_FIELD = 'price.minPrice.productState'
+const PRODUCT_STATE_FIELD = 'price.conditions'
 
 export const buildConditionFilter = (choice: ProductConditionChoice): Filter | null => {
   if (choice === 'any') {

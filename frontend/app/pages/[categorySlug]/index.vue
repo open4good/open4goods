@@ -7,7 +7,45 @@
       :image="heroImage"
       :breadcrumbs="category.breadCrumb ?? []"
       :eyebrow="category.verticalMetaTitle"
-    />
+    >
+      <template #actions>
+        <div class="category-page__hero-actions">
+          <div class="category-page__hero-copy">
+            <p class="category-page__hero-eyebrow">
+              {{ $t('category.hero.nudge.eyebrow') }}
+            </p>
+            <p class="category-page__hero-helper">
+              {{ $t('category.hero.nudge.subtitle') }}
+            </p>
+          </div>
+          <v-btn
+            color="primary"
+            variant="flat"
+            prepend-icon="mdi-robot-love"
+            class="category-page__hero-cta"
+            @click="isNudgeWizardOpen = true"
+          >
+            {{ $t('category.hero.nudge.cta') }}
+          </v-btn>
+        </div>
+      </template>
+    </CategoryHero>
+
+    <v-dialog
+      v-model="isNudgeWizardOpen"
+      scrollable
+      max-width="980"
+      transition="dialog-bottom-transition"
+    >
+      <NudgeToolWizard
+        v-if="category"
+        :initial-category-id="category.id"
+        :initial-filters="manualFilters"
+        :initial-subsets="activeSubsetIds"
+        :verticals="[category]"
+        @navigate="handleNudgeNavigate"
+      />
+    </v-dialog>
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
       <div
@@ -365,6 +403,7 @@ import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
+import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import { CATEGORY_DEFAULT_VIEW_MODE, CATEGORY_PAGE_SIZES } from '~/constants/category'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
@@ -926,6 +965,7 @@ const sortField = ref<string | null>(null)
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const activeSubsetIds = ref<string[]>([])
 const manualFilters = ref<FilterRequestDto>({})
+const isNudgeWizardOpen = ref(false)
 const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
 const lastAppliedDefaultSort = ref<string | null>(null)
@@ -1866,6 +1906,10 @@ const applyMobileFilters = () => {
   filtersDrawer.value = false
 }
 
+const handleNudgeNavigate = () => {
+  isNudgeWizardOpen.value = false
+}
+
 const clearAllFilters = () => {
   manualFilters.value = {}
   activeSubsetIds.value = []
@@ -1884,6 +1928,34 @@ const clearAllFilters = () => {
 
   &__container
     max-width: 1560px
+
+  &__hero-actions
+    display: inline-flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 0.75rem
+
+  &__hero-copy
+    display: flex
+    flex-direction: column
+    gap: 0.25rem
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+
+  &__hero-eyebrow
+    margin: 0
+    font-size: 0.85rem
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    color: rgba(var(--v-theme-accent-supporting), 0.9)
+
+  &__hero-helper
+    margin: 0
+    font-size: 0.95rem
+    max-width: 36ch
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+  &__hero-cta
+    box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.18)
 
   &__toolbar
     display: flex

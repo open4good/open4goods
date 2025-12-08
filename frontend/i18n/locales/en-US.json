@@ -474,7 +474,12 @@
     "hero": {
       "breadcrumbAriaLabel": "Category navigation breadcrumb",
       "breadcrumbDivider": "/",
-      "missingBreadcrumbTitle": "Category"
+      "missingBreadcrumbTitle": "Category",
+      "nudge": {
+        "cta": "Get tailored picks",
+        "subtitle": "Skip straight to the best matches for this category with a guided setup.",
+        "eyebrow": "Smart assistant"
+      }
     },
     "products": {
       "compare": {
@@ -2047,6 +2052,11 @@
           "description": "Navigate across the entire Nudger taxonomy.",
           "empty": "No categories are available right now.",
           "showMore": "Show more..."
+        },
+        "nudge": {
+          "title": "Need a shortcut?",
+          "description": "Answer a few questions and we will pre-filter this category for you.",
+          "button": "Launch the Nudge tool"
         },
         "cta": {
           "label": "Browse every category"
