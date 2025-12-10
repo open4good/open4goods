@@ -148,14 +148,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
           </v-col>
 
           <v-col cols="12" lg="6" class="home-hero__wizard">
-            <v-sheet rounded="xl" elevation="8" class="home-hero__wizard-sheet">
-              <div class="home-hero__wizard-header">
-                <p class="home-hero__nudge-eyebrow">{{ t('home.nudgeTool.eyebrow') }}</p>
-                <h2 class="home-hero__nudge-title">{{ t('home.nudgeTool.title') }}</h2>
-                <p class="home-hero__nudge-subtitle">{{ t('home.nudgeTool.subtitle') }}</p>
-              </div>
-              <NudgeToolWizard :verticals="wizardVerticals" />
-            </v-sheet>
+            <NudgeToolWizard :verticals="wizardVerticals" />
           </v-col>
         </v-row>
       </div>
@@ -244,43 +237,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero__wizard
   display: flex
   align-items: stretch
-
-.home-hero__wizard-sheet
-  width: 100%
-  display: flex
-  flex-direction: column
-  gap: 1.5rem
-  padding: clamp(1rem, 2.8vw, 1.5rem)
-  background: rgba(var(--v-theme-surface-glass-strong), 0.96)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6)
-
-.home-hero__wizard-header
-  display: flex
-  flex-direction: column
-  gap: 0.4rem
-
-.home-hero__nudge-eyebrow
-  display: inline-flex
-  align-items: center
-  gap: 8px
-  margin: 0
-  padding: 6px 12px
-  font-weight: 700
-  color: rgb(var(--v-theme-text-on-accent))
-  background: linear-gradient(90deg, rgba(var(--v-theme-hero-gradient-start), 0.9), rgba(var(--v-theme-hero-gradient-end), 0.95))
-  border-radius: 999px
-  width: fit-content
-
-.home-hero__nudge-title
-  margin: 0
-  font-size: clamp(1.5rem, 2.4vw, 1.85rem)
-  color: rgb(var(--v-theme-text-neutral-strong))
-  font-weight: 800
-
-.home-hero__nudge-subtitle
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
-  font-size: clamp(1rem, 1.4vw, 1.05rem)
 
 @media (max-width: 959px)
   .home-hero

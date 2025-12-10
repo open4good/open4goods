@@ -67,11 +67,6 @@
         ]
       }
     },
-    "nudgeTool": {
-      "eyebrow": "Personalised guidance",
-      "title": "Try the Nudge tool",
-      "subtitle": "Answer a few quick questions to jump straight to responsible products."
-    },
     "problems": {
       "title": "Too many labels, not enough clarity?",
       "description": "Comparing impact, price and trust sources across dozens of tabs is exhausting. Nudger brings it back to one place.",

@@ -187,7 +187,7 @@ const hashState = computed<CategoryHashState>(() => ({
 const defaultStepIcons = {
   category: 'mdi-shape-outline',
   scores: 'mdi-star-check-outline',
-  condition: 'mdi-tune-vertical',
+  condition: 'mdi-recycle-variant',
   subset: 'mdi-tune-variant',
   recommendations: 'mdi-lightbulb-on-outline',
 }
@@ -312,7 +312,11 @@ const goToPrevious = () => {
   const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
   const previousStep = steps.value[index - 1]
   if (previousStep) {
-    activeStepKey.value = previousStep.key
+    if (previousStep.key === 'category') {
+      resetForCategorySelection()
+    } else {
+      activeStepKey.value = previousStep.key
+    }
   }
 }
 
@@ -438,13 +442,30 @@ const stepperItems = computed(() =>
   })),
 )
 
-const showStepper = computed(() => Boolean(selectedCategoryId.value))
+const showStepper = computed(
+  () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value),
+)
 
 const onStepClick = (value: string | number) => {
   const targetKey = String(value)
+  if (targetKey === 'category') {
+    resetForCategorySelection()
+    return
+  }
+
   if (steps.value.some((step) => step.key === targetKey)) {
     activeStepKey.value = targetKey
   }
+}
+
+const resetForCategorySelection = () => {
+  selectedCategoryId.value = null
+  selectedScores.value = []
+  activeSubsetIds.value = []
+  condition.value = 'any'
+  recommendations.value = []
+  totalMatches.value = 0
+  activeStepKey.value = 'category'
 }
 
 onMounted(async () => {
