@@ -119,7 +119,7 @@
         },
         "openIndependent": {
           "title": "Ouvert & indépendant",
-          "description": "Open source, open data, aucune influence de marque."
+          "description": "Open Source, open data, aucune influence de marque."
         },
         "noTracking": {
           "title": "Zéro tracking",
@@ -845,15 +845,15 @@
           "title": "Analyser nos données ouvertes"
         },
         "opensource": {
-          "ariaLabel": "Aller vers la page open source de Nudger",
-          "cta": "Voir la page open source",
+          "ariaLabel": "Aller vers la page Open Source de Nudger",
+          "cta": "Voir la page Open Source",
           "description": "Parcourez nos dépôts, suivez les pull requests en cours et soumettez vos propres contributions.",
           "title": "Contribuer sur GitHub"
         }
       },
       "description": "Nous publions notre feuille de route, notre code et nos jeux de données pour que chacun puisse auditer, réutiliser ou contribuer à Nudger.",
       "eyebrow": "Collaboration ouverte",
-      "title": "Explorez nos communs open source et open data"
+      "title": "Explorez nos communs Open Source et open data"
     },
     "seo": {
       "description": "Partagez vos idées, signalez les bugs et votez pour les prochaines évolutions de Nudger.",
@@ -951,7 +951,7 @@
             "ariaLabel": "Ouvrir la page open data GTIN",
             "label": "Voir le dataset GTIN"
           },
-          "description": "Tous les produits référencés sur Nudger avec marque, modèle, prix, catégories...",
+          "description": "Tous les produits référencés sur Nudger avec marque, modèle, prix, catégories, ...",
           "features": {
             "coverage": "Codes barres EAN13, UPC, GTIN et préfixes GS1",
             "refresh": "Mise à jour chaque semaine",
@@ -988,7 +988,7 @@
               "ariaLabel": "Lancer le téléchargement direct depuis Nudger",
               "label": "Télécharger depuis nudger.fr"
             },
-            "description": "Récupérez le fichier ZIP directement sur l'infrastructure Nudger.",
+            "description": "Récupérez le fichier ZIP directement sur l'infrastructure de Nudger.",
             "speed": "Débit limité à {value} par client",
             "speedUnknown": "Débit limité par client",
             "title": "Téléchargement direct depuis Nudger"
@@ -1002,7 +1002,7 @@
             },
             "description": "Téléchargement via le portail open data officiel de l'État français.",
             "speed": "Infrastructure haut débit",
-            "title": "Miroir rapide (data.gouv.fr)"
+            "title": "Téléchargement depuis data.gouv.fr"
           }
         },
         "placeholder": "—",
@@ -1019,7 +1019,7 @@
             "label": "brand"
           },
           "categories": {
-            "description": "Catégories agrégées par Nudger (séparées par |).",
+            "description": "Catégories du produit.",
             "label": "categories"
           },
           "currency": {
@@ -1059,47 +1059,47 @@
             "label": "name"
           },
           "offers_count": {
-            "description": "Nombre d'offres commerciales suivies pour le produit.",
+            "description": "Nombre d'offres commerciales disponibles pour le produit.",
             "label": "offers_count"
           },
           "url": {
-            "description": "URL de fiche produit lorsque des offres sont disponibles.",
+            "description": "URL de la fiche produit lorsque des offres sont disponibles.",
             "label": "url"
           }
         },
-        "columnsSubtitle": "Chaque ligne correspond à un identifiant produit enrichi par Nudger.",
-        "columnsTitle": "Colonnes présentes dans le dataset GTIN",
+        "columnsSubtitle": "Chaque ligne correspond à un produit unique, identifié par son code-barre.",
+        "columnsTitle": "Colonnes présentes dans le fichier GTIN",
         "download": {
           "fast": {
             "highlight": "Pensé pour la distribution, l'économie circulaire et les usages grand public"
           },
-          "subtitle": "Choisissez le miroir adapté à votre bande passante et à vos automatisations.",
+          "subtitle": "Choisissez le site adapté à votre bande passante.",
           "title": "Options de téléchargement"
         },
         "faq": {
           "items": {
             "differenceEan": {
-              "answer": "<p><strong>L’EAN (European Article Number)</strong> était autrefois l'identifiant standard utilisé en Europe pour marquer les produits. Aujourd'hui, le terme GTIN a remplacé l’EAN afin de standardiser les codes de produit à l'échelle mondiale. L'EAN-13 est désormais un GTIN-13. En pratique, la transition de l'EAN au GTIN est surtout une question de nomenclature, et la structure du code reste la même. Le GTIN englobe également d'autres identifiants comme le UPC (Universal Product Code) utilisé en Amérique du Nord.</p>",
+              "answer": "<p><strong>L’EAN (European Article Number)</strong> était autrefois l'identifiant standard utilisé en Europe pour marquer les produits. Aujourd'hui, le terme GTIN a remplacé l’EAN afin de standardiser les codes de produit à l'échelle mondiale. L'EAN-13 est désormais un GTIN-13. <br/>En pratique, la transition de l'EAN au GTIN est surtout une question de nomenclature, et la structure du code reste la même. Le GTIN englobe également d'autres identifiants comme l'UPC (Universal Product Code) utilisé en Amérique du Nord.</p>",
               "question": "Quelle est la différence entre GTIN et EAN ?"
             },
+            "formats": {
+              "answer": "<p><strong>Les principaux formats de GTIN</strong> sont :<ul> <li> <strong>GTIN-12</strong> : couramment utilisé aux États-Unis et au Canada sous le nom de code UPC</li> <li><strong>GTIN-13</strong> : le plus courant en Europe</li><li><strong>GTIN-14</strong> : utilisé pour les unités logistiques , comme des cartons ou des palettes, plutôt que pour des articles à l’unité</li></ul> Ces différents formats permettent de répondre aux besoins spécifiques de chaque région et de chaque chaîne d'approvisionnement. <br/></p>",
+              "question": "Quels sont les différents formats de GTIN ?"
+            },
             "differenceUpc": {
-              "answer": "<p><strong>L'UPC (Universal Product Code)</strong> est une forme de GTIN-12, utilisé principalement en Amérique du Nord. La différence entre GTIN et UPC réside surtout dans leur utilisation régionale : le GTIN est un terme plus global, tandis que l’UPC se réfère à un code spécifique utilisé dans un contexte nord-américain. Toutefois, les deux systèmes sont interopérables, et dans le cadre de la norme GTIN, l’UPC est reconnu comme une sous-catégorie.</p>",
+              "answer": "<p><strong>L'UPC (Universal Product Code)</strong> est une forme de GTIN-12, utilisé principalement en Amérique du Nord. La différence entre GTIN et UPC réside surtout dans leur utilisation régionale : le GTIN est un terme plus global, tandis que l’UPC se réfère à un code spécifique utilisé dans un contexte nord-américain. Toutefois, les deux systèmes sont compatibles et dans le cadre de la norme GTIN, l’UPC est reconnu comme une de ses sous-catégories.</p>",
               "question": "Quelle est la différence entre GTIN et UPC ?"
             },
             "ean13": {
-              "answer": "<p><strong>L’EAN-13</strong> est un code-barres constitué de 13 chiffres qui identifie les produits au niveau international, principalement en Europe. L'EAN-13 est aussi appelé GTIN-13 et est largement utilisé dans les points de vente pour scanner et suivre les articles. Il inclut un préfixe de pays, un code d’entreprise, un code produit et une clé de contrôle qui garantit l'exactitude du code.</p>",
+              "answer": "<p><strong>L’EAN-13</strong> est un code-barres constitué de 13 chiffres qui identifie les produits au niveau international, principalement en Europe.<br/> L'EAN-13 est aussi appelé GTIN-13 et est largement utilisé dans les points de vente pour scanner et suivre les articles. Il inclut un préfixe de pays, un code d’entreprise, un code produit et une clé de contrôle qui garantit l'exactitude du code.</p>",
               "question": "Qu'est-ce que le format EAN-13 ?"
             },
-            "formats": {
-              "answer": "<p><strong>Les principaux formats de GTIN</strong> sont : GTIN-12 (couramment utilisé aux États-Unis et au Canada sous le nom de UPC), GTIN-13 (le plus courant en Europe), et GTIN-14 (pour les unités logistiques). Ces différents formats permettent de répondre aux besoins spécifiques de chaque région et chaque chaîne d'approvisionnement. Le format GTIN-14 est généralement utilisé pour l'identification d’unités logistiques plus grandes, comme des cartons ou des palettes, plutôt que pour des articles à l’unité.</p>",
-              "question": "Quels sont les différents formats de GTIN ?"
-            },
             "logistics": {
-              "answer": "<p><strong>Le GTIN dans la logistique</strong> joue un rôle essentiel pour identifier les produits à travers les chaînes d'approvisionnement. Par exemple, le format GTIN-14 permet d'identifier des unités d'expédition comme des cartons ou des palettes, et facilite ainsi la gestion des stocks et des expéditions. L’utilisation des codes-barres GTIN dans la logistique permet une traçabilité précise des produits tout au long de leur cycle de vie, du fabricant au distributeur.</p>",
+              "answer": "<p><strong>Le GTIN dans la logistique</strong> joue un rôle essentiel pour identifier les produits à travers les chaînes d'approvisionnement. <br/>Par exemple, le format GTIN-14 permet d'identifier des unités d'expédition comme des cartons ou des palettes, et facilite ainsi la gestion des stocks et des expéditions. <br/>L’utilisation des codes-barres GTIN dans la logistique permet une traçabilité précise des produits tout au long de leur cycle de vie, du fabricant au distributeur.</p>",
               "question": "Comment le GTIN est-il utilisé dans la logistique ?"
             },
             "whatIs": {
-              "answer": "<p><strong>Le GTIN (Global Trade Item Number)</strong> est un identifiant unique utilisé pour identifier des produits à l'échelle mondiale. Il se présente sous plusieurs formats (GTIN-12, GTIN-13, GTIN-14), chaque format étant adapté à différents types de produits ou à des régions spécifiques. Par exemple, le GTIN-13 est couramment utilisé en Europe, tandis que le GTIN-12 est plus fréquent en Amérique du Nord. Chaque GTIN garantit qu’un produit peut être suivi, identifié et catalogué dans n'importe quelle partie du monde, assurant ainsi une gestion efficace des stocks et des ventes.</p>",
+              "answer": "<p><strong>Le GTIN (Global Trade Item Number)</strong> est un code numérique unique utilisé pour identifier des produits à l'échelle mondiale. Il se présente sous plusieurs formats (GTIN-12, GTIN-13, GTIN-14), chacun d'eux étant adapté à différents types de produits ou à des régions spécifiques. <br/>Par exemple, le GTIN-13 est couramment utilisé en Europe, tandis que le GTIN-12 est plus fréquent en Amérique du Nord. <br/>Chaque GTIN garantit qu’un produit peut être suivi, identifié et catalogué dans n'importe quelle partie du monde, assurant ainsi une gestion efficace des stocks et des ventes.</p>",
               "question": "Qu'est-ce qu'un GTIN ?"
             }
           },
@@ -1129,7 +1129,7 @@
           "title": "Données ouvertes GTIN – télécharger le catalogue de codes-barres"
         },
         "summary": {
-          "title": "Vue d'ensemble du dataset GTIN"
+          "title": "Chiffres clés du dataset GTIN"
         }
       },
       "isbn": {
@@ -1179,7 +1179,7 @@
             "label": "nb_page"
           },
           "offers_count": {
-            "description": "Nombre d'offres commerciales suivies pour le livre.",
+            "description": "Nombre d'offres commerciales disponibles pour ce livre.",
             "label": "offers_count"
           },
           "souscategorie": {
@@ -1195,47 +1195,47 @@
             "label": "title"
           },
           "url": {
-            "description": "URL de fiche produit lorsque disponible.",
+            "description": "URL de la fiche du livre lorsque disponible.",
             "label": "url"
           }
         },
         "columnsSubtitle": "Chaque ligne correspond à un livre identifié par son ISBN.",
-        "columnsTitle": "Colonnes présentes dans le dataset ISBN",
+        "columnsTitle": "Colonnes présentes dans le fichier ISBN",
         "download": {
           "fast": {
-            "highlight": "Miroir pensé pour les usages culturels, bibliothèques et acteurs du livre"
+            "highlight": "Pensé pour les usages culturels, bibliothèques et acteurs du livre"
           },
-          "subtitle": "Sélectionnez le miroir adapté à votre flux et à votre trafic.",
+          "subtitle": "Sélectionnez le site adapté à votre bande passante.",
           "title": "Options de téléchargement"
         },
         "faq": {
           "items": {
             "assignment": {
-              "answer": "<p>Un ISBN est attribué par une agence nationale ISBN dans chaque pays, qui gère la distribution et l'enregistrement des numéros ISBN. L'éditeur ou l'auteur doit contacter cette agence pour obtenir un ISBN pour son livre. Lors de la demande, des informations sur l'ouvrage sont fournies, telles que le titre, l’auteur, le format et l’édition. Une fois attribué, l'ISBN est unique pour cette édition et ne peut être réutilisé pour une autre. Cela garantit une gestion efficace des livres dans les systèmes de bibliothèques, de vente, et de distribution. Il est essentiel pour toute œuvre destinée à une large diffusion ou à la vente.</p>",
+              "answer": "<p>Un ISBN est attribué par une agence nationale ISBN dans chaque pays, qui gère la distribution et l'enregistrement des numéros ISBN. <br/>L'éditeur ou l'auteur doit contacter cette agence pour obtenir un ISBN pour son livre. <br/>Lors de la demande, des informations sur l'ouvrage sont fournies, telles que le titre, l’auteur, le format et l’édition. Une fois attribué, l'ISBN est unique pour cette édition et ne peut être réutilisé pour une autre, cela garantit une gestion efficace des livres dans les systèmes de bibliothèques, de vente, et de distribution.</p>",
               "question": "Comment un ISBN est-il attribué à un livre ?"
             },
             "difference": {
-              "answer": "<p>L'ISBN-10 était le format d'origine utilisé jusqu'en 2007. Il se composait de 10 chiffres. Cependant, pour s'aligner avec les standards mondiaux des codes-barres EAN-13, le système est passé à un format à 13 chiffres, l'ISBN-13. Ce changement a permis de standardiser les processus de vente et de distribution à l’échelle mondiale, car les ISBN-13 sont compatibles avec les systèmes de codes-barres commerciaux utilisés dans divers secteurs. Bien que les ISBN-10 existent encore pour les anciens ouvrages, les nouveaux livres publiés depuis 2007 utilisent exclusivement le format ISBN-13, qui offre une plus grande capacité pour les identifications futures.</p>",
+              "answer": "<p>L'<strong>ISBN-10</strong> était le format d'origine utilisé jusqu'en 2007. Il se composait de <strong>10 chiffres</strong>. Cependant, pour s'aligner avec les standards mondiaux des codes-barres EAN-13, le système est passé à l'<strong>ISBN-13</strong>, un format à <strong>13 chiffres</strong>. <br/>Ce changement a permis de standardiser les processus de vente et de distribution à l’échelle mondiale, car les ISBN-13 sont compatibles avec les systèmes de codes-barres commerciaux utilisés dans divers secteurs. <br/>Bien que les ISBN-10 existent encore pour les anciens ouvrages, les nouveaux livres publiés depuis 2007 utilisent exclusivement le format ISBN-13, qui offre une plus grande capacité pour les identifications futures.</p>",
               "question": "Quelle est la différence entre un ISBN-10 et un ISBN-13 ?"
             },
             "importance": {
-              "answer": "<p>Un code ISBN est important car il permet d'identifier un livre de manière unique et standardisée dans les systèmes de gestion, de vente, et de distribution. Sans ISBN, un livre peut être difficile à trouver dans les catalogues en ligne ou en librairie, car les systèmes de distribution reposent en grande partie sur cet identifiant. L'ISBN facilite aussi le référencement dans les bases de données des bibliothèques et des librairies, ce qui améliore sa visibilité et son accessibilité pour le public. Il est essentiel pour qu'un livre puisse être largement distribué, que ce soit sous format imprimé ou numérique.</p>",
-              "question": "Importance des ISBN ?"
+              "answer": "<p>Il est essentiel pour qu'un livre puisse être largement distribué, que ce soit sous format imprimé ou numérique.<br/> L'ISBN facilite aussi le référencement dans les bases de données, ce qui améliore sa visibilité et son accessibilité pour le public.<br/> Sans ISBN, un livre peut être difficile à trouver dans les catalogues en ligne ou en librairie, car les systèmes de distribution reposent en grande partie sur cet identifiant. </p>",
+              "question": "Pourquoi les ISBN sont-ils importants ?"
             },
             "meaning": {
               "answer": "<p>ISBN signifie <strong>\"International Standard Book Number\"</strong>, un numéro international normalisé pour les livres. Ce numéro sert à identifier de manière unique une publication dans le monde entier. Il permet de simplifier la gestion des livres dans les systèmes de stockage, de distribution et de vente. Le système ISBN est utilisé dans de nombreux pays et est géré par des agences nationales. Chaque ISBN est attribué spécifiquement à un titre et à une édition particulière, ce qui permet une gestion précise et évite toute confusion entre différentes éditions ou formats d'un même ouvrage (par exemple, entre une version reliée et une version broché).</p>",
               "question": "Quelle est la signification d'ISBN ?"
             },
             "nonBook": {
-              "answer": "<p>Il arrive qu'un ISBN soit utilisé pour identifier autre chose qu'un livre. Cela peut se produire pour plusieurs raisons :</p><ul><li><strong>Manque de compréhension des standards</strong> : Certains vendeurs ou plateformes utilisent l'ISBN comme un identifiant générique, surtout si le produit est culturel ou lié aux loisirs créatifs.</li><li><strong>Économies de coût</strong> : Dans certains cas, il est plus économique pour un petit fabricant de réutiliser un code ISBN existant, bien que cela soit en dehors des normes.</li><li><strong>Confusion de formats de codes</strong> : Certaines plateformes de vente n’étant pas strictes sur la validation des codes standards, elles acceptent des ISBN pour des produits autres que des livres, ce qui crée des ambiguïtés.</li><li><strong>Réaffectation ou erreur d'attribution</strong> : L'ISBN est parfois utilisé incorrectement pour des produits non éditoriaux, surtout si le fabricant ou le distributeur n’a pas de code-barres GTIN adapté.</li></ul>",
-              "question": "Pourquoi je retrouve des produits (autres que des livres) dans la base ?"
+              "answer": "<p>Il arrive qu'un ISBN soit utilisé pour identifier autre chose qu'un livre, cela peut se produire pour plusieurs raisons :</p><ul><li><strong>manque de compréhension des standards</strong> : certains vendeurs ou plateformes utilisent l'ISBN comme un identifiant générique, surtout si le produit est culturel ou lié aux loisirs créatifs.</li><li><strong>économies de coût</strong> : dans certains cas, il est plus économique pour un petit fabricant de réutiliser un code ISBN existant, bien que cela soit en dehors des normes.</li><li><strong>confusion de formats de codes</strong> : certaines plateformes de vente n’étant pas strictes sur la validation des codes standards, elles acceptent des ISBN pour des produits autres que des livres, ce qui crée des ambiguïtés.</li><li><strong>réaffectation ou erreur d'attribution</strong> : l'ISBN est parfois utilisé incorrectement pour des produits non éditoriaux, surtout si le fabricant ou le distributeur n’a pas de code-barres GTIN adapté.</li></ul>",
+              "question": "Pourquoi est-ce que je retrouve des produits (autres que des livres) dans la base ?"
             },
             "structure": {
-              "answer": "<p>Un ISBN est composé de 13 chiffres (ou 10 dans l’ancien système), répartis en cinq segments. Ces segments incluent : un préfixe (qui identifie le système de numérotation), un groupe d’enregistrement (qui représente le pays ou la région linguistique), un numéro d'éditeur, un numéro de titre (qui identifie un ouvrage spécifique), et enfin, un chiffre de contrôle qui valide la structure de l’ISBN. Cette structure permet une identification rapide et précise des livres, facilitant leur gestion à l’échelle mondiale. Le passage à l'ISBN-13 en 2007 s'est aligné sur les normes mondiales des codes-barres, rendant la distribution des livres encore plus efficace à travers différents systèmes de commerce et de bibliothèque.</p>",
+              "answer": "<p>Un ISBN est composé de 13 chiffres (ou 10 dans l’ancien système), répartis en cinq segments. Ces segments incluent : <ul> <li> <strong> un préfixe </strong>: qui identifie le système de numérotation</li><li><strong>un groupe d’enregistrement</strong> : représente le pays ou la région linguistique</li><li> <strong>un numéro d'éditeur</strong></li><li> <strong>un numéro de titre</strong> :  identifie un ouvrage spécifique</li><li><strong>un chiffre de contrôle</strong> :  valide la structure de l’ISBN</li></ul> Cette structure permet une identification rapide et précise des livres, facilitant leur gestion à l’échelle mondiale. Le passage à l'ISBN-13 en 2007 s'est aligné sur les normes mondiales des codes-barres, rendant la distribution des livres encore plus efficace et standardisée.</p>",
               "question": "Comment un ISBN est-il structuré ?"
             },
             "whatIs": {
-              "answer": "<p>Un ISBN (International Standard Book Number) est un numéro unique qui permet d'identifier un livre à l'échelle mondiale. C’est un identifiant essentiel pour les éditeurs, librairies, bibliothèques, et toutes les plateformes de vente de livres. L'ISBN facilite la gestion des stocks, la distribution, et la vente des livres. Chaque livre ou édition d'un même livre dispose de son propre ISBN, garantissant une identification unique dans les bases de données et les catalogues. Les ISBN sont utilisés aussi bien pour les livres imprimés que pour les livres numériques (e-books), et permettent aux lecteurs de retrouver facilement l’ouvrage qu’ils cherchent, notamment dans les systèmes de bibliothèques et sur les plateformes de vente en ligne.</p>",
+              "answer": "<p>Un ISBN (<strong>International Standard Book Number</strong>) est un numéro unique qui permet d'identifier un livre à l'échelle mondiale.<br/> C’est un identifiant essentiel pour les éditeurs, librairies, bibliothèques, et toutes les plateformes de vente de livres. L'ISBN facilite la gestion des stocks, la distribution, et la vente des livres.<br/> Chaque livre ou édition d'un même livre dispose de son propre ISBN, garantissant une identification unique dans les bases de données et les catalogues.<br/> Les ISBN sont utilisés aussi bien pour les livres imprimés que pour les livres numériques (e-books) et permettent aux lecteurs de retrouver facilement l’ouvrage qu’ils cherchent, notamment dans les systèmes de bibliothèques et sur les plateformes de vente en ligne.</p>",
               "question": "Qu'est-ce qu'un ISBN ?"
             }
           },
@@ -1265,7 +1265,7 @@
           "title": "Données ouvertes ISBN – télécharger l'export de métadonnées livres"
         },
         "summary": {
-          "title": "Vue d'ensemble du dataset ISBN"
+          "title": "Chiffres clés du dataset ISBN"
         }
       },
       "subtitle": "Les deux exports sont mis à jour chaque semaine et publiés sous licence ODbL.",
@@ -1273,7 +1273,7 @@
     },
     "errors": {
       "datasetFailed": "Impossible de charger les détails du jeu de données. Merci de réessayer.",
-      "overviewFailed": "Impossible de charger la vue d'ensemble open data. Merci de réessayer."
+      "overviewFailed": "Impossible de charger la vue d'ensemble Open Data. Merci de réessayer."
     },
     "faq": {
       "items": {
@@ -1282,28 +1282,28 @@
           "question": "Qui produit et met à disposition les données ouvertes ?"
         },
         "definition": {
-          "answer": "<p>L'open data, ou données ouvertes, désigne des données rendues accessibles à tous, sans restriction d’accès, et sous un format librement exploitable. Elles peuvent être réutilisées, modifiées, redistribuées par n’importe qui, à des fins personnelles ou professionnelles. L'objectif est de maximiser l'accès à l'information pour encourager la transparence, l'innovation et l'efficacité dans différents secteurs. L'open data est souvent fourni par des organismes publics, mais certaines entreprises privées commencent aussi à publier certaines de leurs données. Un aspect clé de l'open data est l'accessibilité technique : les données doivent être disponibles dans des formats standards et lisibles par des machines (comme les fichiers CSV, JSON ou XML) afin de permettre leur réutilisation sans obstacles techniques majeurs. En facilitant l'accès aux données, l'open data ouvre la voie à de nombreuses applications, comme la création d'applications mobiles, de visualisations ou d'analyses approfondies.</p>",
-          "question": "Qu'est-ce que l'open data ?"
+          "answer": "<p>L'Open Data, ou données ouvertes, désigne des données rendues accessibles à tous, sans restriction d’accès, et sous un format librement exploitable. Elles peuvent être réutilisées, modifiées, redistribuées par n’importe qui, à des fins personnelles ou professionnelles. L'objectif est de maximiser l'accès à l'information pour encourager la transparence, l'innovation et l'efficacité dans différents secteurs. L'Open Data est souvent fourni par des organismes publics, mais certaines entreprises privées commencent aussi à publier certaines de leurs données. Un aspect clé de l'Open Data est l'accessibilité technique : les données doivent être disponibles dans des formats standards et lisibles par des machines (comme les fichiers CSV, JSON ou XML) afin de permettre leur réutilisation sans obstacles techniques majeurs. En facilitant l'accès aux données, l'Open Data ouvre la voie à de nombreuses applications, comme la création d'applications mobiles, de visualisations ou d'analyses approfondies.</p>",
+          "question": "Qu'est-ce que l'Open Data ?"
         },
         "importance": {
-          "answer": "<p>L'open data est crucial pour promouvoir la transparence et l’innovation. En rendant les données accessibles, il permet aux citoyens de mieux comprendre les décisions des gouvernements et de participer aux discussions publiques de manière informée. Les entreprises peuvent utiliser ces données pour développer de nouveaux produits et services, ce qui stimule la croissance économique. De plus, l'open data permet une meilleure prise de décision, car les données publiques peuvent être analysées pour améliorer les politiques publiques, réduire les inefficacités, et rendre les gouvernements plus responsables de leurs actions. L'open data favorise aussi la collaboration entre différentes parties prenantes, notamment les chercheurs, les entrepreneurs, les développeurs et les collectivités locales, qui peuvent travailler ensemble pour résoudre des problèmes communs en utilisant les données de manière créative.</p>",
-          "question": "Pourquoi l'open data est-il important ?"
+          "answer": "<p>L'Open Data est crucial pour promouvoir la transparence et l’innovation. En rendant les données accessibles, il permet aux citoyens de mieux comprendre les décisions des gouvernements et de participer aux discussions publiques de manière informée. Les entreprises peuvent utiliser ces données pour développer de nouveaux produits et services, ce qui stimule la croissance économique. De plus, l'Open Data permet une meilleure prise de décision, car les données publiques peuvent être analysées pour améliorer les politiques publiques, réduire les inefficacités, et rendre les gouvernements plus responsables de leurs actions. L'Open Data favorise aussi la collaboration entre différentes parties prenantes, notamment les chercheurs, les entrepreneurs, les développeurs et les collectivités locales, qui peuvent travailler ensemble pour résoudre des problèmes communs en utilisant les données de manière créative.</p>",
+          "question": "Pourquoi l'Open Data est-il important ?"
         },
         "sources": {
-          "answer": "<p>Les extractions fournies par Nudger sont issues de nos travaux d'aggrégation des données produits. Nous intégrons une grande variété de sources de données, que l'on peut classer en plusieurs types :</p><p><strong>Sites des marques et fabricants :</strong><br>Nous extrayons directement de la donnée à partir des fiches produits mises à disposition par les marques et fabricants.</p><p><strong>Sites institutionnels et données ouvertes :</strong> (base eprel, open food facts)<br>Nous intégrons des données issues de référentiels publics ou ouverts.</p><p><strong>Flux d'affiliation et plateformes marchandes :</strong> (awin, effinity, affilae, amazon, ..)<br>Dans le cadre de la relation contractuelle de promotion de Nudger et des plateformes. A ce titre, nous intégrons un lien dans notre extraction, permettant de faire jouer l'affiliation si des offres actives existent pour le produit.</p><p>Nudger aggrège, normalise et résout les conflits pour exposer des données factuelles et minimales sur les produits. La constitution et la mise à disposition de cette base sont opérées dans une logique de bien commun. Nous sommes également convaincus que le partage de ces données est au bénéfice de tous les acteurs de la chaîne de consommation (fabricants, distributeurs, chercheurs, citoyens).</p><p>Pour autant, nous sommes soucieux de respecter la propriété intellectuelle, aussi n'hésitez pas à <a href=\"/contact\">nous contacter</a> pour toute question, ou si en tant que dépositaire de données vous souhaitez vous opposer à votre participation à cette base.</p>",
+          "answer": "<p>Les extractions fournies par Nudger sont issues de nos travaux de collecte des données produits. Nous intégrons une grande variété de sources de données, que l'on peut classer en plusieurs types :</p><p><ul><strong><li>Sites des marques et fabricants :</strong> nous extrayons directement de la donnée à partir des fiches produits mises à disposition par les marques et fabricants.</li><li><strong>Sites institutionnels et données ouvertes :</strong> nous intégrons des données issues de référentiels publics ou ouverts.</li><p><strong><li>Flux d'affiliation et plateformes marchandes :</strong> données obtenues dans le cadre de la relation contractuelle de promotion de Nudger avec les plateformes. Nudger est rétribué quand vous réalisez des achats sur les plateformes marchandes partenaires, mais n'entretient aucune dépendance vis à vis des marques présentées sur le site. L'Impact Score est complètement indépendant et cette relation commerciale n'a pas d'incidence sur les prix des produits que vous trouverez sur Nudger. </li></ul>Nous réunissons et harmonisons des données provenant de différentes sources pour présenter des informations fiables, factuelles et minimales sur les produits.<br/>Nous construisons cette base dans une logique de bien commun car nous sommes convaincus que ces données sont utiles pour tout le monde : consommateurs, chercheurs, fabricants, distributeurs, ...<br/>Pour autant, nous respectons la propriété intellectuelle : si vous êtes détenteur de données et que vous souhaitez poser une question ou demander le retrait de certaines informations, vous pouvez <a href=\"/contact\">nous contacter</a> à tout moment, nous sommes à votre écoute !",
           "question": "Sources de données et contributions"
         }
       },
-      "subtitle": "Comprendre notre approche de l'open data.",
+      "subtitle": "Comprendre notre approche de l'Open Data.",
       "title": "Questions fréquentes"
     },
     "hero": {
       "eyebrow": "Libérez les données !",
       "primaryCta": {
-        "ariaLabel": "Faire défiler jusqu'à la section des jeux de données open data",
+        "ariaLabel": "Faire défiler jusqu'à la section des jeux de données Open Data",
         "label": "Découvre nos jeux de données"
       },
-      "subtitle": "On est des geeks et on partage, pas de secrets chez nous.<br/> Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
+      "subtitle": "Nous sommes des geeks généreux et partageurs. Pas de secrets chez nous.<br/> Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
       "title": "Open Data"
     },
     "license": {
@@ -1312,17 +1312,17 @@
         "href": "https://spdx.org/licenses/ODbL-1.0.html#licenseText",
         "label": "Consulter la licence ODbL"
       },
-      "description": "Vous pouvez utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
-      "title": "Licence Open Database (ODbL)"
+      "description": "La licence ODbL (Open Database License) permet à tout le monde d’utiliser librement une base de données : la consulter, la modifier et la redistribuer, même à des fins commerciales. <br/>Son but est clair : garantir que les données restent ouvertes et accessibles à tous, aujourd’hui comme demain.<br/> Vous pouvez donc utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
+      "title": "Open Database Licence (ODbL)"
     },
-    "loading": "Chargement des informations open data…",
+    "loading": "Chargement des informations opendata…",
     "opensource": {
       "cta": {
-        "ariaLabel": "Aller vers la page open source",
-        "label": "Visiter la page open source"
+        "ariaLabel": "Aller vers la page open-source",
+        "label": "Visiter la page Open Source"
       },
-      "description": "Envie de découvrir le code derrière ces datasets ? Explorez les services, la gouvernance et la communauté Nudger.",
-      "title": "Nudger est aussi open source"
+      "description": "Il n'y a pas que les données dans la vie. Dans la même philosophie de transparence, Nudger publie librement l'intégralité du code de sa plateforme.",
+      "title": "En en plus, Nudger est Open Source !"
     },
     "seo": {
       "description": "Découvrez les jeux de données GTIN et ISBN à télécharger sur Nudger. La plus grande base de données de codes barres d'europe !",
@@ -1365,20 +1365,20 @@
     "hero": {
       "ctaGroupLabel": "Appels à action principaux",
       "infoCard": {
-        "description": "est construit en commun. Chaque pull request, issue ou retour utilisateur façonne une plateforme plus transparente.",
-        "highlight": "Open4goods",
+        "description": "L’Open Source désigne des logiciels dont le fonctionnement est ouvert et accessible à tous. Chacun peut les utiliser librement, les modifier et les partager. L’idée centrale est le partage du savoir et la collaboration.",
+        "highlight": "",
         "items": {
-          "collaborativeReviews": "Revue collaborative des contributions",
-          "openLicenses": "Code et données publiés sous licences ouvertes",
-          "sharedGovernance": "Gouvernance partagée et documentation vivante"
+          "collaborativeReviews": "Contributions",
+          "openLicenses": "Code publié sous licence GPL",
+          "sharedGovernance": "Une documentation vivante"
         }
       },
       "primaryCta": {
         "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet",
         "label": "Explorer les dépôts"
       },
-      "subtitle": "Code, données et gouvernance sont transparents pour que chacun·e puisse auditer et améliorer Nudger.",
-      "title": "Rien à cacher, tout à partager"
+      "subtitle": "Découvrez les coulisses de Nudger : notre code est ouvert pour que chacun puisse apprendre, comprendre et améliorer Nudger.",
+      "title": "Open Source"
     },
     "pillars": {
       "cards": {
@@ -1449,8 +1449,8 @@
     },
     "seo": {
       "description": "Découvrez comment Nudger partage son code, ses données et sa gouvernance pour construire ensemble un bien commun de l'achat responsable.",
-      "imageAlt": "Logotype Nudger représentant le programme open source",
-      "title": "Open source chez Nudger"
+      "imageAlt": "Logotype Nudger représentant le programme Open Source",
+      "title": "Open Source chez Nudger"
     }
   },
   "partners": {
@@ -1996,7 +1996,7 @@
         "links": {
           "legal": "Mentions légales",
           "openData": "Open data",
-          "openSource": "Open source",
+          "openSource": "Open Source",
           "privacy": "Politique de confidentialité"
         },
         "title": "Ressources"
@@ -2112,7 +2112,7 @@
                 "description": "Accédez à nos jeux de données ouverts."
               },
               "opensource": {
-                "label": "Open source",
+                "label": "Open Source",
                 "description": "Des envies de code ?"
               }
             }
