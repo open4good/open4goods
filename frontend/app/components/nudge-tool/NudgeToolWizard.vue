@@ -2,22 +2,25 @@
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
     <div class="nudge-wizard__header">
       <v-stepper
+        v-if="showStepper"
         v-model="activeStepKey"
         density="compact"
         alt-labels
         :items="stepperItems"
         class="nudge-wizard__stepper"
+        @click:step="onStepClick"
       />
 
-      <v-btn
-        v-if="totalMatches >= 0 && selectedCategory"
-        variant="text"
-        color="primary"
-        :disabled="!selectedCategory"
-        @click="navigateToCategoryPage"
-      >
-        {{ $t('nudge-tool.meta.matches', { count: totalMatches }) }}
-      </v-btn>
+      <div v-if="totalMatches >= 0 && selectedCategory" class="nudge-wizard__matches">
+        <v-btn
+          variant="text"
+          color="primary"
+          :disabled="!selectedCategory"
+          @click="navigateToCategoryPage"
+        >
+          {{ $t('nudge-tool.meta.matches', { count: totalMatches }) }}
+        </v-btn>
+      </div>
     </div>
 
     <div v-if="loading" class="nudge-wizard__progress">
@@ -181,6 +184,14 @@ const hashState = computed<CategoryHashState>(() => ({
   activeSubsets: activeSubsetIds.value,
 }))
 
+const defaultStepIcons = {
+  category: 'mdi-shape-outline',
+  scores: 'mdi-star-check-outline',
+  condition: 'mdi-tune-vertical',
+  subset: 'mdi-tune-variant',
+  recommendations: 'mdi-lightbulb-on-outline',
+}
+
 type WizardStep = {
   key: string
   component: Component
@@ -251,6 +262,33 @@ const steps = computed<WizardStep[]>(() => {
 
   return sequence
 })
+
+const getSubsetGroupIcon = (key: string) => {
+  const groupId = key.replace('group-', '')
+  const group = subsetGroups.value.find((entry) => entry.id === groupId)
+
+  return group?.mdiIcon || defaultStepIcons.subset
+}
+
+const resolveStepIcon = (stepKey: string) => {
+  if (stepKey === 'category') {
+    return defaultStepIcons.category
+  }
+
+  if (stepKey === 'scores') {
+    return defaultStepIcons.scores
+  }
+
+  if (stepKey === 'condition') {
+    return defaultStepIcons.condition
+  }
+
+  if (stepKey.startsWith('group-')) {
+    return getSubsetGroupIcon(stepKey)
+  }
+
+  return defaultStepIcons.recommendations
+}
 
 watch(
   steps,
@@ -395,9 +433,19 @@ const stepperItems = computed(() =>
   steps.value.map((step) => ({
     title: step.title,
     value: step.key,
-    disabled: step.key !== 'category' && !selectedCategoryId.value,
+    icon: resolveStepIcon(step.key),
+    disabled: false,
   })),
 )
+
+const showStepper = computed(() => Boolean(selectedCategoryId.value))
+
+const onStepClick = (value: string | number) => {
+  const targetKey = String(value)
+  if (steps.value.some((step) => step.key === targetKey)) {
+    activeStepKey.value = targetKey
+  }
+}
 
 onMounted(async () => {
   await hydrateCategories()
@@ -417,15 +465,19 @@ onMounted(async () => {
 
   &__header {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 12px;
   }
 
   &__stepper {
-    flex: 1 1 240px;
-    min-width: 0;
+    width: 100%;
+  }
+
+  &__matches {
+    display: flex;
+    justify-content: center;
   }
 
   &__progress {
