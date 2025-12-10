@@ -483,6 +483,11 @@ onMounted(async () => {
 .nudge-wizard {
   position: relative;
   padding: 16px;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   &__header {
     display: flex;
@@ -510,6 +515,9 @@ onMounted(async () => {
 
   &__window {
     min-height: 420px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   &__footer {
