@@ -5,13 +5,7 @@
         <h2 class="nudge-step-scores__title">{{ $t('nudge-tool.steps.scores.title') }}</h2>
         <p class="nudge-step-scores__subtitle">{{ $t('nudge-tool.steps.scores.subtitle') }}</p>
       </div>
-      <v-btn
-        color="primary"
-        :disabled="!hasSelection"
-        @click="emit('continue')"
-      >
-        {{ $t('nudge-tool.actions.continue') }}
-      </v-btn>
+
     </div>
 
     <v-row dense>

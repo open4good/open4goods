@@ -9,7 +9,10 @@
         :items="stepperItems"
         class="nudge-wizard__stepper"
         @click:step="onStepClick"
-      />
+        hide-actions
+      >
+
+      </v-stepper>
 
       <div v-if="totalMatches >= 0 && selectedCategory" class="nudge-wizard__matches">
         <v-btn

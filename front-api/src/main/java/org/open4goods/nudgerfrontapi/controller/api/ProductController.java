@@ -505,7 +505,7 @@ public class ProductController {
             if (!StringUtils.hasText(score)) {
                 continue;
             }
-            String mapping = "scores." + score.trim();
+            String mapping = "scores." + score.trim()+".value";
             target.add(mapping);
         }
     }
