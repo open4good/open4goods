@@ -468,6 +468,7 @@ public class ProductController {
         VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
         ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
         Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
+        augmentWithAggregatedScores(allowedFilters, config);
         Set<String> allowedSorts = collectGlobalSortMappings();
         if (hasVertical) {
             allowedSorts.addAll(allowedFilters);
@@ -486,6 +487,27 @@ public class ProductController {
         addFieldMappings(allowed, fieldOptions.impact());
         addFieldMappings(allowed, fieldOptions.technical());
         return allowed;
+    }
+
+    /**
+     * Add aggregated score mappings derived from the vertical configuration.
+     *
+     * @param target collection of allowed filter mappings to update
+     * @param config vertical configuration supplying aggregated score identifiers
+     */
+    private void augmentWithAggregatedScores(Set<String> target, VerticalConfig config) {
+        LOGGER.info("Entering augmentWithAggregatedScores(targetSize={}, config={})",
+                target != null ? target.size() : 0, config);
+        if (target == null || config == null || config.getAggregatedScores() == null) {
+            return;
+        }
+        for (String score : config.getAggregatedScores()) {
+            if (!StringUtils.hasText(score)) {
+                continue;
+            }
+            String mapping = "scores." + score.trim();
+            target.add(mapping);
+        }
     }
 
     /**
