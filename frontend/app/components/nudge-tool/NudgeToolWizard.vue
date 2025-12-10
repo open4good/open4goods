@@ -1,5 +1,25 @@
 <template>
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
+    <div class="nudge-wizard__header">
+      <v-stepper
+        v-model="activeStepKey"
+        density="compact"
+        alt-labels
+        :items="stepperItems"
+        class="nudge-wizard__stepper"
+      />
+
+      <v-btn
+        v-if="totalMatches >= 0 && selectedCategory"
+        variant="text"
+        color="primary"
+        :disabled="!selectedCategory"
+        @click="navigateToCategoryPage"
+      >
+        {{ $t('nudge-tool.meta.matches', { count: totalMatches }) }}
+      </v-btn>
+    </div>
+
     <div v-if="loading" class="nudge-wizard__progress">
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
@@ -18,18 +38,26 @@
     </v-window>
 
     <div class="nudge-wizard__footer">
-      <div class="nudge-wizard__meta">
-        <v-chip v-if="totalMatches > 0" size="small" color="surface-primary-080">
-          {{ $t('nudge-tool.meta.matches', { count: totalMatches }) }}
-        </v-chip>
-      </div>
       <v-btn
+        v-if="hasPreviousStep"
+        variant="text"
+        prepend-icon="mdi-chevron-left"
+        @click="goToPrevious"
+      >
+        {{ $t('nudge-tool.actions.previous') }}
+      </v-btn>
+
+      <v-spacer />
+
+      <v-btn
+        v-if="hasNextStep"
         color="primary"
         variant="flat"
-        :disabled="!canNavigate"
-        @click="navigateToCategoryPage"
+        :disabled="isNextDisabled"
+        append-icon="mdi-chevron-right"
+        @click="goToNext"
       >
-        {{ $t('nudge-tool.actions.seeAll') }}
+        {{ $t('nudge-tool.actions.next') }}
       </v-btn>
     </div>
   </v-card>
@@ -76,6 +104,7 @@ const props = defineProps<{
 const emit = defineEmits<{ (event: 'navigate', payload: { hash: string; categorySlug: string }): void }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const { fetchCategories } = useCategories()
 
 const categories = ref<VerticalConfigDto[]>(props.verticals ?? [])
@@ -152,12 +181,11 @@ const hashState = computed<CategoryHashState>(() => ({
   activeSubsets: activeSubsetIds.value,
 }))
 
-const canNavigate = computed(() => Boolean(selectedCategory?.value))
-
 type WizardStep = {
   key: string
   component: Component
   props: Record<string, unknown>
+  title: string
   onUpdate?: (value: unknown) => void
 }
 
@@ -168,28 +196,31 @@ const steps = computed<WizardStep[]>(() => {
     sequence.push({
       key: 'category',
       component: NudgeToolStepCategory,
+      title: t('nudge-tool.steps.category.title'),
       props: { categories: categories.value, selectedCategoryId: selectedCategoryId.value },
+    })
+  }
+
+  if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
+    sequence.push({
+      key: 'scores',
+      component: NudgeToolStepScores,
+      title: t('nudge-tool.steps.scores.title'),
+      props: { modelValue: selectedScores.value, scores: nudgeConfig.value?.scores ?? [] },
+      onUpdate: (value: string[]) => (selectedScores.value = value),
     })
   }
 
   sequence.push({
     key: 'condition',
     component: NudgeToolStepCondition,
+    title: t('nudge-tool.steps.condition.title'),
     props: { modelValue: condition.value },
     onUpdate: (value: ProductConditionChoice) => {
       condition.value = value
       goToNext()
     },
   })
-
-  if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
-    sequence.push({
-      key: 'scores',
-      component: NudgeToolStepScores,
-      props: { modelValue: selectedScores.value, scores: nudgeConfig.value?.scores ?? [] },
-      onUpdate: (value: string[]) => (selectedScores.value = value),
-    })
-  }
 
   subsetGroups.value.forEach((group) => {
     const subsets = groupedSubsets.value[group.id ?? ''] ?? []
@@ -200,6 +231,7 @@ const steps = computed<WizardStep[]>(() => {
     sequence.push({
       key: `group-${group.id}`,
       component: NudgeToolStepSubsetGroup,
+      title: group.title ?? '',
       props: { group, subsets, modelValue: activeSubsetIds.value },
       onUpdate: (value: string[]) => (activeSubsetIds.value = value),
     })
@@ -208,6 +240,7 @@ const steps = computed<WizardStep[]>(() => {
   sequence.push({
     key: 'recommendations',
     component: NudgeToolStepRecommendations,
+    title: t('nudge-tool.steps.recommendations.title'),
     props: {
       products: recommendations.value,
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
@@ -234,6 +267,14 @@ const goToNext = () => {
   const nextStep = steps.value[index + 1]
   if (nextStep) {
     activeStepKey.value = nextStep.key
+  }
+}
+
+const goToPrevious = () => {
+  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  const previousStep = steps.value[index - 1]
+  if (previousStep) {
+    activeStepKey.value = previousStep.key
   }
 }
 
@@ -300,6 +341,64 @@ const navigateToCategoryPage = () => {
   void router.push({ path: `/${slug}`, hash })
 }
 
+const getStepGroupSelection = (key: string) => {
+  const groupId = key.replace('group-', '')
+  const subsets = groupedSubsets.value[groupId] ?? []
+  const subsetIds = subsets.map((subset) => subset.id)
+
+  return activeSubsetIds.value.filter((subsetId) => subsetIds.includes(subsetId))
+}
+
+const hasPreviousStep = computed(() => {
+  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  return index > 0
+})
+
+const hasNextStep = computed(() => {
+  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  return index >= 0 && index < steps.value.length - 1
+})
+
+const isMultiSelectStep = computed(() =>
+  activeStepKey.value === 'scores' || activeStepKey.value.startsWith('group-'),
+)
+
+const hasSelectionForStep = computed(() => {
+  if (activeStepKey.value === 'scores') {
+    return selectedScores.value.length > 0
+  }
+
+  if (activeStepKey.value.startsWith('group-')) {
+    return getStepGroupSelection(activeStepKey.value).length > 0
+  }
+
+  if (activeStepKey.value === 'category') {
+    return Boolean(selectedCategoryId.value)
+  }
+
+  return true
+})
+
+const isNextDisabled = computed(() => {
+  if (activeStepKey.value === 'category') {
+    return !selectedCategoryId.value
+  }
+
+  if (isMultiSelectStep.value) {
+    return !hasSelectionForStep.value
+  }
+
+  return false
+})
+
+const stepperItems = computed(() =>
+  steps.value.map((step) => ({
+    title: step.title,
+    value: step.key,
+    disabled: step.key !== 'category' && !selectedCategoryId.value,
+  })),
+)
+
 onMounted(async () => {
   await hydrateCategories()
 
@@ -315,6 +414,19 @@ onMounted(async () => {
 .nudge-wizard {
   position: relative;
   padding: 16px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  &__stepper {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
 
   &__progress {
     position: absolute;
