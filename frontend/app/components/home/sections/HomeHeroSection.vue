@@ -237,6 +237,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero__wizard
   display: flex
   align-items: stretch
+  width: 100%
+  align-self: stretch
 
 @media (max-width: 959px)
   .home-hero
