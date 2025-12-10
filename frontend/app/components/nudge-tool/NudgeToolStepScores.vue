@@ -48,7 +48,6 @@ const props = defineProps<{
 const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void; (event: 'continue'): void }>()
 
 const selectedNames = computed(() => props.modelValue)
-const hasSelection = computed(() => selectedNames.value.length > 0)
 
 const getScoreIcon = (score: NudgeToolScoreDto) => score.mdiIcon ?? 'mdi-leaf'
 
