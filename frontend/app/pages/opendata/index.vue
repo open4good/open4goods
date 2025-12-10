@@ -3,7 +3,8 @@
     <OpendataHero
       :eyebrow="t('opendata.hero.eyebrow')"
       :title="t('opendata.hero.title')"
-      :subtitle="t('opendata.hero.subtitle')"
+      :subtitle="heroSubtitle"
+      :education-card="educationCard"
       description-bloc-id="webpages:opendata:hero-overview"
       :primary-cta="heroPrimaryCta"
     />
@@ -36,7 +37,7 @@
     <OpendataDatasetHighlights
       id="datasets"
       :title="t('opendata.datasets.title')"
-      :subtitle="t('opendata.datasets.subtitle')"
+      :subtitle="datasetsSubtitle"
       :cards="datasetCards"
     />
 
@@ -46,6 +47,7 @@
       :license-label="t('opendata.license.cta.label')"
       :license-aria-label="t('opendata.license.cta.ariaLabel')"
       :license-url="t('opendata.license.cta.href')"
+      :license-id="licenseSectionId"
     />
 
     <OpendataFaqSection
@@ -85,12 +87,16 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const licenseSectionId = 'opendata-odbl-license'
 
 const { data, pending, error, refresh } = await useAsyncData<OpenDataOverviewDto>('opendata-overview', () =>
   $fetch<OpenDataOverviewDto>('/api/opendata', {
     headers: requestHeaders,
   }),
 )
+
+const heroSubtitle = computed(() => String(t('opendata.hero.subtitle', { licenseId: licenseSectionId })))
+const datasetsSubtitle = computed(() => String(t('opendata.datasets.subtitle', { licenseId: licenseSectionId })))
 
 const formatProductCount = (count?: string | number | null) => {
   if (count == null || count === '') {
@@ -214,6 +220,12 @@ const heroPrimaryCta = computed(() => ({
   ariaLabel: String(t('opendata.hero.primaryCta.ariaLabel')),
   href: '#datasets',
   appendIcon: 'mdi-arrow-down',
+}))
+
+const educationCard = computed(() => ({
+  icon: 'mdi-database-check-outline',
+  title: String(t('opendata.hero.educationCard.title')),
+  bodyHtml: String(t('opendata.hero.educationCard.description')),
 }))
 
 const canonicalUrl = computed(

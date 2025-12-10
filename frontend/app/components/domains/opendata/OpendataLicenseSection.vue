@@ -1,21 +1,32 @@
 <script setup lang="ts">
-defineProps<{
-  title: string
-  description: string
-  licenseLabel: string
-  licenseUrl: string
-  licenseAriaLabel: string
-}>()
+withDefaults(
+  defineProps<{
+    title: string
+    description: string
+    licenseLabel: string
+    licenseUrl: string
+    licenseAriaLabel: string
+    licenseId?: string
+  }>(),
+  {
+    licenseId: 'opendata-odbl-license',
+  },
+)
 </script>
 
 <template>
-  <section class="opendata-license" aria-labelledby="opendata-license-heading">
+  <section
+    :id="licenseId"
+    class="opendata-license"
+    aria-labelledby="opendata-license-heading"
+  >
     <v-container max-width="lg">
       <v-card class="opendata-license__card" elevation="4" rounded="xl">
         <div class="opendata-license__content">
           <div class="opendata-license__text">
             <h2 id="opendata-license-heading" class="opendata-license__title">{{ title }}</h2>
-            <p class="opendata-license__description">{{ description }}</p>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <p class="opendata-license__description" v-html="description" />
           </div>
           <div class="opendata-license__cta">
             <v-btn

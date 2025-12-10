@@ -1261,7 +1261,7 @@
           "title": "Chiffres clés du dataset ISBN"
         }
       },
-      "subtitle": "Les deux exports sont mis à jour chaque semaine et publiés sous licence ODbL.",
+      "subtitle": "Les deux exports sont mis à jour chaque semaine et publiés sous licence <a href=\"#{licenseId}\" data-scroll-target=\"#{licenseId}\">ODbL</a>.",
       "title": "Deux jeux de données"
     },
     "errors": {
@@ -1295,6 +1295,10 @@
       "primaryCta": {
         "ariaLabel": "Faire défiler jusqu'à la section des jeux de données Open Data",
         "label": "Découvre nos jeux de données"
+      },
+      "educationCard": {
+        "description": "L’open data, ou « données ouvertes », désigne des informations rendues disponibles librement par des organismes pour que chacun puisse les consulter, les utiliser et les réutiliser. L’objectif est de favoriser la transparence et la connaissance, de mieux comprendre le monde qui nous entoure et de permettre à des citoyens, associations ou entreprises de créer de nouvelles idées et services utiles.",
+        "title": "Open Da... Quoi ?"
       },
       "subtitle": "Nous sommes des geeks généreux et partageurs. Pas de secrets chez nous.<br/> Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
       "title": "Open Data"

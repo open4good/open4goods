@@ -15,11 +15,28 @@ interface DatasetCard {
   href: string
 }
 
-defineProps<{
+const props = defineProps<{
   title: string
   subtitle?: string
   cards: DatasetCard[]
 }>()
+
+const handleSubtitleClick = (event: MouseEvent) => {
+  if (!import.meta.client || !props.subtitle) {
+    return
+  }
+
+  const anchor = (event.target as HTMLElement | null)?.closest('[data-scroll-target]')
+  const targetSelector = anchor?.getAttribute('data-scroll-target')
+
+  if (anchor && targetSelector) {
+    const target = document.querySelector(targetSelector)
+    if (target instanceof HTMLElement) {
+      event.preventDefault()
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+}
 </script>
 
 <template>
@@ -31,6 +48,7 @@ defineProps<{
         <p
           v-if="subtitle"
           class="opendata-datasets__subtitle subtitle-text"
+          @click="handleSubtitleClick"
           v-html="subtitle"
         ></p>
         <!-- eslint-enable vue/no-v-html -->

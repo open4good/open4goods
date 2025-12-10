@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
+
 interface HeroCta {
   label: string
   href: string
@@ -8,16 +10,30 @@ interface HeroCta {
   appendIcon?: string
 }
 
+interface HeroEducationCardItem {
+  icon?: string
+  text: string
+}
+
+interface HeroEducationCardProps {
+  icon: string
+  title: string
+  bodyHtml?: string
+  items?: HeroEducationCardItem[]
+}
+
 const props = withDefaults(
   defineProps<{
     eyebrow?: string
     title: string
     subtitle: string
     primaryCta?: HeroCta
+    educationCard?: HeroEducationCardProps
   }>(),
   {
     eyebrow: undefined,
     primaryCta: undefined,
+    educationCard: undefined,
   },
 )
 
@@ -35,6 +51,23 @@ const handlePrimaryClick = (event: MouseEvent) => {
     }
   }
 }
+
+const handleSubtitleClick = (event: MouseEvent) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const anchor = (event.target as HTMLElement | null)?.closest('[data-scroll-target]')
+  const targetSelector = anchor?.getAttribute('data-scroll-target')
+
+  if (anchor && targetSelector) {
+    const target = document.querySelector(targetSelector)
+    if (target instanceof HTMLElement) {
+      event.preventDefault()
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+}
 </script>
 
 <template>
@@ -46,7 +79,7 @@ const handlePrimaryClick = (event: MouseEvent) => {
             <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{ eyebrow }}</span>
             <h1 id="opendata-hero-heading" class="opendata-hero__title">{{ title }}</h1>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="opendata-hero__subtitle" v-html="subtitle" />
+            <p class="opendata-hero__subtitle" @click="handleSubtitleClick" v-html="subtitle" />
           </div>
 
 
@@ -73,6 +106,15 @@ const handlePrimaryClick = (event: MouseEvent) => {
             <div class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary" />
               <span v-for="index in 6" :key="index" />
           </div>
+
+          <HeroEducationCard
+            v-if="educationCard"
+            class="opendata-hero__education-card"
+            :icon="educationCard.icon"
+            :title="educationCard.title"
+            :body-html="educationCard.bodyHtml"
+            :items="educationCard.items"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -121,6 +163,7 @@ const handlePrimaryClick = (event: MouseEvent) => {
   display: flex
   justify-content: center
   align-items: center
+  position: relative
 
 .opendata-hero__glow
   position: relative
@@ -139,12 +182,25 @@ const handlePrimaryClick = (event: MouseEvent) => {
   border-color: rgba(var(--v-theme-accent-supporting), 0.3)
   box-shadow: 0 0 40px rgba(var(--v-theme-accent-supporting), 0.22)
 
+.opendata-hero__education-card
+  width: 100%
+  max-width: 420px
+  position: relative
+  z-index: 1
+  margin-top: clamp(1rem, 3vw, 2rem)
+  box-shadow: 0 20px 60px rgba(var(--v-theme-shadow-primary-600), 0.18)
+
 
 @media (max-width: 959px)
   .opendata-hero__visual
     margin-top: 2rem
+    align-items: stretch
 
   .opendata-hero__glow
     width: 240px
+    margin-inline: auto
+
+  .opendata-hero__education-card
+    max-width: none
 </style>
 
