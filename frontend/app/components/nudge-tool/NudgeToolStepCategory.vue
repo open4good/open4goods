@@ -19,12 +19,30 @@
           :color="selectedCategoryId === category.id ? 'primary' : undefined"
           :variant="selectedCategoryId === category.id ? 'elevated' : 'tonal'"
           rounded="xl"
-          role="button"
-          :aria-pressed="(selectedCategoryId === category.id).toString()"
-          @click="() => emit('select', category.id ?? '')"
-        >
-          <div class="nudge-step-category__icon">
-            <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+        role="button"
+        :aria-pressed="(selectedCategoryId === category.id).toString()"
+        @click="() => emit('select', category.id ?? '')"
+      >
+          <div class="nudge-step-category__image">
+            <v-img
+              :src="category.imageSmall"
+              :alt="category.verticalHomeTitle ?? category.id ?? ''"
+              aspect-ratio="1"
+              class="nudge-step-category__img"
+              cover
+            >
+              <template #placeholder>
+                <div class="nudge-step-category__fallback">
+                  <v-icon icon="mdi-tag" size="28" />
+                </div>
+              </template>
+
+              <template #error>
+                <div class="nudge-step-category__fallback">
+                  <v-icon icon="mdi-tag" size="28" />
+                </div>
+              </template>
+            </v-img>
           </div>
           <p class="nudge-step-category__name">{{ category.verticalHomeTitle ?? category.id }}</p>
         </v-card>
@@ -68,14 +86,24 @@ const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
     gap: 8px;
   }
 
-  &__icon {
-    display: inline-flex;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--v-theme-primary), 0.1);
+  &__image {
+    width: 72px;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(var(--v-theme-primary), 0.08);
+  }
+
+  &__img {
+    height: 100%;
+  }
+
+  &__fallback {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    background: rgba(var(--v-theme-primary), 0.06);
+    color: rgb(var(--v-theme-primary));
   }
 
   &__name {
