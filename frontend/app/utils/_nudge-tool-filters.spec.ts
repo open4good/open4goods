@@ -6,19 +6,27 @@ import {
   buildConditionFilter,
   buildNudgeFilterRequest,
   buildScoreFilters,
-  type ProductConditionChoice,
+  type ProductConditionSelection,
 } from './_nudge-tool-filters'
 
 describe('nudge tool filters', () => {
   it('builds condition filters according to the choice', () => {
-    const cases: Record<ProductConditionChoice, Filter | null> = {
-      any: null,
+    const cases: Record<string, Filter | null> = {
+      none: null,
       new: { field: 'price.conditions', operator: 'term', terms: ['NEW'] },
       occasion: { field: 'price.conditions', operator: 'term', terms: ['OCCASION'] },
+      multi: { field: 'price.conditions', operator: 'term', terms: ['NEW', 'OCCASION'] },
     }
 
     Object.entries(cases).forEach(([choice, expected]) => {
-      expect(buildConditionFilter(choice as ProductConditionChoice)).toEqual(expected)
+      const selection: ProductConditionSelection =
+        choice === 'none'
+          ? []
+          : choice === 'multi'
+            ? ['new', 'occasion']
+            : [choice as ProductConditionSelection[number]]
+
+      expect(buildConditionFilter(selection)).toEqual(expected)
     })
   })
 

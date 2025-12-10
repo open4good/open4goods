@@ -125,14 +125,105 @@ export const getRemainingSubsetFilters = (
   return convertSubsetCriteriaToFilters(subset).filter((_, index) => index !== removedIndex)
 }
 
+const buildGroupKey = (subset: VerticalSubsetDto): string => {
+  return subset.group ?? subset.id ?? 'ungrouped'
+}
+
+const groupFiltersByField = (filters: Filter[]): Map<string, Filter[]> => {
+  const buckets = new Map<string, Filter[]>()
+
+  filters.forEach((filter) => {
+    if (!filter.field || !filter.operator) {
+      return
+    }
+
+    const key = `${filter.field ?? ''}|${filter.operator}`
+    const bucket = buckets.get(key) ?? []
+    bucket.push(filter)
+    buckets.set(key, bucket)
+  })
+
+  return buckets
+}
+
+const mergeTermFilters = (field: string, filters: Filter[]): Filter | null => {
+  const terms = filters.flatMap((filter) => normalizeTerms(filter.terms))
+  if (!terms.length) {
+    return null
+  }
+
+  return { field, operator: 'term', terms: Array.from(new Set(terms)) }
+}
+
+const mergeRangeFilters = (field: string, filters: Filter[]): Filter | null => {
+  const minValues = filters
+    .map((filter) => filter.min)
+    .filter((value): value is number => typeof value === 'number')
+  const maxValues = filters
+    .map((filter) => filter.max)
+    .filter((value): value is number => typeof value === 'number')
+
+  const merged: Filter = { field, operator: 'range' }
+
+  if (minValues.length) {
+    merged.min = Math.min(...minValues)
+  }
+
+  if (maxValues.length) {
+    merged.max = Math.max(...maxValues)
+  }
+
+  if (merged.min != null && merged.max != null && merged.min > merged.max) {
+    return null
+  }
+
+  if (merged.min == null && merged.max == null) {
+    return null
+  }
+
+  return merged
+}
+
+const mergeGroupFilters = (filters: Filter[]): Filter[] => {
+  const groupedByField = groupFiltersByField(filters)
+
+  return Array.from(groupedByField.entries())
+    .map(([, entries]) => {
+      const operator = entries[0]?.operator
+      const field = entries[0]?.field ?? ''
+
+      if (operator === 'term') {
+        return mergeTermFilters(field, entries)
+      }
+
+      if (operator === 'range') {
+        return mergeRangeFilters(field, entries)
+      }
+
+      return null
+    })
+    .filter((filter): filter is Filter => Boolean(filter))
+}
+
 export const buildFilterRequestFromSubsets = (
   subsets: VerticalSubsetDto[],
   activeSubsetIds: string[],
 ): FilterRequestDto => {
-  const filters = activeSubsetIds.flatMap((subsetId) => {
+  const groups = new Map<string, Filter[]>()
+
+  activeSubsetIds.forEach((subsetId) => {
     const subset = subsets.find((candidate) => candidate.id === subsetId)
-    return subset ? convertSubsetCriteriaToFilters(subset) : []
+    if (!subset) {
+      return
+    }
+
+    const groupKey = buildGroupKey(subset)
+    const current = groups.get(groupKey) ?? []
+    const filters = convertSubsetCriteriaToFilters(subset)
+    groups.set(groupKey, [...current, ...filters])
   })
 
-  return filters.length ? { filters } : {}
+  const mergedFilters = Array.from(groups.values()).flatMap((filters) => mergeGroupFilters(filters))
+
+  return mergedFilters.length ? { filters: mergedFilters } : {}
 }

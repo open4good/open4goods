@@ -15,14 +15,14 @@
 		  class="nudge-wizard__stepper elevation-0 border-0"
 		/>
 
-      <div v-if="totalMatches >= 0 && selectedCategory" class="nudge-wizard__matches">
+      <div v-if="shouldShowMatches" class="nudge-wizard__matches">
         <v-btn
           variant="text"
           color="primary"
           :disabled="!selectedCategory"
           @click="navigateToCategoryPage"
         >
-          {{ $t('nudge-tool.meta.matches', { count: totalMatches }) }}
+          {{ $t('nudge-tool.meta.matches', { count: animatedMatches }) }}
         </v-btn>
       </div>
     </div>
@@ -83,7 +83,7 @@ import {
   buildConditionFilter,
   buildNudgeFilterRequest,
   buildScoreFilters,
-  type ProductConditionChoice,
+  type ProductConditionSelection,
 } from '~/utils/_nudge-tool-filters'
 import NudgeToolStepCategory from './NudgeToolStepCategory.vue'
 import NudgeToolStepCondition from './NudgeToolStepCondition.vue'
@@ -116,7 +116,7 @@ const { fetchCategories } = useCategories()
 
 const categories = ref<VerticalConfigDto[]>(props.verticals ?? [])
 const selectedCategoryId = ref<string | null>(props.initialCategoryId ?? null)
-const condition = ref<ProductConditionChoice>('any')
+const condition = ref<ProductConditionSelection>([])
 const selectedScores = ref<string[]>([])
 const activeSubsetIds = ref<string[]>(props.initialSubsets ?? [])
 const baseFilters = ref<Filter[]>(props.initialFilters?.filters ?? [])
@@ -124,6 +124,7 @@ const baseFilters = ref<Filter[]>(props.initialFilters?.filters ?? [])
 const activeStepKey = ref<string>('category')
 const loading = ref(false)
 const totalMatches = ref(0)
+const animatedMatches = ref(0)
 const recommendations = ref<ProductDto[]>([])
 
 const selectedCategory = computed(() =>
@@ -231,9 +232,8 @@ const steps = computed<WizardStep[]>(() => {
     component: NudgeToolStepCondition,
     title: t('nudge-tool.steps.condition.title'),
     props: { modelValue: condition.value },
-    onUpdate: (value: ProductConditionChoice) => {
+    onUpdate: (value: ProductConditionSelection) => {
       condition.value = value
-      goToNext()
     },
   })
 
@@ -305,6 +305,10 @@ watch(
 )
 
 const goToNext = () => {
+  if (isNextDisabled.value) {
+    return
+  }
+
   const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
   const nextStep = steps.value[index + 1]
   if (nextStep) {
@@ -365,6 +369,41 @@ watch(
   { deep: true },
 )
 
+let animationFrame: number | null = null
+
+watch(
+  totalMatches,
+  (next) => {
+    if (!import.meta.client) {
+      animatedMatches.value = next
+      return
+    }
+
+    if (animationFrame != null) {
+      cancelAnimationFrame(animationFrame)
+    }
+
+    const startValue = animatedMatches.value
+    const delta = next - startValue
+    const duration = 450
+    const startTime = performance.now()
+
+    const step = (timestamp: number) => {
+      const progress = Math.min((timestamp - startTime) / duration, 1)
+      animatedMatches.value = Math.round(startValue + delta * progress)
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(step)
+      } else {
+        animationFrame = null
+      }
+    }
+
+    animationFrame = requestAnimationFrame(step)
+  },
+  { immediate: true },
+)
+
 const hydrateCategories = async () => {
   if (categories.value.length) {
     return
@@ -401,17 +440,25 @@ const hasPreviousStep = computed(() => {
 })
 
 const hasNextStep = computed(() => {
+  if (activeStepKey.value === 'category') {
+    return false
+  }
+
   const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
   return index >= 0 && index < steps.value.length - 1
 })
 
 const isMultiSelectStep = computed(() =>
-  activeStepKey.value === 'scores' || activeStepKey.value.startsWith('group-'),
+  activeStepKey.value === 'scores' || activeStepKey.value === 'condition' || activeStepKey.value.startsWith('group-'),
 )
 
 const hasSelectionForStep = computed(() => {
   if (activeStepKey.value === 'scores') {
     return selectedScores.value.length > 0
+  }
+
+  if (activeStepKey.value === 'condition') {
+    return condition.value.length > 0
   }
 
   if (activeStepKey.value.startsWith('group-')) {
@@ -451,23 +498,15 @@ const showStepper = computed(
   () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value),
 )
 
-const onStepClick = (value: string | number) => {
-  const targetKey = String(value)
-  if (targetKey === 'category') {
-    resetForCategorySelection()
-    return
-  }
-
-  if (steps.value.some((step) => step.key === targetKey)) {
-    activeStepKey.value = targetKey
-  }
-}
+const shouldShowMatches = computed(
+  () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category',
+)
 
 const resetForCategorySelection = () => {
   selectedCategoryId.value = null
   selectedScores.value = []
   activeSubsetIds.value = []
-  condition.value = 'any'
+  condition.value = []
   recommendations.value = []
   totalMatches.value = 0
   activeStepKey.value = 'category'

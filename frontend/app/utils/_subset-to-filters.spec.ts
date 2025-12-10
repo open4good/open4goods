@@ -3,6 +3,7 @@ import type { Filter, VerticalSubsetDto } from '~~/shared/api-client'
 
 import {
   convertSubsetCriteriaToFilters,
+  buildFilterRequestFromSubsets,
   getRemainingSubsetFilters,
   mergeFiltersWithoutDuplicates,
 } from './_subset-to-filters'
@@ -43,5 +44,70 @@ describe('_subset-to-filters helpers', () => {
         expect.objectContaining({ field: 'price.min', operator: 'range', min: 0 }),
       ]),
     )
+  })
+
+  it('merges subset selections within the same group using OR semantics for term filters', () => {
+    const subsets: VerticalSubsetDto[] = [
+      {
+        id: 'new-items',
+        group: 'condition',
+        criterias: [{ field: 'price.conditions', operator: 'EQUALS', value: 'NEW' }],
+      },
+      {
+        id: 'used-items',
+        group: 'condition',
+        criterias: [{ field: 'price.conditions', operator: 'EQUALS', value: 'OCCASION' }],
+      },
+    ]
+
+    const request = buildFilterRequestFromSubsets(subsets, ['new-items', 'used-items'])
+
+    expect(request).toEqual({
+      filters: [
+        {
+          field: 'price.conditions',
+          operator: 'term',
+          terms: expect.arrayContaining(['NEW', 'OCCASION']),
+        },
+      ],
+    })
+  })
+
+  it('combines compatible range filters by widening the bounds', () => {
+    const subsets: VerticalSubsetDto[] = [
+      {
+        id: 'mid-range',
+        group: 'price',
+        criterias: [{ field: 'price.min', operator: 'LOWER_THAN', value: '800' }],
+      },
+      {
+        id: 'entry',
+        group: 'price',
+        criterias: [{ field: 'price.min', operator: 'LOWER_THAN', value: '500' }],
+      },
+    ]
+
+    const request = buildFilterRequestFromSubsets(subsets, ['mid-range', 'entry'])
+
+    expect(request.filters?.[0]).toMatchObject({ field: 'price.min', operator: 'range', max: 800 })
+  })
+
+  it('drops conflicting range filters when they cannot be merged safely', () => {
+    const subsets: VerticalSubsetDto[] = [
+      {
+        id: 'budget',
+        group: 'price',
+        criterias: [{ field: 'price.min', operator: 'LOWER_THAN', value: '500' }],
+      },
+      {
+        id: 'premium',
+        group: 'price',
+        criterias: [{ field: 'price.min', operator: 'GREATER_THAN', value: '1000' }],
+      },
+    ]
+
+    const request = buildFilterRequestFromSubsets(subsets, ['budget', 'premium'])
+
+    expect(request).toEqual({})
   })
 })
