@@ -12,6 +12,7 @@ const props = withDefaults(
     items?: HeroEducationCardItem[]
   }>(),
   {
+    bodyHtml: undefined,
     items: () => [],
   },
 )
@@ -24,11 +25,13 @@ const props = withDefaults(
       <h2 class="hero-education-card__title">{{ props.title }}</h2>
     </div>
 
+    <!-- eslint-disable vue/no-v-html -->
     <p
       v-if="props.bodyHtml"
       class="hero-education-card__body"
       v-html="props.bodyHtml"
     />
+    <!-- eslint-enable vue/no-v-html -->
 
     <v-divider v-if="props.items?.length" class="my-4" />
 

@@ -1261,7 +1261,7 @@
           "title": "ISBN dataset overview"
         }
       },
-      "subtitle": "Pick the export that matches your project. Both are updated weekly and delivered under the Open Database Licence.",
+      "subtitle": "Pick the export that matches your project. Both are updated weekly and delivered under the Open Database Licence (<a href=\"#{licenseId}\" data-scroll-target=\"#{licenseId}\">ODbL</a>).",
       "title": "Two complementary datasets"
     },
     "errors": {
@@ -1295,6 +1295,10 @@
       "primaryCta": {
         "ariaLabel": "Scroll to the open data datasets section",
         "label": "Explore the datasets"
+      },
+      "educationCard": {
+        "description": "Open data refers to information that organisations make freely available so anyone can consult, use or reuse it. The goal is to promote transparency and knowledge, better understand the world around us, and enable citizens, nonprofits or companies to create new ideas and useful services.",
+        "title": "Open data... what?"
       },
       "subtitle": "Download GTIN and ISBN datasets maintained by Nudger to build your own analyses, services and research.",
       "title": "Transparent product data for responsible commerce"
