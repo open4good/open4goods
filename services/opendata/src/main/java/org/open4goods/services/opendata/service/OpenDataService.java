@@ -75,7 +75,6 @@ public class OpenDataService implements HealthIndicator {
             "gtinType",
             "offers_count",
             "min_price",
-            "min_price_compensation",
             "currency",
             "categories",
             "url"
@@ -87,7 +86,6 @@ public class OpenDataService implements HealthIndicator {
             "last_updated",
             "offers_count",
             "min_price",
-            "min_price_compensation",
             "currency",
             "url",
             "editeur",
@@ -414,23 +412,20 @@ public class OpenDataService implements HealthIndicator {
             if (bestPrice.getPrice() != null) {
                 line[8] = String.valueOf(bestPrice.getPrice());
             }
-            if (bestPrice.getCompensation() != null) {
-                line[9] = String.valueOf(bestPrice.getCompensation());
-            }
             if (bestPrice.getCurrency() != null) {
-                line[10] = bestPrice.getCurrency().toString();
+                line[9] = bestPrice.getCurrency().toString();
             }
         }
 
         Collection<String> categories = data.getDatasourceCategories();
         if (categories != null && !categories.isEmpty()) {
-            line[11] = StringUtils.join(categories, " ; ");
+            line[10] = StringUtils.join(categories, " ; ");
         }
 
         try {
             // TODO : Point to international website + internationalized URL
             String url = "https://nudger.fr/" + StringUtils.defaultString(data.gtin());
-            line[12] = url;
+            line[11] = url;
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for GTIN {}", data.getId(), e);
         }
@@ -457,30 +452,27 @@ public class OpenDataService implements HealthIndicator {
             if (bestPrice.getPrice() != null) {
                 line[4] = String.valueOf(bestPrice.getPrice());
             }
-            if (bestPrice.getCompensation() != null) {
-                line[5] = String.valueOf(bestPrice.getCompensation());
-            }
             if (bestPrice.getCurrency() != null) {
-                line[6] = bestPrice.getCurrency().toString();
+                line[5] = bestPrice.getCurrency().toString();
             }
         }
         try {
             // TODO : Point to international website + internationalized URL
             String url = "https://nudger.fr/" + StringUtils.defaultString(data.gtin());
-            line[7] = url;
+            line[6] = url;
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for ISBN {}", data.getId(), e);
         }
 
         Map<String, String> isbnAttributes = extractAttributes(data, ISBN_ATTRIBUTE_KEYS);
-        line[8] = StringUtils.defaultString(isbnAttributes.get("EDITEUR"));
-        line[9] = StringUtils.defaultString(isbnAttributes.get("FORMAT"));
-        line[10] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
-        line[11] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 1"));
-        line[12] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 2"));
-        line[13] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 3"));
-        line[14] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
-        line[15] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
+        line[7] = StringUtils.defaultString(isbnAttributes.get("EDITEUR"));
+        line[8] = StringUtils.defaultString(isbnAttributes.get("FORMAT"));
+        line[9] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
+        line[10] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 1"));
+        line[11] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 2"));
+        line[12] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 3"));
+        line[13] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
+        line[14] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
 
         return line;
     }
