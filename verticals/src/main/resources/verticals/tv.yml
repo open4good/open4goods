@@ -221,7 +221,7 @@ nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
       scoreMinValue: 3
-      mdiIcon: "lightning-bolt"
+      mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
         fr: "Consommation énergétique"
@@ -230,7 +230,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
       scoreMinValue: 3
-      mdiIcon: "archive-outline"
+      mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
         fr: "Durabilité"
@@ -240,7 +240,7 @@ nudgeToolConfig:
                 
     - scoreName: "REPARABILITY"
       scoreMinValue: 3
-      mdiIcon: "tools"
+      mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
         fr: "Réparabilité"
@@ -248,8 +248,8 @@ nudgeToolConfig:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "BRAND_SUSTAINABILITY"
-      scoreMinValue: 3
-      mdiIcon: "scale-balance"
+      scoreMinValue: 4
+      mdiIcon: "mdi-scale-balance"
       title:
         en: "ESG criterias"
         fr: "Critères ESG"
@@ -258,7 +258,7 @@ nudgeToolConfig:
         fr: "Modèles dont la marque dispose d'un bon indice ESG"
   subsetGroups:
     - id: "price"
-      mdiIcon: "currency-eur"
+      mdiIcon: "mdi-currency-eur"
       layout: "grid"
       title:
         en: "Budget"
@@ -270,7 +270,7 @@ nudgeToolConfig:
         en: "Continue"
         fr: "Continuer"
     - id: "screen_size"
-      mdiIcon: "television-classic"
+      mdiIcon: "mdi-television-classic"
       layout: "grid"
       title:
         en: "Screen size"

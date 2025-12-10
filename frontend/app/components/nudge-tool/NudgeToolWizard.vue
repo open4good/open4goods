@@ -1,15 +1,19 @@
 <template>
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
     <div class="nudge-wizard__header">
-      <v-stepper
-        v-if="showStepper"
-        v-model="activeStepKey"
-        density="compact"
-        alt-labels
-        :items="stepperItems"
-        class="nudge-wizard__stepper"
-        hide-actions
-      />
+		<v-stepper
+		  v-if="showStepper"
+		  v-model="activeStepKey"
+		  density="compact"
+		  alt-labels
+		  :items="stepperItems"
+		  :item-props="true"
+		  editable
+		  non-linear
+		  flat
+		  hide-actions
+		  class="nudge-wizard__stepper elevation-0 border-0"
+		/>
 
       <div v-if="totalMatches >= 0 && selectedCategory" class="nudge-wizard__matches">
         <v-btn
@@ -439,6 +443,7 @@ const stepperItems = computed(() =>
     value: step.key,
     icon: resolveStepIcon(step.key),
     disabled: false,
+    editable: true
   })),
 )
 
