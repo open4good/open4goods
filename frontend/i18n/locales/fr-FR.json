@@ -1358,8 +1358,9 @@
     "hero": {
       "ctaGroupLabel": "Appels à action principaux",
       "infoCard": {
+        "title": "C'est quoi l'Open Source ?",
         "description": "L’Open Source désigne des logiciels dont le fonctionnement est ouvert et accessible à tous. Chacun peut les utiliser librement, les modifier et les partager. L’idée centrale est le partage du savoir et la collaboration.",
-        "highlight": "",
+        "highlight": "Open4goods",
         "items": {
           "collaborativeReviews": "Contributions",
           "openLicenses": "Code publié sous licence GPL",

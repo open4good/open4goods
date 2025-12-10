@@ -1358,6 +1358,7 @@
     "hero": {
       "ctaGroupLabel": "Primary hero actions",
       "infoCard": {
+        "title": "What is open source?",
         "description": "grows with everyone. Every pull request, issue or piece of feedback makes the platform more transparent.",
         "highlight": "Open4goods",
         "items": {
