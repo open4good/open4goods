@@ -2,21 +2,22 @@ import type { Filter, FilterRequestDto, NudgeToolScoreDto } from '~~/shared/api-
 
 import { mergeFiltersWithoutDuplicates } from './_subset-to-filters'
 
-export type ProductConditionChoice = 'new' | 'occasion' | 'any'
+export type ProductConditionChoice = 'new' | 'occasion'
+export type ProductConditionSelection = ProductConditionChoice[]
 
 const PRODUCT_STATE_FIELD = 'price.conditions'
 
-export const buildConditionFilter = (choice: ProductConditionChoice): Filter | null => {
-  if (choice === 'any') {
+export const buildConditionFilter = (choices: ProductConditionSelection): Filter | null => {
+  if (!choices.length) {
     return null
   }
 
-  const value = choice === 'new' ? 'NEW' : 'OCCASION'
+  const terms = Array.from(new Set(choices.map((choice) => (choice === 'new' ? 'NEW' : 'OCCASION'))))
 
   return {
     field: PRODUCT_STATE_FIELD,
     operator: 'term',
-    terms: [value],
+    terms,
   }
 }
 
