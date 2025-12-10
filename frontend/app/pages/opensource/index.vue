@@ -94,8 +94,8 @@ interface ContactCtaDisplay {
 
 interface HeroInfoCardDisplay {
   icon: string
-  highlight?: string
-  description?: string
+  title: string
+  bodyHtml?: string
   items: { icon?: string; text: string }[]
 }
 
@@ -141,8 +141,8 @@ const heroCtaGroupLabel = computed(() => String(t('opensource.hero.ctaGroupLabel
 
 const heroInfoCard = computed<HeroInfoCardDisplay>(() => ({
   icon: 'mdi-source-branch',
-  highlight: String(t('opensource.hero.infoCard.highlight')),
-  description: String(t('opensource.hero.infoCard.description')),
+  title: String(t('opensource.hero.infoCard.title')),
+  bodyHtml: `<strong>${String(t('opensource.hero.infoCard.highlight'))}</strong> ${String(t('opensource.hero.infoCard.description'))}`,
   items: [
     {
       icon: 'mdi-checkbox-marked-circle-outline',
