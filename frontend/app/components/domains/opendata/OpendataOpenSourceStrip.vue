@@ -49,7 +49,6 @@ defineProps<{
   box-shadow: 0 12px 40px rgba(var(--v-theme-shadow-primary-600), 0.08)
 
 .opendata-oss__text
-  max-width: 640px
   display: flex
   flex-direction: column
   gap: 0.75rem
