@@ -41,7 +41,7 @@
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
     },
     "hero": {
-      "eyebrow": "Nudger, c'est :",
+      "eyebrow": "notre comparateur :",
       "title": "Réconcilier écologie et pouvoir d'achat",
       "subtitle": "Gagne du temps. Choisis librement.",
       "imageAlt": "Illustration d’un comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
@@ -57,12 +57,12 @@
             "label": "Une évaluation écologique et environnementale unique"
           },
           {
-            "icon": "🏷️",
-            "label": "Les meilleurs prix du marché"
-          },
-          {
             "icon": "🛡️",
             "label": "100% indépendant, logiciel libre et données ouvertes"
+          },
+          {
+            "icon": "🏷️",
+            "label": "Sans se faire avoir sur les prix"
           }
         ]
       }

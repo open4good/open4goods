@@ -221,35 +221,35 @@ nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
       scoreMinValue: 3
-      mdiIcon: "leaf"
+      mdiIcon: "lightning-bolt"
       title:
-        en: "Low energy consumption"
+        en: "Energy consumption"
         fr: "Consommation énergétique"
       description:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
       scoreMinValue: 3
-      mdiIcon: "leaf"
+      mdiIcon: "archive-outline"
       title:
-        en: "Great durability"
-        fr: "Bonne durabilité"
+        en: "Durability"
+        fr: "Durabilité"
       description:
         en: "Televisions with a good durability"
         fr: "Téléviseurs avec une bonne durabilité"
                 
     - scoreName: "REPARABILITY"
       scoreMinValue: 3
-      mdiIcon: "leaf"
+      mdiIcon: "tools"
       title:
-        en: "Great reparability"
-        fr: "Bonne réparabilité"
+        en: "Reparability"
+        fr: "Réparabilité"
       description:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "BRAND_SUSTAINABILITY"
       scoreMinValue: 3
-      mdiIcon: "wrench"
+      mdiIcon: "scale-balance"
       title:
         en: "ESG criterias"
         fr: "Critères ESG"
@@ -258,7 +258,7 @@ nudgeToolConfig:
         fr: "Modèles dont la marque dispose d'un bon indice ESG"
   subsetGroups:
     - id: "price"
-      mdiIcon: "cash"
+      mdiIcon: "currency-eur"
       layout: "grid"
       title:
         en: "Budget"
