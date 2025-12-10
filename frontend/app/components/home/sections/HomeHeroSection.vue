@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
-import { useDisplay } from 'vuetify'
+import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import type { VerticalConfigDto } from '~~/shared/api-client'
 
 type HeroHelperItem = {
   icon: string
@@ -14,8 +15,7 @@ type HeroHelperItem = {
 const props = defineProps<{
   searchQuery: string
   minSuggestionQueryLength: number
-  heroVideoSrc: string
-  heroVideoPoster: string
+  verticals?: VerticalConfigDto[]
 }>()
 
 const emit = defineEmits<{
@@ -29,12 +29,8 @@ const { t, tm } = useI18n()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
-const { minSuggestionQueryLength, heroVideoSrc, heroVideoPoster } = toRefs(props)
-
-const display = useDisplay()
-
-const shouldShowHeroVideo = computed(() => Boolean(heroVideoSrc.value))
-const shouldRenderHeroMedia = computed(() => display.mdAndUp.value && shouldShowHeroVideo.value)
+const { minSuggestionQueryLength } = toRefs(props)
+const wizardVerticals = computed(() => props.verticals ?? [])
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
@@ -151,32 +147,14 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             </ul>
           </v-col>
 
-          <v-col
-            v-if="shouldRenderHeroMedia"
-            cols="12"
-            lg="6"
-            class="home-hero__media"
-            :aria-hidden="!shouldRenderHeroMedia"
-          >
-            <v-sheet rounded="xl" elevation="8" class="home-hero__media-sheet">
-              <ClientOnly>
-                <div v-if="shouldShowHeroVideo" class="home-hero__video-wrapper">
-                  <video
-                    class="home-hero__video"
-                    :poster="heroVideoPoster"
-                    muted
-                    autoplay
-                    playsinline
-                    preload="metadata"
-                  >
-                    <source :src="heroVideoSrc" type="video/mp4" />
-                  </video>
-                  <div class="home-hero__video-overlay" />
-                </div>
-              </ClientOnly>
-              <p v-if="heroVideoSrc" class="home-hero__media-link home-hero__sr-only">
-                <a :href="heroVideoSrc">{{ t('home.hero.video.accessibleLink') }}</a>
-              </p>
+          <v-col cols="12" lg="6" class="home-hero__wizard">
+            <v-sheet rounded="xl" elevation="8" class="home-hero__wizard-sheet">
+              <div class="home-hero__wizard-header">
+                <p class="home-hero__nudge-eyebrow">{{ t('home.nudgeTool.eyebrow') }}</p>
+                <h2 class="home-hero__nudge-title">{{ t('home.nudgeTool.title') }}</h2>
+                <p class="home-hero__nudge-subtitle">{{ t('home.nudgeTool.subtitle') }}</p>
+              </div>
+              <NudgeToolWizard :verticals="wizardVerticals" />
             </v-sheet>
           </v-col>
         </v-row>
@@ -263,51 +241,46 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero__helper-text
   line-height: 1.35
 
-.home-hero__media
+.home-hero__wizard
   display: flex
+  align-items: stretch
+
+.home-hero__wizard-sheet
+  width: 100%
+  display: flex
+  flex-direction: column
+  gap: 1.5rem
+  padding: clamp(1rem, 2.8vw, 1.5rem)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.96)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6)
+
+.home-hero__wizard-header
+  display: flex
+  flex-direction: column
+  gap: 0.4rem
+
+.home-hero__nudge-eyebrow
+  display: inline-flex
   align-items: center
-  justify-content: center
-
-.home-hero__media-sheet
-  width: 100%
-  padding: clamp(0.5rem, 2vw, 1rem)
-  background: rgba(var(--v-theme-surface-glass), 0.85)
-  overflow: hidden
-  position: relative
-
-.home-hero__video-wrapper
-  position: relative
-  width: 100%
-  aspect-ratio: 16 / 9
-  border-radius: clamp(1.75rem, 4vw, 2.5rem)
-  overflow: hidden
-
-.home-hero__video
-  width: 100%
-  height: 100%
-  object-fit: cover
-  transform: scale(1.3)
-  transform-origin: center
-
-.home-hero__video-overlay
-  position: absolute
-  inset: 0
-  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.1), rgba(var(--v-theme-hero-gradient-end), 0.2))
-  pointer-events: none
-
-.home-hero__media-link
+  gap: 8px
   margin: 0
+  padding: 6px 12px
+  font-weight: 700
+  color: rgb(var(--v-theme-text-on-accent))
+  background: linear-gradient(90deg, rgba(var(--v-theme-hero-gradient-start), 0.9), rgba(var(--v-theme-hero-gradient-end), 0.95))
+  border-radius: 999px
+  width: fit-content
 
-.home-hero__sr-only
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  white-space: nowrap
-  border: 0
+.home-hero__nudge-title
+  margin: 0
+  font-size: clamp(1.5rem, 2.4vw, 1.85rem)
+  color: rgb(var(--v-theme-text-neutral-strong))
+  font-weight: 800
+
+.home-hero__nudge-subtitle
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: clamp(1rem, 1.4vw, 1.05rem)
 
 @media (max-width: 959px)
   .home-hero
@@ -315,18 +288,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     padding-block-start: clamp(2.5rem, 12vw, 4.5rem)
     padding-block-end: clamp(3.5rem, 16vw, 5.5rem)
 
-  .home-hero__media
+  .home-hero__wizard
     order: 1
 
   .home-hero__content
     order: 2
-
-  .home-hero__video-wrapper
-    aspect-ratio: 4 / 5
-    min-height: 320px
-
-  .home-hero__video
-    transform: scale(1.15)
 
   .home-hero__categories-inner
     padding: clamp(0.4rem, 5vw, 0.75rem) clamp(0.75rem, 5vw, 1.25rem)

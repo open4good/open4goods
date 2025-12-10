@@ -10,7 +10,6 @@ import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
-import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import type { CategorySuggestionItem, ProductSuggestionItem } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
@@ -27,8 +26,6 @@ const requestURL = useRequestURL()
 const searchQuery = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
-const heroVideoSrc = useState<string>('home-hero-video-src', () => '/videos/video-concept1.mp4')
-const heroVideoPoster = '/images/home/hero-placeholder.svg'
 
 type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
 type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
@@ -70,14 +67,6 @@ const hasRenderableImage = (value: unknown): value is string =>
 if (import.meta.server) {
   await fetchCategories(true)
   await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
-
-  const { getHeroVideoSources } = await import('~~/server/utils/hero-videos')
-  const videoCandidates = await getHeroVideoSources()
-
-  if (videoCandidates.length > 0) {
-    const randomIndex = Math.floor(Math.random() * videoCandidates.length)
-    heroVideoSrc.value = videoCandidates[randomIndex]
-  }
 } else {
   if (rawCategories.value.length === 0) {
     await fetchCategories(true)
@@ -506,26 +495,11 @@ useHead(() => ({
     <HomeHeroSection
       v-model:search-query="searchQuery"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-      :hero-video-src="heroVideoSrc"
-      :hero-video-poster="heroVideoPoster"
+      :verticals="rawCategories"
       @submit="handleSearchSubmit"
       @select-category="handleCategorySuggestion"
       @select-product="handleProductSuggestion"
     />
-    <section class="home-page__nudge-tool">
-      <v-container class="pa-0 pa-md-6">
-        <v-row class="align-center" :gutter="0">
-          <v-col cols="12" md="4" class="pe-md-6 pb-6 pb-md-0">
-            <p class="home-page__nudge-eyebrow">{{ t('home.nudgeTool.eyebrow') }}</p>
-            <h2 class="home-page__nudge-title">{{ t('home.nudgeTool.title') }}</h2>
-            <p class="home-page__nudge-subtitle">{{ t('home.nudgeTool.subtitle') }}</p>
-          </v-col>
-          <v-col cols="12" md="8">
-            <NudgeToolWizard :verticals="rawCategories" />
-          </v-col>
-        </v-row>
-      </v-container>
-    </section>
     <div class="home-page__sections">
       <HomeProblemsSection :items="problemItems" />
 
@@ -564,33 +538,6 @@ useHead(() => ({
   flex-direction: column
   gap: 0
   background-color: rgb(var(--v-theme-surface-default))
-
-.home-page__nudge-tool
-  background-color: rgb(var(--v-theme-surface-primary-050))
-  padding: clamp(2.5rem, 6vw, 4rem) 0
-
-.home-page__nudge-eyebrow
-  display: inline-flex
-  align-items: center
-  gap: 8px
-  margin: 0 0 8px
-  padding: 6px 12px
-  font-weight: 700
-  color: rgb(var(--v-theme-text-on-accent))
-  background: linear-gradient(90deg, rgba(var(--v-theme-hero-gradient-start), 0.8), rgba(var(--v-theme-hero-gradient-end), 0.9))
-  border-radius: 999px
-  width: fit-content
-
-.home-page__nudge-title
-  margin: 0 0 8px
-  font-size: clamp(1.6rem, 2.5vw, 2rem)
-  color: rgb(var(--v-theme-text-neutral-strong))
-  font-weight: 800
-
-.home-page__nudge-subtitle
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
-  font-size: clamp(1rem, 1.6vw, 1.1rem)
 
 .home-page__sections
   display: flex
