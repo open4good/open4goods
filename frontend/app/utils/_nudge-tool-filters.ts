@@ -36,7 +36,7 @@ export const buildScoreFilters = (
       }
 
       return {
-        field: `scores.${name}`,
+        field: `scores.${name}.value`,
         operator: 'range',
         min: matchedScore.scoreMinValue,
       } satisfies Filter

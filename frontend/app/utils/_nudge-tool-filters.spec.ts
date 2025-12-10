@@ -32,14 +32,14 @@ describe('nudge tool filters', () => {
     )
 
     expect(filters).toEqual([
-      { field: 'scores.REPAIRABILITY', operator: 'range', min: 6 },
+      { field: 'scores.REPAIRABILITY.value', operator: 'range', min: 6 },
     ])
   })
 
   it('merges base, condition, score and subset filters without duplicates', () => {
     const baseFilters: Filter[] = [{ field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] }]
     const conditionFilter: Filter = { field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] }
-    const scoreFilters: Filter[] = [{ field: 'scores.IMPACT', operator: 'range', min: 50 }]
+    const scoreFilters: Filter[] = [{ field: 'scores.IMPACT.value', operator: 'range', min: 50 }]
     const subsetFilters: Filter[] = [{ field: 'attributes.indexed.SIZE', operator: 'range', max: 40 }]
 
     const request = buildNudgeFilterRequest(baseFilters, conditionFilter, scoreFilters, subsetFilters)
@@ -47,7 +47,7 @@ describe('nudge tool filters', () => {
     expect(request).toEqual({
       filters: [
         { field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] },
-        { field: 'scores.IMPACT', operator: 'range', min: 50 },
+        { field: 'scores.IMPACT.value', operator: 'range', min: 50 },
         { field: 'attributes.indexed.SIZE', operator: 'range', max: 40 },
       ],
     })
