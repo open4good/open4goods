@@ -67,11 +67,6 @@
         ]
       }
     },
-    "nudgeTool": {
-      "eyebrow": "Guidage personnalisé",
-      "title": "Essayez l'outil Nudge",
-      "subtitle": "Répondez à quelques questions et accédez directement aux produits responsables."
-    },
     "problems": {
       "title": "Trop de labels, pas assez de clarté ?",
       "description": "Comparer impact, prix et fiabilité à travers une multitude d’onglets est épuisant. Nudger rassemble tout au même endroit.",

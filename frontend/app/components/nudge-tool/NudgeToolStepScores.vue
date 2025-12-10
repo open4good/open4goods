@@ -31,7 +31,7 @@
           @click="toggle(score.scoreName ?? '')"
         >
           <div class="nudge-step-scores__icon">
-            <v-icon :icon="score.mdiIcon ?? 'mdi-leaf'" size="28" />
+            <v-icon :icon="getScoreIcon(score)" size="28" />
           </div>
           <div class="nudge-step-scores__content">
             <p class="nudge-step-scores__name">{{ score.title }}</p>
@@ -55,6 +55,8 @@ const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void; 
 
 const selectedNames = computed(() => props.modelValue)
 const hasSelection = computed(() => selectedNames.value.length > 0)
+
+const getScoreIcon = (score: NudgeToolScoreDto) => score.mdiIcon ?? 'mdi-leaf'
 
 const toggle = (scoreName: string) => {
   const next = new Set(selectedNames.value)
