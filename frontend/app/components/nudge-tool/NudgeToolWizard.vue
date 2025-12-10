@@ -1,15 +1,31 @@
 <template>
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
     <div class="nudge-wizard__header">
-      <v-stepper
-        v-if="showStepper"
-        v-model="activeStepKey"
-        density="compact"
-        alt-labels
-        :items="stepperItems"
-        class="nudge-wizard__stepper"
-        @click:step="onStepClick"
-      />
+      <v-stepper v-model="activeStepKey" density="compact" alt-labels class="nudge-wizard__stepper">
+        <v-stepper-header v-if="showStepper">
+          <v-stepper-item
+            v-for="step in steps"
+            :key="step.key"
+            :value="step.key"
+            :icon="resolveStepIcon(step.key)"
+            :title="step.title"
+            @click="onStepClick(step.key)"
+          />
+        </v-stepper-header>
+
+        <v-stepper-window>
+          <v-stepper-window-item v-for="step in steps" :key="step.key" :value="step.key">
+            <component
+              :is="step.component"
+              v-bind="step.props"
+              @select="onCategorySelect"
+              @update:model-value="(value: unknown) => step.onUpdate?.(value)"
+              @continue="goToNext"
+              @see-all="navigateToCategoryPage"
+            />
+          </v-stepper-window-item>
+        </v-stepper-window>
+      </v-stepper>
 
       <div v-if="totalMatches >= 0 && selectedCategory" class="nudge-wizard__matches">
         <v-btn
@@ -26,19 +42,6 @@
     <div v-if="loading" class="nudge-wizard__progress">
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
-
-    <v-window v-model="activeStepKey" class="nudge-wizard__window" :touch="false">
-      <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
-        <component
-          :is="step.component"
-          v-bind="step.props"
-          @select="onCategorySelect"
-          @update:model-value="(value: unknown) => step.onUpdate?.(value)"
-          @continue="goToNext"
-          @see-all="navigateToCategoryPage"
-        />
-      </v-window-item>
-    </v-window>
 
     <div class="nudge-wizard__footer">
       <v-btn
@@ -432,15 +435,6 @@ const isNextDisabled = computed(() => {
 
   return false
 })
-
-const stepperItems = computed(() =>
-  steps.value.map((step) => ({
-    title: step.title,
-    value: step.key,
-    icon: resolveStepIcon(step.key),
-    disabled: false,
-  })),
-)
 
 const showStepper = computed(
   () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value),
