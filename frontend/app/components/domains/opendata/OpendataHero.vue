@@ -183,8 +183,6 @@ const handleSubtitleClick = (event: MouseEvent) => {
   box-shadow: 0 0 40px rgba(var(--v-theme-accent-supporting), 0.22)
 
 .opendata-hero__education-card
-  width: 100%
-  max-width: 420px
   position: relative
   z-index: 1
   margin-top: clamp(1rem, 3vw, 2rem)
