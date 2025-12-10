@@ -244,24 +244,19 @@ const faqItems = computed(() => [
     answer: String(t('opendata.datasets.isbn.faq.items.whatIs.answer')),
   },
   {
-    id: 'meaning',
-    question: String(t('opendata.datasets.isbn.faq.items.meaning.question')),
-    answer: String(t('opendata.datasets.isbn.faq.items.meaning.answer')),
-  },
-  {
     id: 'structure',
     question: String(t('opendata.datasets.isbn.faq.items.structure.question')),
     answer: String(t('opendata.datasets.isbn.faq.items.structure.answer')),
   },
   {
-    id: 'difference',
-    question: String(t('opendata.datasets.isbn.faq.items.difference.question')),
-    answer: String(t('opendata.datasets.isbn.faq.items.difference.answer')),
-  },
-  {
     id: 'assignment',
     question: String(t('opendata.datasets.isbn.faq.items.assignment.question')),
     answer: String(t('opendata.datasets.isbn.faq.items.assignment.answer')),
+  },
+  {
+    id: 'difference',
+    question: String(t('opendata.datasets.isbn.faq.items.difference.question')),
+    answer: String(t('opendata.datasets.isbn.faq.items.difference.answer')),
   },
   {
     id: 'importance',

@@ -245,19 +245,14 @@ const faqItems = computed(() => [
     answer: String(t('opendata.datasets.gtin.faq.items.whatIs.answer')),
   },
   {
-    id: 'difference-ean',
-    question: String(t('opendata.datasets.gtin.faq.items.differenceEan.question')),
-    answer: String(t('opendata.datasets.gtin.faq.items.differenceEan.answer')),
-  },
-  {
     id: 'formats',
     question: String(t('opendata.datasets.gtin.faq.items.formats.question')),
     answer: String(t('opendata.datasets.gtin.faq.items.formats.answer')),
   },
   {
-    id: 'difference-upc',
-    question: String(t('opendata.datasets.gtin.faq.items.differenceUpc.question')),
-    answer: String(t('opendata.datasets.gtin.faq.items.differenceUpc.answer')),
+    id: 'logistics',
+    question: String(t('opendata.datasets.gtin.faq.items.logistics.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.logistics.answer')),
   },
   {
     id: 'ean-13',
@@ -265,9 +260,14 @@ const faqItems = computed(() => [
     answer: String(t('opendata.datasets.gtin.faq.items.ean13.answer')),
   },
   {
-    id: 'logistics',
-    question: String(t('opendata.datasets.gtin.faq.items.logistics.question')),
-    answer: String(t('opendata.datasets.gtin.faq.items.logistics.answer')),
+    id: 'difference-ean',
+    question: String(t('opendata.datasets.gtin.faq.items.differenceEan.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.differenceEan.answer')),
+  },
+  {
+    id: 'difference-upc',
+    question: String(t('opendata.datasets.gtin.faq.items.differenceUpc.question')),
+    answer: String(t('opendata.datasets.gtin.faq.items.differenceUpc.answer')),
   },
 ])
 

@@ -1202,36 +1202,32 @@
           "title": "Download options"
         },
         "faq": {
-          "items": {
-            "assignment": {
-              "answer": "<p>An ISBN is assigned by a national ISBN agency in each country, responsible for distributing and registering ISBN numbers. Publishers or authors contact this agency to obtain an ISBN for their book. When applying, they provide information about the work, such as the title, author, format and edition. Once assigned, the ISBN is unique to that edition and cannot be reused for another. This ensures efficient management of books in library, sales and distribution systems. It is essential for any work intended for wide circulation or sale.</p>",
-              "question": "How is an ISBN assigned to a book?"
+            "items": {
+              "whatIs": {
+                "answer": "<p>An ISBN (International Standard Book Number) is a unique number that identifies a book worldwide. It is essential for publishers, booksellers, libraries and any platform selling books. ISBNs make it easier to manage inventory, distribution and sales. Each book or edition of the same book has its own ISBN, ensuring unique identification in databases and catalogues. ISBNs are used for both printed books and e-books, helping readers find the exact title they need in library systems and online marketplaces.</p>",
+                "question": "What is an ISBN?"
+              },
+              "structure": {
+                "answer": "<p>An ISBN consists of 13 digits (or 10 in the former system) split into five segments. These segments include: a prefix (identifying the numbering system), a registration group (representing the country or language area), a publisher number, a title number (identifying a specific work) and a check digit that validates the structure of the ISBN. This structure allows rapid and accurate identification of books, simplifying their management worldwide. The move to ISBN-13 in 2007 aligned the system with global barcode standards, making book distribution even more efficient across retail and library networks.</p>",
+                "question": "How is an ISBN structured?"
+              },
+              "assignment": {
+                "answer": "<p>An ISBN is assigned by a national ISBN agency in each country, responsible for distributing and registering ISBN numbers. Publishers or authors contact this agency to obtain an ISBN for their book. When applying, they provide information about the work, such as the title, author, format and edition. Once assigned, the ISBN is unique to that edition and cannot be reused for another. This ensures efficient management of books in library, sales and distribution systems. It is essential for any work intended for wide circulation or sale.</p>",
+                "question": "How is an ISBN assigned to a book?"
+              },
+              "difference": {
+                "answer": "<p>ISBN-10 was the original format used until 2007 and consisted of 10 digits. To align with the global EAN-13 barcode standards, the system moved to a 13-digit format: ISBN-13. This change standardised sales and distribution processes worldwide because ISBN-13 codes are compatible with commercial barcode systems used across industries. While ISBN-10 codes still exist for older works, new books published since 2007 exclusively use ISBN-13, which provides greater capacity for future identifiers.</p>",
+                "question": "What is the difference between ISBN-10 and ISBN-13?"
+              },
+              "importance": {
+                "answer": "<p>An ISBN is important because it provides a unique, standardised identifier for a book within management, sales and distribution systems. Without an ISBN, a book can be difficult to find in online catalogues or bookshops because distribution systems rely heavily on this identifier. ISBNs also facilitate indexing in library and bookstore databases, improving visibility and accessibility for readers. They are essential for a book to be widely distributed, whether in print or digital format.</p>",
+                "question": "Why are ISBNs important?"
+              },
+              "nonBook": {
+                "answer": "<p>Sometimes an ISBN is used to identify something other than a book. Several situations can lead to this:</p><ul><li><strong>Lack of understanding of standards</strong>: Some sellers or platforms use the ISBN as a generic identifier, especially when the product is cultural or related to creative hobbies.</li><li><strong>Cost savings</strong>: In certain cases it is cheaper for a small manufacturer to reuse an existing ISBN code, even though it falls outside the standards.</li><li><strong>Code format confusion</strong>: Some marketplaces do not strictly validate standard codes and accept ISBNs for non-book products, which creates ambiguities.</li><li><strong>Reassignment or attribution error</strong>: ISBNs are sometimes used incorrectly for non-editorial products, especially when the manufacturer or distributor does not have an appropriate GTIN barcode.</li></ul>",
+                "question": "Why do I sometimes find non-book products in the database?"
+              }
             },
-            "difference": {
-              "answer": "<p>ISBN-10 was the original format used until 2007 and consisted of 10 digits. To align with the global EAN-13 barcode standards, the system moved to a 13-digit format: ISBN-13. This change standardised sales and distribution processes worldwide because ISBN-13 codes are compatible with commercial barcode systems used across industries. While ISBN-10 codes still exist for older works, new books published since 2007 exclusively use ISBN-13, which provides greater capacity for future identifiers.</p>",
-              "question": "What is the difference between ISBN-10 and ISBN-13?"
-            },
-            "importance": {
-              "answer": "<p>An ISBN is important because it provides a unique, standardised identifier for a book within management, sales and distribution systems. Without an ISBN, a book can be difficult to find in online catalogues or bookshops because distribution systems rely heavily on this identifier. ISBNs also facilitate indexing in library and bookstore databases, improving visibility and accessibility for readers. They are essential for a book to be widely distributed, whether in print or digital format.</p>",
-              "question": "Why are ISBNs important?"
-            },
-            "meaning": {
-              "answer": "<p>ISBN stands for <strong>“International Standard Book Number”</strong>, a standardised international number for books. It uniquely identifies a publication worldwide and simplifies the management of books in storage, distribution and sales systems. The ISBN system is used in many countries and is managed by national agencies. Each ISBN is assigned to a specific title and edition, preventing any confusion between different editions or formats of the same work (for example, between a hardback and a paperback edition).</p>",
-              "question": "What does ISBN stand for?"
-            },
-            "nonBook": {
-              "answer": "<p>Sometimes an ISBN is used to identify something other than a book. Several situations can lead to this:</p><ul><li><strong>Lack of understanding of standards</strong>: Some sellers or platforms use the ISBN as a generic identifier, especially when the product is cultural or related to creative hobbies.</li><li><strong>Cost savings</strong>: In certain cases it is cheaper for a small manufacturer to reuse an existing ISBN code, even though it falls outside the standards.</li><li><strong>Code format confusion</strong>: Some marketplaces do not strictly validate standard codes and accept ISBNs for non-book products, which creates ambiguities.</li><li><strong>Reassignment or attribution error</strong>: ISBNs are sometimes used incorrectly for non-editorial products, especially when the manufacturer or distributor does not have an appropriate GTIN barcode.</li></ul>",
-              "question": "Why do I sometimes find non-book products in the database?"
-            },
-            "structure": {
-              "answer": "<p>An ISBN consists of 13 digits (or 10 in the former system) split into five segments. These segments include: a prefix (identifying the numbering system), a registration group (representing the country or language area), a publisher number, a title number (identifying a specific work) and a check digit that validates the structure of the ISBN. This structure allows rapid and accurate identification of books, simplifying their management worldwide. The move to ISBN-13 in 2007 aligned the system with global barcode standards, making book distribution even more efficient across retail and library networks.</p>",
-              "question": "How is an ISBN structured?"
-            },
-            "whatIs": {
-              "answer": "<p>An ISBN (International Standard Book Number) is a unique number that identifies a book worldwide. It is essential for publishers, booksellers, libraries and any platform selling books. ISBNs make it easier to manage inventory, distribution and sales. Each book or edition of the same book has its own ISBN, ensuring unique identification in databases and catalogues. ISBNs are used for both printed books and e-books, helping readers find the exact title they need in library systems and online marketplaces.</p>",
-              "question": "What is an ISBN?"
-            }
-          },
           "subtitle": "Key concepts about the ISBN export.",
           "title": "Frequently asked questions"
         },
