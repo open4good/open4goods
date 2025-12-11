@@ -1,19 +1,19 @@
 <template>
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
     <div class="nudge-wizard__header">
-		<v-stepper
-		  v-if="showStepper"
-		  v-model="activeStepKey"
-		  density="compact"
-		  alt-labels
-		  :items="stepperItems"
-		  :item-props="true"
-		  editable
-		  non-linear
-		  flat
-		  hide-actions
-		  class="nudge-wizard__stepper elevation-0 border-0"
-		/>
+      <v-stepper
+        v-if="showStepper"
+        v-model="activeStepKey"
+        density="compact"
+        :alt-labels="!display.smAndDown.value"
+        :items="stepperItems"
+        :item-props="true"
+        editable
+        non-linear
+        flat
+        hide-actions
+        class="nudge-wizard__stepper elevation-0 border-0"
+      />
 
       <div v-if="shouldShowMatches" class="nudge-wizard__matches">
         <v-btn
@@ -23,6 +23,9 @@
           @click="navigateToCategoryPage"
         >
           {{ $t('nudge-tool.meta.matches', { count: animatedMatches }) }}
+          <template #append>
+            <v-icon icon="mdi-link-variant" />
+          </template>
         </v-btn>
       </div>
     </div>
@@ -39,7 +42,6 @@
           @select="onCategorySelect"
           @update:model-value="(value: unknown) => step.onUpdate?.(value)"
           @continue="goToNext"
-          @see-all="navigateToCategoryPage"
         />
       </v-window-item>
     </v-window>
@@ -74,6 +76,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import type { Component } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
+import { useDisplay } from 'vuetify'
 import {
   buildCategoryHash,
   type CategoryHashState,
@@ -113,6 +116,7 @@ const emit = defineEmits<{ (event: 'navigate', payload: { hash: string; category
 const router = useRouter()
 const { t } = useI18n()
 const { fetchCategories } = useCategories()
+const display = useDisplay()
 
 const categories = ref<VerticalConfigDto[]>(props.verticals ?? [])
 const selectedCategoryId = ref<string | null>(props.initialCategoryId ?? null)
@@ -455,8 +459,8 @@ const hasNextStep = computed(() => {
   return index >= 0 && index < steps.value.length - 1
 })
 
-const isMultiSelectStep = computed(() =>
-  activeStepKey.value === 'scores' || activeStepKey.value === 'condition' || activeStepKey.value.startsWith('group-'),
+const isMultiSelectStep = computed(
+  () => activeStepKey.value === 'condition' || activeStepKey.value.startsWith('group-'),
 )
 
 const hasSelectionForStep = computed(() => {
@@ -493,11 +497,11 @@ const isNextDisabled = computed(() => {
 
 const stepperItems = computed(() =>
   steps.value.map((step) => ({
-    title: step.title,
+    title: display.smAndDown.value ? undefined : step.title,
     value: step.key,
     icon: resolveStepIcon(step.key),
     disabled: false,
-    editable: true
+    editable: true,
   })),
 )
 
@@ -509,15 +513,29 @@ const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category',
 )
 
-const resetForCategorySelection = () => {
+const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
   selectedScores.value = []
   activeSubsetIds.value = []
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
+}
+
+const resetForCategorySelection = () => {
+  resetCategorySelectionState()
   activeStepKey.value = 'category'
 }
+
+watch(
+  activeStepKey,
+  (next) => {
+    if (next === 'category') {
+      resetCategorySelectionState()
+    }
+  },
+  { flush: 'post' },
+)
 
 onMounted(async () => {
   await hydrateCategories()

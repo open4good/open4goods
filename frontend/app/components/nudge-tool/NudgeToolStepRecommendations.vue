@@ -5,9 +5,6 @@
         <h2 class="nudge-step-recos__title">{{ $t('nudge-tool.steps.recommendations.title') }}</h2>
         <p class="nudge-step-recos__subtitle">{{ $t('nudge-tool.steps.recommendations.subtitle') }}</p>
       </div>
-      <v-btn color="primary" :disabled="!canNavigate" @click="emit('see-all')">
-        {{ $t('nudge-tool.actions.seeAll') }}
-      </v-btn>
     </div>
 
     <div v-if="loading" class="py-4">
@@ -42,9 +39,6 @@ const props = defineProps<{
   loading: boolean
 }>()
 
-const emit = defineEmits<{ (event: 'see-all'): void }>()
-
-const canNavigate = computed(() => props.totalCount > 0)
 </script>
 
 <style scoped lang="scss">
