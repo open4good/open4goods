@@ -413,6 +413,7 @@ import {
   type CategoryHashState,
   type CategoryViewMode,
 } from '~/utils/_category-filter-state'
+import { mergeFilterRequests } from '~/utils/_merge-filter-requests'
 import {
   buildFilterRequestFromSubsets,
   convertSubsetCriteriaToFilters,
@@ -1157,13 +1158,9 @@ const hasActiveFilters = computed(() => {
   return manualCount > 0 || activeSubsetClauses.value.length > 0
 })
 
-const combinedFilters = computed<FilterRequestDto | undefined>(() => {
-  const subsetClauses = subsetFilters.value.filters ?? []
-  const manualClauses = manualFilters.value.filters ?? []
-  const filters = [...subsetClauses, ...manualClauses]
-
-  return filters.length ? { filters } : undefined
-})
+const combinedFilters = computed<FilterRequestDto | undefined>(() =>
+  mergeFilterRequests(subsetFilters.value, manualFilters.value),
+)
 
 const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])
 

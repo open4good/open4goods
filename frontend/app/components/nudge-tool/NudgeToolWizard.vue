@@ -344,6 +344,10 @@ const fetchRecommendations = async () => {
   loading.value = true
 
   try {
+    const hasFilters =
+      (filterRequest.value.filters?.length ?? 0) > 0 ||
+      (filterRequest.value.filterGroups?.length ?? 0) > 0
+
     const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       body: {
@@ -351,7 +355,7 @@ const fetchRecommendations = async () => {
         pageNumber: 0,
         pageSize: 3,
         sort: { sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }] },
-        filters: filterRequest.value.filters?.length ? filterRequest.value : undefined,
+        filters: hasFilters ? filterRequest.value : undefined,
       },
     })
 
