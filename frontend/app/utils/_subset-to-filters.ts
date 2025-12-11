@@ -1,4 +1,4 @@
-import type { Filter, FilterGroup, FilterRequestDto, SubsetCriteria, VerticalSubsetDto } from '~~/shared/api-client'
+import type { Filter, FilterRequestDto, SubsetCriteria, VerticalSubsetDto } from '~~/shared/api-client'
 
 const parseNumericValue = (value: string | undefined): number | undefined => {
   if (value == null) {
@@ -133,12 +133,16 @@ export const buildFilterRequestFromSubsets = (
   subsets: VerticalSubsetDto[],
   activeSubsetIds: string[],
 ): FilterRequestDto => {
-  const filterGroups: FilterGroup[] = activeSubsetIds
+  const aggregatedMustFilters = activeSubsetIds
     .map((subsetId) => subsets.find((candidate) => candidate.id === subsetId))
     .filter((subset): subset is VerticalSubsetDto => Boolean(subset))
-    .map((subset) => mergeFiltersWithoutDuplicates([], convertSubsetCriteriaToFilters(subset)))
-    .map((filters) => ({ must: filters }))
-    .filter((group): group is FilterGroup => Boolean(group.must?.length))
+    .reduce<Filter[]>((merged, subset) => {
+      return mergeFiltersWithoutDuplicates(merged, convertSubsetCriteriaToFilters(subset))
+    }, [])
 
-  return filterGroups.length ? { filterGroups } : {}
+  if (!aggregatedMustFilters.length) {
+    return {}
+  }
+
+  return { filterGroups: [{ must: aggregatedMustFilters }] }
 }

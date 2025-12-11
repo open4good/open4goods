@@ -25,8 +25,12 @@ describe('mergeFilterRequests', () => {
         { field: 'fieldB', operator: 'term', terms: ['b'] },
       ],
       filterGroups: [
-        { must: [{ field: 'groupA', operator: 'range', min: 1 }] },
-        { must: [{ field: 'groupB', operator: 'range', max: 10 }] },
+        {
+          must: [
+            { field: 'groupA', operator: 'range', min: 1 },
+            { field: 'groupB', operator: 'range', max: 10 },
+          ],
+        },
       ],
     })
   })
