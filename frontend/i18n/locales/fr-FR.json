@@ -1360,7 +1360,7 @@
       "infoCard": {
         "title": "C'est quoi l'Open Source ?",
         "description": "L’Open Source désigne des logiciels dont le fonctionnement est ouvert et accessible à tous. Chacun peut les utiliser librement, les modifier et les partager. L’idée centrale est le partage du savoir et la collaboration.",
-        "highlight": "Open4goods",
+        "highlight": "",
         "items": {
           "collaborativeReviews": "Contributions",
           "openLicenses": "Code publié sous licence GPL",
@@ -1369,7 +1369,7 @@
       },
       "primaryCta": {
         "ariaLabel": "Ouvrir l'organisation GitHub de Nudger dans un nouvel onglet",
-        "label": "Explorer les dépôts"
+        "label": "accéder au code"
       },
       "subtitle": "Découvrez les coulisses de Nudger : notre code est ouvert pour que chacun puisse apprendre, comprendre et améliorer Nudger.",
       "title": "Open Source"

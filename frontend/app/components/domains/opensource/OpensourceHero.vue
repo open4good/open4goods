@@ -48,13 +48,11 @@ withDefaults(
       <v-row class="align-center" :no-gutters="false" justify="space-between">
         <v-col cols="12" md="7" class="d-flex flex-column gap-4">
           <div class="hero-headline">
-            <h1 id="opensource-hero-title" class="hero-title">
+            <h1 id="opensource-hero-title" class="hero-title mb-3">
               <span class="fw-light">{{ title }}</span>
             </h1>
             <p class="hero-subtitle">{{ subtitle }}</p>
           </div>
-
-          <TextContent :bloc-id="descriptionBlocId" :ipsum-length="220" />
 
           <div class="hero-ctas" role="group" :aria-label="ctaGroupLabel">
             <v-btn
@@ -67,7 +65,7 @@ withDefaults(
               :target="cta.target"
               :rel="cta.rel"
               size="large"
-              class="me-3 mb-3"
+              class="me-3 mb-3 mt-5"
               append-icon="mdi-arrow-top-right"
             >
               <template v-if="cta.icon" #prepend>
