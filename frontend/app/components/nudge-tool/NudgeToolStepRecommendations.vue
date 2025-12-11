@@ -28,16 +28,9 @@
 </template>
 
 <script setup lang="ts">
-import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 
-const props = defineProps<{
-  products: ProductDto[]
-  popularAttributes?: AttributeConfigDto[]
-  totalCount: number
-  loading: boolean
-}>()
 
 </script>
 

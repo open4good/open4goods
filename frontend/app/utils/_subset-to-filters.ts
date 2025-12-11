@@ -125,9 +125,7 @@ export const getRemainingSubsetFilters = (
   return convertSubsetCriteriaToFilters(subset).filter((_, index) => index !== removedIndex)
 }
 
-const buildGroupKey = (subset: VerticalSubsetDto): string => {
-  return subset.group ?? subset.id ?? 'ungrouped'
-}
+
 
 export const buildFilterRequestFromSubsets = (
   subsets: VerticalSubsetDto[],
