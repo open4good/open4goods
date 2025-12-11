@@ -14,22 +14,43 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * <p>The structure mirrors the JSON payload accepted by the {@code filters}
  * property of the {@code POST /products} request body. Clients can combine
  * multiple clauses. Legacy {@link #filters()} are evaluated with AND semantics
- * on the Elasticsearch query. {@link #filterGroups()} enables OR combinations
- * inside a group while groups themselves are combined with AND.</p>
+ * on the Elasticsearch query. {@link #filterGroups()} enables grouped
+ * combinations whose internal logic is controlled via
+ * {@link FilterGroup#combinationOperator()} while groups themselves are
+ * combined with AND.</p>
  */
 public record FilterRequestDto(
         @Schema(description = "Collection of filter clauses. When omitted no additional filtering is applied.")
         List<Filter> filters,
-        @Schema(description = "Collection of filter groups combined with AND. Each group combines its filters with OR semantics.")
+        @Schema(description = "Collection of filter groups combined with AND. Each group combines its filters according to the provided combination operator.")
         List<FilterGroup> filterGroups) {
 
     /**
-     * Groups a set of filter clauses that should be combined using OR
-     * semantics.
+     * Groups a set of filter clauses combined using the provided operator.
      */
     public record FilterGroup(
-            @Schema(description = "Filters evaluated with OR semantics within the group.")
-            List<Filter> filters) {
+            @Schema(description = "Filters evaluated within the group.")
+            List<Filter> filters,
+            @Schema(description = "Logical operator applied between filters inside the group.", defaultValue = "or")
+            CombinationOperator combinationOperator) {
+
+        public FilterGroup(List<Filter> filters) {
+            this(filters, CombinationOperator.or);
+        }
+
+        public FilterGroup {
+            combinationOperator = combinationOperator == null ? CombinationOperator.or : combinationOperator;
+        }
+    }
+
+    /**
+     * Logical operators supported when combining filters within a group.
+     */
+    public enum CombinationOperator {
+        @Schema(description = "Combine filters with OR semantics")
+        or,
+        @Schema(description = "Combine filters with AND semantics")
+        and
     }
 
     /**

@@ -41,6 +41,7 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.CombinationOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
@@ -199,6 +200,35 @@ class SearchServiceTest {
 
         assertThat(fieldNames).contains(FilterField.condition.fieldPath(), FilterField.brand.fieldPath());
         assertThat(expandCriteria(builtCriteria).anyMatch(Criteria::isOr)).isTrue();
+    }
+
+    @Test
+    void conjunctiveFilterGroupEnforcesAllRangeBounds() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter minPrice = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 0.0, null);
+        Filter maxPrice = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, null, 500.0);
+        FilterRequestDto filters = new FilterRequestDto(List.of(),
+                List.of(new FilterRequestDto.FilterGroup(List.of(minPrice, maxPrice), CombinationOperator.and)));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+        List<Criteria> priceCriteria = expandCriteria(builtCriteria)
+                .filter(criteria -> criteria.getField() != null
+                        && FilterField.price.fieldPath().equals(criteria.getField().getName()))
+                .toList();
+
+        assertThat(priceCriteria).isNotEmpty()
+                .allSatisfy(criteria -> assertThat(criteria.isOr()).isFalse());
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 0.0)).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 500.0)).isTrue();
     }
 
     @Test

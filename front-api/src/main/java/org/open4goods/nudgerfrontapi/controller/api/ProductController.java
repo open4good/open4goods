@@ -712,7 +712,8 @@ public class ProductController {
                 return Validation.error(sanitizedFilters.error());
             }
             if (sanitizedFilters.value() != null && !sanitizedFilters.value().isEmpty()) {
-                sanitizedGroups.add(new FilterRequestDto.FilterGroup(List.copyOf(sanitizedFilters.value())));
+                sanitizedGroups.add(new FilterRequestDto.FilterGroup(List.copyOf(sanitizedFilters.value()),
+                        group.combinationOperator()));
             }
         }
 

@@ -524,7 +524,15 @@ public class SearchService {
                     if (clause == null) {
                         continue;
                     }
-                    groupCriteria = groupCriteria == null ? clause : groupCriteria.or(clause);
+                    if (groupCriteria == null) {
+                        groupCriteria = clause;
+                    }
+                    else {
+                        groupCriteria = switch (group.combinationOperator()) {
+                        case and -> groupCriteria.and(clause);
+                        case or -> groupCriteria.or(clause);
+                        };
+                    }
                 }
                 if (groupCriteria != null) {
                     combined = combined.and(groupCriteria);
