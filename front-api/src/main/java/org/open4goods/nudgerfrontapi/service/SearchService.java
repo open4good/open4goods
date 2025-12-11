@@ -499,27 +499,59 @@ public class SearchService {
     }
 
     private Criteria applyFilters(Criteria criteria, FilterRequestDto filters) {
-        if (filters == null || filters.filters() == null || filters.filters().isEmpty()) {
+        if (filters == null) {
             return criteria;
         }
 
         Criteria combined = criteria;
-        for (Filter filter : filters.filters()) {
-            Criteria clause = buildFilterCriteria(filter);
-            if (clause != null) {
-                combined = combined.and(clause);
+        if (filters.filters() != null) {
+            for (Filter filter : filters.filters()) {
+                Criteria clause = buildFilterCriteria(filter);
+                if (clause != null) {
+                    combined = combined.and(clause);
+                }
+            }
+        }
+
+        if (filters.filterGroups() != null) {
+            for (FilterRequestDto.FilterGroup group : filters.filterGroups()) {
+                if (group == null || group.filters() == null || group.filters().isEmpty()) {
+                    continue;
+                }
+                Criteria groupCriteria = null;
+                for (Filter filter : group.filters()) {
+                    Criteria clause = buildFilterCriteria(filter);
+                    if (clause == null) {
+                        continue;
+                    }
+                    groupCriteria = groupCriteria == null ? clause : groupCriteria.or(clause);
+                }
+                if (groupCriteria != null) {
+                    combined = combined.and(groupCriteria);
+                }
             }
         }
         return combined;
     }
 
     private boolean hasExcludedOverride(FilterRequestDto filters) {
-        if (filters == null || filters.filters() == null) {
+        if (filters == null) {
             return false;
         }
-        return filters.filters().stream()
-                .filter(Objects::nonNull)
-                .map(Filter::field)
+        Stream<String> legacyFields = filters.filters() == null ? Stream.empty()
+                : filters.filters().stream()
+                        .filter(Objects::nonNull)
+                        .map(Filter::field);
+
+        Stream<String> groupFields = filters.filterGroups() == null ? Stream.empty()
+                : filters.filterGroups().stream()
+                        .filter(Objects::nonNull)
+                        .filter(group -> group.filters() != null)
+                        .flatMap(group -> group.filters().stream())
+                        .filter(Objects::nonNull)
+                        .map(Filter::field);
+
+        return Stream.concat(legacyFields, groupFields)
                 .filter(StringUtils::hasText)
                 .map(String::trim)
                 .anyMatch(field -> field.equals(EXCLUDED_CAUSES_FIELD));

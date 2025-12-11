@@ -678,18 +678,60 @@ public class ProductController {
         if (filterRequest == null) {
             return Validation.ok(null);
         }
-        if (filterRequest.filters() == null) {
-            return Validation.ok(filterRequest);
+        Validation<List<FilterRequestDto.Filter>> legacyValidation = sanitizeFilterList(filterRequest.filters(),
+                allowedFilterMappings);
+        if (legacyValidation.hasError()) {
+            return Validation.error(legacyValidation.error());
+        }
+
+        Validation<List<FilterRequestDto.FilterGroup>> groupValidation = sanitizeFilterGroups(
+                filterRequest.filterGroups(),
+                allowedFilterMappings);
+        if (groupValidation.hasError()) {
+            return Validation.error(groupValidation.error());
+        }
+
+        return Validation.ok(new FilterRequestDto(legacyValidation.value(), groupValidation.value()));
+    }
+
+    private Validation<List<FilterRequestDto.FilterGroup>> sanitizeFilterGroups(
+            List<FilterRequestDto.FilterGroup> filterGroups,
+            Set<String> allowedFilterMappings) {
+        if (filterGroups == null) {
+            return Validation.ok(null);
+        }
+
+        List<FilterRequestDto.FilterGroup> sanitizedGroups = new ArrayList<>();
+        for (FilterRequestDto.FilterGroup group : filterGroups) {
+            if (group == null || group.filters() == null || group.filters().isEmpty()) {
+                continue;
+            }
+            Validation<List<FilterRequestDto.Filter>> sanitizedFilters = sanitizeFilterList(group.filters(),
+                    allowedFilterMappings);
+            if (sanitizedFilters.hasError()) {
+                return Validation.error(sanitizedFilters.error());
+            }
+            if (sanitizedFilters.value() != null && !sanitizedFilters.value().isEmpty()) {
+                sanitizedGroups.add(new FilterRequestDto.FilterGroup(List.copyOf(sanitizedFilters.value())));
+            }
+        }
+
+        return Validation.ok(sanitizedGroups.isEmpty() ? List.of() : List.copyOf(sanitizedGroups));
+    }
+
+    private Validation<List<FilterRequestDto.Filter>> sanitizeFilterList(List<FilterRequestDto.Filter> filters,
+            Set<String> allowedFilterMappings) {
+        if (filters == null) {
+            return Validation.ok(null);
         }
 
         List<FilterRequestDto.Filter> sanitized = new ArrayList<>();
-        for (FilterRequestDto.Filter filter : filterRequest.filters()) {
+        for (FilterRequestDto.Filter filter : filters) {
             if (filter == null || !StringUtils.hasText(filter.field())) {
                 LOGGER.warn("Filter entry is missing a field definition: {}", filter);
                 return Validation.error(badRequest("Invalid filters parameter", "Filter field is mandatory"));
             }
             String mapping = filter.field().trim();
-            // Allow filtering on admin-only exclusion causes field regardless of vertical configuration
             if (!ADMIN_EXCLUDED_CAUSES_FIELD.equals(mapping) && !allowedFilterMappings.contains(mapping)) {
                 LOGGER.warn("Filter field '{}' is not permitted", mapping);
                 return Validation.error(badRequest("Invalid filters parameter",
@@ -697,8 +739,7 @@ public class ProductController {
             }
             sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max()));
         }
-
-        return Validation.ok(new FilterRequestDto(List.copyOf(sanitized)));
+        return Validation.ok(sanitized.isEmpty() ? List.of() : List.copyOf(sanitized));
     }
 
     private record SearchCapabilities(Set<String> allowedFilters, Set<String> allowedSorts,

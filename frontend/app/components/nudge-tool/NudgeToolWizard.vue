@@ -180,12 +180,15 @@ const scoreFilters = computed(() =>
 const conditionFilter = computed(() => buildConditionFilter(condition.value))
 
 const filterRequest = computed<FilterRequestDto>(() => {
-  const subsetFilters = subsetFilterRequest.value.filters ?? []
-  return buildNudgeFilterRequest(baseFilters.value, conditionFilter.value, scoreFilters.value, subsetFilters)
+  const subsetGroups = subsetFilterRequest.value.filterGroups ?? []
+  return buildNudgeFilterRequest(baseFilters.value, conditionFilter.value, scoreFilters.value, subsetGroups)
 })
 
 const hashState = computed<CategoryHashState>(() => ({
-  filters: filterRequest.value.filters?.length ? filterRequest.value : undefined,
+  filters:
+    filterRequest.value.filters?.length || filterRequest.value.filterGroups?.length
+      ? filterRequest.value
+      : undefined,
   activeSubsets: activeSubsetIds.value,
 }))
 

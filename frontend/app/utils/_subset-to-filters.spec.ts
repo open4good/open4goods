@@ -63,11 +63,12 @@ describe('_subset-to-filters helpers', () => {
     const request = buildFilterRequestFromSubsets(subsets, ['new-items', 'used-items'])
 
     expect(request).toEqual({
-      filters: [
+      filterGroups: [
         {
-          field: 'price.conditions',
-          operator: 'term',
-          terms: expect.arrayContaining(['NEW', 'OCCASION']),
+          filters: [
+            { field: 'price.conditions', operator: 'term', terms: ['NEW'] },
+            { field: 'price.conditions', operator: 'term', terms: ['OCCASION'] },
+          ],
         },
       ],
     })
@@ -89,7 +90,12 @@ describe('_subset-to-filters helpers', () => {
 
     const request = buildFilterRequestFromSubsets(subsets, ['mid-range', 'entry'])
 
-    expect(request.filters?.[0]).toMatchObject({ field: 'price.min', operator: 'range', max: 800 })
+    expect(request.filterGroups?.[0]?.filters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'price.min', operator: 'range', max: 800 }),
+        expect.objectContaining({ field: 'price.min', operator: 'range', max: 500 }),
+      ]),
+    )
   })
 
   it('drops conflicting range filters when they cannot be merged safely', () => {
@@ -108,6 +114,11 @@ describe('_subset-to-filters helpers', () => {
 
     const request = buildFilterRequestFromSubsets(subsets, ['budget', 'premium'])
 
-    expect(request).toEqual({})
+    expect(request.filterGroups?.[0]?.filters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'price.min', operator: 'range', max: 500 }),
+        expect.objectContaining({ field: 'price.min', operator: 'range', min: 1000 }),
+      ]),
+    )
   })
 })

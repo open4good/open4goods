@@ -67,8 +67,9 @@ class ProductControllerTest {
 
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(config);
 
-        Filter filter = new Filter("scores.ENERGY_CONSUMPTION", FilterOperator.range, null, 0.0, 100.0);
-        ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null, new FilterRequestDto(List.of(filter)));
+        Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0);
+        ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
+                new FilterRequestDto(List.of(filter), List.of()));
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
@@ -84,7 +85,8 @@ class ProductControllerTest {
         verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
                 filterCaptor.capture());
 
-        assertThat(filterCaptor.getValue().filters()).extracting(Filter::field).contains("scores.ENERGY_CONSUMPTION");
+        assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
+                .contains("scores.ENERGY_CONSUMPTION.value");
     }
 }
 
