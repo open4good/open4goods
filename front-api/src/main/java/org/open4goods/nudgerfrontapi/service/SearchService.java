@@ -542,13 +542,38 @@ public class SearchService {
             return null;
         }
 
-        Criteria mustCriteria = buildJoinedCriteria(group.must(), Criteria::and);
+        Criteria mustCriteria = buildMustCriteria(group.must());
         Criteria shouldCriteria = buildJoinedCriteria(group.should(), Criteria::or);
 
         if (mustCriteria != null && shouldCriteria != null) {
             return mustCriteria.and(shouldCriteria);
         }
         return mustCriteria != null ? mustCriteria : shouldCriteria;
+    }
+
+    private Criteria buildMustCriteria(List<Filter> mustFilters) {
+        if (mustFilters == null || mustFilters.isEmpty()) {
+            return null;
+        }
+
+        Map<FilterKey, List<Filter>> byFieldAndOperator = new LinkedHashMap<>();
+        for (Filter filter : mustFilters) {
+            if (filter == null || filter.operator() == null || !StringUtils.hasText(filter.field())) {
+                continue;
+            }
+            FilterKey key = new FilterKey(filter.field().trim(), filter.operator());
+            byFieldAndOperator.computeIfAbsent(key, ignored -> new ArrayList<>())
+                    .add(filter);
+        }
+
+        Criteria combined = null;
+        for (List<Filter> groupedFilters : byFieldAndOperator.values()) {
+            Criteria fieldCriteria = buildJoinedCriteria(groupedFilters, Criteria::or);
+            if (fieldCriteria != null) {
+                combined = combined == null ? fieldCriteria : combined.and(fieldCriteria);
+            }
+        }
+        return combined;
     }
 
     private Criteria buildJoinedCriteria(List<Filter> filters, BiFunction<Criteria, Criteria, Criteria> combiner) {
@@ -663,6 +688,9 @@ public class SearchService {
         return FilterField.fromFieldPath(fieldPath)
                 .map(FilterField::valueType)
                 .orElseGet(() -> inferValueType(fieldPath, operator));
+    }
+
+    private record FilterKey(String field, FilterOperator operator) {
     }
 
     private FilterValueType inferValueType(String fieldPath, FilterOperator operator) {

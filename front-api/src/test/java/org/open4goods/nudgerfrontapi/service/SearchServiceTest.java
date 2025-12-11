@@ -203,6 +203,42 @@ class SearchServiceTest {
     }
 
     @Test
+    void mustFiltersOnSameFieldAreOrCombinedWithinGroup() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter lowerPrice = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, null, 500.0);
+        Filter midPrice = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 500.0, 1000.0);
+        Filter brandFilter = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Sony"), null, null);
+
+        FilterRequestDto filters = new FilterRequestDto(List.of(),
+                List.of(new FilterRequestDto.FilterGroup(List.of(lowerPrice, midPrice, brandFilter), List.of())));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.brand.fieldPath(), "Sony")).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 500.0)).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 1000.0)).isTrue();
+
+        List<Criteria> orNodes = expandCriteria(builtCriteria)
+                .filter(Criteria::isOr)
+                .toList();
+        assertThat(orNodes).isNotEmpty();
+        assertThat(orNodes.stream()
+                .flatMap(criteria -> Stream.concat(Stream.of(criteria), criteria.getSubCriteria().stream()))
+                .filter(criteria -> criteria.getField() != null)
+                .map(Criteria::getField)
+                .map(Field::getName))
+                .allMatch(fieldName -> fieldName.equals(FilterField.price.fieldPath()));
+    }
+
+    @Test
     void boundedRangeFiltersWithinGroupsPreserveBothLimits() {
         Pageable pageable = PageRequest.of(0, 3);
 
