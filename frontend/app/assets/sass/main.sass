@@ -11,3 +11,44 @@
 @use 'layouts/headers'
 @use 'layouts/footers'
 @use 'pages/blog'
+
+// custom pour element nudger
+
+.v-theme--nudger
+    .v-main
+        top: 0!important
+        --v-layout-top: 0!important
+
+.v-theme--nudger
+    .main-menu-app-bar
+        .v-list
+            background: transparent!important
+
+        .theme-toggle
+            background-color: transparent!important
+
+    .card__nudger 
+        background: #ffffff!important
+        border-radius: 30px!important
+        padding: 1.25rem!important
+
+        &--border
+            border: 1px solid rgb(var(--v-theme-primary))!important
+
+        &--radius_bottom-right_50px
+            border-bottom-right-radius: 50px!important
+
+        &--radius_top-right_0
+            border-top-right-radius: 0!important
+
+    .home-hero__subtitle
+        font-size: clamp(1.05rem, 2.6vw, 1.35rem)
+        color: rgb(var(--v-theme-text-neutral-strong))
+        text-align: center
+        font-weight: bolder
+        text-transform: uppercase
+        margin: 0 0 1.25rem 0
+
+    .nudger_degrade-defaut
+        background-image: linear-gradient(to left, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)))!important
+        color: #ffffff!important
