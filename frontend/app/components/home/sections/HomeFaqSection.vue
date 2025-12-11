@@ -18,11 +18,8 @@ const { t } = useI18n()
   <section class="home-section home-faq" aria-labelledby="home-faq-title">
     <v-container fluid class="home-section__container">
       <div class="home-section__inner">
-        <header class="home-section__header">
-          <h2 id="home-faq-title">{{ t('home.faq.title') }}</h2>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="home-section__subtitle subtitle-text" v-html="t('home.faq.subtitle')" />
-        </header>
+        <h2 id="home-faq-title" class="home-hero__subtitle">{{ t('home.faq.title') }}</h2>
+        <p class="home-section__subtitle text-center">{{ t('home.faq.subtitle') }}</p>
         <v-expansion-panels class="home-faq__panels" multiple variant="accordion">
           <v-expansion-panel v-for="panel in props.items" :key="panel.blocId">
             <v-expansion-panel-title >
@@ -44,41 +41,43 @@ const { t } = useI18n()
 </template>
 
 <style scoped lang="sass">
-.home-section
-  padding-block: clamp(3rem, 6vw, 5rem)
-  background: rgba(var(--v-theme-surface-default), 0.98)
+  .home-section
+    padding-block: clamp(1.5rem, 3vw, 2.75rem)
+    background: rgb(var(--v-theme-surface-default))
 
-.home-section__container
-  padding-inline: clamp(1.5rem, 5vw, 4rem)
+  .home-section__container
+    padding-inline: 0
 
-.home-section__inner
-  max-width: 1180px
-  margin: 0 auto
-  display: flex
-  flex-direction: column
-  gap: clamp(2rem, 5vw, 3rem)
+  .home-section__inner
+    max-width: 1180px
+    margin: 0 auto
+    display: flex
+    flex-direction: column
+    gap: clamp(0.875rem, 2vw, 1.25rem);
 
-.home-section__header
-  max-width: 760px
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+  .home-section__header
+    max-width: 760px
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
 
-.home-section__subtitle
-  margin: 0
+  .home-section__subtitle
+    margin: 0
+    color: rgb(var(--v-theme-text-neutral-secondary))
 
-.home-faq__panels
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
-  overflow: hidden
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
+  .home-faq__panels
+    border-radius: clamp(1.25rem, 3vw, 1.75rem)
+    overflow: hidden
+    border: 1px solid rgb(var(--v-theme-primary))
 
-.home-faq__panel-title
-  font-weight: 600
-  font-size: 1.05rem
+  .home-faq__panel-title
+    font-weight: 600
+    font-size: 1.05rem
 
-.home-faq__panel-text
-  background: rgba(var(--v-theme-surface-primary-080), 0.4)
+  .home-faq__panel-text
+    //background: rgba(var(--v-theme-surface-primary-080), 0.4)
+    background: rgb(var(--v-theme-surface-default))
 
-.home-faq__text-content
-  padding-block: 0.5rem
+  .home-faq__text-content
+    padding-block: 0.5rem
 </style>
