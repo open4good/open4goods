@@ -530,18 +530,19 @@ useHead(() => ({
 </template>
 
 <style scoped lang="sass">
-.home-page
-  --cat-height: 150px
-  --cat-in-hero: calc(var(--cat-height) / 2)
-  --cat-overlap: calc(var(--cat-height) - var(--cat-in-hero))
-  display: flex
-  flex-direction: column
-  gap: 0
-  background-color: rgb(var(--v-theme-surface-default))
+  .home-page
+    --cat-height: 150px
+    --cat-in-hero: calc(var(--cat-height) / 2)
+    --cat-overlap: calc(var(--cat-height) - var(--cat-in-hero))
+    display: flex
+    flex-direction: column
+    gap: 0
+    background-color: transparent
 
-.home-page__sections
-  display: flex
-  flex-direction: column
-  gap: clamp(3rem, 7vw, 5rem)
-  padding-top: var(--cat-overlap)
+  .home-page__sections
+    display: flex
+    flex-direction: column
+    gap: clamp(1.5rem, 3.5vw, 2.5rem)
+    padding-top: var(--cat-overlap)
+    background: rgb(var(--v-theme-surface-default))
 </style>
