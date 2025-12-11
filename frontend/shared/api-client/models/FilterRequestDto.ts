@@ -64,7 +64,7 @@ export function FilterRequestDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         return json;
     }
     return {
-
+        
         'filters': json['filters'] == null ? undefined : ((json['filters'] as Array<any>).map(FilterFromJSON)),
         'filterGroups': json['filterGroups'] == null ? undefined : ((json['filterGroups'] as Array<any>).map(FilterGroupFromJSON)),
     };
@@ -80,7 +80,7 @@ export function FilterRequestDtoToJSONTyped(value?: FilterRequestDto | null, ign
     }
 
     return {
-
+        
         'filters': value['filters'] == null ? undefined : ((value['filters'] as Array<any>).map(FilterToJSON)),
         'filterGroups': value['filterGroups'] == null ? undefined : ((value['filterGroups'] as Array<any>).map(FilterGroupToJSON)),
     };
