@@ -2209,12 +2209,12 @@
     },
     "steps": {
       "category": {
-        "title": "Choisissez une catégorie",
-        "subtitle": "Sélectionnez le type de produit à explorer"
+        "title": "Choisis une catégorie",
+        "subtitle": "Nudger te guide, pas à pas."
       },
       "condition": {
-        "title": "État du produit",
-        "subtitle": "Neuf, reconditionné ou les deux ?",
+        "title": "Neuf ou occasion ?",
+        "subtitle": "L'occasion est meilleur pour la planète. Et pour le porte-feuille !",
         "options": {
           "new": "Neuf",
           "occasion": "Reconditionné",
@@ -2223,7 +2223,7 @@
       },
       "scores": {
         "title": "Priorités écologiques",
-        "subtitle": "Choisissez les thèmes qui comptent pour vous"
+        "subtitle": "Qu'est ce compte pour toi ?"
       },
       "recommendations": {
         "title": "Nos propositions",
