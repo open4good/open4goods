@@ -133,24 +133,12 @@ export const buildFilterRequestFromSubsets = (
   subsets: VerticalSubsetDto[],
   activeSubsetIds: string[],
 ): FilterRequestDto => {
-  const groups = new Map<string, Filter[]>()
-
-  activeSubsetIds.forEach((subsetId) => {
-    const subset = subsets.find((candidate) => candidate.id === subsetId)
-    if (!subset) {
-      return
-    }
-
-    const groupKey = buildGroupKey(subset)
-    const current = groups.get(groupKey) ?? []
-    const filters = convertSubsetCriteriaToFilters(subset)
-    groups.set(groupKey, [...current, ...filters])
-  })
-
-  const filterGroups: FilterGroup[] = Array.from(groups.values())
-    .map((filters) => mergeFiltersWithoutDuplicates([], filters))
-    .map((filters) => ({ filters }))
-    .filter((group): group is FilterGroup => Boolean(group.filters?.length))
+  const filterGroups: FilterGroup[] = activeSubsetIds
+    .map((subsetId) => subsets.find((candidate) => candidate.id === subsetId))
+    .filter((subset): subset is VerticalSubsetDto => Boolean(subset))
+    .map((subset) => mergeFiltersWithoutDuplicates([], convertSubsetCriteriaToFilters(subset)))
+    .map((filters) => ({ must: filters }))
+    .filter((group): group is FilterGroup => Boolean(group.must?.length))
 
   return filterGroups.length ? { filterGroups } : {}
 }

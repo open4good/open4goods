@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -513,25 +514,57 @@ public class SearchService {
             }
         }
 
-        if (filters.filterGroups() != null) {
-            for (FilterRequestDto.FilterGroup group : filters.filterGroups()) {
-                if (group == null || group.filters() == null || group.filters().isEmpty()) {
-                    continue;
-                }
-                Criteria groupCriteria = null;
-                for (Filter filter : group.filters()) {
-                    Criteria clause = buildFilterCriteria(filter);
-                    if (clause == null) {
-                        continue;
-                    }
-                    groupCriteria = groupCriteria == null ? clause : groupCriteria.or(clause);
-                }
-                if (groupCriteria != null) {
-                    combined = combined.and(groupCriteria);
-                }
+        Criteria grouped = buildGroupedCriteria(filters.filterGroups());
+        if (grouped != null) {
+            combined = combined.and(grouped);
+        }
+
+        return combined;
+    }
+
+    private Criteria buildGroupedCriteria(List<FilterRequestDto.FilterGroup> filterGroups) {
+        if (filterGroups == null || filterGroups.isEmpty()) {
+            return null;
+        }
+
+        Criteria grouped = null;
+        for (FilterRequestDto.FilterGroup group : filterGroups) {
+            Criteria groupCriteria = buildGroupCriteria(group);
+            if (groupCriteria != null) {
+                grouped = grouped == null ? groupCriteria : grouped.or(groupCriteria);
             }
         }
-        return combined;
+        return grouped;
+    }
+
+    private Criteria buildGroupCriteria(FilterRequestDto.FilterGroup group) {
+        if (group == null) {
+            return null;
+        }
+
+        Criteria mustCriteria = buildJoinedCriteria(group.must(), Criteria::and);
+        Criteria shouldCriteria = buildJoinedCriteria(group.should(), Criteria::or);
+
+        if (mustCriteria != null && shouldCriteria != null) {
+            return mustCriteria.and(shouldCriteria);
+        }
+        return mustCriteria != null ? mustCriteria : shouldCriteria;
+    }
+
+    private Criteria buildJoinedCriteria(List<Filter> filters, BiFunction<Criteria, Criteria, Criteria> combiner) {
+        if (filters == null || filters.isEmpty()) {
+            return null;
+        }
+
+        Criteria joined = null;
+        for (Filter filter : filters) {
+            Criteria clause = buildFilterCriteria(filter);
+            if (clause == null) {
+                continue;
+            }
+            joined = joined == null ? clause : combiner.apply(joined, clause);
+        }
+        return joined;
     }
 
     private boolean hasExcludedOverride(FilterRequestDto filters) {
@@ -546,8 +579,9 @@ public class SearchService {
         Stream<String> groupFields = filters.filterGroups() == null ? Stream.empty()
                 : filters.filterGroups().stream()
                         .filter(Objects::nonNull)
-                        .filter(group -> group.filters() != null)
-                        .flatMap(group -> group.filters().stream())
+                        .flatMap(group -> Stream.concat(
+                                group.must() == null ? Stream.empty() : group.must().stream(),
+                                group.should() == null ? Stream.empty() : group.should().stream()))
                         .filter(Objects::nonNull)
                         .map(Filter::field);
 

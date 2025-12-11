@@ -173,7 +173,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void filterGroupsApplyOrSemanticsWithinGroup() {
+    void filterGroupsCombineMustBeforeOrAcrossGroups() {
         Pageable pageable = PageRequest.of(0, 5);
 
         when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
@@ -183,7 +183,8 @@ class SearchServiceTest {
         Filter brandA = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Fairphone"), null, null);
         Filter brandB = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Samsung"), null, null);
         FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter),
-                List.of(new FilterRequestDto.FilterGroup(List.of(brandA, brandB))));
+                List.of(new FilterRequestDto.FilterGroup(List.of(brandA), List.of()),
+                        new FilterRequestDto.FilterGroup(List.of(brandB), List.of())));
 
         searchService.search(pageable, null, null, null, filters);
 
@@ -199,6 +200,30 @@ class SearchServiceTest {
 
         assertThat(fieldNames).contains(FilterField.condition.fieldPath(), FilterField.brand.fieldPath());
         assertThat(expandCriteria(builtCriteria).anyMatch(Criteria::isOr)).isTrue();
+    }
+
+    @Test
+    void boundedRangeFiltersWithinGroupsPreserveBothLimits() {
+        Pageable pageable = PageRequest.of(0, 3);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter priceRange = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 100.0, 500.0);
+        Filter brandFilter = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Sony"), null, null);
+
+        FilterRequestDto filters = new FilterRequestDto(List.of(),
+                List.of(new FilterRequestDto.FilterGroup(List.of(brandFilter, priceRange), List.of())));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 100.0)).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 500.0)).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.brand.fieldPath(), "Sony")).isTrue();
     }
 
     @Test

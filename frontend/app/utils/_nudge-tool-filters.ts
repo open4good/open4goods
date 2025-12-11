@@ -56,7 +56,12 @@ export const buildNudgeFilterRequest = (
     : [...baseFilters]
 
   const enriched = mergeFiltersWithoutDuplicates(withCondition, [...scoreFilters])
-  const filterGroups = subsetFilterGroups.filter((group) => (group.filters?.length ?? 0) > 0)
+  const filterGroups = subsetFilterGroups
+    .map((group) => ({
+      must: group.must ?? group.filters ?? [],
+      should: group.should ?? [],
+    }))
+    .filter((group) => (group.must?.length ?? 0) > 0 || (group.should?.length ?? 0) > 0)
 
   return {
     ...(enriched.length ? { filters: enriched } : {}),
