@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -14,22 +16,26 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * <p>The structure mirrors the JSON payload accepted by the {@code filters}
  * property of the {@code POST /products} request body. Clients can combine
  * multiple clauses. Legacy {@link #filters()} are evaluated with AND semantics
- * on the Elasticsearch query. {@link #filterGroups()} enables OR combinations
- * inside a group while groups themselves are combined with AND.</p>
+ * on the Elasticsearch query. {@link #filterGroups()} enables composing
+ * disjunctions of grouped filters where each group can express its own AND and
+ * OR clauses.</p>
  */
 public record FilterRequestDto(
         @Schema(description = "Collection of filter clauses. When omitted no additional filtering is applied.")
         List<Filter> filters,
-        @Schema(description = "Collection of filter groups combined with AND. Each group combines its filters with OR semantics.")
+        @Schema(description = "Collection of filter groups combined with OR. Each group can mix mandatory (must) and optional (should) clauses.")
         List<FilterGroup> filterGroups) {
 
     /**
-     * Groups a set of filter clauses that should be combined using OR
-     * semantics.
+     * Groups filter clauses to preserve AND combinations before joining groups
+     * with OR semantics.
      */
     public record FilterGroup(
-            @Schema(description = "Filters evaluated with OR semantics within the group.")
-            List<Filter> filters) {
+            @Schema(description = "Filters that must all match within the group to be eligible for selection.")
+            List<Filter> must,
+            @Schema(description = "Filters evaluated with OR semantics within the group. This field also accepts the legacy 'filters' key for backward compatibility.")
+            @JsonAlias("filters")
+            List<Filter> should) {
     }
 
     /**

@@ -703,16 +703,29 @@ public class ProductController {
 
         List<FilterRequestDto.FilterGroup> sanitizedGroups = new ArrayList<>();
         for (FilterRequestDto.FilterGroup group : filterGroups) {
-            if (group == null || group.filters() == null || group.filters().isEmpty()) {
+            if (group == null) {
                 continue;
             }
-            Validation<List<FilterRequestDto.Filter>> sanitizedFilters = sanitizeFilterList(group.filters(),
-                    allowedFilterMappings);
-            if (sanitizedFilters.hasError()) {
-                return Validation.error(sanitizedFilters.error());
+            Validation<List<FilterRequestDto.Filter>> sanitizedMust = sanitizeFilterList(group.must(), allowedFilterMappings);
+            if (sanitizedMust.hasError()) {
+                return Validation.error(sanitizedMust.error());
             }
-            if (sanitizedFilters.value() != null && !sanitizedFilters.value().isEmpty()) {
-                sanitizedGroups.add(new FilterRequestDto.FilterGroup(List.copyOf(sanitizedFilters.value())));
+            Validation<List<FilterRequestDto.Filter>> sanitizedShould = sanitizeFilterList(group.should(),
+                    allowedFilterMappings);
+            if (sanitizedShould.hasError()) {
+                return Validation.error(sanitizedShould.error());
+            }
+
+            List<FilterRequestDto.Filter> must = sanitizedMust.value();
+            List<FilterRequestDto.Filter> should = sanitizedShould.value();
+
+            boolean hasMust = must != null && !must.isEmpty();
+            boolean hasShould = should != null && !should.isEmpty();
+
+            if (hasMust || hasShould) {
+                sanitizedGroups.add(new FilterRequestDto.FilterGroup(
+                        hasMust ? List.copyOf(must) : List.of(),
+                        hasShould ? List.copyOf(should) : List.of()));
             }
         }
 

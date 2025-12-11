@@ -5,7 +5,14 @@ export const mergeFilterRequests = (
   secondary?: FilterRequestDto,
 ): FilterRequestDto | undefined => {
   const filters = [...(primary?.filters ?? []), ...(secondary?.filters ?? [])]
-  const filterGroups = [...(primary?.filterGroups ?? []), ...(secondary?.filterGroups ?? [])]
+  const mergedMust = [...(primary?.filterGroups ?? []), ...(secondary?.filterGroups ?? [])]
+    .flatMap((group) => group.must ?? group.filters ?? [])
+  const mergedShould = [...(primary?.filterGroups ?? []), ...(secondary?.filterGroups ?? [])]
+    .flatMap((group) => group.should ?? [])
+
+  const filterGroups = mergedMust.length || mergedShould.length
+    ? [{ ...(mergedMust.length ? { must: mergedMust } : {}), ...(mergedShould.length ? { should: mergedShould } : {}) }]
+    : []
 
   if (!filters.length && !filterGroups.length) {
     return undefined

@@ -28,7 +28,19 @@ import {
  */
 export interface FilterGroup {
     /**
-     * Filters evaluated with OR semantics within the group.
+     * Filters that must all match within the group.
+     * @type {Array<Filter>}
+     * @memberof FilterGroup
+     */
+    must?: Array<Filter>;
+    /**
+     * Filters evaluated with OR semantics within the group. Legacy payloads may still send this array under the `filters` key.
+     * @type {Array<Filter>}
+     * @memberof FilterGroup
+     */
+    should?: Array<Filter>;
+    /**
+     * @deprecated use `should` instead.
      * @type {Array<Filter>}
      * @memberof FilterGroup
      */
@@ -52,6 +64,10 @@ export function FilterGroupFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
 
+        'must': json['must'] == null ? undefined : ((json['must'] as Array<any>).map(FilterFromJSON)),
+        'should': json['should'] == null
+            ? (json['filters'] == null ? undefined : ((json['filters'] as Array<any>).map(FilterFromJSON)))
+            : ((json['should'] as Array<any>).map(FilterFromJSON)),
         'filters': json['filters'] == null ? undefined : ((json['filters'] as Array<any>).map(FilterFromJSON)),
     };
 }
@@ -67,6 +83,10 @@ export function FilterGroupToJSONTyped(value?: FilterGroup | null, ignoreDiscrim
 
     return {
 
+        'must': value['must'] == null ? undefined : ((value['must'] as Array<any>).map(FilterToJSON)),
+        'should': value['should'] == null
+            ? (value['filters'] == null ? undefined : ((value['filters'] as Array<any>).map(FilterToJSON)))
+            : ((value['should'] as Array<any>).map(FilterToJSON)),
         'filters': value['filters'] == null ? undefined : ((value['filters'] as Array<any>).map(FilterToJSON)),
     };
 }
