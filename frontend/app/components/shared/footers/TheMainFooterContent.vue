@@ -220,100 +220,100 @@ const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', impo
 </template>
 
 <style lang="postcss" scoped>
-.footer-container {
-  max-width: none;
-  width: 100%;
-  padding-inline: clamp(24px, 6vw, 96px);
-  color: rgb(var(--v-theme-hero-overlay-strong));
-}
+  .footer-container {
+    max-width: none;
+    width: 100%;
+    padding-inline: clamp(24px, 6vw, 96px);
+    color: rgb(var(--v-theme-hero-overlay-strong));
+  }
 
-.footer-upper {
-  position: relative;
-  z-index: 1;
-}
+  .footer-upper {
+    position: relative;
+    z-index: 1;
+  }
 
-.footer-panel {
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(var(--v-theme-hero-overlay-soft), 0.08);
-  border: 1px solid rgba(var(--v-theme-hero-overlay-soft), 0.16);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 18px 42px -24px rgba(var(--v-theme-shadow-primary-600), 0.35);
-  height: 100%;
-}
+  .footer-panel {
+    padding: 24px;
+    border-radius: 20px;
+    background: rgba(var(--v-theme-hero-overlay-soft), 0.08);
+    border: 1px solid rgba(var(--v-theme-hero-overlay-soft), 0.16);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 18px 42px -24px rgba(var(--v-theme-shadow-primary-600), 0.35);
+    height: 100%;
+  }
 
-.footer-mission {
-  line-height: 1.6;
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.96);
-}
+  .footer-mission {
+    line-height: 1.6;
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.96);
+  }
 
-.footer-link-btn {
-  justify-content: flex-start;
-  text-transform: none;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
+  .footer-link-btn {
+    justify-content: flex-start;
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
 
-.footer-link-btn :deep(.v-btn__append) {
-  opacity: 0.9;
-}
+  .footer-link-btn :deep(.v-btn__append) {
+    opacity: 0.9;
+  }
 
-.footer-section-title {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
+  .footer-section-title {
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
 
-.footer-list :deep(.v-list-item-title) {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.82);
-}
+  .footer-list :deep(.v-list-item-title) {
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.82);
+  }
 
-.footer-list-item {
-  min-height: 32px;
-  border-radius: 12px;
-  transition: background-color 0.2s ease;
-}
+  .footer-list-item {
+    min-height: 32px;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+  }
 
-.footer-list-item:hover {
-  background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
-}
+  .footer-list-item:hover {
+    background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
+  }
 
-.footer-divider {
-  opacity: 0.24 !important;
-}
+  .footer-divider {
+    opacity: 0.24 !important;
+  }
 
-.footer-bottom {
-  position: relative;
-  z-index: 1;
-}
+  .footer-bottom {
+    position: relative;
+    z-index: 1;
+  }
 
-.footer-logo {
-  max-width: 160px;
-  filter: drop-shadow(0 8px 18px rgba(var(--v-theme-shadow-primary-600), 0.45));
-}
+  .footer-logo {
+    max-width: 160px;
+    filter: drop-shadow(0 8px 18px rgba(var(--v-theme-shadow-primary-600), 0.45));
+  }
 
-.footer-logo-link {
-  transition: opacity 0.2s ease;
-}
+  .footer-logo-link {
+    transition: opacity 0.2s ease;
+  }
 
-.footer-logo-link:hover {
-  opacity: 0.85;
-}
+  .footer-logo-link:hover {
+    opacity: 0.85;
+  }
 
-.footer-meta {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
-}
+  .footer-meta {
+    color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
+  }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 </style>
