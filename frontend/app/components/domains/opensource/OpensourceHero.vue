@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
-import TextContent from '~/components/domains/content/TextContent.vue'
 
 interface HeroCta {
   label: string
