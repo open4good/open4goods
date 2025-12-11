@@ -41,6 +41,7 @@ export * from './FeedbackVoteEligibilityDto';
 export * from './FeedbackVoteResponseDto';
 export * from './FieldMetadataDto';
 export * from './Filter';
+export * from './FilterGroup';
 export * from './FilterRequestDto';
 export * from './FullPageDto';
 export * from './GlobalSearchResponseDto';

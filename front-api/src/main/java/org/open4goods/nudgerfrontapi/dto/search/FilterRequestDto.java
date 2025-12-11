@@ -13,12 +13,24 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * <p>The structure mirrors the JSON payload accepted by the {@code filters}
  * property of the {@code POST /products} request body. Clients can combine
- * multiple clauses. Each clause is evaluated with an AND semantics on the
- * Elasticsearch query.</p>
+ * multiple clauses. Legacy {@link #filters()} are evaluated with AND semantics
+ * on the Elasticsearch query. {@link #filterGroups()} enables OR combinations
+ * inside a group while groups themselves are combined with AND.</p>
  */
 public record FilterRequestDto(
         @Schema(description = "Collection of filter clauses. When omitted no additional filtering is applied.")
-        List<Filter> filters) {
+        List<Filter> filters,
+        @Schema(description = "Collection of filter groups combined with AND. Each group combines its filters with OR semantics.")
+        List<FilterGroup> filterGroups) {
+
+    /**
+     * Groups a set of filter clauses that should be combined using OR
+     * semantics.
+     */
+    public record FilterGroup(
+            @Schema(description = "Filters evaluated with OR semantics within the group.")
+            List<Filter> filters) {
+    }
 
     /**
      * Describes a single filter clause sent by the client.

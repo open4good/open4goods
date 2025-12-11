@@ -48,7 +48,7 @@ describe('nudge tool filters', () => {
     const baseFilters: Filter[] = [{ field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] }]
     const conditionFilter: Filter = { field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] }
     const scoreFilters: Filter[] = [{ field: 'scores.IMPACT.value', operator: 'range', min: 50 }]
-    const subsetFilters: Filter[] = [{ field: 'attributes.indexed.SIZE', operator: 'range', max: 40 }]
+    const subsetFilters = [{ filters: [{ field: 'attributes.indexed.SIZE', operator: 'range', max: 40 }] }]
 
     const request = buildNudgeFilterRequest(baseFilters, conditionFilter, scoreFilters, subsetFilters)
 
@@ -56,8 +56,8 @@ describe('nudge tool filters', () => {
       filters: [
         { field: 'price.minPrice.productState', operator: 'term', terms: ['NEW'] },
         { field: 'scores.IMPACT.value', operator: 'range', min: 50 },
-        { field: 'attributes.indexed.SIZE', operator: 'range', max: 40 },
       ],
+      filterGroups: subsetFilters,
     })
   })
 })

@@ -1,4 +1,4 @@
-import type { Filter, FilterRequestDto, NudgeToolScoreDto } from '~~/shared/api-client'
+import type { Filter, FilterGroup, FilterRequestDto, NudgeToolScoreDto } from '~~/shared/api-client'
 
 import { mergeFiltersWithoutDuplicates } from './_subset-to-filters'
 
@@ -49,13 +49,17 @@ export const buildNudgeFilterRequest = (
   baseFilters: Filter[],
   conditionFilter: Filter | null,
   scoreFilters: Filter[],
-  subsetFilters: Filter[],
+  subsetFilterGroups: FilterGroup[],
 ): FilterRequestDto => {
   const withCondition = conditionFilter
     ? mergeFiltersWithoutDuplicates(baseFilters, [conditionFilter])
     : [...baseFilters]
 
-  const enriched = mergeFiltersWithoutDuplicates(withCondition, [...scoreFilters, ...subsetFilters])
+  const enriched = mergeFiltersWithoutDuplicates(withCondition, [...scoreFilters])
+  const filterGroups = subsetFilterGroups.filter((group) => (group.filters?.length ?? 0) > 0)
 
-  return enriched.length ? { filters: enriched } : {}
+  return {
+    ...(enriched.length ? { filters: enriched } : {}),
+    ...(filterGroups.length ? { filterGroups } : {}),
+  }
 }
