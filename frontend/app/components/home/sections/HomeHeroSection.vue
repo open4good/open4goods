@@ -103,13 +103,16 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
+        <div class="home-hero__heading">
+          <h1 id="home-hero-title" class="home-hero__title">
+            {{ t('home.hero.title') }}
+          </h1>
+          <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
+        </div>
+
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" lg="6" class="home-hero__content">
-            <h1 id="home-hero-title" class="home-hero__title">
-              {{ t('home.hero.title') }}
-            </h1>
-            <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
-
+            
             <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
               <SearchSuggestField
                 :model-value="searchQueryValue"
@@ -174,6 +177,13 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   justify-content: center
   gap: clamp(2rem, 5vw, 3rem)
 
+.home-hero__heading
+  width: 100%
+  text-align: center
+  display: flex
+  flex-direction: column
+  gap: 0.8rem
+
 .home-hero__layout
   --v-gutter-x: clamp(2rem, 5vw, 3.5rem)
   --v-gutter-y: clamp(2rem, 5vw, 3.5rem)
@@ -191,17 +201,20 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   margin: 0
 
 .home-hero__title
-  font-size: clamp(1.8rem, 4.8vw, 3.8rem)
+  width: 100%
+  font-size: clamp(1.8rem, 4.2vw, 3.6rem)
   line-height: 1.05
   margin: 0
   white-space: nowrap
-  overflow: hidden
-  text-overflow: ellipsis
+  overflow: visible
+  text-overflow: unset
+  text-align: center
 
 .home-hero__subtitle
-  font-size: clamp(1.05rem, 2.6vw, 1.35rem)
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem)
   color: rgb(var(--v-theme-text-neutral-secondary))
   margin: 0
+  text-align: center
 
 .home-hero__search
   display: flex
