@@ -13,12 +13,36 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * <p>The structure mirrors the JSON payload accepted by the {@code filters}
  * property of the {@code POST /products} request body. Clients can combine
- * multiple clauses. Each clause is evaluated with an AND semantics on the
- * Elasticsearch query.</p>
+ * multiple clauses. Legacy {@link #filters()} are evaluated with AND semantics
+ * on the Elasticsearch query. {@link #filterGroups()} enables OR combinations
+ * inside a group while groups themselves are combined with AND. Each group may
+ * contain individual filters evaluated with OR semantics as well as conjunctive
+ * filter sets that are ANDed together before the OR is applied.</p>
  */
 public record FilterRequestDto(
         @Schema(description = "Collection of filter clauses. When omitted no additional filtering is applied.")
-        List<Filter> filters) {
+        List<Filter> filters,
+        @Schema(description = "Collection of filter groups combined with AND. Each group combines its entries with OR semantics, while each entry may itself AND multiple filters.")
+        List<FilterGroup> filterGroups) {
+
+    /**
+     * Groups a set of filter clauses that should be combined using OR
+     * semantics.
+     */
+    public record FilterGroup(
+            @Schema(description = "Filters evaluated with OR semantics within the group.")
+            List<Filter> filters,
+            @Schema(description = "Conjunctive filter sets combined with OR semantics within the group. Each set ANDs its filters before being ORed with siblings.")
+            List<FilterConjunction> filterSets) {
+    }
+
+    /**
+     * Represents a set of filters evaluated with AND semantics.
+     */
+    public record FilterConjunction(
+            @Schema(description = "Filters evaluated with AND semantics within the conjunction.")
+            List<Filter> filters) {
+    }
 
     /**
      * Describes a single filter clause sent by the client.

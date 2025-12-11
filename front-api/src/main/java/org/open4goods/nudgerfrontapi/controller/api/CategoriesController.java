@@ -229,7 +229,7 @@ public class CategoriesController {
                 List.of(condition), null, null);
         Filter taxonomyFilter = new Filter(FilterField.googleTaxonomyId.fieldPath(), FilterOperator.term,
                 taxonomyIds, null, null);
-        FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter, taxonomyFilter));
+        FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter, taxonomyFilter), List.of());
 
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,
                 Sort.by(Sort.Order.desc(SORT_FIELD_IMPACT_SCORE)));

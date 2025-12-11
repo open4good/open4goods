@@ -37,6 +37,7 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterConjunction;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
@@ -499,30 +500,176 @@ public class SearchService {
     }
 
     private Criteria applyFilters(Criteria criteria, FilterRequestDto filters) {
-        if (filters == null || filters.filters() == null || filters.filters().isEmpty()) {
+        if (filters == null) {
             return criteria;
         }
 
         Criteria combined = criteria;
-        for (Filter filter : filters.filters()) {
-            Criteria clause = buildFilterCriteria(filter);
-            if (clause != null) {
-                combined = combined.and(clause);
+        if (filters.filters() != null) {
+            for (Filter filter : filters.filters()) {
+                Criteria clause = buildFilterCriteria(filter);
+                if (clause != null) {
+                    combined = combined.and(clause);
+                }
+            }
+        }
+
+        if (filters.filterGroups() != null) {
+            for (FilterRequestDto.FilterGroup group : filters.filterGroups()) {
+                if (group == null) {
+                    continue;
+                }
+                Criteria groupCriteria = buildGroupCriteria(group);
+                if (groupCriteria != null) {
+                    combined = combined.and(groupCriteria);
+                }
             }
         }
         return combined;
     }
 
+    private Criteria buildGroupCriteria(FilterRequestDto.FilterGroup group) {
+        Criteria groupCriteria = null;
+
+        if (group.filters() != null) {
+            for (Filter filter : group.filters()) {
+                Criteria clause = buildFilterCriteria(filter);
+                if (clause == null) {
+                    continue;
+                }
+                groupCriteria = appendOr(groupCriteria, clause);
+            }
+        }
+
+        if (group.filterSets() != null) {
+            for (FilterConjunction conjunction : group.filterSets()) {
+                Criteria conjunctionCriteria = buildConjunctionCriteria(conjunction);
+                if (conjunctionCriteria == null) {
+                    continue;
+                }
+                groupCriteria = appendOr(groupCriteria, conjunctionCriteria);
+            }
+        }
+
+        return groupCriteria;
+    }
+
+    private Criteria buildConjunctionCriteria(FilterConjunction conjunction) {
+        if (conjunction == null || conjunction.filters() == null || conjunction.filters().isEmpty()) {
+            return null;
+        }
+
+        Criteria combined = null;
+        for (Filter filter : mergeRangeFilters(conjunction.filters())) {
+            Criteria clause = buildFilterCriteria(filter);
+            if (clause == null) {
+                continue;
+            }
+            combined = combined == null ? clause : combined.and(clause);
+        }
+        return combined;
+    }
+
+    private List<Filter> mergeRangeFilters(Collection<Filter> filters) {
+        Map<String, Filter> merged = new LinkedHashMap<>();
+        List<Filter> passthrough = new ArrayList<>();
+
+        if (filters == null) {
+            return passthrough;
+        }
+
+        for (Filter filter : filters) {
+            if (filter == null) {
+                continue;
+            }
+            if (filter.operator() != FilterOperator.range) {
+                passthrough.add(filter);
+                continue;
+            }
+
+            Filter existing = merged.get(filter.field());
+            if (existing == null) {
+                merged.put(filter.field(), filter);
+                continue;
+            }
+
+            Double mergedMin = mergeLowerBounds(existing.min(), filter.min());
+            Double mergedMax = mergeUpperBounds(existing.max(), filter.max());
+
+            if (mergedMin != null && mergedMax != null && mergedMin > mergedMax) {
+                LOGGER.warn("Discarding conflicting range filters for field {}: min {} exceeds max {}", filter.field(), mergedMin,
+                        mergedMax);
+                continue;
+            }
+
+            merged.put(filter.field(), new Filter(filter.field(), FilterOperator.range, filter.terms(), mergedMin, mergedMax));
+        }
+
+        passthrough.addAll(merged.values());
+        return passthrough;
+    }
+
+    private Double mergeLowerBounds(Double left, Double right) {
+        if (left == null) {
+            return right;
+        }
+        if (right == null) {
+            return left;
+        }
+        return Math.max(left, right);
+    }
+
+    private Double mergeUpperBounds(Double left, Double right) {
+        if (left == null) {
+            return right;
+        }
+        if (right == null) {
+            return left;
+        }
+        return Math.min(left, right);
+    }
+
+    private Criteria appendOr(Criteria existing, Criteria addition) {
+        return existing == null ? addition : existing.or(addition);
+    }
+
     private boolean hasExcludedOverride(FilterRequestDto filters) {
-        if (filters == null || filters.filters() == null) {
+        if (filters == null) {
             return false;
         }
-        return filters.filters().stream()
-                .filter(Objects::nonNull)
-                .map(Filter::field)
+        Stream<String> legacyFields = filters.filters() == null ? Stream.empty()
+                : filters.filters().stream()
+                        .filter(Objects::nonNull)
+                        .map(Filter::field);
+
+        Stream<String> groupFields = filters.filterGroups() == null ? Stream.empty()
+                : filters.filterGroups().stream()
+                        .filter(Objects::nonNull)
+                        .flatMap(group -> Stream.concat(
+                                safeFilters(group.filters()),
+                                safeConjunctionFilters(group.filterSets())))
+                        .map(Filter::field);
+
+        return Stream.concat(legacyFields, groupFields)
                 .filter(StringUtils::hasText)
                 .map(String::trim)
                 .anyMatch(field -> field.equals(EXCLUDED_CAUSES_FIELD));
+    }
+
+    private Stream<Filter> safeFilters(Collection<Filter> filters) {
+        return filters == null ? Stream.empty() : filters.stream().filter(Objects::nonNull);
+    }
+
+    private Stream<Filter> safeConjunctionFilters(Collection<FilterConjunction> conjunctions) {
+        if (conjunctions == null) {
+            return Stream.empty();
+        }
+        return conjunctions.stream()
+                .filter(Objects::nonNull)
+                .map(FilterConjunction::filters)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull);
     }
 
     private Criteria buildFilterCriteria(Filter filter) {

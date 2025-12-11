@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -39,6 +40,7 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterConjunction;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -55,12 +57,14 @@ import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.Criteria.CriteriaEntry;
+import org.springframework.data.elasticsearch.core.query.Criteria.OperationKey;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import org.springframework.data.elasticsearch.core.query.Field;
 
 /**
  * Unit tests for {@link SearchService} focusing on filter application.
@@ -109,7 +113,7 @@ class SearchServiceTest {
 
         Filter priceFilter = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 100.0, 400.0);
         Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term, List.of("NEW"), null, null);
-        FilterRequestDto filters = new FilterRequestDto(List.of(priceFilter, conditionFilter));
+        FilterRequestDto filters = new FilterRequestDto(List.of(priceFilter, conditionFilter), List.of());
 
         Agg aggregation = new Agg("byOffers", FilterField.offersCount.fieldPath(),
                 AggType.terms, null, null, 5, null);
@@ -152,7 +156,7 @@ class SearchServiceTest {
 
         Filter excludedFilter = new Filter(FilterField.excludedCauses.fieldPath(), FilterOperator.term,
                 List.of("MODERATION"), null, null);
-        FilterRequestDto adminFilters = new FilterRequestDto(List.of(excludedFilter));
+        FilterRequestDto adminFilters = new FilterRequestDto(List.of(excludedFilter), List.of());
 
         SearchService.SearchResult overriddenResult = searchService.search(pageable, null, null, null, adminFilters);
         assertThat(overriddenResult.hits().getSearchHits()).hasSize(1);
@@ -168,6 +172,93 @@ class SearchServiceTest {
         assertThat(hasExcludedClauseWithValue(overriddenCriteria, false)).isFalse();
         assertThat(hasFieldClauseWithValue(overriddenCriteria, FilterField.excludedCauses.fieldPath(), "MODERATION"))
                 .isTrue();
+    }
+
+    @Test
+    void filterGroupsApplyOrSemanticsWithinGroup() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term, List.of("NEW"), null, null);
+        Filter brandA = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Fairphone"), null, null);
+        Filter brandB = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Samsung"), null, null);
+        FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter),
+                List.of(new FilterRequestDto.FilterGroup(List.of(brandA, brandB), null)));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        List<String> fieldNames = expandCriteria(builtCriteria)
+                .map(Criteria::getField)
+                .filter(Objects::nonNull)
+                .map(Field::getName)
+                .toList();
+
+        assertThat(fieldNames).contains(FilterField.condition.fieldPath(), FilterField.brand.fieldPath());
+        assertThat(expandCriteria(builtCriteria).anyMatch(Criteria::isOr)).isTrue();
+    }
+
+    @Test
+    void filterGroupConjunctionsAreAndedBeforeBeingOrCombined() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter lowerThanFiveHundred = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, null, 500.0);
+        Filter greaterThanZero = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 0.0, null);
+        Filter lowerThanThousand = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, null, 1000.0);
+        Filter greaterThanFiveHundred = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 500.0, null);
+
+        FilterConjunction budgetRange = new FilterConjunction(List.of(lowerThanFiveHundred, greaterThanZero));
+        FilterConjunction midRange = new FilterConjunction(List.of(lowerThanThousand, greaterThanFiveHundred));
+
+        FilterRequestDto filters = new FilterRequestDto(null,
+                List.of(new FilterRequestDto.FilterGroup(null, List.of(budgetRange, midRange))));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        long orCount = expandCriteria(builtCriteria)
+                .filter(Criteria::isOr)
+                .count();
+        assertThat(orCount).isEqualTo(1);
+
+        List<Criteria> priceCriteria = expandCriteria(builtCriteria)
+                .filter(criteria -> criteria.getField() != null
+                        && FilterField.price.fieldPath().equals(criteria.getField().getName()))
+                .toList();
+        assertThat(priceCriteria).hasSize(2);
+        assertThat(priceCriteria.stream().anyMatch(Criteria::isOr)).isTrue();
+
+        List<CriteriaEntry> priceEntries = priceCriteria.stream()
+                .flatMap(criteria -> criteria.getQueryCriteriaEntries().stream())
+                .toList();
+
+        assertThat(priceEntries).anySatisfy(entry -> {
+            assertThat(entry.getKey()).isEqualTo(OperationKey.GREATER_EQUAL);
+            assertThat(entry.getValue()).isEqualTo(0.0);
+        });
+        assertThat(priceEntries).anySatisfy(entry -> {
+            assertThat(entry.getKey()).isEqualTo(OperationKey.LESS_EQUAL);
+            assertThat(entry.getValue()).isEqualTo(500.0);
+        });
+        assertThat(priceEntries).anySatisfy(entry -> {
+            assertThat(entry.getKey()).isEqualTo(OperationKey.GREATER_EQUAL);
+            assertThat(entry.getValue()).isEqualTo(500.0);
+        });
+        assertThat(priceEntries).anySatisfy(entry -> {
+            assertThat(entry.getKey()).isEqualTo(OperationKey.LESS_EQUAL);
+            assertThat(entry.getValue()).isEqualTo(1000.0);
+        });
     }
 
     @Test
