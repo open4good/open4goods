@@ -191,9 +191,12 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   margin: 0
 
 .home-hero__title
-  font-size: clamp(2.2rem, 5vw, 3.8rem)
+  font-size: clamp(1.8rem, 4.8vw, 3.8rem)
   line-height: 1.05
   margin: 0
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
 
 .home-hero__subtitle
   font-size: clamp(1.05rem, 2.6vw, 1.35rem)
@@ -247,10 +250,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     padding-block-end: clamp(3.5rem, 16vw, 5.5rem)
 
   .home-hero__wizard
-    order: 1
+    order: 2
 
   .home-hero__content
-    order: 2
+    order: 1
 
   .home-hero__categories-inner
     padding: clamp(0.4rem, 5vw, 0.75rem) clamp(0.75rem, 5vw, 1.25rem)
