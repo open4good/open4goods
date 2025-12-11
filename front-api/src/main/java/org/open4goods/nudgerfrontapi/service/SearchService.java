@@ -567,13 +567,86 @@ public class SearchService {
         }
 
         Criteria combined = null;
-        for (List<Filter> groupedFilters : byFieldAndOperator.values()) {
-            Criteria fieldCriteria = buildJoinedCriteria(groupedFilters, Criteria::or);
+        for (Map.Entry<FilterKey, List<Filter>> entry : byFieldAndOperator.entrySet()) {
+            Criteria fieldCriteria;
+            if (entry.getKey().operator() == FilterOperator.range) {
+                fieldCriteria = buildRangeGroupCriteria(entry.getKey().field(), entry.getValue());
+            } else {
+                fieldCriteria = buildJoinedCriteria(entry.getValue(), Criteria::or);
+            }
             if (fieldCriteria != null) {
                 combined = combined == null ? fieldCriteria : combined.and(fieldCriteria);
             }
         }
         return combined;
+    }
+
+    private Criteria buildRangeGroupCriteria(String fieldPath, List<Filter> filters) {
+        List<Criteria> normalizedRanges = normalizeRangeFilters(fieldPath, filters);
+        if (normalizedRanges.isEmpty()) {
+            return null;
+        }
+
+        Criteria combined = null;
+        for (Criteria rangeCriteria : normalizedRanges) {
+            combined = combined == null ? rangeCriteria : combined.or(rangeCriteria);
+        }
+        return combined;
+    }
+
+    private List<Criteria> normalizeRangeFilters(String fieldPath, List<Filter> filters) {
+        if (filters == null || filters.isEmpty()) {
+            return List.of();
+        }
+
+        List<Criteria> normalized = new ArrayList<>();
+        List<Double> mins = new ArrayList<>();
+        List<Double> maxs = new ArrayList<>();
+
+        for (Filter filter : filters) {
+            if (filter == null) {
+                continue;
+            }
+            Double min = filter.min();
+            Double max = filter.max();
+            if (min != null && max != null) {
+                Criteria bounded = buildRangeCriteria(fieldPath, min, max);
+                if (bounded != null) {
+                    normalized.add(bounded);
+                }
+            } else if (min != null) {
+                mins.add(min);
+            } else if (max != null) {
+                maxs.add(max);
+            }
+        }
+
+        mins.sort(Comparator.naturalOrder());
+        maxs.sort(Comparator.naturalOrder());
+
+        int paired = Math.min(mins.size(), maxs.size());
+        for (int i = 0; i < paired; i++) {
+            Criteria range = buildRangeCriteria(fieldPath, mins.get(i), maxs.get(i));
+            if (range != null) {
+                normalized.add(range);
+            }
+        }
+
+        for (int i = paired; i < mins.size(); i++) {
+            Criteria lowerBounded = buildRangeCriteria(fieldPath, mins.get(i), null);
+            if (lowerBounded != null) {
+                normalized.add(lowerBounded);
+            }
+        }
+
+        for (int i = paired; i < maxs.size(); i++) {
+            Criteria upperBounded = buildRangeCriteria(fieldPath, null, maxs.get(i));
+            if (upperBounded != null) {
+                normalized.add(upperBounded);
+            }
+        }
+
+        return normalized;
     }
 
     private Criteria buildJoinedCriteria(List<Filter> filters, BiFunction<Criteria, Criteria, Criteria> combiner) {

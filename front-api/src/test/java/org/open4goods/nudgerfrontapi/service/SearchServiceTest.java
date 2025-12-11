@@ -239,6 +239,38 @@ class SearchServiceTest {
     }
 
     @Test
+    void rangeFiltersPairLowerAndUpperBoundsBeforeUnioning() {
+        Pageable pageable = PageRequest.of(0, 4);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter ecoscoreMax = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, null, 2.0);
+        Filter priceUpper = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, null, 500.0);
+        Filter priceLower = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 0.0, null);
+
+        FilterRequestDto filters = new FilterRequestDto(List.of(),
+                List.of(new FilterRequestDto.FilterGroup(List.of(ecoscoreMax, priceUpper, priceLower), List.of())));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        List<Object> priceValues = expandCriteria(builtCriteria)
+                .filter(entry -> entry.getField() != null
+                        && FilterField.price.fieldPath().equals(entry.getField().getName()))
+                .flatMap(entry -> entry.getQueryCriteriaEntries().stream())
+                .map(CriteriaEntry::getValue)
+                .toList();
+
+        assertThat(hasFieldClauseWithValue(builtCriteria, "scores.ECOSCORE.value", 2.0)).isTrue();
+        assertThat(priceValues).contains(0.0, 500.0);
+        assertThat(expandCriteria(builtCriteria).anyMatch(Criteria::isOr)).isFalse();
+    }
+
+    @Test
     void boundedRangeFiltersWithinGroupsPreserveBothLimits() {
         Pageable pageable = PageRequest.of(0, 3);
 
