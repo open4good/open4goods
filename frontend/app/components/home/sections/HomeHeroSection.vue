@@ -105,7 +105,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       <v-parallax
         class="home-hero__parallax"
         src="/images/home/home-hero_background.webp"
-        height="100%"
+        height="75%"
         scale="1.05"
       />
     </div>
@@ -116,6 +116,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             <h1 id="home-hero-title" class="home-hero__title">
               {{ t('home.hero.title') }}
             </h1>
+          </v-col>
+        </v-row>
+        <v-row justify="center">
+          <v-col cols="12" lg="6" class="home-hero__wizard">
+            <NudgeToolWizard :verticals="wizardVerticals" />
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -164,11 +169,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             </div>
           </v-col>
         </v-row>
-        <v-row justify="center">
-          <v-col cols="12" lg="6" class="home-hero__wizard">
-            <NudgeToolWizard :verticals="wizardVerticals" />
-          </v-col>
-        </v-row>
+
       </div>
     </v-container>
   </HeroSurface>
