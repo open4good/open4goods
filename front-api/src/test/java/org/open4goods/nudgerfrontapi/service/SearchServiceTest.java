@@ -236,7 +236,39 @@ class SearchServiceTest {
         long orCount = expandCriteria(builtCriteria)
                 .filter(Criteria::isOr)
                 .count();
-        assertThat(orCount).isEqualTo(1);
+        assertThat(orCount).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void shouldClausesRequireAtLeastOneBranchWhenCombinedWithMust() {
+        Pageable pageable = PageRequest.of(0, 4);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter priceRange = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 250.0, 750.0);
+        Filter brandA = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("LG"), null, null);
+        Filter brandB = new Filter(FilterField.brand.fieldPath(), FilterOperator.term, List.of("Sony"), null, null);
+
+        FilterRequestDto filters = new FilterRequestDto(List.of(),
+                List.of(new FilterRequestDto.FilterGroup(List.of(priceRange), List.of(brandA, brandB))));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 250.0)).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.price.fieldPath(), 750.0)).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.brand.fieldPath(), "LG")).isTrue();
+        assertThat(hasFieldClauseWithValue(builtCriteria, FilterField.brand.fieldPath(), "Sony")).isTrue();
+
+        long orCount = expandCriteria(builtCriteria)
+                .filter(Criteria::isOr)
+                .count();
+        assertThat(orCount).isGreaterThanOrEqualTo(1);
     }
 
     @Test

@@ -542,26 +542,41 @@ public class SearchService {
             return null;
         }
 
-        Criteria mustCriteria = buildJoinedCriteria(group.must(), Criteria::and);
-        Criteria shouldCriteria = buildJoinedCriteria(group.should(), Criteria::or);
+        List<Criteria> mustClauses = buildCriteriaList(group.must());
+        List<Criteria> shouldClauses = buildCriteriaList(group.should());
 
-        if (mustCriteria != null && shouldCriteria != null) {
-            return mustCriteria.and(shouldCriteria);
+        Criteria mustCriteria = combineCriteriaList(mustClauses, Criteria::and);
+
+        if (!shouldClauses.isEmpty()) {
+            List<Criteria> orBranches = shouldClauses.stream()
+                    .map(should -> combineCriteriaList(Stream.concat(mustClauses.stream(), Stream.of(should)).toList(),
+                            Criteria::and))
+                    .filter(Objects::nonNull)
+                    .toList();
+            return combineCriteriaList(orBranches, Criteria::or);
         }
-        return mustCriteria != null ? mustCriteria : shouldCriteria;
+
+        return mustCriteria;
     }
 
-    private Criteria buildJoinedCriteria(List<Filter> filters, BiFunction<Criteria, Criteria, Criteria> combiner) {
+    private List<Criteria> buildCriteriaList(List<Filter> filters) {
         if (filters == null || filters.isEmpty()) {
+            return List.of();
+        }
+
+        return filters.stream()
+                .map(this::buildFilterCriteria)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private Criteria combineCriteriaList(List<Criteria> criteriaList, BiFunction<Criteria, Criteria, Criteria> combiner) {
+        if (criteriaList == null || criteriaList.isEmpty()) {
             return null;
         }
 
         Criteria joined = null;
-        for (Filter filter : filters) {
-            Criteria clause = buildFilterCriteria(filter);
-            if (clause == null) {
-                continue;
-            }
+        for (Criteria clause : criteriaList) {
             joined = joined == null ? clause : combiner.apply(joined, clause);
         }
         return joined;
