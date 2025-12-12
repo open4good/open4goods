@@ -204,9 +204,16 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
         circle at 20% 20%,
         rgba(var(--v-theme-hero-gradient-start), 0.18),
         transparent 35%
-      ),
-      radial-gradient(circle at 80% 10%, rgba(var(--v-theme-hero-gradient-end), 0.16), transparent 40%),
-      linear-gradient(180deg, rgba(var(--v-theme-surface-default), 0) 0%, rgba(var(--v-theme-surface-default), 0.15) 40%, rgba(var(--v-theme-surface-default), 0.65) 100%)
+      ), radial-gradient(
+        circle at 80% 10%,
+        rgba(var(--v-theme-hero-gradient-end), 0.16),
+        transparent 40%
+      ), linear-gradient(
+        180deg,
+        rgba(var(--v-theme-surface-default), 0) 0%,
+        rgba(var(--v-theme-surface-default), 0.15) 40%,
+        rgba(var(--v-theme-surface-default), 0.65) 100%
+      )
     pointer-events: none
 
   .home-hero__container
