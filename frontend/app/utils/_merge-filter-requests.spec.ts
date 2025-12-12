@@ -12,7 +12,10 @@ describe('mergeFilterRequests', () => {
   it('merges filters and filter groups from both payloads', () => {
     const primary: FilterRequestDto = {
       filters: [{ field: 'fieldA', operator: 'term', terms: ['a'] }],
-      filterGroups: [{ must: [{ field: 'groupA', operator: 'range', min: 1 }] }],
+      filterGroups: [
+        { must: [{ field: 'groupA', operator: 'range', min: 1 }] },
+        { should: [{ field: 'bonus', operator: 'term', terms: ['x'] }] },
+      ],
     }
     const secondary: FilterRequestDto = {
       filters: [{ field: 'fieldB', operator: 'term', terms: ['b'] }],
@@ -25,12 +28,9 @@ describe('mergeFilterRequests', () => {
         { field: 'fieldB', operator: 'term', terms: ['b'] },
       ],
       filterGroups: [
-        {
-          must: [
-            { field: 'groupA', operator: 'range', min: 1 },
-            { field: 'groupB', operator: 'range', max: 10 },
-          ],
-        },
+        { must: [{ field: 'groupA', operator: 'range', min: 1 }] },
+        { should: [{ field: 'bonus', operator: 'term', terms: ['x'] }] },
+        { must: [{ field: 'groupB', operator: 'range', max: 10 }] },
       ],
     })
   })
@@ -42,6 +42,16 @@ describe('mergeFilterRequests', () => {
 
     expect(mergeFilterRequests(primary, undefined)).toEqual({
       filterGroups: [{ must: [{ field: 'only-group', operator: 'term', terms: ['x'] }] }],
+    })
+  })
+
+  it('deduplicates identical filter groups', () => {
+    const baseGroup = { must: [{ field: 'shared', operator: 'range', min: 2 }] }
+    const primary: FilterRequestDto = { filterGroups: [baseGroup] }
+    const secondary: FilterRequestDto = { filterGroups: [baseGroup] }
+
+    expect(mergeFilterRequests(primary, secondary)).toEqual({
+      filterGroups: [baseGroup],
     })
   })
 })

@@ -64,17 +64,13 @@ describe('_subset-to-filters helpers', () => {
 
     expect(request).toEqual({
       filterGroups: [
-        {
-          must: [
-            { field: 'price.conditions', operator: 'term', terms: ['NEW'] },
-            { field: 'price.conditions', operator: 'term', terms: ['OCCASION'] },
-          ],
-        },
+        { must: [{ field: 'price.conditions', operator: 'term', terms: ['NEW'] }] },
+        { must: [{ field: 'price.conditions', operator: 'term', terms: ['OCCASION'] }] },
       ],
     })
   })
 
-  it('combines compatible range filters by widening the bounds', () => {
+  it('keeps each range subset in its own filter group', () => {
     const subsets: VerticalSubsetDto[] = [
       {
         id: 'mid-range',
@@ -90,12 +86,12 @@ describe('_subset-to-filters helpers', () => {
 
     const request = buildFilterRequestFromSubsets(subsets, ['mid-range', 'entry'])
 
-    expect(request.filterGroups?.[0]?.must).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ field: 'price.min', operator: 'range', max: 800 }),
-        expect.objectContaining({ field: 'price.min', operator: 'range', max: 500 }),
-      ]),
-    )
+    expect(request).toEqual({
+      filterGroups: [
+        { must: [{ field: 'price.min', operator: 'range', max: 800 }] },
+        { must: [{ field: 'price.min', operator: 'range', max: 500 }] },
+      ],
+    })
   })
 
   it('drops conflicting range filters when they cannot be merged safely', () => {
@@ -114,11 +110,11 @@ describe('_subset-to-filters helpers', () => {
 
     const request = buildFilterRequestFromSubsets(subsets, ['budget', 'premium'])
 
-    expect(request.filterGroups?.[0]?.must).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ field: 'price.min', operator: 'range', max: 500 }),
-        expect.objectContaining({ field: 'price.min', operator: 'range', min: 1000 }),
-      ]),
-    )
+    expect(request).toEqual({
+      filterGroups: [
+        { must: [{ field: 'price.min', operator: 'range', max: 500 }] },
+        { must: [{ field: 'price.min', operator: 'range', min: 1000 }] },
+      ],
+    })
   })
 })
