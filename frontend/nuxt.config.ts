@@ -216,7 +216,7 @@ export default defineNuxtConfig({
       runtimeCaching,
     },
   },
-
+  // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
       vuetifyOptions: {
         theme: {
