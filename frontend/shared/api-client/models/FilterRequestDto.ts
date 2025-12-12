@@ -41,7 +41,7 @@ export interface FilterRequestDto {
      */
     filters?: Array<Filter>;
     /**
-     * Collection of filter groups combined with OR. Each group can mix mandatory (must) and optional (should) clauses.
+     * Collection of filter groups combined with AND. Each group can mix mandatory (must) and optional (should) clauses.
      * @type {Array<FilterGroup>}
      * @memberof FilterRequestDto
      */
