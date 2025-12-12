@@ -101,6 +101,14 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 <template>
   <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
+    <div class="home-hero__background" aria-hidden="true">
+      <v-parallax
+        class="home-hero__parallax"
+        src="/images/home/home-hero_background.webp"
+        height="100%"
+        scale="1.05"
+      />
+    </div>
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
@@ -163,7 +171,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
         </v-row>
       </div>
     </v-container>
-
   </HeroSurface>
 </template>
 
@@ -174,19 +181,38 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
     --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
     --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
+    position: relative
+    overflow: hidden
     min-height: clamp(560px, 75dvh, 880px)
     padding-block-start: clamp(3rem, 8vw, 5.5rem)
     padding-block-end: calc(clamp(3.5rem, 10vw, 6rem) + var(--hero-cat-in-hero))
 
-  .v-theme--nudger
-    .home-hero
-      background-image: url('/images/home/home-hero_background.webp')
-      background-size: cover
-      background-position: center
-      background-repeat: no-repeat
+  .home-hero__background
+    position: absolute
+    inset: 0
+    z-index: 0
+    pointer-events: none
+
+  .home-hero__parallax
+    height: 100%
+
+  .home-hero__background::after
+    content: ''
+    position: absolute
+    inset: 0
+    background: radial-gradient(
+        circle at 20% 20%,
+        rgba(var(--v-theme-hero-gradient-start), 0.18),
+        transparent 35%
+      ),
+      radial-gradient(circle at 80% 10%, rgba(var(--v-theme-hero-gradient-end), 0.16), transparent 40%),
+      linear-gradient(180deg, rgba(var(--v-theme-surface-default), 0) 0%, rgba(var(--v-theme-surface-default), 0.15) 40%, rgba(var(--v-theme-surface-default), 0.65) 100%)
+    pointer-events: none
 
   .home-hero__container
     padding-inline: clamp(1.5rem, 5vw, 4rem)
+    position: relative
+    z-index: 1
 
   .home-hero__inner
     margin: 0 auto

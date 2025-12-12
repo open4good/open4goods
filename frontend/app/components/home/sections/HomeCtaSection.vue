@@ -120,4 +120,16 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
     box-shadow: 0 24px 36px rgba(var(--v-theme-shadow-primary-600), 0.15)
 
   .home-hero__search
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+    width: 100%
+
+  .home-hero__search-input
+    border-radius: clamp(1.25rem, 3vw, 1.75rem)
+    background: rgba(var(--v-theme-surface-default), 0.92)
+    box-shadow: 0 14px 22px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+  .home-hero__search-submit
+    box-shadow: none
 </style>
