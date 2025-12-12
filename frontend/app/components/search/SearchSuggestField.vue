@@ -653,7 +653,7 @@ const handleScannerDecode = (rawValue: string | null) => {
   width: 100%
 
   :deep(.v-field)
-    background-color: rgba(var(--v-theme-hero-overlay-soft), 0.94)
+    background-color: rgba(var(--v-theme-surface-glass-strong), 0.96)
     border-radius: 1rem
     box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
     cursor: text
@@ -665,10 +665,10 @@ const handleScannerDecode = (rawValue: string | null) => {
     cursor: text
 
   :deep(.v-field__prepend-inner .v-icon)
-    color: rgba(var(--v-theme-text-on-accent), 0.7)
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
 
   :deep(input)
-    color: rgb(var(--v-theme-text-on-accent))
+    color: rgb(var(--v-theme-text-neutral-strong))
     cursor: text
 
   :deep(.v-overlay__content)
