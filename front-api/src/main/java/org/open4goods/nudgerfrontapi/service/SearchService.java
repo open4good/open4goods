@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,13 +53,12 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.Criteria;
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
@@ -167,26 +165,22 @@ public class SearchService {
         String sanitizedQuery = sanitize(query);
         String normalizedVerticalId = normalizeVerticalId(verticalId);
 
-        Criteria criteria = buildBaseCriteria(normalizedVerticalId, sanitizedQuery, filters);
+        FilterRequestDto normalizedFilters = normalizeFilters(filters);
+        boolean hasExcludedOverride = hasExcludedOverride(normalizedFilters);
+        boolean applyDefaultExclusion = !hasExcludedOverride;
 
-        boolean hasExcludedOverride = hasExcludedOverride(filters);
+        Query searchQuery = buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters,
+                applyDefaultExclusion);
+
         List<Agg> excludedAggregations = extractExcludedAggregations(aggregationQuery);
-        boolean requiresAdminExcludedAggregation = !hasExcludedOverride && !excludedAggregations.isEmpty();
-        Criteria adminAggregationCriteria = requiresAdminExcludedAggregation
-                ? buildBaseCriteria(normalizedVerticalId, sanitizedQuery, filters)
+        boolean requiresAdminExcludedAggregation = applyDefaultExclusion && !excludedAggregations.isEmpty();
+        Query adminAggregationQuery = requiresAdminExcludedAggregation
+                ? buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters, false)
                 : null;
-
-        // Remove excluded articles unless the caller explicitly overrides the flag
-        if (!hasExcludedOverride) {
-            criteria = criteria.and(new Criteria(EXCLUDED_FIELD).is(false));
-        }
-
-        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
-        criteriaQuery.setPageable(pageable);
 
         List<AggregationDescriptor> descriptors = new ArrayList<>();
         var nativeQueryBuilder = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
-                .withQuery(criteriaQuery)
+                .withQuery(searchQuery)
                 .withPageable(pageable);
 
         if (aggregationQuery != null && aggregationQuery.aggs() != null) {
@@ -211,25 +205,33 @@ public class SearchService {
         }
         List<AggregationResponseDto> aggregations = extractAggregationResults(hits, descriptors);
         if (requiresAdminExcludedAggregation) {
-            List<AggregationResponseDto> overrides = computeExcludedAggregations(adminAggregationCriteria,
+            List<AggregationResponseDto> overrides = computeExcludedAggregations(adminAggregationQuery,
                     excludedAggregations);
             aggregations = mergeAggregationOverrides(aggregations, overrides);
         }
         return new SearchResult(hits, List.copyOf(aggregations));
     }
 
-    private Criteria buildBaseCriteria(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters) {
-        Criteria criteria = repository.getRecentPriceQuery();
-
-        if (StringUtils.hasText(normalizedVerticalId)) {
-            criteria = criteria.and(new Criteria("vertical").is(normalizedVerticalId));
-        }
-
-        if (StringUtils.hasText(sanitizedQuery)) {
-            criteria = criteria.and(new Criteria("offerNames").matches(sanitizedQuery));
-        }
-
-        return applyFilters(criteria, filters);
+    Query buildProductSearchQuery(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters,
+            boolean applyDefaultExclusion) {
+        Long expiration = repository.expirationClause();
+        return Query.of(q -> q.bool(b -> {
+            b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+            b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+            if (applyDefaultExclusion) {
+                b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+            }
+            if (StringUtils.hasText(normalizedVerticalId)) {
+                b.filter(f -> f.term(t -> t.field("vertical").value(normalizedVerticalId)));
+            }
+            if (StringUtils.hasText(sanitizedQuery)) {
+                b.must(m -> m.match(mq -> mq.field("offerNames").query(sanitizedQuery)));
+            }
+            if (filters != null) {
+                applyFilterRequest(filters, b);
+            }
+            return b;
+        }));
     }
 
     private String normalizeVerticalId(String verticalId) {
@@ -499,72 +501,109 @@ public class SearchService {
         return agg != null && StringUtils.hasText(agg.name()) && StringUtils.hasText(agg.field()) && agg.type() != null;
     }
 
-    private Criteria applyFilters(Criteria criteria, FilterRequestDto filters) {
+    FilterRequestDto normalizeFilters(FilterRequestDto filters) {
         if (filters == null) {
-            return criteria;
+            return null;
         }
+        List<Filter> normalizedLegacy = mergeRangeFilters(filters.filters());
+        List<FilterRequestDto.FilterGroup> normalizedGroups = normalizeGroups(filters.filterGroups());
+        return new FilterRequestDto(normalizedLegacy, normalizedGroups);
+    }
 
-        Criteria combined = criteria;
+    private List<FilterRequestDto.FilterGroup> normalizeGroups(List<FilterRequestDto.FilterGroup> filterGroups) {
+        if (filterGroups == null) {
+            return List.of();
+        }
+        List<FilterRequestDto.FilterGroup> normalized = new ArrayList<>();
+        for (FilterRequestDto.FilterGroup group : filterGroups) {
+            if (group == null) {
+                continue;
+            }
+            List<Filter> must = mergeRangeFilters(group.must());
+            List<Filter> should = group.should() == null ? List.of() : List.copyOf(group.should());
+            if (!must.isEmpty() || !should.isEmpty()) {
+                normalized.add(new FilterRequestDto.FilterGroup(must, should));
+            }
+        }
+        return normalized;
+    }
+
+    private List<Filter> mergeRangeFilters(List<Filter> filters) {
+        if (filters == null || filters.isEmpty()) {
+            return List.of();
+        }
+        Map<String, RangeBounds> rangeByField = new LinkedHashMap<>();
+        List<Filter> merged = new ArrayList<>();
+        for (Filter filter : filters) {
+            if (filter == null) {
+                continue;
+            }
+            if (filter.operator() == FilterOperator.range && StringUtils.hasText(filter.field())) {
+                String field = filter.field().trim();
+                RangeBounds bounds = rangeByField.computeIfAbsent(field, ignored -> new RangeBounds());
+                bounds.accept(filter.min(), filter.max());
+            } else {
+                merged.add(filter);
+            }
+        }
+        for (Map.Entry<String, RangeBounds> entry : rangeByField.entrySet()) {
+            RangeBounds bounds = entry.getValue();
+            if (bounds.isEmpty()) {
+                continue;
+            }
+            Double min = bounds.computeMin();
+            Double max = bounds.computeMax();
+            if (min != null && max != null && min > max) {
+                continue;
+            }
+            merged.add(new Filter(entry.getKey(), FilterOperator.range, null, min, max));
+        }
+        return merged;
+    }
+
+    private void applyFilterRequest(FilterRequestDto filters,
+            co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery.Builder builder) {
         if (filters.filters() != null) {
-            for (Filter filter : filters.filters()) {
-                Criteria clause = buildFilterCriteria(filter);
-                if (clause != null) {
-                    combined = combined.and(clause);
+            filters.filters().stream()
+                    .map(this::toQuery)
+                    .filter(Objects::nonNull)
+                    .forEach(builder::filter);
+        }
+        if (filters.filterGroups() != null) {
+            for (FilterRequestDto.FilterGroup group : filters.filterGroups()) {
+                Query groupQuery = buildGroupQuery(group);
+                if (groupQuery != null) {
+                    builder.filter(groupQuery);
                 }
             }
         }
-
-        Criteria grouped = buildGroupedCriteria(filters.filterGroups());
-        if (grouped != null) {
-            combined = combined.and(grouped);
-        }
-
-        return combined;
     }
 
-    private Criteria buildGroupedCriteria(List<FilterRequestDto.FilterGroup> filterGroups) {
-        if (filterGroups == null || filterGroups.isEmpty()) {
-            return null;
-        }
-
-        Criteria grouped = null;
-        for (FilterRequestDto.FilterGroup group : filterGroups) {
-            Criteria groupCriteria = buildGroupCriteria(group);
-            if (groupCriteria != null) {
-                grouped = grouped == null ? groupCriteria : grouped.and(groupCriteria);
-            }
-        }
-        return grouped;
-    }
-
-    private Criteria buildGroupCriteria(FilterRequestDto.FilterGroup group) {
+    private Query buildGroupQuery(FilterRequestDto.FilterGroup group) {
         if (group == null) {
             return null;
         }
-
-        Criteria mustCriteria = buildJoinedCriteria(group.must(), Criteria::and);
-        Criteria shouldCriteria = buildJoinedCriteria(group.should(), Criteria::or);
-
-        if (mustCriteria != null && shouldCriteria != null) {
-            return mustCriteria.and(shouldCriteria);
-        }
-        return mustCriteria != null ? mustCriteria : shouldCriteria;
-    }
-
-    private Criteria buildJoinedCriteria(List<Filter> filters, BiFunction<Criteria, Criteria, Criteria> combiner) {
-        if (filters == null || filters.isEmpty()) {
+        boolean hasShould = group.should() != null && !group.should().isEmpty();
+        boolean hasMust = group.must() != null && !group.must().isEmpty();
+        if (!hasMust && !hasShould) {
             return null;
         }
-
-        Criteria joined = null;
-        for (Filter filter : filters) {
-            Criteria clause = buildFilterCriteria(filter);
-            if (clause == null) {
-                continue;
+        return Query.of(q -> q.bool(b -> {
+            if (hasMust) {
+                group.must().stream()
+                        .map(this::toQuery)
+                        .filter(Objects::nonNull)
+                        .forEach(b::filter);
             }
-            joined = joined == null ? clause : combiner.apply(joined, clause);
-        }
-        return joined;
+            if (hasShould) {
+                group.should().stream()
+                        .map(this::toQuery)
+                        .filter(Objects::nonNull)
+                        .forEach(b::should);
+                b.minimumShouldMatch("1");
+            }
+            return b;
+        }));
     }
 
     private boolean hasExcludedOverride(FilterRequestDto filters) {
@@ -591,7 +630,7 @@ public class SearchService {
                 .anyMatch(field -> field.equals(EXCLUDED_CAUSES_FIELD));
     }
 
-    private Criteria buildFilterCriteria(Filter filter) {
+    private Query toQuery(Filter filter) {
         if (filter == null || !StringUtils.hasText(filter.field()) || filter.operator() == null) {
             return null;
         }
@@ -601,12 +640,12 @@ public class SearchService {
         FilterValueType valueType = resolveValueType(fieldPath, operator);
 
         return switch (operator) {
-        case term -> buildTermCriteria(fieldPath, valueType, filter.terms());
-        case range -> buildRangeCriteria(fieldPath, filter.min(), filter.max());
+        case term -> buildTermQuery(fieldPath, valueType, filter.terms());
+        case range -> buildRangeQuery(fieldPath, filter.min(), filter.max());
         };
     }
 
-    private Criteria buildTermCriteria(String fieldPath, FilterValueType valueType, List<String> terms) {
+    private Query buildTermQuery(String fieldPath, FilterValueType valueType, List<String> terms) {
         if (terms == null || terms.isEmpty()) {
             return null;
         }
@@ -616,7 +655,10 @@ public class SearchService {
             if (numericTerms.isEmpty()) {
                 return null;
             }
-            return new Criteria(fieldPath).in(numericTerms);
+            List<FieldValue> values = numericTerms.stream()
+                    .map(FieldValue::of)
+                    .toList();
+            return Query.of(q -> q.terms(t -> t.field(fieldPath).terms(v -> v.value(values))));
         }
 
         Set<String> sanitized = terms.stream()
@@ -626,7 +668,10 @@ public class SearchService {
         if (sanitized.isEmpty()) {
             return null;
         }
-        return new Criteria(fieldPath).in(sanitized);
+        List<FieldValue> values = sanitized.stream()
+                .map(FieldValue::of)
+                .toList();
+        return Query.of(q -> q.terms(t -> t.field(fieldPath).terms(v -> v.value(values))));
     }
 
     private Collection<Double> parseNumericTerms(String fieldPath, List<String> terms) {
@@ -645,18 +690,20 @@ public class SearchService {
         return values;
     }
 
-    private Criteria buildRangeCriteria(String fieldPath, Double min, Double max) {
-        Criteria clause = new Criteria(fieldPath);
-        boolean hasBound = false;
-        if (min != null) {
-            clause = clause.greaterThanEqual(min);
-            hasBound = true;
+    private Query buildRangeQuery(String fieldPath, Double min, Double max) {
+        if (min == null && max == null) {
+            return null;
         }
-        if (max != null) {
-            clause = clause.lessThanEqual(max);
-            hasBound = true;
-        }
-        return hasBound ? clause : null;
+        return Query.of(q -> q.range(r -> r.number(n -> {
+            n.field(fieldPath);
+            if (min != null) {
+                n.gte(min);
+            }
+            if (max != null) {
+                n.lte(max);
+            }
+            return n;
+        })));
     }
 
     private FilterValueType resolveValueType(String fieldPath, FilterOperator operator) {
@@ -673,6 +720,37 @@ public class SearchService {
             return FilterValueType.numeric;
         }
         return FilterValueType.keyword;
+    }
+
+    private static final class RangeBounds {
+
+        private Double highestMin;
+        private Double lowestMax;
+        private boolean hasMin;
+        private boolean hasMax;
+
+        void accept(Double min, Double max) {
+            if (min != null) {
+                hasMin = true;
+                highestMin = highestMin == null ? min : Math.max(highestMin, min);
+            }
+            if (max != null) {
+                hasMax = true;
+                lowestMax = lowestMax == null ? max : Math.min(lowestMax, max);
+            }
+        }
+
+        boolean isEmpty() {
+            return !hasMin && !hasMax;
+        }
+
+        Double computeMin() {
+            return highestMin;
+        }
+
+        Double computeMax() {
+            return lowestMax;
+        }
     }
 
     private boolean isBooleanAggregationField(String fieldPath) {
@@ -1009,15 +1087,13 @@ public class SearchService {
                 .toList();
     }
 
-    private List<AggregationResponseDto> computeExcludedAggregations(Criteria criteria, List<Agg> aggregations) {
-        if (criteria == null || aggregations == null || aggregations.isEmpty()) {
+    private List<AggregationResponseDto> computeExcludedAggregations(Query query, List<Agg> aggregations) {
+        if (query == null || aggregations == null || aggregations.isEmpty()) {
             return List.of();
         }
-        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
-        criteriaQuery.setPageable(Pageable.unpaged());
 
         var builder = new NativeQueryBuilder()
-                .withQuery(criteriaQuery)
+                .withQuery(query)
                 .withPageable(Pageable.unpaged());
 
         List<AggregationDescriptor> descriptors = new ArrayList<>();

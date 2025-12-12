@@ -114,6 +114,33 @@ export const mergeFiltersWithoutDuplicates = (existing: Filter[], additions: Fil
   return merged
 }
 
+const mergeRangeClauses = (filters: Filter[]): Filter[] => {
+  if (!filters.length) {
+    return []
+  }
+
+  const mergedRanges = new Map<string, { min?: number, max?: number }>()
+  const mergedFilters: Filter[] = []
+
+  for (const filter of filters) {
+    if (filter.operator === 'range' && filter.field) {
+      const existing = mergedRanges.get(filter.field) ?? {}
+      const min = filter.min != null ? filter.min : existing.min
+      const max = filter.max != null ? filter.max : existing.max
+      mergedRanges.set(filter.field, { min, max })
+    }
+    else {
+      mergedFilters.push(filter)
+    }
+  }
+
+  for (const [field, bounds] of mergedRanges.entries()) {
+    mergedFilters.push({ field, operator: 'range', min: bounds.min, max: bounds.max })
+  }
+
+  return mergedFilters
+}
+
 export const getRemainingSubsetFilters = (
   subset: VerticalSubsetDto | undefined,
   removedIndex: number,
@@ -132,17 +159,25 @@ export const buildFilterRequestFromSubsets = (
   activeSubsetIds: string[],
 ): FilterRequestDto => {
   const seen = new Set<string>()
-  const filterGroups = activeSubsetIds
+  const groupedFilters = new Map<string, Filter[]>()
+
+  activeSubsetIds
     .map((subsetId) => subsets.find((candidate) => candidate.id === subsetId))
     .filter((subset): subset is VerticalSubsetDto => Boolean(subset) && !seen.has(subset.id) && seen.add(subset.id))
-    .map((subset) => {
-      const mustClauses = convertSubsetCriteriaToFilters(subset)
+    .forEach((subset) => {
+      const mergedClauses = mergeRangeClauses(convertSubsetCriteriaToFilters(subset))
+      if (!mergedClauses.length) {
+        return
+      }
 
-      const group: FilterGroup | null = mustClauses.length ? { must: mustClauses } : null
-
-      return group
+      const groupKey = subset.group ?? subset.id
+      const existingClauses = groupedFilters.get(groupKey) ?? []
+      groupedFilters.set(groupKey, mergeFiltersWithoutDuplicates(existingClauses, mergedClauses))
     })
-    .filter((group): group is FilterGroup => Boolean(group))
+
+  const filterGroups: FilterGroup[] = Array.from(groupedFilters.values())
+    .map((clauses) => ({ should: clauses }))
+    .filter((group) => Boolean(group.should?.length))
 
   if (!filterGroups.length) {
     return {}

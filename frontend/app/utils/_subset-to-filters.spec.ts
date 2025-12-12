@@ -64,13 +64,17 @@ describe('_subset-to-filters helpers', () => {
 
     expect(request).toEqual({
       filterGroups: [
-        { must: [{ field: 'price.conditions', operator: 'term', terms: ['NEW'] }] },
-        { must: [{ field: 'price.conditions', operator: 'term', terms: ['OCCASION'] }] },
+        {
+          should: [
+            { field: 'price.conditions', operator: 'term', terms: ['NEW'] },
+            { field: 'price.conditions', operator: 'term', terms: ['OCCASION'] },
+          ],
+        },
       ],
     })
   })
 
-  it('keeps each range subset in its own filter group', () => {
+  it('unions range subsets from the same group into should clauses', () => {
     const subsets: VerticalSubsetDto[] = [
       {
         id: 'mid-range',
@@ -88,13 +92,17 @@ describe('_subset-to-filters helpers', () => {
 
     expect(request).toEqual({
       filterGroups: [
-        { must: [{ field: 'price.min', operator: 'range', max: 800 }] },
-        { must: [{ field: 'price.min', operator: 'range', max: 500 }] },
+        {
+          should: [
+            { field: 'price.min', operator: 'range', max: 800 },
+            { field: 'price.min', operator: 'range', max: 500 },
+          ],
+        },
       ],
     })
   })
 
-  it('drops conflicting range filters when they cannot be merged safely', () => {
+  it('keeps distinct range buckets when they cannot be merged', () => {
     const subsets: VerticalSubsetDto[] = [
       {
         id: 'budget',
@@ -112,8 +120,12 @@ describe('_subset-to-filters helpers', () => {
 
     expect(request).toEqual({
       filterGroups: [
-        { must: [{ field: 'price.min', operator: 'range', max: 500 }] },
-        { must: [{ field: 'price.min', operator: 'range', min: 1000 }] },
+        {
+          should: [
+            { field: 'price.min', operator: 'range', max: 500 },
+            { field: 'price.min', operator: 'range', min: 1000 },
+          ],
+        },
       ],
     })
   })
