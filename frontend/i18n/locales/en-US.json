@@ -2118,9 +2118,7 @@
         "darkAriaLabel": "Activate dark theme",
         "darkTooltip": "Switch to dark theme",
         "lightAriaLabel": "Activate light theme",
-        "lightTooltip": "Switch to light theme",
-        "nudgerAriaLabel": "Activate Nudger signature theme",
-        "nudgerTooltip": "Switch to the Nudger signature theme"
+        "lightTooltip": "Switch to light theme"
       },
       "themeToggle": "Toggle theme",
       "title": "Menu"

@@ -452,6 +452,7 @@ describe('Shared menu authentication controls', () => {
 
     expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(true)
 
+    const lightToggle = heroWrapper.get('[data-testid="hero-theme-toggle-light"]')
     const darkToggle = heroWrapper.get('[data-testid="hero-theme-toggle-dark"]')
 
     await darkToggle.trigger('click')
@@ -460,24 +461,22 @@ describe('Shared menu authentication controls', () => {
     expect(storedThemePreference.value).toBe('dark')
     expect(themeName.value).toBe('dark')
 
-    const nudgerToggle = heroWrapper.get('[data-testid="hero-theme-toggle-nudger"]')
-
-    await nudgerToggle.trigger('click')
+    await lightToggle.trigger('click')
     await flushPromises()
 
-    expect(storedThemePreference.value).toBe('nudger')
-    expect(themeName.value).toBe('nudger')
+    expect(storedThemePreference.value).toBe('light')
+    expect(themeName.value).toBe('light')
 
     const mobileWrapper = await mountSuspended(TheMobileMenu)
 
     expect(mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()).toBe(true)
 
-    const lightToggle = mobileWrapper.get('[data-testid="mobile-theme-toggle-light"]')
+    const mobileDarkToggle = mobileWrapper.get('[data-testid="mobile-theme-toggle-dark"]')
 
-    await lightToggle.trigger('click')
+    await mobileDarkToggle.trigger('click')
     await flushPromises()
 
-    expect(themeName.value).toBe('light')
-    expect(storedThemePreference.value).toBe('light')
+    expect(themeName.value).toBe('dark')
+    expect(storedThemePreference.value).toBe('dark')
   })
 })
