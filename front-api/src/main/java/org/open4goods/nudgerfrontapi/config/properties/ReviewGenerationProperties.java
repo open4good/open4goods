@@ -28,6 +28,11 @@ public class ReviewGenerationProperties {
      */
     private String reviewPath = "/review";
 
+    /**
+     * Maximum number of AI review generations allowed per IP and per day.
+     */
+    private int maxGenerationsPerIpPerDay = 3;
+
     public String getApiBaseUrl() {
         return apiBaseUrl;
     }
@@ -50,5 +55,13 @@ public class ReviewGenerationProperties {
 
     public void setReviewPath(String reviewPath) {
         this.reviewPath = reviewPath;
+    }
+
+    public int getMaxGenerationsPerIpPerDay() {
+        return maxGenerationsPerIpPerDay;
+    }
+
+    public void setMaxGenerationsPerIpPerDay(int maxGenerationsPerIpPerDay) {
+        this.maxGenerationsPerIpPerDay = maxGenerationsPerIpPerDay;
     }
 }

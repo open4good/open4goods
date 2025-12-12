@@ -15,9 +15,10 @@ public class ReviewGenerationConfig {
 
 	
 	
-	private String batchFolder = "/opt/open4goods/batch-ids/";
+        private String batchFolder = "/opt/open4goods/batch-ids/";
     private int threadPoolSize = 10;
     private int maxQueueSize = 1000;  // Maximum size of the executor queue.
+    private int maxPerIpPerDay = 3;
     private List<String> preferredDomains = new ArrayList<>();
 
     // Property used for building search queries.
@@ -81,6 +82,14 @@ public class ReviewGenerationConfig {
     }
     public void setMaxQueueSize(int maxQueueSize) {
         this.maxQueueSize = maxQueueSize;
+    }
+
+    public int getMaxPerIpPerDay() {
+        return maxPerIpPerDay;
+    }
+
+    public void setMaxPerIpPerDay(int maxPerIpPerDay) {
+        this.maxPerIpPerDay = maxPerIpPerDay;
     }
 
     public List<String> getPreferredDomains() {

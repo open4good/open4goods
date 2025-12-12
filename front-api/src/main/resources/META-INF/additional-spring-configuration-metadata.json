@@ -194,6 +194,12 @@
       "defaultValue": "/review"
     },
     {
+      "name": "front.review-generation.max-generations-per-ip-per-day",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of AI review generations allowed per IP and per day.",
+      "defaultValue": 3
+    },
+    {
       "name": "front.contact.email",
       "type": "java.lang.String",
       "description": "Recipient email address for contact form submissions."

@@ -8,8 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -23,18 +24,20 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 public class ReviewGenerationClient {
 
     /**
-     * JsonMapper configured to allow missing creator properties.
-     * This is intentional and necessary because the ReviewGenerationStatus response
-     * may contain optional fields that are not always present. Setting
-     * FAIL_ON_MISSING_CREATOR_PROPERTIES to false ensures deserialization succeeds
-     * even when some properties are absent in the JSON response.
-     * This configuration is working as expected and should not be changed.
+     * JsonMapper configured to allow missing/nullable creator properties.
+     * <p>
+     * The review generation response may omit optional fields (e.g. AI attributes
+     * without a populated {@code value}). Disabling the missing/null creator
+     * failure guards prevents Jackson from aborting parsing when the upstream
+     * payload is partially filled.
      */
     private static JsonMapper jsonBuilder = JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false)
             .build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewGenerationClient.class);
+    private static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 
     private final RestClient restClient;
     private final ReviewGenerationProperties properties;
@@ -52,12 +55,28 @@ public class ReviewGenerationClient {
      * @param upc product identifier forwarded to the back-office API
      * @return echoed UPC once the job is scheduled
      */
-    public long triggerGeneration(long upc) {
-        Long response = restClient.post()
-                .uri(builder -> builder.path(properties.getReviewPath()).path("/{id}").build(upc))
-                .retrieve()
-                .body(Long.class);
-        return response == null ? upc : response;
+    public long triggerGeneration(long upc, String clientIp) {
+        try {
+            RestClient.RequestHeadersSpec<?> requestSpec = restClient.post()
+                    .uri(builder -> builder.path(properties.getReviewPath()).path("/{id}").build(upc));
+
+            if (StringUtils.hasText(clientIp)) {
+                requestSpec = requestSpec.header(X_FORWARDED_FOR_HEADER, clientIp);
+            }
+
+            Long response = requestSpec.retrieve().body(Long.class);
+            return response == null ? upc : response;
+        } catch (RestClientResponseException e) {
+            HttpStatusCode statusCode = e.getStatusCode();
+            String detail = String.format("Back-office responded with status %s while triggering review for UPC %d.",
+                    statusCode, upc);
+            LOGGER.error("{} Response body: {}", detail, e.getResponseBodyAsString(), e);
+            throw new ReviewGenerationClientException(detail, statusCode, e);
+        } catch (RestClientException e) {
+            String detail = String.format("HTTP error while triggering review for UPC %d: %s", upc, e.getMessage());
+            LOGGER.error(detail, e);
+            throw new ReviewGenerationClientException(detail, e);
+        }
     }
 
     /**

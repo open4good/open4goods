@@ -8,14 +8,18 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.reviewgeneration.service.ReviewGenerationQuotaExceededException;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * REST controller exposing AI review generation endpoints for the back-office API.
@@ -68,14 +73,34 @@ public class ReviewGenerationController {
                     @ApiResponse(responseCode = "200", description = "Generation scheduled",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = Long.class))),
-                    @ApiResponse(responseCode = "404", description = "Product not found")
+                    @ApiResponse(responseCode = "404", description = "Product not found"),
+                    @ApiResponse(responseCode = "429", description = "Daily generation limit reached")
             })
-    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc) throws ResourceNotFoundException {
+    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, HttpServletRequest request)
+            throws ResourceNotFoundException {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigById(product.getVertical());
-        long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig,
-                CompletableFuture.completedFuture(null));
-        return ResponseEntity.ok(scheduledUpc);
+        String clientIp = resolveClientIp(request);
+        try {
+            long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig,
+                    CompletableFuture.completedFuture(null), clientIp);
+            return ResponseEntity.ok(scheduledUpc);
+        } catch (ReviewGenerationQuotaExceededException e) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, detail.getDetail(), e);
+        }
+    }
+
+    private String resolveClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        String realIp = request.getHeader("X-Real-Ip");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp;
+        }
+        return request.getRemoteAddr();
     }
 
     /**
