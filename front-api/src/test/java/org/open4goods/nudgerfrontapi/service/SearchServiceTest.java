@@ -173,7 +173,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void filterGroupsCombineMustBeforeOrAcrossGroups() {
+    void filterGroupsAreCombinedWithAndAcrossGroups() {
         Pageable pageable = PageRequest.of(0, 5);
 
         when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
@@ -199,7 +199,44 @@ class SearchServiceTest {
                 .toList();
 
         assertThat(fieldNames).contains(FilterField.condition.fieldPath(), FilterField.brand.fieldPath());
-        assertThat(expandCriteria(builtCriteria).anyMatch(Criteria::isOr)).isTrue();
+        assertThat(expandCriteria(builtCriteria).filter(Criteria::isOr)).isEmpty();
+    }
+
+    @Test
+    void groupsUseAndWhileShouldClausesKeepOrSemantics() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(buildSearchHits(List.of()));
+
+        Filter lowerPrice = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 0.0, 500.0);
+        Filter upperPrice = new Filter(FilterField.price.fieldPath(), FilterOperator.range, null, 100.0, 1000.0);
+        Filter smallSize = new Filter("attributes.referentielAttributes.SCREENSIZE", FilterOperator.term,
+                List.of("32"), null, null);
+        Filter mediumSize = new Filter("attributes.referentielAttributes.SCREENSIZE", FilterOperator.term,
+                List.of("55"), null, null);
+
+        FilterRequestDto filters = new FilterRequestDto(List.of(), List.of(
+                new FilterRequestDto.FilterGroup(List.of(lowerPrice, upperPrice), List.of()),
+                new FilterRequestDto.FilterGroup(List.of(), List.of(smallSize, mediumSize))));
+
+        searchService.search(pageable, null, null, null, filters);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Criteria builtCriteria = ((CriteriaQuery) queryCaptor.getValue().getSpringDataQuery()).getCriteria();
+
+        List<String> fieldNames = expandCriteria(builtCriteria)
+                .map(Criteria::getField)
+                .filter(Objects::nonNull)
+                .map(Field::getName)
+                .toList();
+
+        assertThat(fieldNames).contains(FilterField.price.fieldPath(), "attributes.referentielAttributes.SCREENSIZE");
+        long orCount = expandCriteria(builtCriteria)
+                .filter(Criteria::isOr)
+                .count();
+        assertThat(orCount).isEqualTo(1);
     }
 
     @Test

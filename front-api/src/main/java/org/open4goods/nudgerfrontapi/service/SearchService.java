@@ -531,7 +531,7 @@ public class SearchService {
         for (FilterRequestDto.FilterGroup group : filterGroups) {
             Criteria groupCriteria = buildGroupCriteria(group);
             if (groupCriteria != null) {
-                grouped = grouped == null ? groupCriteria : grouped.or(groupCriteria);
+                grouped = grouped == null ? groupCriteria : grouped.and(groupCriteria);
             }
         }
         return grouped;

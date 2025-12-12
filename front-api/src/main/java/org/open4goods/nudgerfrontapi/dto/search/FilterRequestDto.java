@@ -17,18 +17,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * property of the {@code POST /products} request body. Clients can combine
  * multiple clauses. Legacy {@link #filters()} are evaluated with AND semantics
  * on the Elasticsearch query. {@link #filterGroups()} enables composing
- * disjunctions of grouped filters where each group can express its own AND and
+ * conjunctions of grouped filters where each group can express its own AND and
  * OR clauses.</p>
  */
 public record FilterRequestDto(
         @Schema(description = "Collection of filter clauses. When omitted no additional filtering is applied.")
         List<Filter> filters,
-        @Schema(description = "Collection of filter groups combined with OR. Each group can mix mandatory (must) and optional (should) clauses.")
+        @Schema(description = "Collection of filter groups combined with AND. Each group can mix mandatory (must) and optional (should) clauses.")
         List<FilterGroup> filterGroups) {
 
     /**
      * Groups filter clauses to preserve AND combinations before joining groups
-     * with OR semantics.
+     * with AND semantics.
      */
     public record FilterGroup(
             @Schema(description = "Filters that must all match within the group to be eligible for selection.")
