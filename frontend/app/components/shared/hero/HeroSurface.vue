@@ -16,8 +16,8 @@ const props = withDefaults(
   }>(),
   {
     tag: 'section',
-    variant: 'aurora',
-    bleed: false,
+    //variant: 'aurora',
+    //bleed: false,
   },
 )
 
@@ -25,8 +25,8 @@ const attrs = useAttrs()
 
 const heroSurfaceClasses = computed(() => [
   'hero-surface',
-  `hero-surface--${props.variant}`,
-  { 'hero-surface--bleed': props.bleed },
+  //`hero-surface--${props.variant}`,
+  //{ 'hero-surface--bleed': props.bleed },
 ])
 
 const rootProps = computed(() =>
