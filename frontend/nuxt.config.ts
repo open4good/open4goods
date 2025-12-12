@@ -173,7 +173,6 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     "@nuxt/icon",
     "@pinia/nuxt",
-    'nuxt-mcp',
     '@nuxtjs/sitemap',
     '@vite-pwa/nuxt',
     '@nuxtjs/plausible',
