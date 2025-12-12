@@ -8,8 +8,6 @@
         :alt-labels="!display.smAndDown.value"
         :items="stepperItems"
         :item-props="true"
-        editable
-        non-linear
         flat
         hide-actions
         class="nudge-wizard__stepper elevation-0 border-0"
@@ -500,8 +498,7 @@ const stepperItems = computed(() =>
     title: display.smAndDown.value ? undefined : step.title,
     value: step.key,
     icon: resolveStepIcon(step.key),
-    disabled: false,
-    editable: true,
+    disabled: false
   })),
 )
 
