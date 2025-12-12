@@ -60,4 +60,21 @@ describe('nudge tool filters', () => {
       filterGroups: [{ must: [{ field: 'attributes.indexed.SIZE', operator: 'range', max: 40 }], should: [] }],
     })
   })
+
+  it('preserves multiple subset filter groups', () => {
+    const request = buildNudgeFilterRequest(
+      [],
+      null,
+      [],
+      [
+        { must: [{ field: 'price.min', operator: 'range', max: 500 }], should: [] },
+        { should: [{ field: 'scores.ECOSCORE.value', operator: 'range', min: 2 }], must: [] },
+      ],
+    )
+
+    expect(request.filterGroups).toEqual([
+      { must: [{ field: 'price.min', operator: 'range', max: 500 }], should: [] },
+      { should: [{ field: 'scores.ECOSCORE.value', operator: 'range', min: 2 }], must: [] },
+    ])
+  })
 })
