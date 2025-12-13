@@ -8,18 +8,18 @@
     rounded="pill"
     :data-testid="testId"
   >
-    <v-tooltip :text="lightTooltip" location="bottom">
+    <v-tooltip :text="nudgerTooltip" location="bottom">
       <template #activator="{ props: tooltipProps }">
         <v-btn
           v-bind="tooltipProps"
           :value="'light'"
-          :aria-label="lightAriaLabel"
+          :aria-label="nudgerAriaLabel"
           :data-testid="`${testId}-light`"
           :size="size"
           icon
           variant="plain"
         >
-          <v-icon icon="mdi-white-balance-sunny" />
+          <v-icon icon="mdi-gradient-horizontal" />
         </v-btn>
       </template>
     </v-tooltip>
@@ -36,22 +36,6 @@
           variant="plain"
         >
           <v-icon icon="mdi-weather-night" />
-        </v-btn>
-      </template>
-    </v-tooltip>
-
-    <v-tooltip :text="nudgerTooltip" location="bottom">
-      <template #activator="{ props: tooltipProps }">
-        <v-btn
-          v-bind="tooltipProps"
-          :value="'nudger'"
-          :aria-label="nudgerAriaLabel"
-          :data-testid="`${testId}-nudger`"
-          :size="size"
-          icon
-          variant="plain"
-        >
-          <v-icon icon="mdi-gradient-horizontal" />
         </v-btn>
       </template>
     </v-tooltip>
@@ -82,7 +66,7 @@ const props = withDefaults(
 const { t } = useI18n()
 const theme = useTheme()
 const preferredDark = usePreferredDark()
-const themeCookie = useCookie<ThemeName | null>(THEME_PREFERENCE_KEY, {
+const themeCookie = useCookie<string | null>(THEME_PREFERENCE_KEY, {
   sameSite: 'lax',
   path: '/',
   watch: false,
@@ -123,10 +107,8 @@ const selectedTheme = computed<ThemeName>({
   set: (value) => applyTheme(value),
 })
 
-const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
 const darkTooltip = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
 const nudgerTooltip = computed(() => t('siteIdentity.menu.theme.nudgerTooltip'))
-const lightAriaLabel = computed(() => t('siteIdentity.menu.theme.lightAriaLabel'))
 const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
 const nudgerAriaLabel = computed(() => t('siteIdentity.menu.theme.nudgerAriaLabel'))
 
