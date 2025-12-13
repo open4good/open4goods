@@ -1,14 +1,15 @@
 <template>
   <div class="nudge-step-category">
     <div class="nudge-step-category__header">
-      <div class="nudge-step-category__step" :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })">
-        <v-avatar color="surface-primary-080" size="40" rounded="lg">
-          <v-icon icon="mdi-numeric-1-circle" color="accent-primary-highlight" size="26" />
-        </v-avatar>
-      </div>
+      <h2 class="nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
 
-      <div class="nudge-step-category__titles">
-        <h2 class="nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
+      <div class="nudge-step-category__subtitle-row">
+        <div class="nudge-step-category__step" :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })">
+          <v-avatar color="surface-primary-080" size="36" rounded="lg">
+            <v-icon icon="mdi-numeric-1-circle" color="accent-primary-highlight" size="22" />
+          </v-avatar>
+        </div>
+
         <p class="nudge-step-category__subtitle">
           {{ $t('nudge-tool.steps.category.subtitle') }}
         </p>
@@ -118,14 +119,14 @@ watch(
 .nudge-step-category {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 
   &__header {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    text-align: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    text-align: left;
   }
 
   &__step {
@@ -133,16 +134,16 @@ watch(
     align-items: center;
   }
 
-  &__titles {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
   &__title {
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
+  }
+
+  &__subtitle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   &__subtitle {
@@ -152,9 +153,19 @@ watch(
 
   &__slider {
     display: flex;
-    align-items: center;
-    padding-inline: 8px;
-    gap: 8px;
+    align-items: stretch;
+    padding-inline: 4px;
+    gap: 10px;
+
+    :deep(.v-slide-group__container) {
+      align-items: stretch;
+    }
+
+    :deep(.v-slide-group__content) {
+      justify-content: center;
+      gap: 12px;
+      padding-block: 4px;
+    }
   }
 
   &__arrow {
@@ -167,7 +178,7 @@ watch(
   &__card {
     text-align: center;
     padding: 16px 14px;
-    height: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
