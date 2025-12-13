@@ -123,11 +123,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             <NudgeToolWizard :verticals="wizardVerticals" />
           </v-col>
         </v-row>
+
+
         <v-row justify="center">
-          <v-col cols="12" lg="6" class="home-hero__content">
-            <div class="card__nudger">
-              <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
-              <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
+         <v-col cols="12" lg="6" class="home-hero__content">
+			<form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
                 <SearchSuggestField
                   :model-value="searchQueryValue"
                   class="home-hero__search-input"
@@ -153,6 +153,14 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                   </template>
                 </SearchSuggestField>
               </form>
+          </v-col>
+        </v-row>
+
+        <v-row justify="center">
+          <v-col cols="12" lg="6" class="home-hero__content">
+            <div class="card__nudger">
+              <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
+
               <v-row class="mt-5" align="center">
                 <v-col cols="12" lg="4">
                   <p class="mt-4 ms-6 home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>

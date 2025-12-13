@@ -46,7 +46,7 @@
       "subtitle": "Gagne du temps. Choisis librement.",
       "imageAlt": "Illustration d’un comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
       "search": {
-        "label": "Rechercher un produit",
+        "label": "Tu sais déjà ce que tu cherches ?",
         "placeholder": "Recherchez un produit ou une catégorie",
         "ariaLabel": "Rechercher un produit responsable",
         "cta": "NUDGER",
