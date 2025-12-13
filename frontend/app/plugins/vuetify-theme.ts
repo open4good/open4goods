@@ -44,7 +44,7 @@ const themePlugin = defineNuxtPlugin({
   enforce: 'pre',
   setup(nuxt) {
     const nuxtApp = nuxt as NuxtApp
-    const storedPreference = useCookie<ThemeName | null>(THEME_PREFERENCE_KEY, {
+    const storedPreference = useCookie<string | null>(THEME_PREFERENCE_KEY, {
       sameSite: 'lax',
       path: '/',
       watch: false,

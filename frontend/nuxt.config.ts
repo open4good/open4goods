@@ -223,13 +223,10 @@ export default defineNuxtConfig({
           defaultTheme: 'light',
           themes: {
             light: {
-              colors: vuetifyPalettes.light,
+              colors: vuetifyPalettes.nudger,
             },
             dark: {
               colors: vuetifyPalettes.dark,
-            },
-            nudger: {
-              colors: vuetifyPalettes.nudger,
             },
           },
         },
