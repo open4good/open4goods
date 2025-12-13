@@ -1,17 +1,33 @@
 <template>
   <v-card class="nudge-wizard" rounded="xl" elevation="3">
     <div class="nudge-wizard__header">
-      <v-stepper
-        v-if="showStepper"
-        v-model="activeStepKey"
-        density="compact"
-        :alt-labels="!display.smAndDown.value"
-        :items="stepperItems"
-        :item-props="true"
-        flat
-        hide-actions
-        class="nudge-wizard__stepper elevation-0 border-0"
-      />
+      <div class="nudge-wizard__header-row">
+        <v-btn
+          v-if="categorySummary"
+          class="nudge-wizard__category-chip"
+          variant="tonal"
+          color="primary"
+          rounded="lg"
+          @click="resetForCategorySelection"
+        >
+          <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
+            <v-img :src="categorySummary.image" :alt="categorySummary.alt" cover />
+          </v-avatar>
+          <span class="nudge-wizard__category-label">{{ categorySummary.label }}</span>
+        </v-btn>
+
+        <v-stepper
+          v-if="showStepper"
+          v-model="stepperActiveKey"
+          density="compact"
+          :alt-labels="!display.smAndDown.value"
+          :items="stepperItems"
+          :item-props="true"
+          flat
+          hide-actions
+          class="nudge-wizard__stepper elevation-0 border-0"
+        />
+      </div>
 
       <div v-if="shouldShowMatches" class="nudge-wizard__matches">
         <v-btn
@@ -71,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import type { Component } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
@@ -333,9 +349,15 @@ const goToPrevious = () => {
   }
 }
 
-const onCategorySelect = (categoryId: string) => {
+const getFirstContentStepKey = () => steps.value.find((step) => step.key !== 'category')?.key
+
+const onCategorySelect = async (categoryId: string) => {
   selectedCategoryId.value = categoryId
-  goToNext()
+  await nextTick()
+  const nextStepKey = getFirstContentStepKey()
+  if (nextStepKey) {
+    activeStepKey.value = nextStepKey
+  }
 }
 
 const fetchRecommendations = async () => {
@@ -494,13 +516,25 @@ const isNextDisabled = computed(() => {
 })
 
 const stepperItems = computed(() =>
-  steps.value.map((step) => ({
-    title: display.smAndDown.value ? undefined : step.title,
-    value: step.key,
-    icon: resolveStepIcon(step.key),
-    disabled: false
-  })),
+  steps.value
+    .filter((step) => step.key !== 'category' && step.key !== 'recommendations')
+    .map((step) => ({
+      title: display.smAndDown.value ? undefined : step.title,
+      value: step.key,
+      icon: resolveStepIcon(step.key),
+      disabled: false,
+    })),
 )
+
+const stepperActiveKey = computed({
+  get: () =>
+    stepperItems.value.find((item) => item.value === activeStepKey.value)?.value ??
+    stepperItems.value.at(-1)?.value ??
+    activeStepKey.value,
+  set: (value: string) => {
+    activeStepKey.value = value
+  },
+})
 
 const showStepper = computed(
   () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value),
@@ -509,6 +543,18 @@ const showStepper = computed(
 const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category',
 )
+
+const categorySummary = computed(() => {
+  if (!selectedCategory.value || activeStepKey.value === 'category') {
+    return null
+  }
+
+  return {
+    label: selectedCategory.value.verticalHomeTitle ?? selectedCategory.value.id ?? '',
+    image: selectedCategory.value.imageSmall,
+    alt: selectedCategory.value.verticalHomeTitle ?? selectedCategory.value.id ?? '',
+  }
+})
 
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
@@ -567,13 +613,33 @@ onMounted(async () => {
     margin-bottom: 12px;
   }
 
+  &__header-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
   &__stepper {
     width: 100%;
+    min-width: 0;
   }
 
   &__matches {
     display: flex;
     justify-content: center;
+  }
+
+  &__category-chip {
+    text-transform: none;
+    font-weight: 600;
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  &__category-label {
+    white-space: nowrap;
+    color: rgb(var(--v-theme-primary));
   }
 
   &__progress {
