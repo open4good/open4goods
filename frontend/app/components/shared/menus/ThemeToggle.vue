@@ -12,14 +12,30 @@
       <template #activator="{ props: tooltipProps }">
         <v-btn
           v-bind="tooltipProps"
-          :value="'light'"
+          :value="'nudger'"
           :aria-label="nudgerAriaLabel"
-          :data-testid="`${testId}-light`"
+          :data-testid="`${testId}-nudger`"
           :size="size"
           icon
           variant="plain"
         >
           <v-icon icon="mdi-gradient-horizontal" />
+        </v-btn>
+      </template>
+    </v-tooltip>
+
+    <v-tooltip :text="lightTooltip" location="bottom">
+      <template #activator="{ props: tooltipProps }">
+        <v-btn
+          v-bind="tooltipProps"
+          :value="'light'"
+          :aria-label="lightAriaLabel"
+          :data-testid="`${testId}-light`"
+          :size="size"
+          icon
+          variant="plain"
+        >
+          <v-icon icon="mdi-white-balance-sunny" />
         </v-btn>
       </template>
     </v-tooltip>
@@ -107,8 +123,10 @@ const selectedTheme = computed<ThemeName>({
   set: (value) => applyTheme(value),
 })
 
+const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
 const darkTooltip = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
 const nudgerTooltip = computed(() => t('siteIdentity.menu.theme.nudgerTooltip'))
+const lightAriaLabel = computed(() => t('siteIdentity.menu.theme.lightAriaLabel'))
 const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
 const nudgerAriaLabel = computed(() => t('siteIdentity.menu.theme.nudgerAriaLabel'))
 
