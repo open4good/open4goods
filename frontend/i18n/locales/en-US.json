@@ -2204,8 +2204,9 @@
     },
     "steps": {
       "category": {
-        "title": "Choose a category",
-        "subtitle": "Pick the type of product you want to browse"
+        "title": "Nudger guides you, step by step.",
+        "subtitle": "Choose a category",
+        "step": "Step {step}"
       },
       "condition": {
         "title": "Product condition",
