@@ -1,7 +1,9 @@
 <template>
   <div class="nudge-step-category">
+	<v-row justify="center" class="mt-2" >
+    <h2 class="align-center nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
+    </v-row>
     <div class="nudge-step-category__header">
-      <h2 class="nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
 
       <div class="nudge-step-category__subtitle-row">
         <div class="nudge-step-category__step" :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })">

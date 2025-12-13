@@ -584,7 +584,6 @@ onMounted(async () => {
   }
 
   &__window {
-    min-height: 420px;
     flex: 1;
     display: flex;
     flex-direction: column;
