@@ -16,8 +16,8 @@ const props = withDefaults(
   }>(),
   {
     tag: 'section',
-    //variant: 'aurora',
-    //bleed: false,
+    variant: 'aurora',
+    bleed: false,
   },
 )
 

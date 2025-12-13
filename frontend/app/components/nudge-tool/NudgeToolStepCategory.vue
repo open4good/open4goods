@@ -1,28 +1,64 @@
 <template>
   <div class="nudge-step-category">
-    <h2 class="nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
-    <p class="nudge-step-category__subtitle">
-      {{ $t('nudge-tool.steps.category.subtitle') }}
-    </p>
+	<v-row justify="center" class="mt-2" >
+    <h2 class="align-center nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
+    </v-row>
+    <div class="nudge-step-category__header">
 
-    <v-row dense>
-      <v-col
+      <div class="nudge-step-category__subtitle-row">
+        <div class="nudge-step-category__step" :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })">
+          <v-avatar color="surface-primary-080" size="36" rounded="lg">
+            <v-icon icon="mdi-numeric-1-circle" color="accent-primary-highlight" size="22" />
+          </v-avatar>
+        </div>
+
+        <p class="nudge-step-category__subtitle">
+          {{ $t('nudge-tool.steps.category.subtitle') }}
+        </p>
+      </div>
+    </div>
+
+    <v-slide-group
+      v-model="selected"
+      class="nudge-step-category__slider"
+      show-arrows
+      center-active
+      mandatory
+    >
+      <template #prev="{ props: prevArrowProps }">
+        <v-btn
+          v-bind="prevArrowProps"
+          class="nudge-step-category__arrow"
+          icon="mdi-chevron-left"
+          variant="flat"
+          :aria-label="$t('nudge-tool.actions.previous')"
+        />
+      </template>
+
+      <template #next="{ props: nextArrowProps }">
+        <v-btn
+          v-bind="nextArrowProps"
+          class="nudge-step-category__arrow"
+          icon="mdi-chevron-right"
+          variant="flat"
+          :aria-label="$t('nudge-tool.actions.next')"
+        />
+      </template>
+
+      <v-slide-group-item
         v-for="category in categories"
         :key="category.id"
-        cols="6"
-        sm="4"
-        md="3"
+        :value="category.id ?? ''"
       >
         <v-card
           class="nudge-step-category__card"
-          :elevation="selectedCategoryId === category.id ? 6 : 2"
-          :color="selectedCategoryId === category.id ? 'primary' : undefined"
-          :variant="selectedCategoryId === category.id ? 'elevated' : 'tonal'"
+          :class="{ 'nudge-step-category__card--selected': selected === category.id }"
+          :elevation="selected === category.id ? 8 : 2"
           rounded="xl"
-        role="button"
-        :aria-pressed="(selectedCategoryId === category.id).toString()"
-        @click="() => emit('select', category.id ?? '')"
-      >
+          role="button"
+          :aria-pressed="(selected === category.id).toString()"
+          @click="() => emit('select', category.id ?? '')"
+        >
           <div class="nudge-step-category__image">
             <v-img
               :src="category.imageSmall"
@@ -46,44 +82,118 @@
           </div>
           <p class="nudge-step-category__name">{{ category.verticalHomeTitle ?? category.id }}</p>
         </v-card>
-      </v-col>
-    </v-row>
+      </v-slide-group-item>
+    </v-slide-group>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { VerticalConfigDto } from '~~/shared/api-client'
 
-defineProps<{
+const props = defineProps<{
   categories: VerticalConfigDto[]
   selectedCategoryId?: string | null
 }>()
 
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
+
+const selected = ref<string | null>(props.selectedCategoryId ?? null)
+
+watch(
+  () => props.selectedCategoryId,
+  (value) => {
+    selected.value = value ?? null
+  },
+)
+
+watch(
+  selected,
+  (value) => {
+    if (value) {
+      emit('select', value)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped lang="scss">
 .nudge-step-category {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    text-align: left;
+  }
+
+  &__step {
+    display: flex;
+    align-items: center;
+  }
+
   &__title {
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin: 0;
+  }
+
+  &__subtitle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   &__subtitle {
     color: rgb(var(--v-theme-text-neutral-secondary));
-    margin-bottom: 16px;
+    margin: 0;
+  }
+
+  &__slider {
+    display: flex;
+    align-items: stretch;
+    padding-inline: 4px;
+    gap: 10px;
+
+    :deep(.v-slide-group__container) {
+      align-items: stretch;
+    }
+
+    :deep(.v-slide-group__content) {
+      justify-content: center;
+      gap: 12px;
+      padding-block: 4px;
+    }
+  }
+
+  &__arrow {
+    background: rgb(var(--v-theme-surface-primary-080));
+    color: rgb(var(--v-theme-accent-primary-highlight));
+    box-shadow: none;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
   }
 
   &__card {
     text-align: center;
-    padding: 16px;
-    height: 100%;
+    padding: 16px 14px;
+    height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    min-width: 160px;
+    background: rgb(var(--v-theme-surface-default));
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+
+    &--selected {
+      border-color: rgb(var(--v-theme-accent-primary-highlight));
+      box-shadow: 0 10px 25px -12px rgba(var(--v-theme-shadow-primary-600), 0.5);
+    }
   }
 
   &__image {

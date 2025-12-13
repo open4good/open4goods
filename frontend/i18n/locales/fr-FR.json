@@ -2205,8 +2205,9 @@
     },
     "steps": {
       "category": {
-        "title": "Choisis une catégorie",
-        "subtitle": "Nudger te guide, pas à pas."
+        "title": "Nudger te guide, pas à pas.",
+        "subtitle": "Choisis une catégorie",
+        "step": "Étape {step}"
       },
       "condition": {
         "title": "Neuf ou occasion ?",
