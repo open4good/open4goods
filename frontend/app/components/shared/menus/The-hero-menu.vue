@@ -321,7 +321,6 @@
           </div>
         </template>
       </v-list>
-
       <ThemeToggle test-id="hero-theme-toggle" />
       <v-menu
         v-if="isLoggedIn"
