@@ -1977,6 +1977,7 @@
     }
   },
   "siteIdentity": {
+    "logoAlt": "Return to home page via Nudger logo",
     "footer": {
       "accessibleTitle": "Footer information",
       "blogLink": "Our blog",
