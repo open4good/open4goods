@@ -144,16 +144,15 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
           <v-skeleton-loader type="image" class="home-hero__background-skeleton" />
         </div>
       </v-fade-transition>
-      <v-parallax
-        class="home-hero__parallax"
+      <v-img
+        class="home-hero__background-media"
         :src="heroBackgroundSrc"
-        height="100%"
-        scale="1.08"
+        cover
         eager
         @load="handleHeroImageLoad"
       >
         <div class="home-hero__background-overlay" />
-      </v-parallax>
+      </v-img>
     </div>
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
@@ -270,18 +269,12 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     height: 100%
     opacity: 0.45
 
-  .home-hero__parallax
+  .home-hero__background-media
     position: absolute
     inset: 0
     width: 100%
     height: 100%
     opacity: 0.98
-    min-height: 100%
-
-  .home-hero__background :deep(.v-img__img)
-    width: 100%
-    object-fit: cover
-    min-height: 100%
 
   .home-hero__background-overlay
     position: absolute
