@@ -8,21 +8,6 @@
     rounded="pill"
     :data-testid="testId"
   >
-    <v-tooltip :text="nudgerTooltip" location="bottom">
-      <template #activator="{ props: tooltipProps }">
-        <v-btn
-          v-bind="tooltipProps"
-          :value="'nudger'"
-          :aria-label="nudgerAriaLabel"
-          :data-testid="`${testId}-nudger`"
-          :size="size"
-          icon
-          variant="plain"
-        >
-          <v-icon icon="mdi-gradient-horizontal" />
-        </v-btn>
-      </template>
-    </v-tooltip>
 
     <v-tooltip :text="lightTooltip" location="bottom">
       <template #activator="{ props: tooltipProps }">
