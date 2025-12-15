@@ -26,6 +26,14 @@
     background: #0083A4!important;
   }
 
+  .v-theme--dark.main-footer {
+    background: linear-gradient(
+        135deg,
+        rgba(var(--v-theme-surface-default), 0.96) 0%,
+        rgba(var(--v-theme-surface-muted-contrast), 0.96) 100%
+      ) !important;
+  }
+
   .main-footer :deep(a) {
     color: inherit;
   }
