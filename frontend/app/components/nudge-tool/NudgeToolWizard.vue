@@ -519,22 +519,20 @@ const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category',
 )
 
-const isExpandingFromCategory = computed(
+const isCategoryToCondition = computed(
   () => previousStepKey.value === 'category' && activeStepKey.value === 'condition',
 )
 
-const isCollapsingToCategory = computed(
+const isConditionToCategory = computed(
   () => previousStepKey.value === 'condition' && activeStepKey.value === 'category',
 )
 
 const windowTransition = computed(() =>
-  isExpandingFromCategory.value ? 'nudge-wizard-expand-fade' : 'nudge-wizard-slide-fade',
+  isCategoryToCondition.value ? 'nudge-wizard-lift-fade' : 'nudge-wizard-slide-fade',
 )
 
 const windowReverseTransition = computed(() =>
-  isCollapsingToCategory.value
-    ? 'nudge-wizard-expand-fade-reverse'
-    : 'nudge-wizard-slide-fade-reverse',
+  isConditionToCategory.value ? 'nudge-wizard-lift-fade-reverse' : 'nudge-wizard-slide-fade-reverse',
 )
 
 const categorySummary = computed(() => {
@@ -549,7 +547,7 @@ const categorySummary = computed(() => {
   }
 })
 
-const windowTransitionDurationMs = 240
+const windowTransitionDurationMs = 500
 
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
@@ -738,6 +736,36 @@ onMounted(async () => {
 :deep(.nudge-wizard-expand-fade-reverse-enter-to),
 :deep(.nudge-wizard-expand-fade-reverse-leave-from) {
   transform: scaleY(1);
+  opacity: 1;
+}
+
+:deep(.nudge-wizard-lift-fade-enter-active),
+:deep(.nudge-wizard-lift-fade-leave-active),
+:deep(.nudge-wizard-lift-fade-reverse-enter-active),
+:deep(.nudge-wizard-lift-fade-reverse-leave-active) {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+
+:deep(.nudge-wizard-lift-fade-enter-from),
+:deep(.nudge-wizard-lift-fade-reverse-leave-to) {
+  transform: translateY(18px) scale(0.96);
+  opacity: 0;
+}
+
+:deep(.nudge-wizard-lift-fade-leave-to),
+:deep(.nudge-wizard-lift-fade-reverse-enter-from) {
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+}
+
+:deep(.nudge-wizard-lift-fade-enter-to),
+:deep(.nudge-wizard-lift-fade-leave-from),
+:deep(.nudge-wizard-lift-fade-reverse-enter-to),
+:deep(.nudge-wizard-lift-fade-reverse-leave-from) {
+  transform: translateY(0) scale(1);
   opacity: 1;
 }
 </style>
