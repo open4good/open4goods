@@ -7,6 +7,7 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import CardSecondary from '~/components/shared/cards/CardSecondary.vue'
 
 type HeroHelperItem = {
   icon: string
@@ -199,28 +200,34 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                       </template>
                     </SearchSuggestField>
                   </form>
-                  <div class="home-hero__context">
-                    <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
-                    <div class="home-hero__helper-row">
-                      <div class="home-hero__eyebrow-block">
-                        <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
-                        <div v-if="showHeroIcon" class="home-hero__icon-wrapper">
-                          <img
-                            :src="heroIconSrc"
-                            :alt="heroIconAlt"
-                            :class="['home-hero__icon', heroIconAnimation]"
-                            loading="lazy"
-                          />
+                  <CardSecondary class="home-hero__context-card" surface="strong" accent-corner="bottom-right">
+                    <div class="home-hero__context">
+                      <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
+                      <div class="home-hero__helper-row">
+                        <div class="home-hero__eyebrow-block">
+                          <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                          <div v-if="showHeroIcon" class="home-hero__icon-wrapper">
+                            <img
+                              :src="heroIconSrc"
+                              :alt="heroIconAlt"
+                              :class="['home-hero__icon', heroIconAnimation]"
+                              loading="lazy"
+                            />
+                          </div>
                         </div>
+                        <ul v-if="heroHelperItems.length" class="home-hero__helpers">
+                          <li
+                            v-for="(item, index) in heroHelperItems"
+                            :key="`hero-helper-${index}`"
+                            class="home-hero__helper"
+                          >
+                            <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
+                            <span class="home-hero__helper-text">{{ item.label }}</span>
+                          </li>
+                        </ul>
                       </div>
-                      <ul v-if="heroHelperItems.length" class="home-hero__helpers">
-                        <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
-                          <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
-                          <span class="home-hero__helper-text">{{ item.label }}</span>
-                        </li>
-                      </ul>
                     </div>
-                  </div>
+                  </CardSecondary>
                 </div>
               </div>
             </v-sheet>
@@ -402,6 +409,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     flex-direction: column
     gap: 0.75rem
     text-align: left
+
+  .home-hero__context-card
+    height: 100%
 
   .home-hero__helper-row
     display: grid
