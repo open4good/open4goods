@@ -2,9 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import type { Ref } from 'vue'
 import { computed, reactive, ref } from 'vue'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
-
-import type { ThemeName } from '~~/shared/constants/theme'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const isLoggedIn = ref(false)
 const logoutMock = vi.fn()
@@ -17,42 +15,6 @@ const routerInstance = {
   replace: routerReplace,
 }
 const currentRoute = reactive({ path: '/', fullPath: '/' })
-
-const themeName = ref<ThemeName>('light')
-const storedThemePreference = ref<ThemeName>('light')
-function createUseStorageMock(): MockInstance<(key: string, defaultValue: ThemeName) => Ref<ThemeName>> {
-  return vi.fn((_: string, defaultValue: ThemeName) => {
-    if (!storedThemePreference.value) {
-      storedThemePreference.value = defaultValue
-    }
-
-    return storedThemePreference as Ref<ThemeName>
-  })
-}
-function createUseCookieMock(): MockInstance<(key: string) => Ref<ThemeName | null>> {
-  return vi.fn((_: string) => themeCookiePreference as Ref<ThemeName | null>)
-}
-function getStorageMockRegistry() {
-  return globalThis as {
-    __menusAuthUseStorageMock__?: ReturnType<typeof createUseStorageMock>
-  }
-}
-function ensureCookieMock() {
-  const registry = getCookieMockRegistry()
-
-  if (!registry.__menusAuthUseCookieMock__) {
-    registry.__menusAuthUseCookieMock__ = createUseCookieMock()
-  }
-
-  return registry.__menusAuthUseCookieMock__
-}
-function getCookieMockRegistry() {
-  return globalThis as {
-    __menusAuthUseCookieMock__?: ReturnType<typeof createUseCookieMock>
-  }
-}
-const themeCookiePreference = ref<ThemeName | null>(null)
-const preferredDarkMock = ref(false)
 
 const fetchMock = vi.fn()
 const fetchCategoriesMock = vi.fn().mockResolvedValue([])
@@ -117,25 +79,6 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-vi.mock('vuetify', () => ({
-  useTheme: () => ({
-    global: {
-      name: themeName,
-    },
-  }),
-}))
-
-vi.mock('@vueuse/core', () => {
-  const registry = getStorageMockRegistry()
-  const localUseStorageMock = createUseStorageMock()
-  registry.__menusAuthUseStorageMock__ = localUseStorageMock
-
-  return {
-    usePreferredDark: () => preferredDarkMock,
-    useStorage: localUseStorageMock,
-  }
-})
-
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: useCategoriesComposable,
 }))
@@ -158,50 +101,41 @@ vi.mock('~/composables/pwa/usePwaInstallPromptBridge', () => ({
   }),
 }))
 
-const useStorageMock = getStorageMockRegistry().__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
+const useCookieMock = vi.hoisted(() => vi.fn(() => ref(null)))
 
 type NuxtImports = typeof import('#imports')
 
 vi.mock('#imports', async () => {
   const actual = await vi.importActual<NuxtImports>('#imports')
-  const cookieMock = ensureCookieMock()
 
   return {
     ...actual,
     useRoute: useRouteMock,
     useRouter: useRouterMock,
-    useCookie: cookieMock,
+    useCookie: useCookieMock,
     useNuxtApp: () => ({
       $fetch: (...args: unknown[]) => fetchMock(...args),
     }),
   }
 })
 
-vi.mock('#app', () => {
-  const cookieMock = ensureCookieMock()
+vi.mock('#app', () => ({
+  useRoute: useRouteMock,
+  useRouter: useRouterMock,
+  useCookie: useCookieMock,
+  useNuxtApp: () => ({
+    $fetch: (...args: unknown[]) => fetchMock(...args),
+  }),
+}))
 
-  return {
-    useRoute: useRouteMock,
-    useRouter: useRouterMock,
-    useCookie: cookieMock,
-    useNuxtApp: () => ({
-      $fetch: (...args: unknown[]) => fetchMock(...args),
-    }),
-  }
-})
-
-vi.mock('nuxt/app', () => {
-  const cookieMock = ensureCookieMock()
-
-  return {
-    useRoute: useRouteMock,
-    useRouter: useRouterMock,
-    useCookie: cookieMock,
-    useNuxtApp: () => ({
-      $fetch: (...args: unknown[]) => fetchMock(...args),
-    }),
-  }
-})
+vi.mock('nuxt/app', () => ({
+  useRoute: useRouteMock,
+  useRouter: useRouterMock,
+  useCookie: useCookieMock,
+  useNuxtApp: () => ({
+    $fetch: (...args: unknown[]) => fetchMock(...args),
+  }),
+}))
 
 vi.mock('~/composables/menus/useMenuSearchControls', async () => {
   const actual = await vi.importActual<typeof import('~/composables/menus/useMenuSearchControls')>(
@@ -220,8 +154,6 @@ vi.mock('~/composables/menus/useMenuSearchControls', async () => {
     useMenuSearchControls: useMenuSearchControlsMock,
   }
 })
-
-const useCookieMock = ensureCookieMock()
 
 vi.mock('vue-router', () => ({
   useRoute: useRouteMock,
@@ -262,11 +194,6 @@ describe('Shared menu authentication controls', () => {
     routerPush.mockReset()
     routerReplace.mockReset()
     logoutMock.mockResolvedValue(undefined)
-    themeName.value = 'light'
-    storedThemePreference.value = 'light'
-    themeCookiePreference.value = null
-    preferredDarkMock.value = false
-    useStorageMock.mockClear()
     useCookieMock.mockClear()
     fetchMock.mockReset()
     fetchCategoriesMock.mockClear()
@@ -447,37 +374,4 @@ describe('Shared menu authentication controls', () => {
     expect(wrapper.emitted('close')).toBeTruthy()
   })
 
-  it('renders theme toggles and synchronises the stored preference', async () => {
-    const heroWrapper = await mountSuspended(TheHeroMenu)
-
-    expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(true)
-
-    const darkToggle = heroWrapper.get('[data-testid="hero-theme-toggle-dark"]')
-
-    await darkToggle.trigger('click')
-    await flushPromises()
-
-    expect(storedThemePreference.value).toBe('dark')
-    expect(themeName.value).toBe('dark')
-
-    const nudgerToggle = heroWrapper.get('[data-testid="hero-theme-toggle-nudger"]')
-
-    await nudgerToggle.trigger('click')
-    await flushPromises()
-
-    expect(storedThemePreference.value).toBe('nudger')
-    expect(themeName.value).toBe('nudger')
-
-    const mobileWrapper = await mountSuspended(TheMobileMenu)
-
-    expect(mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()).toBe(true)
-
-    const lightToggle = mobileWrapper.get('[data-testid="mobile-theme-toggle-light"]')
-
-    await lightToggle.trigger('click')
-    await flushPromises()
-
-    expect(themeName.value).toBe('light')
-    expect(storedThemePreference.value).toBe('light')
-  })
 })

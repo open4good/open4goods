@@ -2113,15 +2113,6 @@
           }
         }
       },
-      "theme": {
-        "darkAriaLabel": "Activer le thème sombre",
-        "darkTooltip": "Passer au thème sombre",
-        "lightAriaLabel": "Activer le thème clair",
-        "lightTooltip": "Passer au thème clair",
-        "nudgerAriaLabel": "Activer le thème signature Nudger",
-        "nudgerTooltip": "Basculer vers le thème signature Nudger"
-      },
-      "themeToggle": "Changer de thème",
       "title": "Menu"
     },
     "siteName": "Nudger"

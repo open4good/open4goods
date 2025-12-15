@@ -120,8 +120,7 @@ const sectionClasses = computed(() => [
   .home-split__col--visual
     display: flex
     justify-content: center
-    position: sticky;
-    top: 64px // hauteur header menu
+    position: relative
 
   .home-split__visual
     position: relative

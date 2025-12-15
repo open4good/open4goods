@@ -178,18 +178,6 @@
         </div>
       </v-list-group>
 
-      <v-list-item class="px-6 py-4">
-        <template #prepend>
-          <v-icon icon="mdi-theme-light-dark" class="me-4" />
-        </template>
-        <v-list-item-title class="text-body-1">
-          {{ themeToggleLabel }}
-        </v-list-item-title>
-        <template #append>
-          <ThemeToggle test-id="mobile-theme-toggle" density="compact" />
-        </template>
-      </v-list-item>
-
       <v-divider v-if="isLoggedIn" class="mx-6" />
 
       <v-list-item
@@ -255,7 +243,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
-import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from 'vue-i18n'
 
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
@@ -276,11 +263,6 @@ const {
   requestInstall,
 } = usePwaInstallPromptBridge()
 const currentLocale = computed(() => normalizeLocale(locale.value))
-
-const themeToggleLabel = computed(() => {
-  const translation = t('siteIdentity.menu.themeToggle')
-  return translation === 'siteIdentity.menu.themeToggle' ? 'Toggle theme' : translation
-})
 
 const emit = defineEmits<{
   close: []

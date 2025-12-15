@@ -321,8 +321,6 @@
           </div>
         </template>
       </v-list>
-
-      <ThemeToggle test-id="hero-theme-toggle" />
       <v-menu
         v-if="isLoggedIn"
         v-model="isAccountMenuOpen"
@@ -422,7 +420,6 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
-import ThemeToggle from './ThemeToggle.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
 import type { CommunitySection } from './useCommunityMenu'

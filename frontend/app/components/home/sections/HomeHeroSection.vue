@@ -102,11 +102,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 <template>
   <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
     <div class="home-hero__background" aria-hidden="true">
-      <v-parallax
-        class="home-hero__parallax"
+      <v-img
+        class="home-hero__background-image"
         src="/images/home/home-hero_background.webp"
-        height="75%"
-        scale="1.05"
+        alt=""
+        cover
       />
     </div>
     <v-container fluid class="home-hero__container">
@@ -185,16 +185,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 <style scoped lang="sass">
   .home-hero
-    --hero-cat-h: var(--cat-height, 168px)
-    --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
-    --hero-cat-overlap-base: calc(var(--hero-cat-h) - var(--hero-cat-in-hero-base))
-    --hero-cat-in-hero: var(--cat-in-hero, var(--hero-cat-in-hero-base))
-    --hero-cat-overlap: var(--cat-overlap, var(--hero-cat-overlap-base))
     position: relative
     overflow: hidden
-    min-height: clamp(560px, 75dvh, 880px)
-    padding-block-start: clamp(3rem, 8vw, 5.5rem)
-    padding-block-end: calc(clamp(3.5rem, 10vw, 6rem) + var(--hero-cat-in-hero))
+    min-height: clamp(520px, 70dvh, 840px)
+    padding-block: clamp(2.5rem, 7vw, 4.5rem)
 
   .home-hero__background
     position: absolute
@@ -202,8 +196,13 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     z-index: 0
     pointer-events: none
 
-  .home-hero__parallax
+  .home-hero__background-image
     height: 100%
+    width: 100%
+    opacity: 0.95
+
+  .home-hero__background :deep(img)
+    object-fit: cover
 
   .home-hero__background::after
     content: ''
@@ -236,7 +235,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     display: flex
     flex-direction: column
     justify-content: center
-    gap: clamp(2rem, 5vw, 3rem)
+    gap: clamp(1.75rem, 4vw, 2.75rem)
 
   .home-hero__layout
     --v-gutter-x: clamp(2rem, 5vw, 3.5rem)
@@ -342,66 +341,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     white-space: nowrap
     border: 0
 
-  .home-hero__categories
-    position: absolute
-    inset-inline: 0
-    bottom: calc(-1 * var(--hero-cat-overlap))
-    display: flex
-    justify-content: center
-    z-index: 4
-    pointer-events: none
-
-  .home-hero__categories-container
-    width: 100%
-
-  .home-hero__categories-inner
-    position: relative
-    width: min(100%, 1200px)
-    margin-inline: auto
-    padding: clamp(0.4rem, 1.5vw, 0.8rem) clamp(0.75rem, 3vw, 1.5rem)
-    border-radius: clamp(1.5rem, 4vw, 2rem)
-    background: linear-gradient(
-      180deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.2) 0%,
-      rgba(var(--v-theme-surface-default), 0.96) 60%,
-      rgb(var(--v-theme-surface-muted)) 100%
-    )
-    box-shadow: 0 22px 38px rgba(var(--v-theme-shadow-primary-600), 0.16)
-    display: flex
-    align-items: center
-    justify-content: center
-    pointer-events: auto
-    height: var(--hero-cat-h)
-
-  .home-hero__categories-inner :deep(.home-category-carousel)
-    height: 100%
-    display: flex
-
-  .home-hero__categories-inner::before
-    content: ''
-    position: absolute
-    inset: 0
-    border-radius: inherit
-    background: linear-gradient(
-      120deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.1) 0%,
-      rgba(var(--v-theme-hero-gradient-end), 0.12) 45%,
-      rgba(var(--v-theme-surface-default), 0) 100%
-    )
-    pointer-events: none
-    mix-blend-mode: screen
-
-  .home-hero__categories-inner > *
-    position: relative
-    z-index: 1
-
   @media (max-width: 959px)
     .home-hero
-      min-height: clamp(520px, 72dvh, 760px)
-      padding-block-start: clamp(2.5rem, 12vw, 4.5rem)
-      padding-block-end: calc(clamp(3.5rem, 16vw, 5.5rem) + var(--hero-cat-in-hero))
-      --hero-cat-h: var(--cat-height, 168px)
-      --hero-cat-in-hero-base: calc(var(--hero-cat-h) / 2)
+      min-height: clamp(480px, 68dvh, 720px)
+      padding-block: clamp(2rem, 10vw, 3.75rem)
 
     .home-hero__media
       order: 1
@@ -416,6 +359,4 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     .home-hero__video
       transform: scale(1.15)
 
-    .home-hero__categories-inner
-      padding: clamp(0.4rem, 5vw, 0.75rem) clamp(0.75rem, 5vw, 1.25rem)
 </style>
