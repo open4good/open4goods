@@ -1977,6 +1977,7 @@
     }
   },
   "siteIdentity": {
+    "logoAlt": "Retour à l'accueil via le logo Nudger",
     "footer": {
       "accessibleTitle": "Informations du pied de page",
       "blogLink": "Notre blog",

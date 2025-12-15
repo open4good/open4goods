@@ -2,6 +2,7 @@
 import type { RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
+import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 type FooterLink = {
@@ -78,7 +79,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   },
 ])
 
-const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', import.meta.url).href
+const footerLogo = useFooterLogoAsset()
 
 </script>
 
