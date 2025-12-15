@@ -8,6 +8,7 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import CardSecondary from '~/components/shared/cards/CardSecondary.vue'
+import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 
 type HeroHelperItem = {
   icon: string
@@ -34,6 +35,7 @@ const emit = defineEmits<{
 
 const { t, tm } = useI18n()
 const theme = useTheme()
+const heroBackgroundAsset = useHeroBackgroundAsset()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -104,12 +106,20 @@ const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundSrc = computed(() => {
-  const isDarkMode = Boolean(theme.global.current.value.dark)
-  const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
-  const darkImage = props.heroImageDark || '/images/home/hero-placeholder.svg'
+  const themedAsset = heroBackgroundAsset.value?.trim()
 
-  return isDarkMode ? darkImage : lightImage
+  if (themedAsset) {
+    return themedAsset
+  }
+
+  const isDarkMode = Boolean(theme.global.current.value.dark)
+  const lightImage = props.heroImageLight?.trim()
+  const darkImage = props.heroImageDark?.trim()
+
+  return isDarkMode ? darkImage ?? '' : lightImage ?? ''
 })
+
+const heroEyebrow = computed(() => String(t('home.hero.eyebrow')).trim())
 
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
@@ -204,7 +214,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                       <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
                       <div class="home-hero__helper-row">
                         <div class="home-hero__eyebrow-block">
-                          <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                          <p v-if="heroEyebrow" class="home-hero__eyebrow">{{ heroEyebrow }}</p>
                           <div v-if="showHeroIcon" class="home-hero__icon-wrapper">
                             <img
                               :src="heroIconSrc"
@@ -339,9 +349,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   .home-hero__icon-wrapper
     width: clamp(88px, 18vw, 136px)
     height: clamp(88px, 18vw, 136px)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
     box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
     backdrop-filter: blur(8px)
+    border-radius: 50%
 
   .home-hero__icon
     border-radius: inherit
@@ -383,7 +393,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     backdrop-filter: blur(10px)
     background: rgba(var(--v-theme-surface-glass), 0.82)
     border-radius: clamp(1.5rem, 4vw, 2rem)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
     box-shadow: 0 18px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
     padding: clamp(1.5rem, 4vw, 2.5rem)
 

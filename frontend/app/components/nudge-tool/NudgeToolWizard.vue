@@ -547,7 +547,7 @@ const categorySummary = computed(() => {
   }
 })
 
-const windowTransitionDurationMs = 500
+const windowTransitionDurationMs = 1000
 
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
@@ -743,8 +743,8 @@ onMounted(async () => {
 :deep(.nudge-wizard-lift-fade-leave-active),
 :deep(.nudge-wizard-lift-fade-reverse-enter-active),
 :deep(.nudge-wizard-lift-fade-reverse-leave-active) {
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 1000ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: top center;
   will-change: transform, opacity;
 }
