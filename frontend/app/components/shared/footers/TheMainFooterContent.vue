@@ -6,6 +6,8 @@ import FooterTimeSaverVariantFocus from '~/components/shared/footers/time-saver/
 import FooterTimeSaverVariantMinimal from '~/components/shared/footers/time-saver/FooterTimeSaverVariantMinimal.vue'
 import FooterTimeSaverVariantRibbon from '~/components/shared/footers/time-saver/FooterTimeSaverVariantRibbon.vue'
 import type { TimeSaverHelper, TimeSaverModel } from '~/components/shared/footers/time-saver/FooterTimeSaverVariantFocus.vue'
+import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
+
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 type FooterLink = {
@@ -83,7 +85,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   },
 ])
 
-const footerLogo = new URL('../../../assets/images/nudger-logo-orange.svg', import.meta.url).href
+const footerLogo = useFooterLogoAsset()
 
 const timeSaverHelpers = computed<TimeSaverHelper[]>(() => [
   { icon: '🌿', label: t('siteIdentity.footer.timeSaver.helpers.impact') },
