@@ -3,7 +3,6 @@
     <div class="nudge-step-scores__header">
       <div>
         <h2 class="nudge-step-scores__title">{{ $t('nudge-tool.steps.scores.title') }}</h2>
-        <p class="nudge-step-scores__subtitle">{{ $t('nudge-tool.steps.scores.subtitle') }}</p>
       </div>
 
     </div>
@@ -15,23 +14,31 @@
         cols="12"
         sm="6"
       >
-        <v-card
-          class="nudge-step-scores__card"
-          :elevation="selectedNames.includes(score.scoreName ?? '') ? 6 : 2"
-          :variant="selectedNames.includes(score.scoreName ?? '') ? 'elevated' : 'tonal'"
-          rounded="xl"
-          role="button"
-          :aria-pressed="selectedNames.includes(score.scoreName ?? '')"
-          @click="toggle(score.scoreName ?? '')"
+        <v-tooltip
+          location="top"
+          :text="score.description"
+          :disabled="!score.description"
         >
-          <div class="nudge-step-scores__icon">
-            <v-icon :icon="getScoreIcon(score)" size="28" />
-          </div>
-          <div class="nudge-step-scores__content">
-            <p class="nudge-step-scores__name">{{ score.title }}</p>
-            <p class="nudge-step-scores__description">{{ score.description }}</p>
-          </div>
-        </v-card>
+          <template #activator="{ props: activatorProps }">
+            <v-card
+              v-bind="activatorProps"
+              class="nudge-step-scores__card card__nudger"
+              :class="{ 'nudge-step-scores__card--selected': selectedNames.includes(score.scoreName ?? '') }"
+              :variant="selectedNames.includes(score.scoreName ?? '') ? 'elevated' : 'flat'"
+              rounded="xl"
+              role="button"
+              :aria-pressed="selectedNames.includes(score.scoreName ?? '')"
+              @click="toggle(score.scoreName ?? '')"
+            >
+              <div class="nudge-step-scores__icon">
+                <v-icon :icon="getScoreIcon(score)" size="28" />
+              </div>
+              <div class="nudge-step-scores__content">
+                <p class="nudge-step-scores__name">{{ score.title }}</p>
+              </div>
+            </v-card>
+          </template>
+        </v-tooltip>
       </v-col>
     </v-row>
   </div>
@@ -81,17 +88,20 @@ const toggle = (scoreName: string) => {
     margin: 0;
   }
 
-  &__subtitle {
-    margin: 0;
-    color: rgb(var(--v-theme-text-neutral-secondary));
-  }
-
   &__card {
     display: flex;
     gap: 12px;
     padding: 16px;
     height: 100%;
     align-items: center;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+
+    &--selected {
+      border: 1px solid rgba(var(--v-theme-primary), 0.3) !important;
+      box-shadow: 0 14px 38px rgba(var(--v-theme-primary), 0.12);
+      transform: translateY(-2px);
+    }
   }
 
   &__icon {
@@ -107,11 +117,6 @@ const toggle = (scoreName: string) => {
   &__name {
     margin: 0;
     font-weight: 700;
-  }
-
-  &__description {
-    margin: 2px 0 0;
-    color: rgb(var(--v-theme-text-neutral-secondary));
   }
 }
 </style>
