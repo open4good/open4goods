@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRefs } from 'vue'
+import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -24,6 +25,8 @@ const props = defineProps<{
   searchQuery: string
   minSuggestionQueryLength: number
   verticals?: VerticalConfigDto[]
+  heroImageLight?: string
+  heroImageDark?: string
 }>()
 
 const emit = defineEmits<{
@@ -34,6 +37,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, tm } = useI18n()
+const theme = useTheme()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -102,6 +106,15 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   ]
 })
 
+const heroBackgroundSrc = computed(() => {
+  const isDarkMode = Boolean(theme.global.current.value.dark)
+
+  const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
+  const darkImage = props.heroImageDark || '/images/home/hero-placeholder.svg'
+
+  return isDarkMode ? darkImage : lightImage
+})
+
 const handleSubmit = () => {
   emit('submit')
 }
@@ -120,7 +133,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     <div class="home-hero__background" aria-hidden="true">
       <v-img
         class="home-hero__background-image"
-        src="/images/home/home-hero_background.webp"
+        :src="heroBackgroundSrc"
         alt=""
         cover
       />
