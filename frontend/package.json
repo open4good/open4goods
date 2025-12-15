@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "full": "pnpm prepare:nuxt && pnpm install && pnpm generate:api && pnpm build && pnpm generate && pnpm lint && pnpm test --run",
+    "full": "pnpm install && pnpm prepare:nuxt && pnpm generate:api && pnpm build && pnpm generate && pnpm lint && pnpm test --run",
     "fullmem": "NODE_OPTIONS='--max-old-space-size=8192' pnpm install && pnpm generate:api && pnpm build && pnpm generate && pnpm lint && pnpm test --run",
     "dev": "nuxt dev",
     "build": "nuxt build",
@@ -21,8 +21,7 @@
     "postinstall": "pnpm prepare:nuxt && pnpm rebuild sharp",
     "prebuild": "pnpm preprocess:css",
     "prepare": "husky",
-    "cap:copy": "pnpm build && pnpm exec cap copy",
-    "cap:sync": "pnpm build && pnpm exec cap sync"
+    "fast" : "pnpm build && pnpm lint && pnpm test --run"
   },
   "dependencies": {
     "@capacitor/core": "^7.0.0",
