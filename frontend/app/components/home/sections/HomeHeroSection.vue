@@ -217,14 +217,19 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   .home-hero
     position: relative
     overflow: hidden
-    min-height: clamp(560px, 70dvh, 860px)
-    padding-block: clamp(2.5rem, 7vw, 4.75rem)
+    min-height: 100dvh
+    box-sizing: border-box
+    --home-hero-padding: clamp(2.5rem, 7vw, 4.75rem)
+    padding-block: var(--home-hero-padding)
+    padding-top: calc(var(--home-hero-padding) + env(safe-area-inset-top))
+    padding-bottom: calc(var(--home-hero-padding) + env(safe-area-inset-bottom))
 
   .home-hero__background
     position: absolute
     inset: 0
     z-index: 0
     pointer-events: none
+    height: 100%
 
   .home-hero__background-loader
     position: absolute
@@ -246,13 +251,17 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     width: 100%
     height: 100%
     opacity: 0.98
+    min-height: 100%
 
   .home-hero__background :deep(.v-img__img)
+    width: 100%
     object-fit: cover
+    min-height: 100%
 
   .home-hero__background-overlay
     position: absolute
     inset: 0
+    height: 100%
     background: radial-gradient(
         circle at 16% 24%,
         rgba(var(--v-theme-hero-gradient-start), 0.22),
@@ -273,6 +282,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     padding-inline: clamp(1.5rem, 5vw, 4rem)
     position: relative
     z-index: 1
+    min-height: 100%
+    height: 100%
 
   .home-hero__inner
     margin: 0 auto
