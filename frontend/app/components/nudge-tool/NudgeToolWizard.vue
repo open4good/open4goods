@@ -48,7 +48,13 @@
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
-    <v-window v-model="activeStepKey" class="nudge-wizard__window" :touch="false">
+    <v-window
+      v-model="activeStepKey"
+      class="nudge-wizard__window"
+      :touch="false"
+      transition="nudge-wizard-slide-fade"
+      reverse-transition="nudge-wizard-slide-fade-reverse"
+    >
       <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
         <component
           :is="step.component"
@@ -524,6 +530,8 @@ const categorySummary = computed(() => {
   }
 })
 
+const windowTransitionDurationMs = 220
+
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
   selectedScores.value = []
@@ -533,16 +541,38 @@ const resetCategorySelectionState = () => {
   totalMatches.value = 0
 }
 
+let resetTimeout: ReturnType<typeof setTimeout> | null = null
+
+const clearResetTimeout = () => {
+  if (resetTimeout) {
+    clearTimeout(resetTimeout)
+    resetTimeout = null
+  }
+}
+
+const scheduleCategoryReset = () => {
+  clearResetTimeout()
+  resetTimeout = setTimeout(() => {
+    resetCategorySelectionState()
+    resetTimeout = null
+  }, windowTransitionDurationMs)
+}
+
 const resetForCategorySelection = () => {
-  resetCategorySelectionState()
   activeStepKey.value = 'category'
+  scheduleCategoryReset()
 }
 
 watch(
   activeStepKey,
-  (next) => {
-    if (next === 'category') {
-      resetCategorySelectionState()
+  (next, previous) => {
+    if (next === 'category' && previous !== 'category') {
+      scheduleCategoryReset()
+      return
+    }
+
+    if (next !== 'category') {
+      clearResetTimeout()
     }
   },
   { flush: 'post' },
@@ -631,5 +661,33 @@ onMounted(async () => {
     margin-top: 12px;
     flex-wrap: wrap;
   }
+}
+
+:deep(.nudge-wizard-slide-fade-enter-active),
+:deep(.nudge-wizard-slide-fade-leave-active),
+:deep(.nudge-wizard-slide-fade-reverse-enter-active),
+:deep(.nudge-wizard-slide-fade-reverse-leave-active) {
+  transition: transform 220ms ease, opacity 220ms ease;
+  will-change: transform, opacity;
+}
+
+:deep(.nudge-wizard-slide-fade-enter-from),
+:deep(.nudge-wizard-slide-fade-reverse-leave-to) {
+  transform: translateX(16px);
+  opacity: 0;
+}
+
+:deep(.nudge-wizard-slide-fade-leave-to),
+:deep(.nudge-wizard-slide-fade-reverse-enter-from) {
+  transform: translateX(-16px);
+  opacity: 0;
+}
+
+:deep(.nudge-wizard-slide-fade-enter-to),
+:deep(.nudge-wizard-slide-fade-leave-from),
+:deep(.nudge-wizard-slide-fade-reverse-enter-to),
+:deep(.nudge-wizard-slide-fade-reverse-leave-from) {
+  transform: translateX(0);
+  opacity: 1;
 }
 </style>
