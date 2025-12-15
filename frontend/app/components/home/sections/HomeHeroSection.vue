@@ -93,6 +93,14 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   ]
 })
 
+const heroIconAlt = computed(() => String(t('home.hero.iconAlt')).trim())
+const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
+const heroIconAnimationOptions = ['home-hero__icon--fade', 'home-hero__icon--scale', 'home-hero__icon--pulse'] as const
+const heroIconAnimation = ref(
+  heroIconAnimationOptions[Math.floor(Math.random() * heroIconAnimationOptions.length)] || heroIconAnimationOptions[0],
+)
+const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
+
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundSrc = computed(() => {
   const isDarkMode = Boolean(theme.global.current.value.dark)
@@ -194,7 +202,17 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                   <div class="home-hero__context">
                     <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
                     <div class="home-hero__helper-row">
-                      <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                      <div class="home-hero__eyebrow-block">
+                        <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                        <div v-if="showHeroIcon" class="home-hero__icon-wrapper">
+                          <img
+                            :src="heroIconSrc"
+                            :alt="heroIconAlt"
+                            :class="['home-hero__icon', heroIconAnimation]"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
                       <ul v-if="heroHelperItems.length" class="home-hero__helpers">
                         <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
                           <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
