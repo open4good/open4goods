@@ -1,14 +1,15 @@
 <template>
   <div class="nudge-step-subset">
     <div class="nudge-step-subset__header">
-      <div>
-        <div v-if="group.mdiIcon || group.title" class="nudge-step-subset__eyebrow">
-          <v-icon v-if="group.mdiIcon" :icon="group.mdiIcon" size="18" class="me-1" />
-          <span>{{ group.title }}</span>
-        </div>
-        <p class="nudge-step-subset__description">{{ group.description }}</p>
-      </div>
-
+      <h2 class="nudge-step-subset__title">
+        <v-icon
+          :icon="`mdi-numeric-${stepNumber}-circle`"
+          color="accent-primary-highlight"
+          size="30"
+        />
+        {{ group.title }}
+      </h2>
+      <p v-if="group.description" class="nudge-step-subset__description">{{ group.description }}</p>
     </div>
 
     <v-row dense>
@@ -18,24 +19,28 @@
         cols="12"
         sm="6"
       >
-        <v-card
-          class="nudge-step-subset__card"
-          :elevation="modelValue.includes(subset.id ?? '') ? 6 : 2"
-          :variant="modelValue.includes(subset.id ?? '') ? 'elevated' : 'tonal'"
-          rounded="xl"
-          role="button"
-          :aria-pressed="modelValue.includes(subset.id ?? '')"
-          @click="toggle(subset.id ?? '')"
+        <v-tooltip
+          location="top"
+          :text="subset.description"
+          :disabled="!subset.description"
         >
-          <div v-if="subset.image" class="nudge-step-subset__media">
-            <v-img :src="subset.image" height="120" cover />
-          </div>
-          <div class="nudge-step-subset__body">
-            <p class="nudge-step-subset__title">{{ subset.title }}</p>
-            <p class="nudge-step-subset__caption">{{ subset.caption }}</p>
-            <p class="nudge-step-subset__description">{{ subset.description }}</p>
-          </div>
-        </v-card>
+          <template #activator="{ props: activatorProps }">
+            <v-card
+              v-bind="activatorProps"
+              class="nudge-step-subset__card nudge-option-card"
+              :class="{ 'nudge-option-card--selected': modelValue.includes(subset.id ?? '') }"
+              rounded="lg"
+              role="button"
+              :aria-pressed="modelValue.includes(subset.id ?? '')"
+              @click="toggle(subset.id ?? '')"
+            >
+              <div class="nudge-step-subset__body">
+                <p class="nudge-step-subset__name">{{ subset.title }}</p>
+                <p v-if="subset.caption" class="nudge-step-subset__caption">{{ subset.caption }}</p>
+              </div>
+            </v-card>
+          </template>
+        </v-tooltip>
       </v-col>
     </v-row>
   </div>
@@ -48,6 +53,7 @@ const props = defineProps<{
   group: NudgeToolSubsetGroupDto
   subsets: VerticalSubsetDto[]
   modelValue: string[]
+  stepNumber: number
 }>()
 
 const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void; (event: 'continue'): void }>()
@@ -76,28 +82,25 @@ const toggle = (subsetId: string) => {
     margin-bottom: 16px;
   }
 
-  &__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  &__title {
+    font-size: 1.5rem;
     font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   &__description {
-    margin: 4px 0 0;
+    margin: 0;
     color: rgb(var(--v-theme-text-neutral-secondary));
   }
 
   &__card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
     height: 100%;
-  }
-
-  &__media {
-    border-radius: 12px;
-    overflow: hidden;
   }
 
   &__body {
@@ -107,7 +110,7 @@ const toggle = (subsetId: string) => {
     gap: 4px;
   }
 
-  &__title {
+  &__name {
     margin: 0;
     font-weight: 700;
   }

@@ -1,22 +1,24 @@
 <template>
   <div class="nudge-step-condition">
 
-    <h2 class="nudge-step-condition__title"><v-icon icon="mdi-numeric-3-circle" color="accent-primary-highlight" size="30" /> {{ $t('nudge-tool.steps.condition.title') }}</h2>
+    <h2 class="nudge-step-condition__title">
+      <v-icon icon="mdi-numeric-3-circle" color="accent-primary-highlight" size="30" />
+      {{ $t('nudge-tool.steps.condition.title') }}
+    </h2>
     <p class="nudge-step-condition__subtitle">{{ $t('nudge-tool.steps.condition.subtitle') }}</p>
 
-    <v-row dense>
+    <v-row dense class="nudge-step-condition__row" justify="center">
       <v-col
         v-for="option in options"
         :key="option.value"
         cols="12"
         sm="4"
+        class="d-flex"
       >
         <v-card
-          class="nudge-step-condition__card"
-          :elevation="isSelected(option.value) ? 8 : 2"
-          :color="isSelected(option.value) ? 'primary' : undefined"
-          :variant="isSelected(option.value) ? 'elevated' : 'tonal'"
-          rounded="xl"
+          class="nudge-step-condition__card nudge-option-card"
+          :class="{ 'nudge-option-card--selected': isSelected(option.value) }"
+          rounded="lg"
           role="button"
           :aria-pressed="isSelected(option.value).toString()"
           @click="() => toggleOption(option.value)"
@@ -71,9 +73,16 @@ const toggleOption = (choice: ProductConditionChoice) => {
     margin-bottom: 16px;
   }
 
+  &__row {
+    row-gap: 12px;
+  }
+
   &__card {
-    padding: 16px;
-    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
 
   &__label {
