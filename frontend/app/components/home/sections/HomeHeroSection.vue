@@ -93,6 +93,15 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   ]
 })
 
+const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
+const heroIconAnimations = ['home-hero__icon--fade', 'home-hero__icon--scale', 'home-hero__icon--pulse'] as const
+
+const heroIconAnimationClass = computed(() => {
+  const randomIndex = Math.floor(Math.random() * heroIconAnimations.length)
+
+  return heroIconAnimations[randomIndex]
+})
+
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundSrc = computed(() => {
   const isDarkMode = Boolean(theme.global.current.value.dark)
@@ -164,7 +173,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                 <div class="home-hero__panel-block">
                   <NudgeToolWizard :verticals="wizardVerticals" />
                 </div>
-                <div class="home-hero__panel-block">
+                <div class="home-hero__panel-block home-hero__panel-block--secondary">
                   <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
                     <SearchSuggestField
                       :model-value="searchQueryValue"
@@ -192,9 +201,20 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                     </SearchSuggestField>
                   </form>
                   <div class="home-hero__context">
+                    <div class="home-hero__eyebrow-block">
+                      <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                      <v-avatar class="home-hero__icon-wrapper" variant="tonal" size="120" rounded="lg">
+                        <v-img
+                          :src="heroIconSrc"
+                          :alt="t('home.hero.iconAlt')"
+                          class="home-hero__icon"
+                          :class="heroIconAnimationClass"
+                          cover
+                        />
+                      </v-avatar>
+                    </div>
                     <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
                     <div class="home-hero__helper-row">
-                      <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
                       <ul v-if="heroHelperItems.length" class="home-hero__helpers">
                         <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
                           <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
@@ -294,11 +314,13 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     text-align: center
 
   .home-hero__eyebrow-block
-    display: inline-flex
+    display: flex
     flex-direction: column
-    gap: clamp(0.5rem, 1.5vw, 0.75rem)
-    padding-inline-start: clamp(0.25rem, 1.25vw, 0.75rem)
-    align-items: flex-start
+    gap: clamp(0.5rem, 1.5vw, 0.8rem)
+    align-items: center
+    text-align: center
+    margin-inline: auto
+    max-width: 220px
 
   .home-hero__eyebrow
     font-weight: 600
@@ -306,6 +328,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     text-transform: uppercase
     color: rgba(var(--v-theme-hero-gradient-end), 0.9)
     margin: 0
+    text-align: center
 
   .home-hero__icon-wrapper
     width: clamp(88px, 18vw, 136px)
@@ -313,6 +336,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
     box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
     backdrop-filter: blur(8px)
+    align-self: center
 
   .home-hero__icon
     border-radius: inherit
@@ -368,6 +392,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     flex-direction: column
     gap: clamp(1.25rem, 2vw, 1.75rem)
 
+  .home-hero__panel-block--secondary
+    position: relative
+
   .home-hero__context
     display: flex
     flex-direction: column
@@ -375,10 +402,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     text-align: left
 
   .home-hero__helper-row
-    display: grid
+    display: flex
+    justify-content: center
     gap: 0.75rem
-    grid-template-columns: auto 1fr
-    align-items: center
 
   .home-hero__helpers
     margin: 0
@@ -510,14 +536,18 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
   @media (min-width: 960px)
     .home-hero__panel-grid
-      grid-template-columns: 1fr
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr)
+
+    .home-hero__panel-block--secondary
+      justify-self: end
+      max-width: 520px
 
     .home-hero__helper-row
-      grid-template-columns: auto 1fr
+      justify-content: flex-start
 
   @media (min-width: 1280px)
     .home-hero__panel-grid
-      grid-template-columns: 1fr
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr)
 
   @media (min-width: 1440px)
     .home-hero__panel
