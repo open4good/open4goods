@@ -95,6 +95,8 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
 })
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
+const iconAnimationClass = ref<string>('home-hero__icon--fade')
+const iconAnimationPool = ['home-hero__icon--fade', 'home-hero__icon--scale', 'home-hero__icon--pulse']
 const heroBackgroundSrc = computed(() => {
   const isDarkMode = Boolean(theme.global.current.value.dark)
   const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
@@ -108,6 +110,9 @@ const handleHeroImageLoad = () => {
 }
 
 onMounted(() => {
+  const animationIndex = Math.floor(Math.random() * iconAnimationPool.length)
+  iconAnimationClass.value = iconAnimationPool[animationIndex]
+
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
@@ -156,69 +161,72 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                 {{ t('home.hero.title') }}
               </h1>
             </v-slide-y-transition>
+            <div class="home-hero__eyebrow-block" aria-hidden="true">
+              <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+              <div class="home-hero__icon-wrapper">
+                <v-img
+                  :class="['home-hero__icon', iconAnimationClass]"
+                  src="/pwa-assets/icons/android/android-launchericon-512-512.png"
+                  :alt="t('home.hero.iconAlt')"
+                  width="136"
+                  height="136"
+                  cover
+                />
+              </div>
+            </div>
           </v-col>
         </v-row>
-        <v-row class="home-hero__widgets" justify="center" align="stretch">
-          <v-col cols="12" lg="10" xl="10">
-            <v-row class="home-hero__widget-row" align="stretch">
-              <v-col cols="12" lg="6" class="home-hero__widget-col">
-                <HomeWidgetShell
-                  :title="t('home.widgets.nudgeWizard.title')"
-                  :subtitle="t('home.widgets.nudgeWizard.subtitle')"
-                  icon="mdi-auto-fix"
-                >
+        <v-row justify="center">
+          <v-col cols="12" lg="10" xl="8">
+            <v-sheet class="home-hero__panel" color="transparent" elevation="0">
+              <div class="home-hero__panel-grid">
+                <div class="home-hero__panel-block">
                   <NudgeToolWizard :verticals="wizardVerticals" />
-                </HomeWidgetShell>
-              </v-col>
-              <v-col cols="12" lg="6" class="home-hero__widget-col">
-                <HomeWidgetShell
-                  :title="t('home.widgets.search.title')"
-                  :subtitle="t('home.widgets.search.subtitle')"
-                  icon="mdi-magnify"
-                  surface="strong"
-                  dense
-                >
-                  <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
-                    <SearchSuggestField
-                      :model-value="searchQueryValue"
-                      class="home-hero__search-input"
-                      :label="t('home.hero.search.label')"
-                      :placeholder="t('home.hero.search.placeholder')"
-                      :aria-label="t('home.hero.search.ariaLabel')"
-                      :min-chars="minSuggestionQueryLength"
-                      @update:model-value="updateSearchQuery"
-                      @submit="handleSubmit"
-                      @select-category="handleCategorySelect"
-                      @select-product="handleProductSelect"
-                    >
-                      <template #append-inner>
-                        <v-btn
-                          class="home-hero__search-submit nudger_degrade-defaut"
-                          icon="mdi-arrow-right"
-                          variant="flat"
-                          color="primary"
-                          size="small"
-                          type="submit"
-                          :aria-label="t('home.hero.search.cta')"
-                        />
-                      </template>
-                    </SearchSuggestField>
-                  </form>
-                  <div class="home-hero__context">
-                    <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
-                    <div class="home-hero__helper-row">
-                      <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
-                      <ul v-if="heroHelperItems.length" class="home-hero__helpers">
-                        <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
-                          <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
-                          <span class="home-hero__helper-text">{{ item.label }}</span>
-                        </li>
-                      </ul>
+                </div>
+                <div class="home-hero__panel-block">
+                  <HomeWidgetShell variant="primary">
+                    <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
+                      <SearchSuggestField
+                        :model-value="searchQueryValue"
+                        class="home-hero__search-input"
+                        :label="t('home.hero.search.label')"
+                        :placeholder="t('home.hero.search.placeholder')"
+                        :aria-label="t('home.hero.search.ariaLabel')"
+                        :min-chars="minSuggestionQueryLength"
+                        @update:model-value="updateSearchQuery"
+                        @submit="handleSubmit"
+                        @select-category="handleCategorySelect"
+                        @select-product="handleProductSelect"
+                      >
+                        <template #append-inner>
+                          <v-btn
+                            class="home-hero__search-submit nudger_degrade-defaut"
+                            icon="mdi-arrow-right"
+                            variant="flat"
+                            color="primary"
+                            size="small"
+                            type="submit"
+                            :aria-label="t('home.hero.search.cta')"
+                          />
+                        </template>
+                      </SearchSuggestField>
+                    </form>
+                    <div class="home-hero__context">
+                      <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
+                      <div class="home-hero__helper-row">
+                        <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                        <ul v-if="heroHelperItems.length" class="home-hero__helpers">
+                          <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
+                            <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
+                            <span class="home-hero__helper-text">{{ item.label }}</span>
+                          </li>
+                        </ul>
+                      </div>
                     </div>
-                  </div>
-                </HomeWidgetShell>
-              </v-col>
-            </v-row>
+                  </HomeWidgetShell>
+                </div>
+              </div>
+            </v-sheet>
           </v-col>
         </v-row>
       </div>
@@ -363,15 +371,23 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   .home-hero__search-submit
     box-shadow: none
 
-  .home-hero__widgets
-    margin-top: clamp(1.5rem, 4vw, 2.5rem)
+  .home-hero__panel
+    backdrop-filter: blur(10px)
+    background: rgba(var(--v-theme-surface-glass), 0.82)
+    border-radius: clamp(1.5rem, 4vw, 2rem)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+    box-shadow: 0 18px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
+    padding: clamp(1.5rem, 4vw, 2.5rem)
 
-  .home-hero__widget-row
-    --v-gutter-x: 1rem
-    --v-gutter-y: 1rem
+  .home-hero__panel-grid
+    display: grid
+    gap: clamp(1.25rem, 3vw, 1.75rem)
+    grid-template-columns: 1fr
 
-  .home-hero__widget-col
+  .home-hero__panel-block
     display: flex
+    flex-direction: column
+    gap: clamp(1.25rem, 2vw, 1.75rem)
 
     :deep(.home-widget-shell)
       width: 100%
@@ -497,9 +513,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       min-height: clamp(520px, 68dvh, 760px)
       padding-block: clamp(2rem, 10vw, 4rem)
 
-    .home-hero__widget-row
-      --v-gutter-x: 1rem
-      --v-gutter-y: 1.25rem
+    .home-hero__panel
+      padding: clamp(1.25rem, 5vw, 2rem)
+
+    .home-hero__panel-grid
+      gap: clamp(1rem, 3vw, 1.5rem)
 
     .home-hero__media
       order: 1
@@ -515,15 +533,18 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       transform: scale(1.15)
 
   @media (min-width: 960px)
+    .home-hero__panel-grid
+      grid-template-columns: 1fr
+
     .home-hero__helper-row
       grid-template-columns: auto 1fr
 
   @media (min-width: 1280px)
-    .home-hero__widget-row
-      --v-gutter-x: 1.25rem
-      --v-gutter-y: 1.25rem
+    .home-hero__panel-grid
+      grid-template-columns: 1fr
 
   @media (min-width: 1440px)
-    .home-hero__widget-row
-      --v-gutter-x: 1.5rem
+    .home-hero__panel
+      max-width: 980px
+      margin-inline: auto
 </style>

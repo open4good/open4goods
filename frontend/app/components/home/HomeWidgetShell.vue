@@ -7,6 +7,7 @@ const props = withDefaults(
     subtitle?: string
     icon?: string
     surface?: 'glass' | 'strong'
+    variant?: 'primary' | 'secondary' | 'tertiary'
     dense?: boolean
   }>(),
   {
@@ -14,6 +15,7 @@ const props = withDefaults(
     subtitle: '',
     icon: '',
     surface: 'glass',
+    variant: 'primary',
     dense: false,
   },
 )
@@ -21,6 +23,7 @@ const props = withDefaults(
 const shellClasses = computed(() => ({
   'home-widget-shell--strong': props.surface === 'strong',
   'home-widget-shell--dense': props.dense,
+  [`home-widget-shell--${props.variant}`]: true,
 }))
 
 const hasHeaderContent = computed(
@@ -64,13 +67,16 @@ const hasHeaderContent = computed(
   --home-widget-padding-x: clamp(1.1rem, 3vw, 1.6rem);
   --home-widget-padding-y: clamp(1rem, 2.8vw, 1.5rem);
   --home-widget-gap: clamp(0.75rem, 2vw, 1rem);
+  --home-widget-border-color: rgba(var(--v-theme-border-primary-strong), 0.65);
+  --home-widget-highlight-main: rgba(var(--v-theme-accent-supporting), 0.35);
+  --home-widget-highlight-alt: rgba(var(--v-theme-primary), 0.22);
 
   position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--home-widget-gap);
   background: rgba(var(--v-theme-surface-glass), 0.95);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.65);
+  border: 1px solid var(--home-widget-border-color);
   border-radius: var(--home-widget-radius) var(--home-widget-radius) var(--home-widget-radius-emphasis) var(--home-widget-radius);
   box-shadow: 0 14px 38px rgba(var(--v-theme-shadow-primary-600), 0.14);
   padding: var(--home-widget-padding-y) var(--home-widget-padding-x);
@@ -84,10 +90,10 @@ const hasHeaderContent = computed(
     height: 120px;
     bottom: -46px;
     right: -46px;
-    background: radial-gradient(circle at 30% 30%, rgba(var(--v-theme-accent-supporting), 0.35), transparent 70%),
-      radial-gradient(circle at 70% 70%, rgba(var(--v-theme-primary), 0.22), transparent 75%);
+    background: radial-gradient(circle at 30% 30%, var(--home-widget-highlight-main), transparent 70%),
+      radial-gradient(circle at 70% 70%, var(--home-widget-highlight-alt), transparent 75%);
     border-radius: 60px;
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+    border: 1px solid var(--home-widget-border-color);
     filter: blur(0.3px);
     opacity: 0.7;
   }
@@ -100,6 +106,24 @@ const hasHeaderContent = computed(
     --home-widget-padding-x: clamp(0.9rem, 2.5vw, 1.25rem);
     --home-widget-padding-y: clamp(0.85rem, 2.2vw, 1.2rem);
     --home-widget-gap: clamp(0.6rem, 1.6vw, 0.9rem);
+  }
+
+  &--primary {
+    --home-widget-border-color: rgba(var(--v-theme-accent-supporting), 0.55);
+    --home-widget-highlight-main: rgba(var(--v-theme-accent-supporting), 0.4);
+    --home-widget-highlight-alt: rgba(var(--v-theme-primary), 0.28);
+  }
+
+  &--secondary {
+    --home-widget-border-color: rgba(var(--v-theme-border-primary-strong), 0.7);
+    --home-widget-highlight-main: rgba(var(--v-theme-hero-gradient-end), 0.32);
+    --home-widget-highlight-alt: rgba(var(--v-theme-hero-gradient-start), 0.24);
+  }
+
+  &--tertiary {
+    --home-widget-border-color: rgba(var(--v-theme-surface-primary-080), 0.9);
+    --home-widget-highlight-main: rgba(var(--v-theme-surface-primary-120), 0.6);
+    --home-widget-highlight-alt: rgba(var(--v-theme-surface-primary-100), 0.45);
   }
 
   &__header {
