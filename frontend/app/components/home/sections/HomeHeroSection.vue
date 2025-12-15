@@ -1,5 +1,7 @@
 <script setup lang="ts">
+
 import { computed, onMounted, ref, toRefs } from 'vue'
+import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -20,6 +22,8 @@ const props = defineProps<{
   searchQuery: string
   minSuggestionQueryLength: number
   verticals?: VerticalConfigDto[]
+  heroImageLight?: string
+  heroImageDark?: string
 }>()
 
 const emit = defineEmits<{
@@ -30,6 +34,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, tm } = useI18n()
+const theme = useTheme()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -91,17 +96,25 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
 })
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
+const heroBackgroundSrc = computed(() => {
+const isDarkMode = Boolean(theme.global.current.value.dark)
+const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
+const darkImage = props.heroImageDark || '/images/home/hero-placeholder.svg'
 
+  
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
 }
 
+return isDarkMode ? darkImage : lightImage
+  
 onMounted(() => {
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
     }
   }, heroReadyFallbackDelayMs)
+
 })
 
 const handleSubmit = () => {
@@ -120,6 +133,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 <template>
   <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
     <div class="home-hero__background" aria-hidden="true">
+
       <v-fade-transition>
         <div v-if="showHeroSkeleton" class="home-hero__background-loader">
           <v-skeleton-loader type="image" class="home-hero__background-skeleton" />
@@ -135,6 +149,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       >
         <div class="home-hero__background-overlay" />
       </v-parallax>
+
+
+
     </div>
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
