@@ -68,6 +68,20 @@
         ]
       }
     },
+    "parallax": {
+      "essentials": {
+        "ariaLabel": "Decorative background for the challenges and solutions section"
+      },
+      "features": {
+        "ariaLabel": "Decorative background for the key features section"
+      },
+      "knowledge": {
+        "ariaLabel": "Decorative background for community stories and objections"
+      },
+      "cta": {
+        "ariaLabel": "Decorative background for the FAQ and call to action"
+      }
+    },
     "problems": {
       "title": "Too many labels, not enough clarity?",
       "description": "Comparing impact, price and trust sources across dozens of tabs is exhausting. Nudger brings it back to one place.",

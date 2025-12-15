@@ -68,6 +68,20 @@
         ]
       }
     },
+    "parallax": {
+      "essentials": {
+        "ariaLabel": "Fond décoratif pour la section problèmes et solutions"
+      },
+      "features": {
+        "ariaLabel": "Fond décoratif pour la section des fonctionnalités clés"
+      },
+      "knowledge": {
+        "ariaLabel": "Fond décoratif pour les articles et les objections"
+      },
+      "cta": {
+        "ariaLabel": "Fond décoratif pour la FAQ et l’appel à l’action"
+      }
+    },
     "problems": {
       "title": "Trop de labels, pas assez de clarté ?",
       "description": "Comparer impact, prix et fiabilité à travers une multitude d’onglets est épuisant. Nudger rassemble tout au même endroit.",
