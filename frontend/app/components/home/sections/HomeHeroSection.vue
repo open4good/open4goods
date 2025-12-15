@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { computed, onMounted, ref, toRefs } from 'vue'
 import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
@@ -14,7 +13,6 @@ type HeroHelperItem = {
   label: string
 }
 
-const heroBackgroundSrc = '/images/home/home-hero_background.webp'
 const isHeroImageLoaded = ref(false)
 const heroReadyFallbackDelayMs = 900
 
@@ -97,24 +95,23 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundSrc = computed(() => {
-const isDarkMode = Boolean(theme.global.current.value.dark)
-const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
-const darkImage = props.heroImageDark || '/images/home/hero-placeholder.svg'
+  const isDarkMode = Boolean(theme.global.current.value.dark)
+  const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
+  const darkImage = props.heroImageDark || '/images/home/hero-placeholder.svg'
 
-  
+  return isDarkMode ? darkImage : lightImage
+})
+
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
 }
 
-return isDarkMode ? darkImage : lightImage
-  
 onMounted(() => {
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
     }
   }, heroReadyFallbackDelayMs)
-
 })
 
 const handleSubmit = () => {
@@ -133,7 +130,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 <template>
   <HeroSurface tag="section" class="home-hero" aria-labelledby="home-hero-title" variant="aurora" :bleed="true">
     <div class="home-hero__background" aria-hidden="true">
-
       <v-fade-transition>
         <div v-if="showHeroSkeleton" class="home-hero__background-loader">
           <v-skeleton-loader type="image" class="home-hero__background-skeleton" />
@@ -149,9 +145,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       >
         <div class="home-hero__background-overlay" />
       </v-parallax>
-
-
-
     </div>
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
@@ -300,12 +293,42 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     align-items: center
     text-align: center
 
+  .home-hero__eyebrow-block
+    display: inline-flex
+    flex-direction: column
+    gap: clamp(0.5rem, 1.5vw, 0.75rem)
+    padding-inline-start: clamp(0.25rem, 1.25vw, 0.75rem)
+    align-items: flex-start
+
   .home-hero__eyebrow
     font-weight: 600
     letter-spacing: 0.08em
     text-transform: uppercase
     color: rgba(var(--v-theme-hero-gradient-end), 0.9)
     margin: 0
+
+  .home-hero__icon-wrapper
+    width: clamp(88px, 18vw, 136px)
+    height: clamp(88px, 18vw, 136px)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
+    box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
+    backdrop-filter: blur(8px)
+
+  .home-hero__icon
+    border-radius: inherit
+    width: 100%
+    height: 100%
+    transition: transform 250ms ease, filter 250ms ease
+    filter: drop-shadow(0 6px 14px rgba(var(--v-theme-shadow-primary-600), 0.25))
+
+  .home-hero__icon--fade
+    animation: home-hero-fade-up 900ms ease-out both
+
+  .home-hero__icon--scale
+    animation: home-hero-scale-in 800ms ease-out both
+
+  .home-hero__icon--pulse
+    animation: home-hero-pulse 1200ms ease-in-out both
 
   .home-hero__title
     font-size: clamp(2.2rem, 5vw, 3.8rem)
@@ -431,6 +454,36 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     white-space: nowrap
     border: 0
 
+  @keyframes home-hero-fade-up
+    from
+      opacity: 0
+      transform: translateY(12px) scale(0.98)
+    to
+      opacity: 1
+      transform: translateY(0) scale(1)
+
+  @keyframes home-hero-scale-in
+    from
+      opacity: 0
+      transform: scale(0.9)
+    55%
+      opacity: 1
+      transform: scale(1.02)
+    to
+      transform: scale(1)
+
+  @keyframes home-hero-pulse
+    0%
+      transform: scale(0.92)
+      opacity: 0
+    35%
+      transform: scale(1.04)
+      opacity: 1
+    70%
+      transform: scale(0.98)
+    100%
+      transform: scale(1)
+
   @media (max-width: 959px)
     .home-hero
       min-height: clamp(520px, 68dvh, 760px)
@@ -470,5 +523,4 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     .home-hero__panel
       max-width: 980px
       margin-inline: auto
-
 </style>
