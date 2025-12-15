@@ -2,7 +2,7 @@
   <div class="nudge-step-scores">
     <div class="nudge-step-scores__header">
       <div>
-        <h2 class="nudge-step-scores__title">{{ $t('nudge-tool.steps.scores.title') }}</h2>
+	      <h2 class="nudge-step-scores__title"> <v-icon icon="mdi-numeric-2-circle" color="accent-primary-highlight" size="30" /> {{ $t('nudge-tool.steps.scores.title') }}</h2>
       </div>
 
     </div>

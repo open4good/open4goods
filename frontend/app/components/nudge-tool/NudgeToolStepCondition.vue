@@ -1,6 +1,7 @@
 <template>
   <div class="nudge-step-condition">
-    <h2 class="nudge-step-condition__title">{{ $t('nudge-tool.steps.condition.title') }}</h2>
+
+    <h2 class="nudge-step-condition__title"><v-icon icon="mdi-numeric-3-circle" color="accent-primary-highlight" size="30" /> {{ $t('nudge-tool.steps.condition.title') }}</h2>
     <p class="nudge-step-condition__subtitle">{{ $t('nudge-tool.steps.condition.subtitle') }}</p>
 
     <v-row dense>

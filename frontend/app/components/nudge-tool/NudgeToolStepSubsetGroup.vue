@@ -9,9 +9,6 @@
         <p class="nudge-step-subset__description">{{ group.description }}</p>
       </div>
 
-      <v-btn color="primary" @click="emit('continue')">
-        {{ group.ctaLabel || $t('nudge-tool.actions.continue') }}
-      </v-btn>
     </div>
 
     <v-row dense>

@@ -7,9 +7,7 @@
 
       <div class="nudge-step-category__subtitle-row">
         <div class="nudge-step-category__step" :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })">
-          <v-avatar color="surface-primary-080" size="36" rounded="lg">
             <v-icon icon="mdi-numeric-1-circle" color="accent-primary-highlight" size="22" />
-          </v-avatar>
         </div>
 
         <p class="nudge-step-category__subtitle">
