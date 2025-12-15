@@ -110,10 +110,8 @@ const selectedTheme = computed<ThemeName>({
 
 const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
 const darkTooltip = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
-const nudgerTooltip = computed(() => t('siteIdentity.menu.theme.nudgerTooltip'))
 const lightAriaLabel = computed(() => t('siteIdentity.menu.theme.lightAriaLabel'))
 const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
-const nudgerAriaLabel = computed(() => t('siteIdentity.menu.theme.nudgerAriaLabel'))
 
 const density = toRef(props, 'density')
 const size = toRef(props, 'size')

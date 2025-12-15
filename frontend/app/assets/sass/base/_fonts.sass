@@ -40,7 +40,7 @@ $font-files: (
   $format: 'truetype'
 )
   // Résolution du nom de fichier AVANT le bloc @font-face
-  $resolved-file: if($file-name, $file-name, '#{$name}-#{map.get($file-map, $weight)}')
+  $resolved-file: if(sass($file-name): $file-name; else: "#{$name}-#{map.get($file-map, $weight)}")
 
   @if $file-name == null and $style == italic
     $resolved-file: '#{$resolved-file}Italic'
