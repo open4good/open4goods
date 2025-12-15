@@ -6,6 +6,7 @@ import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import HomeWidgetShell from '~/components/home/HomeWidgetShell.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 
 type HeroHelperItem = {
@@ -157,14 +158,26 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             </v-slide-y-transition>
           </v-col>
         </v-row>
-        <v-row justify="center">
-          <v-col cols="12" lg="10" xl="8">
-            <v-sheet class="home-hero__panel" color="transparent" elevation="0">
-              <div class="home-hero__panel-grid">
-                <div class="home-hero__panel-block">
+        <v-row class="home-hero__widgets" justify="center" align="stretch">
+          <v-col cols="12" lg="10" xl="10">
+            <v-row class="home-hero__widget-row" align="stretch">
+              <v-col cols="12" lg="6" class="home-hero__widget-col">
+                <HomeWidgetShell
+                  :title="t('home.widgets.nudgeWizard.title')"
+                  :subtitle="t('home.widgets.nudgeWizard.subtitle')"
+                  icon="mdi-auto-fix"
+                >
                   <NudgeToolWizard :verticals="wizardVerticals" />
-                </div>
-                <div class="home-hero__panel-block">
+                </HomeWidgetShell>
+              </v-col>
+              <v-col cols="12" lg="6" class="home-hero__widget-col">
+                <HomeWidgetShell
+                  :title="t('home.widgets.search.title')"
+                  :subtitle="t('home.widgets.search.subtitle')"
+                  icon="mdi-magnify"
+                  surface="strong"
+                  dense
+                >
                   <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
                     <SearchSuggestField
                       :model-value="searchQueryValue"
@@ -203,9 +216,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                       </ul>
                     </div>
                   </div>
-                </div>
-              </div>
-            </v-sheet>
+                </HomeWidgetShell>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </div>
@@ -350,23 +363,18 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   .home-hero__search-submit
     box-shadow: none
 
-  .home-hero__panel
-    backdrop-filter: blur(10px)
-    background: rgba(var(--v-theme-surface-glass), 0.82)
-    border-radius: clamp(1.5rem, 4vw, 2rem)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
-    box-shadow: 0 18px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
-    padding: clamp(1.5rem, 4vw, 2.5rem)
+  .home-hero__widgets
+    margin-top: clamp(1.5rem, 4vw, 2.5rem)
 
-  .home-hero__panel-grid
-    display: grid
-    gap: clamp(1.25rem, 3vw, 1.75rem)
-    grid-template-columns: 1fr
+  .home-hero__widget-row
+    --v-gutter-x: 1rem
+    --v-gutter-y: 1rem
 
-  .home-hero__panel-block
+  .home-hero__widget-col
     display: flex
-    flex-direction: column
-    gap: clamp(1.25rem, 2vw, 1.75rem)
+
+    :deep(.home-widget-shell)
+      width: 100%
 
   .home-hero__context
     display: flex
@@ -489,11 +497,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       min-height: clamp(520px, 68dvh, 760px)
       padding-block: clamp(2rem, 10vw, 4rem)
 
-    .home-hero__panel
-      padding: clamp(1.25rem, 5vw, 2rem)
-
-    .home-hero__panel-grid
-      gap: clamp(1rem, 3vw, 1.5rem)
+    .home-hero__widget-row
+      --v-gutter-x: 1rem
+      --v-gutter-y: 1.25rem
 
     .home-hero__media
       order: 1
@@ -509,18 +515,15 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       transform: scale(1.15)
 
   @media (min-width: 960px)
-    .home-hero__panel-grid
-      grid-template-columns: 1fr
-
     .home-hero__helper-row
       grid-template-columns: auto 1fr
 
   @media (min-width: 1280px)
-    .home-hero__panel-grid
-      grid-template-columns: 1fr
+    .home-hero__widget-row
+      --v-gutter-x: 1.25rem
+      --v-gutter-y: 1.25rem
 
   @media (min-width: 1440px)
-    .home-hero__panel
-      max-width: 980px
-      margin-inline: auto
+    .home-hero__widget-row
+      --v-gutter-x: 1.5rem
 </style>

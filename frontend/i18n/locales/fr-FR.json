@@ -68,6 +68,16 @@
         ]
       }
     },
+    "widgets": {
+      "nudgeWizard": {
+        "title": "Guidage Nudger",
+        "subtitle": "Choisis ta catégorie et affine selon tes priorités"
+      },
+      "search": {
+        "title": "Recherche directe",
+        "subtitle": "Retrouve un produit ou une catégorie en un clin d'œil"
+      }
+    },
     "problems": {
       "title": "Trop de labels, pas assez de clarté ?",
       "description": "Comparer impact, prix et fiabilité à travers une multitude d’onglets est épuisant. Nudger rassemble tout au même endroit.",

@@ -68,6 +68,16 @@
         ]
       }
     },
+    "widgets": {
+      "nudgeWizard": {
+        "title": "Nudger guidance",
+        "subtitle": "Pick your category and refine by your priorities"
+      },
+      "search": {
+        "title": "Direct search",
+        "subtitle": "Find a product or category at a glance"
+      }
+    },
     "problems": {
       "title": "Too many labels, not enough clarity?",
       "description": "Comparing impact, price and trust sources across dozens of tabs is exhausting. Nudger brings it back to one place.",

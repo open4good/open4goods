@@ -12,6 +12,10 @@ const messages: Record<string, string> = {
   'home.hero.search.ariaLabel': 'Rechercher un produit responsable',
   'home.hero.search.cta': 'NUDGER',
   'home.hero.iconAlt': 'Icône du lanceur PWA Nudger',
+  'home.widgets.nudgeWizard.title': 'Guidage Nudger',
+  'home.widgets.nudgeWizard.subtitle': 'Choisis ta catégorie et affine selon tes priorités',
+  'home.widgets.search.title': 'Recherche directe',
+  'home.widgets.search.subtitle': 'Retrouve un produit ou une catégorie en un clin d’œil',
 }
 
 const helperItems = [
@@ -51,6 +55,7 @@ const mountComponent = async () =>
         HeroSurface: createStub('section'),
         NudgeToolWizard: createStub('div', 'nudge-tool-wizard-stub'),
         SearchSuggestField: createStub('div', 'search-suggest-field-stub'),
+        HomeWidgetShell: createStub('div', 'home-widget-shell-stub'),
         VContainer: createStub('div'),
         VRow: createStub('div'),
         VCol: createStub('div'),

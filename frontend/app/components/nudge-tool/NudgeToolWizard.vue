@@ -1,34 +1,12 @@
 <template>
-  <v-card class="nudge-wizard" rounded="xl" elevation="3">
-    <div class="nudge-wizard__header">
-      <div class="nudge-wizard__header-row">
-        <v-btn
-          v-if="categorySummary"
-          class="nudge-wizard__category-chip"
-          variant="tonal"
-          color="primary"
-          rounded="lg"
-          @click="resetForCategorySelection"
-        >
-          <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
-            <v-img :src="categorySummary.image" :alt="categorySummary.alt" cover />
-          </v-avatar>
-          <span class="nudge-wizard__category-label">{{ categorySummary.label }}</span>
-        </v-btn>
-
-        <v-stepper
-          v-if="showStepper"
-          v-model="stepperActiveKey"
-          density="compact"
-          :alt-labels="!display.smAndDown.value"
-          :items="stepperItems"
-          :item-props="true"
-          flat
-          hide-actions
-          class="nudge-wizard__stepper elevation-0 border-0"
-        />
-      </div>
-
+  <HomeWidgetShell
+    class="nudge-wizard"
+    :title="$t('home.widgets.nudgeWizard.title')"
+    :subtitle="$t('home.widgets.nudgeWizard.subtitle')"
+    icon="mdi-auto-fix"
+    surface="strong"
+  >
+    <template #actions>
       <div v-if="shouldShowMatches" class="nudge-wizard__matches">
         <v-btn
           variant="text"
@@ -42,6 +20,34 @@
           </template>
         </v-btn>
       </div>
+    </template>
+
+    <div class="nudge-wizard__meta">
+      <v-btn
+        v-if="categorySummary"
+        class="nudge-wizard__category-chip"
+        variant="tonal"
+        color="primary"
+        rounded="lg"
+        @click="resetForCategorySelection"
+      >
+        <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
+          <v-img :src="categorySummary.image" :alt="categorySummary.alt" cover />
+        </v-avatar>
+        <span class="nudge-wizard__category-label">{{ categorySummary.label }}</span>
+      </v-btn>
+
+      <v-stepper
+        v-if="showStepper"
+        v-model="stepperActiveKey"
+        density="compact"
+        :alt-labels="!display.smAndDown.value"
+        :items="stepperItems"
+        :item-props="true"
+        flat
+        hide-actions
+        class="nudge-wizard__stepper elevation-0 border-0"
+      />
     </div>
 
     <div v-if="loading" class="nudge-wizard__progress">
@@ -83,7 +89,7 @@
         {{ $t('nudge-tool.actions.next') }}
       </v-btn>
     </div>
-  </v-card>
+  </HomeWidgetShell>
 </template>
 
 <script setup lang="ts">
@@ -91,6 +97,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import type { Component } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
+import HomeWidgetShell from '~/components/home/HomeWidgetShell.vue'
 import {
   buildCategoryHash,
   type CategoryHashState,
@@ -560,42 +567,38 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.nudge-wizard__stepper :deep(.v-stepper-window) {
-  display: none !important;
-}
-
 .nudge-wizard {
   position: relative;
-  padding: 16px;
   width: 100%;
-  max-width: none;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  gap: clamp(0.75rem, 2vw, 1rem);
 
-  &__header {
+  &__meta {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  &__header-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
     flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
   }
 
   &__stepper {
     width: 100%;
     min-width: 0;
+    background: rgba(var(--v-theme-surface-primary-080), 0.6);
+    border-radius: 14px;
+    padding: 4px 8px;
+
+    :deep(.v-stepper-item__title) {
+      white-space: nowrap;
+      font-weight: 600;
+      color: rgb(var(--v-theme-text-neutral-secondary));
+    }
   }
 
   &__matches {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
+    align-items: center;
   }
 
   &__category-chip {
@@ -603,18 +606,20 @@ onMounted(async () => {
     font-weight: 600;
     gap: 8px;
     padding-inline: 12px;
+    background: rgba(var(--v-theme-surface-primary-100), 0.8);
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.55);
   }
 
   &__category-label {
     white-space: nowrap;
-    color: rgb(var(--v-theme-primary));
+    color: rgb(var(--v-theme-text-neutral-strong));
   }
 
   &__progress {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
+    left: -1px;
+    right: -1px;
+    top: -1px;
   }
 
   &__window {
@@ -628,8 +633,11 @@ onMounted(async () => {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-top: 12px;
     flex-wrap: wrap;
   }
+}
+
+.nudge-wizard__stepper :deep(.v-stepper-window) {
+  display: none !important;
 }
 </style>

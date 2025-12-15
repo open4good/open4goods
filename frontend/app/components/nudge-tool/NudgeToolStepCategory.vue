@@ -154,8 +154,8 @@ watch(
   &__slider {
     display: flex;
     align-items: stretch;
-    padding-inline: 4px;
-    gap: 10px;
+    padding-inline: 0;
+    gap: 12px;
 
     :deep(.v-slide-group__container) {
       align-items: stretch;
@@ -169,10 +169,10 @@ watch(
   }
 
   &__arrow {
-    background: rgb(var(--v-theme-surface-primary-080));
+    background: rgba(var(--v-theme-surface-primary-080), 0.9);
     color: rgb(var(--v-theme-accent-primary-highlight));
-    box-shadow: none;
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    box-shadow: 0 6px 16px rgba(var(--v-theme-shadow-primary-600), 0.08);
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
   }
 
   &__card {
@@ -185,21 +185,25 @@ watch(
     justify-content: center;
     gap: 8px;
     min-width: 160px;
-    background: rgb(var(--v-theme-surface-default));
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    background: rgba(var(--v-theme-surface-glass), 0.96);
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
+    box-shadow: 0 14px 30px rgba(var(--v-theme-shadow-primary-600), 0.08);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 
     &--selected {
       border-color: rgb(var(--v-theme-accent-primary-highlight));
-      box-shadow: 0 10px 25px -12px rgba(var(--v-theme-shadow-primary-600), 0.5);
+      box-shadow: 0 16px 32px -10px rgba(var(--v-theme-shadow-primary-600), 0.35);
+      transform: translateY(-2px);
     }
   }
 
   &__image {
     width: 72px;
     aspect-ratio: 1 / 1;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
-    background: rgba(var(--v-theme-primary), 0.08);
+    background: rgba(var(--v-theme-surface-muted), 0.96);
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
   }
 
   &__img {
@@ -210,13 +214,14 @@ watch(
     display: grid;
     place-items: center;
     height: 100%;
-    background: rgba(var(--v-theme-primary), 0.06);
-    color: rgb(var(--v-theme-primary));
+    background: rgba(var(--v-theme-surface-primary-080), 0.9);
+    color: rgb(var(--v-theme-text-neutral-secondary));
   }
 
   &__name {
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
+    color: rgb(var(--v-theme-text-neutral-strong));
   }
 }
 </style>
