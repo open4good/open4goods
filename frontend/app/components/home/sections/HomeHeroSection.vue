@@ -6,7 +6,6 @@ import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
-import HomeWidgetShell from '~/components/home/HomeWidgetShell.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 
 type HeroHelperItem = {
@@ -95,8 +94,6 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
 })
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
-const iconAnimationClass = ref<string>('home-hero__icon--fade')
-const iconAnimationPool = ['home-hero__icon--fade', 'home-hero__icon--scale', 'home-hero__icon--pulse']
 const heroBackgroundSrc = computed(() => {
   const isDarkMode = Boolean(theme.global.current.value.dark)
   const lightImage = props.heroImageLight || '/images/home/home-hero_background.webp'
@@ -110,9 +107,6 @@ const handleHeroImageLoad = () => {
 }
 
 onMounted(() => {
-  const animationIndex = Math.floor(Math.random() * iconAnimationPool.length)
-  iconAnimationClass.value = iconAnimationPool[animationIndex]
-
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
@@ -161,19 +155,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                 {{ t('home.hero.title') }}
               </h1>
             </v-slide-y-transition>
-            <div class="home-hero__eyebrow-block" aria-hidden="true">
-              <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
-              <div class="home-hero__icon-wrapper">
-                <v-img
-                  :class="['home-hero__icon', iconAnimationClass]"
-                  src="/pwa-assets/icons/android/android-launchericon-512-512.png"
-                  :alt="t('home.hero.iconAlt')"
-                  width="136"
-                  height="136"
-                  cover
-                />
-              </div>
-            </div>
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -184,46 +165,44 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                   <NudgeToolWizard :verticals="wizardVerticals" />
                 </div>
                 <div class="home-hero__panel-block">
-                  <HomeWidgetShell variant="primary">
-                    <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
-                      <SearchSuggestField
-                        :model-value="searchQueryValue"
-                        class="home-hero__search-input"
-                        :label="t('home.hero.search.label')"
-                        :placeholder="t('home.hero.search.placeholder')"
-                        :aria-label="t('home.hero.search.ariaLabel')"
-                        :min-chars="minSuggestionQueryLength"
-                        @update:model-value="updateSearchQuery"
-                        @submit="handleSubmit"
-                        @select-category="handleCategorySelect"
-                        @select-product="handleProductSelect"
-                      >
-                        <template #append-inner>
-                          <v-btn
-                            class="home-hero__search-submit nudger_degrade-defaut"
-                            icon="mdi-arrow-right"
-                            variant="flat"
-                            color="primary"
-                            size="small"
-                            type="submit"
-                            :aria-label="t('home.hero.search.cta')"
-                          />
-                        </template>
-                      </SearchSuggestField>
-                    </form>
-                    <div class="home-hero__context">
-                      <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
-                      <div class="home-hero__helper-row">
-                        <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
-                        <ul v-if="heroHelperItems.length" class="home-hero__helpers">
-                          <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
-                            <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
-                            <span class="home-hero__helper-text">{{ item.label }}</span>
-                          </li>
-                        </ul>
-                      </div>
+                  <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
+                    <SearchSuggestField
+                      :model-value="searchQueryValue"
+                      class="home-hero__search-input"
+                      :label="t('home.hero.search.label')"
+                      :placeholder="t('home.hero.search.placeholder')"
+                      :aria-label="t('home.hero.search.ariaLabel')"
+                      :min-chars="minSuggestionQueryLength"
+                      @update:model-value="updateSearchQuery"
+                      @submit="handleSubmit"
+                      @select-category="handleCategorySelect"
+                      @select-product="handleProductSelect"
+                    >
+                      <template #append-inner>
+                        <v-btn
+                          class="home-hero__search-submit nudger_degrade-defaut"
+                          icon="mdi-arrow-right"
+                          variant="flat"
+                          color="primary"
+                          size="small"
+                          type="submit"
+                          :aria-label="t('home.hero.search.cta')"
+                        />
+                      </template>
+                    </SearchSuggestField>
+                  </form>
+                  <div class="home-hero__context">
+                    <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
+                    <div class="home-hero__helper-row">
+                      <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                      <ul v-if="heroHelperItems.length" class="home-hero__helpers">
+                        <li v-for="(item, index) in heroHelperItems" :key="`hero-helper-${index}`" class="home-hero__helper">
+                          <span class="home-hero__helper-icon" aria-hidden="true">{{ item.icon }}</span>
+                          <span class="home-hero__helper-text">{{ item.label }}</span>
+                        </li>
+                      </ul>
                     </div>
-                  </HomeWidgetShell>
+                  </div>
                 </div>
               </div>
             </v-sheet>
@@ -388,9 +367,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     display: flex
     flex-direction: column
     gap: clamp(1.25rem, 2vw, 1.75rem)
-
-    :deep(.home-widget-shell)
-      width: 100%
 
   .home-hero__context
     display: flex
