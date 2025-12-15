@@ -258,6 +258,8 @@ const steps = computed<WizardStep[]>(() => {
     },
   })
 
+  let subsetStepNumber = 4
+
   subsetGroups.value.forEach((group) => {
     const subsets = groupedSubsets.value[group.id ?? ''] ?? []
     if (!subsets.length) {
@@ -268,9 +270,11 @@ const steps = computed<WizardStep[]>(() => {
       key: `group-${group.id}`,
       component: NudgeToolStepSubsetGroup,
       title: group.title ?? '',
-      props: { group, subsets, modelValue: activeSubsetIds.value },
+      props: { group, subsets, modelValue: activeSubsetIds.value, stepNumber: subsetStepNumber },
       onUpdate: (value: string[]) => (activeSubsetIds.value = value),
     })
+
+    subsetStepNumber += 1
   })
 
   sequence.push({
@@ -457,14 +461,6 @@ const navigateToCategoryPage = () => {
   void router.push({ path: `/${slug}`, hash })
 }
 
-const getStepGroupSelection = (key: string) => {
-  const groupId = key.replace('group-', '')
-  const subsets = groupedSubsets.value[groupId] ?? []
-  const subsetIds = subsets.map((subset) => subset.id)
-
-  return activeSubsetIds.value.filter((subsetId) => subsetIds.includes(subsetId))
-}
-
 const hasPreviousStep = computed(() => {
   const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
   return index > 0
@@ -479,37 +475,9 @@ const hasNextStep = computed(() => {
   return index >= 0 && index < steps.value.length - 1
 })
 
-const isMultiSelectStep = computed(
-  () => activeStepKey.value === 'condition' || activeStepKey.value.startsWith('group-'),
-)
-
-const hasSelectionForStep = computed(() => {
-  if (activeStepKey.value === 'scores') {
-    return selectedScores.value.length > 0
-  }
-
-  if (activeStepKey.value === 'condition') {
-    return condition.value.length > 0
-  }
-
-  if (activeStepKey.value.startsWith('group-')) {
-    return getStepGroupSelection(activeStepKey.value).length > 0
-  }
-
-  if (activeStepKey.value === 'category') {
-    return Boolean(selectedCategoryId.value)
-  }
-
-  return true
-})
-
 const isNextDisabled = computed(() => {
   if (activeStepKey.value === 'category') {
     return !selectedCategoryId.value
-  }
-
-  if (isMultiSelectStep.value) {
-    return !hasSelectionForStep.value
   }
 
   return false

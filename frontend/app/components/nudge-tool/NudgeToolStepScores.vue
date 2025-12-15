@@ -2,7 +2,10 @@
   <div class="nudge-step-scores">
     <div class="nudge-step-scores__header">
       <div>
-	      <h2 class="nudge-step-scores__title"> <v-icon icon="mdi-numeric-2-circle" color="accent-primary-highlight" size="30" /> {{ $t('nudge-tool.steps.scores.title') }}</h2>
+        <h2 class="nudge-step-scores__title">
+          <v-icon icon="mdi-numeric-2-circle" color="accent-primary-highlight" size="30" />
+          {{ $t('nudge-tool.steps.scores.title') }}
+        </h2>
       </div>
 
     </div>
@@ -22,10 +25,9 @@
           <template #activator="{ props: activatorProps }">
             <v-card
               v-bind="activatorProps"
-              class="nudge-step-scores__card card__nudger"
-              :class="{ 'nudge-step-scores__card--selected': selectedNames.includes(score.scoreName ?? '') }"
-              :variant="selectedNames.includes(score.scoreName ?? '') ? 'elevated' : 'flat'"
-              rounded="xl"
+              class="nudge-step-scores__card nudge-option-card"
+              :class="{ 'nudge-option-card--selected': selectedNames.includes(score.scoreName ?? '') }"
+              rounded="lg"
               role="button"
               :aria-pressed="selectedNames.includes(score.scoreName ?? '')"
               @click="toggle(score.scoreName ?? '')"
@@ -91,17 +93,8 @@ const toggle = (scoreName: string) => {
   &__card {
     display: flex;
     gap: 12px;
-    padding: 16px;
     height: 100%;
     align-items: center;
-    cursor: pointer;
-    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-
-    &--selected {
-      border: 1px solid rgba(var(--v-theme-primary), 0.3) !important;
-      box-shadow: 0 14px 38px rgba(var(--v-theme-primary), 0.12);
-      transform: translateY(-2px);
-    }
   }
 
   &__icon {
