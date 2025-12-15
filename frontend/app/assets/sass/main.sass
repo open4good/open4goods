@@ -27,28 +27,36 @@
         .theme-toggle
             background-color: transparent!important
 
-    .card__nudger 
-        background: #ffffff!important
-        border-radius: 30px!important
-        padding: 1.25rem!important
+.card__nudger
+    background: rgb(var(--v-theme-surface-default))!important
+    border: 1px solid rgba(var(--v-theme-primary), 0.08)!important
+    border-radius: 30px!important
+    padding: 1.25rem!important
+    color: rgb(var(--v-theme-text-neutral-strong))
+    box-shadow: 0 10px 26px rgba(var(--v-theme-primary), 0.06)
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease
 
-        &--border
-            border: 1px solid rgb(var(--v-theme-primary))!important
+    &:hover
+        box-shadow: 0 18px 42px rgba(var(--v-theme-primary), 0.12)
+        transform: translateY(-1px)
 
-        &--radius_bottom-right_50px
-            border-bottom-right-radius: 50px!important
+    &--border
+        border: 1px solid rgba(var(--v-theme-primary), 0.2)!important
 
-        &--radius_top-right_0
-            border-top-right-radius: 0!important
+    &--radius_bottom-right_50px
+        border-bottom-right-radius: 50px!important
 
-    .home-hero__subtitle
-        font-size: clamp(1.05rem, 2.6vw, 1.35rem)
-        color: rgb(var(--v-theme-text-neutral-strong))
-        text-align: center
-        font-weight: bolder
-        text-transform: uppercase
-        margin: 0 0 1.25rem 0
+    &--radius_top-right_0
+        border-top-right-radius: 0!important
 
-    .nudger_degrade-defaut
-        background-image: linear-gradient(to left, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)))!important
-        color: #ffffff!important
+.home-hero__subtitle
+    font-size: clamp(1.05rem, 2.6vw, 1.35rem)
+    color: rgb(var(--v-theme-text-neutral-strong))
+    text-align: center
+    font-weight: bolder
+    text-transform: uppercase
+    margin: 0 0 1.25rem 0
+
+.nudger_degrade-defaut
+    background-image: linear-gradient(to left, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)))!important
+    color: #ffffff!important
