@@ -10,6 +10,7 @@ import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
+import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 import type { CategorySuggestionItem, ProductSuggestionItem } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
@@ -34,6 +35,42 @@ const { categories: rawCategories, fetchCategories } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
+
+const heroBackgrounds = computed(() => ({
+  light: '/images/home/hero-full-viewport-light.jpg',
+  dark: '/images/home/hero-full-viewport-dark.jpg',
+}))
+
+const parallaxBackgrounds = computed(() => ({
+  essentials: {
+    light: '/images/home/parallax-essentials-light.jpg',
+    dark: '/images/home/parallax-essentials-dark.jpg',
+    overlay: 0.62,
+    parallaxAmount: 0.16,
+    ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
+  },
+  features: {
+    light: '/images/home/parallax-features-light.jpg',
+    dark: '/images/home/parallax-features-dark.jpg',
+    overlay: 0.55,
+    parallaxAmount: 0.12,
+    ariaLabel: String(t('home.parallax.features.ariaLabel')),
+  },
+  knowledge: {
+    light: '/images/home/parallax-knowledge-light.jpg',
+    dark: '/images/home/parallax-knowledge-dark.jpg',
+    overlay: 0.5,
+    parallaxAmount: 0.1,
+    ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
+  },
+  cta: {
+    light: '/images/home/parallax-cta-light.jpg',
+    dark: '/images/home/parallax-cta-dark.jpg',
+    overlay: 0.48,
+    parallaxAmount: 0.08,
+    ariaLabel: String(t('home.parallax.cta.ariaLabel')),
+  },
+}))
 
 const toSafeString = (value: unknown) => {
   if (typeof value === 'string') {
@@ -496,35 +533,87 @@ useHead(() => ({
       v-model:search-query="searchQuery"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       :verticals="rawCategories"
+      :hero-image-light="heroBackgrounds.light"
+      :hero-image-dark="heroBackgrounds.dark"
       @submit="handleSearchSubmit"
       @select-category="handleCategorySuggestion"
       @select-product="handleProductSuggestion"
     />
     <div class="home-page__sections">
-      <HomeProblemsSection :items="problemItems" />
+      <ParallaxSection
+        id="home-essentials"
+        class="home-page__parallax"
+        :background-light="parallaxBackgrounds.essentials.light"
+        :background-dark="parallaxBackgrounds.essentials.dark"
+        :overlay-opacity="parallaxBackgrounds.essentials.overlay"
+        :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
+        :aria-label="parallaxBackgrounds.essentials.ariaLabel"
+        :enable-aplats="true"
+      >
+        <div class="home-page__stack">
+          <HomeProblemsSection :items="problemItems" />
 
-      <HomeSolutionSection :benefits="solutionBenefits" />
+          <HomeSolutionSection :benefits="solutionBenefits" />
+        </div>
+      </ParallaxSection>
 
-      <HomeFeaturesSection :features="featureCards" />
+      <ParallaxSection
+        id="home-features"
+        class="home-page__parallax home-page__parallax--centered"
+        :background-light="parallaxBackgrounds.features.light"
+        :background-dark="parallaxBackgrounds.features.dark"
+        :overlay-opacity="parallaxBackgrounds.features.overlay"
+        :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
+        :aria-label="parallaxBackgrounds.features.ariaLabel"
+        content-align="center"
+      >
+        <HomeFeaturesSection :features="featureCards" />
+      </ParallaxSection>
 
-      <HomeBlogSection
-        :loading="blogLoading"
-        :featured-item="featuredBlogItem"
-        :secondary-items="secondaryBlogItems"
-      />
+      <ParallaxSection
+        id="home-knowledge"
+        class="home-page__parallax"
+        :background-light="parallaxBackgrounds.knowledge.light"
+        :background-dark="parallaxBackgrounds.knowledge.dark"
+        :overlay-opacity="parallaxBackgrounds.knowledge.overlay"
+        :parallax-amount="parallaxBackgrounds.knowledge.parallaxAmount"
+        :aria-label="parallaxBackgrounds.knowledge.ariaLabel"
+        :enable-aplats="true"
+      >
+        <div class="home-page__stack home-page__stack--two-columns">
+          <HomeBlogSection
+            :loading="blogLoading"
+            :featured-item="featuredBlogItem"
+            :secondary-items="secondaryBlogItems"
+          />
 
-      <HomeObjectionsSection :items="objectionItems" />
+          <HomeObjectionsSection :items="objectionItems" />
+        </div>
+      </ParallaxSection>
 
-      <HomeFaqSection :items="faqPanels" />
+      <ParallaxSection
+        id="home-cta"
+        class="home-page__parallax home-page__parallax--centered"
+        :background-light="parallaxBackgrounds.cta.light"
+        :background-dark="parallaxBackgrounds.cta.dark"
+        :overlay-opacity="parallaxBackgrounds.cta.overlay"
+        :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
+        :aria-label="parallaxBackgrounds.cta.ariaLabel"
+        content-align="center"
+      >
+        <div class="home-page__stack home-page__stack--compact">
+          <HomeFaqSection :items="faqPanels" />
 
-      <HomeCtaSection
-        v-model:search-query="searchQuery"
-        :categories-landing-url="categoriesLandingUrl"
-        :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-        @submit="handleSearchSubmit"
-        @select-category="handleCategorySuggestion"
-        @select-product="handleProductSuggestion"
-      />
+          <HomeCtaSection
+            v-model:search-query="searchQuery"
+            :categories-landing-url="categoriesLandingUrl"
+            :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+            @submit="handleSearchSubmit"
+            @select-category="handleCategorySuggestion"
+            @select-product="handleProductSuggestion"
+          />
+        </div>
+      </ParallaxSection>
     </div>
   </div>
 </template>
@@ -542,7 +631,32 @@ useHead(() => ({
   .home-page__sections
     display: flex
     flex-direction: column
-    gap: clamp(1.5rem, 3.5vw, 2.5rem)
+    gap: clamp(1.5rem, 3.5vw, 2.25rem)
     padding-top: var(--cat-overlap)
-    background: rgb(var(--v-theme-surface-default))
+    background: transparent
+
+  .home-page__parallax
+    border-radius: clamp(1.25rem, 3vw, 1.85rem)
+    box-shadow: 0 22px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
+    overflow: hidden
+
+  .home-page__parallax--centered :deep(.home-section)
+    text-align: center
+
+  .home-page__stack
+    display: flex
+    flex-direction: column
+    gap: clamp(1.5rem, 4vw, 2.25rem)
+
+  .home-page__stack--two-columns
+    display: grid
+    grid-template-columns: 1fr
+    gap: clamp(1.5rem, 4vw, 2.25rem)
+
+  .home-page__stack--compact
+    gap: clamp(1.25rem, 3vw, 2rem)
+
+  @media (min-width: 1100px)
+    .home-page__stack--two-columns
+      grid-template-columns: repeat(2, 1fr)
 </style>
