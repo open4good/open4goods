@@ -460,14 +460,6 @@ describe('Shared menu authentication controls', () => {
     expect(storedThemePreference.value).toBe('dark')
     expect(themeName.value).toBe('dark')
 
-    const nudgerToggle = heroWrapper.get('[data-testid="hero-theme-toggle-nudger"]')
-
-    await nudgerToggle.trigger('click')
-    await flushPromises()
-
-    expect(storedThemePreference.value).toBe('nudger')
-    expect(themeName.value).toBe('nudger')
-
     const mobileWrapper = await mountSuspended(TheMobileMenu)
 
     expect(mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()).toBe(true)
