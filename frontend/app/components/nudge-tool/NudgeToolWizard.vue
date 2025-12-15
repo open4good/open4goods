@@ -52,8 +52,8 @@
       v-model="activeStepKey"
       class="nudge-wizard__window"
       :touch="false"
-      transition="nudge-wizard-slide-fade"
-      reverse-transition="nudge-wizard-slide-fade-reverse"
+      :transition="windowTransition"
+      :reverse-transition="windowReverseTransition"
     >
       <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
         <component
@@ -146,6 +146,7 @@ const activeSubsetIds = ref<string[]>(props.initialSubsets ?? [])
 const baseFilters = ref<Filter[]>(props.initialFilters?.filters ?? [])
 
 const activeStepKey = ref<string>('category')
+const previousStepKey = ref<string | null>(null)
 const loading = ref(false)
 const totalMatches = ref(0)
 const animatedMatches = ref(0)
@@ -518,6 +519,24 @@ const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category',
 )
 
+const isExpandingFromCategory = computed(
+  () => previousStepKey.value === 'category' && activeStepKey.value === 'condition',
+)
+
+const isCollapsingToCategory = computed(
+  () => previousStepKey.value === 'condition' && activeStepKey.value === 'category',
+)
+
+const windowTransition = computed(() =>
+  isExpandingFromCategory.value ? 'nudge-wizard-expand-fade' : 'nudge-wizard-slide-fade',
+)
+
+const windowReverseTransition = computed(() =>
+  isCollapsingToCategory.value
+    ? 'nudge-wizard-expand-fade-reverse'
+    : 'nudge-wizard-slide-fade-reverse',
+)
+
 const categorySummary = computed(() => {
   if (!selectedCategory.value || activeStepKey.value === 'category') {
     return null
@@ -530,7 +549,7 @@ const categorySummary = computed(() => {
   }
 })
 
-const windowTransitionDurationMs = 220
+const windowTransitionDurationMs = 240
 
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
@@ -566,6 +585,8 @@ const resetForCategorySelection = () => {
 watch(
   activeStepKey,
   (next, previous) => {
+    previousStepKey.value = previous ?? null
+
     if (next === 'category' && previous !== 'category') {
       scheduleCategoryReset()
       return
@@ -575,7 +596,7 @@ watch(
       clearResetTimeout()
     }
   },
-  { flush: 'post' },
+  { flush: 'pre' },
 )
 
 onMounted(async () => {
@@ -688,6 +709,35 @@ onMounted(async () => {
 :deep(.nudge-wizard-slide-fade-reverse-enter-to),
 :deep(.nudge-wizard-slide-fade-reverse-leave-from) {
   transform: translateX(0);
+  opacity: 1;
+}
+
+:deep(.nudge-wizard-expand-fade-enter-active),
+:deep(.nudge-wizard-expand-fade-leave-active),
+:deep(.nudge-wizard-expand-fade-reverse-enter-active),
+:deep(.nudge-wizard-expand-fade-reverse-leave-active) {
+  transition: transform 240ms ease, opacity 180ms ease;
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+
+:deep(.nudge-wizard-expand-fade-enter-from),
+:deep(.nudge-wizard-expand-fade-reverse-leave-to) {
+  transform: scaleY(0.9);
+  opacity: 0;
+}
+
+:deep(.nudge-wizard-expand-fade-leave-to),
+:deep(.nudge-wizard-expand-fade-reverse-enter-from) {
+  transform: scaleY(0.94);
+  opacity: 0;
+}
+
+:deep(.nudge-wizard-expand-fade-enter-to),
+:deep(.nudge-wizard-expand-fade-leave-from),
+:deep(.nudge-wizard-expand-fade-reverse-enter-to),
+:deep(.nudge-wizard-expand-fade-reverse-leave-from) {
+  transform: scaleY(1);
   opacity: 1;
 }
 </style>
