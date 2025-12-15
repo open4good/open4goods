@@ -2010,6 +2010,22 @@
         "allProducts": "Tous nos produits",
         "ecoscore": "Évaluation environnementale"
       },
+      "timeSaver": {
+        "badge": "Open source et sans pub",
+        "eyebrow": "Gagne du temps",
+        "helpers": {
+          "impact": "Score d'impact en un clin d'œil",
+          "price": "Prix et historique inclus",
+          "trust": "Indépendant, respectueux de la vie privée"
+        },
+        "learnMoreCta": "Explorer les catégories",
+        "primaryCta": "Lancer une recherche",
+        "secondaryCta": "Parcourir responsable",
+        "subtitle": "Compare l'impact, le prix et les signaux de confiance en un seul endroit.",
+        "title": "Choisis librement.",
+        "titleFull": "Gagne du temps. Choisis librement.",
+        "badgeAlt": "Comparateur indépendant"
+      },
       "logoAlt": "Icône Nudger orange",
       "mission": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social des biens que nous achetons.",
       "rightsReserved": "Tous droits réservés"

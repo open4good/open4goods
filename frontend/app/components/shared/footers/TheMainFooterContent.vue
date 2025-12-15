@@ -2,7 +2,12 @@
 import type { RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
+import FooterTimeSaverVariantFocus from '~/components/shared/footers/time-saver/FooterTimeSaverVariantFocus.vue'
+import FooterTimeSaverVariantMinimal from '~/components/shared/footers/time-saver/FooterTimeSaverVariantMinimal.vue'
+import FooterTimeSaverVariantRibbon from '~/components/shared/footers/time-saver/FooterTimeSaverVariantRibbon.vue'
+import type { TimeSaverHelper, TimeSaverModel } from '~/components/shared/footers/time-saver/FooterTimeSaverVariantFocus.vue'
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
+
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 type FooterLink = {
@@ -19,6 +24,7 @@ const currentLocale = computed(() => normalizeLocale(locale.value))
 const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
 const feedbackPath = computed(() => resolveLocalizedRoutePath('feedback', currentLocale.value))
 const categoriesPath = computed(() => resolveLocalizedRoutePath('categories', currentLocale.value))
+const homePath = computed(() => resolveLocalizedRoutePath('/', currentLocale.value) ?? '/')
 
 const currentYear = computed(() => new Date().getFullYear())
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
@@ -81,6 +87,22 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 
 const footerLogo = useFooterLogoAsset()
 
+const timeSaverHelpers = computed<TimeSaverHelper[]>(() => [
+  { icon: '🌿', label: t('siteIdentity.footer.timeSaver.helpers.impact') },
+  { icon: '💶', label: t('siteIdentity.footer.timeSaver.helpers.price') },
+  { icon: '🛡️', label: t('siteIdentity.footer.timeSaver.helpers.trust') },
+])
+
+const timeSaverModel = computed<TimeSaverModel>(() => ({
+  eyebrow: t('siteIdentity.footer.timeSaver.eyebrow'),
+  title: t('siteIdentity.footer.timeSaver.titleFull'),
+  subtitle: t('siteIdentity.footer.timeSaver.subtitle'),
+  badge: t('siteIdentity.footer.timeSaver.badge'),
+  helpers: timeSaverHelpers.value,
+  primaryCta: { label: t('siteIdentity.footer.timeSaver.primaryCta'), to: homePath.value },
+  secondaryCta: { label: t('siteIdentity.footer.timeSaver.secondaryCta'), to: categoriesPath.value },
+}))
+
 </script>
 
 <template>
@@ -88,6 +110,21 @@ const footerLogo = useFooterLogoAsset()
     <h2 id="footer-heading" class="sr-only">
       {{ t('siteIdentity.footer.accessibleTitle') }}
     </h2>
+
+    <v-row class="footer-time-saver g-4 mb-8">
+      <v-col cols="12">
+        <FooterTimeSaverVariantFocus :model="timeSaverModel" />
+      </v-col>
+      <v-col cols="12">
+        <FooterTimeSaverVariantRibbon
+          :model="timeSaverModel"
+          :learn-more-cta="{ label: t('siteIdentity.footer.timeSaver.learnMoreCta'), to: categoriesPath }"
+        />
+      </v-col>
+      <v-col cols="12">
+        <FooterTimeSaverVariantMinimal :model="timeSaverModel" />
+      </v-col>
+    </v-row>
 
     <v-row class="g-8 footer-upper">
       <v-col cols="12" md="4">
@@ -229,6 +266,11 @@ const footerLogo = useFooterLogoAsset()
   }
 
   .footer-upper {
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-time-saver {
     position: relative;
     z-index: 1;
   }

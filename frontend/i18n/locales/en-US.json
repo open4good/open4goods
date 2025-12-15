@@ -2011,6 +2011,22 @@
         "compensation": "Ecological contribution",
         "ecoscore": "Environmental assessment"
       },
+      "timeSaver": {
+        "badge": "Open source & ad-free",
+        "eyebrow": "Save time",
+        "helpers": {
+          "impact": "Impact score at a glance",
+          "price": "Price & history included",
+          "trust": "Independent, privacy-first"
+        },
+        "learnMoreCta": "Explore categories",
+        "primaryCta": "Start searching",
+        "secondaryCta": "Browse responsibly",
+        "subtitle": "Compare impact, price and trust signals in a single place.",
+        "title": "Choose freely.",
+        "titleFull": "Save time. Choose freely.",
+        "badgeAlt": "Independent comparator"
+      },
       "logoAlt": "Nudger orange logo icon",
       "mission": "nudger.fr is an open approach to assess the environmental impact of consumer goods and partially offset the impact of your online purchases.",
       "rightsReserved": "All Rights Reserved"
