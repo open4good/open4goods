@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, ref, toRefs } from 'vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -11,6 +11,14 @@ type HeroHelperItem = {
   icon: string
   label: string
 }
+
+const ICON_ANIMATIONS = [
+  'home-hero__icon--fade',
+  'home-hero__icon--scale',
+  'home-hero__icon--pulse',
+] as const
+
+type IconAnimationClass = (typeof ICON_ANIMATIONS)[number]
 
 const props = defineProps<{
   searchQuery: string
@@ -31,6 +39,14 @@ const searchQueryValue = computed(() => props.searchQuery)
 
 const { minSuggestionQueryLength } = toRefs(props)
 const wizardVerticals = computed(() => props.verticals ?? [])
+
+const selectIconAnimationClass = (): IconAnimationClass => {
+  const randomIndex = Math.floor(Math.random() * ICON_ANIMATIONS.length)
+
+  return ICON_ANIMATIONS[randomIndex]
+}
+
+const iconAnimationClass = ref<IconAnimationClass>(selectIconAnimationClass())
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
@@ -163,7 +179,18 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
               <v-row class="mt-5" align="center">
                 <v-col cols="12" lg="4">
-                  <p class="mt-4 ms-6 home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                  <div class="home-hero__eyebrow-block">
+                    <p class="home-hero__eyebrow">{{ t('home.hero.eyebrow') }}</p>
+                    <v-avatar class="home-hero__icon-wrapper" color="surface-glass-strong" size="128">
+                      <v-img
+                        class="home-hero__icon"
+                        src="/pwa-assets/icons/android/android-launchericon-512-512.png"
+                        :alt="t('home.hero.iconAlt')"
+                        cover
+                        :class="iconAnimationClass"
+                      />
+                    </v-avatar>
+                  </div>
                 </v-col>
                 <v-col cols="12" lg="8">
                   <ul v-if="heroHelperItems.length" class="ms-8 home-hero__helpers">
@@ -246,12 +273,42 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     flex-direction: column
     gap: 1.5rem
 
+  .home-hero__eyebrow-block
+    display: inline-flex
+    flex-direction: column
+    gap: clamp(0.5rem, 1.5vw, 0.75rem)
+    padding-inline-start: clamp(0.25rem, 1.25vw, 0.75rem)
+    align-items: flex-start
+
   .home-hero__eyebrow
     font-weight: 600
     letter-spacing: 0.08em
     text-transform: uppercase
     color: rgba(var(--v-theme-hero-gradient-end), 0.9)
     margin: 0
+
+  .home-hero__icon-wrapper
+    width: clamp(88px, 18vw, 136px)
+    height: clamp(88px, 18vw, 136px)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
+    box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
+    backdrop-filter: blur(8px)
+
+  .home-hero__icon
+    border-radius: inherit
+    width: 100%
+    height: 100%
+    transition: transform 250ms ease, filter 250ms ease
+    filter: drop-shadow(0 6px 14px rgba(var(--v-theme-shadow-primary-600), 0.25))
+
+  .home-hero__icon--fade
+    animation: home-hero-fade-up 900ms ease-out both
+
+  .home-hero__icon--scale
+    animation: home-hero-scale-in 800ms ease-out both
+
+  .home-hero__icon--pulse
+    animation: home-hero-pulse 1200ms ease-in-out both
 
   .home-hero__title
     font-size: clamp(2.2rem, 5vw, 3.8rem)
@@ -340,6 +397,36 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
     clip: rect(0, 0, 0, 0)
     white-space: nowrap
     border: 0
+
+  @keyframes home-hero-fade-up
+    from
+      opacity: 0
+      transform: translateY(12px) scale(0.98)
+    to
+      opacity: 1
+      transform: translateY(0) scale(1)
+
+  @keyframes home-hero-scale-in
+    from
+      opacity: 0
+      transform: scale(0.9)
+    55%
+      opacity: 1
+      transform: scale(1.02)
+    to
+      transform: scale(1)
+
+  @keyframes home-hero-pulse
+    0%
+      transform: scale(0.92)
+      opacity: 0
+    35%
+      transform: scale(1.04)
+      opacity: 1
+    70%
+      transform: scale(0.98)
+    100%
+      transform: scale(1)
 
   @media (max-width: 959px)
     .home-hero
