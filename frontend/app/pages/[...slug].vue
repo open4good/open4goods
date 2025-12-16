@@ -1,5 +1,5 @@
 <template>
-  <div class="product-page">
+  <div class="product-page" :style="productLayoutCssVars">
     <TopBanner
       v-model:open="isStickyBannerOpen"
       :message="bannerMessage"
@@ -172,6 +172,7 @@ const { isLoggedIn } = useAuth()
 const display = useDisplay()
 const { y: scrollY } = useWindowScroll()
 const { height: viewportHeight } = useWindowSize()
+const layoutTopOffset = ref(0)
 
 const stickyBannerThresholdRatio = 0.8
 const isStickyBannerOpen = ref(false)
@@ -1103,6 +1104,14 @@ const navigableSections = computed(() => primarySections.value)
 const adminNavigableSections = computed(() => adminSections.value)
 
 const orientation = computed<'vertical' | 'horizontal'>(() => (display.mdAndDown.value ? 'horizontal' : 'vertical'))
+const productNavMobileSlot = 4
+const productStickyOffset = computed(() => layoutTopOffset.value + (orientation.value === 'horizontal' ? productNavMobileSlot : 0))
+const productSectionScrollGap = computed(() => (orientation.value === 'horizontal' ? 8 : 16))
+const sectionScrollOffset = computed(() => productStickyOffset.value + productSectionScrollGap.value)
+const productLayoutCssVars = computed(() => ({
+  '--product-sticky-offset': `${productStickyOffset.value}px`,
+  '--product-section-scroll-offset': `${sectionScrollOffset.value}px`,
+}))
 
 const activeSection = ref<string>(sectionIds.hero)
 
@@ -1188,8 +1197,24 @@ watch(
   { flush: 'post' },
 )
 
+const updateLayoutTopOffset = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const rootStyles = getComputedStyle(document.documentElement)
+  const resolvedOffset = Number.parseFloat(rootStyles.getPropertyValue('--v-layout-top') ?? '')
+
+  layoutTopOffset.value = Number.isFinite(resolvedOffset) ? resolvedOffset : 0
+}
+
 onMounted(() => {
   observeSections()
+
+  if (import.meta.client) {
+    updateLayoutTopOffset()
+    window.addEventListener('resize', updateLayoutTopOffset)
+  }
 })
 
 watch(
@@ -1203,6 +1228,10 @@ watch(
 onBeforeUnmount(() => {
   observer.value?.disconnect()
   visibleSectionRatios.clear()
+
+  if (import.meta.client) {
+    window.removeEventListener('resize', updateLayoutTopOffset)
+  }
 })
 
 const scrollToSection = (sectionId: string) => {
@@ -1217,8 +1246,7 @@ const scrollToSection = (sectionId: string) => {
 
   activeSection.value = sectionId
 
-  const offset = orientation.value === 'horizontal' ? 96 : 120
-  const top = element.getBoundingClientRect().top + window.scrollY - offset
+  const top = element.getBoundingClientRect().top + window.scrollY - sectionScrollOffset.value
   window.scrollTo({ top, behavior: 'smooth' })
 }
 
@@ -1356,7 +1384,7 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 96px;
+  top: var(--product-sticky-offset, 0px);
   align-self: start;
   height: fit-content;
 }
@@ -1372,7 +1400,7 @@ useHead(() => {
 }
 
 .product-page__section {
-  scroll-margin-top: 96px;
+  scroll-margin-top: var(--product-section-scroll-offset, 0px);
 }
 
 @media (max-width: 1280px) {
@@ -1382,12 +1410,16 @@ useHead(() => {
 
   .product-page__nav {
     position: sticky;
-    top: 0;
+    top: var(--product-sticky-offset, 0px);
     z-index: 20;
   }
 
+  .product-page__nav--mobile {
+    position: static;
+  }
+
   .product-page__section {
-    scroll-margin-top: 140px;
+    scroll-margin-top: var(--product-section-scroll-offset, 0px);
   }
 }
 </style>

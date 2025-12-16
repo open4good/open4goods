@@ -61,7 +61,7 @@ import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = withDefaults(defineProps<{
-  open: boolean
+  open?: boolean
   message: string
   subtitle?: string | null
   color?: string
@@ -94,11 +94,11 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (e: 'update:open', value: boolean): void
-  (e: 'show'): void
-  (e: 'hide'): void
-  (e: 'cta-click'): void
-  (e: 'close'): void
+  'update:open': [value: boolean]
+  show: []
+  hide: []
+  'cta-click': []
+  close: []
 }>()
 
 const { t } = useI18n()
