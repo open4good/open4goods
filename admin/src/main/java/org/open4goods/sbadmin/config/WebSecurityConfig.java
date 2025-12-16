@@ -17,24 +17,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
 import de.codecentric.boot.admin.server.config.AdminServerProperties;
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -56,34 +46,31 @@ public class WebSecurityConfig {
 
 	public WebSecurityConfig(AuthenticationProvider authProvider, AdminServerProperties adminServer) {
 		this.authProvider = authProvider;
-	    this.adminServer = adminServer;
+		this.adminServer = adminServer;
 	}
 
 	//////////////////////////////////////////////
 	// The WebSecurity configuration
 	//////////////////////////////////////////////
-	
-	 @Bean
-     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        successHandler.setTargetUrlParameter("redirectTo");
-        successHandler.setDefaultTargetUrl(this.adminServer.getContextPath() + "/");
 
-         http
-                 .authorizeHttpRequests(req ->
-                         req.requestMatchers(this.adminServer.getContextPath() + "/assets/**").permitAll()
-                                 .requestMatchers(this.adminServer.getContextPath() + "/login").permitAll()
-                                 .anyRequest().hasRole(REQUIRED_ROLE)
-                		 			)
-                 .formLogin(formLogin -> formLogin.loginPage(this.adminServer.getContextPath() + "/login")
-                         .successHandler(successHandler))
-                 .logout((logout) -> logout.logoutUrl(this.adminServer.getContextPath() + "/logout"))
-                 .httpBasic(Customizer.withDefaults())
-                 .csrf(csrf -> csrf.disable())
-                 ;
+	@Bean
+	protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+		successHandler.setTargetUrlParameter("redirectTo");
+		successHandler.setDefaultTargetUrl(this.adminServer.getContextPath() + "/");
 
-            
-        return http.build();
+		http
+				.authorizeHttpRequests(
+						req -> req.requestMatchers(this.adminServer.getContextPath() + "/assets/**").permitAll()
+								.requestMatchers(this.adminServer.getContextPath() + "/login").permitAll()
+								.anyRequest().hasRole(REQUIRED_ROLE))
+				.formLogin(formLogin -> formLogin.loginPage(this.adminServer.getContextPath() + "/login")
+						.successHandler(successHandler))
+				.logout((logout) -> logout.logoutUrl(this.adminServer.getContextPath() + "/logout"))
+				.httpBasic(Customizer.withDefaults())
+				.csrf(csrf -> csrf.disable());
+
+		return http.build();
 
 	}
 
@@ -100,7 +87,6 @@ public class WebSecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	
 	//////////////////////////////////////////////
 	// The cache managers, needed for the XWiki services caching
 	//////////////////////////////////////////////
