@@ -1729,6 +1729,11 @@
         }
       }
     },
+    "banner": {
+      "message": "Soutenez une plateforme éthique !",
+      "cta": "Achetez avec Nudger",
+      "ariaLabel": "Bannière fixe pour promouvoir un achat responsable"
+    },
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
       "errors": {
@@ -2339,6 +2344,11 @@
         "empty": "Aucun produit ne correspond à ces filtres pour le moment.",
         "total": "{count} résultats disponibles"
       }
+    }
+  },
+  "ui": {
+    "topBanner": {
+      "close": "Fermer la bannière"
     }
   },
   "welcome": "Bienvenue"

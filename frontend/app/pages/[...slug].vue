@@ -1,5 +1,15 @@
 <template>
   <div class="product-page">
+    <TopBanner
+      v-model:open="isStickyBannerOpen"
+      :message="bannerMessage"
+      :aria-label="bannerAriaLabel"
+      :cta-label="bannerCtaLabel"
+      :cta-aria-label="bannerCtaLabel"
+      dismissible
+      @cta-click="scrollToSection(sectionIds.price)"
+    />
+
     <v-alert
       v-if="errorMessage"
       type="error"
@@ -118,6 +128,7 @@
 </template>
 
 <script setup lang="ts">
+import { useWindowScroll, useWindowSize } from '@vueuse/core'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createError } from 'h3'
 import {
@@ -135,6 +146,7 @@ import {
   type ProductSearchResponseDto,
 } from '~~/shared/api-client'
 import { matchProductRouteFromSegments, isBackendNotFoundError } from '~~/shared/utils/_product-route'
+import TopBanner from '~/components/shared/ui/TopBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
@@ -158,6 +170,15 @@ const runtimeConfig = useRuntimeConfig()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
+const { y: scrollY } = useWindowScroll()
+const { height: viewportHeight } = useWindowSize()
+
+const stickyBannerThresholdRatio = 0.8
+const isStickyBannerOpen = ref(false)
+
+const bannerMessage = computed(() => t('product.banner.message'))
+const bannerCtaLabel = computed(() => t('product.banner.cta'))
+const bannerAriaLabel = computed(() => t('product.banner.ariaLabel'))
 
 const slugParam = route.params.slug
 const segments = Array.isArray(slugParam)
@@ -1140,6 +1161,32 @@ const observeSections = () => {
     })
   })
 }
+
+watch(
+  () => scrollY.value,
+  (current, previous) => {
+    if (!import.meta.client) {
+      return
+    }
+
+    const viewport = viewportHeight.value || (typeof window !== 'undefined' ? window.innerHeight : 0)
+    if (viewport <= 0) {
+      return
+    }
+
+    const threshold = viewport * stickyBannerThresholdRatio
+    const previousValue = typeof previous === 'number' ? previous : 0
+    const isScrollingDown = current > previousValue
+    const isScrollingUp = current < previousValue
+
+    if (isScrollingDown && current > threshold) {
+      isStickyBannerOpen.value = true
+    } else if (isScrollingUp && current <= threshold) {
+      isStickyBannerOpen.value = false
+    }
+  },
+  { flush: 'post' },
+)
 
 onMounted(() => {
   observeSections()
