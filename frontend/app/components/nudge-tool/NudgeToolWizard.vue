@@ -679,8 +679,20 @@ const { height: headerHeight } = useElementSize(headerRef)
 const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
+const minWindowHeight = ref(0)
+
+watch(activeStepKey, (val) => {
+  if (val === 'category') minWindowHeight.value = 0
+})
+
+watch(windowHeight, (val) => {
+  if (activeStepKey.value !== 'category' && val > 0 && val > minWindowHeight.value) {
+    minWindowHeight.value = val
+  }
+})
+
 const totalHeight = computed(
-  () => headerHeight.value + windowHeight.value + footerHeight.value + 32
+  () => headerHeight.value + Math.max(windowHeight.value, minWindowHeight.value) + footerHeight.value + 32
 ) // 32 = padding
 
 const animatedHeight = useTransition(totalHeight, {
@@ -709,7 +721,7 @@ const formattedHeight = computed(() => {
 
 .nudge-wizard {
   position: relative;
-  padding: 16px;
+  padding: clamp(1.5rem, 3vw, 2rem);
   width: 100%;
   max-width: none;
   display: flex;

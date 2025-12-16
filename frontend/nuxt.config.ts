@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs'
 import type { ManifestOptions } from 'vite-plugin-pwa'
 
 import VueDevTools from 'vite-plugin-vue-devtools'
+import { VueMcp } from 'vite-plugin-vue-mcp'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
@@ -279,7 +280,7 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [
-
+      VueMcp(),
       VueDevTools({
         launchEditor: 'code', // Antigravity is VS Code-based
       }),

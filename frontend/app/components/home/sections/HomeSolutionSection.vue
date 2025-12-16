@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import HomeSplitSection from './HomeSplitSection.vue'
+import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 
 type SolutionBenefit = {
   emoji: string
@@ -19,45 +19,104 @@ const sectionDescription = computed(() => t('home.solution.description'))
 </script>
 
 <template>
-  <HomeSplitSection
+  <ParallaxSection
     id="home-solution"
     class="home-solution"
-    :title="sectionTitle"
-    :description="sectionDescription"
-    :image="{
-      src: '/images/home/nudger-screaming.webp',
-      alt: sectionTitle,
-      sizes: '(min-width: 960px) 306px, 60vw',
-      width: 1024,
-      height: 1536,
-    }"
-    visual-position="right"
+    aria-label="home-solution-title"
+    :background-light="'/assets/themes/light/parallax/parallax-background-bubbles-transparent-1.svg'"
+    :background-dark="'/assets/themes/dark/parallax/parallax-background-bubbles-1.svg'"
+    :parallax-amount="0.16"
   >
-    <v-row class="home-solution__list" dense>
-      <v-col
-        v-for="item in props.benefits"
-        :key="item.label"
-        cols="12"
-        class="home-solution__list-col card__nudger card__nudger--border card__nudger--radius_top-right_0 card__nudger--radius_bottom-right_50px"
-      >
-        <v-sheet class="home-solution__item" rounded="xl" elevation="0">
-          <v-avatar class="home-solution__icon" size="60" color="surface">
-            <span aria-hidden="true">{{ item.emoji }}</span>
-          </v-avatar>
-          <div class="home-solution__texts">
-            <p class="home-solution__label">{{ item.label }}</p>
-            <p class="home-solution__description">{{ item.description }}</p>
+    <div class="home-solution__inner">
+      <v-row class="home-solution__layout" align="center" justify="space-between">
+        <v-col cols="12" md="6" class="home-solution__copy">
+          <header class="home-section__header">
+            <h2 id="home-solution-title">{{ sectionTitle }}</h2>
+            <p class="home-section__subtitle subtitle-text">
+              {{ sectionDescription }}
+            </p>
+          </header>
+          <v-row class="home-solution__list" dense>
+            <v-col
+              v-for="item in props.benefits"
+              :key="item.label"
+              cols="12"
+              class="home-solution__list-col card__nudger card__nudger--border card__nudger--radius_top-right_0 card__nudger--radius_bottom-right_50px"
+            >
+              <v-sheet class="home-solution__item" rounded="xl" elevation="0">
+                <v-avatar class="home-solution__icon" size="60" color="surface">
+                  <span aria-hidden="true">{{ item.emoji }}</span>
+                </v-avatar>
+                <div class="home-solution__texts">
+                  <p class="home-solution__label">{{ item.label }}</p>
+                  <p class="home-solution__description">
+                    {{ item.description }}
+                  </p>
+                </div>
+              </v-sheet>
+            </v-col>
+          </v-row>
+        </v-col>
+        <v-col cols="12" md="6" class="home-solution__visual">
+          <div class="home-solution__image-wrapper">
+            <img
+              src="/images/home/nudger-screaming.webp"
+              :alt="sectionTitle"
+              class="home-solution__image"
+              sizes="(min-width: 960px) 306px, 60vw"
+              width="1024"
+              height="1536"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
-        </v-sheet>
-      </v-col>
-    </v-row>
-  </HomeSplitSection>
+        </v-col>
+      </v-row>
+    </div>
+  </ParallaxSection>
 </template>
 
 <style scoped lang="sass">
-.home-section
-  padding-block: clamp(1.5rem, 3vw, 2.75rem)
-  background: rgb(var(--v-theme-surface-default))
+// .home-solution managed solely by ParallaxSection
+
+.home-solution__inner
+  max-width: 1180px
+  margin: 0 auto
+
+.home-solution__layout
+  row-gap: clamp(2rem, 5vw, 3rem)
+
+.home-solution__copy
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+
+.home-section__header
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.home-section__subtitle
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.home-solution__visual
+  display: flex
+  justify-content: center
+  position: relative
+
+.home-solution__image-wrapper
+  width: min(100%, 460px)
+  display: flex
+  justify-content: center
+  align-items: center
+
+.home-solution__image
+  width: min(66%, 320px)
+  height: auto
+  display: block
+  transform: rotate(3deg)
+  filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
 
 .home-solution__list
   margin: 0
@@ -72,13 +131,14 @@ const sectionDescription = computed(() => t('home.solution.description'))
   display: flex
   gap: 1rem
   align-items: flex-start
+  // Ensure transparent background for item if needed, but Sheet has default surface.
+  // We keep it as is.
 
 .home-solution__item::after
   display: none
 
 .home-solution__icon
   font-size: clamp(1.65rem, 5vw, 2rem)
-  //background: rgba(var(--v-theme-surface-primary-080), 0.6)
   border: 1px solid rgb(var(--v-theme-secondary))
   color: rgb(var(--v-theme-secondary))
 
@@ -98,6 +158,11 @@ const sectionDescription = computed(() => t('home.solution.description'))
   font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
 
+@media (max-width: 959px)
+  .home-solution__visual
+    order: -1
+    margin-bottom: 1rem
+
 @media (max-width: 599px)
   .home-solution__item
     flex-direction: column
@@ -105,4 +170,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
     align-items: center
   .home-solution__texts
     align-items: center
+
 </style>
+
+

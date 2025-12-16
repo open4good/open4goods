@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 
 export type CornerSize = 'sm' | 'md' | 'lg'
 export type CornerVariant = 'icon' | 'text' | 'custom' | 'none'
@@ -9,7 +10,7 @@ export type AccentCorner =
   | 'top-right'
   | 'bottom-left'
   | 'bottom-right'
-export type SurfaceTone = 'glass' | 'strong'
+export type SurfaceTone = 'glass' | 'strong' | 'hero'
 export type RoundedSize = 'sm' | 'md' | 'lg'
 
 const cornerSizeTokens: Record<CornerSize, string> = {
@@ -78,6 +79,7 @@ const emit = defineEmits<RoundedCornerCardEmits>()
 
 const slots = useSlots()
 const { t } = useI18n()
+const heroBackgroundAsset = useHeroBackgroundAsset()
 
 const isInteractive = computed(() => props.selectable && !props.disabled)
 const tabIndex = computed(() => (props.disabled ? -1 : 0))
@@ -90,10 +92,18 @@ const surfaceClass = computed(() => `rounded-card--surface-${props.surface}`)
 const cornerClass = computed(() => `rounded-card--corner-${props.accentCorner}`)
 const roundedClass = computed(() => `rounded-card--rounded-${props.rounded}`)
 
-const sizeStyles = computed(() => ({
-  '--rounded-card-corner-size': cornerSizeTokens[props.cornerSize],
-  '--rounded-card-radius': roundedSizeTokens[props.rounded],
-}))
+const sizeStyles = computed(() => {
+  const styles: Record<string, string> = {
+    '--rounded-card-corner-size': cornerSizeTokens[props.cornerSize],
+    '--rounded-card-radius': roundedSizeTokens[props.rounded],
+  }
+
+  if (props.surface === 'hero' && heroBackgroundAsset.value) {
+    styles['--rounded-card-bg-image'] = `url('${heroBackgroundAsset.value}')`
+  }
+
+  return styles
+})
 
 const hasCornerSlot = computed(() => Boolean(slots.corner))
 const resolvedCornerVariant = computed<CornerVariant>(() => {
@@ -279,6 +289,24 @@ const hasHeader = computed(() =>
 
   &--surface-strong {
     --rounded-card-bg: rgba(var(--v-theme-surface-glass-strong), 0.98);
+  }
+
+  &--surface-hero {
+    --rounded-card-bg: rgba(var(--v-theme-surface-glass), 0.85);
+    background-image: var(--rounded-card-bg-image);
+    background-size: cover;
+    background-position: center;
+    color: rgb(var(--v-theme-text-light-strong));
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+
+    &::before {
+      background: linear-gradient(
+        160deg,
+        rgba(var(--v-theme-surface-default), 0.1) 0%,
+        rgba(var(--v-theme-surface-default), 0.4) 100%
+      );
+      backdrop-filter: blur(0px); /* Reset blur if needed */
+    }
   }
 
   &--selected {

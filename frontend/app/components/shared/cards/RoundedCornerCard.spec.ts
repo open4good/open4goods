@@ -10,6 +10,10 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
+vi.mock('~~/app/composables/useThemedAsset', () => ({
+  useHeroBackgroundAsset: () => ({ value: '/test-hero.webp' }),
+}))
+
 const createStub = (tag: string, className = '') =>
   defineComponent({
     name: `${tag}-stub`,
@@ -64,6 +68,18 @@ describe('RoundedCornerCard', () => {
 
     expect(wrapper.emitted('update:selected')?.[0]).toEqual([true])
     expect(wrapper.emitted('select')?.[0]).toEqual([true])
+
+    await wrapper.unmount()
+  })
+
+  it('renders hero surface with background image', async () => {
+    const wrapper = await mountComponent({
+      surface: 'hero',
+    })
+
+    expect(wrapper.classes()).toContain('rounded-card--surface-hero')
+    const style = wrapper.attributes('style') as string
+    expect(style).toContain("--rounded-card-bg-image: url('/test-hero.webp')")
 
     await wrapper.unmount()
   })

@@ -19,7 +19,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     logo: 'logo.png',
     footerLogo: 'logo-footer.svg',
     favicon: 'favicon.svg',
-    heroBackground: 'hero-background.svg',
+    heroBackground: 'hero-background.webp',
     illustration: 'illustration-generic.svg',
   },
   dark: {

@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <v-row dense class="nudge-step-scores__grid">
+    <v-row class="nudge-step-scores__grid">
       <v-col v-for="score in scores" :key="score.scoreName" cols="12" sm="6">
         <v-tooltip
           location="top"
@@ -23,7 +23,7 @@
           <template #activator="{ props: activatorProps }">
             <v-card
               v-bind="activatorProps"
-              class="nudge-step-scores__card nudge-option-card"
+              class="nudge-step-scores__card nudge-option-card" variant="flat" border="thin"
               :class="{
                 'nudge-option-card--selected': isSelected(score.scoreName),
                 'nudge-step-scores__card--selected': isSelected(
