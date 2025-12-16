@@ -92,7 +92,7 @@ const heroBackgroundStyle = computed(() => ({
       rgba(var(--v-theme-hero-gradient-start), 0.95),
       rgba(var(--v-theme-hero-gradient-end), 0.85)
     ),
-    var(--category-hero-texture);
+    var(--category-hero-texture, none);
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
 

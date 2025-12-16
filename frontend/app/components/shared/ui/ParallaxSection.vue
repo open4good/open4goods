@@ -7,6 +7,7 @@ const props = withDefaults(
   defineProps<{
     id?: string
     ariaLabel?: string
+    backgrounds?: string[]
     backgroundLight?: string
     backgroundDark?: string
     overlayColor?: string
@@ -23,6 +24,7 @@ const props = withDefaults(
   {
     id: undefined,
     ariaLabel: undefined,
+    backgrounds: undefined,
     backgroundLight: undefined,
     backgroundDark: undefined,
     overlayColor: 'rgb(var(--v-theme-surface-default))',
@@ -45,16 +47,42 @@ const { y } = useWindowScroll()
 
 const isDark = computed(() => Boolean(theme.global.current.value.dark))
 
+const normalizeSources = (value?: string | string[]) => {
+  if (!value) {
+    return []
+  }
+
+  return (Array.isArray(value) ? value : [value]).filter((item) => Boolean(item?.trim()))
+}
+
+const resolvedBackgrounds = computed(() => {
+  const themedAssets = normalizeSources(props.backgrounds)
+
+  if (themedAssets.length > 0) {
+    return themedAssets
+  }
+
+  const themedBackgrounds = isDark.value
+    ? normalizeSources(props.backgroundDark)
+    : normalizeSources(props.backgroundLight)
+
+  const fallbackBackgrounds = normalizeSources(props.backgroundDark).concat(
+    normalizeSources(props.backgroundLight),
+  )
+
+  if (themedBackgrounds.length > 0) {
+    return themedBackgrounds
+  }
+
+  return fallbackBackgrounds
+})
+
 const backgroundImage = computed(() => {
-  if (isDark.value && props.backgroundDark) {
-    return props.backgroundDark
+  if (resolvedBackgrounds.value.length === 0) {
+    return ''
   }
 
-  if (!isDark.value && props.backgroundLight) {
-    return props.backgroundLight
-  }
-
-  return props.backgroundDark ?? props.backgroundLight ?? ''
+  return resolvedBackgrounds.value.map((background) => `url('${background}')`).join(', ')
 })
 
 const isBelowBreakpoint = computed(
@@ -74,7 +102,7 @@ const parallaxOffset = computed(() =>
 )
 
 const mediaStyles = computed<CSSProperties>(() => ({
-  '--parallax-image': backgroundImage.value ? `url('${backgroundImage.value}')` : 'none',
+  '--parallax-image': backgroundImage.value || 'none',
   '--parallax-overlay-color': props.overlayColor,
   '--parallax-overlay-opacity': props.overlayOpacity,
   '--parallax-offset': parallaxOffset.value,

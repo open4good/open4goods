@@ -27,6 +27,7 @@
 - `app/layouts/`, `app/stores/`, `app/plugins/`, `app/assets/`, `app/utils/` – Follow Nuxt conventions.
 - `server/` – Nuxt server routes and middleware that wrap OpenAPI clients.
 - `shared/` – Code shared between client and server (generated clients, utils, constants).
+- Theme-scoped visuals (logos, hero/parallax backgrounds, textures) live under `app/assets/themes/<theme>/` with `common/` fallbacks—resolve them via `useThemedAsset`/`useThemeAsset` so light/dark switching stays consistent.
 
 ### Theme-scoped assets
 - Theme-aware visuals live in `app/assets/themes/<theme>/`, with shared fallbacks in `app/assets/themes/common/` (see `app/assets/themes/README.md`).
