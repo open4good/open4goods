@@ -45,10 +45,6 @@
                 <h3 class="text-h5 font-weight-semibold mb-2">
                   {{ verticalCategory.vertical?.verticalHomeTitle ?? verticalCategory.title }}
                 </h3>
-                <p class="text-body-2 text-neutral-secondary mb-4">
-                  {{ verticalCategory.vertical?.verticalHomeDescription ?? '' }}
-                </p>
-
                 <div class="category-navigation-verticals__actions">
                   <NuxtLink
                     v-if="verticalCategory.vertical?.verticalHomeUrl"
@@ -58,14 +54,6 @@
                   >
                     <span>{{ t('categories.navigation.verticals.openVerticalCta') }}</span>
                     <v-icon icon="mdi-arrow-right" size="small" />
-                  </NuxtLink>
-                  <NuxtLink
-                    v-if="verticalCategory.path"
-                    :to="`/categories/${verticalCategory.path}`"
-                    class="category-navigation-verticals__secondary"
-                    :aria-label="t('categories.navigation.verticals.viewPath', { category: verticalCategory.title })"
-                  >
-                    {{ t('categories.navigation.verticals.viewPathCta') }}
                   </NuxtLink>
                 </div>
               </div>

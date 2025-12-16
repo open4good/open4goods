@@ -69,12 +69,8 @@
                   {{ category.title }}
                 </h3>
 
-                <p v-if="category.vertical?.verticalHomeDescription" class="text-body-2 mb-4 text-neutral-secondary">
-                  {{ category.vertical.verticalHomeDescription }}
-                </p>
-
                 <ul
-                  v-else-if="childrenPreview(category).length"
+                  v-if="childrenPreview(category).length"
                   class="category-navigation-grid__children"
                 >
                   <li

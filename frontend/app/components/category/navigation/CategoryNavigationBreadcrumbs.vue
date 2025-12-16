@@ -2,6 +2,7 @@
   <nav
     v-if="breadcrumbItems.length"
     class="category-navigation-breadcrumbs"
+    :class="`category-navigation-breadcrumbs--${variant}`"
     :aria-label="ariaLabel"
     itemscope
     itemtype="https://schema.org/BreadcrumbList"
@@ -23,6 +24,7 @@
         >
           <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
         </NuxtLink>
+
         <a
           v-else-if="item.type === 'external'"
           :href="item.href"
@@ -32,6 +34,7 @@
         >
           <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
         </a>
+
         <span
           v-else
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
@@ -39,9 +42,15 @@
         >
           <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
         </span>
-        <span v-if="index < breadcrumbItems.length - 1" class="category-navigation-breadcrumbs__divider" aria-hidden="true">
-          /
+
+        <span
+          v-if="variant === 'inline' && index < breadcrumbItems.length - 1"
+          class="category-navigation-breadcrumbs__divider"
+          aria-hidden="true"
+        >
+          {{ separator }}
         </span>
+
         <meta itemprop="position" :content="String(index + 1)" />
       </li>
     </ol>
@@ -57,25 +66,22 @@ interface BreadcrumbItem {
 }
 
 type BreadcrumbRenderItem =
-  | {
-      title: string
-      type: 'current'
-    }
-  | {
-      title: string
-      type: 'external'
-      href: string
-    }
-  | {
-      title: string
-      type: 'internal'
-      to: string
-    }
+  | { title: string; type: 'current' }
+  | { title: string; type: 'external'; href: string }
+  | { title: string; type: 'internal'; to: string }
 
-const props = defineProps<{
-  items: BreadcrumbItem[]
-  ariaLabel: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    items: BreadcrumbItem[]
+    ariaLabel: string
+    variant?: 'inline' | 'pills'
+    separator?: string
+  }>(),
+  {
+    variant: 'inline',
+    separator: '/',
+  },
+)
 
 const visibleItems = computed(() => props.items.filter((item) => item.title?.trim().length))
 
@@ -87,27 +93,15 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
     const isLast = index === items.length - 1
 
     if (!rawLink || isLast) {
-      return {
-        title: item.title,
-        type: 'current',
-      }
+      return { title: item.title, type: 'current' }
     }
 
     if (/^https?:\/\//iu.test(rawLink)) {
-      return {
-        title: item.title,
-        type: 'external',
-        href: rawLink,
-      }
+      return { title: item.title, type: 'external', href: rawLink }
     }
 
     const normalized = rawLink.startsWith('/') || rawLink.startsWith('#') ? rawLink : `/${rawLink}`
-
-    return {
-      title: item.title,
-      type: 'internal',
-      to: normalized,
-    }
+    return { title: item.title, type: 'internal', to: normalized }
   })
 })
 </script>
@@ -175,5 +169,40 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
 .category-navigation-breadcrumbs__divider {
   opacity: 0.6;
   color: inherit;
+}
+
+.category-navigation-breadcrumbs--pills {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__list {
+  gap: 0.6rem;
+}
+
+.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__divider {
+  display: none;
+}
+
+.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link {
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.18);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-hero-pill-on-dark), 1);
+}
+
+.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link--interactive:hover,
+.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link--interactive:focus-visible {
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.3);
+  color: rgba(var(--v-theme-hero-pill-on-dark), 1);
+  text-decoration: none;
+}
+
+.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link--current {
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.28);
+  opacity: 0.95;
 }
 </style>

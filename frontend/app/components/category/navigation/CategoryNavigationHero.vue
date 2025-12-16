@@ -1,52 +1,63 @@
 <template>
-  <section
+  <HeroSurface
     class="category-navigation-hero"
     :aria-labelledby="titleId"
+    variant="orbit"
   >
-    <v-container class="category-navigation-hero__container px-4" max-width="xl">
-      <div class="category-navigation-hero__content">
-        <div class="category-navigation-hero__copy">
-          <CategoryNavigationBreadcrumbs
-            v-if="breadcrumbs && breadcrumbs.length"
-            class="mb-4"
-            v-bind="{ items: breadcrumbs, ariaLabel: breadcrumbAriaLabel }"
-          />
-          <h1 :id="titleId" class="text-h3 text-sm-h2 font-weight-bold mb-3">
-            {{ title }}
-          </h1>
-          <p v-if="description" class="text-body-1 text-lg-h6 mb-4">
-            {{ description }}
-          </p>
-          <p
-            v-if="resultSummary"
-            class="text-body-2 text-neutral-soft mb-0"
-            aria-live="polite"
-          >
-            {{ resultSummary }}
-          </p>
-        </div>
+    <v-container class="py-16 px-4" max-width="lg">
+      <v-row align="center" class="g-8">
+        <v-col cols="12" md="7" class="d-flex flex-column gap-6">
+          <div class="category-navigation-hero__header">
+            <CategoryNavigationBreadcrumbs
+              v-if="breadcrumbs?.length"
+              class="category-navigation-hero__breadcrumbs"
+              v-bind="{ items: breadcrumbs, ariaLabel: breadcrumbAriaLabel }"
+              variant="pills"
+            />
 
-        <div class="category-navigation-hero__search">
-          <v-text-field
-            :model-value="modelValue"
-            :label="searchLabel"
-            :placeholder="searchPlaceholder"
-            prepend-inner-icon="mdi-magnify"
-            variant="solo"
-            density="compact"
-            color="primary"
-            class="category-navigation-hero__search-field"
-            @update:model-value="onUpdateModelValue"
-          />
-        </div>
-      </div>
+            <h1 :id="titleId" class="category-navigation-hero__title">
+              {{ title }}
+            </h1>
+
+            <p v-if="description" class="category-navigation-hero__subtitle">
+              {{ description }}
+            </p>
+
+            <p v-if="resultSummary" class="category-navigation-hero__summary" aria-live="polite">
+              {{ resultSummary }}
+            </p>
+          </div>
+        </v-col>
+
+        <v-col cols="12" md="5">
+          <v-card class="category-navigation-hero__search-card" rounded="xl" elevation="6">
+            <div class="category-navigation-hero__search-card-inner" role="search">
+              <p class="category-navigation-hero__search-label">
+                {{ searchLabel }}
+              </p>
+
+              <v-text-field
+                :model-value="modelValue"
+                :placeholder="searchPlaceholder"
+                prepend-inner-icon="mdi-magnify"
+                variant="solo"
+                density="comfortable"
+                color="primary"
+                hide-details
+                class="category-navigation-hero__search-field"
+                :aria-label="searchLabel"
+                @update:model-value="onUpdateModelValue"
+              />
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-container>
-  </section>
+  </HeroSurface>
 </template>
 
 <script setup lang="ts">
 import { useId } from 'vue'
-
 import CategoryNavigationBreadcrumbs from './CategoryNavigationBreadcrumbs.vue'
 
 interface BreadcrumbItem {
@@ -71,96 +82,80 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void
 }>()
 
-const onUpdateModelValue = (value: string) => {
-  emit('update:modelValue', value)
-}
+const onUpdateModelValue = (value: string) => emit('update:modelValue', value)
 </script>
 
-<style scoped>
-.category-navigation-hero {
-  background: linear-gradient(
-      135deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.95),
-      rgba(var(--v-theme-hero-gradient-end), 0.85)
-    ),
-    url('/images/backgrounds/texture-grid.svg');
-  color: rgb(var(--v-theme-hero-overlay-strong));
-}
+<style scoped lang="sass">
+.category-navigation-hero
+  position: relative
+  overflow: hidden
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
 
+.category-navigation-hero__header
+  display: flex
+  flex-direction: column
+  gap: 0.9rem
 
-.category-navigation-hero__container {
-  padding-block: 2.75rem;
-}
+.category-navigation-hero__title
+  margin: 0
+  font-size: clamp(2.4rem, 5vw, 3.5rem)
+  line-height: 1.1
 
-.category-navigation-hero__content {
-  display: grid;
-  gap: 1.75rem;
-  align-items: center;
-}
+.category-navigation-hero__subtitle
+  margin: 0
+  font-size: 1.15rem
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs) {
-  color: rgb(var(--v-theme-hero-overlay-strong));
-}
+.category-navigation-hero__summary
+  margin: 0
+  font-size: 0.95rem
+  color: rgba(var(--v-theme-hero-overlay-soft), 0.9)
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__current) {
-  color: rgb(var(--v-theme-hero-overlay-strong));
-}
+.category-navigation-hero__search-card
+  background: rgba(var(--v-theme-surface-glass), 0.18)
+  border: 1px solid rgba(var(--v-theme-hero-overlay-strong), 0.28)
+  backdrop-filter: blur(14px)
+  box-shadow: 0 20px 60px rgba(var(--v-theme-shadow-primary-600), 0.14)
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__separator) {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
-}
+.category-navigation-hero__search-card-inner
+  padding: clamp(1.25rem, 3vw, 1.75rem)
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:hover),
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
-  color: rgb(var(--v-theme-hero-overlay-strong));
-  text-decoration: underline;
-}
+.category-navigation-hero__search-label
+  margin: 0
+  font-size: 0.85rem
+  letter-spacing: 0.08em
+  text-transform: uppercase
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
-  outline: 2px solid rgba(var(--v-theme-hero-overlay-strong), 0.8);
-  outline-offset: 2px;
-  border-radius: 0.25rem;
-}
+/* --- Correctif contraste (light & dark) --- */
+/* On force le champ à utiliser des tokens "surface/text" neutres,
+   plutôt que des tokens "hero overlay" (souvent blancs). */
 
-@media (min-width: 960px) {
-  .category-navigation-hero__container {
-    padding-block: 3.5rem;
-  }
+.category-navigation-hero__search-field :deep(.v-field)
+  border-radius: 16px
+  background: rgba(var(--v-theme-surface-default), 0.92)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
 
-  .category-navigation-hero__content {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2.5rem;
-  }
-}
+.category-navigation-hero__search-field :deep(.v-field__overlay)
+  opacity: 0
 
-.category-navigation-hero__copy {
-  max-width: min(60ch, 100%);
-}
+/* Texte saisi */
+.category-navigation-hero__search-field :deep(.v-field__input input)
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
 
-@media (min-width: 960px) {
-  .category-navigation-hero__copy {
-    max-width: clamp(52ch, 60vw, 72ch);
-  }
-}
+/* Placeholder */
+.category-navigation-hero__search-field :deep(.v-field__input input::placeholder)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+  opacity: 1
 
-.category-navigation-hero__search {
-  display: flex;
-  justify-content: flex-start;
-}
+/* Icône */
+.category-navigation-hero__search-field :deep(.v-field__prepend-inner)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
-.category-navigation-hero__search-field {
-  width: 100%;
-  max-width: 420px;
-  --v-field-border-opacity: 0;
-  --v-field-background: rgba(255, 255, 255, 0.14);
-  --v-input-control-height: 52px;
-  backdrop-filter: blur(12px);
-  border-radius: 1rem;
-}
-
-@media (min-width: 960px) {
-  .category-navigation-hero__search {
-    justify-content: flex-end;
-  }
-}
+/* Focus */
+.category-navigation-hero__search-field :deep(.v-field--focused)
+  border-color: rgba(var(--v-theme-primary), 0.55)
 </style>

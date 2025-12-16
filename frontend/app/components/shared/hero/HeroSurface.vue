@@ -4,9 +4,7 @@ import type { Component } from 'vue'
 
 type HeroSurfaceVariant = 'aurora' | 'halo' | 'prism' | 'pulse' | 'mesh' | 'orbit'
 
-defineOptions({
-  name: 'HeroSurface',
-})
+defineOptions({ name: 'HeroSurface' })
 
 const props = withDefaults(
   defineProps<{
@@ -16,18 +14,18 @@ const props = withDefaults(
   }>(),
   {
     tag: 'section',
-    //variant: 'aurora',
-    //bleed: false,
+    variant: 'aurora',
+    bleed: false,
   },
 )
 
 const attrs = useAttrs()
 
-const heroSurfaceClasses = computed(() => [
-  'hero-surface',
-  //`hero-surface--${props.variant}`,
-  //{ 'hero-surface--bleed': props.bleed },
-])
+const heroSurfaceClasses = computed(() => ({
+  'hero-surface': true,
+  [`hero-surface--${props.variant}`]: Boolean(props.variant),
+  'hero-surface--bleed': props.bleed,
+}))
 
 const rootProps = computed(() =>
   mergeProps(attrs, {
