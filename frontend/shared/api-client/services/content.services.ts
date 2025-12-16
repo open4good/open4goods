@@ -7,13 +7,16 @@ import { createBackendApiConfig } from './createBackendApiConfig'
  * Content service for fetching HTML blocs from the backend
  */
 export const useContentService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: ContentApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useContentService() is only available on the server runtime.')
+      throw new Error(
+        'useContentService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {

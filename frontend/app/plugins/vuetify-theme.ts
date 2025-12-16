@@ -4,7 +4,11 @@ import { usePreferredDark } from '@vueuse/core'
 
 import type { Ref } from 'vue'
 
-import { THEME_PREFERENCE_KEY, resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
+import {
+  THEME_PREFERENCE_KEY,
+  resolveThemeName,
+  type ThemeName,
+} from '~~/shared/constants/theme'
 
 type VuetifyThemeBridge = {
   theme?: {
@@ -14,14 +18,17 @@ type VuetifyThemeBridge = {
   }
 }
 
-const resolveVuetifyInstance = (nuxtApp: NuxtApp): VuetifyThemeBridge | undefined => {
+const resolveVuetifyInstance = (
+  nuxtApp: NuxtApp
+): VuetifyThemeBridge | undefined => {
   const direct = nuxtApp.$vuetify as unknown as VuetifyThemeBridge | undefined
 
   if (direct?.theme?.global?.name) {
     return direct
   }
 
-  const fromGlobals = nuxtApp.vueApp.config.globalProperties.$vuetify as unknown as VuetifyThemeBridge | undefined
+  const fromGlobals = nuxtApp.vueApp.config.globalProperties
+    .$vuetify as unknown as VuetifyThemeBridge | undefined
 
   if (fromGlobals?.theme?.global?.name) {
     return fromGlobals

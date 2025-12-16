@@ -85,7 +85,9 @@ describe('CategoryFiltersSidebar', () => {
 
     const cardComponent = wrapper.findComponent(CategoryEcoscoreCard)
     expect(cardComponent.exists()).toBe(true)
-    expect(cardComponent.props('verticalHomeUrl')).toBe('https://open4goods.example/maison')
+    expect(cardComponent.props('verticalHomeUrl')).toBe(
+      'https://open4goods.example/maison'
+    )
 
     const card = wrapper.get('[data-test="category-ecoscore-card"]')
     expect(card.text()).toContain('Découvrir')
@@ -94,6 +96,8 @@ describe('CategoryFiltersSidebar', () => {
   it('hides the Eco-score card when no vertical home URL is available', () => {
     const wrapper = mountComponent({ verticalHomeUrl: null })
 
-    expect(wrapper.find('[data-test="category-ecoscore-card"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="category-ecoscore-card"]').exists()).toBe(
+      false
+    )
   })
 })

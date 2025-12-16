@@ -20,7 +20,7 @@ vi.mock('vue-barcode-reader', () => ({
             class: 'stream-barcode-reader-stub',
             onClick: () => emit('decode', '0123456789012'),
           },
-          [],
+          []
         )
     },
   }),
@@ -38,7 +38,12 @@ const mountScanner = () =>
         VProgressCircular: defineComponent({
           name: 'VProgressCircularStub',
           setup(_, { slots }) {
-            return () => h('div', { class: 'v-progress-circular-stub' }, slots.default ? slots.default() : [])
+            return () =>
+              h(
+                'div',
+                { class: 'v-progress-circular-stub' },
+                slots.default ? slots.default() : []
+              )
           },
         }),
       },
@@ -54,9 +59,13 @@ describe('PwaBarcodeScanner', () => {
     const wrapper = mountScanner()
     await flushPromises()
 
-    const viewport = wrapper.find('[data-test="pwa-barcode-scanner"] .pwa-barcode-scanner__viewport')
+    const viewport = wrapper.find(
+      '[data-test="pwa-barcode-scanner"] .pwa-barcode-scanner__viewport'
+    )
     expect(viewport.attributes()['data-mode']).toBe('fallback')
-    expect(wrapper.find('[data-test="pwa-barcode-fallback"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pwa-barcode-fallback"]').exists()).toBe(
+      true
+    )
   })
 
   it('emits decoded values from the fallback component', async () => {

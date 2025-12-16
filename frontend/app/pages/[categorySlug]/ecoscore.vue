@@ -13,7 +13,9 @@
         <div class="category-ecoscore__layout">
           <aside
             class="category-ecoscore__nav"
-            :class="{ 'category-ecoscore__nav--mobile': orientation === 'horizontal' }"
+            :class="{
+              'category-ecoscore__nav--mobile': orientation === 'horizontal',
+            }"
             :aria-label="navAriaLabel"
           >
             <StickySectionNavigation
@@ -33,10 +35,21 @@
               role="region"
               :aria-labelledby="`${sectionIds.overview}-title`"
             >
-              <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
                 <header class="category-ecoscore__header">
-                  <h2 :id="`${sectionIds.overview}-title`" class="category-ecoscore__title">
-                    {{ t('category.ecoscorePage.sections.overview.title', { category: categoryLabel }) }}
+                  <h2
+                    :id="`${sectionIds.overview}-title`"
+                    class="category-ecoscore__title"
+                  >
+                    {{
+                      t('category.ecoscorePage.sections.overview.title', {
+                        category: categoryLabel,
+                      })
+                    }}
                   </h2>
                 </header>
 
@@ -64,13 +77,26 @@
                         :criteria="impactScoreOrbitCriteria"
                       />
                     </v-col>
-                    <v-col cols="12" lg="5" class="d-flex flex-column justify-center">
+                    <v-col
+                      cols="12"
+                      lg="5"
+                      class="d-flex flex-column justify-center"
+                    >
                       <div class="category-ecoscore__intro-copy">
                         <h3 class="category-ecoscore__intro-title">
-                          {{ t('category.ecoscorePage.sections.overview.card.title') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.overview.card.title'
+                            )
+                          }}
                         </h3>
                         <p class="category-ecoscore__intro-description">
-                          {{ t('category.ecoscorePage.sections.overview.card.description', { category: categoryLabel }) }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.overview.card.description',
+                              { category: categoryLabel }
+                            )
+                          }}
                         </p>
                         <v-btn
                           class="category-ecoscore__intro-cta"
@@ -78,10 +104,22 @@
                           size="large"
                           variant="flat"
                           :to="{ path: '/impact-score' }"
-                          :aria-label="t('category.ecoscorePage.sections.overview.card.aria')"
+                          :aria-label="
+                            t(
+                              'category.ecoscorePage.sections.overview.card.aria'
+                            )
+                          "
                         >
-                          <v-icon class="me-2" icon="mdi-compass-outline" size="20" />
-                          {{ t('category.ecoscorePage.sections.overview.card.cta') }}
+                          <v-icon
+                            class="me-2"
+                            icon="mdi-compass-outline"
+                            size="20"
+                          />
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.overview.card.cta'
+                            )
+                          }}
                         </v-btn>
                       </div>
                     </v-col>
@@ -96,32 +134,71 @@
               role="region"
               :aria-labelledby="`${sectionIds.purpose}-title`"
             >
-              <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
                 <header class="category-ecoscore__header">
-                  <h2 :id="`${sectionIds.purpose}-title`" class="category-ecoscore__title">
-                    {{ t('category.ecoscorePage.sections.purpose.title', { category: categoryLabel }) }}
+                  <h2
+                    :id="`${sectionIds.purpose}-title`"
+                    class="category-ecoscore__title"
+                  >
+                    {{
+                      t('category.ecoscorePage.sections.purpose.title', {
+                        category: categoryLabel,
+                      })
+                    }}
                   </h2>
                 </header>
 
-                <v-row class="category-ecoscore__purpose-grid" align="stretch" justify="center">
+                <v-row
+                  class="category-ecoscore__purpose-grid"
+                  align="stretch"
+                  justify="center"
+                >
                   <v-col cols="12" md="10">
-                    <v-card class="category-ecoscore__info-card" elevation="0" rounded="xl">
+                    <v-card
+                      class="category-ecoscore__info-card"
+                      elevation="0"
+                      rounded="xl"
+                    >
                       <h3 class="category-ecoscore__info-title">
-                        {{ t('category.ecoscorePage.sections.purpose.objectiveTitle') }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.purpose.objectiveTitle'
+                          )
+                        }}
                       </h3>
                       <p class="category-ecoscore__info-body">
-                        {{ purposeText ?? t('category.ecoscorePage.sections.purpose.objectiveFallback') }}
+                        {{
+                          purposeText ??
+                          t(
+                            'category.ecoscorePage.sections.purpose.objectiveFallback'
+                          )
+                        }}
                       </p>
                     </v-card>
                   </v-col>
 
                   <v-col cols="12" md="10">
-                    <v-card class="category-ecoscore__info-card" elevation="0" rounded="xl">
+                    <v-card
+                      class="category-ecoscore__info-card"
+                      elevation="0"
+                      rounded="xl"
+                    >
                       <h3 class="category-ecoscore__info-title">
-                        {{ t('category.ecoscorePage.sections.purpose.dataTitle') }}
+                        {{
+                          t('category.ecoscorePage.sections.purpose.dataTitle')
+                        }}
                       </h3>
                       <p class="category-ecoscore__info-body">
-                        {{ availableDataText ?? t('category.ecoscorePage.sections.purpose.dataFallback') }}
+                        {{
+                          availableDataText ??
+                          t(
+                            'category.ecoscorePage.sections.purpose.dataFallback'
+                          )
+                        }}
                       </p>
 
                       <v-divider class="my-4" role="presentation" />
@@ -133,7 +210,9 @@
                           class="category-ecoscore__data-item"
                         >
                           <strong>{{ criterion.label }}</strong>
-                          <span class="category-ecoscore__data-description">{{ criterion.description }}</span>
+                          <span class="category-ecoscore__data-description">{{
+                            criterion.description
+                          }}</span>
                         </li>
                       </ul>
                     </v-card>
@@ -148,10 +227,21 @@
               role="region"
               :aria-labelledby="`${sectionIds.criteria}-title`"
             >
-              <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
                 <header class="category-ecoscore__header">
-                  <h2 :id="`${sectionIds.criteria}-title`" class="category-ecoscore__title">
-                    {{ t('category.ecoscorePage.sections.criteria.title', { category: categoryLabel }) }}
+                  <h2
+                    :id="`${sectionIds.criteria}-title`"
+                    class="category-ecoscore__title"
+                  >
+                    {{
+                      t('category.ecoscorePage.sections.criteria.title', {
+                        category: categoryLabel,
+                      })
+                    }}
                   </h2>
                 </header>
 
@@ -163,7 +253,12 @@
                   />
                 </div>
 
-                <v-row v-if="criteriaCards.length" class="category-ecoscore__criteria-grid" dense justify="center">
+                <v-row
+                  v-if="criteriaCards.length"
+                  class="category-ecoscore__criteria-grid"
+                  dense
+                  justify="center"
+                >
                   <v-col
                     v-for="criterion in criteriaCards"
                     :key="criterion.key"
@@ -171,22 +266,48 @@
                     md="6"
                     lg="5"
                   >
-                    <article class="category-ecoscore__criteria-card" data-test="impact-criteria-card">
-                      <div class="category-ecoscore__criteria-icon" aria-hidden="true">
-                        <v-icon v-if="criterion.icon" :icon="criterion.icon" size="26" />
+                    <article
+                      class="category-ecoscore__criteria-card"
+                      data-test="impact-criteria-card"
+                    >
+                      <div
+                        class="category-ecoscore__criteria-icon"
+                        aria-hidden="true"
+                      >
+                        <v-icon
+                          v-if="criterion.icon"
+                          :icon="criterion.icon"
+                          size="26"
+                        />
                         <span v-else>{{ criterion.fallback }}</span>
                       </div>
                       <div class="category-ecoscore__criteria-content">
-                        <h3 class="category-ecoscore__criteria-title">{{ criterion.label }}</h3>
-                        <p v-if="criterion.description" class="category-ecoscore__criteria-description">
+                        <h3 class="category-ecoscore__criteria-title">
+                          {{ criterion.label }}
+                        </h3>
+                        <p
+                          v-if="criterion.description"
+                          class="category-ecoscore__criteria-description"
+                        >
                           {{ criterion.description }}
                         </p>
-                        <footer v-if="criterion.coefficient !== null" class="category-ecoscore__criteria-footer">
-                          <span>{{ t('category.ecoscorePage.sections.criteria.coefficientPrefix') }}</span>
+                        <footer
+                          v-if="criterion.coefficient !== null"
+                          class="category-ecoscore__criteria-footer"
+                        >
+                          <span>{{
+                            t(
+                              'category.ecoscorePage.sections.criteria.coefficientPrefix'
+                            )
+                          }}</span>
                           <span class="category-ecoscore__criteria-coefficient">
                             {{ formatPercentage(criterion.coefficient) }}
                           </span>
-                          <span>{{ t('category.ecoscorePage.sections.criteria.coefficientSuffix') }}</span>
+                          <span>{{
+                            t(
+                              'category.ecoscorePage.sections.criteria.coefficientSuffix'
+                            )
+                          }}</span>
                         </footer>
                       </div>
                     </article>
@@ -205,37 +326,74 @@
               role="region"
               :aria-labelledby="`${sectionIds.transparency}-title`"
             >
-              <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
                 <header class="category-ecoscore__header">
-                  <h2 :id="`${sectionIds.transparency}-title`" class="category-ecoscore__title">
+                  <h2
+                    :id="`${sectionIds.transparency}-title`"
+                    class="category-ecoscore__title"
+                  >
                     {{ t('category.ecoscorePage.sections.transparency.title') }}
                   </h2>
                 </header>
 
                 <v-row class="category-ecoscore__critical-grid" align="stretch">
                   <v-col cols="12" md="6">
-                    <v-card class="category-ecoscore__critical-card" elevation="0" rounded="xl">
+                    <v-card
+                      class="category-ecoscore__critical-card"
+                      elevation="0"
+                      rounded="xl"
+                    >
                       <div class="category-ecoscore__critical-media">
-                        <v-icon class="category-ecoscore__critical-icon" icon="mdi-alarm-light-outline" size="96" />
+                        <v-icon
+                          class="category-ecoscore__critical-icon"
+                          icon="mdi-alarm-light-outline"
+                          size="96"
+                        />
                       </div>
                       <div class="category-ecoscore__critical-body">
                         <h3 class="category-ecoscore__critical-title">
-                          {{ t('category.ecoscorePage.sections.transparency.criticalReviewTitle') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.transparency.criticalReviewTitle'
+                            )
+                          }}
                         </h3>
                         <p class="category-ecoscore__critical-text">
-                          {{ criticalReviewText ?? t('category.ecoscorePage.sections.transparency.criticalReviewFallback') }}
+                          {{
+                            criticalReviewText ??
+                            t(
+                              'category.ecoscorePage.sections.transparency.criticalReviewFallback'
+                            )
+                          }}
                         </p>
                       </div>
                     </v-card>
                   </v-col>
 
                   <v-col cols="12" md="5">
-                    <v-card class="category-ecoscore__community-card" elevation="0" rounded="xl">
+                    <v-card
+                      class="category-ecoscore__community-card"
+                      elevation="0"
+                      rounded="xl"
+                    >
                       <h3 class="category-ecoscore__community-title">
-                        {{ t('category.ecoscorePage.sections.transparency.communityTitle') }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.transparency.communityTitle'
+                          )
+                        }}
                       </h3>
                       <p class="category-ecoscore__community-text">
-                        {{ t('category.ecoscorePage.sections.transparency.communityBody', { category: categoryLabel }) }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.transparency.communityBody',
+                            { category: categoryLabel }
+                          )
+                        }}
                       </p>
                       <div class="category-ecoscore__community-actions">
                         <v-btn
@@ -248,7 +406,11 @@
                           target="_blank"
                         >
                           <v-icon class="me-2" icon="mdi-github" size="18" />
-                          {{ t('category.ecoscorePage.sections.transparency.communityCta') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.transparency.communityCta'
+                            )
+                          }}
                         </v-btn>
                         <v-btn
                           color="secondary"
@@ -257,7 +419,11 @@
                           rel="noopener"
                           target="_blank"
                         >
-                          {{ t('category.ecoscorePage.sections.transparency.communityIssues') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.transparency.communityIssues'
+                            )
+                          }}
                         </v-btn>
                       </div>
                     </v-card>
@@ -266,10 +432,21 @@
 
                 <div class="category-ecoscore__table-wrapper">
                   <h3 class="category-ecoscore__table-title">
-                    {{ t('category.ecoscorePage.sections.transparency.tableTitle') }}
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.transparency.tableTitle'
+                      )
+                    }}
                   </h3>
-                  <p :id="`${sectionIds.transparency}-table-helper`" class="category-ecoscore__table-helper">
-                    {{ t('category.ecoscorePage.sections.transparency.tableHelper') }}
+                  <p
+                    :id="`${sectionIds.transparency}-table-helper`"
+                    class="category-ecoscore__table-helper"
+                  >
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.transparency.tableHelper'
+                      )
+                    }}
                   </p>
 
                   <v-table
@@ -282,13 +459,25 @@
                     <thead>
                       <tr>
                         <th scope="col" class="text-left">
-                          {{ t('category.ecoscorePage.sections.transparency.tableHeaders.name') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.transparency.tableHeaders.name'
+                            )
+                          }}
                         </th>
                         <th scope="col" class="text-left">
-                          {{ t('category.ecoscorePage.sections.transparency.tableHeaders.proposed') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.transparency.tableHeaders.proposed'
+                            )
+                          }}
                         </th>
                         <th scope="col" class="text-left">
-                          {{ t('category.ecoscorePage.sections.transparency.tableHeaders.applied') }}
+                          {{
+                            t(
+                              'category.ecoscorePage.sections.transparency.tableHeaders.applied'
+                            )
+                          }}
                         </th>
                       </tr>
                     </thead>
@@ -302,22 +491,56 @@
                   </v-table>
 
                   <p v-else class="category-ecoscore__empty">
-                    {{ t('category.ecoscorePage.sections.transparency.tableFallback') }}
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.transparency.tableFallback'
+                      )
+                    }}
                   </p>
                 </div>
 
                 <div class="category-ecoscore__transparency-cards">
                   <h3 class="category-ecoscore__table-title">
-                    {{ t('category.ecoscorePage.sections.transparency.cardsTitle') }}
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.transparency.cardsTitle'
+                      )
+                    }}
                   </h3>
-                  <v-row class="category-ecoscore__transparency-grid" align="stretch">
-                    <v-col v-for="card in transparencyCards" :key="card.key" cols="12" md="5">
-                      <v-card class="category-ecoscore__transparency-card" elevation="4" rounded="xl">
-                        <div class="category-ecoscore__transparency-card-header">
-                          <v-avatar size="48" class="category-ecoscore__transparency-card-icon" color="surface-primary-120">
-                            <v-icon :icon="card.icon" size="28" color="primary" />
+                  <v-row
+                    class="category-ecoscore__transparency-grid"
+                    align="stretch"
+                  >
+                    <v-col
+                      v-for="card in transparencyCards"
+                      :key="card.key"
+                      cols="12"
+                      md="5"
+                    >
+                      <v-card
+                        class="category-ecoscore__transparency-card"
+                        elevation="4"
+                        rounded="xl"
+                      >
+                        <div
+                          class="category-ecoscore__transparency-card-header"
+                        >
+                          <v-avatar
+                            size="48"
+                            class="category-ecoscore__transparency-card-icon"
+                            color="surface-primary-120"
+                          >
+                            <v-icon
+                              :icon="card.icon"
+                              size="28"
+                              color="primary"
+                            />
                           </v-avatar>
-                          <h3 class="category-ecoscore__transparency-card-title">{{ card.title }}</h3>
+                          <h3
+                            class="category-ecoscore__transparency-card-title"
+                          >
+                            {{ card.title }}
+                          </h3>
                         </div>
                         <p class="category-ecoscore__transparency-card-text">
                           {{ card.description }}
@@ -347,25 +570,48 @@
               role="region"
               :aria-labelledby="`${sectionIds.aiAudit}-title`"
             >
-              <v-sheet class="category-ecoscore__surface" elevation="0" rounded="xl">
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
                 <header class="category-ecoscore__header">
-                  <h2 :id="`${sectionIds.aiAudit}-title`" class="category-ecoscore__title">
+                  <h2
+                    :id="`${sectionIds.aiAudit}-title`"
+                    class="category-ecoscore__title"
+                  >
                     {{ t('category.ecoscorePage.sections.aiAudit.title') }}
                   </h2>
                 </header>
 
                 <p class="category-ecoscore__ai-helper">
-                  {{ t('category.ecoscorePage.sections.aiAudit.intro', { category: categoryLabel }) }}
+                  {{
+                    t('category.ecoscorePage.sections.aiAudit.intro', {
+                      category: categoryLabel,
+                    })
+                  }}
                 </p>
 
                 <v-row class="category-ecoscore__ai-grid" align="stretch">
                   <v-col cols="12" lg="12">
-                    <v-card class="category-ecoscore__code-card" elevation="0" rounded="xl">
+                    <v-card
+                      class="category-ecoscore__code-card"
+                      elevation="0"
+                      rounded="xl"
+                    >
                       <h3 class="category-ecoscore__code-title">
-                        {{ t('category.ecoscorePage.sections.aiAudit.promptTitle') }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.aiAudit.promptTitle'
+                          )
+                        }}
                       </h3>
                       <p class="category-ecoscore__code-helper">
-                        {{ t('category.ecoscorePage.sections.aiAudit.promptHelper') }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.aiAudit.promptHelper'
+                          )
+                        }}
                       </p>
                       <!-- eslint-disable vue/no-v-html -->
                       <pre
@@ -387,12 +633,24 @@
                   </v-col>
 
                   <v-col cols="12" lg="12">
-                    <v-card class="category-ecoscore__code-card" elevation="0" rounded="xl">
+                    <v-card
+                      class="category-ecoscore__code-card"
+                      elevation="0"
+                      rounded="xl"
+                    >
                       <h3 class="category-ecoscore__code-title">
-                        {{ t('category.ecoscorePage.sections.aiAudit.responseTitle') }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.aiAudit.responseTitle'
+                          )
+                        }}
                       </h3>
                       <p class="category-ecoscore__code-helper">
-                        {{ t('category.ecoscorePage.sections.aiAudit.responseHelper') }}
+                        {{
+                          t(
+                            'category.ecoscorePage.sections.aiAudit.responseHelper'
+                          )
+                        }}
                       </p>
                       <pre
                         class="category-ecoscore__code-block"
@@ -473,17 +731,29 @@ try {
   category.value = await selectCategoryBySlug(categorySlug.value)
 } catch (error) {
   if (error instanceof Error && error.name === 'CategoryNotFoundError') {
-    throw createError({ statusCode: 404, statusMessage: 'Category not found', cause: error })
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Category not found',
+      cause: error,
+    })
   }
 
   console.error('Failed to resolve category for ecoscore page', error)
-  throw createError({ statusCode: 500, statusMessage: 'Failed to load category', cause: error })
+  throw createError({
+    statusCode: 500,
+    statusMessage: 'Failed to load category',
+    cause: error,
+  })
 }
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 
-const heroTitle = computed(() => category.value?.verticalHomeTitle ?? siteName.value)
-const heroDescription = computed(() => category.value?.verticalHomeDescription ?? null)
+const heroTitle = computed(
+  () => category.value?.verticalHomeTitle ?? siteName.value
+)
+const heroDescription = computed(
+  () => category.value?.verticalHomeDescription ?? null
+)
 const heroImage = computed(() => {
   if (!category.value) {
     return null
@@ -498,32 +768,41 @@ const heroImage = computed(() => {
 })
 
 const categoryLabel = computed(
-  () => category.value?.verticalHomeTitle ?? category.value?.verticalMetaTitle ?? siteName.value,
+  () =>
+    category.value?.verticalHomeTitle ??
+    category.value?.verticalMetaTitle ??
+    siteName.value
 )
 
 const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
-  const base = (category.value?.breadCrumb ?? []).map((item) => ({ ...item }))
+  const base = (category.value?.breadCrumb ?? []).map(item => ({ ...item }))
   const leafTitle = t('category.ecoscorePage.breadcrumbLeaf')
 
   return leafTitle ? [...base, { title: leafTitle }] : base
 })
 
 const impactScoreConfig = computed<ImpactScoreConfigDto | null>(
-  () => category.value?.impactScoreConfig ?? null,
+  () => category.value?.impactScoreConfig ?? null
 )
 
 const impactScoreTexts = computed(() => impactScoreConfig.value?.texts ?? {})
 
-const purposeText = computed(() => impactScoreTexts.value?.purpose?.trim() || null)
-const availableDataText = computed(() => impactScoreTexts.value?.availlableDatas?.trim() || null)
-const criticalReviewText = computed(() => impactScoreTexts.value?.criticalReview?.trim() || null)
+const purposeText = computed(
+  () => impactScoreTexts.value?.purpose?.trim() || null
+)
+const availableDataText = computed(
+  () => impactScoreTexts.value?.availlableDatas?.trim() || null
+)
+const criticalReviewText = computed(
+  () => impactScoreTexts.value?.criticalReview?.trim() || null
+)
 
 const availableImpactScoreCriterias = computed<string[]>(
-  () => category.value?.availableImpactScoreCriterias ?? [],
+  () => category.value?.availableImpactScoreCriterias ?? []
 )
 
 const attributeConfigs = computed<AttributeConfigDto[]>(
-  () => category.value?.attributesConfig?.configs ?? [],
+  () => category.value?.attributesConfig?.configs ?? []
 )
 
 const attributeMap = computed(() => {
@@ -536,7 +815,7 @@ const attributeMap = computed(() => {
 })
 
 const availableCriteria = computed(() => {
-  return availableImpactScoreCriterias.value.map((key) => {
+  return availableImpactScoreCriterias.value.map(key => {
     const attribute = attributeMap.value.get(key)
     return {
       key,
@@ -568,18 +847,21 @@ const impactScoreMax = 5
 const impactScoreOrbitCriteria = computed(() => {
   const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
 
-  return availableImpactScoreCriterias.value.map((key) => {
+  return availableImpactScoreCriterias.value.map(key => {
     const attribute = attributeMap.value.get(key)
     const fallbackTitle = attribute?.scoreTitle ?? attribute?.name ?? key
 
     return {
       key,
       label: fallbackTitle,
-      description: attribute?.scoreDescription ?? availableCriteriaMap.value.get(key)?.description ?? '',
+      description:
+        attribute?.scoreDescription ??
+        availableCriteriaMap.value.get(key)?.description ??
+        '',
       weight: typeof weights?.[key] === 'number' ? Number(weights[key]) : null,
       icon: attribute?.icon ?? null,
       fallback: fallbackTitle.charAt(0).toUpperCase(),
-      lifecycles: Array.from(attribute?.participateInACV ?? []).map((stage) => ({
+      lifecycles: Array.from(attribute?.participateInACV ?? []).map(stage => ({
         code: stage,
         label: lifecycleLabels.value[stage] ?? stage,
       })),
@@ -597,13 +879,21 @@ const criteriaCards = computed(() => {
     ...available,
   ])
 
-  return Array.from(keys).map((key) => {
+  return Array.from(keys).map(key => {
     const attribute = attributeMap.value.get(key)
-    const fallbackTitle = attribute?.scoreTitle ?? availableCriteriaMap.value.get(key)?.label ?? key
+    const fallbackTitle =
+      attribute?.scoreTitle ?? availableCriteriaMap.value.get(key)?.label ?? key
     const description =
-      attribute?.scoreDescription || analysis?.[key]?.trim() || availableCriteriaMap.value.get(key)?.description || ''
-    const utility = attribute?.scoreUtility || availableCriteriaMap.value.get(key)?.utility || ''
-    const coefficient = typeof weights?.[key] === 'number' ? Number(weights?.[key]) : null
+      attribute?.scoreDescription ||
+      analysis?.[key]?.trim() ||
+      availableCriteriaMap.value.get(key)?.description ||
+      ''
+    const utility =
+      attribute?.scoreUtility ||
+      availableCriteriaMap.value.get(key)?.utility ||
+      ''
+    const coefficient =
+      typeof weights?.[key] === 'number' ? Number(weights?.[key]) : null
 
     return {
       key,
@@ -617,10 +907,16 @@ const criteriaCards = computed(() => {
   })
 })
 
-const rawYamlPrompt = computed(() => impactScoreConfig.value?.yamlPrompt?.trim() || '')
-const formattedYamlPrompt = computed(() => (rawYamlPrompt.value.length ? rawYamlPrompt.value : null))
+const rawYamlPrompt = computed(
+  () => impactScoreConfig.value?.yamlPrompt?.trim() || ''
+)
+const formattedYamlPrompt = computed(() =>
+  rawYamlPrompt.value.length ? rawYamlPrompt.value : null
+)
 
-const rawAiJson = computed(() => impactScoreConfig.value?.aiJsonResponse?.trim() || '')
+const rawAiJson = computed(
+  () => impactScoreConfig.value?.aiJsonResponse?.trim() || ''
+)
 const parsedAiJson = computed<Record<string, unknown> | null>(() => {
   if (!rawAiJson.value.length) {
     return null
@@ -673,10 +969,13 @@ const aiCoefficients = computed<Record<string, number>>(() => {
     return {}
   }
 
-  const coefficients = (response as Record<string, unknown>)?.criteriasPonderation
+  const coefficients = (response as Record<string, unknown>)
+    ?.criteriasPonderation
   if (coefficients && typeof coefficients === 'object') {
     return Object.fromEntries(
-      Object.entries(coefficients as Record<string, unknown>).filter(([, value]) => typeof value === 'number'),
+      Object.entries(coefficients as Record<string, unknown>).filter(
+        ([, value]) => typeof value === 'number'
+      )
     )
   }
 
@@ -692,19 +991,23 @@ const coefficientComparison = computed(() => {
     ...Object.keys(proposed ?? {}),
   ])
 
-  return Array.from(keys).map((key) => {
+  return Array.from(keys).map(key => {
     const attribute = attributeMap.value.get(key)
     const fallbackTitle = available?.[key]?.title ?? key
     return {
       key,
       label: attribute?.name ?? fallbackTitle,
-      proposed: typeof proposed?.[key] === 'number' ? Number(proposed?.[key]) : null,
-      applied: typeof applied?.[key] === 'number' ? Number(applied?.[key]) : null,
+      proposed:
+        typeof proposed?.[key] === 'number' ? Number(proposed?.[key]) : null,
+      applied:
+        typeof applied?.[key] === 'number' ? Number(applied?.[key]) : null,
     }
   })
 })
 
-const navAriaLabel = computed(() => t('category.ecoscorePage.navigation.ariaLabel'))
+const navAriaLabel = computed(() =>
+  t('category.ecoscorePage.navigation.ariaLabel')
+)
 
 const sectionIds = {
   overview: 'category-impact-overview',
@@ -744,7 +1047,9 @@ const navigationSections = computed(() => [
   },
 ])
 
-const orientation = computed<'vertical' | 'horizontal'>(() => (display.mdAndDown.value ? 'horizontal' : 'vertical'))
+const orientation = computed<'vertical' | 'horizontal'>(() =>
+  display.mdAndDown.value ? 'horizontal' : 'vertical'
+)
 
 const activeSection = ref<SectionId>(sectionIds.overview)
 const observer = ref<IntersectionObserver | null>(null)
@@ -758,7 +1063,8 @@ const refreshActiveSection = () => {
   }
 
   const sorted = [...visibleSectionRatios.entries()].sort((a, b) => b[1] - a[1])
-  const [nextActive] = sorted.find(([, ratio]) => ratio >= MIN_SECTION_RATIO) ?? sorted[0] ?? []
+  const [nextActive] =
+    sorted.find(([, ratio]) => ratio >= MIN_SECTION_RATIO) ?? sorted[0] ?? []
 
   if (nextActive) {
     activeSection.value = nextActive as SectionId
@@ -775,8 +1081,8 @@ const observeSections = () => {
   refreshActiveSection()
 
   observer.value = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
+    entries => {
+      entries.forEach(entry => {
         const ratio = entry.intersectionRatio
         if (ratio > 0) {
           visibleSectionRatios.set(entry.target.id, ratio)
@@ -790,11 +1096,11 @@ const observeSections = () => {
     {
       rootMargin: '-15% 0px -35% 0px',
       threshold: Array.from({ length: 11 }, (_, index) => index / 10),
-    },
+    }
   )
 
   nextTick(() => {
-    navigationSections.value.forEach((section) => {
+    navigationSections.value.forEach(section => {
       const element = document.getElementById(section.id)
       if (element) {
         observer.value?.observe(element)
@@ -819,12 +1125,15 @@ watch(orientation, () => {
 })
 
 watch(
-  () => navigationSections.value.map((section) => `${section.id}-${section.label}`).join('|'),
+  () =>
+    navigationSections.value
+      .map(section => `${section.id}-${section.label}`)
+      .join('|'),
   () => {
     nextTick(() => {
       observeSections()
     })
-  },
+  }
 )
 
 const scrollToSection = (sectionId: string) => {
@@ -847,7 +1156,7 @@ const scrollToSection = (sectionId: string) => {
 const githubConfigUrl = computed(() =>
   category.value?.id
     ? `https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/${category.value.id}.yml`
-    : null,
+    : null
 )
 
 const transparencyCards = computed(() => {
@@ -870,16 +1179,24 @@ const transparencyCards = computed(() => {
     },
   ] as const
 
-  return cards.map((card) => ({
+  return cards.map(card => ({
     ...card,
-    title: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.title`),
-    description: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.description`, {
-      category: categoryLabel.value,
-    }),
+    title: t(
+      `category.ecoscorePage.sections.transparency.cards.${card.key}.title`
+    ),
+    description: t(
+      `category.ecoscorePage.sections.transparency.cards.${card.key}.description`,
+      {
+        category: categoryLabel.value,
+      }
+    ),
     cta: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.cta`),
-    aria: t(`category.ecoscorePage.sections.transparency.cards.${card.key}.aria`, {
-      category: categoryLabel.value,
-    }),
+    aria: t(
+      `category.ecoscorePage.sections.transparency.cards.${card.key}.aria`,
+      {
+        category: categoryLabel.value,
+      }
+    ),
   }))
 })
 
@@ -897,15 +1214,21 @@ function formatDecimal(value: number | null) {
   return value.toFixed(2)
 }
 
-const canonicalUrl = computed(() => new URL(route.fullPath, requestURL.origin).toString())
-const seoTitle = computed(() => t('category.ecoscorePage.seo.title', { category: categoryLabel.value }))
+const canonicalUrl = computed(() =>
+  new URL(route.fullPath, requestURL.origin).toString()
+)
+const seoTitle = computed(() =>
+  t('category.ecoscorePage.seo.title', { category: categoryLabel.value })
+)
 const seoDescription = computed(() => {
   return (
     purposeText.value ??
     availableDataText.value ??
     category.value?.verticalMetaDescription ??
     category.value?.verticalHomeDescription ??
-    t('category.ecoscorePage.seo.description', { category: categoryLabel.value })
+    t('category.ecoscorePage.seo.description', {
+      category: categoryLabel.value,
+    })
   )
 })
 

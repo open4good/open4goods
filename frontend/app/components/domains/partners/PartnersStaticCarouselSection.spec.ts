@@ -67,7 +67,9 @@ describe('PartnersStaticCarouselSection', () => {
 
     const wrapper = await mountComponent()
 
-    const titles = wrapper.findAll('.partners-static__card h3').map((node) => node.text())
+    const titles = wrapper
+      .findAll('.partners-static__card h3')
+      .map(node => node.text())
     expect(titles).toEqual(['Collectif A', 'Fondation B'])
 
     await wrapper.unmount()

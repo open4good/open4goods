@@ -16,7 +16,10 @@
         <button
           type="button"
           class="sticky-section-navigation__link"
-          :class="{ 'sticky-section-navigation__link--active': section.id === activeSection }"
+          :class="{
+            'sticky-section-navigation__link--active':
+              section.id === activeSection,
+          }"
           @click="onNavigate(section.id)"
         >
           <v-icon
@@ -25,7 +28,9 @@
             size="18"
             class="sticky-section-navigation__icon"
           />
-          <span class="sticky-section-navigation__label">{{ section.label }}</span>
+          <span class="sticky-section-navigation__label">{{
+            section.label
+          }}</span>
         </button>
       </li>
     </ul>
@@ -37,7 +42,9 @@ import type { PropType } from 'vue'
 
 const _props = defineProps({
   sections: {
-    type: Array as PropType<Array<{ id: string; label: string; icon?: string }>>,
+    type: Array as PropType<
+      Array<{ id: string; label: string; icon?: string }>
+    >,
     default: () => [],
   },
   activeSection: {
@@ -139,7 +146,8 @@ const onNavigate = (sectionId: string) => {
   background: rgba(var(--v-theme-surface-primary-100), 0.9);
   color: rgb(var(--v-theme-text-neutral-strong));
   border-color: rgba(var(--v-theme-border-primary-strong), 0.95);
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-primary-highlight), 0.22);
+  box-shadow: inset 0 0 0 1px
+    rgba(var(--v-theme-accent-primary-highlight), 0.22);
 }
 
 .sticky-section-navigation__icon {

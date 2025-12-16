@@ -6,16 +6,25 @@ import { getMainPagePathsForDomainLanguage } from '~~/shared/utils/sitemap-main-
 
 const MAIN_PAGES_SITEMAP_FILENAME = `${APP_ROUTES_SITEMAP_KEY}.xml`
 
-export default defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook('sitemap:sources', (ctx) => {
-    if (ctx.sitemapName !== MAIN_PAGES_SITEMAP_FILENAME && ctx.sitemapName !== APP_ROUTES_SITEMAP_KEY) {
+export default defineNitroPlugin(nitroApp => {
+  nitroApp.hooks.hook('sitemap:sources', ctx => {
+    if (
+      ctx.sitemapName !== MAIN_PAGES_SITEMAP_FILENAME &&
+      ctx.sitemapName !== APP_ROUTES_SITEMAP_KEY
+    ) {
       return
     }
 
-    const requestURL = ctx.event ? getRequestURL(ctx.event) : new URL('https://nudger.fr')
-    const { domainLanguage } = getDomainLanguageFromHostname(requestURL.hostname)
+    const requestURL = ctx.event
+      ? getRequestURL(ctx.event)
+      : new URL('https://nudger.fr')
+    const { domainLanguage } = getDomainLanguageFromHostname(
+      requestURL.hostname
+    )
 
-    const staticPaths = Array.from(new Set(getMainPagePathsForDomainLanguage(domainLanguage)))
+    const staticPaths = Array.from(
+      new Set(getMainPagePathsForDomainLanguage(domainLanguage))
+    )
 
     if (!staticPaths.length) {
       return
@@ -27,7 +36,7 @@ export default defineNitroPlugin((nitroApp) => {
         description: 'Autodiscovered localized marketing routes',
       },
       sourceType: 'user',
-      urls: staticPaths.map((path) => ({ loc: path })),
+      urls: staticPaths.map(path => ({ loc: path })),
     })
   })
 })

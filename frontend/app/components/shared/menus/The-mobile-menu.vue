@@ -1,5 +1,5 @@
 <template>
-  <div class="mobile-menu">
+  <nav class="mobile-menu" :aria-label="t('siteIdentity.menu.mobileAriaLabel')">
     <v-list class="pa-0">
       <v-list-item
         class="px-6 py-4 border-bottom d-flex justify-space-between align-center"
@@ -114,7 +114,9 @@
           <v-list-item
             v-bind="props"
             class="px-6 py-4 mobile-menu__community-activator"
-            :class="{ 'mobile-menu__community-activator--active': isCommunityActive }"
+            :class="{
+              'mobile-menu__community-activator--active': isCommunityActive,
+            }"
             :append-icon="isOpen ? 'mdi-menu-up' : 'mdi-menu-down'"
           >
             <template #prepend>
@@ -158,14 +160,21 @@
               >
                 <template #prepend>
                   <v-avatar size="32" class="mobile-menu__community-link-icon">
-                    <v-icon :icon="link.icon" size="18" color="accent-primary-highlight" />
+                    <v-icon
+                      :icon="link.icon"
+                      size="18"
+                      color="accent-primary-highlight"
+                    />
                   </v-avatar>
                 </template>
 
                 <v-list-item-title class="mobile-menu__community-link-label">
                   {{ link.label }}
                 </v-list-item-title>
-                <v-list-item-subtitle v-if="link.description" class="mobile-menu__community-link-description">
+                <v-list-item-subtitle
+                  v-if="link.description"
+                  class="mobile-menu__community-link-description"
+                >
                   {{ link.description }}
                 </v-list-item-subtitle>
 
@@ -190,12 +199,21 @@
         </template>
       </v-list-item>
 
+      <v-list-item class="px-6 py-4">
+        <template #prepend>
+          <v-icon icon="mdi-magnify-plus-outline" class="me-4" />
+        </template>
+        <v-list-item-title class="text-body-1">
+          {{ t('siteIdentity.menu.zoom.label') }}
+        </v-list-item-title>
+        <template #append>
+          <ZoomToggle density="compact" />
+        </template>
+      </v-list-item>
+
       <v-divider v-if="isLoggedIn" class="mx-6" />
 
-      <v-list-item
-        v-if="isLoggedIn"
-        class="px-6 py-4 account-summary"
-      >
+      <v-list-item v-if="isLoggedIn" class="px-6 py-4 account-summary">
         <template #prepend>
           <v-icon icon="mdi-account-circle" class="me-4" />
         </template>
@@ -245,23 +263,28 @@
         <template #prepend>
           <v-icon icon="mdi-logout" class="me-4" />
         </template>
-        <v-list-item-title class="text-body-1">
-          Logout
-        </v-list-item-title>
+        <v-list-item-title class="text-body-1"> Logout </v-list-item-title>
       </v-list-item>
     </v-list>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 import ThemeToggle from './ThemeToggle.vue'
+import ZoomToggle from './ZoomToggle.vue'
 import { useI18n } from 'vue-i18n'
 
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 import { useCommunityMenu, type CommunityMenuLink } from './useCommunityMenu'
 import { usePwaInstallPromptBridge } from '~/composables/pwa/usePwaInstallPromptBridge'
-import { MIN_SEARCH_QUERY_LENGTH, useMenuSearchControls } from '~/composables/menus/useMenuSearchControls'
+import {
+  MIN_SEARCH_QUERY_LENGTH,
+  useMenuSearchControls,
+} from '~/composables/menus/useMenuSearchControls'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -279,7 +302,9 @@ const currentLocale = computed(() => normalizeLocale(locale.value))
 
 const themeToggleLabel = computed(() => {
   const translation = t('siteIdentity.menu.themeToggle')
-  return translation === 'siteIdentity.menu.themeToggle' ? 'Toggle theme' : translation
+  return translation === 'siteIdentity.menu.themeToggle'
+    ? 'Toggle theme'
+    : translation
 })
 
 const emit = defineEmits<{
@@ -291,7 +316,9 @@ const { isLoggedIn, logout, username, roles } = useAuth()
 const router = useRouter()
 const route = useRoute()
 const isClearingCache = ref(false)
-const showInstallMenuItem = computed(() => installPromptVisible.value && isInstallSupported.value)
+const showInstallMenuItem = computed(
+  () => installPromptVisible.value && isInstallSupported.value
+)
 
 const {
   searchQuery,
@@ -304,8 +331,11 @@ const {
   onNavigate: () => emit('close'),
 })
 
-const { sections: communitySections, activePaths: communityActivePaths } = useCommunityMenu(t, currentLocale)
-const communityLabel = computed(() => String(t('siteIdentity.menu.items.contact')))
+const { sections: communitySections, activePaths: communityActivePaths } =
+  useCommunityMenu(t, currentLocale)
+const communityLabel = computed(() =>
+  String(t('siteIdentity.menu.items.contact'))
+)
 const isCommunityExpanded = ref(false)
 
 const isActiveRoute = (path: string): boolean => {
@@ -320,19 +350,24 @@ const isActiveRoute = (path: string): boolean => {
   return route.path.startsWith(path)
 }
 
-const isCommunityActive = computed(() => communityActivePaths.value.some((path) => isActiveRoute(path)))
+const isCommunityActive = computed(() =>
+  communityActivePaths.value.some(path => isActiveRoute(path))
+)
 
 watch(
   isCommunityActive,
-  (active) => {
+  active => {
     if (active) {
       isCommunityExpanded.value = true
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
-type FetchLike = (input: string, init?: Record<string, unknown>) => Promise<unknown>
+type FetchLike = (
+  input: string,
+  init?: Record<string, unknown>
+) => Promise<unknown>
 
 const resolveFetch = (): FetchLike | undefined => {
   if (typeof nuxtApp.$fetch === 'function') {
@@ -353,7 +388,9 @@ const displayName = computed(() => {
   return label && label.length > 0 ? label : 'Account'
 })
 
-const accountRoles = computed(() => roles.value.map((role) => role.trim()).filter((role) => role.length > 0))
+const accountRoles = computed(() =>
+  roles.value.map(role => role.trim()).filter(role => role.length > 0)
+)
 const hasRoles = computed(() => accountRoles.value.length > 0)
 
 interface MenuLinkDefinition {
@@ -370,7 +407,6 @@ interface MenuLink extends MenuLinkDefinition {
 const updateSearchQuery = (value: string) => {
   searchQuery.value = value
 }
-
 
 const handleInstallFromMenu = async () => {
   if (!showInstallMenuItem.value || installInProgress.value) {
@@ -404,12 +440,14 @@ const handleLogout = async () => {
   }
 }
 
-const isSuccessfulCacheResetResponse = (payload: unknown): payload is { success: true } =>
+const isSuccessfulCacheResetResponse = (
+  payload: unknown
+): payload is { success: true } =>
   Boolean(
     payload &&
-      typeof payload === 'object' &&
-      'success' in payload &&
-      (payload as { success?: boolean }).success === true,
+    typeof payload === 'object' &&
+    'success' in payload &&
+    (payload as { success?: boolean }).success === true
   )
 
 const handleClearCache = async () => {
@@ -423,14 +461,20 @@ const handleClearCache = async () => {
     const fetcher = resolveFetch()
 
     if (!fetcher) {
-      console.error('Failed to clear caches', new Error('No fetch helper available'))
+      console.error(
+        'Failed to clear caches',
+        new Error('No fetch helper available')
+      )
       return
     }
 
     const response = await fetcher('/api/admin/cache/reset', { method: 'POST' })
 
     if (!isSuccessfulCacheResetResponse(response)) {
-      console.error('Failed to clear caches', new Error('Unexpected response payload'))
+      console.error(
+        'Failed to clear caches',
+        new Error('Unexpected response payload')
+      )
       return
     }
 
@@ -465,11 +509,11 @@ const baseMenuItems: MenuLinkDefinition[] = [
 ]
 
 const menuItems = computed<MenuLink[]>(() =>
-  baseMenuItems.map((item) => ({
+  baseMenuItems.map(item => ({
     ...item,
     title: t(item.titleKey),
     to: resolveLocalizedRoutePath(item.routeName, currentLocale.value),
-  })),
+  }))
 )
 </script>
 
@@ -580,5 +624,4 @@ const menuItems = computed<MenuLink[]>(() =>
 .mobile-menu__install :deep(.v-btn)
   text-transform: none
   font-weight: 600
-
 </style>

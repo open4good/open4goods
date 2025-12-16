@@ -3,10 +3,17 @@
     <section class="cms-page__hero" role="banner">
       <v-container class="cms-page__hero-container" fluid>
         <v-sheet class="cms-page__hero-wrapper" elevation="0">
-          <div v-if="hasHeroImage" class="cms-page__hero-media" aria-hidden="true">
+          <div
+            v-if="hasHeroImage"
+            class="cms-page__hero-media"
+            aria-hidden="true"
+          >
             <v-img :src="heroImage" alt="" class="cms-page__hero-image" cover>
               <template #placeholder>
-                <v-skeleton-loader type="image" class="cms-page__hero-image-placeholder" />
+                <v-skeleton-loader
+                  type="image"
+                  class="cms-page__hero-image-placeholder"
+                />
               </template>
             </v-img>
           </div>
@@ -20,7 +27,10 @@
 
             <div class="cms-page__hero-copy">
               <h1 class="cms-page__hero-title">{{ effectivePageTitle }}</h1>
-              <p v-if="effectiveMetaDescription" class="cms-page__hero-description">
+              <p
+                v-if="effectiveMetaDescription"
+                class="cms-page__hero-description"
+              >
                 {{ effectiveMetaDescription }}
               </p>
               <div class="cms-page__hero-actions">
@@ -79,7 +89,12 @@
             </v-btn>
           </div>
 
-          <div v-else class="cms-page__html" role="article" aria-label="CMS content">
+          <div
+            v-else
+            class="cms-page__html"
+            role="article"
+            aria-label="CMS content"
+          >
             <!-- eslint-disable-next-line vue/no-v-html -->
             <div class="xwiki-sandbox" v-html="htmlContent" />
           </div>
@@ -133,20 +148,22 @@ const {
   refresh,
 } = await useFullPage(resolvedPageId)
 
-const effectivePageTitle = computed(() => pageTitle.value || props.fallbackTitle || '')
+const effectivePageTitle = computed(
+  () => pageTitle.value || props.fallbackTitle || ''
+)
 const effectiveMetaDescription = computed(
-  () => metaDescription.value || props.fallbackDescription || '',
+  () => metaDescription.value || props.fallbackDescription || ''
 )
 
 const rawBreadcrumbs = computed(() => props.breadcrumbs ?? [])
 
 const heroBreadcrumbs = computed(() => {
   const items = rawBreadcrumbs.value
-    .map((item) => ({
+    .map(item => ({
       title: item?.title?.trim() ?? '',
       link: item?.link?.trim() ?? '',
     }))
-    .filter((item) => item.title.length)
+    .filter(item => item.title.length)
 
   return items.map((item, index) => ({
     title: item.title,
@@ -163,7 +180,9 @@ const heroBreadcrumbProps = computed(() => ({
 
 const hasSidebar = computed(() => Boolean(slots.sidebar))
 
-const isWideLayout = computed(() => (props.layoutVariant ?? 'default') === 'wide')
+const isWideLayout = computed(
+  () => (props.layoutVariant ?? 'default') === 'wide'
+)
 const heroImage = computed(() => props.heroImage?.trim() ?? '')
 const hasHeroImage = computed(() => heroImage.value.length > 0)
 
@@ -173,7 +192,9 @@ const { isLoggedIn, hasRole } = useAuth()
 const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])
 const canEdit = computed(() => {
   const link = editLink.value
-  return isLoggedIn.value && !!link && allowedRoles.value.some(role => hasRole(role))
+  return (
+    isLoggedIn.value && !!link && allowedRoles.value.some(role => hasRole(role))
+  )
 })
 
 const containerClass = computed(() => [
@@ -198,7 +219,7 @@ const containerMaxWidth = computed(() => {
 })
 
 const isFluidContainer = computed(
-  () => isWideLayout.value || width.value === 'container-fluid',
+  () => isWideLayout.value || width.value === 'container-fluid'
 )
 
 useSeoMeta({

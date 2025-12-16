@@ -12,76 +12,113 @@ const localeRef = ref('en-US')
 const messages: Record<string, string> = {
   'siteIdentity.siteName': 'Nudger',
   'category.ecoscorePage.breadcrumbLeaf': 'impactscore',
-  'category.ecoscorePage.navigation.ariaLabel': 'Impact Score section navigation',
+  'category.ecoscorePage.navigation.ariaLabel':
+    'Impact Score section navigation',
   'category.ecoscorePage.navigation.overview': 'Overview',
   'category.ecoscorePage.navigation.purpose': 'Purpose & data',
   'category.ecoscorePage.navigation.criteria': 'Criteria',
   'category.ecoscorePage.navigation.transparency': 'Transparency',
   'category.ecoscorePage.navigation.aiAudit': 'AI audit',
-  'category.ecoscorePage.sections.overview.title': 'Impact Score for {category}',
+  'category.ecoscorePage.sections.overview.title':
+    'Impact Score for {category}',
   'category.ecoscorePage.sections.overview.card.title': 'Nudger Impact Score',
   'category.ecoscorePage.sections.overview.card.description':
     'This page details the criteria and weightings used to assess the environmental impact of this category.',
-  'category.ecoscorePage.sections.overview.card.aria': 'Learn more about the global Impact Score methodology',
-  'category.ecoscorePage.sections.overview.card.cta': 'Understand the global methodology',
-  'category.ecoscorePage.sections.overview.card.scoreLabel': 'Sample Impact Score',
-  'category.ecoscorePage.sections.overview.visualization.eyebrow': 'Impact breakdown',
-  'category.ecoscorePage.sections.overview.visualization.title': 'Score composition',
+  'category.ecoscorePage.sections.overview.card.aria':
+    'Learn more about the global Impact Score methodology',
+  'category.ecoscorePage.sections.overview.card.cta':
+    'Understand the global methodology',
+  'category.ecoscorePage.sections.overview.card.scoreLabel':
+    'Sample Impact Score',
+  'category.ecoscorePage.sections.overview.visualization.eyebrow':
+    'Impact breakdown',
+  'category.ecoscorePage.sections.overview.visualization.title':
+    'Score composition',
   'category.ecoscorePage.sections.overview.visualization.subtitle':
     'How the {category} Impact Score is distributed across the criteria.',
-  'category.ecoscorePage.sections.overview.visualization.centerLabel': 'Impact Score {category}',
-  'category.ecoscorePage.sections.overview.visualization.weight': '{value}% weight',
-  'category.ecoscorePage.sections.overview.visualization.weightFallback': 'Weight pending',
-  'category.ecoscorePage.sections.purpose.title': 'Why and how we score {category}',
+  'category.ecoscorePage.sections.overview.visualization.centerLabel':
+    'Impact Score {category}',
+  'category.ecoscorePage.sections.overview.visualization.weight':
+    '{value}% weight',
+  'category.ecoscorePage.sections.overview.visualization.weightFallback':
+    'Weight pending',
+  'category.ecoscorePage.sections.purpose.title':
+    'Why and how we score {category}',
   'category.ecoscorePage.sections.purpose.objectiveTitle': 'Objective',
-  'category.ecoscorePage.sections.purpose.objectiveFallback': 'The objective description will be available soon.',
+  'category.ecoscorePage.sections.purpose.objectiveFallback':
+    'The objective description will be available soon.',
   'category.ecoscorePage.sections.purpose.dataTitle': 'Available data',
-  'category.ecoscorePage.sections.purpose.dataFallback': 'Detailed data for each criterion will be available soon.',
-  'category.ecoscorePage.sections.criteria.title': 'Selected criteria and weights',
+  'category.ecoscorePage.sections.purpose.dataFallback':
+    'Detailed data for each criterion will be available soon.',
+  'category.ecoscorePage.sections.criteria.title':
+    'Selected criteria and weights',
   'category.ecoscorePage.sections.criteria.coefficientPrefix': 'Counts for',
-  'category.ecoscorePage.sections.criteria.coefficientSuffix': 'in the overall score',
-  'category.ecoscorePage.sections.criteria.empty': 'Criteria will be published soon.',
-  'category.ecoscorePage.sections.transparency.title': 'Transparency and traceability',
-  'category.ecoscorePage.sections.transparency.criticalReviewTitle': 'Critical review',
-  'category.ecoscorePage.sections.transparency.criticalReviewFallback': 'The critical review will be shared soon.',
-  'category.ecoscorePage.sections.transparency.communityTitle': 'Join the discussion',
+  'category.ecoscorePage.sections.criteria.coefficientSuffix':
+    'in the overall score',
+  'category.ecoscorePage.sections.criteria.empty':
+    'Criteria will be published soon.',
+  'category.ecoscorePage.sections.transparency.title':
+    'Transparency and traceability',
+  'category.ecoscorePage.sections.transparency.criticalReviewTitle':
+    'Critical review',
+  'category.ecoscorePage.sections.transparency.criticalReviewFallback':
+    'The critical review will be shared soon.',
+  'category.ecoscorePage.sections.transparency.communityTitle':
+    'Join the discussion',
   'category.ecoscorePage.sections.transparency.communityBody':
     'The {category} Impact Score definition is public on GitHub. Share your feedback or suggest adjustments.',
-  'category.ecoscorePage.sections.transparency.communityCta': 'View the configuration',
-  'category.ecoscorePage.sections.transparency.communityIssues': 'Open an issue',
-  'category.ecoscorePage.sections.transparency.cardsTitle': 'Open methodology resources',
-  'category.ecoscorePage.sections.transparency.cards.openSource.title': 'Open-source methodology',
+  'category.ecoscorePage.sections.transparency.communityCta':
+    'View the configuration',
+  'category.ecoscorePage.sections.transparency.communityIssues':
+    'Open an issue',
+  'category.ecoscorePage.sections.transparency.cardsTitle':
+    'Open methodology resources',
+  'category.ecoscorePage.sections.transparency.cards.openSource.title':
+    'Open-source methodology',
   'category.ecoscorePage.sections.transparency.cards.openSource.description':
     'Follow our public repositories to track how we refine the Impact Score for {category}.',
-  'category.ecoscorePage.sections.transparency.cards.openSource.cta': 'Explore our open-source approach',
+  'category.ecoscorePage.sections.transparency.cards.openSource.cta':
+    'Explore our open-source approach',
   'category.ecoscorePage.sections.transparency.cards.openSource.aria':
     'Explore open-source resources for the {category} Impact Score',
-  'category.ecoscorePage.sections.transparency.cards.openData.title': 'Open data exports',
+  'category.ecoscorePage.sections.transparency.cards.openData.title':
+    'Open data exports',
   'category.ecoscorePage.sections.transparency.cards.openData.description':
     'Access the datasets powering the Impact Score for {category} and reuse them in your analyses.',
-  'category.ecoscorePage.sections.transparency.cards.openData.cta': 'Browse the data workspace',
+  'category.ecoscorePage.sections.transparency.cards.openData.cta':
+    'Browse the data workspace',
   'category.ecoscorePage.sections.transparency.cards.openData.aria':
     'Browse open data resources for the {category} Impact Score',
-  'category.ecoscorePage.sections.transparency.tableTitle': 'Coefficient summary',
+  'category.ecoscorePage.sections.transparency.tableTitle':
+    'Coefficient summary',
   'category.ecoscorePage.sections.transparency.tableHelper':
     'Comparison between the AI-generated proposal and the coefficients currently applied.',
-  'category.ecoscorePage.sections.transparency.tableFallback': 'Detailed coefficients will be published soon.',
-  'category.ecoscorePage.sections.transparency.tableHeaders.name': 'Criterion name',
-  'category.ecoscorePage.sections.transparency.tableHeaders.proposed': 'Proposed coef.',
-  'category.ecoscorePage.sections.transparency.tableHeaders.applied': 'Applied coef.',
-  'category.ecoscorePage.sections.aiAudit.title': 'Impact Score generation audit',
+  'category.ecoscorePage.sections.transparency.tableFallback':
+    'Detailed coefficients will be published soon.',
+  'category.ecoscorePage.sections.transparency.tableHeaders.name':
+    'Criterion name',
+  'category.ecoscorePage.sections.transparency.tableHeaders.proposed':
+    'Proposed coef.',
+  'category.ecoscorePage.sections.transparency.tableHeaders.applied':
+    'Applied coef.',
+  'category.ecoscorePage.sections.aiAudit.title':
+    'Impact Score generation audit',
   'category.ecoscorePage.sections.aiAudit.intro':
     'Audit the prompts and responses used to configure the {category} Impact Score.',
-  'category.ecoscorePage.sections.aiAudit.promptTitle': 'YAML generation prompt',
+  'category.ecoscorePage.sections.aiAudit.promptTitle':
+    'YAML generation prompt',
   'category.ecoscorePage.sections.aiAudit.promptHelper':
     'Instructions sent to the model to produce the configuration.',
   'category.ecoscorePage.sections.aiAudit.responseTitle': 'Model response',
   'category.ecoscorePage.sections.aiAudit.responseHelper':
     'JSON output from the AI used as the basis of the configuration.',
-  'category.ecoscorePage.sections.aiAudit.yamlUnavailable': 'Prompt unavailable.',
-  'category.ecoscorePage.sections.aiAudit.jsonUnavailable': 'AI response unavailable.',
+  'category.ecoscorePage.sections.aiAudit.yamlUnavailable':
+    'Prompt unavailable.',
+  'category.ecoscorePage.sections.aiAudit.jsonUnavailable':
+    'AI response unavailable.',
   'category.ecoscorePage.seo.title': 'Impact Score for {category}',
-  'category.ecoscorePage.seo.description': 'Impact Score insights for {category}.',
+  'category.ecoscorePage.seo.description':
+    'Impact Score insights for {category}.',
   'category.ecoscorePage.lifecycle.EXTRACTION': 'Extraction',
   'category.ecoscorePage.lifecycle.MANUFACTURING': 'Manufacturing',
   'category.ecoscorePage.lifecycle.TRANSPORTATION': 'Transportation',
@@ -91,26 +128,38 @@ const messages: Record<string, string> = {
 
 const translate = (key: string, params: Record<string, unknown> = {}) => {
   const template = messages[key] ?? key
-  return template.replace(/\{(\w+)\}/g, (_, match) => String(params[match] ?? ''))
+  return template.replace(/\{(\w+)\}/g, (_, match) =>
+    String(params[match] ?? '')
+  )
 }
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: (key: string, params: Record<string, unknown> = {}) => translate(key, params),
+    t: (key: string, params: Record<string, unknown> = {}) =>
+      translate(key, params),
     locale: localeRef,
   }),
 }))
 
-const route = { params: { categorySlug: 'televisions' }, fullPath: '/televisions/ecoscore' }
+const route = {
+  params: { categorySlug: 'televisions' },
+  fullPath: '/televisions/ecoscore',
+}
 
 mockNuxtImport('useRoute', () => () => route)
-mockNuxtImport('useRequestURL', () => () => new URL('https://example.com/televisions/ecoscore'))
+mockNuxtImport(
+  'useRequestURL',
+  () => () => new URL('https://example.com/televisions/ecoscore')
+)
 mockNuxtImport('useSeoMeta', () => useSeoMetaMock)
-mockNuxtImport('createError', () => (input: { statusMessage?: string } & Record<string, unknown>) => {
-  const error = new Error(input?.statusMessage ?? 'Error')
-  Object.assign(error, input)
-  return error
-})
+mockNuxtImport(
+  'createError',
+  () => (input: { statusMessage?: string } & Record<string, unknown>) => {
+    const error = new Error(input?.statusMessage ?? 'Error')
+    Object.assign(error, input)
+    return error
+  }
+)
 
 vi.mock('vuetify', () => ({
   useDisplay: () => ({ mdAndDown }),
@@ -132,7 +181,9 @@ vi.mock('~/components/category/CategoryHero.vue', () => ({
           h(
             'div',
             { 'data-test': 'hero-breadcrumbs' },
-            (props.breadcrumbs as Array<{ title?: string }>).map((item) => item.title ?? '').join(' / '),
+            (props.breadcrumbs as Array<{ title?: string }>)
+              .map(item => item.title ?? '')
+              .join(' / ')
           ),
           h('h1', { class: 'category-hero-stub__title' }, props.title),
         ])
@@ -144,7 +195,10 @@ vi.mock('~/components/shared/ui/StickySectionNavigation.vue', () => ({
   default: defineComponent({
     name: 'StickySectionNavigationStub',
     props: {
-      sections: { type: Array as () => Array<{ id: string; label: string }>, default: () => [] },
+      sections: {
+        type: Array as () => Array<{ id: string; label: string }>,
+        default: () => [],
+      },
     },
     emits: ['navigate'],
     setup(props, { emit }) {
@@ -152,18 +206,19 @@ vi.mock('~/components/shared/ui/StickySectionNavigation.vue', () => ({
         h(
           'nav',
           { class: 'sticky-nav-stub', 'data-test': 'sticky-nav' },
-          (props.sections as Array<{ id: string; label: string }>).map((section) =>
-            h(
-              'button',
-              {
-                type: 'button',
-                class: 'sticky-nav-stub__item',
-                'data-section-id': section.id,
-                onClick: () => emit('navigate', section.id),
-              },
-              section.label,
-            ),
-          ),
+          (props.sections as Array<{ id: string; label: string }>).map(
+            section =>
+              h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'sticky-nav-stub__item',
+                  'data-section-id': section.id,
+                  onClick: () => emit('navigate', section.id),
+                },
+                section.label
+              )
+          )
         )
     },
   }),
@@ -176,7 +231,8 @@ vi.mock('~/components/domains/content/TextContent.vue', () => ({
       blocId: { type: String, default: '' },
     },
     setup(props) {
-      return () => h('div', { class: 'text-content-stub' }, `content:${props.blocId}`)
+      return () =>
+        h('div', { class: 'text-content-stub' }, `content:${props.blocId}`)
     },
   }),
 }))
@@ -188,7 +244,8 @@ vi.mock('~/components/shared/ui/ImpactScore.vue', () => ({
       score: { type: Number, default: 0 },
     },
     setup(props) {
-      return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+      return () =>
+        h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
     },
   }),
 }))
@@ -230,7 +287,12 @@ const categoryFixture = {
   availableImpactScoreCriterias: ['POWER', 'REPAIRABILITY'],
   attributesConfig: {
     configs: [
-      { key: 'POWER', name: 'Energy efficiency', icon: 'mdi-flash', participateInACV: new Set(['USE', 'TRANSPORTATION']) },
+      {
+        key: 'POWER',
+        name: 'Energy efficiency',
+        icon: 'mdi-flash',
+        participateInACV: new Set(['USE', 'TRANSPORTATION']),
+      },
       {
         key: 'REPAIRABILITY',
         name: 'Repairability index',
@@ -252,7 +314,8 @@ const vuetifyStubs = {
   'v-container': defineComponent({
     name: 'VContainerStub',
     setup(_props, { slots, attrs }) {
-      return () => h('div', { class: 'v-container-stub', ...attrs }, slots.default?.())
+      return () =>
+        h('div', { class: 'v-container-stub', ...attrs }, slots.default?.())
     },
   }),
   'v-row': { template: '<div class="v-row-stub"><slot /></div>' },
@@ -264,22 +327,32 @@ const vuetifyStubs = {
   'v-btn': defineComponent({
     name: 'VBtnStub',
     setup(_props, { slots, attrs }) {
-      return () => h('button', { class: 'v-btn-stub', type: 'button', ...attrs }, slots.default?.())
+      return () =>
+        h(
+          'button',
+          { class: 'v-btn-stub', type: 'button', ...attrs },
+          slots.default?.()
+        )
     },
   }),
   'v-icon': { template: '<i class="v-icon-stub"><slot /></i>' },
   'v-avatar': { template: '<div class="v-avatar-stub"><slot /></div>' },
   'v-img': defineComponent({
     name: 'VImgStub',
-    props: { src: { type: String, default: '' }, alt: { type: String, default: '' } },
+    props: {
+      src: { type: String, default: '' },
+      alt: { type: String, default: '' },
+    },
     setup(props) {
-      return () => h('img', { class: 'v-img-stub', src: props.src, alt: props.alt })
+      return () =>
+        h('img', { class: 'v-img-stub', src: props.src, alt: props.alt })
     },
   }),
   'v-table': defineComponent({
     name: 'VTableStub',
     setup(_props, { slots, attrs }) {
-      return () => h('table', { class: 'v-table-stub', ...attrs }, slots.default?.())
+      return () =>
+        h('table', { class: 'v-table-stub', ...attrs }, slots.default?.())
     },
   }),
   'v-divider': { template: '<hr class="v-divider-stub" />' },
@@ -331,7 +404,7 @@ describe('Category ecosystem Impact Score page', () => {
 
     const navItems = wrapper.findAll('.sticky-nav-stub__item')
     expect(navItems).toHaveLength(5)
-    expect(navItems.map((item) => item.text())).toEqual([
+    expect(navItems.map(item => item.text())).toEqual([
       'Overview',
       'Purpose & data',
       'Criteria',
@@ -364,7 +437,9 @@ describe('Category ecosystem Impact Score page', () => {
     expect(table).toContain('0.30')
     expect(table).toContain('0.35')
 
-    const transparencyCards = wrapper.findAll('.category-ecoscore__transparency-card')
+    const transparencyCards = wrapper.findAll(
+      '.category-ecoscore__transparency-card'
+    )
     expect(transparencyCards).toHaveLength(2)
     expect(transparencyCards[0].text()).toContain('Open-source methodology')
   })
@@ -376,7 +451,10 @@ describe('Category ecosystem Impact Score page', () => {
     const scrollSpy = vi.spyOn(window, 'scrollTo')
     const originalGetElementById = document.getElementById.bind(document)
     vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
-      return originalGetElementById(id) ?? (wrapper.element.querySelector(`#${id}`) as HTMLElement | null)
+      return (
+        originalGetElementById(id) ??
+        (wrapper.element.querySelector(`#${id}`) as HTMLElement | null)
+      )
     })
 
     const navItems = wrapper.findAll('.sticky-nav-stub__item')

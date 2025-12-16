@@ -40,9 +40,17 @@ describe('_subset-to-filters helpers', () => {
     expect(merged).toHaveLength(2)
     expect(merged).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ field: 'price.min', operator: 'range', max: 500 }),
-        expect.objectContaining({ field: 'price.min', operator: 'range', min: 0 }),
-      ]),
+        expect.objectContaining({
+          field: 'price.min',
+          operator: 'range',
+          max: 500,
+        }),
+        expect.objectContaining({
+          field: 'price.min',
+          operator: 'range',
+          min: 0,
+        }),
+      ])
     )
   })
 
@@ -51,23 +59,34 @@ describe('_subset-to-filters helpers', () => {
       {
         id: 'new-items',
         group: 'condition',
-        criterias: [{ field: 'price.conditions', operator: 'EQUALS', value: 'NEW' }],
+        criterias: [
+          { field: 'price.conditions', operator: 'EQUALS', value: 'NEW' },
+        ],
       },
       {
         id: 'used-items',
         group: 'condition',
-        criterias: [{ field: 'price.conditions', operator: 'EQUALS', value: 'OCCASION' }],
+        criterias: [
+          { field: 'price.conditions', operator: 'EQUALS', value: 'OCCASION' },
+        ],
       },
     ]
 
-    const request = buildFilterRequestFromSubsets(subsets, ['new-items', 'used-items'])
+    const request = buildFilterRequestFromSubsets(subsets, [
+      'new-items',
+      'used-items',
+    ])
 
     expect(request).toEqual({
       filterGroups: [
         {
           should: [
             { field: 'price.conditions', operator: 'term', terms: ['NEW'] },
-            { field: 'price.conditions', operator: 'term', terms: ['OCCASION'] },
+            {
+              field: 'price.conditions',
+              operator: 'term',
+              terms: ['OCCASION'],
+            },
           ],
         },
       ],
@@ -79,16 +98,23 @@ describe('_subset-to-filters helpers', () => {
       {
         id: 'mid-range',
         group: 'price',
-        criterias: [{ field: 'price.min', operator: 'LOWER_THAN', value: '800' }],
+        criterias: [
+          { field: 'price.min', operator: 'LOWER_THAN', value: '800' },
+        ],
       },
       {
         id: 'entry',
         group: 'price',
-        criterias: [{ field: 'price.min', operator: 'LOWER_THAN', value: '500' }],
+        criterias: [
+          { field: 'price.min', operator: 'LOWER_THAN', value: '500' },
+        ],
       },
     ]
 
-    const request = buildFilterRequestFromSubsets(subsets, ['mid-range', 'entry'])
+    const request = buildFilterRequestFromSubsets(subsets, [
+      'mid-range',
+      'entry',
+    ])
 
     expect(request).toEqual({
       filterGroups: [
@@ -107,16 +133,23 @@ describe('_subset-to-filters helpers', () => {
       {
         id: 'budget',
         group: 'price',
-        criterias: [{ field: 'price.min', operator: 'LOWER_THAN', value: '500' }],
+        criterias: [
+          { field: 'price.min', operator: 'LOWER_THAN', value: '500' },
+        ],
       },
       {
         id: 'premium',
         group: 'price',
-        criterias: [{ field: 'price.min', operator: 'GREATER_THAN', value: '1000' }],
+        criterias: [
+          { field: 'price.min', operator: 'GREATER_THAN', value: '1000' },
+        ],
       },
     ]
 
-    const request = buildFilterRequestFromSubsets(subsets, ['budget', 'premium'])
+    const request = buildFilterRequestFromSubsets(subsets, [
+      'budget',
+      'premium',
+    ])
 
     expect(request).toEqual({
       filterGroups: [

@@ -8,7 +8,7 @@ export const usePluralizedTranslation = () => {
   const translatePlural = (
     baseKey: string,
     count: number,
-    values: Record<string, unknown> = {},
+    values: Record<string, unknown> = {}
   ): string => {
     const selection = pluralRules.value.select(count)
     const normalized = selection === 'one' && count === 0 ? 'other' : selection

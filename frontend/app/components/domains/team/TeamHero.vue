@@ -22,15 +22,12 @@ const headingId = useId()
   >
     <v-container class="py-12 px-4 text-center mx-auto" max-width="xl">
       <div class="team-hero__wrapper">
-
         <h1 :id="headingId" class="team-hero__title">{{ props.title }}</h1>
         <p class="team-hero__subtitle">{{ props.subtitle }}</p>
 
         <div class="team-hero__content">
           <TextContent :bloc-id="props.descriptionBlocId" :ipsum-length="220" />
         </div>
-
-
       </div>
     </v-container>
   </v-sheet>

@@ -37,7 +37,7 @@ const props = withDefaults(
     contentAlign: 'start',
     enableAplats: false,
     aplatSvg: '/images/home/parallax-aplats.svg',
-  },
+  }
 )
 
 const theme = useTheme()
@@ -52,7 +52,9 @@ const normalizeSources = (value?: string | string[]) => {
     return []
   }
 
-  return (Array.isArray(value) ? value : [value]).filter((item) => Boolean(item?.trim()))
+  return (Array.isArray(value) ? value : [value]).filter(item =>
+    Boolean(item?.trim())
+  )
 }
 
 const resolvedBackgrounds = computed(() => {
@@ -67,7 +69,7 @@ const resolvedBackgrounds = computed(() => {
     : normalizeSources(props.backgroundLight)
 
   const fallbackBackgrounds = normalizeSources(props.backgroundDark).concat(
-    normalizeSources(props.backgroundLight),
+    normalizeSources(props.backgroundLight)
   )
 
   if (themedBackgrounds.length > 0) {
@@ -82,11 +84,15 @@ const backgroundImage = computed(() => {
     return ''
   }
 
-  return resolvedBackgrounds.value.map((background) => `url('${background}')`).join(', ')
+  return resolvedBackgrounds.value
+    .map(background => `url('${background}')`)
+    .join(', ')
 })
 
 const isBelowBreakpoint = computed(
-  () => props.disableParallaxBelow > 0 && display.width.value < props.disableParallaxBelow,
+  () =>
+    props.disableParallaxBelow > 0 &&
+    display.width.value < props.disableParallaxBelow
 )
 
 const parallaxEnabled = computed(
@@ -94,11 +100,11 @@ const parallaxEnabled = computed(
     import.meta.client &&
     !isBelowBreakpoint.value &&
     prefersReducedMotion.value === 'no-preference' &&
-    props.parallaxAmount > 0,
+    props.parallaxAmount > 0
 )
 
 const parallaxOffset = computed(() =>
-  parallaxEnabled.value ? `${-y.value * props.parallaxAmount}px` : '0px',
+  parallaxEnabled.value ? `${-y.value * props.parallaxAmount}px` : '0px'
 )
 
 const mediaStyles = computed<CSSProperties>(() => ({
@@ -119,13 +125,19 @@ const innerStyles = computed<CSSProperties>(() => ({
 }))
 
 const contentAlignClass = computed(() =>
-  props.contentAlign === 'center' ? 'parallax-section__inner--center' : 'parallax-section__inner--start',
+  props.contentAlign === 'center'
+    ? 'parallax-section__inner--center'
+    : 'parallax-section__inner--start'
 )
 </script>
 
 <template>
   <section :id="props.id" class="parallax-section" :aria-label="ariaLabel">
-    <div class="parallax-section__media" :style="mediaStyles" aria-hidden="true">
+    <div
+      class="parallax-section__media"
+      :style="mediaStyles"
+      aria-hidden="true"
+    >
       <div class="parallax-section__image" />
       <div class="parallax-section__overlay" />
       <div v-if="enableAplats" class="parallax-section__aplats">
@@ -142,7 +154,11 @@ const contentAlignClass = computed(() =>
     </div>
     <div class="parallax-section__content" :style="contentStyles">
       <v-container fluid class="parallax-section__container">
-        <div class="parallax-section__inner" :class="contentAlignClass" :style="innerStyles">
+        <div
+          class="parallax-section__inner"
+          :class="contentAlignClass"
+          :style="innerStyles"
+        >
           <slot />
         </div>
       </v-container>
@@ -151,85 +167,85 @@ const contentAlignClass = computed(() =>
 </template>
 
 <style scoped lang="sass">
-  .parallax-section
-    position: relative
-    overflow: hidden
-    background-color: rgb(var(--v-theme-surface-default))
+.parallax-section
+  position: relative
+  overflow: hidden
+  background-color: rgb(var(--v-theme-surface-default))
 
-  .parallax-section__media
-    position: absolute
-    inset: 0
-    width: 100%
-    height: 100%
-    pointer-events: none
+.parallax-section__media
+  position: absolute
+  inset: 0
+  width: 100%
+  height: 100%
+  pointer-events: none
 
+.parallax-section__image
+  position: absolute
+  inset: -10%
+  background-image: var(--parallax-image)
+  background-size: cover
+  background-repeat: no-repeat
+  background-position: center center
+  transform: translate3d(0, var(--parallax-offset), 0)
+  transition: transform 160ms ease-out
+  filter: saturate(1.05)
+
+.parallax-section__overlay
+  position: absolute
+  inset: 0
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--parallax-overlay-color) 12%, transparent) 0%,
+    color-mix(in srgb, var(--parallax-overlay-color) 65%, transparent) 42%,
+    color-mix(in srgb, var(--parallax-overlay-color) 82%, transparent) 100%
+  )
+  mix-blend-mode: multiply
+  opacity: var(--parallax-overlay-opacity)
+
+.parallax-section__aplats
+  position: absolute
+  inset: 0
+  display: flex
+  align-items: center
+  justify-content: center
+  opacity: 0.45
+  filter: drop-shadow(0 20px 45px rgba(var(--v-theme-shadow-primary-600), 0.22))
+
+.parallax-section__aplat-image
+  max-width: min(100%, 1024px)
+  width: 90%
+  height: auto
+
+.parallax-section__content
+  position: relative
+  z-index: 1
+
+.parallax-section__container
+  padding-inline: clamp(1.5rem, 5vw, 4rem)
+
+.parallax-section__inner
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+
+.parallax-section__inner--center
+  align-items: center
+  text-align: center
+
+.parallax-section__inner--start
+  align-items: stretch
+
+:deep(.home-section)
+  background: transparent
+  box-shadow: none
+
+:deep(.home-section__container)
+  padding-inline: 0
+
+@media (max-width: 959px)
   .parallax-section__image
-    position: absolute
-    inset: -10%
-    background-image: var(--parallax-image)
-    background-size: cover
-    background-repeat: no-repeat
-    background-position: center center
-    transform: translate3d(0, var(--parallax-offset), 0)
-    transition: transform 160ms ease-out
-    filter: saturate(1.05)
+    transform: none !important
 
   .parallax-section__overlay
-    position: absolute
-    inset: 0
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--parallax-overlay-color) 12%, transparent) 0%,
-      color-mix(in srgb, var(--parallax-overlay-color) 65%, transparent) 42%,
-      color-mix(in srgb, var(--parallax-overlay-color) 82%, transparent) 100%
-    )
-    mix-blend-mode: multiply
-    opacity: var(--parallax-overlay-opacity)
-
-  .parallax-section__aplats
-    position: absolute
-    inset: 0
-    display: flex
-    align-items: center
-    justify-content: center
-    opacity: 0.45
-    filter: drop-shadow(0 20px 45px rgba(var(--v-theme-shadow-primary-600), 0.22))
-
-  .parallax-section__aplat-image
-    max-width: min(100%, 1024px)
-    width: 90%
-    height: auto
-
-  .parallax-section__content
-    position: relative
-    z-index: 1
-
-  .parallax-section__container
-    padding-inline: clamp(1.5rem, 5vw, 4rem)
-
-  .parallax-section__inner
-    display: flex
-    flex-direction: column
-    gap: clamp(1.5rem, 4vw, 2.5rem)
-
-  .parallax-section__inner--center
-    align-items: center
-    text-align: center
-
-  .parallax-section__inner--start
-    align-items: stretch
-
-  :deep(.home-section)
-    background: transparent
-    box-shadow: none
-
-  :deep(.home-section__container)
-    padding-inline: 0
-
-  @media (max-width: 959px)
-    .parallax-section__image
-      transform: none !important
-
-    .parallax-section__overlay
-      opacity: calc(var(--parallax-overlay-opacity) + 0.08)
+    opacity: calc(var(--parallax-overlay-opacity) + 0.08)
 </style>

@@ -4,11 +4,17 @@ import { join, relative, sep } from 'node:path'
 const PAGE_EXTENSION_PATTERN = /\.(vue|md)$/iu
 const DYNAMIC_SEGMENT_PATTERN = /(^|\/)\[[^/]+?\](?=\/|$)/u
 const EXCLUDED_ROUTE_SEGMENTS = new Set(['auth', 'contrib'])
-const EXCLUDED_ROUTE_PATHS = new Set(['index-v1', 'xwiki-fullpage', 'blog/test-images'])
+const EXCLUDED_ROUTE_PATHS = new Set([
+  'index-v1',
+  'xwiki-fullpage',
+  'blog/test-images',
+])
 
 const toPosixPath = (value: string): string => value.split(sep).join('/')
 
-export const normalizeRouteNameFromRelativePath = (relativePath: string): string | null => {
+export const normalizeRouteNameFromRelativePath = (
+  relativePath: string
+): string | null => {
   if (!PAGE_EXTENSION_PATTERN.test(relativePath)) {
     return null
   }
@@ -25,7 +31,7 @@ export const normalizeRouteNameFromRelativePath = (relativePath: string): string
 
   const segments = withoutExtension.split('/')
 
-  if (segments.some((segment) => EXCLUDED_ROUTE_SEGMENTS.has(segment))) {
+  if (segments.some(segment => EXCLUDED_ROUTE_SEGMENTS.has(segment))) {
     return null
   }
 
@@ -48,7 +54,7 @@ export interface CollectStaticPageRouteNamesOptions {
 
 export const collectStaticPageRouteNames = (
   directory: string,
-  options: CollectStaticPageRouteNamesOptions = {},
+  options: CollectStaticPageRouteNamesOptions = {}
 ): string[] => {
   const rootDir = options.rootDir ?? directory
   const entries = readdirSync(directory, { withFileTypes: true })
@@ -60,14 +66,17 @@ export const collectStaticPageRouteNames = (
     if (entry.isDirectory()) {
       const relativeDirectory = toPosixPath(relative(rootDir, entryPath))
 
-      if (relativeDirectory && DYNAMIC_SEGMENT_PATTERN.test(relativeDirectory)) {
+      if (
+        relativeDirectory &&
+        DYNAMIC_SEGMENT_PATTERN.test(relativeDirectory)
+      ) {
         continue
       }
 
       if (relativeDirectory) {
         const segments = relativeDirectory.split('/')
 
-        if (segments.some((segment) => EXCLUDED_ROUTE_SEGMENTS.has(segment))) {
+        if (segments.some(segment => EXCLUDED_ROUTE_SEGMENTS.has(segment))) {
           continue
         }
       }

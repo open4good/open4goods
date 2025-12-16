@@ -1,15 +1,22 @@
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
 
-import { THEME_ASSETS_FALLBACK, themeAssets, type ThemeAssetKey } from '~~/config/theme/assets'
+import {
+  THEME_ASSETS_FALLBACK,
+  themeAssets,
+  type ThemeAssetKey,
+} from '~~/config/theme/assets'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
 export type ThemedAssetIndex = Record<string, string>
 
-const rawAssetIndex = import.meta.glob('../assets/themes/**/*.{png,jpg,jpeg,svg,webp,avif,ico}', {
-  eager: true,
-  import: 'default',
-}) as Record<string, string>
+const rawAssetIndex = import.meta.glob(
+  '../assets/themes/**/*.{png,jpg,jpeg,svg,webp,avif,ico}',
+  {
+    eager: true,
+    import: 'default',
+  }
+) as Record<string, string>
 
 const normalizePath = (filePath: string): string =>
   filePath
@@ -22,12 +29,12 @@ const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
     ...acc,
     [normalizePath(filePath)]: url as string,
   }),
-  {},
+  {}
 )
 
 export const resolveAssetPathForTheme = (
   assetKey: ThemeAssetKey,
-  themeName: ThemeName,
+  themeName: ThemeName
 ): string | undefined => {
   const fromTheme = themeAssets[themeName]?.[assetKey]
   const fromCommon = themeAssets.common?.[assetKey]
@@ -40,7 +47,7 @@ export const resolveThemedAssetUrlFromIndex = (
   relativePath: string,
   themeName: ThemeName,
   index: ThemedAssetIndex,
-  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK,
+  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK
 ): string | undefined => {
   const sanitizedPath = relativePath.replace(/^\//, '')
   const candidates = [
@@ -61,18 +68,23 @@ export const resolveThemedAssetUrlFromIndex = (
 const useCurrentThemeName = () => {
   const vuetifyTheme = useTheme()
 
-  return computed<ThemeName>(() => resolveThemeName(vuetifyTheme.global.name.value, THEME_ASSETS_FALLBACK))
+  return computed<ThemeName>(() =>
+    resolveThemeName(vuetifyTheme.global.name.value, THEME_ASSETS_FALLBACK)
+  )
 }
 
 export const resolveThemedAssetUrl = (
   relativePath: string,
-  themeName: ThemeName,
-): string | undefined => resolveThemedAssetUrlFromIndex(relativePath, themeName, themedAssetIndex)
+  themeName: ThemeName
+): string | undefined =>
+  resolveThemedAssetUrlFromIndex(relativePath, themeName, themedAssetIndex)
 
 export const useThemedAsset = (relativePath: string) => {
   const themeName = useCurrentThemeName()
 
-  return computed(() => resolveThemedAssetUrl(relativePath, themeName.value) ?? '')
+  return computed(
+    () => resolveThemedAssetUrl(relativePath, themeName.value) ?? ''
+  )
 }
 
 export const useThemeAsset = (assetKey: ThemeAssetKey) => {

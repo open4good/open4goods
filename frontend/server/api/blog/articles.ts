@@ -13,10 +13,7 @@ import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
  */
 export default defineEventHandler(async (event): Promise<PageDto> => {
   // Set cache headers for 1 hour
-  setDomainLanguageCacheHeaders(
-    event,
-    'public, max-age=3600, s-maxage=3600'
-  )
+  setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
   const rawHost =
     event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
@@ -32,8 +29,12 @@ export default defineEventHandler(async (event): Promise<PageDto> => {
     : query.pageSize
   const tagParam = Array.isArray(query.tag) ? query.tag[0] : query.tag
 
-  const pageNumber = pageNumberParam ? Number.parseInt(pageNumberParam, 10) : undefined
-  const pageSize = pageSizeParam ? Number.parseInt(pageSizeParam, 10) : undefined
+  const pageNumber = pageNumberParam
+    ? Number.parseInt(pageNumberParam, 10)
+    : undefined
+  const pageSize = pageSizeParam
+    ? Number.parseInt(pageSizeParam, 10)
+    : undefined
 
   try {
     // Use the service to fetch articles

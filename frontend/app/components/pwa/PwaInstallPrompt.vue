@@ -53,7 +53,12 @@
             {{ updateDescription }}
           </p>
           <template #actions>
-            <v-btn color="warning" size="small" data-test="pwa-update-cta" @click="handleUpdate">
+            <v-btn
+              color="warning"
+              size="small"
+              data-test="pwa-update-cta"
+              @click="handleUpdate"
+            >
               {{ updateCta }}
             </v-btn>
           </template>
@@ -125,12 +130,20 @@ const installDescription = computed(() => String(t('pwa.install.description')))
 const installCta = computed(() => String(t('pwa.install.cta')))
 const installDismissLabel = computed(() => String(t('pwa.install.dismiss')))
 const updateTitle = computed(() => String(t('pwa.install.updateTitle')))
-const updateDescription = computed(() => String(t('pwa.install.updateDescription')))
+const updateDescription = computed(() =>
+  String(t('pwa.install.updateDescription'))
+)
 const updateCta = computed(() => String(t('pwa.install.updateCta')))
 const offlineReadyTitle = computed(() => String(t('pwa.install.offlineReady')))
-const offlineReadyDescription = computed(() => String(t('pwa.install.offlineReadyDescription')))
-const installSuccessMessage = computed(() => installOutcome.value === 'accepted' ? String(t('pwa.install.success')) : '')
-const installErrorMessage = computed(() => installError.value ? String(t('pwa.install.error')) : '')
+const offlineReadyDescription = computed(() =>
+  String(t('pwa.install.offlineReadyDescription'))
+)
+const installSuccessMessage = computed(() =>
+  installOutcome.value === 'accepted' ? String(t('pwa.install.success')) : ''
+)
+const installErrorMessage = computed(() =>
+  installError.value ? String(t('pwa.install.error')) : ''
+)
 
 const handleInstall = async () => {
   await requestInstall()

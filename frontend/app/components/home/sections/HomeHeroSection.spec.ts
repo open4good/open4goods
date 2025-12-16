@@ -5,7 +5,7 @@ import HomeHeroSection from './HomeHeroSection.vue'
 
 const messages: Record<string, string> = {
   'home.hero.eyebrow': 'notre comparateur',
-  'home.hero.title': 'Réconcilier écologie et pouvoir d\'achat',
+  'home.hero.title': "Réconcilier écologie et pouvoir d'achat",
   'home.hero.subtitle': 'Gagne du temps. Choisis librement.',
   'home.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
   'home.hero.search.placeholder': 'Recherchez un produit ou une catégorie',
@@ -21,7 +21,8 @@ const helperItems = [
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => messages[key] ?? key,
-    tm: (key: string) => (key === 'home.hero.search.helpers' ? helperItems : []),
+    tm: (key: string) =>
+      key === 'home.hero.search.helpers' ? helperItems : [],
   }),
 }))
 
@@ -29,14 +30,24 @@ const createStub = (tag: string, className = '') =>
   defineComponent({
     name: `${tag}-stub`,
     setup(_, { slots, attrs }) {
-      return () => h(tag, { class: [className, attrs.class], ...attrs }, slots.default ? slots.default() : [])
+      return () =>
+        h(
+          tag,
+          { class: [className, attrs.class], ...attrs },
+          slots.default ? slots.default() : []
+        )
     },
   })
 
 const VImgStub = defineComponent({
   name: 'VImgStub',
   setup(_, { slots, attrs }) {
-    return () => h('img', { class: ['v-img-stub', attrs.class], ...attrs }, slots.default ? slots.default() : [])
+    return () =>
+      h(
+        'img',
+        { class: ['v-img-stub', attrs.class], ...attrs },
+        slots.default ? slots.default() : []
+      )
   },
 })
 
@@ -75,7 +86,9 @@ describe('HomeHeroSection', () => {
     const icon = wrapper.find('.home-hero__icon')
 
     expect(eyebrow.text()).toBe(messages['home.hero.eyebrow'])
-    expect(icon.attributes('src')).toBe('/pwa-assets/icons/android/android-launchericon-512-512.png')
+    expect(icon.attributes('src')).toBe(
+      '/pwa-assets/icons/android/android-launchericon-512-512.png'
+    )
     expect(icon.attributes('alt')).toBe(messages['home.hero.iconAlt'])
 
     await wrapper.unmount()

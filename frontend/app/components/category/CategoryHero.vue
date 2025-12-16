@@ -70,16 +70,15 @@ const eyebrow = computed(() => props.eyebrow ?? null)
 
 const heroBreadcrumbs = computed<HeroBreadcrumbItem[]>(() => {
   const items = breadcrumbs.value
-    .map((item) => ({
-      title:
-        item.title?.trim().length
-          ? item.title
-          : item.link?.trim().length
-            ? item.link
-            : t('category.hero.missingBreadcrumbTitle'),
+    .map(item => ({
+      title: item.title?.trim().length
+        ? item.title
+        : item.link?.trim().length
+          ? item.link
+          : t('category.hero.missingBreadcrumbTitle'),
       link: item.link?.trim().length ? item.link : undefined,
     }))
-    .filter((item) => item.title.trim().length)
+    .filter(item => item.title.trim().length)
 
   if (!items.length) {
     return []

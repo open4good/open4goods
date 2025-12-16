@@ -10,7 +10,12 @@
       >
         <div v-if="isMobileLayout" class="pwa-offline-indicator__mobile">
           <div class="pwa-offline-indicator__mobile-body">
-            <v-icon icon="mdi-wifi-off" class="pwa-offline-indicator__icon" size="24" aria-hidden="true" />
+            <v-icon
+              icon="mdi-wifi-off"
+              class="pwa-offline-indicator__icon"
+              size="24"
+              aria-hidden="true"
+            />
             <div>
               <p class="pwa-offline-indicator__eyebrow">
                 {{ indicatorLabel }}
@@ -69,7 +74,10 @@
               <v-icon icon="mdi-wifi-off" aria-hidden="true" />
             </v-btn>
           </template>
-          <div class="pwa-offline-indicator__tooltip" data-test="pwa-offline-tooltip">
+          <div
+            class="pwa-offline-indicator__tooltip"
+            data-test="pwa-offline-tooltip"
+          >
             <p class="pwa-offline-indicator__title">
               {{ title }}
             </p>
@@ -119,7 +127,7 @@ const mobileHelper = computed(() => String(t('pwa.offline.mobileHelper')))
 const retryLabel = computed(() => String(t('pwa.offline.cta')))
 const dismissLabel = computed(() => String(t('pwa.offline.dismiss')))
 
-watch(isOnline, (online) => {
+watch(isOnline, online => {
   if (online) {
     offlineDismissed.value = false
   }

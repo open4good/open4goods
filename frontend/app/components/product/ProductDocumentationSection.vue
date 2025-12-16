@@ -9,7 +9,12 @@
       <nav
         class="product-docs__nav"
         role="tablist"
-        :aria-label="tWithFallback('product.docs.navigationAria', 'Product documentation list')"
+        :aria-label="
+          tWithFallback(
+            'product.docs.navigationAria',
+            'Product documentation list'
+          )
+        "
         :aria-activedescendant="activeTabId ?? undefined"
         data-testid="product-docs-nav"
       >
@@ -17,7 +22,9 @@
           v-if="tabsOverflowing"
           type="button"
           class="product-docs__nav-arrow"
-          :aria-label="tWithFallback('product.docs.controls.scrollLeft', 'Scroll left')"
+          :aria-label="
+            tWithFallback('product.docs.controls.scrollLeft', 'Scroll left')
+          "
           :disabled="!canScrollTabsBackward"
           @click="scrollTabs(-1)"
         >
@@ -40,9 +47,13 @@
             @click="selectPdf(index)"
             @keydown="onTabKeydown(index, $event)"
           >
-            <span class="product-docs__tab-title">{{ truncatedTabTitle(pdf) }}</span>
+            <span class="product-docs__tab-title">{{
+              truncatedTabTitle(pdf)
+            }}</span>
             <div class="product-docs__tab-columns">
-              <div class="product-docs__tab-column product-docs__tab-column--left">
+              <div
+                class="product-docs__tab-column product-docs__tab-column--left"
+              >
                 <span
                   v-for="(item, leftIndex) in getTabLeftMeta(pdf)"
                   :key="`left-${pdf.cacheKey ?? index}-${leftIndex}`"
@@ -51,7 +62,9 @@
                   {{ item }}
                 </span>
               </div>
-              <div class="product-docs__tab-column product-docs__tab-column--right">
+              <div
+                class="product-docs__tab-column product-docs__tab-column--right"
+              >
                 <span
                   v-for="(item, rightIndex) in getTabRightMeta(pdf)"
                   :key="`right-${pdf.cacheKey ?? index}-${rightIndex}`"
@@ -68,7 +81,9 @@
           v-if="tabsOverflowing"
           type="button"
           class="product-docs__nav-arrow"
-          :aria-label="tWithFallback('product.docs.controls.scrollRight', 'Scroll right')"
+          :aria-label="
+            tWithFallback('product.docs.controls.scrollRight', 'Scroll right')
+          "
           :disabled="!canScrollTabsForward"
           @click="scrollTabs(1)"
         >
@@ -85,7 +100,9 @@
       >
         <header class="product-docs__viewer-header">
           <div class="product-docs__viewer-heading">
-            <h3 class="product-docs__viewer-title" :title="activePdfTitle">{{ activePdfDisplayTitle }}</h3>
+            <h3 class="product-docs__viewer-title" :title="activePdfTitle">
+              {{ activePdfDisplayTitle }}
+            </h3>
             <p v-if="activePdfMetaLeft" class="product-docs__viewer-meta">
               {{ activePdfMetaLeft }}
             </p>
@@ -101,17 +118,28 @@
               rel="noopener"
               class="product-docs__download"
             >
-              <v-icon icon="mdi-file-pdf-box" size="20" class="product-docs__download-icon" />
+              <v-icon
+                icon="mdi-file-pdf-box"
+                size="20"
+                class="product-docs__download-icon"
+              />
               <span>{{ $t('product.docs.download') }}</span>
             </a>
             <div class="product-docs__viewer-toolbar" role="group">
               <button
                 type="button"
                 class="product-docs__control"
-                :aria-label="tWithFallback('product.docs.controls.rotate', 'Rotate document')"
+                :aria-label="
+                  tWithFallback(
+                    'product.docs.controls.rotate',
+                    'Rotate document'
+                  )
+                "
                 @click="rotateClockwise"
               >
-                {{ tWithFallback('product.docs.controls.rotateLabel', 'Rotate') }}
+                {{
+                  tWithFallback('product.docs.controls.rotateLabel', 'Rotate')
+                }}
               </button>
             </div>
           </div>
@@ -131,7 +159,11 @@
                   :width="viewerWidth"
                   @loaded="onPdfLoaded"
                 />
-                <p v-else class="product-docs__viewer-empty" data-testid="product-docs-preview-empty">
+                <p
+                  v-else
+                  class="product-docs__viewer-empty"
+                  data-testid="product-docs-preview-empty"
+                >
                   {{ $t('product.docs.previewUnavailable') }}
                 </p>
               </div>
@@ -207,7 +239,9 @@ const pdfLoadedPageCount = ref<number | null>(null)
 
 const MAX_TAB_TITLE_LENGTH = 35
 
-const activePdf = computed(() => (activePdfIndex.value >= 0 ? pdfs.value[activePdfIndex.value] ?? null : null))
+const activePdf = computed(() =>
+  activePdfIndex.value >= 0 ? (pdfs.value[activePdfIndex.value] ?? null) : null
+)
 
 const hasPdfs = computed(() => pdfs.value.length > 0)
 
@@ -215,11 +249,17 @@ const sectionUid = useId()
 const panelId = `${sectionUid}-panel`
 const tabId = (index: number) => `${sectionUid}-tab-${index}`
 
-const activeTabId = computed(() => (activePdfIndex.value >= 0 ? tabId(activePdfIndex.value) : null))
+const activeTabId = computed(() =>
+  activePdfIndex.value >= 0 ? tabId(activePdfIndex.value) : null
+)
 
-const totalPages = computed(() => activePdf.value?.numberOfPages ?? pdfLoadedPageCount.value ?? 0)
+const totalPages = computed(
+  () => activePdf.value?.numberOfPages ?? pdfLoadedPageCount.value ?? 0
+)
 
-const viewerWidth = computed(() => (measuredViewerWidth.value > 0 ? measuredViewerWidth.value : undefined))
+const viewerWidth = computed(() =>
+  measuredViewerWidth.value > 0 ? measuredViewerWidth.value : undefined
+)
 
 const viewerRotation = computed(() => ((rotation.value % 360) + 360) % 360)
 
@@ -231,7 +271,8 @@ const languageDisplayNames = computed(() => {
   }
 })
 
-const tWithFallback = (key: string, fallback: string) => (te(key) ? t(key) : fallback)
+const tWithFallback = (key: string, fallback: string) =>
+  te(key) ? t(key) : fallback
 
 const selectPdf = (index: number) => {
   if (index < 0 || index >= pdfs.value.length) {
@@ -280,13 +321,16 @@ const scrollTabs = (direction: number) => {
 
 watch(
   pdfs,
-  (nextPdfs) => {
+  nextPdfs => {
     if (!nextPdfs.length) {
       activePdfIndex.value = -1
       return
     }
 
-    const clampedIndex = Math.min(Math.max(activePdfIndex.value, 0), nextPdfs.length - 1)
+    const clampedIndex = Math.min(
+      Math.max(activePdfIndex.value, 0),
+      nextPdfs.length - 1
+    )
     activePdfIndex.value = clampedIndex
 
     if (import.meta.client) {
@@ -296,7 +340,9 @@ watch(
   { immediate: true }
 )
 
-const updateViewerWidth = (entries: ResizeObserverEntry[] | ResizeObserverEntry) => {
+const updateViewerWidth = (
+  entries: ResizeObserverEntry[] | ResizeObserverEntry
+) => {
   const entry = Array.isArray(entries) ? entries[0] : entries
   const width = entry?.contentRect?.width ?? 0
   measuredViewerWidth.value = width
@@ -307,16 +353,27 @@ let stopViewerResize: (() => void) | undefined
 
 if (import.meta.client) {
   onMounted(() => {
-    const tabResizeObserver = useResizeObserver(tabsTrackRef, updateTabScrollState)
+    const tabResizeObserver = useResizeObserver(
+      tabsTrackRef,
+      updateTabScrollState
+    )
 
     stopTabScrollListeners = [
       useEventListener(tabsTrackRef, 'scroll', updateTabScrollState),
-      useEventListener(window, 'resize', () => requestAnimationFrame(updateTabScrollState)),
+      useEventListener(window, 'resize', () =>
+        requestAnimationFrame(updateTabScrollState)
+      ),
       tabResizeObserver.stop,
     ].filter((stop): stop is () => void => typeof stop === 'function')
 
-    const viewerResizeObserver = useResizeObserver(viewerSurfaceRef, updateViewerWidth)
-    stopViewerResize = typeof viewerResizeObserver.stop === 'function' ? viewerResizeObserver.stop : undefined
+    const viewerResizeObserver = useResizeObserver(
+      viewerSurfaceRef,
+      updateViewerWidth
+    )
+    stopViewerResize =
+      typeof viewerResizeObserver.stop === 'function'
+        ? viewerResizeObserver.stop
+        : undefined
 
     nextTick(() => {
       updateTabScrollState()
@@ -324,7 +381,7 @@ if (import.meta.client) {
   })
 
   onBeforeUnmount(() => {
-    stopTabScrollListeners.forEach((stop) => stop())
+    stopTabScrollListeners.forEach(stop => stop())
     stopTabScrollListeners = []
 
     stopViewerResize?.()
@@ -339,11 +396,15 @@ const onTabKeydown = (index: number, event: KeyboardEvent) => {
   }
 }
 
-const fallbackDocumentTitle = computed(() => tWithFallback('product.docs.documentPdf', 'Document PDF'))
+const fallbackDocumentTitle = computed(() =>
+  tWithFallback('product.docs.documentPdf', 'Document PDF')
+)
 
 const resolvePdfTitle = (pdf: ProductPdfDto) => {
   const candidates = [pdf.extractedTitle, pdf.metadataTitle, pdf.fileName]
-  const resolved = candidates.find((value): value is string => typeof value === 'string' && value.trim().length)
+  const resolved = candidates.find(
+    (value): value is string => typeof value === 'string' && value.trim().length
+  )
   return resolved?.trim() ?? fallbackDocumentTitle.value
 }
 
@@ -384,7 +445,9 @@ const formatDate = (pdf: ProductPdfDto) => {
   }
 
   try {
-    return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(new Date(timestamp))
+    return new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'medium',
+    }).format(new Date(timestamp))
   } catch {
     return null
   }
@@ -437,22 +500,36 @@ const formatBytes = (bytes?: number) => {
 }
 
 const getTabLeftMeta = (pdf: ProductPdfDto) => {
-  const inferredPageCount = pdf === activePdf.value ? totalPages.value : pdf.numberOfPages
+  const inferredPageCount =
+    pdf === activePdf.value ? totalPages.value : pdf.numberOfPages
 
-  return [formatPageCount(inferredPageCount), formatDate(pdf), formatLanguage(pdf)].filter(
-    (value): value is string => Boolean(value)
-  )
+  return [
+    formatPageCount(inferredPageCount),
+    formatDate(pdf),
+    formatLanguage(pdf),
+  ].filter((value): value is string => Boolean(value))
 }
 
 const getTabRightMeta = (pdf: ProductPdfDto) =>
-  [formatBytes(pdf.fileSize), formatProducer(pdf)].filter((value): value is string => Boolean(value))
+  [formatBytes(pdf.fileSize), formatProducer(pdf)].filter(
+    (value): value is string => Boolean(value)
+  )
 
-const joinMetaParts = (parts: string[]) => parts.filter((value) => value?.trim().length).join(' · ')
+const joinMetaParts = (parts: string[]) =>
+  parts.filter(value => value?.trim().length).join(' · ')
 
-const activePdfTitle = computed(() => (activePdf.value ? pdfTitle(activePdf.value) : t('product.docs.title')))
-const activePdfDisplayTitle = computed(() => truncateTitle(activePdfTitle.value))
-const activePdfMetaLeft = computed(() => (activePdf.value ? joinMetaParts(getTabLeftMeta(activePdf.value)) : ''))
-const activePdfMetaRight = computed(() => (activePdf.value ? joinMetaParts(getTabRightMeta(activePdf.value)) : ''))
+const activePdfTitle = computed(() =>
+  activePdf.value ? pdfTitle(activePdf.value) : t('product.docs.title')
+)
+const activePdfDisplayTitle = computed(() =>
+  truncateTitle(activePdfTitle.value)
+)
+const activePdfMetaLeft = computed(() =>
+  activePdf.value ? joinMetaParts(getTabLeftMeta(activePdf.value)) : ''
+)
+const activePdfMetaRight = computed(() =>
+  activePdf.value ? joinMetaParts(getTabRightMeta(activePdf.value)) : ''
+)
 
 watch(
   activePdf,
@@ -473,7 +550,6 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
     pdfLoadedPageCount.value = Number(pages)
   }
 }
-
 </script>
 
 <style scoped>
@@ -525,7 +601,10 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   font-size: 1.2rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .product-docs__nav-arrow:hover:not(:disabled) {
@@ -572,7 +651,10 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   scroll-snap-align: start;
 }
 
@@ -670,7 +752,9 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   color: rgb(var(--v-theme-text-on-accent));
   background: rgb(var(--v-theme-accent-primary-highlight));
   box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-docs__download-icon {
@@ -707,7 +791,10 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .product-docs__control:hover:not(:disabled) {

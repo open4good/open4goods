@@ -31,7 +31,9 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 const routeLoading = useState<boolean>('routeLoading', () => false)
 const { t } = useI18n()
 
-const spinnerLabel = computed(() => String(t('components.pageLoadingOverlay.label')))
+const spinnerLabel = computed(() =>
+  String(t('components.pageLoadingOverlay.label'))
+)
 const scrimColor = computed(() => 'rgba(var(--v-theme-surface-default), 0.72)')
 
 const previousOverflow = ref<string | null>(null)
@@ -72,14 +74,14 @@ const unlockScroll = () => {
 if (import.meta.client) {
   watch(
     routeLoading,
-    (isLoading) => {
+    isLoading => {
       if (isLoading) {
         lockScroll()
       } else {
         unlockScroll()
       }
     },
-    { immediate: true },
+    { immediate: true }
   )
 }
 

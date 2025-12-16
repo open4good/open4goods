@@ -17,12 +17,25 @@
         :paused="!active"
         @decode="handleFallbackDecode"
       />
-      <div v-else class="pwa-barcode-scanner__placeholder" data-test="pwa-barcode-placeholder">
-        <v-progress-circular indeterminate size="32" color="primary" class="mr-2" />
+      <div
+        v-else
+        class="pwa-barcode-scanner__placeholder"
+        data-test="pwa-barcode-placeholder"
+      >
+        <v-progress-circular
+          indeterminate
+          size="32"
+          color="primary"
+          class="mr-2"
+        />
         <p class="pwa-barcode-scanner__status">{{ loadingLabel }}</p>
       </div>
     </div>
-    <p v-if="statusMessage" class="pwa-barcode-scanner__status" data-test="pwa-barcode-status">
+    <p
+      v-if="statusMessage"
+      class="pwa-barcode-scanner__status"
+      data-test="pwa-barcode-status"
+    >
       {{ statusMessage }}
     </p>
   </div>
@@ -52,7 +65,9 @@ let detector: BarcodeDetector | null = null
 let detectionFrame: number | null = null
 let fallbackLoader: Promise<void> | null = null
 
-const modeLabel = computed(() => (isUsingNativeScanner.value ? 'native' : 'fallback'))
+const modeLabel = computed(() =>
+  isUsingNativeScanner.value ? 'native' : 'fallback'
+)
 
 const stopNativeScanner = () => {
   if (detectionFrame !== null) {
@@ -61,7 +76,7 @@ const stopNativeScanner = () => {
   }
 
   if (mediaStream) {
-    mediaStream.getTracks().forEach((track) => track.stop())
+    mediaStream.getTracks().forEach(track => track.stop())
     mediaStream = null
   }
 
@@ -105,7 +120,8 @@ const startNativeScanner = async () => {
   }
 
   const hasBarcodeDetector = 'BarcodeDetector' in window
-  const canAccessCamera = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
+  const canAccessCamera =
+    typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
 
   if (!hasBarcodeDetector || !canAccessCamera || props.active === false) {
     return false
@@ -114,12 +130,18 @@ const startNativeScanner = async () => {
   statusMessage.value = ''
 
   try {
-    const detectorCtor = (window as typeof window & { BarcodeDetector: typeof BarcodeDetector }).BarcodeDetector
-    detector = new detectorCtor({ formats: ['ean_13', 'ean_8', 'code_128', 'upc_a'] })
+    const detectorCtor = (
+      window as typeof window & { BarcodeDetector: typeof BarcodeDetector }
+    ).BarcodeDetector
+    detector = new detectorCtor({
+      formats: ['ean_13', 'ean_8', 'code_128', 'upc_a'],
+    })
     mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
-        facingMode: device.isMobileOrTablet ? { ideal: 'environment' } : 'environment',
+        facingMode: device.isMobileOrTablet
+          ? { ideal: 'environment' }
+          : 'environment',
       },
     })
 
@@ -146,11 +168,11 @@ const loadFallbackScanner = async () => {
   }
 
   fallbackLoader = import('vue-barcode-reader')
-    .then((module) => {
+    .then(module => {
       fallbackComponent.value = module.StreamBarcodeReader
       statusMessage.value = ''
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('Fallback scanner failed to load', error)
       statusMessage.value = props.errorLabel
       emit('error', props.errorLabel)
@@ -180,14 +202,14 @@ const handleFallbackDecode = (value: string | null) => {
 
 watch(
   () => props.active,
-  async (isActive) => {
+  async isActive => {
     if (isActive) {
       await initialiseScanner()
     } else {
       stopNativeScanner()
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 onBeforeUnmount(() => {

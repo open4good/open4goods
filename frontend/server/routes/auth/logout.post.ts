@@ -25,7 +25,9 @@ export default defineEventHandler(async (event: H3Event) => {
 
     await $fetch(`${config.apiUrl}/auth/logout`, {
       method: 'POST',
-      headers: cookieHeader.length ? { cookie: cookieHeader.join('; ') } : undefined,
+      headers: cookieHeader.length
+        ? { cookie: cookieHeader.join('; ') }
+        : undefined,
     })
   } catch (err) {
     clearAuthCookies(event, config)
@@ -60,7 +62,11 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     console.error('Logout error', err)
-    throw createError({ statusCode: 500, statusMessage: 'Logout failed', cause: err })
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Logout failed',
+      cause: err,
+    })
   }
 
   clearAuthCookies(event, config)

@@ -5,7 +5,7 @@ import { defineComponent, h } from 'vue'
 import ProductAttributeSourcingLabel from '~~/app/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import type { ProductDto } from '~~/shared/api-client'
 
-type ProductRouteHandler = typeof import('./[gtin]')['default']
+type ProductRouteHandler = (typeof import('./[gtin]'))['default']
 
 const getProductByGtinMock = vi.hoisted(() => vi.fn())
 const useProductServiceMock = vi.hoisted(() =>
@@ -21,7 +21,11 @@ const getRouterParamMock = vi.hoisted(() =>
 )
 const createErrorMock = vi.hoisted(() =>
   vi.fn(
-    (input: { statusCode: number; statusMessage: string; cause?: unknown }) => ({
+    (input: {
+      statusCode: number
+      statusMessage: string
+      cause?: unknown
+    }) => ({
       ...input,
       isCreateError: true,
     })
@@ -60,7 +64,7 @@ const VBtnStub = defineComponent({
           'aria-label': props.ariaLabel,
           type: 'button',
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -72,7 +76,8 @@ const VIconStub = defineComponent({
     color: { type: String, default: '' },
   },
   setup(props) {
-    return () => h('i', { class: 'v-icon-stub', 'data-color': props.color }, props.icon)
+    return () =>
+      h('i', { class: 'v-icon-stub', 'data-color': props.color }, props.icon)
   },
 })
 
@@ -177,17 +182,21 @@ describe('server/api/products/[gtin]', () => {
       logMessage: 'HTTP 502 - Bad Gateway',
     })
     getRouterParamMock.mockImplementation((event, name) => {
-      const context = (event as {
-        context?: { params?: Record<string, string | undefined> }
-      }).context
+      const context = (
+        event as {
+          context?: { params?: Record<string, string | undefined> }
+        }
+      ).context
       return context?.params?.[name]
     })
-    createErrorMock.mockImplementation((input) => ({
+    createErrorMock.mockImplementation(input => ({
       ...input,
       isCreateError: true,
     }))
 
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
 
     handler = (await import('./[gtin]')).default
   })
@@ -288,7 +297,8 @@ describe('server/api/products/[gtin]', () => {
 
     const response = await handler(event)
 
-    const indexedSources = response.attributes?.indexedAttributes?.weight?.sourcing?.sources
+    const indexedSources =
+      response.attributes?.indexedAttributes?.weight?.sourcing?.sources
     expect(Array.isArray(indexedSources)).toBe(true)
     expect(indexedSources).toEqual([
       expect.objectContaining({ datasourceName: 'icecat.biz', value: '1 kg' }),
@@ -296,13 +306,15 @@ describe('server/api/products/[gtin]', () => {
     ])
 
     const groupedSources =
-      response.attributes?.classifiedAttributes?.[0]?.attributes?.[0]?.sourcing?.sources
+      response.attributes?.classifiedAttributes?.[0]?.attributes?.[0]?.sourcing
+        ?.sources
     expect(Array.isArray(groupedSources)).toBe(true)
     expect(groupedSources).toHaveLength(2)
 
     const wrapper = mount(ProductAttributeSourcingLabel, {
       props: {
-        sourcing: response.attributes?.indexedAttributes?.weight?.sourcing ?? null,
+        sourcing:
+          response.attributes?.indexedAttributes?.weight?.sourcing ?? null,
         value: '1 kg',
       },
       global: {

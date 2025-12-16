@@ -11,7 +11,11 @@
       :stats="heroStats"
     />
 
-    <section id="feedback-tabs" class="feedback-tabs" aria-labelledby="feedback-tabs-heading">
+    <section
+      id="feedback-tabs"
+      class="feedback-tabs"
+      aria-labelledby="feedback-tabs-heading"
+    >
       <v-container class="py-16">
         <header class="feedback-tabs__header">
           <p class="feedback-tabs__eyebrow">{{ t('feedback.tabs.eyebrow') }}</p>
@@ -44,7 +48,11 @@
         </v-tabs>
 
         <v-window v-model="selectedTab" class="feedback-tabs__window">
-          <v-window-item v-for="tab in tabs" :key="tab.value" :value="tab.value">
+          <v-window-item
+            v-for="tab in tabs"
+            :key="tab.value"
+            :value="tab.value"
+          >
             <v-row class="g-8 mt-8" align="stretch">
               <v-col cols="12" md="6">
                 <ClientOnly>
@@ -57,18 +65,24 @@
                     :error-message="issueErrorMessages[tab.value]"
                     :empty-state-label="tab.emptyMessage"
                     :vote-button-label="t('feedback.voting.voteButton')"
-                    :vote-button-aria-label="t('feedback.voting.voteButtonAria')"
+                    :vote-button-aria-label="
+                      t('feedback.voting.voteButtonAria')
+                    "
                     :open-issue-label="t('feedback.voting.openIssue')"
                     :status-message="voteStatusMessage"
                     :remaining-votes="remainingVotes"
                     :can-vote="canVote"
                     :vote-pending-id="votingIssueId"
-                    :vote-disabled-when-no-votes-message="t('feedback.voting.noVotes')"
-                    :vote-disabled-when-blocked-message="t('feedback.voting.limitReached')"
+                    :vote-disabled-when-no-votes-message="
+                      t('feedback.voting.noVotes')
+                    "
+                    :vote-disabled-when-blocked-message="
+                      t('feedback.voting.limitReached')
+                    "
                     :issue-icon="tab.icon"
                     :vote-completed-label="t('feedback.voting.voteCompleted')"
                     :voted-issue-ids="votedIssueIds"
-                    @vote="(issueId) => handleVote(issueId, tab.value)"
+                    @vote="issueId => handleVote(issueId, tab.value)"
                   />
 
                   <template #fallback>
@@ -91,11 +105,15 @@
                   :category-icon="tab.icon"
                   :category-type="tab.value"
                   :submitting="submissionState.submitting"
-                  :success="submissionState.success && submittedCategory === tab.value"
+                  :success="
+                    submissionState.success && submittedCategory === tab.value
+                  "
                   :error-message="submissionState.errorMessage"
                   :site-key="siteKey"
                   :author-label="t('feedback.form.fields.author.label')"
-                  :author-placeholder="t('feedback.form.fields.author.placeholder')"
+                  :author-placeholder="
+                    t('feedback.form.fields.author.placeholder')
+                  "
                   :default-author="t('feedback.form.fields.author.default')"
                   :title-label="t('feedback.form.fields.title.label')"
                   :title-placeholder="tab.formTitlePlaceholder"
@@ -104,13 +122,25 @@
                   :submit-label="t('feedback.form.actions.submit')"
                   :reset-label="t('feedback.form.actions.reset')"
                   :success-message="t('feedback.form.feedback.success')"
-                  :missing-captcha-message="t('feedback.form.feedback.missingSiteKey')"
+                  :missing-captcha-message="
+                    t('feedback.form.feedback.missingSiteKey')
+                  "
                   :privacy-notice="t('feedback.form.privacy')"
-                  :captcha-missing-message="t('feedback.form.errors.missingCaptcha')"
-                  :captcha-expired-message="t('feedback.form.errors.captchaExpired')"
-                  :captcha-failed-message="t('feedback.form.errors.captchaFailed')"
-                  :title-too-short-message="t('feedback.form.errors.title.length')"
-                  :message-too-short-message="t('feedback.form.errors.message.length')"
+                  :captcha-missing-message="
+                    t('feedback.form.errors.missingCaptcha')
+                  "
+                  :captcha-expired-message="
+                    t('feedback.form.errors.captchaExpired')
+                  "
+                  :captcha-failed-message="
+                    t('feedback.form.errors.captchaFailed')
+                  "
+                  :title-too-short-message="
+                    t('feedback.form.errors.title.length')
+                  "
+                  :message-too-short-message="
+                    t('feedback.form.errors.message.length')
+                  "
                   :current-locale="currentLocale"
                   :current-url="currentUrl"
                   @submit="handleSubmitFeedback"
@@ -178,8 +208,12 @@ const tabs = computed(() => [
     formTitle: String(t('feedback.form.sections.idea.title')),
     formSubtitle: String(t('feedback.form.sections.idea.subtitle')),
     formIntro: String(t('feedback.form.sections.idea.intro')),
-    formTitlePlaceholder: String(t('feedback.form.sections.idea.titlePlaceholder')),
-    formMessagePlaceholder: String(t('feedback.form.sections.idea.messagePlaceholder')),
+    formTitlePlaceholder: String(
+      t('feedback.form.sections.idea.titlePlaceholder')
+    ),
+    formMessagePlaceholder: String(
+      t('feedback.form.sections.idea.messagePlaceholder')
+    ),
   },
   {
     value: 'BUG' as const,
@@ -192,8 +226,12 @@ const tabs = computed(() => [
     formTitle: String(t('feedback.form.sections.bug.title')),
     formSubtitle: String(t('feedback.form.sections.bug.subtitle')),
     formIntro: String(t('feedback.form.sections.bug.intro')),
-    formTitlePlaceholder: String(t('feedback.form.sections.bug.titlePlaceholder')),
-    formMessagePlaceholder: String(t('feedback.form.sections.bug.messagePlaceholder')),
+    formTitlePlaceholder: String(
+      t('feedback.form.sections.bug.titlePlaceholder')
+    ),
+    formMessagePlaceholder: String(
+      t('feedback.form.sections.bug.messagePlaceholder')
+    ),
   },
 ])
 
@@ -224,7 +262,10 @@ const fetchIssues = async (category: FeedbackCategory) => {
     issueLoadFailed[category] = false
     return response
   } catch (error) {
-    console.warn('Falling back to empty feedback issues list', { category, error })
+    console.warn('Falling back to empty feedback issues list', {
+      category,
+      error,
+    })
     issueErrorMessages[category] = loadErrorLabel.value
     issueLoadFailed[category] = true
     return []
@@ -280,15 +321,21 @@ const loadRemainingVotes = async () => {
   }
 
   try {
-    remainingVotesState.value = await $fetch<FeedbackRemainingVotesDto, string>(votesRemainingEndpoint, {
-      query: buildVotesQuery(),
-      headers: {
-        ...requestHeaders,
-        'cache-control': 'no-cache',
-      },
-    })
+    remainingVotesState.value = await $fetch<FeedbackRemainingVotesDto, string>(
+      votesRemainingEndpoint,
+      {
+        query: buildVotesQuery(),
+        headers: {
+          ...requestHeaders,
+          'cache-control': 'no-cache',
+        },
+      }
+    )
   } catch (error) {
-    console.warn('Unable to load remaining votes, falling back to unknown state', error)
+    console.warn(
+      'Unable to load remaining votes, falling back to unknown state',
+      error
+    )
     remainingVotesState.value = {}
   }
 }
@@ -299,30 +346,40 @@ const loadVoteEligibility = async () => {
   }
 
   try {
-    canVoteState.value = await $fetch<FeedbackVoteEligibilityDto, string>(votesEligibilityEndpoint, {
-      query: buildVotesQuery(),
-      headers: {
-        ...requestHeaders,
-        'cache-control': 'no-cache',
-      },
-    })
+    canVoteState.value = await $fetch<FeedbackVoteEligibilityDto, string>(
+      votesEligibilityEndpoint,
+      {
+        query: buildVotesQuery(),
+        headers: {
+          ...requestHeaders,
+          'cache-control': 'no-cache',
+        },
+      }
+    )
   } catch (error) {
-    console.warn('Unable to determine vote eligibility, assuming voting is allowed', error)
+    console.warn(
+      'Unable to determine vote eligibility, assuming voting is allowed',
+      error
+    )
     canVoteState.value = { canVote: true }
   }
 }
 
-const issuesByType = computed<Record<FeedbackCategory, FeedbackIssueDisplay[]>>(() => ({
-  IDEA: ideaIssues.value,
-  BUG: bugIssues.value,
-}))
+const issuesByType = computed<Record<FeedbackCategory, FeedbackIssueDisplay[]>>(
+  () => ({
+    IDEA: ideaIssues.value,
+    BUG: bugIssues.value,
+  })
+)
 
 const issueLoadingStates = computed<Record<FeedbackCategory, boolean>>(() => ({
   IDEA: ideaIssuesLoading.value,
   BUG: bugIssuesLoading.value,
 }))
 
-const remainingVotes = computed(() => remainingVotesState.value?.remainingVotes ?? null)
+const remainingVotes = computed(
+  () => remainingVotesState.value?.remainingVotes ?? null
+)
 const canVote = computed(() => canVoteState.value?.canVote ?? true)
 
 const voteStatusMessage = computed(() => {
@@ -335,7 +392,9 @@ const voteStatusMessage = computed(() => {
       return String(t('feedback.voting.noVotes'))
     }
 
-    return String(t('feedback.voting.remaining', { count: remainingVotes.value }))
+    return String(
+      t('feedback.voting.remaining', { count: remainingVotes.value })
+    )
   }
 
   return null
@@ -359,7 +418,10 @@ const voteErrors = reactive<Record<FeedbackCategory, string | null>>({
 
 const extractErrorMessage = (error: unknown): string => {
   if (error instanceof FetchError) {
-    const data = error.data as { statusMessage?: string; message?: string } | null
+    const data = error.data as {
+      statusMessage?: string
+      message?: string
+    } | null
 
     if (data?.statusMessage) {
       return data.statusMessage
@@ -390,7 +452,10 @@ const refreshVotesState = async () => {
   await Promise.allSettled([loadRemainingVotes(), loadVoteEligibility()])
 }
 
-const handleVote = async (issueId: string | undefined, category: FeedbackCategory) => {
+const handleVote = async (
+  issueId: string | undefined,
+  category: FeedbackCategory
+) => {
   if (!issueId) {
     return
   }
@@ -448,24 +513,24 @@ const handleVote = async (issueId: string | undefined, category: FeedbackCategor
 
 watch(
   () => voteErrors.IDEA,
-  (error) => {
+  error => {
     if (error) {
       issueErrorMessages.IDEA = error
     } else if (!issueLoadFailed.IDEA) {
       issueErrorMessages.IDEA = null
     }
-  },
+  }
 )
 
 watch(
   () => voteErrors.BUG,
-  (error) => {
+  error => {
     if (error) {
       issueErrorMessages.BUG = error
     } else if (!issueLoadFailed.BUG) {
       issueErrorMessages.BUG = null
     }
-  },
+  }
 )
 
 const handleSubmitFeedback = async (payload: FeedbackFormSubmitPayload) => {
@@ -475,15 +540,19 @@ const handleSubmitFeedback = async (payload: FeedbackFormSubmitPayload) => {
   submittedCategory.value = payload.type as FeedbackCategory
 
   try {
-    const response = await $fetch<FeedbackSubmissionResponseDto>('/api/feedback', {
-      method: 'POST',
-      headers: requestHeaders,
-      body: payload,
-    })
+    const response = await $fetch<FeedbackSubmissionResponseDto>(
+      '/api/feedback',
+      {
+        method: 'POST',
+        headers: requestHeaders,
+        body: payload,
+      }
+    )
 
     if (!response.success) {
       submissionState.success = false
-      submissionState.errorMessage = response.message ?? String(t('feedback.common.genericError'))
+      submissionState.errorMessage =
+        response.message ?? String(t('feedback.common.genericError'))
       return
     }
 
@@ -528,9 +597,18 @@ const heroStats = computed(() => ({
   title: String(t('feedback.hero.stats.title')),
   description: String(t('feedback.hero.stats.description')),
   items: [
-    { icon: 'mdi-progress-check', label: String(t('feedback.hero.stats.items.iterations')) },
-    { icon: 'mdi-vote-outline', label: String(t('feedback.hero.stats.items.votes')) },
-    { icon: 'mdi-database-eye-outline', label: String(t('feedback.hero.stats.items.transparency')) },
+    {
+      icon: 'mdi-progress-check',
+      label: String(t('feedback.hero.stats.items.iterations')),
+    },
+    {
+      icon: 'mdi-vote-outline',
+      label: String(t('feedback.hero.stats.items.votes')),
+    },
+    {
+      icon: 'mdi-database-eye-outline',
+      label: String(t('feedback.hero.stats.items.transparency')),
+    },
   ],
 }))
 
@@ -558,13 +636,16 @@ const openSourceCards = computed(() => [
 ])
 
 const canonicalUrl = computed(() =>
-  new URL(resolveLocalizedRoutePath('feedback', locale.value), requestURL.origin).toString(),
+  new URL(
+    resolveLocalizedRoutePath('feedback', locale.value),
+    requestURL.origin
+  ).toString()
 )
 
 const appendSubmittedIssue = (
   category: FeedbackCategory,
   payload: FeedbackFormSubmitPayload,
-  response: FeedbackSubmissionResponseDto,
+  response: FeedbackSubmissionResponseDto
 ) => {
   const issuesRef = category === 'IDEA' ? ideaIssues : bugIssues
   const existingIssues = issuesRef.value ?? []
@@ -577,7 +658,7 @@ const appendSubmittedIssue = (
     votes: 0,
   }
 
-  const deduplicatedIssues = existingIssues.filter((issue) => {
+  const deduplicatedIssues = existingIssues.filter(issue => {
     if (response.issueNumber && issue.number === response.issueNumber) {
       return false
     }
@@ -586,7 +667,10 @@ const appendSubmittedIssue = (
       return false
     }
 
-    if (!response.issueNumber && issue.title?.trim().toLowerCase() === trimmedTitle.toLowerCase()) {
+    if (
+      !response.issueNumber &&
+      issue.title?.trim().toLowerCase() === trimmedTitle.toLowerCase()
+    ) {
       return false
     }
 
@@ -613,15 +697,20 @@ const handleHeroPrimaryCtaClick = (event: MouseEvent) => {
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 const ogLocale = computed(() => locale.value.replace('-', '_'))
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 const ogImageAlt = computed(() => String(t('feedback.seo.imageAlt')))
 
 const alternateLinks = computed(() =>
-  availableLocales.map((availableLocale) => ({
+  availableLocales.map(availableLocale => ({
     rel: 'alternate' as const,
     hreflang: availableLocale,
-    href: new URL(resolveLocalizedRoutePath('feedback', availableLocale), requestURL.origin).toString(),
-  })),
+    href: new URL(
+      resolveLocalizedRoutePath('feedback', availableLocale),
+      requestURL.origin
+    ).toString(),
+  }))
 )
 
 useSeoMeta({

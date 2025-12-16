@@ -38,9 +38,18 @@
                 class="product-gallery__stage-media"
                 @error="handleImageError"
               />
-              <div v-if="heroMedia.type === 'video'" class="product-gallery__stage-overlay">
-                <v-icon icon="mdi-play-circle-outline" size="56" class="product-gallery__stage-icon" />
-                <span class="product-gallery__sr-only">{{ $t('product.hero.videoBadge') }}</span>
+              <div
+                v-if="heroMedia.type === 'video'"
+                class="product-gallery__stage-overlay"
+              >
+                <v-icon
+                  icon="mdi-play-circle-outline"
+                  size="56"
+                  class="product-gallery__stage-icon"
+                />
+                <span class="product-gallery__sr-only">{{
+                  $t('product.hero.videoBadge')
+                }}</span>
               </div>
             </button>
             <div v-else class="product-gallery__stage-video">
@@ -58,8 +67,13 @@
                 <v-icon icon="mdi-play-circle-outline" size="24" />
                 <span>{{ $t('product.hero.videoBadge') }}</span>
               </div>
-              <div class="product-gallery__stage-overlay product-gallery__stage-overlay--inline" aria-hidden="true">
-                <span class="product-gallery__sr-only">{{ $t('product.hero.videoBadge') }}</span>
+              <div
+                class="product-gallery__stage-overlay product-gallery__stage-overlay--inline"
+                aria-hidden="true"
+              >
+                <span class="product-gallery__sr-only">{{
+                  $t('product.hero.videoBadge')
+                }}</span>
               </div>
               <button
                 type="button"
@@ -77,7 +91,9 @@
 
           <div
             class="product-gallery__thumbnails"
-            :class="{ 'product-gallery__thumbnails--nav': showThumbnailNavigation }"
+            :class="{
+              'product-gallery__thumbnails--nav': showThumbnailNavigation,
+            }"
             role="group"
             :aria-label="thumbnailGroupLabel"
           >
@@ -97,7 +113,11 @@
               class="product-gallery__thumbnails-viewport"
               @scroll="handleThumbnailScroll"
             >
-              <ul ref="thumbnailList" class="product-gallery__thumbnails-list" role="list">
+              <ul
+                ref="thumbnailList"
+                class="product-gallery__thumbnails-list"
+                role="list"
+              >
                 <li
                   v-for="(item, index) in galleryItems"
                   :key="item.id"
@@ -106,7 +126,10 @@
                   <button
                     type="button"
                     class="product-gallery__thumbnail-button"
-                    :class="{ 'product-gallery__thumbnail-button--active': index === activeMediaIndex }"
+                    :class="{
+                      'product-gallery__thumbnail-button--active':
+                        index === activeMediaIndex,
+                    }"
                     data-testid="product-gallery-thumbnail"
                     :aria-label="thumbnailAriaLabel(item, index)"
                     :aria-pressed="index === activeMediaIndex"
@@ -148,7 +171,11 @@
             </button>
           </div>
 
-          <div v-if="pictureSwipeComponent" ref="pictureSwipeContainer" class="product-gallery__lightbox">
+          <div
+            v-if="pictureSwipeComponent"
+            ref="pictureSwipeContainer"
+            class="product-gallery__lightbox"
+          >
             <component
               :is="pictureSwipeComponent"
               ref="pictureSwipeRef"
@@ -214,9 +241,11 @@ const props = defineProps({
   },
 })
 
-type PictureSwipeComponent = typeof import('vue3-picture-swipe')['default']
+type PictureSwipeComponent = (typeof import('vue3-picture-swipe'))['default']
 
-type PictureSwipeComponentInstance = ComponentPublicInstance<{ pswp?: LightboxInstance }> & {
+type PictureSwipeComponentInstance = ComponentPublicInstance<{
+  pswp?: LightboxInstance
+}> & {
   open?: (index: number) => void
   $el?: HTMLElement
 }
@@ -239,19 +268,19 @@ const FALLBACK_IMAGE_SRC = '/images/no-image.png'
 const thumbnailGroupLabel = computed(() =>
   te('product.hero.thumbnails.groupLabel')
     ? t('product.hero.thumbnails.groupLabel')
-    : 'Product media thumbnails',
+    : 'Product media thumbnails'
 )
 
 const previousThumbnailsLabel = computed(() =>
   te('product.hero.thumbnails.previous')
     ? t('product.hero.thumbnails.previous')
-    : 'Scroll thumbnails backward',
+    : 'Scroll thumbnails backward'
 )
 
 const nextThumbnailsLabel = computed(() =>
   te('product.hero.thumbnails.next')
     ? t('product.hero.thumbnails.next')
-    : 'Scroll thumbnails forward',
+    : 'Scroll thumbnails forward'
 )
 
 let thumbnailResizeObserver: ResizeObserver | null = null
@@ -297,7 +326,9 @@ const scrollActiveThumbnailIntoView = () => {
     return
   }
 
-  const activeItem = list.children[activeMediaIndex.value] as HTMLElement | undefined
+  const activeItem = list.children[activeMediaIndex.value] as
+    | HTMLElement
+    | undefined
   if (!activeItem) {
     return
   }
@@ -313,7 +344,10 @@ const scrollActiveThumbnailIntoView = () => {
   }
 
   if (itemEnd > viewportEnd) {
-    viewport.scrollTo({ left: itemEnd - viewport.clientWidth, behavior: 'smooth' })
+    viewport.scrollTo({
+      left: itemEnd - viewport.clientWidth,
+      behavior: 'smooth',
+    })
   }
 }
 
@@ -347,7 +381,10 @@ const observeThumbnailElements = () => {
 
 type ImageModifiers = Parameters<typeof nuxtImage>[1]
 
-const resolveImageUrl = (src: string | null | undefined, modifiers?: ImageModifiers) => {
+const resolveImageUrl = (
+  src: string | null | undefined,
+  modifiers?: ImageModifiers
+) => {
   if (!src) {
     return ''
   }
@@ -359,8 +396,10 @@ const resolveImageUrl = (src: string | null | undefined, modifiers?: ImageModifi
   }
 }
 
-const fallbackDimension = (value: number | null | undefined, fallback: number) =>
-  typeof value === 'number' && value > 0 ? value : fallback
+const fallbackDimension = (
+  value: number | null | undefined,
+  fallback: number
+) => (typeof value === 'number' && value > 0 ? value : fallback)
 
 const handleImageError = (event: Event) => {
   if (!import.meta.client) {
@@ -388,7 +427,7 @@ const coverImageRaw = computed(
     props.product.resources?.coverImagePath ??
     props.product.resources?.externalCover ??
     props.product.base?.coverImagePath ??
-    null,
+    null
 )
 
 interface ProductGalleryItem {
@@ -426,7 +465,10 @@ type LightboxItem = {
 }
 
 interface LightboxInstance {
-  listen(event: 'gettingData', handler: (index: number, item: LightboxItem) => void): void
+  listen(
+    event: 'gettingData',
+    handler: (index: number, item: LightboxItem) => void
+  ): void
   listen(event: string, handler: (...args: unknown[]) => void): void
   getCurrentIndex?: () => number
   container?: HTMLElement
@@ -440,15 +482,12 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
   const videos = props.product.resources?.videos ?? []
 
   const fallbackPoster =
-    coverImageRaw.value ??
-    images[0]?.url ??
-    images[0]?.originalUrl ??
-    ''
+    coverImageRaw.value ?? images[0]?.url ?? images[0]?.originalUrl ?? ''
 
   const imageItems: ProductGalleryItem[] = []
   const videoItems: ProductGalleryItem[] = []
 
-  images.forEach((image) => {
+  images.forEach(image => {
     const original = image.originalUrl ?? image.url ?? ''
     if (!original) {
       return
@@ -458,18 +497,20 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
     const caption = image.datasourceName ?? props.title
     const width = fallbackDimension(image.width, DEFAULT_IMAGE_WIDTH)
     const height = fallbackDimension(image.height, DEFAULT_IMAGE_HEIGHT)
-    const preview = resolveImageUrl(source, {
-      width: 1200,
-      height: 900,
-      fit: 'cover',
-      format: 'webp',
-    }) || source
-    const thumbnail = resolveImageUrl(source, {
-      width: DEFAULT_THUMBNAIL_SIZE,
-      height: DEFAULT_THUMBNAIL_SIZE,
-      fit: 'cover',
-      format: 'webp',
-    }) || preview
+    const preview =
+      resolveImageUrl(source, {
+        width: 1200,
+        height: 900,
+        fit: 'cover',
+        format: 'webp',
+      }) || source
+    const thumbnail =
+      resolveImageUrl(source, {
+        width: DEFAULT_THUMBNAIL_SIZE,
+        height: DEFAULT_THUMBNAIL_SIZE,
+        fit: 'cover',
+        format: 'webp',
+      }) || preview
 
     imageItems.push({
       id: `image-${image.cacheKey ?? original}`,
@@ -488,7 +529,7 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
     })
   })
 
-  videos.forEach((video) => {
+  videos.forEach(video => {
     const url = video.url ?? ''
     if (!url) {
       return
@@ -535,7 +576,8 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
     .map((item, index) => ({ item, index }))
     .filter(({ item }) => Boolean(item.originalUrl))
     .sort((a, b) => {
-      const normaliseGroup = (value: unknown) => (value == null ? '' : String(value).toLowerCase())
+      const normaliseGroup = (value: unknown) =>
+        value == null ? '' : String(value).toLowerCase()
 
       const groupA = normaliseGroup(a.item.group)
       const groupB = normaliseGroup(b.item.group)
@@ -552,24 +594,27 @@ const galleryItems = computed<ProductGalleryItem[]>(() => {
 })
 
 const heroFallbackImage = computed(() => {
-  const fallback = coverImageRaw.value ?? galleryItems.value[0]?.previewUrl ?? null
+  const fallback =
+    coverImageRaw.value ?? galleryItems.value[0]?.previewUrl ?? null
   if (!fallback) {
     return null
   }
 
-  return resolveImageUrl(fallback, {
-    width: 960,
-    height: 720,
-    fit: 'cover',
-    format: 'webp',
-  }) || fallback
+  return (
+    resolveImageUrl(fallback, {
+      width: 960,
+      height: 720,
+      fit: 'cover',
+      format: 'webp',
+    }) || fallback
+  )
 })
 
 const activeMediaIndex = ref(0)
 
 watch(
   galleryItems,
-  (items) => {
+  items => {
     if (!items.length) {
       activeMediaIndex.value = 0
       void nextTick(() => {
@@ -588,12 +633,16 @@ watch(
       scrollActiveThumbnailIntoView()
     })
   },
-  { immediate: true },
+  { immediate: true }
 )
 
-const heroMedia = computed(() => galleryItems.value[activeMediaIndex.value] ?? null)
+const heroMedia = computed(
+  () => galleryItems.value[activeMediaIndex.value] ?? null
+)
 
-const heroMediaIsVideo = computed(() => heroMedia.value?.type === 'video' && Boolean(heroMedia.value.videoUrl))
+const heroMediaIsVideo = computed(
+  () => heroMedia.value?.type === 'video' && Boolean(heroMedia.value.videoUrl)
+)
 
 const stageAriaLabel = computed(() => {
   const media = heroMedia.value
@@ -627,11 +676,13 @@ const escapeMap: Record<string, string> = {
   "'": '&#39;',
 }
 
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => escapeMap[char] ?? char)
-const escapeAttribute = (value: string | null | undefined) => escapeHtml(String(value ?? ''))
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, char => escapeMap[char] ?? char)
+const escapeAttribute = (value: string | null | undefined) =>
+  escapeHtml(String(value ?? ''))
 
 const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
-  galleryItems.value.map((item) => {
+  galleryItems.value.map(item => {
     const caption = item.caption || props.title
     const sanitizedCaption = escapeHtml(caption)
 
@@ -644,7 +695,10 @@ const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
     }
 
     return {
-      src: item.type === 'video' ? item.posterUrl ?? item.originalUrl : item.originalUrl,
+      src:
+        item.type === 'video'
+          ? (item.posterUrl ?? item.originalUrl)
+          : item.originalUrl,
       thumbnail: item.thumbnailUrl,
       w: item.width,
       h: item.height,
@@ -653,7 +707,7 @@ const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
       type: item.type,
       open4goodsMeta: meta,
     }
-  }),
+  })
 )
 
 const pictureSwipeOptions = computed<PictureSwipeOptions>(() => {
@@ -669,12 +723,18 @@ const pictureSwipeOptions = computed<PictureSwipeOptions>(() => {
 
   if (import.meta.client) {
     base.getThumbBoundsFn = (index: number) => {
-      const thumbnails = document.querySelectorAll<HTMLElement>('.product-gallery__thumbnail-image')
+      const thumbnails = document.querySelectorAll<HTMLElement>(
+        '.product-gallery__thumbnail-image'
+      )
       const element = thumbnails[index]
 
       if (!element) {
         const scrollY = window.scrollY || document.documentElement.scrollTop
-        return { x: window.innerWidth / 2, y: scrollY + window.innerHeight / 2, w: 0 }
+        return {
+          x: window.innerWidth / 2,
+          y: scrollY + window.innerHeight / 2,
+          w: 0,
+        }
       }
 
       const rect = element.getBoundingClientRect()
@@ -694,7 +754,11 @@ const pictureSwipeOptions = computed<PictureSwipeOptions>(() => {
 const lightboxBound = ref(false)
 
 const bindLightboxListeners = () => {
-  const instance = (pictureSwipeRef.value as ComponentPublicInstance<{ pswp?: LightboxInstance }> | null)?.pswp
+  const instance = (
+    pictureSwipeRef.value as ComponentPublicInstance<{
+      pswp?: LightboxInstance
+    }> | null
+  )?.pswp
 
   if (!instance || lightboxBound.value) {
     return
@@ -716,7 +780,9 @@ const bindLightboxListeners = () => {
     const meta = item.open4goodsMeta
 
     if (meta?.type === 'video' && meta.videoUrl) {
-      const posterAttribute = meta.posterUrl ? ` poster="${escapeAttribute(meta.posterUrl)}"` : ''
+      const posterAttribute = meta.posterUrl
+        ? ` poster="${escapeAttribute(meta.posterUrl)}"`
+        : ''
       item.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${posterAttribute} src="${escapeAttribute(meta.videoUrl)}"></video></div>`
       item.w = meta.width || item.w || DEFAULT_VIDEO_WIDTH
       item.h = meta.height || item.h || DEFAULT_VIDEO_HEIGHT
@@ -727,11 +793,14 @@ const bindLightboxListeners = () => {
   })
 
   instance.listen('afterChange', () => {
-    activeMediaIndex.value = instance.getCurrentIndex?.() ?? activeMediaIndex.value
+    activeMediaIndex.value =
+      instance.getCurrentIndex?.() ?? activeMediaIndex.value
     stopVideo()
 
     nextTick(() => {
-      const video = instance.container?.querySelector?.('.product-gallery__lightbox-video video')
+      const video = instance.container?.querySelector?.(
+        '.product-gallery__lightbox-video video'
+      )
       if (video instanceof HTMLVideoElement) {
         activeVideo = video
         video.play().catch(() => {})
@@ -765,7 +834,9 @@ const ensureLightbox = async () => {
   }
 
   try {
-    const [{ default: VuePictureSwipe }] = await Promise.all([import('vue3-picture-swipe')])
+    const [{ default: VuePictureSwipe }] = await Promise.all([
+      import('vue3-picture-swipe'),
+    ])
     pictureSwipeComponent.value = VuePictureSwipe
   } catch (error) {
     console.error('Failed to load gallery', error)
@@ -788,12 +859,18 @@ const openLightboxAt = (index: number) => {
     return true
   }
 
-  const rootElement = (componentInstance.$el ?? pictureSwipeContainer.value) as HTMLElement | undefined
-  const anchors = rootElement?.querySelectorAll<HTMLAnchorElement>('figure.gallery-thumbnail a')
+  const rootElement = (componentInstance.$el ?? pictureSwipeContainer.value) as
+    | HTMLElement
+    | undefined
+  const anchors = rootElement?.querySelectorAll<HTMLAnchorElement>(
+    'figure.gallery-thumbnail a'
+  )
   const target = anchors?.[index]
 
   if (target) {
-    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    target.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true })
+    )
     window.setTimeout(bindLightboxListeners, 150)
     return true
   }
@@ -831,7 +908,9 @@ const pauseHeroVideo = () => {
 }
 
 const galleryButtonLabel = computed(() =>
-  te('product.hero.openGalleryCta') ? t('product.hero.openGalleryCta') : 'Open gallery',
+  te('product.hero.openGalleryCta')
+    ? t('product.hero.openGalleryCta')
+    : 'Open gallery'
 )
 
 const openGalleryFromVideo = (index: number) => {
@@ -848,7 +927,7 @@ onMounted(async () => {
 
 watch(
   pictureSwipeRef,
-  async (instance) => {
+  async instance => {
     if (!instance || pendingOpenIndex.value === null) {
       return
     }
@@ -859,7 +938,7 @@ watch(
     pendingOpenIndex.value = null
     openLightboxAt(index)
   },
-  { flush: 'post' },
+  { flush: 'post' }
 )
 
 watch([thumbnailViewport, thumbnailList], () => {
@@ -971,7 +1050,9 @@ onBeforeUnmount(() => {
   padding: 0.5rem 1rem;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .product-gallery__video-gallery-btn:hover,
@@ -999,16 +1080,28 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(0deg, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.2));
+  background: linear-gradient(
+    0deg,
+    rgba(15, 23, 42, 0.65),
+    rgba(15, 23, 42, 0.2)
+  );
   pointer-events: none;
 }
 
 .product-gallery__stage--video .product-gallery__stage-overlay {
-  background: linear-gradient(0deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.25));
+  background: linear-gradient(
+    0deg,
+    rgba(15, 23, 42, 0.75),
+    rgba(15, 23, 42, 0.25)
+  );
 }
 
 .product-gallery__stage-overlay--inline {
-  background: linear-gradient(0deg, rgba(15, 23, 42, 0.35), rgba(15, 23, 42, 0.05));
+  background: linear-gradient(
+    0deg,
+    rgba(15, 23, 42, 0.35),
+    rgba(15, 23, 42, 0.05)
+  );
 }
 
 .product-gallery__stage-icon {
@@ -1060,7 +1153,10 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-gallery__thumbnails-arrow:hover:not(:disabled) {
@@ -1088,7 +1184,9 @@ onBeforeUnmount(() => {
   overflow: hidden;
   cursor: pointer;
   background: transparent;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .product-gallery__thumbnail-button:hover {

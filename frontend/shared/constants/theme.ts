@@ -6,7 +6,7 @@ export const THEME_PREFERENCE_KEY = 'open4goods-preferred-theme'
 
 export const resolveThemeName = (
   value: string | null | undefined,
-  fallback: ThemeName = 'light',
+  fallback: ThemeName = 'light'
 ): ThemeName => {
   if (value && (THEME_NAMES as readonly string[]).includes(value)) {
     return value as ThemeName

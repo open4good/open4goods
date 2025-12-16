@@ -1,6 +1,7 @@
 # Backend service integration
 
 ## Overview
+
 The frontend talks to the backend through the generated OpenAPI client under
 [`shared/api-client`](../shared/api-client). Every downstream call should be
 wrapped in a thin service that:
@@ -24,6 +25,7 @@ as [`TheArticle.vue`](../app/components/domains/blog/TheArticle.vue) display the
 resulting data. The sections below break that flow down.
 
 ## 1. Create a service wrapper (server only)
+
 Service wrappers live next to the generated APIs. They enforce authentication,
 domain language propagation, and lazy client instantiation. The blog service is
 representative:
@@ -35,13 +37,16 @@ import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
 export const useBlogService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: BlogApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useBlogService() is only available on the server runtime.')
+      throw new Error(
+        'useBlogService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -55,7 +60,11 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
     return await resolveApi().post({ slug, domainLanguage })
   }
 
-  const getArticles = async (params?: { tag?: string; pageNumber?: number; pageSize?: number }) => {
+  const getArticles = async (params?: {
+    tag?: string
+    pageNumber?: number
+    pageSize?: number
+  }) => {
     return await resolveApi().posts({ ...params, domainLanguage })
   }
 
@@ -78,6 +87,7 @@ Key points to preserve in every service wrapper:
   may talk to the backend directly.
 
 ## 2. Expose the service through a Nuxt server route
+
 Nuxt server routes translate incoming HTTP requests into service calls. The blog
 article endpoint mirrors the recommended structure:
 
@@ -85,15 +95,19 @@ article endpoint mirrors the recommended structure:
 // server/api/blog/articles/[slug].ts
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
   const slug = getRouterParam(event, 'slug')
   if (!slug) {
-    throw createError({ statusCode: 400, statusMessage: 'Article slug is required' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Article slug is required',
+    })
   }
 
-  const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  const rawHost =
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
   const blogService = useBlogService(domainLanguage)
 
@@ -101,7 +115,11 @@ export default defineEventHandler(async (event) => {
     return await blogService.getArticleBySlug(slug)
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching blog article:', backendError.logMessage, backendError)
+    console.error(
+      'Error fetching blog article:',
+      backendError.logMessage,
+      backendError
+    )
 
     throw createError({
       statusCode: backendError.statusCode,
@@ -120,6 +138,7 @@ header—mixing manual header calls risks dropping one of them and breaking
 multi-domain caching.
 
 ## 3. Consume the server route from a composable
+
 Composables hide the transport details from components and pages. They call the
 Nuxt server routes with `$fetch`, manage loading/error state, and expose a typed
 API. The blog composable demonstrates the pattern:
@@ -140,7 +159,8 @@ export const useBlog = () => {
       currentArticle.value = article
       return article
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch article'
+      error.value =
+        err instanceof Error ? err.message : 'Failed to fetch article'
       console.error('Error in fetchArticle:', err)
       return null
     } finally {
@@ -148,7 +168,12 @@ export const useBlog = () => {
     }
   }
 
-  return { currentArticle: readonly(currentArticle), loading: readonly(loading), error: readonly(error), fetchArticle }
+  return {
+    currentArticle: readonly(currentArticle),
+    loading: readonly(loading),
+    error: readonly(error),
+    fetchArticle,
+  }
 }
 ```
 
@@ -156,6 +181,7 @@ When a feature needs pagination, filters, or reset helpers, expose them from the
 composable so the UI remains declarative.
 
 ## 4. Render data in a page or component
+
 With the composable in place, pages and components can focus on presentation.
 The blog article page fetches data in `setup()` and passes the resolved article
 to [`TheArticle.vue`](../app/components/domains/blog/TheArticle.vue):
@@ -177,7 +203,10 @@ const article = computed(() => currentArticle.value)
 
 <template>
   <TheArticle v-if="article" :article="article" />
-  <v-skeleton-loader v-else-if="loading" type="heading, image, paragraph, paragraph" />
+  <v-skeleton-loader
+    v-else-if="loading"
+    type="heading, image, paragraph, paragraph"
+  />
   <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
 </template>
 ```

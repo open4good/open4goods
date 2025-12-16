@@ -4,33 +4,34 @@ import { createCompareService } from './CompareService'
 import type { CompareProductEntry } from './CompareService'
 
 describe('CompareService', () => {
-  const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
-    gtin: 1234567890123,
-    base: {
-      vertical: 'VERTICAL',
-      gtinInfo: {
-        countryName: 'France',
-        countryFlagUrl: 'https://example.com/fr.svg',
+  const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto =>
+    ({
+      gtin: 1234567890123,
+      base: {
+        vertical: 'VERTICAL',
+        gtinInfo: {
+          countryName: 'France',
+          countryFlagUrl: 'https://example.com/fr.svg',
+        },
       },
-    },
-    identity: {
-      brand: 'Brand',
-      model: 'Model X',
-      bestName: 'Brand Model X',
-    },
-    resources: {
-      coverImagePath: 'https://example.com/cover.jpg',
-    },
-    aiReview: {
-      review: {
-        description: '<p>Great <strong>product</strong></p>',
-        pros: ['<b>Efficient</b>'],
-        cons: ['<i>Pricey</i>'],
+      identity: {
+        brand: 'Brand',
+        model: 'Model X',
+        bestName: 'Brand Model X',
       },
-    },
-    scores: overrides.scores,
-    ...overrides,
-  }) as ProductDto
+      resources: {
+        coverImagePath: 'https://example.com/cover.jpg',
+      },
+      aiReview: {
+        review: {
+          description: '<p>Great <strong>product</strong></p>',
+          pros: ['<b>Efficient</b>'],
+          cons: ['<i>Pricey</i>'],
+        },
+      },
+      scores: overrides.scores,
+      ...overrides,
+    }) as ProductDto
 
   const minimalEntry = (verticalId: string | null): CompareProductEntry => ({
     gtin: '1',

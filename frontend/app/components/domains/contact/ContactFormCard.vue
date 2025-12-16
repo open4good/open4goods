@@ -1,5 +1,9 @@
 <template>
-  <section id="contact-form" class="contact-form" aria-labelledby="contact-form-heading">
+  <section
+    id="contact-form"
+    class="contact-form"
+    aria-labelledby="contact-form-heading"
+  >
     <v-container class="py-12">
       <v-row justify="center">
         <v-col cols="12" md="8" lg="6">
@@ -52,7 +56,11 @@
               {{ t('contact.form.feedback.missingSiteKey') }}
             </v-alert>
 
-            <v-form ref="formRef" class="contact-form__form" @submit.prevent="handleSubmit">
+            <v-form
+              ref="formRef"
+              class="contact-form__form"
+              @submit.prevent="handleSubmit"
+            >
               <v-row dense>
                 <v-col cols="12">
                   <v-text-field
@@ -116,9 +124,17 @@
                       class="contact-form__captcha-placeholder"
                       aria-hidden="true"
                     >
-                      <v-icon icon="mdi-shield-alert-outline" size="36" color="primary" />
+                      <v-icon
+                        icon="mdi-shield-alert-outline"
+                        size="36"
+                        color="primary"
+                      />
                     </div>
-                    <p v-if="captchaError" class="contact-form__captcha-error" role="alert">
+                    <p
+                      v-if="captchaError"
+                      class="contact-form__captcha-error"
+                      role="alert"
+                    >
                       {{ captchaError }}
                     </p>
                   </div>
@@ -202,7 +218,7 @@ const captchaTheme = computed(() =>
   theme.global.current.value.dark ? 'dark' : 'light'
 )
 const captchaLocale = computed(() =>
-  (locale.value?.startsWith('fr') ? 'fr' : 'en')
+  locale.value?.startsWith('fr') ? 'fr' : 'en'
 )
 
 const nameRules = computed(() => [
@@ -216,13 +232,17 @@ const emailPattern =
 
 const emailRules = computed(() => [
   (value: string) => !!value?.trim() || t('contact.form.errors.email.required'),
-  (value: string) => emailPattern.test(value?.trim() ?? '') || t('contact.form.errors.email.invalid'),
+  (value: string) =>
+    emailPattern.test(value?.trim() ?? '') ||
+    t('contact.form.errors.email.invalid'),
 ])
 
 const messageRules = computed(() => [
-  (value: string) => !!value?.trim() || t('contact.form.errors.message.required'),
   (value: string) =>
-    (value?.trim().length ?? 0) >= 10 || t('contact.form.errors.message.length'),
+    !!value?.trim() || t('contact.form.errors.message.required'),
+  (value: string) =>
+    (value?.trim().length ?? 0) >= 10 ||
+    t('contact.form.errors.message.length'),
 ])
 
 const handleCaptchaVerify = (token: string) => {
@@ -286,22 +306,22 @@ const handleSubmit = async () => {
 
 watch(
   () => props.success,
-  (value) => {
+  value => {
     if (!value) {
       return
     }
 
     clearFormFields()
-  },
+  }
 )
 
 watch(
   () => props.errorMessage,
-  (value) => {
+  value => {
     if (value) {
       resetCaptcha()
     }
-  },
+  }
 )
 </script>
 

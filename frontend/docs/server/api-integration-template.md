@@ -22,13 +22,16 @@ import { createBackendApiConfig } from './createBackendApiConfig'
  * Categories service for handling category-related API calls
  */
 export const useCategoriesService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: CategoriesApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useCategoriesService() is only available on the server runtime.')
+      throw new Error(
+        'useCategoriesService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -43,7 +46,9 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
    * @param onlyEnabled - Filter only enabled categories
    * @returns Promise<VerticalConfigDto[]>
    */
-  const getCategories = async (onlyEnabled?: boolean): Promise<VerticalConfigDto[]> => {
+  const getCategories = async (
+    onlyEnabled?: boolean
+  ): Promise<VerticalConfigDto[]> => {
     try {
       return await resolveApi().categories1({ domainLanguage, onlyEnabled })
     } catch (error) {
@@ -57,7 +62,9 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
    * @param categoryId - Category identifier
    * @returns Promise<VerticalConfigFullDto>
    */
-  const getCategoryById = async (categoryId: string): Promise<VerticalConfigFullDto> => {
+  const getCategoryById = async (
+    categoryId: string
+  ): Promise<VerticalConfigFullDto> => {
     try {
       return await resolveApi().category({ categoryId, domainLanguage })
     } catch (error) {
@@ -71,6 +78,7 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
 ```
 
 **Key points:**
+
 - Inject `createBackendApiConfig()` for authentication
 - Required `domainLanguage` parameter
 - Server-side guard (throws error if called client-side)
@@ -92,44 +100,46 @@ import { extractBackendErrorDetails } from '../../utils/log-backend-error'
  * Categories API endpoint
  * Handles GET requests for categories with caching
  */
-export default defineEventHandler(async (event): Promise<VerticalConfigDto[]> => {
-  // Set cache headers for 1 hour
-  setResponseHeader(
-    event,
-    'Cache-Control',
-    'public, max-age=3600, s-maxage=3600'
-  )
-
-  const rawHost =
-    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
-
-  const categoriesService = useCategoriesService(domainLanguage)
-  const query = getQuery(event)
-  const onlyEnabledParam = Array.isArray(query.onlyEnabled)
-    ? query.onlyEnabled[0]
-    : query.onlyEnabled
-
-  const onlyEnabled = onlyEnabledParam === 'true' || onlyEnabledParam === true
-
-  try {
-    const response = await categoriesService.getCategories(onlyEnabled)
-    return response
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    console.error(
-      'Error fetching categories:',
-      backendError.logMessage,
-      backendError
+export default defineEventHandler(
+  async (event): Promise<VerticalConfigDto[]> => {
+    // Set cache headers for 1 hour
+    setResponseHeader(
+      event,
+      'Cache-Control',
+      'public, max-age=3600, s-maxage=3600'
     )
 
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
-    })
+    const rawHost =
+      event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+    const { domainLanguage } = resolveDomainLanguage(rawHost)
+
+    const categoriesService = useCategoriesService(domainLanguage)
+    const query = getQuery(event)
+    const onlyEnabledParam = Array.isArray(query.onlyEnabled)
+      ? query.onlyEnabled[0]
+      : query.onlyEnabled
+
+    const onlyEnabled = onlyEnabledParam === 'true' || onlyEnabledParam === true
+
+    try {
+      const response = await categoriesService.getCategories(onlyEnabled)
+      return response
+    } catch (error) {
+      const backendError = await extractBackendErrorDetails(error)
+      console.error(
+        'Error fetching categories:',
+        backendError.logMessage,
+        backendError
+      )
+
+      throw createError({
+        statusCode: backendError.statusCode,
+        statusMessage: backendError.statusMessage,
+        cause: error,
+      })
+    }
   }
-})
+)
 ```
 
 **File:** `server/api/categories/[id].ts` (optional for parameterized routes)
@@ -140,34 +150,49 @@ import type { VerticalConfigFullDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 
-export default defineEventHandler(async (event): Promise<VerticalConfigFullDto> => {
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600')
+export default defineEventHandler(
+  async (event): Promise<VerticalConfigFullDto> => {
+    setResponseHeader(
+      event,
+      'Cache-Control',
+      'public, max-age=3600, s-maxage=3600'
+    )
 
-  const categoryId = getRouterParam(event, 'id')
-  if (!categoryId) {
-    throw createError({ statusCode: 400, statusMessage: 'Category ID is required' })
+    const categoryId = getRouterParam(event, 'id')
+    if (!categoryId) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Category ID is required',
+      })
+    }
+
+    const rawHost =
+      event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+    const { domainLanguage } = resolveDomainLanguage(rawHost)
+    const categoriesService = useCategoriesService(domainLanguage)
+
+    try {
+      return await categoriesService.getCategoryById(categoryId)
+    } catch (error) {
+      const backendError = await extractBackendErrorDetails(error)
+      console.error(
+        'Error fetching category:',
+        backendError.logMessage,
+        backendError
+      )
+
+      throw createError({
+        statusCode: backendError.statusCode,
+        statusMessage: backendError.statusMessage,
+        cause: error,
+      })
+    }
   }
-
-  const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
-  const categoriesService = useCategoriesService(domainLanguage)
-
-  try {
-    return await categoriesService.getCategoryById(categoryId)
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching category:', backendError.logMessage, backendError)
-
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
-    })
-  }
-})
+)
 ```
 
 **Key points:**
+
 - Appropriate cache headers
 - Resolve `domainLanguage` from headers
 - Parse and validate query params
@@ -178,29 +203,23 @@ export default defineEventHandler(async (event): Promise<VerticalConfigFullDto> 
 **File:** `app/composables/categories/useCategories.ts`
 
 ```ts
-import type { VerticalConfigDto, VerticalConfigFullDto } from '~~/shared/api-client'
+import type {
+  VerticalConfigDto,
+  VerticalConfigFullDto,
+} from '~~/shared/api-client'
 
 /**
  * Composable for categories-related functionality
  */
 export const useCategories = () => {
   // Reactive state
-  const categories = useState<VerticalConfigDto[]>(
-    'categories-list',
-    () => [],
-  )
+  const categories = useState<VerticalConfigDto[]>('categories-list', () => [])
   const currentCategory = useState<VerticalConfigFullDto | null>(
     'categories-current',
-    () => null,
+    () => null
   )
-  const loading = useState(
-    'categories-loading',
-    () => false,
-  )
-  const error = useState<string | null>(
-    'categories-error',
-    () => null,
-  )
+  const loading = useState('categories-loading', () => false)
+  const error = useState<string | null>('categories-error', () => null)
 
   /**
    * Fetch categories from the backend proxy
@@ -235,7 +254,9 @@ export const useCategories = () => {
     error.value = null
 
     try {
-      const category = await $fetch<VerticalConfigFullDto>(`/api/categories/${categoryId}`)
+      const category = await $fetch<VerticalConfigFullDto>(
+        `/api/categories/${categoryId}`
+      )
       currentCategory.value = category
       return category
     } catch (err) {
@@ -279,6 +300,7 @@ export const useCategories = () => {
 ```
 
 **Key points:**
+
 - Reactive state with `useState` for SSR
 - Readonly state exposure
 - Fetch methods using `$fetch` to server routes
@@ -319,6 +341,7 @@ const categoryItems = computed(() => {
 ```
 
 **Key points:**
+
 - Use `useAsyncData` for SSR
 - Immediate fetch on mount
 - Data transformation to adapt to presentation component

@@ -5,17 +5,17 @@ const { t } = useI18n()
 </script>
 
 <template>
-    <div class="hero-title-container">
-        <h1 class="hero-title-text">
-            {{ t('siteIdentity.hero.mainTitle') }}
-        </h1>
-        <h2 class="hero-subtitle-text">
-            {{ t('siteIdentity.hero.mainSubtitle') }}
-        </h2>
-        <div class="pt-2">
-            <TheSearchBar />
-        </div>
+  <div class="hero-title-container">
+    <h1 class="hero-title-text">
+      {{ t('siteIdentity.hero.mainTitle') }}
+    </h1>
+    <h2 class="hero-subtitle-text">
+      {{ t('siteIdentity.hero.mainSubtitle') }}
+    </h2>
+    <div class="pt-2">
+      <TheSearchBar />
     </div>
+  </div>
 </template>
 
 <style scoped lang="sass">

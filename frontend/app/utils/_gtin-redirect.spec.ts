@@ -25,7 +25,9 @@ describe('app/utils/_gtin-redirect', () => {
 
   it('returns the canonical fullSlug path when the product exists', async () => {
     const dependencies = createDependencies({
-      fetchProduct: vi.fn().mockResolvedValue({ fullSlug: 'produits/example-product' }),
+      fetchProduct: vi
+        .fn()
+        .mockResolvedValue({ fullSlug: 'produits/example-product' }),
     })
 
     const target = await resolveGtinRedirectTarget('123456', dependencies)
@@ -36,7 +38,9 @@ describe('app/utils/_gtin-redirect', () => {
 
   it('strips query strings and fragments from the slug', async () => {
     const dependencies = createDependencies({
-      fetchProduct: vi.fn().mockResolvedValue({ fullSlug: '/produits/example?ref=123#section' }),
+      fetchProduct: vi
+        .fn()
+        .mockResolvedValue({ fullSlug: '/produits/example?ref=123#section' }),
     })
 
     const target = await resolveGtinRedirectTarget('123456', dependencies)
@@ -50,7 +54,9 @@ describe('app/utils/_gtin-redirect', () => {
       fetchProduct: vi.fn().mockRejectedValue(backendError),
     })
 
-    await expect(resolveGtinRedirectTarget('123456', dependencies)).rejects.toMatchObject({
+    await expect(
+      resolveGtinRedirectTarget('123456', dependencies)
+    ).rejects.toMatchObject({
       statusCode: 404,
       statusMessage: 'Product not found',
       isCreateError: true,
@@ -65,7 +71,9 @@ describe('app/utils/_gtin-redirect', () => {
 
   it('falls back to the raw product slug when the fullSlug is missing', async () => {
     const dependencies = createDependencies({
-      fetchProduct: vi.fn().mockResolvedValue({ slug: '123456-example-product ' }),
+      fetchProduct: vi
+        .fn()
+        .mockResolvedValue({ slug: '123456-example-product ' }),
     })
 
     const target = await resolveGtinRedirectTarget('123456', dependencies)
@@ -78,7 +86,9 @@ describe('app/utils/_gtin-redirect', () => {
       fetchProduct: vi.fn().mockResolvedValue({ fullSlug: '   ', slug: null }),
     })
 
-    await expect(resolveGtinRedirectTarget('123456', dependencies)).rejects.toMatchObject({
+    await expect(
+      resolveGtinRedirectTarget('123456', dependencies)
+    ).rejects.toMatchObject({
       statusCode: 404,
       statusMessage: 'Product not found',
       isCreateError: true,

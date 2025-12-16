@@ -58,20 +58,24 @@ const toggleDrawer = () => {
   drawer.value = !drawer.value
 }
 
-const isMobileNavigation = computed(() => device.isMobileOrTablet || display.mdAndDown.value)
+const isMobileNavigation = computed(
+  () => device.isMobileOrTablet || display.mdAndDown.value
+)
 const drawerWidth = computed(() => (isMobileNavigation.value ? 320 : 360))
 const drawerInlineStyles = computed(() => ({
-  paddingBottom: isMobileNavigation.value ? 'calc(env(safe-area-inset-bottom) + 24px)' : '24px',
+  paddingBottom: isMobileNavigation.value
+    ? 'calc(env(safe-area-inset-bottom) + 24px)'
+    : '24px',
 }))
 
 watch(
   () => isMobileNavigation.value,
-  (isMobileView) => {
+  isMobileView => {
     if (!isMobileView) {
       drawer.value = false
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 </script>
 
@@ -85,4 +89,3 @@ watch(
 .mobile-menu-drawer
   padding-top: calc(env(safe-area-inset-top) + 8px)
 </style>
-

@@ -13,7 +13,9 @@ defineProps<{
     <v-container max-width="lg">
       <div class="opendata-oss__surface">
         <div class="opendata-oss__text">
-          <h2 id="opendata-oss-heading" class="opendata-oss__title">{{ title }}</h2>
+          <h2 id="opendata-oss-heading" class="opendata-oss__title">
+            {{ title }}
+          </h2>
           <p class="opendata-oss__description">{{ description }}</p>
         </div>
         <v-btn
@@ -71,4 +73,3 @@ defineProps<{
   .opendata-oss__surface .v-btn
     width: 100%
 </style>
-

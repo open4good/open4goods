@@ -24,7 +24,10 @@ const resolveClassList = (value: unknown): string => {
   }
 
   if (Array.isArray(value)) {
-    return value.map((entry) => resolveClassList(entry)).filter(Boolean).join(' ')
+    return value
+      .map(entry => resolveClassList(entry))
+      .filter(Boolean)
+      .join(' ')
   }
 
   if (typeof value === 'object') {
@@ -47,12 +50,15 @@ const VChipStub = defineComponent({
         'button',
         {
           ...attrs,
-          class: ['v-chip-stub', resolveClassList((attrs as Record<string, unknown>).class)].join(' '),
+          class: [
+            'v-chip-stub',
+            resolveClassList((attrs as Record<string, unknown>).class),
+          ].join(' '),
           type: 'button',
           'data-closable': props.closable ? 'true' : 'false',
           onClick: () => emit('click:close'),
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -66,11 +72,14 @@ const VBtnStub = defineComponent({
         'button',
         {
           ...attrs,
-          class: ['v-btn-stub', resolveClassList((attrs as Record<string, unknown>).class)].join(' '),
+          class: [
+            'v-btn-stub',
+            resolveClassList((attrs as Record<string, unknown>).class),
+          ].join(' '),
           type: 'button',
           onClick: (event: MouseEvent) => emit('click', event),
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -190,7 +199,7 @@ describe('CategoryActiveFilters', () => {
       },
     })
 
-    const chipTexts = wrapper.findAll('.v-chip-stub').map((chip) => chip.text())
+    const chipTexts = wrapper.findAll('.v-chip-stub').map(chip => chip.text())
     expect(chipTexts).toContain('Weight: 1.2 → 5.7')
   })
 })

@@ -20,7 +20,9 @@ declare module 'h3' {
   }
 }
 
-const resolveNavigationCacheContext = (event: H3Event): NavigationCacheContext => {
+const resolveNavigationCacheContext = (
+  event: H3Event
+): NavigationCacheContext => {
   if (event.context.categoryNavigationCacheContext) {
     return event.context.categoryNavigationCacheContext
   }
@@ -37,8 +39,7 @@ const resolveNavigationCacheContext = (event: H3Event): NavigationCacheContext =
 
       throw createError({
         statusCode: 400,
-        statusMessage:
-          'googleCategoryId must be a valid integer when provided',
+        statusMessage: 'googleCategoryId must be a valid integer when provided',
       })
     }
 
@@ -66,10 +67,7 @@ const resolveNavigationCacheContext = (event: H3Event): NavigationCacheContext =
 }
 
 const handler = async (event: H3Event): Promise<CategoryNavigationDto> => {
-  setDomainLanguageCacheHeaders(
-    event,
-    'public, max-age=1800, s-maxage=1800'
-  )
+  setDomainLanguageCacheHeaders(event, 'public, max-age=1800, s-maxage=1800')
 
   const { domainLanguage, googleCategoryId, path } =
     resolveNavigationCacheContext(event)
@@ -96,7 +94,7 @@ const handler = async (event: H3Event): Promise<CategoryNavigationDto> => {
 export default cachedEventHandler(handler, {
   name: 'category-navigation',
   maxAge: 1800,
-  getKey: (event) => {
+  getKey: event => {
     const { domainLanguage, googleCategoryId, path } =
       resolveNavigationCacheContext(event)
 

@@ -5,7 +5,9 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 
-const runtimeConfigMock = vi.hoisted(() => ({ public: { staticServer: 'https://static.example' } }))
+const runtimeConfigMock = vi.hoisted(() => ({
+  public: { staticServer: 'https://static.example' },
+}))
 
 vi.mock('#app', () => ({
   useRuntimeConfig: () => runtimeConfigMock,
@@ -46,7 +48,7 @@ const VIconStub = defineComponent({
           'data-color': props.color,
           'data-size': props.size,
         },
-        props.icon,
+        props.icon
       )
   },
 })
@@ -90,7 +92,7 @@ const VBtnStub = defineComponent({
           'data-variant': props.variant,
           type: 'button',
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -109,7 +111,8 @@ const VImgStub = defineComponent({
     alt: { type: String, default: '' },
   },
   setup(props) {
-    return () => h('img', { class: 'v-img-stub', src: props.src, alt: props.alt })
+    return () =>
+      h('img', { class: 'v-img-stub', src: props.src, alt: props.alt })
   },
 })
 
@@ -128,7 +131,9 @@ const VTextFieldStub = defineComponent({
 
     return () =>
       h('label', { class: 'v-text-field-stub' }, [
-        props.label ? h('span', { class: 'v-text-field-stub__label' }, props.label) : null,
+        props.label
+          ? h('span', { class: 'v-text-field-stub__label' }, props.label)
+          : null,
         h('input', {
           class: 'v-text-field-stub__input',
           value: props.modelValue,
@@ -309,7 +314,8 @@ const i18n = createI18n({
               gtin: 'GTIN',
               gtinLabel: 'GTIN barcode reference',
               gtinImageAlt: 'GTIN barcode for {gtin}',
-              empty: 'Identity information is not yet available for this product.',
+              empty:
+                'Identity information is not yet available for this product.',
             },
             attributes: {
               empty: 'Indexed attributes will appear here when available.',
@@ -319,7 +325,8 @@ const i18n = createI18n({
             title: 'Detailed specifications',
             unknownLabel: 'Specification',
             untitledGroup: 'Additional details',
-            empty: 'No detailed specifications are available for this product yet.',
+            empty:
+              'No detailed specifications are available for this product yet.',
             noResults: 'No specifications match your search.',
           },
           sourcing: {
@@ -411,7 +418,7 @@ describe('ProductAttributesSection', () => {
     const rows = wrapper.findAll('table.v-table-stub tbody tr')
     expect(rows.length).toBeGreaterThanOrEqual(3)
 
-    const mainText = rows.map((row) => row.text()).join(' ')
+    const mainText = rows.map(row => row.text()).join(' ')
     expect(mainText).toContain('Weight')
     expect(mainText).toContain('2 kg')
     expect(mainText).toContain('Depth')

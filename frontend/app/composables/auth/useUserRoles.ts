@@ -1,6 +1,8 @@
 import { jwtDecode } from 'jwt-decode'
 
-interface JwtPayload { roles?: string[] }
+interface JwtPayload {
+  roles?: string[]
+}
 
 export const useUserRoles = () => {
   const config = useRuntimeConfig()

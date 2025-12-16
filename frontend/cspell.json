@@ -51,12 +51,5 @@
   ],
   "useGitignore": true,
   "allowCompoundWords": true,
-  "dictionaries": [
-    "typescript",
-    "node",
-    "npm",
-    "html",
-    "css",
-    "vue"
-  ]
+  "dictionaries": ["typescript", "node", "npm", "html", "css", "vue"]
 }

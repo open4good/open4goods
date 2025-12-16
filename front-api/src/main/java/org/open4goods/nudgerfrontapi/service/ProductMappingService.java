@@ -114,8 +114,10 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Maps {@link Product} domain entities to DTOs consumed by the frontend API.
  * <p>
- * The service centralises every projection required by the Nuxt application: conditional component
- * inclusion, localisation of textual content and enrichment of affiliation links. By keeping the
+ * The service centralises every projection required by the Nuxt application:
+ * conditional component
+ * inclusion, localisation of textual content and enrichment of affiliation
+ * links. By keeping the
  * conversion logic here we ensure controllers stay declarative and consistent.
  * </p>
  */
@@ -143,7 +145,6 @@ public class ProductMappingService {
     private final ReviewGenerationClient reviewGenerationClient;
     private final HcaptchaService hcaptchaService;
     private final ProductTimelineService productTimelineService;
-
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -190,28 +191,41 @@ public class ProductMappingService {
     }
 
     /**
-     * Map the product domain model to the DTO expected by the frontend while applying localisation rules.
+     * Map the product domain model to the DTO expected by the frontend while
+     * applying localisation rules.
      *
      * @param product        product retrieved from the repository
      * @param locale         locale requested by the caller
-     * @param includes       requested components (defaults to all when {@code null})
+     * @param includes       requested components (defaults to all when
+     *                       {@code null})
      * @param domainLanguage domain language requested by the caller
-     * @return DTO representing the product or {@code null} when no vertical configuration matches
+     * @return DTO representing the product or {@code null} when no vertical
+     *         configuration matches
      */
-    public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage, boolean resolveProductReferences) {
+    public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage,
+            boolean resolveProductReferences) {
 
         VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
-        ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale) : null;
+        ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale)
+                : null;
         ProductIdentityDto identity = components.contains(ProductDtoComponent.identity) ? mapIdentity(product) : null;
-        ProductNamesDto names = components.contains(ProductDtoComponent.names) ? mapNames(product, domainLanguage, locale) : null;
-        ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes) ? mapAttributes(product, vConfig, domainLanguage) : null;
-        ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product) : null;
-        ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources) ? mapDatasources(product) : null;
-        Map<Long, ProductReferenceDto> referencedProducts = components.contains(ProductDtoComponent.scores) && resolveProductReferences
-                ? resolveReferencedProducts(product, domainLanguage, locale, vConfig)
-                : Collections.emptyMap();
+        ProductNamesDto names = components.contains(ProductDtoComponent.names)
+                ? mapNames(product, domainLanguage, locale)
+                : null;
+        ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes)
+                ? mapAttributes(product, vConfig, domainLanguage)
+                : null;
+        ProductResourcesDto resources = components.contains(ProductDtoComponent.resources) ? mapResources(product)
+                : null;
+        ProductDatasourcesDto datasources = components.contains(ProductDtoComponent.datasources)
+                ? mapDatasources(product)
+                : null;
+        Map<Long, ProductReferenceDto> referencedProducts = components.contains(ProductDtoComponent.scores)
+                && resolveProductReferences
+                        ? resolveReferencedProducts(product, domainLanguage, locale, vConfig)
+                        : Collections.emptyMap();
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
                 ? mapScores(product, domainLanguage, vConfig, referencedProducts)
                 : null;
@@ -228,7 +242,8 @@ public class ProductMappingService {
 
         String slug = null;
         if (product.getNames() != null) {
-            // Slug is derived from the vertical specific URL mapping defined in the product names block.
+            // Slug is derived from the vertical specific URL mapping defined in the product
+            // names block.
             slug = resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
         }
         String fullSlug = null;
@@ -257,7 +272,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Resolve the products referenced by score extremes or rankings and project them to lightweight DTOs.
+     * Resolve the products referenced by score extremes or rankings and project
+     * them to lightweight DTOs.
      */
     private Map<Long, ProductReferenceDto> resolveReferencedProducts(Product product, DomainLanguage domainLanguage,
             Locale locale, VerticalConfig vConf) {
@@ -316,7 +332,7 @@ public class ProductMappingService {
      * Retrieve product references from the cache or repository.
      */
     private Map<Long, ProductReferenceDto> fetchProductReferences(Set<Long> ids, DomainLanguage domainLanguage,
-            Locale locale,  VerticalConfig vConf) {
+            Locale locale, VerticalConfig vConf) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -329,8 +345,7 @@ public class ProductMappingService {
             ProductReferenceDto cached = getCachedProductReference(id, domainLanguage, locale);
             if (cached != null) {
                 resolved.put(id, cached);
-            }
-            else {
+            } else {
                 missing.add(id);
             }
         }
@@ -340,13 +355,13 @@ public class ProductMappingService {
                 for (Long id : missing) {
                     Product referencedProduct = fetched.get(String.valueOf(id));
                     if (referencedProduct != null) {
-                        ProductReferenceDto referenceDto = mapProductReference(referencedProduct, domainLanguage, locale, vConf);
+                        ProductReferenceDto referenceDto = mapProductReference(referencedProduct, domainLanguage,
+                                locale, vConf);
                         resolved.put(id, referenceDto);
                         cacheProductReference(id, domainLanguage, locale, referenceDto);
                     }
                 }
-            }
-            catch (ResourceNotFoundException ex) {
+            } catch (ResourceNotFoundException ex) {
                 logger.warn("Unable to resolve referenced products {}: {}", missing, ex.getMessage());
             }
         }
@@ -354,9 +369,11 @@ public class ProductMappingService {
     }
 
     /**
-     * Project a referenced product to the lightweight DTO used by rankings and extremes.
+     * Project a referenced product to the lightweight DTO used by rankings and
+     * extremes.
      */
-    private ProductReferenceDto mapProductReference(Product referencedProduct, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConf) {
+    private ProductReferenceDto mapProductReference(Product referencedProduct, DomainLanguage domainLanguage,
+            Locale locale, VerticalConfig vConf) {
         if (referencedProduct == null) {
             return null;
         }
@@ -373,21 +390,18 @@ public class ProductMappingService {
             }
         }
 
-
         ProductScoresDto scores = null;
         if (referencedProduct.getScores().size() > 0) {
-        	scores = mapScores(referencedProduct, domainLanguage, vConf, null);
+            scores = mapScores(referencedProduct, domainLanguage, vConf, null);
         }
 
-
-		return new ProductReferenceDto(
+        return new ProductReferenceDto(
                 referencedProduct.getId(),
                 fullSlug,
                 referencedProduct.bestName(),
                 referencedProduct.brand(),
                 referencedProduct.model(),
-                scores
-        		);
+                scores);
     }
 
     /**
@@ -426,11 +440,9 @@ public class ProductMappingService {
         String languageKey;
         if (domainLanguage != null && StringUtils.hasText(domainLanguage.languageTag())) {
             languageKey = domainLanguage.languageTag();
-        }
-        else if (locale != null) {
+        } else if (locale != null) {
             languageKey = locale.toLanguageTag();
-        }
-        else {
+        } else {
             languageKey = DEFAULT_LANGUAGE_KEY;
         }
         return PRODUCT_REFERENCE_CACHE_PREFIX + ':' + id + ':' + languageKey;
@@ -440,7 +452,8 @@ public class ProductMappingService {
      * Translate the user provided includes into the enum set used internally.
      *
      * @param includes includes provided by the caller
-     * @return resolved set of components, defaults to all when empty or {@code null}
+     * @return resolved set of components, defaults to all when empty or
+     *         {@code null}
      */
     private EnumSet<ProductDtoComponent> resolveComponents(Set<String> includes) {
         if (includes == null || includes.isEmpty()) {
@@ -461,7 +474,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Map immutable product fields describing core metadata (creation timestamps, vertical etc.).
+     * Map immutable product fields describing core metadata (creation timestamps,
+     * vertical etc.).
      */
     private ProductBaseDto mapBase(Product product, DomainLanguage domainLanguage, Locale locale) {
         Score ecoscore = product.ecoscore();
@@ -473,7 +487,8 @@ public class ProductMappingService {
                 mapExternalIds(product.getExternalIds()),
                 product.getGoogleTaxonomyId(),
                 product.isExcluded(),
-                product.getExcludedCauses() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getExcludedCauses()),
+                product.getExcludedCauses() == null ? Collections.emptySet()
+                        : new LinkedHashSet<>(product.getExcludedCauses()),
                 mapGtinInfo(product.getGtinInfos(), domainLanguage, locale),
                 resolveCoverImageUrl(product.getCoverImagePath()),
                 product.bestName(),
@@ -527,16 +542,18 @@ public class ProductMappingService {
      */
     private ProductAttributesDto mapAttributes(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage) {
         ProductAttributes attributes = product.getAttributes();
-        List<ProductClassifiedAttributeGroupDto> classifiedAttributes = mapClassifiedAttributes(product, vConfig, domainLanguage);
+        List<ProductClassifiedAttributeGroupDto> classifiedAttributes = mapClassifiedAttributes(product, vConfig,
+                domainLanguage);
         if (attributes == null) {
-            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(),  classifiedAttributes);
+            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), classifiedAttributes);
         }
         Map<String, ProductIndexedAttributeDto> indexed;
         if (attributes.getIndexed() == null) {
             indexed = Collections.emptyMap();
         } else {
             indexed = new LinkedHashMap<>();
-            attributes.getIndexed().forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage)));
+            attributes.getIndexed()
+                    .forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage)));
         }
         Map<String, String> referential;
         if (attributes.getReferentielAttributes() == null) {
@@ -549,42 +566,42 @@ public class ProductMappingService {
         return new ProductAttributesDto(referential, indexed, classifiedAttributes);
     }
 
-    private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage) {
+    private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig,
+            DomainLanguage domainLanguage) {
         if (product == null || product.getAttributes() == null || vConfig == null) {
             return Collections.emptyList();
         }
-        List<AttributesFeatureGroups> groups = icecatService.features(vConfig, resolveIcecatLanguage(domainLanguage), product);
+        List<AttributesFeatureGroups> groups = icecatService.features(vConfig, resolveIcecatLanguage(domainLanguage),
+                product);
         if (groups == null || groups.isEmpty()) {
             return Collections.emptyList();
         }
         return groups.stream()
-        	    .map(group -> {
-        	        var features = group.features();
-        	        var unFeatures = group.unFeatures();
+                .map(group -> {
+                    var features = group.features();
+                    var unFeatures = group.unFeatures();
 
-        	        // Assuming Attribute has proper equals/hashCode
-        	        var excluded = new java.util.HashSet<>();
-        	        excluded.addAll(features);
-        	        excluded.addAll(unFeatures);
+                    // Assuming Attribute has proper equals/hashCode
+                    var excluded = new java.util.HashSet<>();
+                    excluded.addAll(features);
+                    excluded.addAll(unFeatures);
 
-        	        var filteredAttributes = group.getAttributes().stream()
-        	            .filter(a -> !excluded.contains(a))
-        	            .collect(java.util.stream.Collectors.toList());
+                    var filteredAttributes = group.getAttributes().stream()
+                            .filter(a -> !excluded.contains(a))
+                            .collect(java.util.stream.Collectors.toList());
 
-        	        return new ProductClassifiedAttributeGroupDto(
-        	            group.getName(),
-        	            mapAttributeList(filteredAttributes),
-        	            mapAttributeList(features),
-        	            mapAttributeList(unFeatures)
-        	        );
-        	    })
-        	    .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
+                    return new ProductClassifiedAttributeGroupDto(
+                            group.getName(),
+                            mapAttributeList(filteredAttributes),
+                            mapAttributeList(features),
+                            mapAttributeList(unFeatures));
+                })
+                .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
     }
 
     private String resolveIcecatLanguage(DomainLanguage domainLanguage) {
         return domainLanguage == null ? DomainLanguage.en.languageTag() : domainLanguage.languageTag();
     }
-
 
     private List<ProductAttributeDto> mapAttributeList(List<ProductAttribute> attributes) {
         if (attributes == null || attributes.isEmpty()) {
@@ -671,11 +688,13 @@ public class ProductMappingService {
     }
 
     /**
-     * Map the AI generated review associated with the product using localisation fallback rules.
+     * Map the AI generated review associated with the product using localisation
+     * fallback rules.
      *
      * @param product        product retrieved from the repository
      * @param domainLanguage requested domain language guiding localisation
-     * @param locale         HTTP locale fallback used when the domain language is not provided
+     * @param locale         HTTP locale fallback used when the domain language is
+     *                       not provided
      * @return DTO describing the AI review or {@code null} when none is available
      */
     private ProductAiReviewDto mapAiReview(Product product, DomainLanguage domainLanguage, Locale locale) {
@@ -683,7 +702,8 @@ public class ProductMappingService {
             return null;
         }
 
-        ResolvedLocalisedValue<AiReviewHolder> resolved = resolveLocalised(product.getReviews(), domainLanguage, locale);
+        ResolvedLocalisedValue<AiReviewHolder> resolved = resolveLocalised(product.getReviews(), domainLanguage,
+                locale);
         AiReviewHolder holder = resolved.value();
         if (holder == null) {
             return null;
@@ -768,7 +788,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Remove null entries from the AI review sources map and expose an immutable view.
+     * Remove null entries from the AI review sources map and expose an immutable
+     * view.
      */
     private Map<String, Integer> sanitizeSourceWeights(Map<String, Integer> sources) {
         if (sources == null || sources.isEmpty()) {
@@ -802,15 +823,16 @@ public class ProductMappingService {
                 ranking.getSpecializedBetter());
     }
 
-
     /**
      * Map offers including best prices, histories and trends.
      */
     private ProductOffersDto mapOffers(Product product) {
         AggregatedPrices aggregatedPrices = product.getPrice();
         ProductAggregatedPriceDto bestPrice = mapAggregatedPrice(product.bestPrice());
-        ProductAggregatedPriceDto bestNew = aggregatedPrices == null ? null : mapAggregatedPrice(aggregatedPrices.bestNewOffer());
-        ProductAggregatedPriceDto bestOccasion = aggregatedPrices == null ? null : mapAggregatedPrice(aggregatedPrices.bestOccasionOffer());
+        ProductAggregatedPriceDto bestNew = aggregatedPrices == null ? null
+                : mapAggregatedPrice(aggregatedPrices.bestNewOffer());
+        ProductAggregatedPriceDto bestOccasion = aggregatedPrices == null ? null
+                : mapAggregatedPrice(aggregatedPrices.bestOccasionOffer());
 
         Map<ProductCondition, List<ProductAggregatedPriceDto>> offersByCondition = Collections.emptyMap();
         ProductPriceHistoryDto newHistory = null;
@@ -847,31 +869,33 @@ public class ProductMappingService {
                 newHistory,
                 occasionHistory,
                 newTrend,
-                occasionTrend
-                );
+                occasionTrend);
     }
 
     /**
      * Retrieve a paginated list of products and map them to DTOs.
      *
-     * @param pageable        pagination configuration
-     * @param locale          locale requested by the caller
-     * @param includes        optional set of components to include
-     * @param aggregation     aggregation configuration (currently ignored but reserved for future use)
-     * @param domainLanguage  domain language requested by the caller
+     * @param pageable       pagination configuration
+     * @param locale         locale requested by the caller
+     * @param includes       optional set of components to include
+     * @param aggregation    aggregation configuration (currently ignored but
+     *                       reserved for future use)
+     * @param domainLanguage domain language requested by the caller
      * @return page of mapped products
      */
     /**
-     * Execute a paginated search on products and convert the results to DTOs alongside aggregation metadata.
+     * Execute a paginated search on products and convert the results to DTOs
+     * alongside aggregation metadata.
      *
-     * @param pageable         pagination information requested by the caller
-     * @param locale           locale resolved for the request
-     * @param includes         requested DTO components
-     * @param aggregation      optional aggregation definition
-     * @param domainLanguage   requested domain language
-     * @param verticalId       optional vertical identifier
-     * @param query            optional free text query
-     * @param filters         optional search filters applied on the Elasticsearch query
+     * @param pageable       pagination information requested by the caller
+     * @param locale         locale resolved for the request
+     * @param includes       requested DTO components
+     * @param aggregation    optional aggregation definition
+     * @param domainLanguage requested domain language
+     * @param verticalId     optional vertical identifier
+     * @param query          optional free text query
+     * @param filters        optional search filters applied on the Elasticsearch
+     *                       query
      * @return response payload containing paginated products and aggregations
      */
     public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
@@ -887,7 +911,8 @@ public class ProductMappingService {
                 .toList();
 
         Page<ProductDto> page = new PageImpl<>(items, pageable, hits.getTotalHits());
-        PageMetaDto meta = new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        PageMetaDto meta = new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(),
+                page.getTotalPages());
         PageDto<ProductDto> pageDto = new PageDto<>(meta, items);
 
         return new ProductSearchResponseDto(pageDto, result.aggregations());
@@ -902,11 +927,12 @@ public class ProductMappingService {
     }
 
     /**
-     * Request AI review generation for the product after verifying captcha and product existence.
+     * Request AI review generation for the product after verifying captcha and
+     * product existence.
      *
-     * @param gtin             product identifier used to trigger generation
-     * @param captchaResponse  hCaptcha token provided by the caller
-     * @param request          HTTP request used to resolve the client IP address
+     * @param gtin            product identifier used to trigger generation
+     * @param captchaResponse hCaptcha token provided by the caller
+     * @param request         HTTP request used to resolve the client IP address
      * @return UPC echoed back by the back-office API once the job is scheduled
      * @throws ResourceNotFoundException when the product cannot be found locally
      * @throws SecurityException         when captcha verification fails
@@ -925,7 +951,8 @@ public class ProductMappingService {
      * Retrieve the status of an AI review generation process.
      *
      * @param gtin product identifier used when the generation was triggered
-     * @return status returned by the back-office API or {@code null} when the UPC is unknown upstream
+     * @return status returned by the back-office API or {@code null} when the UPC
+     *         is unknown upstream
      */
     public ReviewGenerationStatus getReviewStatus(long gtin) {
         return reviewGenerationClient.getStatus(gtin);
@@ -978,7 +1005,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Resolve the vertical configuration matching the provided identifier with fallback to the default configuration.
+     * Resolve the vertical configuration matching the provided identifier with
+     * fallback to the default configuration.
      */
     private VerticalConfig resolveVerticalConfig(String verticalId) {
         if (!StringUtils.hasText(verticalId)) {
@@ -1009,7 +1037,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Build the public URL of the cover image based on the configured resource root.
+     * Build the public URL of the cover image based on the configured resource
+     * root.
      */
     private String resolveCoverImageUrl(String coverImagePath) {
         if (!StringUtils.hasText(coverImagePath)) {
@@ -1023,7 +1052,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Build the public URL of a resource using the configured root path and cache key information.
+     * Build the public URL of a resource using the configured root path and cache
+     * key information.
      */
     private String buildResourceUrl(Resource resource, String pathSegment) {
         if (resource == null) {
@@ -1037,11 +1067,13 @@ public class ProductMappingService {
                 || !StringUtils.hasText(resource.getExtension())) {
             return resource.getUrl();
         }
-        return resourceRoot + pathSegment + resource.getFileName() + "_" + resource.getCacheKey() + "." + resource.getExtension();
+        return resourceRoot + pathSegment + resource.getFileName() + "_" + resource.getCacheKey() + "."
+                + resource.getExtension();
     }
 
     /**
-     * Convert a resource URL to its optimised WebP variant by replacing the extension.
+     * Convert a resource URL to its optimised WebP variant by replacing the
+     * extension.
      */
     private String toWebpUrl(String originalUrl) {
         if (!StringUtils.hasText(originalUrl)) {
@@ -1055,8 +1087,7 @@ public class ProductMappingService {
         int extensionIndex = basePath.lastIndexOf('.');
         if (extensionIndex > lastSlashIndex) {
             basePath = basePath.substring(0, extensionIndex + 1) + "webp";
-        }
-        else {
+        } else {
             basePath = basePath + ".webp";
         }
         return basePath + query;
@@ -1065,16 +1096,78 @@ public class ProductMappingService {
     /**
      * Map indexed attributes which include localisation hints and scoring flags.
      */
-    private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute, VerticalConfig vConfig, DomainLanguage domainLanguage) {
+    /**
+     * Map indexed attributes which include localisation hints and scoring flags.
+     * 
+     * <p>
+     * This method applies defensive null handling to prevent NPE when
+     * AttributeConfig
+     * entries have missing or incomplete name fields. Fallback order:
+     * <ol>
+     * <li>Requested locale from domainLanguage</li>
+     * <li>'default' locale if requested locale missing</li>
+     * <li>Raw attribute key if name field is null</li>
+     * </ol>
+     * 
+     * @param attribute      the indexed attribute to map
+     * @param vConfig        the vertical configuration containing attribute
+     *                       metadata
+     * @param domainLanguage the requested domain language for localisation
+     * @return the mapped DTO or null if the input attribute is null
+     */
+    private ProductIndexedAttributeDto mapIndexedAttribute(IndexedAttribute attribute, VerticalConfig vConfig,
+            DomainLanguage domainLanguage) {
         if (attribute == null) {
             return null;
         }
+
         String displayName = attribute.getName();
+
         if (vConfig != null && vConfig.getAttributesConfig() != null
                 && vConfig.getAttributesConfig().getAttributeConfigByKey(attribute.getName()) != null) {
-            displayName = vConfig.getAttributesConfig().getAttributeConfigByKey(attribute.getName()).getName()
-                    .get(domainLanguage.languageTag());
+
+            AttributeConfig config = vConfig.getAttributesConfig().getAttributeConfigByKey(attribute.getName());
+
+            // Defensive null handling: check if getName() returns null
+            if (config.getName() == null) {
+                logger.warn(
+                        "AttributeConfig.getName() is null for attribute key='{}', vertical='{}', locale='{}'. Falling back to attribute key.",
+                        attribute.getName(),
+                        vConfig.getId(),
+                        domainLanguage.languageTag());
+                displayName = attribute.getName(); // Fallback to attribute key
+            } else {
+                // Try to get the requested locale
+                String requestedLocale = domainLanguage.languageTag();
+                String localisedName = config.getName().get(requestedLocale);
+
+                if (localisedName == null) {
+                    // Requested locale missing, try 'default' locale
+                    localisedName = config.getName().get(DEFAULT_LANGUAGE_KEY);
+
+                    if (localisedName == null) {
+                        // Even 'default' locale missing, fall back to attribute key
+                        logger.warn(
+                                "AttributeConfig missing both locale '{}' and 'default' for attribute key='{}', vertical='{}'. Available locales: {}. Falling back to attribute key.",
+                                requestedLocale,
+                                attribute.getName(),
+                                vConfig.getId(),
+                                config.getName().keySet());
+                        localisedName = attribute.getName();
+                    } else {
+                        // Successfully fell back to 'default' locale
+                        logger.debug(
+                                "AttributeConfig missing locale '{}' for attribute key='{}', vertical='{}'. Using 'default' locale.",
+                                requestedLocale,
+                                attribute.getName(),
+                                vConfig.getId());
+                    }
+                }
+
+                displayName = localisedName;
+            }
         }
+
         ProductAttributeSourceDto sourcing = mapAttributeSourcing(attribute, attribute.getValue());
         return new ProductIndexedAttributeDto(
                 displayName,
@@ -1095,7 +1188,8 @@ public class ProductMappingService {
         return new ProductAttributeDto(
                 attribute.getName(),
                 attribute.getValue(),
-                attribute.getIcecatTaxonomyIds() == null ? Collections.emptySet() : new LinkedHashSet<>(attribute.getIcecatTaxonomyIds()),
+                attribute.getIcecatTaxonomyIds() == null ? Collections.emptySet()
+                        : new LinkedHashSet<>(attribute.getIcecatTaxonomyIds()),
                 sourcing);
     }
 
@@ -1253,8 +1347,6 @@ public class ProductMappingService {
                 safeCall(price::shortPrice));
     }
 
-
-
     /**
      * Build the favicon proxy URL for the provided source URL.
      */
@@ -1274,14 +1366,15 @@ public class ProductMappingService {
     }
 
     /**
-     * Extract the canonical root URL (scheme, host and optional port) from a full URL.
+     * Extract the canonical root URL (scheme, host and optional port) from a full
+     * URL.
      */
     private String extractRootUrl(String url) {
 
-    	String normUrl = url;
-    	if (!normUrl.startsWith("http")) {
-    		normUrl = "https://" + normUrl;
-    	}
+        String normUrl = url;
+        if (!normUrl.startsWith("http")) {
+            normUrl = "https://" + normUrl;
+        }
         URI uri = URI.create(normUrl);
         String scheme = uri.getScheme();
         String host = uri.getHost();
@@ -1302,9 +1395,9 @@ public class ProductMappingService {
             return -1;
         }
         return switch (scheme.toLowerCase(Locale.ROOT)) {
-        case "http" -> 80;
-        case "https" -> 443;
-        default -> -1;
+            case "http" -> 80;
+            case "https" -> 443;
+            default -> -1;
         };
     }
 
@@ -1318,8 +1411,10 @@ public class ProductMappingService {
         List<ProductPriceHistoryEntryDto> entries = history.stream()
                 .map(this::mapPriceHistoryEntry)
                 .collect(Collectors.toList());
-        PriceHistory lowest = history.stream().min((left, right) -> Double.compare(left.price(), right.price())).orElse(null);
-        PriceHistory highest = history.stream().max((left, right) -> Double.compare(left.price(), right.price())).orElse(null);
+        PriceHistory lowest = history.stream().min((left, right) -> Double.compare(left.price(), right.price()))
+                .orElse(null);
+        PriceHistory highest = history.stream().max((left, right) -> Double.compare(left.price(), right.price()))
+                .orElse(null);
         Double average = history.stream().mapToDouble(PriceHistory::price).average().orElse(Double.NaN);
         if (Double.isNaN(average)) {
             average = null;
@@ -1334,8 +1429,10 @@ public class ProductMappingService {
     /**
      * Build the DTO representation of a price trend computed from a price history.
      *
-     * @param priceTrend domain model trend computed from {@link PriceTrend#of(java.util.List, AggregatedPrice)}
-     * @return DTO mirroring the supplied trend or {@code null} when none is provided
+     * @param priceTrend domain model trend computed from
+     *                   {@link PriceTrend#of(java.util.List, AggregatedPrice)}
+     * @return DTO mirroring the supplied trend or {@code null} when none is
+     *         provided
      */
     private ProductPriceTrendDto mapPriceTrend(PriceTrend priceTrend) {
         if (priceTrend == null || null == priceTrend.actualPrice()) {
@@ -1356,7 +1453,8 @@ public class ProductMappingService {
      *
      * @param history     chronological price history entries
      * @param actualPrice price used as the current reference for the trend
-     * @return computed {@link PriceTrend} or {@code null} when the history is missing
+     * @return computed {@link PriceTrend} or {@code null} when the history is
+     *         missing
      */
     private PriceTrend computePriceTrend(List<PriceHistory> history, AggregatedPrice actualPrice) {
         if (history == null || history.isEmpty()) {
@@ -1369,17 +1467,18 @@ public class ProductMappingService {
      * Convert the integer trend indicator to its API level enumeration.
      *
      * @param trendValue numeric trend indicator returned by the domain model
-     * @return matching {@link PriceTrendState} or {@code null} when the value is not recognised
+     * @return matching {@link PriceTrendState} or {@code null} when the value is
+     *         not recognised
      */
     private PriceTrendState toTrendState(Integer trendValue) {
         if (trendValue == null) {
             return null;
         }
         return switch (trendValue) {
-        case -1 -> PriceTrendState.PRICE_DECREASE;
-        case 0 -> PriceTrendState.PRICE_STABLE;
-        case 1 -> PriceTrendState.PRICE_INCREASE;
-        default -> null;
+            case -1 -> PriceTrendState.PRICE_DECREASE;
+            case 0 -> PriceTrendState.PRICE_STABLE;
+            case 1 -> PriceTrendState.PRICE_INCREASE;
+            default -> null;
         };
     }
 
@@ -1394,7 +1493,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Map a score into its DTO, including localisation of impact criteria when possible.
+     * Map a score into its DTO, including localisation of impact criteria when
+     * possible.
      */
     private ProductScoreDto mapScore(Score score, DomainLanguage domainLanguage, VerticalConfig vConf,
             Map<Long, ProductReferenceDto> referencedProducts) {
@@ -1409,11 +1509,11 @@ public class ProductMappingService {
         String description = null;
         String title = null;
         if (attributeConfig == null) {
-            // With criteria metadata removed from the configuration, fall back to the score identifier when no attribute metadata exists.
+            // With criteria metadata removed from the configuration, fall back to the score
+            // identifier when no attribute metadata exists.
             logger.debug("No attribute-backed metadata found for score {}", score.getName());
             title = score.getName();
-        }
-        else {
+        } else {
             title = localise(attributeConfig.getScoreTitle(), domainLanguage);
             if (!StringUtils.hasText(title)) {
                 title = localise(attributeConfig.getName(), domainLanguage);
@@ -1421,8 +1521,8 @@ public class ProductMappingService {
             description = localise(attributeConfig.getScoreDescription(), domainLanguage);
         }
 
-
-        Map<Long, ProductReferenceDto> references = referencedProducts == null ? Collections.emptyMap() : referencedProducts;
+        Map<Long, ProductReferenceDto> references = referencedProducts == null ? Collections.emptyMap()
+                : referencedProducts;
 
         return new ProductScoreDto(
                 score.getName(),
@@ -1460,16 +1560,19 @@ public class ProductMappingService {
     }
 
     /**
-     * Convenience overload to localise string attributes when no display locale is available.
+     * Convenience overload to localise string attributes when no display locale is
+     * available.
      */
     private String localise(Localisable<String, String> localisable, DomainLanguage domainLanguage) {
         return resolveLocalisedString(localisable, domainLanguage, null);
     }
 
     /**
-     * Resolve a string localisable by delegating to {@link #resolveLocalised(Localisable, DomainLanguage, Locale)}.
+     * Resolve a string localisable by delegating to
+     * {@link #resolveLocalised(Localisable, DomainLanguage, Locale)}.
      */
-    private String resolveLocalisedString(Localisable<String, String> localisable, DomainLanguage domainLanguage, Locale locale) {
+    private String resolveLocalisedString(Localisable<String, String> localisable, DomainLanguage domainLanguage,
+            Locale locale) {
         ResolvedLocalisedValue<String> resolved = resolveLocalised(localisable, domainLanguage, locale);
         return resolved.value();
     }
@@ -1477,7 +1580,8 @@ public class ProductMappingService {
     /**
      * Resolve the best matching value from a {@link Localisable} structure.
      */
-    private <T> ResolvedLocalisedValue<T> resolveLocalised(Localisable<String, T> localisable, DomainLanguage domainLanguage, Locale locale) {
+    private <T> ResolvedLocalisedValue<T> resolveLocalised(Localisable<String, T> localisable,
+            DomainLanguage domainLanguage, Locale locale) {
         if (localisable == null || localisable.isEmpty()) {
             return new ResolvedLocalisedValue<>(null, null);
         }
@@ -1535,7 +1639,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Execute a supplier and swallow unexpected exceptions, returning {@code null} on failure.
+     * Execute a supplier and swallow unexpected exceptions, returning {@code null}
+     * on failure.
      */
     private <T> T safeCall(Supplier<T> supplier) {
         try {
@@ -1547,7 +1652,8 @@ public class ProductMappingService {
     }
 
     /**
-     * Small value object capturing the resolved key and value for localisation lookups.
+     * Small value object capturing the resolved key and value for localisation
+     * lookups.
      */
     private record ResolvedLocalisedValue<T>(String key, T value) {
     }

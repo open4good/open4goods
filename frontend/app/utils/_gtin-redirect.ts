@@ -2,7 +2,11 @@ import type { ProductDto } from '~~/shared/api-client'
 
 export interface ResolveGtinRedirectDependencies {
   fetchProduct: (gtin: string) => Promise<ProductDto>
-  createError: (input: { statusCode: number; statusMessage: string; cause?: unknown }) => Error
+  createError: (input: {
+    statusCode: number
+    statusMessage: string
+    cause?: unknown
+  }) => Error
 }
 
 export const resolveGtinRedirectTarget = async (

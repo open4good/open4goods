@@ -19,37 +19,48 @@ const messages: Record<string, unknown> = {
   'home.hero.subtitle': 'Save time, stay true to your values.',
   'home.hero.imageAlt': 'Hero illustration',
   'home.problems.title': 'Too many labels, not enough clarity?',
-  'home.problems.items.labelsOverload': 'Lost in the jungle of labels? Hard to truly compare.',
-  'home.problems.items.budgetVsEcology': 'Ecology versus budget? Tired of choosing between the two.',
+  'home.problems.items.labelsOverload':
+    'Lost in the jungle of labels? Hard to truly compare.',
+  'home.problems.items.budgetVsEcology':
+    'Ecology versus budget? Tired of choosing between the two.',
   'home.problems.items.tooManyTabs': 'Eight tabs open? One place is enough.',
   'home.solution.title': 'Responsible shopping, minus the headache',
-  'home.solution.description': 'Nudger combines environmental, technical and pricing insights to simplify every decision.',
+  'home.solution.description':
+    'Nudger combines environmental, technical and pricing insights to simplify every decision.',
   'home.solution.benefits.time.title': 'Save time',
   'home.solution.benefits.time.description': 'We analyse the data for you.',
   'home.solution.benefits.savings.title': 'Save money',
   'home.solution.benefits.savings.description': 'Price comparison built in.',
   'home.solution.benefits.planet.title': 'Shop better',
-  'home.solution.benefits.planet.description': 'Spot the most responsible products.',
+  'home.solution.benefits.planet.description':
+    'Spot the most responsible products.',
   'home.solution.benefits.trust.title': 'Trustworthy',
-  'home.solution.benefits.trust.description': 'Open data, independent recommendations.',
+  'home.solution.benefits.trust.description':
+    'Open data, independent recommendations.',
   'home.features.title': 'Key features',
   'home.features.subtitle': 'See what Nudger puts at your fingertips.',
   'home.features.cards.impactScore.title': 'AI Impact Score',
-  'home.features.cards.impactScore.description': 'A clear ecological score (5 criteria, AI used with restraint).',
+  'home.features.cards.impactScore.description':
+    'A clear ecological score (5 criteria, AI used with restraint).',
   'home.features.cards.priceComparison.title': 'Price comparison + history',
-  'home.features.cards.priceComparison.description': 'Pay the right price at the right time.',
+  'home.features.cards.priceComparison.description':
+    'Pay the right price at the right time.',
   'home.features.cards.openIndependent.title': 'Open & independent',
-  'home.features.cards.openIndependent.description': 'Open source, open data, no brand influence.',
+  'home.features.cards.openIndependent.description':
+    'Open source, open data, no brand influence.',
   'home.features.cards.noTracking.title': 'Zero tracking',
-  'home.features.cards.noTracking.description': 'We track products, not you. Cookies are for eating.',
+  'home.features.cards.noTracking.description':
+    'We track products, not you. Cookies are for eating.',
   'home.features.cards.massiveBase.title': 'Massive dataset',
-  'home.features.cards.massiveBase.description': 'The largest open-data catalogue on the market: 50 million references.',
+  'home.features.cards.massiveBase.description':
+    'The largest open-data catalogue on the market: 50 million references.',
   'home.categories.title': 'Popular categories',
   'home.categories.subtitle': '',
   'home.categories.cta': 'Browse products',
   'home.categories.impactLink': 'ImpactScore televisions',
   'home.categories.fallbackTitle': 'Category',
-  'home.categories.fallbackDescription': 'Fallback description for the category.',
+  'home.categories.fallbackDescription':
+    'Fallback description for the category.',
   'home.categories.carouselAriaLabel': 'Categories carousel',
   'home.categories.bannerAriaLabel': 'Browse highlighted categories',
   'home.categories.scrollPrevious': 'Scroll to previous categories',
@@ -59,7 +70,8 @@ const messages: Record<string, unknown> = {
   'home.categories.items.electronics.title': 'Electronics',
   'home.categories.items.electronics.description': 'Smartphones, TVs, audio…',
   'home.categories.items.appliances.title': 'Appliances',
-  'home.categories.items.appliances.description': 'Washing machines, dishwashers, fridges…',
+  'home.categories.items.appliances.description':
+    'Washing machines, dishwashers, fridges…',
   'home.blog.title': 'Live from the blog',
   'home.blog.subtitle': 'Latest stories from the team.',
   'home.blog.cta': 'Browse all articles',
@@ -68,21 +80,27 @@ const messages: Record<string, unknown> = {
   'home.blog.carouselAriaLabel': 'Featured blog posts carousel',
   'home.blog.items.first.title': 'How we keep our AI frugal',
   'home.blog.items.first.date': '15 Jan 2025',
-  'home.blog.items.first.excerpt': 'The technical choices that keep Nudger’s computations low-carbon.',
+  'home.blog.items.first.excerpt':
+    'The technical choices that keep Nudger’s computations low-carbon.',
   'home.blog.items.second.title': 'Prioritising durability and repairability',
   'home.blog.items.second.date': '8 Jan 2025',
-  'home.blog.items.second.excerpt': 'Why repairability weighs more in the Impact Score.',
+  'home.blog.items.second.excerpt':
+    'Why repairability weighs more in the Impact Score.',
   'home.blog.items.third.title': 'Balancing price and impact, step by step',
   'home.blog.items.third.date': '20 Dec 2024',
-  'home.blog.items.third.excerpt': 'Nudger’s method to align ecology and budget.',
+  'home.blog.items.third.excerpt':
+    'Nudger’s method to align ecology and budget.',
   'home.objections.title': 'Straight questions, clear answers',
   'home.objections.subtitle': 'The topics we hear about the most.',
   'home.objections.items.aiEnergy.question': 'Does AI burn too much energy?',
-  'home.objections.items.aiEnergy.answer': 'Frugal AI, optimised computations, net positive impact.',
+  'home.objections.items.aiEnergy.answer':
+    'Frugal AI, optimised computations, net positive impact.',
   'home.objections.items.reuse.question': 'Is true frugality all about reuse?',
-  'home.objections.items.reuse.answer': 'We promote using less first, then better.',
+  'home.objections.items.reuse.answer':
+    'We promote using less first, then better.',
   'home.objections.items.independence.question': 'Are you independent?',
-  'home.objections.items.independence.answer': 'Yes. Results stay neutral, code is open.',
+  'home.objections.items.independence.answer':
+    'Yes. Results stay neutral, code is open.',
   'home.faq.title': 'FAQ',
   'home.faq.subtitle': 'Quick answers to the most common questions.',
   'home.faq.items.free.question': 'Is Nudger free?',
@@ -90,11 +108,15 @@ const messages: Record<string, unknown> = {
   'home.faq.items.account.question': 'Do I need an account?',
   'home.faq.items.account.answer': 'No for searching; an account is optional.',
   'home.faq.items.categories.question': 'Which categories are covered?',
-  'home.faq.items.categories.answer': 'Electronics & Appliances today, more to come.',
-  'home.faq.items.impactScore.question': 'How do you calculate the Impact Score?',
-  'home.faq.items.impactScore.answer': 'Five weighted criteria + lean AI, fully open methodology.',
+  'home.faq.items.categories.answer':
+    'Electronics & Appliances today, more to come.',
+  'home.faq.items.impactScore.question':
+    'How do you calculate the Impact Score?',
+  'home.faq.items.impactScore.answer':
+    'Five weighted criteria + lean AI, fully open methodology.',
   'home.faq.items.dataFreshness.question': 'Are the data kept up to date?',
-  'home.faq.items.dataFreshness.answer': 'Yes, refreshed regularly with quality checks.',
+  'home.faq.items.dataFreshness.answer':
+    'Yes, refreshed regularly with quality checks.',
   'home.faq.items.suggestProduct.question': 'How can I suggest a product?',
   'home.faq.items.suggestProduct.answer': 'Use our dedicated contact form.',
   'home.cta.title': 'Ready to buy better without overspending?',
@@ -103,9 +125,10 @@ const messages: Record<string, unknown> = {
   'home.cta.searchSubmit': 'Launch search',
   'home.cta.browseTaxonomy': 'Explore categories',
   'home.seo.title': 'Nudger – Responsible shopping made easy',
-  'home.seo.description': 'Compare the environmental impact and prices of over 50 million products with Nudger.',
+  'home.seo.description':
+    'Compare the environmental impact and prices of over 50 million products with Nudger.',
   'home.seo.imageAlt': 'Illustration of the Nudger dashboard',
-  'siteIdentity.siteName': 'Nudger'
+  'siteIdentity.siteName': 'Nudger',
 }
 
 const translate = (key: string) => {
@@ -124,9 +147,13 @@ const localePathMock = vi.fn((to: unknown) => {
 
   if (to && typeof to === 'object' && 'name' in to) {
     const name = String(to.name)
-    const query = 'query' in to && to.query && typeof to.query === 'object' && 'q' in to.query
-      ? `?q=${String((to.query as Record<string, unknown>).q ?? '')}`
-      : ''
+    const query =
+      'query' in to &&
+      to.query &&
+      typeof to.query === 'object' &&
+      'q' in to.query
+        ? `?q=${String((to.query as Record<string, unknown>).q ?? '')}`
+        : ''
     return `/localized/${name}${query}`
   }
 
@@ -206,7 +233,12 @@ function useBlogComposable() {
     clearCurrentArticle: vi.fn(),
     clearError: vi.fn(),
     error: computed(() => null),
-    pagination: computed(() => ({ page: 1, size: 6, totalElements: blogArticlesMock.value.length, totalPages: 1 })),
+    pagination: computed(() => ({
+      page: 1,
+      size: 6,
+      totalElements: blogArticlesMock.value.length,
+      totalPages: 1,
+    })),
   }
 }
 
@@ -276,7 +308,13 @@ const SearchSuggestFieldStub = defineComponent({
   props: {
     modelValue: { type: String, default: '' },
   },
-  emits: ['update:modelValue', 'clear', 'select-category', 'select-product', 'submit'],
+  emits: [
+    'update:modelValue',
+    'clear',
+    'select-category',
+    'select-product',
+    'submit',
+  ],
   setup(props, { emit, attrs }) {
     const onInput = (event: Event) => {
       const target = event.target as HTMLInputElement
@@ -336,7 +374,8 @@ const NuxtLinkStub = defineComponent({
     to: { type: [String, Object], default: '' },
   },
   setup(props, { slots, attrs }) {
-    const href = typeof props.to === 'string' ? props.to : JSON.stringify(props.to)
+    const href =
+      typeof props.to === 'string' ? props.to : JSON.stringify(props.to)
     return () => h('a', { ...attrs, href }, slots.default?.())
   },
 })
@@ -351,7 +390,9 @@ const HomeBlogCarouselStub = defineComponent({
       h(
         'div',
         { class: 'home-blog-carousel-stub' },
-        (props.items as Array<{ title?: string }>).map((item) => item.title).join('|'),
+        (props.items as Array<{ title?: string }>)
+          .map(item => item.title)
+          .join('|')
       )
   },
 })
@@ -415,7 +456,10 @@ describe('Home page', () => {
     await searchInput.setValue('smart tv')
     await searchForm.trigger('submit.prevent')
 
-    expect(localePathMock).toHaveBeenCalledWith({ name: 'search', query: { q: 'smart tv' } })
+    expect(localePathMock).toHaveBeenCalledWith({
+      name: 'search',
+      query: { q: 'smart tv' },
+    })
     expect(routerPush).toHaveBeenCalledWith('/localized/search?q=smart tv')
   })
 
@@ -424,10 +468,18 @@ describe('Home page', () => {
 
     const headEntries = headSpy.mock.calls.map(([value]) => value)
     const scriptEntry = headEntries
-      .flatMap((entry) => (entry && typeof entry === 'object' && 'script' in entry ? (entry.script as unknown[]) : []))
-      .find((entry) => entry && typeof entry === 'object' && 'key' in entry && (entry as { key: string }).key === 'home-faq-jsonld') as
-      | { children?: string }
-      | undefined
+      .flatMap(entry =>
+        entry && typeof entry === 'object' && 'script' in entry
+          ? (entry.script as unknown[])
+          : []
+      )
+      .find(
+        entry =>
+          entry &&
+          typeof entry === 'object' &&
+          'key' in entry &&
+          (entry as { key: string }).key === 'home-faq-jsonld'
+      ) as { children?: string } | undefined
 
     expect(scriptEntry).toBeTruthy()
 

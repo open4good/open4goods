@@ -56,18 +56,22 @@ const paginationInfoMessage = computed(() =>
     current: currentPage.value,
     total: totalPages.value,
     count: totalElements.value,
-  }),
+  })
 )
 const paginationAriaLabelKey = 'blog.pagination.ariaLabel'
 const paginationAriaLabel = computed(() => t(paginationAriaLabelKey))
 const pageLinkLabel = (pageNumber: number) =>
   t('blog.pagination.pageLink', { page: pageNumber })
-const buildArticleTitleId = (index: number) => `blog-article-card-title-${index}`
-const buildArticleSummaryId = (index: number) => `blog-article-card-summary-${index}`
+const buildArticleTitleId = (index: number) =>
+  `blog-article-card-title-${index}`
+const buildArticleSummaryId = (index: number) =>
+  `blog-article-card-summary-${index}`
 const buildArticleImageAlt = (title?: string | null) => {
   const sanitized = title?.trim()
 
-  return sanitized && sanitized.length > 0 ? sanitized : 'Blog article illustration'
+  return sanitized && sanitized.length > 0
+    ? sanitized
+    : 'Blog article illustration'
 }
 
 const extractArticleSlug = (rawSlug: string | null | undefined) => {
@@ -88,7 +92,9 @@ const extractArticleSlug = (rawSlug: string | null | undefined) => {
   return segments.at(-1) ?? null
 }
 
-const buildArticleLink = (slug: string | null | undefined): string | undefined => {
+const buildArticleLink = (
+  slug: string | null | undefined
+): string | undefined => {
   const normalizedSlug = extractArticleSlug(slug)
 
   if (!normalizedSlug) {
@@ -98,8 +104,10 @@ const buildArticleLink = (slug: string | null | undefined): string | undefined =
   return `/blog/${normalizedSlug}`
 }
 
-const getArticleLink = (slug: string | null | undefined) => buildArticleLink(slug)
-const hasArticleLink = (slug: string | null | undefined) => Boolean(getArticleLink(slug))
+const getArticleLink = (slug: string | null | undefined) =>
+  buildArticleLink(slug)
+const hasArticleLink = (slug: string | null | undefined) =>
+  Boolean(getArticleLink(slug))
 
 const navigateToArticle = (slug: string | null | undefined) => {
   const link = getArticleLink(slug)
@@ -146,7 +154,7 @@ watch(
     }
 
     await loadArticlesFromRoute()
-  },
+  }
 )
 
 const buildPageQuery = (pageNumber: number) => {
@@ -192,7 +200,7 @@ type NamedTag = BlogTagDto & { name: string }
 
 const availableTags = computed<NamedTag[]>(() =>
   tags.value
-    .map((tag) => ({
+    .map(tag => ({
       ...tag,
       name: (tag.name ?? '').trim(),
     }))
@@ -203,7 +211,7 @@ const activeTag = computed(() => selectedTag.value)
 const allTagValue = '__all__'
 const tagGroupValue = computed({
   get: () => activeTag.value ?? allTagValue,
-  set: (value) => {
+  set: value => {
     if (typeof value !== 'string') {
       return
     }
@@ -239,12 +247,15 @@ const baseSeoTitle = computed(() => t('blog.seo.baseTitle'))
 const tagSeoTitle = computed(() =>
   sanitizedTag.value
     ? t('blog.seo.tagTitle', { tag: sanitizedTag.value })
-    : baseSeoTitle.value,
+    : baseSeoTitle.value
 )
 const pageSeoTitle = computed(() =>
   currentPage.value > 1
-    ? t('blog.seo.pageTitle', { title: tagSeoTitle.value, page: currentPage.value })
-    : tagSeoTitle.value,
+    ? t('blog.seo.pageTitle', {
+        title: tagSeoTitle.value,
+        page: currentPage.value,
+      })
+    : tagSeoTitle.value
 )
 
 const truncateToLength = (value: string, maxLength = 160) => {
@@ -259,12 +270,12 @@ const baseSeoDescription = computed(() => t('blog.seo.description'))
 const tagSeoDescription = computed(() =>
   sanitizedTag.value
     ? t('blog.seo.tagDescription', { tag: sanitizedTag.value })
-    : baseSeoDescription.value,
+    : baseSeoDescription.value
 )
 const articleSummaries = computed(() =>
   visibleArticles.value
-    .map((article) => (article.summary ?? '').trim())
-    .filter((summary) => summary.length > 0),
+    .map(article => (article.summary ?? '').trim())
+    .filter(summary => summary.length > 0)
 )
 const seoDescription = computed(() => {
   const base = tagSeoDescription.value
@@ -278,7 +289,8 @@ const seoDescription = computed(() => {
 })
 
 const primaryArticleImage = computed(
-  () => visibleArticles.value.find((article) => Boolean(article.image))?.image ?? null,
+  () =>
+    visibleArticles.value.find(article => Boolean(article.image))?.image ?? null
 )
 
 let requestUrl: URL | undefined
@@ -313,13 +325,14 @@ const canonicalUrl = computed(() => {
   return base.toString()
 })
 
-const dateFormatter = computed(() =>
-  new Intl.DateTimeFormat(locale.value || 'en', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  }),
+const dateFormatter = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value || 'en', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
 )
 
 const formatDate = (timestamp: number) => {
@@ -353,7 +366,7 @@ const buildAbsoluteArticleLink = (slug: string | null | undefined) => {
 
 const structuredData = computed(() => {
   const articles = visibleArticles.value
-    .map((article) => {
+    .map(article => {
       const entry: Record<string, unknown> = {
         '@type': 'BlogPosting',
       }
@@ -386,7 +399,7 @@ const structuredData = computed(() => {
 
       return entry
     })
-    .filter((entry) => Object.keys(entry).length > 1)
+    .filter(entry => Object.keys(entry).length > 1)
 
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -456,7 +469,9 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
       <div class="blog-hero__content">
         <p class="blog-hero__eyebrow">{{ t('blog.hero.eyebrow') }}</p>
         <div class="blog-hero__copy">
-          <h1 id="blog-hero-heading" class="blog-hero__title">{{ t('blog.hero.title') }}</h1>
+          <h1 id="blog-hero-heading" class="blog-hero__title">
+            {{ t('blog.hero.title') }}
+          </h1>
           <p class="blog-hero__subtitle">{{ t('blog.hero.subtitle') }}</p>
         </div>
       </div>
@@ -475,7 +490,12 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
       :aria-busy="tagsLoading"
     >
       <div class="d-flex align-center gap-2 text-primary font-weight-medium">
-        <v-icon icon="mdi-tag-multiple" size="small" color="primary" aria-hidden="true" />
+        <v-icon
+          icon="mdi-tag-multiple"
+          size="small"
+          color="primary"
+          aria-hidden="true"
+        />
         <span class="text-subtitle-1">{{ t('blog.list.tagsTitle') }}</span>
       </div>
 
@@ -510,7 +530,9 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           :aria-label="tag.name"
         >
           <span v-if="typeof tag.count === 'number' && tag.count > 0">
-            {{ t('blog.list.tagWithCount', { tag: tag.name, count: tag.count }) }}
+            {{
+              t('blog.list.tagWithCount', { tag: tag.name, count: tag.count })
+            }}
           </span>
           <span v-else>
             {{ tag.name }}
@@ -524,8 +546,16 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
         role="status"
         aria-live="polite"
       >
-        <v-progress-circular indeterminate size="16" width="2" color="primary" aria-hidden="true" />
-        <span class="ms-2 text-body-2 text-primary">{{ t('blog.list.tagsLoading') }}</span>
+        <v-progress-circular
+          indeterminate
+          size="16"
+          width="2"
+          color="primary"
+          aria-hidden="true"
+        />
+        <span class="ms-2 text-body-2 text-primary">{{
+          t('blog.list.tagsLoading')
+        }}</span>
       </div>
     </v-sheet>
 
@@ -538,7 +568,9 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
       aria-live="polite"
     >
       <v-progress-circular indeterminate aria-hidden="true" />
-      <p class="text-body-1 text-medium-emphasis">{{ t('blog.list.loading') }}</p>
+      <p class="text-body-1 text-medium-emphasis">
+        {{ t('blog.list.loading') }}
+      </p>
     </v-sheet>
 
     <v-sheet
@@ -581,9 +613,15 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
             :link="Boolean(getArticleLink(article.url))"
             :to="getArticleLink(article.url) || undefined"
             :aria-labelledby="buildArticleTitleId(index)"
-            :aria-describedby="article.summary ? buildArticleSummaryId(index) : undefined"
+            :aria-describedby="
+              article.summary ? buildArticleSummaryId(index) : undefined
+            "
           >
-            <div v-if="article.image" class="d-block" data-test="article-image-link">
+            <div
+              v-if="article.image"
+              class="d-block"
+              data-test="article-image-link"
+            >
               <v-img
                 :src="article.image"
                 :alt="buildArticleImageAlt(article.title)"
@@ -603,41 +641,71 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
               </span>
             </v-card-title>
 
-          <v-card-text :id="buildArticleSummaryId(index)" class="px-4 pb-4 flex-grow-1">
-            <p class="text-body-2 text-medium-emphasis mb-0">{{ article.summary }}</p>
-          </v-card-text>
-
-          <v-card-actions class="px-4 py-4 align-center blog-articles__meta">
-            <div class="d-flex flex-column gap-2" aria-label="Article metadata">
-              <div v-if="article.author" class="d-flex align-center text-body-2">
-                <v-icon size="small" color="primary" class="me-2" aria-hidden="true">mdi-account</v-icon>
-                <span class="text-primary font-weight-medium">{{ article.author }}</span>
-              </div>
-              <div v-if="article.createdMs" class="d-flex align-center text-body-2">
-                <v-icon size="small" color="grey" class="me-2" aria-hidden="true">mdi-calendar</v-icon>
-                <time class="text-medium-emphasis" :datetime="buildDateIsoString(article.createdMs)">
-                  {{ formatDate(article.createdMs) }}
-                </time>
-              </div>
-            </div>
-
-            <v-spacer></v-spacer>
-
-            <v-btn
-              variant="outlined"
-              size="small"
-              color="primary"
-              type="button"
-              :disabled="!hasArticleLink(article.url)"
-              data-test="article-read-more"
-              :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
-              @click.stop="navigateToArticle(article.url)"
+            <v-card-text
+              :id="buildArticleSummaryId(index)"
+              class="px-4 pb-4 flex-grow-1"
             >
-              {{ t('blog.list.readMore') }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+              <p class="text-body-2 text-medium-emphasis mb-0">
+                {{ article.summary }}
+              </p>
+            </v-card-text>
 
+            <v-card-actions class="px-4 py-4 align-center blog-articles__meta">
+              <div
+                class="d-flex flex-column gap-2"
+                aria-label="Article metadata"
+              >
+                <div
+                  v-if="article.author"
+                  class="d-flex align-center text-body-2"
+                >
+                  <v-icon
+                    size="small"
+                    color="primary"
+                    class="me-2"
+                    aria-hidden="true"
+                    >mdi-account</v-icon
+                  >
+                  <span class="text-primary font-weight-medium">{{
+                    article.author
+                  }}</span>
+                </div>
+                <div
+                  v-if="article.createdMs"
+                  class="d-flex align-center text-body-2"
+                >
+                  <v-icon
+                    size="small"
+                    color="grey"
+                    class="me-2"
+                    aria-hidden="true"
+                    >mdi-calendar</v-icon
+                  >
+                  <time
+                    class="text-medium-emphasis"
+                    :datetime="buildDateIsoString(article.createdMs)"
+                  >
+                    {{ formatDate(article.createdMs) }}
+                  </time>
+                </div>
+              </div>
+
+              <v-spacer></v-spacer>
+
+              <v-btn
+                variant="outlined"
+                size="small"
+                color="primary"
+                type="button"
+                :disabled="!hasArticleLink(article.url)"
+                data-test="article-read-more"
+                :aria-label="`${t('blog.list.readMore')} - ${article.title || t('blog.list.readMore')}`"
+                @click.stop="navigateToArticle(article.url)"
+              >
+                {{ t('blog.list.readMore') }}
+              </v-btn>
+            </v-card-actions>
+          </v-card>
         </v-col>
       </v-row>
 
@@ -660,7 +728,10 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
           </nav>
         </ClientOnly>
 
-        <p class="text-body-2 text-medium-emphasis text-center" aria-live="polite">
+        <p
+          class="text-body-2 text-medium-emphasis text-center"
+          aria-live="polite"
+        >
           {{ paginationInfoMessage }}
         </p>
 

@@ -39,7 +39,9 @@ const cardState = ref<Record<string, boolean>>({
 })
 
 const customScore = 72
-const customScoreLabel = computed(() => t('home.roundedCards.samples.custom.progressLabel', { value: customScore }))
+const customScoreLabel = computed(() =>
+  t('home.roundedCards.samples.custom.progressLabel', { value: customScore })
+)
 
 const toStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -47,7 +49,7 @@ const toStringArray = (value: unknown): string[] => {
   }
 
   return value
-    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+    .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
     .filter((entry): entry is string => entry.length > 0)
 }
 
@@ -141,15 +143,29 @@ const updateSelected = (id: string, value: boolean) => {
 </script>
 
 <template>
-  <section class="home-card-showcase" aria-labelledby="home-card-showcase-title">
+  <section
+    class="home-card-showcase"
+    aria-labelledby="home-card-showcase-title"
+  >
     <v-container fluid class="home-card-showcase__container">
       <div class="home-card-showcase__header">
-        <p class="home-card-showcase__eyebrow">{{ t('home.roundedCards.eyebrow') }}</p>
-        <h2 id="home-card-showcase-title" class="home-card-showcase__title">{{ t('home.roundedCards.title') }}</h2>
-        <p class="home-card-showcase__subtitle">{{ t('home.roundedCards.subtitle') }}</p>
+        <p class="home-card-showcase__eyebrow">
+          {{ t('home.roundedCards.eyebrow') }}
+        </p>
+        <h2 id="home-card-showcase-title" class="home-card-showcase__title">
+          {{ t('home.roundedCards.title') }}
+        </h2>
+        <p class="home-card-showcase__subtitle">
+          {{ t('home.roundedCards.subtitle') }}
+        </p>
       </div>
 
-      <v-row class="home-card-showcase__grid" align="stretch" justify="center" dense>
+      <v-row
+        class="home-card-showcase__grid"
+        align="stretch"
+        justify="center"
+        dense
+      >
         <v-col v-for="card in cards" :key="card.id" cols="12" md="6" lg="4">
           <RoundedCornerCard
             class="home-card-showcase__card"
@@ -169,10 +185,13 @@ const updateSelected = (id: string, value: boolean) => {
             :hover-elevation="14"
             :elevation="9"
             :aria-label="card.ariaLabel"
-            @update:selected="(value) => updateSelected(card.id, value)"
+            @update:selected="value => updateSelected(card.id, value)"
           >
             <ul v-if="card.bullets.length" class="home-card-showcase__bullets">
-              <li v-for="(bullet, index) in card.bullets" :key="`${card.id}-bullet-${index}`">
+              <li
+                v-for="(bullet, index) in card.bullets"
+                :key="`${card.id}-bullet-${index}`"
+              >
                 {{ bullet }}
               </li>
             </ul>
@@ -187,7 +206,9 @@ const updateSelected = (id: string, value: boolean) => {
                   rotate="-90"
                   :title="customScoreLabel"
                 >
-                  <span class="home-card-showcase__corner-meter-text">{{ customScoreLabel }}</span>
+                  <span class="home-card-showcase__corner-meter-text">{{
+                    customScoreLabel
+                  }}</span>
                 </v-progress-circular>
               </div>
             </template>
@@ -208,90 +229,89 @@ const updateSelected = (id: string, value: boolean) => {
 </template>
 
 <style scoped lang="sass">
+.home-card-showcase
+  padding: clamp(1.5rem, 5vw, 2.75rem) clamp(1.25rem, 6vw, 3.5rem)
+  background: linear-gradient(140deg, rgba(var(--v-theme-surface-ice-050), 0.8), rgba(var(--v-theme-surface-muted), 0.9))
+  border-radius: clamp(1.5rem, 4vw, 2.5rem)
+  box-shadow: 0 18px 42px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+.home-card-showcase__container
+  max-width: 1260px
+  margin: 0 auto
+
+.home-card-showcase__header
+  text-align: center
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+  margin-bottom: clamp(1.25rem, 4vw, 2rem)
+
+.home-card-showcase__eyebrow
+  margin: 0
+  font-weight: 700
+  letter-spacing: 0.08em
+  text-transform: uppercase
+  color: rgba(var(--v-theme-hero-gradient-start), 0.9)
+
+.home-card-showcase__title
+  margin: 0
+  font-size: clamp(1.6rem, 4vw, 2.1rem)
+  line-height: 1.2
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.home-card-showcase__subtitle
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  max-width: 780px
+  align-self: center
+  line-height: 1.4
+
+.home-card-showcase__grid
+  --v-gutter-x: clamp(1rem, 3vw, 1.5rem)
+  --v-gutter-y: clamp(1rem, 3vw, 1.5rem)
+
+.home-card-showcase__card
+  height: 100%
+
+.home-card-showcase__bullets
+  margin: 0
+  padding-inline-start: 1rem
+  display: grid
+  gap: 0.35rem
+  color: rgb(var(--v-theme-text-neutral-strong))
+  line-height: 1.4
+
+.home-card-showcase__bullets li
+  margin: 0
+
+.home-card-showcase__corner-meter
+  display: grid
+  place-items: center
+  color: rgb(var(--v-theme-text-on-accent))
+
+.home-card-showcase__corner-meter-text
+  font-weight: 800
+  font-size: 0.85rem
+
+@media (max-width: 960px)
   .home-card-showcase
-    padding: clamp(1.5rem, 5vw, 2.75rem) clamp(1.25rem, 6vw, 3.5rem)
-    background: linear-gradient(140deg, rgba(var(--v-theme-surface-ice-050), 0.8), rgba(var(--v-theme-surface-muted), 0.9))
-    border-radius: clamp(1.5rem, 4vw, 2.5rem)
-    box-shadow: 0 18px 42px rgba(var(--v-theme-shadow-primary-600), 0.12)
-
-  .home-card-showcase__container
-    max-width: 1260px
-    margin: 0 auto
-
-  .home-card-showcase__header
-    text-align: center
-    display: flex
-    flex-direction: column
-    gap: 0.5rem
-    margin-bottom: clamp(1.25rem, 4vw, 2rem)
-
-  .home-card-showcase__eyebrow
-    margin: 0
-    font-weight: 700
-    letter-spacing: 0.08em
-    text-transform: uppercase
-    color: rgba(var(--v-theme-hero-gradient-start), 0.9)
+    padding: clamp(1.2rem, 5vw, 2rem)
+    border-radius: clamp(1.1rem, 3vw, 1.6rem)
 
   .home-card-showcase__title
-    margin: 0
-    font-size: clamp(1.6rem, 4vw, 2.1rem)
-    line-height: 1.2
-    color: rgb(var(--v-theme-text-neutral-strong))
+    font-size: clamp(1.45rem, 5vw, 1.8rem)
 
   .home-card-showcase__subtitle
-    margin: 0
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    max-width: 780px
-    align-self: center
-    line-height: 1.4
+    font-size: 0.95rem
 
+@media (min-width: 1280px)
   .home-card-showcase__grid
-    --v-gutter-x: clamp(1rem, 3vw, 1.5rem)
-    --v-gutter-y: clamp(1rem, 3vw, 1.5rem)
+    --v-gutter-y: 1.75rem
+    --v-gutter-x: 1.75rem
 
   .home-card-showcase__card
-    height: 100%
+    transform-origin: center
 
-  .home-card-showcase__bullets
-    margin: 0
-    padding-inline-start: 1rem
-    display: grid
-    gap: 0.35rem
-    color: rgb(var(--v-theme-text-neutral-strong))
-    line-height: 1.4
-
-  .home-card-showcase__bullets li
-    margin: 0
-
-  .home-card-showcase__corner-meter
-    display: grid
-    place-items: center
-    color: rgb(var(--v-theme-text-on-accent))
-
-  .home-card-showcase__corner-meter-text
-    font-weight: 800
-    font-size: 0.85rem
-
-  @media (max-width: 960px)
-    .home-card-showcase
-      padding: clamp(1.2rem, 5vw, 2rem)
-      border-radius: clamp(1.1rem, 3vw, 1.6rem)
-
-    .home-card-showcase__title
-      font-size: clamp(1.45rem, 5vw, 1.8rem)
-
-    .home-card-showcase__subtitle
-      font-size: 0.95rem
-
-  @media (min-width: 1280px)
-    .home-card-showcase__grid
-      --v-gutter-y: 1.75rem
-      --v-gutter-x: 1.75rem
-
-    .home-card-showcase__card
-      transform-origin: center
-
-      &:hover
-        transform: translateY(-2px)
-
+    &:hover
+      transform: translateY(-2px)
 </style>

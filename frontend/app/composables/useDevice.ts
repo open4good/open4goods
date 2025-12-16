@@ -24,18 +24,23 @@ const DEFAULT_DEVICE: DeviceInfo = {
 export function useDevice() {
   const nuxtApp = useNuxtApp()
   const display = useDisplay()
-  const deviceState = useState<DeviceInfo>('nudger-device-state', () => ({ ...DEFAULT_DEVICE }))
-  const mixinComputed = (deviceMixin as ComponentOptions | undefined)?.computed ?? {}
+  const deviceState = useState<DeviceInfo>('nudger-device-state', () => ({
+    ...DEFAULT_DEVICE,
+  }))
+  const mixinComputed =
+    (deviceMixin as ComponentOptions | undefined)?.computed ?? {}
 
   const computeFromMixin = (width: number) => {
     const ctx: Record<string, unknown> = { windowWidth: width }
-    const resolve = (key: keyof typeof mixinComputed, fallback: () => boolean) => {
+    const resolve = (
+      key: keyof typeof mixinComputed,
+      fallback: () => boolean
+    ) => {
       const handler = mixinComputed[key]
       if (typeof handler === 'function') {
         try {
           return handler.call(ctx)
-        }
-        catch {
+        } catch {
           return fallback()
         }
       }
@@ -55,7 +60,10 @@ export function useDevice() {
       isTablet,
       isDesktop,
       isMobileOrTablet: resolve('isMobileOrTablet', () => isMobile || isTablet),
-      isDesktopOrTablet: resolve('isDesktopOrTablet', () => isDesktop || isTablet),
+      isDesktopOrTablet: resolve(
+        'isDesktopOrTablet',
+        () => isDesktop || isTablet
+      ),
     }
   }
 
@@ -88,7 +96,7 @@ export function useDevice() {
         syncFromModule()
         syncFromWindow()
       },
-      { immediate: false },
+      { immediate: false }
     )
   }
 

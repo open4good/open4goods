@@ -3,20 +3,18 @@
     <div class="nudge-step-scores__header">
       <div>
         <h2 class="nudge-step-scores__title">
-          <v-icon icon="mdi-numeric-2-circle" color="accent-primary-highlight" size="30" />
+          <v-icon
+            icon="mdi-numeric-2-circle"
+            color="accent-primary-highlight"
+            size="30"
+          />
           {{ $t('nudge-tool.steps.scores.title') }}
         </h2>
       </div>
-
     </div>
 
     <v-row dense>
-      <v-col
-        v-for="score in scores"
-        :key="score.scoreName"
-        cols="12"
-        sm="6"
-      >
+      <v-col v-for="score in scores" :key="score.scoreName" cols="12" sm="6">
         <v-tooltip
           location="top"
           :text="score.description"
@@ -26,7 +24,11 @@
             <v-card
               v-bind="activatorProps"
               class="nudge-step-scores__card nudge-option-card"
-              :class="{ 'nudge-option-card--selected': selectedNames.includes(score.scoreName ?? '') }"
+              :class="{
+                'nudge-option-card--selected': selectedNames.includes(
+                  score.scoreName ?? ''
+                ),
+              }"
               rounded="lg"
               role="button"
               :aria-pressed="selectedNames.includes(score.scoreName ?? '')"
@@ -54,7 +56,10 @@ const props = defineProps<{
   modelValue: string[]
 }>()
 
-const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void; (event: 'continue'): void }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string[]): void
+  (event: 'continue'): void
+}>()
 
 const selectedNames = computed(() => props.modelValue)
 

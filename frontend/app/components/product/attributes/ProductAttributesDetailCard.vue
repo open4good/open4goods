@@ -8,25 +8,47 @@
         </v-chip>
       </header>
 
-      <div v-if="group.features.length" class="product-attributes__chip-list product-attributes__chip-list--positive">
+      <div
+        v-if="group.features.length"
+        class="product-attributes__chip-list product-attributes__chip-list--positive"
+      >
         <ul>
           <li v-for="feature in group.features" :key="feature.key">
-            <v-icon icon="mdi-check-circle" size="18" class="product-attributes__chip-icon product-attributes__chip-icon--positive" />
-            <span class="product-attributes__chip-label">{{ feature.name }}</span>
+            <v-icon
+              icon="mdi-check-circle"
+              size="18"
+              class="product-attributes__chip-icon product-attributes__chip-icon--positive"
+            />
+            <span class="product-attributes__chip-label">{{
+              feature.name
+            }}</span>
           </li>
         </ul>
       </div>
 
-      <div v-if="group.unFeatures.length" class="product-attributes__chip-list product-attributes__chip-list--negative">
+      <div
+        v-if="group.unFeatures.length"
+        class="product-attributes__chip-list product-attributes__chip-list--negative"
+      >
         <ul>
           <li v-for="feature in group.unFeatures" :key="feature.key">
-            <v-icon icon="mdi-close-octagon-outline" size="18" class="product-attributes__chip-icon product-attributes__chip-icon--negative" />
-            <span class="product-attributes__chip-label">{{ feature.name }}</span>
+            <v-icon
+              icon="mdi-close-octagon-outline"
+              size="18"
+              class="product-attributes__chip-icon product-attributes__chip-icon--negative"
+            />
+            <span class="product-attributes__chip-label">{{
+              feature.name
+            }}</span>
           </li>
         </ul>
       </div>
 
-      <v-table v-if="group.attributes.length" density="comfortable" class="product-attributes__table">
+      <v-table
+        v-if="group.attributes.length"
+        density="comfortable"
+        class="product-attributes__table"
+      >
         <tbody>
           <tr v-for="attribute in group.attributes" :key="attribute.key">
             <th scope="row">{{ attribute.name }}</th>

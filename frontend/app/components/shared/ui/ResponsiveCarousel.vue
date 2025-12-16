@@ -12,7 +12,10 @@
       height="auto"
       role="region"
     >
-      <v-carousel-item v-for="(slideItems, index) in slides" :key="`carousel-slide-${index}`">
+      <v-carousel-item
+        v-for="(slideItems, index) in slides"
+        :key="`carousel-slide-${index}`"
+      >
         <div class="responsive-carousel__slide" role="list">
           <div
             v-for="(item, itemIndex) in slideItems"
@@ -44,7 +47,7 @@ const props = withDefaults(
   {
     breakpoints: () => ({ xs: 1, sm: 1, md: 2, lg: 3, xl: 3 }),
     itemKey: (_item: unknown, index: number) => index,
-  },
+  }
 )
 
 const display = useDisplay()
@@ -55,7 +58,10 @@ const itemsPerSlide = computed(() => {
   const config = props.breakpoints ?? {}
 
   if (display.xl.value) {
-    return Math.max(1, config.xl ?? config.lg ?? config.md ?? config.sm ?? config.xs ?? 1)
+    return Math.max(
+      1,
+      config.xl ?? config.lg ?? config.md ?? config.sm ?? config.xs ?? 1
+    )
   }
 
   if (display.lg.value) {
@@ -92,18 +98,18 @@ const showControls = computed(() => slides.value.length > 1)
 
 watch(
   () => slides.value.length,
-  (length) => {
+  length => {
     if (currentSlide.value >= length) {
       currentSlide.value = 0
     }
-  },
+  }
 )
 
 watch(
   () => props.items.length,
   () => {
     currentSlide.value = 0
-  },
+  }
 )
 
 watch(
@@ -111,7 +117,7 @@ watch(
   () => {
     currentSlide.value = 0
   },
-  { deep: false },
+  { deep: false }
 )
 </script>
 
@@ -143,4 +149,3 @@ watch(
   }
 }
 </style>
-

@@ -2,7 +2,13 @@ import type { ThemeName } from '~~/shared/constants/theme'
 
 export const THEME_ASSETS_FALLBACK: ThemeName = 'light'
 
-export const THEME_ASSET_KEYS = ['logo', 'footerLogo', 'favicon', 'heroBackground', 'illustration'] as const
+export const THEME_ASSET_KEYS = [
+  'logo',
+  'footerLogo',
+  'favicon',
+  'heroBackground',
+  'illustration',
+] as const
 
 export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]
 

@@ -14,7 +14,7 @@ const stubs = {
             ...attrs,
             'data-testid': 'hero-education-card',
           },
-          slots.default?.(),
+          slots.default?.()
         )
     },
   }),
@@ -42,7 +42,8 @@ const stubs = {
   VDivider: defineComponent({
     name: 'VDividerStub',
     setup(_, { attrs }) {
-      return () => h('hr', { ...attrs, 'data-testid': 'hero-education-card-divider' })
+      return () =>
+        h('hr', { ...attrs, 'data-testid': 'hero-education-card-divider' })
     },
   }),
 }
@@ -60,9 +61,17 @@ describe('HeroEducationCard', () => {
       },
     })
 
-    expect(wrapper.find('.hero-education-card__title').text()).toBe('What is open source?')
-    expect(wrapper.find('[data-testid="hero-education-card-icon"]').attributes('data-icon')).toBe('mdi-school-outline')
-    expect(wrapper.find('.hero-education-card__body').html()).toContain('<strong>Open4goods</strong>')
+    expect(wrapper.find('.hero-education-card__title').text()).toBe(
+      'What is open source?'
+    )
+    expect(
+      wrapper
+        .find('[data-testid="hero-education-card-icon"]')
+        .attributes('data-icon')
+    ).toBe('mdi-school-outline')
+    expect(wrapper.find('.hero-education-card__body').html()).toContain(
+      '<strong>Open4goods</strong>'
+    )
   })
 
   it('renders list items with their optional icons', () => {
@@ -82,8 +91,16 @@ describe('HeroEducationCard', () => {
 
     const listItems = wrapper.findAll('.hero-education-card__list li')
     expect(listItems).toHaveLength(2)
-    expect(listItems[0].find('[data-testid="hero-education-card-icon"]').attributes('data-icon')).toBe('mdi-check')
-    expect(listItems[1].find('[data-testid="hero-education-card-icon"]').exists()).toBe(false)
-    expect(wrapper.find('[data-testid="hero-education-card-divider"]').exists()).toBe(true)
+    expect(
+      listItems[0]
+        .find('[data-testid="hero-education-card-icon"]')
+        .attributes('data-icon')
+    ).toBe('mdi-check')
+    expect(
+      listItems[1].find('[data-testid="hero-education-card-icon"]').exists()
+    ).toBe(false)
+    expect(
+      wrapper.find('[data-testid="hero-education-card-divider"]').exists()
+    ).toBe(true)
   })
 })

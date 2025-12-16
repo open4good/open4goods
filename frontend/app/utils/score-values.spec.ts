@@ -9,14 +9,24 @@ describe('score value helpers', () => {
   }
 
   it('prioritises the canonical value field', () => {
-    const resolved = resolveScoreNumericValue({ ...baseScore, value: 4.2, relativ: { value: 1.1 } })
+    const resolved = resolveScoreNumericValue({
+      ...baseScore,
+      value: 4.2,
+      relativ: { value: 1.1 },
+    })
 
     expect(resolved).toEqual({ value: 4.2, source: 'value' })
   })
 
   it('falls back to relativ and legacy relative values', () => {
-    const relativScore = resolveScoreNumericValue({ ...baseScore, relativ: { value: 3.3 } })
-    const legacyScore = resolveScoreNumericValue({ ...baseScore, relative: { value: 2.5 } })
+    const relativScore = resolveScoreNumericValue({
+      ...baseScore,
+      relativ: { value: 3.3 },
+    })
+    const legacyScore = resolveScoreNumericValue({
+      ...baseScore,
+      relative: { value: 2.5 },
+    })
 
     expect(relativScore).toEqual({ value: 3.3, source: 'relative' })
     expect(legacyScore).toEqual({ value: 2.5, source: 'legacyRelative' })
@@ -36,7 +46,9 @@ describe('score value helpers', () => {
 
   it('extracts only the numeric value', () => {
     expect(extractScoreValue({ ...baseScore, value: 4.6 })).toBe(4.6)
-    expect(extractScoreValue({ ...baseScore, relativ: { value: 2.4 } })).toBe(2.4)
+    expect(extractScoreValue({ ...baseScore, relativ: { value: 2.4 } })).toBe(
+      2.4
+    )
     expect(extractScoreValue(baseScore)).toBeNull()
   })
 })

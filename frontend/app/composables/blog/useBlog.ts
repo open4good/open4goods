@@ -7,40 +7,22 @@ const DEFAULT_PAGE_SIZE = 12
 
 export const useBlog = () => {
   // Reactive state
-  const articles = useState<BlogPostDto[]>(
-    'blog-articles',
-    () => [],
-  )
+  const articles = useState<BlogPostDto[]>('blog-articles', () => [])
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
   const currentArticle = useState<BlogPostDto | null>(
     'blog-current-article',
-    () => null,
+    () => null
   )
-  const tags = useState<BlogTagDto[]>(
-    'blog-tags',
-    () => [],
-  )
-  const selectedTag = useState<string | null>(
-    'blog-selected-tag',
-    () => null,
-  )
-  const loading = useState(
-    'blog-loading',
-    () => false,
-  )
-  const error = useState<string | null>(
-    'blog-error',
-    () => null,
-  )
-  const pagination = useState(
-    'blog-pagination',
-    () => ({
-      page: 1,
-      size: DEFAULT_PAGE_SIZE,
-      totalElements: 0,
-      totalPages: 0,
-    }),
-  )
+  const tags = useState<BlogTagDto[]>('blog-tags', () => [])
+  const selectedTag = useState<string | null>('blog-selected-tag', () => null)
+  const loading = useState('blog-loading', () => false)
+  const error = useState<string | null>('blog-error', () => null)
+  const pagination = useState('blog-pagination', () => ({
+    page: 1,
+    size: DEFAULT_PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 0,
+  }))
 
   /**
    * Fetch blog articles for a specific page from the backend proxy
@@ -48,14 +30,16 @@ export const useBlog = () => {
   const fetchArticles = async (
     page: number = pagination.value.page,
     size: number = pagination.value.size,
-    tag: string | null = selectedTag.value,
+    tag: string | null = selectedTag.value
   ) => {
     loading.value = true
     error.value = null
 
     try {
       const sanitizedPage = Number.isFinite(page) ? Math.max(page, 1) : 1
-      const sanitizedSize = Number.isFinite(size) ? Math.max(size, 1) : DEFAULT_PAGE_SIZE
+      const sanitizedSize = Number.isFinite(size)
+        ? Math.max(size, 1)
+        : DEFAULT_PAGE_SIZE
       const sanitizedTag = tag?.trim() ?? null
 
       // Use our server API as proxy instead of calling external API directly
@@ -74,10 +58,13 @@ export const useBlog = () => {
 
       const pageMeta = response.page
       const resolvedPageSize = pageMeta?.size ?? sanitizedSize
-      const resolvedTotalElements = pageMeta?.totalElements ?? currentPageArticles.length
+      const resolvedTotalElements =
+        pageMeta?.totalElements ?? currentPageArticles.length
       const computedTotalPages =
         pageMeta?.totalPages ??
-        (resolvedPageSize > 0 ? Math.ceil(resolvedTotalElements / resolvedPageSize) : 1)
+        (resolvedPageSize > 0
+          ? Math.ceil(resolvedTotalElements / resolvedPageSize)
+          : 1)
       const safeTotalPages = Math.max(computedTotalPages ?? 1, 1)
       const zeroBasedPage = pageMeta?.number ?? sanitizedPage - 1
       const safePage = Math.min(zeroBasedPage + 1, safeTotalPages)
@@ -150,11 +137,9 @@ export const useBlog = () => {
     error.value = null
 
     try {
-      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${slug}`,
-        {
-          headers: requestHeaders,
-        },
-      )
+      const article = await $fetch<BlogPostDto>(`/api/blog/articles/${slug}`, {
+        headers: requestHeaders,
+      })
       currentArticle.value = article
       return article
     } catch (err) {

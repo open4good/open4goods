@@ -9,7 +9,10 @@
         {{ t('category.filters.activeTitle') }}
       </span>
 
-      <v-tooltip :text="t('category.filters.clearAllTooltip')" location="bottom">
+      <v-tooltip
+        :text="t('category.filters.clearAllTooltip')"
+        location="bottom"
+      >
         <template #activator="{ props: tooltipProps }">
           <v-btn
             icon
@@ -94,13 +97,20 @@ const activeFilters = computed(() => props.filters?.filters ?? [])
 const subsetClauses = computed(() => props.subsetClauses ?? [])
 const metadata = computed(() => props.fieldMetadata ?? {})
 
-const formatChipBoundary = (value: number | string | null | undefined, isPrice: boolean) => {
+const formatChipBoundary = (
+  value: number | string | null | undefined,
+  isPrice: boolean
+) => {
   return formatNumericRangeValue(value, n, { isPrice })
 }
 
 const createManualLabel = (filter: Filter) => {
   const mapping = filter.field ?? ''
-  const fieldLabel = resolveFilterFieldTitle(metadata.value[mapping], t, mapping)
+  const fieldLabel = resolveFilterFieldTitle(
+    metadata.value[mapping],
+    t,
+    mapping
+  )
 
   if (filter.operator === 'term') {
     const term = filter.terms?.[0] ?? ''
@@ -114,7 +124,7 @@ const createManualLabel = (filter: Filter) => {
 }
 
 const manualFilterChips = computed<ManualFilterChip[]>(() => {
-  return activeFilters.value.map((filter) => {
+  return activeFilters.value.map(filter => {
     const mapping = filter.field ?? ''
 
     if (filter.operator === 'term') {
@@ -141,7 +151,7 @@ const manualFilterChips = computed<ManualFilterChip[]>(() => {
 })
 
 const subsetFilterChips = computed<SubsetFilterChip[]>(() => {
-  return subsetClauses.value.map((clause) => ({
+  return subsetClauses.value.map(clause => ({
     kind: 'subset' as const,
     id: clause.id,
     label: clause.label,
@@ -161,7 +171,6 @@ const onRemoveChip = (chip: ActiveFilterChip) => {
 
   emit('remove-filter', chip.field, chip.type, chip.term)
 }
-
 </script>
 
 <style scoped lang="sass">

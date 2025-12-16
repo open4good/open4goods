@@ -8,7 +8,8 @@ import CategoryResultsCount from './CategoryResultsCount.vue'
 const reducedMotionPreference = ref<'reduce' | 'no-preference'>('no-preference')
 
 vi.mock('@vueuse/core', async () => {
-  const actual = await vi.importActual<typeof import('@vueuse/core')>('@vueuse/core')
+  const actual =
+    await vi.importActual<typeof import('@vueuse/core')>('@vueuse/core')
 
   return {
     ...actual,

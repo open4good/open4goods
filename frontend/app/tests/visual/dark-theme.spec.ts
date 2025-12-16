@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { vuetifyPalettes, type ThemeColors } from '../../../config/theme/palettes'
+import {
+  vuetifyPalettes,
+  type ThemeColors,
+} from '../../../config/theme/palettes'
 
 const darkColors: ThemeColors = vuetifyPalettes.dark ?? {}
 
@@ -26,15 +29,15 @@ type Rgb = [number, number, number]
 
 const hexToRgb = (hex: string): Rgb => {
   const normalized = hex.replace('#', '')
-  const value = normalized.length === 3
-    ? normalized.split('').map((char) => char + char).join('')
-    : normalized
+  const value =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map(char => char + char)
+          .join('')
+      : normalized
   const int = Number.parseInt(value, 16)
-  return [
-    (int >> 16) & 255,
-    (int >> 8) & 255,
-    int & 255,
-  ]
+  return [(int >> 16) & 255, (int >> 8) & 255, int & 255]
 }
 
 const luminance = ([r, g, b]: Rgb): number => {
@@ -49,7 +52,10 @@ const luminance = ([r, g, b]: Rgb): number => {
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue
 }
 
-const contrastRatio = (foregroundHex: string, backgroundHex: string): number => {
+const contrastRatio = (
+  foregroundHex: string,
+  backgroundHex: string
+): number => {
   const foregroundLum = luminance(hexToRgb(foregroundHex))
   const backgroundLum = luminance(hexToRgb(backgroundHex))
   const [lighter, darker] = [foregroundLum, backgroundLum].sort((a, b) => b - a)
@@ -59,9 +65,11 @@ const contrastRatio = (foregroundHex: string, backgroundHex: string): number => 
 
 describe('vuetify dark palette', () => {
   it('aligns surface and text tokens with the glossary', () => {
-    Object.entries(expectedDarkSurfaceTokens).forEach(([token, expectedValue]) => {
-      expect(darkColors[token]).toBe(expectedValue)
-    })
+    Object.entries(expectedDarkSurfaceTokens).forEach(
+      ([token, expectedValue]) => {
+        expect(darkColors[token]).toBe(expectedValue)
+      }
+    )
   })
 
   it('keeps readable contrast for menu, hero search, and callouts', () => {
@@ -80,7 +88,10 @@ describe('vuetify dark palette', () => {
       expect(background).toBeTruthy()
 
       const ratio = contrastRatio(foreground, background)
-      expect(ratio, `${context} should keep WCAG AA contrast`).toBeGreaterThanOrEqual(4.5)
+      expect(
+        ratio,
+        `${context} should keep WCAG AA contrast`
+      ).toBeGreaterThanOrEqual(4.5)
     })
   })
 })

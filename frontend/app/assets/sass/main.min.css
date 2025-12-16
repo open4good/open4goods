@@ -1,1 +1,18 @@
-@use 'base/variables' as *{}@use 'base/mixins' as *{}@use 'base/fonts'{}@use 'base/reset'{}@use 'components/buttons'{}@use 'components/cards'{}@use 'layouts/headers'{}@use 'layouts/footers'{}@use 'pages/blog'{}
+@use 'base/variables' as * {
+}
+@use 'base/mixins' as * {
+}
+@use 'base/fonts' {
+}
+@use 'base/reset' {
+}
+@use 'components/buttons' {
+}
+@use 'components/cards' {
+}
+@use 'layouts/headers' {
+}
+@use 'layouts/footers' {
+}
+@use 'pages/blog' {
+}

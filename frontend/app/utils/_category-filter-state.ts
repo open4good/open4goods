@@ -30,32 +30,37 @@ const fromBase64Url = (value: string): string => {
 }
 
 const removeUndefined = <T extends object>(value: T): Partial<T> => {
-  return (Object.keys(value) as Array<keyof T>).reduce<Partial<T>>((accumulator, key) => {
-    const entryValue = value[key]
+  return (Object.keys(value) as Array<keyof T>).reduce<Partial<T>>(
+    (accumulator, key) => {
+      const entryValue = value[key]
 
-    if (entryValue === undefined) {
+      if (entryValue === undefined) {
+        return accumulator
+      }
+
+      if (Array.isArray(entryValue) && entryValue.length === 0) {
+        return accumulator
+      }
+
+      if (
+        entryValue &&
+        typeof entryValue === 'object' &&
+        !Array.isArray(entryValue) &&
+        Object.keys(entryValue as Record<string, unknown>).length === 0
+      ) {
+        return accumulator
+      }
+
+      ;(accumulator as Record<keyof T, T[keyof T]>)[key] = entryValue
       return accumulator
-    }
-
-    if (Array.isArray(entryValue) && entryValue.length === 0) {
-      return accumulator
-    }
-
-    if (
-      entryValue &&
-      typeof entryValue === 'object' &&
-      !Array.isArray(entryValue) &&
-      Object.keys(entryValue as Record<string, unknown>).length === 0
-    ) {
-      return accumulator
-    }
-
-    ;(accumulator as Record<keyof T, T[keyof T]>)[key] = entryValue
-    return accumulator
-  }, {})
+    },
+    {}
+  )
 }
 
-export const serializeCategoryHashState = (state: CategoryHashState): string => {
+export const serializeCategoryHashState = (
+  state: CategoryHashState
+): string => {
   const cleaned = removeUndefined(state)
 
   if (!Object.keys(cleaned).length) {
@@ -66,7 +71,9 @@ export const serializeCategoryHashState = (state: CategoryHashState): string => 
   return compressToBase64(rawPayload)
 }
 
-export const deserializeCategoryHashState = (payload: string | null | undefined): CategoryHashState | null => {
+export const deserializeCategoryHashState = (
+  payload: string | null | undefined
+): CategoryHashState | null => {
   if (!payload || payload.trim().length === 0) {
     return null
   }

@@ -7,13 +7,16 @@ import { createBackendApiConfig } from './createBackendApiConfig'
  * Service wrapper responsible for submitting contact form messages to the backend API.
  */
 export const useContactService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: ContactApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useContactService() is only available on the server runtime.')
+      throw new Error(
+        'useContactService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -24,7 +27,7 @@ export const useContactService = (domainLanguage: DomainLanguage) => {
   }
 
   const submitMessage = async (
-    payload: ContactRequestDto,
+    payload: ContactRequestDto
   ): Promise<ContactResponseDto> => {
     const language =
       domainLanguage === 'fr'

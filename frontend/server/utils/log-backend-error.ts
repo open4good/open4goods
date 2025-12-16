@@ -113,7 +113,9 @@ export async function extractBackendErrorDetails(
   }
 
   const fallbackMessage =
-    error instanceof Error ? error.message : 'Unexpected error while calling backend'
+    error instanceof Error
+      ? error.message
+      : 'Unexpected error while calling backend'
 
   const statusCode = 500
   const statusText = 'Internal Server Error'

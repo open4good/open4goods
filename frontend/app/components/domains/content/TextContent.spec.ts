@@ -4,7 +4,9 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import TextContent from './TextContent.vue'
 
 const useContentBlocMock = vi.hoisted(() => vi.fn())
-const generateLoremMock = vi.hoisted(() => vi.fn<(length?: number) => string>(() => 'generated-lorem'))
+const generateLoremMock = vi.hoisted(() =>
+  vi.fn<(length?: number) => string>(() => 'generated-lorem')
+)
 const hasRoleMock = vi.fn<(role: string) => boolean>(() => false)
 
 const authState = {
@@ -37,7 +39,9 @@ vi.mock('~/utils/content/_loremIpsum', () => ({
 }))
 
 const defaultStubs = {
-  'v-progress-circular': { template: '<div class="v-progress-circular-stub" />' },
+  'v-progress-circular': {
+    template: '<div class="v-progress-circular-stub" />',
+  },
   'v-alert': { template: '<div class="v-alert-stub"><slot /></div>' },
 }
 
@@ -83,7 +87,9 @@ beforeEach(() => {
 
 describe('TextContent', () => {
   it('fetches bloc content using the provided bloc identifier', async () => {
-    useContentBlocMock.mockResolvedValue(createBlocResponse({ htmlContent: '<p>Loaded</p>' }))
+    useContentBlocMock.mockResolvedValue(
+      createBlocResponse({ htmlContent: '<p>Loaded</p>' })
+    )
 
     await mountComponent()
 
@@ -96,12 +102,16 @@ describe('TextContent', () => {
   })
 
   it('renders remote HTML content when available', async () => {
-    const blocResponse = createBlocResponse({ htmlContent: '<p>Server content</p>' })
+    const blocResponse = createBlocResponse({
+      htmlContent: '<p>Server content</p>',
+    })
     useContentBlocMock.mockResolvedValue(blocResponse)
 
     const wrapper = await mountComponent()
 
-    expect(wrapper.get('.xwiki-sandbox').element.innerHTML).toBe('<p>Server content</p>')
+    expect(wrapper.get('.xwiki-sandbox').element.innerHTML).toBe(
+      '<p>Server content</p>'
+    )
     expect(wrapper.find('.v-progress-circular-stub').exists()).toBe(false)
     expect(wrapper.find('.v-alert-stub').exists()).toBe(false)
   })
@@ -123,7 +133,9 @@ describe('TextContent', () => {
 
     const wrapper = await mountComponent()
 
-    expect(wrapper.find('.v-alert-stub').text()).toContain('Unable to load bloc')
+    expect(wrapper.find('.v-alert-stub').text()).toContain(
+      'Unable to load bloc'
+    )
     expect(wrapper.find('.xwiki-sandbox').exists()).toBe(false)
   })
 
@@ -134,7 +146,9 @@ describe('TextContent', () => {
     const wrapper = await mountComponent({ ipsumLength: 120 })
 
     expect(generateLoremMock).toHaveBeenCalledWith(120)
-    expect(wrapper.get('.xwiki-sandbox').element.innerHTML).toBe('generated-lorem')
+    expect(wrapper.get('.xwiki-sandbox').element.innerHTML).toBe(
+      'generated-lorem'
+    )
   })
 
   it('uses the defaultLength prop when ipsumLength is not provided', async () => {
@@ -169,7 +183,9 @@ describe('TextContent', () => {
     const wrapper = await mountComponent()
 
     const editLink = wrapper.get('a.edit-link')
-    expect(editLink.attributes('href')).toBe('https://xwiki.example.com/edit/Main.WebHome')
+    expect(editLink.attributes('href')).toBe(
+      'https://xwiki.example.com/edit/Main.WebHome'
+    )
     expect(editLink.attributes('target')).toBe('_blank')
     expect(editLink.attributes('rel')).toBe('noopener')
     expect(hasRoleMock).toHaveBeenCalledWith('content-editor')

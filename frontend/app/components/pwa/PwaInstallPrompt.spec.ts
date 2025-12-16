@@ -65,7 +65,8 @@ vi.mock('vuetify', () => ({
   }),
 }))
 
-type InstallPromptComponent = typeof import('./PwaInstallPrompt.vue')['default']
+type InstallPromptComponent =
+  (typeof import('./PwaInstallPrompt.vue'))['default']
 let PwaInstallPrompt: InstallPromptComponent
 
 beforeAll(async () => {
@@ -93,10 +94,16 @@ const VAlertStub = defineComponent({
           ...attrs,
         },
         [
-          props.title ? h('strong', { class: 'v-alert-stub__title' }, props.title) : null,
-          slots.default ? h('div', { class: 'v-alert-stub__content' }, slots.default()) : null,
-          slots.actions ? h('div', { class: 'v-alert-stub__actions' }, slots.actions()) : null,
-        ],
+          props.title
+            ? h('strong', { class: 'v-alert-stub__title' }, props.title)
+            : null,
+          slots.default
+            ? h('div', { class: 'v-alert-stub__content' }, slots.default())
+            : null,
+          slots.actions
+            ? h('div', { class: 'v-alert-stub__actions' }, slots.actions())
+            : null,
+        ]
       )
   },
 })
@@ -114,7 +121,7 @@ const VBtnStub = defineComponent({
           ...attrs,
           onClick: (event: MouseEvent) => emit('click', event),
         },
-        slots.default ? slots.default() : [],
+        slots.default ? slots.default() : []
       )
   },
 })
@@ -143,10 +150,10 @@ describe('PwaInstallPrompt', () => {
     isInstallSupported.value = true
     await nextTick()
 
-    expect(wrapper.find('[data-test="pwa-install-banner"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="pwa-install-banner"]').exists()).toBe(
+      false
+    )
   })
-
-
 
   it('shows update and offline ready banners', async () => {
     const wrapper = mountPrompt()
@@ -174,7 +181,9 @@ describe('PwaInstallPrompt', () => {
     installError.value = 'failed'
     await nextTick()
 
-    expect(wrapper.find('[data-test="pwa-install-success"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pwa-install-success"]').exists()).toBe(
+      true
+    )
     expect(wrapper.find('[data-test="pwa-install-error"]').exists()).toBe(true)
   })
 })

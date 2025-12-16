@@ -10,7 +10,12 @@
         <p class="contact-details__subtitle subtitle-text" v-html="subtitle" />
       </div>
 
-      <v-row class="contact-details__cards" align="stretch" justify="center" role="list">
+      <v-row
+        class="contact-details__cards"
+        align="stretch"
+        justify="center"
+        role="list"
+      >
         <v-col
           v-for="item in items"
           :key="item.title"
@@ -85,10 +90,13 @@ withDefaults(
   }>(),
   {
     eyebrow: undefined,
-  },
+  }
 )
 
-const isExternalLink = (href: string) => /^(?:https?:)?\/\//.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
+const isExternalLink = (href: string) =>
+  /^(?:https?:)?\/\//.test(href) ||
+  href.startsWith('mailto:') ||
+  href.startsWith('tel:')
 
 const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
   if (!link.href) {

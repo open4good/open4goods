@@ -22,13 +22,14 @@ describe('useCategoryNavigation composable', () => {
     fetchMock.mockResolvedValueOnce(navigationResponse)
 
     const { useCategoryNavigation } = await import('./useCategoryNavigation')
-    const { fetchNavigation, navigation, loading, error } = useCategoryNavigation()
+    const { fetchNavigation, navigation, loading, error } =
+      useCategoryNavigation()
 
     const result = await fetchNavigation()
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/categories/navigation',
-      expect.objectContaining({ params: undefined }),
+      expect.objectContaining({ params: undefined })
     )
     expect(result).toEqual(navigationResponse)
     expect(navigation.value).toEqual(navigationResponse)
@@ -46,7 +47,7 @@ describe('useCategoryNavigation composable', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/categories/navigation',
-      expect.objectContaining({ params: { path: 'electronics' } }),
+      expect.objectContaining({ params: { path: 'electronics' } })
     )
     expect(error.value).toBe('Network error')
     expect(navigation.value).toBeNull()
@@ -71,7 +72,11 @@ describe('useCategoryNavigation composable', () => {
     vi.doMock('nitropack/runtime/internal/cache', () => ({
       cachedEventHandler: (
         handler: (event: unknown) => unknown | Promise<unknown>,
-        options?: { name?: string; maxAge?: number; getKey?: (event: unknown) => string },
+        options?: {
+          name?: string
+          maxAge?: number
+          getKey?: (event: unknown) => string
+        }
       ) => {
         const name = options?.name ?? 'default'
         const maxAgeMs = (options?.maxAge ?? 0) * 1000
@@ -99,7 +104,7 @@ describe('useCategoryNavigation composable', () => {
       setResponseHeader: (
         event: { node: { res: { headers: Record<string, string> } } },
         name: string,
-        value: string,
+        value: string
       ) => {
         event.node.res.headers[name.toLowerCase()] = value
       },
@@ -109,7 +114,8 @@ describe('useCategoryNavigation composable', () => {
       }),
     }))
 
-    const { default: handler } = await import('../../../server/api/categories/navigation.get')
+    const { default: handler } =
+      await import('../../../server/api/categories/navigation.get')
 
     const event = {
       context: { query: {} },

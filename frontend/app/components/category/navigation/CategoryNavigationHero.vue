@@ -4,7 +4,10 @@
     :aria-labelledby="titleId"
     :style="heroBackgroundStyle"
   >
-    <v-container class="category-navigation-hero__container px-4" max-width="xl">
+    <v-container
+      class="category-navigation-hero__container px-4"
+      max-width="xl"
+    >
       <div class="category-navigation-hero__content">
         <div class="category-navigation-hero__copy">
           <CategoryNavigationBreadcrumbs
@@ -80,13 +83,16 @@ const onUpdateModelValue = (value: string) => {
 const textureGrid = useThemedAsset('backgrounds/texture-grid.svg')
 
 const heroBackgroundStyle = computed(() => ({
-  '--category-hero-texture': textureGrid.value ? `url('${textureGrid.value}')` : undefined,
+  '--category-hero-texture': textureGrid.value
+    ? `url('${textureGrid.value}')`
+    : undefined,
 }))
 </script>
 
 <style scoped>
 .category-navigation-hero {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       135deg,
       rgba(var(--v-theme-hero-gradient-start), 0.95),
       rgba(var(--v-theme-hero-gradient-end), 0.85)
@@ -94,7 +100,6 @@ const heroBackgroundStyle = computed(() => ({
     var(--category-hero-texture, none);
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
-
 
 .category-navigation-hero__container {
   padding-block: 2.75rem;
@@ -110,21 +115,26 @@ const heroBackgroundStyle = computed(() => ({
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__current) {
+.category-navigation-hero__copy
+  :deep(.category-navigation-breadcrumbs__current) {
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__separator) {
+.category-navigation-hero__copy
+  :deep(.category-navigation-breadcrumbs__separator) {
   color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
 }
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:hover),
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
+.category-navigation-hero__copy
+  :deep(.category-navigation-breadcrumbs__link--interactive:hover),
+.category-navigation-hero__copy
+  :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
   color: rgb(var(--v-theme-hero-overlay-strong));
   text-decoration: underline;
 }
 
-.category-navigation-hero__copy :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
+.category-navigation-hero__copy
+  :deep(.category-navigation-breadcrumbs__link--interactive:focus-visible) {
   outline: 2px solid rgba(var(--v-theme-hero-overlay-strong), 0.8);
   outline-offset: 2px;
   border-radius: 0.25rem;

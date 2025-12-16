@@ -1,6 +1,11 @@
 <template>
   <aside class="category-doc-rail" data-testid="category-doc-rail">
-    <v-card v-if="wikiPages.length" class="category-doc-rail__card" rounded="xl" elevation="1">
+    <v-card
+      v-if="wikiPages.length"
+      class="category-doc-rail__card"
+      rounded="xl"
+      elevation="1"
+    >
       <v-card-title class="category-doc-rail__title">
         <v-icon icon="mdi-book-open-page-variant" size="20" class="me-2" />
         {{ $t('category.documentation.guidesTitle') }}
@@ -19,7 +24,12 @@
       </v-list>
     </v-card>
 
-    <v-card v-if="relatedPosts.length" class="category-doc-rail__card" rounded="xl" elevation="1">
+    <v-card
+      v-if="relatedPosts.length"
+      class="category-doc-rail__card"
+      rounded="xl"
+      elevation="1"
+    >
       <v-card-title class="category-doc-rail__title">
         <v-icon icon="mdi-newspaper-variant-outline" size="20" class="me-2" />
         {{ $t('category.documentation.postsTitle') }}

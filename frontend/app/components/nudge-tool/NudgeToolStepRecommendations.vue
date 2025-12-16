@@ -2,8 +2,12 @@
   <div class="nudge-step-recos">
     <div class="nudge-step-recos__header">
       <div>
-        <h2 class="nudge-step-recos__title">{{ $t('nudge-tool.steps.recommendations.title') }}</h2>
-        <p class="nudge-step-recos__subtitle">{{ $t('nudge-tool.steps.recommendations.subtitle') }}</p>
+        <h2 class="nudge-step-recos__title">
+          {{ $t('nudge-tool.steps.recommendations.title') }}
+        </h2>
+        <p class="nudge-step-recos__subtitle">
+          {{ $t('nudge-tool.steps.recommendations.subtitle') }}
+        </p>
       </div>
     </div>
 
@@ -18,7 +22,9 @@
         :popular-attributes="popularAttributes"
         size="compact"
       />
-      <p v-else class="nudge-step-recos__empty">{{ $t('nudge-tool.steps.recommendations.empty') }}</p>
+      <p v-else class="nudge-step-recos__empty">
+        {{ $t('nudge-tool.steps.recommendations.empty') }}
+      </p>
     </div>
 
     <p class="nudge-step-recos__footnote">
@@ -28,10 +34,7 @@
 </template>
 
 <script setup lang="ts">
-
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
-
-
 </script>
 
 <style scoped lang="scss">

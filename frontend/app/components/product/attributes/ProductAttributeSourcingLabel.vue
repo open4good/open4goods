@@ -30,7 +30,9 @@
                 <p class="product-attribute-sourcing__tooltip-title">
                   {{ t('product.attributes.sourcing.bestValue') }}
                 </p>
-                <p class="product-attribute-sourcing__tooltip-highlight">{{ displayValue }}</p>
+                <p class="product-attribute-sourcing__tooltip-highlight">
+                  {{ displayValue }}
+                </p>
               </div>
               <v-chip
                 size="small"
@@ -56,12 +58,19 @@
               >
                 <thead>
                   <tr>
-                    <th scope="col">{{ t('product.attributes.sourcing.columns.source') }}</th>
-                    <th scope="col">{{ t('product.attributes.sourcing.columns.value') }}</th>
+                    <th scope="col">
+                      {{ t('product.attributes.sourcing.columns.source') }}
+                    </th>
+                    <th scope="col">
+                      {{ t('product.attributes.sourcing.columns.value') }}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="source in normalizedSources" :key="sourceKey(source)">
+                  <tr
+                    v-for="source in normalizedSources"
+                    :key="sourceKey(source)"
+                  >
                     <td>{{ formatSourceName(source.datasourceName) }}</td>
                     <td>{{ formatSourceValue(source.value) }}</td>
                   </tr>
@@ -80,7 +89,10 @@
     <span class="product-attribute-sourcing__value">
       <slot :display-value="displayValue" :display-html="sanitizedDisplayHtml">
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <span class="product-attribute-sourcing__value-text" v-html="sanitizedDisplayHtml || displayValue" />
+        <span
+          class="product-attribute-sourcing__value-text"
+          v-html="sanitizedDisplayHtml || displayValue"
+        />
       </slot>
     </span>
   </span>
@@ -115,7 +127,8 @@ const props = defineProps({
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
-const tooltipContentClass = 'product-attribute-sourcing__tooltip-overlay' as const
+const tooltipContentClass =
+  'product-attribute-sourcing__tooltip-overlay' as const
 const tooltipContentStyles = Object.freeze({
   backgroundColor: 'transparent',
   boxShadow: 'none',
@@ -150,16 +163,19 @@ const sanitizedDisplayHtml = computed(() => {
 })
 
 const isIterable = <T,>(candidate: unknown): candidate is Iterable<T> =>
-  Boolean(candidate && typeof (candidate as Iterable<T>)[Symbol.iterator] === 'function')
+  Boolean(
+    candidate &&
+    typeof (candidate as Iterable<T>)[Symbol.iterator] === 'function'
+  )
 
 const isDefinedSource = (
-  item: ProductSourcedAttributeDto | null | undefined,
+  item: ProductSourcedAttributeDto | null | undefined
 ): item is ProductSourcedAttributeDto => Boolean(item)
 
 type MaybeRef<T> = T | Ref<T>
 
 const normalizeSources = (
-  rawSources: MaybeRef<ProductAttributeSourceDto['sources'] | null | undefined>,
+  rawSources: MaybeRef<ProductAttributeSourceDto['sources'] | null | undefined>
 ): ProductSourcedAttributeDto[] => {
   const resolvedSources = unref(rawSources)
 
@@ -193,24 +209,26 @@ const normalizeSources = (
   }
 
   if (typeof candidate === 'object' && candidate !== null) {
-    return Object.values(candidate as Record<string, ProductSourcedAttributeDto | null | undefined>).filter(
-      isDefinedSource,
-    )
+    return Object.values(
+      candidate as Record<string, ProductSourcedAttributeDto | null | undefined>
+    ).filter(isDefinedSource)
   }
 
   return []
 }
 
 const normalizedSources = computed<ProductSourcedAttributeDto[]>(() =>
-  normalizeSources(props.sourcing?.sources ?? null),
+  normalizeSources(props.sourcing?.sources ?? null)
 )
 
 const hasSources = computed(() => normalizedSources.value.length > 0)
 
-const hasSourcingDetails = computed(() => Boolean(bestValue.value) || hasSources.value)
+const hasSourcingDetails = computed(
+  () => Boolean(bestValue.value) || hasSources.value
+)
 
 const isTooltipEnabled = computed(
-  () => props.enableTooltip && hasSourcingDetails.value,
+  () => props.enableTooltip && hasSourcingDetails.value
 )
 
 const sourceCountLabel = computed(() => {
@@ -230,12 +248,12 @@ const statusLabel = computed(() =>
   t(
     conflicts.value
       ? 'product.attributes.sourcing.status.conflicts'
-      : 'product.attributes.sourcing.status.noConflicts',
-  ),
+      : 'product.attributes.sourcing.status.noConflicts'
+  )
 )
 
 const tooltipAriaLabel = computed(() =>
-  t('product.attributes.sourcing.tooltipAriaLabel'),
+  t('product.attributes.sourcing.tooltipAriaLabel')
 )
 
 const formatSourceName = (name?: string | null) => {
@@ -272,7 +290,7 @@ const sourceKey = (source: ProductSourcedAttributeDto) => {
     source.icecatTaxonomyId ?? '',
     source.name ?? '',
   ]
-    .map((segment) => String(segment ?? ''))
+    .map(segment => String(segment ?? ''))
     .join('|')
 }
 </script>
@@ -295,7 +313,10 @@ const sourceKey = (source: ProductSourcedAttributeDto) => {
 
 .product-attribute-sourcing__info {
   --product-attribute-icon-bg: rgba(var(--v-theme-surface-primary-120), 0.8);
-  --product-attribute-icon-hover: rgba(var(--v-theme-surface-primary-100), 0.95);
+  --product-attribute-icon-hover: rgba(
+    var(--v-theme-surface-primary-100),
+    0.95
+  );
   border-radius: 999px;
   padding: 0.15rem;
   min-width: auto;

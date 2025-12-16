@@ -11,12 +11,16 @@ export default defineEventHandler(
 
     const verticalIdParam = getRouterParam(event, 'verticalId')
     if (!verticalIdParam) {
-      throw createError({ statusCode: 400, statusMessage: 'verticalId parameter is required.' })
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'verticalId parameter is required.',
+      })
     }
 
     const verticalId = decodeURIComponent(verticalIdParam)
 
-    const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+    const rawHost =
+      event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
     const { domainLanguage } = resolveDomainLanguage(rawHost)
 
     const productService = useProductService(domainLanguage)
@@ -29,7 +33,7 @@ export default defineEventHandler(
         'Error fetching filterable fields for vertical:',
         verticalId,
         backendError.logMessage,
-        backendError,
+        backendError
       )
 
       throw createError({
@@ -38,5 +42,5 @@ export default defineEventHandler(
         cause: error,
       })
     }
-  },
+  }
 )

@@ -11,9 +11,15 @@
           @click="resetForCategorySelection"
         >
           <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
-            <v-img :src="categorySummary.image" :alt="categorySummary.alt" cover />
+            <v-img
+              :src="categorySummary.image"
+              :alt="categorySummary.alt"
+              cover
+            />
           </v-avatar>
-          <span class="nudge-wizard__category-label">{{ categorySummary.label }}</span>
+          <span class="nudge-wizard__category-label">{{
+            categorySummary.label
+          }}</span>
         </v-btn>
 
         <v-stepper
@@ -131,7 +137,9 @@ const props = defineProps<{
   verticals?: VerticalConfigDto[]
 }>()
 
-const emit = defineEmits<{ (event: 'navigate', payload: { hash: string; categorySlug: string }): void }>()
+const emit = defineEmits<{
+  (event: 'navigate', payload: { hash: string; categorySlug: string }): void
+}>()
 
 const router = useRouter()
 const { t } = useI18n()
@@ -152,8 +160,10 @@ const totalMatches = ref(0)
 const animatedMatches = ref(0)
 const recommendations = ref<ProductDto[]>([])
 
-const selectedCategory = computed(() =>
-  categories.value.find((entry) => entry.id === selectedCategoryId.value) ?? null,
+const selectedCategory = computed(
+  () =>
+    categories.value.find(entry => entry.id === selectedCategoryId.value) ??
+    null
 )
 
 const nudgeConfig = computed(() => selectedCategory.value?.nudgeToolConfig)
@@ -168,22 +178,22 @@ const subsetGroups = computed<NudgeToolSubsetGroupDto[]>(() => {
   const subsets = nudgeConfig.value?.subsets ?? []
 
   return subsets
-    .map((subset) => subset.group)
+    .map(subset => subset.group)
     .filter((groupId): groupId is string => Boolean(groupId))
-    .filter((groupId) => {
+    .filter(groupId => {
       if (seen.has(groupId)) {
         return false
       }
       seen.add(groupId)
       return true
     })
-    .map((groupId) => ({ id: groupId, title: groupId }))
+    .map(groupId => ({ id: groupId, title: groupId }))
 })
 
 const groupedSubsets = computed<Record<string, VerticalSubsetDto[]>>(() => {
   const groups: Record<string, VerticalSubsetDto[]> = {}
 
-  ;(nudgeConfig.value?.subsets ?? []).forEach((subset) => {
+  ;(nudgeConfig.value?.subsets ?? []).forEach(subset => {
     const key = subset.group ?? 'default'
     if (!groups[key]) {
       groups[key] = []
@@ -195,23 +205,32 @@ const groupedSubsets = computed<Record<string, VerticalSubsetDto[]>>(() => {
 })
 
 const subsetFilterRequest = computed(() =>
-  buildFilterRequestFromSubsets(nudgeConfig.value?.subsets ?? [], activeSubsetIds.value),
+  buildFilterRequestFromSubsets(
+    nudgeConfig.value?.subsets ?? [],
+    activeSubsetIds.value
+  )
 )
 
 const scoreFilters = computed(() =>
-  buildScoreFilters(nudgeConfig.value?.scores ?? [], selectedScores.value),
+  buildScoreFilters(nudgeConfig.value?.scores ?? [], selectedScores.value)
 )
 
 const conditionFilter = computed(() => buildConditionFilter(condition.value))
 
 const filterRequest = computed<FilterRequestDto>(() => {
   const subsetGroups = subsetFilterRequest.value.filterGroups ?? []
-  return buildNudgeFilterRequest(baseFilters.value, conditionFilter.value, scoreFilters.value, subsetGroups)
+  return buildNudgeFilterRequest(
+    baseFilters.value,
+    conditionFilter.value,
+    scoreFilters.value,
+    subsetGroups
+  )
 })
 
 const hashState = computed<CategoryHashState>(() => ({
   filters:
-    filterRequest.value.filters?.length || filterRequest.value.filterGroups?.length
+    filterRequest.value.filters?.length ||
+    filterRequest.value.filterGroups?.length
       ? filterRequest.value
       : undefined,
   activeSubsets: activeSubsetIds.value,
@@ -241,7 +260,10 @@ const steps = computed<WizardStep[]>(() => {
       key: 'category',
       component: NudgeToolStepCategory,
       title: t('nudge-tool.steps.category.title'),
-      props: { categories: categories.value, selectedCategoryId: selectedCategoryId.value },
+      props: {
+        categories: categories.value,
+        selectedCategoryId: selectedCategoryId.value,
+      },
     })
   }
 
@@ -250,7 +272,10 @@ const steps = computed<WizardStep[]>(() => {
       key: 'scores',
       component: NudgeToolStepScores,
       title: t('nudge-tool.steps.scores.title'),
-      props: { modelValue: selectedScores.value, scores: nudgeConfig.value?.scores ?? [] },
+      props: {
+        modelValue: selectedScores.value,
+        scores: nudgeConfig.value?.scores ?? [],
+      },
       onUpdate: (value: string[]) => (selectedScores.value = value),
     })
   }
@@ -267,7 +292,7 @@ const steps = computed<WizardStep[]>(() => {
 
   let subsetStepNumber = 4
 
-  subsetGroups.value.forEach((group) => {
+  subsetGroups.value.forEach(group => {
     const subsets = groupedSubsets.value[group.id ?? ''] ?? []
     if (!subsets.length) {
       return
@@ -277,7 +302,12 @@ const steps = computed<WizardStep[]>(() => {
       key: `group-${group.id}`,
       component: NudgeToolStepSubsetGroup,
       title: group.title ?? '',
-      props: { group, subsets, modelValue: activeSubsetIds.value, stepNumber: subsetStepNumber },
+      props: {
+        group,
+        subsets,
+        modelValue: activeSubsetIds.value,
+        stepNumber: subsetStepNumber,
+      },
       onUpdate: (value: string[]) => (activeSubsetIds.value = value),
     })
 
@@ -301,7 +331,7 @@ const steps = computed<WizardStep[]>(() => {
 
 const getSubsetGroupIcon = (key: string) => {
   const groupId = key.replace('group-', '')
-  const group = subsetGroups.value.find((entry) => entry.id === groupId)
+  const group = subsetGroups.value.find(entry => entry.id === groupId)
 
   return group?.mdiIcon || defaultStepIcons.subset
 }
@@ -328,12 +358,12 @@ const resolveStepIcon = (stepKey: string) => {
 
 watch(
   steps,
-  (allSteps) => {
-    if (!allSteps.find((step) => step.key === activeStepKey.value)) {
+  allSteps => {
+    if (!allSteps.find(step => step.key === activeStepKey.value)) {
       activeStepKey.value = allSteps[0]?.key ?? 'recommendations'
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 )
 
 const goToNext = () => {
@@ -341,7 +371,7 @@ const goToNext = () => {
     return
   }
 
-  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   const nextStep = steps.value[index + 1]
   if (nextStep) {
     activeStepKey.value = nextStep.key
@@ -349,7 +379,7 @@ const goToNext = () => {
 }
 
 const goToPrevious = () => {
-  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   const previousStep = steps.value[index - 1]
   if (previousStep) {
     if (previousStep.key === 'category') {
@@ -360,7 +390,8 @@ const goToPrevious = () => {
   }
 }
 
-const getFirstContentStepKey = () => steps.value.find((step) => step.key !== 'category')?.key
+const getFirstContentStepKey = () =>
+  steps.value.find(step => step.key !== 'category')?.key
 
 const onCategorySelect = async (categoryId: string) => {
   selectedCategoryId.value = categoryId
@@ -383,16 +414,19 @@ const fetchRecommendations = async () => {
       (filterRequest.value.filters?.length ?? 0) > 0 ||
       (filterRequest.value.filterGroups?.length ?? 0) > 0
 
-    const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
-      method: 'POST',
-      body: {
-        verticalId: selectedCategoryId.value,
-        pageNumber: 0,
-        pageSize: 3,
-        sort: { sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }] },
-        filters: hasFilters ? filterRequest.value : undefined,
-      },
-    })
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        body: {
+          verticalId: selectedCategoryId.value,
+          pageNumber: 0,
+          pageSize: 3,
+          sort: { sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }] },
+          filters: hasFilters ? filterRequest.value : undefined,
+        },
+      }
+    )
 
     recommendations.value = response.products?.data ?? []
     totalMatches.value = response.products?.page?.totalElements ?? 0
@@ -408,14 +442,14 @@ watch(
   () => {
     debouncedFetch()
   },
-  { deep: true },
+  { deep: true }
 )
 
 let animationFrame: number | null = null
 
 watch(
   totalMatches,
-  (next) => {
+  next => {
     if (!import.meta.client) {
       animatedMatches.value = next
       return
@@ -443,7 +477,7 @@ watch(
 
     animationFrame = requestAnimationFrame(step)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const hydrateCategories = async () => {
@@ -460,7 +494,10 @@ const navigateToCategoryPage = () => {
     return
   }
 
-  const slug = selectedCategory.value.verticalHomeUrl?.replace(/^\//u, '') ?? selectedCategory.value.id ?? ''
+  const slug =
+    selectedCategory.value.verticalHomeUrl?.replace(/^\//u, '') ??
+    selectedCategory.value.id ??
+    ''
   const hash = buildCategoryHash(hashState.value)
 
   emit('navigate', { hash, categorySlug: slug })
@@ -469,7 +506,7 @@ const navigateToCategoryPage = () => {
 }
 
 const hasPreviousStep = computed(() => {
-  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   return index > 0
 })
 
@@ -478,7 +515,7 @@ const hasNextStep = computed(() => {
     return false
   }
 
-  const index = steps.value.findIndex((step) => step.key === activeStepKey.value)
+  const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   return index >= 0 && index < steps.value.length - 1
 })
 
@@ -492,18 +529,19 @@ const isNextDisabled = computed(() => {
 
 const stepperItems = computed(() =>
   steps.value
-    .filter((step) => step.key !== 'category' && step.key !== 'recommendations')
-    .map((step) => ({
+    .filter(step => step.key !== 'category' && step.key !== 'recommendations')
+    .map(step => ({
       title: display.smAndDown.value ? undefined : step.title,
       value: step.key,
       icon: resolveStepIcon(step.key),
       disabled: false,
-    })),
+    }))
 )
 
 const stepperActiveKey = computed({
   get: () =>
-    stepperItems.value.find((item) => item.value === activeStepKey.value)?.value ??
+    stepperItems.value.find(item => item.value === activeStepKey.value)
+      ?.value ??
     stepperItems.value.at(-1)?.value ??
     activeStepKey.value,
   set: (value: string) => {
@@ -512,27 +550,33 @@ const stepperActiveKey = computed({
 })
 
 const showStepper = computed(
-  () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value),
+  () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value)
 )
 
 const shouldShowMatches = computed(
-  () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category',
+  () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
 )
 
 const isCategoryToCondition = computed(
-  () => previousStepKey.value === 'category' && activeStepKey.value === 'condition',
+  () =>
+    previousStepKey.value === 'category' && activeStepKey.value === 'condition'
 )
 
 const isConditionToCategory = computed(
-  () => previousStepKey.value === 'condition' && activeStepKey.value === 'category',
+  () =>
+    previousStepKey.value === 'condition' && activeStepKey.value === 'category'
 )
 
 const windowTransition = computed(() =>
-  isCategoryToCondition.value ? 'nudge-wizard-lift-fade' : 'nudge-wizard-slide-fade',
+  isCategoryToCondition.value
+    ? 'nudge-wizard-lift-fade'
+    : 'nudge-wizard-slide-fade'
 )
 
 const windowReverseTransition = computed(() =>
-  isConditionToCategory.value ? 'nudge-wizard-lift-fade-reverse' : 'nudge-wizard-slide-fade-reverse',
+  isConditionToCategory.value
+    ? 'nudge-wizard-lift-fade-reverse'
+    : 'nudge-wizard-slide-fade-reverse'
 )
 
 const categorySummary = computed(() => {
@@ -541,9 +585,15 @@ const categorySummary = computed(() => {
   }
 
   return {
-    label: selectedCategory.value.verticalHomeTitle ?? selectedCategory.value.id ?? '',
+    label:
+      selectedCategory.value.verticalHomeTitle ??
+      selectedCategory.value.id ??
+      '',
     image: selectedCategory.value.imageSmall,
-    alt: selectedCategory.value.verticalHomeTitle ?? selectedCategory.value.id ?? '',
+    alt:
+      selectedCategory.value.verticalHomeTitle ??
+      selectedCategory.value.id ??
+      '',
   }
 })
 
@@ -594,14 +644,16 @@ watch(
       clearResetTimeout()
     }
   },
-  { flush: 'pre' },
+  { flush: 'pre' }
 )
 
 onMounted(async () => {
   await hydrateCategories()
 
   if (selectedCategoryId.value && !selectedCategory.value) {
-    selectedCategoryId.value = categories.value.find((cat) => cat.id === selectedCategoryId.value)?.id ?? null
+    selectedCategoryId.value =
+      categories.value.find(cat => cat.id === selectedCategoryId.value)?.id ??
+      null
   }
 
   debouncedFetch()
@@ -686,7 +738,9 @@ onMounted(async () => {
 :deep(.nudge-wizard-slide-fade-leave-active),
 :deep(.nudge-wizard-slide-fade-reverse-enter-active),
 :deep(.nudge-wizard-slide-fade-reverse-leave-active) {
-  transition: transform 220ms ease, opacity 220ms ease;
+  transition:
+    transform 220ms ease,
+    opacity 220ms ease;
   will-change: transform, opacity;
 }
 
@@ -714,7 +768,9 @@ onMounted(async () => {
 :deep(.nudge-wizard-expand-fade-leave-active),
 :deep(.nudge-wizard-expand-fade-reverse-enter-active),
 :deep(.nudge-wizard-expand-fade-reverse-leave-active) {
-  transition: transform 240ms ease, opacity 180ms ease;
+  transition:
+    transform 240ms ease,
+    opacity 180ms ease;
   transform-origin: top center;
   will-change: transform, opacity;
 }
@@ -743,7 +799,8 @@ onMounted(async () => {
 :deep(.nudge-wizard-lift-fade-leave-active),
 :deep(.nudge-wizard-lift-fade-reverse-enter-active),
 :deep(.nudge-wizard-lift-fade-reverse-leave-active) {
-  transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
+  transition:
+    transform 1000ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 1000ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: top center;
   will-change: transform, opacity;

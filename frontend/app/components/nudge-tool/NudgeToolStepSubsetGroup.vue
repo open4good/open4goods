@@ -9,16 +9,13 @@
         />
         {{ group.title }}
       </h2>
-      <p v-if="group.description" class="nudge-step-subset__description">{{ group.description }}</p>
+      <p v-if="group.description" class="nudge-step-subset__description">
+        {{ group.description }}
+      </p>
     </div>
 
     <v-row dense>
-      <v-col
-        v-for="subset in subsets"
-        :key="subset.id"
-        cols="12"
-        sm="6"
-      >
+      <v-col v-for="subset in subsets" :key="subset.id" cols="12" sm="6">
         <v-tooltip
           location="top"
           :text="subset.description"
@@ -28,7 +25,11 @@
             <v-card
               v-bind="activatorProps"
               class="nudge-step-subset__card nudge-option-card"
-              :class="{ 'nudge-option-card--selected': modelValue.includes(subset.id ?? '') }"
+              :class="{
+                'nudge-option-card--selected': modelValue.includes(
+                  subset.id ?? ''
+                ),
+              }"
               rounded="lg"
               role="button"
               :aria-pressed="modelValue.includes(subset.id ?? '')"
@@ -36,7 +37,9 @@
             >
               <div class="nudge-step-subset__body">
                 <p class="nudge-step-subset__name">{{ subset.title }}</p>
-                <p v-if="subset.caption" class="nudge-step-subset__caption">{{ subset.caption }}</p>
+                <p v-if="subset.caption" class="nudge-step-subset__caption">
+                  {{ subset.caption }}
+                </p>
               </div>
             </v-card>
           </template>
@@ -47,7 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import type { NudgeToolSubsetGroupDto, VerticalSubsetDto } from '~~/shared/api-client'
+import type {
+  NudgeToolSubsetGroupDto,
+  VerticalSubsetDto,
+} from '~~/shared/api-client'
 
 const props = defineProps<{
   group: NudgeToolSubsetGroupDto
@@ -56,7 +62,10 @@ const props = defineProps<{
   stepNumber: number
 }>()
 
-const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void; (event: 'continue'): void }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string[]): void
+  (event: 'continue'): void
+}>()
 
 const toggle = (subsetId: string) => {
   const next = new Set(props.modelValue)

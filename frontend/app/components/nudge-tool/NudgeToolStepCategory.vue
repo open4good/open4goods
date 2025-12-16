@@ -1,13 +1,21 @@
 <template>
   <div class="nudge-step-category">
-	<v-row justify="center" class="mt-2" >
-    <h2 class="align-center nudge-step-category__title">{{ $t('nudge-tool.steps.category.title') }}</h2>
+    <v-row justify="center" class="mt-2">
+      <h2 class="align-center nudge-step-category__title">
+        {{ $t('nudge-tool.steps.category.title') }}
+      </h2>
     </v-row>
     <div class="nudge-step-category__header">
-
       <div class="nudge-step-category__subtitle-row">
-        <div class="nudge-step-category__step" :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })">
-            <v-icon icon="mdi-numeric-1-circle" color="accent-primary-highlight" size="22" />
+        <div
+          class="nudge-step-category__step"
+          :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })"
+        >
+          <v-icon
+            icon="mdi-numeric-1-circle"
+            color="accent-primary-highlight"
+            size="22"
+          />
         </div>
 
         <p class="nudge-step-category__subtitle">
@@ -50,7 +58,9 @@
       >
         <v-card
           class="nudge-step-category__card"
-          :class="{ 'nudge-step-category__card--selected': selected === category.id }"
+          :class="{
+            'nudge-step-category__card--selected': selected === category.id,
+          }"
           :elevation="selected === category.id ? 8 : 2"
           rounded="xl"
           role="button"
@@ -78,7 +88,9 @@
               </template>
             </v-img>
           </div>
-          <p class="nudge-step-category__name">{{ category.verticalHomeTitle ?? category.id }}</p>
+          <p class="nudge-step-category__name">
+            {{ category.verticalHomeTitle ?? category.id }}
+          </p>
         </v-card>
       </v-slide-group-item>
     </v-slide-group>
@@ -99,19 +111,19 @@ const selected = ref<string | null>(props.selectedCategoryId ?? null)
 
 watch(
   () => props.selectedCategoryId,
-  (value) => {
+  value => {
     selected.value = value ?? null
-  },
+  }
 )
 
 watch(
   selected,
-  (value) => {
+  value => {
     if (value) {
       emit('select', value)
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 </script>
 

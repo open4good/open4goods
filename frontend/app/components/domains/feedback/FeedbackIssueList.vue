@@ -7,11 +7,25 @@
       </p>
     </header>
 
-    <v-alert v-if="statusMessage" type="info" variant="tonal" border="start" class="mb-4" role="status">
+    <v-alert
+      v-if="statusMessage"
+      type="info"
+      variant="tonal"
+      border="start"
+      class="mb-4"
+      role="status"
+    >
       {{ statusMessage }}
     </v-alert>
 
-    <v-alert v-if="errorMessage" type="error" variant="tonal" border="start" class="mb-4" role="alert">
+    <v-alert
+      v-if="errorMessage"
+      type="error"
+      variant="tonal"
+      border="start"
+      class="mb-4"
+      role="alert"
+    >
       {{ errorMessage }}
     </v-alert>
 
@@ -20,15 +34,28 @@
       :aria-busy="loading && !errorMessage"
       aria-live="polite"
     >
-      <div v-if="loading && !errorMessage" class="feedback-issue-list__loading" role="status">
+      <div
+        v-if="loading && !errorMessage"
+        class="feedback-issue-list__loading"
+        role="status"
+      >
         <v-skeleton-loader
           type="heading, text@2, list-item-three-line@3"
           class="feedback-issue-list__loading-skeleton"
         />
       </div>
 
-      <div v-else-if="issues.length === 0" class="feedback-issue-list__empty" role="status">
-        <v-icon icon="mdi-emoticon-thought" size="36" color="primary" class="mb-2" />
+      <div
+        v-else-if="issues.length === 0"
+        class="feedback-issue-list__empty"
+        role="status"
+      >
+        <v-icon
+          icon="mdi-emoticon-thought"
+          size="36"
+          color="primary"
+          class="mb-2"
+        />
         <p class="mb-0">{{ emptyStateLabel }}</p>
       </div>
 
@@ -39,79 +66,97 @@
         role="list"
         density="comfortable"
       >
-      <v-list-item
-        v-for="issue in issues"
-        :key="issueKey(issue)"
-        class="feedback-issue-list__item"
-        :aria-label="issue.title"
-      >
-        <template #prepend>
-          <v-avatar size="40" class="feedback-issue-list__issue-avatar" color="surface-primary-120">
-            <v-icon :icon="issueIcon" size="24" color="primary" />
-          </v-avatar>
-        </template>
-
-        <template #title>
-          <div class="feedback-issue-list__issue-header">
-            <span class="feedback-issue-list__issue-number">#{{ issue.number ?? '—' }}</span>
-            <p class="feedback-issue-list__issue-title">{{ issue.title }}</p>
-          </div>
-        </template>
-
-        <template #subtitle>
-          <div class="feedback-issue-list__issue-meta">
-            <span class="feedback-issue-list__issue-votes">
-              <v-icon icon="mdi-thumb-up-outline" size="18" class="me-1" />
-              {{ issue.votes ?? 0 }}
-            </span>
-            <v-btn
-              v-if="issue.url"
-              :href="issue.url"
-              target="_blank"
-              rel="noopener nofollow"
-              variant="text"
-              size="small"
-              :aria-label="`${openIssueLabel} ${issue.number ?? ''}`"
-              append-icon="mdi-open-in-new"
+        <v-list-item
+          v-for="issue in issues"
+          :key="issueKey(issue)"
+          class="feedback-issue-list__item"
+          :aria-label="issue.title"
+        >
+          <template #prepend>
+            <v-avatar
+              size="40"
+              class="feedback-issue-list__issue-avatar"
+              color="surface-primary-120"
             >
-              {{ openIssueLabel }}
-            </v-btn>
-          </div>
-        </template>
+              <v-icon :icon="issueIcon" size="24" color="primary" />
+            </v-avatar>
+          </template>
 
-        <template #append>
-          <v-tooltip v-if="voteDisabledMessage" location="top">
-            <template #activator="{ props: tooltipProps }">
-              <span v-bind="tooltipProps">
-                <v-btn
-                  color="primary"
-                  variant="flat"
-                  size="small"
-                  :aria-label="`${voteButtonAriaLabel} ${issue.title}`"
-                  :disabled="isVoteDisabled || !issue.id || hasIssueBeenVoted(issue.id)"
-                  :loading="votePendingId === issue.id"
-                  @click="handleVote(issue.id)"
-                >
-                  {{ hasIssueBeenVoted(issue.id) ? voteCompletedLabel : voteButtonLabel }}
-                </v-btn>
+          <template #title>
+            <div class="feedback-issue-list__issue-header">
+              <span class="feedback-issue-list__issue-number"
+                >#{{ issue.number ?? '—' }}</span
+              >
+              <p class="feedback-issue-list__issue-title">{{ issue.title }}</p>
+            </div>
+          </template>
+
+          <template #subtitle>
+            <div class="feedback-issue-list__issue-meta">
+              <span class="feedback-issue-list__issue-votes">
+                <v-icon icon="mdi-thumb-up-outline" size="18" class="me-1" />
+                {{ issue.votes ?? 0 }}
               </span>
-            </template>
-            <span>{{ voteDisabledMessage }}</span>
-          </v-tooltip>
-          <v-btn
-            v-else
-            color="primary"
-            variant="flat"
-            size="small"
-            :aria-label="`${voteButtonAriaLabel} ${issue.title}`"
-            :disabled="isVoteDisabled || !issue.id || hasIssueBeenVoted(issue.id)"
-            :loading="votePendingId === issue.id"
-            @click="handleVote(issue.id)"
-          >
-            {{ hasIssueBeenVoted(issue.id) ? voteCompletedLabel : voteButtonLabel }}
-          </v-btn>
-        </template>
-      </v-list-item>
+              <v-btn
+                v-if="issue.url"
+                :href="issue.url"
+                target="_blank"
+                rel="noopener nofollow"
+                variant="text"
+                size="small"
+                :aria-label="`${openIssueLabel} ${issue.number ?? ''}`"
+                append-icon="mdi-open-in-new"
+              >
+                {{ openIssueLabel }}
+              </v-btn>
+            </div>
+          </template>
+
+          <template #append>
+            <v-tooltip v-if="voteDisabledMessage" location="top">
+              <template #activator="{ props: tooltipProps }">
+                <span v-bind="tooltipProps">
+                  <v-btn
+                    color="primary"
+                    variant="flat"
+                    size="small"
+                    :aria-label="`${voteButtonAriaLabel} ${issue.title}`"
+                    :disabled="
+                      isVoteDisabled || !issue.id || hasIssueBeenVoted(issue.id)
+                    "
+                    :loading="votePendingId === issue.id"
+                    @click="handleVote(issue.id)"
+                  >
+                    {{
+                      hasIssueBeenVoted(issue.id)
+                        ? voteCompletedLabel
+                        : voteButtonLabel
+                    }}
+                  </v-btn>
+                </span>
+              </template>
+              <span>{{ voteDisabledMessage }}</span>
+            </v-tooltip>
+            <v-btn
+              v-else
+              color="primary"
+              variant="flat"
+              size="small"
+              :aria-label="`${voteButtonAriaLabel} ${issue.title}`"
+              :disabled="
+                isVoteDisabled || !issue.id || hasIssueBeenVoted(issue.id)
+              "
+              :loading="votePendingId === issue.id"
+              @click="handleVote(issue.id)"
+            >
+              {{
+                hasIssueBeenVoted(issue.id)
+                  ? voteCompletedLabel
+                  : voteButtonLabel
+              }}
+            </v-btn>
+          </template>
+        </v-list-item>
       </v-list>
     </div>
   </section>
@@ -169,7 +214,9 @@ const voteDisabledMessage = computed(() => {
 })
 
 const isVoteDisabled = computed(
-  () => !props.canVote || (props.remainingVotes !== null && props.remainingVotes <= 0),
+  () =>
+    !props.canVote ||
+    (props.remainingVotes !== null && props.remainingVotes <= 0)
 )
 
 const votedIssueIdsSet = computed(() => new Set(props.votedIssueIds))

@@ -4,7 +4,11 @@
       <v-expansion-panel value="global" expand-icon="mdi-chevron-down">
         <template #title>
           <div class="category-filters__title">
-            <v-icon icon="mdi-tune-variant" size="20" class="category-filters__title-icon" />
+            <v-icon
+              icon="mdi-tune-variant"
+              size="20"
+              class="category-filters__title-icon"
+            />
             <span>{{ t('category.filters.globalTitle') }}</span>
           </div>
         </template>
@@ -25,7 +29,11 @@
       <v-expansion-panel value="impact" expand-icon="mdi-chevron-down">
         <template #title>
           <div class="category-filters__title">
-            <v-icon icon="mdi-leaf" size="20" class="category-filters__title-icon" />
+            <v-icon
+              icon="mdi-leaf"
+              size="20"
+              class="category-filters__title-icon"
+            />
             <span>{{ t('category.filters.impactTitle') }}</span>
           </div>
         </template>
@@ -40,14 +48,21 @@
               @update-terms="updateTermsFilter"
             />
 
-            <div v-if="impactRemaining.length" class="category-filters__see-more">
+            <div
+              v-if="impactRemaining.length"
+              class="category-filters__see-more"
+            >
               <v-btn
                 variant="text"
                 density="comfortable"
                 color="primary"
                 @click="toggleImpactExpansion"
               >
-                {{ impactExpanded ? t('category.filters.hideImpact') : t('category.filters.showMoreImpact') }}
+                {{
+                  impactExpanded
+                    ? t('category.filters.hideImpact')
+                    : t('category.filters.showMoreImpact')
+                }}
               </v-btn>
 
               <CategoryFilterList
@@ -68,7 +83,11 @@
       <v-expansion-panel value="technical" expand-icon="mdi-chevron-down">
         <template #title>
           <div class="category-filters__title">
-            <v-icon icon="mdi-cog" size="20" class="category-filters__title-icon" />
+            <v-icon
+              icon="mdi-cog"
+              size="20"
+              class="category-filters__title-icon"
+            />
             <span>{{ t('category.filters.technicalTitle') }}</span>
           </div>
         </template>
@@ -83,14 +102,21 @@
               @update-terms="updateTermsFilter"
             />
 
-            <div v-if="technicalRemaining.length" class="category-filters__see-more">
+            <div
+              v-if="technicalRemaining.length"
+              class="category-filters__see-more"
+            >
               <v-btn
                 variant="text"
                 density="comfortable"
                 color="primary"
                 @click="toggleTechnicalExpansion"
               >
-                {{ technicalExpanded ? t('category.filters.hideTechnical') : t('category.filters.showMoreTechnical') }}
+                {{
+                  technicalExpanded
+                    ? t('category.filters.hideTechnical')
+                    : t('category.filters.showMoreTechnical')
+                }}
               </v-btn>
 
               <CategoryFilterList
@@ -135,7 +161,7 @@ const props = withDefaults(
   }>(),
   {
     baselineAggregations: () => [],
-  },
+  }
 )
 
 const emit = defineEmits<{
@@ -149,7 +175,9 @@ const activeFilters = computed(() => props.filters?.filters ?? [])
 const { t } = useI18n()
 
 const aggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
-  return (props.aggregations ?? []).reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
+  return (props.aggregations ?? []).reduce<
+    Record<string, AggregationResponseDto>
+  >((accumulator, aggregation) => {
     if (aggregation.field) {
       accumulator[aggregation.field] = aggregation
     }
@@ -158,26 +186,32 @@ const aggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
   }, {})
 })
 
-const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
-  return (props.baselineAggregations ?? []).reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
-    if (aggregation.field && !(aggregation.field in accumulator)) {
-      accumulator[aggregation.field] = aggregation
-    }
+const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(
+  () => {
+    return (props.baselineAggregations ?? []).reduce<
+      Record<string, AggregationResponseDto>
+    >((accumulator, aggregation) => {
+      if (aggregation.field && !(aggregation.field in accumulator)) {
+        accumulator[aggregation.field] = aggregation
+      }
 
-    return accumulator
-  }, {})
-})
+      return accumulator
+    }, {})
+  }
+)
 
 const impactPrimary = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.impact ?? []
-  const ecoscore = entries.filter((item) => item.mapping === ECOSCORE_RELATIVE_FIELD)
+  const ecoscore = entries.filter(
+    item => item.mapping === ECOSCORE_RELATIVE_FIELD
+  )
   return ecoscore.length ? ecoscore : entries.slice(0, 1)
 })
 
 const impactRemaining = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.impact ?? []
-  const primary = new Set(impactPrimary.value.map((entry) => entry.mapping))
-  return entries.filter((entry) => entry.mapping && !primary.has(entry.mapping))
+  const primary = new Set(impactPrimary.value.map(entry => entry.mapping))
+  return entries.filter(entry => entry.mapping && !primary.has(entry.mapping))
 })
 
 const technicalPrimary = computed<FieldMetadataDto[]>(() => {
@@ -194,8 +228,11 @@ const emitFilters = (filters: Filter[]) => {
   emit('update:filters', filters.length ? { filters } : {})
 }
 
-const updateRangeFilter = (field: string, range: { min?: number; max?: number }) => {
-  const current = activeFilters.value.filter((filter) => filter.field !== field)
+const updateRangeFilter = (
+  field: string,
+  range: { min?: number; max?: number }
+) => {
+  const current = activeFilters.value.filter(filter => filter.field !== field)
 
   if (range.min == null && range.max == null) {
     emitFilters(current)
@@ -214,7 +251,7 @@ const updateRangeFilter = (field: string, range: { min?: number; max?: number })
 }
 
 const updateTermsFilter = (field: string, terms: string[]) => {
-  const current = activeFilters.value.filter((filter) => filter.field !== field)
+  const current = activeFilters.value.filter(filter => filter.field !== field)
 
   if (!terms.length) {
     emitFilters(current)
@@ -238,7 +275,6 @@ const toggleImpactExpansion = () => {
 const toggleTechnicalExpansion = () => {
   emit('update:technicalExpanded', !props.technicalExpanded)
 }
-
 </script>
 
 <style scoped lang="sass">

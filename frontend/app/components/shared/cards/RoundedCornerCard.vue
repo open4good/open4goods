@@ -4,7 +4,11 @@ import { useI18n } from 'vue-i18n'
 
 export type CornerSize = 'sm' | 'md' | 'lg'
 export type CornerVariant = 'icon' | 'text' | 'custom' | 'none'
-export type AccentCorner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+export type AccentCorner =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
 export type SurfaceTone = 'glass' | 'strong'
 export type RoundedSize = 'sm' | 'md' | 'lg'
 
@@ -62,7 +66,7 @@ const props = withDefaults(
     ariaLabel: '',
     disabled: false,
     cornerTooltip: '',
-  },
+  }
 )
 
 type RoundedCornerCardEmits = {
@@ -77,7 +81,9 @@ const { t } = useI18n()
 
 const isInteractive = computed(() => props.selectable && !props.disabled)
 const tabIndex = computed(() => (props.disabled ? -1 : 0))
-const ariaPressed = computed(() => (isInteractive.value ? String(props.selected) : undefined))
+const ariaPressed = computed(() =>
+  isInteractive.value ? String(props.selected) : undefined
+)
 const ariaDisabled = computed(() => (props.disabled ? 'true' : undefined))
 
 const surfaceClass = computed(() => `rounded-card--surface-${props.surface}`)
@@ -103,7 +109,9 @@ const resolvedCornerLabel = computed(() => {
     return props.cornerLabel
   }
 
-  return props.selected ? t('shared.roundedCard.cornerSelected') : t('shared.roundedCard.cornerIdle')
+  return props.selected
+    ? t('shared.roundedCard.cornerSelected')
+    : t('shared.roundedCard.cornerIdle')
 })
 
 const cornerTooltip = computed(() => {
@@ -111,10 +119,14 @@ const cornerTooltip = computed(() => {
     return props.cornerTooltip
   }
 
-  return props.selected ? t('shared.roundedCard.tooltipSelected') : t('shared.roundedCard.tooltipIdle')
+  return props.selected
+    ? t('shared.roundedCard.tooltipSelected')
+    : t('shared.roundedCard.tooltipIdle')
 })
 
-const resolvedIcon = computed(() => (props.selected ? props.selectedIcon : props.unselectedIcon))
+const resolvedIcon = computed(() =>
+  props.selected ? props.selectedIcon : props.unselectedIcon
+)
 
 const hoverState = ref(false)
 const isHovered = computed({
@@ -123,7 +135,9 @@ const isHovered = computed({
     hoverState.value = value
   },
 })
-const elevationValue = computed(() => (isHovered.value ? props.hoverElevation : props.elevation))
+const elevationValue = computed(() =>
+  isHovered.value ? props.hoverElevation : props.elevation
+)
 
 const handleSelect = (event: MouseEvent | KeyboardEvent) => {
   emit('click', event as MouseEvent)
@@ -144,9 +158,13 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-const cardAriaLabel = computed(() => props.ariaLabel || props.title || props.subtitle || undefined)
+const cardAriaLabel = computed(
+  () => props.ariaLabel || props.title || props.subtitle || undefined
+)
 
-const hasHeader = computed(() => Boolean(props.title || props.subtitle || props.eyebrow || slots.header))
+const hasHeader = computed(() =>
+  Boolean(props.title || props.subtitle || props.eyebrow || slots.header)
+)
 </script>
 
 <template>
@@ -178,16 +196,40 @@ const hasHeader = computed(() => Boolean(props.title || props.subtitle || props.
     @focusin="isHovered = true"
     @focusout="isHovered = false"
   >
-    <div class="rounded-card__corner" :class="[`rounded-card__corner--${resolvedCornerVariant}`]" :title="cornerTooltip">
-      <div v-if="resolvedCornerVariant === 'icon'" class="rounded-card__corner-indicator" aria-hidden="true">
-        <v-icon v-if="resolvedIcon?.startsWith('mdi-')" :icon="resolvedIcon" size="26" />
-        <v-img v-else-if="resolvedIcon" :src="resolvedIcon" :alt="cornerTooltip" eager cover />
+    <div
+      class="rounded-card__corner"
+      :class="[`rounded-card__corner--${resolvedCornerVariant}`]"
+      :title="cornerTooltip"
+    >
+      <div
+        v-if="resolvedCornerVariant === 'icon'"
+        class="rounded-card__corner-indicator"
+        aria-hidden="true"
+      >
+        <v-icon
+          v-if="resolvedIcon?.startsWith('mdi-')"
+          :icon="resolvedIcon"
+          size="26"
+        />
+        <v-img
+          v-else-if="resolvedIcon"
+          :src="resolvedIcon"
+          :alt="cornerTooltip"
+          eager
+          cover
+        />
       </div>
-      <div v-else-if="resolvedCornerVariant === 'text'" class="rounded-card__corner-label">
+      <div
+        v-else-if="resolvedCornerVariant === 'text'"
+        class="rounded-card__corner-label"
+      >
         <v-icon v-if="cornerIcon" :icon="cornerIcon" size="18" />
         <span>{{ resolvedCornerLabel }}</span>
       </div>
-      <div v-else-if="resolvedCornerVariant === 'custom'" class="rounded-card__corner-custom">
+      <div
+        v-else-if="resolvedCornerVariant === 'custom'"
+        class="rounded-card__corner-custom"
+      >
         <slot name="corner" />
       </div>
     </div>
@@ -230,7 +272,10 @@ const hasHeader = computed(() => Boolean(props.title || props.subtitle || props.
   background: var(--rounded-card-bg);
   color: var(--rounded-card-text);
   overflow: hidden;
-  transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
 
   &--surface-strong {
     --rounded-card-bg: rgba(var(--v-theme-surface-glass-strong), 0.98);
@@ -260,8 +305,17 @@ const hasHeader = computed(() => Boolean(props.title || props.subtitle || props.
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 22% 18%, rgba(var(--v-theme-surface-primary-080), 0.5), transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(var(--v-theme-surface-primary-100), 0.45), transparent 40%);
+    background:
+      radial-gradient(
+        circle at 22% 18%,
+        rgba(var(--v-theme-surface-primary-080), 0.5),
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(var(--v-theme-surface-primary-100), 0.45),
+        transparent 40%
+      );
     opacity: 0.85;
     pointer-events: none;
   }
@@ -320,7 +374,11 @@ const hasHeader = computed(() => Boolean(props.title || props.subtitle || props.
     position: absolute;
     width: var(--rounded-card-corner-size);
     height: var(--rounded-card-corner-size);
-    background: linear-gradient(135deg, var(--rounded-card-highlight-main), rgba(var(--v-theme-accent-supporting), 0.38));
+    background: linear-gradient(
+      135deg,
+      var(--rounded-card-highlight-main),
+      rgba(var(--v-theme-accent-supporting), 0.38)
+    );
     border: 1px solid var(--rounded-card-border);
     display: inline-flex;
     align-items: center;
@@ -328,7 +386,10 @@ const hasHeader = computed(() => Boolean(props.title || props.subtitle || props.
     color: rgb(var(--v-theme-text-on-accent));
     overflow: hidden;
     z-index: 2;
-    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
     backdrop-filter: blur(6px);
 
     &--icon {

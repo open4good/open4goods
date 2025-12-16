@@ -2,9 +2,11 @@ import { MAX_COMPARE_ITEMS } from '~/stores/useProductCompareStore'
 
 const HASH_SEPARATOR = 'Vs'
 
-const sanitizeGtins = (values: Array<string | number | null | undefined>): string[] => {
+const sanitizeGtins = (
+  values: Array<string | number | null | undefined>
+): string[] => {
   const normalized = values
-    .map((value) => {
+    .map(value => {
       if (typeof value === 'number' && Number.isFinite(value)) {
         return Math.trunc(value).toString()
       }
@@ -15,12 +17,12 @@ const sanitizeGtins = (values: Array<string | number | null | undefined>): strin
 
       return ''
     })
-    .map((value) => value.replace(/[^0-9]/g, ''))
-    .filter((value) => value.length > 0)
+    .map(value => value.replace(/[^0-9]/g, ''))
+    .filter(value => value.length > 0)
 
   const seen = new Set<string>()
 
-  return normalized.filter((value) => {
+  return normalized.filter(value => {
     if (seen.has(value)) {
       return false
     }
@@ -50,7 +52,9 @@ export const parseCompareHash = (hash: string | null | undefined): string[] => {
   return gtins.slice(0, MAX_COMPARE_ITEMS)
 }
 
-export const buildCompareHashFragment = (gtins: Array<string | number | null | undefined>): string => {
+export const buildCompareHashFragment = (
+  gtins: Array<string | number | null | undefined>
+): string => {
   const sanitized = sanitizeGtins(gtins).slice(0, MAX_COMPARE_ITEMS)
 
   if (!sanitized.length) {
@@ -60,7 +64,9 @@ export const buildCompareHashFragment = (gtins: Array<string | number | null | u
   return sanitized.join(HASH_SEPARATOR)
 }
 
-export const buildCompareHash = (gtins: Array<string | number | null | undefined>): string => {
+export const buildCompareHash = (
+  gtins: Array<string | number | null | undefined>
+): string => {
   const fragment = buildCompareHashFragment(gtins)
   return fragment ? `#${fragment}` : ''
 }

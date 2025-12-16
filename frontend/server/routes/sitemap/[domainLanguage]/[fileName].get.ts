@@ -10,7 +10,7 @@ import { getLocalSitemapFilePath } from '~~/server/utils/sitemap-local-files'
 const isDomainLanguage = (value: string | undefined): value is DomainLanguage =>
   value === 'en' || value === 'fr'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const domainLanguage = event.context.params?.domainLanguage
   const fileNameParam = event.context.params?.fileName
 
@@ -24,16 +24,21 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Sitemap not found' })
   }
 
-  const configuredFilePath = getLocalSitemapFilePath(domainLanguage, normalizedFileName)
+  const configuredFilePath = getLocalSitemapFilePath(
+    domainLanguage,
+    normalizedFileName
+  )
 
   if (!configuredFilePath) {
-    throw createError({ statusCode: 404, statusMessage: 'Sitemap not configured' })
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Sitemap not configured',
+    })
   }
 
   try {
     await access(configuredFilePath)
-  }
-  catch (error) {
+  } catch (error) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Sitemap file missing',

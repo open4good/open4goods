@@ -3,7 +3,9 @@
     <NuxtLink
       :to="productLink"
       class="product-alternative-card__link"
-      :aria-label="t('product.impact.alternatives.viewProduct', { name: displayName })"
+      :aria-label="
+        t('product.impact.alternatives.viewProduct', { name: displayName })
+      "
       :prefetch="false"
     >
       <div class="product-alternative-card__media">
@@ -41,7 +43,9 @@
               size="16"
               class="product-alternative-card__attribute-icon"
             />
-            <span class="product-alternative-card__attribute-value">{{ attribute.value }}</span>
+            <span class="product-alternative-card__attribute-value">{{
+              attribute.value
+            }}</span>
           </v-chip>
         </div>
         <div class="product-alternative-card__score">
@@ -51,7 +55,9 @@
             :max="5"
             size="small"
           />
-          <span v-if="bestPrice" class="product-alternative-card__price">{{ bestPrice }}</span>
+          <span v-if="bestPrice" class="product-alternative-card__price">{{
+            bestPrice
+          }}</span>
         </div>
       </div>
     </NuxtLink>
@@ -61,7 +67,10 @@
           <v-btn
             v-bind="tooltipProps"
             class="product-alternative-card__compare-btn"
-            :class="{ 'product-alternative-card__compare-btn--active': isCompareSelected }"
+            :class="{
+              'product-alternative-card__compare-btn--active':
+                isCompareSelected,
+            }"
             variant="flat"
             color="primary"
             :aria-pressed="isCompareSelected"
@@ -71,7 +80,9 @@
             @click.stop.prevent="toggleCompare"
           >
             <v-icon :icon="compareButtonIcon" size="18" />
-            <span class="product-alternative-card__compare-label">{{ compareButtonLabel }}</span>
+            <span class="product-alternative-card__compare-label">{{
+              compareButtonLabel
+            }}</span>
           </v-btn>
         </template>
       </v-tooltip>
@@ -92,7 +103,10 @@ import {
 } from '~/stores/useProductCompareStore'
 import { formatBestPrice } from '~/utils/_product-pricing'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import {
+  formatAttributeValue,
+  resolvePopularAttributes,
+} from '~/utils/_product-attributes'
 
 const props = defineProps({
   product: {
@@ -123,7 +137,7 @@ const brand = computed(() => product.value.identity?.brand?.trim() ?? '')
 const model = computed(() => product.value.identity?.model?.trim() ?? '')
 
 const brandModelTitle = computed(() => {
-  const segments = [brand.value, model.value].filter((value) => value.length)
+  const segments = [brand.value, model.value].filter(value => value.length)
   return segments.join(' • ')
 })
 
@@ -149,7 +163,7 @@ const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
 const popularAttributesList = computed(() =>
   resolvePopularAttributes(product.value, popularAttributeConfigs.value)
-    .map((attribute) => {
+    .map(attribute => {
       const value = formatAttributeValue(attribute, t, n)
       if (!value) {
         return null
@@ -161,7 +175,12 @@ const popularAttributesList = computed(() =>
         value,
       }
     })
-    .filter((attribute): attribute is { key: string; icon: string | null; value: string } => Boolean(attribute)),
+    .filter(
+      (
+        attribute
+      ): attribute is { key: string; icon: string | null; value: string } =>
+        Boolean(attribute)
+    )
 )
 
 const productLink = computed(() => {
@@ -173,7 +192,9 @@ const compareStore = useProductCompareStore()
 const reasonMessage = (reason: CompareListBlockReason | undefined) => {
   switch (reason) {
     case 'limit-reached':
-      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
+      return t('category.products.compare.limitReached', {
+        count: MAX_COMPARE_ITEMS,
+      })
     case 'vertical-mismatch':
       return t('category.products.compare.differentCategory')
     case 'missing-identifier':
@@ -183,15 +204,21 @@ const reasonMessage = (reason: CompareListBlockReason | undefined) => {
   }
 }
 
-const compareEligibility = computed(() => compareStore.canAddProduct(product.value))
+const compareEligibility = computed(() =>
+  compareStore.canAddProduct(product.value)
+)
 const isCompareSelected = computed(() => compareStore.hasProduct(product.value))
 
 const compareButtonLabel = computed(() =>
-  isCompareSelected.value ? t('product.hero.compare.selected') : t('product.hero.compare.label'),
+  isCompareSelected.value
+    ? t('product.hero.compare.selected')
+    : t('product.hero.compare.label')
 )
 
 const compareButtonIcon = computed(() =>
-  isCompareSelected.value ? 'mdi-check-circle-outline' : 'mdi-compare-horizontal',
+  isCompareSelected.value
+    ? 'mdi-check-circle-outline'
+    : 'mdi-compare-horizontal'
 )
 
 const compareButtonTitle = computed(() => {
@@ -229,7 +256,7 @@ const compareButtonAriaLabel = computed(() => {
 })
 
 const isCompareDisabled = computed(
-  () => !isCompareSelected.value && !compareEligibility.value.success,
+  () => !isCompareSelected.value && !compareEligibility.value.success
 )
 
 const toggleCompare = () => {
@@ -250,7 +277,9 @@ const toggleCompare = () => {
   background: rgba(var(--v-theme-surface-default), 0.96);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-alternative-card__link {
@@ -367,7 +396,10 @@ const toggleCompare = () => {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
   background-color: rgba(var(--v-theme-surface-default), 0.95);
   color: rgb(var(--v-theme-text-neutral-strong));
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .product-alternative-card__compare-btn:hover,

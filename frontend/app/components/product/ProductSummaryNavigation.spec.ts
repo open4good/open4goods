@@ -38,7 +38,9 @@ describe('ProductSummaryNavigation', () => {
 
     const items = wrapper.findAll('.product-summary-navigation__link')
     expect(items).toHaveLength(sections.length)
-    expect(items[1]?.classes()).toContain('product-summary-navigation__link--active')
+    expect(items[1]?.classes()).toContain(
+      'product-summary-navigation__link--active'
+    )
 
     await wrapper.unmount()
   })
@@ -58,7 +60,9 @@ describe('ProductSummaryNavigation', () => {
   it('applies horizontal orientation modifier', async () => {
     const wrapper = await mountComponent({ orientation: 'horizontal' })
 
-    expect(wrapper.classes()).toContain('product-summary-navigation--horizontal')
+    expect(wrapper.classes()).toContain(
+      'product-summary-navigation--horizontal'
+    )
 
     await wrapper.unmount()
   })
@@ -74,9 +78,13 @@ describe('ProductSummaryNavigation', () => {
       adminHelper: 'Restricted zone',
     })
 
-    expect(wrapper.find('.product-summary-navigation__admin-panel').exists()).toBe(true)
+    expect(
+      wrapper.find('.product-summary-navigation__admin-panel').exists()
+    ).toBe(true)
 
-    const adminButton = wrapper.find('button.product-summary-navigation__admin-link')
+    const adminButton = wrapper.find(
+      'button.product-summary-navigation__admin-link'
+    )
     await adminButton.trigger('click')
 
     const emitted = wrapper.emitted('navigate') ?? []

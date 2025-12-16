@@ -31,16 +31,20 @@ export default defineEventHandler(
     const payload = await readBody<ProductsSearchPayload | null>(event)
 
     if (!payload) {
-      throw createError({ statusCode: 400, statusMessage: 'Request body is required.' })
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Request body is required.',
+      })
     }
 
-    const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+    const rawHost =
+      event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
     const { domainLanguage } = resolveDomainLanguage(rawHost)
 
     const productService = useProductService(domainLanguage)
 
     const buildSearchBody = (
-      input: ProductsSearchPayload,
+      input: ProductsSearchPayload
     ): ProductSearchRequestDto | undefined => {
       const body: ProductSearchRequestDto = {}
       let hasContent = false
@@ -74,14 +78,18 @@ export default defineEventHandler(
         include: payload.include,
         ...(searchBody ? { body: searchBody } : {}),
       })
-      response.products?.data?.forEach((product) => {
+      response.products?.data?.forEach(product => {
         normaliseProductDto(product)
       })
 
       return response
     } catch (error) {
       const backendError = await extractBackendErrorDetails(error)
-      console.error('Error searching products:', backendError.logMessage, backendError)
+      console.error(
+        'Error searching products:',
+        backendError.logMessage,
+        backendError
+      )
 
       throw createError({
         statusCode: backendError.statusCode,
@@ -89,5 +97,5 @@ export default defineEventHandler(
         cause: error,
       })
     }
-  },
+  }
 )

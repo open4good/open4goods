@@ -34,7 +34,8 @@ vi.mock('~~/app/composables/pwa/usePwaOfflineNoticeBridge', () => ({
   }),
 }))
 
-type OfflineNoticeComponent = typeof import('./PwaOfflineNotice.vue')['default']
+type OfflineNoticeComponent =
+  (typeof import('./PwaOfflineNotice.vue'))['default']
 let PwaOfflineNotice: OfflineNoticeComponent
 
 beforeAll(async () => {
@@ -58,10 +59,22 @@ const VTooltipStub = defineComponent({
   props: { modelValue: { type: Boolean, default: false } },
   setup(props, { slots }) {
     return () =>
-      h('div', { class: 'v-tooltip-stub', 'data-open': String(props.modelValue) }, [
-        slots.activator ? h('div', { class: 'v-tooltip-stub__activator' }, slots.activator({ props: {} })) : null,
-        slots.default ? h('div', { class: 'v-tooltip-stub__content' }, slots.default()) : null,
-      ])
+      h(
+        'div',
+        { class: 'v-tooltip-stub', 'data-open': String(props.modelValue) },
+        [
+          slots.activator
+            ? h(
+                'div',
+                { class: 'v-tooltip-stub__activator' },
+                slots.activator({ props: {} })
+              )
+            : null,
+          slots.default
+            ? h('div', { class: 'v-tooltip-stub__content' }, slots.default())
+            : null,
+        ]
+      )
   },
 })
 
@@ -78,7 +91,7 @@ const VBtnStub = defineComponent({
           ...attrs,
           onClick: (event: MouseEvent) => emit('click', event),
         },
-        slots.default ? slots.default() : [],
+        slots.default ? slots.default() : []
       )
   },
 })
@@ -86,7 +99,8 @@ const VBtnStub = defineComponent({
 const VIconStub = defineComponent({
   name: 'VIconStub',
   setup(_, { slots }) {
-    return () => h('span', { class: 'v-icon-stub' }, slots.default ? slots.default() : [])
+    return () =>
+      h('span', { class: 'v-icon-stub' }, slots.default ? slots.default() : [])
   },
 })
 
@@ -110,7 +124,9 @@ describe('PwaOfflineNotice', () => {
     displayMock.smAndDown.value = false
     navigatorOnlineSpy?.mockRestore()
     reloadSpy?.mockRestore()
-    navigatorOnlineSpy = vi.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false)
+    navigatorOnlineSpy = vi
+      .spyOn(window.navigator, 'onLine', 'get')
+      .mockReturnValue(false)
     reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => {})
   })
 
@@ -118,8 +134,12 @@ describe('PwaOfflineNotice', () => {
     const wrapper = mountNotice()
     await nextTick()
 
-    expect(wrapper.find('[data-test="pwa-offline-indicator"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="pwa-offline-tooltip"]').text()).toContain('Connection lost')
+    expect(wrapper.find('[data-test="pwa-offline-indicator"]').exists()).toBe(
+      true
+    )
+    expect(wrapper.find('[data-test="pwa-offline-tooltip"]').text()).toContain(
+      'Connection lost'
+    )
   })
 
   it('dismisses the indicator and persists the flag', async () => {
@@ -129,7 +149,9 @@ describe('PwaOfflineNotice', () => {
     await wrapper.find('[data-test="pwa-offline-dismiss"]').trigger('click')
     await nextTick()
 
-    expect(wrapper.find('[data-test="pwa-offline-indicator"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="pwa-offline-indicator"]').exists()).toBe(
+      false
+    )
     expect(offlineDismissed.value).toBe(true)
   })
 

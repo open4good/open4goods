@@ -1,5 +1,8 @@
 <template>
-  <v-card :class="['product-life-timeline', `product-life-timeline--${layout}`]" variant="flat">
+  <v-card
+    :class="['product-life-timeline', `product-life-timeline--${layout}`]"
+    variant="flat"
+  >
     <div class="product-life-timeline__header">
       <div>
         <p class="product-life-timeline__eyebrow">
@@ -9,7 +12,11 @@
           {{ $t('product.attributes.timeline.subtitle') }}
         </p>
       </div>
-      <v-icon icon="mdi-timeline-text-outline" class="product-life-timeline__header-icon" size="28" />
+      <v-icon
+        icon="mdi-timeline-text-outline"
+        class="product-life-timeline__header-icon"
+        size="28"
+      />
     </div>
 
     <div v-if="hasEvents" class="product-life-timeline__body">
@@ -19,7 +26,9 @@
           :key="group.key"
           class="product-life-timeline__year-group"
           role="group"
-          :aria-label="t('product.attributes.timeline.ariaYear', { year: group.year })"
+          :aria-label="
+            t('product.attributes.timeline.ariaYear', { year: group.year })
+          "
         >
           <div class="product-life-timeline__year-label">{{ group.year }}</div>
 
@@ -37,30 +46,48 @@
                   <button
                     type="button"
                     class="product-life-timeline__event-point"
-                    :style="{ '--timeline-event-color': `rgb(var(--v-theme-${event.color}))` }"
+                    :style="{
+                      '--timeline-event-color': `rgb(var(--v-theme-${event.color}))`,
+                    }"
                     v-bind="tooltipProps"
                     :aria-label="event.ariaLabel"
                   >
                     <span class="product-life-timeline__event-dot" />
-                    <v-icon :icon="event.icon" size="18" class="product-life-timeline__event-icon" />
+                    <v-icon
+                      :icon="event.icon"
+                      size="18"
+                      class="product-life-timeline__event-icon"
+                    />
                   </button>
                 </template>
 
                 <div class="product-life-timeline__tooltip">
-                  <p class="product-life-timeline__tooltip-title">{{ event.label }}</p>
-                  <p class="product-life-timeline__tooltip-description">{{ event.description }}</p>
+                  <p class="product-life-timeline__tooltip-title">
+                    {{ event.label }}
+                  </p>
+                  <p class="product-life-timeline__tooltip-description">
+                    {{ event.description }}
+                  </p>
 
                   <div class="product-life-timeline__tooltip-meta">
-                    <span>{{ t('product.attributes.timeline.tooltip.date') }} · {{ event.fullDateLabel }}</span>
+                    <span
+                      >{{ t('product.attributes.timeline.tooltip.date') }} ·
+                      {{ event.fullDateLabel }}</span
+                    >
                     <span v-if="event.sourceLabel">
-                      {{ t('product.attributes.timeline.tooltip.source') }} · {{ event.sourceLabel }}
+                      {{ t('product.attributes.timeline.tooltip.source') }} ·
+                      {{ event.sourceLabel }}
                     </span>
                   </div>
                 </div>
               </v-tooltip>
 
-              <span class="product-life-timeline__event-month">{{ event.monthLabel }}</span>
-              <span class="product-life-timeline__event-title">{{ event.label }}</span>
+              <span class="product-life-timeline__event-month">{{
+                event.monthLabel
+              }}</span>
+              <span class="product-life-timeline__event-title">{{
+                event.label
+              }}</span>
             </div>
           </div>
         </div>
@@ -76,14 +103,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { ProductTimelineDto, ProductTimelineEventDto } from '~~/shared/api-client'
+import type {
+  ProductTimelineDto,
+  ProductTimelineEventDto,
+} from '~~/shared/api-client'
 
 const props = withDefaults(
-  defineProps<{ timeline: ProductTimelineDto | null; layout?: 'vertical' | 'horizontal'; alternate?: boolean }>(),
+  defineProps<{
+    timeline: ProductTimelineDto | null
+    layout?: 'vertical' | 'horizontal'
+    alternate?: boolean
+  }>(),
   {
     layout: 'horizontal',
     alternate: false,
-  },
+  }
 )
 
 const { t, locale } = useI18n()
@@ -109,17 +143,24 @@ type TimelineYearGroup = {
 
 const eventLabelKeys: Record<string, string> = {
   PRICE_FIRST_SEEN_NEW: 'product.attributes.timeline.events.priceFirstSeenNew',
-  PRICE_FIRST_SEEN_OCCASION: 'product.attributes.timeline.events.priceFirstSeenOccasion',
+  PRICE_FIRST_SEEN_OCCASION:
+    'product.attributes.timeline.events.priceFirstSeenOccasion',
   PRICE_LAST_SEEN_NEW: 'product.attributes.timeline.events.priceLastSeenNew',
-  PRICE_LAST_SEEN_OCCASION: 'product.attributes.timeline.events.priceLastSeenOccasion',
-  EPREL_ON_MARKET_START: 'product.attributes.timeline.events.eprelOnMarketStart',
+  PRICE_LAST_SEEN_OCCASION:
+    'product.attributes.timeline.events.priceLastSeenOccasion',
+  EPREL_ON_MARKET_START:
+    'product.attributes.timeline.events.eprelOnMarketStart',
   EPREL_ON_MARKET_END: 'product.attributes.timeline.events.eprelOnMarketEnd',
-  EPREL_ON_MARKET_FIRST_START: 'product.attributes.timeline.events.eprelOnMarketFirstStart',
-  EPREL_FIRST_PUBLICATION: 'product.attributes.timeline.events.eprelFirstPublication',
-  EPREL_LAST_PUBLICATION: 'product.attributes.timeline.events.eprelLastPublication',
+  EPREL_ON_MARKET_FIRST_START:
+    'product.attributes.timeline.events.eprelOnMarketFirstStart',
+  EPREL_FIRST_PUBLICATION:
+    'product.attributes.timeline.events.eprelFirstPublication',
+  EPREL_LAST_PUBLICATION:
+    'product.attributes.timeline.events.eprelLastPublication',
   EPREL_EXPORT: 'product.attributes.timeline.events.eprelExport',
   EPREL_IMPORTED: 'product.attributes.timeline.events.eprelImported',
-  EPREL_ORGANISATION_CLOSED: 'product.attributes.timeline.events.eprelOrganisationClosed',
+  EPREL_ORGANISATION_CLOSED:
+    'product.attributes.timeline.events.eprelOrganisationClosed',
 }
 
 const sourceLabelKeys: Record<string, string> = {
@@ -151,23 +192,40 @@ const sourceOverrideByType: Record<string, string> = {
   EPREL_IMPORTED: 'PRICE_HISTORY',
 }
 
-const monthFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'long' }))
+const monthFormatter = computed(
+  () => new Intl.DateTimeFormat(locale.value, { month: 'long' })
+)
 const fullDateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long', year: 'numeric' }),
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
 )
 const eventDescriptionKeys: Record<string, string> = {
-  PRICE_FIRST_SEEN_NEW: 'product.attributes.timeline.descriptions.priceFirstSeenNew',
-  PRICE_FIRST_SEEN_OCCASION: 'product.attributes.timeline.descriptions.priceFirstSeenOccasion',
-  PRICE_LAST_SEEN_NEW: 'product.attributes.timeline.descriptions.priceLastSeenNew',
-  PRICE_LAST_SEEN_OCCASION: 'product.attributes.timeline.descriptions.priceLastSeenOccasion',
-  EPREL_ON_MARKET_START: 'product.attributes.timeline.descriptions.eprelOnMarketStart',
-  EPREL_ON_MARKET_END: 'product.attributes.timeline.descriptions.eprelOnMarketEnd',
-  EPREL_ON_MARKET_FIRST_START: 'product.attributes.timeline.descriptions.eprelOnMarketFirstStart',
-  EPREL_FIRST_PUBLICATION: 'product.attributes.timeline.descriptions.eprelFirstPublication',
-  EPREL_LAST_PUBLICATION: 'product.attributes.timeline.descriptions.eprelLastPublication',
+  PRICE_FIRST_SEEN_NEW:
+    'product.attributes.timeline.descriptions.priceFirstSeenNew',
+  PRICE_FIRST_SEEN_OCCASION:
+    'product.attributes.timeline.descriptions.priceFirstSeenOccasion',
+  PRICE_LAST_SEEN_NEW:
+    'product.attributes.timeline.descriptions.priceLastSeenNew',
+  PRICE_LAST_SEEN_OCCASION:
+    'product.attributes.timeline.descriptions.priceLastSeenOccasion',
+  EPREL_ON_MARKET_START:
+    'product.attributes.timeline.descriptions.eprelOnMarketStart',
+  EPREL_ON_MARKET_END:
+    'product.attributes.timeline.descriptions.eprelOnMarketEnd',
+  EPREL_ON_MARKET_FIRST_START:
+    'product.attributes.timeline.descriptions.eprelOnMarketFirstStart',
+  EPREL_FIRST_PUBLICATION:
+    'product.attributes.timeline.descriptions.eprelFirstPublication',
+  EPREL_LAST_PUBLICATION:
+    'product.attributes.timeline.descriptions.eprelLastPublication',
   EPREL_EXPORT: 'product.attributes.timeline.descriptions.eprelExport',
   EPREL_IMPORTED: 'product.attributes.timeline.descriptions.eprelImported',
-  EPREL_ORGANISATION_CLOSED: 'product.attributes.timeline.descriptions.eprelOrganisationClosed',
+  EPREL_ORGANISATION_CLOSED:
+    'product.attributes.timeline.descriptions.eprelOrganisationClosed',
 }
 
 const groupedEvents = computed<TimelineYearGroup[]>(() => {
@@ -178,7 +236,9 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
     .filter(
       (event): event is ProductTimelineEventDto & { timestamp: number } =>
         typeof event?.timestamp === 'number' &&
-        !['EPREL_FIRST_PUBLICATION', 'EPREL_LAST_PUBLICATION'].includes(event.type ?? ''),
+        !['EPREL_FIRST_PUBLICATION', 'EPREL_LAST_PUBLICATION'].includes(
+          event.type ?? ''
+        )
     )
     .sort((a, b) => a.timestamp - b.timestamp)
     .forEach((event, index) => {
@@ -186,11 +246,12 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
       const source = event.source
       const key = `${type ?? 'unknown'}-${event.timestamp}-${index}`
       const labelKey = type
-        ? eventLabelKeys[type] ?? 'product.attributes.timeline.events.generic'
+        ? (eventLabelKeys[type] ?? 'product.attributes.timeline.events.generic')
         : 'product.attributes.timeline.events.generic'
       const label = t(labelKey)
       const descriptionKey = type
-        ? eventDescriptionKeys[type] ?? 'product.attributes.timeline.descriptions.generic'
+        ? (eventDescriptionKeys[type] ??
+          'product.attributes.timeline.descriptions.generic')
         : 'product.attributes.timeline.descriptions.generic'
       const description = t(descriptionKey)
       const date = new Date(event.timestamp)
@@ -198,9 +259,13 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
       const fullDateLabel = fullDateFormatter.value.format(date)
       const icon = (type && eventIcons[type]) ?? 'mdi-timeline-clock-outline'
       const resolvedSource = (type && sourceOverrideByType[type]) ?? source
-      const color = (resolvedSource && sourceColors[resolvedSource]) ?? 'primary'
+      const color =
+        (resolvedSource && sourceColors[resolvedSource]) ?? 'primary'
       const sourceLabel = resolvedSource
-        ? t(sourceLabelKeys[resolvedSource] ?? 'product.attributes.timeline.sources.generic')
+        ? t(
+            sourceLabelKeys[resolvedSource] ??
+              'product.attributes.timeline.sources.generic'
+          )
         : null
       const year = date.getFullYear()
       const ariaLabel = t('product.attributes.timeline.tooltip.ariaLabel', {
@@ -238,7 +303,7 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
 
   return Array.from(yearGroups.values())
     .sort((a, b) => a.year - b.year)
-    .map((group) => ({
+    .map(group => ({
       ...group,
       events: group.events.sort((a, b) => a.timestamp - b.timestamp),
     }))
@@ -370,7 +435,9 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-life-timeline__event-point::after {

@@ -35,7 +35,10 @@ defineProps<{
 </script>
 
 <template>
-  <section class="opensource-pillars" aria-labelledby="opensource-pillars-title">
+  <section
+    class="opensource-pillars"
+    aria-labelledby="opensource-pillars-title"
+  >
     <v-container class="py-14">
       <div class="section-header">
         <v-chip
@@ -53,14 +56,23 @@ defineProps<{
       </div>
 
       <v-row class="mt-6" align="stretch" dense>
-        <v-col v-for="card in cards" :key="card.title" cols="12" md="4" class="d-flex">
+        <v-col
+          v-for="card in cards"
+          :key="card.title"
+          cols="12"
+          md="4"
+          class="d-flex"
+        >
           <v-card class="pillar-card" rounded="xl" elevation="6">
             <div class="pillar-icon">
               <v-icon :icon="card.icon" size="40" aria-hidden="true" />
             </div>
             <div class="pillar-content">
               <h3 class="pillar-title">{{ card.title }}</h3>
-              <TextContent :bloc-id="card.descriptionBlocId" :ipsum-length="160" />
+              <TextContent
+                :bloc-id="card.descriptionBlocId"
+                :ipsum-length="160"
+              />
             </div>
             <div v-if="card.action" class="pillar-action">
               <v-btn
@@ -90,10 +102,15 @@ defineProps<{
         <div class="feedback-content">
           <div class="feedback-text">
             <h3 class="feedback-title">{{ feedbackCallout.title }}</h3>
-            <p class="feedback-description">{{ feedbackCallout.description }}</p>
+            <p class="feedback-description">
+              {{ feedbackCallout.description }}
+            </p>
             <ul class="feedback-points">
               <li v-for="(point, index) in feedbackCallout.points" :key="index">
-                <v-icon icon="mdi-checkbox-marked-circle-outline" size="small" />
+                <v-icon
+                  icon="mdi-checkbox-marked-circle-outline"
+                  size="small"
+                />
                 <span>{{ point }}</span>
               </li>
             </ul>

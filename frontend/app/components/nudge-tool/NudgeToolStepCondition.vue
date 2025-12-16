@@ -1,11 +1,16 @@
 <template>
   <div class="nudge-step-condition">
-
     <h2 class="nudge-step-condition__title">
-      <v-icon icon="mdi-numeric-3-circle" color="accent-primary-highlight" size="30" />
+      <v-icon
+        icon="mdi-numeric-3-circle"
+        color="accent-primary-highlight"
+        size="30"
+      />
       {{ $t('nudge-tool.steps.condition.title') }}
     </h2>
-    <p class="nudge-step-condition__subtitle">{{ $t('nudge-tool.steps.condition.subtitle') }}</p>
+    <p class="nudge-step-condition__subtitle">
+      {{ $t('nudge-tool.steps.condition.subtitle') }}
+    </p>
 
     <v-row dense class="nudge-step-condition__row" justify="center">
       <v-col
@@ -38,13 +43,27 @@ const props = defineProps<{
   modelValue: ProductConditionChoice[]
 }>()
 
-const emit = defineEmits<{ (event: 'update:modelValue', value: ProductConditionChoice[]): void }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: ProductConditionChoice[]): void
+}>()
 
 const { t } = useI18n()
 
-const options: Array<{ value: ProductConditionChoice; label: string; icon: string }> = [
-  { value: 'new', label: t('nudge-tool.steps.condition.options.new'), icon: 'mdi-star-outline' },
-  { value: 'occasion', label: t('nudge-tool.steps.condition.options.occasion'), icon: 'mdi-recycle-variant' },
+const options: Array<{
+  value: ProductConditionChoice
+  label: string
+  icon: string
+}> = [
+  {
+    value: 'new',
+    label: t('nudge-tool.steps.condition.options.new'),
+    icon: 'mdi-star-outline',
+  },
+  {
+    value: 'occasion',
+    label: t('nudge-tool.steps.condition.options.occasion'),
+    icon: 'mdi-recycle-variant',
+  },
 ]
 
 const isSelected = (choice: ProductConditionChoice) => {
@@ -53,7 +72,7 @@ const isSelected = (choice: ProductConditionChoice) => {
 
 const toggleOption = (choice: ProductConditionChoice) => {
   const nextSelection = isSelected(choice)
-    ? props.modelValue.filter((entry) => entry !== choice)
+    ? props.modelValue.filter(entry => entry !== choice)
     : [...props.modelValue, choice]
 
   emit('update:modelValue', nextSelection)

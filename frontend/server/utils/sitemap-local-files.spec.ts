@@ -27,7 +27,10 @@ describe('sitemap-local-files helpers', () => {
       getLocalSitemapFilePath,
     } = await import('~~/server/utils/sitemap-local-files')
 
-    const descriptors = getLocalSitemapFileDescriptorsForDomainLanguage('fr', runtimeConfig)
+    const descriptors = getLocalSitemapFileDescriptorsForDomainLanguage(
+      'fr',
+      runtimeConfig
+    )
 
     expect(descriptors).toEqual([
       {
@@ -42,14 +45,22 @@ describe('sitemap-local-files helpers', () => {
       },
     ])
 
-    expect(getPublicSitemapUrlsForDomainLanguage('fr', 'https://nudger.fr', runtimeConfig)).toEqual([
+    expect(
+      getPublicSitemapUrlsForDomainLanguage(
+        'fr',
+        'https://nudger.fr',
+        runtimeConfig
+      )
+    ).toEqual([
       'https://nudger.fr/sitemap/fr/blog-posts.xml',
       'https://nudger.fr/sitemap/fr/category-pages.xml',
     ])
 
     expect(getLocalSitemapFilePath('fr', 'blog-posts.xml', runtimeConfig)).toBe(
-      '/opt/open4goods/sitemap/fr/blog-posts.xml',
+      '/opt/open4goods/sitemap/fr/blog-posts.xml'
     )
-    expect(getLocalSitemapFilePath('fr', 'missing.xml', runtimeConfig)).toBeNull()
+    expect(
+      getLocalSitemapFilePath('fr', 'missing.xml', runtimeConfig)
+    ).toBeNull()
   })
 })

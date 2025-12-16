@@ -3,7 +3,10 @@
     <template #activator="{ props: activatorProps }">
       <div
         class="impact-score"
-        :class="[`impact-score--${size}`, { 'impact-score--with-value': showValue }]"
+        :class="[
+          `impact-score--${size}`,
+          { 'impact-score--with-value': showValue },
+        ]"
         v-bind="activatorProps"
         :aria-label="tooltipLabel"
         tabindex="0"
@@ -21,7 +24,9 @@
           readonly
           aria-hidden="true"
         />
-        <span v-if="showValue" class="impact-score__value">{{ formattedScore }}</span>
+        <span v-if="showValue" class="impact-score__value">{{
+          formattedScore
+        }}</span>
       </div>
     </template>
   </v-tooltip>
@@ -61,15 +66,18 @@ const props = defineProps({
 
 const { t, n } = useI18n()
 
-const length = computed(() => Math.max(1, Math.round(Number.isFinite(props.max) ? props.max : 5)))
+const length = computed(() =>
+  Math.max(1, Math.round(Number.isFinite(props.max) ? props.max : 5))
+)
 
 const normalizedScore = computed(() => {
   const safeScore = Number.isFinite(props.score) ? props.score : 0
   return Math.min(Math.max(safeScore, 0), length.value)
 })
 
-const formattedScore = computed(() =>
-  `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`,
+const formattedScore = computed(
+  () =>
+    `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`
 )
 
 const ratingSize = computed(() => {
@@ -85,7 +93,9 @@ const ratingSize = computed(() => {
   }
 })
 
-const ratingDensity = computed(() => (props.size === 'small' ? 'compact' : 'comfortable'))
+const ratingDensity = computed(() =>
+  props.size === 'small' ? 'compact' : 'comfortable'
+)
 
 const ratingColor = computed(() => props.color)
 
@@ -93,9 +103,12 @@ const ratingBackgroundColor = computed(() => props.inactiveColor)
 
 const tooltipLabel = computed(() =>
   t('components.impactScore.tooltip', {
-    value: n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 }),
+    value: n(normalizedScore.value, {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 0,
+    }),
     max: length.value,
-  }),
+  })
 )
 
 const size = computed(() => props.size)

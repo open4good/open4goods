@@ -22,14 +22,17 @@ vi.mock('vue-i18n', () => ({
         'search.suggestions.scanner.openLabel': 'Scan a barcode',
         'search.suggestions.scanner.closeLabel': 'Close the scanner',
         'search.suggestions.scanner.title': 'Scan a barcode',
-        'search.suggestions.scanner.helper': 'Align the barcode within the frame.',
+        'search.suggestions.scanner.helper':
+          'Align the barcode within the frame.',
         'search.suggestions.scanner.loading': 'Preparing camera…',
         'search.suggestions.scanner.error': 'Camera unavailable.',
       }
 
       const template = messages[key] ?? key
 
-      return template.replace(/\{(\w+)\}/gu, (_, match) => String(params[match] ?? ''))
+      return template.replace(/\{(\w+)\}/gu, (_, match) =>
+        String(params[match] ?? '')
+      )
     },
   }),
 }))
@@ -67,7 +70,14 @@ const VAutocompleteStub = defineComponent({
     noDataText: { type: String, default: '' },
     search: { type: String, default: '' },
   },
-  emits: ['update:modelValue', 'update:search', 'click:clear', 'keydown:enter', 'blur', 'focus'],
+  emits: [
+    'update:modelValue',
+    'update:search',
+    'click:clear',
+    'keydown:enter',
+    'blur',
+    'focus',
+  ],
   setup(props, { slots, attrs }) {
     const { class: className, ...restAttrs } = attrs
 
@@ -79,9 +89,13 @@ const VAutocompleteStub = defineComponent({
           class: ['v-autocomplete-stub', className as string | undefined],
         },
         [
-          slots['append-inner'] ? h('div', { class: 'append-inner-slot' }, slots['append-inner']()) : null,
-          slots['no-data'] ? h('div', { class: 'no-data-slot' }, slots['no-data']()) : null,
-        ],
+          slots['append-inner']
+            ? h('div', { class: 'append-inner-slot' }, slots['append-inner']())
+            : null,
+          slots['no-data']
+            ? h('div', { class: 'no-data-slot' }, slots['no-data']())
+            : null,
+        ]
       )
   },
 })
@@ -92,7 +106,11 @@ const createStub = (tag: string) =>
     props: { class: { type: String, default: '' } },
     setup(props, { slots, attrs }) {
       return () =>
-        h(tag, { class: props.class, ...attrs }, slots.default ? slots.default() : [])
+        h(
+          tag,
+          { class: props.class, ...attrs },
+          slots.default ? slots.default() : []
+        )
     },
   })
 
@@ -109,7 +127,7 @@ const PwaBarcodeScannerStub = defineComponent({
           'data-active': String(props.active),
           onClick: () => emit('decode', '9876543210987'),
         },
-        [],
+        []
       )
   },
 })
@@ -124,7 +142,7 @@ const VDialogStub = defineComponent({
         ? h(
             'div',
             { class: 'v-dialog-stub', 'data-open': String(props.modelValue) },
-            slots.default ? slots.default() : [],
+            slots.default ? slots.default() : []
           )
         : null
   },
@@ -226,8 +244,12 @@ describe('SearchSuggestField', () => {
     expect(items).toHaveLength(2)
     expect(items[0]?.type).toBe('category')
     expect(items[1]?.type).toBe('product')
-    expect((items[0] as Record<string, string>).image).toBe('https://static.example.com/assets/tv.jpg')
-    expect((items[1] as Record<string, string>).image).toBe('https://static.example.com/images/tv.webp')
+    expect((items[0] as Record<string, string>).image).toBe(
+      'https://static.example.com/assets/tv.jpg'
+    )
+    expect((items[1] as Record<string, string>).image).toBe(
+      'https://static.example.com/images/tv.webp'
+    )
   })
 
   it('emits events when a suggestion is selected or cleared', async () => {
@@ -241,8 +263,8 @@ describe('SearchSuggestField', () => {
     await flushPromises()
 
     const items = autocomplete.props('items') as Array<Record<string, unknown>>
-    const category = items.find((item) => item.type === 'category')
-    const product = items.find((item) => item.type === 'product')
+    const category = items.find(item => item.type === 'category')
+    const product = items.find(item => item.type === 'product')
 
     autocomplete.vm.$emit('update:modelValue', category)
     autocomplete.vm.$emit('update:modelValue', product)
@@ -260,10 +282,13 @@ describe('SearchSuggestField', () => {
   })
 
   it('shows an empty state when no suggestions are available after the minimum length', async () => {
-    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({
-      categoryMatches: [],
-      productMatches: [],
-    }))
+    vi.stubGlobal(
+      '$fetch',
+      vi.fn().mockResolvedValue({
+        categoryMatches: [],
+        productMatches: [],
+      })
+    )
 
     const wrapper = await mountField()
     const autocomplete = wrapper.getComponent(VAutocompleteStub)
@@ -302,8 +327,6 @@ describe('SearchSuggestField', () => {
     expect(autocomplete.props('search')).toBe('tv')
   })
 
-
-
   it('does not emit submit when a suggestion is selected via the keyboard', async () => {
     const wrapper = await mountField()
     const autocomplete = wrapper.getComponent(VAutocompleteStub)
@@ -315,9 +338,12 @@ describe('SearchSuggestField', () => {
     await flushPromises()
 
     const items = autocomplete.props('items') as Array<Record<string, unknown>>
-    const product = items.find((item) => item.type === 'product')
+    const product = items.find(item => item.type === 'product')
 
-    autocomplete.vm.$emit('keydown:enter', new KeyboardEvent('keydown', { key: 'Enter' }))
+    autocomplete.vm.$emit(
+      'keydown:enter',
+      new KeyboardEvent('keydown', { key: 'Enter' })
+    )
     autocomplete.vm.$emit('update:modelValue', product)
     vi.runAllTimers()
     await flushPromises()
@@ -330,7 +356,9 @@ describe('SearchSuggestField', () => {
     displayMock.smAndDown.value = true
     const wrapper = await mountField()
 
-    expect(wrapper.find('[data-test="search-scanner-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="search-scanner-button"]').exists()).toBe(
+      true
+    )
   })
 
   it('opens the scanner dialog when the button is clicked', async () => {

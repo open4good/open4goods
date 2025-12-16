@@ -2,10 +2,16 @@
   <header class="impact-subscore-header">
     <div class="impact-subscore-header__info">
       <h4 class="impact-subscore-header__title">{{ title }}</h4>
-      <p v-if="subtitle" class="impact-subscore-header__subtitle">{{ subtitle }}</p>
+      <p v-if="subtitle" class="impact-subscore-header__subtitle">
+        {{ subtitle }}
+      </p>
     </div>
 
-    <div v-if="on20Value" class="impact-subscore-header__score" aria-hidden="true">
+    <div
+      v-if="on20Value"
+      class="impact-subscore-header__score"
+      aria-hidden="true"
+    >
       <span class="impact-subscore-header__score-value">{{ on20Value }}</span>
       <span class="impact-subscore-header__score-scale">/20</span>
     </div>
@@ -30,7 +36,6 @@ const on20Value = computed(() => {
 
   return n(props.on20, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
 })
-
 </script>
 
 <style scoped>
