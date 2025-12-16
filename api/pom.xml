@@ -41,7 +41,7 @@
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>api</artifactId>
-            <version>0.35.1</version>
+            <version>0.36.0</version>
         </dependency>
 
         <!-- Or DJL ONNX Runtime engine (if you exported ONNX) -->
