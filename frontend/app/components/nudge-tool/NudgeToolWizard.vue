@@ -1,6 +1,11 @@
 <template>
-  <v-card class="nudge-wizard" rounded="xl" elevation="3">
-    <div class="nudge-wizard__header">
+  <v-card
+    class="nudge-wizard"
+    rounded="xl"
+    elevation="3"
+    :style="{ height: formattedHeight }"
+  >
+    <div ref="headerRef" class="nudge-wizard__header">
       <div class="nudge-wizard__header-row">
         <v-btn
           v-if="categorySummary"
@@ -29,6 +34,7 @@
           :alt-labels="!display.smAndDown.value"
           :items="stepperItems"
           :item-props="true"
+          editable
           flat
           hide-actions
           class="nudge-wizard__stepper elevation-0 border-0"
@@ -54,25 +60,27 @@
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
-    <v-window
-      v-model="activeStepKey"
-      class="nudge-wizard__window"
-      :touch="false"
-      :transition="windowTransition"
-      :reverse-transition="windowReverseTransition"
-    >
-      <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
-        <component
-          :is="step.component"
-          v-bind="step.props"
-          @select="onCategorySelect"
-          @update:model-value="(value: unknown) => step.onUpdate?.(value)"
-          @continue="goToNext"
-        />
-      </v-window-item>
-    </v-window>
+    <div ref="windowWrapperRef">
+      <v-window
+        v-model="activeStepKey"
+        class="nudge-wizard__window"
+        :touch="false"
+        :transition="windowTransition"
+        :reverse-transition="windowReverseTransition"
+      >
+        <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
+          <component
+            :is="step.component"
+            v-bind="step.props"
+            @select="onCategorySelect"
+            @update:model-value="(value: unknown) => step.onUpdate?.(value)"
+            @continue="goToNext"
+          />
+        </v-window-item>
+      </v-window>
+    </div>
 
-    <div class="nudge-wizard__footer">
+    <div ref="footerRef" class="nudge-wizard__footer">
       <v-btn
         v-if="hasPreviousStep"
         variant="text"
@@ -99,66 +107,64 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import type { Component } from 'vue'
-import { useDebounceFn } from '@vueuse/core'
+import { useDebounceFn, useElementSize, useTransition } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
+import { useCategories } from '~/composables/categories/useCategories'
 import {
-  buildCategoryHash,
-  type CategoryHashState,
-} from '~/utils/_category-filter-state'
-import { buildFilterRequestFromSubsets } from '~/utils/_subset-to-filters'
+  NudgeToolStepCategory,
+  NudgeToolStepCondition,
+  NudgeToolStepRecommendations,
+  NudgeToolStepScores,
+  NudgeToolStepSubsetGroup,
+} from '#components'
+import type {
+  CategoryHashState,
+  Filter,
+  FilterRequestDto,
+  NudgeToolSubsetGroupDto,
+  ProductConditionSelection,
+  ProductDto,
+  ProductSearchResponseDto,
+  VerticalCategoryDto,
+  VerticalConfigDto,
+  VerticalSubsetDto,
+} from '~/shared/api-client'
+import { buildCategoryHash } from '~/utils/_category-filter-state'
 import {
   buildConditionFilter,
   buildNudgeFilterRequest,
   buildScoreFilters,
-  type ProductConditionSelection,
 } from '~/utils/_nudge-tool-filters'
-import NudgeToolStepCategory from './NudgeToolStepCategory.vue'
-import NudgeToolStepCondition from './NudgeToolStepCondition.vue'
-import NudgeToolStepScores from './NudgeToolStepScores.vue'
-import NudgeToolStepSubsetGroup from './NudgeToolStepSubsetGroup.vue'
-import NudgeToolStepRecommendations from './NudgeToolStepRecommendations.vue'
-import type {
-  Filter,
-  FilterRequestDto,
-  NudgeToolSubsetGroupDto,
-  ProductDto,
-  ProductSearchResponseDto,
-  VerticalConfigDto,
-  VerticalSubsetDto,
-} from '~~/shared/api-client'
-import { useCategories } from '~/composables/categories/useCategories'
 
 const props = defineProps<{
-  initialCategoryId?: string | null
-  initialFilters?: FilterRequestDto
-  initialSubsets?: string[]
   verticals?: VerticalConfigDto[]
+  initialFilters?: FilterRequestDto
+  initialCategoryId?: string | null
+  initialSubsets?: string[]
 }>()
 
 const emit = defineEmits<{
-  (event: 'navigate', payload: { hash: string; categorySlug: string }): void
+  (e: 'navigate', payload: { hash: string; categorySlug: string }): void
 }>()
 
-const router = useRouter()
 const { t } = useI18n()
-const { fetchCategories } = useCategories()
 const display = useDisplay()
+const router = useRouter()
+const { fetchCategories } = useCategories()
 
-const categories = ref<VerticalConfigDto[]>(props.verticals ?? [])
+const categories = useState<VerticalCategoryDto[]>('nudge-categories', () => [])
 const selectedCategoryId = ref<string | null>(props.initialCategoryId ?? null)
 const condition = ref<ProductConditionSelection>([])
 const selectedScores = ref<string[]>([])
 const activeSubsetIds = ref<string[]>(props.initialSubsets ?? [])
 const baseFilters = ref<Filter[]>(props.initialFilters?.filters ?? [])
-
-const activeStepKey = ref<string>('category')
-const previousStepKey = ref<string | null>(null)
-const loading = ref(false)
-const totalMatches = ref(0)
-const animatedMatches = ref(0)
 const recommendations = ref<ProductDto[]>([])
+const totalMatches = ref(0)
+const loading = ref(false)
+const animatedMatches = ref(0)
+
+const activeStepKey = ref('category')
+const previousStepKey = ref<string | null>(null)
 
 const selectedCategory = computed(
   () =>
@@ -527,8 +533,8 @@ const isNextDisabled = computed(() => {
   return false
 })
 
-const stepperItems = computed(() =>
-  steps.value
+const stepperItems = computed(() => {
+  const allSteps = steps.value
     .filter(step => step.key !== 'category' && step.key !== 'recommendations')
     .map(step => ({
       title: display.smAndDown.value ? undefined : step.title,
@@ -536,7 +542,13 @@ const stepperItems = computed(() =>
       icon: resolveStepIcon(step.key),
       disabled: false,
     }))
-)
+
+  const currentIndex = allSteps.findIndex(item => item.value === activeStepKey.value)
+  if (currentIndex === -1) return allSteps
+
+  // Show only current and previous steps
+  return allSteps.slice(0, currentIndex + 1)
+})
 
 const stepperActiveKey = computed({
   get: () =>
@@ -597,7 +609,7 @@ const categorySummary = computed(() => {
   }
 })
 
-const windowTransitionDurationMs = 1000
+const windowTransitionDurationMs = 500
 
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
@@ -658,6 +670,36 @@ onMounted(async () => {
 
   debouncedFetch()
 })
+
+const headerRef = ref<HTMLElement>()
+const windowWrapperRef = ref<HTMLElement>()
+const footerRef = ref<HTMLElement>()
+
+const { height: headerHeight } = useElementSize(headerRef)
+const { height: windowHeight } = useElementSize(windowWrapperRef)
+const { height: footerHeight } = useElementSize(footerRef)
+
+const totalHeight = computed(
+  () => headerHeight.value + windowHeight.value + footerHeight.value + 32
+) // 32 = padding
+
+const animatedHeight = useTransition(totalHeight, {
+  duration: 500,
+  transition: [0.4, 0, 0.2, 1], // Ease-out-like curve
+})
+
+// Only apply fixed height when content is ready/stable to avoid jumps during hydration
+const isReady = ref(false)
+onMounted(() => {
+  setTimeout(() => {
+    isReady.value = true
+  }, 100)
+})
+
+const formattedHeight = computed(() => {
+  if (!isReady.value) return 'auto'
+  return `${animatedHeight.value}px`
+})
 </script>
 
 <style scoped lang="scss">
@@ -672,7 +714,7 @@ onMounted(async () => {
   max-width: none;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  transition: height 500ms ease;
 
   &__header {
     display: flex;
@@ -739,8 +781,8 @@ onMounted(async () => {
 :deep(.nudge-wizard-slide-fade-reverse-enter-active),
 :deep(.nudge-wizard-slide-fade-reverse-leave-active) {
   transition:
-    transform 220ms ease,
-    opacity 220ms ease;
+    transform 500ms ease,
+    opacity 500ms ease;
   will-change: transform, opacity;
 }
 
@@ -769,8 +811,8 @@ onMounted(async () => {
 :deep(.nudge-wizard-expand-fade-reverse-enter-active),
 :deep(.nudge-wizard-expand-fade-reverse-leave-active) {
   transition:
-    transform 240ms ease,
-    opacity 180ms ease;
+    transform 500ms ease,
+    opacity 400ms ease;
   transform-origin: top center;
   will-change: transform, opacity;
 }
