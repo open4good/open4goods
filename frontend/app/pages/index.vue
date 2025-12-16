@@ -627,8 +627,8 @@ useHead(() => ({
       >
         <div class="home-page__stack">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('problems')"
+            class="home-page__section"
           >
             <v-slide-y-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.problems">
@@ -638,8 +638,8 @@ useHead(() => ({
           </div>
 
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('solution')"
+            class="home-page__section"
           >
             <v-slide-y-reverse-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.solution">
@@ -660,8 +660,8 @@ useHead(() => ({
         content-align="center"
       >
         <div
-          class="home-page__section"
           v-intersect="createIntersectHandler('features')"
+          class="home-page__section"
         >
           <v-scale-transition :disabled="prefersReducedMotion">
             <div v-show="animatedSections.features">
@@ -682,8 +682,8 @@ useHead(() => ({
       >
         <div class="home-page__stack">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('blog')"
+            class="home-page__section"
           >
             <v-slide-x-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.blog">
@@ -709,8 +709,8 @@ useHead(() => ({
       >
         <div class="home-page__stack">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('objections')"
+            class="home-page__section"
           >
             <v-slide-x-reverse-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.objections">
@@ -732,8 +732,8 @@ useHead(() => ({
       >
         <div class="home-page__stack home-page__stack--compact">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('faq')"
+            class="home-page__section"
           >
             <v-fade-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.faq">
@@ -743,8 +743,8 @@ useHead(() => ({
           </div>
 
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('cta')"
+            class="home-page__section"
           >
             <v-slide-y-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.cta">
