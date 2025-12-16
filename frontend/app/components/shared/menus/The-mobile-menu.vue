@@ -190,6 +190,18 @@
         </template>
       </v-list-item>
 
+      <v-list-item class="px-6 py-4">
+        <template #prepend>
+          <v-icon icon="mdi-magnify-plus-outline" class="me-4" />
+        </template>
+        <v-list-item-title class="text-body-1">
+          {{ t('siteIdentity.menu.zoom.label') }}
+        </v-list-item-title>
+        <template #append>
+          <ZoomToggle density="compact" />
+        </template>
+      </v-list-item>
+
       <v-divider v-if="isLoggedIn" class="mx-6" />
 
       <v-list-item
@@ -256,6 +268,7 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 import ThemeToggle from './ThemeToggle.vue'
+import ZoomToggle from './ZoomToggle.vue'
 import { useI18n } from 'vue-i18n'
 
 import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'

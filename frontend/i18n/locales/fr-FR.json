@@ -1296,32 +1296,32 @@
           "title": "Options de téléchargement"
         },
         "faq": {
-            "items": {
-              "whatIs": {
-                "answer": "<p>Un ISBN (<strong>International Standard Book Number</strong>) est un numéro unique qui permet d'identifier un livre à l'échelle mondiale.<br/> C’est un identifiant essentiel pour les éditeurs, librairies, bibliothèques, et toutes les plateformes de vente de livres. L'ISBN facilite la gestion des stocks, la distribution, et la vente des livres.<br/> Chaque livre ou édition d'un même livre dispose de son propre ISBN, garantissant une identification unique dans les bases de données et les catalogues.<br/> Les ISBN sont utilisés aussi bien pour les livres imprimés que pour les livres numériques (e-books) et permettent aux lecteurs de retrouver facilement l’ouvrage qu’ils cherchent, notamment dans les systèmes de bibliothèques et sur les plateformes de vente en ligne.</p>",
-                "question": "Qu'est-ce qu'un ISBN ?"
-              },
-              "structure": {
-                "answer": "<p>Un ISBN est composé de 13 chiffres (ou 10 dans l’ancien système), répartis en cinq segments. Ces segments incluent : <ul> <li> <strong> un préfixe </strong>: qui identifie le système de numérotation</li><li><strong>un groupe d’enregistrement</strong> : représente le pays ou la région linguistique</li><li> <strong>un numéro d'éditeur</strong></li><li> <strong>un numéro de titre</strong> :  identifie un ouvrage spécifique</li><li><strong>un chiffre de contrôle</strong> :  valide la structure de l’ISBN</li></ul> Cette structure permet une identification rapide et précise des livres, facilitant leur gestion à l’échelle mondiale. Le passage à l'ISBN-13 en 2007 s'est aligné sur les normes mondiales des codes-barres, rendant la distribution des livres encore plus efficace et standardisée.</p>",
-                "question": "Comment un ISBN est-il structuré ?"
-              },
-              "assignment": {
-                "answer": "<p>Un ISBN est attribué par une agence nationale ISBN dans chaque pays, qui gère la distribution et l'enregistrement des numéros ISBN. <br/>L'éditeur ou l'auteur doit contacter cette agence pour obtenir un ISBN pour son livre. <br/>Lors de la demande, des informations sur l'ouvrage sont fournies, telles que le titre, l’auteur, le format et l’édition. Une fois attribué, l'ISBN est unique pour cette édition et ne peut être réutilisé pour une autre, cela garantit une gestion efficace des livres dans les systèmes de bibliothèques, de vente, et de distribution.</p>",
-                "question": "Comment un ISBN est-il attribué à un livre ?"
-              },
-              "difference": {
-                "answer": "<p>L'<strong>ISBN-10</strong> était le format d'origine utilisé jusqu'en 2007. Il se composait de <strong>10 chiffres</strong>. Cependant, pour s'aligner avec les standards mondiaux des codes-barres EAN-13, le système est passé à l'<strong>ISBN-13</strong>, un format à <strong>13 chiffres</strong>. <br/>Ce changement a permis de standardiser les processus de vente et de distribution à l’échelle mondiale, car les ISBN-13 sont compatibles avec les systèmes de codes-barres commerciaux utilisés dans divers secteurs. <br/>Bien que les ISBN-10 existent encore pour les anciens ouvrages, les nouveaux livres publiés depuis 2007 utilisent exclusivement le format ISBN-13, qui offre une plus grande capacité pour les identifications futures.</p>",
-                "question": "Quelle est la différence entre un ISBN-10 et un ISBN-13 ?"
-              },
-              "importance": {
-                "answer": "<p>Il est essentiel pour qu'un livre puisse être largement distribué, que ce soit sous format imprimé ou numérique.<br/> L'ISBN facilite aussi le référencement dans les bases de données, ce qui améliore sa visibilité et son accessibilité pour le public.<br/> Sans ISBN, un livre peut être difficile à trouver dans les catalogues en ligne ou en librairie, car les systèmes de distribution reposent en grande partie sur cet identifiant. </p>",
-                "question": "Pourquoi les ISBN sont-ils importants ?"
-              },
-              "nonBook": {
-                "answer": "<p>Il arrive qu'un ISBN soit utilisé pour identifier autre chose qu'un livre, cela peut se produire pour plusieurs raisons :</p><ul><li><strong>manque de compréhension des standards</strong> : certains vendeurs ou plateformes utilisent l'ISBN comme un identifiant générique, surtout si le produit est culturel ou lié aux loisirs créatifs.</li><li><strong>économies de coût</strong> : dans certains cas, il est plus économique pour un petit fabricant de réutiliser un code ISBN existant, bien que cela soit en dehors des normes.</li><li><strong>confusion de formats de codes</strong> : certaines plateformes de vente n’étant pas strictes sur la validation des codes standards, elles acceptent des ISBN pour des produits autres que des livres, ce qui crée des ambiguïtés.</li><li><strong>réaffectation ou erreur d'attribution</strong> : l'ISBN est parfois utilisé incorrectement pour des produits non éditoriaux, surtout si le fabricant ou le distributeur n’a pas de code-barres GTIN adapté.</li></ul>",
-                "question": "Pourquoi est-ce que je retrouve des produits (autres que des livres) dans la base ?"
-              }
+          "items": {
+            "whatIs": {
+              "answer": "<p>Un ISBN (<strong>International Standard Book Number</strong>) est un numéro unique qui permet d'identifier un livre à l'échelle mondiale.<br/> C’est un identifiant essentiel pour les éditeurs, librairies, bibliothèques, et toutes les plateformes de vente de livres. L'ISBN facilite la gestion des stocks, la distribution, et la vente des livres.<br/> Chaque livre ou édition d'un même livre dispose de son propre ISBN, garantissant une identification unique dans les bases de données et les catalogues.<br/> Les ISBN sont utilisés aussi bien pour les livres imprimés que pour les livres numériques (e-books) et permettent aux lecteurs de retrouver facilement l’ouvrage qu’ils cherchent, notamment dans les systèmes de bibliothèques et sur les plateformes de vente en ligne.</p>",
+              "question": "Qu'est-ce qu'un ISBN ?"
             },
+            "structure": {
+              "answer": "<p>Un ISBN est composé de 13 chiffres (ou 10 dans l’ancien système), répartis en cinq segments. Ces segments incluent : <ul> <li> <strong> un préfixe </strong>: qui identifie le système de numérotation</li><li><strong>un groupe d’enregistrement</strong> : représente le pays ou la région linguistique</li><li> <strong>un numéro d'éditeur</strong></li><li> <strong>un numéro de titre</strong> :  identifie un ouvrage spécifique</li><li><strong>un chiffre de contrôle</strong> :  valide la structure de l’ISBN</li></ul> Cette structure permet une identification rapide et précise des livres, facilitant leur gestion à l’échelle mondiale. Le passage à l'ISBN-13 en 2007 s'est aligné sur les normes mondiales des codes-barres, rendant la distribution des livres encore plus efficace et standardisée.</p>",
+              "question": "Comment un ISBN est-il structuré ?"
+            },
+            "assignment": {
+              "answer": "<p>Un ISBN est attribué par une agence nationale ISBN dans chaque pays, qui gère la distribution et l'enregistrement des numéros ISBN. <br/>L'éditeur ou l'auteur doit contacter cette agence pour obtenir un ISBN pour son livre. <br/>Lors de la demande, des informations sur l'ouvrage sont fournies, telles que le titre, l’auteur, le format et l’édition. Une fois attribué, l'ISBN est unique pour cette édition et ne peut être réutilisé pour une autre, cela garantit une gestion efficace des livres dans les systèmes de bibliothèques, de vente, et de distribution.</p>",
+              "question": "Comment un ISBN est-il attribué à un livre ?"
+            },
+            "difference": {
+              "answer": "<p>L'<strong>ISBN-10</strong> était le format d'origine utilisé jusqu'en 2007. Il se composait de <strong>10 chiffres</strong>. Cependant, pour s'aligner avec les standards mondiaux des codes-barres EAN-13, le système est passé à l'<strong>ISBN-13</strong>, un format à <strong>13 chiffres</strong>. <br/>Ce changement a permis de standardiser les processus de vente et de distribution à l’échelle mondiale, car les ISBN-13 sont compatibles avec les systèmes de codes-barres commerciaux utilisés dans divers secteurs. <br/>Bien que les ISBN-10 existent encore pour les anciens ouvrages, les nouveaux livres publiés depuis 2007 utilisent exclusivement le format ISBN-13, qui offre une plus grande capacité pour les identifications futures.</p>",
+              "question": "Quelle est la différence entre un ISBN-10 et un ISBN-13 ?"
+            },
+            "importance": {
+              "answer": "<p>Il est essentiel pour qu'un livre puisse être largement distribué, que ce soit sous format imprimé ou numérique.<br/> L'ISBN facilite aussi le référencement dans les bases de données, ce qui améliore sa visibilité et son accessibilité pour le public.<br/> Sans ISBN, un livre peut être difficile à trouver dans les catalogues en ligne ou en librairie, car les systèmes de distribution reposent en grande partie sur cet identifiant. </p>",
+              "question": "Pourquoi les ISBN sont-ils importants ?"
+            },
+            "nonBook": {
+              "answer": "<p>Il arrive qu'un ISBN soit utilisé pour identifier autre chose qu'un livre, cela peut se produire pour plusieurs raisons :</p><ul><li><strong>manque de compréhension des standards</strong> : certains vendeurs ou plateformes utilisent l'ISBN comme un identifiant générique, surtout si le produit est culturel ou lié aux loisirs créatifs.</li><li><strong>économies de coût</strong> : dans certains cas, il est plus économique pour un petit fabricant de réutiliser un code ISBN existant, bien que cela soit en dehors des normes.</li><li><strong>confusion de formats de codes</strong> : certaines plateformes de vente n’étant pas strictes sur la validation des codes standards, elles acceptent des ISBN pour des produits autres que des livres, ce qui crée des ambiguïtés.</li><li><strong>réaffectation ou erreur d'attribution</strong> : l'ISBN est parfois utilisé incorrectement pour des produits non éditoriaux, surtout si le fabricant ou le distributeur n’a pas de code-barres GTIN adapté.</li></ul>",
+              "question": "Pourquoi est-ce que je retrouve des produits (autres que des livres) dans la base ?"
+            }
+          },
           "subtitle": "Les notions essentielles autour de l'export ISBN.",
           "title": "Questions fréquentes"
         },
@@ -2054,18 +2054,18 @@
       },
       "newOffers": "Offres neuves",
       "noOccasionHistory": "Pas d'historique pour les offres d'occasion.",
-  "occasionOffers": "Offres d'occasion",
-  "offerList": "Liste des offres",
-  "metrics": {
-    "average": "Prix moyen",
-    "bestOffer": "Meilleure offre",
-    "highest": "Prix le plus haut",
-    "lowest": "Prix le plus bas",
-    "viewOffer": "Ouvrir l'offre chez {source}",
-    "unknownSource": "Source inconnue"
-  },
-  "noHistory": "Pas assez de données pour afficher l'historique des prix.",
-  "subtitle": "Suivez l’évolution des prix et comparez les offres.",
+      "occasionOffers": "Offres d'occasion",
+      "offerList": "Liste des offres",
+      "metrics": {
+        "average": "Prix moyen",
+        "bestOffer": "Meilleure offre",
+        "highest": "Prix le plus haut",
+        "lowest": "Prix le plus bas",
+        "viewOffer": "Ouvrir l'offre chez {source}",
+        "unknownSource": "Source inconnue"
+      },
+      "noHistory": "Pas assez de données pour afficher l'historique des prix.",
+      "subtitle": "Suivez l’évolution des prix et comparez les offres.",
       "title": "Prix et évolution",
       "trend": {
         "decrease": "Baisse de {amount}",
@@ -2236,6 +2236,11 @@
         "lightTooltip": "Passer au thème clair",
         "nudgerAriaLabel": "Activer le thème signature Nudger",
         "nudgerTooltip": "Basculer vers le thème signature Nudger"
+      },
+      "zoom": {
+        "label": "Activer le zoom",
+        "activate": "Zoomer (120%)",
+        "reset": "Réinitialiser le zoom"
       },
       "themeToggle": "Changer de thème",
       "title": "Menu"
