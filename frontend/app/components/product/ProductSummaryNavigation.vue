@@ -124,7 +124,7 @@ const onNavigate = (sectionId: string) => {
 <style scoped>
 .product-summary-navigation {
   position: sticky;
-  top: 96px;
+  top: var(--product-sticky-offset, 0px);
   z-index: 10;
   padding: 1.5rem 1rem;
   border-radius: 16px;
@@ -134,7 +134,7 @@ const onNavigate = (sectionId: string) => {
 }
 
 .product-summary-navigation--horizontal {
-  top: 0;
+  top: var(--product-sticky-offset, 0px);
   background: rgba(var(--v-theme-surface-glass), 0.9);
   border-radius: 0;
   padding: 0.75rem 1rem;

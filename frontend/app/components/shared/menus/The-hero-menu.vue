@@ -1,5 +1,5 @@
 <template>
-  <menu id="container-main-menu" class="d-none d-md-block">
+  <nav id="container-main-menu" class="d-none d-md-block" :aria-label="t('siteIdentity.menu.ariaLabel')">
     <!-- Desktop menu -->
     <div class="d-flex justify-end align-center ga-4">
       <div
@@ -486,7 +486,7 @@
         </v-card>
       </v-menu>
     </div>
-  </menu>
+  </nav>
 
   <v-dialog
     v-model="isNudgeWizardOpen"

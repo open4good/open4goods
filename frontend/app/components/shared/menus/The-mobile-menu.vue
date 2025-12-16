@@ -1,5 +1,5 @@
 <template>
-  <div class="mobile-menu">
+  <nav class="mobile-menu" :aria-label="t('siteIdentity.menu.mobileAriaLabel')">
     <v-list class="pa-0">
       <v-list-item
         class="px-6 py-4 border-bottom d-flex justify-space-between align-center"
@@ -266,7 +266,7 @@
         <v-list-item-title class="text-body-1"> Logout </v-list-item-title>
       </v-list-item>
     </v-list>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
