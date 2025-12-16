@@ -45,7 +45,9 @@ const normalizedCategoryName = computed(() => {
 })
 
 const description = computed(() =>
-  t('category.filters.ecoscore.description', { category: normalizedCategoryName.value }),
+  t('category.filters.ecoscore.description', {
+    category: normalizedCategoryName.value,
+  })
 )
 
 const ecoscoreUrl = computed(() => {

@@ -5,10 +5,16 @@ import { useI18n } from 'vue-i18n'
 import FooterTimeSaverVariantFocus from '~/components/shared/footers/time-saver/FooterTimeSaverVariantFocus.vue'
 import FooterTimeSaverVariantMinimal from '~/components/shared/footers/time-saver/FooterTimeSaverVariantMinimal.vue'
 import FooterTimeSaverVariantRibbon from '~/components/shared/footers/time-saver/FooterTimeSaverVariantRibbon.vue'
-import type { TimeSaverHelper, TimeSaverModel } from '~/components/shared/footers/time-saver/FooterTimeSaverVariantFocus.vue'
+import type {
+  TimeSaverHelper,
+  TimeSaverModel,
+} from '~/components/shared/footers/time-saver/FooterTimeSaverVariantFocus.vue'
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
 
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 
 type FooterLink = {
   label: string
@@ -21,10 +27,18 @@ type FooterLink = {
 
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
-const blogPath = computed(() => resolveLocalizedRoutePath('blog', currentLocale.value))
-const feedbackPath = computed(() => resolveLocalizedRoutePath('feedback', currentLocale.value))
-const categoriesPath = computed(() => resolveLocalizedRoutePath('categories', currentLocale.value))
-const homePath = computed(() => resolveLocalizedRoutePath('/', currentLocale.value) ?? '/')
+const blogPath = computed(() =>
+  resolveLocalizedRoutePath('blog', currentLocale.value)
+)
+const feedbackPath = computed(() =>
+  resolveLocalizedRoutePath('feedback', currentLocale.value)
+)
+const categoriesPath = computed(() =>
+  resolveLocalizedRoutePath('categories', currentLocale.value)
+)
+const homePath = computed(
+  () => resolveLocalizedRoutePath('/', currentLocale.value) ?? '/'
+)
 
 const currentYear = computed(() => new Date().getFullYear())
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
@@ -99,10 +113,15 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
   subtitle: t('siteIdentity.footer.timeSaver.subtitle'),
   badge: t('siteIdentity.footer.timeSaver.badge'),
   helpers: timeSaverHelpers.value,
-  primaryCta: { label: t('siteIdentity.footer.timeSaver.primaryCta'), to: homePath.value },
-  secondaryCta: { label: t('siteIdentity.footer.timeSaver.secondaryCta'), to: categoriesPath.value },
+  primaryCta: {
+    label: t('siteIdentity.footer.timeSaver.primaryCta'),
+    to: homePath.value,
+  },
+  secondaryCta: {
+    label: t('siteIdentity.footer.timeSaver.secondaryCta'),
+    to: categoriesPath.value,
+  },
 }))
-
 </script>
 
 <template>
@@ -118,7 +137,10 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
       <v-col cols="12">
         <FooterTimeSaverVariantRibbon
           :model="timeSaverModel"
-          :learn-more-cta="{ label: t('siteIdentity.footer.timeSaver.learnMoreCta'), to: categoriesPath }"
+          :learn-more-cta="{
+            label: t('siteIdentity.footer.timeSaver.learnMoreCta'),
+            to: categoriesPath,
+          }"
         />
       </v-col>
       <v-col cols="12">
@@ -143,7 +165,11 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
             {{ t('siteIdentity.footer.feedback.cta') }}
           </v-btn>
 
-          <v-list density="compact" bg-color="transparent" class="footer-list pa-0">
+          <v-list
+            density="compact"
+            bg-color="transparent"
+            class="footer-list pa-0"
+          >
             <v-list-item
               v-for="link in feedbackLinks"
               :key="String(link.to ?? link.href ?? link.label)"
@@ -154,7 +180,12 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
               :rel="link.rel"
             >
               <template #prepend>
-                <v-icon v-if="link.icon" :icon="link.icon" size="18" class="me-2" />
+                <v-icon
+                  v-if="link.icon"
+                  :icon="link.icon"
+                  size="18"
+                  class="me-2"
+                />
               </template>
               <template #title>
                 <span class="text-body-2">{{ link.label }}</span>
@@ -184,7 +215,11 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.comparator.title') }}
           </div>
-          <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+          <v-list
+            density="compact"
+            bg-color="transparent"
+            class="footer-list pa-0 mt-2"
+          >
             <v-list-item
               v-for="link in resourceLinks"
               :key="String(link.to ?? link.href ?? link.label)"
@@ -219,7 +254,11 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.community.title') }}
           </div>
-          <v-list density="compact" bg-color="transparent" class="footer-list pa-0 mt-2">
+          <v-list
+            density="compact"
+            bg-color="transparent"
+            class="footer-list pa-0 mt-2"
+          >
             <v-list-item
               v-for="link in communityLinks"
               :key="String(link.to ?? link.href ?? link.label)"
@@ -258,105 +297,105 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
 </template>
 
 <style lang="postcss" scoped>
-  .footer-container {
-    max-width: none;
-    width: 100%;
-    padding-inline: clamp(24px, 6vw, 96px);
-    color: rgb(var(--v-theme-hero-overlay-strong));
-  }
+.footer-container {
+  max-width: none;
+  width: 100%;
+  padding-inline: clamp(24px, 6vw, 96px);
+  color: rgb(var(--v-theme-hero-overlay-strong));
+}
 
-  .footer-upper {
-    position: relative;
-    z-index: 1;
-  }
+.footer-upper {
+  position: relative;
+  z-index: 1;
+}
 
-  .footer-time-saver {
-    position: relative;
-    z-index: 1;
-  }
+.footer-time-saver {
+  position: relative;
+  z-index: 1;
+}
 
-  .footer-panel {
-    padding: 24px;
-    border-radius: 20px;
-    background: rgba(var(--v-theme-hero-overlay-soft), 0.08);
-    border: 1px solid rgba(var(--v-theme-hero-overlay-soft), 0.16);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 18px 42px -24px rgba(var(--v-theme-shadow-primary-600), 0.35);
-    height: 100%;
-  }
+.footer-panel {
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.08);
+  border: 1px solid rgba(var(--v-theme-hero-overlay-soft), 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 18px 42px -24px rgba(var(--v-theme-shadow-primary-600), 0.35);
+  height: 100%;
+}
 
-  .footer-mission {
-    line-height: 1.6;
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.96);
-  }
+.footer-mission {
+  line-height: 1.6;
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.96);
+}
 
-  .footer-link-btn {
-    justify-content: flex-start;
-    text-transform: none;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
+.footer-link-btn {
+  justify-content: flex-start;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
 
-  .footer-link-btn :deep(.v-btn__append) {
-    opacity: 0.9;
-  }
+.footer-link-btn :deep(.v-btn__append) {
+  opacity: 0.9;
+}
 
-  .footer-section-title {
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
+.footer-section-title {
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 
-  .footer-list :deep(.v-list-item-title) {
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.82);
-  }
+.footer-list :deep(.v-list-item-title) {
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.82);
+}
 
-  .footer-list-item {
-    min-height: 32px;
-    border-radius: 12px;
-    transition: background-color 0.2s ease;
-  }
+.footer-list-item {
+  min-height: 32px;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
 
-  .footer-list-item:hover {
-    background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
-  }
+.footer-list-item:hover {
+  background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
+}
 
-  .footer-divider {
-    opacity: 0.24 !important;
-  }
+.footer-divider {
+  opacity: 0.24 !important;
+}
 
-  .footer-bottom {
-    position: relative;
-    z-index: 1;
-  }
+.footer-bottom {
+  position: relative;
+  z-index: 1;
+}
 
-  .footer-logo {
-    max-width: 160px;
-    filter: drop-shadow(0 8px 18px rgba(var(--v-theme-shadow-primary-600), 0.45));
-  }
+.footer-logo {
+  max-width: 160px;
+  filter: drop-shadow(0 8px 18px rgba(var(--v-theme-shadow-primary-600), 0.45));
+}
 
-  .footer-logo-link {
-    transition: opacity 0.2s ease;
-  }
+.footer-logo-link {
+  transition: opacity 0.2s ease;
+}
 
-  .footer-logo-link:hover {
-    opacity: 0.85;
-  }
+.footer-logo-link:hover {
+  opacity: 0.85;
+}
 
-  .footer-meta {
-    color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
-  }
+.footer-meta {
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.72);
+}
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 </style>

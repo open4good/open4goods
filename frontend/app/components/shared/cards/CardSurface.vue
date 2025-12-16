@@ -28,8 +28,14 @@ const shellClasses = computed(() => ({
   [`card-surface--accent-${props.accentCorner}`]: true,
 }))
 
-const hasHeaderContent = computed(
-  () => Boolean(props.title || props.subtitle || props.icon || !!useSlots().header || !!useSlots().actions),
+const hasHeaderContent = computed(() =>
+  Boolean(
+    props.title ||
+    props.subtitle ||
+    props.icon ||
+    !!useSlots().header ||
+    !!useSlots().actions
+  )
 )
 </script>
 
@@ -38,7 +44,13 @@ const hasHeaderContent = computed(
     <header v-if="hasHeaderContent" class="card-surface__header">
       <slot name="header">
         <div class="card-surface__header-main">
-          <v-avatar v-if="icon" class="card-surface__icon" size="36" color="surface-primary-120" rounded="lg">
+          <v-avatar
+            v-if="icon"
+            class="card-surface__icon"
+            size="36"
+            color="surface-primary-120"
+            rounded="lg"
+          >
             <v-icon :icon="icon" color="accent-primary-highlight" size="24" />
           </v-avatar>
           <div class="card-surface__titles">
@@ -79,7 +91,8 @@ const hasHeaderContent = computed(
   gap: var(--card-gap);
   background: rgba(var(--v-theme-surface-glass), 0.95);
   border: 1px solid var(--card-border-color);
-  border-radius: var(--card-radius) var(--card-radius) var(--card-radius-emphasis) var(--card-radius);
+  border-radius: var(--card-radius) var(--card-radius)
+    var(--card-radius-emphasis) var(--card-radius);
   box-shadow: 0 14px 38px rgba(var(--v-theme-shadow-primary-600), 0.14);
   padding: var(--card-padding-y) var(--card-padding-x);
   overflow: hidden;
@@ -92,8 +105,17 @@ const hasHeaderContent = computed(
     height: 120px;
     bottom: -46px;
     right: -46px;
-    background: radial-gradient(circle at 30% 30%, var(--card-highlight-main), transparent 70%),
-      radial-gradient(circle at 70% 70%, var(--card-highlight-alt), transparent 75%);
+    background:
+      radial-gradient(
+        circle at 30% 30%,
+        var(--card-highlight-main),
+        transparent 70%
+      ),
+      radial-gradient(
+        circle at 70% 70%,
+        var(--card-highlight-alt),
+        transparent 75%
+      );
     border-radius: 60px;
     border: 1px solid var(--card-border-color);
     filter: blur(0.3px);
@@ -129,19 +151,23 @@ const hasHeaderContent = computed(
   }
 
   &--accent-top-left {
-    border-radius: var(--card-radius-emphasis) var(--card-radius) var(--card-radius) var(--card-radius);
+    border-radius: var(--card-radius-emphasis) var(--card-radius)
+      var(--card-radius) var(--card-radius);
   }
 
   &--accent-top-right {
-    border-radius: var(--card-radius) var(--card-radius-emphasis) var(--card-radius) var(--card-radius);
+    border-radius: var(--card-radius) var(--card-radius-emphasis)
+      var(--card-radius) var(--card-radius);
   }
 
   &--accent-bottom-left {
-    border-radius: var(--card-radius) var(--card-radius) var(--card-radius) var(--card-radius-emphasis);
+    border-radius: var(--card-radius) var(--card-radius) var(--card-radius)
+      var(--card-radius-emphasis);
   }
 
   &--accent-bottom-right {
-    border-radius: var(--card-radius) var(--card-radius) var(--card-radius-emphasis) var(--card-radius);
+    border-radius: var(--card-radius) var(--card-radius)
+      var(--card-radius-emphasis) var(--card-radius);
   }
 
   &__header {

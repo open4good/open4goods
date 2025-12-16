@@ -45,7 +45,10 @@ describe('getMainPagePathsForDomainLanguage', () => {
 
   it('drops excluded runtime routes even when configured with trailing slashes', async () => {
     const previousStaticRoutes = process.env.NUXT_STATIC_MAIN_PAGE_ROUTES
-    process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify(['/offline/', '/team'])
+    process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify([
+      '/offline/',
+      '/team',
+    ])
 
     const { getMainPagePathsForDomainLanguage } = await loadModule()
     const paths = getMainPagePathsForDomainLanguage('en')

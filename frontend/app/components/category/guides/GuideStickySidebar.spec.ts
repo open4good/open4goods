@@ -13,12 +13,16 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, string>) => {
       const dictionary: Record<string, string> = {
-        'category.documentation.backToCategory': `Back to ${params?.category ?? ''}`.trim(),
+        'category.documentation.backToCategory':
+          `Back to ${params?.category ?? ''}`.trim(),
         'category.documentation.guidesTitle': 'Helpful guides',
         'category.documentation.postsTitle': 'Related articles',
-        'category.documentation.sidebarAria': `${params?.category ?? ''} documentation navigation`.trim(),
-        'category.documentation.guidesAria': `Other guides for ${params?.category ?? ''}`.trim(),
-        'category.documentation.postsAria': `Related blog posts about ${params?.category ?? ''}`.trim(),
+        'category.documentation.sidebarAria':
+          `${params?.category ?? ''} documentation navigation`.trim(),
+        'category.documentation.guidesAria':
+          `Other guides for ${params?.category ?? ''}`.trim(),
+        'category.documentation.postsAria':
+          `Related blog posts about ${params?.category ?? ''}`.trim(),
       }
 
       return dictionary[key] ?? key
@@ -76,18 +80,19 @@ describe('GuideStickySidebar', () => {
   it('navigates to a guide when a guide item is selected', async () => {
     const wrapper = await mountComponent()
 
-    const firstGuideButton = wrapper.get('[data-test="guide-sidebar-guides"] .sticky-section-navigation__link')
+    const firstGuideButton = wrapper.get(
+      '[data-test="guide-sidebar-guides"] .sticky-section-navigation__link'
+    )
     await firstGuideButton.trigger('click')
 
     expect(pushMock).toHaveBeenCalledWith('/electronics/energy')
   })
 
   it('truncates long titles in navigation sections', async () => {
-    const longTitle = 'This is a very long guide title that should be truncated gracefully by the sidebar component'
+    const longTitle =
+      'This is a very long guide title that should be truncated gracefully by the sidebar component'
     const wrapper = await mountComponent({
-      guides: [
-        { title: longTitle, to: '/electronics/long-guide' },
-      ],
+      guides: [{ title: longTitle, to: '/electronics/long-guide' }],
       posts: [],
     })
 

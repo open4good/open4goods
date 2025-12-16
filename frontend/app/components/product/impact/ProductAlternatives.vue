@@ -1,8 +1,12 @@
 <template>
   <article class="product-alternatives">
     <header class="product-alternatives__header">
-      <h3 class="product-alternatives__title">{{ t('product.impact.alternatives.title') }}</h3>
-      <p class="product-alternatives__subtitle">{{ t('product.impact.alternatives.subtitle') }}</p>
+      <h3 class="product-alternatives__title">
+        {{ t('product.impact.alternatives.title') }}
+      </h3>
+      <p class="product-alternatives__subtitle">
+        {{ t('product.impact.alternatives.subtitle') }}
+      </p>
     </header>
 
     <div v-if="filterDefinitions.length" class="product-alternatives__filters">
@@ -18,7 +22,9 @@
               type="button"
               class="product-alternatives__chip"
               :class="{
-                'product-alternatives__chip--active': isFilterActive(filter.key),
+                'product-alternatives__chip--active': isFilterActive(
+                  filter.key
+                ),
                 'product-alternatives__chip--disabled': filter.disabled,
               }"
               v-bind="tooltipProps"
@@ -44,7 +50,12 @@
           <v-slide-group show-arrows class="product-alternatives__slide-group">
             <v-slide-group-item
               v-for="alternative in alternatives"
-              :key="alternative.gtin ?? alternative.fullSlug ?? alternative.slug ?? JSON.stringify(alternative.identity)"
+              :key="
+                alternative.gtin ??
+                alternative.fullSlug ??
+                alternative.slug ??
+                JSON.stringify(alternative.identity)
+              "
               class="product-alternatives__slide-item"
             >
               <ProductAlternativeCard
@@ -55,15 +66,25 @@
             </v-slide-group-item>
           </v-slide-group>
         </div>
-        <div v-else-if="errorMessage" class="product-alternatives__empty product-alternatives__empty--error">
+        <div
+          v-else-if="errorMessage"
+          class="product-alternatives__empty product-alternatives__empty--error"
+        >
           <p>{{ errorMessage }}</p>
           <v-btn color="primary" variant="text" @click="retryFetch">
             {{ t('product.impact.alternatives.retry') }}
           </v-btn>
         </div>
         <div v-else class="product-alternatives__empty-card">
-          <v-icon icon="mdi-emoticon-happy-outline" size="56" class="product-alternatives__empty-icon" aria-hidden="true" />
-          <p class="product-alternatives__empty-message">{{ t('product.impact.alternatives.bestProduct') }}</p>
+          <v-icon
+            icon="mdi-emoticon-happy-outline"
+            size="56"
+            class="product-alternatives__empty-icon"
+            aria-hidden="true"
+          />
+          <p class="product-alternatives__empty-message">
+            {{ t('product.impact.alternatives.bestProduct') }}
+          </p>
         </div>
       </template>
     </div>
@@ -113,7 +134,9 @@ const hasInteracted = ref(false)
 const activeFilterKeys = ref<Set<string>>(new Set())
 let requestToken = 0
 
-const normalizedPopularAttributes = computed(() => props.popularAttributes ?? [])
+const normalizedPopularAttributes = computed(
+  () => props.popularAttributes ?? []
+)
 
 const formatCurrency = (value: number, currency?: string | null) => {
   if (!Number.isFinite(value)) {
@@ -132,7 +155,10 @@ const formatCurrency = (value: number, currency?: string | null) => {
 }
 
 const resolveScoreNumericValue = (
-  score: { relativ?: { value?: number | null } | null; value?: number | null } | null | undefined,
+  score:
+    | { relativ?: { value?: number | null } | null; value?: number | null }
+    | null
+    | undefined
 ): number | null => {
   const relative = score?.relativ?.value
   if (typeof relative === 'number' && Number.isFinite(relative)) {
@@ -148,12 +174,16 @@ const resolveScoreNumericValue = (
 }
 
 const ecoscoreValue = computed<number | null>(() => {
-  const ecoscoreScore = resolveScoreNumericValue(props.product?.scores?.ecoscore ?? null)
+  const ecoscoreScore = resolveScoreNumericValue(
+    props.product?.scores?.ecoscore ?? null
+  )
   if (ecoscoreScore != null) {
     return ecoscoreScore
   }
 
-  const mapValue = resolveScoreNumericValue(props.product?.scores?.scores?.ECOSCORE)
+  const mapValue = resolveScoreNumericValue(
+    props.product?.scores?.scores?.ECOSCORE
+  )
   if (mapValue != null) {
     return mapValue
   }
@@ -171,7 +201,9 @@ const priceValue = computed<number | null>(() => {
   return typeof price === 'number' && Number.isFinite(price) ? price : null
 })
 
-const priceCurrency = computed(() => props.product?.offers?.bestPrice?.currency ?? null)
+const priceCurrency = computed(
+  () => props.product?.offers?.bestPrice?.currency ?? null
+)
 
 const toNumeric = (value: unknown): number | null => {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -192,7 +224,7 @@ const toTerm = (value: unknown): string | null => {
   }
 
   if (Array.isArray(value)) {
-    const firstMeaningful = value.find((entry) => entry != null)
+    const firstMeaningful = value.find(entry => entry != null)
     return toTerm(firstMeaningful)
   }
 
@@ -212,18 +244,27 @@ const toTerm = (value: unknown): string | null => {
   return null
 }
 
-const resolveAttributeMapping = (key: string, config: AttributeConfigDto | undefined): string | null => {
+const resolveAttributeMapping = (
+  key: string,
+  config: AttributeConfigDto | undefined
+): string | null => {
   if (!props.product) {
     return null
   }
 
   const indexed = props.product.attributes?.indexedAttributes?.[key]
   if (indexed) {
-    if (config?.filteringType === 'NUMERIC' || typeof indexed.numericValue === 'number') {
+    if (
+      config?.filteringType === 'NUMERIC' ||
+      typeof indexed.numericValue === 'number'
+    ) {
       return `attributes.indexed.${key}.numericValue`
     }
 
-    if (config?.filteringType === 'BOOLEAN' || typeof indexed.booleanValue === 'boolean') {
+    if (
+      config?.filteringType === 'BOOLEAN' ||
+      typeof indexed.booleanValue === 'boolean'
+    ) {
       return `attributes.indexed.${key}.booleanValue`
     }
 
@@ -254,123 +295,142 @@ type AlternativeFilterDefinition = {
   resolveClause: () => Filter | null
 }
 
-const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(() => {
-  if (ecoscoreValue.value == null) {
-    return null
-  }
-
-  const value = ecoscoreValue.value
-  return {
-    key: 'ecoscore',
-    label: t('product.impact.alternatives.filters.ecoscore'),
-    tooltip: t('product.impact.alternatives.tooltips.ecoscore', {
-      value: n(value, { maximumFractionDigits: 1, minimumFractionDigits: 0 }),
-    }),
-    defaultSelected: true,
-    disabled: false,
-    resolveClause: () => ({
-      field: ECOSCORE_RELATIVE_FIELD,
-      operator: 'range',
-      min: value,
-    }),
-  }
-})
-
-const priceFilterDefinition = computed<AlternativeFilterDefinition | null>(() => {
-  if (priceValue.value == null) {
-    return null
-  }
-
-  const value = priceValue.value
-  return {
-    key: 'price',
-    label: t('product.impact.alternatives.filters.price'),
-    tooltip:
-      t('product.impact.alternatives.tooltips.price', {
-        value: formatCurrency(value, priceCurrency.value) ?? n(value, { maximumFractionDigits: 2 }),
-      }) ?? '',
-    defaultSelected: true,
-    disabled: false,
-    resolveClause: () => ({
-      field: 'price.minPrice.price',
-      operator: 'range',
-      max: value,
-    }),
-  }
-})
-
-const attributeFilterDefinitions = computed<AlternativeFilterDefinition[]>(() => {
-  if (!props.product) {
-    return []
-  }
-
-  return normalizedPopularAttributes.value.reduce<AlternativeFilterDefinition[]>((accumulator, config) => {
-    const key = config.key?.trim()
-    if (!key) {
-      return accumulator
+const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(
+  () => {
+    if (ecoscoreValue.value == null) {
+      return null
     }
 
-    const mapping = resolveAttributeMapping(key, config)
-    if (!mapping) {
-      return accumulator
+    const value = ecoscoreValue.value
+    return {
+      key: 'ecoscore',
+      label: t('product.impact.alternatives.filters.ecoscore'),
+      tooltip: t('product.impact.alternatives.tooltips.ecoscore', {
+        value: n(value, { maximumFractionDigits: 1, minimumFractionDigits: 0 }),
+      }),
+      defaultSelected: true,
+      disabled: false,
+      resolveClause: () => ({
+        field: ECOSCORE_RELATIVE_FIELD,
+        operator: 'range',
+        min: value,
+      }),
+    }
+  }
+)
+
+const priceFilterDefinition = computed<AlternativeFilterDefinition | null>(
+  () => {
+    if (priceValue.value == null) {
+      return null
     }
 
-    const rawValue = resolveAttributeRawValueByKey(props.product as ProductDto, key)
-    if (rawValue == null) {
-      return accumulator
+    const value = priceValue.value
+    return {
+      key: 'price',
+      label: t('product.impact.alternatives.filters.price'),
+      tooltip:
+        t('product.impact.alternatives.tooltips.price', {
+          value:
+            formatCurrency(value, priceCurrency.value) ??
+            n(value, { maximumFractionDigits: 2 }),
+        }) ?? '',
+      defaultSelected: true,
+      disabled: false,
+      resolveClause: () => ({
+        field: 'price.minPrice.price',
+        operator: 'range',
+        max: value,
+      }),
+    }
+  }
+)
+
+const attributeFilterDefinitions = computed<AlternativeFilterDefinition[]>(
+  () => {
+    if (!props.product) {
+      return []
     }
 
-    const betterRule = config.betterIs ?? null
-    const readableLabel = config.name ?? key
-
-    if (betterRule) {
-      const numericValue = toNumeric(rawValue)
-      if (numericValue == null) {
+    return normalizedPopularAttributes.value.reduce<
+      AlternativeFilterDefinition[]
+    >((accumulator, config) => {
+      const key = config.key?.trim()
+      if (!key) {
         return accumulator
       }
 
-      const prefersGreater = betterRule === 'GREATER'
-      const symbol = prefersGreater ? '↑' : '↓'
+      const mapping = resolveAttributeMapping(key, config)
+      if (!mapping) {
+        return accumulator
+      }
+
+      const rawValue = resolveAttributeRawValueByKey(
+        props.product as ProductDto,
+        key
+      )
+      if (rawValue == null) {
+        return accumulator
+      }
+
+      const betterRule = config.betterIs ?? null
+      const readableLabel = config.name ?? key
+
+      if (betterRule) {
+        const numericValue = toNumeric(rawValue)
+        if (numericValue == null) {
+          return accumulator
+        }
+
+        const prefersGreater = betterRule === 'GREATER'
+        const symbol = prefersGreater ? '↑' : '↓'
+
+        accumulator.push({
+          key: `attribute:${key}`,
+          label: `${readableLabel} ${symbol}`,
+          tooltip: prefersGreater
+            ? t('product.impact.alternatives.tooltips.attributeBetter', {
+                label: readableLabel,
+              })
+            : t('product.impact.alternatives.tooltips.attributeLower', {
+                label: readableLabel,
+              }),
+          defaultSelected: true,
+          disabled: false,
+          resolveClause: () => ({
+            field: mapping,
+            operator: 'range',
+            ...(prefersGreater ? { min: numericValue } : { max: numericValue }),
+          }),
+        })
+
+        return accumulator
+      }
+
+      const term = toTerm(rawValue)
+      if (!term) {
+        return accumulator
+      }
 
       accumulator.push({
         key: `attribute:${key}`,
-        label: `${readableLabel} ${symbol}`,
-        tooltip: prefersGreater
-          ? t('product.impact.alternatives.tooltips.attributeBetter', { label: readableLabel })
-          : t('product.impact.alternatives.tooltips.attributeLower', { label: readableLabel }),
-        defaultSelected: true,
+        label: `${readableLabel} =`,
+        tooltip: t('product.impact.alternatives.tooltips.attributeEqual', {
+          label: readableLabel,
+        }),
+        defaultSelected: false,
         disabled: false,
         resolveClause: () => ({
           field: mapping,
-          operator: 'range',
-          ...(prefersGreater ? { min: numericValue } : { max: numericValue }),
+          operator: 'term',
+          terms: [term],
         }),
       })
 
       return accumulator
-    }
-
-    const term = toTerm(rawValue)
-    if (!term) {
-      return accumulator
-    }
-
-    accumulator.push({
-      key: `attribute:${key}`,
-      label: `${readableLabel} =`,
-      tooltip: t('product.impact.alternatives.tooltips.attributeEqual', { label: readableLabel }),
-      defaultSelected: false,
-      disabled: false,
-      resolveClause: () => ({
-        field: mapping,
-        operator: 'term',
-        terms: [term],
-      }),
-    })
-
-    return accumulator
-  }, [])
-})
+    }, [])
+  }
+)
 
 const filterDefinitions = computed<AlternativeFilterDefinition[]>(() => {
   const definitions: AlternativeFilterDefinition[] = []
@@ -388,8 +448,11 @@ const filterDefinitions = computed<AlternativeFilterDefinition[]>(() => {
   return definitions
 })
 
-const filterDefinitionMap = computed(() =>
-  new Map(filterDefinitions.value.map((definition) => [definition.key, definition])),
+const filterDefinitionMap = computed(
+  () =>
+    new Map(
+      filterDefinitions.value.map(definition => [definition.key, definition])
+    )
 )
 
 const isFilterActive = (key: string) => activeFilterKeys.value.has(key)
@@ -412,19 +475,24 @@ const toggleFilter = (key: string) => {
 
 const activeClauses = computed<Filter[]>(() => {
   return Array.from(activeFilterKeys.value)
-    .map((key) => filterDefinitionMap.value.get(key))
-    .filter((definition): definition is AlternativeFilterDefinition => Boolean(definition) && !definition.disabled)
-    .map((definition) => definition.resolveClause())
+    .map(key => filterDefinitionMap.value.get(key))
+    .filter(
+      (definition): definition is AlternativeFilterDefinition =>
+        Boolean(definition) && !definition.disabled
+    )
+    .map(definition => definition.resolveClause())
     .filter((clause): clause is Filter => clause != null)
 })
 
-const canSearch = computed(() => Boolean(props.product?.gtin) && props.verticalId.trim().length > 0)
+const canSearch = computed(
+  () => Boolean(props.product?.gtin) && props.verticalId.trim().length > 0
+)
 
 const syncActiveFilters = (preserveSelection: boolean) => {
   const previous = new Set(activeFilterKeys.value)
   const next = new Set<string>()
 
-  filterDefinitions.value.forEach((definition) => {
+  filterDefinitions.value.forEach(definition => {
     if (definition.disabled) {
       return
     }
@@ -452,7 +520,7 @@ watch(
     errorMessage.value = null
     syncActiveFilters(false)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
@@ -460,7 +528,7 @@ watch(
   () => {
     syncActiveFilters(hasInteracted.value)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const fetchAlternatives = async () => {
@@ -495,17 +563,24 @@ const fetchAlternatives = async () => {
   errorMessage.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
-      method: 'POST',
-      body,
-    })
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        body,
+      }
+    )
 
     if (currentToken !== requestToken) {
       return
     }
 
-    const pageData = Array.isArray(response.products?.data) ? response.products.data : []
-    const products = pageData.filter((candidate) => candidate.gtin !== props.product?.gtin)
+    const pageData = Array.isArray(response.products?.data)
+      ? response.products.data
+      : []
+    const products = pageData.filter(
+      candidate => candidate.gtin !== props.product?.gtin
+    )
     alternatives.value = products.slice(0, props.maxResults)
   } catch (error) {
     if (currentToken !== requestToken) {
@@ -529,7 +604,7 @@ watch(
       fetchAlternatives()
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const retryFetch = () => {
@@ -545,7 +620,11 @@ const retryFetch = () => {
   padding: 1.5rem;
   border-radius: 24px;
   min-height: 100%;
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-glass), 0.95), rgba(var(--v-theme-surface-primary-080), 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-glass), 0.95),
+    rgba(var(--v-theme-surface-primary-080), 0.9)
+  );
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
 }
 
@@ -591,7 +670,11 @@ const retryFetch = () => {
   color: rgb(var(--v-theme-text-neutral-strong));
   font-size: 0.875rem;
   font-weight: 600;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-alternatives__chip:hover:not(:disabled),

@@ -37,12 +37,16 @@ withDefaults(
     ctas: () => [],
     ctaGroupLabel: undefined,
     infoCard: undefined,
-  },
+  }
 )
 </script>
 
 <template>
-  <HeroSurface class="opensource-hero" aria-labelledby="opensource-hero-title" variant="prism">
+  <HeroSurface
+    class="opensource-hero"
+    aria-labelledby="opensource-hero-title"
+    variant="prism"
+  >
     <v-container class="py-16 position-relative">
       <v-row class="align-center" :no-gutters="false" justify="space-between">
         <v-col cols="12" md="7" class="d-flex flex-column gap-4">

@@ -4,13 +4,16 @@ import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
 export const useCommercialEventsService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: CommercialEventsApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useCommercialEventsService() is only available on the server runtime.')
+      throw new Error(
+        'useCommercialEventsService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {

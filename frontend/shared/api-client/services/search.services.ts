@@ -4,13 +4,16 @@ import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
 export const useSearchService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: SearchApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useSearchService() is only available on the server runtime.')
+      throw new Error(
+        'useSearchService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -20,7 +23,9 @@ export const useSearchService = (domainLanguage: DomainLanguage) => {
     return api
   }
 
-  const executeGlobalSearch = async (query: string): Promise<GlobalSearchResponseDto> => {
+  const executeGlobalSearch = async (
+    query: string
+  ): Promise<GlobalSearchResponseDto> => {
     const normalizedQuery = query?.trim()
 
     if (!normalizedQuery) {
@@ -33,13 +38,17 @@ export const useSearchService = (domainLanguage: DomainLanguage) => {
         domainLanguage: domainLanguage,
       })
     } catch (error) {
-      console.error('Error executing global search', { query: normalizedQuery, domainLanguage }, error)
+      console.error(
+        'Error executing global search',
+        { query: normalizedQuery, domainLanguage },
+        error
+      )
       throw error
     }
   }
 
   const fetchSearchSuggestions = async (
-    query: string,
+    query: string
   ): Promise<SearchSuggestResponseDto> => {
     const normalizedQuery = query?.trim()
 
@@ -53,10 +62,14 @@ export const useSearchService = (domainLanguage: DomainLanguage) => {
         domainLanguage,
       })
     } catch (error) {
-      console.error('Error fetching search suggestions', {
-        query: normalizedQuery,
-        domainLanguage,
-      }, error)
+      console.error(
+        'Error fetching search suggestions',
+        {
+          query: normalizedQuery,
+          domainLanguage,
+        },
+        error
+      )
 
       throw error
     }

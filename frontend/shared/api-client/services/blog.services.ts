@@ -7,13 +7,16 @@ import { createBackendApiConfig } from './createBackendApiConfig'
  * Blog service for handling blog-related API calls
  */
 export const useBlogService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: BlogApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useBlogService() is only available on the server runtime.')
+      throw new Error(
+        'useBlogService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {

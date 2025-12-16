@@ -26,7 +26,9 @@ const handleSubtitleClick = (event: MouseEvent) => {
     return
   }
 
-  const anchor = (event.target as HTMLElement | null)?.closest('[data-scroll-target]')
+  const anchor = (event.target as HTMLElement | null)?.closest(
+    '[data-scroll-target]'
+  )
   const targetSelector = anchor?.getAttribute('data-scroll-target')
 
   if (anchor && targetSelector) {
@@ -40,10 +42,15 @@ const handleSubtitleClick = (event: MouseEvent) => {
 </script>
 
 <template>
-  <section class="opendata-datasets" aria-labelledby="opendata-datasets-heading">
+  <section
+    class="opendata-datasets"
+    aria-labelledby="opendata-datasets-heading"
+  >
     <v-container max-width="lg">
       <div class="opendata-datasets__header">
-        <h2 id="opendata-datasets-heading" class="opendata-datasets__title">{{ title }}</h2>
+        <h2 id="opendata-datasets-heading" class="opendata-datasets__title">
+          {{ title }}
+        </h2>
         <!-- eslint-disable vue/no-v-html -->
         <p
           v-if="subtitle"
@@ -68,10 +75,16 @@ const handleSubtitleClick = (event: MouseEvent) => {
             </div>
             <div class="opendata-dataset-card__content">
               <h3 class="opendata-dataset-card__title">{{ card.title }}</h3>
-              <p class="opendata-dataset-card__description">{{ card.description }}</p>
+              <p class="opendata-dataset-card__description">
+                {{ card.description }}
+              </p>
               <ul class="opendata-dataset-card__features">
                 <li v-for="feature in card.features" :key="feature.text">
-                  <v-icon v-if="feature.icon" :icon="feature.icon" size="small" />
+                  <v-icon
+                    v-if="feature.icon"
+                    :icon="feature.icon"
+                    size="small"
+                  />
                   <span>{{ feature.text }}</span>
                 </li>
               </ul>
@@ -175,4 +188,3 @@ const handleSubtitleClick = (event: MouseEvent) => {
     display: flex
     justify-content: flex-start
 </style>
-

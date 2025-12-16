@@ -3,7 +3,10 @@ import { computed, unref, toRef } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
 import { useAuth } from '~/composables/useAuth'
 import { useRuntimeConfig } from '#app'
-import { DEFAULT_LOREM_LENGTH, _generateLoremIpsum } from '~/utils/content/_loremIpsum'
+import {
+  DEFAULT_LOREM_LENGTH,
+  _generateLoremIpsum,
+} from '~/utils/content/_loremIpsum'
 import '~/assets/css/text-content.css'
 
 // Props
@@ -19,7 +22,7 @@ const props = withDefaults(
     defaultLength: DEFAULT_LOREM_LENGTH,
     ipsumLength: undefined,
     fallbackText: undefined,
-  },
+  }
 )
 
 // Composables
@@ -36,7 +39,9 @@ const canEdit = computed(() => {
   return isLoggedIn.value && !!link && roles.some(role => hasRole(role))
 })
 
-const fallbackLoremLength = computed(() => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH)
+const fallbackLoremLength = computed(
+  () => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH
+)
 
 const escapeHtml = (value: string) =>
   value
@@ -68,13 +73,14 @@ const displayHtml = computed(() => {
 
   return _generateLoremIpsum(fallbackLoremLength.value)
 })
-
 </script>
 
 <template>
   <div class="text-content" :class="{ editable: canEdit }">
     <v-progress-circular v-if="pending" indeterminate />
-    <v-alert v-else-if="error" type="error" variant="tonal">{{ error }}</v-alert>
+    <v-alert v-else-if="error" type="error" variant="tonal">{{
+      error
+    }}</v-alert>
 
     <!-- Encapsulated XWiki content -->
     <!-- eslint-disable-next-line vue/no-v-html -->

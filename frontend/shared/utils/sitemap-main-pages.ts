@@ -1,4 +1,7 @@
-import { LOCALIZED_ROUTE_PATHS, resolveLocalizedRoutePath } from './localized-routes'
+import {
+  LOCALIZED_ROUTE_PATHS,
+  resolveLocalizedRoutePath,
+} from './localized-routes'
 import {
   type DomainLanguage,
   type NuxtLocale,
@@ -7,7 +10,9 @@ import {
 
 const parseRouteNames = (value: unknown): string[] => {
   if (Array.isArray(value)) {
-    return value.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+    return value.filter(
+      (entry): entry is string => typeof entry === 'string' && entry.length > 0
+    )
   }
 
   if (typeof value === 'string') {
@@ -15,10 +20,12 @@ const parseRouteNames = (value: unknown): string[] => {
       const parsed = JSON.parse(value)
 
       return Array.isArray(parsed)
-        ? parsed.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+        ? parsed.filter(
+            (entry): entry is string =>
+              typeof entry === 'string' && entry.length > 0
+          )
         : []
-    }
-    catch {
+    } catch {
       return []
     }
   }
@@ -29,18 +36,21 @@ const parseRouteNames = (value: unknown): string[] => {
 const getRuntimeConfiguredRouteNames = (): string[] => {
   try {
     const { staticMainPageRoutes, public: publicConfig } = useRuntimeConfig()
-    const configured = staticMainPageRoutes ?? publicConfig?.staticMainPageRoutes
+    const configured =
+      staticMainPageRoutes ?? publicConfig?.staticMainPageRoutes
     const parsed = parseRouteNames(configured)
 
     if (parsed.length > 0) {
       return parsed
     }
-  }
-  catch {
+  } catch {
     // Ignore runtime config lookup failures when executed outside a Nuxt context
   }
 
-  if (typeof process !== 'undefined' && process.env?.NUXT_STATIC_MAIN_PAGE_ROUTES) {
+  if (
+    typeof process !== 'undefined' &&
+    process.env?.NUXT_STATIC_MAIN_PAGE_ROUTES
+  ) {
     return parseRouteNames(process.env.NUXT_STATIC_MAIN_PAGE_ROUTES)
   }
 
@@ -64,7 +74,9 @@ const resolveStaticRouteNames = (): string[] => {
     routeNames.add(routeName)
   }
 
-  staticRouteNamesCache = Array.from(routeNames).sort((a, b) => a.localeCompare(b))
+  staticRouteNamesCache = Array.from(routeNames).sort((a, b) =>
+    a.localeCompare(b)
+  )
 
   return staticRouteNamesCache
 }
@@ -74,7 +86,7 @@ export type StaticMainPageRouteName = string
 const buildRoutePathsForLocale = (locale: NuxtLocale): string[] => {
   const seenPaths = new Set<string>()
 
-  resolveStaticRouteNames().forEach((routeName) => {
+  resolveStaticRouteNames().forEach(routeName => {
     const path = resolveLocalizedRoutePath(routeName, locale)
 
     if (!path) {
@@ -88,7 +100,7 @@ const buildRoutePathsForLocale = (locale: NuxtLocale): string[] => {
 }
 
 export const getMainPagePathsForDomainLanguage = (
-  domainLanguage: DomainLanguage,
+  domainLanguage: DomainLanguage
 ): string[] => {
   const locale = getNuxtLocaleForDomainLanguage(domainLanguage)
 

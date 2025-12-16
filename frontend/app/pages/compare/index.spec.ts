@@ -17,7 +17,10 @@ type CompareProductEntryLike = {
 }
 
 const loadProductsMock = vi.fn<[string[]], Promise<CompareProductEntryLike[]>>()
-const loadVerticalMock = vi.fn<[string | null], Promise<Record<string, unknown> | null>>()
+const loadVerticalMock = vi.fn<
+  [string | null],
+  Promise<Record<string, unknown> | null>
+>()
 const hasMixedVerticalsMock = vi.fn<[CompareProductEntryLike[]], boolean>()
 
 vi.mock('~/services/compare/CompareService', () => ({
@@ -58,7 +61,8 @@ vi.mock('~/components/shared/ui/ImpactScore.vue', () => ({
     name: 'ImpactScoreStub',
     props: { score: { type: Number, default: 0 } },
     setup(props) {
-      return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+      return () =>
+        h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
     },
   }),
 }))
@@ -106,11 +110,14 @@ const messages: Record<string, string> = {
 
 const translate = (key: string, params: Record<string, unknown> = {}) => {
   const template = messages[key] ?? key
-  return template.replace(/\{(\w+)\}/g, (_, match) => String(params[match] ?? ''))
+  return template.replace(/\{(\w+)\}/g, (_, match) =>
+    String(params[match] ?? '')
+  )
 }
 
 mockNuxtImport('useI18n', () => () => ({
-  t: (key: string, params: Record<string, unknown> = {}) => translate(key, params),
+  t: (key: string, params: Record<string, unknown> = {}) =>
+    translate(key, params),
   n: (value: number | bigint, options?: Intl.NumberFormatOptions) => {
     const numericValue = typeof value === 'bigint' ? Number(value) : value
     return new Intl.NumberFormat(localeRef.value, options).format(numericValue)
@@ -131,11 +138,21 @@ mockNuxtImport('useRouter', () => () => ({
       return { href: to }
     }
 
-    if (to && typeof to === 'object' && 'path' in to && typeof to.path === 'string') {
+    if (
+      to &&
+      typeof to === 'object' &&
+      'path' in to &&
+      typeof to.path === 'string'
+    ) {
       return { href: to.path }
     }
 
-    if (to && typeof to === 'object' && 'href' in to && typeof to.href === 'string') {
+    if (
+      to &&
+      typeof to === 'object' &&
+      'href' in to &&
+      typeof to.href === 'string'
+    ) {
       return { href: to.href }
     }
 
@@ -170,9 +187,17 @@ const mountPage = async () => {
         VContainer: simpleStub('div'),
         VIcon: defineComponent({
           name: 'VIconStub',
-          props: { icon: { type: String, default: '' }, size: { type: [Number, String], default: 24 } },
+          props: {
+            icon: { type: String, default: '' },
+            size: { type: [Number, String], default: 24 },
+          },
           setup(props) {
-            return () => h('span', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
+            return () =>
+              h(
+                'span',
+                { class: 'v-icon-stub', 'data-icon': props.icon },
+                props.icon
+              )
           },
         }),
         VAlert: simpleStub('div'),
@@ -181,16 +206,21 @@ const mountPage = async () => {
           name: 'VBtnStub',
           props: { type: { type: String, default: 'button' } },
           setup(props, { slots, attrs }) {
-            return () => h('button', { ...attrs, type: props.type }, slots.default?.())
+            return () =>
+              h('button', { ...attrs, type: props.type }, slots.default?.())
           },
         }),
         VTooltip: defineComponent({
           name: 'VTooltipStub',
-          props: { text: { type: String, default: '' }, location: { type: String, default: '' } },
+          props: {
+            text: { type: String, default: '' },
+            location: { type: String, default: '' },
+          },
           setup(_props, { slots }) {
             const activator = slots.activator?.({ props: {} })
             const content = slots.default?.()
-            return () => h('div', { class: 'v-tooltip-stub' }, [activator, content])
+            return () =>
+              h('div', { class: 'v-tooltip-stub' }, [activator, content])
           },
         }),
         ClientOnly: simpleStub('div'),
@@ -229,12 +259,16 @@ const mountPage = async () => {
                 })
             }
 
-            return () => h('a', { ...attrs, href: resolveHref() }, slots.default?.())
+            return () =>
+              h('a', { ...attrs, href: resolveHref() }, slots.default?.())
           },
         }),
         NuxtImg: defineComponent({
           name: 'NuxtImgStub',
-          props: { alt: { type: String, default: '' }, src: { type: String, default: '' } },
+          props: {
+            alt: { type: String, default: '' },
+            src: { type: String, default: '' },
+          },
           setup(props) {
             return () => h('img', { alt: props.alt, src: props.src })
           },
@@ -244,7 +278,9 @@ const mountPage = async () => {
   })
 }
 
-const createEntry = (overrides: Partial<CompareProductEntryLike> = {}): CompareProductEntryLike => ({
+const createEntry = (
+  overrides: Partial<CompareProductEntryLike> = {}
+): CompareProductEntryLike => ({
   gtin: '1234567890123',
   verticalId: 'vertical-1',
   product: {
@@ -279,7 +315,9 @@ describe('Compare page hero', () => {
   })
 
   it('renders the hero with the vertical title in lowercase when available', async () => {
-    loadProductsMock.mockResolvedValue([createEntry({ verticalId: 'vertical-1' })])
+    loadProductsMock.mockResolvedValue([
+      createEntry({ verticalId: 'vertical-1' }),
+    ])
     loadVerticalMock.mockResolvedValue({
       verticalHomeTitle: 'Lave-vaisselle',
       verticalHomeUrl: 'electromenager/lave-vaisselle',
@@ -289,9 +327,11 @@ describe('Compare page hero', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(wrapper.get('.compare-page__title').text()).toBe('Comparateur de lave-vaisselle')
+    expect(wrapper.get('.compare-page__title').text()).toBe(
+      'Comparateur de lave-vaisselle'
+    )
     expect(wrapper.get('.compare-page__subtitle').text()).toBe(
-      'Analysez les fiches techniques, les prix et les indicateurs écologiques des lave-vaisselle sélectionnés.',
+      'Analysez les fiches techniques, les prix et les indicateurs écologiques des lave-vaisselle sélectionnés.'
     )
 
     const backLink = wrapper.get('.compare-page__hero-back')
@@ -306,9 +346,11 @@ describe('Compare page hero', () => {
     const wrapper = await mountPage()
     await flushPromises()
 
-    expect(wrapper.get('.compare-page__title').text()).toBe('Comparateur de produits')
+    expect(wrapper.get('.compare-page__title').text()).toBe(
+      'Comparateur de produits'
+    )
     expect(wrapper.get('.compare-page__subtitle').text()).toBe(
-      'Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.',
+      'Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.'
     )
     expect(wrapper.find('.compare-page__hero-back').exists()).toBe(false)
   })
@@ -378,14 +420,18 @@ describe('Ecological scores', () => {
 
     const ecologicalSection = wrapper
       .findAll('.compare-section')
-      .find((section) =>
-        section.findAll('.compare-section__title').some((title) => title.text() === 'Impact écologique'),
+      .find(section =>
+        section
+          .findAll('.compare-section__title')
+          .some(title => title.text() === 'Impact écologique')
       )
 
     expect(ecologicalSection).toBeDefined()
 
     const rows = ecologicalSection!.findAll('.compare-grid__row')
-    const ecoscoreRow = rows.find((row) => row.find('.compare-grid__feature-label')?.text() === 'Écoscore')
+    const ecoscoreRow = rows.find(
+      row => row.find('.compare-grid__feature-label')?.text() === 'Écoscore'
+    )
 
     expect(ecoscoreRow).toBeTruthy()
 
@@ -393,11 +439,16 @@ describe('Ecological scores', () => {
     expect(ecoscoreCells).toHaveLength(2)
     expect(ecoscoreCells[0].text()).toContain('4,5')
     expect(ecoscoreCells[1].text()).toContain('2,1')
-    expect(ecoscoreCells[0].classes()).toContain('compare-grid__value--highlight')
-    expect(ecoscoreCells[1].classes()).not.toContain('compare-grid__value--highlight')
+    expect(ecoscoreCells[0].classes()).toContain(
+      'compare-grid__value--highlight'
+    )
+    expect(ecoscoreCells[1].classes()).not.toContain(
+      'compare-grid__value--highlight'
+    )
 
     const brandRow = rows.find(
-      (row) => row.find('.compare-grid__feature-label')?.text() === 'Durabilité marque',
+      row =>
+        row.find('.compare-grid__feature-label')?.text() === 'Durabilité marque'
     )
 
     expect(brandRow).toBeTruthy()

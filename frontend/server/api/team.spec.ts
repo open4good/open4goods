@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-type TeamRouteHandler = typeof import('./team')['default']
+type TeamRouteHandler = (typeof import('./team'))['default']
 
 const runtimeConfig = vi.hoisted(() => ({
   apiUrl: '',
@@ -9,7 +9,7 @@ const runtimeConfig = vi.hoisted(() => ({
 
 const setResponseHeaderMock = vi.hoisted(() => vi.fn())
 
-vi.mock('h3', async (importOriginal) => ({
+vi.mock('h3', async importOriginal => ({
   ...(await importOriginal<typeof import('h3')>()),
   setResponseHeader: setResponseHeaderMock,
 }))

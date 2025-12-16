@@ -21,7 +21,11 @@
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
           itemprop="item"
         >
-          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+          <span
+            class="category-navigation-breadcrumbs__label"
+            itemprop="name"
+            >{{ item.title }}</span
+          >
         </NuxtLink>
         <a
           v-else-if="item.type === 'external'"
@@ -30,16 +34,28 @@
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
           itemprop="item"
         >
-          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+          <span
+            class="category-navigation-breadcrumbs__label"
+            itemprop="name"
+            >{{ item.title }}</span
+          >
         </a>
         <span
           v-else
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
           aria-current="page"
         >
-          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+          <span
+            class="category-navigation-breadcrumbs__label"
+            itemprop="name"
+            >{{ item.title }}</span
+          >
         </span>
-        <span v-if="index < breadcrumbItems.length - 1" class="category-navigation-breadcrumbs__divider" aria-hidden="true">
+        <span
+          v-if="index < breadcrumbItems.length - 1"
+          class="category-navigation-breadcrumbs__divider"
+          aria-hidden="true"
+        >
           /
         </span>
         <meta itemprop="position" :content="String(index + 1)" />
@@ -77,7 +93,9 @@ const props = defineProps<{
   ariaLabel: string
 }>()
 
-const visibleItems = computed(() => props.items.filter((item) => item.title?.trim().length))
+const visibleItems = computed(() =>
+  props.items.filter(item => item.title?.trim().length)
+)
 
 const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   const items = visibleItems.value
@@ -101,7 +119,10 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
       }
     }
 
-    const normalized = rawLink.startsWith('/') || rawLink.startsWith('#') ? rawLink : `/${rawLink}`
+    const normalized =
+      rawLink.startsWith('/') || rawLink.startsWith('#')
+        ? rawLink
+        : `/${rawLink}`
 
     return {
       title: item.title,
@@ -167,7 +188,8 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   font-weight: 500;
 }
 
-.category-navigation-breadcrumbs__item:last-child .category-navigation-breadcrumbs__label {
+.category-navigation-breadcrumbs__item:last-child
+  .category-navigation-breadcrumbs__label {
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
 }

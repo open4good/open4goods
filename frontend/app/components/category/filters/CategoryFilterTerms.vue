@@ -15,7 +15,11 @@
       />
     </div>
 
-    <div ref="optionsContainer" class="category-filter-terms__options" role="listbox">
+    <div
+      ref="optionsContainer"
+      class="category-filter-terms__options"
+      role="listbox"
+    >
       <v-checkbox
         v-for="option in filteredOptions"
         :key="option.key ?? '__missing__'"
@@ -47,7 +51,11 @@
 
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core'
-import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
+import type {
+  AggregationResponseDto,
+  FieldMetadataDto,
+  Filter,
+} from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 
 const props = defineProps<{
@@ -70,10 +78,10 @@ const hasScrollableOptions = ref(false)
 
 watch(
   () => props.modelValue,
-  (next) => {
+  next => {
     localTerms.value = next?.operator === 'term' ? [...(next.terms ?? [])] : []
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const MISSING_TERM_KEY = '__missing__'
@@ -99,7 +107,7 @@ const baselineBuckets = computed(() => props.baselineAggregation?.buckets ?? [])
 const currentCounts = computed(() => {
   const map = new Map<string, number>()
 
-  currentBuckets.value.forEach((bucket) => {
+  currentBuckets.value.forEach(bucket => {
     const key = normalizeTermKey(toTermValue(bucket.key))
     map.set(key, bucket.count ?? 0)
   })
@@ -115,7 +123,9 @@ const mergedOptions = computed<TermOption[]>(() => {
     const normalized = normalizeTermKey(key)
 
     if (seen.has(normalized)) {
-      const index = options.findIndex((option) => normalizeTermKey(option.key) === normalized)
+      const index = options.findIndex(
+        option => normalizeTermKey(option.key) === normalized
+      )
       if (index !== -1) {
         options[index] = { key, count }
       }
@@ -126,14 +136,14 @@ const mergedOptions = computed<TermOption[]>(() => {
     options.push({ key, count })
   }
 
-  baselineBuckets.value.forEach((bucket) => {
+  baselineBuckets.value.forEach(bucket => {
     const key = toTermValue(bucket.key)
     const normalized = normalizeTermKey(key)
     const currentCount = currentCounts.value.get(normalized) ?? 0
     upsertOption(key, currentCount)
   })
 
-  currentBuckets.value.forEach((bucket) => {
+  currentBuckets.value.forEach(bucket => {
     const key = toTermValue(bucket.key)
     const normalized = normalizeTermKey(key)
     const count = currentCounts.value.get(normalized) ?? bucket.count ?? 0
@@ -141,7 +151,7 @@ const mergedOptions = computed<TermOption[]>(() => {
   })
 
   const selectedTerms = new Set(localTerms.value)
-  selectedTerms.forEach((term) => {
+  selectedTerms.forEach(term => {
     const normalized = normalizeTermKey(term)
     if (!seen.has(normalized)) {
       seen.add(normalized)
@@ -159,7 +169,9 @@ const filteredOptions = computed(() => {
     return mergedOptions.value
   }
 
-  return mergedOptions.value.filter((option) => option.key?.toLowerCase().includes(query))
+  return mergedOptions.value.filter(option =>
+    option.key?.toLowerCase().includes(query)
+  )
 })
 
 const updateScrollState = () => {
@@ -177,11 +189,15 @@ const { stop: stopResizeObserver } = useResizeObserver(optionsContainer, () => {
 })
 
 watch(
-  () => [mergedOptions.value.length, filteredOptions.value.length, search.value],
+  () => [
+    mergedOptions.value.length,
+    filteredOptions.value.length,
+    search.value,
+  ],
   () => {
     nextTick(() => updateScrollState())
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 onMounted(() => {
@@ -192,9 +208,14 @@ onBeforeUnmount(() => {
   stopResizeObserver()
 })
 
-const showSearch = computed(() => hasScrollableOptions.value || search.value.trim().length > 0)
+const showSearch = computed(
+  () => hasScrollableOptions.value || search.value.trim().length > 0
+)
 
-const onCheckboxChange = (term: string | undefined, selected: boolean | null) => {
+const onCheckboxChange = (
+  term: string | undefined,
+  selected: boolean | null
+) => {
   if (!term) {
     return
   }
@@ -217,7 +238,7 @@ const onCheckboxChange = (term: string | undefined, selected: boolean | null) =>
           operator: 'term',
           terms: [...localTerms.value],
         }
-      : null,
+      : null
   )
 }
 

@@ -13,13 +13,19 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section class="home-section home-features" aria-labelledby="home-features-title">
+  <section
+    class="home-section home-features"
+    aria-labelledby="home-features-title"
+  >
     <v-container fluid class="home-section__container">
       <div class="home-section__inner">
         <header class="home-section__header">
           <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="home-section__subtitle subtitle-text" v-html="t('home.features.subtitle')" />
+          <p
+            class="home-section__subtitle subtitle-text"
+            v-html="t('home.features.subtitle')"
+          />
         </header>
         <v-row class="home-features__grid" align="stretch">
           <v-col
@@ -30,9 +36,15 @@ const { t } = useI18n()
             lg="4"
           >
             <v-card class="home-features__card" variant="flat">
-              <v-icon class="home-features__icon" :icon="feature.icon" size="36" />
+              <v-icon
+                class="home-features__icon"
+                :icon="feature.icon"
+                size="36"
+              />
               <h3 class="home-features__card-title">{{ feature.title }}</h3>
-              <p class="home-features__card-description">{{ feature.description }}</p>
+              <p class="home-features__card-description">
+                {{ feature.description }}
+              </p>
             </v-card>
           </v-col>
         </v-row>

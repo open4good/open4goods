@@ -19,20 +19,31 @@
       <div class="product-attributes__main-grid">
         <v-card class="product-attributes__identity-card" variant="flat">
           <div class="product-attributes__identity-heading">
-            <v-icon icon="mdi-card-account-details-outline" class="product-attributes__identity-icon" />
+            <v-icon
+              icon="mdi-card-account-details-outline"
+              class="product-attributes__identity-icon"
+            />
             <span>{{ $t('product.attributes.main.identity.title') }}</span>
           </div>
 
-          <div v-if="identityRows.length" class="product-attributes__identity-table">
+          <div
+            v-if="identityRows.length"
+            class="product-attributes__identity-table"
+          >
             <div
               v-for="row in identityRows"
               :key="row.key"
               class="product-attributes__identity-row"
             >
-              <span class="product-attributes__identity-label">{{ row.label }}</span>
+              <span class="product-attributes__identity-label">{{
+                row.label
+              }}</span>
               <div class="product-attributes__identity-value">
                 <span>{{ row.value }}</span>
-                <div v-if="row.details?.length" class="product-attributes__identity-details">
+                <div
+                  v-if="row.details?.length"
+                  class="product-attributes__identity-details"
+                >
                   <div
                     v-for="detail in row.details"
                     :key="detail.key"
@@ -42,21 +53,30 @@
                       {{ detail.label }}
                     </span>
                     <ul class="product-attributes__identity-detail-list">
-                      <li v-for="value in detail.values" :key="value">{{ value }}</li>
+                      <li v-for="value in detail.values" :key="value">
+                        {{ value }}
+                      </li>
                     </ul>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <p v-else-if="!gtinImageUrl" class="product-attributes__empty product-attributes__identity-empty">
+          <p
+            v-else-if="!gtinImageUrl"
+            class="product-attributes__empty product-attributes__identity-empty"
+          >
             {{ $t('product.attributes.main.identity.empty') }}
           </p>
 
           <figure v-if="gtinImageUrl" class="product-attributes__gtin">
             <v-img
               :src="gtinImageUrl"
-              :alt="$t('product.attributes.main.identity.gtinImageAlt', { gtin: gtinDisplay ?? '—' })"
+              :alt="
+                $t('product.attributes.main.identity.gtinImageAlt', {
+                  gtin: gtinDisplay ?? '—',
+                })
+              "
               class="product-attributes__gtin-image"
               cover
             />
@@ -89,7 +109,6 @@
             {{ $t('product.attributes.main.attributes.empty') }}
           </p>
         </v-card>
-
       </div>
 
       <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
@@ -100,7 +119,9 @@
     </div>
 
     <div class="product-attributes__block product-attributes__block--detailed">
-      <div class="product-attributes__block-header product-attributes__block-header--detailed">
+      <div
+        class="product-attributes__block-header product-attributes__block-header--detailed"
+      >
         <h3 class="product-attributes__block-title">
           {{ $t('product.attributes.detailed.title') }}
         </h3>
@@ -116,7 +137,11 @@
 
       <div class="product-attributes__detailed-layout">
         <div class="product-attributes__details-panel">
-          <v-row v-if="filteredGroups.length" class="product-attributes__details-grid" dense>
+          <v-row
+            v-if="filteredGroups.length"
+            class="product-attributes__details-grid"
+            dense
+          >
             <ProductAttributesDetailCard
               v-for="group in filteredGroups"
               :key="group.id"
@@ -124,12 +149,15 @@
             />
           </v-row>
 
-          <p v-else class="product-attributes__empty product-attributes__empty--detailed">
+          <p
+            v-else
+            class="product-attributes__empty product-attributes__empty--detailed"
+          >
             {{
               $t(
                 hasSearchTerm
                   ? 'product.attributes.detailed.noResults'
-                  : 'product.attributes.detailed.empty',
+                  : 'product.attributes.detailed.empty'
               )
             }}
           </p>
@@ -184,7 +212,7 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
 })
 
 const referentialAttributes = computed<Record<string, string>>(
-  () => resolvedAttributes.value?.referentialAttributes ?? {},
+  () => resolvedAttributes.value?.referentialAttributes ?? {}
 )
 
 const timeline = computed(() => props.product?.timeline ?? null)
@@ -215,7 +243,10 @@ const gtinImageUrl = computed(() => {
   return `${staticServerBase.value}/images/${gtin}-gtin.png`
 })
 
-const RELATIVE_TIME_UNITS: Array<{ unit: Intl.RelativeTimeFormatUnit; ms: number }> = [
+const RELATIVE_TIME_UNITS: Array<{
+  unit: Intl.RelativeTimeFormatUnit
+  ms: number
+}> = [
   { unit: 'year', ms: 1000 * 60 * 60 * 24 * 365 },
   { unit: 'month', ms: 1000 * 60 * 60 * 24 * 30 },
   { unit: 'week', ms: 1000 * 60 * 60 * 24 * 7 },
@@ -225,14 +256,18 @@ const RELATIVE_TIME_UNITS: Array<{ unit: Intl.RelativeTimeFormatUnit; ms: number
   { unit: 'second', ms: 1000 },
 ]
 
-const formatRelativeTimeFromNow = (timestamp?: number | null): string | null => {
+const formatRelativeTimeFromNow = (
+  timestamp?: number | null
+): string | null => {
   if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) {
     return null
   }
 
   const now = Date.now()
   const diff = timestamp - now
-  const formatter = new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' })
+  const formatter = new Intl.RelativeTimeFormat(locale.value, {
+    numeric: 'auto',
+  })
 
   for (const { unit, ms } of RELATIVE_TIME_UNITS) {
     const value = diff / ms
@@ -250,9 +285,9 @@ const formatDateValue = (timestamp?: number | null): string | null => {
   }
 
   try {
-    return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(
-      new Date(timestamp),
-    )
+    return new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'medium',
+    }).format(new Date(timestamp))
   } catch (error) {
     console.warn('Failed to format product date', error)
     return null
@@ -279,14 +314,14 @@ const toStringList = (input: unknown): string[] => {
 
   if (input instanceof Set) {
     return Array.from(input)
-      .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-      .filter((entry) => entry.length > 0)
+      .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
+      .filter(entry => entry.length > 0)
   }
 
   if (Array.isArray(input)) {
     return input
-      .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-      .filter((entry) => entry.length > 0)
+      .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
+      .filter(entry => entry.length > 0)
   }
 
   if (typeof input === 'string') {
@@ -314,7 +349,10 @@ const identityRows = computed<IdentityRow[]>(() => {
   const rows: IdentityRow[] = []
   const identity = props.product?.identity ?? null
 
-  const brand = firstNonEmptyString(identity?.brand, referentialAttributes.value.brand)
+  const brand = firstNonEmptyString(
+    identity?.brand,
+    referentialAttributes.value.brand
+  )
   if (brand) {
     rows.push({
       key: 'brand',
@@ -326,7 +364,10 @@ const identityRows = computed<IdentityRow[]>(() => {
   const alternativeBrands = toStringList(identity?.akaBrands)
   const alternativeModels = toStringList(identity?.akaModels)
 
-  const model = firstNonEmptyString(identity?.model, referentialAttributes.value.model)
+  const model = firstNonEmptyString(
+    identity?.model,
+    referentialAttributes.value.model
+  )
   if (model || alternativeBrands.length || alternativeModels.length) {
     const details: IdentityDetail[] = []
 
@@ -371,7 +412,9 @@ const identityRows = computed<IdentityRow[]>(() => {
     })
   }
 
-  const lastUpdated = formatRelativeTimeFromNow(props.product?.base?.lastChange ?? null)
+  const lastUpdated = formatRelativeTimeFromNow(
+    props.product?.base?.lastChange ?? null
+  )
   if (lastUpdated) {
     rows.push({
       key: 'lastUpdated',
@@ -392,7 +435,7 @@ interface MainAttributeRow {
 
 const resolveDisplayValue = (
   attribute: ProductIndexedAttributeDto | null | undefined,
-  fallback: string | null,
+  fallback: string | null
 ) => {
   const bestValue = attribute?.sourcing?.bestValue
   if (typeof bestValue === 'string') {
@@ -406,7 +449,7 @@ const resolveDisplayValue = (
 }
 
 const formatMainAttributeValue = (
-  attribute: ProductIndexedAttributeDto | null | undefined,
+  attribute: ProductIndexedAttributeDto | null | undefined
 ): string | null => {
   if (!attribute) {
     return null
@@ -416,12 +459,17 @@ const formatMainAttributeValue = (
     return attribute.value.trim()
   }
 
-  if (typeof attribute.numericValue === 'number' && Number.isFinite(attribute.numericValue)) {
+  if (
+    typeof attribute.numericValue === 'number' &&
+    Number.isFinite(attribute.numericValue)
+  ) {
     return n(attribute.numericValue)
   }
 
   if (typeof attribute.booleanValue === 'boolean') {
-    return t(attribute.booleanValue ? 'common.boolean.true' : 'common.boolean.false')
+    return t(
+      attribute.booleanValue ? 'common.boolean.true' : 'common.boolean.false'
+    )
   }
 
   return null
@@ -430,27 +478,30 @@ const formatMainAttributeValue = (
 const mainAttributes = computed<MainAttributeRow[]>(() => {
   const entries = resolvedAttributes.value?.indexedAttributes ?? {}
 
-  return Object.entries(entries).reduce<MainAttributeRow[]>((accumulator, [key, attribute]) => {
-    const fallbackValue = formatMainAttributeValue(attribute)
-    const displayValue = resolveDisplayValue(attribute, fallbackValue)
+  return Object.entries(entries).reduce<MainAttributeRow[]>(
+    (accumulator, [key, attribute]) => {
+      const fallbackValue = formatMainAttributeValue(attribute)
+      const displayValue = resolveDisplayValue(attribute, fallbackValue)
 
-    if (!displayValue) {
+      if (!displayValue) {
+        return accumulator
+      }
+
+      const label =
+        typeof attribute?.name === 'string' && attribute.name.trim().length
+          ? attribute.name.trim()
+          : key
+
+      accumulator.push({
+        key,
+        label,
+        value: displayValue,
+        sourcing: attribute?.sourcing ?? null,
+      })
       return accumulator
-    }
-
-    const label =
-      typeof attribute?.name === 'string' && attribute.name.trim().length
-        ? attribute.name.trim()
-        : key
-
-    accumulator.push({
-      key,
-      label,
-      value: displayValue,
-      sourcing: attribute?.sourcing ?? null,
-    })
-    return accumulator
-  }, [])
+    },
+    []
+  )
 })
 
 export interface DetailAttributeView {
@@ -471,42 +522,51 @@ export interface DetailGroupView {
 
 const sanitizeAttributeList = (
   items: Array<ProductAttributeDto | null | undefined> | undefined,
-  prefix: string,
+  prefix: string
 ): DetailAttributeView[] => {
   if (!items?.length) {
     return []
   }
 
-  return items.reduce<DetailAttributeView[]>((accumulator, attribute, index) => {
-    if (!attribute) {
+  return items.reduce<DetailAttributeView[]>(
+    (accumulator, attribute, index) => {
+      if (!attribute) {
+        return accumulator
+      }
+
+      const rawValue =
+        typeof attribute.value === 'string' ? attribute.value.trim() : ''
+      if (!rawValue.length) {
+        return accumulator
+      }
+
+      const name =
+        typeof attribute.name === 'string' && attribute.name.trim().length
+          ? attribute.name.trim()
+          : t('product.attributes.detailed.unknownLabel')
+
+      const bestValue = attribute.sourcing?.bestValue
+      const displayValue =
+        typeof bestValue === 'string' && bestValue.trim().length
+          ? bestValue.trim()
+          : rawValue
+
+      accumulator.push({
+        key: `${prefix}-${index}`,
+        name,
+        value: displayValue,
+        sourcing: attribute.sourcing ?? null,
+      })
+
       return accumulator
-    }
-
-    const rawValue = typeof attribute.value === 'string' ? attribute.value.trim() : ''
-    if (!rawValue.length) {
-      return accumulator
-    }
-
-    const name =
-      typeof attribute.name === 'string' && attribute.name.trim().length
-        ? attribute.name.trim()
-        : t('product.attributes.detailed.unknownLabel')
-
-    const bestValue = attribute.sourcing?.bestValue
-    const displayValue = typeof bestValue === 'string' && bestValue.trim().length ? bestValue.trim() : rawValue
-
-    accumulator.push({
-      key: `${prefix}-${index}`,
-      name,
-      value: displayValue,
-      sourcing: attribute.sourcing ?? null,
-    })
-
-    return accumulator
-  }, [])
+    },
+    []
+  )
 }
 
-const classifiedGroups = computed(() => resolvedAttributes.value?.classifiedAttributes ?? [])
+const classifiedGroups = computed(
+  () => resolvedAttributes.value?.classifiedAttributes ?? []
+)
 
 const baseGroups = computed<DetailGroupView[]>(() =>
   classifiedGroups.value
@@ -520,9 +580,18 @@ const baseGroups = computed<DetailGroupView[]>(() =>
           ? group.name.trim()
           : t('product.attributes.detailed.untitledGroup')
 
-      const attributes = sanitizeAttributeList(group.attributes, `group-${index}-attr`)
-      const features = sanitizeAttributeList(group.features, `group-${index}-feature`)
-      const unFeatures = sanitizeAttributeList(group.unFeatures, `group-${index}-unfeature`)
+      const attributes = sanitizeAttributeList(
+        group.attributes,
+        `group-${index}-attr`
+      )
+      const features = sanitizeAttributeList(
+        group.features,
+        `group-${index}-feature`
+      )
+      const unFeatures = sanitizeAttributeList(
+        group.unFeatures,
+        `group-${index}-unfeature`
+      )
 
       const totalCount = attributes.length + features.length + unFeatures.length
       if (!totalCount) {
@@ -538,7 +607,7 @@ const baseGroups = computed<DetailGroupView[]>(() =>
         totalCount,
       }
     })
-    .filter((group): group is DetailGroupView => Boolean(group)),
+    .filter((group): group is DetailGroupView => Boolean(group))
 )
 
 const filteredGroups = computed<DetailGroupView[]>(() => {
@@ -548,10 +617,12 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   }
 
   const filterList = (items: DetailAttributeView[]) =>
-    items.filter((item) => `${item.name} ${item.value}`.toLowerCase().includes(term))
+    items.filter(item =>
+      `${item.name} ${item.value}`.toLowerCase().includes(term)
+    )
 
   return baseGroups.value
-    .map((group) => {
+    .map(group => {
       const matchesGroupName = group.name.toLowerCase().includes(term)
 
       if (matchesGroupName) {
@@ -766,7 +837,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 .product-attributes__details-grid {
   margin: 0 -0.75rem;
 }
-
 
 .product-attributes__table-value {
   display: inline-block;

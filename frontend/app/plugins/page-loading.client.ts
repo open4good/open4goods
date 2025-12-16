@@ -1,4 +1,4 @@
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(nuxtApp => {
   if (!import.meta.client) {
     return
   }
@@ -14,7 +14,10 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   nuxtApp.hooks.hook('page:loading:end', stopLoading)
-  nuxtApp.hooks.hook('page:error' as Parameters<typeof nuxtApp.hooks.hook>[0], () => {
-    stopLoading()
-  })
+  nuxtApp.hooks.hook(
+    'page:error' as Parameters<typeof nuxtApp.hooks.hook>[0],
+    () => {
+      stopLoading()
+    }
+  )
 })

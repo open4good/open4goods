@@ -4,12 +4,16 @@ import { useAdministrationService } from '~~/shared/api-client/services/administ
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { setDomainLanguageCacheHeaders } from '../../../utils/cache-headers'
-import { extractBackendErrorDetails, logBackendError } from '../../../utils/log-backend-error'
+import {
+  extractBackendErrorDetails,
+  logBackendError,
+} from '../../../utils/log-backend-error'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   setDomainLanguageCacheHeaders(event, 'private, no-store')
 
-  const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  const rawHost =
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
   const administrationService = useAdministrationService(domainLanguage)
 

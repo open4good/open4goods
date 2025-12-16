@@ -31,7 +31,9 @@
       >
         {{ t('opendata.errors.overviewFailed') }}
       </v-alert>
-      <v-btn color="primary" variant="tonal" @click="refresh">{{ t('common.actions.retry') }}</v-btn>
+      <v-btn color="primary" variant="tonal" @click="refresh">{{
+        t('common.actions.retry')
+      }}</v-btn>
     </v-container>
 
     <OpendataDatasetHighlights
@@ -89,14 +91,19 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const licenseSectionId = 'opendata-odbl-license'
 
-const { data, pending, error, refresh } = await useAsyncData<OpenDataOverviewDto>('opendata-overview', () =>
-  $fetch<OpenDataOverviewDto>('/api/opendata', {
-    headers: requestHeaders,
-  }),
-)
+const { data, pending, error, refresh } =
+  await useAsyncData<OpenDataOverviewDto>('opendata-overview', () =>
+    $fetch<OpenDataOverviewDto>('/api/opendata', {
+      headers: requestHeaders,
+    })
+  )
 
-const heroSubtitle = computed(() => String(t('opendata.hero.subtitle', { licenseId: licenseSectionId })))
-const datasetsSubtitle = computed(() => String(t('opendata.datasets.subtitle', { licenseId: licenseSectionId })))
+const heroSubtitle = computed(() =>
+  String(t('opendata.hero.subtitle', { licenseId: licenseSectionId }))
+)
+const datasetsSubtitle = computed(() =>
+  String(t('opendata.datasets.subtitle', { licenseId: licenseSectionId }))
+)
 
 const formatProductCount = (count?: string | number | null) => {
   if (count == null || count === '') {
@@ -104,7 +111,9 @@ const formatProductCount = (count?: string | number | null) => {
   }
 
   const numericValue =
-    typeof count === 'number' ? count : Number(String(count).replace(/[^\d]/g, ''))
+    typeof count === 'number'
+      ? count
+      : Number(String(count).replace(/[^\d]/g, ''))
 
   if (!Number.isFinite(numericValue) || numericValue <= 0) {
     return String(t('opendata.stats.placeholder'))
@@ -112,7 +121,9 @@ const formatProductCount = (count?: string | number | null) => {
 
   if (numericValue >= 1_000_000) {
     const millions = Math.round(numericValue / 1_000_000)
-    return String(t('opendata.stats.totalProducts.millions', { value: millions }))
+    return String(
+      t('opendata.stats.totalProducts.millions', { value: millions })
+    )
   }
 
   return new Intl.NumberFormat(locale.value).format(numericValue)
@@ -228,10 +239,15 @@ const educationCard = computed(() => ({
   bodyHtml: String(t('opendata.hero.educationCard.description')),
 }))
 
-const canonicalUrl = computed(
-  () => new URL(resolveLocalizedRoutePath('opendata', locale.value), requestURL.origin).toString(),
+const canonicalUrl = computed(() =>
+  new URL(
+    resolveLocalizedRoutePath('opendata', locale.value),
+    requestURL.origin
+  ).toString()
 )
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 
 useSeoMeta({
   title: () => String(t('opendata.seo.title')),
@@ -244,9 +260,7 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 </script>
 
@@ -259,4 +273,3 @@ useHead(() => ({
 .opendata-page__loader
   margin: 0
 </style>
-

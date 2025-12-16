@@ -38,12 +38,15 @@ withDefaults(
   }>(),
   {
     opendataCallout: undefined,
-  },
+  }
 )
 </script>
 
 <template>
-  <section class="opensource-resources" aria-labelledby="opensource-resources-title">
+  <section
+    class="opensource-resources"
+    aria-labelledby="opensource-resources-title"
+  >
     <v-container class="py-14">
       <div class="section-header">
         <v-chip
@@ -55,19 +58,30 @@ withDefaults(
         >
           {{ eyebrow }}
         </v-chip>
-        <h2 id="opensource-resources-title" class="section-title">{{ title }}</h2>
+        <h2 id="opensource-resources-title" class="section-title">
+          {{ title }}
+        </h2>
         <TextContent :bloc-id="descriptionBlocId" :ipsum-length="200" />
       </div>
 
       <v-row class="mt-8" align="stretch" dense>
-        <v-col v-for="resource in resources" :key="resource.href" cols="12" md="4" class="d-flex">
+        <v-col
+          v-for="resource in resources"
+          :key="resource.href"
+          cols="12"
+          md="4"
+          class="d-flex"
+        >
           <v-card class="resource-card" rounded="xl" elevation="4">
             <div class="resource-icon" aria-hidden="true">
               <v-icon :icon="resource.icon" size="36" />
             </div>
             <div class="resource-body">
               <h3 class="resource-title">{{ resource.title }}</h3>
-              <TextContent :bloc-id="resource.descriptionBlocId" :ipsum-length="140" />
+              <TextContent
+                :bloc-id="resource.descriptionBlocId"
+                :ipsum-length="140"
+              />
             </div>
             <v-btn
               :href="resource.href"
@@ -96,7 +110,9 @@ withDefaults(
         <div class="opendata-content">
           <div class="opendata-text">
             <h2 class="opendata-title">{{ opendataCallout.title }}</h2>
-            <p class="opendata-description">{{ opendataCallout.description }}</p>
+            <p class="opendata-description">
+              {{ opendataCallout.description }}
+            </p>
           </div>
           <v-btn
             :href="opendataCallout.ctaHref"
@@ -115,7 +131,10 @@ withDefaults(
         <div class="contact-content">
           <div class="contact-text">
             <h2 class="contact-title">{{ contact.title }}</h2>
-            <TextContent :bloc-id="contact.descriptionBlocId" :ipsum-length="180" />
+            <TextContent
+              :bloc-id="contact.descriptionBlocId"
+              :ipsum-length="180"
+            />
           </div>
           <v-btn
             :href="contact.ctaHref"
@@ -129,7 +148,6 @@ withDefaults(
           </v-btn>
         </div>
       </v-card>
-
     </v-container>
   </section>
 </template>

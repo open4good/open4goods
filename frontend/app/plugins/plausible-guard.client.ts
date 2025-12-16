@@ -14,7 +14,11 @@ export default defineNuxtPlugin({
     const plausibleConfig = runtimeConfig.public.plausible || {}
 
     plausibleConfig.ignoredHostnames = Array.from(
-      new Set([...(plausibleConfig.ignoredHostnames ?? []), 'localhost', '127.0.0.1'])
+      new Set([
+        ...(plausibleConfig.ignoredHostnames ?? []),
+        'localhost',
+        '127.0.0.1',
+      ])
     )
 
     if (isDoNotTrackEnabled()) {

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildCompareHash, buildCompareHashFragment, parseCompareHash } from './_compare-url'
+import {
+  buildCompareHash,
+  buildCompareHashFragment,
+  parseCompareHash,
+} from './_compare-url'
 
 describe('compare url helpers', () => {
   it('parses hash fragments ignoring case and duplicates', () => {

@@ -22,16 +22,20 @@ const normalizeSitemapPaths = (paths: unknown): string[] => {
   return Array.from(
     new Set(
       paths
-        .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-        .filter((entry): entry is string => Boolean(entry)),
-    ),
+        .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
+        .filter((entry): entry is string => Boolean(entry))
+    )
   )
 }
 
-const getRuntimeConfig = (runtimeConfig?: SitemapLocalFilesRuntimeConfig): SitemapLocalFilesRuntimeConfig =>
-  runtimeConfig ?? useRuntimeConfig()
+const getRuntimeConfig = (
+  runtimeConfig?: SitemapLocalFilesRuntimeConfig
+): SitemapLocalFilesRuntimeConfig => runtimeConfig ?? useRuntimeConfig()
 
-const buildPublicPath = (domainLanguage: DomainLanguage, filePath: string): LocalSitemapFileDescriptor | null => {
+const buildPublicPath = (
+  domainLanguage: DomainLanguage,
+  filePath: string
+): LocalSitemapFileDescriptor | null => {
   const fileName = basename(filePath)
 
   if (!fileName) {
@@ -47,16 +51,17 @@ const buildPublicPath = (domainLanguage: DomainLanguage, filePath: string): Loca
 
 export const getLocalSitemapFileDescriptorsForDomainLanguage = (
   domainLanguage: DomainLanguage,
-  runtimeConfig?: SitemapLocalFilesRuntimeConfig,
+  runtimeConfig?: SitemapLocalFilesRuntimeConfig
 ): LocalSitemapFileDescriptor[] => {
   const resolvedRuntimeConfig = getRuntimeConfig(runtimeConfig)
-  const configuredPaths = resolvedRuntimeConfig.sitemapLocalFiles?.[domainLanguage]
+  const configuredPaths =
+    resolvedRuntimeConfig.sitemapLocalFiles?.[domainLanguage]
   const normalizedPaths = normalizeSitemapPaths(configuredPaths)
 
   const seenFileNames = new Set<string>()
 
   return normalizedPaths
-    .map((filePath) => buildPublicPath(domainLanguage, filePath))
+    .map(filePath => buildPublicPath(domainLanguage, filePath))
     .filter((descriptor): descriptor is LocalSitemapFileDescriptor => {
       if (!descriptor) {
         return false
@@ -74,20 +79,22 @@ export const getLocalSitemapFileDescriptorsForDomainLanguage = (
 export const getPublicSitemapUrlsForDomainLanguage = (
   domainLanguage: DomainLanguage,
   origin: string,
-  runtimeConfig?: SitemapLocalFilesRuntimeConfig,
+  runtimeConfig?: SitemapLocalFilesRuntimeConfig
 ): string[] =>
-  getLocalSitemapFileDescriptorsForDomainLanguage(domainLanguage, runtimeConfig).map((descriptor) =>
-    new URL(descriptor.publicPath, origin).toString(),
-  )
+  getLocalSitemapFileDescriptorsForDomainLanguage(
+    domainLanguage,
+    runtimeConfig
+  ).map(descriptor => new URL(descriptor.publicPath, origin).toString())
 
 export const getLocalSitemapFilePath = (
   domainLanguage: DomainLanguage,
   fileName: string,
-  runtimeConfig?: SitemapLocalFilesRuntimeConfig,
+  runtimeConfig?: SitemapLocalFilesRuntimeConfig
 ): string | null => {
-  const descriptor = getLocalSitemapFileDescriptorsForDomainLanguage(domainLanguage, runtimeConfig).find(
-    (entry) => entry.fileName === fileName,
-  )
+  const descriptor = getLocalSitemapFileDescriptorsForDomainLanguage(
+    domainLanguage,
+    runtimeConfig
+  ).find(entry => entry.fileName === fileName)
 
   return descriptor?.filePath ?? null
 }

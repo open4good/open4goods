@@ -78,7 +78,7 @@ const VBtnStub: Component = {
             emit('click', event)
           },
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 }
@@ -100,7 +100,9 @@ const createProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
     bestName: overrides.identity?.bestName ?? 'Example product',
   },
   resources: {
-    coverImagePath: overrides.resources?.coverImagePath ?? 'https://cdn.example.com/image.jpg',
+    coverImagePath:
+      overrides.resources?.coverImagePath ??
+      'https://cdn.example.com/image.jpg',
   },
   slug: overrides.slug,
   fullSlug: overrides.fullSlug,
@@ -141,7 +143,8 @@ describe('CategoryComparePanel', () => {
                 addToList: 'Add to compare',
                 removeFromList: 'Remove from compare',
                 limitReached: 'You can compare up to {count} products.',
-                differentCategory: 'Only compare products from the same category.',
+                differentCategory:
+                  'Only compare products from the same category.',
                 missingIdentifier: 'Cannot compare this product.',
               },
               untitledProduct: 'Untitled product',
@@ -153,11 +156,11 @@ describe('CategoryComparePanel', () => {
     vuetify = createVuetify()
   })
 
-const mountPanel = async () => {
-  const module = await import('./CategoryComparePanel.vue')
-  const CategoryComparePanel = module.default
+  const mountPanel = async () => {
+    const module = await import('./CategoryComparePanel.vue')
+    const CategoryComparePanel = module.default
 
-  return mount(CategoryComparePanel, {
+    return mount(CategoryComparePanel, {
       global: {
         plugins: [pinia, i18n, vuetify],
         stubs: {
@@ -178,7 +181,15 @@ const mountPanel = async () => {
               },
             },
             setup(props, { slots }) {
-              return () => h('a', { href: typeof props.to === 'string' ? props.to : '#', role: 'link' }, slots.default?.())
+              return () =>
+                h(
+                  'a',
+                  {
+                    href: typeof props.to === 'string' ? props.to : '#',
+                    role: 'link',
+                  },
+                  slots.default?.()
+                )
             },
           },
         },
@@ -200,7 +211,9 @@ const mountPanel = async () => {
     const wrapper = await mountPanel()
 
     expect(wrapper.text()).toContain('Compare products')
-    const removeButtons = wrapper.findAll('.category-compare-panel__item-remove')
+    const removeButtons = wrapper.findAll(
+      '.category-compare-panel__item-remove'
+    )
     expect(removeButtons).toHaveLength(2)
 
     const firstRemoveButton = removeButtons[0]!
@@ -226,7 +239,9 @@ const mountPanel = async () => {
 
     await launchButton.trigger('click')
     await nextTick()
-    const emitted = wrapper.emitted('launch-comparison') as unknown[][] | undefined
+    const emitted = wrapper.emitted('launch-comparison') as
+      | unknown[][]
+      | undefined
     expect(emitted).toBeTruthy()
     expect(emitted?.[0]?.[0]).toHaveLength(2)
     expect(routerPush).toHaveBeenLastCalledWith('/compare#201Vs202')
@@ -239,7 +254,7 @@ const mountPanel = async () => {
         fullSlug: '/products/example-product',
         base: { bestName: 'Linked product' },
         identity: { bestName: 'Linked product' },
-      }),
+      })
     )
 
     const wrapper = await mountPanel()

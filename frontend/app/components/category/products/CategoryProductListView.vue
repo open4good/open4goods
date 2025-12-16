@@ -12,7 +12,11 @@
         <v-avatar size="88" rounded="lg">
           <v-img
             :src="resolveImage(product)"
-            :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
+            :alt="
+              product.identity?.bestName ??
+              product.identity?.model ??
+              $t('category.products.untitledProduct')
+            "
             cover
           >
             <template #placeholder>
@@ -26,13 +30,20 @@
         <div class="category-product-list__content">
           <div class="category-product-list__header">
             <h3 class="category-product-list__title">
-              {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
+              {{
+                product.identity?.bestName ??
+                product.identity?.model ??
+                product.identity?.brand ??
+                '#' + product.gtin
+              }}
             </h3>
           </div>
 
           <div class="category-product-list__meta">
             <span class="category-product-list__price">
-              <span aria-hidden="true" class="category-product-list__price-icon">€</span>
+              <span aria-hidden="true" class="category-product-list__price-icon"
+                >€</span
+              >
               {{ listPriceValue(product) }}
             </span>
             <span class="category-product-list__offers">
@@ -41,16 +52,28 @@
             </span>
           </div>
 
-          <ul v-if="popularAttributesByProduct(product).length" class="category-product-list__attributes" role="list">
+          <ul
+            v-if="popularAttributesByProduct(product).length"
+            class="category-product-list__attributes"
+            role="list"
+          >
             <li
               v-for="attribute in popularAttributesByProduct(product)"
               :key="attribute.key"
               class="category-product-list__attribute"
               role="listitem"
             >
-              <span class="category-product-list__attribute-label">{{ attribute.label }}</span>
-              <span class="category-product-list__attribute-separator" aria-hidden="true">:</span>
-              <span class="category-product-list__attribute-value">{{ attribute.value }}</span>
+              <span class="category-product-list__attribute-label">{{
+                attribute.label
+              }}</span>
+              <span
+                class="category-product-list__attribute-separator"
+                aria-hidden="true"
+                >:</span
+              >
+              <span class="category-product-list__attribute-value">{{
+                attribute.value
+              }}</span>
             </li>
           </ul>
         </div>
@@ -81,7 +104,10 @@ import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
-import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import {
+  formatAttributeValue,
+  resolvePopularAttributes,
+} from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
@@ -104,9 +130,11 @@ const resolveImage = (product: ProductDto) => {
   )
 }
 
-const productLink = (product: ProductDto) => product.fullSlug ?? product.slug ?? undefined
+const productLink = (product: ProductDto) =>
+  product.fullSlug ?? product.slug ?? undefined
 
-const impactScoreValue = (product: ProductDto) => resolvePrimaryImpactScore(product)
+const impactScoreValue = (product: ProductDto) =>
+  resolvePrimaryImpactScore(product)
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 
@@ -125,7 +153,8 @@ const listPriceValue = (product: ProductDto) => {
   return bestPriceLabel(product)
 }
 
-const offersCountLabel = (product: ProductDto) => formatOffersCount(product, translatePlural)
+const offersCountLabel = (product: ProductDto) =>
+  formatOffersCount(product, translatePlural)
 
 type DisplayedAttribute = {
   key: string
@@ -133,9 +162,11 @@ type DisplayedAttribute = {
   value: string
 }
 
-const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] => {
+const popularAttributesByProduct = (
+  product: ProductDto
+): DisplayedAttribute[] => {
   return resolvePopularAttributes(product, popularAttributeConfigs.value)
-    .map((attribute) => {
+    .map(attribute => {
       const value = formatAttributeValue(attribute, t, n)
 
       if (!value) {

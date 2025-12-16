@@ -18,7 +18,9 @@ const { t } = useI18n()
 const titleId = useId()
 const descriptionId = useId()
 
-const displayName = computed(() => props.member.name?.trim() || t('team.cards.unknownName'))
+const displayName = computed(
+  () => props.member.name?.trim() || t('team.cards.unknownName')
+)
 
 const baseBlocId = computed(() => {
   const explicit = props.member.blocId?.trim()
@@ -43,9 +45,13 @@ const titleBlocId = computed(() => {
   return base.endsWith(':') ? `${base.slice(0, -1)}-title:` : `${base}-title`
 })
 
-const portraitAlt = computed(() => t('team.cards.portraitAlt', { name: displayName.value }))
+const portraitAlt = computed(() =>
+  t('team.cards.portraitAlt', { name: displayName.value })
+)
 
-const linkedInLabel = computed(() => t('team.cards.linkedIn', { name: displayName.value }))
+const linkedInLabel = computed(() =>
+  t('team.cards.linkedIn', { name: displayName.value })
+)
 
 const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
 </script>

@@ -4,7 +4,10 @@ import type {
   CategorySuggestionItem,
   ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 
 export interface UseMenuSearchControlsOptions {
   /**
@@ -21,7 +24,9 @@ export interface UseMenuSearchControlsOptions {
 
 export const MIN_SEARCH_QUERY_LENGTH = 2
 
-export const useMenuSearchControls = (options: UseMenuSearchControlsOptions = {}) => {
+export const useMenuSearchControls = (
+  options: UseMenuSearchControlsOptions = {}
+) => {
   const route = useRoute()
   const router = useRouter()
   const { locale } = useI18n()
@@ -30,8 +35,12 @@ export const useMenuSearchControls = (options: UseMenuSearchControlsOptions = {}
   const isSearchOpen = ref(false)
 
   const currentLocale = computed(() => normalizeLocale(locale.value))
-  const homeRoutePath = computed(() => resolveLocalizedRoutePath('index', currentLocale.value))
-  const searchRoutePath = computed(() => resolveLocalizedRoutePath('search', currentLocale.value))
+  const homeRoutePath = computed(() =>
+    resolveLocalizedRoutePath('index', currentLocale.value)
+  )
+  const searchRoutePath = computed(() =>
+    resolveLocalizedRoutePath('search', currentLocale.value)
+  )
   const showMenuSearch = computed(() => route.path !== homeRoutePath.value)
 
   const openSearch = () => {
@@ -48,22 +57,22 @@ export const useMenuSearchControls = (options: UseMenuSearchControlsOptions = {}
 
   watch(
     () => route.path,
-    (path) => {
+    path => {
       if (path === homeRoutePath.value) {
         closeSearch()
         handleSearchClear()
       }
-    },
+    }
   )
 
-  watch(homeRoutePath, (path) => {
+  watch(homeRoutePath, path => {
     if (route.path === path) {
       closeSearch()
       handleSearchClear()
     }
   })
 
-  watch(showMenuSearch, (visible) => {
+  watch(showMenuSearch, visible => {
     if (!visible) {
       closeSearch()
       handleSearchClear()
@@ -89,7 +98,9 @@ export const useMenuSearchControls = (options: UseMenuSearchControlsOptions = {}
     finalizeNavigation()
   }
 
-  const normalizeSuggestionUrl = (raw: string | null | undefined): string | null => {
+  const normalizeSuggestionUrl = (
+    raw: string | null | undefined
+  ): string | null => {
     if (!raw) {
       return null
     }
@@ -113,7 +124,10 @@ export const useMenuSearchControls = (options: UseMenuSearchControlsOptions = {}
     const normalizedUrl = normalizeSuggestionUrl(suggestion.url)
 
     if (normalizedUrl) {
-      if (/^https?:\/\//iu.test(normalizedUrl) && typeof window !== 'undefined') {
+      if (
+        /^https?:\/\//iu.test(normalizedUrl) &&
+        typeof window !== 'undefined'
+      ) {
         window.open(normalizedUrl, '_blank', 'noopener,noreferrer')
         finalizeNavigation()
         return
@@ -147,7 +161,10 @@ export const useMenuSearchControls = (options: UseMenuSearchControlsOptions = {}
   const handleSearchSubmit = () => {
     const trimmedQuery = searchQuery.value.trim()
 
-    if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
+    if (
+      trimmedQuery.length > 0 &&
+      trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH
+    ) {
       return
     }
 

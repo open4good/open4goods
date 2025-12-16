@@ -14,7 +14,9 @@
           <v-icon icon="mdi-arrow-right" size="small" aria-hidden="true" />
         </NuxtLink>
       </div>
-      <p v-if="countLabel" class="search-result-group__count">{{ countLabel }}</p>
+      <p v-if="countLabel" class="search-result-group__count">
+        {{ countLabel }}
+      </p>
     </header>
 
     <CategoryProductCardGrid
@@ -46,7 +48,7 @@ withDefaults(
     verticalHomeUrl: null,
     categoryLinkLabel: '',
     categoryLinkAria: null,
-  },
+  }
 )
 </script>
 

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event): Promise<CommercialEvent[]> => {
     console.error(
       'Error fetching commercial events:',
       backendError.logMessage,
-      backendError,
+      backendError
     )
 
     throw createError({

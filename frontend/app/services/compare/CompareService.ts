@@ -1,5 +1,9 @@
 import DOMPurify from 'isomorphic-dompurify'
-import type { ProductDto, VerticalConfigFullDto, AiReviewDto } from '~~/shared/api-client'
+import type {
+  ProductDto,
+  VerticalConfigFullDto,
+  AiReviewDto,
+} from '~~/shared/api-client'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 
 export interface CompareProductReview {
@@ -22,7 +26,9 @@ export interface CompareProductEntry {
 }
 
 export type FetchProductFn = (gtin: string) => Promise<ProductDto>
-export type FetchVerticalFn = (verticalId: string) => Promise<VerticalConfigFullDto>
+export type FetchVerticalFn = (
+  verticalId: string
+) => Promise<VerticalConfigFullDto>
 
 export interface CompareServiceOptions {
   fetchProduct?: FetchProductFn
@@ -34,7 +40,10 @@ const stripHtml = (content: string | null): string | null => {
     return null
   }
 
-  const sanitized = DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }).trim()
+  const sanitized = DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  }).trim()
   const stripped = sanitized.replace(/<[^>]+>/g, '').trim()
 
   return stripped.length ? stripped : null
@@ -48,7 +57,9 @@ const sanitizeHtml = (content: string | null): string | null => {
   return DOMPurify.sanitize(content, { ADD_ATTR: ['target', 'rel', 'class'] })
 }
 
-const normaliseReview = (review: AiReviewDto | null | undefined): CompareProductReview => {
+const normaliseReview = (
+  review: AiReviewDto | null | undefined
+): CompareProductReview => {
   if (!review) {
     return {
       description: null,
@@ -60,13 +71,19 @@ const normaliseReview = (review: AiReviewDto | null | undefined): CompareProduct
   const description = stripHtml(review.description ?? null)
   const pros = Array.isArray(review.pros)
     ? review.pros
-        .map((entry) => sanitizeHtml(String(entry)))
-        .filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+        .map(entry => sanitizeHtml(String(entry)))
+        .filter(
+          (entry): entry is string =>
+            typeof entry === 'string' && entry.length > 0
+        )
     : []
   const cons = Array.isArray(review.cons)
     ? review.cons
-        .map((entry) => sanitizeHtml(String(entry)))
-        .filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+        .map(entry => sanitizeHtml(String(entry)))
+        .filter(
+          (entry): entry is string =>
+            typeof entry === 'string' && entry.length > 0
+        )
     : []
 
   return { description, pros, cons }
@@ -94,7 +111,9 @@ const resolveCoverImage = (product: ProductDto): string | null => {
   )
 }
 
-const resolveCountry = (product: ProductDto): { name: string; flag?: string } | null => {
+const resolveCountry = (
+  product: ProductDto
+): { name: string; flag?: string } | null => {
   const info = product.base?.gtinInfo
   if (!info?.countryName) {
     return null
@@ -106,26 +125,32 @@ const resolveCountry = (product: ProductDto): { name: string; flag?: string } | 
   }
 }
 
-const defaultFetchProduct: FetchProductFn = async (gtin) => {
+const defaultFetchProduct: FetchProductFn = async gtin => {
   return await $fetch<ProductDto>(`/api/products/${gtin}`)
 }
 
-const defaultFetchVertical: FetchVerticalFn = async (verticalId) => {
-  return await $fetch<VerticalConfigFullDto>(`/api/categories/${encodeURIComponent(verticalId)}`)
+const defaultFetchVertical: FetchVerticalFn = async verticalId => {
+  return await $fetch<VerticalConfigFullDto>(
+    `/api/categories/${encodeURIComponent(verticalId)}`
+  )
 }
 
 export const createCompareService = (options: CompareServiceOptions = {}) => {
   const fetchProduct = options.fetchProduct ?? defaultFetchProduct
   const fetchVertical = options.fetchVertical ?? defaultFetchVertical
 
-  const loadProducts = async (gtins: string[]): Promise<CompareProductEntry[]> => {
-    const uniqueGtins = Array.from(new Set(gtins.filter((gtin) => gtin.length > 0)))
+  const loadProducts = async (
+    gtins: string[]
+  ): Promise<CompareProductEntry[]> => {
+    const uniqueGtins = Array.from(
+      new Set(gtins.filter(gtin => gtin.length > 0))
+    )
     if (!uniqueGtins.length) {
       return []
     }
 
     const products = await Promise.all(
-      uniqueGtins.map(async (gtin) => {
+      uniqueGtins.map(async gtin => {
         const product = await fetchProduct(gtin)
         const verticalId = product.base?.vertical ?? null
         const review = normaliseReview(product.aiReview?.review)
@@ -142,13 +167,15 @@ export const createCompareService = (options: CompareServiceOptions = {}) => {
           review,
           country: resolveCountry(product),
         }
-      }),
+      })
     )
 
     return products
   }
 
-  const loadVertical = async (verticalId: string | null): Promise<VerticalConfigFullDto | null> => {
+  const loadVertical = async (
+    verticalId: string | null
+  ): Promise<VerticalConfigFullDto | null> => {
     if (!verticalId) {
       return null
     }
@@ -158,8 +185,11 @@ export const createCompareService = (options: CompareServiceOptions = {}) => {
 
   const hasMixedVerticals = (entries: CompareProductEntry[]): boolean => {
     const ids = entries
-      .map((entry) => entry.verticalId)
-      .filter((value): value is string => typeof value === 'string' && value.length > 0)
+      .map(entry => entry.verticalId)
+      .filter(
+        (value): value is string =>
+          typeof value === 'string' && value.length > 0
+      )
 
     if (!ids.length) {
       return false

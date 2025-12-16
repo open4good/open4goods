@@ -61,7 +61,7 @@ describe('_product-route', () => {
 
     it('accepts unicode characters in the slug portion', () => {
       expect(
-        matchProductRouteFromSegments(['1234567890123-Éco-Produit']),
+        matchProductRouteFromSegments(['1234567890123-Éco-Produit'])
       ).toEqual({
         categorySlug: null,
         gtin: '1234567890123',
@@ -73,7 +73,7 @@ describe('_product-route', () => {
           'maison-jardin',
           '1234567890123',
           'Produit-Éco',
-        ]),
+        ])
       ).toEqual({
         categorySlug: 'maison-jardin',
         gtin: '1234567890123',
@@ -98,12 +98,7 @@ describe('_product-route', () => {
       expect(matchProductRouteFromSegments([])).toBeNull()
       expect(matchProductRouteFromSegments(['only-one'])).toBeNull()
       expect(
-        matchProductRouteFromSegments([
-          'too',
-          'many',
-          'segments',
-          'here',
-        ])
+        matchProductRouteFromSegments(['too', 'many', 'segments', 'here'])
       ).toBeNull()
     })
 
@@ -119,9 +114,7 @@ describe('_product-route', () => {
     it('requires the product segment to expose a GTIN and slug separated by a hyphen', () => {
       expect(matchProductRouteFromSegments(['tech', '12345'])).toBeNull()
       expect(matchProductRouteFromSegments(['tech', '123456'])).toBeNull()
-      expect(
-        matchProductRouteFromSegments(['tech', '1234567890'])
-      ).toBeNull()
+      expect(matchProductRouteFromSegments(['tech', '1234567890'])).toBeNull()
       expect(
         matchProductRouteFromSegments(['tech', '12345-missing-digits'])
       ).toBeNull()
@@ -136,9 +129,7 @@ describe('_product-route', () => {
     })
 
     it('detects a Nitro fetch error exposing the status on the response object', () => {
-      expect(
-        isBackendNotFoundError({ response: { status: 404 } })
-      ).toBe(true)
+      expect(isBackendNotFoundError({ response: { status: 404 } })).toBe(true)
     })
 
     it('returns false for non-object inputs', () => {

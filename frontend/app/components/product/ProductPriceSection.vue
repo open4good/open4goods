@@ -16,11 +16,17 @@
         'product-price__charts--empty': visibleChartsCount === 0,
       }"
     >
-      <article v-if="hasNewHistory" ref="newChartCardRef" class="product-price__chart-card">
+      <article
+        v-if="hasNewHistory"
+        ref="newChartCardRef"
+        class="product-price__chart-card"
+      >
         <header class="product-price__chart-header">
           <div class="product-price__chart-heading">
             <h3>{{ $t('product.price.newOffers') }}</h3>
-            <p v-if="newTrendLabel" class="product-price__trend">{{ newTrendLabel }}</p>
+            <p v-if="newTrendLabel" class="product-price__trend">
+              {{ newTrendLabel }}
+            </p>
           </div>
         </header>
         <ClientOnly v-if="!isTestEnvironment">
@@ -38,23 +44,41 @@
           </template>
         </ClientOnly>
         <template v-else>
-          <div v-if="newChartOption" class="echart-stub" :data-option="JSON.stringify(newChartOption)"></div>
+          <div
+            v-if="newChartOption"
+            class="echart-stub"
+            :data-option="JSON.stringify(newChartOption)"
+          ></div>
           <div v-else class="product-price__chart-placeholder" />
         </template>
         <footer
           v-if="newStats"
           class="product-price__metrics"
-          :class="bestNewOffer ? 'product-price__metrics--with-offer' : 'product-price__metrics--solo'"
+          :class="
+            bestNewOffer
+              ? 'product-price__metrics--with-offer'
+              : 'product-price__metrics--solo'
+          "
         >
           <ClientOnly>
             <NuxtLink
               v-if="bestNewOffer && bestNewOfferLink"
               :to="bestNewOfferLink"
               class="product-price__metrics-highlight product-price__metrics-offer-card product-price__metrics-offer--link"
-              :aria-label="$t('product.price.metrics.viewOffer', {
-                source: bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
-              })"
-              @click="handleOfferRedirectClick(bestNewOffer, 'best-new-offer', bestNewOfferLink)"
+              :aria-label="
+                $t('product.price.metrics.viewOffer', {
+                  source:
+                    bestNewOffer?.datasourceName ??
+                    $t('product.price.metrics.unknownSource'),
+                })
+              "
+              @click="
+                handleOfferRedirectClick(
+                  bestNewOffer,
+                  'best-new-offer',
+                  bestNewOfferLink
+                )
+              "
             >
               <span class="product-price__metrics-label">
                 {{ $t('product.price.metrics.bestOffer') }}
@@ -66,16 +90,29 @@
                   :alt="bestNewOffer.datasourceName ?? ''"
                   width="48"
                   height="48"
-                >
+                />
                 <div class="product-price__metrics-offer-text">
                   <p class="product-price__metrics-price">
-                    {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
+                    {{
+                      formatCurrency(
+                        bestNewOffer?.price,
+                        bestNewOffer?.currency
+                      )
+                    }}
                   </p>
                   <p class="product-price__metrics-source">
-                    {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                    {{
+                      bestNewOffer?.datasourceName ??
+                      $t('product.price.metrics.unknownSource')
+                    }}
                   </p>
                 </div>
-                <v-icon icon="mdi-open-in-new" size="18" class="product-price__metrics-offer-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-open-in-new"
+                  size="18"
+                  class="product-price__metrics-offer-icon"
+                  aria-hidden="true"
+                />
               </div>
             </NuxtLink>
             <div
@@ -92,13 +129,21 @@
                   :alt="bestNewOffer.datasourceName ?? ''"
                   width="48"
                   height="48"
-                >
+                />
                 <div class="product-price__metrics-offer-text">
                   <p class="product-price__metrics-price">
-                    {{ formatCurrency(bestNewOffer?.price, bestNewOffer?.currency) }}
+                    {{
+                      formatCurrency(
+                        bestNewOffer?.price,
+                        bestNewOffer?.currency
+                      )
+                    }}
                   </p>
                   <p class="product-price__metrics-source">
-                    {{ bestNewOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                    {{
+                      bestNewOffer?.datasourceName ??
+                      $t('product.price.metrics.unknownSource')
+                    }}
                   </p>
                 </div>
               </div>
@@ -107,24 +152,63 @@
           <div class="product-price__metrics-summary">
             <dl>
               <div class="product-price__metrics-row">
-                <v-icon icon="mdi-trending-down" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-trending-down"
+                  size="20"
+                  class="product-price__metrics-stat-icon"
+                  aria-hidden="true"
+                />
                 <div class="product-price__metrics-stat-text">
                   <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                  <dd>{{ formatStat(newStats.min, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                  <dd>
+                    {{
+                      formatStat(
+                        newStats.min,
+                        bestNewOffer?.currency ??
+                          props.offers?.bestPrice?.currency
+                      )
+                    }}
+                  </dd>
                 </div>
               </div>
               <div class="product-price__metrics-row">
-                <v-icon icon="mdi-chart-line" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-chart-line"
+                  size="20"
+                  class="product-price__metrics-stat-icon"
+                  aria-hidden="true"
+                />
                 <div class="product-price__metrics-stat-text">
                   <dt>{{ $t('product.price.metrics.average') }}</dt>
-                  <dd>{{ formatStat(newStats.average, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                  <dd>
+                    {{
+                      formatStat(
+                        newStats.average,
+                        bestNewOffer?.currency ??
+                          props.offers?.bestPrice?.currency
+                      )
+                    }}
+                  </dd>
                 </div>
               </div>
               <div class="product-price__metrics-row">
-                <v-icon icon="mdi-trending-up" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-trending-up"
+                  size="20"
+                  class="product-price__metrics-stat-icon"
+                  aria-hidden="true"
+                />
                 <div class="product-price__metrics-stat-text">
                   <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                  <dd>{{ formatStat(newStats.max, bestNewOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                  <dd>
+                    {{
+                      formatStat(
+                        newStats.max,
+                        bestNewOffer?.currency ??
+                          props.offers?.bestPrice?.currency
+                      )
+                    }}
+                  </dd>
                 </div>
               </div>
             </dl>
@@ -132,7 +216,11 @@
         </footer>
       </article>
 
-      <article v-if="hasOccasionHistory" ref="occasionChartCardRef" class="product-price__chart-card">
+      <article
+        v-if="hasOccasionHistory"
+        ref="occasionChartCardRef"
+        class="product-price__chart-card"
+      >
         <header class="product-price__chart-header">
           <div class="product-price__chart-heading">
             <h3>{{ $t('product.price.occasionOffers') }}</h3>
@@ -163,17 +251,31 @@
         <footer
           v-if="occasionStats"
           class="product-price__metrics"
-          :class="bestOccasionOffer ? 'product-price__metrics--with-offer' : 'product-price__metrics--solo'"
+          :class="
+            bestOccasionOffer
+              ? 'product-price__metrics--with-offer'
+              : 'product-price__metrics--solo'
+          "
         >
           <ClientOnly>
             <NuxtLink
               v-if="bestOccasionOffer && bestOccasionOfferLink"
               :to="bestOccasionOfferLink"
               class="product-price__metrics-highlight product-price__metrics-offer-card product-price__metrics-offer--link"
-              :aria-label="$t('product.price.metrics.viewOffer', {
-                source: bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource'),
-              })"
-              @click="handleOfferRedirectClick(bestOccasionOffer, 'best-occasion-offer', bestOccasionOfferLink)"
+              :aria-label="
+                $t('product.price.metrics.viewOffer', {
+                  source:
+                    bestOccasionOffer?.datasourceName ??
+                    $t('product.price.metrics.unknownSource'),
+                })
+              "
+              @click="
+                handleOfferRedirectClick(
+                  bestOccasionOffer,
+                  'best-occasion-offer',
+                  bestOccasionOfferLink
+                )
+              "
             >
               <span class="product-price__metrics-label">
                 {{ $t('product.price.metrics.bestOffer') }}
@@ -185,16 +287,29 @@
                   :alt="bestOccasionOffer.datasourceName ?? ''"
                   width="48"
                   height="48"
-                >
+                />
                 <div class="product-price__metrics-offer-text">
                   <p class="product-price__metrics-price">
-                    {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
+                    {{
+                      formatCurrency(
+                        bestOccasionOffer?.price,
+                        bestOccasionOffer?.currency
+                      )
+                    }}
                   </p>
                   <p class="product-price__metrics-source">
-                    {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                    {{
+                      bestOccasionOffer?.datasourceName ??
+                      $t('product.price.metrics.unknownSource')
+                    }}
                   </p>
                 </div>
-                <v-icon icon="mdi-open-in-new" size="18" class="product-price__metrics-offer-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-open-in-new"
+                  size="18"
+                  class="product-price__metrics-offer-icon"
+                  aria-hidden="true"
+                />
               </div>
             </NuxtLink>
             <div
@@ -211,13 +326,21 @@
                   :alt="bestOccasionOffer.datasourceName ?? ''"
                   width="48"
                   height="48"
-                >
+                />
                 <div class="product-price__metrics-offer-text">
                   <p class="product-price__metrics-price">
-                    {{ formatCurrency(bestOccasionOffer?.price, bestOccasionOffer?.currency) }}
+                    {{
+                      formatCurrency(
+                        bestOccasionOffer?.price,
+                        bestOccasionOffer?.currency
+                      )
+                    }}
                   </p>
                   <p class="product-price__metrics-source">
-                    {{ bestOccasionOffer?.datasourceName ?? $t('product.price.metrics.unknownSource') }}
+                    {{
+                      bestOccasionOffer?.datasourceName ??
+                      $t('product.price.metrics.unknownSource')
+                    }}
                   </p>
                 </div>
               </div>
@@ -226,24 +349,63 @@
           <div class="product-price__metrics-summary">
             <dl>
               <div class="product-price__metrics-row">
-                <v-icon icon="mdi-trending-down" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-trending-down"
+                  size="20"
+                  class="product-price__metrics-stat-icon"
+                  aria-hidden="true"
+                />
                 <div class="product-price__metrics-stat-text">
                   <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                  <dd>{{ formatStat(occasionStats.min, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                  <dd>
+                    {{
+                      formatStat(
+                        occasionStats.min,
+                        bestOccasionOffer?.currency ??
+                          props.offers?.bestPrice?.currency
+                      )
+                    }}
+                  </dd>
                 </div>
               </div>
               <div class="product-price__metrics-row">
-                <v-icon icon="mdi-chart-line" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-chart-line"
+                  size="20"
+                  class="product-price__metrics-stat-icon"
+                  aria-hidden="true"
+                />
                 <div class="product-price__metrics-stat-text">
                   <dt>{{ $t('product.price.metrics.average') }}</dt>
-                  <dd>{{ formatStat(occasionStats.average, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                  <dd>
+                    {{
+                      formatStat(
+                        occasionStats.average,
+                        bestOccasionOffer?.currency ??
+                          props.offers?.bestPrice?.currency
+                      )
+                    }}
+                  </dd>
                 </div>
               </div>
               <div class="product-price__metrics-row">
-                <v-icon icon="mdi-trending-up" size="20" class="product-price__metrics-stat-icon" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-trending-up"
+                  size="20"
+                  class="product-price__metrics-stat-icon"
+                  aria-hidden="true"
+                />
                 <div class="product-price__metrics-stat-text">
                   <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                  <dd>{{ formatStat(occasionStats.max, bestOccasionOffer?.currency ?? props.offers?.bestPrice?.currency) }}</dd>
+                  <dd>
+                    {{
+                      formatStat(
+                        occasionStats.max,
+                        bestOccasionOffer?.currency ??
+                          props.offers?.bestPrice?.currency
+                      )
+                    }}
+                  </dd>
                 </div>
               </div>
             </dl>
@@ -251,7 +413,10 @@
         </footer>
       </article>
 
-      <p v-if="visibleChartsCount === 0" class="product-price__charts-empty-message">
+      <p
+        v-if="visibleChartsCount === 0"
+        class="product-price__charts-empty-message"
+      >
         {{ $t('product.price.noHistory') }}
       </p>
     </div>
@@ -272,12 +437,20 @@
           <tr v-for="offer in sortedOffers" :key="offer.id">
             <td>
               <div class="product-price__source">
-                <img v-if="offer.favicon" :src="offer.favicon" :alt="offer.datasourceName" width="18" height="18">
+                <img
+                  v-if="offer.favicon"
+                  :src="offer.favicon"
+                  :alt="offer.datasourceName"
+                  width="18"
+                  height="18"
+                />
                 <span>{{ offer.datasourceName }}</span>
               </div>
             </td>
             <td>
-              <a :href="offer.url" target="_blank" rel="noopener nofollow">{{ offer.offerName }}</a>
+              <a :href="offer.url" target="_blank" rel="noopener nofollow">{{
+                offer.offerName
+              }}</a>
             </td>
             <td>{{ formatCurrency(offer.price, offer.currency) }}</td>
             <td>{{ offer.conditionLabel }}</td>
@@ -306,9 +479,20 @@ import { useI18n } from 'vue-i18n'
 import { formatDistanceToNow, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { useAnalytics } from '~/composables/useAnalytics'
-import type { ProductDto, CommercialEvent, ProductAggregatedPriceDto } from '~~/shared/api-client'
+import type {
+  ProductDto,
+  CommercialEvent,
+  ProductAggregatedPriceDto,
+} from '~~/shared/api-client'
 
-use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, TitleComponent, CanvasRenderer])
+use([
+  LineChart,
+  GridComponent,
+  TooltipComponent,
+  DataZoomComponent,
+  TitleComponent,
+  CanvasRenderer,
+])
 
 const props = defineProps({
   sectionId: {
@@ -326,7 +510,8 @@ const props = defineProps({
 })
 
 const { locale, n, t } = useI18n()
-const { trackProductRedirect, extractTokenFromLink, isClientContribLink } = useAnalytics()
+const { trackProductRedirect, extractTokenFromLink, isClientContribLink } =
+  useAnalytics()
 
 type HistoryEntry = { timestamp: number; price: number }
 
@@ -335,45 +520,84 @@ const occasionChartCardRef = ref<HTMLElement | null>(null)
 
 const isTestEnvironment = Boolean(import.meta.vitest ?? process.env.VITEST)
 
-const chartVisibility = ref({ new: isTestEnvironment, occasion: isTestEnvironment })
+const chartVisibility = ref({
+  new: isTestEnvironment,
+  occasion: isTestEnvironment,
+})
 let chartObserver: IntersectionObserver | null = null
 
 const normalizeHistoryEntries = (
-  entries?: Array<{ timestamp?: number | null; price?: number | null }>,
+  entries?: Array<{ timestamp?: number | null; price?: number | null }>
 ): HistoryEntry[] =>
   (entries ?? [])
-    .map((entry) => ({
-      timestamp: typeof entry.timestamp === 'number' ? entry.timestamp : Number(entry.timestamp ?? Number.NaN),
-      price: typeof entry.price === 'number' ? entry.price : Number(entry.price ?? Number.NaN),
+    .map(entry => ({
+      timestamp:
+        typeof entry.timestamp === 'number'
+          ? entry.timestamp
+          : Number(entry.timestamp ?? Number.NaN),
+      price:
+        typeof entry.price === 'number'
+          ? entry.price
+          : Number(entry.price ?? Number.NaN),
     }))
-    .filter((entry): entry is HistoryEntry => Number.isFinite(entry.timestamp) && Number.isFinite(entry.price))
+    .filter(
+      (entry): entry is HistoryEntry =>
+        Number.isFinite(entry.timestamp) && Number.isFinite(entry.price)
+    )
 
 const MIN_HISTORY_POINTS = 3
 
-const newHistory = computed(() => normalizeHistoryEntries(props.offers?.newHistory?.entries))
-const occasionHistory = computed(() => normalizeHistoryEntries(props.offers?.occasionHistory?.entries))
+const newHistory = computed(() =>
+  normalizeHistoryEntries(props.offers?.newHistory?.entries)
+)
+const occasionHistory = computed(() =>
+  normalizeHistoryEntries(props.offers?.occasionHistory?.entries)
+)
 
-const hasNewHistory = computed(() => newHistory.value.length >= MIN_HISTORY_POINTS)
-const hasOccasionHistory = computed(() => occasionHistory.value.length >= MIN_HISTORY_POINTS)
+const hasNewHistory = computed(
+  () => newHistory.value.length >= MIN_HISTORY_POINTS
+)
+const hasOccasionHistory = computed(
+  () => occasionHistory.value.length >= MIN_HISTORY_POINTS
+)
 
 const resolvedEvents = computed(() =>
   props.commercialEvents
-    .map((event) => ({
+    .map(event => ({
       label: event.label,
       start: event.startDate ? new Date(event.startDate).getTime() : Number.NaN,
       end: event.endDate ? new Date(event.endDate).getTime() : Number.NaN,
     }))
-    .filter((event) => Number.isFinite(event.start) && Number.isFinite(event.end) && event.start <= event.end),
+    .filter(
+      event =>
+        Number.isFinite(event.start) &&
+        Number.isFinite(event.end) &&
+        event.start <= event.end
+    )
 )
 
 const newChartOption = computed(() =>
-  hasNewHistory.value ? buildChartOption(newHistory.value, resolvedEvents.value, t('product.price.newOffers')) : null,
+  hasNewHistory.value
+    ? buildChartOption(
+        newHistory.value,
+        resolvedEvents.value,
+        t('product.price.newOffers')
+      )
+    : null
 )
 const occasionChartOption = computed(() =>
-  hasOccasionHistory.value ? buildChartOption(occasionHistory.value, resolvedEvents.value, t('product.price.occasionOffers')) : null,
+  hasOccasionHistory.value
+    ? buildChartOption(
+        occasionHistory.value,
+        resolvedEvents.value,
+        t('product.price.occasionOffers')
+      )
+    : null
 )
 
-const visibleChartsCount = computed(() => [hasNewHistory.value, hasOccasionHistory.value].filter(Boolean).length)
+const visibleChartsCount = computed(
+  () => [hasNewHistory.value, hasOccasionHistory.value].filter(Boolean).length
+)
 
 const observeCharts = () => {
   if (chartObserver || (!hasNewHistory.value && !hasOccasionHistory.value)) {
@@ -397,8 +621,8 @@ const observeCharts = () => {
   }
 
   chartObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
+    entries => {
+      entries.forEach(entry => {
         if (!entry.isIntersecting || entry.intersectionRatio < 0.3) {
           return
         }
@@ -414,7 +638,7 @@ const observeCharts = () => {
         }
       })
     },
-    { threshold: 0.3 },
+    { threshold: 0.3 }
   )
 
   if (newChartCardRef.value) {
@@ -441,7 +665,7 @@ const computeHistoryStats = (entries: HistoryEntry[]): HistoryStats | null => {
     return null
   }
 
-  const prices = entries.map((entry) => entry.price)
+  const prices = entries.map(entry => entry.price)
   const min = Math.min(...prices)
   const max = Math.max(...prices)
   const average = prices.reduce((acc, price) => acc + price, 0) / prices.length
@@ -449,13 +673,21 @@ const computeHistoryStats = (entries: HistoryEntry[]): HistoryStats | null => {
   return { min, max, average }
 }
 
-const newStats = computed(() => (hasNewHistory.value ? computeHistoryStats(newHistory.value) : null))
-const occasionStats = computed(() => (hasOccasionHistory.value ? computeHistoryStats(occasionHistory.value) : null))
+const newStats = computed(() =>
+  hasNewHistory.value ? computeHistoryStats(newHistory.value) : null
+)
+const occasionStats = computed(() =>
+  hasOccasionHistory.value ? computeHistoryStats(occasionHistory.value) : null
+)
 
 const bestNewOffer = computed(() => props.offers?.bestNewOffer ?? null)
-const bestOccasionOffer = computed(() => props.offers?.bestOccasionOffer ?? null)
+const bestOccasionOffer = computed(
+  () => props.offers?.bestOccasionOffer ?? null
+)
 
-const resolveOfferLink = (offer: ProductAggregatedPriceDto | null | undefined): string | null => {
+const resolveOfferLink = (
+  offer: ProductAggregatedPriceDto | null | undefined
+): string | null => {
   if (!offer || typeof offer !== 'object') {
     return null
   }
@@ -465,16 +697,18 @@ const resolveOfferLink = (offer: ProductAggregatedPriceDto | null | undefined): 
     return `/contrib/${token}`
   }
 
-  return 'url' in offer ? offer.url ?? null : null
+  return 'url' in offer ? (offer.url ?? null) : null
 }
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
-const bestOccasionOfferLink = computed(() => resolveOfferLink(bestOccasionOffer.value))
+const bestOccasionOfferLink = computed(() =>
+  resolveOfferLink(bestOccasionOffer.value)
+)
 
 const handleOfferRedirectClick = (
   offer: ProductAggregatedPriceDto | null,
   placement: string,
-  link?: string | null,
+  link?: string | null
 ) => {
   if (!isClientContribLink(link)) {
     return
@@ -489,7 +723,9 @@ const handleOfferRedirectClick = (
 }
 
 const formatStat = (value?: number | null, currency: string = 'EUR') =>
-  value == null || Number.isNaN(value) ? '—' : n(value, { style: 'currency', currency, maximumFractionDigits: 2 })
+  value == null || Number.isNaN(value)
+    ? '—'
+    : n(value, { style: 'currency', currency, maximumFractionDigits: 2 })
 
 const newTrendLabel = computed(() => {
   const trend = props.offers?.newTrend
@@ -498,11 +734,23 @@ const newTrendLabel = computed(() => {
   }
 
   if (trend.trend === 'PRICE_DECREASE') {
-    return t('product.price.trend.decrease', { amount: n(Math.abs(trend.variation ?? 0), { style: 'currency', currency: props.offers?.bestPrice?.currency ?? 'EUR', maximumFractionDigits: 2 }) })
+    return t('product.price.trend.decrease', {
+      amount: n(Math.abs(trend.variation ?? 0), {
+        style: 'currency',
+        currency: props.offers?.bestPrice?.currency ?? 'EUR',
+        maximumFractionDigits: 2,
+      }),
+    })
   }
 
   if (trend.trend === 'PRICE_INCREASE') {
-    return t('product.price.trend.increase', { amount: n(Math.abs(trend.variation ?? 0), { style: 'currency', currency: props.offers?.bestPrice?.currency ?? 'EUR', maximumFractionDigits: 2 }) })
+    return t('product.price.trend.increase', {
+      amount: n(Math.abs(trend.variation ?? 0), {
+        style: 'currency',
+        currency: props.offers?.bestPrice?.currency ?? 'EUR',
+        maximumFractionDigits: 2,
+      }),
+    })
   }
 
   return t('product.price.trend.stable')
@@ -510,31 +758,36 @@ const newTrendLabel = computed(() => {
 
 const sortedOffers = computed(() => {
   const entries = props.offers?.offersByCondition ?? {}
-  const aggregated = Object.values(entries).flat().map((offer, index) => ({
-    ...offer,
-    id: offer.url ?? `${offer.datasourceName ?? 'source'}-${index}`,
-    conditionLabel: t(
-      `product.price.condition.${typeof offer.condition === 'string' ? offer.condition.toLowerCase() : 'new'}`,
-    ),
-    updatedLabel: formatUpdated(offer.timeStamp),
-  }))
+  const aggregated = Object.values(entries)
+    .flat()
+    .map((offer, index) => ({
+      ...offer,
+      id: offer.url ?? `${offer.datasourceName ?? 'source'}-${index}`,
+      conditionLabel: t(
+        `product.price.condition.${typeof offer.condition === 'string' ? offer.condition.toLowerCase() : 'new'}`
+      ),
+      updatedLabel: formatUpdated(offer.timeStamp),
+    }))
 
   return aggregated
-    .filter((offer): offer is typeof aggregated[number] & { price: number } => typeof offer.price === 'number')
+    .filter(
+      (offer): offer is (typeof aggregated)[number] & { price: number } =>
+        typeof offer.price === 'number'
+    )
     .sort((a, b) => a.price - b.price)
 })
 
 const buildChartOption = (
   entries: HistoryEntry[],
   events: Array<{ start: number; end: number; label?: string }>,
-  title: string,
+  title: string
 ) => {
   if (entries.length < MIN_HISTORY_POINTS) {
     return null
   }
 
-  const data = entries.map((entry) => [entry.timestamp, entry.price])
-  const markArea = events.map((event) => [
+  const data = entries.map(entry => [entry.timestamp, entry.price])
+  const markArea = events.map(event => [
     {
       xAxis: event.start,
       itemStyle: { color: 'rgba(59, 130, 246, 0.08)' },
@@ -550,7 +803,12 @@ const buildChartOption = (
   ])
 
   return {
-    title: { text: title, left: 'center', top: 10, textStyle: { fontSize: 14, fontWeight: 600 } },
+    title: {
+      text: title,
+      left: 'center',
+      top: 10,
+      textStyle: { fontSize: 14, fontWeight: 600 },
+    },
     tooltip: {
       trigger: 'axis',
       valueFormatter: (value: number | string) =>
@@ -571,7 +829,9 @@ const buildChartOption = (
             return ''
           }
 
-          return format(numericValue, 'dd MMM', { locale: locale.value.startsWith('fr') ? fr : enUS })
+          return format(numericValue, 'dd MMM', {
+            locale: locale.value.startsWith('fr') ? fr : enUS,
+          })
         },
       },
     },
@@ -643,7 +903,8 @@ const formatCurrency = (value?: number | null, currency: string = 'EUR') => {
 }
 
 const formatUpdated = (timestamp?: number | null) => {
-  const numericTimestamp = typeof timestamp === 'number' ? timestamp : Number(timestamp)
+  const numericTimestamp =
+    typeof timestamp === 'number' ? timestamp : Number(timestamp)
   if (!Number.isFinite(numericTimestamp) || numericTimestamp <= 0) {
     return '—'
   }
@@ -814,7 +1075,9 @@ onBeforeUnmount(() => {
 .product-price__metrics-offer--link {
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-price__metrics-offer--link:hover,

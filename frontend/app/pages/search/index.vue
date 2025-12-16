@@ -1,7 +1,10 @@
 <template>
   <div class="search-page">
     <section class="search-hero" aria-labelledby="search-hero-heading">
-      <v-container class="search-hero__container py-0 px-4 mx-auto" max-width="xl">
+      <v-container
+        class="search-hero__container py-0 px-4 mx-auto"
+        max-width="xl"
+      >
         <div class="search-hero__content">
           <p class="search-hero__eyebrow">{{ t('search.hero.eyebrow') }}</p>
           <div class="search-hero__copy">
@@ -9,7 +12,10 @@
               {{ t('search.hero.title') }}
             </h1>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="search-hero__subtitle subtitle-text" v-html="t('search.hero.subtitle')" />
+            <p
+              class="search-hero__subtitle subtitle-text"
+              v-html="t('search.hero.subtitle')"
+            />
           </div>
 
           <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
@@ -33,7 +39,10 @@
           <p v-if="showInitialState" class="search-hero__helper">
             {{ t('search.states.initial') }}
           </p>
-          <p v-else-if="showMinimumNotice" class="search-hero__helper search-hero__helper--warning">
+          <p
+            v-else-if="showMinimumNotice"
+            class="search-hero__helper search-hero__helper--warning"
+          >
             {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
           </p>
         </div>
@@ -49,7 +58,11 @@
       role="progressbar"
     />
 
-    <v-container v-if="hasMinimumLength" class="search-page__results py-10 px-4 mx-auto" max-width="xl">
+    <v-container
+      v-if="hasMinimumLength"
+      class="search-page__results py-10 px-4 mx-auto"
+      max-width="xl"
+    >
       <v-alert
         v-if="error"
         type="error"
@@ -60,16 +73,25 @@
         role="alert"
       >
         <div class="search-page__alert-content">
-          <p class="search-page__alert-title">{{ t('search.states.error.title') }}</p>
-          <p class="search-page__alert-description">{{ t('search.states.error.description') }}</p>
+          <p class="search-page__alert-title">
+            {{ t('search.states.error.title') }}
+          </p>
+          <p class="search-page__alert-description">
+            {{ t('search.states.error.description') }}
+          </p>
         </div>
         <template #append>
-          <v-btn color="primary" variant="text" @click="refresh">{{ t('common.actions.retry') }}</v-btn>
+          <v-btn color="primary" variant="text" @click="refresh">{{
+            t('common.actions.retry')
+          }}</v-btn>
         </template>
       </v-alert>
 
       <template v-else>
-        <div v-if="!displayGroups.length && !pending" class="search-page__empty">
+        <div
+          v-if="!displayGroups.length && !pending"
+          class="search-page__empty"
+        >
           <h2 class="search-page__empty-title">
             {{ t('search.states.empty.title', { query: normalizedQuery }) }}
           </h2>
@@ -95,7 +117,9 @@
             :popular-attributes="group.popularAttributes"
             :vertical-home-url="group.verticalHomeUrl"
             :category-link-label="t('search.groups.viewCategory')"
-            :category-link-aria="t('search.groups.viewCategoryAria', { title: group.title })"
+            :category-link-aria="
+              t('search.groups.viewCategoryAria', { title: group.title })
+            "
           />
         </div>
       </template>
@@ -136,55 +160,56 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const routeQuery = computed(() =>
-  typeof route.query.q === 'string' ? route.query.q : '',
+  typeof route.query.q === 'string' ? route.query.q : ''
 )
 const searchInput = ref(routeQuery.value)
 
-watch(routeQuery, (value) => {
+watch(routeQuery, value => {
   searchInput.value = value
 })
 
 const normalizedQuery = computed(() => routeQuery.value.trim())
 const trimmedInput = computed(() => searchInput.value.trim())
 const hasMinimumLength = computed(
-  () => normalizedQuery.value.length >= MIN_QUERY_LENGTH,
+  () => normalizedQuery.value.length >= MIN_QUERY_LENGTH
 )
 const showInitialState = computed(
-  () => trimmedInput.value.length === 0 && normalizedQuery.value.length === 0,
+  () => trimmedInput.value.length === 0 && normalizedQuery.value.length === 0
 )
 const showMinimumNotice = computed(
-  () => trimmedInput.value.length > 0 && trimmedInput.value.length < MIN_QUERY_LENGTH,
+  () =>
+    trimmedInput.value.length > 0 &&
+    trimmedInput.value.length < MIN_QUERY_LENGTH
 )
 
-const { data, pending, error, refresh } = await useAsyncData<
-  GlobalSearchResponseDto | null
->(
-  'global-search',
-  async () => {
-    if (!hasMinimumLength.value) {
-      return null
+const { data, pending, error, refresh } =
+  await useAsyncData<GlobalSearchResponseDto | null>(
+    'global-search',
+    async () => {
+      if (!hasMinimumLength.value) {
+        return null
+      }
+
+      return await $fetch<GlobalSearchResponseDto>('/api/search', {
+        headers: requestHeaders,
+        params: {
+          query: normalizedQuery.value,
+        },
+      })
+    },
+    {
+      watch: [() => normalizedQuery.value],
+      immediate: hasMinimumLength.value,
     }
-
-    return await $fetch<GlobalSearchResponseDto>('/api/search', {
-      headers: requestHeaders,
-      params: {
-        query: normalizedQuery.value,
-      },
-    })
-  },
-  {
-    watch: [() => normalizedQuery.value],
-    immediate: hasMinimumLength.value,
-  },
-)
+  )
 
 watch(
   () => hasMinimumLength.value,
-  (canSearch) => {
+  canSearch => {
     if (!canSearch && data.value) {
       data.value = null
     }
-  },
+  }
 )
 
 const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
@@ -193,14 +218,14 @@ const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
     $fetch<VerticalConfigDto[]>('/api/categories', {
       headers: requestHeaders,
       params: { onlyEnabled: true },
-    }),
+    })
 )
 
 const verticals = computed(() => verticalsData.value ?? [])
 const verticalById = computed(() => {
   const entries = new Map<string, VerticalConfigDto>()
 
-  verticals.value.forEach((vertical) => {
+  verticals.value.forEach(vertical => {
     if (vertical.id) {
       entries.set(vertical.id, vertical)
     }
@@ -218,7 +243,9 @@ interface SearchGroup {
   verticalHomeUrl: string | null
 }
 
-const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
+const normalizeVerticalHomeUrl = (
+  raw: string | null | undefined
+): string | null => {
   if (!raw) {
     return null
   }
@@ -236,10 +263,10 @@ const buildGroupCountLabel = (count: number) =>
   translatePlural('search.groups.count', count, { count })
 
 const extractProducts = (
-  results: { product?: ProductDto | null }[] | undefined,
+  results: { product?: ProductDto | null }[] | undefined
 ): ProductDto[] =>
   (results ?? [])
-    .map((entry) => entry.product)
+    .map(entry => entry.product)
     .filter((product): product is ProductDto => Boolean(product))
 
 const primaryGroups = computed(() => {
@@ -249,7 +276,9 @@ const primaryGroups = computed(() => {
     .map((group, index) => {
       const products = extractProducts(group.results)
       const verticalId = group.verticalId ?? null
-      const vertical = verticalId ? verticalById.value.get(verticalId) ?? null : null
+      const vertical = verticalId
+        ? (verticalById.value.get(verticalId) ?? null)
+        : null
 
       if (!products.length) {
         return null
@@ -257,10 +286,14 @@ const primaryGroups = computed(() => {
 
       const title =
         vertical?.verticalHomeTitle ??
-        (verticalId ? formatFallbackVerticalTitle(verticalId) : t('search.groups.unknownTitle'))
+        (verticalId
+          ? formatFallbackVerticalTitle(verticalId)
+          : t('search.groups.unknownTitle'))
 
       const countLabel = buildGroupCountLabel(products.length)
-      const verticalHomeUrl = normalizeVerticalHomeUrl(vertical?.verticalHomeUrl)
+      const verticalHomeUrl = normalizeVerticalHomeUrl(
+        vertical?.verticalHomeUrl
+      )
 
       return {
         key: `primary-${verticalId ?? index}`,
@@ -297,12 +330,18 @@ const fallbackGroups = computed(() => {
         return null
       }
 
-      const vertical = verticalId ? verticalById.value.get(verticalId) ?? null : null
+      const vertical = verticalId
+        ? (verticalById.value.get(verticalId) ?? null)
+        : null
       const title =
         vertical?.verticalHomeTitle ??
-        (verticalId ? formatFallbackVerticalTitle(verticalId) : t('search.groups.unknownTitle'))
+        (verticalId
+          ? formatFallbackVerticalTitle(verticalId)
+          : t('search.groups.unknownTitle'))
       const countLabel = buildGroupCountLabel(products.length)
-      const verticalHomeUrl = normalizeVerticalHomeUrl(vertical?.verticalHomeUrl)
+      const verticalHomeUrl = normalizeVerticalHomeUrl(
+        vertical?.verticalHomeUrl
+      )
 
       return {
         key: `fallback-${verticalId ?? index}`,
@@ -318,27 +357,27 @@ const fallbackGroups = computed(() => {
 })
 
 const usingFallback = computed(
-  () => !primaryGroups.value.length && fallbackGroups.value.length > 0,
+  () => !primaryGroups.value.length && fallbackGroups.value.length > 0
 )
 const displayGroups = computed(() =>
-  primaryGroups.value.length ? primaryGroups.value : fallbackGroups.value,
+  primaryGroups.value.length ? primaryGroups.value : fallbackGroups.value
 )
 
 const totalResults = computed(() =>
-  displayGroups.value.reduce((sum, group) => sum + group.products.length, 0),
+  displayGroups.value.reduce((sum, group) => sum + group.products.length, 0)
 )
 
 const resultsCountLabel = computed(() =>
   translatePlural('search.results.count', totalResults.value, {
     count: totalResults.value,
-  }),
+  })
 )
 
 const resultsSummaryLabel = computed(() =>
   t('search.results.summary', {
     countLabel: resultsCountLabel.value,
     query: normalizedQuery.value,
-  }),
+  })
 )
 
 const handleSearchSubmit = () => {
@@ -369,7 +408,7 @@ const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
     suggestion.url ??
       (suggestion.verticalId
         ? verticalById.value.get(suggestion.verticalId)?.verticalHomeUrl
-        : null),
+        : null)
   )
 
   if (!verticalUrl) {
@@ -394,28 +433,28 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
     localePath({
       name: 'gtin',
       params: { gtin },
-    }),
+    })
   )
 }
 
-const canonicalUrl = computed(
-  () => new URL(localePath({ name: 'search' }), requestURL.origin).toString(),
+const canonicalUrl = computed(() =>
+  new URL(localePath({ name: 'search' }), requestURL.origin).toString()
 )
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 const ogLocale = computed(() => locale.value.replace('-', '_'))
-const ogImageUrl = computed(
-  () => new URL('/nudger-icon-512x512.png', requestURL.origin).toString(),
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 const ogImageAlt = computed(() => String(t('search.seo.imageAlt')))
 const alternateLinks = computed(() =>
-  availableLocales.map((availableLocale) => ({
+  availableLocales.map(availableLocale => ({
     rel: 'alternate' as const,
     hreflang: availableLocale,
     href: new URL(
       localePath({ name: 'search' }, availableLocale),
-      requestURL.origin,
+      requestURL.origin
     ).toString(),
-  })),
+  }))
 )
 
 useSeoMeta({
@@ -442,7 +481,7 @@ function formatFallbackVerticalTitle(verticalId: string): string {
   return verticalId
     .split(/[-_]/u)
     .filter(Boolean)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ')
 }
 </script>

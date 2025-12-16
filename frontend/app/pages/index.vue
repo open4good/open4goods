@@ -13,7 +13,10 @@ import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
 import HomeRoundedCardShowcase from '~/components/home/sections/HomeRoundedCardShowcase.vue'
 import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
-import type { CategorySuggestionItem, ProductSuggestionItem } from '~/components/search/SearchSuggestField.vue'
+import type {
+  CategorySuggestionItem,
+  ProductSuggestionItem,
+} from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
 import { useThemedAsset } from '~/composables/useThemedAsset'
@@ -44,26 +47,43 @@ const heroBackgrounds = computed(() => ({
   dark: '/images/home/hero-full-viewport-dark.jpg',
 }))
 
-type ParallaxSectionId = 'essentials' | 'features' | 'blog' | 'objections' | 'cta'
+type ParallaxSectionId =
+  | 'essentials'
+  | 'features'
+  | 'blog'
+  | 'objections'
+  | 'cta'
 
 const parallaxAssetPaths: Record<ParallaxSectionId, string[]> = {
-  essentials: ['parallax/parallax-background-1.svg', 'parallax/parallax-background-bubbles-1.svg'],
-  features: ['parallax/parallax-background-2.svg', 'parallax/parallax-background-bubbles-2.svg'],
-  blog: ['parallax/parallax-background-3.svg', 'parallax/parallax-background-bubbles-3.svg'],
-  objections: ['parallax/parallax-background-1.svg', 'parallax/parallax-background-bubbles-1.svg'],
+  essentials: [
+    'parallax/parallax-background-1.svg',
+    'parallax/parallax-background-bubbles-1.svg',
+  ],
+  features: [
+    'parallax/parallax-background-2.svg',
+    'parallax/parallax-background-bubbles-2.svg',
+  ],
+  blog: [
+    'parallax/parallax-background-3.svg',
+    'parallax/parallax-background-bubbles-3.svg',
+  ],
+  objections: [
+    'parallax/parallax-background-1.svg',
+    'parallax/parallax-background-bubbles-1.svg',
+  ],
   cta: ['parallax/parallax-background-2.svg'],
 }
 
 const parallaxAssets = Object.fromEntries(
   Object.entries(parallaxAssetPaths).map(([section, assets]) => [
     section,
-    assets.map((assetPath) => useThemedAsset(assetPath)),
-  ]),
+    assets.map(assetPath => useThemedAsset(assetPath)),
+  ])
 ) as Record<ParallaxSectionId, ReturnType<typeof useThemedAsset>[]>
 
 const resolveParallaxLayers = (section: ParallaxSectionId) =>
   parallaxAssets[section]
-    .map((asset) => asset.value?.trim())
+    .map(asset => asset.value?.trim())
     .filter((asset): asset is string => Boolean(asset))
 
 const parallaxBackgrounds = computed(() => ({
@@ -121,24 +141,28 @@ const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
 })
 
 const markAllSectionsVisible = () => {
-  (Object.keys(animatedSections) as AnimatedSectionKey[]).forEach((key) => {
+  ;(Object.keys(animatedSections) as AnimatedSectionKey[]).forEach(key => {
     animatedSections[key] = true
   })
 }
 
 watch(
   prefersReducedMotion,
-  (shouldReduce) => {
+  shouldReduce => {
     if (shouldReduce) {
       markAllSectionsVisible()
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const createIntersectHandler =
   (key: AnimatedSectionKey) =>
-  (_entries: IntersectionObserverEntry[], _observer: IntersectionObserver, isIntersecting: boolean) => {
+  (
+    _entries: IntersectionObserverEntry[],
+    _observer: IntersectionObserver,
+    isIntersecting: boolean
+  ) => {
     if (animatedSections[key]) {
       return
     }
@@ -172,7 +196,8 @@ const stripHtmlComments = (value: string) => {
   return input
 }
 
-const sanitizeBlogSummary = (value: unknown) => stripHtmlComments(toSafeString(value)).trim()
+const sanitizeBlogSummary = (value: unknown) =>
+  stripHtmlComments(toSafeString(value)).trim()
 
 const hasRenderableImage = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
@@ -305,13 +330,13 @@ const faqPanels = computed(() =>
   faqItems.value.map((item, index) => ({
     ...item,
     blocId: `HOME:FAQ:${index + 1}`,
-  })),
+  }))
 )
 
 const faqJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: faqItems.value.map((item) => ({
+  mainEntity: faqItems.value.map(item => ({
     '@type': 'Question',
     name: item.question,
     acceptedAnswer: {
@@ -321,26 +346,41 @@ const faqJsonLd = computed(() => ({
   })),
 }))
 
-const canonicalUrl = computed(
-  () => new URL(resolveLocalizedRoutePath('index', locale.value), requestURL.origin).toString(),
+const canonicalUrl = computed(() =>
+  new URL(
+    resolveLocalizedRoutePath('index', locale.value),
+    requestURL.origin
+  ).toString()
 )
 
 const alternateLinks = computed(() =>
-  availableLocales.map((availableLocale) => ({
+  availableLocales.map(availableLocale => ({
     rel: 'alternate' as const,
     hreflang: availableLocale,
-    href: new URL(resolveLocalizedRoutePath('index', availableLocale), requestURL.origin).toString(),
-  })),
+    href: new URL(
+      resolveLocalizedRoutePath('index', availableLocale),
+      requestURL.origin
+    ).toString(),
+  }))
 )
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
-const logoUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
-
-const localizedHomeUrls = computed(() =>
-  Array.from(new Set([canonicalUrl.value, ...alternateLinks.value.map((link) => link.href)])),
+const logoUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-const linkedinUrl = computed(() => toTrimmedString(t('siteIdentity.links.linkedin')))
+const localizedHomeUrls = computed(() =>
+  Array.from(
+    new Set([
+      canonicalUrl.value,
+      ...alternateLinks.value.map(link => link.href),
+    ])
+  )
+)
+
+const linkedinUrl = computed(() =>
+  toTrimmedString(t('siteIdentity.links.linkedin'))
+)
 
 const organizationJsonLd = computed(() => ({
   '@context': 'https://schema.org',
@@ -348,11 +388,16 @@ const organizationJsonLd = computed(() => ({
   name: siteName.value,
   url: canonicalUrl.value,
   logo: logoUrl.value,
-  sameAs: Array.from(new Set([linkedinUrl.value, ...localizedHomeUrls.value].filter(Boolean))),
+  sameAs: Array.from(
+    new Set([linkedinUrl.value, ...localizedHomeUrls.value].filter(Boolean))
+  ),
 }))
 
-const searchPageUrl = computed(
-  () => new URL(resolveLocalizedRoutePath('search', locale.value), requestURL.origin).toString(),
+const searchPageUrl = computed(() =>
+  new URL(
+    resolveLocalizedRoutePath('search', locale.value),
+    requestURL.origin
+  ).toString()
 )
 
 const websiteJsonLd = computed(() => ({
@@ -371,7 +416,9 @@ const websiteJsonLd = computed(() => ({
 
 const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
 
-const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
+const normalizeVerticalHomeUrl = (
+  raw: string | null | undefined
+): string | null => {
   if (!raw) {
     return null
   }
@@ -390,7 +437,7 @@ const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null
 }
 
 const blogDateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }),
+  () => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
 )
 
 const fallbackBlogEntries = computed<HomeBlogItem[]>(() => [
@@ -402,14 +449,20 @@ const fallbackBlogEntries = computed<HomeBlogItem[]>(() => [
     slug: 'impact-score-ia',
   },
   {
-    url: localePath({ name: 'blog-slug', params: { slug: 'prioriser-durabilite' } }),
+    url: localePath({
+      name: 'blog-slug',
+      params: { slug: 'prioriser-durabilite' },
+    }),
     title: String(t('home.blog.items.second.title')),
     summary: String(t('home.blog.items.second.excerpt')),
     formattedDate: String(t('home.blog.items.second.date')),
     slug: 'prioriser-durabilite',
   },
   {
-    url: localePath({ name: 'blog-slug', params: { slug: 'equilibrer-prix-impact' } }),
+    url: localePath({
+      name: 'blog-slug',
+      params: { slug: 'equilibrer-prix-impact' },
+    }),
     title: String(t('home.blog.items.third.title')),
     summary: String(t('home.blog.items.third.excerpt')),
     formattedDate: String(t('home.blog.items.third.date')),
@@ -424,14 +477,15 @@ const blogListItems = computed<HomeBlogItem[]>(() => {
     return fallbackBlogEntries.value
   }
 
-  return articles.map((article) => {
+  return articles.map(article => {
     const formattedDate = article.createdMs
       ? blogDateFormatter.value.format(new Date(article.createdMs))
       : ''
 
     const title = toTrimmedString(article.title)
     const summary = sanitizeBlogSummary(article.summary)
-    const image = typeof article.image === 'string' ? article.image.trim() : null
+    const image =
+      typeof article.image === 'string' ? article.image.trim() : null
 
     return {
       ...article,
@@ -483,7 +537,10 @@ const extractBlogSlug = (article: BlogPostDto): string | null => {
     return candidate
   }
 
-  return pickSlugSegment((article as { slug?: string }).slug) ?? pickSlugSegment(article.url)
+  return (
+    pickSlugSegment((article as { slug?: string }).slug) ??
+    pickSlugSegment(article.url)
+  )
 }
 
 const resolveBlogArticleLink = (article: BlogPostDto) => {
@@ -497,7 +554,7 @@ const resolveBlogArticleLink = (article: BlogPostDto) => {
 }
 
 const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
-  blogListItems.value.map((item) => {
+  blogListItems.value.map(item => {
     const link = resolveBlogArticleLink(item)
     const hasImage = hasRenderableImage(item.image)
 
@@ -506,7 +563,7 @@ const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
       link,
       hasImage,
     }
-  }),
+  })
 )
 
 const featuredBlogItem = computed(() => enrichedBlogItems.value[0] ?? null)
@@ -521,14 +578,17 @@ const navigateToSearch = (query?: string) => {
     localePath({
       name: 'search',
       query: normalizedQuery ? { q: normalizedQuery } : undefined,
-    }),
+    })
   )
 }
 
 const handleSearchSubmit = () => {
   const trimmedQuery = searchQuery.value.trim()
 
-  if (trimmedQuery.length > 0 && trimmedQuery.length < MIN_SUGGESTION_QUERY_LENGTH) {
+  if (
+    trimmedQuery.length > 0 &&
+    trimmedQuery.length < MIN_SUGGESTION_QUERY_LENGTH
+  ) {
     return
   }
 
@@ -557,7 +617,7 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
       localePath({
         name: 'gtin',
         params: { gtin },
-      }),
+      })
     )
     return
   }
@@ -627,8 +687,8 @@ useHead(() => ({
       >
         <div class="home-page__stack">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('problems')"
+            class="home-page__section"
           >
             <v-slide-y-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.problems">
@@ -638,8 +698,8 @@ useHead(() => ({
           </div>
 
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('solution')"
+            class="home-page__section"
           >
             <v-slide-y-reverse-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.solution">
@@ -660,8 +720,8 @@ useHead(() => ({
         content-align="center"
       >
         <div
-          class="home-page__section"
           v-intersect="createIntersectHandler('features')"
+          class="home-page__section"
         >
           <v-scale-transition :disabled="prefersReducedMotion">
             <div v-show="animatedSections.features">
@@ -682,8 +742,8 @@ useHead(() => ({
       >
         <div class="home-page__stack">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('blog')"
+            class="home-page__section"
           >
             <v-slide-x-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.blog">
@@ -709,8 +769,8 @@ useHead(() => ({
       >
         <div class="home-page__stack">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('objections')"
+            class="home-page__section"
           >
             <v-slide-x-reverse-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.objections">
@@ -732,8 +792,8 @@ useHead(() => ({
       >
         <div class="home-page__stack home-page__stack--compact">
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('faq')"
+            class="home-page__section"
           >
             <v-fade-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.faq">
@@ -743,8 +803,8 @@ useHead(() => ({
           </div>
 
           <div
-            class="home-page__section"
             v-intersect="createIntersectHandler('cta')"
+            class="home-page__section"
           >
             <v-slide-y-transition :disabled="prefersReducedMotion">
               <div v-show="animatedSections.cta">
@@ -768,46 +828,45 @@ useHead(() => ({
 </template>
 
 <style scoped lang="sass">
-  .home-page
-    --cat-height: 150px
-    --cat-in-hero: calc(var(--cat-height) / 2)
-    --cat-overlap: calc(var(--cat-height) - var(--cat-in-hero))
-    display: flex
-    flex-direction: column
-    gap: 0
-    background-color: transparent
+.home-page
+  --cat-height: 150px
+  --cat-in-hero: calc(var(--cat-height) / 2)
+  --cat-overlap: calc(var(--cat-height) - var(--cat-in-hero))
+  display: flex
+  flex-direction: column
+  gap: 0
+  background-color: transparent
 
-  .home-page__sections
-    display: flex
-    flex-direction: column
-    gap: clamp(1.5rem, 3.5vw, 2.25rem)
-    padding-top: var(--cat-overlap)
-    background: transparent
+.home-page__sections
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 3.5vw, 2.25rem)
+  padding-top: var(--cat-overlap)
+  background: transparent
 
-  .home-page__parallax
-    border-radius: clamp(1.25rem, 3vw, 1.85rem)
-    box-shadow: 0 22px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
-    overflow: hidden
+.home-page__parallax
+  border-radius: clamp(1.25rem, 3vw, 1.85rem)
+  box-shadow: 0 22px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  overflow: hidden
 
-  .home-page__parallax--centered :deep(.home-section)
-    text-align: center
+.home-page__parallax--centered :deep(.home-section)
+  text-align: center
 
-  .home-page__stack
-    display: flex
-    flex-direction: column
-    gap: clamp(1.5rem, 4vw, 2.25rem)
+.home-page__stack
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 4vw, 2.25rem)
 
-  .home-page__stack--compact
-    gap: clamp(1.25rem, 3vw, 2rem)
+.home-page__stack--compact
+  gap: clamp(1.25rem, 3vw, 2rem)
 
-  @media (min-width: 1100px)
-    .home-page__stack--two-columns
-      grid-template-columns: repeat(2, 1fr)
+@media (min-width: 1100px)
+  .home-page__stack--two-columns
+    grid-template-columns: repeat(2, 1fr)
 
-  .home-page__card-showcase
-    margin-top: clamp(1rem, 3vw, 1.5rem)
+.home-page__card-showcase
+  margin-top: clamp(1rem, 3vw, 1.5rem)
 
-  .home-page__section
-    width: 100%
-
+.home-page__section
+  width: 100%
 </style>

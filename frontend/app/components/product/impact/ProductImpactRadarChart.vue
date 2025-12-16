@@ -35,13 +35,19 @@ interface RadarSeriesEntry {
   symbolColor: string
 }
 
-const props = defineProps<{ axes: RadarAxisEntry[]; series: RadarSeriesEntry[]; productName: string }>()
+const props = defineProps<{
+  axes: RadarAxisEntry[]
+  series: RadarSeriesEntry[]
+  productName: string
+}>()
 
 ensureImpactECharts()
 
 const { t } = useI18n()
 
-const ariaLabel = computed(() => t('product.impact.radarAria', { product: props.productName }))
+const ariaLabel = computed(() =>
+  t('product.impact.radarAria', { product: props.productName })
+)
 
 const option = computed<EChartsOption | null>(() => {
   if (!props.axes.length || !props.series.length) {
@@ -49,15 +55,23 @@ const option = computed<EChartsOption | null>(() => {
   }
 
   const finiteValues = props.series
-    .flatMap((entry) => entry.values)
-    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+    .flatMap(entry => entry.values)
+    .filter(
+      (value): value is number =>
+        typeof value === 'number' && Number.isFinite(value)
+    )
 
   const maxObservedValue = finiteValues.length ? Math.max(...finiteValues) : 5
   const paddedMax = maxObservedValue > 0 ? maxObservedValue * 1.1 : 5
 
-  const indicator = props.axes.map((entry) => ({ name: entry.name, max: paddedMax }))
-  const seriesData = props.series.map((entry) => ({
-    value: entry.values.map((value) => (typeof value === 'number' && Number.isFinite(value) ? value : null)),
+  const indicator = props.axes.map(entry => ({
+    name: entry.name,
+    max: paddedMax,
+  }))
+  const seriesData = props.series.map(entry => ({
+    value: entry.values.map(value =>
+      typeof value === 'number' && Number.isFinite(value) ? value : null
+    ),
     name: entry.label,
     areaStyle: { color: entry.areaColor },
     lineStyle: { color: entry.lineColor, width: 2 },
@@ -66,11 +80,15 @@ const option = computed<EChartsOption | null>(() => {
   }))
 
   return {
-    color: props.series.map((entry) => entry.lineColor),
+    color: props.series.map(entry => entry.lineColor),
     tooltip: {
       trigger: 'item',
-      formatter: (params) => {
-        if (!params || typeof params !== 'object' || !Array.isArray((params as { value?: unknown }).value)) {
+      formatter: params => {
+        if (
+          !params ||
+          typeof params !== 'object' ||
+          !Array.isArray((params as { value?: unknown }).value)
+        ) {
           return ''
         }
 
@@ -80,11 +98,14 @@ const option = computed<EChartsOption | null>(() => {
         const lines = [`<strong>${seriesName}</strong>`]
         value.forEach((entryValue, index) => {
           const axis = props.axes[index]
-          const numericValue = typeof entryValue === 'number' && Number.isFinite(entryValue)
-            ? entryValue
-            : null
+          const numericValue =
+            typeof entryValue === 'number' && Number.isFinite(entryValue)
+              ? entryValue
+              : null
           const renderedValue = numericValue != null ? numericValue : '–'
-          const attributeLabel = axis?.attributeValue ? ` (${axis.attributeValue})` : ''
+          const attributeLabel = axis?.attributeValue
+            ? ` (${axis.attributeValue})`
+            : ''
 
           lines.push(`${axis?.name ?? ''}: ${renderedValue}${attributeLabel}`)
         })
@@ -93,7 +114,7 @@ const option = computed<EChartsOption | null>(() => {
       },
     },
     legend: {
-      data: props.series.map((entry) => entry.label),
+      data: props.series.map(entry => entry.label),
       bottom: 0,
       left: 'center',
       padding: [16, 24, 0, 24],

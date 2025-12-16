@@ -11,7 +11,10 @@ const PRICE_SCALE_SEGMENTS: PriceScaleSegment[] = [
 
 const DEFAULT_STEP = 1000
 
-const clampNumericValue = (value: number | null | undefined, fallback = 0): number => {
+const clampNumericValue = (
+  value: number | null | undefined,
+  fallback = 0
+): number => {
   if (value == null || Number.isNaN(value)) {
     return fallback
   }
@@ -19,11 +22,16 @@ const clampNumericValue = (value: number | null | undefined, fallback = 0): numb
   return Math.max(0, Number(value))
 }
 
-const resolveSegmentSteps = (lowerBound: number, segment: PriceScaleSegment): number => {
+const resolveSegmentSteps = (
+  lowerBound: number,
+  segment: PriceScaleSegment
+): number => {
   return Math.round((segment.limit - lowerBound) / segment.step)
 }
 
-export const priceToSliderValue = (price: number | null | undefined): number => {
+export const priceToSliderValue = (
+  price: number | null | undefined
+): number => {
   const safePrice = clampNumericValue(price)
   let position = 0
   let lowerBound = 0
@@ -51,7 +59,9 @@ export const priceToSliderValue = (price: number | null | undefined): number => 
   return position + extraSteps
 }
 
-export const sliderValueToPrice = (sliderValue: number | null | undefined): number => {
+export const sliderValueToPrice = (
+  sliderValue: number | null | undefined
+): number => {
   const safeValue = clampNumericValue(sliderValue)
   let remaining = Math.round(safeValue)
   let lowerBound = 0
@@ -78,7 +88,10 @@ export const isPriceField = (mapping: string | null | undefined): boolean => {
   return mapping.toLowerCase().includes('price')
 }
 
-export const clampSliderRange = ([min, max]: [number, number]): [number, number] => {
+export const clampSliderRange = ([min, max]: [number, number]): [
+  number,
+  number,
+] => {
   if (Number.isNaN(min) || Number.isNaN(max)) {
     return [0, 0]
   }

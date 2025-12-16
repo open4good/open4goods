@@ -51,7 +51,9 @@ const handleDownloadClick = (option: DownloadOption) => {
   <section class="dataset-download" aria-labelledby="dataset-download-heading">
     <v-container max-width="lg">
       <div class="dataset-download__header">
-        <h2 id="dataset-download-heading" class="dataset-download__title">{{ title }}</h2>
+        <h2 id="dataset-download-heading" class="dataset-download__title">
+          {{ title }}
+        </h2>
         <p v-if="subtitle" class="dataset-download__subtitle">{{ subtitle }}</p>
       </div>
 
@@ -64,13 +66,21 @@ const handleDownloadClick = (option: DownloadOption) => {
           class="d-flex justify-center"
         >
           <v-card class="dataset-download__card" rounded="xl" elevation="4">
-            <div v-if="option.badge" class="dataset-download__badge">{{ option.badge }}</div>
+            <div v-if="option.badge" class="dataset-download__badge">
+              {{ option.badge }}
+            </div>
             <h3 class="dataset-download__card-title">{{ option.title }}</h3>
-            <p class="dataset-download__card-description">{{ option.description }}</p>
+            <p class="dataset-download__card-description">
+              {{ option.description }}
+            </p>
 
             <ul class="dataset-download__highlights">
               <li v-for="highlight in option.highlights" :key="highlight.text">
-                <v-icon v-if="highlight.icon" :icon="highlight.icon" size="small" />
+                <v-icon
+                  v-if="highlight.icon"
+                  :icon="highlight.icon"
+                  size="small"
+                />
                 <span>{{ highlight.text }}</span>
               </li>
             </ul>
@@ -175,4 +185,3 @@ const handleDownloadClick = (option: DownloadOption) => {
   .dataset-download__cta
     width: 100%
 </style>
-

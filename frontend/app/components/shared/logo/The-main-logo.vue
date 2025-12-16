@@ -14,7 +14,6 @@ const logoSrc = useLogoAsset()
   </NuxtLink>
 </template>
 
-
 <style scoped lang="sass">
 .logo-link
   display: inline-block

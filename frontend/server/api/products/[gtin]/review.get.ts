@@ -10,7 +10,10 @@ export default defineEventHandler(
     const gtinParam = getRouterParam(event, 'gtin')
 
     if (!gtinParam) {
-      throw createError({ statusCode: 400, statusMessage: 'Product GTIN is required' })
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Product GTIN is required',
+      })
     }
 
     const parsedGtin = Number.parseInt(gtinParam, 10)
@@ -34,7 +37,7 @@ export default defineEventHandler(
       console.error(
         'Error fetching AI review status:',
         backendError.logMessage,
-        backendError,
+        backendError
       )
 
       throw createError({
@@ -43,5 +46,5 @@ export default defineEventHandler(
         cause: error,
       })
     }
-  },
+  }
 )

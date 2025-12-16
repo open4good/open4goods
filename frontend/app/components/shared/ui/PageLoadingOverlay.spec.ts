@@ -54,8 +54,10 @@ const mountOverlay = () =>
     attachTo: document.body,
   })
 
-const findOverlay = () => document.body.querySelector('[data-testid="page-loading-overlay"]')
-const findSpinner = () => document.body.querySelector('[data-testid="page-loading-spinner"]')
+const findOverlay = () =>
+  document.body.querySelector('[data-testid="page-loading-overlay"]')
+const findSpinner = () =>
+  document.body.querySelector('[data-testid="page-loading-spinner"]')
 const flushOverlay = () => nextTick()
 
 describe('PageLoadingOverlay', () => {

@@ -10,7 +10,9 @@ interface ResponseErrorHeaders {
 }
 
 class MockHeaders implements ResponseErrorHeaders {
-  constructor(private readonly entries: Record<string, string | undefined> = {}) {}
+  constructor(
+    private readonly entries: Record<string, string | undefined> = {}
+  ) {}
 
   get(name: string): string | null {
     const value = this.entries[name]
@@ -23,7 +25,10 @@ vi.mock('..', () => {
   class MockResponseError extends Error {
     response: { status: number; headers: ResponseErrorHeaders }
 
-    constructor(status: number, headers: Record<string, string | undefined> = {}) {
+    constructor(
+      status: number,
+      headers: Record<string, string | undefined> = {}
+    ) {
       super(`Response returned status code ${status}`)
       this.name = 'ResponseError'
       this.response = {
@@ -47,7 +52,7 @@ vi.mock('./createBackendApiConfig', () => ({
 
 type ResponseErrorConstructor = new (
   status: number,
-  headers?: Record<string, string | undefined>,
+  headers?: Record<string, string | undefined>
 ) => Error & {
   response: {
     status: number
@@ -55,7 +60,7 @@ type ResponseErrorConstructor = new (
   }
 }
 
-let useAffiliationService: typeof import('./affiliation.services')['useAffiliationService']
+let useAffiliationService: (typeof import('./affiliation.services'))['useAffiliationService']
 let ResponseErrorCtor: ResponseErrorConstructor
 
 describe('useAffiliationService.resolveRedirect', () => {
@@ -70,15 +75,15 @@ describe('useAffiliationService.resolveRedirect', () => {
       redirectGetRaw: redirectGetRawMock,
       redirectPostRaw: redirectPostRawMock,
     }))
-
     ;({ useAffiliationService } = await import('./affiliation.services'))
     const apiModule = await import('..')
-    ResponseErrorCtor = apiModule.ResponseError as unknown as ResponseErrorConstructor
+    ResponseErrorCtor =
+      apiModule.ResponseError as unknown as ResponseErrorConstructor
   })
 
   it('returns redirect details for GET requests', async () => {
     redirectGetRawMock.mockRejectedValueOnce(
-      new ResponseErrorCtor(301, { Location: 'https://example.com/get' }),
+      new ResponseErrorCtor(301, { Location: 'https://example.com/get' })
     )
 
     const affiliationService = useAffiliationService('en')
@@ -89,7 +94,9 @@ describe('useAffiliationService.resolveRedirect', () => {
     })
 
     expect(createBackendApiConfigMock).toHaveBeenCalledTimes(1)
-    expect(AffiliationApiMock).toHaveBeenCalledWith({ basePath: 'https://api.test' })
+    expect(AffiliationApiMock).toHaveBeenCalledWith({
+      basePath: 'https://api.test',
+    })
     expect(redirectGetRawMock).toHaveBeenCalledTimes(1)
     expect(redirectGetRawMock).toHaveBeenCalledWith(
       {
@@ -97,22 +104,30 @@ describe('useAffiliationService.resolveRedirect', () => {
         domainLanguage: 'en',
         userAgent: 'Mozilla/5.0',
       },
-      expect.any(Function),
+      expect.any(Function)
     )
 
     const initOverride = redirectGetRawMock.mock.calls[0]?.[1]
 
     expect(initOverride).toBeDefined()
 
-    const overriddenInit = await initOverride!({ init: { headers: { foo: 'bar' } } })
+    const overriddenInit = await initOverride!({
+      init: { headers: { foo: 'bar' } },
+    })
 
-    expect(overriddenInit).toEqual({ headers: { foo: 'bar' }, redirect: 'manual' })
-    expect(response).toEqual({ statusCode: 301, location: 'https://example.com/get' })
+    expect(overriddenInit).toEqual({
+      headers: { foo: 'bar' },
+      redirect: 'manual',
+    })
+    expect(response).toEqual({
+      statusCode: 301,
+      location: 'https://example.com/get',
+    })
   })
 
   it('returns redirect details for POST requests', async () => {
     redirectPostRawMock.mockRejectedValueOnce(
-      new ResponseErrorCtor(301, { Location: 'https://example.com/post' }),
+      new ResponseErrorCtor(301, { Location: 'https://example.com/post' })
     )
 
     const affiliationService = useAffiliationService('fr')
@@ -128,9 +143,12 @@ describe('useAffiliationService.resolveRedirect', () => {
         domainLanguage: 'fr',
         userAgent: undefined,
       },
-      expect.any(Function),
+      expect.any(Function)
     )
-    expect(response).toEqual({ statusCode: 301, location: 'https://example.com/post' })
+    expect(response).toEqual({
+      statusCode: 301,
+      location: 'https://example.com/post',
+    })
   })
 
   it('throws when the redirect response is missing the Location header', async () => {
@@ -139,7 +157,10 @@ describe('useAffiliationService.resolveRedirect', () => {
     const affiliationService = useAffiliationService('en')
 
     await expect(
-      affiliationService.resolveRedirect({ token: 'missing-location', method: 'GET' }),
+      affiliationService.resolveRedirect({
+        token: 'missing-location',
+        method: 'GET',
+      })
     ).rejects.toThrow('Redirect response is missing the Location header.')
   })
 
@@ -149,7 +170,7 @@ describe('useAffiliationService.resolveRedirect', () => {
     const affiliationService = useAffiliationService('en')
 
     await expect(
-      affiliationService.resolveRedirect({ token: 'bad-status', method: 'GET' }),
+      affiliationService.resolveRedirect({ token: 'bad-status', method: 'GET' })
     ).rejects.toBeInstanceOf(ResponseErrorCtor)
   })
 
@@ -160,7 +181,10 @@ describe('useAffiliationService.resolveRedirect', () => {
     const affiliationService = useAffiliationService('en')
 
     await expect(
-      affiliationService.resolveRedirect({ token: 'unknown-error', method: 'GET' }),
+      affiliationService.resolveRedirect({
+        token: 'unknown-error',
+        method: 'GET',
+      })
     ).rejects.toBe(unknownError)
   })
 })

@@ -16,12 +16,18 @@ const FILTER_FIELD_TRANSLATION_KEYS: Record<string, string> = {
 const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   'price.minPrice.price': 'category.products.sort.fields.price',
   offersCount: 'category.products.sort.fields.offersCount',
-  'attributes.referentielAttributes.BRAND': 'category.products.sort.fields.brand',
-  'attributes.referentielAttributes.MODEL': 'category.products.sort.fields.model',
+  'attributes.referentielAttributes.BRAND':
+    'category.products.sort.fields.brand',
+  'attributes.referentielAttributes.MODEL':
+    'category.products.sort.fields.model',
   [ECOSCORE_RELATIVE_FIELD]: 'category.products.sort.fields.impactScore',
 }
 
-const resolveTranslation = (mapping: string, t: TranslateFn, keys: Record<string, string>): string | null => {
+const resolveTranslation = (
+  mapping: string,
+  t: TranslateFn,
+  keys: Record<string, string>
+): string | null => {
   const translationKey = keys[mapping]
   if (!translationKey) {
     return null
@@ -36,7 +42,7 @@ const normalizeTitle = (title?: string | null) => title?.trim() ?? ''
 export const resolveFilterFieldTitle = (
   field: FieldMetadataDto | undefined,
   t: TranslateFn,
-  fallbackMapping?: string | null,
+  fallbackMapping?: string | null
 ): string => {
   const providedTitle = normalizeTitle(field?.title)
   if (providedTitle) {
@@ -55,7 +61,10 @@ export const resolveFilterFieldTitle = (
   return translated ?? mapping
 }
 
-export const resolveSortFieldTitle = (field: FieldMetadataDto, t: TranslateFn): string => {
+export const resolveSortFieldTitle = (
+  field: FieldMetadataDto,
+  t: TranslateFn
+): string => {
   const providedTitle = normalizeTitle(field.title)
   if (providedTitle) {
     return providedTitle

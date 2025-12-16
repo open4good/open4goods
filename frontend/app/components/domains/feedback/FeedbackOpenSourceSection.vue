@@ -1,9 +1,15 @@
 <template>
-  <section class="feedback-open-source" aria-labelledby="feedback-open-source-heading">
+  <section
+    class="feedback-open-source"
+    aria-labelledby="feedback-open-source-heading"
+  >
     <v-container class="py-16">
       <div class="feedback-open-source__header">
         <p class="feedback-open-source__eyebrow">{{ eyebrow }}</p>
-        <h2 id="feedback-open-source-heading" class="feedback-open-source__title">
+        <h2
+          id="feedback-open-source-heading"
+          class="feedback-open-source__title"
+        >
           {{ title }}
         </h2>
         <p class="feedback-open-source__description">
@@ -15,7 +21,11 @@
         <v-col v-for="card in cards" :key="card.title" cols="12" md="6">
           <v-card class="feedback-open-source__card" elevation="6" rounded="xl">
             <div class="feedback-open-source__card-header">
-              <v-avatar size="44" class="feedback-open-source__card-icon" color="surface-primary-120">
+              <v-avatar
+                size="44"
+                class="feedback-open-source__card-icon"
+                color="surface-primary-120"
+              >
                 <v-icon :icon="card.icon" size="26" color="primary" />
               </v-avatar>
               <h3 class="feedback-open-source__card-title">{{ card.title }}</h3>
@@ -43,7 +53,6 @@
 </template>
 
 <script setup lang="ts">
-
 type FeedbackCardCta = {
   label: string
   ariaLabel: string
@@ -70,12 +79,17 @@ defineProps<{
 
 <style scoped lang="scss">
 .feedback-open-source {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       145deg,
       rgba(var(--v-theme-surface-ice-050), 0.95),
       rgba(var(--v-theme-surface-ice-100), 0.9)
     ),
-    radial-gradient(circle at top left, rgba(var(--v-theme-hero-gradient-end), 0.18), transparent 55%);
+    radial-gradient(
+      circle at top left,
+      rgba(var(--v-theme-hero-gradient-end), 0.18),
+      transparent 55%
+    );
 
   &__header {
     max-width: 56rem;

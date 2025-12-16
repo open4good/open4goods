@@ -40,7 +40,8 @@ const sharedOverrides = [
         {
           patterns: [
             {
-              regex: '^~~/shared/api-client/services/(?!auth\\.services(?:$|/))',
+              regex:
+                '^~~/shared/api-client/services/(?!auth\\.services(?:$|/))',
               allowTypeImports: true,
               message:
                 'Use the Nuxt server route + composable pattern instead of importing generated backend services directly into client code.',
@@ -73,12 +74,14 @@ async function resolveConfig() {
   const fallback = await createFallbackConfig()
   const overrides = fallback.hasVuePlugin
     ? sharedOverrides
-    : sharedOverrides.map((entry) =>
+    : sharedOverrides.map(entry =>
         entry.rules
           ? {
               ...entry,
               rules: Object.fromEntries(
-                Object.entries(entry.rules).filter(([ruleName]) => !ruleName.startsWith('vue/'))
+                Object.entries(entry.rules).filter(
+                  ([ruleName]) => !ruleName.startsWith('vue/')
+                )
               ),
             }
           : entry
@@ -88,12 +91,13 @@ async function resolveConfig() {
 }
 
 async function createFallbackConfig() {
-  const [jsModule, globalsModule, vueModule, tsParserModule] = await Promise.all([
-    import('@eslint/js').catch(() => null),
-    import('globals').catch(() => null),
-    import('eslint-plugin-vue').catch(() => null),
-    import('@typescript-eslint/parser').catch(() => null),
-  ])
+  const [jsModule, globalsModule, vueModule, tsParserModule] =
+    await Promise.all([
+      import('@eslint/js').catch(() => null),
+      import('globals').catch(() => null),
+      import('eslint-plugin-vue').catch(() => null),
+      import('@typescript-eslint/parser').catch(() => null),
+    ])
 
   const globals = globalsModule?.default || globalsModule || {}
   const resolvedGlobals = {
@@ -146,10 +150,13 @@ async function createFallbackConfig() {
 
   if (vuePlugin) {
     const vueFlatConfig =
-      vuePlugin.configs?.['flat/vue3-recommended'] || vuePlugin.configs?.['flat/recommended']
+      vuePlugin.configs?.['flat/vue3-recommended'] ||
+      vuePlugin.configs?.['flat/recommended']
 
     if (vueFlatConfig) {
-      const normalized = Array.isArray(vueFlatConfig) ? vueFlatConfig : [vueFlatConfig]
+      const normalized = Array.isArray(vueFlatConfig)
+        ? vueFlatConfig
+        : [vueFlatConfig]
       normalized.forEach((entry, index) => {
         configs.push({
           name: entry.name || `nudger/fallback/vue-${index}`,

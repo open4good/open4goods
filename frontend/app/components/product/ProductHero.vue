@@ -1,9 +1,5 @@
 <template>
-  <section
-    class="product-hero"
-    itemscope
-    itemtype="https://schema.org/Product"
-  >
+  <section class="product-hero" itemscope itemtype="https://schema.org/Product">
     <meta itemprop="sku" :content="String(product.base?.gtin ?? '')" />
     <meta itemprop="brand" :content="product.identity?.brand ?? ''" />
 
@@ -18,19 +14,36 @@
       />
     </header>
 
-    <ProductHeroGallery class="product-hero__gallery" :product="product" :title="heroTitle" />
+    <ProductHeroGallery
+      class="product-hero__gallery"
+      :product="product"
+      :title="heroTitle"
+    />
 
     <div class="product-hero__details">
       <div v-if="impactScore !== null" class="product-hero__impact-overview">
-        <ImpactScore :score="impactScore" :max="5" size="xlarge" :show-value="true" />
+        <ImpactScore
+          :score="impactScore"
+          :max="5"
+          size="xlarge"
+          :show-value="true"
+        />
       </div>
 
       <div v-if="hasBrandOrModel" class="product-hero__brand-line">
-        <span v-if="productBrandName" class="product-hero__brand-name">{{ productBrandName }}</span>
-        <span v-if="productModelName" class="product-hero__model-name">{{ productModelName }}</span>
+        <span v-if="productBrandName" class="product-hero__brand-name">{{
+          productBrandName
+        }}</span>
+        <span v-if="productModelName" class="product-hero__model-name">{{
+          productModelName
+        }}</span>
       </div>
 
-      <ul v-if="heroAttributes.length" class="product-hero__attributes" role="list">
+      <ul
+        v-if="heroAttributes.length"
+        class="product-hero__attributes"
+        role="list"
+      >
         <li
           v-for="attribute in heroAttributes"
           :key="attribute.key"
@@ -38,8 +51,12 @@
           role="listitem"
         >
           <template v-if="attribute.showLabel !== false">
-            <span class="product-hero__attribute-label">{{ attribute.label }}</span>
-            <span class="product-hero__attribute-separator" aria-hidden="true">:</span>
+            <span class="product-hero__attribute-label">{{
+              attribute.label
+            }}</span>
+            <span class="product-hero__attribute-separator" aria-hidden="true"
+              >:</span
+            >
           </template>
           <span class="product-hero__attribute-value">
             <template v-if="attribute.tooltip">
@@ -52,7 +69,10 @@
                     :enable-tooltip="attribute.enableTooltip !== false"
                   >
                     <template #default="{ displayValue, displayHtml }">
-                      <span class="product-hero__attribute-value-content" v-bind="tooltipProps">
+                      <span
+                        class="product-hero__attribute-value-content"
+                        v-bind="tooltipProps"
+                      >
                         <NuxtImg
                           v-if="attribute.flag"
                           :src="attribute.flag"
@@ -102,7 +122,9 @@
         <div class="product-hero__meta-bottom">
           <v-btn
             class="product-hero__compare-button"
-            :class="{ 'product-hero__compare-button--active': isCompareSelected }"
+            :class="{
+              'product-hero__compare-button--active': isCompareSelected,
+            }"
             color="primary"
             variant="flat"
             :aria-pressed="isCompareSelected"
@@ -111,8 +133,14 @@
             :disabled="isCompareDisabled"
             @click="toggleCompare"
           >
-            <v-icon :icon="compareButtonIcon" size="20" class="product-hero__compare-icon" />
-            <span class="product-hero__compare-label">{{ compareButtonText }}</span>
+            <v-icon
+              :icon="compareButtonIcon"
+              size="20"
+              class="product-hero__compare-icon"
+            />
+            <span class="product-hero__compare-label">{{
+              compareButtonText
+            }}</span>
           </v-btn>
         </div>
       </div>
@@ -137,9 +165,16 @@ import {
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
-import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import {
+  formatAttributeValue,
+  resolvePopularAttributes,
+} from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import type { AttributeConfigDto, ProductAttributeSourceDto, ProductDto } from '~~/shared/api-client'
+import type {
+  AttributeConfigDto,
+  ProductAttributeSourceDto,
+  ProductDto,
+} from '~~/shared/api-client'
 
 export interface ProductHeroBreadcrumb {
   title: string
@@ -197,12 +232,20 @@ const heroTitle = computed(() => {
   return fallbackTitle.value || bestName.value
 })
 
-const productBrandName = computed(() => normalizeString(props.product.identity?.brand))
-const productModelName = computed(() => normalizeString(props.product.identity?.model))
-const hasBrandOrModel = computed(() => productBrandName.value.length > 0 || productModelName.value.length > 0)
+const productBrandName = computed(() =>
+  normalizeString(props.product.identity?.brand)
+)
+const productModelName = computed(() =>
+  normalizeString(props.product.identity?.model)
+)
+const hasBrandOrModel = computed(
+  () => productBrandName.value.length > 0 || productModelName.value.length > 0
+)
 
 const brandModelLine = computed(() => {
-  const parts = [productBrandName.value, productModelName.value].filter((value) => value.length)
+  const parts = [productBrandName.value, productModelName.value].filter(
+    value => value.length
+  )
   return parts.join(' - ')
 })
 
@@ -218,7 +261,9 @@ type HeroAttribute = DisplayedAttribute & {
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
-const resolveIndexedAttributeSourcing = (key: string): ProductAttributeSourceDto | null => {
+const resolveIndexedAttributeSourcing = (
+  key: string
+): ProductAttributeSourceDto | null => {
   const indexedAttributes = props.product.attributes?.indexedAttributes ?? {}
 
   if (key in indexedAttributes && indexedAttributes[key]?.sourcing) {
@@ -238,7 +283,7 @@ const resolveIndexedAttributeSourcing = (key: string): ProductAttributeSourceDto
 
 const popularAttributes = computed<HeroAttribute[]>(() =>
   resolvePopularAttributes(props.product, popularAttributeConfigs.value)
-    .map((attribute) => {
+    .map(attribute => {
       const value = formatAttributeValue(attribute, t, n)
       if (!value) {
         return null
@@ -254,7 +299,7 @@ const popularAttributes = computed<HeroAttribute[]>(() =>
         enableTooltip: false,
       }
     })
-    .filter((attribute): attribute is HeroAttribute => attribute != null),
+    .filter((attribute): attribute is HeroAttribute => attribute != null)
 )
 
 const heroAttributes = computed<HeroAttribute[]>(() => {
@@ -262,7 +307,9 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
 
   if (
     gtinCountry.value &&
-    !baseAttributes.some((attribute) => attribute.key === 'base.gtinInfo.countryName')
+    !baseAttributes.some(
+      attribute => attribute.key === 'base.gtinInfo.countryName'
+    )
   ) {
     baseAttributes.push({
       key: 'gtin-country',
@@ -282,7 +329,9 @@ const compareStore = useProductCompareStore()
 const reasonMessage = (reason: CompareListBlockReason | undefined) => {
   switch (reason) {
     case 'limit-reached':
-      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
+      return t('category.products.compare.limitReached', {
+        count: MAX_COMPARE_ITEMS,
+      })
     case 'vertical-mismatch':
       return t('category.products.compare.differentCategory')
     case 'missing-identifier':
@@ -292,11 +341,15 @@ const reasonMessage = (reason: CompareListBlockReason | undefined) => {
   }
 }
 
-const compareEligibility = computed(() => compareStore.canAddProduct(props.product))
+const compareEligibility = computed(() =>
+  compareStore.canAddProduct(props.product)
+)
 const isCompareSelected = computed(() => compareStore.hasProduct(props.product))
 
 const compareButtonText = computed(() =>
-  isCompareSelected.value ? t('product.hero.compare.selected') : t('product.hero.compare.label'),
+  isCompareSelected.value
+    ? t('product.hero.compare.selected')
+    : t('product.hero.compare.label')
 )
 
 const compareButtonTitle = computed(() => {
@@ -313,7 +366,9 @@ const compareButtonTitle = computed(() => {
 
 const compareButtonAriaLabel = computed(() => {
   const productName =
-    heroTitle.value || props.product.identity?.bestName || props.product.base?.bestName
+    heroTitle.value ||
+    props.product.identity?.bestName ||
+    props.product.base?.bestName
 
   if (isCompareSelected.value) {
     if (te('product.hero.compare.ariaSelected')) {
@@ -335,11 +390,13 @@ const compareButtonAriaLabel = computed(() => {
 })
 
 const compareButtonIcon = computed(() =>
-  isCompareSelected.value ? 'mdi-check-circle-outline' : 'mdi-compare-horizontal',
+  isCompareSelected.value
+    ? 'mdi-check-circle-outline'
+    : 'mdi-compare-horizontal'
 )
 
 const isCompareDisabled = computed(
-  () => !isCompareSelected.value && !compareEligibility.value.success,
+  () => !isCompareSelected.value && !compareEligibility.value.success
 )
 
 const toggleCompare = () => {
@@ -352,47 +409,59 @@ const toggleCompare = () => {
 
 const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const normalizedProductTitle = heroTitle.value.trim().toLowerCase()
-  const normalizedProductSlug = (props.product.fullSlug ?? props.product.slug ?? '').trim().toLowerCase()
+  const normalizedProductSlug = (
+    props.product.fullSlug ??
+    props.product.slug ??
+    ''
+  )
+    .trim()
+    .toLowerCase()
 
-  const baseCrumbs = props.breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, breadcrumb) => {
-    const rawTitle = breadcrumb?.title ?? breadcrumb?.link ?? ''
-    const trimmedTitle = rawTitle.toString().trim()
-    const titleValue = trimmedTitle.length ? trimmedTitle : t('product.hero.missingBreadcrumbTitle')
+  const baseCrumbs = props.breadcrumbs.reduce<ProductHeroBreadcrumb[]>(
+    (acc, breadcrumb) => {
+      const rawTitle = breadcrumb?.title ?? breadcrumb?.link ?? ''
+      const trimmedTitle = rawTitle.toString().trim()
+      const titleValue = trimmedTitle.length
+        ? trimmedTitle
+        : t('product.hero.missingBreadcrumbTitle')
 
-    if (!titleValue.trim().length) {
-      return acc
-    }
+      if (!titleValue.trim().length) {
+        return acc
+      }
 
-    const normalizedTitle = titleValue.trim().toLowerCase()
-    const normalizedLinkValue = breadcrumb?.link?.toString().trim().toLowerCase() ?? ''
+      const normalizedTitle = titleValue.trim().toLowerCase()
+      const normalizedLinkValue =
+        breadcrumb?.link?.toString().trim().toLowerCase() ?? ''
 
-    const matchesProductTitle = normalizedProductTitle.length
-      ? normalizedTitle === normalizedProductTitle
-      : false
-    const matchesProductLink = normalizedProductSlug.length
-      ? normalizedLinkValue.endsWith(normalizedProductSlug)
-      : false
+      const matchesProductTitle = normalizedProductTitle.length
+        ? normalizedTitle === normalizedProductTitle
+        : false
+      const matchesProductLink = normalizedProductSlug.length
+        ? normalizedLinkValue.endsWith(normalizedProductSlug)
+        : false
 
-    if (matchesProductTitle || matchesProductLink) {
-      return acc
-    }
+      if (matchesProductTitle || matchesProductLink) {
+        return acc
+      }
 
-    const trimmedLink = breadcrumb?.link?.toString().trim() ?? ''
-    const normalizedLink = trimmedLink
-      ? trimmedLink.startsWith('http')
-        ? trimmedLink
-        : trimmedLink.startsWith('/')
+      const trimmedLink = breadcrumb?.link?.toString().trim() ?? ''
+      const normalizedLink = trimmedLink
+        ? trimmedLink.startsWith('http')
           ? trimmedLink
-          : `/${trimmedLink}`
-      : undefined
+          : trimmedLink.startsWith('/')
+            ? trimmedLink
+            : `/${trimmedLink}`
+        : undefined
 
-    acc.push({
-      title: titleValue,
-      link: normalizedLink,
-    })
+      acc.push({
+        title: titleValue,
+        link: normalizedLink,
+      })
 
-    return acc
-  }, [])
+      return acc
+    },
+    []
+  )
 
   const modelTitle = productModelName.value.trim()
   const brandModelTitle = brandModelLine.value.trim()
@@ -405,7 +474,9 @@ const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
 
   if (finalTitle.length) {
     const normalizedFinal = finalTitle.toLowerCase()
-    const hasDuplicate = baseCrumbs.some((crumb) => crumb.title.trim().toLowerCase() === normalizedFinal)
+    const hasDuplicate = baseCrumbs.some(
+      crumb => crumb.title.trim().toLowerCase() === normalizedFinal
+    )
 
     if (!hasDuplicate) {
       baseCrumbs.push({
@@ -435,7 +506,6 @@ const gtinCountry = computed(() => {
 })
 
 const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
-
 </script>
 
 <style scoped>
@@ -445,10 +515,13 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
   gap: 2.5rem;
   padding: 2.5rem;
   border-radius: 32px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-ice-050), 0.9), rgba(var(--v-theme-surface-glass), 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-ice-050), 0.9),
+    rgba(var(--v-theme-surface-glass), 0.95)
+  );
   box-shadow: 0 32px 70px rgba(15, 23, 42, 0.08);
 }
-
 
 .product-hero__breadcrumbs {
   display: flex;
@@ -595,7 +668,10 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
   background-color: rgba(var(--v-theme-surface-default), 0.92);
   color: rgb(var(--v-theme-text-neutral-strong));
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-hero__compare-button:hover {
@@ -619,7 +695,6 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 .product-hero__compare-label {
   font-size: 0.95rem;
 }
-
 
 .product-hero__pricing {
   align-self: stretch;

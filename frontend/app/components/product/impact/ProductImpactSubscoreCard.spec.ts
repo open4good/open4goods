@@ -8,7 +8,12 @@ vi.mock('./ProductImpactSubscoreGenericCard.vue', () => ({
   default: defineComponent({
     name: 'GenericCardStub',
     setup(_, { attrs }) {
-      return () => h('div', { class: 'generic-card-stub' }, attrs['data-testid'] ?? 'generic-card')
+      return () =>
+        h(
+          'div',
+          { class: 'generic-card-stub' },
+          attrs['data-testid'] ?? 'generic-card'
+        )
     },
   }),
 }))

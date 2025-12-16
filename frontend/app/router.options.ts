@@ -8,7 +8,10 @@ export default <RouterConfig>{
       return savedPosition
     }
 
-    if (typeof window !== 'undefined' && to.hash?.startsWith(HASH_STATE_PREFIX)) {
+    if (
+      typeof window !== 'undefined' &&
+      to.hash?.startsWith(HASH_STATE_PREFIX)
+    ) {
       return false
     }
 

@@ -18,7 +18,11 @@
       <v-row :gap="24" align="stretch">
         <v-col
           v-for="verticalCategory in limitedVerticals"
-          :key="verticalCategory.path ?? verticalCategory.slug ?? verticalCategory.googleCategoryId"
+          :key="
+            verticalCategory.path ??
+            verticalCategory.slug ??
+            verticalCategory.googleCategoryId
+          "
           cols="12"
           md="6"
           lg="4"
@@ -33,17 +37,27 @@
                 <v-img
                   v-if="verticalCategory.vertical?.imageLarge"
                   :src="verticalCategory.vertical.imageLarge"
-                  :alt="verticalCategory.vertical?.verticalHomeTitle ?? verticalCategory.title ?? ''"
+                  :alt="
+                    verticalCategory.vertical?.verticalHomeTitle ??
+                    verticalCategory.title ??
+                    ''
+                  "
                   cover
                 />
-                <div v-else class="category-navigation-verticals__media-placeholder">
+                <div
+                  v-else
+                  class="category-navigation-verticals__media-placeholder"
+                >
                   <v-icon icon="mdi-image-outline" size="36" />
                 </div>
               </div>
 
               <div class="category-navigation-verticals__content">
                 <h3 class="text-h5 font-weight-semibold mb-2">
-                  {{ verticalCategory.vertical?.verticalHomeTitle ?? verticalCategory.title }}
+                  {{
+                    verticalCategory.vertical?.verticalHomeTitle ??
+                    verticalCategory.title
+                  }}
                 </h3>
                 <p class="text-body-2 text-neutral-secondary mb-4">
                   {{ verticalCategory.vertical?.verticalHomeDescription ?? '' }}
@@ -54,16 +68,26 @@
                     v-if="verticalCategory.vertical?.verticalHomeUrl"
                     :to="`/${verticalCategory.vertical.verticalHomeUrl}`"
                     class="category-navigation-verticals__cta"
-                    :aria-label="t('categories.navigation.verticals.openVertical', { category: verticalCategory.title })"
+                    :aria-label="
+                      t('categories.navigation.verticals.openVertical', {
+                        category: verticalCategory.title,
+                      })
+                    "
                   >
-                    <span>{{ t('categories.navigation.verticals.openVerticalCta') }}</span>
+                    <span>{{
+                      t('categories.navigation.verticals.openVerticalCta')
+                    }}</span>
                     <v-icon icon="mdi-arrow-right" size="small" />
                   </NuxtLink>
                   <NuxtLink
                     v-if="verticalCategory.path"
                     :to="`/categories/${verticalCategory.path}`"
                     class="category-navigation-verticals__secondary"
-                    :aria-label="t('categories.navigation.verticals.viewPath', { category: verticalCategory.title })"
+                    :aria-label="
+                      t('categories.navigation.verticals.viewPath', {
+                        category: verticalCategory.title,
+                      })
+                    "
                   >
                     {{ t('categories.navigation.verticals.viewPathCta') }}
                   </NuxtLink>

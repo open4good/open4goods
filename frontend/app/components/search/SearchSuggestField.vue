@@ -27,95 +27,116 @@
       @blur="handleBlur"
       @focus="handleFocus"
     >
-    <template #append-inner>
-      <slot v-if="$slots['append-inner']" name="append-inner" />
-      <v-btn
-        v-if="shouldShowScannerButton"
-        class="search-suggest-field__scanner-button"
-        density="comfortable"
-        variant="text"
-        icon
-        :aria-label="t('search.suggestions.scanner.openLabel')"
-        data-test="search-scanner-button"
-        @click="openScannerDialog"
-      >
-        <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
-      </v-btn>
-    </template>
-    <template #item="{ item, props: itemProps, index }">
-      <div class="search-suggest-field__entry" :data-section="item.raw.type">
-        <p
-          v-if="item.raw.type === 'category' && index === 0"
-          class="search-suggest-field__section"
+      <template #append-inner>
+        <slot v-if="$slots['append-inner']" name="append-inner" />
+        <v-btn
+          v-if="shouldShowScannerButton"
+          class="search-suggest-field__scanner-button"
+          density="comfortable"
+          variant="text"
+          icon
+          :aria-label="t('search.suggestions.scanner.openLabel')"
+          data-test="search-scanner-button"
+          @click="openScannerDialog"
         >
-          {{ t('search.suggestions.sections.categories') }}
-        </p>
-        <template v-if="item.raw.type === 'category'">
-          <v-list-item
-            v-bind="itemProps"
-            class="search-suggest-field__item search-suggest-field__item--category"
-            :aria-label="t('search.suggestions.categoryAria', { category: item.raw.title })"
+          <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
+        </v-btn>
+      </template>
+      <template #item="{ item, props: itemProps, index }">
+        <div class="search-suggest-field__entry" :data-section="item.raw.type">
+          <p
+            v-if="item.raw.type === 'category' && index === 0"
+            class="search-suggest-field__section"
           >
-            <template #prepend>
-              <v-avatar class="search-suggest-field__avatar" rounded="lg" size="52">
-                <v-img :src="item.raw.image" :alt="''" cover />
-              </v-avatar>
-            </template>
-            <v-list-item-title class="search-suggest-field__title">
-              {{ item.raw.title }}
-            </v-list-item-title>
-            <template #append>
-              <v-icon icon="mdi-arrow-top-right" size="small" aria-hidden="true" />
-            </template>
-          </v-list-item>
-        </template>
+            {{ t('search.suggestions.sections.categories') }}
+          </p>
+          <template v-if="item.raw.type === 'category'">
+            <v-list-item
+              v-bind="itemProps"
+              class="search-suggest-field__item search-suggest-field__item--category"
+              :aria-label="
+                t('search.suggestions.categoryAria', {
+                  category: item.raw.title,
+                })
+              "
+            >
+              <template #prepend>
+                <v-avatar
+                  class="search-suggest-field__avatar"
+                  rounded="lg"
+                  size="52"
+                >
+                  <v-img :src="item.raw.image" :alt="''" cover />
+                </v-avatar>
+              </template>
+              <v-list-item-title class="search-suggest-field__title">
+                {{ item.raw.title }}
+              </v-list-item-title>
+              <template #append>
+                <v-icon
+                  icon="mdi-arrow-top-right"
+                  size="small"
+                  aria-hidden="true"
+                />
+              </template>
+            </v-list-item>
+          </template>
 
-        <p
-          v-if="item.raw.type === 'product' && index === firstProductIndex"
-          class="search-suggest-field__section search-suggest-field__section--compact"
-        >
-          {{ t('search.suggestions.sections.products') }}
-        </p>
-        <template v-if="item.raw.type === 'product'">
-          <v-list-item
-            v-bind="itemProps"
-            class="search-suggest-field__item search-suggest-field__item--product"
-            :aria-label="t('search.suggestions.productAria', { product: item.raw.title })"
+          <p
+            v-if="item.raw.type === 'product' && index === firstProductIndex"
+            class="search-suggest-field__section search-suggest-field__section--compact"
           >
-            <template #prepend>
-              <v-avatar class="search-suggest-field__avatar" rounded="lg" size="44">
-                <v-img :src="item.raw.image" :alt="''" cover />
-              </v-avatar>
-            </template>
-            <v-list-item-title class="search-suggest-field__product-title">
-              {{ item.raw.title }}
-            </v-list-item-title>
-            <template #append>
-              <ImpactScore
-                v-if="item.raw.ecoscoreValue !== null"
-                class="search-suggest-field__impact"
-                :score="item.raw.ecoscoreValue"
-                size="small"
-              />
-            </template>
-          </v-list-item>
-        </template>
-      </div>
-    </template>
+            {{ t('search.suggestions.sections.products') }}
+          </p>
+          <template v-if="item.raw.type === 'product'">
+            <v-list-item
+              v-bind="itemProps"
+              class="search-suggest-field__item search-suggest-field__item--product"
+              :aria-label="
+                t('search.suggestions.productAria', { product: item.raw.title })
+              "
+            >
+              <template #prepend>
+                <v-avatar
+                  class="search-suggest-field__avatar"
+                  rounded="lg"
+                  size="44"
+                >
+                  <v-img :src="item.raw.image" :alt="''" cover />
+                </v-avatar>
+              </template>
+              <v-list-item-title class="search-suggest-field__product-title">
+                {{ item.raw.title }}
+              </v-list-item-title>
+              <template #append>
+                <ImpactScore
+                  v-if="item.raw.ecoscoreValue !== null"
+                  class="search-suggest-field__impact"
+                  :score="item.raw.ecoscoreValue"
+                  size="small"
+                />
+              </template>
+            </v-list-item>
+          </template>
+        </div>
+      </template>
 
-    <template v-if="showEmptyState" #no-data>
-      <div class="search-suggest-field__empty">
-        <p v-if="!hasMinimumLength" class="search-suggest-field__empty-text">
-          {{ t('search.suggestions.minimum', { min: minChars }) }}
-        </p>
-        <p v-else-if="hasError" class="search-suggest-field__empty-text search-suggest-field__empty-text--error">
-          {{ t('search.suggestions.error') }}
-        </p>
-        <p v-else class="search-suggest-field__empty-text">
-          {{ t('search.suggestions.empty') }}
-        </p>
-      </div>
-    </template>
+      <template v-if="showEmptyState" #no-data>
+        <div class="search-suggest-field__empty">
+          <p v-if="!hasMinimumLength" class="search-suggest-field__empty-text">
+            {{ t('search.suggestions.minimum', { min: minChars }) }}
+          </p>
+          <p
+            v-else-if="hasError"
+            class="search-suggest-field__empty-text search-suggest-field__empty-text--error"
+          >
+            {{ t('search.suggestions.error') }}
+          </p>
+          <p v-else class="search-suggest-field__empty-text">
+            {{ t('search.suggestions.empty') }}
+          </p>
+        </div>
+      </template>
     </v-autocomplete>
     <v-dialog
       v-model="isScannerDialogOpen"
@@ -226,7 +247,7 @@ const props = withDefaults(
   }>(),
   {
     minChars: 2,
-  },
+  }
 )
 
 const emit = defineEmits<{
@@ -258,14 +279,14 @@ const isScannerComponentReady = ref(false)
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
 const hasMinimumLength = computed(
-  () => internalSearch.value.trim().length >= minChars.value,
+  () => internalSearch.value.trim().length >= minChars.value
 )
 
 const showEmptyState = computed(
   () =>
     !loading.value &&
     hasMinimumLength.value &&
-    (hasError.value || (!categories.value.length && !products.value.length)),
+    (hasError.value || (!categories.value.length && !products.value.length))
 )
 
 const firstProductIndex = computed(() => categories.value.length)
@@ -292,12 +313,12 @@ const loadScannerComponent = async (): Promise<Component> => {
 
   if (!scannerLoadPromise) {
     scannerLoadPromise = import('~/components/pwa/PwaBarcodeScanner.vue')
-      .then((module) => {
+      .then(module => {
         cachedScannerComponent = module.default
         isScannerComponentReady.value = true
         return cachedScannerComponent
       })
-      .catch((error) => {
+      .catch(error => {
         scannerLoadPromise = null
         throw error
       })
@@ -332,14 +353,11 @@ const closeScannerDialog = () => {
   isScannerDialogOpen.value = false
 }
 
-watch(
-  isScannerDialogOpen,
-  (isOpen) => {
-    if (!isOpen) {
-      isScannerActive.value = false
-    }
-  },
-)
+watch(isScannerDialogOpen, isOpen => {
+  if (!isOpen) {
+    isScannerActive.value = false
+  }
+})
 
 const staticServerBase = computed(() => {
   const configured = runtimeConfig.public?.staticServer
@@ -369,9 +387,10 @@ const toAbsoluteUrl = (value?: string | null): string | null => {
 
 const normalizeCategory = (
   match: SearchSuggestCategoryMatchDto,
-  index: number,
+  index: number
 ): CategorySuggestionItem | null => {
-  const title = match.verticalHomeTitle?.trim() || t('search.suggestions.unknownCategory')
+  const title =
+    match.verticalHomeTitle?.trim() || t('search.suggestions.unknownCategory')
   const normalizedUrl = (() => {
     const raw = match.verticalHomeUrl?.trim()
     if (!raw) {
@@ -391,18 +410,21 @@ const normalizeCategory = (
   }
 }
 
-const unknownProductLabel = computed(() => t('search.suggestions.unknownProduct'))
+const unknownProductLabel = computed(() =>
+  t('search.suggestions.unknownProduct')
+)
 
 const normalizeProduct = (
   match: SearchSuggestProductMatchDto,
-  index: number,
+  index: number
 ): ProductSuggestionItem | null => {
   const brand = match.brand?.trim()
   const model = match.model?.trim()
 
-  const title = brand && model
-    ? `${brand} – ${model}`
-    : brand || model || unknownProductLabel.value
+  const title =
+    brand && model
+      ? `${brand} – ${model}`
+      : brand || model || unknownProductLabel.value
 
   const gtin = match.gtin?.trim() || null
 
@@ -442,7 +464,7 @@ const loadSuggestions = async (query: string) => {
       '/api/search/suggest',
       {
         params: { query: trimmed },
-      },
+      }
     )
 
     if (requestId !== currentRequest.value) {
@@ -500,7 +522,7 @@ const setInternalSearchValue = (value: string) => {
 
 watch(
   internalSearch,
-  (value) => {
+  value => {
     if (suppressInternalWatch) {
       suppressInternalWatch = false
       return
@@ -512,12 +534,12 @@ watch(
 
     debouncedLoad(value)
   },
-  { flush: 'sync' },
+  { flush: 'sync' }
 )
 
 watch(
   () => props.modelValue,
-  (value) => {
+  value => {
     const normalized = value ?? ''
 
     lastCommittedValue.value = normalized
@@ -529,7 +551,7 @@ watch(
     setInternalSearchValue(normalized)
     debouncedLoad(normalized)
   },
-  { flush: 'post' },
+  { flush: 'post' }
 )
 
 const handleBlur = () => {

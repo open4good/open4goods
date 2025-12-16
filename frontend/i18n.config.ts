@@ -5,5 +5,5 @@ export default defineI18nConfig(() => ({
   availableLocales: ['en-US', 'fr-FR'],
   missingWarn: false,
   fallbackWarn: false,
-  warnHtmlMessage: false
+  warnHtmlMessage: false,
 }))

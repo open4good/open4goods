@@ -1,6 +1,11 @@
 import type { ProductScoreDto } from 'shared/api-client'
 
-export type ScoreValueSource = 'value' | 'relative' | 'legacyRelative' | 'percent' | 'on20'
+export type ScoreValueSource =
+  | 'value'
+  | 'relative'
+  | 'legacyRelative'
+  | 'percent'
+  | 'on20'
 
 export interface ResolvedScoreValue {
   value: number
@@ -8,7 +13,7 @@ export interface ResolvedScoreValue {
 }
 
 export const resolveScoreNumericValue = (
-  score: ProductScoreDto | null | undefined,
+  score: ProductScoreDto | null | undefined
 ): ResolvedScoreValue | null => {
   if (!score) {
     return null
@@ -25,7 +30,8 @@ export const resolveScoreNumericValue = (
     return { value: relativeValue, source: 'relative' }
   }
 
-  const legacyRelative = (score as { relative?: { value?: number | null } }).relative?.value
+  const legacyRelative = (score as { relative?: { value?: number | null } })
+    .relative?.value
   if (typeof legacyRelative === 'number' && Number.isFinite(legacyRelative)) {
     return { value: legacyRelative, source: 'legacyRelative' }
   }
@@ -41,6 +47,8 @@ export const resolveScoreNumericValue = (
   return null
 }
 
-export const extractScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
+export const extractScoreValue = (
+  score: ProductScoreDto | null | undefined
+): number | null => {
   return resolveScoreNumericValue(score)?.value ?? null
 }

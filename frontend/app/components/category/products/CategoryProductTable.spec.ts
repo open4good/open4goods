@@ -54,7 +54,8 @@ const CompareToggleStub: Component = {
     },
   },
   setup() {
-    return () => h('button', { type: 'button', 'data-test': 'category-product-compare' })
+    return () =>
+      h('button', { type: 'button', 'data-test': 'category-product-compare' })
   },
 }
 
@@ -114,7 +115,8 @@ const mountTable = async (props?: Record<string, unknown>) => {
         VDataTable: VDataTableStub,
         ImpactScore: defineComponent({
           setup(_, { slots }) {
-            return () => h('div', { 'data-test': 'impact-score-stub' }, slots.default?.())
+            return () =>
+              h('div', { 'data-test': 'impact-score-stub' }, slots.default?.())
           },
         }),
         CategoryProductCompareToggle: CompareToggleStub,
@@ -186,7 +188,9 @@ describe('CategoryProductTable', () => {
     const headers = table.props('headers') as Array<{ key: string }>
     const items = table.props('items') as Array<Record<string, unknown>>
 
-    expect(headers.some((header) => header.key === 'attribute:DIAGONALE_POUCES')).toBe(true)
+    expect(
+      headers.some(header => header.key === 'attribute:DIAGONALE_POUCES')
+    ).toBe(true)
     expect(items[0]!['attribute:DIAGONALE_POUCES']).toBe('32 "')
   })
 
@@ -209,7 +213,7 @@ describe('CategoryProductTable', () => {
     ])
 
     expect(wrapper.emitted('update:sort-field')?.[0]?.[0]).toBe(
-      'attributes.indexed.DIAGONALE_POUCES.numericValue',
+      'attributes.indexed.DIAGONALE_POUCES.numericValue'
     )
     expect(wrapper.emitted('update:sort-order')?.[0]?.[0]).toBe('asc')
   })
@@ -222,15 +226,21 @@ describe('CategoryProductTable', () => {
     const table = wrapper.getComponent(VDataTableStub)
 
     table.vm.$emit('update:sort-by', [{ key: 'brand', order: 'asc' }])
-    expect(wrapper.emitted('update:sort-field')?.[0]?.[0]).toBe('attributes.referentielAttributes.BRAND')
+    expect(wrapper.emitted('update:sort-field')?.[0]?.[0]).toBe(
+      'attributes.referentielAttributes.BRAND'
+    )
     expect(wrapper.emitted('update:sort-order')?.[0]?.[0]).toBe('asc')
 
     table.vm.$emit('update:sort-by', [{ key: 'model', order: 'desc' }])
-    expect(wrapper.emitted('update:sort-field')?.[1]?.[0]).toBe('attributes.referentielAttributes.MODEL')
+    expect(wrapper.emitted('update:sort-field')?.[1]?.[0]).toBe(
+      'attributes.referentielAttributes.MODEL'
+    )
     expect(wrapper.emitted('update:sort-order')?.[1]?.[0]).toBe('desc')
 
     table.vm.$emit('update:sort-by', [{ key: 'impactScore' }])
-    expect(wrapper.emitted('update:sort-field')?.[2]?.[0]).toBe(ECOSCORE_RELATIVE_FIELD)
+    expect(wrapper.emitted('update:sort-field')?.[2]?.[0]).toBe(
+      ECOSCORE_RELATIVE_FIELD
+    )
     expect(wrapper.emitted('update:sort-order')?.[2]?.[0]).toBe('asc')
   })
 })

@@ -55,54 +55,54 @@ const sectionDescription = computed(() => t('home.solution.description'))
 </template>
 
 <style scoped lang="sass">
-  .home-section
-    padding-block: clamp(1.5rem, 3vw, 2.75rem)
-    background: rgb(var(--v-theme-surface-default))
+.home-section
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
 
-  .home-solution__list
-    margin: 0
-    padding: 0
-    row-gap: clamp(1rem, 2.5vw, 1.5rem)
+.home-solution__list
+  margin: 0
+  padding: 0
+  row-gap: clamp(1rem, 2.5vw, 1.5rem)
 
-  .home-solution__list-col
-    display: flex
+.home-solution__list-col
+  display: flex
 
+.home-solution__item
+  width: 100%
+  display: flex
+  gap: 1rem
+  align-items: flex-start
+
+.home-solution__item::after
+  display: none
+
+.home-solution__icon
+  font-size: clamp(1.65rem, 5vw, 2rem)
+  //background: rgba(var(--v-theme-surface-primary-080), 0.6)
+  border: 1px solid rgb(var(--v-theme-secondary))
+  color: rgb(var(--v-theme-secondary))
+
+.home-solution__texts
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+
+.home-solution__description
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.95rem
+
+.home-solution__label
+  margin: 0
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem)
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+@media (max-width: 599px)
   .home-solution__item
-    width: 100%
-    display: flex
-    gap: 1rem
-    align-items: flex-start
-
-  .home-solution__item::after
-    display: none
-
-  .home-solution__icon
-    font-size: clamp(1.65rem, 5vw, 2rem)
-    //background: rgba(var(--v-theme-surface-primary-080), 0.6)
-    border: 1px solid rgb(var(--v-theme-secondary))
-    color: rgb(var(--v-theme-secondary))
-
-  .home-solution__texts
-    display: flex
     flex-direction: column
-    gap: 0.35rem
-
-  .home-solution__description
-    margin: 0
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    font-size: 0.95rem
-
-  .home-solution__label
-    margin: 0
-    font-size: clamp(1.05rem, 2.4vw, 1.25rem)
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  @media (max-width: 599px)
-    .home-solution__item
-      flex-direction: column
-      text-align: center
-      align-items: center
-    .home-solution__texts
-      align-items: center
+    text-align: center
+    align-items: center
+  .home-solution__texts
+    align-items: center
 </style>

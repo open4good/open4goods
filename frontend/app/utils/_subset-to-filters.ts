@@ -1,4 +1,10 @@
-import type { Filter, FilterGroup, FilterRequestDto, SubsetCriteria, VerticalSubsetDto } from '~~/shared/api-client'
+import type {
+  Filter,
+  FilterGroup,
+  FilterRequestDto,
+  SubsetCriteria,
+  VerticalSubsetDto,
+} from '~~/shared/api-client'
 
 const parseNumericValue = (value: string | undefined): number | undefined => {
   if (value == null) {
@@ -10,7 +16,9 @@ const parseNumericValue = (value: string | undefined): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
-const convertCriteria = (criteria: SubsetCriteria | undefined): Filter | null => {
+const convertCriteria = (
+  criteria: SubsetCriteria | undefined
+): Filter | null => {
   if (!criteria?.field || !criteria.operator) {
     return null
   }
@@ -52,16 +60,18 @@ const convertCriteria = (criteria: SubsetCriteria | undefined): Filter | null =>
   return null
 }
 
-export const convertSubsetCriteriaToFilters = (subset: VerticalSubsetDto): Filter[] => {
+export const convertSubsetCriteriaToFilters = (
+  subset: VerticalSubsetDto
+): Filter[] => {
   const clauses = subset.criterias ?? []
 
   return clauses
-    .map((criteria) => convertCriteria(criteria))
+    .map(criteria => convertCriteria(criteria))
     .filter((filter): filter is Filter => Boolean(filter))
 }
 
 const normalizeTerms = (terms: string[] | undefined): string[] => {
-  return (terms ?? []).map((term) => `${term}`)
+  return (terms ?? []).map(term => `${term}`)
 }
 
 const areTermFiltersEqual = (left: Filter, right: Filter): boolean => {
@@ -79,7 +89,10 @@ const areTermFiltersEqual = (left: Filter, right: Filter): boolean => {
 }
 
 const areRangeFiltersEqual = (left: Filter, right: Filter): boolean => {
-  return (left.min ?? null) === (right.min ?? null) && (left.max ?? null) === (right.max ?? null)
+  return (
+    (left.min ?? null) === (right.min ?? null) &&
+    (left.max ?? null) === (right.max ?? null)
+  )
 }
 
 export const areFiltersEquivalent = (left: Filter, right: Filter): boolean => {
@@ -98,15 +111,18 @@ export const areFiltersEquivalent = (left: Filter, right: Filter): boolean => {
   return false
 }
 
-export const mergeFiltersWithoutDuplicates = (existing: Filter[], additions: Filter[]): Filter[] => {
+export const mergeFiltersWithoutDuplicates = (
+  existing: Filter[],
+  additions: Filter[]
+): Filter[] => {
   if (!additions.length) {
     return [...existing]
   }
 
   const merged = [...existing]
 
-  additions.forEach((candidate) => {
-    if (!merged.some((entry) => areFiltersEquivalent(entry, candidate))) {
+  additions.forEach(candidate => {
+    if (!merged.some(entry => areFiltersEquivalent(entry, candidate))) {
       merged.push(candidate)
     }
   })
@@ -119,7 +135,7 @@ const mergeRangeClauses = (filters: Filter[]): Filter[] => {
     return []
   }
 
-  const mergedRanges = new Map<string, { min?: number, max?: number }>()
+  const mergedRanges = new Map<string, { min?: number; max?: number }>()
   const mergedFilters: Filter[] = []
 
   for (const filter of filters) {
@@ -128,14 +144,18 @@ const mergeRangeClauses = (filters: Filter[]): Filter[] => {
       const min = filter.min != null ? filter.min : existing.min
       const max = filter.max != null ? filter.max : existing.max
       mergedRanges.set(filter.field, { min, max })
-    }
-    else {
+    } else {
       mergedFilters.push(filter)
     }
   }
 
   for (const [field, bounds] of mergedRanges.entries()) {
-    mergedFilters.push({ field, operator: 'range', min: bounds.min, max: bounds.max })
+    mergedFilters.push({
+      field,
+      operator: 'range',
+      min: bounds.min,
+      max: bounds.max,
+    })
   }
 
   return mergedFilters
@@ -143,41 +163,49 @@ const mergeRangeClauses = (filters: Filter[]): Filter[] => {
 
 export const getRemainingSubsetFilters = (
   subset: VerticalSubsetDto | undefined,
-  removedIndex: number,
+  removedIndex: number
 ): Filter[] => {
   if (!subset) {
     return []
   }
 
-  return convertSubsetCriteriaToFilters(subset).filter((_, index) => index !== removedIndex)
+  return convertSubsetCriteriaToFilters(subset).filter(
+    (_, index) => index !== removedIndex
+  )
 }
-
-
 
 export const buildFilterRequestFromSubsets = (
   subsets: VerticalSubsetDto[],
-  activeSubsetIds: string[],
+  activeSubsetIds: string[]
 ): FilterRequestDto => {
   const seen = new Set<string>()
   const groupedFilters = new Map<string, Filter[]>()
 
   activeSubsetIds
-    .map((subsetId) => subsets.find((candidate) => candidate.id === subsetId))
-    .filter((subset): subset is VerticalSubsetDto => Boolean(subset) && !seen.has(subset.id) && seen.add(subset.id))
-    .forEach((subset) => {
-      const mergedClauses = mergeRangeClauses(convertSubsetCriteriaToFilters(subset))
+    .map(subsetId => subsets.find(candidate => candidate.id === subsetId))
+    .filter(
+      (subset): subset is VerticalSubsetDto =>
+        Boolean(subset) && !seen.has(subset.id) && seen.add(subset.id)
+    )
+    .forEach(subset => {
+      const mergedClauses = mergeRangeClauses(
+        convertSubsetCriteriaToFilters(subset)
+      )
       if (!mergedClauses.length) {
         return
       }
 
       const groupKey = subset.group ?? subset.id
       const existingClauses = groupedFilters.get(groupKey) ?? []
-      groupedFilters.set(groupKey, mergeFiltersWithoutDuplicates(existingClauses, mergedClauses))
+      groupedFilters.set(
+        groupKey,
+        mergeFiltersWithoutDuplicates(existingClauses, mergedClauses)
+      )
     })
 
   const filterGroups: FilterGroup[] = Array.from(groupedFilters.values())
-    .map((clauses) => ({ should: clauses }))
-    .filter((group) => Boolean(group.should?.length))
+    .map(clauses => ({ should: clauses }))
+    .filter(group => Boolean(group.should?.length))
 
   if (!filterGroups.length) {
     return {}

@@ -96,60 +96,64 @@ const truncateLabel = (value: string) => {
 
 const normalizedGuides = computed(() =>
   (props.guides ?? [])
-    .filter((item) => item.title?.trim().length && item.to?.trim().length)
-    .map((item) => ({
+    .filter(item => item.title?.trim().length && item.to?.trim().length)
+    .map(item => ({
       id: item.to,
       href: item.to,
       label: truncateLabel(item.title),
-    })),
+    }))
 )
 
 const normalizedPosts = computed(() =>
   (props.posts ?? [])
-    .filter((item) => item.title?.trim().length && item.to?.trim().length)
-    .map((item) => ({
+    .filter(item => item.title?.trim().length && item.to?.trim().length)
+    .map(item => ({
       id: item.to,
       href: item.to,
       label: truncateLabel(item.title),
-    })),
+    }))
 )
 
 const guideSections = computed(() =>
-  normalizedGuides.value.map((item) => ({
+  normalizedGuides.value.map(item => ({
     id: item.id,
     label: item.label,
     icon: 'mdi-compass-outline',
-  })),
+  }))
 )
 
 const postSections = computed(() =>
-  normalizedPosts.value.map((item) => ({
+  normalizedPosts.value.map(item => ({
     id: item.id,
     label: item.label,
     icon: 'mdi-post-outline',
-  })),
+  }))
 )
 
-const guideLookup = computed(() => new Map(normalizedGuides.value.map((item) => [item.id, item.href])))
-const postLookup = computed(() => new Map(normalizedPosts.value.map((item) => [item.id, item.href])))
+const guideLookup = computed(
+  () => new Map(normalizedGuides.value.map(item => [item.id, item.href]))
+)
+const postLookup = computed(
+  () => new Map(normalizedPosts.value.map(item => [item.id, item.href]))
+)
 
 const showGuides = computed(() => guideSections.value.length > 0)
 const showPosts = computed(() => postSections.value.length > 0)
 
 const sidebarAriaLabel = computed(() =>
-  t('category.documentation.sidebarAria', { category: props.categoryName }),
+  t('category.documentation.sidebarAria', { category: props.categoryName })
 )
 
 const guidesTitle = computed(() => t('category.documentation.guidesTitle'))
 const postsTitle = computed(() => t('category.documentation.postsTitle'))
 const guidesAriaLabel = computed(() =>
-  t('category.documentation.guidesAria', { category: props.categoryName }),
+  t('category.documentation.guidesAria', { category: props.categoryName })
 )
 const postsAriaLabel = computed(() =>
-  t('category.documentation.postsAria', { category: props.categoryName }),
+  t('category.documentation.postsAria', { category: props.categoryName })
 )
 const backToCategoryLabel = computed(() =>
-  t('category.documentation.backToCategory', { category: props.categoryName }),
+  t('category.documentation.backToCategory', { category: props.categoryName })
 )
 
 const onGuideNavigate = (id: string) => {

@@ -8,11 +8,14 @@ interface TriggerReviewPayload {
   hcaptchaResponse?: string
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const gtinParam = getRouterParam(event, 'gtin')
 
   if (!gtinParam) {
-    throw createError({ statusCode: 400, statusMessage: 'Product GTIN is required' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Product GTIN is required',
+    })
   }
 
   const parsedGtin = Number.parseInt(gtinParam, 10)
@@ -45,7 +48,11 @@ export default defineEventHandler(async (event) => {
     return { status: 'accepted' }
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error('Error triggering AI review generation:', backendError.logMessage, backendError)
+    console.error(
+      'Error triggering AI review generation:',
+      backendError.logMessage,
+      backendError
+    )
 
     throw createError({
       statusCode: backendError.statusCode,

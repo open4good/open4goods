@@ -3,7 +3,5 @@
   "compilerOptions": {
     "typeRoots": ["./types", "./node_modules/@types"]
   },
-  "include": [
-    "./types/**/*.d.ts"
-  ]
+  "include": ["./types/**/*.d.ts"]
 }

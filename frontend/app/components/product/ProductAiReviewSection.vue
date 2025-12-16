@@ -9,10 +9,21 @@
       </p>
     </header>
 
-    <div v-if="reviewContent" class="product-ai-review__content" itemscope itemtype="https://schema.org/Review">
+    <div
+      v-if="reviewContent"
+      class="product-ai-review__content"
+      itemscope
+      itemtype="https://schema.org/Review"
+    >
       <div v-if="createdDate" class="product-ai-review__metadata">
-        <v-icon icon="mdi-calendar-clock" size="18" class="product-ai-review__metadata-icon" />
-        <span>{{ $t('product.aiReview.generatedAt', { date: createdDate }) }}</span>
+        <v-icon
+          icon="mdi-calendar-clock"
+          size="18"
+          class="product-ai-review__metadata-icon"
+        />
+        <span>{{
+          $t('product.aiReview.generatedAt', { date: createdDate })
+        }}</span>
       </div>
 
       <article class="product-ai-review__article">
@@ -24,7 +35,10 @@
             <v-icon icon="mdi-robot-outline" size="28" />
           </div>
           <div class="product-ai-review__intro-content">
-            <h3 v-if="reviewContent.mediumTitle" class="product-ai-review__article-title">
+            <h3
+              v-if="reviewContent.mediumTitle"
+              class="product-ai-review__article-title"
+            >
               {{ reviewContent.mediumTitle }}
             </h3>
             <p
@@ -37,8 +51,15 @@
           </div>
         </div>
 
-        <div v-if="hasAnalysisSections" class="product-ai-review__analysis-grid">
-          <section v-if="reviewContent.summary" class="product-ai-review__card" itemprop="reviewBody">
+        <div
+          v-if="hasAnalysisSections"
+          class="product-ai-review__analysis-grid"
+        >
+          <section
+            v-if="reviewContent.summary"
+            class="product-ai-review__card"
+            itemprop="reviewBody"
+          >
             <header class="product-ai-review__card-header">
               <div class="product-ai-review__card-icon">
                 <v-icon icon="mdi-lightbulb-on-outline" size="22" />
@@ -47,7 +68,9 @@
                 {{ $t('product.aiReview.sections.overall') }}
               </h4>
             </header>
-            <p class="product-ai-review__card-text">{{ reviewContent.summary }}</p>
+            <p class="product-ai-review__card-text">
+              {{ reviewContent.summary }}
+            </p>
           </section>
 
           <section
@@ -55,7 +78,9 @@
             class="product-ai-review__card product-ai-review__card--wide"
           >
             <header class="product-ai-review__card-header">
-              <div class="product-ai-review__card-icon product-ai-review__card-icon--accent">
+              <div
+                class="product-ai-review__card-icon product-ai-review__card-icon--accent"
+              >
                 <v-icon icon="mdi-text-box-outline" size="22" />
               </div>
               <h4 class="product-ai-review__card-title">
@@ -64,11 +89,18 @@
             </header>
             <div class="product-ai-review__card-body">
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <div ref="descriptionRef" class="product-ai-review__richtext" v-html="reviewContent.description" />
+              <div
+                ref="descriptionRef"
+                class="product-ai-review__richtext"
+                v-html="reviewContent.description"
+              />
             </div>
           </section>
 
-          <section v-if="reviewContent.technicalReview" class="product-ai-review__card">
+          <section
+            v-if="reviewContent.technicalReview"
+            class="product-ai-review__card"
+          >
             <header class="product-ai-review__card-header">
               <div class="product-ai-review__card-icon">
                 <v-icon icon="mdi-cog-outline" size="22" />
@@ -78,12 +110,20 @@
               </h4>
             </header>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="product-ai-review__card-text" v-html="reviewContent.technicalReview" />
+            <p
+              class="product-ai-review__card-text"
+              v-html="reviewContent.technicalReview"
+            />
           </section>
 
-          <section v-if="reviewContent.ecologicalReview" class="product-ai-review__card">
+          <section
+            v-if="reviewContent.ecologicalReview"
+            class="product-ai-review__card"
+          >
             <header class="product-ai-review__card-header">
-              <div class="product-ai-review__card-icon product-ai-review__card-icon--eco">
+              <div
+                class="product-ai-review__card-icon product-ai-review__card-icon--eco"
+              >
                 <v-icon icon="mdi-leaf-outline" size="22" />
               </div>
               <h4 class="product-ai-review__card-title">
@@ -91,7 +131,10 @@
               </h4>
             </header>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="product-ai-review__card-text" v-html="reviewContent.ecologicalReview" />
+            <p
+              class="product-ai-review__card-text"
+              v-html="reviewContent.ecologicalReview"
+            />
           </section>
         </div>
       </article>
@@ -100,9 +143,14 @@
         v-if="reviewContent.pros?.length || reviewContent.cons?.length"
         class="product-ai-review__insights"
       >
-        <section v-if="reviewContent.pros?.length" class="product-ai-review__panel">
+        <section
+          v-if="reviewContent.pros?.length"
+          class="product-ai-review__panel"
+        >
           <header class="product-ai-review__panel-header">
-            <div class="product-ai-review__panel-icon product-ai-review__panel-icon--pros">
+            <div
+              class="product-ai-review__panel-icon product-ai-review__panel-icon--pros"
+            >
               <v-icon icon="mdi-thumb-up-outline" size="20" />
             </div>
             <h4 class="product-ai-review__panel-title">
@@ -110,7 +158,11 @@
             </h4>
           </header>
           <ul class="product-ai-review__list">
-            <li v-for="pro in reviewContent.pros" :key="pro" class="product-ai-review__list-item">
+            <li
+              v-for="pro in reviewContent.pros"
+              :key="pro"
+              class="product-ai-review__list-item"
+            >
               <v-icon
                 icon="mdi-check-circle-outline"
                 size="18"
@@ -122,9 +174,14 @@
           </ul>
         </section>
 
-        <section v-if="reviewContent.cons?.length" class="product-ai-review__panel">
+        <section
+          v-if="reviewContent.cons?.length"
+          class="product-ai-review__panel"
+        >
           <header class="product-ai-review__panel-header">
-            <div class="product-ai-review__panel-icon product-ai-review__panel-icon--cons">
+            <div
+              class="product-ai-review__panel-icon product-ai-review__panel-icon--cons"
+            >
               <v-icon icon="mdi-alert-circle-outline" size="20" />
             </div>
             <h4 class="product-ai-review__panel-title">
@@ -132,7 +189,11 @@
             </h4>
           </header>
           <ul class="product-ai-review__list">
-            <li v-for="con in reviewContent.cons" :key="con" class="product-ai-review__list-item">
+            <li
+              v-for="con in reviewContent.cons"
+              :key="con"
+              class="product-ai-review__list-item"
+            >
               <v-icon
                 icon="mdi-close-circle-outline"
                 size="18"
@@ -145,7 +206,10 @@
         </section>
       </div>
 
-      <div v-if="reviewContent.attributes?.length" class="product-ai-review__attributes">
+      <div
+        v-if="reviewContent.attributes?.length"
+        class="product-ai-review__attributes"
+      >
         <header class="product-ai-review__section-header">
           <div class="product-ai-review__section-icon">
             <v-icon icon="mdi-card-account-details-outline" size="20" />
@@ -154,7 +218,10 @@
         </header>
         <v-table density="comfortable" class="product-ai-review__table">
           <tbody>
-            <tr v-for="attribute in reviewContent.attributes" :key="attribute.name">
+            <tr
+              v-for="attribute in reviewContent.attributes"
+              :key="attribute.name"
+            >
               <th scope="row">{{ attribute.name }}</th>
               <td>{{ attribute.value }}</td>
             </tr>
@@ -162,23 +229,35 @@
         </v-table>
       </div>
 
-      <div v-if="reviewContent.sources?.length" class="product-ai-review__sources">
+      <div
+        v-if="reviewContent.sources?.length"
+        class="product-ai-review__sources"
+      >
         <header class="product-ai-review__section-header">
           <div class="product-ai-review__section-icon">
             <v-icon icon="mdi-book-open-variant" size="20" />
           </div>
           <h4>{{ $t('product.aiReview.sections.sources') }}</h4>
         </header>
-        <v-table density="compact" class="product-ai-review__table product-ai-review__table--compact">
+        <v-table
+          density="compact"
+          class="product-ai-review__table product-ai-review__table--compact"
+        >
           <thead>
             <tr>
               <th scope="col">{{ $t('product.aiReview.sources.index') }}</th>
               <th scope="col">{{ $t('product.aiReview.sources.source') }}</th>
-              <th scope="col">{{ $t('product.aiReview.sources.description') }}</th>
+              <th scope="col">
+                {{ $t('product.aiReview.sources.description') }}
+              </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="source in reviewContent.sources" :id="`review-ref-${source.number}`" :key="source.number">
+            <tr
+              v-for="source in reviewContent.sources"
+              :id="`review-ref-${source.number}`"
+              :key="source.number"
+            >
               <td>
                 <a :href="source.url" target="_blank" rel="noopener">
                   [{{ source.number }}]
@@ -193,7 +272,7 @@
                     class="product-ai-review__source-favicon"
                     width="16"
                     height="16"
-                  >
+                  />
                   <span>{{ source.name }}</span>
                 </div>
               </td>
@@ -213,7 +292,12 @@
         {{ $t('product.aiReview.empty') }}
       </p>
       <div class="product-ai-review__actions">
-        <v-btn color="primary" :loading="requesting" :disabled="requesting" @click="startRequest">
+        <v-btn
+          color="primary"
+          :loading="requesting"
+          :disabled="requesting"
+          @click="startRequest"
+        >
           {{ $t('product.aiReview.requestButton') }}
         </v-btn>
         <v-alert v-if="errorMessage" type="error" class="mt-4" border="start">
@@ -255,7 +339,12 @@ import { useTheme } from 'vuetify'
 import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import DOMPurify from 'isomorphic-dompurify'
-import type { AiReviewDto, AiReviewSourceDto, AiReviewAttributeDto, ReviewGenerationStatus } from '~~/shared/api-client'
+import type {
+  AiReviewDto,
+  AiReviewSourceDto,
+  AiReviewAttributeDto,
+  ReviewGenerationStatus,
+} from '~~/shared/api-client'
 
 interface ReviewContent {
   description?: string | null
@@ -311,21 +400,25 @@ const descriptionRef = ref<HTMLElement | null>(null)
 
 watch(
   () => props.initialReview,
-  (value) => {
+  value => {
     review.value = normalizeReview(value)
-  },
+  }
 )
 
 watch(
   () => props.reviewCreatedAt,
-  (value) => {
+  value => {
     createdMs.value = value ?? null
-  },
+  }
 )
 
 const hasSiteKey = computed(() => props.siteKey.length > 0)
-const captchaTheme = computed(() => (theme.global.current.value.dark ? 'dark' : 'light'))
-const captchaLocale = computed(() => (locale.value.startsWith('fr') ? 'fr' : 'en'))
+const captchaTheme = computed(() =>
+  theme.global.current.value.dark ? 'dark' : 'light'
+)
+const captchaLocale = computed(() =>
+  locale.value.startsWith('fr') ? 'fr' : 'en'
+)
 
 const reviewContent = computed(() => review.value)
 
@@ -335,7 +428,12 @@ const hasAnalysisSections = computed(() => {
     return false
   }
 
-  return Boolean(content.summary || content.description || content.technicalReview || content.ecologicalReview)
+  return Boolean(
+    content.summary ||
+    content.description ||
+    content.technicalReview ||
+    content.ecologicalReview
+  )
 })
 
 const createdDate = computed(() => {
@@ -348,7 +446,12 @@ const createdDate = computed(() => {
   })
 })
 
-const isGenerating = computed(() => status.value?.status && status.value.status !== 'SUCCESS' && status.value.status !== 'FAILED')
+const isGenerating = computed(
+  () =>
+    status.value?.status &&
+    status.value.status !== 'SUCCESS' &&
+    status.value.status !== 'FAILED'
+)
 const statusPercent = computed(() => Math.round(status.value?.percent ?? 0))
 
 const statusMessage = computed(() => {
@@ -386,32 +489,38 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
 
   const pros = Array.isArray(reviewData.pros)
     ? reviewData.pros
-        .map((entry) => sanitizeHtml(String(entry)))
-        .filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+        .map(entry => sanitizeHtml(String(entry)))
+        .filter(
+          (entry): entry is string =>
+            typeof entry === 'string' && entry.length > 0
+        )
     : []
   const cons = Array.isArray(reviewData.cons)
     ? reviewData.cons
-        .map((entry) => sanitizeHtml(String(entry)))
-        .filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+        .map(entry => sanitizeHtml(String(entry)))
+        .filter(
+          (entry): entry is string =>
+            typeof entry === 'string' && entry.length > 0
+        )
     : []
 
   const sources: AiReviewSourceDto[] = (reviewData.sources ?? [])
-    .map((source) => ({
+    .map(source => ({
       number: source.number ?? undefined,
       name: source.name ?? undefined,
       description: source.description ?? undefined,
       url: source.url ?? undefined,
       favicon: source.favicon ?? undefined,
     }))
-    .filter((source) => Boolean(source.url))
+    .filter(source => Boolean(source.url))
 
   const attributes: AiReviewAttributeDto[] = (reviewData.attributes ?? [])
-    .map((attribute) => ({
+    .map(attribute => ({
       name: attribute.name ?? '',
       value: attribute.value ?? '',
       number: attribute.number ?? undefined,
     }))
-    .filter((attribute) => attribute.name.length > 0)
+    .filter(attribute => attribute.name.length > 0)
 
   return {
     description: sanitizeHtml(reviewData.description ?? null),
@@ -469,7 +578,10 @@ const triggerGeneration = async () => {
     startPolling()
   } catch (error) {
     console.error('Failed to trigger AI review', error)
-    errorMessage.value = error instanceof Error ? error.message : t('product.aiReview.errors.generic')
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t('product.aiReview.errors.generic')
   } finally {
     requesting.value = false
   }
@@ -477,7 +589,9 @@ const triggerGeneration = async () => {
 
 const pollStatus = async () => {
   try {
-    const response = await $fetch<ReviewGenerationStatus>(`/api/products/${props.gtin}/review`)
+    const response = await $fetch<ReviewGenerationStatus>(
+      `/api/products/${props.gtin}/review`
+    )
     if (!response || !response.status) {
       stopPolling()
       errorMessage.value = t('product.aiReview.errors.generic')
@@ -491,7 +605,7 @@ const pollStatus = async () => {
       errorMessage.value =
         response.result?.enoughData === false
           ? t('product.aiReview.errors.notEnoughData')
-          : response.errorMessage ?? t('product.aiReview.errors.generic')
+          : (response.errorMessage ?? t('product.aiReview.errors.generic'))
       return
     }
 
@@ -512,7 +626,10 @@ const pollStatus = async () => {
     }
   } catch (error) {
     console.error('Failed to fetch review status', error)
-    errorMessage.value = error instanceof Error ? error.message : t('product.aiReview.errors.generic')
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t('product.aiReview.errors.generic')
     stopPolling()
   }
 }
@@ -548,7 +665,7 @@ watch(
       element.removeEventListener('click', handler)
     })
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 onBeforeUnmount(() => {
@@ -614,7 +731,8 @@ const handleReferenceClick = (event: Event) => {
   background: rgba(var(--v-theme-surface-glass), 0.92);
   border-radius: 24px;
   padding: 1.75rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08),
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08),
     0 18px 40px -24px rgba(var(--v-theme-shadow-primary-600), 0.4);
   display: flex;
   flex-direction: column;

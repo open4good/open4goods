@@ -38,13 +38,15 @@ describe('ProductImpactSubscoreGenericCard', () => {
                   higher: {
                     worst: 'Worst indicator is {worst}.',
                     best: 'Best indicator is {best} across {count} {verticalTitle}.',
-                    average: 'Average is {average}, equivalent to {averageOn20}/20.',
+                    average:
+                      'Average is {average}, equivalent to {averageOn20}/20.',
                     product: '{productName} scores {productOn20}/20.',
                   },
                   lower: {
                     worst: 'Highest indicator is {worst}.',
                     best: 'Lowest indicator is {best} across {count} {verticalTitle}.',
-                    average: 'Average is {average}, equivalent to {averageOn20}/20.',
+                    average:
+                      'Average is {average}, equivalent to {averageOn20}/20.',
                     product: '{productName} scores {productOn20}/20.',
                   },
                 },
@@ -56,13 +58,15 @@ describe('ProductImpactSubscoreGenericCard', () => {
                   higher: {
                     worst: 'Worst repairability indicator is {worst}.',
                     best: 'Best repairability indicator is {best} across {count} {verticalTitle}.',
-                    average: 'Average repairability is {average}, equivalent to {averageOn20}/20.',
+                    average:
+                      'Average repairability is {average}, equivalent to {averageOn20}/20.',
                     product: '{productName} repairability is {productOn20}/20.',
                   },
                   lower: {
                     worst: 'Highest repairability indicator is {worst}.',
                     best: 'Lowest repairability indicator is {best} across {count} {verticalTitle}.',
-                    average: 'Average repairability is {average}, equivalent to {averageOn20}/20.',
+                    average:
+                      'Average repairability is {average}, equivalent to {averageOn20}/20.',
                     product: '{productName} repairability is {productOn20}/20.',
                   },
                 },
@@ -109,33 +113,56 @@ describe('ProductImpactSubscoreGenericCard', () => {
         stubs: {
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
-            props: ['value', 'labelKey', 'labelParams', 'tooltipKey', 'tooltipParams'],
+            props: [
+              'value',
+              'labelKey',
+              'labelParams',
+              'tooltipKey',
+              'tooltipParams',
+            ],
             setup(props) {
-              return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
+              return () =>
+                h(
+                  'span',
+                  { class: 'coefficient-stub' },
+                  `coefficient:${props.value}`
+                )
             },
           }),
           'v-expansion-panels': defineComponent({
             name: 'VExpansionPanelsStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panels-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'expansion-panels-stub' }, slots.default?.())
             },
           }),
           'v-expansion-panel': defineComponent({
             name: 'VExpansionPanelStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'expansion-panel-stub' }, slots.default?.())
             },
           }),
           'v-expansion-panel-title': defineComponent({
             name: 'VExpansionPanelTitleStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-title-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'div',
+                  { class: 'expansion-panel-title-stub' },
+                  slots.default?.()
+                )
             },
           }),
           'v-expansion-panel-text': defineComponent({
             name: 'VExpansionPanelTextStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-text-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'div',
+                  { class: 'expansion-panel-text-stub' },
+                  slots.default?.()
+                )
             },
           }),
           ClientOnly: defineComponent({
@@ -182,33 +209,56 @@ describe('ProductImpactSubscoreGenericCard', () => {
         stubs: {
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
-            props: ['value', 'labelKey', 'labelParams', 'tooltipKey', 'tooltipParams'],
+            props: [
+              'value',
+              'labelKey',
+              'labelParams',
+              'tooltipKey',
+              'tooltipParams',
+            ],
             setup(props) {
-              return () => h('span', { class: 'coefficient-stub' }, `coefficient:${props.value}`)
+              return () =>
+                h(
+                  'span',
+                  { class: 'coefficient-stub' },
+                  `coefficient:${props.value}`
+                )
             },
           }),
           'v-expansion-panels': defineComponent({
             name: 'VExpansionPanelsStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panels-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'expansion-panels-stub' }, slots.default?.())
             },
           }),
           'v-expansion-panel': defineComponent({
             name: 'VExpansionPanelStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'expansion-panel-stub' }, slots.default?.())
             },
           }),
           'v-expansion-panel-title': defineComponent({
             name: 'VExpansionPanelTitleStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-title-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'div',
+                  { class: 'expansion-panel-title-stub' },
+                  slots.default?.()
+                )
             },
           }),
           'v-expansion-panel-text': defineComponent({
             name: 'VExpansionPanelTextStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-text-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'div',
+                  { class: 'expansion-panel-text-stub' },
+                  slots.default?.()
+                )
             },
           }),
           ClientOnly: defineComponent({

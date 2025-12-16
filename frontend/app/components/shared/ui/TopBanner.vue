@@ -15,10 +15,7 @@
           <p class="top-banner__title">
             {{ message }}
           </p>
-          <p
-            v-if="subtitle"
-            class="top-banner__subtitle"
-          >
+          <p v-if="subtitle" class="top-banner__subtitle">
             {{ subtitle }}
           </p>
         </div>
@@ -60,45 +57,45 @@
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const props = withDefaults(defineProps<{
-  open: boolean
-  message: string
-  subtitle?: string | null
-  color?: string
-  elevation?: string | number
-  ctaLabel?: string | null
-  ctaColor?: string
-  ctaVariant?: 'flat' | 'elevated' | 'tonal' | 'text' | 'outlined'
-  ctaSize?: 'x-small' | 'small' | 'default' | 'large' | 'x-large'
-  ctaHref?: string | null
-  ctaTarget?: '_blank' | '_self' | '_parent' | '_top'
-  ctaRel?: string | null
-  dismissible?: boolean
-  ariaLabel?: string
-  ctaAriaLabel?: string
-}>(), {
-  open: false,
-  subtitle: null,
-  color: 'surface-primary-080',
-  elevation: 8,
-  ctaLabel: null,
-  ctaColor: 'primary',
-  ctaVariant: 'elevated',
-  ctaSize: 'small',
-  ctaHref: null,
-  ctaTarget: undefined,
-  ctaRel: null,
-  dismissible: false,
-  ariaLabel: undefined,
-  ctaAriaLabel: undefined,
-})
+const props = withDefaults(
+  defineProps<{
+    open?: boolean
+    message: string
+    subtitle?: string | null
+    color?: string
+    elevation?: string | number
+    ctaLabel?: string | null
+    ctaColor?: string
+    ctaVariant?: 'flat' | 'elevated' | 'tonal' | 'text' | 'outlined'
+    ctaSize?: 'x-small' | 'small' | 'default' | 'large' | 'x-large'
+    ctaHref?: string | null
+    ctaTarget?: '_blank' | '_self' | '_parent' | '_top'
+    ctaRel?: string | null
+    dismissible?: boolean
+    ariaLabel?: string
+    ctaAriaLabel?: string
+  }>(),
+  {
+    open: false,
+    subtitle: null,
+    color: 'surface-primary-080',
+    elevation: 8,
+    ctaLabel: null,
+    ctaColor: 'primary',
+    ctaVariant: 'elevated',
+    ctaSize: 'small',
+    ctaHref: null,
+    ctaTarget: undefined,
+    ctaRel: null,
+    dismissible: false,
+    ariaLabel: undefined,
+    ctaAriaLabel: undefined,
+  }
+)
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
-  (e: 'show'): void
-  (e: 'hide'): void
-  (e: 'cta-click'): void
-  (e: 'close'): void
+  (e: 'show' | 'hide' | 'cta-click' | 'close'): void
 }>()
 
 const { t } = useI18n()
@@ -116,7 +113,7 @@ watch(
       emit('hide')
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const updateVisibility = (value: boolean) => {

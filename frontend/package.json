@@ -21,7 +21,7 @@
     "postinstall": "pnpm prepare:nuxt && pnpm rebuild sharp",
     "prebuild": "pnpm preprocess:css",
     "prepare": "husky",
-    "fast" : "pnpm build && pnpm lint && pnpm test --run"
+    "fast": "pnpm build && pnpm lint && pnpm test --run"
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",

@@ -11,10 +11,7 @@ import { setDomainLanguageCacheHeaders } from '../../../utils/cache-headers'
  */
 export default defineEventHandler(async (event): Promise<BlogPostDto> => {
   // Cache the article for one hour
-  setDomainLanguageCacheHeaders(
-    event,
-    'public, max-age=3600, s-maxage=3600'
-  )
+  setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
   const slug = getRouterParam(event, 'slug')
 

@@ -7,12 +7,20 @@
     :density="density"
     :size="size"
     :data-testid="testId"
-    @click="toggleZoom"
     :aria-label="t('siteIdentity.menu.zoom.label')"
+    @click="toggleZoom"
   >
-    <v-icon :icon="isZoomed ? 'mdi-magnify-minus-outline' : 'mdi-magnify-plus-outline'" />
+    <v-icon
+      :icon="
+        isZoomed ? 'mdi-magnify-minus-outline' : 'mdi-magnify-plus-outline'
+      "
+    />
     <v-tooltip activator="parent" location="bottom">
-      {{ isZoomed ? t('siteIdentity.menu.zoom.reset') : t('siteIdentity.menu.zoom.activate') }}
+      {{
+        isZoomed
+          ? t('siteIdentity.menu.zoom.reset')
+          : t('siteIdentity.menu.zoom.activate')
+      }}
     </v-tooltip>
   </v-btn>
 </template>
@@ -22,7 +30,7 @@ import { useStorage } from '@vueuse/core'
 import { watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     density?: 'default' | 'comfortable' | 'compact'
     size?: 'x-small' | 'small' | 'default'
@@ -32,7 +40,7 @@ const props = withDefaults(
     density: 'comfortable',
     size: 'small',
     testId: 'zoom-toggle',
-  },
+  }
 )
 
 const { t } = useI18n()
@@ -49,7 +57,7 @@ const applyZoom = (zoomed: boolean) => {
   }
 }
 
-watch(isZoomed, (val) => {
+watch(isZoomed, val => {
   applyZoom(val)
 })
 
@@ -62,7 +70,7 @@ onMounted(() => {
 .zoom-toggle
   background-color: rgba(var(--v-theme-surface-muted), 0.6)
   color: rgb(var(--v-theme-text-neutral-strong))
-  
+
   &.v-btn--active
     color: rgb(var(--v-theme-accent-supporting))
 </style>

@@ -21,15 +21,29 @@ describe('localized-routes utilities', () => {
   it('resolves localized static paths', () => {
     expect(resolveLocalizedRoutePath('team', 'fr-FR')).toBe('/equipe')
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
-    expect(resolveLocalizedRoutePath('legal-notice', 'fr-FR')).toBe('/mentions-legales')
-    expect(resolveLocalizedRoutePath('legal-notice', 'en-US')).toBe('/legal-notice')
-    expect(resolveLocalizedRoutePath('data-privacy', 'fr-FR')).toBe('/politique-confidentialite')
-    expect(resolveLocalizedRoutePath('data-privacy', 'en-US')).toBe('/data-privacy')
+    expect(resolveLocalizedRoutePath('legal-notice', 'fr-FR')).toBe(
+      '/mentions-legales'
+    )
+    expect(resolveLocalizedRoutePath('legal-notice', 'en-US')).toBe(
+      '/legal-notice'
+    )
+    expect(resolveLocalizedRoutePath('data-privacy', 'fr-FR')).toBe(
+      '/politique-confidentialite'
+    )
+    expect(resolveLocalizedRoutePath('data-privacy', 'en-US')).toBe(
+      '/data-privacy'
+    )
   })
 
   it('matches paths back to their localized routes', () => {
-    expect(matchLocalizedRouteByPath('/equipe')).toEqual({ routeName: 'team', locale: 'fr-FR' })
-    expect(matchLocalizedRouteByPath('/team')).toEqual({ routeName: 'team', locale: 'en-US' })
+    expect(matchLocalizedRouteByPath('/equipe')).toEqual({
+      routeName: 'team',
+      locale: 'fr-FR',
+    })
+    expect(matchLocalizedRouteByPath('/team')).toEqual({
+      routeName: 'team',
+      locale: 'en-US',
+    })
     expect(matchLocalizedRouteByPath('/mentions-legales')).toEqual({
       routeName: 'legal-notice',
       locale: 'fr-FR',
@@ -60,11 +74,13 @@ describe('localized-routes utilities', () => {
       locale: 'en-US',
       pageId: LOCALIZED_WIKI_PATHS['legal-notice']['en-US'].pageId,
     })
-    expect(matchLocalizedWikiRouteByPath('/politique-confidentialite')).toEqual({
-      routeName: 'data-privacy',
-      locale: 'fr-FR',
-      pageId: LOCALIZED_WIKI_PATHS['data-privacy']['fr-FR'].pageId,
-    })
+    expect(matchLocalizedWikiRouteByPath('/politique-confidentialite')).toEqual(
+      {
+        routeName: 'data-privacy',
+        locale: 'fr-FR',
+        pageId: LOCALIZED_WIKI_PATHS['data-privacy']['fr-FR'].pageId,
+      }
+    )
     expect(matchLocalizedWikiRouteByPath('/data-privacy')).toEqual({
       routeName: 'data-privacy',
       locale: 'en-US',
@@ -72,7 +88,6 @@ describe('localized-routes utilities', () => {
     })
     expect(matchLocalizedWikiRouteByPath('/team')).toBeNull()
   })
-
 
   it('falls back to default paths when no mapping exists', () => {
     expect(resolveLocalizedRoutePath('privacy', 'fr-FR')).toBe('/privacy')

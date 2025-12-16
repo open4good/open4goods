@@ -134,10 +134,12 @@ const heroCtas = computed<HeroCtaDisplay[]>(() => [
     variant: 'flat',
     target: '_blank',
     rel: 'noopener',
-  }
+  },
 ])
 
-const heroCtaGroupLabel = computed(() => String(t('opensource.hero.ctaGroupLabel')))
+const heroCtaGroupLabel = computed(() =>
+  String(t('opensource.hero.ctaGroupLabel'))
+)
 
 const heroInfoCard = computed<HeroInfoCardDisplay>(() => ({
   icon: 'mdi-source-branch',
@@ -270,20 +272,28 @@ const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
 }))
 
 const canonicalUrl = computed(() =>
-  new URL(resolveLocalizedRoutePath('opensource', locale.value), requestURL.origin).toString(),
+  new URL(
+    resolveLocalizedRoutePath('opensource', locale.value),
+    requestURL.origin
+  ).toString()
 )
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 const ogLocale = computed(() => locale.value.replace('-', '_'))
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 const ogImageAlt = computed(() => String(t('opensource.seo.imageAlt')))
 
 const alternateLinks = computed(() =>
-  availableLocales.map((availableLocale) => ({
+  availableLocales.map(availableLocale => ({
     rel: 'alternate' as const,
     hreflang: availableLocale,
-    href: new URL(resolveLocalizedRoutePath('opensource', availableLocale), requestURL.origin).toString(),
-  })),
+    href: new URL(
+      resolveLocalizedRoutePath('opensource', availableLocale),
+      requestURL.origin
+    ).toString(),
+  }))
 )
 
 useSeoMeta({

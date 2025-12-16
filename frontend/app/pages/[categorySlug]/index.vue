@@ -58,8 +58,10 @@
               <v-btn
                 class="category-page__fast-filters-toggle"
                 :class="{
-                  'category-page__fast-filters-toggle--collapsed': filtersCollapsed,
-                  'category-page__fast-filters-toggle--expanded': !filtersCollapsed,
+                  'category-page__fast-filters-toggle--collapsed':
+                    filtersCollapsed,
+                  'category-page__fast-filters-toggle--expanded':
+                    !filtersCollapsed,
                 }"
                 icon
                 variant="text"
@@ -73,8 +75,10 @@
                   size="40"
                   class="category-page__fast-filters-toggle-icon"
                   :class="{
-                    'category-page__fast-filters-toggle-icon--collapsed': filtersCollapsed,
-                    'category-page__fast-filters-toggle-icon--expanded': !filtersCollapsed,
+                    'category-page__fast-filters-toggle-icon--collapsed':
+                      filtersCollapsed,
+                    'category-page__fast-filters-toggle-icon--expanded':
+                      !filtersCollapsed,
                   }"
                 />
               </v-btn>
@@ -127,8 +131,12 @@
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
-              @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
-              @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+              @update:impact-expanded="
+                (value: boolean) => (impactExpanded = value)
+              "
+              @update:technical-expanded="
+                (value: boolean) => (technicalExpanded = value)
+              "
               @apply-mobile="applyMobileFilters"
               @clear-mobile="clearAllFilters"
             />
@@ -139,7 +147,8 @@
             ref="filtersSidebarRef"
             class="category-page__filters-surface"
             :class="{
-              'category-page__filters-surface--collapsed': !isFiltersColumnVisible,
+              'category-page__filters-surface--collapsed':
+                !isFiltersColumnVisible,
             }"
             role="complementary"
             :aria-label="$t('category.products.openFilters')"
@@ -163,8 +172,12 @@
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
-              @update:impact-expanded="(value: boolean) => (impactExpanded = value)"
-              @update:technical-expanded="(value: boolean) => (technicalExpanded = value)"
+              @update:impact-expanded="
+                (value: boolean) => (impactExpanded = value)
+              "
+              @update:technical-expanded="
+                (value: boolean) => (technicalExpanded = value)
+              "
             />
           </aside>
 
@@ -172,7 +185,8 @@
             ref="filtersResizerRef"
             class="category-page__filters-resizer"
             :class="{
-              'category-page__filters-resizer--collapsed': !isFiltersColumnVisible,
+              'category-page__filters-resizer--collapsed':
+                !isFiltersColumnVisible,
             }"
             role="separator"
             aria-orientation="vertical"
@@ -191,7 +205,9 @@
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
 
           <div class="category-page__toolbar">
-            <div class="category-page__toolbar-section category-page__toolbar-section--left">
+            <div
+              class="category-page__toolbar-section category-page__toolbar-section--left"
+            >
               <v-btn
                 v-if="!isDesktop"
                 color="primary"
@@ -222,8 +238,15 @@
                     location="bottom"
                   />
                 </div>
-                <v-btn-toggle v-model="sortOrder" class="category-page__sort-order" density="comfortable">
-                  <v-btn value="asc" :aria-label="$t('category.products.sortOrderAsc')">
+                <v-btn-toggle
+                  v-model="sortOrder"
+                  class="category-page__sort-order"
+                  density="comfortable"
+                >
+                  <v-btn
+                    value="asc"
+                    :aria-label="$t('category.products.sortOrderAsc')"
+                  >
                     <v-icon icon="mdi-sort-ascending" />
                     <v-tooltip
                       activator="parent"
@@ -231,7 +254,10 @@
                       location="bottom"
                     />
                   </v-btn>
-                  <v-btn value="desc" :aria-label="$t('category.products.sortOrderDesc')">
+                  <v-btn
+                    value="desc"
+                    :aria-label="$t('category.products.sortOrderDesc')"
+                  >
                     <v-icon icon="mdi-sort-descending" />
                     <v-tooltip
                       activator="parent"
@@ -243,7 +269,9 @@
               </div>
             </div>
 
-            <div class="category-page__toolbar-section category-page__toolbar-section--center">
+            <div
+              class="category-page__toolbar-section category-page__toolbar-section--center"
+            >
               <div class="category-page__search">
                 <v-text-field
                   v-model="searchTerm"
@@ -262,9 +290,18 @@
               </div>
             </div>
 
-            <div class="category-page__toolbar-section category-page__toolbar-section--right">
-              <v-btn-toggle v-model="viewMode" mandatory class="category-page__view-toggle">
-                <v-btn value="cards" :aria-label="$t('category.products.viewCards')">
+            <div
+              class="category-page__toolbar-section category-page__toolbar-section--right"
+            >
+              <v-btn-toggle
+                v-model="viewMode"
+                mandatory
+                class="category-page__view-toggle"
+              >
+                <v-btn
+                  value="cards"
+                  :aria-label="$t('category.products.viewCards')"
+                >
                   <v-icon icon="mdi-view-grid" />
                   <v-tooltip
                     activator="parent"
@@ -272,7 +309,10 @@
                     location="bottom"
                   />
                 </v-btn>
-                <v-btn value="list" :aria-label="$t('category.products.viewList')">
+                <v-btn
+                  value="list"
+                  :aria-label="$t('category.products.viewList')"
+                >
                   <v-icon icon="mdi-view-list" />
                   <v-tooltip
                     activator="parent"
@@ -280,7 +320,10 @@
                     location="bottom"
                   />
                 </v-btn>
-                <v-btn value="table" :aria-label="$t('category.products.viewTable')">
+                <v-btn
+                  value="table"
+                  :aria-label="$t('category.products.viewTable')"
+                >
                   <v-icon icon="mdi-table" />
                   <v-tooltip
                     activator="parent"
@@ -347,7 +390,6 @@
             />
           </template>
         </section>
-
       </div>
     </v-container>
 
@@ -404,7 +446,10 @@ import CategoryProductCardGrid from '~/components/category/products/CategoryProd
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
-import { CATEGORY_DEFAULT_VIEW_MODE, CATEGORY_PAGE_SIZES } from '~/constants/category'
+import {
+  CATEGORY_DEFAULT_VIEW_MODE,
+  CATEGORY_PAGE_SIZES,
+} from '~/constants/category'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import {
@@ -421,7 +466,10 @@ import {
   mergeFiltersWithoutDuplicates,
 } from '~/utils/_subset-to-filters'
 import type { CategorySubsetClause } from '~/types/category-subset'
-import { resolveFilterFieldTitle, resolveSortFieldTitle } from '~/utils/_field-localization'
+import {
+  resolveFilterFieldTitle,
+  resolveSortFieldTitle,
+} from '~/utils/_field-localization'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const route = useRoute()
@@ -453,7 +501,9 @@ const showAdminFilters = computed(() => adminFilterFields.value.length > 0)
 const MOBILE_USER_AGENT_PATTERN =
   /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
 
-const resolveUserAgentFromHeader = (headerValue: string | string[] | undefined): string | null => {
+const resolveUserAgentFromHeader = (
+  headerValue: string | string[] | undefined
+): string | null => {
   if (!headerValue) {
     return null
   }
@@ -467,20 +517,23 @@ const resolveUserAgentFromHeader = (headerValue: string | string[] | undefined):
 
 const display = useDisplay()
 
-const initialIsDesktop = useState<boolean>('category-page-initial-is-desktop', () => {
-  if (import.meta.server) {
-    const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
-    const userAgent = resolveUserAgentFromHeader(userAgentHeader)
+const initialIsDesktop = useState<boolean>(
+  'category-page-initial-is-desktop',
+  () => {
+    if (import.meta.server) {
+      const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
+      const userAgent = resolveUserAgentFromHeader(userAgentHeader)
 
-    if (!userAgent) {
-      return true
+      if (!userAgent) {
+        return true
+      }
+
+      return !MOBILE_USER_AGENT_PATTERN.test(userAgent)
     }
 
-    return !MOBILE_USER_AGENT_PATTERN.test(userAgent)
+    return display.lgAndUp.value
   }
-
-  return display.lgAndUp.value
-})
+)
 
 const isHydrated = ref(false)
 
@@ -489,14 +542,18 @@ onMounted(() => {
 })
 
 const rawParam = route.params.categorySlug
-const slug = Array.isArray(rawParam) ? rawParam[0] ?? '' : rawParam ?? ''
+const slug = Array.isArray(rawParam) ? (rawParam[0] ?? '') : (rawParam ?? '')
 const slugPattern = /^[a-z-]+$/
 
 if (!slugPattern.test(slug)) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
 }
 
-const { currentCategory, error: categoriesError, selectCategoryBySlug } = useCategories()
+const {
+  currentCategory,
+  error: categoriesError,
+  selectCategoryBySlug,
+} = useCategories()
 
 const { data: categoryData } = await useAsyncData(
   `category-detail-${slug}`,
@@ -505,13 +562,17 @@ const { data: categoryData } = await useAsyncData(
       return await selectCategoryBySlug(slug)
     } catch (err) {
       if (err instanceof Error && err.name === 'CategoryNotFoundError') {
-        throw createError({ statusCode: 404, statusMessage: err.message, cause: err })
+        throw createError({
+          statusCode: 404,
+          statusMessage: err.message,
+          cause: err,
+        })
       }
 
       throw err
     }
   },
-  { server: true, immediate: true },
+  { server: true, immediate: true }
 )
 
 const category = computed<VerticalConfigFullDto | null>(() => {
@@ -523,7 +584,9 @@ const category = computed<VerticalConfigFullDto | null>(() => {
   return fallback ? (toRaw(fallback) as VerticalConfigFullDto) : null
 })
 const errorMessage = computed(() => categoriesError.value)
-const hasFastFilters = computed(() => (category.value?.subsets?.length ?? 0) > 0)
+const hasFastFilters = computed(
+  () => (category.value?.subsets?.length ?? 0) > 0
+)
 
 const heroImage = computed(() => {
   if (!category.value) {
@@ -544,20 +607,28 @@ const categoryDisplayName = computed(
     category.value?.verticalHomeTitle ??
     category.value?.verticalMetaTitle ??
     category.value?.verticalHomeDescription ??
-    siteName.value,
+    siteName.value
 )
-const canonicalUrl = computed(() => new URL(route.path, requestURL.origin).toString())
+const canonicalUrl = computed(() =>
+  new URL(route.path, requestURL.origin).toString()
+)
 const seoTitle = computed(
-  () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle ?? siteName.value,
+  () =>
+    category.value?.verticalMetaTitle ??
+    category.value?.verticalHomeTitle ??
+    siteName.value
 )
 const seoDescription = computed(
-  () => category.value?.verticalMetaDescription ?? category.value?.verticalHomeDescription ?? '',
+  () =>
+    category.value?.verticalMetaDescription ??
+    category.value?.verticalHomeDescription ??
+    ''
 )
 const ogTitle = computed(
-  () => category.value?.verticalMetaOpenGraphTitle ?? seoTitle.value,
+  () => category.value?.verticalMetaOpenGraphTitle ?? seoTitle.value
 )
 const ogDescription = computed(
-  () => category.value?.verticalMetaOpenGraphDescription ?? seoDescription.value,
+  () => category.value?.verticalMetaOpenGraphDescription ?? seoDescription.value
 )
 const ogImage = computed(() => {
   if (!heroImage.value) {
@@ -643,9 +714,7 @@ type StructuredDataScript = {
 }
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 
 const verticalId = computed(() => category.value?.id ?? null)
@@ -666,11 +735,13 @@ const { data: initialProductsData } = await useAsyncData(
       },
     })
   },
-  { server: true, immediate: true },
+  { server: true, immediate: true }
 )
 
-const productsData = ref<ProductSearchResponseDto | null>(initialProductsData.value ?? null)
-watch(initialProductsData, (value) => {
+const productsData = ref<ProductSearchResponseDto | null>(
+  initialProductsData.value ?? null
+)
+watch(initialProductsData, value => {
   if (value) {
     productsData.value = value
   }
@@ -678,21 +749,24 @@ watch(initialProductsData, (value) => {
 
 const baselineAggregationMap = ref<Record<string, AggregationResponseDto>>({})
 
-const baselineAggregations = computed(() => Object.values(baselineAggregationMap.value))
-
-const { data: filterOptionsData, execute: loadFilterOptions } = useLazyAsyncData(
-  `category-filter-options-${slug}`,
-  async () => {
-    if (!verticalId.value) {
-      return null
-    }
-
-    return await $fetch<ProductFieldOptionsResponse>(
-      `/api/products/fields/filters/${encodeURIComponent(verticalId.value)}`,
-    )
-  },
-  { server: false, immediate: false },
+const baselineAggregations = computed(() =>
+  Object.values(baselineAggregationMap.value)
 )
+
+const { data: filterOptionsData, execute: loadFilterOptions } =
+  useLazyAsyncData(
+    `category-filter-options-${slug}`,
+    async () => {
+      if (!verticalId.value) {
+        return null
+      }
+
+      return await $fetch<ProductFieldOptionsResponse>(
+        `/api/products/fields/filters/${encodeURIComponent(verticalId.value)}`
+      )
+    },
+    { server: false, immediate: false }
+  )
 
 const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
   `category-sort-options-${slug}`,
@@ -702,30 +776,35 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
     }
 
     return await $fetch<ProductFieldOptionsResponse>(
-      `/api/products/fields/sortable/${encodeURIComponent(verticalId.value)}`,
+      `/api/products/fields/sortable/${encodeURIComponent(verticalId.value)}`
     )
   },
-  { server: false, immediate: false },
+  { server: false, immediate: false }
 )
 
 const filterOptions = computed(() => filterOptionsData.value ?? null)
 const sortOptions = computed(() => sortOptionsData.value ?? null)
 
-const isDesktop = computed(() => (isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value))
+const isDesktop = computed(() =>
+  isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value
+)
 const filtersDrawer = ref(false)
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
 const DEFAULT_FILTERS_COLLAPSED_STATE = true
 
-const filtersVisibilityCookie = useCookie<string | null>(FILTERS_VISIBILITY_STORAGE_KEY, {
-  sameSite: 'lax',
-  path: '/',
-  watch: false,
-})
+const filtersVisibilityCookie = useCookie<string | null>(
+  FILTERS_VISIBILITY_STORAGE_KEY,
+  {
+    sameSite: 'lax',
+    path: '/',
+    watch: false,
+  }
+)
 
 const resolveCollapsedPreference = (
   value: string | boolean | null | undefined,
-  fallback: boolean,
+  fallback: boolean
 ): boolean => {
   if (typeof value === 'boolean') {
     return value
@@ -746,11 +825,14 @@ const resolveCollapsedPreference = (
 
 const filtersCollapsedState = useStorage<boolean>(
   FILTERS_VISIBILITY_STORAGE_KEY,
-  resolveCollapsedPreference(filtersVisibilityCookie.value, DEFAULT_FILTERS_COLLAPSED_STATE),
+  resolveCollapsedPreference(
+    filtersVisibilityCookie.value,
+    DEFAULT_FILTERS_COLLAPSED_STATE
+  ),
   undefined,
   {
     serializer: StorageSerializers.boolean,
-  },
+  }
 )
 
 const syncFiltersCollapsedCookie = (value: boolean) => {
@@ -763,22 +845,24 @@ const syncFiltersCollapsedCookie = (value: boolean) => {
 
 syncFiltersCollapsedCookie(filtersCollapsedState.value)
 
-watch(filtersCollapsedState, (value) => {
+watch(filtersCollapsedState, value => {
   syncFiltersCollapsedCookie(value)
 })
 
 const filtersCollapsed = computed<boolean>({
   get: () => filtersCollapsedState.value,
-  set: (value) => {
+  set: value => {
     filtersCollapsedState.value = value
   },
 })
 const filtersToggleLabel = computed(() =>
   filtersCollapsed.value
     ? t('category.filters.toggle.show')
-    : t('category.filters.toggle.hide'),
+    : t('category.filters.toggle.hide')
 )
-const isFiltersColumnVisible = computed(() => isDesktop.value && !filtersCollapsed.value)
+const isFiltersColumnVisible = computed(
+  () => isDesktop.value && !filtersCollapsed.value
+)
 
 const FILTERS_PANEL_STORAGE_KEY = 'category-page-filters-width'
 const DEFAULT_FILTERS_PANEL_WIDTH = 300
@@ -787,16 +871,20 @@ const MAX_FILTERS_PANEL_WIDTH = 480
 const RESIZER_COLUMN_WIDTH = 12
 
 const clampFiltersPanelWidth = (value: number | null | undefined): number => {
-  const numericValue = typeof value === 'number' && !Number.isNaN(value)
-    ? value
-    : DEFAULT_FILTERS_PANEL_WIDTH
+  const numericValue =
+    typeof value === 'number' && !Number.isNaN(value)
+      ? value
+      : DEFAULT_FILTERS_PANEL_WIDTH
 
-  return Math.min(MAX_FILTERS_PANEL_WIDTH, Math.max(MIN_FILTERS_PANEL_WIDTH, numericValue))
+  return Math.min(
+    MAX_FILTERS_PANEL_WIDTH,
+    Math.max(MIN_FILTERS_PANEL_WIDTH, numericValue)
+  )
 }
 
 const filtersPanelWidth = useStorage<number>(
   FILTERS_PANEL_STORAGE_KEY,
-  DEFAULT_FILTERS_PANEL_WIDTH,
+  DEFAULT_FILTERS_PANEL_WIDTH
 )
 
 filtersPanelWidth.value = clampFiltersPanelWidth(filtersPanelWidth.value)
@@ -860,7 +948,10 @@ const removePointerListeners = () => {
 }
 
 const onPointerMove = (event: PointerEvent) => {
-  if (!isResizing.value || (activePointerId !== null && event.pointerId !== activePointerId)) {
+  if (
+    !isResizing.value ||
+    (activePointerId !== null && event.pointerId !== activePointerId)
+  ) {
     return
   }
 
@@ -872,7 +963,10 @@ const onPointerMove = (event: PointerEvent) => {
 }
 
 const onPointerEnd = (event: PointerEvent) => {
-  if (!isResizing.value || (activePointerId !== null && event.pointerId !== activePointerId)) {
+  if (
+    !isResizing.value ||
+    (activePointerId !== null && event.pointerId !== activePointerId)
+  ) {
     return
   }
 
@@ -922,7 +1016,6 @@ const onResizeHandlePointerDown = (event: PointerEvent) => {
   }
 }
 
-
 watch(
   isDesktop,
   (value, previous) => {
@@ -943,10 +1036,10 @@ watch(
     initialPointerX = 0
     initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
-watch(filtersCollapsed, (collapsed) => {
+watch(filtersCollapsed, collapsed => {
   if (collapsed) {
     removePointerListeners()
     isResizing.value = false
@@ -971,7 +1064,10 @@ const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
 const lastAppliedDefaultSort = ref<string | null>(null)
 
-const areFiltersEqual = (left: FilterRequestDto, right: FilterRequestDto): boolean => {
+const areFiltersEqual = (
+  left: FilterRequestDto,
+  right: FilterRequestDto
+): boolean => {
   const leftFilters = left.filters ?? []
   const rightFilters = right.filters ?? []
 
@@ -998,8 +1094,10 @@ const subsetMap = computed(() => {
   const availableSubsets = category.value?.subsets ?? []
 
   availableSubsets
-    .filter((subset): subset is VerticalSubsetDto => Boolean(subset && subset.id))
-    .forEach((subset) => {
+    .filter((subset): subset is VerticalSubsetDto =>
+      Boolean(subset && subset.id)
+    )
+    .forEach(subset => {
       if (subset.id) {
         map.set(subset.id, subset)
       }
@@ -1010,7 +1108,9 @@ const subsetMap = computed(() => {
 
 const DEFAULT_SUBSET_GROUP_KEY = 'ungrouped'
 
-const getSubsetGroupKey = (subset: VerticalSubsetDto | undefined | null): string => {
+const getSubsetGroupKey = (
+  subset: VerticalSubsetDto | undefined | null
+): string => {
   return subset?.group ?? DEFAULT_SUBSET_GROUP_KEY
 }
 
@@ -1018,7 +1118,7 @@ const normalizeActiveSubsetIds = (subsetIds: string[]): string[] => {
   const seenGroups = new Set<string>()
   const normalized: string[] = []
 
-  subsetIds.forEach((subsetId) => {
+  subsetIds.forEach(subsetId => {
     const subset = subsetMap.value.get(subsetId)
     const groupKey = subset ? getSubsetGroupKey(subset) : subsetId
     if (seenGroups.has(groupKey)) {
@@ -1060,13 +1160,16 @@ const applyHashPayload = (payload: CategoryHashState | null) => {
     sortOrder.value = nextSortOrder
   }
 
-  const nextFilters: FilterRequestDto =
-    payload?.filters?.filters?.length ? payload.filters : {}
+  const nextFilters: FilterRequestDto = payload?.filters?.filters?.length
+    ? payload.filters
+    : {}
 
   const normalizedFilters = nextFilters.filters?.length
     ? nextFilters.filters
-        .map((filter) => ({ ...filter }))
-        .filter((filter) => isAdmin.value || filter.field !== ADMIN_EXCLUDED_FIELD)
+        .map(filter => ({ ...filter }))
+        .filter(
+          filter => isAdmin.value || filter.field !== ADMIN_EXCLUDED_FIELD
+        )
     : []
 
   const filtersPayload: FilterRequestDto = normalizedFilters.length
@@ -1077,7 +1180,9 @@ const applyHashPayload = (payload: CategoryHashState | null) => {
     manualFilters.value = filtersPayload
   }
 
-  const nextActiveSubsets = normalizeActiveSubsetIds(payload?.activeSubsets ?? [])
+  const nextActiveSubsets = normalizeActiveSubsetIds(
+    payload?.activeSubsets ?? []
+  )
   if (!arraysEqual(activeSubsetIds.value, nextActiveSubsets)) {
     activeSubsetIds.value = [...nextActiveSubsets]
   }
@@ -1103,14 +1208,18 @@ const handleHashChange = () => {
 }
 
 const subsetFilters = computed(() =>
-  buildFilterRequestFromSubsets(category.value?.subsets ?? [], activeSubsetIds.value),
+  buildFilterRequestFromSubsets(
+    category.value?.subsets ?? [],
+    activeSubsetIds.value
+  )
 )
 
 const buildSubsetClauseLabel = (filter: Filter): string => {
   const mapping = filter.field ?? ''
   const fallbackField = mapping || 'field'
   const metadata = mapping ? filterFieldMap.value[mapping] : undefined
-  const fieldLabel = resolveFilterFieldTitle(metadata, t, fallbackField) || fallbackField
+  const fieldLabel =
+    resolveFilterFieldTitle(metadata, t, fallbackField) || fallbackField
 
   if (filter.operator === 'term') {
     const term = filter.terms?.[0] ?? ''
@@ -1120,11 +1229,15 @@ const buildSubsetClauseLabel = (filter: Filter): string => {
   const bounds: string[] = []
 
   if (typeof filter.min === 'number') {
-    bounds.push(t('category.fastFilters.operator.greaterThan', { value: filter.min }))
+    bounds.push(
+      t('category.fastFilters.operator.greaterThan', { value: filter.min })
+    )
   }
 
   if (typeof filter.max === 'number') {
-    bounds.push(t('category.fastFilters.operator.lowerThan', { value: filter.max }))
+    bounds.push(
+      t('category.fastFilters.operator.lowerThan', { value: filter.max })
+    )
   }
 
   if (!bounds.length) {
@@ -1135,7 +1248,7 @@ const buildSubsetClauseLabel = (filter: Filter): string => {
 }
 
 const activeSubsetClauses = computed<CategorySubsetClause[]>(() => {
-  return activeSubsetIds.value.flatMap((subsetId) => {
+  return activeSubsetIds.value.flatMap(subsetId => {
     const subset = subsetMap.value.get(subsetId)
     if (!subset) {
       return []
@@ -1159,14 +1272,16 @@ const hasActiveFilters = computed(() => {
 })
 
 const combinedFilters = computed<FilterRequestDto | undefined>(() =>
-  mergeFilterRequests(subsetFilters.value, manualFilters.value),
+  mergeFilterRequests(subsetFilters.value, manualFilters.value)
 )
 
 const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])
 
 const defaultSortField = computed<string | null>(() => {
   const impactFields = sortOptions.value?.impact ?? []
-  const candidate = impactFields.find((field) => typeof field.mapping === 'string')
+  const candidate = impactFields.find(
+    field => typeof field.mapping === 'string'
+  )
 
   return candidate?.mapping ? String(candidate.mapping) : null
 })
@@ -1195,8 +1310,8 @@ const sortItems = computed(() => {
   const seen = new Set<string>()
 
   return fields
-    .filter((field) => field.mapping && !seen.has(field.mapping))
-    .map((field) => {
+    .filter(field => field.mapping && !seen.has(field.mapping))
+    .map(field => {
       seen.add(field.mapping as string)
       return {
         value: field.mapping as string,
@@ -1205,26 +1320,23 @@ const sortItems = computed(() => {
     })
 })
 
-watch(
-  defaultSortField,
-  (value, previous) => {
-    if (!value) {
-      if (!sortField.value) {
-        sortOrder.value = 'desc'
-      }
-      lastAppliedDefaultSort.value = null
-      return
+watch(defaultSortField, (value, previous) => {
+  if (!value) {
+    if (!sortField.value) {
+      sortOrder.value = 'desc'
     }
+    lastAppliedDefaultSort.value = null
+    return
+  }
 
-    if (
-      !sortField.value ||
-      sortField.value === previous ||
-      sortField.value === lastAppliedDefaultSort.value
-    ) {
-      applyDefaultSort()
-    }
-  },
-)
+  if (
+    !sortField.value ||
+    sortField.value === previous ||
+    sortField.value === lastAppliedDefaultSort.value
+  ) {
+    applyDefaultSort()
+  }
+})
 
 const sortRequest = computed<SortRequestDto | undefined>(() => {
   if (!sortField.value) {
@@ -1242,7 +1354,9 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 })
 
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
-const resultsCount = computed(() => productsData.value?.products?.page?.totalElements ?? 0)
+const resultsCount = computed(
+  () => productsData.value?.products?.page?.totalElements ?? 0
+)
 
 const productListJsonLd = computed(() => {
   const products = currentProducts.value
@@ -1265,7 +1379,9 @@ const productListJsonLd = computed(() => {
     const productUrl = toAbsoluteUrl(product.fullSlug ?? product.slug)
     const imageUrl =
       toAbsoluteUrl(product.resources?.coverImagePath) ??
-      toAbsoluteUrl(product.resources?.externalCover ?? product.resources?.images?.[0]?.url)
+      toAbsoluteUrl(
+        product.resources?.externalCover ?? product.resources?.images?.[0]?.url
+      )
 
     const offersCount = product.offers?.offersCount ?? 0
     const bestPrice = product.offers?.bestPrice
@@ -1277,7 +1393,9 @@ const productListJsonLd = computed(() => {
             priceCurrency: bestPrice.currency ?? undefined,
             url: productUrl ?? canonicalUrl.value,
             availability:
-              offersCount > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+              offersCount > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
           }
         : undefined
 
@@ -1308,11 +1426,15 @@ const productListJsonLd = computed(() => {
       '@type': 'ListItem',
       position: index + 1,
       url: productUrl,
-      item: Object.fromEntries(Object.entries(productSchema).filter(([, value]) => value != null)),
+      item: Object.fromEntries(
+        Object.entries(productSchema).filter(([, value]) => value != null)
+      ),
     }
   })
 
-  const filteredItems = items.filter((item): item is Exclude<typeof items[number], null> => item !== null)
+  const filteredItems = items.filter(
+    (item): item is Exclude<(typeof items)[number], null> => item !== null
+  )
 
   if (!filteredItems.length) {
     return null
@@ -1355,7 +1477,7 @@ let structuredDataHeadEntry: ActiveHeadEntry<UseHeadInput> | null = null
 
 watch(
   structuredDataScripts,
-  (scripts) => {
+  scripts => {
     structuredDataHeadEntry?.dispose?.()
 
     if (!scripts.length) {
@@ -1367,32 +1489,33 @@ watch(
       script: scripts,
     })
   },
-  { immediate: true },
+  { immediate: true }
 )
 
-const pageCount = computed(() => productsData.value?.products?.page?.totalPages ?? 1)
+const pageCount = computed(
+  () => productsData.value?.products?.page?.totalPages ?? 1
+)
 const currentAggregations = computed<AggregationResponseDto[]>(
-  () => productsData.value?.aggregations ?? [],
+  () => productsData.value?.aggregations ?? []
 )
 
 const captureBaselineAggregations = (
-  aggregations: AggregationResponseDto[] | null | undefined,
+  aggregations: AggregationResponseDto[] | null | undefined
 ) => {
   if (!aggregations || !aggregations.length) {
     baselineAggregationMap.value = {}
     return
   }
 
-  baselineAggregationMap.value = aggregations.reduce<Record<string, AggregationResponseDto>>(
-    (accumulator, aggregation) => {
-      if (aggregation.field) {
-        accumulator[aggregation.field] = aggregation
-      }
+  baselineAggregationMap.value = aggregations.reduce<
+    Record<string, AggregationResponseDto>
+  >((accumulator, aggregation) => {
+    if (aggregation.field) {
+      accumulator[aggregation.field] = aggregation
+    }
 
-      return accumulator
-    },
-    {},
-  )
+    return accumulator
+  }, {})
 }
 
 watch(
@@ -1416,14 +1539,14 @@ watch(
 
     captureBaselineAggregations(state.aggregations)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => verticalId.value,
   () => {
     baselineAggregationMap.value = {}
-  },
+  }
 )
 
 const hasDocumentation = computed(() => {
@@ -1448,13 +1571,16 @@ const tableFields = computed<FieldMetadataDto[]>(() => {
 })
 
 const filterFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
-  return tableFields.value.reduce<Record<string, FieldMetadataDto>>((accumulator, field) => {
-    if (field.mapping) {
-      accumulator[String(field.mapping)] = field
-    }
+  return tableFields.value.reduce<Record<string, FieldMetadataDto>>(
+    (accumulator, field) => {
+      if (field.mapping) {
+        accumulator[String(field.mapping)] = field
+      }
 
-    return accumulator
-  }, {})
+      return accumulator
+    },
+    {}
+  )
 })
 
 const viewComponent = computed(() => {
@@ -1469,7 +1595,9 @@ const viewComponent = computed(() => {
   return CategoryProductCardGrid
 })
 
-const popularAttributes = computed(() => category.value?.popularAttributes ?? [])
+const popularAttributes = computed(
+  () => category.value?.popularAttributes ?? []
+)
 
 const attributeKeys = computed(() => {
   const technical = category.value?.technicalFilters ?? []
@@ -1477,21 +1605,24 @@ const attributeKeys = computed(() => {
 
   return Array.from(
     new Set(
-      [...technical, ...eco].filter((entry): entry is string => Boolean(entry)),
-    ),
+      [...technical, ...eco].filter((entry): entry is string => Boolean(entry))
+    )
   )
 })
 
 const attributeConfigMap = computed<Record<string, AttributeConfigDto>>(() => {
   const configs = category.value?.attributesConfig?.configs ?? []
 
-  return configs.reduce<Record<string, AttributeConfigDto>>((accumulator, config) => {
-    if (config?.key) {
-      accumulator[config.key] = config
-    }
+  return configs.reduce<Record<string, AttributeConfigDto>>(
+    (accumulator, config) => {
+      if (config?.key) {
+        accumulator[config.key] = config
+      }
 
-    return accumulator
-  }, {})
+      return accumulator
+    },
+    {}
+  )
 })
 
 const viewComponentProps = computed(() => {
@@ -1520,7 +1651,7 @@ const productError = ref<string | null>(null)
 const hasHydrated = ref(false)
 
 const isDefaultQueryState = computed(() => {
-  const hasDefaultFilters = !(manualFilters.value.filters?.length)
+  const hasDefaultFilters = !manualFilters.value.filters?.length
   const hasDefaultSubsets = activeSubsetIds.value.length === 0
   const hasDefaultSearch = searchTerm.value === ''
   const hasDefaultPaging =
@@ -1541,16 +1672,19 @@ const isUsingInitialProductsData = computed(() => {
     return false
   }
 
-  return productsData.value === initialProductsData.value && isDefaultQueryState.value
+  return (
+    productsData.value === initialProductsData.value &&
+    isDefaultQueryState.value
+  )
 })
 
-const shouldFetchFreshProducts = computed(() =>
-  hasHydrated.value && !isUsingInitialProductsData.value,
+const shouldFetchFreshProducts = computed(
+  () => hasHydrated.value && !isUsingInitialProductsData.value
 )
 
 const buildAggregationRequest = (
   options: ProductFieldOptionsResponse | null,
-  extraFields: FieldMetadataDto[] = [],
+  extraFields: FieldMetadataDto[] = []
 ): AggregationRequestDto | undefined => {
   const fields = [
     ...(options?.global ?? []),
@@ -1562,7 +1696,7 @@ const buildAggregationRequest = (
   const seen = new Set<string>()
   const aggs: Agg[] = []
 
-  fields.forEach((field) => {
+  fields.forEach(field => {
     if (!field.mapping || seen.has(field.mapping)) {
       return
     }
@@ -1572,7 +1706,8 @@ const buildAggregationRequest = (
     const agg: Agg = {
       name: field.mapping,
       field: field.mapping,
-      type: field.valueType === 'numeric' ? AggTypeEnum.Range : AggTypeEnum.Terms,
+      type:
+        field.valueType === 'numeric' ? AggTypeEnum.Range : AggTypeEnum.Terms,
     }
 
     if (field.aggregationConfiguration?.buckets != null) {
@@ -1598,18 +1733,24 @@ const fetchProducts = async () => {
   productError.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
-      method: 'POST',
-      body: {
-        verticalId: verticalId.value,
-        pageNumber: pageNumber.value,
-        pageSize: pageSize.value,
-        query: searchTerm.value || undefined,
-        sort: sortRequest.value,
-        filters: combinedFilters.value,
-        aggs: buildAggregationRequest(filterOptions.value, adminFilterFields.value),
-      },
-    })
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        body: {
+          verticalId: verticalId.value,
+          pageNumber: pageNumber.value,
+          pageSize: pageSize.value,
+          query: searchTerm.value || undefined,
+          sort: sortRequest.value,
+          filters: combinedFilters.value,
+          aggs: buildAggregationRequest(
+            filterOptions.value,
+            adminFilterFields.value
+          ),
+        },
+      }
+    )
 
     productsData.value = response
   } catch (error) {
@@ -1635,7 +1776,7 @@ watch(
 
     pageNumber.value = 0
     debouncedFetch()
-  },
+  }
 )
 
 watch(
@@ -1648,7 +1789,7 @@ watch(
     pageNumber.value = 0
     debouncedFetch()
   },
-  { deep: true },
+  { deep: true }
 )
 
 watch(
@@ -1661,7 +1802,7 @@ watch(
     pageNumber.value = 0
     debouncedFetch()
   },
-  { deep: true },
+  { deep: true }
 )
 
 watch(
@@ -1673,7 +1814,7 @@ watch(
 
     pageNumber.value = 0
     debouncedFetch()
-  },
+  }
 )
 
 watch(
@@ -1684,38 +1825,37 @@ watch(
     }
 
     debouncedFetch()
-  },
+  }
 )
 
 watch(
   () => filterOptions.value,
-  (value) => {
+  value => {
     if (value && shouldFetchFreshProducts.value) {
       fetchProducts()
     }
-  },
+  }
 )
 
-watch(
-  isAdmin,
-  (value) => {
-    if (!value) {
-      const existing = manualFilters.value.filters ?? []
-      const filtered = existing.filter((filter) => filter.field !== ADMIN_EXCLUDED_FIELD)
+watch(isAdmin, value => {
+  if (!value) {
+    const existing = manualFilters.value.filters ?? []
+    const filtered = existing.filter(
+      filter => filter.field !== ADMIN_EXCLUDED_FIELD
+    )
 
-      if (filtered.length !== existing.length) {
-        manualFilters.value = filtered.length ? { filters: filtered } : {}
-      }
-
-      return
+    if (filtered.length !== existing.length) {
+      manualFilters.value = filtered.length ? { filters: filtered } : {}
     }
 
-    if (shouldFetchFreshProducts.value) {
-      pageNumber.value = 0
-      debouncedFetch()
-    }
-  },
-)
+    return
+  }
+
+  if (shouldFetchFreshProducts.value) {
+    pageNumber.value = 0
+    debouncedFetch()
+  }
+})
 
 const hashState = computed<CategoryHashState>(() => ({
   filters: manualFilters.value.filters?.length ? manualFilters.value : {},
@@ -1742,7 +1882,7 @@ const onTableSortOrderUpdate = (order: 'asc' | 'desc') => {
 
 watch(
   hashState,
-  (state) => {
+  state => {
     if (!import.meta.client || !hasHydrated.value) {
       return
     }
@@ -1758,19 +1898,21 @@ watch(
 
       const targetLocation = hash ? { ...baseLocation, hash } : baseLocation
 
-      void router.push(targetLocation).catch((error) => {
+      void router.push(targetLocation).catch(error => {
         if (!isNavigationFailure(error)) {
           console.error('Failed to update category hash fragment.', error)
         }
       })
     }
   },
-  { deep: true },
+  { deep: true }
 )
 
 onMounted(async () => {
   if (import.meta.client) {
-    applyHashPayload(deserializeCategoryHashState(window.location.hash.slice(1)))
+    applyHashPayload(
+      deserializeCategoryHashState(window.location.hash.slice(1))
+    )
     window.addEventListener('hashchange', handleHashChange)
   }
 
@@ -1799,31 +1941,25 @@ onBeforeUnmount(() => {
   removePointerListeners()
 })
 
-watch(
-  verticalId,
-  (id, previousId) => {
-    if (import.meta.client && id) {
-      loadFilterOptions()
-      loadSortOptions()
-    }
+watch(verticalId, (id, previousId) => {
+  if (import.meta.client && id) {
+    loadFilterOptions()
+    loadSortOptions()
+  }
 
-    if (id && id !== previousId) {
-      sortField.value = null
-      sortOrder.value = 'desc'
-      lastAppliedDefaultSort.value = null
-    }
-  },
-)
+  if (id && id !== previousId) {
+    sortField.value = null
+    sortOrder.value = 'desc'
+    lastAppliedDefaultSort.value = null
+  }
+})
 
-watch(
-  subsetMap,
-  () => {
-    const normalized = normalizeActiveSubsetIds(activeSubsetIds.value)
-    if (!arraysEqual(activeSubsetIds.value, normalized)) {
-      activeSubsetIds.value = normalized
-    }
-  },
-)
+watch(subsetMap, () => {
+  const normalized = normalizeActiveSubsetIds(activeSubsetIds.value)
+  if (!arraysEqual(activeSubsetIds.value, normalized)) {
+    activeSubsetIds.value = normalized
+  }
+})
 
 const onToggleSubset = (subsetId: string, active: boolean) => {
   const subset = subsetMap.value.get(subsetId)
@@ -1833,7 +1969,7 @@ const onToggleSubset = (subsetId: string, active: boolean) => {
     if (subset) {
       const targetGroup = getSubsetGroupKey(subset)
 
-      next.forEach((id) => {
+      next.forEach(id => {
         if (id === subsetId) {
           return
         }
@@ -1855,7 +1991,7 @@ const onToggleSubset = (subsetId: string, active: boolean) => {
 
 const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   activeSubsetIds.value = normalizeActiveSubsetIds(
-    activeSubsetIds.value.filter((id) => id !== clause.subsetId),
+    activeSubsetIds.value.filter(id => id !== clause.subsetId)
   )
 
   const subset = subsetMap.value.get(clause.subsetId)
@@ -1866,13 +2002,20 @@ const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   }
 
   const currentManualFilters = manualFilters.value.filters ?? []
-  const merged = mergeFiltersWithoutDuplicates(currentManualFilters, remainingFilters)
+  const merged = mergeFiltersWithoutDuplicates(
+    currentManualFilters,
+    remainingFilters
+  )
 
   manualFilters.value = merged.length ? { filters: merged } : {}
 }
 
-const onRemoveManualFilter = (field: string, type: 'term' | 'range', term: string | null) => {
-  const next = (manualFilters.value.filters ?? []).filter((filter) => {
+const onRemoveManualFilter = (
+  field: string,
+  type: 'term' | 'range',
+  term: string | null
+) => {
+  const next = (manualFilters.value.filters ?? []).filter(filter => {
     if (filter.field !== field) {
       return true
     }

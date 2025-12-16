@@ -14,7 +14,12 @@ const createStub = (tag: string, className = '') =>
   defineComponent({
     name: `${tag}-stub`,
     setup(_, { slots, attrs }) {
-      return () => h(tag, { class: [className, attrs.class], ...attrs }, slots.default ? slots.default() : [])
+      return () =>
+        h(
+          tag,
+          { class: [className, attrs.class], ...attrs },
+          slots.default ? slots.default() : []
+        )
     },
   })
 
@@ -43,7 +48,9 @@ describe('RoundedCornerCard', () => {
       cornerLabel: 'Fresh',
     })
 
-    expect(wrapper.find('.rounded-card__corner-label').text()).toContain('Fresh')
+    expect(wrapper.find('.rounded-card__corner-label').text()).toContain(
+      'Fresh'
+    )
     await wrapper.unmount()
   })
 

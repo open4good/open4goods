@@ -29,7 +29,9 @@ defineProps<{
             </NuxtLink>
             <span class="dataset-hero__eyebrow">{{ eyebrow }}</span>
           </div>
-          <h1 id="dataset-hero-heading" class="dataset-hero__title">{{ title }}</h1>
+          <h1 id="dataset-hero-heading" class="dataset-hero__title">
+            {{ title }}
+          </h1>
           <TextContent :bloc-id="descriptionBlocId" :ipsum-length="220" />
         </div>
       </div>
@@ -94,4 +96,3 @@ defineProps<{
   font-size: clamp(2.25rem, 4.5vw, 3.25rem)
   line-height: 1.15
 </style>
-

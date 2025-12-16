@@ -66,18 +66,20 @@ export const useProductCompareStore = defineStore('product-compare', () => {
   })
   const isCollapsed = useLocalStorage<boolean>(COLLAPSE_STORAGE_KEY, false)
 
-  if (items.value.some((item) => item.gtin == null)) {
+  if (items.value.some(item => item.gtin == null)) {
     items.value = items.value
       .filter((item): item is CompareListItem => item.gtin != null)
-      .map((item) => ({ ...item, gtin: Number(item.gtin) }))
-      .filter((item) => Number.isFinite(item.gtin))
+      .map(item => ({ ...item, gtin: Number(item.gtin) }))
+      .filter(item => Number.isFinite(item.gtin))
   }
 
   const referenceVerticalId = computed(() => {
-    return items.value.find((item) => item.verticalId)?.verticalId ?? null
+    return items.value.find(item => item.verticalId)?.verticalId ?? null
   })
 
-  const hasReachedLimit = computed(() => items.value.length >= MAX_COMPARE_ITEMS)
+  const hasReachedLimit = computed(
+    () => items.value.length >= MAX_COMPARE_ITEMS
+  )
 
   const hasProduct = (product: ProductDto) => {
     const identifier = getProductIdentifier(product)
@@ -86,11 +88,11 @@ export const useProductCompareStore = defineStore('product-compare', () => {
       return false
     }
 
-    return items.value.some((item) => item.id === identifier)
+    return items.value.some(item => item.id === identifier)
   }
 
   const removeById = (id: string) => {
-    items.value = items.value.filter((item) => item.id !== id)
+    items.value = items.value.filter(item => item.id !== id)
 
     if (items.value.length === 0) {
       isCollapsed.value = false
@@ -125,7 +127,11 @@ export const useProductCompareStore = defineStore('product-compare', () => {
     const productVertical = resolveProductVertical(product)
     const currentVertical = referenceVerticalId.value
 
-    if (currentVertical && productVertical && currentVertical !== productVertical) {
+    if (
+      currentVertical &&
+      productVertical &&
+      currentVertical !== productVertical
+    ) {
       return { success: false, reason: 'vertical-mismatch' }
     }
 

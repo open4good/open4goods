@@ -28,11 +28,22 @@ describe('TopBanner', () => {
         stubs: {
           VSheet: { template: '<section class="v-sheet"><slot /></section>' },
           VBtn: {
-            template: '<button class="v-btn" @click="$emit(\'click\', $event)"><slot /></button>',
-            props: ['color', 'variant', 'size', 'href', 'target', 'rel', 'ariaLabel'],
+            template:
+              '<button class="v-btn" @click="$emit(\'click\', $event)"><slot /></button>',
+            props: [
+              'color',
+              'variant',
+              'size',
+              'href',
+              'target',
+              'rel',
+              'ariaLabel',
+            ],
           },
           VIcon: { template: '<span class="v-icon"><slot /></span>' },
-          VSlideYTransition: { template: '<div class="v-slide"><slot /></div>' },
+          VSlideYTransition: {
+            template: '<div class="v-slide"><slot /></div>',
+          },
         },
       },
     })

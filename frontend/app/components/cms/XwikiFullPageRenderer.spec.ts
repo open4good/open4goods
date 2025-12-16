@@ -11,20 +11,22 @@ vi.mock('~/composables/cms/useFullPage', () => ({
   useFullPage: useFullPageMock,
 }))
 
-vi.mock('~/components/category/navigation/CategoryNavigationBreadcrumbs.vue', () => ({
-  default: {
-    name: 'CategoryNavigationBreadcrumbs',
-    props: {
-      items: {
-        type: Array,
-        default: () => [],
+vi.mock(
+  '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue',
+  () => ({
+    default: {
+      name: 'CategoryNavigationBreadcrumbs',
+      props: {
+        items: {
+          type: Array,
+          default: () => [],
+        },
+        ariaLabel: {
+          type: String,
+          default: '',
+        },
       },
-      ariaLabel: {
-        type: String,
-        default: '',
-      },
-    },
-    template: `
+      template: `
       <nav class="category-navigation-breadcrumbs" :aria-label="ariaLabel">
         <ol>
           <li
@@ -38,8 +40,9 @@ vi.mock('~/components/category/navigation/CategoryNavigationBreadcrumbs.vue', ()
         </ol>
       </nav>
     `,
-  },
-}))
+    },
+  })
+)
 
 vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({
@@ -105,7 +108,7 @@ const createFullPageResponse = () => ({
 
 const mountComponent = async (
   props: Record<string, unknown> = {},
-  slots: Record<string, () => ReturnType<typeof h>> = {},
+  slots: Record<string, () => ReturnType<typeof h>> = {}
 ) => {
   const module = await import('./XwikiFullPageRenderer.vue')
   const Component = module.default
@@ -153,7 +156,9 @@ describe('XwikiFullPageRenderer', () => {
       ],
     })
 
-    const breadcrumbItems = wrapper.findAll('.category-navigation-breadcrumbs__item')
+    const breadcrumbItems = wrapper.findAll(
+      '.category-navigation-breadcrumbs__item'
+    )
     expect(breadcrumbItems).toHaveLength(3)
 
     const firstLink = breadcrumbItems.at(0)?.find('a')
@@ -166,9 +171,13 @@ describe('XwikiFullPageRenderer', () => {
   })
 
   it('renders sidebar content when provided through slot', async () => {
-    const wrapper = await mountComponent({}, {
-      sidebar: () => h('div', { 'data-test': 'sidebar-slot' }, 'Sidebar content'),
-    })
+    const wrapper = await mountComponent(
+      {},
+      {
+        sidebar: () =>
+          h('div', { 'data-test': 'sidebar-slot' }, 'Sidebar content'),
+      }
+    )
 
     const layout = wrapper.get('.cms-page__layout')
     expect(layout.classes()).toContain('cms-page__layout--with-sidebar')
@@ -178,7 +187,9 @@ describe('XwikiFullPageRenderer', () => {
   })
 
   it('renders hero media when an image is provided', async () => {
-    const wrapper = await mountComponent({ heroImage: 'https://cdn.example.com/hero.png' })
+    const wrapper = await mountComponent({
+      heroImage: 'https://cdn.example.com/hero.png',
+    })
 
     const media = wrapper.find('.cms-page__hero-media')
     expect(media.exists()).toBe(true)
@@ -189,9 +200,13 @@ describe('XwikiFullPageRenderer', () => {
   })
 
   it('enables wide layout variant when requested', async () => {
-    const wrapper = await mountComponent({ layoutVariant: 'wide' }, {
-      sidebar: () => h('div', { 'data-test': 'sidebar-slot' }, 'Sidebar content'),
-    })
+    const wrapper = await mountComponent(
+      { layoutVariant: 'wide' },
+      {
+        sidebar: () =>
+          h('div', { 'data-test': 'sidebar-slot' }, 'Sidebar content'),
+      }
+    )
 
     expect(wrapper.classes()).toContain('cms-page--wide')
 

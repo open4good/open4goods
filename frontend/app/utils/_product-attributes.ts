@@ -1,7 +1,10 @@
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 
 type TranslateFn = (key: string, params?: Record<string, unknown>) => string
-type NumberFormatFn = (value: number, options?: Intl.NumberFormatOptions) => string
+type NumberFormatFn = (
+  value: number,
+  options?: Intl.NumberFormatOptions
+) => string
 
 export interface ResolvedProductAttribute {
   key: string
@@ -18,7 +21,7 @@ const hasMeaningfulValue = (value: unknown): boolean => {
   }
 
   if (Array.isArray(value)) {
-    return value.some((entry) => hasMeaningfulValue(entry))
+    return value.some(entry => hasMeaningfulValue(entry))
   }
 
   if (typeof value === 'string') {
@@ -54,13 +57,20 @@ const readValueFromIndexedAttribute = (attribute: unknown): unknown => {
   return null
 }
 
-const getValueByPath = (product: ProductDto, path: string | undefined): unknown => {
+const getValueByPath = (
+  product: ProductDto,
+  path: string | undefined
+): unknown => {
   if (!path) {
     return undefined
   }
 
   return path.split('.').reduce<unknown>((accumulator, segment) => {
-    if (accumulator == null || typeof accumulator !== 'object' || Array.isArray(accumulator)) {
+    if (
+      accumulator == null ||
+      typeof accumulator !== 'object' ||
+      Array.isArray(accumulator)
+    ) {
       return undefined
     }
 
@@ -74,7 +84,10 @@ const getValueByPath = (product: ProductDto, path: string | undefined): unknown 
   }, product as unknown)
 }
 
-const resolveAttributeRawValue = (product: ProductDto, key: string): unknown => {
+const resolveAttributeRawValue = (
+  product: ProductDto,
+  key: string
+): unknown => {
   if (!key) {
     return null
   }
@@ -95,13 +108,19 @@ const resolveAttributeRawValue = (product: ProductDto, key: string): unknown => 
     return indexedValue
   }
 
-  const nestedIndexed = getValueByPath(product, `attributes.indexedAttributes.${key}`)
+  const nestedIndexed = getValueByPath(
+    product,
+    `attributes.indexedAttributes.${key}`
+  )
   const nestedValue = readValueFromIndexedAttribute(nestedIndexed)
   if (hasMeaningfulValue(nestedValue)) {
     return nestedValue
   }
 
-  const nestedReferential = getValueByPath(product, `attributes.referentialAttributes.${key}`)
+  const nestedReferential = getValueByPath(
+    product,
+    `attributes.referentialAttributes.${key}`
+  )
   if (hasMeaningfulValue(nestedReferential)) {
     return nestedReferential
   }
@@ -109,13 +128,16 @@ const resolveAttributeRawValue = (product: ProductDto, key: string): unknown => 
   return null
 }
 
-export const resolveAttributeRawValueByKey = (product: ProductDto, key: string): unknown => {
+export const resolveAttributeRawValueByKey = (
+  product: ProductDto,
+  key: string
+): unknown => {
   return resolveAttributeRawValue(product, key)
 }
 
 export const resolvePopularAttributes = (
   product: ProductDto,
-  configs: AttributeConfigDto[] | null | undefined,
+  configs: AttributeConfigDto[] | null | undefined
 ): ResolvedProductAttribute[] => {
   if (!configs?.length) {
     return []
@@ -148,7 +170,7 @@ export const resolvePopularAttributes = (
 export const resolveRemainingAttributes = (
   product: ProductDto,
   popularKeys: string[] = [],
-  limit: number | null = 6,
+  limit: number | null = 6
 ): ResolvedProductAttribute[] => {
   const usedKeys = new Set(popularKeys.filter(Boolean))
   const results: ResolvedProductAttribute[] = []
@@ -165,7 +187,10 @@ export const resolveRemainingAttributes = (
     }
 
     const label =
-      typeof attribute === 'object' && attribute && 'name' in attribute && typeof attribute.name === 'string'
+      typeof attribute === 'object' &&
+      attribute &&
+      'name' in attribute &&
+      typeof attribute.name === 'string'
         ? attribute.name
         : key
 
@@ -191,7 +216,7 @@ export const resolveRemainingAttributes = (
 const formatRawValue = (
   value: unknown,
   t: TranslateFn,
-  n: NumberFormatFn,
+  n: NumberFormatFn
 ): string | null => {
   if (value == null) {
     return null
@@ -199,7 +224,7 @@ const formatRawValue = (
 
   if (Array.isArray(value)) {
     const formatted = value
-      .map((entry) => formatRawValue(entry, t, n))
+      .map(entry => formatRawValue(entry, t, n))
       .filter((entry): entry is string => Boolean(entry))
       .join(', ')
 
@@ -229,7 +254,7 @@ const formatRawValue = (
 export const formatAttributeValue = (
   attribute: ResolvedProductAttribute,
   t: TranslateFn,
-  n: NumberFormatFn,
+  n: NumberFormatFn
 ): string | null => {
   const base = formatRawValue(attribute.rawValue, t, n)
 
@@ -249,4 +274,3 @@ export const formatAttributeValue = (
 
   return formatted
 }
-

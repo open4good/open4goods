@@ -21,11 +21,9 @@ export const useContentBloc = async (
       }
 
       const headers = useRequestHeaders(['host', 'x-forwarded-host'])
-      return $fetch<XwikiContentBlocDto>(`/api/blocs/${id}`,
-        {
-          headers,
-        },
-      )
+      return $fetch<XwikiContentBlocDto>(`/api/blocs/${id}`, {
+        headers,
+      })
     },
     {
       server: true,

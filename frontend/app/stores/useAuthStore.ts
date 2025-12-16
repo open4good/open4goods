@@ -13,11 +13,12 @@ export const useAuthStore = defineStore('auth', {
     username: null,
   }),
   getters: {
-    hasRole: (state) => (role: string) => state.roles.includes(role),
+    hasRole: state => (role: string) => state.roles.includes(role),
   },
   actions: {
     async logout() {
-      const { authService } = await import('~~/shared/api-client/services/auth.services')
+      const { authService } =
+        await import('~~/shared/api-client/services/auth.services')
       await authService.logout()
     },
   },

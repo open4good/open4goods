@@ -5,7 +5,11 @@ const useSafeRequestURL = (): URL | null => {
   try {
     return useRequestURL()
   } catch {
-    if (import.meta.client && typeof window !== 'undefined' && window.location) {
+    if (
+      import.meta.client &&
+      typeof window !== 'undefined' &&
+      window.location
+    ) {
       try {
         return new URL(window.location.href)
       } catch {
@@ -18,7 +22,7 @@ const useSafeRequestURL = (): URL | null => {
 }
 
 export const useCanonicalUrl = (
-  path?: MaybeRefOrGetter<string | null | undefined>,
+  path?: MaybeRefOrGetter<string | null | undefined>
 ) => {
   const route = useRoute()
   const requestURL = useSafeRequestURL()
@@ -30,9 +34,10 @@ export const useCanonicalUrl = (
       return null
     }
 
-    const rawPath = path ? toValue(path) ?? '' : route.fullPath ?? ''
+    const rawPath = path ? (toValue(path) ?? '') : (route.fullPath ?? '')
     const [pathWithoutHash] = rawPath.split('#')
-    const normalizedPath = pathWithoutHash && pathWithoutHash.length > 0 ? pathWithoutHash : '/'
+    const normalizedPath =
+      pathWithoutHash && pathWithoutHash.length > 0 ? pathWithoutHash : '/'
 
     try {
       return new URL(normalizedPath, origin).toString()

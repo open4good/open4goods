@@ -40,7 +40,7 @@ const VBtnStub = defineComponent({
           'aria-label': props.ariaLabel,
           type: 'button',
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -52,7 +52,8 @@ const VIconStub = defineComponent({
     color: { type: String, default: '' },
   },
   setup(props) {
-    return () => h('i', { class: 'v-icon-stub', 'data-color': props.color }, props.icon)
+    return () =>
+      h('i', { class: 'v-icon-stub', 'data-color': props.color }, props.icon)
   },
 })
 
@@ -118,7 +119,7 @@ describe('ProductAttributeSourcingLabel', () => {
   const mountComponent = (
     sourcing?: ProductAttributeSourceDto | null,
     value = 'Fallback',
-    extraProps: Record<string, unknown> = {},
+    extraProps: Record<string, unknown> = {}
   ) =>
     mount(ProductAttributeSourcingLabel, {
       props: { sourcing, value, ...extraProps },
@@ -161,7 +162,9 @@ describe('ProductAttributeSourcingLabel', () => {
     expect(tableRows).toHaveLength(1)
     expect(tableRows[0].text()).toContain('fnac.com')
 
-    const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
+    const countLabel = wrapper.find(
+      '.product-attribute-sourcing__tooltip-count'
+    )
     expect(countLabel.text()).toContain('1 source')
   })
 
@@ -197,7 +200,7 @@ describe('ProductAttributeSourcingLabel', () => {
           language: null,
           icecatTaxonomyId: 3566,
         },
-      ]),
+      ])
     )
 
     const sourcing: ProductAttributeSourceDto = {
@@ -212,7 +215,9 @@ describe('ProductAttributeSourcingLabel', () => {
     expect(rows).toHaveLength(1)
     expect(rows[0].text()).toContain('icecat.biz')
 
-    const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
+    const countLabel = wrapper.find(
+      '.product-attribute-sourcing__tooltip-count'
+    )
     expect(countLabel.text()).toContain('1 source')
   })
 
@@ -238,7 +243,9 @@ describe('ProductAttributeSourcingLabel', () => {
     expect(rows).toHaveLength(1)
     expect(rows[0].text()).toContain('eprel')
 
-    const countLabel = wrapper.find('.product-attribute-sourcing__tooltip-count')
+    const countLabel = wrapper.find(
+      '.product-attribute-sourcing__tooltip-count'
+    )
     expect(countLabel.text()).toContain('1 source')
   })
 })

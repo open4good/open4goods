@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-type ContribRouteHandler = typeof import('./[token]')['default']
+type ContribRouteHandler = (typeof import('./[token]'))['default']
 
 const resolveRedirectMock = vi.hoisted(() => vi.fn())
 const useAffiliationServiceMock = vi.hoisted(() =>
@@ -15,7 +15,11 @@ const getRouterParamMock = vi.hoisted(() =>
 )
 const createErrorMock = vi.hoisted(() =>
   vi.fn(
-    (input: { statusCode: number; statusMessage: string; cause?: unknown }) => ({
+    (input: {
+      statusCode: number
+      statusMessage: string
+      cause?: unknown
+    }) => ({
       ...input,
       isCreateError: true,
     })
@@ -48,7 +52,9 @@ describe('server/api/contrib/[token]', () => {
     vi.resetModules()
 
     resolveRedirectMock.mockReset()
-    useAffiliationServiceMock.mockReturnValue({ resolveRedirect: resolveRedirectMock })
+    useAffiliationServiceMock.mockReturnValue({
+      resolveRedirect: resolveRedirectMock,
+    })
     resolveDomainLanguageMock.mockReturnValue({ domainLanguage: 'en' })
     extractBackendErrorDetailsMock.mockResolvedValue({
       statusCode: 500,
@@ -59,12 +65,19 @@ describe('server/api/contrib/[token]', () => {
       logMessage: 'HTTP 500 - Backend failure',
     })
     getRouterParamMock.mockImplementation((event, name) => {
-      const context = (event as { context?: { params?: Record<string, string | undefined> } }).context
+      const context = (
+        event as { context?: { params?: Record<string, string | undefined> } }
+      ).context
       return context?.params?.[name]
     })
-    createErrorMock.mockImplementation((input) => ({ ...input, isCreateError: true }))
+    createErrorMock.mockImplementation(input => ({
+      ...input,
+      isCreateError: true,
+    }))
 
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
 
     handler = (await import('./[token]')).default
   })
@@ -75,7 +88,10 @@ describe('server/api/contrib/[token]', () => {
   })
 
   it('resolves redirects for GET requests', async () => {
-    resolveRedirectMock.mockResolvedValue({ statusCode: 301, location: 'https://example.test' })
+    resolveRedirectMock.mockResolvedValue({
+      statusCode: 301,
+      location: 'https://example.test',
+    })
 
     const event = {
       node: {
@@ -98,11 +114,17 @@ describe('server/api/contrib/[token]', () => {
       method: 'GET',
       userAgent: undefined,
     })
-    expect(response).toEqual({ statusCode: 301, location: 'https://example.test' })
+    expect(response).toEqual({
+      statusCode: 301,
+      location: 'https://example.test',
+    })
   })
 
   it('resolves redirects for POST requests and forwards the user agent header', async () => {
-    resolveRedirectMock.mockResolvedValue({ statusCode: 301, location: 'https://example.test/post' })
+    resolveRedirectMock.mockResolvedValue({
+      statusCode: 301,
+      location: 'https://example.test/post',
+    })
 
     const event = {
       node: {
@@ -124,7 +146,10 @@ describe('server/api/contrib/[token]', () => {
       method: 'POST',
       userAgent: 'Mozilla/5.0',
     })
-    expect(response).toEqual({ statusCode: 301, location: 'https://example.test/post' })
+    expect(response).toEqual({
+      statusCode: 301,
+      location: 'https://example.test/post',
+    })
   })
 
   it('propagates the Location header from manual redirect responses', async () => {

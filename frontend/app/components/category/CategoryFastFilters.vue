@@ -23,11 +23,19 @@
         <v-chip-group
           class="category-fast-filters__chip-group"
           :model-value="getGroupSelection(group.key)"
-          @update:model-value="(value) => onGroupSelectionChange(group.key, value)"
+          @update:model-value="
+            value => onGroupSelectionChange(group.key, value)
+          "
         >
           <template
             v-for="subset in group.subsets"
-            :key="subset.id ?? subset.caption ?? subset.title ?? subset.group ?? 'subset'"
+            :key="
+              subset.id ??
+              subset.caption ??
+              subset.title ??
+              subset.group ??
+              'subset'
+            "
           >
             <v-tooltip
               v-if="subset.description"
@@ -108,19 +116,22 @@ const activeSubsetIds = computed(() => props.activeSubsetIds ?? [])
 const DEFAULT_GROUP_KEY = 'ungrouped'
 
 const subsetMap = computed(() => {
-  return subsets.value.reduce<Record<string, VerticalSubsetDto>>((accumulator, subset) => {
-    if (subset.id) {
-      accumulator[subset.id] = subset
-    }
-    return accumulator
-  }, {})
+  return subsets.value.reduce<Record<string, VerticalSubsetDto>>(
+    (accumulator, subset) => {
+      if (subset.id) {
+        accumulator[subset.id] = subset
+      }
+      return accumulator
+    },
+    {}
+  )
 })
 
 const formatGroupLabel = (groupKey: string) => {
   return groupKey
     .split(/[-_\s]+/)
     .filter(Boolean)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ')
 }
 
@@ -144,9 +155,12 @@ const getGroupKey = (subset: VerticalSubsetDto | undefined | null): string => {
 }
 
 const groupedSubsets = computed(() => {
-  const groups = new Map<string, { key: string; label: string; subsets: VerticalSubsetDto[] }>()
+  const groups = new Map<
+    string,
+    { key: string; label: string; subsets: VerticalSubsetDto[] }
+  >()
 
-  subsets.value.forEach((subset) => {
+  subsets.value.forEach(subset => {
     if (!subset) {
       return
     }
@@ -167,12 +181,14 @@ const isSubsetActive = (subset: VerticalSubsetDto): boolean => {
 }
 
 const getGroupSelection = (groupKey: string): string | null => {
-  const group = groupedSubsets.value.find((entry) => entry.key === groupKey)
+  const group = groupedSubsets.value.find(entry => entry.key === groupKey)
   if (!group) {
     return null
   }
 
-  const activeSubset = group.subsets.find((subset) => subset.id && isSubsetActive(subset))
+  const activeSubset = group.subsets.find(
+    subset => subset.id && isSubsetActive(subset)
+  )
   return activeSubset?.id ?? null
 }
 
@@ -274,7 +290,9 @@ const scrollBy = (direction: 'forward' | 'backward') => {
 
   const step = element.clientWidth * 0.8 || 320
   const nextPosition =
-    direction === 'forward' ? element.scrollLeft + step : element.scrollLeft - step
+    direction === 'forward'
+      ? element.scrollLeft + step
+      : element.scrollLeft - step
 
   element.scrollTo({ left: nextPosition, behavior: 'smooth' })
 }
@@ -289,9 +307,16 @@ let stopScrollListener: (() => void) | undefined
 onMounted(() => {
   updateNavigationState()
 
-  stopScrollListener = useEventListener(scrollContainer, 'scroll', updateNavigationState)
+  stopScrollListener = useEventListener(
+    scrollContainer,
+    'scroll',
+    updateNavigationState
+  )
   stopWindowListener = useEventListener(window, 'resize', updateNavigationState)
-  const resizeObserver = useResizeObserver(scrollContainer, updateNavigationState)
+  const resizeObserver = useResizeObserver(
+    scrollContainer,
+    updateNavigationState
+  )
   stopResizeObserver = resizeObserver.stop
 })
 

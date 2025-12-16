@@ -31,7 +31,9 @@
       >
         {{ t('opendata.errors.datasetFailed') }}
       </v-alert>
-      <v-btn color="primary" variant="tonal" @click="refresh">{{ t('common.actions.retry') }}</v-btn>
+      <v-btn color="primary" variant="tonal" @click="refresh">{{
+        t('common.actions.retry')
+      }}</v-btn>
     </v-container>
 
     <OpendataDatasetSummary
@@ -39,12 +41,13 @@
       :items="summaryItems"
     />
 
-
     <section class="dataset-format" aria-labelledby="dataset-format-heading">
       <v-container max-width="lg">
         <div class="dataset-format__card">
           <div class="dataset-format__header">
-            <h2 id="dataset-format-heading">{{ t('opendata.datasets.isbn.format.title') }}</h2>
+            <h2 id="dataset-format-heading">
+              {{ t('opendata.datasets.isbn.format.title') }}
+            </h2>
             <p>{{ t('opendata.datasets.isbn.format.description') }}</p>
           </div>
           <ul class="dataset-format__list">
@@ -60,14 +63,20 @@
     <section class="dataset-columns" aria-labelledby="dataset-columns-heading">
       <v-container max-width="lg">
         <div class="dataset-columns__header">
-          <h2 id="dataset-columns-heading">{{ t('opendata.datasets.isbn.columnsTitle') }}</h2>
+          <h2 id="dataset-columns-heading">
+            {{ t('opendata.datasets.isbn.columnsTitle') }}
+          </h2>
           <p>{{ t('opendata.datasets.isbn.columnsSubtitle') }}</p>
         </div>
         <v-table class="dataset-columns__table" density="comfortable">
           <thead>
             <tr>
-              <th scope="col">{{ t('opendata.datasets.common.columnName') }}</th>
-              <th scope="col">{{ t('opendata.datasets.common.columnDescription') }}</th>
+              <th scope="col">
+                {{ t('opendata.datasets.common.columnName') }}
+              </th>
+              <th scope="col">
+                {{ t('opendata.datasets.common.columnDescription') }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -105,7 +114,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { OpenDataDatasetDto, OpenDataOverviewDto } from '~~/shared/api-client'
+import type {
+  OpenDataDatasetDto,
+  OpenDataOverviewDto,
+} from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 import OpendataDatasetHero from '~/components/domains/opendata/OpendataDatasetHero.vue'
@@ -128,22 +140,27 @@ interface DatasetPayload {
   overview: OpenDataOverviewDto
 }
 
-const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>('opendata-isbn', async () => {
-  const [dataset, overview] = await Promise.all([
-    $fetch<OpenDataDatasetDto>('/api/opendata/isbn', {
-      headers: requestHeaders,
-    }),
-    $fetch<OpenDataOverviewDto>('/api/opendata', {
-      headers: requestHeaders,
-    }),
-  ])
+const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>(
+  'opendata-isbn',
+  async () => {
+    const [dataset, overview] = await Promise.all([
+      $fetch<OpenDataDatasetDto>('/api/opendata/isbn', {
+        headers: requestHeaders,
+      }),
+      $fetch<OpenDataOverviewDto>('/api/opendata', {
+        headers: requestHeaders,
+      }),
+    ])
 
-  return { dataset, overview }
-})
+    return { dataset, overview }
+  }
+)
 
 const dataset = computed(() => data.value?.dataset)
 const overview = computed(() => data.value?.overview)
-const placeholder = computed(() => String(t('opendata.datasets.common.placeholder')))
+const placeholder = computed(() =>
+  String(t('opendata.datasets.common.placeholder'))
+)
 
 const summaryItems = computed(() => [
   {
@@ -177,15 +194,25 @@ const downloadOptions = computed(() => {
     {
       id: 'datagouv',
       title: String(t('opendata.datasets.common.download.fast.title')),
-      description: String(t('opendata.datasets.common.download.fast.description')),
+      description: String(
+        t('opendata.datasets.common.download.fast.description')
+      ),
       badge: String(t('opendata.datasets.common.download.fast.badge')),
       highlights: [
-        { icon: 'mdi-lightning-bolt-outline', text: String(t('opendata.datasets.common.download.fast.speed')) },
-        { icon: 'mdi-school-outline', text: String(t('opendata.datasets.isbn.download.fast.highlight')) },
+        {
+          icon: 'mdi-lightning-bolt-outline',
+          text: String(t('opendata.datasets.common.download.fast.speed')),
+        },
+        {
+          icon: 'mdi-school-outline',
+          text: String(t('opendata.datasets.isbn.download.fast.highlight')),
+        },
       ],
       cta: {
         label: String(t('opendata.datasets.common.download.fast.cta.label')),
-        ariaLabel: String(t('opendata.datasets.common.download.fast.cta.ariaLabel')),
+        ariaLabel: String(
+          t('opendata.datasets.common.download.fast.cta.ariaLabel')
+        ),
         href: String(t('opendata.datasets.common.download.fast.cta.href')),
         target: '_blank',
         rel: 'noopener nofollow',
@@ -194,7 +221,9 @@ const downloadOptions = computed(() => {
     {
       id: 'direct',
       title: String(t('opendata.datasets.common.download.direct.title')),
-      description: String(t('opendata.datasets.common.download.direct.description')),
+      description: String(
+        t('opendata.datasets.common.download.direct.description')
+      ),
       highlights: [
         {
           icon: 'mdi-account-multiple-outline',
@@ -203,7 +232,7 @@ const downloadOptions = computed(() => {
               ? t('opendata.datasets.common.download.direct.concurrent', {
                   value: limits.concurrentDownloads,
                 })
-              : t('opendata.datasets.common.download.direct.concurrentUnknown'),
+              : t('opendata.datasets.common.download.direct.concurrentUnknown')
           ),
         },
         {
@@ -213,13 +242,15 @@ const downloadOptions = computed(() => {
               ? t('opendata.datasets.common.download.direct.speed', {
                   value: limits.downloadSpeed,
                 })
-              : t('opendata.datasets.common.download.direct.speedUnknown'),
+              : t('opendata.datasets.common.download.direct.speedUnknown')
           ),
         },
       ],
       cta: {
         label: String(t('opendata.datasets.common.download.direct.cta.label')),
-        ariaLabel: String(t('opendata.datasets.common.download.direct.cta.ariaLabel')),
+        ariaLabel: String(
+          t('opendata.datasets.common.download.direct.cta.ariaLabel')
+        ),
         href: directUrl ?? '#',
         disabled: !directUrl,
       },
@@ -233,7 +264,9 @@ const columnDefinitions = computed(() => {
   return headers.map(header => ({
     key: header,
     label: String(t(`opendata.datasets.isbn.columns.${header}.label` as const)),
-    description: String(t(`opendata.datasets.isbn.columns.${header}.description` as const)),
+    description: String(
+      t(`opendata.datasets.isbn.columns.${header}.description` as const)
+    ),
   }))
 })
 
@@ -270,10 +303,15 @@ const faqItems = computed(() => [
   },
 ])
 
-const canonicalUrl = computed(
-  () => new URL(resolveLocalizedRoutePath('opendata-isbn', locale.value), requestURL.origin).toString(),
+const canonicalUrl = computed(() =>
+  new URL(
+    resolveLocalizedRoutePath('opendata-isbn', locale.value),
+    requestURL.origin
+  ).toString()
 )
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 
 useSeoMeta({
   title: () => String(t('opendata.datasets.isbn.seo.title')),
@@ -286,9 +324,7 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 </script>
 
@@ -373,4 +409,3 @@ useHead(() => ({
 .dataset-columns__table tbody tr:nth-child(even)
   background: rgba(var(--v-theme-surface-primary-050), 0.6)
 </style>
-

@@ -40,7 +40,6 @@ const { t } = useI18n()
   >
     <v-container class="py-12 px-4 mx-auto" max-width="xl">
       <div class="team-members-section__header">
-
         <h2 :id="headingId" class="team-members-section__title">
           {{ props.title }}
         </h2>
@@ -50,7 +49,12 @@ const { t } = useI18n()
         </div>
       </div>
 
-      <v-row v-if="hasMembers" class="team-members-section__grid mt-2" align="stretch" justify="center">
+      <v-row
+        v-if="hasMembers"
+        class="team-members-section__grid mt-2"
+        align="stretch"
+        justify="center"
+      >
         <v-col
           v-for="member in props.members"
           :key="member.name"
@@ -60,17 +64,15 @@ const { t } = useI18n()
           xl="3"
           class="d-flex"
         >
-          <TeamMemberCard :member="member" :variant="props.memberVariant" class="flex-grow-1" />
+          <TeamMemberCard
+            :member="member"
+            :variant="props.memberVariant"
+            class="flex-grow-1"
+          />
         </v-col>
       </v-row>
 
-      <v-alert
-        v-else
-        type="info"
-        variant="tonal"
-        border="start"
-        class="mt-6"
-      >
+      <v-alert v-else type="info" variant="tonal" border="start" class="mt-6">
         {{ t('team.sections.empty') }}
       </v-alert>
     </v-container>

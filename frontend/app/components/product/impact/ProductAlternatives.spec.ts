@@ -121,33 +121,65 @@ describe('ProductAlternatives', () => {
     expect(fetchMock).toHaveBeenCalled()
     const lastCall = fetchMock.mock.calls.at(-1)
     expect(lastCall?.[0]).toBe('/api/products/search')
-    const requestBody = (lastCall?.[1] as { body?: { filters?: { filters?: Array<Record<string, unknown>> } } })?.body
+    const requestBody = (
+      lastCall?.[1] as {
+        body?: { filters?: { filters?: Array<Record<string, unknown>> } }
+      }
+    )?.body
     const initialFilters = requestBody?.filters?.filters ?? []
     expect(initialFilters).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ field: 'price.minPrice.price', operator: 'range', max: 349.9 }),
-        expect.objectContaining({ field: ECOSCORE_RELATIVE_FIELD, operator: 'range', min: 15 }),
-        expect.objectContaining({ field: 'attributes.indexed.POWER_CONSUMPTION.numericValue', operator: 'range', max: 55 }),
-      ]),
+        expect.objectContaining({
+          field: 'price.minPrice.price',
+          operator: 'range',
+          max: 349.9,
+        }),
+        expect.objectContaining({
+          field: ECOSCORE_RELATIVE_FIELD,
+          operator: 'range',
+          min: 15,
+        }),
+        expect.objectContaining({
+          field: 'attributes.indexed.POWER_CONSUMPTION.numericValue',
+          operator: 'range',
+          max: 55,
+        }),
+      ])
     )
 
     const priceChip = wrapper
       .findAll('.product-alternatives__chip')
-      .find((chip) => chip.text() === 'Price ≤ yours')
+      .find(chip => chip.text() === 'Price ≤ yours')
     expect(priceChip).toBeDefined()
     await priceChip?.trigger('click')
 
     await flushPromises()
 
     const updatedCall = fetchMock.mock.calls.at(-1)
-    const updatedBody = (updatedCall?.[1] as { body?: { filters?: { filters?: Array<Record<string, unknown>> } } })?.body
+    const updatedBody = (
+      updatedCall?.[1] as {
+        body?: { filters?: { filters?: Array<Record<string, unknown>> } }
+      }
+    )?.body
     const updatedFilters = updatedBody?.filters?.filters ?? []
     expect(updatedFilters).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ field: ECOSCORE_RELATIVE_FIELD, operator: 'range', min: 15 }),
-        expect.objectContaining({ field: 'attributes.indexed.POWER_CONSUMPTION.numericValue', operator: 'range', max: 55 }),
-      ]),
+        expect.objectContaining({
+          field: ECOSCORE_RELATIVE_FIELD,
+          operator: 'range',
+          min: 15,
+        }),
+        expect.objectContaining({
+          field: 'attributes.indexed.POWER_CONSUMPTION.numericValue',
+          operator: 'range',
+          max: 55,
+        }),
+      ])
     )
-    expect(updatedFilters).not.toEqual(expect.arrayContaining([expect.objectContaining({ field: 'price.minPrice.price' })]))
+    expect(updatedFilters).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'price.minPrice.price' }),
+      ])
+    )
   })
 })

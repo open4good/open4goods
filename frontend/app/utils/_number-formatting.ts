@@ -1,4 +1,7 @@
-export type NumberFormatter = (value: number, options?: Intl.NumberFormatOptions) => string
+export type NumberFormatter = (
+  value: number,
+  options?: Intl.NumberFormatOptions
+) => string
 
 type FormatNumericRangeValueOptions = {
   isPrice?: boolean
@@ -10,7 +13,10 @@ const DEFAULT_FALLBACK = '–'
 export const formatNumericRangeValue = (
   value: number | string | null | undefined,
   formatter: NumberFormatter,
-  { isPrice = false, fallback = DEFAULT_FALLBACK }: FormatNumericRangeValueOptions = {},
+  {
+    isPrice = false,
+    fallback = DEFAULT_FALLBACK,
+  }: FormatNumericRangeValueOptions = {}
 ): string => {
   if (value == null || value === '') {
     return fallback

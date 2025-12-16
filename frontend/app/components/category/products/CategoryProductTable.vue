@@ -21,13 +21,19 @@
     </template>
 
     <template #[`item.brand`]="{ value }">
-      <span class="category-product-table__brand">{{ value ?? $t('category.products.unknownBrand') }}</span>
+      <span class="category-product-table__brand">{{
+        value ?? $t('category.products.unknownBrand')
+      }}</span>
     </template>
 
     <template #[`item.model`]="{ value, item }">
       <div class="category-product-table__model">
         <div class="category-product-table__model-name">
-          {{ value ?? item.product.identity?.bestName ?? '#' + (item.product.gtin ?? '') }}
+          {{
+            value ??
+            item.product.identity?.bestName ??
+            '#' + (item.product.gtin ?? '')
+          }}
         </div>
       </div>
     </template>
@@ -58,7 +64,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { AttributeConfigDto, FieldMetadataDto, ProductDto } from '~~/shared/api-client'
+import type {
+  AttributeConfigDto,
+  FieldMetadataDto,
+  ProductDto,
+} from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
 import {
@@ -83,7 +93,13 @@ interface CategoryProductTableRowBase {
 }
 
 interface CategoryProductTableRow extends CategoryProductTableRowBase {
-  [key: string]: AttributeCellValue | ProductDto | string | number | null | undefined
+  [key: string]:
+    | AttributeCellValue
+    | ProductDto
+    | string
+    | number
+    | null
+    | undefined
 }
 
 interface AttributeColumn {
@@ -118,12 +134,16 @@ const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const attributeConfigMap = computed<Record<string, AttributeConfigDto>>(
-  () => props.attributeConfigs ?? {},
+  () => props.attributeConfigs ?? {}
 )
 const attributeKeys = computed(() => props.attributeKeys ?? [])
-const fieldMetadataMap = computed<Record<string, FieldMetadataDto>>(() => props.fieldMetadata ?? {})
+const fieldMetadataMap = computed<Record<string, FieldMetadataDto>>(
+  () => props.fieldMetadata ?? {}
+)
 
-const extractAttributeKeyFromMapping = (mapping: string | undefined): string | null => {
+const extractAttributeKeyFromMapping = (
+  mapping: string | undefined
+): string | null => {
   if (!mapping) {
     return null
   }
@@ -156,7 +176,10 @@ const attributeFieldMappingByKey = computed<Record<string, string>>(() => {
   }, {})
 })
 
-const guessAttributeMapping = (key: string, config: AttributeConfigDto | undefined): string => {
+const guessAttributeMapping = (
+  key: string,
+  config: AttributeConfigDto | undefined
+): string => {
   const base = `attributes.indexed.${key}`
 
   switch (config?.filteringType) {
@@ -182,9 +205,14 @@ const attributeColumns = computed<AttributeColumn[]>(() => {
     seen.add(normalizedKey)
 
     const config = attributeConfigMap.value?.[normalizedKey]
-    const mapping = attributeFieldMappingByKey.value[normalizedKey] ?? guessAttributeMapping(normalizedKey, config)
+    const mapping =
+      attributeFieldMappingByKey.value[normalizedKey] ??
+      guessAttributeMapping(normalizedKey, config)
     const field = fieldMetadataMap.value?.[mapping]
-    const title = config?.name ?? resolveFilterFieldTitle(field, t, mapping) ?? normalizedKey
+    const title =
+      config?.name ??
+      resolveFilterFieldTitle(field, t, mapping) ??
+      normalizedKey
 
     accumulator.push({
       key: normalizedKey,
@@ -199,10 +227,30 @@ const attributeColumns = computed<AttributeColumn[]>(() => {
 })
 
 const headers = computed(() => [
-  { key: 'compare', title: t('category.products.headers.compare'), sortable: false, width: 48 },
-  { key: 'brand', title: t('category.products.headers.brand'), sortable: true, width: 140 },
-  { key: 'model', title: t('category.products.headers.model'), sortable: true, minWidth: 200 },
-  { key: 'impactScore', title: t('category.products.headers.impactScore'), sortable: true, width: 140 },
+  {
+    key: 'compare',
+    title: t('category.products.headers.compare'),
+    sortable: false,
+    width: 48,
+  },
+  {
+    key: 'brand',
+    title: t('category.products.headers.brand'),
+    sortable: true,
+    width: 140,
+  },
+  {
+    key: 'model',
+    title: t('category.products.headers.model'),
+    sortable: true,
+    minWidth: 200,
+  },
+  {
+    key: 'impactScore',
+    title: t('category.products.headers.impactScore'),
+    sortable: true,
+    width: 140,
+  },
   {
     key: 'bestPrice',
     title: t('category.products.headers.bestPrice'),
@@ -215,7 +263,7 @@ const headers = computed(() => [
     sortable: true,
     width: 140,
   },
-  ...attributeColumns.value.map((column) => ({
+  ...attributeColumns.value.map(column => ({
     key: column.headerKey,
     title: column.title,
     sortable: true,
@@ -234,7 +282,7 @@ const staticSortHeaderToFieldMapping: Record<string, string> = {
 const sortHeaderToFieldMapping = computed<Record<string, string>>(() => {
   const mapping: Record<string, string> = { ...staticSortHeaderToFieldMapping }
 
-  attributeColumns.value.forEach((column) => {
+  attributeColumns.value.forEach(column => {
     if (column.mapping) {
       mapping[column.headerKey] = column.mapping
     }
@@ -245,8 +293,11 @@ const sortHeaderToFieldMapping = computed<Record<string, string>>(() => {
 
 const fieldToSortHeader = computed<Record<string, string>>(() =>
   Object.fromEntries(
-    Object.entries(sortHeaderToFieldMapping.value).map(([header, field]) => [field, header]),
-  ),
+    Object.entries(sortHeaderToFieldMapping.value).map(([header, field]) => [
+      field,
+      header,
+    ])
+  )
 )
 
 const internalSortBy = computed(() => {
@@ -266,9 +317,13 @@ const internalSortBy = computed(() => {
 })
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
-const offersCountLabel = (product: ProductDto) => formatOffersCount(product, translatePlural)
+const offersCountLabel = (product: ProductDto) =>
+  formatOffersCount(product, translatePlural)
 
-const resolveAttributeCellValue = (product: ProductDto, column: AttributeColumn): string | null => {
+const resolveAttributeCellValue = (
+  product: ProductDto,
+  column: AttributeColumn
+): string | null => {
   const rawValue = resolveAttributeRawValueByKey(product, column.key)
 
   return formatAttributeValue(
@@ -281,23 +336,26 @@ const resolveAttributeCellValue = (product: ProductDto, column: AttributeColumn)
       suffix: column.config?.suffix ?? null,
     },
     t,
-    n,
+    n
   )
 }
 
 const rows = computed<CategoryProductTableRow[]>(() => {
-  return props.products.map((product) => {
+  return props.products.map(product => {
     const baseRow: CategoryProductTableRow = {
       product,
       compare: null,
       brand: product.identity?.brand,
-      model: product.identity?.model ?? product.identity?.bestName ?? product.identity?.brand,
+      model:
+        product.identity?.model ??
+        product.identity?.bestName ??
+        product.identity?.brand,
       impactScore: resolvePrimaryImpactScore(product),
       bestPrice: bestPriceLabel(product),
       offersCount: product.offers?.offersCount ?? 0,
     }
 
-    attributeColumns.value.forEach((column) => {
+    attributeColumns.value.forEach(column => {
       baseRow[column.headerKey] = resolveAttributeCellValue(product, column)
     })
 
@@ -324,7 +382,10 @@ const onSortByUpdate = (sortBy: { key: string; order?: 'asc' | 'desc' }[]) => {
   emit('update:sort-order', entry.order ?? 'asc')
 }
 
-const onRowClick = (_event: MouseEvent, item: { item: CategoryProductTableRow }) => {
+const onRowClick = (
+  _event: MouseEvent,
+  item: { item: CategoryProductTableRow }
+) => {
   const product = item.item.product
   const target = product.fullSlug ?? product.slug
 

@@ -10,7 +10,7 @@ withDefaults(
   }>(),
   {
     licenseId: 'opendata-odbl-license',
-  },
+  }
 )
 </script>
 
@@ -24,7 +24,9 @@ withDefaults(
       <v-card class="opendata-license__card" elevation="4" rounded="xl">
         <div class="opendata-license__content">
           <div class="opendata-license__text">
-            <h2 id="opendata-license-heading" class="opendata-license__title">{{ title }}</h2>
+            <h2 id="opendata-license-heading" class="opendata-license__title">
+              {{ title }}
+            </h2>
             <!-- eslint-disable-next-line vue/no-v-html -->
             <p class="opendata-license__description" v-html="description" />
           </div>
@@ -93,4 +95,3 @@ withDefaults(
   .opendata-license__cta .v-btn
     width: 100%
 </style>
-

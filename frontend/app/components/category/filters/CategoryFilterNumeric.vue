@@ -40,21 +40,34 @@
       @end="emitRange"
     >
       <template #thumb-label="{ modelValue: thumbValue }">
-        {{ formatSliderValue(Array.isArray(thumbValue) ? thumbValue[0] : thumbValue) }}
+        {{
+          formatSliderValue(
+            Array.isArray(thumbValue) ? thumbValue[0] : thumbValue
+          )
+        }}
       </template>
     </v-range-slider>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
+import type {
+  AggregationResponseDto,
+  FieldMetadataDto,
+  Filter,
+} from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 import { formatNumericRangeValue } from '~/utils/_number-formatting'
 import VueECharts from 'vue-echarts'
 import type { EChartsOption } from 'echarts'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
 import type { TooltipComponentOption } from 'echarts/components'
-import { clampSliderRange, isPriceField, priceToSliderValue, sliderValueToPrice } from './price-scale'
+import {
+  clampSliderRange,
+  isPriceField,
+  priceToSliderValue,
+  sliderValueToPrice,
+} from './price-scale'
 
 type RangeBucketDatum = {
   value: number
@@ -82,9 +95,13 @@ const { translatePlural } = usePluralizedTranslation()
 
 const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 
-const ariaLabel = computed(() => `${displayTitle.value} ${t('category.filters.rangeAriaSuffix')}`)
+const ariaLabel = computed(
+  () => `${displayTitle.value} ${t('category.filters.rangeAriaSuffix')}`
+)
 
-const parseNumericBound = (value: string | number | null | undefined): number | undefined => {
+const parseNumericBound = (
+  value: string | number | null | undefined
+): number | undefined => {
   if (value == null) {
     return undefined
   }
@@ -98,7 +115,7 @@ const parseNumericBound = (value: string | number | null | undefined): number | 
 }
 
 const resolveAggregationBounds = (
-  aggregation?: AggregationResponseDto,
+  aggregation?: AggregationResponseDto
 ): { min: number; max: number } | undefined => {
   if (!aggregation) {
     return undefined
@@ -110,7 +127,9 @@ const resolveAggregationBounds = (
 
   const derivedMin = parseNumericBound(firstBucket?.key)
   const derivedMax =
-    parseNumericBound(lastBucket?.to) ?? parseNumericBound(lastBucket?.key) ?? derivedMin
+    parseNumericBound(lastBucket?.to) ??
+    parseNumericBound(lastBucket?.key) ??
+    derivedMin
 
   const min = aggregation.min ?? derivedMin
   const max = aggregation.max ?? derivedMax
@@ -166,7 +185,10 @@ const sliderBounds = computed(() => {
   }
 })
 
-const resolveSliderRange = (min?: number | null, max?: number | null): [number, number] => {
+const resolveSliderRange = (
+  min?: number | null,
+  max?: number | null
+): [number, number] => {
   if (priceField.value) {
     const resolvedMin = priceToSliderValue(min ?? numericBounds.value.min)
     const resolvedMax = priceToSliderValue(max ?? numericBounds.value.max)
@@ -193,43 +215,54 @@ const formatSliderValue = (value: number): string => {
   }
 
   const resolvedValue = priceField.value ? sliderValueToPrice(value) : value
-  return formatNumericRangeValue(resolvedValue, n, { isPrice: priceField.value })
+  return formatNumericRangeValue(resolvedValue, n, {
+    isPrice: priceField.value,
+  })
 }
 
 const formatBoundary = (value: number | string | null | undefined): string => {
   return formatNumericRangeValue(value, n, { isPrice: priceField.value })
 }
 
-const localValue = ref<[number, number]>([sliderBounds.value.min, sliderBounds.value.max])
+const localValue = ref<[number, number]>([
+  sliderBounds.value.min,
+  sliderBounds.value.max,
+])
 
 watch(
   () => sliderBounds.value,
-  (next) => {
+  next => {
     localValue.value = [next.min, next.max]
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   () => props.modelValue,
-  (filter) => {
+  filter => {
     if (filter?.operator === 'range') {
       localValue.value = resolveSliderRange(filter.min, filter.max)
       return
     }
 
     localValue.value = [sliderBounds.value.min, sliderBounds.value.max]
-  },
+  }
 )
 
 const buckets = computed(() => props.aggregation?.buckets ?? [])
 
 const hasBuckets = computed(() => buckets.value.length > 0)
 
-const toColorWithAlpha = (value: string | undefined, fallbackRaw: string, alpha = 1) => {
+const toColorWithAlpha = (
+  value: string | undefined,
+  fallbackRaw: string,
+  alpha = 1
+) => {
   const normalized = value?.trim()
   if (!normalized) {
-    return alpha === 1 ? `rgb(${fallbackRaw})` : `rgba(${fallbackRaw}, ${alpha})`
+    return alpha === 1
+      ? `rgb(${fallbackRaw})`
+      : `rgba(${fallbackRaw}, ${alpha})`
   }
 
   if (normalized.startsWith('#')) {
@@ -252,23 +285,41 @@ const toColorWithAlpha = (value: string | undefined, fallbackRaw: string, alpha 
 }
 
 const chartColorVar = import.meta.client
-  ? useCssVar('--v-theme-chart-range-bar', document.documentElement, { initialValue: '33, 150, 243' })
+  ? useCssVar('--v-theme-chart-range-bar', document.documentElement, {
+      initialValue: '33, 150, 243',
+    })
   : ref('33, 150, 243')
 
 const axisColorVar = import.meta.client
-  ? useCssVar('--v-theme-text-neutral-secondary', document.documentElement, { initialValue: '71, 84, 103' })
+  ? useCssVar('--v-theme-text-neutral-secondary', document.documentElement, {
+      initialValue: '71, 84, 103',
+    })
   : ref('71, 84, 103')
 
 const labelColorVar = import.meta.client
-  ? useCssVar('--v-theme-text-neutral-strong', document.documentElement, { initialValue: '16, 24, 40' })
+  ? useCssVar('--v-theme-text-neutral-strong', document.documentElement, {
+      initialValue: '16, 24, 40',
+    })
   : ref('16, 24, 40')
 
-const chartBarColor = computed(() => toColorWithAlpha(chartColorVar.value, '33, 150, 243', 0.75))
-const chartBarHoverColor = computed(() => toColorWithAlpha(chartColorVar.value, '33, 150, 243', 1))
-const axisColor = computed(() => toColorWithAlpha(axisColorVar.value, '71, 84, 103'))
-const labelColor = computed(() => toColorWithAlpha(labelColorVar.value, '16, 24, 40'))
-const gridLineColor = computed(() => toColorWithAlpha(axisColorVar.value, '229, 231, 235'))
-const pointerShadowColor = computed(() => toColorWithAlpha(axisColorVar.value, '148, 163, 184', 0.18))
+const chartBarColor = computed(() =>
+  toColorWithAlpha(chartColorVar.value, '33, 150, 243', 0.75)
+)
+const chartBarHoverColor = computed(() =>
+  toColorWithAlpha(chartColorVar.value, '33, 150, 243', 1)
+)
+const axisColor = computed(() =>
+  toColorWithAlpha(axisColorVar.value, '71, 84, 103')
+)
+const labelColor = computed(() =>
+  toColorWithAlpha(labelColorVar.value, '16, 24, 40')
+)
+const gridLineColor = computed(() =>
+  toColorWithAlpha(axisColorVar.value, '229, 231, 235')
+)
+const pointerShadowColor = computed(() =>
+  toColorWithAlpha(axisColorVar.value, '148, 163, 184', 0.18)
+)
 const CHART_HORIZONTAL_PADDING = 8
 
 const chartHeight = computed(() => {
@@ -308,7 +359,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
     return null
   }
 
-  const data: RangeBucketDatum[] = buckets.value.map((bucket) => ({
+  const data: RangeBucketDatum[] = buckets.value.map(bucket => ({
     value: bucket.count ?? 0,
     range: formatBucketLabel(bucket.key, bucket.to, bucket.missing),
     count: bucket.count ?? 0,
@@ -331,14 +382,19 @@ const chartOptions = computed<EChartsOption | null>(() => {
     return index % labelStep.value === 0
   }
 
-  const tooltipFormatter: TooltipComponentOption['formatter'] = (rawParams) => {
+  const tooltipFormatter: TooltipComponentOption['formatter'] = rawParams => {
     const params = Array.isArray(rawParams) ? rawParams[0] : rawParams
-    const bucket = (params as CallbackDataParams).data as RangeBucketDatum | undefined
+    const bucket = (params as CallbackDataParams).data as
+      | RangeBucketDatum
+      | undefined
     if (!bucket) {
       return ''
     }
 
-    const countLabel = translatePlural('category.products.resultsCount', bucket.count)
+    const countLabel = translatePlural(
+      'category.products.resultsCount',
+      bucket.count
+    )
     return `<strong>${bucket.range}</strong><br />${countLabel}`
   }
 
@@ -355,7 +411,13 @@ const chartOptions = computed<EChartsOption | null>(() => {
       position: 'top',
       color: labelColor.value,
       fontSize: 11,
-      formatter: ({ data, dataIndex }: { data?: RangeBucketDatum; dataIndex?: number }) => {
+      formatter: ({
+        data,
+        dataIndex,
+      }: {
+        data?: RangeBucketDatum
+        dataIndex?: number
+      }) => {
         const index = dataIndex ?? 0
         const bucket = data
         if (!bucket || !shouldDisplayLabelAtIndex(index)) {
@@ -396,7 +458,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
     },
     xAxis: {
       type: 'category',
-      data: data.map((bucket) => bucket.range),
+      data: data.map(bucket => bucket.range),
       axisLine: {
         show: true,
         lineStyle: {
@@ -411,7 +473,8 @@ const chartOptions = computed<EChartsOption | null>(() => {
         rotate: xAxisLabelRotation.value,
         overflow: 'truncate',
         hideOverlap: true,
-        formatter: (value: string, index: number) => (shouldDisplayLabelAtIndex(index) ? value : ''),
+        formatter: (value: string, index: number) =>
+          shouldDisplayLabelAtIndex(index) ? value : '',
       },
       boundaryGap: true,
       splitLine: { show: false },
@@ -444,9 +507,12 @@ const chartAriaLabel = computed(() => {
   }
 
   const entries = buckets.value
-    .map((bucket) => {
+    .map(bucket => {
       const range = formatBucketLabel(bucket.key, bucket.to, bucket.missing)
-      const countLabel = translatePlural('category.products.resultsCount', bucket.count ?? 0)
+      const countLabel = translatePlural(
+        'category.products.resultsCount',
+        bucket.count ?? 0
+      )
       return `${range}: ${countLabel}`
     })
     .join('; ')
@@ -499,7 +565,11 @@ const onBarClick = (params: CallbackDataParams) => {
   })
 }
 
-const formatBucketLabel = (from?: string | number | null, to?: number | null, missing?: boolean) => {
+const formatBucketLabel = (
+  from?: string | number | null,
+  to?: number | null,
+  missing?: boolean
+) => {
   if (missing) {
     return t('category.filters.missingLabel')
   }

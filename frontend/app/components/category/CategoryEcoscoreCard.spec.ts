@@ -53,7 +53,10 @@ describe('CategoryEcoscoreCard', () => {
                 }
 
                 if (typeof props.to === 'object') {
-                  return (props.to as Record<string, string>).href ?? (props.to as Record<string, string>).path
+                  return (
+                    (props.to as Record<string, string>).href ??
+                    (props.to as Record<string, string>).path
+                  )
                 }
 
                 return undefined
@@ -66,7 +69,7 @@ describe('CategoryEcoscoreCard', () => {
                     ...attrs,
                     href: resolveHref(),
                   },
-                  slots.default?.(),
+                  slots.default?.()
                 )
             },
           }),
@@ -94,19 +97,25 @@ describe('CategoryEcoscoreCard', () => {
     const wrapper = mountCard('https://example.com/vertical')
 
     const link = wrapper.get('[data-test="category-ecoscore-card"]')
-    expect(link.attributes('href')).toBe('https://example.com/vertical/ecoscore')
+    expect(link.attributes('href')).toBe(
+      'https://example.com/vertical/ecoscore'
+    )
   })
 
   it('normalizes trailing slashes when computing the Eco-score link', () => {
     const wrapper = mountCard('https://example.com/vertical/')
 
     const link = wrapper.get('[data-test="category-ecoscore-card"]')
-    expect(link.attributes('href')).toBe('https://example.com/vertical/ecoscore')
+    expect(link.attributes('href')).toBe(
+      'https://example.com/vertical/ecoscore'
+    )
   })
 
   it('does not render anything when the base URL is missing', () => {
     const wrapper = mountCard(null)
 
-    expect(wrapper.find('[data-test="category-ecoscore-card"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="category-ecoscore-card"]').exists()).toBe(
+      false
+    )
   })
 })

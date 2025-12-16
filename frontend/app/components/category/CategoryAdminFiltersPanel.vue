@@ -1,5 +1,8 @@
 <template>
-  <section class="category-admin-panel" aria-labelledby="category-admin-panel-title">
+  <section
+    class="category-admin-panel"
+    aria-labelledby="category-admin-panel-title"
+  >
     <header class="category-admin-panel__header">
       <p id="category-admin-panel-title" class="category-admin-panel__eyebrow">
         {{ t('category.admin.title') }}
@@ -45,7 +48,7 @@ const props = withDefaults(
   }>(),
   {
     baselineAggregations: () => [],
-  },
+  }
 )
 
 const emit = defineEmits<{ 'update:filters': [FilterRequestDto] }>()
@@ -55,24 +58,31 @@ const { t } = useI18n()
 const activeFilters = computed(() => props.filters?.filters ?? [])
 
 const aggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
-  return props.aggregations.reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
-    if (aggregation.field) {
-      accumulator[aggregation.field] = aggregation
-    }
+  return props.aggregations.reduce<Record<string, AggregationResponseDto>>(
+    (accumulator, aggregation) => {
+      if (aggregation.field) {
+        accumulator[aggregation.field] = aggregation
+      }
 
-    return accumulator
-  }, {})
+      return accumulator
+    },
+    {}
+  )
 })
 
-const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
-  return props.baselineAggregations.reduce<Record<string, AggregationResponseDto>>((accumulator, aggregation) => {
-    if (aggregation.field && !(aggregation.field in accumulator)) {
-      accumulator[aggregation.field] = aggregation
-    }
+const baselineAggregationMap = computed<Record<string, AggregationResponseDto>>(
+  () => {
+    return props.baselineAggregations.reduce<
+      Record<string, AggregationResponseDto>
+    >((accumulator, aggregation) => {
+      if (aggregation.field && !(aggregation.field in accumulator)) {
+        accumulator[aggregation.field] = aggregation
+      }
 
-    return accumulator
-  }, {})
-})
+      return accumulator
+    }, {})
+  }
+)
 
 const fieldHelper = computed(() => {
   if (!props.fields.length) {
@@ -88,8 +98,11 @@ const emitFilters = (filters: Filter[]) => {
   emit('update:filters', filters.length ? { filters } : {})
 }
 
-const updateRangeFilter = (field: string, range: { min?: number; max?: number }) => {
-  const current = activeFilters.value.filter((filter) => filter.field !== field)
+const updateRangeFilter = (
+  field: string,
+  range: { min?: number; max?: number }
+) => {
+  const current = activeFilters.value.filter(filter => filter.field !== field)
 
   if (range.min == null && range.max == null) {
     emitFilters(current)
@@ -108,7 +121,7 @@ const updateRangeFilter = (field: string, range: { min?: number; max?: number })
 }
 
 const updateTermsFilter = (field: string, terms: string[]) => {
-  const current = activeFilters.value.filter((filter) => filter.field !== field)
+  const current = activeFilters.value.filter(filter => filter.field !== field)
 
   if (!terms.length) {
     emitFilters(current)
