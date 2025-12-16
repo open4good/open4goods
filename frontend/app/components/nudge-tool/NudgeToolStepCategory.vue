@@ -206,7 +206,7 @@ watch(
     aspect-ratio: 1 / 1;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(var(--v-theme-primary), 0.08);
+    background: transparent;
   }
 
   &__img {
@@ -217,7 +217,7 @@ watch(
     display: grid;
     place-items: center;
     height: 100%;
-    background: rgba(var(--v-theme-primary), 0.06);
+    background: transparent;
     color: rgb(var(--v-theme-primary));
   }
 

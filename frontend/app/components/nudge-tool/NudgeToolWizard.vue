@@ -67,6 +67,7 @@
         :touch="false"
         :transition="windowTransition"
         :reverse-transition="windowReverseTransition"
+        :style="{ minHeight: contentMinHeight }"
       >
         <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
           <component
@@ -261,17 +262,15 @@ type WizardStep = {
 const steps = computed<WizardStep[]>(() => {
   const sequence: WizardStep[] = []
 
-  if (!props.initialCategoryId) {
-    sequence.push({
-      key: 'category',
-      component: NudgeToolStepCategory,
-      title: t('nudge-tool.steps.category.title'),
-      props: {
-        categories: categories.value,
-        selectedCategoryId: selectedCategoryId.value,
-      },
-    })
-  }
+  sequence.push({
+    key: 'category',
+    component: NudgeToolStepCategory,
+    title: t('nudge-tool.steps.category.title'),
+    props: {
+      categories: categories.value,
+      selectedCategoryId: selectedCategoryId.value,
+    },
+  })
 
   if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
     sequence.push({
@@ -296,7 +295,7 @@ const steps = computed<WizardStep[]>(() => {
     },
   })
 
-  let subsetStepNumber = 4
+  let subsetStepNumber = sequence.length + 1
 
   subsetGroups.value.forEach(group => {
     const subsets = groupedSubsets.value[group.id ?? ''] ?? []
@@ -618,6 +617,8 @@ const resetCategorySelectionState = () => {
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
+  baseWindowHeight.value = 0
+  maxContentHeight.value = 0
 }
 
 let resetTimeout: ReturnType<typeof setTimeout> | null = null
@@ -668,6 +669,13 @@ onMounted(async () => {
       null
   }
 
+  if (props.initialCategoryId) {
+    const nextStepKey = getFirstContentStepKey()
+    if (nextStepKey) {
+      activeStepKey.value = nextStepKey
+    }
+  }
+
   debouncedFetch()
 })
 
@@ -679,20 +687,34 @@ const { height: headerHeight } = useElementSize(headerRef)
 const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
-const minWindowHeight = ref(0)
+const baseWindowHeight = ref(0)
+const maxContentHeight = ref(0)
 
-watch(activeStepKey, (val) => {
-  if (val === 'category') minWindowHeight.value = 0
-})
+watch(windowHeight, val => {
+  if (val <= 0) {
+    return
+  }
 
-watch(windowHeight, (val) => {
-  if (activeStepKey.value !== 'category' && val > 0 && val > minWindowHeight.value) {
-    minWindowHeight.value = val
+  if (activeStepKey.value === 'category' || baseWindowHeight.value === 0) {
+    baseWindowHeight.value = Math.max(baseWindowHeight.value, val)
+  }
+
+  if (activeStepKey.value !== 'category') {
+    maxContentHeight.value = Math.max(maxContentHeight.value, val, baseWindowHeight.value)
   }
 })
 
+const stableWindowHeight = computed(() => {
+  if (activeStepKey.value === 'category') {
+    return Math.max(windowHeight.value, baseWindowHeight.value)
+  }
+
+  const floorHeight = Math.max(baseWindowHeight.value, maxContentHeight.value)
+  return Math.max(windowHeight.value, floorHeight)
+})
+
 const totalHeight = computed(
-  () => headerHeight.value + Math.max(windowHeight.value, minWindowHeight.value) + footerHeight.value + 32
+  () => headerHeight.value + stableWindowHeight.value + footerHeight.value + 32
 ) // 32 = padding
 
 const animatedHeight = useTransition(totalHeight, {
@@ -711,6 +733,20 @@ onMounted(() => {
 const formattedHeight = computed(() => {
   if (!isReady.value) return 'auto'
   return `${animatedHeight.value}px`
+})
+
+const contentMinHeight = computed(() => {
+  if (!isReady.value) {
+    return undefined
+  }
+
+  if (activeStepKey.value === 'category') {
+    const minHeight = Math.max(windowHeight.value, baseWindowHeight.value)
+    return minHeight ? `${minHeight}px` : undefined
+  }
+
+  const minHeight = Math.max(maxContentHeight.value, baseWindowHeight.value)
+  return minHeight ? `${minHeight}px` : undefined
 })
 </script>
 
