@@ -61,14 +61,19 @@
             "icon": "🏷️",
             "label": "The best prices on the market"
           },
-          {
-            "icon": "🛡️",
-            "label": "Independent comparator, open-source software and open data"
-          }
-        ]
+      {
+        "icon": "🛡️",
+        "label": "Independent comparator, open-source software and open data"
       }
+    ]
     },
-    "parallax": {
+    "context": {
+      "cornerLabel": "Impact digest",
+      "cornerTooltip": "Key highlights from Nudger’s methodology",
+      "ariaLabel": "Hero context card summarising Nudger’s promise"
+    }
+  },
+  "parallax": {
       "essentials": {
         "ariaLabel": "Decorative background for the challenges and solutions section"
       },
@@ -247,12 +252,86 @@
         }
       }
     },
+    "roundedCards": {
+      "eyebrow": "Design system",
+      "title": "Rounded corner cards",
+      "subtitle": "One reusable card for hero highlights, feature grids, and pickers with selectable corners.",
+      "ariaLabel": "Rounded card showcase grid",
+      "samples": {
+        "impact": {
+          "eyebrow": "Icon · bottom-right · large",
+          "title": "Impact-first state",
+          "subtitle": "Selected badge with large rounded corner and elevated glass surface.",
+          "tooltip": "Toggle the selected indicator",
+          "bullets": [
+            "Built-in selected/unselected SVGs",
+            "Hover and keyboard focus elevate the card",
+            "Fits dense hero layouts"
+          ]
+        },
+        "text": {
+          "eyebrow": "Text · top-right · medium",
+          "title": "Text badge corner",
+          "subtitle": "Swap the corner icon for a text pill with optional icon.",
+          "tooltip": "Corner text badge",
+          "cornerLabel": "Fresh data",
+          "bullets": [
+            "Use `cornerVariant=text` with an optional icon",
+            "Ideal for badges like \"beta\" or \"new\"",
+            "Keeps the corner highlight subtle"
+          ]
+        },
+        "compact": {
+          "eyebrow": "Icon · top-left · small",
+          "title": "Compact selector",
+          "subtitle": "Small corner radius with unselected state by default.",
+          "tooltip": "Mark this compact card as selected",
+          "bullets": [
+            "Smaller corner footprint for tight grids",
+            "Uses the unselected SVG until toggled",
+            "Keyboard and click both flip the state"
+          ]
+        },
+        "custom": {
+          "eyebrow": "Custom slot · bottom-left · medium",
+          "title": "Slot anything in the corner",
+          "subtitle": "Inject avatars, progress rings, or KPIs into the highlighted corner.",
+          "tooltip": "Custom corner content",
+          "progressLabel": "{value}% impact readiness",
+          "bullets": [
+            "Provide content via the `corner` slot",
+            "Blend text, icons, or charts",
+            "Keeps the rounded mask and gradient"
+          ]
+        },
+        "dual": {
+          "eyebrow": "Text + icon · bottom-right · medium",
+          "title": "Mixed content card",
+          "subtitle": "Textual badge with supporting icon and elevated actions.",
+          "tooltip": "Toggle this mixed badge card",
+          "cornerLabel": "Priority",
+          "bullets": [
+            "Demonstrates rounded size medium",
+            "Shows action slot usage",
+            "Great for CTA or selection flows"
+          ]
+        }
+      }
+    },
     "cta": {
       "title": "Ready to buy better without overspending?",
       "subtitle": "Restart a search or explore the analysed offers.",
       "button": "Start a search",
       "searchSubmit": "Launch search",
       "browseTaxonomy": "Explore categories"
+    }
+  },
+  "shared": {
+    "roundedCard": {
+      "tooltipSelected": "Card selected",
+      "tooltipIdle": "Mark this card as selected",
+      "cornerSelected": "Selected",
+      "cornerIdle": "Available"
     }
   },
   "categories": {

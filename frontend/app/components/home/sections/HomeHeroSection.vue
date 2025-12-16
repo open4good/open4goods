@@ -7,7 +7,7 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
-import CardSecondary from '~/components/shared/cards/CardSecondary.vue'
+import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 
 type HeroHelperItem = {
@@ -209,7 +209,20 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                       </template>
                     </SearchSuggestField>
                   </form>
-                  <CardSecondary class="home-hero__context-card" surface="strong" accent-corner="bottom-right">
+                  <RoundedCornerCard
+                    class="home-hero__context-card"
+                    surface="strong"
+                    accent-corner="bottom-right"
+                    corner-variant="text"
+                    corner-size="lg"
+                    rounded="lg"
+                    :selectable="false"
+                    :elevation="10"
+                    :hover-elevation="14"
+                    :corner-label="t('home.hero.context.cornerLabel')"
+                    :corner-tooltip="t('home.hero.context.cornerTooltip')"
+                    :aria-label="t('home.hero.context.ariaLabel')"
+                  >
                     <div class="home-hero__context">
                       <p class="home-hero__subtitle">{{ t('home.hero.subtitle') }}</p>
                       <div class="home-hero__helper-row">
@@ -236,7 +249,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                         </ul>
                       </div>
                     </div>
-                  </CardSecondary>
+                  </RoundedCornerCard>
                 </div>
               </div>
             </v-sheet>
