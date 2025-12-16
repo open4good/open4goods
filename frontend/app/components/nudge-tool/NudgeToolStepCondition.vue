@@ -22,13 +22,23 @@
       >
         <v-card
           class="nudge-step-condition__card nudge-option-card"
-          :class="{ 'nudge-option-card--selected': isSelected(option.value) }"
+          :class="{
+            'nudge-option-card--selected': isSelected(option.value),
+          }"
           rounded="lg"
           role="button"
           :aria-pressed="isSelected(option.value).toString()"
           @click="() => toggleOption(option.value)"
         >
-          <v-icon :icon="option.icon" size="32" class="mb-2" />
+          <div class="nudge-step-condition__icon-wrapper">
+            <v-icon :icon="option.icon" size="26" />
+            <v-icon
+              v-if="isSelected(option.value)"
+              icon="mdi-check-circle"
+              size="18"
+              class="nudge-step-condition__check"
+            />
+          </div>
           <p class="nudge-step-condition__label">{{ option.label }}</p>
         </v-card>
       </v-col>
@@ -99,14 +109,36 @@ const toggleOption = (choice: ProductConditionChoice) => {
   &__card {
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 14px 16px;
   }
 
   &__label {
     margin: 0;
     font-weight: 600;
+    flex: 1;
+  }
+
+  &__icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(var(--v-theme-primary), 0.08);
+    color: rgb(var(--v-theme-primary));
+    position: relative;
+  }
+
+  &__check {
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    color: rgb(var(--v-theme-primary));
   }
 }
 </style>
