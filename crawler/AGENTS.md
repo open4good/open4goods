@@ -1,5 +1,8 @@
 # Crawler Agents Guide
 
+> **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
+> This guide **extends** the root conventions with Crawler-specific rules.
+
 This module is part of the open4goods multi-module Maven project.
 
 ## Technology

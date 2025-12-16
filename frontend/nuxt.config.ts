@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs'
 
 import type { ManifestOptions } from 'vite-plugin-pwa'
 
+import VueDevTools from 'vite-plugin-vue-devtools'
+
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
 import { APP_ROUTES_SITEMAP_KEY, SITEMAP_PATH_PREFIX } from './shared/utils/sitemap-config'
@@ -218,20 +220,20 @@ export default defineNuxtConfig({
   },
   // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
-      vuetifyOptions: {
-        theme: {
-          defaultTheme: 'light',
-          themes: {
-            light: {
-              colors: vuetifyPalettes.nudger,
-            },
-            dark: {
-              colors: vuetifyPalettes.dark,
-            },
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'light',
+        themes: {
+          light: {
+            colors: vuetifyPalettes.nudger,
+          },
+          dark: {
+            colors: vuetifyPalettes.dark,
           },
         },
       },
     },
+  },
   i18n: {
     defaultLocale: 'fr-FR',
     langDir: '../i18n/locales',
@@ -273,6 +275,15 @@ export default defineNuxtConfig({
         ...xwikiSandboxPrefixerOptions,
       },
     },
+  },
+
+  vite: {
+    plugins: [
+
+      VueDevTools({
+        launchEditor: 'code', // Antigravity is VS Code-based
+      }),
+    ],
   },
 
   build: {

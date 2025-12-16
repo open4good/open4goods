@@ -1,5 +1,8 @@
 # Verticals Agents Guide
 
+> **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
+> This guide **extends** the root conventions with Verticals-specific rules.
+
 This module is part of the open4goods multi-module Maven project.
 
 ## Technology

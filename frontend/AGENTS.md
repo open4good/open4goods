@@ -1,5 +1,8 @@
 # Nudger Frontend – Agent Guide (Nuxt 4 / Vue 3 / Vuetify)
 
+> **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
+> This guide **extends** the root conventions with frontend-specific rules for Nuxt 4, Vue 3, and Vuetify.
+
 ## Guardrails
 
 - Only implement what is explicitly requested; ask for clarification before expanding scope.

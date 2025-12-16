@@ -1,8 +1,17 @@
-# Ui Agents Guide
+# UI Module – DEPRECATED ⚠️
 
-THIS MODULE IS OUTDATED, A MIGRATION ON A NEW NUXT3 / VUE 3 FRONT IS BEING IMPLEMENTED.
-DO NOT WASTE TIME ON THIS SUBPROJECT, IGNORE IT
+> **Status**: This module is being replaced by [frontend](../frontend) (Nuxt 3 / Vue 3).  
+> **Action**: Do not add new features. For current UI development, see [frontend/AGENTS.md](../frontend/AGENTS.md).
 
+## Migration Status
+
+This legacy UI module (Thymeleaf + Bootstrap) is being phased out in favor of the modern Nuxt 3 frontend. All new UI development should occur in the `frontend` module.
+
+**Migration Progress**:
+- ✅ Blog integration → `frontend/composables/useBlog.ts`
+- ✅ Product pages → `frontend/pages/products/`
+- 🔄 User authentication flows → In progress
+- ⏳ Admin panels → Planned
 
 This module is part of the open4goods multi-module Maven project. 
 ## Technology

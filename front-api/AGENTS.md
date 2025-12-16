@@ -1,5 +1,8 @@
 # Nudger Front API — AGENTS Guide
 
+> **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
+> This guide **extends** the root conventions with front-API-specific rules for Spring Boot 3 and SpringDoc.
+
 ## 1. Mission
 Provide a **clear and fully documented REST API** for the Nuxt 3 frontend, using Spring Boot 3 and SpringDoc.  
 The OpenAPI contract is generated directly from the annotated controllers and DTOs.
