@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840" fill="none" role="img" aria-label="Light parallax background with floating bubbles">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#F8FBFF" />
+    </linearGradient>
+    <radialGradient id="bubbleBlue" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(380 240) scale(360 260)">
+      <stop stop-color="#38BDF8" stop-opacity="0.24" />
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="bubbleGreen" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1240 540) scale(420 320)">
+      <stop stop-color="#22C55E" stop-opacity="0.22" />
+      <stop offset="1" stop-color="#22C55E" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="840" fill="url(#base)" />
+  <rect width="1600" height="840" fill="url(#bubbleBlue)" />
+  <rect width="1600" height="840" fill="url(#bubbleGreen)" />
+  <g fill="#FFFFFF" stroke="#D7E5F4" stroke-width="1.4" opacity="0.9">
+    <circle cx="240" cy="320" r="76" fill-opacity="0.62" />
+    <circle cx="520" cy="560" r="120" fill-opacity="0.55" />
+    <circle cx="980" cy="320" r="88" fill-opacity="0.48" />
+    <circle cx="1360" cy="480" r="96" fill-opacity="0.52" />
+    <circle cx="1160" cy="220" r="52" fill-opacity="0.46" />
+  </g>
+</svg>

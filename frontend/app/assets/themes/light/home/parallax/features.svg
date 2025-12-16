@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840" fill="none" role="img" aria-label="Light layered parallax background with flowing ribbons">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#F2F6FD" />
+    </linearGradient>
+    <linearGradient id="ribbonA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D6E8FB" stop-opacity="0.85" />
+      <stop offset="1" stop-color="#B8D4F6" stop-opacity="0.2" />
+    </linearGradient>
+    <linearGradient id="ribbonB" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#E5F5FF" stop-opacity="0.85" />
+      <stop offset="1" stop-color="#C9F2E6" stop-opacity="0.35" />
+    </linearGradient>
+    <radialGradient id="pulse" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1280 320) scale(520 360)">
+      <stop stop-color="#38BDF8" stop-opacity="0.3" />
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="840" fill="url(#base)" />
+  <rect width="1600" height="840" fill="url(#pulse)" />
+  <path d="M-80 240 C 260 170, 600 210, 980 150 C 1260 100, 1500 140, 1720 90" stroke="url(#ribbonA)" stroke-width="90" stroke-linecap="round" opacity="0.8" />
+  <path d="M-40 420 C 320 360, 700 380, 1020 340 C 1280 310, 1500 330, 1740 300" stroke="url(#ribbonB)" stroke-width="110" stroke-linecap="round" opacity="0.65" />
+  <path d="M-60 600 C 300 560, 620 590, 980 540 C 1280 500, 1520 510, 1760 470" stroke="url(#ribbonA)" stroke-width="70" stroke-linecap="round" opacity="0.6" />
+  <g fill="#FFFFFF" fill-opacity="0.55" stroke="#D5E4F3" stroke-width="1.6" opacity="0.8">
+    <circle cx="240" cy="320" r="62" />
+    <circle cx="640" cy="160" r="42" />
+    <circle cx="1180" cy="620" r="74" />
+    <circle cx="1460" cy="480" r="58" />
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840" fill="none" role="img" aria-label="Light parallax background with layered concentric waves">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#F4F7FB" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(940 320) scale(720 520)">
+      <stop stop-color="#DFF1FF" stop-opacity="0.8" />
+      <stop offset="1" stop-color="#E3F4FF" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C6E0FA" stop-opacity="0.8" />
+      <stop offset="1" stop-color="#B8E7D2" stop-opacity="0.4" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="840" fill="url(#bg2)" />
+  <rect width="1600" height="840" fill="url(#glow)" />
+  <g opacity="0.65" stroke="url(#wave)" stroke-width="52" stroke-linecap="round" fill="none">
+    <path d="M-120 240 C 260 120, 620 160, 980 190 C 1280 216, 1500 180, 1760 150" />
+    <path d="M-140 420 C 240 300, 620 340, 980 360 C 1280 380, 1520 350, 1780 330" stroke-width="44" opacity="0.8" />
+    <path d="M-120 600 C 240 480, 620 520, 980 520 C 1260 515, 1520 500, 1780 470" stroke-width="36" opacity="0.7" />
+  </g>
+  <g fill="#FFFFFF" fill-opacity="0.7" stroke="#D6E6F5" stroke-width="1.4" opacity="0.8">
+    <circle cx="260" cy="300" r="54" />
+    <circle cx="620" cy="640" r="92" />
+    <circle cx="1260" cy="520" r="110" />
+    <circle cx="1440" cy="220" r="66" />
+  </g>
+</svg>

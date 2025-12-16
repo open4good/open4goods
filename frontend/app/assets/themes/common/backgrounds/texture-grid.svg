@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-label="Subtle geometric grid texture">
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="none" />
+      <path d="M0 0h32v32H0z" fill="none" stroke="#E3EFFA" stroke-width="0.75" opacity="0.65" />
+      <path d="M16 0v32M0 16h32" fill="none" stroke="#CBD5E1" stroke-width="0.65" opacity="0.35" />
+    </pattern>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F8FAFC" stop-opacity="0.75" />
+      <stop offset="1" stop-color="#EEF4FA" stop-opacity="0.75" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" fill="url(#wash)" />
+  <rect width="320" height="320" fill="url(#grid)" />
+</svg>

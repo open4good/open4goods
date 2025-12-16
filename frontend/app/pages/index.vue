@@ -14,6 +14,7 @@ import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 import type { CategorySuggestionItem, ProductSuggestionItem } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
+import { useThemedAsset } from '~~/app/composables/useThemedAsset'
 
 definePageMeta({
   ssr: true,
@@ -34,6 +35,13 @@ type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
 const { categories: rawCategories, fetchCategories } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
+const parallaxBackgroundAssets = {
+  essentials: useThemedAsset('home/parallax/essentials.svg'),
+  features: useThemedAsset('home/parallax/features.svg'),
+  knowledge: useThemedAsset('home/parallax/knowledge.svg'),
+  cta: useThemedAsset('home/parallax/cta.svg'),
+}
+
 const BLOG_ARTICLES_LIMIT = 4
 
 const heroBackgrounds = computed(() => ({
@@ -43,29 +51,29 @@ const heroBackgrounds = computed(() => ({
 
 const parallaxBackgrounds = computed(() => ({
   essentials: {
-    light: '/images/home/parallax-essentials-light.jpg',
-    dark: '/images/home/parallax-essentials-dark.jpg',
+    light: parallaxBackgroundAssets.essentials.value,
+    dark: parallaxBackgroundAssets.essentials.value,
     overlay: 0.62,
     parallaxAmount: 0.16,
     ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
   },
   features: {
-    light: '/images/home/parallax-features-light.jpg',
-    dark: '/images/home/parallax-features-dark.jpg',
+    light: parallaxBackgroundAssets.features.value,
+    dark: parallaxBackgroundAssets.features.value,
     overlay: 0.55,
     parallaxAmount: 0.12,
     ariaLabel: String(t('home.parallax.features.ariaLabel')),
   },
   knowledge: {
-    light: '/images/home/parallax-knowledge-light.jpg',
-    dark: '/images/home/parallax-knowledge-dark.jpg',
+    light: parallaxBackgroundAssets.knowledge.value,
+    dark: parallaxBackgroundAssets.knowledge.value,
     overlay: 0.5,
     parallaxAmount: 0.1,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   cta: {
-    light: '/images/home/parallax-cta-light.jpg',
-    dark: '/images/home/parallax-cta-dark.jpg',
+    light: parallaxBackgroundAssets.cta.value,
+    dark: parallaxBackgroundAssets.cta.value,
     overlay: 0.48,
     parallaxAmount: 0.08,
     ariaLabel: String(t('home.parallax.cta.ariaLabel')),

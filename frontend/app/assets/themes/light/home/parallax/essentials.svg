@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840" fill="none" role="img" aria-label="Light airy parallax background with glassy diagonals">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F9FBFF" />
+      <stop offset="0.45" stop-color="#EEF4FA" />
+      <stop offset="1" stop-color="#E8F1FB" />
+    </linearGradient>
+    <radialGradient id="glowBlue" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520 220) scale(520 360)">
+      <stop stop-color="#38BDF8" stop-opacity="0.35" />
+      <stop offset="1" stop-color="#1D4ED8" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowGreen" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1280 440) scale(620 420)">
+      <stop stop-color="#22C55E" stop-opacity="0.25" />
+      <stop offset="1" stop-color="#166534" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C6DDF4" stop-opacity="0.7" />
+      <stop offset="1" stop-color="#A5C7EA" stop-opacity="0.2" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="840" fill="url(#bg)" />
+  <rect width="1600" height="840" fill="url(#glowBlue)" />
+  <rect width="1600" height="840" fill="url(#glowGreen)" />
+  <g opacity="0.65">
+    <path d="M-40 140 C 340 60, 580 120, 920 80 C 1240 40, 1420 80, 1680 20" stroke="url(#stroke)" stroke-width="48" stroke-linecap="round" />
+    <path d="M-20 260 C 340 180, 640 240, 980 200 C 1240 170, 1500 220, 1700 160" stroke="url(#stroke)" stroke-width="34" stroke-linecap="round" opacity="0.6" />
+    <path d="M-20 420 C 360 330, 620 400, 980 360 C 1260 330, 1480 370, 1700 330" stroke="url(#stroke)" stroke-width="28" stroke-linecap="round" opacity="0.55" />
+  </g>
+  <g opacity="0.85">
+    <circle cx="320" cy="520" r="120" fill="#FFFFFF" fill-opacity="0.35" stroke="#E3EFFA" stroke-width="2" />
+    <circle cx="880" cy="660" r="160" fill="#FFFFFF" fill-opacity="0.32" stroke="#D5E4F3" stroke-width="2" />
+    <circle cx="1380" cy="260" r="110" fill="#FFFFFF" fill-opacity="0.28" stroke="#D5E4F3" stroke-width="2" />
+  </g>
+</svg>

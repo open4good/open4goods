@@ -2,6 +2,7 @@
   <section
     class="category-navigation-hero"
     :aria-labelledby="titleId"
+    :style="heroBackgroundStyle"
   >
     <v-container class="category-navigation-hero__container px-4" max-width="xl">
       <div class="category-navigation-hero__content">
@@ -45,9 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { useId } from 'vue'
+import { computed, useId } from 'vue'
 
 import CategoryNavigationBreadcrumbs from './CategoryNavigationBreadcrumbs.vue'
+import { useThemedAsset } from '~~/app/composables/useThemedAsset'
 
 interface BreadcrumbItem {
   title: string
@@ -74,16 +76,23 @@ const emit = defineEmits<{
 const onUpdateModelValue = (value: string) => {
   emit('update:modelValue', value)
 }
+
+const textureGrid = useThemedAsset('backgrounds/texture-grid.svg')
+
+const heroBackgroundStyle = computed(() => ({
+  '--category-hero-texture': textureGrid.value ? `url('${textureGrid.value}')` : 'none',
+}))
 </script>
 
 <style scoped>
 .category-navigation-hero {
+  --category-hero-texture: none;
   background: linear-gradient(
       135deg,
       rgba(var(--v-theme-hero-gradient-start), 0.95),
       rgba(var(--v-theme-hero-gradient-end), 0.85)
     ),
-    url('/images/backgrounds/texture-grid.svg');
+    var(--category-hero-texture);
   color: rgb(var(--v-theme-hero-overlay-strong));
 }
 

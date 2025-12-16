@@ -28,6 +28,10 @@
 - `server/` – Nuxt server routes and middleware that wrap OpenAPI clients.
 - `shared/` – Code shared between client and server (generated clients, utils, constants).
 
+### Theme-scoped assets
+- Theme-aware visuals live in `app/assets/themes/<theme>/`, with shared fallbacks in `app/assets/themes/common/` (see `app/assets/themes/README.md`).
+- Resolve URLs with `useThemedAsset`/`useThemeAsset` instead of hardcoding `/images/...` so Nuxt bundles the correct variant per theme. This applies to backgrounds (e.g., parallax, hero textures) as well as logos/favicons.
+
 ## Coding Conventions
 - Use Composition API with `<script setup lang="ts">`; avoid class-style components.
 - Prefer `ref`, `computed`, `watch`, `useState`, `useFetch`, `useAsyncData`, etc. via Nuxt auto-imports.
