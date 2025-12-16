@@ -1729,6 +1729,11 @@
         }
       }
     },
+    "banner": {
+      "message": "Support an ethical platform!",
+      "cta": "Shop with Nudger",
+      "ariaLabel": "Sticky banner promoting responsible shopping"
+    },
     "aiReview": {
       "empty": "Summary not requested yet.",
       "errors": {
@@ -2338,6 +2343,11 @@
         "empty": "No products match these filters yet.",
         "total": "{count} results available"
       }
+    }
+  },
+  "ui": {
+    "topBanner": {
+      "close": "Close banner"
     }
   },
   "welcome": "Welcome"
