@@ -57,11 +57,11 @@
         :value="category.id ?? ''"
       >
         <v-card
-          class="nudge-step-category__card"
+          class="nudge-step-category__card nudge-option-card nudge-option-card--flat"
           :class="{
-            'nudge-step-category__card--selected': selected === category.id,
+            'nudge-option-card--selected': selected === category.id,
           }"
-          :elevation="selected === category.id ? 8 : 2"
+          variant="flat"
           rounded="xl"
           role="button"
           :aria-pressed="(selected === category.id).toString()"
@@ -197,13 +197,7 @@ watch(
     justify-content: center;
     gap: 8px;
     min-width: 160px;
-    background: rgb(var(--v-theme-surface-default));
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-
-    &--selected {
-      border-color: rgb(var(--v-theme-accent-primary-highlight));
-      box-shadow: 0 10px 25px -12px rgba(var(--v-theme-shadow-primary-600), 0.5);
-    }
+    box-shadow: none;
   }
 
   &__image {

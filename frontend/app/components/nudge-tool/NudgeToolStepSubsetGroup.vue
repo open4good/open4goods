@@ -26,20 +26,29 @@
               v-bind="activatorProps"
               class="nudge-step-subset__card nudge-option-card"
               :class="{
-                'nudge-option-card--selected': modelValue.includes(
-                  subset.id ?? ''
-                ),
+                'nudge-option-card--selected': isSelected(subset.id),
               }"
               rounded="lg"
               role="button"
-              :aria-pressed="modelValue.includes(subset.id ?? '')"
+              :aria-pressed="isSelected(subset.id).toString()"
               @click="toggle(subset.id ?? '')"
             >
               <div class="nudge-step-subset__body">
-                <p class="nudge-step-subset__name">{{ subset.title }}</p>
-                <p v-if="subset.caption" class="nudge-step-subset__caption">
-                  {{ subset.caption }}
-                </p>
+                <div class="nudge-step-subset__text">
+                  <p class="nudge-step-subset__name">{{ subset.title }}</p>
+                  <p v-if="subset.caption" class="nudge-step-subset__caption">
+                    {{ subset.caption }}
+                  </p>
+                </div>
+                <div class="nudge-step-subset__icon-wrapper">
+                  <v-icon :icon="getSubsetIcon(subset)" size="24" />
+                  <v-icon
+                    v-if="isSelected(subset.id)"
+                    icon="mdi-check-circle"
+                    size="18"
+                    class="nudge-step-subset__check"
+                  />
+                </div>
               </div>
             </v-card>
           </template>
@@ -66,6 +75,12 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: string[]): void
   (event: 'continue'): void
 }>()
+
+const isSelected = (subsetId?: string | null) =>
+  subsetId ? props.modelValue.includes(subsetId) : false
+
+const getSubsetIcon = (subset: VerticalSubsetDto) =>
+  subset.mdiIcon ?? 'mdi-sprout'
 
 const toggle = (subsetId: string) => {
   const next = new Set(props.modelValue)
@@ -108,15 +123,22 @@ const toggle = (subsetId: string) => {
   &__card {
     display: flex;
     flex-direction: column;
-    align-items: center;
     height: 100%;
+    padding: 14px 16px;
   }
 
   &__body {
-    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__text {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
   }
 
   &__name {
@@ -127,6 +149,25 @@ const toggle = (subsetId: string) => {
   &__caption {
     margin: 0;
     color: rgb(var(--v-theme-text-neutral-secondary));
+  }
+
+  &__icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(var(--v-theme-primary), 0.08);
+    color: rgb(var(--v-theme-primary));
+    position: relative;
+  }
+
+  &__check {
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    color: rgb(var(--v-theme-primary));
   }
 }
 </style>
