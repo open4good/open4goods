@@ -57,6 +57,7 @@ const mountComponent = async () =>
         VAvatar: createStub('div'),
         VImg: VImgStub,
         VBtn: createStub('button'),
+        RoundedCornerCard: createStub('div', 'rounded-corner-card-stub'),
       },
     },
   })

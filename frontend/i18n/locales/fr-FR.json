@@ -66,6 +66,11 @@
             "label": "Sans se faire avoir sur les prix"
           }
         ]
+      },
+      "context": {
+        "cornerLabel": "Résumé impact",
+        "cornerTooltip": "Les points forts de la méthodologie Nudger",
+        "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
       }
     },
     "parallax": {
@@ -247,12 +252,86 @@
         }
       }
     },
+    "roundedCards": {
+      "eyebrow": "Design system",
+      "title": "Cartes à coins arrondis",
+      "subtitle": "Une seule carte réutilisable pour les blocs héros, grilles de fonctionnalités et sélecteurs à coins accentués.",
+      "ariaLabel": "Grille de démonstration des cartes arrondies",
+      "samples": {
+        "impact": {
+          "eyebrow": "Icône · bas droite · large",
+          "title": "État sélectionné",
+          "subtitle": "Badge sélection avec grand angle arrondi et surface glass.",
+          "tooltip": "Basculer l'indicateur sélectionné",
+          "bullets": [
+            "Icônes sélection/non sélection intégrées",
+            "Survol et focus clavier augmentent le relief",
+            "S'intègre aux mises en page denses du héros"
+          ]
+        },
+        "text": {
+          "eyebrow": "Texte · haut droite · moyen",
+          "title": "Coin texte",
+          "subtitle": "Remplacez l'icône par un badge texte avec icône optionnelle.",
+          "tooltip": "Badge texte du coin",
+          "cornerLabel": "Données fraîches",
+          "bullets": [
+            "Utilisez `cornerVariant=text` avec icône optionnelle",
+            "Parfait pour les badges « beta » ou « new »",
+            "Accent discret côté arrondi"
+          ]
+        },
+        "compact": {
+          "eyebrow": "Icône · haut gauche · petit",
+          "title": "Sélecteur compact",
+          "subtitle": "Petit rayon d'angle avec état non sélectionné par défaut.",
+          "tooltip": "Marquer cette carte compacte comme sélectionnée",
+          "bullets": [
+            "Empreinte réduite pour les grilles serrées",
+            "Utilise le SVG non sélectionné jusqu'à clic",
+            "Clavier et clic inversent l'état"
+          ]
+        },
+        "custom": {
+          "eyebrow": "Slot custom · bas gauche · moyen",
+          "title": "Contenu sur-mesure",
+          "subtitle": "Injectez avatars, anneaux de progression ou KPIs dans le coin.",
+          "tooltip": "Contenu custom du coin",
+          "progressLabel": "{value}% de préparation impact",
+          "bullets": [
+            "Alimentez via le slot `corner`",
+            "Mélangez texte, icônes ou graphiques",
+            "Conserve le masque et le dégradé arrondi"
+          ]
+        },
+        "dual": {
+          "eyebrow": "Texte + icône · bas droite · moyen",
+          "title": "Carte mixte",
+          "subtitle": "Badge textuel avec icône et zone d'actions.",
+          "tooltip": "Basculer cette carte mixte",
+          "cornerLabel": "Priorité",
+          "bullets": [
+            "Montre le rayon moyen",
+            "Illustre le slot actions",
+            "Adaptée aux CTA ou sélections"
+          ]
+        }
+      }
+    },
     "cta": {
       "title": "Prêt à acheter mieux sans vous ruiner ?",
       "subtitle": "Relancez une recherche ou découvrez les offres analysées.",
       "button": "Lancer une recherche",
       "searchSubmit": "Lancer la recherche",
       "browseTaxonomy": "Explorer les catégories"
+    }
+  },
+  "shared": {
+    "roundedCard": {
+      "tooltipSelected": "Carte sélectionnée",
+      "tooltipIdle": "Marquer cette carte comme sélectionnée",
+      "cornerSelected": "Sélectionné",
+      "cornerIdle": "Disponible"
     }
   },
   "categories": {
