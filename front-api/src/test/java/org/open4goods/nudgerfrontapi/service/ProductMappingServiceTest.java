@@ -48,7 +48,6 @@ import org.springframework.cache.caffeine.CaffeineCache;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-
 class ProductMappingServiceTest {
 
     private ProductRepository repository;
@@ -168,7 +167,8 @@ class ProductMappingServiceTest {
         when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
         when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
 
-        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,null, "Phones", "Phones description", "phones", List.of(), null, null);
+        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,
+                null, "Phones", "Phones description", "phones", List.of(), null, null);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(verticalDto);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("scores"), DomainLanguage.en);
@@ -238,7 +238,8 @@ class ProductMappingServiceTest {
         assertThat(dto.resources().videos()).hasSize(1);
         assertThat(dto.resources().pdfs()).hasSize(1);
 
-        assertThat(dto.resources().images().get(0).url()).isEqualTo("https://static.example/images/main-image_img123.webp");
+        assertThat(dto.resources().images().get(0).url())
+                .isEqualTo("https://static.example/images/main-image_img123.webp");
         assertThat(dto.resources().images().get(0).height()).isEqualTo(800);
         assertThat(dto.resources().images().get(0).width()).isEqualTo(600);
 
@@ -263,7 +264,8 @@ class ProductMappingServiceTest {
         when(repository.getById(gtin)).thenReturn(product);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
-        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1,null, null, null, null, null, null, "telephones-reconditionnes", List.of(), null, null);
+        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1, null, null, null,
+                null, null, null, "telephones-reconditionnes", List.of(), null, null);
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(verticalConfig);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(configDto);
 
@@ -298,7 +300,8 @@ class ProductMappingServiceTest {
         product.setOffersCount(1);
 
         when(repository.getById(gtin)).thenReturn(product);
-        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product")).thenReturn("encrypted-token");
+        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product"))
+                .thenReturn("encrypted-token");
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("offers"), DomainLanguage.en);
 
@@ -308,8 +311,6 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestPrice().condition()).isEqualTo(ProductCondition.NEW);
         assertThat(dto.offers().bestPrice().affiliationToken()).isEqualTo("raw-token");
     }
-
-
 
     @Test
     void createReviewVerifiesCaptchaAndDelegatesToClient() throws Exception {
@@ -339,5 +340,155 @@ class ProductMappingServiceTest {
         ReviewGenerationStatus returned = service.getReviewStatus(gtin);
 
         assertThat(returned).isEqualTo(status);
+    }
+
+    /**
+     * Test defensive null handling when AttributeConfig.getName() returns null.
+     * Verifies that mapIndexedAttribute gracefully falls back to the attribute key
+     * instead of throwing NullPointerException.
+     */
+    @Test
+    void mapIndexedAttribute_shouldHandleNullAttributeConfigName() throws Exception {
+        long gtin = 999L;
+        Product product = new Product(gtin);
+        product.setVertical("test-vertical");
+
+        // Create an indexed attribute
+        org.open4goods.model.attribute.IndexedAttribute indexedAttr = new org.open4goods.model.attribute.IndexedAttribute();
+        indexedAttr.setName("TEST_ATTRIBUTE");
+        indexedAttr.setValue("test value");
+        indexedAttr.setNumericValue(42.0);
+
+        org.open4goods.model.attribute.ProductAttributes productAttrs = new org.open4goods.model.attribute.ProductAttributes();
+        Map<String, org.open4goods.model.attribute.IndexedAttribute> indexedMap = new HashMap<>();
+        indexedMap.put("TEST_ATTRIBUTE", indexedAttr);
+        productAttrs.setIndexed(indexedMap);
+        product.setAttributes(productAttrs);
+
+        // Create AttributeConfig with NULL name field (simulating the bug)
+        org.open4goods.model.vertical.AttributeConfig attrConfig = new org.open4goods.model.vertical.AttributeConfig();
+        attrConfig.setKey("TEST_ATTRIBUTE");
+        attrConfig.setName(null); // This is the problematic case causing NPE
+
+        org.open4goods.model.vertical.AttributesConfig attrsConfig = new org.open4goods.model.vertical.AttributesConfig();
+        attrsConfig.setConfigs(List.of(attrConfig));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("test-vertical");
+        verticalConfig.setAttributesConfig(attrsConfig);
+
+        when(repository.getById(gtin)).thenReturn(product);
+        when(verticalsConfigService.getConfigById("test-vertical")).thenReturn(verticalConfig);
+
+        // Execute - should NOT throw NPE, should fallback to attribute key
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("attributes"), DomainLanguage.fr);
+
+        // Verify: attributes facet exists and uses fallback name
+        assertThat(dto.attributes()).isNotNull();
+        assertThat(dto.attributes().indexedAttributes()).isNotNull();
+        assertThat(dto.attributes().indexedAttributes()).containsKey("TEST_ATTRIBUTE");
+
+        // Display name should be the attribute key (fallback) since config.getName()
+        // was null
+        assertThat(dto.attributes().indexedAttributes().get("TEST_ATTRIBUTE").name())
+                .isEqualTo("TEST_ATTRIBUTE");
+    }
+
+    /**
+     * Test defensive handling when the requested locale is missing from
+     * AttributeConfig.
+     * Verifies fallback to 'default' locale.
+     */
+    @Test
+    void mapIndexedAttribute_shouldFallbackToDefaultLocaleWhenRequestedLocaleMissing() throws Exception {
+        long gtin = 888L;
+        Product product = new Product(gtin);
+        product.setVertical("test-vertical");
+
+        org.open4goods.model.attribute.IndexedAttribute indexedAttr = new org.open4goods.model.attribute.IndexedAttribute();
+        indexedAttr.setName("COLOR");
+        indexedAttr.setValue("Blue");
+
+        org.open4goods.model.attribute.ProductAttributes productAttrs = new org.open4goods.model.attribute.ProductAttributes();
+        Map<String, org.open4goods.model.attribute.IndexedAttribute> indexedMap = new HashMap<>();
+        indexedMap.put("COLOR", indexedAttr);
+        productAttrs.setIndexed(indexedMap);
+        product.setAttributes(productAttrs);
+
+        // AttributeConfig with 'default' and 'en' locales, but missing 'fr'
+        org.open4goods.model.vertical.AttributeConfig attrConfig = new org.open4goods.model.vertical.AttributeConfig();
+        attrConfig.setKey("COLOR");
+        Localisable<String, String> name = new Localisable<>();
+        name.put("default", "Color");
+        name.put("en", "Colour");
+        // Note: 'fr' locale is intentionally missing
+        attrConfig.setName(name);
+
+        org.open4goods.model.vertical.AttributesConfig attrsConfig = new org.open4goods.model.vertical.AttributesConfig();
+        attrsConfig.setConfigs(List.of(attrConfig));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("test-vertical");
+        verticalConfig.setAttributesConfig(attrsConfig);
+
+        when(repository.getById(gtin)).thenReturn(product);
+        when(verticalsConfigService.getConfigById("test-vertical")).thenReturn(verticalConfig);
+
+        // Request French locale (which is missing)
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("attributes"), DomainLanguage.fr);
+
+        // Should fallback to 'default' locale
+        assertThat(dto.attributes()).isNotNull();
+        assertThat(dto.attributes().indexedAttributes()).containsKey("COLOR");
+        assertThat(dto.attributes().indexedAttributes().get("COLOR").name())
+                .isEqualTo("Color"); // From 'default' locale
+    }
+
+    /**
+     * Test defensive handling when both requested locale AND 'default' locale are
+     * missing.
+     * Verifies fallback to raw attribute key.
+     */
+    @Test
+    void mapIndexedAttribute_shouldFallbackToAttributeKeyWhenBothLocalesMissing() throws Exception {
+        long gtin = 777L;
+        Product product = new Product(gtin);
+        product.setVertical("test-vertical");
+
+        org.open4goods.model.attribute.IndexedAttribute indexedAttr = new org.open4goods.model.attribute.IndexedAttribute();
+        indexedAttr.setName("BRAND");
+        indexedAttr.setValue("Samsung");
+
+        org.open4goods.model.attribute.ProductAttributes productAttrs = new org.open4goods.model.attribute.ProductAttributes();
+        Map<String, org.open4goods.model.attribute.IndexedAttribute> indexedMap = new HashMap<>();
+        indexedMap.put("BRAND", indexedAttr);
+        productAttrs.setIndexed(indexedMap);
+        product.setAttributes(productAttrs);
+
+        // AttributeConfig with only 'en' locale (missing both 'fr' and 'default')
+        org.open4goods.model.vertical.AttributeConfig attrConfig = new org.open4goods.model.vertical.AttributeConfig();
+        attrConfig.setKey("BRAND");
+        Localisable<String, String> name = new Localisable<>();
+        name.put("en", "Brand"); // Only English, no 'default' or 'fr'
+        attrConfig.setName(name);
+
+        org.open4goods.model.vertical.AttributesConfig attrsConfig = new org.open4goods.model.vertical.AttributesConfig();
+        attrsConfig.setConfigs(List.of(attrConfig));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("test-vertical");
+        verticalConfig.setAttributesConfig(attrsConfig);
+
+        when(repository.getById(gtin)).thenReturn(product);
+        when(verticalsConfigService.getConfigById("test-vertical")).thenReturn(verticalConfig);
+
+        // Request French locale (missing both 'fr' and 'default')
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("attributes"), DomainLanguage.fr);
+
+        // Should fallback to raw attribute key
+        assertThat(dto.attributes()).isNotNull();
+        assertThat(dto.attributes().indexedAttributes()).containsKey("BRAND");
+        assertThat(dto.attributes().indexedAttributes().get("BRAND").name())
+                .isEqualTo("BRAND"); // Fallback to attribute key itself
     }
 }
