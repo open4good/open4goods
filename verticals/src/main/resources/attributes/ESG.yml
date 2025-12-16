@@ -1,0 +1,16 @@
+key: "ESG"
+betterIs: "GREATER"
+faIcon: "mdi-scale-balance"
+name:
+  default: "ESG score"
+  fr: "Score ESG"
+asScore: true
+scoreTitle:
+  default: "ESG performance"
+  fr: "Performance ESG"
+scoreDescription:
+  default: "Composite score reflecting environmental, social, and governance practices."
+  fr: "Score composite reflétant les pratiques environnementales, sociales et de gouvernance."
+scoreUtility:
+  default: "Highlights brands with robust ESG commitments contributing to lower lifecycle risks."
+  fr: "Met en avant les marques avec des engagements ESG solides, réduisant les risques sur le cycle de vie."

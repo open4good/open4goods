@@ -665,6 +665,7 @@ attributesConfig:
     - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
     - key: "POWER_CONSUMPTION_SDR"
     - key: "POWER_CONSUMPTION_HDR"
+    - key: "ESG"
     - key: "CLASSE_ENERGY_HDR"
     - key: "CLASSE_ENERGY_SDR"
 ##############################################################################
@@ -799,6 +800,5 @@ matchingCategories:
      - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PANASONIC | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
      - "HIGH-TECH | HIGH-TECH>MARQUES HIGH-TECH>TCL>TV MINI LED TCL>TV MINI LED 4K TCL | MARQUES HIGH-TECH | TCL"
      - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-
 
 
