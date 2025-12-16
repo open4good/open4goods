@@ -14,6 +14,7 @@ import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 import type { CategorySuggestionItem, ProductSuggestionItem } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
+import { useThemedAsset } from '~/composables/useThemedAsset'
 
 definePageMeta({
   ssr: true,
@@ -41,31 +42,48 @@ const heroBackgrounds = computed(() => ({
   dark: '/images/home/hero-full-viewport-dark.jpg',
 }))
 
+type ParallaxSectionId = 'essentials' | 'features' | 'knowledge' | 'cta'
+
+const parallaxAssetPaths: Record<ParallaxSectionId, string[]> = {
+  essentials: ['parallax/parallax-background-1.svg', 'parallax/parallax-background-bubbles-1.svg'],
+  features: ['parallax/parallax-background-2.svg', 'parallax/parallax-background-bubbles-2.svg'],
+  knowledge: ['parallax/parallax-background-3.svg', 'parallax/parallax-background-bubbles-3.svg'],
+  cta: ['parallax/parallax-background-2.svg'],
+}
+
+const parallaxAssets = Object.fromEntries(
+  Object.entries(parallaxAssetPaths).map(([section, assets]) => [
+    section,
+    assets.map((assetPath) => useThemedAsset(assetPath)),
+  ]),
+) as Record<ParallaxSectionId, ReturnType<typeof useThemedAsset>[]>
+
+const resolveParallaxLayers = (section: ParallaxSectionId) =>
+  parallaxAssets[section]
+    .map((asset) => asset.value?.trim())
+    .filter((asset): asset is string => Boolean(asset))
+
 const parallaxBackgrounds = computed(() => ({
   essentials: {
-    light: '/images/home/parallax-essentials-light.jpg',
-    dark: '/images/home/parallax-essentials-dark.jpg',
+    backgrounds: resolveParallaxLayers('essentials'),
     overlay: 0.62,
     parallaxAmount: 0.16,
     ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
   },
   features: {
-    light: '/images/home/parallax-features-light.jpg',
-    dark: '/images/home/parallax-features-dark.jpg',
+    backgrounds: resolveParallaxLayers('features'),
     overlay: 0.55,
     parallaxAmount: 0.12,
     ariaLabel: String(t('home.parallax.features.ariaLabel')),
   },
   knowledge: {
-    light: '/images/home/parallax-knowledge-light.jpg',
-    dark: '/images/home/parallax-knowledge-dark.jpg',
+    backgrounds: resolveParallaxLayers('knowledge'),
     overlay: 0.5,
     parallaxAmount: 0.1,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   cta: {
-    light: '/images/home/parallax-cta-light.jpg',
-    dark: '/images/home/parallax-cta-dark.jpg',
+    backgrounds: resolveParallaxLayers('cta'),
     overlay: 0.48,
     parallaxAmount: 0.08,
     ariaLabel: String(t('home.parallax.cta.ariaLabel')),
@@ -543,8 +561,7 @@ useHead(() => ({
       <ParallaxSection
         id="home-essentials"
         class="home-page__parallax"
-        :background-light="parallaxBackgrounds.essentials.light"
-        :background-dark="parallaxBackgrounds.essentials.dark"
+        :backgrounds="parallaxBackgrounds.essentials.backgrounds"
         :overlay-opacity="parallaxBackgrounds.essentials.overlay"
         :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
         :aria-label="parallaxBackgrounds.essentials.ariaLabel"
@@ -560,8 +577,7 @@ useHead(() => ({
       <ParallaxSection
         id="home-features"
         class="home-page__parallax home-page__parallax--centered"
-        :background-light="parallaxBackgrounds.features.light"
-        :background-dark="parallaxBackgrounds.features.dark"
+        :backgrounds="parallaxBackgrounds.features.backgrounds"
         :overlay-opacity="parallaxBackgrounds.features.overlay"
         :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
         :aria-label="parallaxBackgrounds.features.ariaLabel"
@@ -573,8 +589,7 @@ useHead(() => ({
       <ParallaxSection
         id="home-knowledge"
         class="home-page__parallax"
-        :background-light="parallaxBackgrounds.knowledge.light"
-        :background-dark="parallaxBackgrounds.knowledge.dark"
+        :backgrounds="parallaxBackgrounds.knowledge.backgrounds"
         :overlay-opacity="parallaxBackgrounds.knowledge.overlay"
         :parallax-amount="parallaxBackgrounds.knowledge.parallaxAmount"
         :aria-label="parallaxBackgrounds.knowledge.ariaLabel"
@@ -594,8 +609,7 @@ useHead(() => ({
       <ParallaxSection
         id="home-cta"
         class="home-page__parallax home-page__parallax--centered"
-        :background-light="parallaxBackgrounds.cta.light"
-        :background-dark="parallaxBackgrounds.cta.dark"
+        :backgrounds="parallaxBackgrounds.cta.backgrounds"
         :overlay-opacity="parallaxBackgrounds.cta.overlay"
         :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
         :aria-label="parallaxBackgrounds.cta.ariaLabel"
