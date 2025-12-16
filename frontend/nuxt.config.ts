@@ -121,14 +121,14 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'icon', type: 'image/png', href: '/pwa-assets/icons/nudger-standard-96x96.png', sizes: '96x96' },
+        { rel: 'icon', type: 'image/png', href: '/pwa-assets/icons/android/android-launchericon-96-96.png', sizes: '96x96' },
         { rel: 'shortcut icon', href: '/favicon.ico' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/pwa-assets/icons/nudger-standard-180x180.png' },
-        { rel: 'mask-icon', href: '/pwa-assets/icons-maskable/nudger-maskable-512x512.png', color: '#00DE9F' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/pwa-assets/icons/ios/180.png' },
         { rel: 'manifest', href: '/site.webmanifest' },
       ],
       meta: [
-        { name: 'theme-color', content: '#00DE9F' },
+        { name: 'theme-color', content: '#00DE9F', media: '(prefers-color-scheme: light)' },
+        { name: 'theme-color', content: '#121212', media: '(prefers-color-scheme: dark)' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
       ],
