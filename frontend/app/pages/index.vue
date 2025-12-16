@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type { BlogPostDto } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
@@ -42,12 +43,13 @@ const heroBackgrounds = computed(() => ({
   dark: '/images/home/hero-full-viewport-dark.jpg',
 }))
 
-type ParallaxSectionId = 'essentials' | 'features' | 'knowledge' | 'cta'
+type ParallaxSectionId = 'essentials' | 'features' | 'blog' | 'objections' | 'cta'
 
 const parallaxAssetPaths: Record<ParallaxSectionId, string[]> = {
   essentials: ['parallax/parallax-background-1.svg', 'parallax/parallax-background-bubbles-1.svg'],
   features: ['parallax/parallax-background-2.svg', 'parallax/parallax-background-bubbles-2.svg'],
-  knowledge: ['parallax/parallax-background-3.svg', 'parallax/parallax-background-bubbles-3.svg'],
+  blog: ['parallax/parallax-background-3.svg', 'parallax/parallax-background-bubbles-3.svg'],
+  objections: ['parallax/parallax-background-1.svg', 'parallax/parallax-background-bubbles-1.svg'],
   cta: ['parallax/parallax-background-2.svg'],
 }
 
@@ -76,10 +78,16 @@ const parallaxBackgrounds = computed(() => ({
     parallaxAmount: 0.12,
     ariaLabel: String(t('home.parallax.features.ariaLabel')),
   },
-  knowledge: {
-    backgrounds: resolveParallaxLayers('knowledge'),
+  blog: {
+    backgrounds: resolveParallaxLayers('blog'),
     overlay: 0.5,
     parallaxAmount: 0.1,
+    ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
+  },
+  objections: {
+    backgrounds: resolveParallaxLayers('objections'),
+    overlay: 0.58,
+    parallaxAmount: 0.11,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   cta: {
@@ -89,6 +97,55 @@ const parallaxBackgrounds = computed(() => ({
     ariaLabel: String(t('home.parallax.cta.ariaLabel')),
   },
 }))
+
+type AnimatedSectionKey =
+  | 'problems'
+  | 'solution'
+  | 'features'
+  | 'blog'
+  | 'objections'
+  | 'faq'
+  | 'cta'
+
+const prefersReducedMotion = usePreferredReducedMotion()
+
+const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
+  problems: false,
+  solution: false,
+  features: false,
+  blog: false,
+  objections: false,
+  faq: false,
+  cta: false,
+})
+
+const markAllSectionsVisible = () => {
+  (Object.keys(animatedSections) as AnimatedSectionKey[]).forEach((key) => {
+    animatedSections[key] = true
+  })
+}
+
+watch(
+  prefersReducedMotion,
+  (shouldReduce) => {
+    if (shouldReduce) {
+      markAllSectionsVisible()
+    }
+  },
+  { immediate: true },
+)
+
+const createIntersectHandler =
+  (key: AnimatedSectionKey) =>
+  (_entries: IntersectionObserverEntry[], _observer: IntersectionObserver, isIntersecting: boolean) => {
+    if (animatedSections[key]) {
+      return
+    }
+
+    if (prefersReducedMotion.value || isIntersecting) {
+      animatedSections[key] = true
+    }
+  }
 
 const toSafeString = (value: unknown) => {
   if (typeof value === 'string') {
@@ -568,9 +625,27 @@ useHead(() => ({
         :enable-aplats="true"
       >
         <div class="home-page__stack">
-          <HomeProblemsSection :items="problemItems" />
+          <div
+            class="home-page__section"
+            v-intersect="createIntersectHandler('problems')"
+          >
+            <v-slide-y-transition :disabled="prefersReducedMotion">
+              <div v-show="animatedSections.problems">
+                <HomeProblemsSection :items="problemItems" />
+              </div>
+            </v-slide-y-transition>
+          </div>
 
-          <HomeSolutionSection :benefits="solutionBenefits" />
+          <div
+            class="home-page__section"
+            v-intersect="createIntersectHandler('solution')"
+          >
+            <v-slide-y-reverse-transition :disabled="prefersReducedMotion">
+              <div v-show="animatedSections.solution">
+                <HomeSolutionSection :benefits="solutionBenefits" />
+              </div>
+            </v-slide-y-reverse-transition>
+          </div>
         </div>
       </ParallaxSection>
 
@@ -583,26 +658,65 @@ useHead(() => ({
         :aria-label="parallaxBackgrounds.features.ariaLabel"
         content-align="center"
       >
-        <HomeFeaturesSection :features="featureCards" />
+        <div
+          class="home-page__section"
+          v-intersect="createIntersectHandler('features')"
+        >
+          <v-scale-transition :disabled="prefersReducedMotion">
+            <div v-show="animatedSections.features">
+              <HomeFeaturesSection :features="featureCards" />
+            </div>
+          </v-scale-transition>
+        </div>
       </ParallaxSection>
 
       <ParallaxSection
-        id="home-knowledge"
+        id="home-knowledge-blog"
         class="home-page__parallax"
-        :backgrounds="parallaxBackgrounds.knowledge.backgrounds"
-        :overlay-opacity="parallaxBackgrounds.knowledge.overlay"
-        :parallax-amount="parallaxBackgrounds.knowledge.parallaxAmount"
-        :aria-label="parallaxBackgrounds.knowledge.ariaLabel"
+        :backgrounds="parallaxBackgrounds.blog.backgrounds"
+        :overlay-opacity="parallaxBackgrounds.blog.overlay"
+        :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
+        :aria-label="parallaxBackgrounds.blog.ariaLabel"
         :enable-aplats="true"
       >
-        <div class="home-page__stack home-page__stack--two-columns">
-          <HomeBlogSection
-            :loading="blogLoading"
-            :featured-item="featuredBlogItem"
-            :secondary-items="secondaryBlogItems"
-          />
+        <div class="home-page__stack">
+          <div
+            class="home-page__section"
+            v-intersect="createIntersectHandler('blog')"
+          >
+            <v-slide-x-transition :disabled="prefersReducedMotion">
+              <div v-show="animatedSections.blog">
+                <HomeBlogSection
+                  :loading="blogLoading"
+                  :featured-item="featuredBlogItem"
+                  :secondary-items="secondaryBlogItems"
+                />
+              </div>
+            </v-slide-x-transition>
+          </div>
+        </div>
+      </ParallaxSection>
 
-          <HomeObjectionsSection :items="objectionItems" />
+      <ParallaxSection
+        id="home-knowledge-objections"
+        class="home-page__parallax"
+        :backgrounds="parallaxBackgrounds.objections.backgrounds"
+        :overlay-opacity="parallaxBackgrounds.objections.overlay"
+        :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
+        :aria-label="parallaxBackgrounds.objections.ariaLabel"
+        :enable-aplats="true"
+      >
+        <div class="home-page__stack">
+          <div
+            class="home-page__section"
+            v-intersect="createIntersectHandler('objections')"
+          >
+            <v-slide-x-reverse-transition :disabled="prefersReducedMotion">
+              <div v-show="animatedSections.objections">
+                <HomeObjectionsSection :items="objectionItems" />
+              </div>
+            </v-slide-x-reverse-transition>
+          </div>
         </div>
       </ParallaxSection>
 
@@ -616,16 +730,34 @@ useHead(() => ({
         content-align="center"
       >
         <div class="home-page__stack home-page__stack--compact">
-          <HomeFaqSection :items="faqPanels" />
+          <div
+            class="home-page__section"
+            v-intersect="createIntersectHandler('faq')"
+          >
+            <v-fade-transition :disabled="prefersReducedMotion">
+              <div v-show="animatedSections.faq">
+                <HomeFaqSection :items="faqPanels" />
+              </div>
+            </v-fade-transition>
+          </div>
 
-          <HomeCtaSection
-            v-model:search-query="searchQuery"
-            :categories-landing-url="categoriesLandingUrl"
-            :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-            @submit="handleSearchSubmit"
-            @select-category="handleCategorySuggestion"
-            @select-product="handleProductSuggestion"
-          />
+          <div
+            class="home-page__section"
+            v-intersect="createIntersectHandler('cta')"
+          >
+            <v-slide-y-transition :disabled="prefersReducedMotion">
+              <div v-show="animatedSections.cta">
+                <HomeCtaSection
+                  v-model:search-query="searchQuery"
+                  :categories-landing-url="categoriesLandingUrl"
+                  :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+                  @submit="handleSearchSubmit"
+                  @select-category="handleCategorySuggestion"
+                  @select-product="handleProductSuggestion"
+                />
+              </div>
+            </v-slide-y-transition>
+          </div>
         </div>
       </ParallaxSection>
     </div>
@@ -662,15 +794,9 @@ useHead(() => ({
     flex-direction: column
     gap: clamp(1.5rem, 4vw, 2.25rem)
 
-  .home-page__stack--two-columns
-    display: grid
-    grid-template-columns: 1fr
-    gap: clamp(1.5rem, 4vw, 2.25rem)
-
   .home-page__stack--compact
     gap: clamp(1.25rem, 3vw, 2rem)
 
-  @media (min-width: 1100px)
-    .home-page__stack--two-columns
-      grid-template-columns: repeat(2, 1fr)
+  .home-page__section
+    width: 100%
 </style>
