@@ -195,10 +195,10 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
           <v-col cols="12" lg="10" xl="8">
             <v-sheet class="home-hero__panel" color="transparent" elevation="0">
               <div class="home-hero__panel-grid">
-                <div class="home-hero__panel-block">
+                <div class="home-hero__panel-block home-hero__panel-block--wizard">
                   <NudgeToolWizard :verticals="wizardVerticals" />
                 </div>
-                <div class="home-hero__panel-block">
+                <div class="home-hero__panel-block home-hero__panel-block--context">
                   <form
                     class="home-hero__search"
                     role="search"
@@ -448,12 +448,19 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 .home-hero__panel-grid
   display: grid
   gap: clamp(1.5rem, 4vw, 2.5rem)
-  grid-template-columns: 1fr
+  grid-template-columns: minmax(0, 1fr)
+  align-items: stretch
 
 .home-hero__panel-block
   display: flex
   flex-direction: column
   gap: clamp(1.25rem, 2vw, 1.75rem)
+
+.home-hero__panel-block--wizard
+  height: 100%
+
+.home-hero__panel-block--context
+  height: 100%
 
 .home-hero__context
   display: flex
@@ -600,14 +607,14 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 @media (min-width: 960px)
   .home-hero__panel-grid
-    grid-template-columns: 1fr
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr)
 
   .home-hero__helper-row
     grid-template-columns: auto 1fr
 
 @media (min-width: 1280px)
   .home-hero__panel-grid
-    grid-template-columns: 1fr
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr)
 
 @media (min-width: 1440px)
   .home-hero__panel

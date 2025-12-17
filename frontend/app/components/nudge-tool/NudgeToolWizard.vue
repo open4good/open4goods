@@ -6,26 +6,52 @@
     :style="{ height: formattedHeight }"
   >
     <div ref="headerRef" class="nudge-wizard__header">
-      <div class="nudge-wizard__header-row">
-        <v-btn
-          v-if="categorySummary"
-          class="nudge-wizard__category-chip"
-          variant="tonal"
-          color="primary"
-          rounded="lg"
-          @click="resetForCategorySelection"
-        >
-          <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
+      <button
+        v-if="showCategoryBadge"
+        type="button"
+        class="nudge-wizard__category-badge"
+        :aria-label="$t('nudge-tool.meta.matches', { count: animatedMatches })"
+        @click="navigateToCategoryPage"
+      >
+        <span class="nudge-wizard__badge-backdrop" aria-hidden="true" />
+        <span class="nudge-wizard__badge-content">
+          <v-avatar
+            v-if="categorySummary?.image"
+            size="56"
+            rounded="lg"
+            class="nudge-wizard__badge-avatar"
+          >
             <v-img
               :src="categorySummary.image"
               :alt="categorySummary.alt"
               cover
             />
           </v-avatar>
-          <span class="nudge-wizard__category-label">{{
-            categorySummary.label
-          }}</span>
-        </v-btn>
+          <div class="nudge-wizard__badge-text">
+            <span class="nudge-wizard__badge-label">{{
+              categorySummary?.label
+            }}</span>
+            <span class="nudge-wizard__badge-count">{{
+              $t('nudge-tool.meta.matches', { count: animatedMatches })
+            }}</span>
+          </div>
+        </span>
+      </button>
+
+      <div class="nudge-wizard__header-main">
+        <div class="nudge-wizard__title-row">
+          <p class="nudge-wizard__headline">{{ activeStepTitle }}</p>
+          <v-btn
+            v-if="activeStepKey !== 'category'"
+            class="nudge-wizard__headline-action"
+            variant="text"
+            size="small"
+            prepend-icon="mdi-gesture-tap-button"
+            @click="resetForCategorySelection"
+          >
+            {{ $t('nudge-tool.steps.category.title') }}
+          </v-btn>
+        </div>
 
         <v-stepper
           v-if="showStepper"
@@ -39,20 +65,6 @@
           hide-actions
           class="nudge-wizard__stepper elevation-0 border-0"
         />
-      </div>
-
-      <div v-if="shouldShowMatches" class="nudge-wizard__matches">
-        <v-btn
-          variant="text"
-          color="primary"
-          :disabled="!selectedCategory"
-          @click="navigateToCategoryPage"
-        >
-          {{ $t('nudge-tool.meta.matches', { count: animatedMatches }) }}
-          <template #append>
-            <v-icon icon="mdi-link-variant" />
-          </template>
-        </v-btn>
       </div>
     </div>
 
@@ -590,6 +602,10 @@ const windowReverseTransition = computed(() =>
     : 'nudge-wizard-slide-fade-reverse'
 )
 
+const activeStepTitle = computed(
+  () => steps.value.find(step => step.key === activeStepKey.value)?.title ?? ''
+)
+
 const categorySummary = computed(() => {
   if (!selectedCategory.value || activeStepKey.value === 'category') {
     return null
@@ -607,6 +623,10 @@ const categorySummary = computed(() => {
       '',
   }
 })
+
+const showCategoryBadge = computed(
+  () => Boolean(categorySummary.value) && shouldShowMatches.value
+)
 
 const windowTransitionDurationMs = 500
 
@@ -763,20 +783,54 @@ const contentMinHeight = computed(() => {
   display: flex;
   flex-direction: column;
   transition: height 500ms ease;
+  overflow: visible;
+  background: linear-gradient(
+      135deg,
+      rgba(var(--v-theme-surface-glass), 0.96),
+      rgba(var(--v-theme-surface-primary-080), 0.95)
+    ),
+    radial-gradient(
+      circle at 12% 18%,
+      rgba(var(--v-theme-hero-gradient-start), 0.12),
+      transparent 38%
+    );
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+  box-shadow: 0 18px 32px rgba(var(--v-theme-shadow-primary-600), 0.12);
 
   &__header {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1.35rem);
     margin-bottom: 12px;
   }
 
-  &__header-row {
+  &__header-main {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  &__title-row {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
     flex-wrap: wrap;
+  }
+
+  &__headline {
+    margin: 0;
+    font-weight: 700;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    color: rgb(var(--v-theme-text-neutral-strong));
+  }
+
+  &__headline-action {
+    align-self: center;
+    text-transform: none;
+    font-weight: 600;
   }
 
   &__stepper {
@@ -784,21 +838,80 @@ const contentMinHeight = computed(() => {
     min-width: 0;
   }
 
-  &__matches {
+  &__category-badge {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--v-theme-hero-gradient-start), 0.22),
+      rgba(var(--v-theme-hero-gradient-end), 0.36)
+    );
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.55);
+    box-shadow: 0 16px 30px rgba(var(--v-theme-shadow-primary-600), 0.16);
+    color: rgb(var(--v-theme-text-on-accent));
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 38px rgba(var(--v-theme-shadow-primary-600), 0.2);
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.7);
+    }
+  }
+
+  &__badge-backdrop {
+    position: absolute;
+    inset: auto auto auto 0;
+    width: 180px;
+    height: 180px;
+    transform: translate(-42%, -48%);
+    background: radial-gradient(
+      circle,
+      rgba(var(--v-theme-hero-gradient-mid), 0.22),
+      rgba(var(--v-theme-hero-gradient-start), 0.05) 60%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    z-index: 0;
+  }
+
+  &__badge-content {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  &__badge-avatar {
+    box-shadow: 0 12px 22px rgba(var(--v-theme-shadow-primary-600), 0.18);
+  }
+
+  &__badge-text {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 0.15rem;
   }
 
-  &__category-chip {
-    text-transform: none;
-    font-weight: 600;
-    gap: 8px;
-    padding-inline: 12px;
+  &__badge-label {
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: rgb(var(--v-theme-text-on-accent));
   }
 
-  &__category-label {
-    white-space: nowrap;
-    color: rgb(var(--v-theme-primary));
+  &__badge-count {
+    font-size: 0.95rem;
+    color: rgba(var(--v-theme-text-on-accent), 0.9);
   }
 
   &__progress {
@@ -821,6 +934,24 @@ const contentMinHeight = computed(() => {
     gap: 8px;
     margin-top: 12px;
     flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .nudge-wizard {
+    &__header {
+      grid-template-columns: 1fr;
+    }
+
+    &__category-badge {
+      width: 100%;
+      justify-content: center;
+    }
+
+    &__title-row {
+      justify-content: flex-start;
+      gap: 0.65rem;
+    }
   }
 }
 
