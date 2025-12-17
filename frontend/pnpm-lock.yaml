@@ -146,7 +146,7 @@ importers:
         version: 3.3.0(@netlify/blobs@9.1.2)(@unhead/vue@2.0.19(vue@3.5.25(typescript@5.9.3)))(db0@0.3.4)(h3@1.15.4)(ioredis@5.8.2)(magicast@0.5.1)(rollup@4.53.3)(unhead@2.0.19)(unstorage@1.17.3(@netlify/blobs@9.1.2)(db0@0.3.4)(ioredis@5.8.2))(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
       '@nuxtjs/sitemap':
         specifier: ^7.4.3
-        version: 7.4.10(h3@1.15.4)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
+        version: 7.5.0(h3@1.15.4)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
       '@nuxtjs/tailwindcss':
         specifier: ^6.14.0
         version: 6.14.0(magicast@0.5.1)
@@ -2379,8 +2379,8 @@ packages:
   '@nuxtjs/seo@3.3.0':
     resolution: {integrity: sha512-QV2WCLm69yGvH6MZSNC+7In4UfQ2cTVy0e3Pnt7uP8gZhdddiG8Gd63gNqg5VdEwdtynrLK02Nja2K+k0m1zmQ==}
 
-  '@nuxtjs/sitemap@7.4.10':
-    resolution: {integrity: sha512-HtiwgHGxz5InSg/VTbglxFnDKsdGd+rKj81swrb8dBHPrZX1t5x/E+QSrQPEnKKkvQ6THAzz9iL+bMTEpod7SA==}
+  '@nuxtjs/sitemap@7.5.0':
+    resolution: {integrity: sha512-hcA2Dy/PGX7k6I8bQXEYM0NS1hTiaiV6wYDEyhku2xdrdzPZk4gNCN8Ry/Iaz9xgC7Fug1ZS2RDAHdrpe3TNWw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: '>=3'
@@ -4464,6 +4464,14 @@ packages:
 
   c12@3.3.2:
     resolution: {integrity: sha512-QkikB2X5voO1okL3QsES0N690Sn/K9WokXqUsDQsWy5SnYb+psYQFGA10iy1bZHj3fjISKsI67Q90gruvWWM3A==}
+    peerDependencies:
+      magicast: '*'
+    peerDependenciesMeta:
+      magicast:
+        optional: true
+
+  c12@3.3.3:
+    resolution: {integrity: sha512-750hTRvgBy5kcMNPdh95Qo+XUBeGo8C7nsKSmedDmaQI+E0r82DwHeM6vBewDe4rGFbnxoa4V9pw+sPh5+Iz8Q==}
     peerDependencies:
       magicast: '*'
     peerDependenciesMeta:
@@ -11778,7 +11786,7 @@ snapshots:
 
   '@nuxt/devtools-kit@3.1.1(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
-      '@nuxt/kit': 4.2.1(magicast@0.5.1)
+      '@nuxt/kit': 4.2.2(magicast@0.5.1)
       execa: 8.0.1
       vite: 7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
@@ -12192,7 +12200,7 @@ snapshots:
 
   '@nuxt/kit@4.2.2(magicast@0.5.1)':
     dependencies:
-      c12: 3.3.2(magicast@0.5.1)
+      c12: 3.3.3(magicast@0.5.1)
       consola: 3.4.2
       defu: 6.1.4
       destr: 2.0.5
@@ -12210,7 +12218,7 @@ snapshots:
       semver: 7.7.3
       tinyglobby: 0.2.15
       ufo: 1.6.1
-      unctx: 2.4.1
+      unctx: 2.5.0
       untyped: 2.0.0
     transitivePeerDependencies:
       - magicast
@@ -12547,7 +12555,7 @@ snapshots:
     dependencies:
       '@nuxt/kit': 4.2.2(magicast@0.5.1)
       '@nuxtjs/robots': 5.6.7(h3@1.15.4)(magicast@0.5.1)(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
-      '@nuxtjs/sitemap': 7.4.10(h3@1.15.4)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
+      '@nuxtjs/sitemap': 7.5.0(h3@1.15.4)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
       nuxt-link-checker: 4.3.9(@netlify/blobs@9.1.2)(db0@0.3.4)(h3@1.15.4)(ioredis@5.8.2)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))
       nuxt-og-image: 5.1.13(@unhead/vue@2.0.19(vue@3.5.25(typescript@5.9.3)))(h3@1.15.4)(magicast@0.5.1)(unstorage@1.17.3(@netlify/blobs@9.1.2)(db0@0.3.4)(ioredis@5.8.2))(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))
       nuxt-schema-org: 5.0.10(@unhead/vue@2.0.19(vue@3.5.25(typescript@5.9.3)))(h3@1.15.4)(magicast@0.5.1)(unhead@2.0.19)(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)
@@ -12587,7 +12595,7 @@ snapshots:
       - vue
       - zod
 
-  '@nuxtjs/sitemap@7.4.10(h3@1.15.4)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)':
+  '@nuxtjs/sitemap@7.5.0(h3@1.15.4)(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.25(typescript@5.9.3))(zod@3.25.76)':
     dependencies:
       '@nuxt/devtools-kit': 3.1.1(magicast@0.5.1)(vite@7.2.7(@types/node@25.0.1)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.96.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@nuxt/kit': 4.2.2(magicast@0.5.1)
@@ -14674,6 +14682,23 @@ snapshots:
   c12@3.3.2(magicast@0.5.1):
     dependencies:
       chokidar: 4.0.3
+      confbox: 0.2.2
+      defu: 6.1.4
+      dotenv: 17.2.3
+      exsolve: 1.0.8
+      giget: 2.0.0
+      jiti: 2.6.1
+      ohash: 2.0.11
+      pathe: 2.0.3
+      perfect-debounce: 2.0.0
+      pkg-types: 2.3.0
+      rc9: 2.1.2
+    optionalDependencies:
+      magicast: 0.5.1
+
+  c12@3.3.3(magicast@0.5.1):
+    dependencies:
+      chokidar: 5.0.0
       confbox: 0.2.2
       defu: 6.1.4
       dotenv: 17.2.3
