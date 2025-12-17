@@ -6,11 +6,7 @@
           class="nudge-step-category__step"
           :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })"
         >
-          <v-icon
-            icon="mdi-numeric-1-circle"
-            color="accent-primary-highlight"
-            size="28"
-          />
+
         </div>
         <h2 class="nudge-step-category__title">
           {{ $t('nudge-tool.steps.category.title') }}

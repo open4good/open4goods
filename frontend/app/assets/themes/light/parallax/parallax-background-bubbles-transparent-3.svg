@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" fill="none" role="img" aria-label="Transparent parallax background with bubbles rising on the right">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" fill="none" role="img" aria-label="Transparent parallax background with bubbles rising on the right">
   <defs>
     <!-- Ambient washes -->
     <radialGradient id="washBlue" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(980 300) scale(980 620)">

@@ -2333,6 +2333,9 @@
       "previous": "Précédent",
       "next": "Suivant"
     },
+    "wizard": {
+      "welcome": "Bienvenue !"
+    },
     "meta": {
       "matches": "{count} produits correspondent à vos choix"
     },

@@ -1,46 +1,33 @@
 <template>
-  <v-card
+  <RoundedCornerCard
     class="nudge-wizard"
     rounded="xl"
     elevation="3"
+    accent-corner="top-left"
+    corner-size="lg"
+    corner-variant="custom"
     :style="{ height: formattedHeight }"
   >
+    <template #corner>
+      <div 
+        class="nudge-wizard__corner-content"
+        :class="{ 'nudge-wizard__corner-content--clickable': shouldShowMatches }"
+        @click="handleCornerClick"
+      >
+        <span v-if="activeStepKey === 'category'" class="text-h6 font-weight-bold">
+          {{ $t('nudge-tool.wizard.welcome') }}
+        </span>
+        <div v-else-if="categorySummary" class="d-flex flex-column align-center">
+             <v-avatar size="32" class="mb-1">
+                <v-img :src="categorySummary.image" :alt="categorySummary.alt" cover />
+             </v-avatar>
+             <div class="text-caption font-weight-bold lh-1">{{ categorySummary.label }}</div>
+             <div class="text-caption text-medium-emphasis">{{ animatedMatches }}</div>
+        </div>
+      </div>
+    </template>
     <div ref="headerRef" class="nudge-wizard__header">
-      <div class="nudge-wizard__header-row">
-        <v-btn
-          v-if="categorySummary"
-          class="nudge-wizard__category-chip"
-          variant="tonal"
-          color="primary"
-          rounded="lg"
-          @click="resetForCategorySelection"
-        >
-          <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
-            <v-img
-              :src="categorySummary.image"
-              :alt="categorySummary.alt"
-              cover
-            />
-          </v-avatar>
-          <span class="nudge-wizard__category-label">{{
-            categorySummary.label
-          }}</span>
-        </v-btn>
-      </div>
-
-      <div v-if="shouldShowMatches" class="nudge-wizard__matches">
-        <v-btn
-          variant="text"
-          color="primary"
-          :disabled="!selectedCategory"
-          @click="navigateToCategoryPage"
-        >
-          {{ $t('nudge-tool.meta.matches', { count: animatedMatches }) }}
-          <template #append>
-            <v-icon icon="mdi-link-variant" />
-          </template>
-        </v-btn>
-      </div>
+      <!-- Header removed in favor of corner content -->
     </div>
 
     <div v-if="loading" class="nudge-wizard__progress">
@@ -91,7 +78,7 @@
         {{ $t('nudge-tool.actions.next') }}
       </v-btn>
     </div>
-  </v-card>
+  </RoundedCornerCard>
 </template>
 
 <script setup lang="ts">
@@ -103,6 +90,7 @@ import {
   NudgeToolStepRecommendations,
   NudgeToolStepScores,
   NudgeToolStepSubsetGroup,
+  RoundedCornerCard,
 } from '#components'
 import type {
   CategoryHashState,
@@ -460,6 +448,12 @@ const navigateToCategoryPage = () => {
   void router.push({ path: `/${slug}`, hash })
 }
 
+const handleCornerClick = () => {
+    if (shouldShowMatches.value) {
+        navigateToCategoryPage()
+    }
+}
+
 const hasPreviousStep = computed(() => {
   const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   return index > 0
@@ -613,7 +607,7 @@ const maxHeaderHeight = ref(0)
 const maxFooterHeight = ref(0)
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
-const WIZARD_MIN_HEIGHT = 450
+const WIZARD_MIN_HEIGHT = 300
 
 // Track max heights to prevent shrinking
 watch(windowHeight, val => {
@@ -693,6 +687,24 @@ const contentMinHeight = computed(() => {
   flex-direction: column;
   transition: height 500ms ease;
 
+  &__corner-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 1.1;
+    
+    &--clickable {
+        cursor: pointer;
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+  }
+
   &__header {
     display: flex;
     flex-direction: column;
@@ -713,22 +725,7 @@ const contentMinHeight = computed(() => {
     min-width: 0;
   }
 
-  &__matches {
-    display: flex;
-    justify-content: center;
-  }
 
-  &__category-chip {
-    text-transform: none;
-    font-weight: 600;
-    gap: 8px;
-    padding-inline: 12px;
-  }
-
-  &__category-label {
-    white-space: nowrap;
-    color: rgb(var(--v-theme-primary));
-  }
 
   &__progress {
     position: absolute;

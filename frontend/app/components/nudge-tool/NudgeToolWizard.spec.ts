@@ -18,6 +18,15 @@ vi.mock('~/composables/categories/useCategories', () => ({
     useCategories: () => ({ fetchCategories: vi.fn().mockResolvedValue([]) })
 }))
 
+vi.mock('#components', () => ({
+    NudgeToolStepCategory: { template: '<div>Category</div>' },
+    NudgeToolStepScores: { template: '<div>Scores</div>' },
+    NudgeToolStepCondition: { template: '<div>Condition</div>' },
+    NudgeToolStepSubsetGroup: { template: '<div>SubsetGroup</div>' },
+    NudgeToolStepRecommendations: { template: '<div>Recommendations</div>' },
+    RoundedCornerCard: { template: '<div><slot /><slot name="corner"/></div>' }
+}))
+
 // Mock other imports that might cause issues
 vi.mock('~/utils/_category-filter-state', () => ({
     buildCategoryHash: vi.fn()
@@ -44,8 +53,11 @@ describe('NudgeToolWizard', () => {
         // Stub components to avoid deep rendering
         const wrapper = mount(NudgeToolWizard, {
             global: {
+                mocks: {
+                    $t: (t: string) => t
+                },
                 stubs: {
-                    VCard: { template: '<div><slot /></div>' },
+                    RoundedCornerCard: { template: '<div><slot /><slot name="corner" /></div>' },
                     VBtn: true,
                     VAvatar: true,
                     VImg: true,
@@ -79,8 +91,6 @@ describe('NudgeToolWizard', () => {
         // Initially at 'category', should exist
         expect(wrapper.exists()).toBe(true)
 
-        // Stepper is removed, so we don't check for it anymore.
-        // We can check that the header row exists
-        expect(wrapper.find('.nudge-wizard__header-row').exists()).toBe(true)
+        // Header row was removed in refactor, removed assertion.
     })
 })

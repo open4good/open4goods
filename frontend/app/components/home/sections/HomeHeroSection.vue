@@ -664,13 +664,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   .home-hero__content
     order: 2
 
-  .home-hero__video-wrapper
-    aspect-ratio: 4 / 5
-    min-height: 320px
-
-  .home-hero__video
-    transform: scale(1.15)
-
 @media (min-width: 960px)
   .home-hero__panel-grid
     grid-template-columns: 1fr
