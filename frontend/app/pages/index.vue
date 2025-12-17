@@ -56,22 +56,22 @@ type ParallaxSectionId =
 
 const parallaxAssetPaths: Record<ParallaxSectionId, string[]> = {
   essentials: [
-    'parallax/parallax-background-1.svg',
-    'parallax/parallax-background-bubbles-1.svg',
+    'parallax/parallax-background-1-1.svg',
+    'parallax/parallax-background-bubbles-1-1.svg',
   ],
   features: [
-    'parallax/parallax-background-2.svg',
-    'parallax/parallax-background-bubbles-2.svg',
+    'parallax/parallax-background-2-1.svg',
+    'parallax/parallax-background-bubbles-2-1.svg',
   ],
   blog: [
-    'parallax/parallax-background-3.svg',
-    'parallax/parallax-background-bubbles-3.svg',
+    'parallax/parallax-background-3-1.svg',
+    'parallax/parallax-background-bubbles-3-1.svg',
   ],
   objections: [
-    'parallax/parallax-background-1.svg',
-    'parallax/parallax-background-bubbles-1.svg',
+    'parallax/parallax-background-1-1.svg',
+    'parallax/parallax-background-bubbles-1-1.svg',
   ],
-  cta: ['parallax/parallax-background-2.svg'],
+  cta: ['parallax/parallax-background-2-1.svg'],
 }
 
 const parallaxAssets = Object.fromEntries(

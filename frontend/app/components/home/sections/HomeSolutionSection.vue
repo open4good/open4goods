@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
+import { useThemedAsset } from '~/composables/useThemedAsset'
 
 type SolutionBenefit = {
   emoji: string
@@ -16,6 +17,14 @@ const { t } = useI18n()
 
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
+
+const parallaxBackground = useThemedAsset(
+  'parallax/parallax-background-bubbles-transparent-1-1.svg'
+)
+
+const backgrounds = computed(() =>
+  parallaxBackground.value ? [parallaxBackground.value] : []
+)
 </script>
 
 <template>
@@ -23,8 +32,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
     id="home-solution"
     class="home-solution"
     aria-label="home-solution-title"
-    :background-light="'/assets/themes/light/parallax/parallax-background-bubbles-transparent-1.svg'"
-    :background-dark="'/assets/themes/dark/parallax/parallax-background-bubbles-1.svg'"
+    :backgrounds="backgrounds"
     :parallax-amount="0.16"
   >
     <div class="home-solution__inner">
