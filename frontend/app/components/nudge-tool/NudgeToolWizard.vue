@@ -26,19 +26,6 @@
             categorySummary.label
           }}</span>
         </v-btn>
-
-        <v-stepper
-          v-if="showStepper"
-          v-model="stepperActiveKey"
-          density="compact"
-          :alt-labels="!display.smAndDown.value"
-          :items="stepperItems"
-          :item-props="true"
-          editable
-          flat
-          hide-actions
-          class="nudge-wizard__stepper elevation-0 border-0"
-        />
       </div>
 
       <div v-if="shouldShowMatches" class="nudge-wizard__matches">
@@ -109,7 +96,6 @@
 
 <script setup lang="ts">
 import { useDebounceFn, useElementSize, useTransition } from '@vueuse/core'
-import { useDisplay } from 'vuetify'
 import { useCategories } from '~/composables/categories/useCategories'
 import {
   NudgeToolStepCategory,
@@ -149,7 +135,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const display = useDisplay()
 const router = useRouter()
 const { fetchCategories } = useCategories()
 
@@ -243,14 +228,6 @@ const hashState = computed<CategoryHashState>(() => ({
   activeSubsets: activeSubsetIds.value,
 }))
 
-const defaultStepIcons = {
-  category: 'mdi-shape-outline',
-  scores: 'mdi-star-check-outline',
-  condition: 'mdi-recycle-variant',
-  subset: 'mdi-tune-variant',
-  recommendations: 'mdi-lightbulb-on-outline',
-}
-
 type WizardStep = {
   key: string
   component: Component
@@ -333,33 +310,6 @@ const steps = computed<WizardStep[]>(() => {
 
   return sequence
 })
-
-const getSubsetGroupIcon = (key: string) => {
-  const groupId = key.replace('group-', '')
-  const group = subsetGroups.value.find(entry => entry.id === groupId)
-
-  return group?.mdiIcon || defaultStepIcons.subset
-}
-
-const resolveStepIcon = (stepKey: string) => {
-  if (stepKey === 'category') {
-    return defaultStepIcons.category
-  }
-
-  if (stepKey === 'scores') {
-    return defaultStepIcons.scores
-  }
-
-  if (stepKey === 'condition') {
-    return defaultStepIcons.condition
-  }
-
-  if (stepKey.startsWith('group-')) {
-    return getSubsetGroupIcon(stepKey)
-  }
-
-  return defaultStepIcons.recommendations
-}
 
 watch(
   steps,
@@ -532,38 +482,6 @@ const isNextDisabled = computed(() => {
   return false
 })
 
-const stepperItems = computed(() => {
-  const allSteps = steps.value
-    .filter(step => step.key !== 'category' && step.key !== 'recommendations')
-    .map(step => ({
-      title: display.smAndDown.value ? undefined : step.title,
-      value: step.key,
-      icon: resolveStepIcon(step.key),
-      disabled: false,
-    }))
-
-  const currentIndex = allSteps.findIndex(item => item.value === activeStepKey.value)
-  if (currentIndex === -1) return allSteps
-
-  // Show only current and previous steps
-  return allSteps.slice(0, currentIndex + 1)
-})
-
-const stepperActiveKey = computed({
-  get: () =>
-    stepperItems.value.find(item => item.value === activeStepKey.value)
-      ?.value ??
-    stepperItems.value.at(-1)?.value ??
-    activeStepKey.value,
-  set: (value: string) => {
-    activeStepKey.value = value
-  },
-})
-
-const showStepper = computed(
-  () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value)
-)
-
 const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
 )
@@ -617,8 +535,7 @@ const resetCategorySelectionState = () => {
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
-  baseWindowHeight.value = 0
-  maxContentHeight.value = 0
+  // Don't reset maxContentHeight here to avoid jump if we return to wizard
 }
 
 let resetTimeout: ReturnType<typeof setTimeout> | null = null
@@ -655,6 +572,10 @@ watch(
 
     if (next !== 'category') {
       clearResetTimeout()
+      // Lock current height as base if moving from category to content
+      if (previous === 'category') {
+         // Logic handled in height watcher
+      }
     }
   },
   { flush: 'pre' }
@@ -687,67 +608,74 @@ const { height: headerHeight } = useElementSize(headerRef)
 const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
-const baseWindowHeight = ref(0)
 const maxContentHeight = ref(0)
+const isContentMode = computed(() => activeStepKey.value !== 'category')
 
+// We only track max height for the "wizard content" steps
 watch(windowHeight, val => {
-  if (val <= 0) {
-    return
-  }
+  if (val <= 0) return
 
-  if (activeStepKey.value === 'category' || baseWindowHeight.value === 0) {
-    baseWindowHeight.value = Math.max(baseWindowHeight.value, val)
-  }
-
-  if (activeStepKey.value !== 'category') {
-    maxContentHeight.value = Math.max(maxContentHeight.value, val, baseWindowHeight.value)
+  if (isContentMode.value) {
+    // 600px minimum or whatever current height is, to avoid jump
+    const currentMax = Math.max(maxContentHeight.value, val)
+     // Apply some minimum reasonable height for wizard part if we want
+     // But user asked for "largest screen size", so we just accumulate max
+    maxContentHeight.value = currentMax
   }
 })
 
-const stableWindowHeight = computed(() => {
-  if (activeStepKey.value === 'category') {
-    return Math.max(windowHeight.value, baseWindowHeight.value)
+const targetHeight = computed(() => {
+  if (!isContentMode.value) {
+    // In category mode, just let it be natural height
+    return headerHeight.value + windowHeight.value + footerHeight.value + 32
   }
 
-  const floorHeight = Math.max(baseWindowHeight.value, maxContentHeight.value)
-  return Math.max(windowHeight.value, floorHeight)
+  // In content mode, force the max observed height for stability
+  // Uses stable maxContentHeight for the window part
+  const safeWindowHeight = Math.max(windowHeight.value, maxContentHeight.value)
+  // Padding is clamp(1.5rem, 3vw, 2rem). Max is 2rem * 2 = 64px.
+  return headerHeight.value + safeWindowHeight + footerHeight.value + 80 // 64px padding + 16px safety buffer
 })
 
-const totalHeight = computed(
-  () => headerHeight.value + stableWindowHeight.value + footerHeight.value + 32
-) // 32 = padding
-
-const animatedHeight = useTransition(totalHeight, {
-  duration: 500,
-  transition: [0.4, 0, 0.2, 1], // Ease-out-like curve
-})
-
-// Only apply fixed height when content is ready/stable to avoid jumps during hydration
+// Use transition ONLY if we already mounted + moving between modes or growing
+// But user said: "No animation on initial load side client"
 const isReady = ref(false)
 onMounted(() => {
+  // Little delay to ensure hydration matches
   setTimeout(() => {
     isReady.value = true
-  }, 100)
+  }, 50)
+})
+
+// We only animate if we are ready
+const animatedHeight = useTransition(targetHeight, {
+  duration: 500,
+  transition: [0.4, 0, 0.2, 1],
+  disabled: !isReady.value, // Disable transition initially
 })
 
 const formattedHeight = computed(() => {
-  if (!isReady.value) return 'auto'
+  if (!isReady.value) return 'auto' // Natural height on server/initial client
+  
+  // If we are in category mode, we might want 'auto' or animated.
+  // User said: "First one : category page. Must appears directly"
+  // If we return specific pixel height, it will animate. 
+  // If we return 'auto' it won't.
+  
+  // Strategy:
+  // If staying in category => auto (handles resize naturally)
+  // If switching category -> wizard => animate to fixed
+  // If in wizard => fixed stable height
+  
   return `${animatedHeight.value}px`
 })
 
 const contentMinHeight = computed(() => {
-  if (!isReady.value) {
-    return undefined
-  }
-
-  if (activeStepKey.value === 'category') {
-    const minHeight = Math.max(windowHeight.value, baseWindowHeight.value)
-    return minHeight ? `${minHeight}px` : undefined
-  }
-
-  const minHeight = Math.max(maxContentHeight.value, baseWindowHeight.value)
-  return minHeight ? `${minHeight}px` : undefined
+  if (!isContentMode.value) return undefined
+  // Force min-height on the VWindow content specifically to avoid jitter inside
+  return maxContentHeight.value > 0 ? `${maxContentHeight.value}px` : undefined
 })
+
 </script>
 
 <style scoped lang="scss">

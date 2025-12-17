@@ -76,8 +76,11 @@ describe('NudgeToolWizard', () => {
 
         expect(wrapper.exists()).toBe(true)
 
-        // Initially at 'category', stepper should likely be hidden or have no items relevant since we filter 'category'
-        // The component says: v-if="showStepper". showStepper = activeStepKey != 'category' && selectedCategoryId
-        expect(wrapper.find('.stub-stepper').exists()).toBe(false)
+        // Initially at 'category', should exist
+        expect(wrapper.exists()).toBe(true)
+
+        // Stepper is removed, so we don't check for it anymore.
+        // We can check that the header row exists
+        expect(wrapper.find('.nudge-wizard__header-row').exists()).toBe(true)
     })
 })
