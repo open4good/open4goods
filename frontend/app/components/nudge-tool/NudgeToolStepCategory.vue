@@ -1,22 +1,6 @@
 <template>
   <div class="nudge-step-category">
-    <div class="nudge-step-category__header">
-      <div class="nudge-step-category__title-row">
-        <div
-          class="nudge-step-category__step"
-          :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })"
-        >
-
-        </div>
-        <h2 class="nudge-step-category__title">
-          {{ $t('nudge-tool.steps.category.title') }}
-        </h2>
-      </div>
-
-      <p class="nudge-step-category__subtitle">
-        {{ $t('nudge-tool.steps.category.subtitle') }}
-      </p>
-    </div>
+    <!-- Header removed, moved to Wizard -->
 
     <v-slide-group
       v-model="selected"

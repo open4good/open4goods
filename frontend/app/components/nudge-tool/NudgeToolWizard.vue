@@ -4,7 +4,7 @@
     rounded="xl"
     elevation="3"
     accent-corner="top-left"
-    corner-size="lg"
+    corner-size="xl"
     corner-variant="custom"
     :style="{ height: formattedHeight }"
   >
@@ -14,20 +14,44 @@
         :class="{ 'nudge-wizard__corner-content--clickable': shouldShowMatches }"
         @click="handleCornerClick"
       >
-        <span v-if="activeStepKey === 'category'" class="text-h6 font-weight-bold">
+        <div v-if="activeStepKey === 'category'" class="text-h5 font-weight-bold text-white">
           {{ $t('nudge-tool.wizard.welcome') }}
-        </span>
-        <div v-else-if="categorySummary" class="d-flex flex-column align-center">
-             <v-avatar size="32" class="mb-1">
-                <v-img :src="categorySummary.image" :alt="categorySummary.alt" cover />
-             </v-avatar>
-             <div class="text-caption font-weight-bold lh-1">{{ categorySummary.label }}</div>
-             <div class="text-caption text-medium-emphasis">{{ animatedMatches }}</div>
+        </div>
+        <div v-else-if="categorySummary" class="d-flex flex-column align-center justify-center fill-height pt-4 pb-2">
+             <div class="nudge-wizard__corner-icon mb-1">
+                <v-icon :icon="categorySummary.icon" size="32" color="white" />
+             </div>
+             <div class="text-caption font-weight-bold lh-1 text-white mb-1">{{ categorySummary.label }}</div>
+             <div class="text-caption text-white font-weight-black" style="font-size: 1.1em;">{{ animatedMatches }}</div>
         </div>
       </div>
     </template>
     <div ref="headerRef" class="nudge-wizard__header">
-      <!-- Header removed in favor of corner content -->
+      <h2 class="text-h5 font-weight-bold text-center mb-1">{{ currentStepTitle }}</h2>
+      <p v-if="currentStepSubtitle" class="text-subtitle-2 text-medium-emphasis text-center mb-4">{{ currentStepSubtitle }}</p>
+      
+      <div class="nudge-wizard__actions d-flex align-center justify-space-between w-100 px-4 mb-4">
+        <v-btn
+            v-if="hasPreviousStep"
+            variant="text"
+            prepend-icon="mdi-chevron-left"
+            @click="goToPrevious"
+        >
+            {{ $t('nudge-tool.actions.previous') }}
+        </v-btn>
+        <div v-else></div>
+
+        <v-btn
+            v-if="hasNextStep"
+            color="primary"
+            variant="flat"
+            :disabled="isNextDisabled"
+            append-icon="mdi-chevron-right"
+            @click="goToNext"
+        >
+            {{ $t('nudge-tool.actions.next') }}
+        </v-btn>
+      </div>
     </div>
 
     <div v-if="loading" class="nudge-wizard__progress">
@@ -54,30 +78,7 @@
         </v-window-item>
       </v-window>
     </div>
-
-    <div ref="footerRef" class="nudge-wizard__footer">
-      <v-btn
-        v-if="hasPreviousStep"
-        variant="text"
-        prepend-icon="mdi-chevron-left"
-        @click="goToPrevious"
-      >
-        {{ $t('nudge-tool.actions.previous') }}
-      </v-btn>
-
-      <v-spacer />
-
-      <v-btn
-        v-if="hasNextStep"
-        color="primary"
-        variant="flat"
-        :disabled="isNextDisabled"
-        append-icon="mdi-chevron-right"
-        @click="goToNext"
-      >
-        {{ $t('nudge-tool.actions.next') }}
-      </v-btn>
-    </div>
+    <!-- Footer removed -->
   </RoundedCornerCard>
 </template>
 
@@ -221,6 +222,7 @@ type WizardStep = {
   component: Component
   props: Record<string, unknown>
   title: string
+  subtitle?: string
   onUpdate?: (value: unknown) => void
 }
 
@@ -231,6 +233,7 @@ const steps = computed<WizardStep[]>(() => {
     key: 'category',
     component: NudgeToolStepCategory,
     title: t('nudge-tool.steps.category.title'),
+    subtitle: t('nudge-tool.steps.category.subtitle'),
     props: {
       categories: categories.value,
       selectedCategoryId: selectedCategoryId.value,
@@ -242,6 +245,7 @@ const steps = computed<WizardStep[]>(() => {
       key: 'scores',
       component: NudgeToolStepScores,
       title: t('nudge-tool.steps.scores.title'),
+      subtitle: t('nudge-tool.steps.scores.subtitle'),
       props: {
         modelValue: selectedScores.value,
         scores: nudgeConfig.value?.scores ?? [],
@@ -254,6 +258,7 @@ const steps = computed<WizardStep[]>(() => {
     key: 'condition',
     component: NudgeToolStepCondition,
     title: t('nudge-tool.steps.condition.title'),
+    subtitle: t('nudge-tool.steps.condition.subtitle'),
     props: { modelValue: condition.value },
     onUpdate: (value: ProductConditionSelection) => {
       condition.value = value
@@ -272,6 +277,7 @@ const steps = computed<WizardStep[]>(() => {
       key: `group-${group.id}`,
       component: NudgeToolStepSubsetGroup,
       title: group.title ?? '',
+      subtitle: t('nudge-tool.steps.subset.subtitle'),
       props: {
         group,
         subsets,
@@ -288,6 +294,7 @@ const steps = computed<WizardStep[]>(() => {
     key: 'recommendations',
     component: NudgeToolStepRecommendations,
     title: t('nudge-tool.steps.recommendations.title'),
+    subtitle: t('nudge-tool.steps.recommendations.subtitle'),
     props: {
       products: recommendations.value,
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
@@ -298,6 +305,13 @@ const steps = computed<WizardStep[]>(() => {
 
   return sequence
 })
+
+const currentStep = computed(() => 
+    steps.value.find(step => step.key === activeStepKey.value)
+)
+
+const currentStepTitle = computed(() => currentStep.value?.title ?? '')
+const currentStepSubtitle = computed(() => currentStep.value?.subtitle ?? '')
 
 watch(
   steps,
@@ -513,6 +527,7 @@ const categorySummary = computed(() => {
       selectedCategory.value.id ??
       '',
     image: selectedCategory.value.imageSmall,
+    icon: (selectedCategory.value as any).icon ?? 'mdi-tag', // Fallback or explicit cast if typing is missing
     alt:
       selectedCategory.value.verticalHomeTitle ??
       selectedCategory.value.id ??

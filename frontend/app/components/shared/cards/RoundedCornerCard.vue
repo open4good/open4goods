@@ -3,7 +3,7 @@ import { computed, ref, useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 
-export type CornerSize = 'sm' | 'md' | 'lg'
+export type CornerSize = 'sm' | 'md' | 'lg' | 'xl'
 export type CornerVariant = 'icon' | 'text' | 'custom' | 'none'
 export type AccentCorner =
   | 'top-left'
@@ -11,18 +11,20 @@ export type AccentCorner =
   | 'bottom-left'
   | 'bottom-right'
 export type SurfaceTone = 'glass' | 'strong' | 'hero'
-export type RoundedSize = 'sm' | 'md' | 'lg'
+export type RoundedSize = 'sm' | 'md' | 'lg' | 'xl'
 
 const cornerSizeTokens: Record<CornerSize, string> = {
   sm: '46px',
   md: '58px',
   lg: '72px',
+  xl: '120px',
 }
 
 const roundedSizeTokens: Record<RoundedSize, string> = {
   sm: '14px',
   md: '18px',
   lg: '24px',
+  xl: '32px',
 }
 
 const props = withDefaults(

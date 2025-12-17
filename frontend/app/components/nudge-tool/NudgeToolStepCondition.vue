@@ -30,16 +30,16 @@
           :aria-pressed="isSelected(option.value).toString()"
           @click="() => toggleOption(option.value)"
         >
-          <div class="nudge-step-condition__icon-wrapper">
-            <v-icon :icon="option.icon" size="26" />
-            <v-icon
-              v-if="isSelected(option.value)"
-              icon="mdi-check-circle"
-              size="18"
-              class="nudge-step-condition__check"
-            />
+          <div class="nudge-step-condition__content">
+              <div class="nudge-step-condition__icon-wrapper">
+                <v-icon :icon="option.icon" size="26" />
+              </div>
+              <p class="nudge-step-condition__label">{{ option.label }}</p>
           </div>
-          <p class="nudge-step-condition__label">{{ option.label }}</p>
+          
+          <div class="nudge-step-condition__indicator">
+             <v-icon v-if="isSelected(option.value)" icon="mdi-check" size="20" color="white" />
+          </div>
         </v-card>
       </v-col>
     </v-row>
@@ -110,10 +110,41 @@ const toggleOption = (choice: ProductConditionChoice) => {
     width: 100%;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    gap: 12px;
+    align-items: stretch; /* Stretch to fill height */
     justify-content: space-between;
-    padding: 14px 16px;
+    padding: 0; /* Remove padding from card, handle in content */
+    overflow: hidden;
+    background: rgb(var(--v-theme-surface-primary-050)) !important; /* Lighter background */
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+    transition: all 0.2s ease;
+    
+    &.nudge-option-card--selected {
+        background: rgb(var(--v-theme-surface-primary-100)) !important;
+        border-color: rgb(var(--v-theme-primary));
+        
+        .nudge-step-condition__indicator {
+            background: rgb(var(--v-theme-primary));
+            border-left: 1px solid rgb(var(--v-theme-primary));
+        }
+    }
+  }
+
+  &__content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+  }
+
+  &__indicator {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--v-theme-primary), 0.1);
+      border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+      transition: background 0.2s ease;
   }
 
   &__label {
@@ -129,16 +160,13 @@ const toggleOption = (choice: ProductConditionChoice) => {
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: rgba(var(--v-theme-primary), 0.08);
+    background: rgba(var(--v-theme-surface-default), 0.6);
     color: rgb(var(--v-theme-primary));
-    position: relative;
   }
-
+  
+  /* Remove old check style */
   &__check {
-    position: absolute;
-    right: -6px;
-    top: -6px;
-    color: rgb(var(--v-theme-primary));
+    display: none;
   }
 }
 </style>
