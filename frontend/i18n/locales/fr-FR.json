@@ -55,11 +55,21 @@
         "helpers": [
           {
             "icon": "🌿",
-            "label": "Une évaluation écologique et environnementale unique"
+            "label": "Une évaluation écologique et environnementale unique",
+            "segments": [
+              { "text": "Une évaluation écologique", "to": "/impact-score" },
+              { "text": " et environnementale unique" }
+            ]
           },
           {
             "icon": "🛡️",
-            "label": "100% indépendant, logiciel libre et données ouvertes"
+            "label": "100% indépendant, logiciel libre et données ouvertes",
+            "segments": [
+              { "text": "100% indépendant, " },
+              { "text": "logiciel libre", "to": "/opensource" },
+              { "text": " et " },
+              { "text": "données ouvertes", "to": "/opendata" }
+            ]
           },
           {
             "icon": "🏷️",

@@ -15,7 +15,14 @@ const messages: Record<string, string> = {
 }
 
 const helperItems = [
-  { icon: '🌿', label: 'Une évaluation écologique et environnementale unique' },
+  {
+    icon: '🌿',
+    label: 'Une évaluation écologique et environnementale unique',
+    segments: [
+      { text: 'Une évaluation écologique', to: '/impact-score' },
+      { text: ' et environnementale unique' },
+    ],
+  },
 ]
 
 vi.mock('vue-i18n', () => ({
@@ -51,6 +58,23 @@ const VImgStub = defineComponent({
   },
 })
 
+const NuxtLinkStub = defineComponent({
+  name: 'NuxtLinkStub',
+  setup(_, { slots, attrs }) {
+    return () =>
+      h(
+        'a',
+        {
+          class: attrs.class,
+          href:
+            (attrs as { to?: string; href?: string }).to ??
+            (attrs as { href?: string }).href,
+        },
+        slots.default ? slots.default() : []
+      )
+  },
+})
+
 const mountComponent = async () =>
   mountSuspended(HomeHeroSection, {
     props: {
@@ -69,6 +93,7 @@ const mountComponent = async () =>
         VImg: VImgStub,
         VBtn: createStub('button'),
         RoundedCornerCard: createStub('div', 'rounded-corner-card-stub'),
+        NuxtLink: NuxtLinkStub,
       },
     },
   })
@@ -101,6 +126,18 @@ describe('HomeHeroSection', () => {
     const icon = wrapper.find('.home-hero__icon')
 
     expect(icon.classes()).toContain('home-hero__icon--pulse')
+
+    await wrapper.unmount()
+  })
+
+  it('renders helper text with linked segments', async () => {
+    const wrapper = await mountComponent()
+    const helperText = wrapper.find('.home-hero__helper-text')
+    const helperLink = helperText.find('.home-hero__helper-link')
+
+    expect(helperText.text()).toContain(helperItems[0].label)
+    expect(helperLink.exists()).toBe(true)
+    expect(helperLink.attributes('href')).toBe('/impact-score')
 
     await wrapper.unmount()
   })
