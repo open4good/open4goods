@@ -1,18 +1,6 @@
 <template>
   <div class="nudge-step-subset">
-    <div class="nudge-step-subset__header">
-      <h2 class="nudge-step-subset__title">
-        <v-icon
-          :icon="`mdi-numeric-${stepNumber}-circle`"
-          color="accent-primary-highlight"
-          size="30"
-        />
-        {{ group.title }}
-      </h2>
-      <p v-if="group.description" class="nudge-step-subset__description">
-        {{ group.description }}
-      </p>
-    </div>
+    <!-- Header removed, moved to Wizard -->
 
     <v-row dense>
       <v-col v-for="subset in subsets" :key="subset.id" cols="12" sm="6">
@@ -33,21 +21,21 @@
               :aria-pressed="isSelected(subset.id).toString()"
               @click="toggle(subset.id ?? '')"
             >
-              <div class="nudge-step-subset__body">
-                <div class="nudge-step-subset__text">
-                  <p class="nudge-step-subset__name">{{ subset.title }}</p>
-                  <p v-if="subset.caption" class="nudge-step-subset__caption">
-                    {{ subset.caption }}
-                  </p>
+              <div class="d-flex align-stretch flex-grow-1">
+                <div class="nudge-step-subset__content">
+                  <div class="nudge-step-subset__text">
+                    <p class="nudge-step-subset__name">{{ subset.title }}</p>
+                    <p v-if="subset.caption" class="nudge-step-subset__caption">
+                      {{ subset.caption }}
+                    </p>
+                  </div>
+                  <div class="nudge-step-subset__icon-wrapper">
+                    <v-icon :icon="getSubsetIcon(subset)" size="24" />
+                  </div>
                 </div>
-                <div class="nudge-step-subset__icon-wrapper">
-                  <v-icon :icon="getSubsetIcon(subset)" size="24" />
-                  <v-icon
-                    v-if="isSelected(subset.id)"
-                    icon="mdi-check-circle"
-                    size="18"
-                    class="nudge-step-subset__check"
-                  />
+
+                <div class="nudge-step-subset__indicator">
+                  <v-icon v-if="isSelected(subset.id)" icon="mdi-check" size="20" color="white" />
                 </div>
               </div>
             </v-card>
@@ -124,14 +112,41 @@ const toggle = (subsetId: string) => {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    background: rgb(var(--v-theme-surface-primary-050)) !important;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+    transition: all 0.2s ease;
+  }
+  
+  .nudge-option-card--selected {
+    background: rgb(var(--v-theme-surface-primary-100)) !important;
+    border-color: rgb(var(--v-theme-primary));
+    
+    .nudge-step-subset__indicator {
+        background: rgb(var(--v-theme-primary));
+        border-left: 1px solid rgb(var(--v-theme-primary));
+    }
   }
 
-  &__body {
+  &__content {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    padding: 14px 16px;
+  }
+
+  &__indicator {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--v-theme-primary), 0.1);
+      border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+      transition: background 0.2s ease;
   }
 
   &__text {
@@ -158,15 +173,7 @@ const toggle = (subsetId: string) => {
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: rgba(var(--v-theme-primary), 0.08);
-    color: rgb(var(--v-theme-primary));
-    position: relative;
-  }
-
-  &__check {
-    position: absolute;
-    right: -6px;
-    top: -6px;
+    background: rgba(var(--v-theme-surface-default), 0.6);
     color: rgb(var(--v-theme-primary));
   }
 }

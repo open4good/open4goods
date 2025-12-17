@@ -1,17 +1,6 @@
 <template>
   <div class="nudge-step-scores">
-    <div class="nudge-step-scores__header">
-      <div>
-        <h2 class="nudge-step-scores__title">
-          <v-icon
-            icon="mdi-numeric-2-circle"
-            color="accent-primary-highlight"
-            size="30"
-          />
-          {{ $t('nudge-tool.steps.scores.title') }}
-        </h2>
-      </div>
-    </div>
+    <!-- Header removed, moved to Wizard -->
 
     <v-row class="nudge-step-scores__grid">
       <v-col v-for="score in scores" :key="score.scoreName" cols="12" sm="6">
@@ -35,21 +24,21 @@
               :aria-pressed="isSelected(score.scoreName).toString()"
               @click="toggle(score.scoreName ?? '')"
             >
-              <div class="nudge-step-scores__top-row">
-                <div class="nudge-step-scores__titles">
-                  <p class="nudge-step-scores__name">{{ score.title }}</p>
-                  <p v-if="score.caption" class="nudge-step-scores__caption">
-                    {{ score.caption }}
-                  </p>
+              <div class="d-flex align-stretch flex-grow-1">
+                <div class="nudge-step-scores__content">
+                  <div class="nudge-step-scores__titles">
+                    <p class="nudge-step-scores__name">{{ score.title }}</p>
+                    <p v-if="score.caption" class="nudge-step-scores__caption">
+                      {{ score.caption }}
+                    </p>
+                  </div>
+                  <div class="nudge-step-scores__icon-wrapper">
+                    <v-icon :icon="getScoreIcon(score)" size="28" />
+                  </div>
                 </div>
-                <div class="nudge-step-scores__icon-wrapper">
-                  <v-icon :icon="getScoreIcon(score)" size="28" />
-                  <v-icon
-                    v-if="isSelected(score.scoreName)"
-                    icon="mdi-check-circle"
-                    size="18"
-                    class="nudge-step-scores__check"
-                  />
+                
+                <div class="nudge-step-scores__indicator">
+                  <v-icon v-if="isSelected(score.scoreName)" icon="mdi-check" size="20" color="white" />
                 </div>
               </div>
             </v-card>
@@ -117,28 +106,50 @@ const toggle = (scoreName: string) => {
   &__card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
     height: 100%;
-    border-radius: 22px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
     position: relative;
+    background: rgb(var(--v-theme-surface-primary-050)) !important;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+    transition: all 0.2s ease;
   }
 
   &__card--selected {
-    background: rgba(var(--v-theme-primary), 0.08) !important;
+    background: rgb(var(--v-theme-surface-primary-100)) !important;
+    border-color: rgb(var(--v-theme-primary));
+    
+    .nudge-step-scores__indicator {
+        background: rgb(var(--v-theme-primary));
+        border-left: 1px solid rgb(var(--v-theme-primary));
+    }
   }
-
-  &__top-row {
+  
+  &__content {
+    flex: 1;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 12px;
+    padding: 14px 16px;
+  }
+
+  &__indicator {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--v-theme-primary), 0.1);
+      border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+      transition: background 0.2s ease;
   }
 
   &__titles {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
   }
 
   &__name {
@@ -160,15 +171,8 @@ const toggle = (scoreName: string) => {
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: rgba(var(--v-theme-primary), 0.08);
+    background: rgba(var(--v-theme-surface-default), 0.6);
     position: relative;
-    color: rgb(var(--v-theme-primary));
-  }
-
-  &__check {
-    position: absolute;
-    right: -6px;
-    top: -6px;
     color: rgb(var(--v-theme-primary));
   }
 }

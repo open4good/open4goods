@@ -1,23 +1,88 @@
-# ROLE
- * You are a creative UI/UX expert in nuxt, vue, vuetify.
- * You know and apply best practices in vue / nuxt interfaces design
- * The feature request is described in the bellow USER DEMAND section, through frnech vocal speech to text
-
- # Instructions
- * You must ask for any clarifications in design or coding directions if needed.
- * You can propose UI / UX enhancements to match a best user perception
- * You must think mobile first and responsiv
- * All static texts must be i18n localised
- * You will heavily respect coding guidelines defined in the AGENTS.md
- * After coding tasks, you will check conformity with pnpm build, pnpm lint and pnpm test on reasonable related tests file
-
-# SCOPE
- * You will craft only in the /frontend project
- * However, you are allowed to read files in external modules if required for a better intervention.
-
-
-
-
-
-# USER DEMAND
-
+{
+  "task": "Generate a pure vector SVG parallax background for a website section",
+  "output": {
+    "format": "svg",
+    "svg_markup_only": true,
+    "canvas": { "width": 1600, "height": 800, "viewBox": "0 0 1600 800", "preserveAspectRatio": "xMidYMid slice" }
+  },
+  "theme": {
+    "mode": "light",
+    "palette_name": "nudger",
+    "colors": {
+      "bg_start": "#00DE9F",
+      "bg_mid": "#00A1C2",
+      "bg_end": "#0088D6",
+      "accent_1": "#FF8479",
+      "accent_2": "#5BDB3B",
+      "neutral_text": "#004A63",
+      "surface": "#F4F4F4"
+    }
+  },
+  "composition": {
+    "background": {
+      "type": "soft gradient",
+      "gradient": { "kind": "linear", "from": "bg_start", "via": "bg_mid", "to": "bg_end", "angle_deg": 25 },
+      "ambient_overlays": [
+        { "kind": "radial", "color": "bg_mid", "opacity": 0.18, "cx": 0.15, "cy": 0.55, "r": 0.65 },
+        { "kind": "radial", "color": "bg_end", "opacity": 0.14, "cx": 0.85, "cy": 0.35, "r": 0.75 }
+      ],
+      "micro_texture": { "kind": "vector_microdots", "opacity": 0.10, "dot_radius_px": 1.2, "spacing_px": 22 }
+    },
+    "safe_area": {
+      "keep_clear": true,
+      "rect": { "x": 260, "y": 120, "width": 1080, "height": 560 },
+      "note": "Keep the center mostly empty so UI cards/text stay readable"
+    },
+    "layers": [
+      {
+        "id": "parallax-back",
+        "depth": 0.10,
+        "elements": [
+          { "type": "soft_blob", "fill": "bg_mid", "opacity": 0.18, "x": 180, "y": 420, "size": 520 },
+          { "type": "curved_stream_line", "stroke": "surface", "opacity": 0.12, "stroke_width": 10, "path_hint": "gentle upward current on left edge" }
+        ]
+      },
+      {
+        "id": "parallax-mid",
+        "depth": 0.18,
+        "elements": [
+          { "type": "bubbles_cluster", "fill": "surface", "opacity_range": [0.10, 0.22], "count": 10, "zone": "left_lane", "sizes": [26, 110] },
+          { "type": "ring_outlines", "stroke": "accent_1", "opacity": 0.12, "count": 4, "zone": "top_right_edge" }
+        ]
+      },
+      {
+        "id": "parallax-front",
+        "depth": 0.28,
+        "elements": [
+          { "type": "small_sparkles", "fill": "surface", "opacity": 0.18, "count": 16, "zone": "edges_only" },
+          { "type": "accent_dots", "fill": "accent_2", "opacity": 0.10, "count": 10, "zone": "bottom_right_edge" }
+        ]
+      }
+    ]
+  },
+  "svg_rules": {
+    "vector_only": true,
+    "no_images": true,
+    "no_text": true,
+    "no_embedded_bitmaps": true,
+    "prefer_shapes": ["circle", "ellipse", "path"],
+    "max_elements": 140,
+    "min_stroke_width": 0.75,
+    "use_gradients": true,
+    "filters": { "allowed": ["subtle_blur"], "max_blur_px": 18, "note": "Avoid heavy rasterized effects" }
+  },
+  "negative_prompt": [
+    "pixelated background",
+    "raster image",
+    "bitmap texture",
+    "<image> tag",
+    "base64 embedded image",
+    "photography",
+    "3D render",
+    "complex illustration",
+    "busy center area",
+    "hard edges everywhere",
+    "high contrast noise",
+    "text, logos, letters"
+  ]
+}
