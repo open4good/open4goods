@@ -8,7 +8,7 @@ import { extractGtinParam, isValidGtinParam } from '~~/shared/utils/_gtin'
 import { resolveGtinRedirectTarget } from '~/utils/_gtin-redirect'
 
 definePageMeta({
-  validate: (route) => isValidGtinParam(route.params.gtin),
+  validate: route => isValidGtinParam(route.params.gtin),
 })
 
 const route = useRoute()

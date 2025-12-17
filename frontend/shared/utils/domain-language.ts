@@ -110,20 +110,25 @@ export const getNuxtLocaleForDomainLanguage = (
   domainLanguage: DomainLanguage
 ): NuxtLocale => DOMAIN_LANGUAGE_TO_LOCALE_MAP[domainLanguage]
 
-export const buildI18nLocaleDomains = (): Record<NuxtLocale, NuxtI18nLocaleDomains> => {
+export const buildI18nLocaleDomains = (): Record<
+  NuxtLocale,
+  NuxtI18nLocaleDomains
+> => {
   const localeHostMap = new Map<NuxtLocale, string[]>()
 
-  Object.entries(HOST_DOMAIN_LANGUAGE_MAP).forEach(([hostname, domainLanguage]) => {
-    const locale = getNuxtLocaleForDomainLanguage(domainLanguage)
-    const hostsForLocale = localeHostMap.get(locale)
+  Object.entries(HOST_DOMAIN_LANGUAGE_MAP).forEach(
+    ([hostname, domainLanguage]) => {
+      const locale = getNuxtLocaleForDomainLanguage(domainLanguage)
+      const hostsForLocale = localeHostMap.get(locale)
 
-    if (hostsForLocale) {
-      hostsForLocale.push(hostname)
-      return
+      if (hostsForLocale) {
+        hostsForLocale.push(hostname)
+        return
+      }
+
+      localeHostMap.set(locale, [hostname])
     }
-
-    localeHostMap.set(locale, [hostname])
-  })
+  )
 
   return Object.fromEntries(
     Array.from(localeHostMap.entries()).map(([locale, hostnames]) => {
@@ -136,7 +141,7 @@ export const buildI18nLocaleDomains = (): Record<NuxtLocale, NuxtI18nLocaleDomai
           ...(alternateDomains.length > 0 ? { domains: alternateDomains } : {}),
         } satisfies NuxtI18nLocaleDomains,
       ]
-    }),
+    })
   ) as Record<NuxtLocale, NuxtI18nLocaleDomains>
 }
 

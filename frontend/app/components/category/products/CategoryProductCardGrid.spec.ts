@@ -45,7 +45,7 @@ const VBtnStub: Component = {
             emit('click', event)
           },
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 }
@@ -53,7 +53,8 @@ const VBtnStub: Component = {
 const VTooltipStub: Component = {
   inheritAttrs: false,
   setup(_props, { slots, attrs }) {
-    return () => h('div', attrs, [slots.activator?.({ props: {} }), slots.default?.()])
+    return () =>
+      h('div', attrs, [slots.activator?.({ props: {} }), slots.default?.()])
   },
 }
 
@@ -71,7 +72,9 @@ const CompareToggleStub: Component = {
   },
   setup(props) {
     const store = useProductCompareStore()
-    const isSelected = computed(() => store.hasProduct(props.product as ProductDto))
+    const isSelected = computed(() =>
+      store.hasProduct(props.product as ProductDto)
+    )
     const isDisabled = computed(() => {
       if (isSelected.value) {
         return false
@@ -185,7 +188,8 @@ describe('CategoryProductCardGrid', () => {
                 addToList: 'Add to compare',
                 removeFromList: 'Remove from compare',
                 limitReached: 'Maximum reached {count}',
-                differentCategory: 'Only compare products from the same category.',
+                differentCategory:
+                  'Only compare products from the same category.',
                 missingIdentifier: 'Cannot compare this product.',
               },
             },
@@ -216,7 +220,10 @@ describe('CategoryProductCardGrid', () => {
   })
 
   it('disables the compare button for incompatible categories', async () => {
-    const first = buildProduct({ gtin: 2001, base: { vertical: 'electronics' } as ProductDto['base'] })
+    const first = buildProduct({
+      gtin: 2001,
+      base: { vertical: 'electronics' } as ProductDto['base'],
+    })
     const other = buildProduct({
       gtin: 2002,
       base: { vertical: 'kitchen' } as ProductDto['base'],
@@ -248,9 +255,15 @@ describe('CategoryProductCardGrid', () => {
     const wrapper = await mountGrid([product])
 
     const pricing = wrapper.get('.category-product-card-grid__pricing')
-    expect(pricing.classes()).toContain('category-product-card-grid__pricing--split')
+    expect(pricing.classes()).toContain(
+      'category-product-card-grid__pricing--split'
+    )
 
-    expect(wrapper.findAll('.category-product-card-grid__price-badge')).toHaveLength(2)
-    expect(wrapper.findAll('.category-product-card-grid__price-badge-condition')).toHaveLength(0)
+    expect(
+      wrapper.findAll('.category-product-card-grid__price-badge')
+    ).toHaveLength(2)
+    expect(
+      wrapper.findAll('.category-product-card-grid__price-badge-condition')
+    ).toHaveLength(0)
   })
 })

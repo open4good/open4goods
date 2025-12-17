@@ -1,5 +1,9 @@
 <template>
-  <v-tooltip v-if="badgeLabel && tooltipLabel" :text="tooltipLabel" location="top">
+  <v-tooltip
+    v-if="badgeLabel && tooltipLabel"
+    :text="tooltipLabel"
+    location="top"
+  >
     <template #activator="{ props: tooltipProps }">
       <v-chip
         class="impact-coefficient-badge"
@@ -79,7 +83,9 @@ const badgeLabel = computed<string | null>(() => {
     return null
   }
 
-  const key = props.labelKey?.trim().length ? props.labelKey : 'product.impact.weightChip'
+  const key = props.labelKey?.trim().length
+    ? props.labelKey
+    : 'product.impact.weightChip'
   const params = {
     value: percentLabel.value,
     percent: percentLabel.value,
@@ -94,7 +100,9 @@ const tooltipLabel = computed<string | null>(() => {
     return null
   }
 
-  const key = props.tooltipKey?.trim().length ? props.tooltipKey : 'product.impact.weightTooltip'
+  const key = props.tooltipKey?.trim().length
+    ? props.tooltipKey
+    : 'product.impact.weightTooltip'
   const params = {
     value: percentLabel.value,
     percent: percentLabel.value,

@@ -15,10 +15,18 @@
             class="contrib-page__spinner"
           />
           <h1 class="contrib-page__title">
-            {{ isPending ? t('contrib.loading.title') : t('contrib.success.title') }}
+            {{
+              isPending
+                ? t('contrib.loading.title')
+                : t('contrib.success.title')
+            }}
           </h1>
           <p class="contrib-page__message">
-            {{ isPending ? t('contrib.loading.message') : t('contrib.success.message') }}
+            {{
+              isPending
+                ? t('contrib.loading.message')
+                : t('contrib.success.message')
+            }}
           </p>
           <v-btn
             v-if="showSuccess && redirectUrl"
@@ -103,22 +111,23 @@ const fetchRedirect = async () => {
   }
 
   const encodedToken = encodeURIComponent(token.value)
-  return $fetch<AffiliationRedirectResponse>(`/api/contrib/${encodedToken}`,
-    {
-      headers: requestHeaders,
-    },
-  )
+  return $fetch<AffiliationRedirectResponse>(`/api/contrib/${encodedToken}`, {
+    headers: requestHeaders,
+  })
 }
 
-const { data, pending, error } = await useAsyncData<AffiliationRedirectResponse>(
-  `contrib-redirect-${token.value}`,
-  fetchRedirect,
-)
+const { data, pending, error } =
+  await useAsyncData<AffiliationRedirectResponse>(
+    `contrib-redirect-${token.value}`,
+    fetchRedirect
+  )
 
 const redirectUrl = computed(() => data.value?.location ?? null)
 const isPending = computed(() => pending.value)
 const hasError = computed(() => Boolean(error.value))
-const showSuccess = computed(() => !isPending.value && !hasError.value && Boolean(redirectUrl.value))
+const showSuccess = computed(
+  () => !isPending.value && !hasError.value && Boolean(redirectUrl.value)
+)
 
 const getErrorMessage = (err: unknown): string | null => {
   if (!err) {
@@ -130,7 +139,9 @@ const getErrorMessage = (err: unknown): string | null => {
     return statusMessage
   }
 
-  const maybeData = (err as { data?: { statusMessage?: string; message?: string } }).data
+  const maybeData = (
+    err as { data?: { statusMessage?: string; message?: string } }
+  ).data
   if (maybeData?.statusMessage) {
     return maybeData.statusMessage
   }
@@ -157,7 +168,7 @@ const hasTriggeredRedirect = ref(false)
 if (import.meta.client) {
   watch(
     () => redirectUrl.value,
-    async (value) => {
+    async value => {
       if (!value || hasTriggeredRedirect.value) {
         return
       }
@@ -179,21 +190,27 @@ if (import.meta.client) {
 
   watch(
     () => error.value,
-    (currentError) => {
+    currentError => {
       if (!currentError || hasLoggedError.value) {
         return
       }
 
       hasLoggedError.value = true
       const message = getErrorMessage(currentError)
-      console.warn('Affiliation redirect returned a non-redirect response', message, currentError)
+      console.warn(
+        'Affiliation redirect returned a non-redirect response',
+        message,
+        currentError
+      )
     },
     { immediate: true }
   )
 }
 
 const canonicalUrl = computed(() => requestURL.href)
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 const homeLink = computed(() => localePath({ name: 'index' }) ?? '/')
 
 useSeoMeta({
@@ -207,9 +224,7 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 </script>
 

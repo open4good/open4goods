@@ -118,12 +118,17 @@ const { t } = useI18n()
 const primaryScore = computed(() => props.scores[0] ?? null)
 const secondaryScores = computed(() => props.scores.slice(1))
 const detailScores = computed(() =>
-  props.scores.filter((score) => score.id?.toUpperCase() !== 'ECOSCORE'),
+  props.scores.filter(score => score.id?.toUpperCase() !== 'ECOSCORE')
 )
 const radarAxes = computed<RadarAxisEntry[]>(() => radarData.value.axes ?? [])
-const availableSeries = computed<RadarSeriesEntry[]>(() => radarData.value.series ?? [])
+const availableSeries = computed<RadarSeriesEntry[]>(
+  () => radarData.value.series ?? []
+)
 
-const radarSeriesStyles: Record<RadarSeriesKey, { line: string; area: string; symbol: string }> = {
+const radarSeriesStyles: Record<
+  RadarSeriesKey,
+  { line: string; area: string; symbol: string }
+> = {
   current: {
     line: 'rgba(25, 118, 210, 0.85)',
     area: 'rgba(25, 118, 210, 0.25)',
@@ -153,14 +158,16 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
   }
 
   return availableSeries.value
-    .map((entry) => {
+    .map(entry => {
       const style = radarSeriesStyles[entry.key]
       const values = radarAxes.value.map((_, index) => {
         const value = entry.values[index]
-        return typeof value === 'number' && Number.isFinite(value) ? value : null
+        return typeof value === 'number' && Number.isFinite(value)
+          ? value
+          : null
       })
 
-      const hasRenderableValue = values.some((value) => value !== null)
+      const hasRenderableValue = values.some(value => value !== null)
       if (!hasRenderableValue) {
         return null
       }
@@ -178,10 +185,14 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
         symbolColor: style.symbol,
       }
     })
-    .filter((seriesEntry): seriesEntry is ChartSeriesEntry => seriesEntry !== null)
+    .filter(
+      (seriesEntry): seriesEntry is ChartSeriesEntry => seriesEntry !== null
+    )
 })
 
-const showRadar = computed(() => radarAxes.value.length >= 3 && chartSeries.value.length > 0)
+const showRadar = computed(
+  () => radarAxes.value.length >= 3 && chartSeries.value.length > 0
+)
 </script>
 
 <style scoped>
@@ -211,5 +222,4 @@ const showRadar = computed(() => radarAxes.value.length >= 3 && chartSeries.valu
   display: flex;
   flex-direction: column;
 }
-
 </style>

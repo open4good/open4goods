@@ -2,7 +2,14 @@ import { useNuxtApp, useRuntimeConfig } from '#imports'
 import { isDoNotTrackEnabled } from '~/utils/do-not-track'
 
 type PlausibleTracker = {
-  trackEvent: (eventName: string, options?: { props?: Record<string, unknown>; url?: string; referrer?: string }) => void
+  trackEvent: (
+    eventName: string,
+    options?: {
+      props?: Record<string, unknown>
+      url?: string
+      referrer?: string
+    }
+  ) => void
 }
 
 type SearchSource = 'form' | 'suggestion'
@@ -30,7 +37,9 @@ const isClientContribLink = (link?: string | null): link is string =>
   Boolean(link && link.startsWith('/contrib/'))
 
 const extractTokenFromLink = (link?: string | null) =>
-  isClientContribLink(link) ? link.split('/').filter(Boolean).pop() ?? null : null
+  isClientContribLink(link)
+    ? (link.split('/').filter(Boolean).pop() ?? null)
+    : null
 
 export const useAnalytics = () => {
   const nuxtApp = useNuxtApp()
@@ -45,10 +54,15 @@ export const useAnalytics = () => {
       return false
     }
 
-    return Boolean(runtimeConfig.public.plausible?.enabled && nuxtApp.$plausible)
+    return Boolean(
+      runtimeConfig.public.plausible?.enabled && nuxtApp.$plausible
+    )
   }
 
-  const trackEvent = (eventName: string, options?: { props?: Record<string, unknown>; url?: string }) => {
+  const trackEvent = (
+    eventName: string,
+    options?: { props?: Record<string, unknown>; url?: string }
+  ) => {
     if (!isEnabled()) {
       return
     }
@@ -57,7 +71,11 @@ export const useAnalytics = () => {
     plausible?.trackEvent(eventName, options)
   }
 
-  const trackOpenDataDownload = ({ datasetId, method, href }: OpenDataDownloadContext) => {
+  const trackOpenDataDownload = ({
+    datasetId,
+    method,
+    href,
+  }: OpenDataDownloadContext) => {
     trackEvent('open-data-download', {
       props: {
         dataset: datasetId,
@@ -67,7 +85,12 @@ export const useAnalytics = () => {
     })
   }
 
-  const trackProductRedirect = ({ token, placement, source, url }: ProductRedirectContext) => {
+  const trackProductRedirect = ({
+    token,
+    placement,
+    source,
+    url,
+  }: ProductRedirectContext) => {
     const resolvedToken = token ?? extractTokenFromLink(url)
 
     if (!resolvedToken) {

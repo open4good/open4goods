@@ -2,7 +2,11 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
-import { ProductTimelineEventSource, ProductTimelineEventType, type ProductTimelineDto } from '~~/shared/api-client'
+import {
+  ProductTimelineEventSource,
+  ProductTimelineEventType,
+  type ProductTimelineDto,
+} from '~~/shared/api-client'
 
 const i18n = createI18n({
   legacy: false,
@@ -66,7 +70,12 @@ const i18n = createI18n({
 const VCardStub = defineComponent({
   name: 'VCardStub',
   setup(_, { slots, attrs }) {
-    return () => h('div', { ...attrs, class: ['v-card-stub', attrs.class] }, slots.default?.())
+    return () =>
+      h(
+        'div',
+        { ...attrs, class: ['v-card-stub', attrs.class] },
+        slots.default?.()
+      )
   },
 })
 
@@ -74,7 +83,8 @@ const VIconStub = defineComponent({
   name: 'VIconStub',
   props: { icon: { type: String, default: '' } },
   setup(props) {
-    return () => h('i', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
+    return () =>
+      h('i', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
   },
 })
 
@@ -112,7 +122,10 @@ const buildTimeline = (): ProductTimelineDto => ({
 
 const mountComponent = async (
   timeline: ProductTimelineDto | null,
-  extraProps: Partial<{ layout: 'vertical' | 'horizontal'; alternate: boolean }> = {},
+  extraProps: Partial<{
+    layout: 'vertical' | 'horizontal'
+    alternate: boolean
+  }> = {}
 ) => {
   const module = await import('./ProductLifeTimeline.vue')
   const Component = module.default
@@ -134,24 +147,35 @@ describe('ProductLifeTimeline', () => {
   it('renders timeline events with full month labels and tooltips', async () => {
     const wrapper = await mountComponent(buildTimeline())
 
-    const monthLabels = wrapper.findAll('.product-life-timeline__event-month').map((node) => node.text())
-    const titles = wrapper.findAll('.product-life-timeline__event-title').map((node) => node.text())
+    const monthLabels = wrapper
+      .findAll('.product-life-timeline__event-month')
+      .map(node => node.text())
+    const titles = wrapper
+      .findAll('.product-life-timeline__event-title')
+      .map(node => node.text())
 
     expect(monthLabels).toEqual(['September', 'January', 'June'])
     expect(titles).toContain('Market start')
     expect(wrapper.text()).toContain('First new offer')
     expect(wrapper.text()).toContain('Market start')
-    expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(true)
+    expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(
+      true
+    )
   })
 
   it('renders empty state when no events', async () => {
     const wrapper = await mountComponent({ events: [] })
 
-    expect(wrapper.text()).toContain('Lifecycle information is not available yet.')
+    expect(wrapper.text()).toContain(
+      'Lifecycle information is not available yet.'
+    )
   })
 
   it('supports vertical layout option', async () => {
-    const wrapper = await mountComponent(buildTimeline(), { layout: 'vertical', alternate: true })
+    const wrapper = await mountComponent(buildTimeline(), {
+      layout: 'vertical',
+      alternate: true,
+    })
 
     expect(wrapper.find('.product-life-timeline--vertical').exists()).toBe(true)
   })

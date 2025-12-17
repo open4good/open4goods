@@ -1,12 +1,24 @@
 <template>
   <section v-if="hasContent" class="impact-subscore-explanation">
-    <div v-if="hasImportance" class="impact-subscore-explanation__card impact-subscore-explanation__card--importance">
-      <h5 class="impact-subscore-explanation__title">{{ t('product.impact.importanceTitle') }}</h5>
-      <p class="impact-subscore-explanation__paragraph">{{ importanceDescription }}</p>
+    <div
+      v-if="hasImportance"
+      class="impact-subscore-explanation__card impact-subscore-explanation__card--importance"
+    >
+      <h5 class="impact-subscore-explanation__title">
+        {{ t('product.impact.importanceTitle') }}
+      </h5>
+      <p class="impact-subscore-explanation__paragraph">
+        {{ importanceDescription }}
+      </p>
     </div>
 
-    <div v-if="readIndicatorParagraphs.length || score.description" class="impact-subscore-explanation__card">
-      <h5 class="impact-subscore-explanation__title">{{ readIndicatorTitle }}</h5>
+    <div
+      v-if="readIndicatorParagraphs.length || score.description"
+      class="impact-subscore-explanation__card"
+    >
+      <h5 class="impact-subscore-explanation__title">
+        {{ readIndicatorTitle }}
+      </h5>
       <p
         v-for="(paragraph, index) in readIndicatorParagraphs"
         :key="`paragraph-${index}`"
@@ -14,18 +26,34 @@
       >
         {{ paragraph }}
       </p>
-      <p v-if="score.description" class="impact-subscore-explanation__description">{{ score.description }}</p>
+      <p
+        v-if="score.description"
+        class="impact-subscore-explanation__description"
+      >
+        {{ score.description }}
+      </p>
     </div>
 
     <dl v-if="infoItems.length" class="impact-subscore-explanation__list">
-      <div v-for="item in infoItems" :key="item.label" class="impact-subscore-explanation__row">
+      <div
+        v-for="item in infoItems"
+        :key="item.label"
+        class="impact-subscore-explanation__row"
+      >
         <dt class="impact-subscore-explanation__term">{{ item.label }}</dt>
         <dd class="impact-subscore-explanation__value">{{ item.value }}</dd>
       </div>
     </dl>
 
-    <dl v-if="metadataItems.length" class="impact-subscore-explanation__list impact-subscore-explanation__list--metadata">
-      <div v-for="item in metadataItems" :key="item.label" class="impact-subscore-explanation__row">
+    <dl
+      v-if="metadataItems.length"
+      class="impact-subscore-explanation__list impact-subscore-explanation__list--metadata"
+    >
+      <div
+        v-for="item in metadataItems"
+        :key="item.label"
+        class="impact-subscore-explanation__row"
+      >
         <dt class="impact-subscore-explanation__term">{{ item.label }}</dt>
         <dd class="impact-subscore-explanation__value">{{ item.value }}</dd>
       </div>
@@ -63,12 +91,17 @@ const normalizedScoreKey = computed(() => {
   return normalized.length ? normalized : 'default'
 })
 
-const translationBaseKey = computed(() => `product.impact.subscores.${normalizedScoreKey.value}`)
+const translationBaseKey = computed(
+  () => `product.impact.subscores.${normalizedScoreKey.value}`
+)
 const translationFallbackBase = 'product.impact.subscores.default'
 
 const betterIsLower = computed(() => props.score.betterIs === 'LOWER')
 
-const resolveTranslation = (suffix: string, params: Record<string, unknown>) => {
+const resolveTranslation = (
+  suffix: string,
+  params: Record<string, unknown>
+) => {
   const candidate = `${translationBaseKey.value}.${suffix}`
   if (te(candidate)) {
     return t(candidate, params)
@@ -77,9 +110,14 @@ const resolveTranslation = (suffix: string, params: Record<string, unknown>) => 
   return t(`${translationFallbackBase}.${suffix}`, params)
 }
 
-const readIndicatorOrientationKey = computed(() => (betterIsLower.value ? 'lower' : 'higher'))
+const readIndicatorOrientationKey = computed(() =>
+  betterIsLower.value ? 'lower' : 'higher'
+)
 
-const resolveReadIndicatorTranslation = (suffix: string, params: Record<string, unknown>) => {
+const resolveReadIndicatorTranslation = (
+  suffix: string,
+  params: Record<string, unknown>
+) => {
   const orientedKey = `${translationBaseKey.value}.readIndicator.${readIndicatorOrientationKey.value}.${suffix}`
   if (te(orientedKey)) {
     return t(orientedKey, params)
@@ -113,7 +151,7 @@ const normalizedVerticalTitle = computed(() => {
 const productDisplayName = computed(() => {
   const brand = props.productBrand?.trim()
   const model = props.productModel?.trim()
-  const segments = [brand, model].filter((segment) => segment?.length)
+  const segments = [brand, model].filter(segment => segment?.length)
   if (segments.length) {
     return segments.join(' ')
   }
@@ -124,8 +162,10 @@ const productDisplayName = computed(() => {
 const absoluteStats = computed(() => props.score.absolute ?? null)
 
 const importanceDescription = computed(() => {
-  const scoreDescription = props.score.importanceDescription?.toString().trim() ?? ''
-  const explicitDescription = props.importanceDescription?.toString().trim() ?? ''
+  const scoreDescription =
+    props.score.importanceDescription?.toString().trim() ?? ''
+  const explicitDescription =
+    props.importanceDescription?.toString().trim() ?? ''
 
   return explicitDescription || scoreDescription
 })
@@ -149,18 +189,25 @@ const scoreLabelLower = computed(() => {
   }
 })
 
-const formatNumber = (value: number | null | undefined, options?: Intl.NumberFormatOptions) => {
+const formatNumber = (
+  value: number | null | undefined,
+  options?: Intl.NumberFormatOptions
+) => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return null
   }
 
-  return n(value, { maximumFractionDigits: 2, minimumFractionDigits: 0, ...options })
+  return n(value, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    ...options,
+  })
 }
 
 const computeOn20 = (
   value: number | null | undefined,
   worst: number | null | undefined,
-  best: number | null | undefined,
+  best: number | null | undefined
 ) => {
   if (
     typeof value !== 'number' ||
@@ -186,10 +233,16 @@ const computeOn20 = (
 const infoItems = computed(() => {
   const items: Array<{ label: string; value: string }> = []
 
-  if (props.score.ranking != null && Number.isFinite(Number(props.score.ranking))) {
+  if (
+    props.score.ranking != null &&
+    Number.isFinite(Number(props.score.ranking))
+  ) {
     items.push({
       label: t('product.impact.tableHeaders.ranking'),
-      value: n(Number(props.score.ranking), { maximumFractionDigits: 0, minimumFractionDigits: 0 }),
+      value: n(Number(props.score.ranking), {
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0,
+      }),
     })
   }
 
@@ -199,7 +252,9 @@ const infoItems = computed(() => {
 const metadataItems = computed(() => {
   const entries = Object.entries(props.score.metadatas ?? {})
     .map(([key, value]) => ({ key, value }))
-    .filter((entry) => entry.value != null && String(entry.value).trim().length > 0)
+    .filter(
+      entry => entry.value != null && String(entry.value).trim().length > 0
+    )
 
   return entries.map(({ key, value }) => ({
     label: formatMetadataLabel(key),
@@ -228,28 +283,45 @@ const populationValue = computed(() => {
   }
 })
 
-const worstRawValue = computed(() => (betterIsLower.value ? absoluteStats.value?.max : absoluteStats.value?.min))
-const bestRawValue = computed(() => (betterIsLower.value ? absoluteStats.value?.min : absoluteStats.value?.max))
+const worstRawValue = computed(() =>
+  betterIsLower.value ? absoluteStats.value?.max : absoluteStats.value?.min
+)
+const bestRawValue = computed(() =>
+  betterIsLower.value ? absoluteStats.value?.min : absoluteStats.value?.max
+)
 
 const worstValue = computed(() => formatNumber(worstRawValue.value))
 
 const bestValue = computed(() => formatNumber(bestRawValue.value))
 const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
 const averageOn20Value = computed(() => {
-  const computedValue = computeOn20(absoluteStats.value?.avg ?? null, worstRawValue.value, bestRawValue.value)
+  const computedValue = computeOn20(
+    absoluteStats.value?.avg ?? null,
+    worstRawValue.value,
+    bestRawValue.value
+  )
   return formatNumber(computedValue, { maximumFractionDigits: 1 })
 })
 
 const productAbsoluteValue = computed(() => {
-  if (typeof absoluteStats.value?.value === 'number' && Number.isFinite(absoluteStats.value?.value)) {
+  if (
+    typeof absoluteStats.value?.value === 'number' &&
+    Number.isFinite(absoluteStats.value?.value)
+  ) {
     return formatNumber(absoluteStats.value?.value)
   }
 
-  if (typeof props.score.value === 'number' && Number.isFinite(props.score.value)) {
+  if (
+    typeof props.score.value === 'number' &&
+    Number.isFinite(props.score.value)
+  ) {
     return formatNumber(props.score.value)
   }
 
-  if (typeof props.score.absoluteValue === 'number' && Number.isFinite(props.score.absoluteValue)) {
+  if (
+    typeof props.score.absoluteValue === 'number' &&
+    Number.isFinite(props.score.absoluteValue)
+  ) {
     return formatNumber(props.score.absoluteValue)
   }
 
@@ -279,7 +351,9 @@ const readIndicatorParams = computed(() => ({
   ranking: rankingValue.value,
 }))
 
-const readIndicatorTitle = computed(() => resolveTranslation('readIndicator.title', readIndicatorParams.value))
+const readIndicatorTitle = computed(() =>
+  resolveTranslation('readIndicator.title', readIndicatorParams.value)
+)
 
 const readIndicatorParagraphs = computed(() => {
   const paragraphs: string[] = []
@@ -301,7 +375,7 @@ const readIndicatorParagraphs = computed(() => {
     paragraphs.push(resolveReadIndicatorTranslation('product', params))
   }
 
-  return paragraphs.filter((paragraph) => paragraph?.toString().trim().length)
+  return paragraphs.filter(paragraph => paragraph?.toString().trim().length)
 })
 
 const hasContent = computed(
@@ -310,7 +384,7 @@ const hasContent = computed(
     Boolean(props.score.description) ||
     infoItems.value.length > 0 ||
     metadataItems.value.length > 0 ||
-    hasImportance.value,
+    hasImportance.value
 )
 
 function formatMetadataLabel(rawKey: string): string {
@@ -323,7 +397,7 @@ function formatMetadataLabel(rawKey: string): string {
   return humanized
     .split(' ')
     .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
 }
 </script>

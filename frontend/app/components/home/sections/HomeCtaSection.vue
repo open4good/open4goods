@@ -20,7 +20,7 @@ const props = withDefaults(
   }>(),
   {
     minSuggestionQueryLength: 2,
-  },
+  }
 )
 
 const emit = defineEmits<Emits>()
@@ -54,9 +54,17 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
       <v-row justify="center">
         <v-col cols="12" lg="6">
           <div class="home-cta__content card__nudger">
-            <p id="home-cta-title" class="home-hero__subtitle">{{ t('home.cta.title') }}</p>
-            <p class="home-section__subtitle text-center">{{ t('home.cta.subtitle') }}</p>
-            <form class="home-hero__search" role="search" @submit.prevent="handleSubmit">
+            <p id="home-cta-title" class="home-hero__subtitle">
+              {{ t('home.cta.title') }}
+            </p>
+            <p class="home-section__subtitle text-center">
+              {{ t('home.cta.subtitle') }}
+            </p>
+            <form
+              class="home-hero__search"
+              role="search"
+              @submit.prevent="handleSubmit"
+            >
               <SearchSuggestField
                 :model-value="searchQueryValue"
                 class="home-hero__search-input"
@@ -103,33 +111,33 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
 </template>
 
 <style scoped lang="sass">
-  .home-section
-    padding-block: clamp(1.5rem, 3vw, 2.75rem)
-    background: rgb(var(--v-theme-surface-default))
+.home-section
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
 
-  .home-section__container
-    padding-inline: 0
+.home-section__container
+  padding-inline: 0
 
-  .home-cta__content
-    display: flex
-    flex-direction: column
-    gap: clamp(0.875rem, 2vw, 1.25rem);
-    padding: clamp(2rem, 5vw, 3rem)
-    border-radius: clamp(1.75rem, 4vw, 2.5rem)
-    background: rgba(var(--v-theme-surface-default), 0.96)
-    box-shadow: 0 24px 36px rgba(var(--v-theme-shadow-primary-600), 0.15)
+.home-cta__content
+  display: flex
+  flex-direction: column
+  gap: clamp(0.875rem, 2vw, 1.25rem);
+  padding: clamp(2rem, 5vw, 3rem)
+  border-radius: clamp(1.75rem, 4vw, 2.5rem)
+  background: rgba(var(--v-theme-surface-default), 0.96)
+  box-shadow: 0 24px 36px rgba(var(--v-theme-shadow-primary-600), 0.15)
 
-  .home-hero__search
-    display: flex
-    flex-direction: column
-    gap: 0.75rem
-    width: 100%
+.home-hero__search
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+  width: 100%
 
-  .home-hero__search-input
-    border-radius: clamp(1.25rem, 3vw, 1.75rem)
-    background: rgba(var(--v-theme-surface-default), 0.92)
-    box-shadow: 0 14px 22px rgba(var(--v-theme-shadow-primary-600), 0.12)
+.home-hero__search-input
+  border-radius: clamp(1.25rem, 3vw, 1.75rem)
+  background: rgba(var(--v-theme-surface-default), 0.92)
+  box-shadow: 0 14px 22px rgba(var(--v-theme-shadow-primary-600), 0.12)
 
-  .home-hero__search-submit
-    box-shadow: none
+.home-hero__search-submit
+  box-shadow: none
 </style>

@@ -3,10 +3,17 @@
     <section v-if="showAdmin" :id="panelId" class="product-admin">
       <header class="product-admin__header">
         <h2 class="product-admin__title">{{ $t('product.admin.title') }}</h2>
-        <p class="product-admin__subtitle">{{ $t('product.admin.subtitle') }}</p>
+        <p class="product-admin__subtitle">
+          {{ $t('product.admin.subtitle') }}
+        </p>
       </header>
 
-      <article :id="jsonSectionId" class="product-admin__block" role="region" :aria-label="$t('product.admin.sections.productJson.title')">
+      <article
+        :id="jsonSectionId"
+        class="product-admin__block"
+        role="region"
+        :aria-label="$t('product.admin.sections.productJson.title')"
+      >
         <header class="product-admin__block-header">
           <h3 class="product-admin__block-title">
             {{ $t('product.admin.sections.productJson.title') }}

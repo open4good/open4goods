@@ -2,7 +2,13 @@
 import { computed, mergeProps, useAttrs } from 'vue'
 import type { Component } from 'vue'
 
-type HeroSurfaceVariant = 'aurora' | 'halo' | 'prism' | 'pulse' | 'mesh' | 'orbit'
+type HeroSurfaceVariant =
+  | 'aurora'
+  | 'halo'
+  | 'prism'
+  | 'pulse'
+  | 'mesh'
+  | 'orbit'
 
 defineOptions({ name: 'HeroSurface' })
 
@@ -17,6 +23,7 @@ const props = withDefaults(
     variant: 'aurora',
     bleed: false,
   },
+
 )
 
 const attrs = useAttrs()
@@ -30,7 +37,7 @@ const heroSurfaceClasses = computed(() => ({
 const rootProps = computed(() =>
   mergeProps(attrs, {
     class: heroSurfaceClasses.value,
-  }),
+  })
 )
 </script>
 

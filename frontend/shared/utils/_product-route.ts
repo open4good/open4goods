@@ -24,7 +24,7 @@ const normaliseCategorySlug = (value: string | undefined): string | null => {
 }
 
 const matchProductSegment = (
-  productSegment: string | undefined,
+  productSegment: string | undefined
 ): { gtin: string; slug: string } | null => {
   const match = productSegment?.trim().match(PRODUCT_SEGMENT_PATTERN)
 
@@ -43,7 +43,7 @@ const matchProductSegment = (
 
 const matchSplitProductSegments = (
   gtinSegment: string | undefined,
-  slugSegment: string | undefined,
+  slugSegment: string | undefined
 ): { gtin: string; slug: string } | null => {
   const gtin = gtinSegment?.trim() ?? ''
   const slug = slugSegment?.trim() ?? ''
@@ -59,7 +59,7 @@ const matchSplitProductSegments = (
 }
 
 export const matchProductRouteFromSegments = (
-  segments: readonly string[],
+  segments: readonly string[]
 ): ProductRouteMatch | null => {
   if (segments.length === 0 || segments.length > 3) {
     return null

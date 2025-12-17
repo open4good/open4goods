@@ -11,7 +11,14 @@ vi.mock('vue-echarts', () => ({
     props: { option: { type: Object, default: () => ({}) } },
     setup(props, { slots }) {
       return () =>
-        h('div', { class: 'echart-stub', 'data-option': JSON.stringify(props.option ?? {}) }, slots.default?.())
+        h(
+          'div',
+          {
+            class: 'echart-stub',
+            'data-option': JSON.stringify(props.option ?? {}),
+          },
+          slots.default?.()
+        )
     },
   }),
 }))
@@ -46,7 +53,8 @@ const i18nMessages = {
           highest: 'Prix le plus haut',
           viewOffer: "Ouvrir l'offre chez {source}",
         },
-        noHistory: "L'historique des prix n'est pas encore disponible pour ce produit.",
+        noHistory:
+          "L'historique des prix n'est pas encore disponible pour ce produit.",
         headers: {
           source: 'Source',
           offer: 'Offre',
@@ -211,8 +219,15 @@ describe('ProductPriceSection', () => {
     vi.useRealTimers()
   })
 
-  const mountComponent = async (overrides?: Partial<NonNullable<ProductDto['offers']>>) => {
-    const i18n = createI18n({ legacy: false, locale: 'fr-FR', fallbackLocale: 'en-US', messages: i18nMessages })
+  const mountComponent = async (
+    overrides?: Partial<NonNullable<ProductDto['offers']>>
+  ) => {
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'fr-FR',
+      fallbackLocale: 'en-US',
+      messages: i18nMessages,
+    })
 
     const offers = JSON.parse(JSON.stringify(baseOffers)) as typeof baseOffers
     Object.assign(offers, overrides)
@@ -235,7 +250,12 @@ describe('ProductPriceSection', () => {
             name: 'NuxtLinkStub',
             props: { to: { type: String, required: true } },
             setup(props, { slots }) {
-              return () => h('a', { href: props.to, class: 'nuxt-link-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'a',
+                  { href: props.to, class: 'nuxt-link-stub' },
+                  slots.default?.()
+                )
             },
           }),
           'v-table': TableStub,
@@ -272,7 +292,8 @@ describe('ProductPriceSection', () => {
 
     const chart = wrapper.find('.echart-stub')
     const option = JSON.parse(chart.attributes('data-option') ?? '{}')
-    const markAreaLabel = option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
+    const markAreaLabel =
+      option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
     expect(markAreaLabel).toBe('Summer sales')
     expect(option?.series?.[0]?.type).toBe('line')
     expect(option?.series?.[0]?.showSymbol).toBe(false)
@@ -296,9 +317,13 @@ describe('ProductPriceSection', () => {
   it('links to the affiliation redirect when best offers have a token', async () => {
     const wrapper = await mountComponent()
 
-    const footerHighlights = wrapper.findAll('.product-price__metrics .product-price__metrics-highlight')
+    const footerHighlights = wrapper.findAll(
+      '.product-price__metrics .product-price__metrics-highlight'
+    )
     expect(footerHighlights).toHaveLength(2)
-    const links = wrapper.findAll('.product-price__metrics .product-price__metrics-offer--link')
+    const links = wrapper.findAll(
+      '.product-price__metrics .product-price__metrics-offer--link'
+    )
     expect(links).toHaveLength(2)
     expect(links[0]?.attributes('href')).toBe('/contrib/abc123')
     expect(links[1]?.attributes('href')).toBe('/contrib/def456')
@@ -311,8 +336,8 @@ describe('ProductPriceSection', () => {
 
     const icons = wrapper.findAll('.product-price__metrics-highlight img')
     expect(icons).toHaveLength(2)
-    expect(icons.every((icon) => icon.attributes('width') === '48')).toBe(true)
-    expect(icons.every((icon) => icon.attributes('height') === '48')).toBe(true)
+    expect(icons.every(icon => icon.attributes('width') === '48')).toBe(true)
+    expect(icons.every(icon => icon.attributes('height') === '48')).toBe(true)
 
     await wrapper.unmount()
   })
@@ -321,19 +346,30 @@ describe('ProductPriceSection', () => {
     const wrapper = await mountComponent({ bestNewOffer: undefined })
 
     expect(wrapper.findAll('.product-price__metrics-highlight')).toHaveLength(1)
-    expect(wrapper.find('.product-price__metrics-highlight').text()).toContain('Merchant U')
+    expect(wrapper.find('.product-price__metrics-highlight').text()).toContain(
+      'Merchant U'
+    )
 
     await wrapper.unmount()
   })
 
   it('hides charts when history has fewer than three points', async () => {
     const wrapper = await mountComponent({
-      newHistory: { entries: [{ timestamp: Date.UTC(2024, 4, 1), price: 899 }] },
-      occasionHistory: { entries: [{ timestamp: Date.UTC(2024, 5, 1), price: 649 }, { timestamp: Date.UTC(2024, 4, 15), price: 699 }] },
+      newHistory: {
+        entries: [{ timestamp: Date.UTC(2024, 4, 1), price: 899 }],
+      },
+      occasionHistory: {
+        entries: [
+          { timestamp: Date.UTC(2024, 5, 1), price: 649 },
+          { timestamp: Date.UTC(2024, 4, 15), price: 699 },
+        ],
+      },
     })
 
     expect(wrapper.findAll('.echart-stub')).toHaveLength(0)
-    expect(wrapper.find('.product-price__charts-empty-message').exists()).toBe(true)
+    expect(wrapper.find('.product-price__charts-empty-message').exists()).toBe(
+      true
+    )
 
     await wrapper.unmount()
   })

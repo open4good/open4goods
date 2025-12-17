@@ -20,7 +20,10 @@ const resolveClassList = (value: unknown): string => {
   }
 
   if (Array.isArray(value)) {
-    return value.map((entry) => resolveClassList(entry)).filter(Boolean).join(' ')
+    return value
+      .map(entry => resolveClassList(entry))
+      .filter(Boolean)
+      .join(' ')
   }
 
   if (typeof value === 'object') {
@@ -44,7 +47,12 @@ const VIconStub = defineComponent({
 const VExpansionPanelsStub = defineComponent({
   name: 'VExpansionPanels',
   setup(_, { slots, attrs }) {
-    return () => h('div', { class: 'v-expansion-panels-stub', ...attrs }, slots.default?.())
+    return () =>
+      h(
+        'div',
+        { class: 'v-expansion-panels-stub', ...attrs },
+        slots.default?.()
+      )
   },
 })
 
@@ -52,7 +60,11 @@ const VExpansionPanelStub = defineComponent({
   name: 'VExpansionPanel',
   props: { value: { type: String, default: '' } },
   setup(_, { slots }) {
-    return () => h('div', { class: 'v-expansion-panel-stub' }, [slots.title?.(), slots.text?.()])
+    return () =>
+      h('div', { class: 'v-expansion-panel-stub' }, [
+        slots.title?.(),
+        slots.text?.(),
+      ])
   },
 })
 
@@ -66,11 +78,14 @@ const VBtnStub = defineComponent({
         'button',
         {
           ...attrs,
-          class: ['v-btn-stub', resolveClassList((attrs as Record<string, unknown>).class)].join(' '),
+          class: [
+            'v-btn-stub',
+            resolveClassList((attrs as Record<string, unknown>).class),
+          ].join(' '),
           type: props.type,
           onClick: (event: MouseEvent) => emit('click', event),
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })

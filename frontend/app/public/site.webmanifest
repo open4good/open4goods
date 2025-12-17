@@ -5,7 +5,6 @@
   "description": "Compare ecological impact scores, price history and trusted sellers for millions of appliances with Nudger.",
   "lang": "en",
   "dir": "ltr",
-
   "translations": [
     {
       "lang": "en",
@@ -22,105 +21,25 @@
       "description": "Comparez les scores d’impact écologique, l’historique des prix et les vendeurs de confiance pour des millions d’appareils avec Nudger."
     }
   ],
-
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "window-controls-overlay"],
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "window-controls-overlay"
+  ],
   "orientation": "portrait",
   "background_color": "#F3FFFB",
   "theme_color": "#00DE9F",
-  "categories": ["shopping", "lifestyle", "productivity"],
+  "categories": [
+    "shopping",
+    "lifestyle",
+    "productivity"
+  ],
   "handle_links": "preferred",
   "prefer_related_applications": false,
-
   "icons": [
-    {
-      "src": "/pwa-assets/icons/nudger-standard-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-180x180.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/pwa-assets/icons/nudger-standard-1024x1024.png",
-      "sizes": "1024x1024",
-      "type": "image/png"
-    },
-
-    {
-      "src": "/pwa-assets/icons-maskable/nudger-maskable-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-assets/icons-maskable/nudger-maskable-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-assets/icons-maskable/nudger-maskable-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-assets/icons-maskable/nudger-maskable-1024x1024.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-
-    {
-      "src": "/pwa-assets/icons/android/android-launchericon-48-48.png",
-      "sizes": "48x48",
-      "type": "image/png"
-    },
     {
       "src": "/pwa-assets/icons/android/android-launchericon-72-72.png",
       "sizes": "72x72",
@@ -132,8 +51,23 @@
       "type": "image/png"
     },
     {
+      "src": "/pwa-assets/icons/ios/128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
       "src": "/pwa-assets/icons/android/android-launchericon-144-144.png",
       "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-assets/icons/ios/152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-assets/icons/ios/180.png",
+      "sizes": "180x180",
       "type": "image/png"
     },
     {
@@ -142,12 +76,21 @@
       "type": "image/png"
     },
     {
+      "src": "/pwa-assets/icons/ios/256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
       "src": "/pwa-assets/icons/android/android-launchericon-512-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/pwa-assets/icons/ios/1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
     }
   ],
-
   "screenshots": [
     {
       "src": "/pwa-assets/screenshots/desktop-dashboard.png",
@@ -164,7 +107,6 @@
       "label": "Nudger mobile search"
     }
   ],
-
   "shortcuts": [
     {
       "name": "Search responsible products",
@@ -173,7 +115,7 @@
       "url": "/search?utm_source=pwa-shortcut",
       "icons": [
         {
-          "src": "/pwa-assets/icons/nudger-standard-192x192.png",
+          "src": "/pwa-assets/icons/android/android-launchericon-192-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -186,14 +128,13 @@
       "url": "/impact-score?utm_source=pwa-shortcut",
       "icons": [
         {
-          "src": "/pwa-assets/icons/nudger-standard-192x192.png",
+          "src": "/pwa-assets/icons/android/android-launchericon-192-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
       ]
     }
   ],
-
   "edge_side_panel": {
     "preferred_width": 480
   }

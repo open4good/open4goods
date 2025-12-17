@@ -19,13 +19,16 @@ import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
 export const useProductService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: ProductApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useProductService() is only available on the server runtime.')
+      throw new Error(
+        'useProductService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -35,8 +38,11 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     return api
   }
 
-  const getProductByGtin = async (gtin: string | number): Promise<ProductDto> => {
-    const parsedGtin = typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
+  const getProductByGtin = async (
+    gtin: string | number
+  ): Promise<ProductDto> => {
+    const parsedGtin =
+      typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
 
     if (!Number.isFinite(parsedGtin)) {
       throw new TypeError('GTIN must be a number.')
@@ -54,10 +60,12 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const getFilterableFieldsForVertical = async (
-    verticalId: string,
+    verticalId: string
   ): Promise<ProductFieldOptionsResponse> => {
     if (!verticalId) {
-      throw new TypeError('verticalId is required to resolve filterable fields.')
+      throw new TypeError(
+        'verticalId is required to resolve filterable fields.'
+      )
     }
 
     const request: FilterableFieldsForVerticalRequest = {
@@ -68,13 +76,17 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     try {
       return await resolveApi().filterableFieldsForVertical(request)
     } catch (error) {
-      console.error('Error fetching filterable fields for vertical:', verticalId, error)
+      console.error(
+        'Error fetching filterable fields for vertical:',
+        verticalId,
+        error
+      )
       throw error
     }
   }
 
   const getSortableFieldsForVertical = async (
-    verticalId: string,
+    verticalId: string
   ): Promise<ProductFieldOptionsResponse> => {
     if (!verticalId) {
       throw new TypeError('verticalId is required to resolve sortable fields.')
@@ -88,7 +100,11 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     try {
       return await resolveApi().sortableFieldsForVertical(request)
     } catch (error) {
-      console.error('Error fetching sortable fields for vertical:', verticalId, error)
+      console.error(
+        'Error fetching sortable fields for vertical:',
+        verticalId,
+        error
+      )
       throw error
     }
   }
@@ -99,7 +115,7 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
       sort?: SortRequestDto
       filters?: FilterRequestDto
       body?: ProductSearchRequestDto
-    },
+    }
   ): Promise<ProductSearchResponseDto> => {
     const {
       aggs,
@@ -136,9 +152,10 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const getReviewStatus = async (
-    gtin: string | number,
+    gtin: string | number
   ): Promise<ReviewGenerationStatus> => {
-    const parsedGtin = typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
+    const parsedGtin =
+      typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
 
     if (!Number.isFinite(parsedGtin)) {
       throw new TypeError('GTIN must be a number.')
@@ -150,23 +167,30 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
         domainLanguage,
       })
     } catch (error) {
-      console.error('Error fetching review status for product', parsedGtin, error)
+      console.error(
+        'Error fetching review status for product',
+        parsedGtin,
+        error
+      )
       throw error
     }
   }
 
   const triggerReviewGeneration = async (
     gtin: string | number,
-    hcaptchaResponse: string,
+    hcaptchaResponse: string
   ): Promise<number> => {
-    const parsedGtin = typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
+    const parsedGtin =
+      typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
 
     if (!Number.isFinite(parsedGtin)) {
       throw new TypeError('GTIN must be a number.')
     }
 
     if (!hcaptchaResponse) {
-      throw new TypeError('hCaptcha response is required to trigger review generation.')
+      throw new TypeError(
+        'hCaptcha response is required to trigger review generation.'
+      )
     }
 
     const config = createBackendApiConfig()
@@ -185,7 +209,11 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
         },
       })
     } catch (error) {
-      console.error('Error triggering review generation for product', parsedGtin, error)
+      console.error(
+        'Error triggering review generation for product',
+        parsedGtin,
+        error
+      )
       throw error
     }
   }

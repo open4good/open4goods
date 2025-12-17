@@ -30,7 +30,10 @@
           md="6"
           lg="4"
         >
-          <article class="category-navigation-grid__card" :aria-label="ariaLabel(category.title)">
+          <article
+            class="category-navigation-grid__card"
+            :aria-label="ariaLabel(category.title)"
+          >
             <v-card
               class="h-100 d-flex flex-column"
               elevation="0"
@@ -39,7 +42,9 @@
               <v-img
                 v-if="category.vertical?.imageMedium"
                 :src="category.vertical.imageMedium"
-                :alt="category.vertical?.verticalHomeTitle ?? category.title ?? ''"
+                :alt="
+                  category.vertical?.verticalHomeTitle ?? category.title ?? ''
+                "
                 class="category-navigation-grid__image"
                 cover
               />
@@ -69,6 +74,13 @@
                   {{ category.title }}
                 </h3>
 
+                <p
+                  v-if="category.vertical?.verticalHomeDescription"
+                  class="text-body-2 mb-4 text-neutral-secondary"
+                >
+                  {{ category.vertical.verticalHomeDescription }}
+                </p>
+
                 <ul
                   v-if="childrenPreview(category).length"
                   class="category-navigation-grid__children"
@@ -87,9 +99,15 @@
                   v-if="category.path"
                   :to="`/categories/${category.path}`"
                   class="category-navigation-grid__link"
-                  :aria-label="t('categories.navigation.grid.openSubcategory', { category: category.title })"
+                  :aria-label="
+                    t('categories.navigation.grid.openSubcategory', {
+                      category: category.title,
+                    })
+                  "
                 >
-                  <span>{{ t('categories.navigation.grid.openSubcategoryCta') }}</span>
+                  <span>{{
+                    t('categories.navigation.grid.openSubcategoryCta')
+                  }}</span>
                   <v-icon icon="mdi-arrow-right" size="small" />
                 </NuxtLink>
 
@@ -97,9 +115,15 @@
                   v-if="category.vertical?.verticalHomeUrl"
                   :to="`/${category.vertical.verticalHomeUrl}`"
                   class="category-navigation-grid__link"
-                  :aria-label="t('categories.navigation.grid.viewVertical', { category: category.title })"
+                  :aria-label="
+                    t('categories.navigation.grid.viewVertical', {
+                      category: category.title,
+                    })
+                  "
                 >
-                  <span>{{ t('categories.navigation.grid.viewVerticalCta') }}</span>
+                  <span>{{
+                    t('categories.navigation.grid.viewVerticalCta')
+                  }}</span>
                   <v-icon icon="mdi-open-in-new" size="small" />
                 </NuxtLink>
               </div>
@@ -127,7 +151,9 @@ const ariaLabel = (title?: string) =>
   })
 
 const childrenPreview = (category: CategoryNavigationDtoChildCategoriesInner) =>
-  (category.children as CategoryNavigationDtoChildCategoriesInner[] | undefined)?.slice(0, 4) ?? []
+  (
+    category.children as CategoryNavigationDtoChildCategoriesInner[] | undefined
+  )?.slice(0, 4) ?? []
 
 defineExpose({
   ariaLabel,

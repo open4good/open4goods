@@ -90,7 +90,7 @@ No class in a lower layer may depend on a higher one.
 
 ---
 
-## 7  Build & test
+## 6  Build & test
 
 To compile **all modules**:
 
@@ -98,7 +98,7 @@ To compile **all modules**:
 mvn --offline clean install
 ```
 
-## 8  Pull-request checklist
+## 7  Pull-request checklist
 
 1. Clear commit & PR description (**why** and **what**).  
 2. `mvn --offline clean install` passes locally.  
@@ -107,15 +107,27 @@ mvn --offline clean install
 
 ---
 
-## 9  Rationale
+## 8  Rationale
 
 A predictable, enforced structure lowers cognitive load for humans and gives large-language models a deterministic environment in which to operate. This accelerates onboarding, reduces bugs, and keeps architecture sound as we migrate monolith parts to independent Spring Boot services (see the services/**) .
 
-## 10  Automated dependency updates
+## 9  Automated dependency updates
 
 Dependencies for Maven modules, Node projects (`frontend` and `ui`), and GitHub
 Actions workflows are maintained by Renovate. Updates run nightly (after 10pm
 and before 5am) with major Maven upgrades disabled.
+
+## 10  Module-Specific Guides
+
+For detailed module-specific conventions, see:
+
+- **Frontend**: [frontend/AGENTS.md](frontend/AGENTS.md) – Nuxt 4 / Vue 3 / Vuetify
+- **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) – SpringDoc / OpenAPI
+- **Services**: [services/AGENTS.md](services/AGENTS.md) – Microservices (19 services)
+- **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [crawler](crawler/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
+- **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) – Being replaced by frontend
+
+---
 
 > **Questions?**
 > Open a GitHub Discussion or justify any deviation in your PR description.

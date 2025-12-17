@@ -11,11 +11,12 @@
           height="144"
           loading="lazy"
         />
-        <span v-else class="impact-subscore-repairability__fallback">{{ absoluteValue ?? '—' }}</span>
+        <span v-else class="impact-subscore-repairability__fallback">{{
+          absoluteValue ?? '—'
+        }}</span>
       </div>
     </template>
   </ProductImpactSubscoreGenericCard>
-
 </template>
 
 <script setup lang="ts">
@@ -41,7 +42,9 @@ const numericAbsoluteValue = computed<number | null>(() => {
   const candidates = [
     score.absolute?.value,
     score.value,
-    typeof score.absoluteValue === 'number' ? score.absoluteValue : parseLocalizedNumber(score.absoluteValue),
+    typeof score.absoluteValue === 'number'
+      ? score.absoluteValue
+      : parseLocalizedNumber(score.absoluteValue),
   ]
 
   for (const candidate of candidates) {
@@ -58,7 +61,10 @@ const repairabilityImageKey = computed<string | null>(() => {
     return null
   }
 
-  const clamped = Math.min(Math.max(numericAbsoluteValue.value, MIN_ASSET_VALUE), MAX_ASSET_VALUE)
+  const clamped = Math.min(
+    Math.max(numericAbsoluteValue.value, MIN_ASSET_VALUE),
+    MAX_ASSET_VALUE
+  )
   const rounded = Math.round(clamped * 10) / 10
   return rounded.toFixed(1)
 })
@@ -71,7 +77,9 @@ const repairabilityImageSrc = computed<string | null>(() => {
   return `/images/reparability/${repairabilityImageKey.value}.svg`
 })
 
-function parseLocalizedNumber(value: string | number | null | undefined): number | null {
+function parseLocalizedNumber(
+  value: string | number | null | undefined
+): number | null {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null
   }

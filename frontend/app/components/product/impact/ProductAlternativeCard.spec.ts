@@ -106,7 +106,10 @@ describe('ProductAlternativeCard', () => {
             name: 'VTooltipStub',
             props: ['text'],
             setup(_, { slots }) {
-              return () => slots.activator?.({ props: {} }) ?? slots.default?.() ?? h('div')
+              return () =>
+                slots.activator?.({ props: {} }) ??
+                slots.default?.() ??
+                h('div')
             },
           }),
           'v-icon': defineComponent({
@@ -116,21 +119,39 @@ describe('ProductAlternativeCard', () => {
           }),
           'v-btn': defineComponent({
             name: 'VBtnStub',
-            props: ['variant', 'color', 'ariaPressed', 'ariaLabel', 'title', 'disabled'],
+            props: [
+              'variant',
+              'color',
+              'ariaPressed',
+              'ariaLabel',
+              'title',
+              'disabled',
+            ],
             setup(_, { slots }) {
-              return () => h('button', { class: 'v-btn-stub', type: 'button' }, slots.default?.())
+              return () =>
+                h(
+                  'button',
+                  { class: 'v-btn-stub', type: 'button' },
+                  slots.default?.()
+                )
             },
           }),
         },
       },
     })
 
-    expect(wrapper.find('.product-alternative-card__title').text()).toBe('EcoCorp • X')
-    expect(wrapper.find('.product-alternative-card__attributes').exists()).toBe(false)
+    expect(wrapper.find('.product-alternative-card__title').text()).toBe(
+      'EcoCorp • X'
+    )
+    expect(wrapper.find('.product-alternative-card__attributes').exists()).toBe(
+      false
+    )
 
     const priceText = wrapper.find('.product-alternative-card__price').text()
     expect(priceText).toMatch(/299/)
 
-    expect(wrapper.find('.product-alternative-card__compare-btn').exists()).toBe(true)
+    expect(
+      wrapper.find('.product-alternative-card__compare-btn').exists()
+    ).toBe(true)
   })
 })

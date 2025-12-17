@@ -6,7 +6,10 @@
     itemtype="https://schema.org/AggregateOffer"
     v-bind="$attrs"
   >
-    <meta itemprop="offerCount" :content="String(product.offers?.offersCount ?? 0)" />
+    <meta
+      itemprop="offerCount"
+      :content="String(product.offers?.offersCount ?? 0)"
+    />
     <meta itemprop="priceCurrency" :content="priceCurrencyCode" />
     <div
       v-if="conditionOptions.length"
@@ -35,7 +38,11 @@
         :class="priceTrendToneClass"
         @click="scrollToSelector('#price-history')"
       >
-        <v-icon :icon="priceTrendIcon" size="18" class="product-hero__price-trend-icon" />
+        <v-icon
+          :icon="priceTrendIcon"
+          size="18"
+          class="product-hero__price-trend-icon"
+        />
         <span>{{ priceTrendLabel }}</span>
       </button>
 
@@ -60,7 +67,9 @@
                 :to="bestPriceMerchant.url"
                 class="product-hero__price-merchant-link"
                 :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
-                :rel="bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'"
+                :rel="
+                  bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'
+                "
                 :prefetch="false"
                 @click="handleMerchantClick"
               >
@@ -94,7 +103,9 @@
             :to="bestPriceMerchant.url"
             class="product-hero__price-merchant-link"
             :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
-            :rel="bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'"
+            :rel="
+              bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'
+            "
             :prefetch="false"
             @click="handleMerchantClick"
           >
@@ -121,10 +132,13 @@
           <span>{{ bestPriceMerchant.name }}</span>
         </div>
       </div>
-
     </div>
     <div class="product-hero__price-actions">
-      <v-btn color="primary" variant="flat" @click="scrollToSelector('#offers-list', 136)">
+      <v-btn
+        color="primary"
+        variant="flat"
+        @click="scrollToSelector('#offers-list', 136)"
+      >
         {{ viewOffersLabel }}
       </v-btn>
     </div>
@@ -149,13 +163,20 @@ const props = defineProps({
 })
 
 const { n, t } = useI18n()
-const { trackProductRedirect, isClientContribLink, extractTokenFromLink } = useAnalytics()
+const { trackProductRedirect, isClientContribLink, extractTokenFromLink } =
+  useAnalytics()
 
-type AggregatedOffer = NonNullable<NonNullable<ProductDto['offers']>['bestPrice']>
+type AggregatedOffer = NonNullable<
+  NonNullable<ProductDto['offers']>['bestPrice']
+>
 
-const aggregatedBestOffer = computed<AggregatedOffer | null>(() => props.product.offers?.bestPrice ?? null)
+const aggregatedBestOffer = computed<AggregatedOffer | null>(
+  () => props.product.offers?.bestPrice ?? null
+)
 
-const bestOffersByCondition = computed<Record<OfferCondition, AggregatedOffer | null>>(() => {
+const bestOffersByCondition = computed<
+  Record<OfferCondition, AggregatedOffer | null>
+>(() => {
   const offers = props.product.offers
   const aggregated = aggregatedBestOffer.value
 
@@ -182,14 +203,16 @@ const bestOffersByCondition = computed<Record<OfferCondition, AggregatedOffer | 
 const conditionPriority: OfferCondition[] = ['occasion', 'new']
 
 const availableConditions = computed<OfferCondition[]>(() =>
-  conditionPriority.filter((condition) => Boolean(bestOffersByCondition.value[condition])),
+  conditionPriority.filter(condition =>
+    Boolean(bestOffersByCondition.value[condition])
+  )
 )
 
 const selectedCondition = ref<OfferCondition>(conditionPriority[0])
 
 watch(
   availableConditions,
-  (conditions) => {
+  conditions => {
     if (!conditions.length) {
       return
     }
@@ -198,7 +221,7 @@ watch(
       selectedCondition.value = conditions[0]
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const activeCondition = computed<OfferCondition>(() => {
@@ -217,40 +240,49 @@ const selectCondition = (condition: OfferCondition) => {
   selectedCondition.value = condition
 }
 
-const activeOffer = computed<AggregatedOffer | null>(() => bestOffersByCondition.value[activeCondition.value])
+const activeOffer = computed<AggregatedOffer | null>(
+  () => bestOffersByCondition.value[activeCondition.value]
+)
 
 const conditionOptions = computed(() =>
-  availableConditions.value.map((condition) => ({
+  availableConditions.value.map(condition => ({
     value: condition,
     label: t(`product.hero.offerConditions.${condition}`),
     selected: condition === activeCondition.value,
-  })),
+  }))
 )
 
 const hasConditionToggle = computed(() => conditionOptions.value.length > 1)
 
-const conditionToggleAriaLabel = computed(() => t('product.hero.offerConditionsToggleAria'))
-
-const priceCurrencyCode = computed(
-  () => activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR',
+const conditionToggleAriaLabel = computed(() =>
+  t('product.hero.offerConditionsToggleAria')
 )
 
-const bestPriceValue = computed(() => (typeof activeOffer.value?.price === 'number' ? activeOffer.value.price : null))
+const priceCurrencyCode = computed(
+  () =>
+    activeOffer.value?.currency ?? aggregatedBestOffer.value?.currency ?? 'EUR'
+)
+
+const bestPriceValue = computed(() =>
+  typeof activeOffer.value?.price === 'number' ? activeOffer.value.price : null
+)
 
 const animatedPrice = ref<number | null>(null)
 
 const priceRangesByCondition = computed<
   Record<
     OfferCondition,
-    | {
-        min: number
-        max: number
-        currency: string
-      }
-    | null
+    {
+      min: number
+      max: number
+      currency: string
+    } | null
   >
 >(() => {
-  const ranges: Record<OfferCondition, { min: number; max: number; currency: string } | null> = {
+  const ranges: Record<
+    OfferCondition,
+    { min: number; max: number; currency: string } | null
+  > = {
     occasion: null,
     new: null,
   }
@@ -264,17 +296,20 @@ const priceRangesByCondition = computed<
     }
 
     const numericPrices = (offers ?? [])
-      .map((offer) => ({
+      .map(offer => ({
         value: typeof offer?.price === 'number' ? offer.price : null,
         currency: offer?.currency ?? priceCurrencyCode.value,
       }))
-      .filter((entry): entry is { value: number; currency: string } => typeof entry.value === 'number')
+      .filter(
+        (entry): entry is { value: number; currency: string } =>
+          typeof entry.value === 'number'
+      )
 
     if (!numericPrices.length) {
       continue
     }
 
-    const values = numericPrices.map((entry) => entry.value)
+    const values = numericPrices.map(entry => entry.value)
     ranges[normalizedCondition as OfferCondition] = {
       min: Math.min(...values),
       max: Math.max(...values),
@@ -282,7 +317,7 @@ const priceRangesByCondition = computed<
     }
   }
 
-  ;['occasion', 'new'].forEach((condition) => {
+  ;['occasion', 'new'].forEach(condition => {
     const typedCondition = condition as OfferCondition
     if (ranges[typedCondition]) {
       return
@@ -293,7 +328,9 @@ const priceRangesByCondition = computed<
       ranges[typedCondition] = {
         min: fallbackPrice,
         max: fallbackPrice,
-        currency: bestOffersByCondition.value[typedCondition]?.currency ?? priceCurrencyCode.value,
+        currency:
+          bestOffersByCondition.value[typedCondition]?.currency ??
+          priceCurrencyCode.value,
       }
     }
   })
@@ -301,7 +338,9 @@ const priceRangesByCondition = computed<
   return ranges
 })
 
-const displayedPriceValue = computed(() => animatedPrice.value ?? bestPriceValue.value)
+const displayedPriceValue = computed(
+  () => animatedPrice.value ?? bestPriceValue.value
+)
 
 const bestPriceLabel = computed(() => {
   const price = displayedPriceValue.value
@@ -341,7 +380,7 @@ const offersCountLabel = computed(() => n(offersCount.value))
 const viewOffersLabel = computed(() =>
   offersCount.value <= 1
     ? t('product.hero.viewSingleOffer')
-    : t('product.hero.viewOffersCount', { count: offersCountLabel.value }),
+    : t('product.hero.viewOffersCount', { count: offersCountLabel.value })
 )
 
 const isSingleOffer = computed(() => offersCount.value === 1)
@@ -351,7 +390,9 @@ const affiliationLink = computed(() => {
     return null
   }
 
-  const token = activeOffer.value?.affiliationToken ?? aggregatedBestOffer.value?.affiliationToken
+  const token =
+    activeOffer.value?.affiliationToken ??
+    aggregatedBestOffer.value?.affiliationToken
   return token ? `/contrib/${token}` : null
 })
 
@@ -362,8 +403,8 @@ const bestPriceMerchant = computed(() => {
   }
 
   const url = isSingleOffer.value
-    ? affiliationLink.value ?? merchant.url ?? null
-    : merchant.url ?? null
+    ? (affiliationLink.value ?? merchant.url ?? null)
+    : (merchant.url ?? null)
 
   return {
     name: merchant.datasourceName,
@@ -396,7 +437,10 @@ const priceTrend = computed(() => {
     return null
   }
 
-  const trend = activeCondition.value === 'occasion' ? offers.occasionTrend : offers.newTrend
+  const trend =
+    activeCondition.value === 'occasion'
+      ? offers.occasionTrend
+      : offers.newTrend
   return trend ?? null
 })
 
@@ -455,7 +499,9 @@ const priceTrendIcon = computed(() => {
   }
 })
 
-const priceTrendToneClass = computed(() => `product-hero__price-trend--${priceTrendTone.value}`)
+const priceTrendToneClass = computed(
+  () => `product-hero__price-trend--${priceTrendTone.value}`
+)
 
 const scrollToSelector = (selector: string, offset = 120) => {
   if (!import.meta.client) {
@@ -467,11 +513,17 @@ const scrollToSelector = (selector: string, offset = 120) => {
     return
   }
 
-  const top = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) - offset
+  const top =
+    target.getBoundingClientRect().top +
+    (window.scrollY || window.pageYOffset || 0) -
+    offset
   window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
 }
 
-const animatedConditions = ref<Record<OfferCondition, boolean>>({ occasion: false, new: false })
+const animatedConditions = ref<Record<OfferCondition, boolean>>({
+  occasion: false,
+  new: false,
+})
 const animationFrameId = ref<number | null>(null)
 
 const startPriceCountdown = (condition: OfferCondition) => {
@@ -495,7 +547,11 @@ const startPriceCountdown = (condition: OfferCondition) => {
   const startValue = Number.isFinite(range.max) ? range.max : targetPrice
   const endValue = Number.isFinite(range.min) ? range.min : targetPrice
 
-  if (!Number.isFinite(startValue) || !Number.isFinite(endValue) || startValue === endValue) {
+  if (
+    !Number.isFinite(startValue) ||
+    !Number.isFinite(endValue) ||
+    startValue === endValue
+  ) {
     animatedPrice.value = null
     animatedConditions.value[condition] = true
     return
@@ -531,14 +587,14 @@ const startPriceCountdown = (condition: OfferCondition) => {
 
 watch(
   activeCondition,
-  (condition) => {
+  condition => {
     if (!import.meta.client) {
       return
     }
 
     startPriceCountdown(condition)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 onBeforeUnmount(() => {
@@ -577,7 +633,10 @@ onBeforeUnmount(() => {
   background: rgba(var(--v-theme-surface-default), 0.85);
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-hero__price-chip:hover,
@@ -682,7 +741,10 @@ onBeforeUnmount(() => {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
   background: transparent;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }

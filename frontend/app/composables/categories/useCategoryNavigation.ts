@@ -2,7 +2,10 @@ import { readonly } from 'vue'
 import type { CategoryNavigationDto } from '~~/shared/api-client'
 
 export const useCategoryNavigation = () => {
-  const navigation = useState<CategoryNavigationDto | null>('category-navigation', () => null)
+  const navigation = useState<CategoryNavigationDto | null>(
+    'category-navigation',
+    () => null
+  )
   const loading = useState('category-navigation-loading', () => false)
   const error = useState<string | null>('category-navigation-error', () => null)
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
@@ -25,28 +28,35 @@ export const useCategoryNavigation = () => {
 
         return accumulator
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     )
 
     return Object.keys(normalizedEntries).length ? normalizedEntries : undefined
   }
 
-  const fetchNavigation = async (
-    params?: { googleCategoryId?: number; path?: string },
-  ): Promise<CategoryNavigationDto | null> => {
+  const fetchNavigation = async (params?: {
+    googleCategoryId?: number
+    path?: string
+  }): Promise<CategoryNavigationDto | null> => {
     loading.value = true
     error.value = null
 
     try {
       const headers = buildRequestHeaders()
-      const response = await $fetch<CategoryNavigationDto>('/api/categories/navigation', {
-        ...(headers ? { headers } : {}),
-        params,
-      })
+      const response = await $fetch<CategoryNavigationDto>(
+        '/api/categories/navigation',
+        {
+          ...(headers ? { headers } : {}),
+          params,
+        }
+      )
 
       navigation.value = response ?? null
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch category navigation'
+      error.value =
+        err instanceof Error
+          ? err.message
+          : 'Failed to fetch category navigation'
       navigation.value = null
       console.error('Error in fetchCategoryNavigation:', err)
     } finally {

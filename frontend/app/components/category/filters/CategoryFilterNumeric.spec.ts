@@ -3,7 +3,11 @@ import { createI18n } from 'vue-i18n'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import type { PropType } from 'vue'
-import type { AggregationResponseDto, FieldMetadataDto, Filter } from '~~/shared/api-client'
+import type {
+  AggregationResponseDto,
+  FieldMetadataDto,
+  Filter,
+} from '~~/shared/api-client'
 
 import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
 
@@ -23,7 +27,10 @@ const createI18nPlugin = () =>
 const RangeSliderStub = defineComponent({
   name: 'RangeSliderStub',
   props: {
-    modelValue: { type: Array as PropType<[number, number]>, default: () => [0, 0] },
+    modelValue: {
+      type: Array as PropType<[number, number]>,
+      default: () => [0, 0],
+    },
   },
   emits: ['update:modelValue', 'end'],
   setup(props, { slots }) {
@@ -85,6 +92,8 @@ describe('CategoryFilterNumeric', () => {
     }
 
     const wrapper = mountComponent(filter)
-    expect(wrapper.find('.category-filter-numeric__range').text()).toBe('1.2 → 5.7')
+    expect(wrapper.find('.category-filter-numeric__range').text()).toBe(
+      '1.2 → 5.7'
+    )
   })
 })

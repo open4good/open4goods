@@ -43,7 +43,8 @@ describe('ProductImpactEcoScoreCard', () => {
             name: 'ImpactScoreStub',
             props: ['score', 'max', 'showValue', 'size'],
             setup(props) {
-              return () => h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+              return () =>
+                h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
             },
           }),
           NuxtLink: defineComponent({
@@ -53,8 +54,12 @@ describe('ProductImpactEcoScoreCard', () => {
               return () =>
                 h(
                   'a',
-                  { class: 'nuxt-link-stub', href: typeof props.to === 'string' ? props.to : '#', 'data-to': props.to },
-                  slots.default?.(),
+                  {
+                    class: 'nuxt-link-stub',
+                    href: typeof props.to === 'string' ? props.to : '#',
+                    'data-to': props.to,
+                  },
+                  slots.default?.()
                 )
             },
           }),
@@ -69,7 +74,9 @@ describe('ProductImpactEcoScoreCard', () => {
 
     expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
     expect(wrapper.text()).toContain('score:3.6')
-    expect(wrapper.find('.impact-ecoscore__cta').text()).toContain('Access the methodology')
+    expect(wrapper.find('.impact-ecoscore__cta').text()).toContain(
+      'Access the methodology'
+    )
     expect(wrapper.text()).not.toContain('Absolute value')
   })
 

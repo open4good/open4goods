@@ -2,7 +2,16 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import type { Ref } from 'vue'
 import { computed, reactive, ref } from 'vue'
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from 'vitest'
 
 import type { ThemeName } from '~~/shared/constants/theme'
 
@@ -20,7 +29,9 @@ const currentRoute = reactive({ path: '/', fullPath: '/' })
 
 const themeName = ref<ThemeName>('light')
 const storedThemePreference = ref<ThemeName>('light')
-function createUseStorageMock(): MockInstance<(key: string, defaultValue: ThemeName) => Ref<ThemeName>> {
+function createUseStorageMock(): MockInstance<
+  (key: string, defaultValue: ThemeName) => Ref<ThemeName>
+> {
   return vi.fn((_: string, defaultValue: ThemeName) => {
     if (!storedThemePreference.value) {
       storedThemePreference.value = defaultValue
@@ -29,7 +40,9 @@ function createUseStorageMock(): MockInstance<(key: string, defaultValue: ThemeN
     return storedThemePreference as Ref<ThemeName>
   })
 }
-function createUseCookieMock(): MockInstance<(key: string) => Ref<ThemeName | null>> {
+function createUseCookieMock(): MockInstance<
+  (key: string) => Ref<ThemeName | null>
+> {
   return vi.fn((_: string) => themeCookiePreference as Ref<ThemeName | null>)
 }
 function getStorageMockRegistry() {
@@ -158,7 +171,8 @@ vi.mock('~/composables/pwa/usePwaInstallPromptBridge', () => ({
   }),
 }))
 
-const useStorageMock = getStorageMockRegistry().__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
+const useStorageMock = getStorageMockRegistry()
+  .__menusAuthUseStorageMock__ as ReturnType<typeof createUseStorageMock>
 
 type NuxtImports = typeof import('#imports')
 
@@ -204,9 +218,9 @@ vi.mock('nuxt/app', () => {
 })
 
 vi.mock('~/composables/menus/useMenuSearchControls', async () => {
-  const actual = await vi.importActual<typeof import('~/composables/menus/useMenuSearchControls')>(
-    '~/composables/menus/useMenuSearchControls',
-  )
+  const actual = await vi.importActual<
+    typeof import('~/composables/menus/useMenuSearchControls')
+  >('~/composables/menus/useMenuSearchControls')
 
   const useMenuSearchControlsMock = vi.fn((...args) => {
     useMenuSearchControlsSpy(...args)
@@ -228,8 +242,8 @@ vi.mock('vue-router', () => ({
   useRouter: useRouterMock,
 }))
 
-let TheHeroMenu: typeof import('./The-hero-menu.vue')['default']
-let TheMobileMenu: typeof import('./The-mobile-menu.vue')['default']
+let TheHeroMenu: (typeof import('./The-hero-menu.vue'))['default']
+let TheMobileMenu: (typeof import('./The-mobile-menu.vue'))['default']
 
 beforeAll(async () => {
   TheHeroMenu = (await import('./The-hero-menu.vue')).default
@@ -243,7 +257,9 @@ describe('Shared menu authentication controls', () => {
     global: {
       stubs: {
         VMenu: vMenuStub,
-        SearchSuggestField: { template: '<div class="search-suggest-field-stub" />' },
+        SearchSuggestField: {
+          template: '<div class="search-suggest-field-stub" />',
+        },
       },
     },
   }
@@ -251,7 +267,9 @@ describe('Shared menu authentication controls', () => {
     global: {
       stubs: {
         VMenu: vMenuStub,
-        SearchSuggestField: { template: '<div class="search-suggest-field-stub" />' },
+        SearchSuggestField: {
+          template: '<div class="search-suggest-field-stub" />',
+        },
       },
     },
   }
@@ -290,21 +308,28 @@ describe('Shared menu authentication controls', () => {
     }
 
     if (typeof window !== 'undefined') {
-      reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => undefined)
+      reloadSpy = vi
+        .spyOn(window.location, 'reload')
+        .mockImplementation(() => undefined)
 
       if (!('visualViewport' in window)) {
-        ;(window as unknown as {
-          visualViewport?: Pick<NonNullable<Window['visualViewport']>, 'addEventListener' | 'removeEventListener'>
-        }).visualViewport = {
+        ;(
+          window as unknown as {
+            visualViewport?: Pick<
+              NonNullable<Window['visualViewport']>,
+              'addEventListener' | 'removeEventListener'
+            >
+          }
+        ).visualViewport = {
           addEventListener: () => undefined,
           removeEventListener: () => undefined,
         }
       }
     }
 
-    ;(globalThis as { $fetch?: (...args: unknown[]) => Promise<unknown> }).$fetch = (
-      ...args: unknown[]
-    ) => fetchMock(...args)
+    ;(
+      globalThis as { $fetch?: (...args: unknown[]) => Promise<unknown> }
+    ).$fetch = (...args: unknown[]) => fetchMock(...args)
   })
 
   afterEach(() => {
@@ -315,11 +340,20 @@ describe('Shared menu authentication controls', () => {
 
   it('does not render account controls when logged out', async () => {
     const heroWrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
-    const mobileWrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    const mobileWrapper = await mountSuspended(
+      TheMobileMenu,
+      mobileMountOptions
+    )
 
-    expect(heroWrapper.find('[data-testid="hero-account-menu-activator"]').exists()).toBe(false)
-    expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(false)
-    expect(mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()).toBe(false)
+    expect(
+      heroWrapper.find('[data-testid="hero-account-menu-activator"]').exists()
+    ).toBe(false)
+    expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(
+      false
+    )
+    expect(
+      mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()
+    ).toBe(false)
   })
 
   it('renders the mobile install CTA when available', async () => {
@@ -340,7 +374,10 @@ describe('Shared menu authentication controls', () => {
     const heroWrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
     expect(heroWrapper.exists()).toBe(true)
 
-    const mobileWrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    const mobileWrapper = await mountSuspended(
+      TheMobileMenu,
+      mobileMountOptions
+    )
     expect(mobileWrapper.exists()).toBe(true)
 
     expect(useMenuSearchControlsSpy).toHaveBeenCalledTimes(2)
@@ -385,7 +422,9 @@ describe('Shared menu authentication controls', () => {
 
     const startIndex = menuSearchControlsInstances.length
     await mountSuspended(TheHeroMenu, heroMountOptions)
-    const heroControls = menuSearchControlsInstances[startIndex] as { showMenuSearch: Ref<boolean> }
+    const heroControls = menuSearchControlsInstances[startIndex] as {
+      showMenuSearch: Ref<boolean>
+    }
 
     currentRoute.path = '/'
     currentRoute.fullPath = '/'
@@ -426,7 +465,10 @@ describe('Shared menu authentication controls', () => {
     await clearItem.trigger('click')
     await flushPromises()
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/admin/cache/reset', expect.objectContaining({ method: 'POST' }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/admin/cache/reset',
+      expect.objectContaining({ method: 'POST' })
+    )
     expect(reloadSpy).toHaveBeenCalledTimes(1)
   })
 
@@ -442,7 +484,10 @@ describe('Shared menu authentication controls', () => {
     await clearCacheItem.trigger('click')
     await flushPromises()
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/admin/cache/reset', expect.objectContaining({ method: 'POST' }))
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/admin/cache/reset',
+      expect.objectContaining({ method: 'POST' })
+    )
     expect(reloadSpy).toHaveBeenCalledTimes(1)
     expect(wrapper.emitted('close')).toBeTruthy()
   })
@@ -450,7 +495,9 @@ describe('Shared menu authentication controls', () => {
   it('renders theme toggles and synchronises the stored preference', async () => {
     const heroWrapper = await mountSuspended(TheHeroMenu)
 
-    expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(true)
+    expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(
+      true
+    )
 
     const darkToggle = heroWrapper.get('[data-testid="hero-theme-toggle-dark"]')
 
@@ -460,19 +507,15 @@ describe('Shared menu authentication controls', () => {
     expect(storedThemePreference.value).toBe('dark')
     expect(themeName.value).toBe('dark')
 
-    const nudgerToggle = heroWrapper.get('[data-testid="hero-theme-toggle-nudger"]')
-
-    await nudgerToggle.trigger('click')
-    await flushPromises()
-
-    expect(storedThemePreference.value).toBe('nudger')
-    expect(themeName.value).toBe('nudger')
-
     const mobileWrapper = await mountSuspended(TheMobileMenu)
 
-    expect(mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()).toBe(true)
+    expect(
+      mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()
+    ).toBe(true)
 
-    const lightToggle = mobileWrapper.get('[data-testid="mobile-theme-toggle-light"]')
+    const lightToggle = mobileWrapper.get(
+      '[data-testid="mobile-theme-toggle-light"]'
+    )
 
     await lightToggle.trigger('click')
     await flushPromises()

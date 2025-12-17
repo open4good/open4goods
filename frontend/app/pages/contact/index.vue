@@ -60,9 +60,18 @@ const formError = ref<string | null>(null)
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
 
 const heroHighlights = computed<HeroHighlight[]>(() => [
-  { icon: 'mdi-account-heart-outline', text: String(t('contact.hero.highlights.commitment')) },
-  { icon: 'mdi-lightbulb-on-outline', text: String(t('contact.hero.highlights.expertise')) },
-  { icon: 'mdi-leaf-circle-outline', text: String(t('contact.hero.highlights.impact')) },
+  {
+    icon: 'mdi-account-heart-outline',
+    text: String(t('contact.hero.highlights.commitment')),
+  },
+  {
+    icon: 'mdi-lightbulb-on-outline',
+    text: String(t('contact.hero.highlights.expertise')),
+  },
+  {
+    icon: 'mdi-leaf-circle-outline',
+    text: String(t('contact.hero.highlights.impact')),
+  },
 ])
 
 const heroChannels = computed<HeroContactChannel[]>(() => [
@@ -123,26 +132,39 @@ const contactDetailItems = computed<ContactDetailItem[]>(() => [
 ])
 
 const canonicalUrl = computed(() =>
-  new URL(resolveLocalizedRoutePath('contact', locale.value), requestURL.origin).toString(),
+  new URL(
+    resolveLocalizedRoutePath('contact', locale.value),
+    requestURL.origin
+  ).toString()
 )
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 const ogLocale = computed(() => locale.value.replace('-', '_'))
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 const ogImageAlt = computed(() => String(t('contact.seo.imageAlt')))
 const alternateLinks = computed(() =>
-  availableLocales.map((availableLocale) => ({
+  availableLocales.map(availableLocale => ({
     rel: 'alternate' as const,
     hreflang: availableLocale,
-    href: new URL(resolveLocalizedRoutePath('contact', availableLocale), requestURL.origin).toString(),
-  })),
+    href: new URL(
+      resolveLocalizedRoutePath('contact', availableLocale),
+      requestURL.origin
+    ).toString(),
+  }))
 )
 
-const fallbackErrorMessage = computed(() => String(t('contact.form.feedback.genericError')))
+const fallbackErrorMessage = computed(() =>
+  String(t('contact.form.feedback.genericError'))
+)
 
 const extractErrorMessage = (error: unknown): string => {
   if (error instanceof FetchError) {
-    const data = error.data as { statusMessage?: string; message?: string } | null
+    const data = error.data as {
+      statusMessage?: string
+      message?: string
+    } | null
 
     if (data?.statusMessage) {
       return data.statusMessage

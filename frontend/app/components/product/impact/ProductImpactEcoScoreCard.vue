@@ -2,9 +2,13 @@
   <article v-if="score" class="impact-ecoscore">
     <header class="impact-ecoscore__header">
       <div class="impact-ecoscore__header-main">
-        <span class="impact-ecoscore__eyebrow">{{ $t('product.impact.primaryScoreLabel') }}</span>
+        <span class="impact-ecoscore__eyebrow">{{
+          $t('product.impact.primaryScoreLabel')
+        }}</span>
         <h3 class="impact-ecoscore__title">{{ score.label }}</h3>
-        <p v-if="score.description" class="impact-ecoscore__description">{{ score.description }}</p>
+        <p v-if="score.description" class="impact-ecoscore__description">
+          {{ score.description }}
+        </p>
       </div>
       <NuxtLink
         :to="methodologyHref"
@@ -32,7 +36,9 @@
       <ProductImpactDetailsTable
         v-if="detailScores.length"
         class="impact-ecoscore__analysis-details"
-        :class="{ 'impact-ecoscore__analysis-details--full': !shouldDisplayRadar }"
+        :class="{
+          'impact-ecoscore__analysis-details--full': !shouldDisplayRadar,
+        }"
         :scores="detailScores"
       />
     </div>
@@ -43,10 +49,16 @@
         color="primary"
         variant="text"
         block
-        :append-icon="isSubscoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+        :append-icon="
+          isSubscoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'
+        "
         @click="toggleSubscores"
       >
-        {{ isSubscoreExpanded ? $t('product.impact.hideDetails') : $t('product.impact.showDetails') }}
+        {{
+          isSubscoreExpanded
+            ? $t('product.impact.hideDetails')
+            : $t('product.impact.showDetails')
+        }}
       </v-btn>
     </div>
 
@@ -73,7 +85,9 @@
     </v-expand-transition>
   </article>
   <article v-else class="impact-ecoscore impact-ecoscore--empty">
-    <span class="impact-ecoscore__placeholder">{{ $t('product.impact.noPrimaryScore') }}</span>
+    <span class="impact-ecoscore__placeholder">{{
+      $t('product.impact.noPrimaryScore')
+    }}</span>
   </article>
 </template>
 
@@ -130,11 +144,19 @@ const productImage = computed(() => props.productImage ?? '')
 const verticalTitle = computed(() => props.verticalTitle ?? '')
 const secondaryScores = computed(() => props.secondaryScores ?? [])
 const loading = computed(() => props.loading ?? false)
-const shouldDisplayRadar = computed(
-  () => Boolean(props.showRadar && radarAxes.value.length >= 3 && chartSeries.value.length > 0),
+const shouldDisplayRadar = computed(() =>
+  Boolean(
+    props.showRadar &&
+    radarAxes.value.length >= 3 &&
+    chartSeries.value.length > 0
+  )
 )
-const hasDetailContent = computed(() => shouldDisplayRadar.value || detailScores.value.length > 0)
-const showAccordion = computed(() => loading.value || secondaryScores.value.length > 0)
+const hasDetailContent = computed(
+  () => shouldDisplayRadar.value || detailScores.value.length > 0
+)
+const showAccordion = computed(
+  () => loading.value || secondaryScores.value.length > 0
+)
 
 const toggleSubscores = () => {
   isSubscoreExpanded.value = !isSubscoreExpanded.value
@@ -182,7 +204,11 @@ const methodologyHref = computed(() => {
   gap: 1.5rem;
   padding: 2rem;
   border-radius: 26px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-100), 0.95), rgba(var(--v-theme-surface-glass-strong), 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-primary-100), 0.95),
+    rgba(var(--v-theme-surface-glass-strong), 0.9)
+  );
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.12);
   min-height: 100%;
 }
@@ -283,7 +309,10 @@ const methodologyHref = computed(() => {
   color: rgb(var(--v-theme-primary));
   background: rgba(var(--v-theme-surface-default), 0.9);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .impact-ecoscore__cta:hover,

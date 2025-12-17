@@ -25,19 +25,13 @@ export const useCategories = () => {
   }
 
   // Reactive state
-  const categories = useState<VerticalConfigDto[]>(
-    'categories-list',
-    () => [],
-  )
+  const categories = useState<VerticalConfigDto[]>('categories-list', () => [])
   const categoriesListCache = useState<
     Record<string, CacheEntry<VerticalConfigDto[]>>
   >('categories-list-cache', () => getGlobalCacheStore('categories-list-cache'))
   const categoryDetailCache = useState<
     Record<string, CacheEntry<VerticalConfigFullDto>>
-  >(
-    'category-detail-cache',
-    () => getGlobalCacheStore('category-detail-cache'),
-  )
+  >('category-detail-cache', () => getGlobalCacheStore('category-detail-cache'))
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
   const buildRequestHeaders = () => {
@@ -58,26 +52,20 @@ export const useCategories = () => {
 
         return accumulator
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     )
 
     return Object.keys(normalizedEntries).length ? normalizedEntries : undefined
   }
-  const loading = useState(
-    'categories-loading',
-    () => false,
-  )
-  const error = useState<string | null>(
-    'categories-error',
-    () => null,
-  )
+  const loading = useState('categories-loading', () => false)
+  const error = useState<string | null>('categories-error', () => null)
   const activeCategoryId = useState<string | null>(
     'categories-active-id',
-    () => null,
+    () => null
   )
   const currentCategory = useState<VerticalConfigFullDto | null>(
     'categories-current',
-    () => null,
+    () => null
   )
 
   /**
@@ -85,12 +73,15 @@ export const useCategories = () => {
    * @param onlyEnabled - Filter only enabled categories
    */
   const fetchCategories = async (
-    onlyEnabled: boolean = true,
+    onlyEnabled: boolean = true
   ): Promise<VerticalConfigDto[]> => {
     const cacheKey = `list-${onlyEnabled}`
     const cachedCategories = categoriesListCache.value[cacheKey]
 
-    if (cachedCategories && Date.now() - cachedCategories.timestamp < TWO_HOURS_MS) {
+    if (
+      cachedCategories &&
+      Date.now() - cachedCategories.timestamp < TWO_HOURS_MS
+    ) {
       categories.value = cachedCategories.data
       return categories.value
     }
@@ -126,7 +117,7 @@ export const useCategories = () => {
    * @param slug - Category slug to match against verticalHomeUrl
    */
   const selectCategoryBySlug = async (
-    slug: string,
+    slug: string
   ): Promise<VerticalConfigFullDto> => {
     error.value = null
 
@@ -152,7 +143,7 @@ export const useCategories = () => {
     loading.value = true
 
     try {
-      const matchingCategory = categories.value.find((category) => {
+      const matchingCategory = categories.value.find(category => {
         const verticalSlug = category.verticalHomeUrl?.replace(/^\//, '') ?? ''
         return verticalSlug === slug
       })
@@ -179,7 +170,7 @@ export const useCategories = () => {
       const detailHeaders = buildRequestHeaders()
       const detail = await $fetch<VerticalConfigFullDto>(
         `/api/categories/${encodeURIComponent(matchingCategory.id)}`,
-        detailHeaders ? { headers: detailHeaders } : undefined,
+        detailHeaders ? { headers: detailHeaders } : undefined
       )
 
       currentCategory.value = detail
@@ -187,7 +178,8 @@ export const useCategories = () => {
         data: detail,
         timestamp: Date.now(),
       }
-      categoryDetailCache.value[slug] = categoryDetailCache.value[matchingCategory.id]
+      categoryDetailCache.value[slug] =
+        categoryDetailCache.value[matchingCategory.id]
       return detail
     } catch (err) {
       error.value =

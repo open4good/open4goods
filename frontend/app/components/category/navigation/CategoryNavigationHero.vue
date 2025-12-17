@@ -2,7 +2,7 @@
   <HeroSurface
     class="category-navigation-hero"
     :aria-labelledby="titleId"
-    variant="orbit"
+     variant="orbit"
   >
     <v-container class="py-16 px-4" max-width="lg">
       <v-row align="center" class="g-8">
@@ -14,6 +14,7 @@
               v-bind="{ items: breadcrumbs, ariaLabel: breadcrumbAriaLabel }"
               variant="pills"
             />
+
 
             <h1 :id="titleId" class="category-navigation-hero__title">
               {{ title }}
@@ -58,6 +59,7 @@
 
 <script setup lang="ts">
 import { useId } from 'vue'
+
 import CategoryNavigationBreadcrumbs from './CategoryNavigationBreadcrumbs.vue'
 
 interface BreadcrumbItem {
@@ -101,6 +103,7 @@ const onUpdateModelValue = (value: string) => emit('update:modelValue', value)
   font-size: clamp(2.4rem, 5vw, 3.5rem)
   line-height: 1.1
 
+
 .category-navigation-hero__subtitle
   margin: 0
   font-size: 1.15rem
@@ -133,6 +136,7 @@ const onUpdateModelValue = (value: string) => emit('update:modelValue', value)
 /* --- Correctif contraste (light & dark) --- */
 /* On force le champ à utiliser des tokens "surface/text" neutres,
    plutôt que des tokens "hero overlay" (souvent blancs). */
+
 
 .category-navigation-hero__search-field :deep(.v-field)
   border-radius: 16px

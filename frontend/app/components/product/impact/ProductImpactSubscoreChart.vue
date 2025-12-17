@@ -29,7 +29,9 @@ const props = defineProps<{
 ensureImpactECharts()
 
 const filteredDistribution = computed(() =>
-  props.distribution.filter((bucket) => bucket.label.toUpperCase() !== 'ES-UNKNOWN'),
+  props.distribution.filter(
+    bucket => bucket.label.toUpperCase() !== 'ES-UNKNOWN'
+  )
 )
 
 const hasData = computed(() => filteredDistribution.value.length > 0)
@@ -44,7 +46,7 @@ const chartOption = computed<EChartsOption | null>(() => {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: {
       type: 'category',
-      data: filteredDistribution.value.map((bucket) => bucket.label),
+      data: filteredDistribution.value.map(bucket => bucket.label),
       axisLabel: { rotate: 35 },
     },
     yAxis: { type: 'value' },
@@ -52,7 +54,7 @@ const chartOption = computed<EChartsOption | null>(() => {
       {
         type: 'bar',
         name: props.label,
-        data: filteredDistribution.value.map((bucket) => bucket.value),
+        data: filteredDistribution.value.map(bucket => bucket.value),
         itemStyle: {
           color: 'rgba(33, 150, 243, 0.75)',
         },

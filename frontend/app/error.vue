@@ -68,7 +68,10 @@
             </div>
           </div>
 
-          <aside class="error-page__aside" aria-labelledby="error-status-heading">
+          <aside
+            class="error-page__aside"
+            aria-labelledby="error-status-heading"
+          >
             <div class="error-page__status-card">
               <p id="error-status-heading" class="error-page__status-eyebrow">
                 {{ pageStrings.badge }}
@@ -92,21 +95,25 @@
                   {{ debugStrings.title }}
                 </h2>
                 <p v-if="errorMessage" class="error-page__debug-message">
-                  <span class="error-page__debug-label">{{ debugStrings.messageLabel }}</span>
-                  <span class="error-page__debug-value">{{ errorMessage }}</span>
+                  <span class="error-page__debug-label">{{
+                    debugStrings.messageLabel
+                  }}</span>
+                  <span class="error-page__debug-value">{{
+                    errorMessage
+                  }}</span>
                 </p>
                 <div v-if="errorStack" class="error-page__debug-stack">
-                  <p class="error-page__debug-label">{{ debugStrings.stackLabel }}</p>
-                  <pre class="error-page__debug-stack-content">{{ errorStack }}</pre>
+                  <p class="error-page__debug-label">
+                    {{ debugStrings.stackLabel }}
+                  </p>
+                  <pre class="error-page__debug-stack-content">{{
+                    errorStack
+                  }}</pre>
                 </div>
-                <p
-                  v-else-if="errorMessage"
-                  class="error-page__debug-empty"
-                >
+                <p v-else-if="errorMessage" class="error-page__debug-empty">
                   {{ debugStrings.empty }}
                 </p>
               </section>
-
             </div>
           </aside>
         </v-container>
@@ -156,7 +163,9 @@ const routeLoading = useState('routeLoading', () => false)
 routeLoading.value = false
 
 const statusCode = computed(() => props.error?.statusCode ?? 500)
-const paddedStatusCode = computed(() => String(statusCode.value).padStart(3, '0'))
+const paddedStatusCode = computed(() =>
+  String(statusCode.value).padStart(3, '0')
+)
 const is404 = computed(() => statusCode.value === 404)
 
 const pageStrings = computed<ErrorPageStrings>(() => {
@@ -169,7 +178,7 @@ const pageStrings = computed<ErrorPageStrings>(() => {
       description: String(t('error.page.notFound.description')),
       helper: String(t('error.page.notFound.helper')),
       statusMessage: String(
-        fallbackStatusMessage ?? t('error.page.notFound.statusMessage'),
+        fallbackStatusMessage ?? t('error.page.notFound.statusMessage')
       ),
     }
   }
@@ -180,14 +189,18 @@ const pageStrings = computed<ErrorPageStrings>(() => {
     description: String(t('error.page.generic.description')),
     helper: String(t('error.page.generic.helper')),
     statusMessage: String(
-      fallbackStatusMessage ?? t('error.page.generic.statusMessage'),
+      fallbackStatusMessage ?? t('error.page.generic.statusMessage')
     ),
   }
 })
 
 const eyebrow = computed(() => String(t('error.page.eyebrow')))
-const statusLabel = computed(() => String(t('error.page.statusLabel', { code: paddedStatusCode.value })))
-const actionsAriaLabel = computed(() => String(t('error.page.actions.ariaLabel')))
+const statusLabel = computed(() =>
+  String(t('error.page.statusLabel', { code: paddedStatusCode.value }))
+)
+const actionsAriaLabel = computed(() =>
+  String(t('error.page.actions.ariaLabel'))
+)
 
 const actionLabels = computed(() => ({
   goHome: String(t('error.page.actions.goHome')),
@@ -216,8 +229,7 @@ const normaliseErrorDetail = (value: unknown): string => {
 
   try {
     return JSON.stringify(value, null, 2)
-  }
-  catch {
+  } catch {
     return String(value)
   }
 }
@@ -240,7 +252,7 @@ const errorMessage = computed(() =>
     props.error?.statusMessage,
     (props.error?.data as { message?: unknown } | undefined)?.message,
     (props.error?.cause as { message?: unknown } | undefined)?.message,
-  ]),
+  ])
 )
 
 const errorStack = computed(() =>
@@ -248,7 +260,7 @@ const errorStack = computed(() =>
     props.error?.stack,
     (props.error?.cause as { stack?: unknown } | undefined)?.stack,
     (props.error?.data as { stack?: unknown } | undefined)?.stack,
-  ]),
+  ])
 )
 
 useSeoMeta({
@@ -263,20 +275,24 @@ const toggleDrawer = () => {
   drawer.value = !drawer.value
 }
 
-const isMobileNavigation = computed(() => device.isMobileOrTablet || display.mdAndDown.value)
+const isMobileNavigation = computed(
+  () => device.isMobileOrTablet || display.mdAndDown.value
+)
 const drawerWidth = computed(() => (isMobileNavigation.value ? 320 : 360))
 const drawerInlineStyles = computed(() => ({
-  paddingBottom: isMobileNavigation.value ? 'calc(env(safe-area-inset-bottom) + 24px)' : '24px',
+  paddingBottom: isMobileNavigation.value
+    ? 'calc(env(safe-area-inset-bottom) + 24px)'
+    : '24px',
 }))
 
 watch(
   () => isMobileNavigation.value,
-  (isMobileView) => {
+  isMobileView => {
     if (!isMobileView) {
       drawer.value = false
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const handleGoHome = () => {

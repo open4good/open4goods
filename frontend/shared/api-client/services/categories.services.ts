@@ -11,13 +11,16 @@ import { createBackendApiConfig } from './createBackendApiConfig'
  * Categories service for handling category-related API calls
  */
 export const useCategoriesService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: CategoriesApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useCategoriesService() is only available on the server runtime.')
+      throw new Error(
+        'useCategoriesService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -32,7 +35,9 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
    * @param onlyEnabled - Filter only enabled categories
    * @returns Promise<VerticalConfigDto[]>
    */
-  const getCategories = async (onlyEnabled?: boolean): Promise<VerticalConfigDto[]> => {
+  const getCategories = async (
+    onlyEnabled?: boolean
+  ): Promise<VerticalConfigDto[]> => {
     try {
       return await resolveApi().categories1({ domainLanguage, onlyEnabled })
     } catch (error) {
@@ -47,7 +52,7 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
    * @returns Promise<VerticalConfigFullDto>
    */
   const getCategoryById = async (
-    categoryId: string,
+    categoryId: string
   ): Promise<VerticalConfigFullDto> => {
     try {
       return await resolveApi().category({ categoryId, domainLanguage })

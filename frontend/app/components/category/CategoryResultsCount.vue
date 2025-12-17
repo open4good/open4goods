@@ -1,5 +1,9 @@
 <template>
-  <p class="category-page__results-count" aria-live="polite" data-test="category-results-count">
+  <p
+    class="category-page__results-count"
+    aria-live="polite"
+    data-test="category-results-count"
+  >
     {{ label }}
   </p>
 </template>
@@ -16,24 +20,31 @@ const { locale } = useI18n()
 
 const animatedCount = ref(Math.max(0, Math.round(props.count)))
 const reducedMotionPreference = usePreferredReducedMotion()
-const isReducedMotionPreferred = computed(() => reducedMotionPreference.value === 'reduce')
+const isReducedMotionPreferred = computed(
+  () => reducedMotionPreference.value === 'reduce'
+)
 const isMounted = ref(false)
 let animationFrameId: number | null = null
 
 const numberFormatter = computed(
-  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 0 }),
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 0 })
 )
 
-const formattedCount = computed(() => numberFormatter.value.format(animatedCount.value))
+const formattedCount = computed(() =>
+  numberFormatter.value.format(animatedCount.value)
+)
 
 const label = computed(() =>
   translatePlural('category.products.resultsCount', animatedCount.value, {
     count: formattedCount.value,
-  }),
+  })
 )
 
 const cancelAnimation = () => {
-  if (animationFrameId !== null && typeof cancelAnimationFrame !== 'undefined') {
+  if (
+    animationFrameId !== null &&
+    typeof cancelAnimationFrame !== 'undefined'
+  ) {
     cancelAnimationFrame(animationFrameId)
     animationFrameId = null
   }
@@ -100,12 +111,12 @@ watch(
 
     animateCount(previousValue, nextValue)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
   isReducedMotionPreferred,
-  (current) => {
+  current => {
     if (!current) {
       return
     }
@@ -113,7 +124,7 @@ watch(
     cancelAnimation()
     updateCountInstantly(props.count)
   },
-  { immediate: false },
+  { immediate: false }
 )
 
 onMounted(() => {

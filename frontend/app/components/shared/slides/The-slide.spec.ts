@@ -114,7 +114,7 @@ describe('TheSlide', () => {
       expect(images.length).toBeGreaterThan(0)
 
       // Images should have cursor-pointer class
-      images.forEach((img) => {
+      images.forEach(img => {
         expect(img.classes()).toContain('cursor-pointer')
       })
     })

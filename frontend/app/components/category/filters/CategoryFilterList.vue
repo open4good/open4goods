@@ -32,8 +32,8 @@ const props = withDefaults(
     activeFilters: Filter[]
   }>(),
   {
-    baselineAggregations: () => ({} as Record<string, AggregationResponseDto>),
-  },
+    baselineAggregations: () => ({}) as Record<string, AggregationResponseDto>,
+  }
 )
 
 const emit = defineEmits<{
@@ -42,11 +42,13 @@ const emit = defineEmits<{
 }>()
 
 const resolveComponent = (field: FieldMetadataDto) => {
-  return field.valueType === 'numeric' ? CategoryFilterNumeric : CategoryFilterTerms
+  return field.valueType === 'numeric'
+    ? CategoryFilterNumeric
+    : CategoryFilterTerms
 }
 
 const findActiveFilter = (field?: string | null) => {
-  return props.activeFilters.find((filter) => filter.field === field) ?? null
+  return props.activeFilters.find(filter => filter.field === field) ?? null
 }
 
 const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {

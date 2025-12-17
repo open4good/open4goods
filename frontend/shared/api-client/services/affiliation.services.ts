@@ -24,13 +24,16 @@ export interface AffiliationRedirectResponse {
  * Service responsible for resolving affiliation redirects through the backend API.
  */
 export const useAffiliationService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: AffiliationApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useAffiliationService() is only available on the server runtime.')
+      throw new Error(
+        'useAffiliationService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -64,22 +67,24 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
       if (method === 'POST') {
         await apiInstance.redirectPostRaw(
           { token, domainLanguage: language, userAgent },
-          async (requestContext) => ({
+          async requestContext => ({
             ...requestContext.init,
             redirect: 'manual',
-          }),
+          })
         )
       } else {
         await apiInstance.redirectGetRaw(
           { token, domainLanguage: language, userAgent },
-          async (requestContext) => ({
+          async requestContext => ({
             ...requestContext.init,
             redirect: 'manual',
-          }),
+          })
         )
       }
 
-      throw new Error('Expected a redirect response from the affiliation endpoint.')
+      throw new Error(
+        'Expected a redirect response from the affiliation endpoint.'
+      )
     } catch (error) {
       if (error instanceof ResponseError) {
         if (error.response.status === 301) {

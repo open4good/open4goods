@@ -46,7 +46,8 @@ describe('useCategories composable', () => {
     })
 
     const { useCategories } = await import('./useCategories')
-    const { selectCategoryBySlug, currentCategory, activeCategoryId } = useCategories()
+    const { selectCategoryBySlug, currentCategory, activeCategoryId } =
+      useCategories()
 
     const detail = await selectCategoryBySlug('dish-washers')
 
@@ -59,7 +60,8 @@ describe('useCategories composable', () => {
     fetchMock.mockResolvedValueOnce([])
 
     const { useCategories } = await import('./useCategories')
-    const { selectCategoryBySlug, error, currentCategory, activeCategoryId } = useCategories()
+    const { selectCategoryBySlug, error, currentCategory, activeCategoryId } =
+      useCategories()
 
     await expect(selectCategoryBySlug('unknown-slug')).rejects.toMatchObject({
       name: 'CategoryNotFoundError',

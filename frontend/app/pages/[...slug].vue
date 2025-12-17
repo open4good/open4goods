@@ -1,5 +1,15 @@
 <template>
   <div class="product-page">
+    <TopBanner
+      v-model:open="isStickyBannerOpen"
+      :message="bannerMessage"
+      :aria-label="bannerAriaLabel"
+      :cta-label="bannerCtaLabel"
+      :cta-aria-label="bannerCtaLabel"
+      dismissible
+      @cta-click="scrollToSection(sectionIds.price)"
+    />
+
     <v-alert
       v-if="errorMessage"
       type="error"
@@ -10,14 +20,13 @@
       {{ errorMessage }}
     </v-alert>
 
-    <v-skeleton-loader
-      v-else-if="pending"
-      type="article"
-      class="mb-6"
-    />
+    <v-skeleton-loader v-else-if="pending" type="article" class="mb-6" />
 
     <div v-else-if="product" class="product-page__layout">
-      <aside class="product-page__nav" :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }">
+      <aside
+        class="product-page__nav"
+        :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
+      >
         <ProductSummaryNavigation
           :sections="navigableSections"
           :admin-sections="adminNavigableSections"
@@ -102,10 +111,7 @@
           <ProductDocumentationSection :pdfs="product.resources.pdfs" />
         </section>
 
-        <section
-          v-if="showAdminSection"
-          class="product-page__section"
-        >
+        <section v-if="showAdminSection" class="product-page__section">
           <ProductAdminSection
             :product="product"
             :panel-id="sectionIds.adminPanel"
@@ -118,6 +124,7 @@
 </template>
 
 <script setup lang="ts">
+import { useWindowScroll, useWindowSize } from '@vueuse/core'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createError } from 'h3'
 import {
@@ -134,7 +141,11 @@ import {
   type ProductScoreDto,
   type ProductSearchResponseDto,
 } from '~~/shared/api-client'
-import { matchProductRouteFromSegments, isBackendNotFoundError } from '~~/shared/utils/_product-route'
+import {
+  matchProductRouteFromSegments,
+  isBackendNotFoundError,
+} from '~~/shared/utils/_product-route'
+import TopBanner from '~/components/shared/ui/TopBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
@@ -158,10 +169,21 @@ const runtimeConfig = useRuntimeConfig()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
+const { y: scrollY } = useWindowScroll()
+const { height: viewportHeight } = useWindowSize()
+
+const stickyBannerThresholdRatio = 0.8
+const isStickyBannerOpen = ref(false)
+
+const bannerMessage = computed(() => t('product.banner.message'))
+const bannerCtaLabel = computed(() => t('product.banner.cta'))
+const bannerAriaLabel = computed(() => t('product.banner.ariaLabel'))
 
 const slugParam = route.params.slug
 const segments = Array.isArray(slugParam)
-  ? slugParam.filter((segment): segment is string => typeof segment === 'string')
+  ? slugParam.filter(
+      (segment): segment is string => typeof segment === 'string'
+    )
   : typeof slugParam === 'string'
     ? [slugParam]
     : []
@@ -212,7 +234,7 @@ const {
       return null
     }
   },
-  { server: true, immediate: true },
+  { server: true, immediate: true }
 )
 
 const product = computed(() => productData.value)
@@ -230,7 +252,9 @@ if (product.value?.fullSlug) {
 
 const { selectCategoryBySlug } = useCategories()
 
-const categoryDetail = ref<Awaited<ReturnType<typeof selectCategoryBySlug>> | null>(null)
+const categoryDetail = ref<Awaited<
+  ReturnType<typeof selectCategoryBySlug>
+> | null>(null)
 const loadingAggregations = ref(false)
 const aggregations = ref<Record<string, AggregationResponseDto>>({})
 
@@ -252,29 +276,35 @@ const requestedScoreIds = computed(() => {
 
   pushId('ECOSCORE')
 
-  const ponderations = categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
-  Object.keys(ponderations).forEach((key) => pushId(key))
+  const ponderations =
+    categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
+  Object.keys(ponderations).forEach(key => pushId(key))
 
   return ids
 })
 
 const scoreCoefficientMap = computed<Record<string, number>>(() => {
-  const raw = categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
+  const raw =
+    categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
 
-  return Object.entries(raw).reduce<Record<string, number>>((acc, [key, value]) => {
-    const normalizedKey = typeof key === 'string' ? key.trim().toUpperCase() : ''
-    if (!normalizedKey.length) {
+  return Object.entries(raw).reduce<Record<string, number>>(
+    (acc, [key, value]) => {
+      const normalizedKey =
+        typeof key === 'string' ? key.trim().toUpperCase() : ''
+      if (!normalizedKey.length) {
+        return acc
+      }
+
+      const numericValue = typeof value === 'number' ? value : Number(value)
+      if (!Number.isFinite(numericValue)) {
+        return acc
+      }
+
+      acc[normalizedKey] = Math.min(Math.max(numericValue, 0), 1)
       return acc
-    }
-
-    const numericValue = typeof value === 'number' ? value : Number(value)
-    if (!Number.isFinite(numericValue)) {
-      return acc
-    }
-
-    acc[normalizedKey] = Math.min(Math.max(numericValue, 0), 1)
-    return acc
-  }, {})
+    },
+    {}
+  )
 })
 
 const attributeConfigMap = computed(() => {
@@ -311,7 +341,10 @@ if (categorySlug) {
   try {
     categoryDetail.value = await selectCategoryBySlug(categorySlug)
   } catch (categoryError) {
-    console.error('Failed to resolve category detail for product page.', categoryError)
+    console.error(
+      'Failed to resolve category detail for product page.',
+      categoryError
+    )
   }
 }
 
@@ -327,7 +360,7 @@ const scoreAggregations = async () => {
 
   loadingAggregations.value = true
 
-  const aggs: Agg[] = scores.map((scoreId) => ({
+  const aggs: Agg[] = scores.map(scoreId => ({
     name: `score_${scoreId}`,
     field: `scores.${scoreId}.value`,
     type: AggTypeEnum.Range,
@@ -335,17 +368,20 @@ const scoreAggregations = async () => {
   }))
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>('/api/products/search', {
-      method: 'POST',
-      body: {
-        verticalId: categoryDetail.value.id,
-        pageSize: 0,
-        aggs: { aggs },
-      },
-    })
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        body: {
+          verticalId: categoryDetail.value.id,
+          pageSize: 0,
+          aggs: { aggs },
+        },
+      }
+    )
 
     const resolved: Record<string, AggregationResponseDto> = {}
-    ;(response.aggregations ?? []).forEach((aggregation) => {
+    ;(response.aggregations ?? []).forEach(aggregation => {
       if (aggregation.name) {
         resolved[aggregation.name] = aggregation
       }
@@ -370,8 +406,12 @@ const productTitle = computed(() => {
   )
 })
 
-const heroPopularAttributes = computed(() => categoryDetail.value?.popularAttributes ?? [])
-const verticalHomeUrl = computed(() => categoryDetail.value?.verticalHomeUrl?.trim() ?? '')
+const heroPopularAttributes = computed(
+  () => categoryDetail.value?.popularAttributes ?? []
+)
+const verticalHomeUrl = computed(
+  () => categoryDetail.value?.verticalHomeUrl?.trim() ?? ''
+)
 const verticalTitle = computed(() => {
   const candidates = [
     categoryDetail.value?.verticalHomeTitle,
@@ -407,9 +447,10 @@ const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
 
 const normalizedCategoryPath = computed(() => {
   const raw =
-    ((categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
-      categoryDetail.value?.verticalHomeUrl ??
-      null) ?? null
+    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
+    categoryDetail.value?.verticalHomeUrl ??
+    null ??
+    null
 
   if (!raw) {
     return null
@@ -468,42 +509,52 @@ const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
 
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
-  const categoryFullSlug = (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ?? null
+  const categoryFullSlug =
+    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
+    null
 
-  const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>((acc, crumb, index, array) => {
-    const rawTitle = crumb?.title ?? crumb?.link ?? ''
-    const title = rawTitle.toString().trim()
-    if (!title.length) {
-      return acc
-    }
+  const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>(
+    (acc, crumb, index, array) => {
+      const rawTitle = crumb?.title ?? crumb?.link ?? ''
+      const title = rawTitle.toString().trim()
+      if (!title.length) {
+        return acc
+      }
 
-    const crumbFullSlug = (crumb as { fullSlug?: string | null }).fullSlug ?? null
-    const rawLink =
-      crumbFullSlug ??
-      (index === array.length - 1 ? categoryFullSlug ?? crumb?.link : crumb?.link) ??
-      null
+      const crumbFullSlug =
+        (crumb as { fullSlug?: string | null }).fullSlug ?? null
+      const rawLink =
+        crumbFullSlug ??
+        (index === array.length - 1
+          ? (categoryFullSlug ?? crumb?.link)
+          : crumb?.link) ??
+        null
 
-    const trimmed = rawLink?.toString().trim() ?? ''
-    const normalized = trimmed
-      ? trimmed.startsWith('http')
-        ? trimmed
-        : trimmed.startsWith('/')
+      const trimmed = rawLink?.toString().trim() ?? ''
+      const normalized = trimmed
+        ? trimmed.startsWith('http')
           ? trimmed
-          : `/${trimmed}`
-      : undefined
+          : trimmed.startsWith('/')
+            ? trimmed
+            : `/${trimmed}`
+        : undefined
 
-    acc.push({
-      title,
-      link: normalized ?? undefined,
-    })
+      acc.push({
+        title,
+        link: normalized ?? undefined,
+      })
 
-    return acc
-  }, [])
+      return acc
+    },
+    []
+  )
 
   const brandCrumb = brandBreadcrumb.value
   if (brandCrumb) {
     const duplicateIndex = resolvedCategories.findIndex(
-      (entry) => entry.title.trim().toLowerCase() === brandCrumb.title.trim().toLowerCase(),
+      entry =>
+        entry.title.trim().toLowerCase() ===
+        brandCrumb.title.trim().toLowerCase()
     )
 
     if (duplicateIndex >= 0) {
@@ -545,7 +596,9 @@ const toAbsoluteUrl = (value?: string | null) => {
 }
 
 const canonicalPath = computed(() => {
-  const fallbackPath = route.path.startsWith('/') ? route.path : `/${route.path}`
+  const fallbackPath = route.path.startsWith('/')
+    ? route.path
+    : `/${route.path}`
   const preferredSlug = product.value?.fullSlug ?? product.value?.slug ?? null
   const normalizedSlug = preferredSlug
     ? preferredSlug.startsWith('/')
@@ -558,12 +611,15 @@ const canonicalPath = computed(() => {
   return sanitized?.length ? sanitized : fallbackPath
 })
 
-const canonicalUrl = computed(() => new URL(canonicalPath.value, requestURL.origin).toString())
+const canonicalUrl = computed(() =>
+  new URL(canonicalPath.value, requestURL.origin).toString()
+)
 
 const resolvedProductImageSource = computed(() => {
   const galleryImages = product.value?.resources?.images ?? []
-  const firstGalleryImage = galleryImages.find((image) => Boolean(image?.url))?.url
-    ?? galleryImages.find((image) => Boolean(image?.originalUrl))?.originalUrl
+  const firstGalleryImage =
+    galleryImages.find(image => Boolean(image?.url))?.url ??
+    galleryImages.find(image => Boolean(image?.originalUrl))?.originalUrl
 
   return (
     product.value?.resources?.coverImagePath ??
@@ -585,7 +641,8 @@ useSeoMeta({
   title: () => productTitle.value,
   description: () => productMetaDescription.value,
   ogTitle: () => product.value?.names?.ogTitle ?? productTitle.value,
-  ogDescription: () => product.value?.names?.ogDescription ?? productMetaDescription.value,
+  ogDescription: () =>
+    product.value?.names?.ogDescription ?? productMetaDescription.value,
   ogUrl: () => canonicalUrl.value,
   ogType: 'product',
   ogImage: () => ogImageUrl.value,
@@ -593,14 +650,17 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 
-const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(() => {
-  return (product.value?.scores?.scores ?? {}) as Record<string, ProductScoreDto | undefined>
-})
+const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
+  () => {
+    return (product.value?.scores?.scores ?? {}) as Record<
+      string,
+      ProductScoreDto | undefined
+    >
+  }
+)
 
 const resolveProductScoreById = (scoreId: string): ProductScoreDto | null => {
   const normalized = typeof scoreId === 'string' ? scoreId.trim() : ''
@@ -626,13 +686,20 @@ const resolveProductScoreById = (scoreId: string): ProductScoreDto | null => {
   return null
 }
 
-const isRenderableScore = (score: ProductScoreDto | undefined | null): score is ProductScoreDto & { id: string; name: string } => {
-  return typeof score?.id === 'string' && score.id.length > 0 && typeof score.name === 'string' && score.name.length > 0
+const isRenderableScore = (
+  score: ProductScoreDto | undefined | null
+): score is ProductScoreDto & { id: string; name: string } => {
+  return (
+    typeof score?.id === 'string' &&
+    score.id.length > 0 &&
+    typeof score.name === 'string' &&
+    score.name.length > 0
+  )
 }
 
 const selectedProductScores = computed(() => {
   return requestedScoreIds.value
-    .map((scoreId) => resolveProductScoreById(scoreId))
+    .map(scoreId => resolveProductScoreById(scoreId))
     .filter(isRenderableScore)
 })
 
@@ -640,26 +707,33 @@ const impactScores = computed(() => {
   const desiredScores = selectedProductScores.value
   const coefficients = scoreCoefficientMap.value
 
-  return desiredScores.map((score) => {
+  return desiredScores.map(score => {
     const normalizedScoreId = score.id?.toString().trim().toUpperCase() ?? ''
-    const attributeConfig = normalizedScoreId ? attributeConfigMap.value.get(normalizedScoreId) : undefined
-    const criterion = normalizedScoreId ? availableImpactCriteriaMap.value.get(normalizedScoreId) : undefined
+    const attributeConfig = normalizedScoreId
+      ? attributeConfigMap.value.get(normalizedScoreId)
+      : undefined
+    const criterion = normalizedScoreId
+      ? availableImpactCriteriaMap.value.get(normalizedScoreId)
+      : undefined
     const aggregation = aggregations.value[`score_${score.id}`]
     const distribution = (aggregation?.buckets ?? [])
       .map((bucket: AggregationBucketDto) => ({
         label: bucket.key != null ? String(bucket.key) : '',
         value: Number(bucket.count ?? 0),
       }))
-      .filter((bucket) => bucket.label.length > 0)
+      .filter(bucket => bucket.label.length > 0)
 
     // For ECOSCORE, use the absolute value; for subscores, use relative value
     const isEcoscore = score.id?.toUpperCase() === 'ECOSCORE'
-    const absoluteScoreValue = typeof score.value === 'number' && Number.isFinite(score.value)
-      ? score.value
-      : null
-    const relativeScoreValue = typeof score.relativ?.value === 'number' && Number.isFinite(score.relativ.value)
-      ? score.relativ.value
-      : null
+    const absoluteScoreValue =
+      typeof score.value === 'number' && Number.isFinite(score.value)
+        ? score.value
+        : null
+    const relativeScoreValue =
+      typeof score.relativ?.value === 'number' &&
+      Number.isFinite(score.relativ.value)
+        ? score.relativ.value
+        : null
 
     const participateInScores = attributeConfig?.participateInScores
       ? Array.from(attributeConfig.participateInScores)
@@ -667,11 +741,20 @@ const impactScores = computed(() => {
     const participateInACV = attributeConfig?.participateInACV
       ? Array.from(attributeConfig.participateInACV)
       : []
-    const attribute = normalizedScoreId ? findIndexedAttribute(normalizedScoreId) : null
-    const attributeValue = attribute ? resolveIndexedAttributeValue(attribute) : null
+    const attribute = normalizedScoreId
+      ? findIndexedAttribute(normalizedScoreId)
+      : null
+    const attributeValue = attribute
+      ? resolveIndexedAttributeValue(attribute)
+      : null
     const attributeSourcing = attribute?.sourcing ?? null
     const attributeSuffix = attributeConfig?.suffix ?? null
-    const aggregates = (score as ProductScoreDto & { aggregates?: Record<string, number> | null }).aggregates ?? null
+    const aggregates =
+      (
+        score as ProductScoreDto & {
+          aggregates?: Record<string, number> | null
+        }
+      ).aggregates ?? null
 
     return {
       id: score.id,
@@ -694,7 +777,8 @@ const impactScores = computed(() => {
       letter: score.letter ?? null,
       on20: score.on20 ?? null,
       distribution,
-      energyLetter: score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
+      energyLetter:
+        score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
       metadatas: score.metadatas ?? null,
       unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
       aggregates,
@@ -704,7 +788,11 @@ const impactScores = computed(() => {
   })
 })
 
-const formatBrandModelLabel = (brand: string, model: string, fallback: string): string => {
+const formatBrandModelLabel = (
+  brand: string,
+  model: string,
+  fallback: string
+): string => {
   const normalizedBrand = brand.trim()
   const normalizedModel = model.trim()
   if (normalizedBrand && normalizedModel) {
@@ -722,19 +810,23 @@ const formatBrandModelLabel = (brand: string, model: string, fallback: string): 
   return fallback.trim()
 }
 
-const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | undefined): string => {
+const resolveReferenceFallbackName = (
+  reference: ProductReferenceDto | null | undefined
+): string => {
   if (!reference) {
     return ''
   }
 
-  const bestName = typeof reference.bestName === 'string' ? reference.bestName.trim() : ''
+  const bestName =
+    typeof reference.bestName === 'string' ? reference.bestName.trim() : ''
   if (bestName.length) {
     return bestName
   }
 
-  const slug = typeof reference.fullSlug === 'string' ? reference.fullSlug.trim() : ''
+  const slug =
+    typeof reference.fullSlug === 'string' ? reference.fullSlug.trim() : ''
   if (slug.length) {
-    const segments = slug.split('/').filter((segment) => segment.trim().length)
+    const segments = slug.split('/').filter(segment => segment.trim().length)
     const lastSegment = segments[segments.length - 1]
     if (lastSegment?.length) {
       return lastSegment
@@ -744,10 +836,16 @@ const resolveReferenceFallbackName = (reference: ProductReferenceDto | null | un
   return ''
 }
 
-const findIndexedAttribute = (attributeId: string): ProductIndexedAttributeDto | null => {
+const findIndexedAttribute = (
+  attributeId: string
+): ProductIndexedAttributeDto | null => {
   const attributes = product.value?.attributes?.indexedAttributes ?? {}
   const normalizedId = attributeId.trim()
-  const candidates = [normalizedId, normalizedId.toUpperCase(), normalizedId.toLowerCase()]
+  const candidates = [
+    normalizedId,
+    normalizedId.toUpperCase(),
+    normalizedId.toLowerCase(),
+  ]
 
   for (const candidate of candidates) {
     const attribute = attributes[candidate]
@@ -759,16 +857,24 @@ const findIndexedAttribute = (attributeId: string): ProductIndexedAttributeDto |
   return null
 }
 
-const resolveIndexedAttributeValue = (attribute?: ProductIndexedAttributeDto | null): string | null => {
+const resolveIndexedAttributeValue = (
+  attribute?: ProductIndexedAttributeDto | null
+): string | null => {
   if (!attribute) {
     return null
   }
 
-  if (typeof attribute.value === 'string' && attribute.value.trim().length > 0) {
+  if (
+    typeof attribute.value === 'string' &&
+    attribute.value.trim().length > 0
+  ) {
     return attribute.value
   }
 
-  if (typeof attribute.numericValue === 'number' && Number.isFinite(attribute.numericValue)) {
+  if (
+    typeof attribute.numericValue === 'number' &&
+    Number.isFinite(attribute.numericValue)
+  ) {
     return String(attribute.numericValue)
   }
 
@@ -782,30 +888,49 @@ const resolveIndexedAttributeValue = (attribute?: ProductIndexedAttributeDto | n
 const findIndexedAttributeValue = (attributeId: string): string | null =>
   resolveIndexedAttributeValue(findIndexedAttribute(attributeId))
 
-const extractAbsoluteScoreValue = (score: ProductScoreDto | null | undefined): number | null => {
-  if (typeof score?.absolute?.value === 'number' && Number.isFinite(score.absolute.value)) {
+const extractAbsoluteScoreValue = (
+  score: ProductScoreDto | null | undefined
+): number | null => {
+  if (
+    typeof score?.absolute?.value === 'number' &&
+    Number.isFinite(score.absolute.value)
+  ) {
     return score.absolute.value
   }
 
   return resolveScoreNumericValue(score)?.value ?? null
 }
 
-const extractReferenceScoreValue = (reference: ProductReferenceDto | null | undefined, scoreId: string): number | null => {
+const extractReferenceScoreValue = (
+  reference: ProductReferenceDto | null | undefined,
+  scoreId: string
+): number | null => {
   if (!reference?.scores) {
     return null
   }
 
-  const rawScores = (reference.scores as { scores?: Record<string, unknown> } | Record<string, unknown> | null) ?? null
+  const rawScores =
+    (reference.scores as
+      | { scores?: Record<string, unknown> }
+      | Record<string, unknown>
+      | null) ?? null
   if (!rawScores) {
     return null
   }
 
-  const scoreContainer = 'scores' in rawScores && rawScores.scores && typeof rawScores.scores === 'object'
-    ? (rawScores.scores as Record<string, unknown>)
-    : (rawScores as Record<string, unknown>)
+  const scoreContainer =
+    'scores' in rawScores &&
+    rawScores.scores &&
+    typeof rawScores.scores === 'object'
+      ? (rawScores.scores as Record<string, unknown>)
+      : (rawScores as Record<string, unknown>)
 
   const normalizedId = scoreId.trim()
-  const candidates = [normalizedId, normalizedId.toUpperCase(), normalizedId.toLowerCase()]
+  const candidates = [
+    normalizedId,
+    normalizedId.toUpperCase(),
+    normalizedId.toLowerCase(),
+  ]
 
   for (const candidate of candidates) {
     if (!candidate) {
@@ -815,9 +940,11 @@ const extractReferenceScoreValue = (reference: ProductReferenceDto | null | unde
     const entry = scoreContainer[candidate]
     if (entry && typeof entry === 'object') {
       const asScore = entry as ProductScoreDto
-      const absoluteValue = typeof asScore?.absolute?.value === 'number' && Number.isFinite(asScore.absolute.value)
-        ? asScore.absolute.value
-        : null
+      const absoluteValue =
+        typeof asScore?.absolute?.value === 'number' &&
+        Number.isFinite(asScore.absolute.value)
+          ? asScore.absolute.value
+          : null
       const resolved = resolveScoreNumericValue(asScore)
 
       if (absoluteValue != null) {
@@ -847,15 +974,21 @@ interface RadarDataset {
 }
 
 const ecoscoreScore = computed(() => resolveProductScoreById('ECOSCORE'))
-const bestReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscoreScore.value?.highestScore ?? null)
-const worstReferenceProduct = computed<ProductReferenceDto | null>(() => ecoscoreScore.value?.lowestScore ?? null)
+const bestReferenceProduct = computed<ProductReferenceDto | null>(
+  () => ecoscoreScore.value?.highestScore ?? null
+)
+const worstReferenceProduct = computed<ProductReferenceDto | null>(
+  () => ecoscoreScore.value?.lowestScore ?? null
+)
 
 const radarData = computed<RadarDataset>(() => {
   const scores = selectedProductScores.value
-  const filteredScores = scores.filter((score) => score.id?.trim().toUpperCase() !== 'ECOSCORE')
+  const filteredScores = scores.filter(
+    score => score.id?.trim().toUpperCase() !== 'ECOSCORE'
+  )
 
   const axesDetails = filteredScores
-    .map((score) => {
+    .map(score => {
       const id = score.id?.trim()
       if (!id) {
         return null
@@ -864,7 +997,9 @@ const radarData = computed<RadarDataset>(() => {
       const name = score.name?.trim() ?? id
       const productValue = extractAbsoluteScoreValue(score)
 
-      if (!(typeof productValue === 'number' && Number.isFinite(productValue))) {
+      if (
+        !(typeof productValue === 'number' && Number.isFinite(productValue))
+      ) {
         return null
       }
 
@@ -880,34 +1015,44 @@ const radarData = computed<RadarDataset>(() => {
       }
     })
     .filter(
-      (entry): entry is {
+      (
+        entry
+      ): entry is {
         id: string
         name: string
         productValue: number
         attributeValue: string | null
         bestValue: number | null
         worstValue: number | null
-      } => Boolean(entry),
+      } => Boolean(entry)
     )
 
   if (!axesDetails.length) {
     return { axes: [], series: [] }
   }
 
-  const axes = axesDetails.map(({ id, name, attributeValue }) => ({ id, name, attributeValue }))
-  const productValues = axesDetails.map((entry) => entry.productValue)
-  const bestValues = axesDetails.map((entry) => entry.bestValue ?? null)
-  const worstValues = axesDetails.map((entry) => entry.worstValue ?? null)
+  const axes = axesDetails.map(({ id, name, attributeValue }) => ({
+    id,
+    name,
+    attributeValue,
+  }))
+  const productValues = axesDetails.map(entry => entry.productValue)
+  const bestValues = axesDetails.map(entry => entry.bestValue ?? null)
+  const worstValues = axesDetails.map(entry => entry.worstValue ?? null)
 
   const series: RadarSeriesEntry[] = []
 
   const productSeriesLabel = formatBrandModelLabel(
     productBrand.value,
     productModel.value,
-    productTitle.value,
+    productTitle.value
   )
 
-  if (productValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+  if (
+    productValues.some(
+      value => typeof value === 'number' && Number.isFinite(value)
+    )
+  ) {
     series.push({
       key: 'current',
       name: productSeriesLabel,
@@ -916,12 +1061,20 @@ const radarData = computed<RadarDataset>(() => {
   }
 
   const bestLabel = formatBrandModelLabel(
-    typeof bestReferenceProduct.value?.brand === 'string' ? bestReferenceProduct.value.brand : '',
-    typeof bestReferenceProduct.value?.model === 'string' ? bestReferenceProduct.value.model : '',
-    resolveReferenceFallbackName(bestReferenceProduct.value),
+    typeof bestReferenceProduct.value?.brand === 'string'
+      ? bestReferenceProduct.value.brand
+      : '',
+    typeof bestReferenceProduct.value?.model === 'string'
+      ? bestReferenceProduct.value.model
+      : '',
+    resolveReferenceFallbackName(bestReferenceProduct.value)
   )
 
-  if (bestValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+  if (
+    bestValues.some(
+      value => typeof value === 'number' && Number.isFinite(value)
+    )
+  ) {
     series.push({
       key: 'best',
       name: bestLabel,
@@ -930,12 +1083,20 @@ const radarData = computed<RadarDataset>(() => {
   }
 
   const worstLabel = formatBrandModelLabel(
-    typeof worstReferenceProduct.value?.brand === 'string' ? worstReferenceProduct.value.brand : '',
-    typeof worstReferenceProduct.value?.model === 'string' ? worstReferenceProduct.value.model : '',
-    resolveReferenceFallbackName(worstReferenceProduct.value),
+    typeof worstReferenceProduct.value?.brand === 'string'
+      ? worstReferenceProduct.value.brand
+      : '',
+    typeof worstReferenceProduct.value?.model === 'string'
+      ? worstReferenceProduct.value.model
+      : '',
+    resolveReferenceFallbackName(worstReferenceProduct.value)
   )
 
-  if (worstValues.some((value) => typeof value === 'number' && Number.isFinite(value))) {
+  if (
+    worstValues.some(
+      value => typeof value === 'number' && Number.isFinite(value)
+    )
+  ) {
     series.push({
       key: 'worst',
       name: worstLabel,
@@ -949,7 +1110,9 @@ const radarData = computed<RadarDataset>(() => {
   }
 })
 
-const { data: commercialEventsData } = await useAsyncData<CommercialEvent[] | null>(
+const { data: commercialEventsData } = await useAsyncData<
+  CommercialEvent[] | null
+>(
   'commercial-events',
   async () => {
     try {
@@ -959,12 +1122,14 @@ const { data: commercialEventsData } = await useAsyncData<CommercialEvent[] | nu
       return []
     }
   },
-  { server: true },
+  { server: true }
 )
 
 const commercialEvents = computed(() => commercialEventsData.value ?? [])
 
-const hcaptchaSiteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
+const hcaptchaSiteKey = computed(
+  () => runtimeConfig.public.hcaptchaSiteKey ?? ''
+)
 
 const showAdminSection = computed(() => isLoggedIn.value)
 const showAttributesSection = computed(() => {
@@ -976,9 +1141,9 @@ const showAttributesSection = computed(() => {
   const identity = currentProduct.identity
   const hasIdentityStrings = Boolean(
     identity &&
-      [identity.brand, identity.model, identity.bestName]
-        .filter((value): value is string => typeof value === 'string')
-        .some((value) => value.trim().length > 0),
+    [identity.brand, identity.model, identity.bestName]
+      .filter((value): value is string => typeof value === 'string')
+      .some(value => value.trim().length > 0)
   )
 
   const hasCollectionValues = (input: unknown): boolean => {
@@ -994,11 +1159,12 @@ const showAttributesSection = computed(() => {
   }
 
   const hasIdentityCollections =
-    hasCollectionValues(identity?.akaBrands) || hasCollectionValues(identity?.akaModels)
+    hasCollectionValues(identity?.akaBrands) ||
+    hasCollectionValues(identity?.akaModels)
 
   const attributes = currentProduct.attributes
   const hasIndexed = Object.keys(attributes?.indexedAttributes ?? {}).length > 0
-  const hasClassified = (attributes?.classifiedAttributes ?? []).some((group) => {
+  const hasClassified = (attributes?.classifiedAttributes ?? []).some(group => {
     if (!group) {
       return false
     }
@@ -1010,10 +1176,12 @@ const showAttributesSection = computed(() => {
     )
   })
 
-  return hasIdentityStrings || hasIdentityCollections || hasIndexed || hasClassified
+  return (
+    hasIdentityStrings || hasIdentityCollections || hasIndexed || hasClassified
+  )
 })
-const showAlternativesSection = computed(
-  () => Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0),
+const showAlternativesSection = computed(() =>
+  Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0)
 )
 
 const sectionIds = {
@@ -1032,10 +1200,30 @@ type NavigableSection = { id: string; label: string; icon: string }
 type ConditionalSection = NavigableSection & { condition: boolean }
 
 const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
-  { id: sectionIds.hero, label: t('product.navigation.overview'), icon: 'mdi-information-outline', condition: true },
-  { id: sectionIds.impact, label: t('product.navigation.impact'), icon: 'mdi-leaf', condition: impactScores.value.length > 0 },
-  { id: sectionIds.ai, label: t('product.navigation.ai'), icon: 'mdi-robot-outline', condition: true },
-  { id: sectionIds.price, label: t('product.navigation.price'), icon: 'mdi-currency-eur', condition: !!product.value?.offers },
+  {
+    id: sectionIds.hero,
+    label: t('product.navigation.overview'),
+    icon: 'mdi-information-outline',
+    condition: true,
+  },
+  {
+    id: sectionIds.impact,
+    label: t('product.navigation.impact'),
+    icon: 'mdi-leaf',
+    condition: impactScores.value.length > 0,
+  },
+  {
+    id: sectionIds.ai,
+    label: t('product.navigation.ai'),
+    icon: 'mdi-robot-outline',
+    condition: true,
+  },
+  {
+    id: sectionIds.price,
+    label: t('product.navigation.price'),
+    icon: 'mdi-currency-eur',
+    condition: !!product.value?.offers,
+  },
   {
     id: sectionIds.alternatives,
     label: t('product.navigation.alternatives'),
@@ -1058,8 +1246,8 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
 
 const primarySections = computed<NavigableSection[]>(() =>
   primarySectionDefinitions.value
-    .filter((section) => section.condition)
-    .map(({ condition: _condition, ...rest }) => rest),
+    .filter(section => section.condition)
+    .map(({ condition: _condition, ...rest }) => rest)
 )
 
 const adminSections = computed<NavigableSection[]>(() => {
@@ -1076,12 +1264,17 @@ const adminSections = computed<NavigableSection[]>(() => {
   ]
 })
 
-const sections = computed<NavigableSection[]>(() => [...primarySections.value, ...adminSections.value])
+const sections = computed<NavigableSection[]>(() => [
+  ...primarySections.value,
+  ...adminSections.value,
+])
 
 const navigableSections = computed(() => primarySections.value)
 const adminNavigableSections = computed(() => adminSections.value)
 
-const orientation = computed<'vertical' | 'horizontal'>(() => (display.mdAndDown.value ? 'horizontal' : 'vertical'))
+const orientation = computed<'vertical' | 'horizontal'>(() =>
+  display.mdAndDown.value ? 'horizontal' : 'vertical'
+)
 
 const activeSection = ref<string>(sectionIds.hero)
 
@@ -1096,7 +1289,8 @@ const refreshActiveSection = () => {
   }
 
   const sorted = [...visibleSectionRatios.entries()].sort((a, b) => b[1] - a[1])
-  const [nextActive] = sorted.find(([, ratio]) => ratio >= MIN_SECTION_RATIO) ?? sorted[0] ?? []
+  const [nextActive] =
+    sorted.find(([, ratio]) => ratio >= MIN_SECTION_RATIO) ?? sorted[0] ?? []
 
   if (nextActive) {
     activeSection.value = nextActive
@@ -1113,8 +1307,8 @@ const observeSections = () => {
   refreshActiveSection()
 
   observer.value = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
+    entries => {
+      entries.forEach(entry => {
         const ratio = entry.intersectionRatio
         if (ratio > 0) {
           visibleSectionRatios.set(entry.target.id, ratio)
@@ -1128,11 +1322,11 @@ const observeSections = () => {
     {
       rootMargin: '-15% 0px -35% 0px',
       threshold: Array.from({ length: 11 }, (_, index) => index / 10),
-    },
+    }
   )
 
   nextTick(() => {
-    sections.value.forEach((section) => {
+    sections.value.forEach(section => {
       const element = document.getElementById(section.id)
       if (element) {
         observer.value?.observe(element)
@@ -1140,6 +1334,34 @@ const observeSections = () => {
     })
   })
 }
+
+watch(
+  () => scrollY.value,
+  (current, previous) => {
+    if (!import.meta.client) {
+      return
+    }
+
+    const viewport =
+      viewportHeight.value ||
+      (typeof window !== 'undefined' ? window.innerHeight : 0)
+    if (viewport <= 0) {
+      return
+    }
+
+    const threshold = viewport * stickyBannerThresholdRatio
+    const previousValue = typeof previous === 'number' ? previous : 0
+    const isScrollingDown = current > previousValue
+    const isScrollingUp = current < previousValue
+
+    if (isScrollingDown && current > threshold) {
+      isStickyBannerOpen.value = true
+    } else if (isScrollingUp && current <= threshold) {
+      isStickyBannerOpen.value = false
+    }
+  },
+  { flush: 'post' }
+)
 
 onMounted(() => {
   observeSections()
@@ -1150,7 +1372,7 @@ watch(
   () => {
     observeSections()
   },
-  { flush: 'post' },
+  { flush: 'post' }
 )
 
 onBeforeUnmount(() => {
@@ -1194,17 +1416,19 @@ const errorMessage = computed(() => {
 const structuredOffers = computed(() => {
   const offersByCondition = product.value?.offers?.offersByCondition ?? {}
   const normalizedOffers = Object.values(offersByCondition)
-    .flatMap((entries) => entries ?? [])
+    .flatMap(entries => entries ?? [])
     .filter(
-      (offer): offer is {
+      (
+        offer
+      ): offer is {
         price: number
         url: string
         currency?: string | null
         condition?: string | null
         datasourceName?: string | null
-      } => typeof offer?.price === 'number' && Boolean(offer?.url),
+      } => typeof offer?.price === 'number' && Boolean(offer?.url)
     )
-    .map((offer) => ({
+    .map(offer => ({
       '@type': 'Offer',
       price: offer.price,
       priceCurrency: offer.currency ?? 'EUR',
@@ -1239,7 +1463,10 @@ const reviewStructuredData = computed(() => {
       '@type': 'Organization',
       name: 'Nudger IA',
     },
-    dateCreated: typeof createdTimestamp === 'number' ? new Date(createdTimestamp).toISOString() : undefined,
+    dateCreated:
+      typeof createdTimestamp === 'number'
+        ? new Date(createdTimestamp).toISOString()
+        : undefined,
   }
 })
 

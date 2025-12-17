@@ -77,10 +77,12 @@ const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
-const { data, pending, error, refresh } = await useAsyncData<TeamProperties>('team-roster', () =>
-  $fetch<TeamProperties>('/api/team', {
-    headers: requestHeaders,
-  })
+const { data, pending, error, refresh } = await useAsyncData<TeamProperties>(
+  'team-roster',
+  () =>
+    $fetch<TeamProperties>('/api/team', {
+      headers: requestHeaders,
+    })
 )
 
 const coreMembers = computed(() => data.value?.cores ?? [])
@@ -101,10 +103,15 @@ const partnersLink = computed(() => {
 
 const contactLink = computed(() => localePath('contact'))
 
-const canonicalUrl = computed(
-  () => new URL(resolveLocalizedRoutePath('team', locale.value), requestURL.origin).toString()
+const canonicalUrl = computed(() =>
+  new URL(
+    resolveLocalizedRoutePath('team', locale.value),
+    requestURL.origin
+  ).toString()
 )
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 
 useSeoMeta({
   title: () => String(t('team.seo.title')),
@@ -117,9 +124,7 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 </script>
 

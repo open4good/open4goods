@@ -8,7 +8,7 @@ import type {
 } from '~~/shared/api-client'
 
 const normaliseSourcesSet = (
-  sourcing: ProductAttributeSourceDto | null | undefined,
+  sourcing: ProductAttributeSourceDto | null | undefined
 ): void => {
   if (!sourcing) {
     return
@@ -16,16 +16,20 @@ const normaliseSourcesSet = (
 
   const { sources } = sourcing
   if (sources instanceof Set) {
-    ;(sourcing as ProductAttributeSourceDto & {
-      sources?: ProductAttributeSourceDto['sources'] | ProductSourcedAttributeDto[]
-    }).sources = Array.from(sources)
+    ;(
+      sourcing as ProductAttributeSourceDto & {
+        sources?:
+          | ProductAttributeSourceDto['sources']
+          | ProductSourcedAttributeDto[]
+      }
+    ).sources = Array.from(sources)
   }
 }
 
 const normaliseAttributeWithSourcing = (
   attribute:
     | (ProductAttributeDto | ProductIndexedAttributeDto | null | undefined)
-    | undefined,
+    | undefined
 ): void => {
   if (!attribute) {
     return
@@ -35,19 +39,21 @@ const normaliseAttributeWithSourcing = (
 }
 
 const normaliseAttributeCollection = (
-  collection?: Array<ProductAttributeDto | ProductIndexedAttributeDto | null | undefined> | null,
+  collection?: Array<
+    ProductAttributeDto | ProductIndexedAttributeDto | null | undefined
+  > | null
 ): void => {
   if (!collection) {
     return
   }
 
-  collection.forEach((attribute) => {
+  collection.forEach(attribute => {
     normaliseAttributeWithSourcing(attribute ?? undefined)
   })
 }
 
 const normaliseClassifiedGroup = (
-  group: ProductClassifiedAttributeGroupDto | null | undefined,
+  group: ProductClassifiedAttributeGroupDto | null | undefined
 ): void => {
   if (!group) {
     return
@@ -58,7 +64,9 @@ const normaliseClassifiedGroup = (
   normaliseAttributeCollection(group.unFeatures)
 }
 
-export const normaliseProductDto = <T extends ProductDto | null | undefined>(product: T): T => {
+export const normaliseProductDto = <T extends ProductDto | null | undefined>(
+  product: T
+): T => {
   if (!product) {
     return product
   }
@@ -66,13 +74,13 @@ export const normaliseProductDto = <T extends ProductDto | null | undefined>(pro
   const { attributes } = product
 
   if (attributes?.indexedAttributes) {
-    Object.values(attributes.indexedAttributes).forEach((attribute) => {
+    Object.values(attributes.indexedAttributes).forEach(attribute => {
       normaliseAttributeWithSourcing(attribute ?? undefined)
     })
   }
 
   if (attributes?.classifiedAttributes) {
-    attributes.classifiedAttributes.forEach((group) => {
+    attributes.classifiedAttributes.forEach(group => {
       normaliseClassifiedGroup(group)
     })
   }

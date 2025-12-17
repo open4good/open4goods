@@ -12,11 +12,13 @@ import type {
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 
 const normaliseSlug = (value: string | null | undefined) =>
-  value?.trim().replace(/^\/+|\/+$/g, '').toLowerCase() ?? ''
+  value
+    ?.trim()
+    .replace(/^\/+|\/+$/g, '')
+    .toLowerCase() ?? ''
 
 definePageMeta({
-  path:
-    '/:categorySlug/:guideSlug([A-Za-z][A-Za-z0-9-]*)',
+  path: '/:categorySlug/:guideSlug([A-Za-z][A-Za-z0-9-]*)',
   validate(route) {
     const raw = route.params.guideSlug
     const slug = Array.isArray(raw) ? raw.join('/') : String(raw ?? '')
@@ -30,7 +32,10 @@ definePageMeta({
       return false
     }
 
-    const category = typeof route.params.categorySlug === 'string' ? route.params.categorySlug : ''
+    const category =
+      typeof route.params.categorySlug === 'string'
+        ? route.params.categorySlug
+        : ''
     const slugSegments = Array.isArray(raw)
       ? raw.filter((segment): segment is string => typeof segment === 'string')
       : normalised
@@ -56,7 +61,9 @@ if (!categorySlug.value) {
 
 const rawSlugParam = route.params.guideSlug
 const slugSegments = Array.isArray(rawSlugParam)
-  ? rawSlugParam.filter((segment): segment is string => typeof segment === 'string')
+  ? rawSlugParam.filter(
+      (segment): segment is string => typeof segment === 'string'
+    )
   : typeof rawSlugParam === 'string'
     ? [rawSlugParam]
     : []
@@ -78,15 +85,25 @@ try {
   categoryDetail = await selectCategoryBySlug(categorySlug.value)
 } catch (error) {
   if (error instanceof Error && error.name === 'CategoryNotFoundError') {
-    throw createError({ statusCode: 404, statusMessage: 'Category not found', cause: error })
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Category not found',
+      cause: error,
+    })
   }
 
   console.error('Failed to resolve category for wiki guide', error)
-  throw createError({ statusCode: 500, statusMessage: 'Failed to load category', cause: error })
+  throw createError({
+    statusCode: 500,
+    statusMessage: 'Failed to load category',
+    cause: error,
+  })
 }
 
 const matchedPage =
-  categoryDetail.wikiPages?.find(page => normaliseSlug(page.verticalUrl) === normalisedSlug) ?? null
+  categoryDetail.wikiPages?.find(
+    page => normaliseSlug(page.verticalUrl) === normalisedSlug
+  ) ?? null
 
 if (!matchedPage) {
   throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
@@ -125,7 +142,9 @@ const resolvedGuideTitle = computed(() => {
   )
 })
 
-const truncatedGuideTitle = computed(() => truncateText(resolvedGuideTitle.value, 48))
+const truncatedGuideTitle = computed(() =>
+  truncateText(resolvedGuideTitle.value, 48)
+)
 
 const categoryName = computed(() => {
   return (
@@ -171,7 +190,7 @@ const otherGuideLinks = computed(() => {
     .filter((item): item is { title: string; to: string } => !!item?.to)
 
   const unique = new Map<string, { title: string; to: string }>()
-  mapped.forEach((item) => {
+  mapped.forEach(item => {
     if (!unique.has(item.to)) {
       unique.set(item.to, item)
     }
@@ -185,7 +204,7 @@ const relatedPostLinks = computed(() => {
 
   const mapped = posts
     .filter((post): post is BlogPostDto => !!post && typeof post === 'object')
-    .map((post) => {
+    .map(post => {
       const slug = post.url?.trim().replace(/^\/+/, '') ?? ''
 
       if (!slug.length) {
@@ -200,7 +219,7 @@ const relatedPostLinks = computed(() => {
     .filter((item): item is { title: string; to: string } => !!item?.to)
 
   const unique = new Map<string, { title: string; to: string }>()
-  mapped.forEach((item) => {
+  mapped.forEach(item => {
     if (!unique.has(item.to)) {
       unique.set(item.to, item)
     }
@@ -209,11 +228,12 @@ const relatedPostLinks = computed(() => {
   return Array.from(unique.values())
 })
 
-const shouldDisplaySidebar = computed(
-  () =>
-    Boolean(
-      categoryPath.value || otherGuideLinks.value.length || relatedPostLinks.value.length,
-    ),
+const shouldDisplaySidebar = computed(() =>
+  Boolean(
+    categoryPath.value ||
+    otherGuideLinks.value.length ||
+    relatedPostLinks.value.length
+  )
 )
 
 const categoryImage = computed(() => {
@@ -224,7 +244,7 @@ const categoryImage = computed(() => {
   ]
 
   const resolved = sources
-    .map((source) => source?.trim())
+    .map(source => source?.trim())
     .filter((source): source is string => Boolean(source && source.length))
     .at(0)
 
@@ -232,7 +252,7 @@ const categoryImage = computed(() => {
 })
 
 const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
-  const base = (categoryDetail.breadCrumb ?? []).map((item) => ({ ...item }))
+  const base = (categoryDetail.breadCrumb ?? []).map(item => ({ ...item }))
   const guideLeaf = truncatedGuideTitle.value
 
   if (guideLeaf) {

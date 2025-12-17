@@ -2,36 +2,59 @@
   <div class="nudge-step-scores">
     <div class="nudge-step-scores__header">
       <div>
-        <h2 class="nudge-step-scores__title">{{ $t('nudge-tool.steps.scores.title') }}</h2>
-        <p class="nudge-step-scores__subtitle">{{ $t('nudge-tool.steps.scores.subtitle') }}</p>
+        <h2 class="nudge-step-scores__title">
+          <v-icon
+            icon="mdi-numeric-2-circle"
+            color="accent-primary-highlight"
+            size="30"
+          />
+          {{ $t('nudge-tool.steps.scores.title') }}
+        </h2>
       </div>
-
     </div>
 
-    <v-row dense>
-      <v-col
-        v-for="score in scores"
-        :key="score.scoreName"
-        cols="12"
-        sm="6"
-      >
-        <v-card
-          class="nudge-step-scores__card"
-          :elevation="selectedNames.includes(score.scoreName ?? '') ? 6 : 2"
-          :variant="selectedNames.includes(score.scoreName ?? '') ? 'elevated' : 'tonal'"
-          rounded="xl"
-          role="button"
-          :aria-pressed="selectedNames.includes(score.scoreName ?? '')"
-          @click="toggle(score.scoreName ?? '')"
+    <v-row class="nudge-step-scores__grid">
+      <v-col v-for="score in scores" :key="score.scoreName" cols="12" sm="6">
+        <v-tooltip
+          location="top"
+          :text="score.description"
+          :disabled="!score.description"
         >
-          <div class="nudge-step-scores__icon">
-            <v-icon :icon="getScoreIcon(score)" size="28" />
-          </div>
-          <div class="nudge-step-scores__content">
-            <p class="nudge-step-scores__name">{{ score.title }}</p>
-            <p class="nudge-step-scores__description">{{ score.description }}</p>
-          </div>
-        </v-card>
+          <template #activator="{ props: activatorProps }">
+            <v-card
+              v-bind="activatorProps"
+              class="nudge-step-scores__card nudge-option-card" variant="flat" border="thin"
+              :class="{
+                'nudge-option-card--selected': isSelected(score.scoreName),
+                'nudge-step-scores__card--selected': isSelected(
+                  score.scoreName ?? ''
+                ),
+              }"
+              rounded="lg"
+              role="button"
+              :aria-pressed="isSelected(score.scoreName).toString()"
+              @click="toggle(score.scoreName ?? '')"
+            >
+              <div class="nudge-step-scores__top-row">
+                <div class="nudge-step-scores__titles">
+                  <p class="nudge-step-scores__name">{{ score.title }}</p>
+                  <p v-if="score.caption" class="nudge-step-scores__caption">
+                    {{ score.caption }}
+                  </p>
+                </div>
+                <div class="nudge-step-scores__icon-wrapper">
+                  <v-icon :icon="getScoreIcon(score)" size="28" />
+                  <v-icon
+                    v-if="isSelected(score.scoreName)"
+                    icon="mdi-check-circle"
+                    size="18"
+                    class="nudge-step-scores__check"
+                  />
+                </div>
+              </div>
+            </v-card>
+          </template>
+        </v-tooltip>
       </v-col>
     </v-row>
   </div>
@@ -45,11 +68,17 @@ const props = defineProps<{
   modelValue: string[]
 }>()
 
-const emit = defineEmits<{ (event: 'update:modelValue', value: string[]): void; (event: 'continue'): void }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string[]): void
+  (event: 'continue'): void
+}>()
 
 const selectedNames = computed(() => props.modelValue)
 
 const getScoreIcon = (score: NudgeToolScoreDto) => score.mdiIcon ?? 'mdi-leaf'
+
+const isSelected = (scoreName?: string | null) =>
+  scoreName ? selectedNames.value.includes(scoreName) : false
 
 const toggle = (scoreName: string) => {
   const next = new Set(selectedNames.value)
@@ -81,37 +110,66 @@ const toggle = (scoreName: string) => {
     margin: 0;
   }
 
-  &__subtitle {
-    margin: 0;
-    color: rgb(var(--v-theme-text-neutral-secondary));
+  &__grid {
+    row-gap: 12px;
   }
 
   &__card {
     display: flex;
-    gap: 12px;
-    padding: 16px;
+    flex-direction: column;
+    gap: 8px;
     height: 100%;
-    align-items: center;
+    border-radius: 22px;
+    padding: 14px 16px;
+    position: relative;
   }
 
-  &__icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--v-theme-primary), 0.08);
+  &__card--selected {
+    background: rgba(var(--v-theme-primary), 0.08) !important;
+  }
+
+  &__top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   &__name {
     margin: 0;
     font-weight: 700;
+    line-height: 1.4;
   }
 
-  &__description {
-    margin: 2px 0 0;
+  &__caption {
+    margin: 0;
     color: rgb(var(--v-theme-text-neutral-secondary));
+    font-size: 0.95rem;
+  }
+
+  &__icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(var(--v-theme-primary), 0.08);
+    position: relative;
+    color: rgb(var(--v-theme-primary));
+  }
+
+  &__check {
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    color: rgb(var(--v-theme-primary));
   }
 }
 </style>

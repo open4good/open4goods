@@ -9,28 +9,35 @@ import {
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
-type DomainLanguageEnum = typeof GtinDomainLanguageEnum[keyof typeof GtinDomainLanguageEnum]
+type DomainLanguageEnum =
+  (typeof GtinDomainLanguageEnum)[keyof typeof GtinDomainLanguageEnum]
 
 const resolveLanguageEnum = (
-  domainLanguage: DomainLanguage,
+  domainLanguage: DomainLanguage
 ): DomainLanguageEnum =>
-  domainLanguage === 'fr' ? GtinDomainLanguageEnum.Fr : GtinDomainLanguageEnum.En
+  domainLanguage === 'fr'
+    ? GtinDomainLanguageEnum.Fr
+    : GtinDomainLanguageEnum.En
 
-const resolveOverviewLanguageEnum = (
-  domainLanguage: DomainLanguage,
-) => (domainLanguage === 'fr' ? OverviewDomainLanguageEnum.Fr : OverviewDomainLanguageEnum.En)
+const resolveOverviewLanguageEnum = (domainLanguage: DomainLanguage) =>
+  domainLanguage === 'fr'
+    ? OverviewDomainLanguageEnum.Fr
+    : OverviewDomainLanguageEnum.En
 
 /**
  * Service responsible for fetching OpenData related metadata from the backend API.
  */
 export const useOpenDataService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: OpenDataApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useOpenDataService() is only available on the server runtime.')
+      throw new Error(
+        'useOpenDataService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {
@@ -75,4 +82,3 @@ export const useOpenDataService = (domainLanguage: DomainLanguage) => {
 
   return { fetchOverview, fetchGtinDataset, fetchIsbnDataset }
 }
-

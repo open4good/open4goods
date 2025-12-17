@@ -7,17 +7,22 @@ import { Configuration } from '..'
  * services can authenticate the proxy calls.
  */
 export const createBackendApiConfig = (): Configuration => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
 
   if (!isServerRuntime) {
-    throw new Error('createBackendApiConfig() can only be used on the server runtime.')
+    throw new Error(
+      'createBackendApiConfig() can only be used on the server runtime.'
+    )
   }
 
   const { apiUrl, machineToken } = useRuntimeConfig()
 
   if (!machineToken) {
-    throw new Error('Missing runtime configuration value "machineToken"; backend calls cannot be authenticated.')
+    throw new Error(
+      'Missing runtime configuration value "machineToken"; backend calls cannot be authenticated.'
+    )
   }
 
   return new Configuration({

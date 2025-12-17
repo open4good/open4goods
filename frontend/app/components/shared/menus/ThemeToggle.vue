@@ -39,22 +39,6 @@
         </v-btn>
       </template>
     </v-tooltip>
-
-    <v-tooltip :text="nudgerTooltip" location="bottom">
-      <template #activator="{ props: tooltipProps }">
-        <v-btn
-          v-bind="tooltipProps"
-          :value="'nudger'"
-          :aria-label="nudgerAriaLabel"
-          :data-testid="`${testId}-nudger`"
-          :size="size"
-          icon
-          variant="plain"
-        >
-          <v-icon icon="mdi-gradient-horizontal" />
-        </v-btn>
-      </template>
-    </v-tooltip>
   </v-btn-toggle>
 </template>
 
@@ -64,7 +48,11 @@ import { computed, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 
-import { THEME_PREFERENCE_KEY, resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
+import {
+  THEME_PREFERENCE_KEY,
+  resolveThemeName,
+  type ThemeName,
+} from '~~/shared/constants/theme'
 
 const props = withDefaults(
   defineProps<{
@@ -76,20 +64,20 @@ const props = withDefaults(
     density: 'comfortable',
     size: 'small',
     testId: 'theme-toggle',
-  },
+  }
 )
 
 const { t } = useI18n()
 const theme = useTheme()
 const preferredDark = usePreferredDark()
-const themeCookie = useCookie<ThemeName | null>(THEME_PREFERENCE_KEY, {
+const themeCookie = useCookie<string | null>(THEME_PREFERENCE_KEY, {
   sameSite: 'lax',
   path: '/',
   watch: false,
 })
 const storedPreference = useStorage<ThemeName>(
   THEME_PREFERENCE_KEY,
-  resolveThemeName(themeCookie.value, preferredDark.value ? 'dark' : 'light'),
+  resolveThemeName(themeCookie.value, preferredDark.value ? 'dark' : 'light')
 )
 
 const applyTheme = (value: ThemeName) => {
@@ -102,7 +90,8 @@ const applyTheme = (value: ThemeName) => {
   }
 
   const isClient = typeof window !== 'undefined'
-  const shouldPersistCookie = isClient || value === 'dark' || themeCookie.value != null
+  const shouldPersistCookie =
+    isClient || value === 'dark' || themeCookie.value != null
 
   if (shouldPersistCookie && themeCookie.value !== value) {
     themeCookie.value = value
@@ -115,20 +104,20 @@ watch(
     const nextTheme = resolveThemeName(stored, prefersDark ? 'dark' : 'light')
     applyTheme(nextTheme)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const selectedTheme = computed<ThemeName>({
   get: () => resolveThemeName(theme.global.name.value),
-  set: (value) => applyTheme(value),
+  set: value => applyTheme(value),
 })
 
 const lightTooltip = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
 const darkTooltip = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
-const nudgerTooltip = computed(() => t('siteIdentity.menu.theme.nudgerTooltip'))
-const lightAriaLabel = computed(() => t('siteIdentity.menu.theme.lightAriaLabel'))
+const lightAriaLabel = computed(() =>
+  t('siteIdentity.menu.theme.lightAriaLabel')
+)
 const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
-const nudgerAriaLabel = computed(() => t('siteIdentity.menu.theme.nudgerAriaLabel'))
 
 const density = toRef(props, 'density')
 const size = toRef(props, 'size')

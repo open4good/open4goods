@@ -22,7 +22,11 @@
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
           itemprop="item"
         >
-          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+          <span
+            class="category-navigation-breadcrumbs__label"
+            itemprop="name"
+            >{{ item.title }}</span
+          >
         </NuxtLink>
 
         <a
@@ -32,7 +36,11 @@
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
           itemprop="item"
         >
-          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+          <span
+            class="category-navigation-breadcrumbs__label"
+            itemprop="name"
+            >{{ item.title }}</span
+          >
         </a>
 
         <span
@@ -40,7 +48,11 @@
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
           aria-current="page"
         >
-          <span class="category-navigation-breadcrumbs__label" itemprop="name">{{ item.title }}</span>
+          <span
+            class="category-navigation-breadcrumbs__label"
+            itemprop="name"
+            >{{ item.title }}</span
+          >
         </span>
 
         <span
@@ -49,6 +61,7 @@
           aria-hidden="true"
         >
           {{ separator }}
+
         </span>
 
         <meta itemprop="position" :content="String(index + 1)" />
@@ -83,7 +96,9 @@ const props = withDefaults(
   },
 )
 
-const visibleItems = computed(() => props.items.filter((item) => item.title?.trim().length))
+const visibleItems = computed(() =>
+  props.items.filter(item => item.title?.trim().length)
+)
 
 const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   const items = visibleItems.value
@@ -102,6 +117,7 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
 
     const normalized = rawLink.startsWith('/') || rawLink.startsWith('#') ? rawLink : `/${rawLink}`
     return { title: item.title, type: 'internal', to: normalized }
+
   })
 })
 </script>
@@ -161,7 +177,8 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   font-weight: 500;
 }
 
-.category-navigation-breadcrumbs__item:last-child .category-navigation-breadcrumbs__label {
+.category-navigation-breadcrumbs__item:last-child
+  .category-navigation-breadcrumbs__label {
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
 }

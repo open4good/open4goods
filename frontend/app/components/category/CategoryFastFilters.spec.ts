@@ -41,7 +41,10 @@ const resolveClassList = (value: unknown): string => {
   }
 
   if (Array.isArray(value)) {
-    return value.map((entry) => resolveClassList(entry)).filter(Boolean).join(' ')
+    return value
+      .map(entry => resolveClassList(entry))
+      .filter(Boolean)
+      .join(' ')
   }
 
   if (typeof value === 'object') {
@@ -61,7 +64,10 @@ const VChipGroupStub = defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { slots, attrs }) {
-    const className = ['v-chip-group-stub', resolveClassList((attrs as Record<string, unknown>).class)]
+    const className = [
+      'v-chip-group-stub',
+      resolveClassList((attrs as Record<string, unknown>).class),
+    ]
       .filter(Boolean)
       .join(' ')
 
@@ -73,9 +79,9 @@ const VChipGroupStub = defineComponent({
           class: className,
           'data-model-value': Array.isArray(props.modelValue)
             ? JSON.stringify(props.modelValue)
-            : props.modelValue ?? '',
+            : (props.modelValue ?? ''),
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -88,7 +94,10 @@ const VChipStub = defineComponent({
   },
   emits: ['click', 'click:close'],
   setup(props, { slots, emit, attrs }) {
-    const className = ['v-chip-stub', resolveClassList((attrs as Record<string, unknown>).class)]
+    const className = [
+      'v-chip-stub',
+      resolveClassList((attrs as Record<string, unknown>).class),
+    ]
       .filter(Boolean)
       .join(' ')
 
@@ -124,10 +133,10 @@ const VChipStub = defineComponent({
                     handleClose(event)
                   },
                 },
-                '×',
+                '×'
               )
             : null,
-        ],
+        ]
       )
   },
 })
@@ -139,7 +148,10 @@ const VTooltipStub = defineComponent({
     location: { type: String, default: 'bottom' },
   },
   setup(props, { slots, attrs }) {
-    const className = ['v-tooltip-stub', resolveClassList((attrs as Record<string, unknown>).class)]
+    const className = [
+      'v-tooltip-stub',
+      resolveClassList((attrs as Record<string, unknown>).class),
+    ]
       .filter(Boolean)
       .join(' ')
 
@@ -152,7 +164,7 @@ const VTooltipStub = defineComponent({
           'data-text': props.text,
           'data-location': props.location,
         },
-        [slots.activator?.({ props: {} }), slots.default?.()],
+        [slots.activator?.({ props: {} }), slots.default?.()]
       )
   },
 })
@@ -164,7 +176,10 @@ const VBtnStub = defineComponent({
   },
   emits: ['click'],
   setup(props, { slots, emit, attrs }) {
-    const className = ['v-btn-stub', resolveClassList((attrs as Record<string, unknown>).class)]
+    const className = [
+      'v-btn-stub',
+      resolveClassList((attrs as Record<string, unknown>).class),
+    ]
       .filter(Boolean)
       .join(' ')
 
@@ -177,7 +192,7 @@ const VBtnStub = defineComponent({
           type: props.type ?? 'button',
           onClick: (event: MouseEvent) => emit('click', event),
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -188,7 +203,10 @@ const VIconStub = defineComponent({
     icon: { type: String, default: '' },
   },
   setup(props, { slots, attrs }) {
-    const className = ['v-icon-stub', resolveClassList((attrs as Record<string, unknown>).class)]
+    const className = [
+      'v-icon-stub',
+      resolveClassList((attrs as Record<string, unknown>).class),
+    ]
       .filter(Boolean)
       .join(' ')
 
@@ -200,7 +218,7 @@ const VIconStub = defineComponent({
           class: className,
           'data-icon': props.icon,
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -224,7 +242,11 @@ const sampleSubsets: VerticalSubsetDto[] = [
     title: 'TV haut de gamme',
     description: 'Les TV dont le prix est supérieur à 1000€.',
     criterias: [
-      { field: 'price.minPrice.price', operator: 'GREATER_THAN', value: '1000' },
+      {
+        field: 'price.minPrice.price',
+        operator: 'GREATER_THAN',
+        value: '1000',
+      },
     ],
   },
   {
@@ -243,7 +265,12 @@ const sampleSubsets: VerticalSubsetDto[] = [
   },
 ]
 
-const mountComponent = async (overrides: Partial<{ subsets: VerticalSubsetDto[]; activeSubsetIds: string[] }> = {}) => {
+const mountComponent = async (
+  overrides: Partial<{
+    subsets: VerticalSubsetDto[]
+    activeSubsetIds: string[]
+  }> = {}
+) => {
   const module = await import('./CategoryFastFilters.vue')
   const Component = module.default
 
@@ -293,7 +320,7 @@ describe('CategoryFastFilters', () => {
     const groups = wrapper.findAll('.category-fast-filters__group')
     expect(groups).toHaveLength(2)
 
-    const groupLabels = groups.map((node) => node.attributes('aria-label'))
+    const groupLabels = groups.map(node => node.attributes('aria-label'))
     expect(groupLabels).toEqual(['Price', 'Screen size'])
 
     const tooltipNodes = wrapper.findAll('.v-tooltip-stub')
@@ -313,7 +340,10 @@ describe('CategoryFastFilters', () => {
     expect(priceGroup).toBeDefined()
     priceGroup!.vm.$emit('update:modelValue', 'price_lower_500')
 
-    expect(wrapper.emitted('toggle-subset')).toContainEqual(['price_lower_500', true])
+    expect(wrapper.emitted('toggle-subset')).toContainEqual([
+      'price_lower_500',
+      true,
+    ])
 
     await wrapper.setProps({ activeSubsetIds: ['price_lower_500'] })
 
@@ -341,16 +371,24 @@ describe('CategoryFastFilters', () => {
     const scroller = wrapper.find('.category-fast-filters__scroller')
     expect(scroller.exists()).toBe(true)
 
-    const element = scroller.element as HTMLElement & { scrollTo: (options: ScrollToOptions) => void }
+    const element = scroller.element as HTMLElement & {
+      scrollTo: (options: ScrollToOptions) => void
+    }
     const scrollToSpy = vi.fn()
     let currentScrollLeft = 0
 
-    Object.defineProperty(element, 'clientWidth', { configurable: true, value: 200 })
-    Object.defineProperty(element, 'scrollWidth', { configurable: true, value: 500 })
+    Object.defineProperty(element, 'clientWidth', {
+      configurable: true,
+      value: 200,
+    })
+    Object.defineProperty(element, 'scrollWidth', {
+      configurable: true,
+      value: 500,
+    })
     Object.defineProperty(element, 'scrollLeft', {
       configurable: true,
       get: () => currentScrollLeft,
-      set: (value) => {
+      set: value => {
         currentScrollLeft = value
       },
     })
@@ -359,7 +397,9 @@ describe('CategoryFastFilters', () => {
     window.dispatchEvent(new Event('resize'))
     await wrapper.vm.$nextTick()
 
-    const nextButton = wrapper.find('[data-testid="category-fast-filters-next"]')
+    const nextButton = wrapper.find(
+      '[data-testid="category-fast-filters-next"]'
+    )
     expect(nextButton.exists()).toBe(true)
 
     await nextButton.trigger('click')
@@ -369,7 +409,9 @@ describe('CategoryFastFilters', () => {
     element.dispatchEvent(new Event('scroll'))
     await wrapper.vm.$nextTick()
 
-    const prevButton = wrapper.find('[data-testid="category-fast-filters-prev"]')
+    const prevButton = wrapper.find(
+      '[data-testid="category-fast-filters-prev"]'
+    )
     expect(prevButton.exists()).toBe(true)
   })
 })

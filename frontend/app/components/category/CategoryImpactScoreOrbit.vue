@@ -16,14 +16,21 @@
       </div>
 
       <p class="impact-orbit__subtitle">
-        {{ t('category.ecoscorePage.sections.overview.visualization.subtitle', { category: categoryName }) }}
+        {{
+          t('category.ecoscorePage.sections.overview.visualization.subtitle', {
+            category: categoryName,
+          })
+        }}
       </p>
     </div>
 
     <!-- BODY -->
     <div class="impact-orbit__layout">
       <!-- CENTER BLOCK -->
-      <section class="impact-orbit__center-wrapper" aria-label="Impact score global">
+      <section
+        class="impact-orbit__center-wrapper"
+        aria-label="Impact score global"
+      >
         <div class="impact-orbit__center-orbit" aria-hidden="true">
           <div class="impact-orbit__ring impact-orbit__ring--outer" />
           <div class="impact-orbit__ring impact-orbit__ring--inner" />
@@ -43,14 +50,24 @@
                 {{ categoryName }}
               </div>
               <p class="impact-orbit__center-label">
-                {{ t('category.ecoscorePage.sections.overview.visualization.centerLabel', { category: categoryName }) }}
+                {{
+                  t(
+                    'category.ecoscorePage.sections.overview.visualization.centerLabel',
+                    { category: categoryName }
+                  )
+                }}
               </p>
             </div>
           </div>
 
           <div class="impact-orbit__center-score">
             <div class="impact-orbit__center-score-label">
-              {{ t('category.ecoscorePage.sections.overview.visualization.centerLabel', { category: categoryName }) }}
+              {{
+                t(
+                  'category.ecoscorePage.sections.overview.visualization.centerLabel',
+                  { category: categoryName }
+                )
+              }}
             </div>
 
             <ImpactScore
@@ -67,7 +84,10 @@
       </section>
 
       <!-- CRITERIA LIST -->
-      <section class="impact-orbit__criteria" aria-label="Répartition par critère">
+      <section
+        class="impact-orbit__criteria"
+        aria-label="Répartition par critère"
+      >
         <article
           v-for="criterion in criteria"
           :key="criterion.key"
@@ -93,7 +113,9 @@
                   v-if="criterion.score != null"
                   class="impact-orbit__criterion-score"
                 >
-                  {{ formatCriterionScore(criterion.score, criterion.maxScore) }}
+                  {{
+                    formatCriterionScore(criterion.score, criterion.maxScore)
+                  }}
                 </span>
               </div>
 
@@ -103,7 +125,12 @@
               >
                 <div
                   class="impact-orbit__criterion-score-bar-fill"
-                  :style="{ '--score-ratio': getCriterionRatio(criterion.score, criterion.maxScore) }"
+                  :style="{
+                    '--score-ratio': getCriterionRatio(
+                      criterion.score,
+                      criterion.maxScore
+                    ),
+                  }"
                 />
               </div>
             </div>
@@ -183,7 +210,9 @@ const { t } = useI18n()
 
 const weightLabel = (value?: number | null) => {
   if (value == null || Number.isNaN(value)) {
-    return t('category.ecoscorePage.sections.overview.visualization.weightFallback')
+    return t(
+      'category.ecoscorePage.sections.overview.visualization.weightFallback'
+    )
   }
 
   return t('category.ecoscorePage.sections.overview.visualization.weight', {
@@ -193,7 +222,7 @@ const weightLabel = (value?: number | null) => {
 
 const formatCriterionScore = (
   value?: number | null,
-  maxValue?: number | null,
+  maxValue?: number | null
 ) => {
   if (value == null || Number.isNaN(value)) {
     return '–'
@@ -208,10 +237,7 @@ const formatCriterionScore = (
   return `${formatter.format(value)} / ${formatter.format(effectiveMax)}`
 }
 
-const getCriterionRatio = (
-  value?: number | null,
-  maxValue?: number | null,
-) => {
+const getCriterionRatio = (value?: number | null, maxValue?: number | null) => {
   if (value == null || Number.isNaN(value)) {
     return 0
   }

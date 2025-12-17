@@ -16,7 +16,10 @@ defineProps<{
 </script>
 
 <template>
-  <section class="opensource-contribution" aria-labelledby="opensource-contribution-title">
+  <section
+    class="opensource-contribution"
+    aria-labelledby="opensource-contribution-title"
+  >
     <v-container class="py-14">
       <div class="section-header">
         <v-chip
@@ -28,12 +31,19 @@ defineProps<{
         >
           {{ eyebrow }}
         </v-chip>
-        <h2 id="opensource-contribution-title" class="section-title">{{ title }}</h2>
+        <h2 id="opensource-contribution-title" class="section-title">
+          {{ title }}
+        </h2>
         <TextContent :bloc-id="descriptionBlocId" :ipsum-length="200" />
       </div>
 
       <div class="steps-grid" role="list">
-        <article v-for="(step, index) in steps" :key="step.title" class="step-card" role="listitem">
+        <article
+          v-for="(step, index) in steps"
+          :key="step.title"
+          class="step-card"
+          role="listitem"
+        >
           <header class="step-header">
             <div class="step-index" aria-hidden="true">{{ index + 1 }}</div>
             <div class="step-icon">

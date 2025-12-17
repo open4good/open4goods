@@ -34,14 +34,14 @@ pnpm cap:sync
 
 1. Open the generated `android/` folder in Android Studio.
 2. Update `android/app/src/main/AndroidManifest.xml` with the correct package name, icons and deep links if needed.
-3. Create or import your keystore under *Build > Generate Signed Bundle/APK*.
+3. Create or import your keystore under _Build > Generate Signed Bundle/APK_.
 4. Build an `.aab` for the Play Store (`Release` variant).
 5. Upload the bundle through the Play Console and fill the store listing (screenshots from `app/public/pwa-assets/screenshots`).
 
 ## iOS build steps
 
 1. Open `ios/App/App.xcworkspace` in Xcode on macOS.
-2. Set the bundle identifier, display name and icons inside the *General* tab.
+2. Set the bundle identifier, display name and icons inside the _General_ tab.
 3. Configure signing & capabilities with your Apple Developer Team.
 4. Archive the build (`Product > Archive`) and distribute it to TestFlight/App Store Connect.
 

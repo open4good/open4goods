@@ -34,7 +34,7 @@ const props = withDefaults(
     eyebrow: undefined,
     primaryCta: undefined,
     educationCard: undefined,
-  },
+  }
 )
 
 const handlePrimaryClick = (event: MouseEvent) => {
@@ -57,7 +57,9 @@ const handleSubtitleClick = (event: MouseEvent) => {
     return
   }
 
-  const anchor = (event.target as HTMLElement | null)?.closest('[data-scroll-target]')
+  const anchor = (event.target as HTMLElement | null)?.closest(
+    '[data-scroll-target]'
+  )
   const targetSelector = anchor?.getAttribute('data-scroll-target')
 
   if (anchor && targetSelector) {
@@ -71,40 +73,53 @@ const handleSubtitleClick = (event: MouseEvent) => {
 </script>
 
 <template>
-  <HeroSurface class="opendata-hero" aria-labelledby="opendata-hero-heading" variant="orbit">
+  <HeroSurface
+    class="opendata-hero"
+    aria-labelledby="opendata-hero-heading"
+    variant="orbit"
+  >
     <v-container class="py-16" max-width="lg">
       <v-row align="center" class="g-8">
         <v-col cols="12" md="7" class="d-flex flex-column gap-6">
           <div class="opendata-hero__header">
-            <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{ eyebrow }}</span>
-            <h1 id="opendata-hero-heading" class="opendata-hero__title">{{ title }}</h1>
+            <span v-if="eyebrow" class="opendata-hero__eyebrow" role="text">{{
+              eyebrow
+            }}</span>
+            <h1 id="opendata-hero-heading" class="opendata-hero__title">
+              {{ title }}
+            </h1>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="opendata-hero__subtitle" @click="handleSubtitleClick" v-html="subtitle" />
+            <p
+              class="opendata-hero__subtitle"
+              @click="handleSubtitleClick"
+              v-html="subtitle"
+            />
           </div>
 
-
-            <div class="mt-4 opendata-hero__actions" role="group">
-              <v-btn
-                v-if="primaryCta"
-                :href="primaryCta.href"
-                :aria-label="primaryCta.ariaLabel"
-                :variant="primaryCta.variant ?? 'flat'"
-                :color="primaryCta.color ?? 'primary'"
-                size="large"
-                class="opendata-hero__cta"
-                :append-icon="primaryCta.appendIcon ?? 'mdi-arrow-right'"
-                @click="handlePrimaryClick"
-              >
-                {{ primaryCta.label }}
-              </v-btn>
-            </div>
+          <div class="mt-4 opendata-hero__actions" role="group">
+            <v-btn
+              v-if="primaryCta"
+              :href="primaryCta.href"
+              :aria-label="primaryCta.ariaLabel"
+              :variant="primaryCta.variant ?? 'flat'"
+              :color="primaryCta.color ?? 'primary'"
+              size="large"
+              class="opendata-hero__cta"
+              :append-icon="primaryCta.appendIcon ?? 'mdi-arrow-right'"
+              @click="handlePrimaryClick"
+            >
+              {{ primaryCta.label }}
+            </v-btn>
+          </div>
         </v-col>
 
         <v-col cols="12" md="5" class="opendata-hero__visual">
           <div class="opendata-hero__glow" aria-hidden="true">
             <div class="opendata-hero__glow-ring" />
-            <div class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary" />
-              <span v-for="index in 6" :key="index" />
+            <div
+              class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary"
+            />
+            <span v-for="index in 6" :key="index" />
           </div>
 
           <HeroEducationCard
@@ -201,4 +216,3 @@ const handleSubtitleClick = (event: MouseEvent) => {
   .opendata-hero__education-card
     max-width: none
 </style>
-

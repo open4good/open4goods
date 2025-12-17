@@ -14,12 +14,17 @@ const props = withDefaults(
   {
     bodyHtml: undefined,
     items: () => [],
-  },
+  }
 )
 </script>
 
 <template>
-  <v-card class="hero-education-card" elevation="12" rounded="xl" aria-hidden="true">
+  <v-card
+    class="hero-education-card"
+    elevation="12"
+    rounded="xl"
+    aria-hidden="true"
+  >
     <div class="hero-education-card__header">
       <v-icon :icon="props.icon" class="hero-education-card__icon" size="64" />
       <h2 class="hero-education-card__title">{{ props.title }}</h2>

@@ -1,9 +1,6 @@
 <template>
   <article class="impact-subscore">
-    <ProductImpactSubscoreHeader
-      :title="score.label"
-      :on20="score.on20"
-    />
+    <ProductImpactSubscoreHeader :title="score.label" :on20="score.on20" />
 
     <div class="impact-subscore__value">
       <div class="impact-subscore__value-primary">
@@ -18,7 +15,9 @@
           <div class="impact-subscore__value-default">
             <span class="impact-subscore__value-number">
               {{ absoluteValue ?? '—' }}
-              <span v-if="absoluteUnit" class="impact-subscore__value-unit">{{ absoluteUnit }}</span>
+              <span v-if="absoluteUnit" class="impact-subscore__value-unit">{{
+                absoluteUnit
+              }}</span>
             </span>
           </div>
         </slot>
@@ -42,7 +41,11 @@
       :label="score.label"
     />
 
-    <v-expansion-panels v-if="hasDetails" class="impact-subscore__details" variant="accordion">
+    <v-expansion-panels
+      v-if="hasDetails"
+      class="impact-subscore__details"
+      variant="accordion"
+    >
       <v-expansion-panel elevation="0" rounded="lg">
         <v-expansion-panel-title class="impact-subscore__details-title">
           {{ $t('product.impact.subscoreDetailsToggle') }}
@@ -100,11 +103,13 @@ const absoluteValue = computed(() => {
 
 const absoluteUnit = computed(() => props.score.unit?.toString().trim() || null)
 
-const hasDistribution = computed(() => Boolean(props.score.distribution?.length))
+const hasDistribution = computed(() =>
+  Boolean(props.score.distribution?.length)
+)
 const hasMetadata = computed(() =>
   Object.values(props.score.metadatas ?? {})
-    .map((value) => (value == null ? null : String(value).trim()))
-    .some((value) => (value?.length ?? 0) > 0),
+    .map(value => (value == null ? null : String(value).trim()))
+    .some(value => (value?.length ?? 0) > 0)
 )
 
 const hasRanking = computed(() => {
@@ -118,11 +123,21 @@ const hasRanking = computed(() => {
 })
 
 const hasDetails = computed(() => {
-  const hasDescription = typeof props.score.description === 'string' && props.score.description.trim().length > 0
-  return hasDescription || Boolean(absoluteValue.value) || hasRanking.value || hasMetadata.value || hasImportance.value
+  const hasDescription =
+    typeof props.score.description === 'string' &&
+    props.score.description.trim().length > 0
+  return (
+    hasDescription ||
+    Boolean(absoluteValue.value) ||
+    hasRanking.value ||
+    hasMetadata.value ||
+    hasImportance.value
+  )
 })
 
-const importanceDescription = computed(() => props.score.importanceDescription?.toString().trim() || '')
+const importanceDescription = computed(
+  () => props.score.importanceDescription?.toString().trim() || ''
+)
 const hasImportance = computed(() => importanceDescription.value.length > 0)
 
 const productAbsoluteValue = computed(() => {
@@ -136,7 +151,10 @@ const productAbsoluteValue = computed(() => {
     return directValue
   }
 
-  if (typeof props.score.absoluteValue === 'number' && Number.isFinite(props.score.absoluteValue)) {
+  if (
+    typeof props.score.absoluteValue === 'number' &&
+    Number.isFinite(props.score.absoluteValue)
+  ) {
     return props.score.absoluteValue
   }
 

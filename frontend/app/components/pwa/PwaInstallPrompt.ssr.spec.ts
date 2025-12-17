@@ -16,13 +16,16 @@ describe('PWA install prompt SSR', () => {
     // @ts-expect-error - window is intentionally unset to emulate SSR
     globalThis.window = undefined
 
-    mockNuxtImport('useCookie', () => (name: string, options?: { default?: () => boolean }) => {
-      if (options?.default) {
-        cookiesWithDefaults.push(name)
-      }
+    mockNuxtImport(
+      'useCookie',
+      () => (name: string, options?: { default?: () => boolean }) => {
+        if (options?.default) {
+          cookiesWithDefaults.push(name)
+        }
 
-      return ref(undefined)
-    })
+        return ref(undefined)
+      }
+    )
 
     const { usePwaPrompt } = await import('~~/app/composables/usePwaPrompt')
 

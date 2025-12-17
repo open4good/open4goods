@@ -19,7 +19,9 @@ describe('mergeFilterRequests', () => {
     }
     const secondary: FilterRequestDto = {
       filters: [{ field: 'fieldB', operator: 'term', terms: ['b'] }],
-      filterGroups: [{ must: [{ field: 'groupB', operator: 'range', max: 10 }] }],
+      filterGroups: [
+        { must: [{ field: 'groupB', operator: 'range', max: 10 }] },
+      ],
     }
 
     expect(mergeFilterRequests(primary, secondary)).toEqual({
@@ -37,11 +39,15 @@ describe('mergeFilterRequests', () => {
 
   it('keeps filter groups when no plain filters exist', () => {
     const primary: FilterRequestDto = {
-      filterGroups: [{ must: [{ field: 'only-group', operator: 'term', terms: ['x'] }] }],
+      filterGroups: [
+        { must: [{ field: 'only-group', operator: 'term', terms: ['x'] }] },
+      ],
     }
 
     expect(mergeFilterRequests(primary, undefined)).toEqual({
-      filterGroups: [{ must: [{ field: 'only-group', operator: 'term', terms: ['x'] }] }],
+      filterGroups: [
+        { must: [{ field: 'only-group', operator: 'term', terms: ['x'] }] },
+      ],
     })
   })
 

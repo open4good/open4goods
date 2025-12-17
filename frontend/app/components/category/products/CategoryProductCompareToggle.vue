@@ -21,7 +21,11 @@
         @click.stop.prevent="toggle"
       >
         <template v-if="isSelected">
-          <span class="category-product-compare-toggle__minus" aria-hidden="true">&minus;</span>
+          <span
+            class="category-product-compare-toggle__minus"
+            aria-hidden="true"
+            >&minus;</span
+          >
         </template>
         <template v-else>
           <v-icon :icon="icon" :size="iconSize" />
@@ -49,7 +53,7 @@ const props = withDefaults(
   {
     icon: 'mdi-compare-horizontal',
     size: 'comfortable',
-  },
+  }
 )
 
 defineOptions({ inheritAttrs: false })
@@ -63,8 +67,8 @@ const compareStore = useProductCompareStore()
 
 const isSelected = computed(() => compareStore.hasProduct(props.product))
 
-const sizeClass = computed(() =>
-  `category-product-compare-toggle--size-${props.size ?? 'comfortable'}`,
+const sizeClass = computed(
+  () => `category-product-compare-toggle--size-${props.size ?? 'comfortable'}`
 )
 
 const iconSize = computed(() => {
@@ -81,7 +85,9 @@ const iconSize = computed(() => {
 const reasonMessage = (reason: CompareListBlockReason | undefined) => {
   switch (reason) {
     case 'limit-reached':
-      return t('category.products.compare.limitReached', { count: MAX_COMPARE_ITEMS })
+      return t('category.products.compare.limitReached', {
+        count: MAX_COMPARE_ITEMS,
+      })
     case 'vertical-mismatch':
       return t('category.products.compare.differentCategory')
     case 'missing-identifier':
@@ -106,7 +112,10 @@ const tooltip = computed(() => {
   }
 
   if (!eligibility.value.success) {
-    return reasonMessage(eligibility.value.reason) ?? t('category.products.compare.addToList')
+    return (
+      reasonMessage(eligibility.value.reason) ??
+      t('category.products.compare.addToList')
+    )
   }
 
   return t('category.products.compare.addToList')
@@ -123,7 +132,10 @@ const ariaLabel = computed(() => {
     return t('category.products.compare.removeFromList')
   }
 
-  return reasonMessage(eligibility.value.reason) ?? t('category.products.compare.addToList')
+  return (
+    reasonMessage(eligibility.value.reason) ??
+    t('category.products.compare.addToList')
+  )
 })
 
 const isDisabled = computed(() => {

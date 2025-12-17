@@ -7,13 +7,27 @@
   >
     <div class="subscore-rating__stars" :style="starStyle">
       <div class="subscore-rating__stars-track" aria-hidden="true">
-        <v-icon v-for="index in length" :key="`track-${index}`" icon="mdi-star" />
+        <v-icon
+          v-for="index in length"
+          :key="`track-${index}`"
+          icon="mdi-star"
+        />
       </div>
-      <div class="subscore-rating__stars-fill" :style="{ width: fillWidth }" aria-hidden="true">
-        <v-icon v-for="index in length" :key="`fill-${index}`" icon="mdi-star" />
+      <div
+        class="subscore-rating__stars-fill"
+        :style="{ width: fillWidth }"
+        aria-hidden="true"
+      >
+        <v-icon
+          v-for="index in length"
+          :key="`fill-${index}`"
+          icon="mdi-star"
+        />
       </div>
     </div>
-    <span v-if="showValue" class="subscore-rating__value">{{ formattedScore }}</span>
+    <span v-if="showValue" class="subscore-rating__value">{{
+      formattedScore
+    }}</span>
   </div>
 </template>
 
@@ -43,17 +57,22 @@ const props = defineProps({
 
 const { t, n } = useI18n()
 
-const length = computed(() => Math.max(1, Math.round(Number.isFinite(props.max) ? props.max : 5)))
+const length = computed(() =>
+  Math.max(1, Math.round(Number.isFinite(props.max) ? props.max : 5))
+)
 
 const normalizedScore = computed(() => {
   const safeScore = Number.isFinite(props.score) ? props.score : 0
   return Math.min(Math.max(safeScore, 0), length.value)
 })
 
-const fillWidth = computed(() => `${(normalizedScore.value / length.value) * 100}%`)
+const fillWidth = computed(
+  () => `${(normalizedScore.value / length.value) * 100}%`
+)
 
-const formattedScore = computed(() =>
-  `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`,
+const formattedScore = computed(
+  () =>
+    `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`
 )
 
 const starSize = computed(() => {
@@ -88,9 +107,12 @@ const showValue = computed(() => props.showValue)
 
 const ariaLabel = computed(() =>
   t('components.impactScore.tooltip', {
-    value: n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 }),
+    value: n(normalizedScore.value, {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 0,
+    }),
     max: length.value,
-  }),
+  })
 )
 </script>
 

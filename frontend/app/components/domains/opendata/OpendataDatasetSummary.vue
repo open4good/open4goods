@@ -16,13 +16,22 @@ defineProps<{
     <v-container max-width="lg">
       <v-card class="dataset-summary__card" rounded="xl" elevation="2">
         <div class="dataset-summary__header">
-          <h2 id="dataset-summary-heading" class="dataset-summary__title">{{ title }}</h2>
+          <h2 id="dataset-summary-heading" class="dataset-summary__title">
+            {{ title }}
+          </h2>
         </div>
         <v-divider class="my-4" />
         <div class="dataset-summary__grid">
-          <div v-for="item in items" :key="item.label" class="dataset-summary__item">
+          <div
+            v-for="item in items"
+            :key="item.label"
+            class="dataset-summary__item"
+          >
             <div class="dataset-summary__item-icon" aria-hidden="true">
-              <v-icon :icon="item.icon ?? 'mdi-information-outline'" size="28" />
+              <v-icon
+                :icon="item.icon ?? 'mdi-information-outline'"
+                size="28"
+              />
             </div>
             <div class="dataset-summary__item-content">
               <p class="dataset-summary__item-label">{{ item.label }}</p>
@@ -96,4 +105,3 @@ defineProps<{
   .dataset-summary__item-value
     font-size: 1.05rem
 </style>
-

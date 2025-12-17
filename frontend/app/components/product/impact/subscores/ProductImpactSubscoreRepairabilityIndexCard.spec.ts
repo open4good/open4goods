@@ -14,7 +14,8 @@ describe('ProductImpactSubscoreRepairabilityIndexCard', () => {
         product: {
           impact: {
             weightChip: 'Counts for {value}% of the total score',
-            weightTooltip: 'The {scoreName} score counts for {value}% of the total score',
+            weightTooltip:
+              'The {scoreName} score counts for {value}% of the total score',
             subscoreDetailsToggle: 'View indicator details',
             tableHeaders: {
               ranking: 'Rank',
@@ -26,7 +27,8 @@ describe('ProductImpactSubscoreRepairabilityIndexCard', () => {
                   title: 'How to read this indicator',
                   worst: 'Worst indicator is {worst}.',
                   best: 'Best indicator is {best} across {count} {verticalTitle}.',
-                  average: 'Average is {average}, equivalent to {averageOn20}/20.',
+                  average:
+                    'Average is {average}, equivalent to {averageOn20}/20.',
                   product: '{productName} scores {productOn20}/20.',
                 },
               },
@@ -69,7 +71,8 @@ describe('ProductImpactSubscoreRepairabilityIndexCard', () => {
             name: 'NuxtImgStub',
             props: ['src'],
             setup(props) {
-              return () => h('img', { class: 'nuxt-img-stub', src: props.src as string })
+              return () =>
+                h('img', { class: 'nuxt-img-stub', src: props.src as string })
             },
           }),
           ImpactCoefficientBadge: defineComponent({
@@ -94,25 +97,37 @@ describe('ProductImpactSubscoreRepairabilityIndexCard', () => {
           'v-expansion-panels': defineComponent({
             name: 'VExpansionPanelsStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panels-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'expansion-panels-stub' }, slots.default?.())
             },
           }),
           'v-expansion-panel': defineComponent({
             name: 'VExpansionPanelStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'expansion-panel-stub' }, slots.default?.())
             },
           }),
           'v-expansion-panel-title': defineComponent({
             name: 'VExpansionPanelTitleStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-title-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'div',
+                  { class: 'expansion-panel-title-stub' },
+                  slots.default?.()
+                )
             },
           }),
           'v-expansion-panel-text': defineComponent({
             name: 'VExpansionPanelTextStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'expansion-panel-text-stub' }, slots.default?.())
+              return () =>
+                h(
+                  'div',
+                  { class: 'expansion-panel-text-stub' },
+                  slots.default?.()
+                )
             },
           }),
           ClientOnly: defineComponent({

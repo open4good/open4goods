@@ -57,14 +57,15 @@ describe('ProductHeroPricing', () => {
                     target: attrs.target as string | undefined,
                     rel: attrs.rel as string | undefined,
                   },
-                  slots.default?.(),
+                  slots.default?.()
                 )
             },
           }),
           ClientOnly: defineComponent({
             name: 'ClientOnlyStub',
             setup(_, { slots }) {
-              return () => h('div', { class: 'client-only-stub' }, slots.default?.())
+              return () =>
+                h('div', { class: 'client-only-stub' }, slots.default?.())
             },
           }),
           'v-btn': defineComponent({
@@ -76,9 +77,11 @@ describe('ProductHeroPricing', () => {
                   {
                     class: ['v-btn-stub', attrs.class],
                     type: 'button',
-                    onClick: attrs.onClick as ((event: MouseEvent) => void) | undefined,
+                    onClick: attrs.onClick as
+                      | ((event: MouseEvent) => void)
+                      | undefined,
                   },
-                  slots.default?.(),
+                  slots.default?.()
                 )
             },
           }),
@@ -135,7 +138,9 @@ describe('ProductHeroPricing', () => {
     expect(chips[0]?.classes()).toContain('product-hero__price-chip--active')
     expect(wrapper.get('.product-hero__price-value').text()).toBe('649')
     expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
-    expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain('Merchant U')
+    expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain(
+      'Merchant U'
+    )
 
     const trendChip = wrapper.get('.product-hero__price-trend')
     expect(trendChip.classes()).toContain('product-hero__price-trend--increase')
@@ -148,11 +153,17 @@ describe('ProductHeroPricing', () => {
     expect(chips[1]?.classes()).toContain('product-hero__price-chip--active')
     expect(wrapper.get('.product-hero__price-value').text()).toBe('799')
     expect(wrapper.get('.product-hero__price-currency').text()).toBe('€')
-    expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain('Shop')
+    expect(wrapper.get('.product-hero__price-merchant-link').text()).toContain(
+      'Shop'
+    )
 
     const updatedTrendChip = wrapper.get('.product-hero__price-trend')
-    expect(updatedTrendChip.classes()).toContain('product-hero__price-trend--decrease')
-    expect(updatedTrendChip.find('.v-icon-stub').text()).toBe('mdi-trending-down')
+    expect(updatedTrendChip.classes()).toContain(
+      'product-hero__price-trend--decrease'
+    )
+    expect(updatedTrendChip.find('.v-icon-stub').text()).toBe(
+      'mdi-trending-down'
+    )
     expect(updatedTrendChip.text()).toContain('Price drop of €10.00')
 
     await wrapper.unmount()
@@ -181,7 +192,9 @@ describe('ProductHeroPricing', () => {
       },
     })
 
-    const clientOnlyLink = wrapper.get('.client-only-stub .product-hero__price-merchant-link')
+    const clientOnlyLink = wrapper.get(
+      '.client-only-stub .product-hero__price-merchant-link'
+    )
     expect(clientOnlyLink.attributes('href')).toBe('/contrib/abc123')
     expect(clientOnlyLink.attributes('target')).toBeUndefined()
 

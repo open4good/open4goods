@@ -51,7 +51,8 @@ describe('CategoryHero', () => {
   it('renders hero title, description and breadcrumbs', async () => {
     const wrapper = await mountComponent({
       title: 'Energy efficient dishwashers',
-      description: 'Compare eco-designed dishwashers to reduce energy consumption.',
+      description:
+        'Compare eco-designed dishwashers to reduce energy consumption.',
       image: 'https://cdn.example.com/hero.jpg',
       breadcrumbs: [
         { title: 'Home', link: '/' },
@@ -60,10 +61,12 @@ describe('CategoryHero', () => {
     })
 
     expect(wrapper.get('h1').text()).toBe('Energy efficient dishwashers')
-    expect(wrapper.text()).toContain('Compare eco-designed dishwashers to reduce energy consumption.')
+    expect(wrapper.text()).toContain(
+      'Compare eco-designed dishwashers to reduce energy consumption.'
+    )
 
     const breadcrumbItems = wrapper.findAll(
-      '.category-navigation-breadcrumbs__item',
+      '.category-navigation-breadcrumbs__item'
     )
     expect(breadcrumbItems).toHaveLength(2)
     const firstBreadcrumbLink = breadcrumbItems.at(0)?.find('a')

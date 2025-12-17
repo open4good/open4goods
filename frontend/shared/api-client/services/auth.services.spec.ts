@@ -16,7 +16,7 @@ vi.mock('~/utils/authCookies', () => ({
 const fetchMock = vi.fn()
 vi.stubGlobal('$fetch', fetchMock)
 
-let authService: typeof import('./auth.services')['authService']
+let authService: (typeof import('./auth.services'))['authService']
 
 describe('AuthService.logout', () => {
   beforeEach(async () => {

@@ -25,23 +25,23 @@
 
 <script setup lang="ts">
 interface SectionConfig {
-  color: string;
-  height: number | string;
-  width: number | string;
+  color: string
+  height: number | string
+  width: number | string
 }
 
 withDefaults(
   defineProps<{
-    sections?: SectionConfig[];
+    sections?: SectionConfig[]
   }>(),
   {
     sections: () => [
-      { color: "grey", height: 300, width: 400 },
-      { color: "grey", height: 300, width: 400 },
-      { color: "grey", height: 300, width: 400 },
+      { color: 'grey', height: 300, width: 400 },
+      { color: 'grey', height: 300, width: 400 },
+      { color: 'grey', height: 300, width: 400 },
     ],
   }
-);
+)
 </script>
 
 <style lang="sass" scoped>

@@ -17,14 +17,20 @@ defineProps<{ stats: StatItem[] }>()
           {{ $t('opendata.stats.accessibilityTitle') }}
         </h2>
         <ul class="opendata-stats__list">
-          <li v-for="stat in stats" :key="stat.label" class="opendata-stats__item">
+          <li
+            v-for="stat in stats"
+            :key="stat.label"
+            class="opendata-stats__item"
+          >
             <div class="opendata-stats__icon" aria-hidden="true">
               <v-icon :icon="stat.icon" size="32" />
             </div>
             <div class="opendata-stats__content">
               <p class="opendata-stats__value">{{ stat.value }}</p>
               <p class="opendata-stats__label">{{ stat.label }}</p>
-              <p v-if="stat.description" class="opendata-stats__description">{{ stat.description }}</p>
+              <p v-if="stat.description" class="opendata-stats__description">
+                {{ stat.description }}
+              </p>
             </div>
           </li>
         </ul>
@@ -103,4 +109,3 @@ defineProps<{ stats: StatItem[] }>()
   white-space: nowrap
   border: 0
 </style>
-

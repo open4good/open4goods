@@ -7,13 +7,16 @@ import { createBackendApiConfig } from './createBackendApiConfig'
  * Team service responsible for fetching team roster data from the backend API.
  */
 export const useTeamService = (domainLanguage: DomainLanguage) => {
-  const isVitest = typeof process !== 'undefined' && process.env?.VITEST === 'true'
+  const isVitest =
+    typeof process !== 'undefined' && process.env?.VITEST === 'true'
   const isServerRuntime = import.meta.server || isVitest
   let api: TeamApi | undefined
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useTeamService() is only available on the server runtime.')
+      throw new Error(
+        'useTeamService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {

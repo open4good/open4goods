@@ -24,7 +24,12 @@ describe('domain-language helpers', () => {
         current.domains.push(domain)
         return acc
       },
-      {} as Partial<Record<ReturnType<typeof getNuxtLocaleForDomainLanguage>, { domain: string; domains: string[] }>>,
+      {} as Partial<
+        Record<
+          ReturnType<typeof getNuxtLocaleForDomainLanguage>,
+          { domain: string; domains: string[] }
+        >
+      >
     )
 
     Object.entries(expectedConfig).forEach(([locale, value]) => {

@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width:400px" >
+  <v-container style="max-width: 400px">
     <v-form v-model="valid" @submit.prevent="onSubmit">
       <v-text-field
         v-model="username"
@@ -24,11 +24,7 @@
         Login
       </v-btn>
     </v-form>
-    <v-alert
-      v-if="error"
-      type="error"
-      class="mt-4"
-    >{{ error }}</v-alert>
+    <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
   </v-container>
 </template>
 
@@ -60,13 +56,18 @@ useSeoMeta({
   ogUrl: () => canonicalUrl.value || undefined,
 })
 
-const isSafeRedirectTarget = (target: unknown): target is string => typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')
+const isSafeRedirectTarget = (target: unknown): target is string =>
+  typeof target === 'string' &&
+  target.startsWith('/') &&
+  !target.startsWith('//')
 
 const resolveRedirectTarget = () => {
   const redirectQuery = route.query.redirect
 
   if (Array.isArray(redirectQuery)) {
-    const firstValidTarget = redirectQuery.find((candidate): candidate is string => isSafeRedirectTarget(candidate))
+    const firstValidTarget = redirectQuery.find(
+      (candidate): candidate is string => isSafeRedirectTarget(candidate)
+    )
     if (firstValidTarget) {
       return firstValidTarget
     }

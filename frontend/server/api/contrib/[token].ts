@@ -1,8 +1,6 @@
 import { createError, defineEventHandler, getRouterParam } from 'h3'
 import type { H3Event } from 'h3'
-import {
-  useAffiliationService,
-} from '~~/shared/api-client/services/affiliation.services'
+import { useAffiliationService } from '~~/shared/api-client/services/affiliation.services'
 import type {
   AffiliationRedirectResponse,
   AffiliationRedirectHttpMethod,
@@ -26,7 +24,9 @@ const resolveMethod = (event: H3Event): AffiliationRedirectHttpMethod => {
   })
 }
 
-const normalizeUserAgent = (rawUserAgent: string | string[] | undefined): string | undefined => {
+const normalizeUserAgent = (
+  rawUserAgent: string | string[] | undefined
+): string | undefined => {
   if (!rawUserAgent) {
     return undefined
   }
@@ -40,7 +40,7 @@ const normalizeUserAgent = (rawUserAgent: string | string[] | undefined): string
 
 const handleRedirect = async (
   event: H3Event,
-  method: AffiliationRedirectHttpMethod,
+  method: AffiliationRedirectHttpMethod
 ): Promise<AffiliationRedirectResponse> => {
   const token = getRouterParam(event, 'token')
 
@@ -51,7 +51,8 @@ const handleRedirect = async (
     })
   }
 
-  const rawHost = event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  const rawHost =
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
 
   const userAgent = normalizeUserAgent(event.node.req.headers['user-agent'])
@@ -69,7 +70,7 @@ const handleRedirect = async (
     console.error(
       'Error resolving affiliation redirect',
       backendError.logMessage,
-      backendError,
+      backendError
     )
 
     throw createError({
@@ -80,7 +81,9 @@ const handleRedirect = async (
   }
 }
 
-export default defineEventHandler(async (event): Promise<AffiliationRedirectResponse> => {
-  const method = resolveMethod(event)
-  return handleRedirect(event, method)
-})
+export default defineEventHandler(
+  async (event): Promise<AffiliationRedirectResponse> => {
+    const method = resolveMethod(event)
+    return handleRedirect(event, method)
+  }
+)

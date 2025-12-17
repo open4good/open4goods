@@ -44,6 +44,7 @@
       "eyebrow": "Responsible shopping",
       "title": "Responsible choices aren’t a luxury",
       "subtitle": "Save time, stay true to your values. Compare effortlessly, choose freely.",
+      "iconAlt": "Nudger PWA launcher icon",
       "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
       "search": {
         "label": "Search for a product",
@@ -65,6 +66,25 @@
             "label": "Independent comparator, open-source software and open data"
           }
         ]
+      },
+      "context": {
+        "cornerLabel": "Impact digest",
+        "cornerTooltip": "Key highlights from Nudger’s methodology",
+        "ariaLabel": "Hero context card summarising Nudger’s promise"
+      }
+    },
+    "parallax": {
+      "essentials": {
+        "ariaLabel": "Decorative background for the challenges and solutions section"
+      },
+      "features": {
+        "ariaLabel": "Decorative background for the key features section"
+      },
+      "knowledge": {
+        "ariaLabel": "Decorative background for community stories and objections"
+      },
+      "cta": {
+        "ariaLabel": "Decorative background for the FAQ and call to action"
       }
     },
     "problems": {
@@ -232,12 +252,86 @@
         }
       }
     },
+    "roundedCards": {
+      "eyebrow": "Design system",
+      "title": "Rounded corner cards",
+      "subtitle": "One reusable card for hero highlights, feature grids, and pickers with selectable corners.",
+      "ariaLabel": "Rounded card showcase grid",
+      "samples": {
+        "impact": {
+          "eyebrow": "Icon · bottom-right · large",
+          "title": "Impact-first state",
+          "subtitle": "Selected badge with large rounded corner and elevated glass surface.",
+          "tooltip": "Toggle the selected indicator",
+          "bullets": [
+            "Built-in selected/unselected SVGs",
+            "Hover and keyboard focus elevate the card",
+            "Fits dense hero layouts"
+          ]
+        },
+        "text": {
+          "eyebrow": "Text · top-right · medium",
+          "title": "Text badge corner",
+          "subtitle": "Swap the corner icon for a text pill with optional icon.",
+          "tooltip": "Corner text badge",
+          "cornerLabel": "Fresh data",
+          "bullets": [
+            "Use `cornerVariant=text` with an optional icon",
+            "Ideal for badges like \"beta\" or \"new\"",
+            "Keeps the corner highlight subtle"
+          ]
+        },
+        "compact": {
+          "eyebrow": "Icon · top-left · small",
+          "title": "Compact selector",
+          "subtitle": "Small corner radius with unselected state by default.",
+          "tooltip": "Mark this compact card as selected",
+          "bullets": [
+            "Smaller corner footprint for tight grids",
+            "Uses the unselected SVG until toggled",
+            "Keyboard and click both flip the state"
+          ]
+        },
+        "custom": {
+          "eyebrow": "Custom slot · bottom-left · medium",
+          "title": "Slot anything in the corner",
+          "subtitle": "Inject avatars, progress rings, or KPIs into the highlighted corner.",
+          "tooltip": "Custom corner content",
+          "progressLabel": "{value}% impact readiness",
+          "bullets": [
+            "Provide content via the `corner` slot",
+            "Blend text, icons, or charts",
+            "Keeps the rounded mask and gradient"
+          ]
+        },
+        "dual": {
+          "eyebrow": "Text + icon · bottom-right · medium",
+          "title": "Mixed content card",
+          "subtitle": "Textual badge with supporting icon and elevated actions.",
+          "tooltip": "Toggle this mixed badge card",
+          "cornerLabel": "Priority",
+          "bullets": [
+            "Demonstrates rounded size medium",
+            "Shows action slot usage",
+            "Great for CTA or selection flows"
+          ]
+        }
+      }
+    },
     "cta": {
       "title": "Ready to buy better without overspending?",
       "subtitle": "Restart a search or explore the analysed offers.",
       "button": "Start a search",
       "searchSubmit": "Launch search",
       "browseTaxonomy": "Explore categories"
+    }
+  },
+  "shared": {
+    "roundedCard": {
+      "tooltipSelected": "Card selected",
+      "tooltipIdle": "Mark this card as selected",
+      "cornerSelected": "Selected",
+      "cornerIdle": "Available"
     }
   },
   "categories": {
@@ -1202,32 +1296,32 @@
           "title": "Download options"
         },
         "faq": {
-            "items": {
-              "whatIs": {
-                "answer": "<p>An ISBN (International Standard Book Number) is a unique number that identifies a book worldwide. It is essential for publishers, booksellers, libraries and any platform selling books. ISBNs make it easier to manage inventory, distribution and sales. Each book or edition of the same book has its own ISBN, ensuring unique identification in databases and catalogues. ISBNs are used for both printed books and e-books, helping readers find the exact title they need in library systems and online marketplaces.</p>",
-                "question": "What is an ISBN?"
-              },
-              "structure": {
-                "answer": "<p>An ISBN consists of 13 digits (or 10 in the former system) split into five segments. These segments include: a prefix (identifying the numbering system), a registration group (representing the country or language area), a publisher number, a title number (identifying a specific work) and a check digit that validates the structure of the ISBN. This structure allows rapid and accurate identification of books, simplifying their management worldwide. The move to ISBN-13 in 2007 aligned the system with global barcode standards, making book distribution even more efficient across retail and library networks.</p>",
-                "question": "How is an ISBN structured?"
-              },
-              "assignment": {
-                "answer": "<p>An ISBN is assigned by a national ISBN agency in each country, responsible for distributing and registering ISBN numbers. Publishers or authors contact this agency to obtain an ISBN for their book. When applying, they provide information about the work, such as the title, author, format and edition. Once assigned, the ISBN is unique to that edition and cannot be reused for another. This ensures efficient management of books in library, sales and distribution systems. It is essential for any work intended for wide circulation or sale.</p>",
-                "question": "How is an ISBN assigned to a book?"
-              },
-              "difference": {
-                "answer": "<p>ISBN-10 was the original format used until 2007 and consisted of 10 digits. To align with the global EAN-13 barcode standards, the system moved to a 13-digit format: ISBN-13. This change standardised sales and distribution processes worldwide because ISBN-13 codes are compatible with commercial barcode systems used across industries. While ISBN-10 codes still exist for older works, new books published since 2007 exclusively use ISBN-13, which provides greater capacity for future identifiers.</p>",
-                "question": "What is the difference between ISBN-10 and ISBN-13?"
-              },
-              "importance": {
-                "answer": "<p>An ISBN is important because it provides a unique, standardised identifier for a book within management, sales and distribution systems. Without an ISBN, a book can be difficult to find in online catalogues or bookshops because distribution systems rely heavily on this identifier. ISBNs also facilitate indexing in library and bookstore databases, improving visibility and accessibility for readers. They are essential for a book to be widely distributed, whether in print or digital format.</p>",
-                "question": "Why are ISBNs important?"
-              },
-              "nonBook": {
-                "answer": "<p>Sometimes an ISBN is used to identify something other than a book. Several situations can lead to this:</p><ul><li><strong>Lack of understanding of standards</strong>: Some sellers or platforms use the ISBN as a generic identifier, especially when the product is cultural or related to creative hobbies.</li><li><strong>Cost savings</strong>: In certain cases it is cheaper for a small manufacturer to reuse an existing ISBN code, even though it falls outside the standards.</li><li><strong>Code format confusion</strong>: Some marketplaces do not strictly validate standard codes and accept ISBNs for non-book products, which creates ambiguities.</li><li><strong>Reassignment or attribution error</strong>: ISBNs are sometimes used incorrectly for non-editorial products, especially when the manufacturer or distributor does not have an appropriate GTIN barcode.</li></ul>",
-                "question": "Why do I sometimes find non-book products in the database?"
-              }
+          "items": {
+            "whatIs": {
+              "answer": "<p>An ISBN (International Standard Book Number) is a unique number that identifies a book worldwide. It is essential for publishers, booksellers, libraries and any platform selling books. ISBNs make it easier to manage inventory, distribution and sales. Each book or edition of the same book has its own ISBN, ensuring unique identification in databases and catalogues. ISBNs are used for both printed books and e-books, helping readers find the exact title they need in library systems and online marketplaces.</p>",
+              "question": "What is an ISBN?"
             },
+            "structure": {
+              "answer": "<p>An ISBN consists of 13 digits (or 10 in the former system) split into five segments. These segments include: a prefix (identifying the numbering system), a registration group (representing the country or language area), a publisher number, a title number (identifying a specific work) and a check digit that validates the structure of the ISBN. This structure allows rapid and accurate identification of books, simplifying their management worldwide. The move to ISBN-13 in 2007 aligned the system with global barcode standards, making book distribution even more efficient across retail and library networks.</p>",
+              "question": "How is an ISBN structured?"
+            },
+            "assignment": {
+              "answer": "<p>An ISBN is assigned by a national ISBN agency in each country, responsible for distributing and registering ISBN numbers. Publishers or authors contact this agency to obtain an ISBN for their book. When applying, they provide information about the work, such as the title, author, format and edition. Once assigned, the ISBN is unique to that edition and cannot be reused for another. This ensures efficient management of books in library, sales and distribution systems. It is essential for any work intended for wide circulation or sale.</p>",
+              "question": "How is an ISBN assigned to a book?"
+            },
+            "difference": {
+              "answer": "<p>ISBN-10 was the original format used until 2007 and consisted of 10 digits. To align with the global EAN-13 barcode standards, the system moved to a 13-digit format: ISBN-13. This change standardised sales and distribution processes worldwide because ISBN-13 codes are compatible with commercial barcode systems used across industries. While ISBN-10 codes still exist for older works, new books published since 2007 exclusively use ISBN-13, which provides greater capacity for future identifiers.</p>",
+              "question": "What is the difference between ISBN-10 and ISBN-13?"
+            },
+            "importance": {
+              "answer": "<p>An ISBN is important because it provides a unique, standardised identifier for a book within management, sales and distribution systems. Without an ISBN, a book can be difficult to find in online catalogues or bookshops because distribution systems rely heavily on this identifier. ISBNs also facilitate indexing in library and bookstore databases, improving visibility and accessibility for readers. They are essential for a book to be widely distributed, whether in print or digital format.</p>",
+              "question": "Why are ISBNs important?"
+            },
+            "nonBook": {
+              "answer": "<p>Sometimes an ISBN is used to identify something other than a book. Several situations can lead to this:</p><ul><li><strong>Lack of understanding of standards</strong>: Some sellers or platforms use the ISBN as a generic identifier, especially when the product is cultural or related to creative hobbies.</li><li><strong>Cost savings</strong>: In certain cases it is cheaper for a small manufacturer to reuse an existing ISBN code, even though it falls outside the standards.</li><li><strong>Code format confusion</strong>: Some marketplaces do not strictly validate standard codes and accept ISBNs for non-book products, which creates ambiguities.</li><li><strong>Reassignment or attribution error</strong>: ISBNs are sometimes used incorrectly for non-editorial products, especially when the manufacturer or distributor does not have an appropriate GTIN barcode.</li></ul>",
+              "question": "Why do I sometimes find non-book products in the database?"
+            }
+          },
           "subtitle": "Key concepts about the ISBN export.",
           "title": "Frequently asked questions"
         },
@@ -1635,6 +1729,11 @@
         }
       }
     },
+    "banner": {
+      "message": "Support an ethical platform!",
+      "cta": "Shop with Nudger",
+      "ariaLabel": "Sticky banner promoting responsible shopping"
+    },
     "aiReview": {
       "empty": "Summary not requested yet.",
       "errors": {
@@ -1955,18 +2054,18 @@
       },
       "newOffers": "New offers",
       "noOccasionHistory": "No history for second-hand offers.",
-  "occasionOffers": "Second-hand offers",
-  "offerList": "Offer list",
-    "metrics": {
-      "average": "Average price",
-      "bestOffer": "Best offer",
-      "highest": "Highest price",
-      "lowest": "Lowest price",
-      "viewOffer": "Open offer from {source}",
-      "unknownSource": "Unknown source"
-    },
-  "noHistory": "Price history is not yet available for this product.",
-  "subtitle": "Track price evolution and compare offers.",
+      "occasionOffers": "Second-hand offers",
+      "offerList": "Offer list",
+      "metrics": {
+        "average": "Average price",
+        "bestOffer": "Best offer",
+        "highest": "Highest price",
+        "lowest": "Lowest price",
+        "viewOffer": "Open offer from {source}",
+        "unknownSource": "Unknown source"
+      },
+      "noHistory": "Price history is not yet available for this product.",
+      "subtitle": "Track price evolution and compare offers.",
       "title": "Prices and trends",
       "trend": {
         "decrease": "Price drop of {amount}",
@@ -1976,6 +2075,7 @@
     }
   },
   "siteIdentity": {
+    "logoAlt": "Return to home page via Nudger logo",
     "footer": {
       "accessibleTitle": "Footer information",
       "blogLink": "Our blog",
@@ -2008,6 +2108,22 @@
         "allProducts": "All products",
         "compensation": "Ecological contribution",
         "ecoscore": "Environmental assessment"
+      },
+      "timeSaver": {
+        "badge": "Open source & ad-free",
+        "eyebrow": "Save time",
+        "helpers": {
+          "impact": "Impact score at a glance",
+          "price": "Price & history included",
+          "trust": "Independent, privacy-first"
+        },
+        "learnMoreCta": "Explore categories",
+        "primaryCta": "Start searching",
+        "secondaryCta": "Browse responsibly",
+        "subtitle": "Compare impact, price and trust signals in a single place.",
+        "title": "Choose freely.",
+        "titleFull": "Save time. Choose freely.",
+        "badgeAlt": "Independent comparator"
       },
       "logoAlt": "Nudger orange logo icon",
       "mission": "nudger.fr is an open approach to assess the environmental impact of consumer goods and partially offset the impact of your online purchases.",
@@ -2122,6 +2238,11 @@
         "nudgerAriaLabel": "Activate Nudger signature theme",
         "nudgerTooltip": "Switch to the Nudger signature theme"
       },
+      "zoom": {
+        "label": "Toggle zoom",
+        "activate": "Zoom in (120%)",
+        "reset": "Reset zoom"
+      },
       "themeToggle": "Toggle theme",
       "title": "Menu"
     },
@@ -2204,8 +2325,9 @@
     },
     "steps": {
       "category": {
-        "title": "Choose a category",
-        "subtitle": "Pick the type of product you want to browse"
+        "title": "Nudger guides you, step by step.",
+        "subtitle": "Choose a category",
+        "step": "Step {step}"
       },
       "condition": {
         "title": "Product condition",
@@ -2217,8 +2339,8 @@
         }
       },
       "scores": {
-        "title": "Ecological priorities",
-        "subtitle": "Select the eco topics that matter most"
+        "title": "Your ecological priorities",
+        "subtitle": ""
       },
       "recommendations": {
         "title": "Our picks for you",
@@ -2226,6 +2348,11 @@
         "empty": "No products match these filters yet.",
         "total": "{count} results available"
       }
+    }
+  },
+  "ui": {
+    "topBanner": {
+      "close": "Close banner"
     }
   },
   "welcome": "Welcome"

@@ -1,5 +1,12 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { type ComponentPublicInstance, defineComponent, h, nextTick, reactive, ref } from 'vue'
+import {
+  type ComponentPublicInstance,
+  defineComponent,
+  h,
+  nextTick,
+  reactive,
+  ref,
+} from 'vue'
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 import TheArticles from './TheArticles.vue'
 
@@ -70,7 +77,7 @@ type MockBlogConfig = {
   loading?: boolean
   error?: string | null
   onFetchArticles?: (
-    payload: FetchArticlesPayload,
+    payload: FetchArticlesPayload
   ) => FetchArticlesResult | Promise<FetchArticlesResult>
 }
 
@@ -97,7 +104,10 @@ vi.mock('#imports', () => ({
   useRequestURL: () => requestUrl,
 }))
 
-const translations: Record<string, string | ((params: Record<string, unknown>) => string)> = {
+const translations: Record<
+  string,
+  string | ((params: Record<string, unknown>) => string)
+> = {
   'blog.list.tagsTitle': 'Browse by tag',
   'blog.list.tagsAriaLabel': 'Blog tags',
   'blog.list.tagsAll': 'All articles',
@@ -108,7 +118,8 @@ const translations: Record<string, string | ((params: Record<string, unknown>) =
   'blog.hero.eyebrow': 'Nudger blog',
   'blog.hero.title': 'Fresh insights on responsible shopping',
   'blog.hero.subtitle': 'Short reads on sustainable appliances and nudges.',
-  'blog.pagination.info': ({ current, total, count }) => `Page ${current} of ${total} (${count})`,
+  'blog.pagination.info': ({ current, total, count }) =>
+    `Page ${current} of ${total} (${count})`,
   'blog.pagination.pageLink': ({ page }) => `Go to page ${page}`,
   'blog.seo.baseTitle': 'Open4Goods blog',
   'blog.seo.tagTitle': ({ tag }) => `Open4Goods blog – ${tag}`,
@@ -163,8 +174,8 @@ let route = createReactiveRoute()
 let routerPush: Mock
 
 const updateRouteQuery = (nextQuery: Record<string, unknown> | undefined) => {
-  const sanitizedEntries = Object.entries(nextQuery ?? {}).filter(([, value]) =>
-    value !== undefined && value !== null,
+  const sanitizedEntries = Object.entries(nextQuery ?? {}).filter(
+    ([, value]) => value !== undefined && value !== null
   )
   const sanitizedQuery = Object.fromEntries(sanitizedEntries)
 
@@ -186,7 +197,9 @@ vi.mock('~/composables/blog/useBlog', () => ({
 }))
 
 const createMockBlogComposable = (config: MockBlogConfig = {}) => {
-  const paginatedArticles = ref<BlogArticle[]>([...(config.articles ?? defaultArticles)])
+  const paginatedArticles = ref<BlogArticle[]>([
+    ...(config.articles ?? defaultArticles),
+  ])
   const tags = ref<BlogTag[]>([...(config.initialTags ?? [])])
   const loading = ref(config.loading ?? false)
   const error = ref<string | null>(config.error ?? null)
@@ -203,7 +216,7 @@ const createMockBlogComposable = (config: MockBlogConfig = {}) => {
     async (
       page: number = pagination.value.page,
       size: number = pagination.value.size,
-      tag: string | null = selectedTag.value,
+      tag: string | null = selectedTag.value
     ) => {
       const sanitizedTag = tag ?? null
 
@@ -220,7 +233,11 @@ const createMockBlogComposable = (config: MockBlogConfig = {}) => {
       selectedTag.value = sanitizedTag
 
       if (config.onFetchArticles) {
-        const result = await config.onFetchArticles({ page, size, tag: sanitizedTag })
+        const result = await config.onFetchArticles({
+          page,
+          size,
+          tag: sanitizedTag,
+        })
 
         if (result?.articles) {
           paginatedArticles.value = [...result.articles]
@@ -233,15 +250,15 @@ const createMockBlogComposable = (config: MockBlogConfig = {}) => {
           }
         }
       }
-    },
+    }
   )
 
   const fetchTags = vi.fn(async () => {
     const resolved = config.resolveTags
       ? await config.resolveTags()
-      : config.initialTags ?? defaultTags
+      : (config.initialTags ?? defaultTags)
 
-    tags.value = resolved.map((tag) => ({ ...tag }))
+    tags.value = resolved.map(tag => ({ ...tag }))
   })
 
   return {
@@ -258,7 +275,7 @@ const createMockBlogComposable = (config: MockBlogConfig = {}) => {
 
 const flushPromises = async () => {
   await nextTick()
-  await new Promise((resolve) => setTimeout(resolve, 0))
+  await new Promise(resolve => setTimeout(resolve, 0))
 }
 
 const createStub = (tag: string, className: string) =>
@@ -306,7 +323,7 @@ const VIconStub = defineComponent({
           class: 'v-icon-stub',
           'data-icon': props.icon,
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -328,7 +345,7 @@ const VChipStub = defineComponent({
           type: 'button',
           'data-value': props.value,
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -349,7 +366,7 @@ const VBtnStub = defineComponent({
           type: props.type ?? 'button',
           onClick: (event: MouseEvent) => emit('click', event),
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -375,7 +392,7 @@ const VCardStub = defineComponent({
                 ? JSON.stringify(props.to)
                 : undefined,
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -388,18 +405,14 @@ const VImgStub = defineComponent({
   },
   setup(props, { slots, attrs }) {
     return () =>
-      h(
-        'figure',
-        { ...attrs, class: 'v-img-stub' },
-        [
-          h('img', {
-            src: props.src,
-            alt: props.alt,
-            'data-test': 'article-image',
-          }),
-          slots.placeholder?.(),
-        ],
-      )
+      h('figure', { ...attrs, class: 'v-img-stub' }, [
+        h('img', {
+          src: props.src,
+          alt: props.alt,
+          'data-test': 'article-image',
+        }),
+        slots.placeholder?.(),
+      ])
   },
 })
 
@@ -429,7 +442,7 @@ const NuxtLinkStub = defineComponent({
                 ? JSON.stringify(props.to)
                 : undefined,
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 })
@@ -523,7 +536,9 @@ describe('TheArticles.vue', () => {
     expect(blogComposable.pagination.value.totalPages).toBe(4)
     expect(blogComposable.selectedTag.value).toBe('Nuxt')
 
-    const tagButtons = wrapper.find('.v-chip-group-stub').findAll('.v-chip-stub')
+    const tagButtons = wrapper
+      .find('.v-chip-group-stub')
+      .findAll('.v-chip-stub')
     expect(tagButtons).toHaveLength(3)
     const [, nuxtChip, vueChip] = tagButtons
     expect(nuxtChip).toBeDefined()
@@ -570,7 +585,7 @@ describe('TheArticles.vue', () => {
     const timeElement = wrapper.find('time')
     const firstArticle = defaultArticles[0]!
     expect(timeElement.attributes('datetime')).toBe(
-      new Date(firstArticle.createdMs ?? 0).toISOString(),
+      new Date(firstArticle.createdMs ?? 0).toISOString()
     )
 
     const images = wrapper.findAll('[data-test="article-image"]')
@@ -629,10 +644,14 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(3)
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(
+      3
+    )
     await flushPromises()
 
-    expect(routerPush).toHaveBeenCalledWith({ query: { page: '3', tag: 'Nuxt' } })
+    expect(routerPush).toHaveBeenCalledWith({
+      query: { page: '3', tag: 'Nuxt' },
+    })
     expect(blogComposable.fetchArticles).toHaveBeenCalledWith(3, 6, 'Nuxt')
     expect(blogComposable.pagination.value.page).toBe(3)
   })
@@ -648,7 +667,9 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(1)
+    await (wrapper.vm as unknown as TheArticlesPublicInstance).handlePageChange(
+      1
+    )
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({ query: {} })
@@ -668,10 +689,15 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as unknown as TheArticlesPublicInstance).handleTagSelection('Vue')
+    await (
+      wrapper.vm as unknown as TheArticlesPublicInstance
+    ).handleTagSelection('Vue')
     await flushPromises()
 
-    expect(routerPush).toHaveBeenCalledWith({ path: '/blog', query: { tag: 'Vue' } })
+    expect(routerPush).toHaveBeenCalledWith({
+      path: '/blog',
+      query: { tag: 'Vue' },
+    })
     expect(blogComposable.fetchArticles).toHaveBeenCalledWith(1, 6, 'Vue')
     expect(blogComposable.pagination.value.page).toBe(1)
     expect(blogComposable.selectedTag.value).toBe('Vue')
@@ -690,7 +716,9 @@ describe('TheArticles.vue', () => {
     routerPush.mockClear()
     blogComposable.fetchArticles.mockClear()
 
-    await (wrapper.vm as unknown as TheArticlesPublicInstance).handleTagSelection(null)
+    await (
+      wrapper.vm as unknown as TheArticlesPublicInstance
+    ).handleTagSelection(null)
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({ path: '/blog', query: {} })
@@ -716,8 +744,12 @@ describe('TheArticles.vue', () => {
     const vm = wrapper.vm as TheArticlesPublicInstance
 
     expect(vm.pageSeoTitle).toBe('Open4Goods blog – Nuxt – Page 2')
-    expect(vm.seoDescription).toBe('Articles about Nuxt. A welcome post for the blog.')
-    expect(vm.primaryArticleImage).toBe('https://cdn.example.com/images/hello.jpg')
+    expect(vm.seoDescription).toBe(
+      'Articles about Nuxt. A welcome post for the blog.'
+    )
+    expect(vm.primaryArticleImage).toBe(
+      'https://cdn.example.com/images/hello.jpg'
+    )
     expect(vm.canonicalUrl).toContain('/blog?page=2&tag=Nuxt')
 
     const schema = vm.structuredData as Record<string, unknown>
@@ -740,7 +772,6 @@ describe('TheArticles.vue', () => {
       description: 'A welcome post for the blog.',
       url: expect.stringContaining('/blog/hello-world'),
     })
-
   })
 
   it('reacts to route query updates triggered outside the component', async () => {
@@ -754,7 +785,6 @@ describe('TheArticles.vue', () => {
     })
 
     blogComposable.fetchArticles.mockClear()
-
     ;(route.query as Record<string, unknown>).page = '4'
     ;(route.query as Record<string, unknown>).tag = 'Vue'
     await flushPromises()

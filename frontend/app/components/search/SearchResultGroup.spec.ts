@@ -35,7 +35,7 @@ const NuxtLinkStub: Component = {
           href,
           'aria-label': props.ariaLabel,
         },
-        slots.default?.(),
+        slots.default?.()
       )
   },
 }
@@ -68,11 +68,15 @@ describe('SearchResultGroup', () => {
     })
 
     expect(wrapper.find('h2').text()).toBe('Coffee makers')
-    expect(wrapper.find('.search-result-group__count').text()).toBe('4 produits')
+    expect(wrapper.find('.search-result-group__count').text()).toBe(
+      '4 produits'
+    )
 
     const link = wrapper.get('[data-test="search-result-group-link"]')
     expect(link.attributes('href')).toBe('/cafetieres')
-    expect(link.attributes('aria-label')).toBe('Accéder à la catégorie Cafetières')
+    expect(link.attributes('aria-label')).toBe(
+      'Accéder à la catégorie Cafetières'
+    )
     expect(link.text()).toContain('Accéder à la catégorie')
   })
 
@@ -85,7 +89,9 @@ describe('SearchResultGroup', () => {
       categoryLinkLabel: 'Voir la catégorie',
     })
 
-    expect(wrapper.find('[data-test="search-result-group-link"]').exists()).toBe(false)
+    expect(
+      wrapper.find('[data-test="search-result-group-link"]').exists()
+    ).toBe(false)
   })
 
   it('omits the count block when no label is provided', () => {

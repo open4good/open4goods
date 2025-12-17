@@ -20,7 +20,6 @@ pnpm exec python3 scripts/generate_pwa_assets.py
 
 After regenerating assets run `pnpm lint` so the manifest import stays type-checked.
 
-
 ## Service worker & caching
 
 `@vite-pwa/nuxt` is registered in `nuxt.config.ts` with:

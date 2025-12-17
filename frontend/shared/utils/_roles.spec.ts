@@ -9,7 +9,9 @@ describe('hasAdminAccess', () => {
   })
 
   it('matches configured roles regardless of casing', () => {
-    expect(hasAdminAccess(['content_editor'], { allowedRoles: ['CONTENT_EDITOR'] })).toBe(true)
+    expect(
+      hasAdminAccess(['content_editor'], { allowedRoles: ['CONTENT_EDITOR'] })
+    ).toBe(true)
   })
 
   it('allows XWIKIADMINGROUP by default', () => {
@@ -18,11 +20,17 @@ describe('hasAdminAccess', () => {
   })
 
   it('ignores roles without admin privileges', () => {
-    expect(hasAdminAccess(['user'], { allowedRoles: ['ROLE_SITEEDITOR'] })).toBe(false)
-    expect(hasAdminAccess(['domain'], { allowedRoles: ['ROLE_SITEEDITOR'] })).toBe(false)
+    expect(
+      hasAdminAccess(['user'], { allowedRoles: ['ROLE_SITEEDITOR'] })
+    ).toBe(false)
+    expect(
+      hasAdminAccess(['domain'], { allowedRoles: ['ROLE_SITEEDITOR'] })
+    ).toBe(false)
   })
 
   it('rejects users without configured admin roles', () => {
-    expect(hasAdminAccess(['content-editor'], { allowedRoles: ['ROLE_SITEEDITOR'] })).toBe(false)
+    expect(
+      hasAdminAccess(['content-editor'], { allowedRoles: ['ROLE_SITEEDITOR'] })
+    ).toBe(false)
   })
 })

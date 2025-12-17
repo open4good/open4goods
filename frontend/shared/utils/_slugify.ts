@@ -6,7 +6,10 @@ export interface SlugifyOptions {
  * Convert a human readable string into a URL/XWiki friendly slug.
  * Accents are stripped and non-alphanumeric characters collapse into hyphens.
  */
-export const _slugify = (input: string, options: SlugifyOptions = {}): string => {
+export const _slugify = (
+  input: string,
+  options: SlugifyOptions = {}
+): string => {
   if (!input) {
     return options.fallback ?? ''
   }

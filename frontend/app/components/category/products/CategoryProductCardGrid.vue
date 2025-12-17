@@ -24,7 +24,11 @@
 
         <v-img
           :src="resolveImage(product)"
-          :alt="product.identity?.bestName ?? product.identity?.model ?? $t('category.products.untitledProduct')"
+          :alt="
+            product.identity?.bestName ??
+            product.identity?.model ??
+            $t('category.products.untitledProduct')
+          "
           :aspect-ratio="4 / 3"
           contain
           class="category-product-card-grid__image"
@@ -37,7 +41,12 @@
         <v-card-item class="category-product-card-grid__body">
           <div class="category-product-card-grid__header">
             <h3 class="category-product-card-grid__title">
-              {{ product.identity?.bestName ?? product.identity?.model ?? product.identity?.brand ?? '#' + product.gtin }}
+              {{
+                product.identity?.bestName ??
+                product.identity?.model ??
+                product.identity?.brand ??
+                '#' + product.gtin
+              }}
             </h3>
           </div>
 
@@ -93,7 +102,9 @@
             <div
               v-if="badges.length"
               class="category-product-card-grid__pricing"
-              :class="{ 'category-product-card-grid__pricing--split': badges.length > 1 }"
+              :class="{
+                'category-product-card-grid__pricing--split': badges.length > 1,
+              }"
               role="list"
             >
               <div
@@ -103,8 +114,12 @@
                 :class="`category-product-card-grid__price-badge--${badge.appearance}`"
                 role="listitem"
               >
-                <span class="category-product-card-grid__price-badge-label">{{ badge.label }}</span>
-                <span class="category-product-card-grid__price-badge-amount">{{ badge.price }}</span>
+                <span class="category-product-card-grid__price-badge-label">{{
+                  badge.label
+                }}</span>
+                <span class="category-product-card-grid__price-badge-amount">{{
+                  badge.price
+                }}</span>
               </div>
             </div>
           </template>
@@ -130,7 +145,10 @@ import type {
 } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
-import { formatAttributeValue, resolvePopularAttributes } from '~/utils/_product-attributes'
+import {
+  formatAttributeValue,
+  resolvePopularAttributes,
+} from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
@@ -167,7 +185,8 @@ const resolveCurrencySymbol = (currency?: string | null): string | null => {
     })
 
     const symbol =
-      formatter.formatToParts(0).find((part) => part.type === 'currency')?.value ?? upperCaseCurrency
+      formatter.formatToParts(0).find(part => part.type === 'currency')
+        ?.value ?? upperCaseCurrency
 
     currencySymbolCache.set(upperCaseCurrency, symbol)
 
@@ -195,11 +214,13 @@ const productLink = (product: ProductDto) => {
   return product.fullSlug ?? product.slug ?? undefined
 }
 
-const impactScoreValue = (product: ProductDto) => resolvePrimaryImpactScore(product)
+const impactScoreValue = (product: ProductDto) =>
+  resolvePrimaryImpactScore(product)
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 
-const offersCountLabel = (product: ProductDto) => formatOffersCount(product, translatePlural)
+const offersCountLabel = (product: ProductDto) =>
+  formatOffersCount(product, translatePlural)
 
 type DisplayedAttribute = {
   key: string
@@ -208,11 +229,16 @@ type DisplayedAttribute = {
   icon?: string | null
 }
 
-const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] => {
-  const attributes = resolvePopularAttributes(product, popularAttributeConfigs.value)
+const popularAttributesByProduct = (
+  product: ProductDto
+): DisplayedAttribute[] => {
+  const attributes = resolvePopularAttributes(
+    product,
+    popularAttributeConfigs.value
+  )
   const entries: DisplayedAttribute[] = []
 
-  attributes.forEach((attribute) => {
+  attributes.forEach(attribute => {
     const value = formatAttributeValue(attribute, t, n)
 
     if (!value) {
@@ -232,7 +258,7 @@ const popularAttributesByProduct = (product: ProductDto): DisplayedAttribute[] =
 
 const formatOfferPrice = (
   offer: ProductAggregatedPriceDto | undefined,
-  fallback: ProductDto,
+  fallback: ProductDto
 ): string | null => {
   if (!offer) {
     return null
@@ -254,9 +280,12 @@ const formatOfferPrice = (
 
     const normalisedShortPrice = shortPrice.replace(/\s+/g, ' ').trim()
     const containsSymbol =
-      normalisedShortPrice.includes(symbol) || normalisedShortPrice.toUpperCase().includes(currency.toUpperCase())
+      normalisedShortPrice.includes(symbol) ||
+      normalisedShortPrice.toUpperCase().includes(currency.toUpperCase())
 
-    return containsSymbol ? normalisedShortPrice : `${normalisedShortPrice}${NBSP}${symbol}`
+    return containsSymbol
+      ? normalisedShortPrice
+      : `${normalisedShortPrice}${NBSP}${symbol}`
   }
 
   const price = offer.price
@@ -316,7 +345,8 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
 
   if (!entries.length) {
     const fallbackOffer = product.offers?.bestPrice
-    const formatted = formatOfferPrice(fallbackOffer, product) ?? bestPriceLabel(product)
+    const formatted =
+      formatOfferPrice(fallbackOffer, product) ?? bestPriceLabel(product)
 
     entries.push({
       key: 'best',
@@ -493,5 +523,4 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
 
     .category-product-card-grid__price-badge-label
       font-size: 0.7rem
-
 </style>

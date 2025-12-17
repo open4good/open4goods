@@ -72,7 +72,7 @@ const resolveArticleLink = (article: BlogPostDto) => {
 }
 
 const enrichedItems = computed(() =>
-  props.items.map((item) => {
+  props.items.map(item => {
     const link = resolveArticleLink(item)
     const isExternal = /^https?:\/\//i.test(link)
     return {
@@ -80,12 +80,16 @@ const enrichedItems = computed(() =>
       link,
       isExternal,
     }
-  }),
+  })
 )
 
-const chunkedItems = computed(() => chunkItems(enrichedItems.value, slidesPerView.value))
+const chunkedItems = computed(() =>
+  chunkItems(enrichedItems.value, slidesPerView.value)
+)
 const shouldShowArrows = computed(() => chunkedItems.value.length > 1)
-const shouldCycle = computed(() => enrichedItems.value.length > slidesPerView.value)
+const shouldCycle = computed(
+  () => enrichedItems.value.length > slidesPerView.value
+)
 </script>
 
 <template>
@@ -148,7 +152,11 @@ const shouldCycle = computed(() => enrichedItems.value.length > slidesPerView.va
                     height="160"
                     class="home-blog-carousel__image"
                   />
-                  <div v-else class="home-blog-carousel__icon" aria-hidden="true">
+                  <div
+                    v-else
+                    class="home-blog-carousel__icon"
+                    aria-hidden="true"
+                  >
                     <v-icon icon="mdi-post-outline" size="52" />
                   </div>
                 </div>
@@ -157,8 +165,12 @@ const shouldCycle = computed(() => enrichedItems.value.length > slidesPerView.va
                     {{ article.formattedDate ?? '' }}
                   </p>
                   <h3 class="home-blog-carousel__title">{{ article.title }}</h3>
-                  <p class="home-blog-carousel__summary">{{ article.summary }}</p>
-                  <span class="home-blog-carousel__cta">{{ t('home.blog.readMore') }}</span>
+                  <p class="home-blog-carousel__summary">
+                    {{ article.summary }}
+                  </p>
+                  <span class="home-blog-carousel__cta">{{
+                    t('home.blog.readMore')
+                  }}</span>
                 </div>
               </v-card>
             </component>

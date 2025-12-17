@@ -7,10 +7,16 @@
         role="complementary"
         :aria-label="t('category.products.compare.regionLabel')"
       >
-        <v-card class="category-compare-panel__card" elevation="12" rounded="xl">
+        <v-card
+          class="category-compare-panel__card"
+          elevation="12"
+          rounded="xl"
+        >
           <header class="category-compare-panel__header">
             <div class="category-compare-panel__title-block">
-              <h2 class="category-compare-panel__title">{{ t('category.products.compare.title') }}</h2>
+              <h2 class="category-compare-panel__title">
+                {{ t('category.products.compare.title') }}
+              </h2>
               <p class="category-compare-panel__count">{{ itemsCountLabel }}</p>
             </div>
 
@@ -32,15 +38,27 @@
           <VExpandTransition>
             <div v-show="!isCollapsed" class="category-compare-panel__body">
               <ul class="category-compare-panel__items" role="list">
-                <li v-for="item in items" :key="item.id" class="category-compare-panel__item">
-                  <v-avatar class="category-compare-panel__item-avatar" size="52" rounded="lg">
+                <li
+                  v-for="item in items"
+                  :key="item.id"
+                  class="category-compare-panel__item"
+                >
+                  <v-avatar
+                    class="category-compare-panel__item-avatar"
+                    size="52"
+                    rounded="lg"
+                  >
                     <v-img
                       v-if="item.image"
                       :src="item.image"
                       :alt="item.name"
                       cover
                     />
-                    <div v-else class="category-compare-panel__item-placeholder" aria-hidden="true">
+                    <div
+                      v-else
+                      class="category-compare-panel__item-placeholder"
+                      aria-hidden="true"
+                    >
                       {{ itemInitials(item.name) }}
                     </div>
                   </v-avatar>
@@ -53,13 +71,19 @@
                     >
                       {{ item.name }}
                     </NuxtLink>
-                    <span v-else class="category-compare-panel__item-name">{{ item.name }}</span>
+                    <span v-else class="category-compare-panel__item-name">{{
+                      item.name
+                    }}</span>
                     <v-btn
                       class="category-compare-panel__item-remove"
                       variant="text"
                       size="small"
                       color="error"
-                      :aria-label="t('category.products.compare.removeSingle', { name: item.name })"
+                      :aria-label="
+                        t('category.products.compare.removeSingle', {
+                          name: item.name,
+                        })
+                      "
                       @click="remove(item.id)"
                     >
                       {{ t('category.products.compare.removeFromList') }}
@@ -96,7 +120,10 @@ import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import { buildCompareHash } from '~/utils/_compare-url'
-import { useProductCompareStore, type CompareListItem } from '~/stores/useProductCompareStore'
+import {
+  useProductCompareStore,
+  type CompareListItem,
+} from '~/stores/useProductCompareStore'
 
 const emit = defineEmits<{
   (event: 'launch-comparison', items: CompareListItem[]): void
@@ -110,12 +137,16 @@ const route = useRoute()
 const compareStore = useProductCompareStore()
 const { items, isCollapsed } = storeToRefs(compareStore)
 
-const comparePath = computed(() => resolveLocalizedRoutePath('compare', locale.value))
+const comparePath = computed(() =>
+  resolveLocalizedRoutePath('compare', locale.value)
+)
 
 const hasItems = computed(() => items.value.length > 0)
 
 const itemsCountLabel = computed(() =>
-  translatePlural('category.products.compare.itemsCount', items.value.length, { count: items.value.length }),
+  translatePlural('category.products.compare.itemsCount', items.value.length, {
+    count: items.value.length,
+  })
 )
 
 const canLaunch = computed(() => items.value.length >= 2)
@@ -128,7 +159,7 @@ const remove = (id: string) => {
   compareStore.removeById(id)
 
   if (route.path === comparePath.value) {
-    const hash = buildCompareHash(items.value.map((item) => item.gtin))
+    const hash = buildCompareHash(items.value.map(item => item.gtin))
     router.replace(hash ? `${comparePath.value}${hash}` : comparePath.value)
   }
 }
@@ -142,7 +173,7 @@ const launchComparison = () => {
     return
   }
 
-  const gtins = items.value.map((item) => item.gtin)
+  const gtins = items.value.map(item => item.gtin)
   const hash = buildCompareHash(gtins)
 
   if (!hash) {
@@ -157,7 +188,7 @@ const itemInitials = (name: string) => {
   return name
     .split(' ')
     .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase())
+    .map(part => part[0]?.toUpperCase())
     .slice(0, 2)
     .join('')
 }

@@ -36,6 +36,7 @@ import jakarta.annotation.PreDestroy;
  * This service is in charge to provide the Verticals configurations.
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
+ * 
  * @author goulven
  *
  */
@@ -43,32 +44,29 @@ public class VerticalsConfigService {
 
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
-        private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
+	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
 
-        private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
-        private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
-        private static final String CLASSPATH_ATTRIBUTES = "classpath:/attributes/*.yml";
+	private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
+	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
+	private static final String CLASSPATH_ATTRIBUTES = "classpath:/attributes/*.yml";
 
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
 
-	// The cache of categories to verticalconfig association. datasource (or all) -> category -> VerticalConfig
-	private final Map<String,Map<String, VerticalConfig>> categoriesToVertical = new ConcurrentHashMap<>();
+	// The cache of categories to verticalconfig association. datasource (or all) ->
+	// category -> VerticalConfig
+	private final Map<String, Map<String, VerticalConfig>> categoriesToVertical = new ConcurrentHashMap<>();
 
-        private Map<String,VerticalConfig> byUrl = new HashMap<>();
+	private Map<String, VerticalConfig> byUrl = new HashMap<>();
 
-        private Map<String,String> toLang = new HashMap<>();
+	private Map<String, String> toLang = new HashMap<>();
 
-        private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
+	private Map<Integer, VerticalConfig> byTaxonomy = new HashMap<>();
 
-        private Map<String, AttributeConfig> attributeCatalog = new HashMap<>();
-
-
-
+	private Map<String, AttributeConfig> attributeCatalog = new HashMap<>();
 
 	private ResourcePatternResolver resourceResolver;
-
 
 	//
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -76,8 +74,8 @@ public class VerticalsConfigService {
 	// The default config
 	private VerticalConfig defaultConfig;
 
-
-	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver) {
+	public VerticalsConfigService(SerialisationService serialisationService,
+			GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver) {
 		super();
 		this.serialisationService = serialisationService;
 		this.resourceResolver = resourceResolver;
@@ -85,12 +83,10 @@ public class VerticalsConfigService {
 		// initial configs loads
 		loadConfigs();
 
-
 		// Update the google product categories with defined verticals
 		getConfigsWithoutDefault().stream().forEach(v -> {
 			googleTaxonomyService.updateCategoryWithVertical(v);
 		});
-
 
 	}
 
@@ -98,24 +94,24 @@ public class VerticalsConfigService {
 	 * Loads configs from classpath and from giit repositories. Thread safe
 	 * operation, so can be used in refresh
 	 */
-//	@Scheduled(fixedDelay = 1000 * 60 * 10, initialDelay = 1000 * 60 * 10)
-        public synchronized void loadConfigs() {
+	// @Scheduled(fixedDelay = 1000 * 60 * 10, initialDelay = 1000 * 60 * 10)
+	public synchronized void loadConfigs() {
 
-                Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
+		Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
 
-                attributeCatalog = loadAttributeCatalog();
-                byUrl.clear();
-                toLang.clear();
-                byTaxonomy.clear();
+		attributeCatalog = loadAttributeCatalog();
+		byUrl.clear();
+		toLang.clear();
+		byTaxonomy.clear();
 
-                // Setting the default config
-                try {
-                        Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
-                        defaultConfig =  serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
-                        resolveAttributeConfigs(defaultConfig);
-                } catch (Exception e) {
-                        logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
-                }
+		// Setting the default config
+		try {
+			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
+			defaultConfig = serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
+			resolveAttributeConfigs(defaultConfig);
+		} catch (Exception e) {
+			logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
+		}
 
 		/////////////////////////////////////////
 		// Load configurations from classpath
@@ -145,14 +141,13 @@ public class VerticalsConfigService {
 						});
 					}
 				} catch (Exception e) {
-					logger.error("Error loading categories matching map : {}",c,e);
+					logger.error("Error loading categories matching map : {}", c, e);
 				}
 
 			}));
 		}
 
 		// Associati
-
 
 		// Mapping url to i18n
 		getConfigsWithoutDefault().forEach(vc -> vc.getI18n().forEach((key, value) -> {
@@ -164,17 +159,15 @@ public class VerticalsConfigService {
 
 	}
 
-
-
 	/**
 	 *
 	 * @return the available verticals configurations from classpath
 	 */
-        private List<VerticalConfig> loadFromClasspath() {
-                List<VerticalConfig> ret = new ArrayList<>();
-                Resource[] resources = null;
-                try {
-                        resources = resourceResolver.getResources(CLASSPATH_VERTICALS);
+	private List<VerticalConfig> loadFromClasspath() {
+		List<VerticalConfig> ret = new ArrayList<>();
+		Resource[] resources = null;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_VERTICALS);
 		} catch (IOException e) {
 			logger.error("Cannot load  verticals from {} : {}", CLASSPATH_VERTICALS, e.getMessage());
 			return ret;
@@ -187,43 +180,43 @@ public class VerticalsConfigService {
 			try {
 				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
 			} catch (Exception e) {
-				logger.error("Cannot retrieve vertical config : {}",r.getFilename(), e);
+				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
 			}
-                }
+		}
 
-                return ret;
-        }
+		return ret;
+	}
 
-        private Map<String, AttributeConfig> loadAttributeCatalog() {
-                Map<String, AttributeConfig> attributes = new HashMap<>();
-                Resource[] resources;
-                try {
-                        resources = resourceResolver.getResources(CLASSPATH_ATTRIBUTES);
-                } catch (IOException e) {
-                        throw new IllegalStateException("Cannot load attributes from " + CLASSPATH_ATTRIBUTES, e);
-                }
+	private Map<String, AttributeConfig> loadAttributeCatalog() {
+		Map<String, AttributeConfig> attributes = new HashMap<>();
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_ATTRIBUTES);
+		} catch (IOException e) {
+			throw new IllegalStateException("Cannot load attributes from " + CLASSPATH_ATTRIBUTES, e);
+		}
 
-                for (Resource resource : resources) {
-                        try (InputStream inputStream = resource.getInputStream()) {
-                                AttributeConfig attributeConfig = serialisationService.fromYaml(inputStream, AttributeConfig.class);
-                                if (attributeConfig == null || attributeConfig.getKey() == null) {
-                                        throw new IllegalStateException("Attribute config defined in " + resource.getFilename() + " has no key");
-                                }
+		for (Resource resource : resources) {
+			try (InputStream inputStream = resource.getInputStream()) {
+				AttributeConfig attributeConfig = serialisationService.fromYaml(inputStream, AttributeConfig.class);
+				if (attributeConfig == null || attributeConfig.getKey() == null) {
+					throw new IllegalStateException(
+							"Attribute config defined in " + resource.getFilename() + " has no key");
+				}
 
-                                if (attributes.containsKey(attributeConfig.getKey())) {
-                                        logger.warn("Duplicate attribute config detected for key {}. Keeping last declared instance.", attributeConfig.getKey());
-                                }
+				if (attributes.containsKey(attributeConfig.getKey())) {
+					logger.warn("Duplicate attribute config detected for key {}. Keeping last declared instance.",
+							attributeConfig.getKey());
+				}
 
-                                attributes.put(attributeConfig.getKey(), attributeConfig);
-                        } catch (Exception e) {
-                                throw new IllegalStateException("Cannot load attribute config from " + resource.getFilename(), e);
-                        }
-                }
+				attributes.put(attributeConfig.getKey(), attributeConfig);
+			} catch (Exception e) {
+				throw new IllegalStateException("Cannot load attribute config from " + resource.getFilename(), e);
+			}
+		}
 
-                return attributes;
-        }
-
-
+		return attributes;
+	}
 
 	/**
 	 * Instanciate a config with a previously defaulted one
@@ -233,87 +226,100 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-        public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws SerialisationException, IOException {
+	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul)
+			throws SerialisationException, IOException {
 
-                // TODO(p3,perf) : chould be cached
-                VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul),VerticalConfig.class);
-                ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
-                VerticalConfig ret = objectReader.readValue(inputStream);
-                inputStream.close();
-                return resolveAttributeConfigs(ret);
-        }
+		// TODO(p3,perf) : chould be cached
+		VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul), VerticalConfig.class);
+		ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
+		VerticalConfig ret = objectReader.readValue(inputStream);
+		inputStream.close();
+		return resolveAttributeConfigs(ret);
+	}
 
-        private VerticalConfig resolveAttributeConfigs(VerticalConfig config) {
-                if (config == null || config.getAttributesConfig() == null || config.getAttributesConfig().getConfigs() == null) {
-                        return config;
-                }
+	private VerticalConfig resolveAttributeConfigs(VerticalConfig config) {
+		if (config == null || config.getAttributesConfig() == null
+				|| config.getAttributesConfig().getConfigs() == null) {
+			return config;
+		}
 
-                List<AttributeConfig> resolved = new ArrayList<>();
-                for (AttributeConfig attributeConfig : config.getAttributesConfig().getConfigs()) {
-                        resolved.add(resolveAttributeConfig(attributeConfig));
-                }
-                config.getAttributesConfig().setConfigs(resolved);
-                return config;
-        }
+		List<AttributeConfig> resolved = new ArrayList<>();
+		for (AttributeConfig attributeConfig : config.getAttributesConfig().getConfigs()) {
+			AttributeConfig resolvedConfig = resolveAttributeConfig(attributeConfig);
+			if (resolvedConfig != null && resolvedConfig.getName() == null) {
+				logger.error(
+						"Invalid configuration for attribute '{}' in vertical '{}': Name is missing. This will cause issues in frontend.",
+						resolvedConfig.getKey(), config.getId());
+			}
+			resolved.add(resolvedConfig);
+		}
+		config.getAttributesConfig().setConfigs(resolved);
+		return config;
+	}
 
-        private AttributeConfig resolveAttributeConfig(AttributeConfig attributeConfig) {
-                if (attributeConfig == null) {
-                        return null;
-                }
+	private AttributeConfig resolveAttributeConfig(AttributeConfig attributeConfig) {
+		if (attributeConfig == null) {
+			return null;
+		}
 
-                if (!isKeyOnly(attributeConfig)) {
-                        return attributeConfig;
-                }
+		if (!isKeyOnly(attributeConfig)) {
+			return attributeConfig;
+		}
 
-                AttributeConfig catalogConfig = attributeCatalog.get(attributeConfig.getKey());
-                if (catalogConfig == null) {
-                        throw new IllegalStateException("Missing attribute definition for key " + attributeConfig.getKey());
-                }
+		AttributeConfig catalogConfig = attributeCatalog.get(attributeConfig.getKey());
+		if (catalogConfig == null) {
+			throw new IllegalStateException("Missing attribute definition for key " + attributeConfig.getKey());
+		}
 
-                return serialisationService.getYamlMapper().convertValue(catalogConfig, AttributeConfig.class);
-        }
+		return serialisationService.getYamlMapper().convertValue(catalogConfig, AttributeConfig.class);
+	}
 
-        private boolean isKeyOnly(AttributeConfig attributeConfig) {
-                if (attributeConfig == null || attributeConfig.getKey() == null) {
-                        return false;
-                }
+	private boolean isKeyOnly(AttributeConfig attributeConfig) {
+		if (attributeConfig == null || attributeConfig.getKey() == null) {
+			return false;
+		}
 
-                AttributeParserConfig parser = attributeConfig.getParser();
-                return attributeConfig.getName() == null
-                                && attributeConfig.getUnit() == null
-                                && attributeConfig.getSuffix() == null
-                                && (attributeConfig.getSynonyms() == null || attributeConfig.getSynonyms().isEmpty())
-                                && attributeConfig.getIcecatFeaturesIds().isEmpty()
-                                && attributeConfig.getEprelFeatureNames().isEmpty()
-                                && attributeConfig.getNumericMapping().isEmpty()
-                                && attributeConfig.getMappings().isEmpty()
-                                && (attributeConfig.getFaIcon() == null || "fa-wrench".equals(attributeConfig.getFaIcon()))
-                                && (attributeConfig.getBetterIs() == null || AttributeComparisonRule.GREATER.equals(attributeConfig.getBetterIs()))
-                                && (attributeConfig.getFilteringType() == null || AttributeType.TEXT.equals(attributeConfig.getFilteringType()))
-                                && !attributeConfig.isAsScore()
-                                && (attributeConfig.getAttributeValuesOrdering() == null || Order.COUNT.equals(attributeConfig.getAttributeValuesOrdering()))
-                                && (attributeConfig.getAttributeValuesReverseOrder() == null || Boolean.FALSE.equals(attributeConfig.getAttributeValuesReverseOrder()))
-                                && hasDefaultParser(parser);
-        }
+		AttributeParserConfig parser = attributeConfig.getParser();
+		return attributeConfig.getName() == null
+				&& attributeConfig.getUnit() == null
+				&& attributeConfig.getSuffix() == null
+				&& (attributeConfig.getSynonyms() == null || attributeConfig.getSynonyms().isEmpty())
+				&& attributeConfig.getIcecatFeaturesIds().isEmpty()
+				&& attributeConfig.getEprelFeatureNames().isEmpty()
+				&& attributeConfig.getNumericMapping().isEmpty()
+				&& attributeConfig.getMappings().isEmpty()
+				&& (attributeConfig.getFaIcon() == null || "fa-wrench".equals(attributeConfig.getFaIcon()))
+				&& (attributeConfig.getBetterIs() == null
+						|| AttributeComparisonRule.GREATER.equals(attributeConfig.getBetterIs()))
+				&& (attributeConfig.getFilteringType() == null
+						|| AttributeType.TEXT.equals(attributeConfig.getFilteringType()))
+				&& !attributeConfig.isAsScore()
+				&& (attributeConfig.getAttributeValuesOrdering() == null
+						|| Order.COUNT.equals(attributeConfig.getAttributeValuesOrdering()))
+				&& (attributeConfig.getAttributeValuesReverseOrder() == null
+						|| Boolean.FALSE.equals(attributeConfig.getAttributeValuesReverseOrder()))
+				&& hasDefaultParser(parser);
+	}
 
-        private boolean hasDefaultParser(AttributeParserConfig parser) {
-                AttributeParserConfig defaults = new AttributeParserConfig();
-                if (parser == null) {
-                        return true;
-                }
+	private boolean hasDefaultParser(AttributeParserConfig parser) {
+		AttributeParserConfig defaults = new AttributeParserConfig();
+		if (parser == null) {
+			return true;
+		}
 
-                return Objects.equals(parser.getNormalize(), defaults.getNormalize())
-                                && Objects.equals(parser.getTrim(), defaults.getTrim())
-                                && Objects.equals(parser.getLowerCase(), defaults.getLowerCase())
-                                && Objects.equals(parser.getUpperCase(), defaults.getUpperCase())
-                                && parser.isRemoveParenthesis() == defaults.isRemoveParenthesis()
-                                && Objects.equals(parser.getClazz(), defaults.getClazz())
-                                && (parser.getDeleteTokens() == null || parser.getDeleteTokens().isEmpty())
-                                && (parser.getTokenMatch() == null || parser.getTokenMatch().isEmpty());
-        }
+		return Objects.equals(parser.getNormalize(), defaults.getNormalize())
+				&& Objects.equals(parser.getTrim(), defaults.getTrim())
+				&& Objects.equals(parser.getLowerCase(), defaults.getLowerCase())
+				&& Objects.equals(parser.getUpperCase(), defaults.getUpperCase())
+				&& parser.isRemoveParenthesis() == defaults.isRemoveParenthesis()
+				&& Objects.equals(parser.getClazz(), defaults.getClazz())
+				&& (parser.getDeleteTokens() == null || parser.getDeleteTokens().isEmpty())
+				&& (parser.getTokenMatch() == null || parser.getTokenMatch().isEmpty());
+	}
 
 	/**
 	 * Instanciate a vertical config for a given categories bag
+	 * 
 	 * @param inputStream
 	 * @param existing
 	 * @return
@@ -344,24 +350,24 @@ public class VerticalsConfigService {
 
 		// Looking for words exclusions in categories
 		if (null != vc) {
-		    for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
-		        for (String category : productCategoriessByDatasource.values()) {
-		            if (category.contains(token)) {
-		                logger.warn("Excluded from matching category {} because categories contains word {}", vc.getId(), token, category);
-		                vc = null;
-		                return null;
-		            }
-		        }
-		    }
+			for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
+				for (String category : productCategoriessByDatasource.values()) {
+					if (category.contains(token)) {
+						logger.warn("Excluded from matching category {} because categories contains word {}",
+								vc.getId(), token, category);
+						vc = null;
+						return null;
+					}
+				}
+			}
 		}
 
 		return vc;
 	}
 
-
-
 	/**
 	 * Return the language for a vertical path, if any
+	 * 
 	 * @param path
 	 * @return
 	 */
@@ -369,10 +375,9 @@ public class VerticalsConfigService {
 		return byUrl.get(path);
 	}
 
-
-
 	/**
- 	 *  Return the path for a vertical language, if any
+	 * Return the path for a vertical language, if any
+	 * 
 	 * @param config
 	 * @param path
 	 * @return
@@ -383,36 +388,38 @@ public class VerticalsConfigService {
 	}
 
 	/**
-	 * Splits the VerticalConfig objects into buckets of a specified size, limiting the total number of buckets.
+	 * Splits the VerticalConfig objects into buckets of a specified size, limiting
+	 * the total number of buckets.
 	 * This is UI HELPER METHOD
-	 * @param bucketSize the size of each bucket (number of VerticalConfig objects per bucket).
-	 * @param maxBucket the maximum number of buckets to return.
-	 * @return a list of buckets, where each bucket is a list of VerticalConfig objects.
+	 * 
+	 * @param bucketSize the size of each bucket (number of VerticalConfig objects
+	 *                   per bucket).
+	 * @param maxBucket  the maximum number of buckets to return.
+	 * @return a list of buckets, where each bucket is a list of VerticalConfig
+	 *         objects.
 	 */
-	//TODO(p1, perf) : cache
+	// TODO(p1, perf) : cache
 	public List<List<VerticalConfig>> getImpactScoreVerticalsByBuckets(int bucketSize, int maxBucket) {
-	    // Get the map of VerticalConfig objects
-	    Map<String, VerticalConfig> theConfigs = getConfigs();
+		// Get the map of VerticalConfig objects
+		Map<String, VerticalConfig> theConfigs = getConfigs();
 
-	    // Create a list to hold all VerticalConfig objects
-	    List<VerticalConfig> configList = new ArrayList<>(getConfigsWithoutDefault());
+		// Create a list to hold all VerticalConfig objects
+		List<VerticalConfig> configList = new ArrayList<>(getConfigsWithoutDefault());
 
+		// Create a list to hold the final buckets
+		List<List<VerticalConfig>> buckets = new ArrayList<>();
 
-	    // Create a list to hold the final buckets
-	    List<List<VerticalConfig>> buckets = new ArrayList<>();
+		// Iterate and create buckets
+		for (int i = 0; i < configList.size() && buckets.size() < maxBucket; i += bucketSize) {
+			// Create a sublist for the current bucket
+			List<VerticalConfig> bucket = configList.subList(i, Math.min(i + bucketSize, configList.size()));
 
-	    // Iterate and create buckets
-	    for (int i = 0; i < configList.size() && buckets.size() < maxBucket; i += bucketSize) {
-	        // Create a sublist for the current bucket
-	        List<VerticalConfig> bucket = configList.subList(i, Math.min(i + bucketSize, configList.size()));
+			// Add the bucket to the list of buckets
+			buckets.add(new ArrayList<>(bucket)); // Use a new ArrayList to ensure immutability of sublists
+		}
 
-	        // Add the bucket to the list of buckets
-	        buckets.add(new ArrayList<>(bucket)); // Use a new ArrayList to ensure immutability of sublists
-	    }
-
-	    return buckets;
+		return buckets;
 	}
-
 
 	/**
 	 *
@@ -425,30 +432,32 @@ public class VerticalsConfigService {
 
 	}
 
-
 	/**
 	 * Return a config by it's icecat categoryId
+	 * 
 	 * @param icecatCategoryId
-	 * TODO(p2,perf) : Maintain a map for key/val access
+	 *                         TODO(p2,perf) : Maintain a map for key/val access
 	 * @return
 	 */
 	public VerticalConfig getByIcecatCategoryId(Integer icecatCategoryId) {
-		return configs.values().stream().filter(e ->icecatCategoryId.equals(e.getIcecatTaxonomyId())).findFirst().orElse(null);
+		return configs.values().stream().filter(e -> icecatCategoryId.equals(e.getIcecatTaxonomyId())).findFirst()
+				.orElse(null);
 	}
 
 	/**
 	 * Return a config by it's google taxonomy id
+	 * 
 	 * @param icecatCategoryId
 	 * @return
 	 */
 	public VerticalConfig getByGoogleTaxonomy(Integer googleCategoryId) {
-		return configs.values().stream().filter(e ->googleCategoryId.equals(e.getGoogleTaxonomyId())).findFirst().orElse(null);
+		return configs.values().stream().filter(e -> googleCategoryId.equals(e.getGoogleTaxonomyId())).findFirst()
+				.orElse(null);
 	}
-
-
 
 	/**
 	 * Return a vertical config for a given taxonomy id
+	 * 
 	 * @param key
 	 * @return
 	 */
@@ -473,6 +482,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's Id, or the default one if not found
+	 * 
 	 * @param vertical
 	 * @return
 	 */
@@ -486,26 +496,27 @@ public class VerticalsConfigService {
 		return vConf;
 	}
 
-
 	/**
-	 * @return all configs, except the _default. Allows filtering on enabled verticals,
-	 * and returns the list ordered by the VerticalConfig.order field.
+	 * @return all configs, except the _default. Allows filtering on enabled
+	 *         verticals,
+	 *         and returns the list ordered by the VerticalConfig.order field.
 	 */
 	// TODO (p1, perf): cache
 	public List<VerticalConfig> getConfigsWithoutDefault(boolean onlyEnabled) {
-	    return getConfigs().values().stream()
-	        .filter(config -> !onlyEnabled || config.isEnabled())
-	        .sorted(Comparator.comparingInt(VerticalConfig::getOrder))
-	        .toList();
+		return getConfigs().values().stream()
+				.filter(config -> !onlyEnabled || config.isEnabled())
+				.sorted(Comparator.comparingInt(VerticalConfig::getOrder))
+				.toList();
 	}
 
 	/**
 	 *
 	 * @return all configs, except the _default.
 	 */
-	public Collection<VerticalConfig>  getConfigsWithoutDefault() {
+	public Collection<VerticalConfig> getConfigsWithoutDefault() {
 		return getConfigsWithoutDefault(false);
 	}
+
 	/**
 	 *
 	 * @return all Vertical configs
@@ -514,9 +525,9 @@ public class VerticalsConfigService {
 		return configs;
 	}
 
-
 	/**
-	 * Shuts down the ExecutorService gracefully, waiting for existing tasks to complete.
+	 * Shuts down the ExecutorService gracefully, waiting for existing tasks to
+	 * complete.
 	 * If the tasks do not complete within the timeout, it forces a shutdown.
 	 */
 	@PreDestroy
@@ -534,8 +545,5 @@ public class VerticalsConfigService {
 			Thread.currentThread().interrupt();
 		}
 	}
-
-
-
 
 }

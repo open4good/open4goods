@@ -16,7 +16,11 @@ const props = defineProps<Props>()
 </script>
 
 <template>
-  <section class="team-callouts" role="region" aria-labelledby="team-callouts-title">
+  <section
+    class="team-callouts"
+    role="region"
+    aria-labelledby="team-callouts-title"
+  >
     <v-container class="py-12 px-4 mx-auto" max-width="xl">
       <v-row class="g-6" align="stretch">
         <v-col cols="12" lg="8">
@@ -27,7 +31,10 @@ const props = defineProps<Props>()
               </h3>
             </v-card-item>
             <v-card-text class="team-callouts__text">
-              <TextContent :bloc-id="props.partnersBlocId" :ipsum-length="120" />
+              <TextContent
+                :bloc-id="props.partnersBlocId"
+                :ipsum-length="120"
+              />
             </v-card-text>
             <v-card-actions>
               <v-btn
@@ -43,7 +50,11 @@ const props = defineProps<Props>()
         </v-col>
 
         <v-col cols="12" lg="4">
-          <v-card class="team-callouts__card team-callouts__card--accent" elevation="4" rounded="xl">
+          <v-card
+            class="team-callouts__card team-callouts__card--accent"
+            elevation="4"
+            rounded="xl"
+          >
             <v-card-item>
               <h3 class="team-callouts__title team-callouts__title--accent">
                 {{ props.contactTitle }}

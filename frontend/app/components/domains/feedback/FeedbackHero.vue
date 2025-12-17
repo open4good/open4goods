@@ -1,6 +1,9 @@
 <template>
-  <HeroSurface class="feedback-hero" aria-labelledby="feedback-hero-heading" variant="mesh">
-
+  <HeroSurface
+    class="feedback-hero"
+    aria-labelledby="feedback-hero-heading"
+    variant="mesh"
+  >
     <v-container class="py-16">
       <v-row class="align-center">
         <v-col cols="12" md="7">
@@ -16,7 +19,11 @@
               {{ description }}
             </p>
 
-            <div class="feedback-hero__actions" role="group" :aria-label="ctaGroupLabel">
+            <div
+              class="feedback-hero__actions"
+              role="group"
+              :aria-label="ctaGroupLabel"
+            >
               <v-btn
                 v-if="primaryCta"
                 color="primary"
@@ -49,24 +56,42 @@
                 {{ secondaryCta.label }}
               </v-btn>
             </div>
-
-
           </div>
         </v-col>
 
         <v-col cols="12" md="5">
-          <v-card class="feedback-hero__card" elevation="8" rounded="xl" role="presentation">
+          <v-card
+            class="feedback-hero__card"
+            elevation="8"
+            rounded="xl"
+            role="presentation"
+          >
             <div class="feedback-hero__card-header">
               <v-icon icon="mdi-vote" size="36" color="primary" />
-              <span class="feedback-hero__card-eyebrow">{{ stats.eyebrow }}</span>
+              <span class="feedback-hero__card-eyebrow">{{
+                stats.eyebrow
+              }}</span>
             </div>
             <p class="feedback-hero__card-title">{{ stats.title }}</p>
-            <p class="feedback-hero__card-description">{{ stats.description }}</p>
+            <p class="feedback-hero__card-description">
+              {{ stats.description }}
+            </p>
             <v-divider class="my-4" />
             <ul class="feedback-hero__card-list" role="list">
-              <li v-for="item in stats.items" :key="item.label" class="feedback-hero__card-item">
-                <v-icon :icon="item.icon" size="22" color="primary" class="me-2" />
-                <span class="feedback-hero__card-item-label">{{ item.label }}</span>
+              <li
+                v-for="item in stats.items"
+                :key="item.label"
+                class="feedback-hero__card-item"
+              >
+                <v-icon
+                  :icon="item.icon"
+                  size="22"
+                  color="primary"
+                  class="me-2"
+                />
+                <span class="feedback-hero__card-item-label">{{
+                  item.label
+                }}</span>
               </li>
             </ul>
           </v-card>
@@ -77,7 +102,6 @@
 </template>
 
 <script setup lang="ts">
-
 type HeroLink = {
   label: string
   ariaLabel: string

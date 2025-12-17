@@ -1,8 +1,16 @@
 <template>
-  <section :id="sectionId" class="feedback-form" :aria-labelledby="`${sectionId}-heading`">
+  <section
+    :id="sectionId"
+    class="feedback-form"
+    :aria-labelledby="`${sectionId}-heading`"
+  >
     <v-card class="feedback-form__card" elevation="0" rounded="xl">
       <div class="feedback-form__header">
-        <v-avatar size="42" class="feedback-form__header-icon" color="surface-primary-120">
+        <v-avatar
+          size="42"
+          class="feedback-form__header-icon"
+          color="surface-primary-120"
+        >
           <v-icon :icon="categoryIcon" size="26" color="primary" />
         </v-avatar>
         <div>
@@ -53,7 +61,11 @@
         {{ missingCaptchaMessage }}
       </v-alert>
 
-      <v-form ref="formRef" class="feedback-form__form" @submit.prevent="onSubmit">
+      <v-form
+        ref="formRef"
+        class="feedback-form__form"
+        @submit.prevent="onSubmit"
+      >
         <v-row dense>
           <v-col cols="12">
             <v-text-field
@@ -109,10 +121,22 @@
                 @expired="handleCaptchaExpired"
                 @error="handleCaptchaError"
               />
-              <div v-else class="feedback-form__captcha-placeholder" aria-hidden="true">
-                <v-icon icon="mdi-shield-alert-outline" size="36" color="primary" />
+              <div
+                v-else
+                class="feedback-form__captcha-placeholder"
+                aria-hidden="true"
+              >
+                <v-icon
+                  icon="mdi-shield-alert-outline"
+                  size="36"
+                  color="primary"
+                />
               </div>
-              <p v-if="captchaError" class="feedback-form__captcha-error" role="alert">
+              <p
+                v-if="captchaError"
+                class="feedback-form__captcha-error"
+                role="alert"
+              >
                 {{ captchaError }}
               </p>
             </div>
@@ -213,12 +237,16 @@ const captchaError = ref<string | null>(null)
 const hasSiteKey = computed(() => props.siteKey?.length > 0)
 const siteKey = computed(() => props.siteKey)
 
-const captchaLocale = computed(() => (props.currentLocale.startsWith('fr') ? 'fr' : 'en'))
-const captchaTheme = computed(() => (theme.current.value.dark ? 'dark' : 'light'))
+const captchaLocale = computed(() =>
+  props.currentLocale.startsWith('fr') ? 'fr' : 'en'
+)
+const captchaTheme = computed(() =>
+  theme.current.value.dark ? 'dark' : 'light'
+)
 
 watch(
   () => props.defaultAuthor,
-  (nextAuthor) => {
+  nextAuthor => {
     if (!author.value) {
       author.value = nextAuthor
     }
@@ -227,7 +255,7 @@ watch(
 
 watch(
   () => props.success,
-  (isSuccess) => {
+  isSuccess => {
     if (isSuccess) {
       resetForm()
     }
@@ -239,11 +267,13 @@ watch([author, titleInput, message], () => {
 })
 
 const titleRules = [
-  (value: string) => (!!value && value.trim().length >= 4) || props.titleTooShortMessage,
+  (value: string) =>
+    (!!value && value.trim().length >= 4) || props.titleTooShortMessage,
 ]
 
 const messageRules = [
-  (value: string) => (!!value && value.trim().length >= 20) || props.messageTooShortMessage,
+  (value: string) =>
+    (!!value && value.trim().length >= 20) || props.messageTooShortMessage,
 ]
 
 const handleCaptchaVerify = (token: string) => {

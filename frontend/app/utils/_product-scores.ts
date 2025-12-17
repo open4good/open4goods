@@ -8,7 +8,9 @@ const isFiniteNumber = (value: unknown): value is number =>
  * Resolve the ECOSCORE value for a product on a five-point scale.
  * The ECOSCORE value is already expected to be between 0 and 5.
  */
-export const resolvePrimaryImpactScore = (product: ProductDto): number | null => {
+export const resolvePrimaryImpactScore = (
+  product: ProductDto
+): number | null => {
   const value = product.scores?.scores?.ECOSCORE?.value
 
   if (!isFiniteNumber(value)) {
@@ -17,4 +19,3 @@ export const resolvePrimaryImpactScore = (product: ProductDto): number | null =>
 
   return clampScore(value)
 }
-

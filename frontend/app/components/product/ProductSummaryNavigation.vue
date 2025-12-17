@@ -13,7 +13,10 @@
         <button
           type="button"
           class="product-summary-navigation__link"
-          :class="{ 'product-summary-navigation__link--active': section.id === activeSection }"
+          :class="{
+            'product-summary-navigation__link--active':
+              section.id === activeSection,
+          }"
           :aria-current="section.id === activeSection ? 'true' : undefined"
           :aria-controls="section.id"
           @click="onNavigate(section.id)"
@@ -24,7 +27,9 @@
             size="18"
             class="product-summary-navigation__icon"
           />
-          <span class="product-summary-navigation__label">{{ section.label }}</span>
+          <span class="product-summary-navigation__label">{{
+            section.label
+          }}</span>
         </button>
       </li>
     </ul>
@@ -47,7 +52,10 @@
           <button
             type="button"
             class="product-summary-navigation__admin-link"
-            :class="{ 'product-summary-navigation__admin-link--active': admin.id === activeSection }"
+            :class="{
+              'product-summary-navigation__admin-link--active':
+                admin.id === activeSection,
+            }"
             :aria-current="admin.id === activeSection ? 'true' : undefined"
             :aria-controls="admin.id"
             @click="onNavigate(admin.id)"
@@ -58,7 +66,9 @@
               size="18"
               class="product-summary-navigation__admin-icon"
             />
-            <span class="product-summary-navigation__admin-label">{{ admin.label }}</span>
+            <span class="product-summary-navigation__admin-label">{{
+              admin.label
+            }}</span>
           </button>
         </li>
       </ul>
@@ -71,11 +81,15 @@ import type { PropType } from 'vue'
 
 const _props = defineProps({
   sections: {
-    type: Array as PropType<Array<{ id: string; label: string; icon?: string }>>,
+    type: Array as PropType<
+      Array<{ id: string; label: string; icon?: string }>
+    >,
     default: () => [],
   },
   adminSections: {
-    type: Array as PropType<Array<{ id: string; label: string; icon?: string }>>,
+    type: Array as PropType<
+      Array<{ id: string; label: string; icon?: string }>
+    >,
     default: () => [],
   },
   activeSection: {
@@ -110,7 +124,7 @@ const onNavigate = (sectionId: string) => {
 <style scoped>
 .product-summary-navigation {
   position: sticky;
-  top: 96px;
+  top: var(--product-sticky-offset, 0px);
   z-index: 10;
   padding: 1.5rem 1rem;
   border-radius: 16px;
@@ -120,7 +134,7 @@ const onNavigate = (sectionId: string) => {
 }
 
 .product-summary-navigation--horizontal {
-  top: 0;
+  top: var(--product-sticky-offset, 0px);
   background: rgba(var(--v-theme-surface-glass), 0.9);
   border-radius: 0;
   padding: 0.75rem 1rem;
@@ -254,7 +268,8 @@ const onNavigate = (sectionId: string) => {
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-error), 0.35);
 }
 
-.product-summary-navigation__admin-link--active .product-summary-navigation__admin-icon {
+.product-summary-navigation__admin-link--active
+  .product-summary-navigation__admin-icon {
   color: rgb(var(--v-theme-surface-default));
 }
 
@@ -270,11 +285,13 @@ const onNavigate = (sectionId: string) => {
   justify-content: center;
 }
 
-.product-summary-navigation--horizontal .product-summary-navigation__admin-panel {
+.product-summary-navigation--horizontal
+  .product-summary-navigation__admin-panel {
   margin-top: 1rem;
 }
 
-.product-summary-navigation--horizontal .product-summary-navigation__admin-list {
+.product-summary-navigation--horizontal
+  .product-summary-navigation__admin-list {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 0.75rem;

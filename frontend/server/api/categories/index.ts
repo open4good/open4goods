@@ -19,7 +19,7 @@ declare module 'h3' {
 }
 
 const resolveCategoriesListCacheContext = (
-  event: H3Event,
+  event: H3Event
 ): CategoriesListCacheContext => {
   if (event.context.categoriesListCacheContext) {
     return event.context.categoriesListCacheContext
@@ -50,12 +50,10 @@ const resolveCategoriesListCacheContext = (
  * Handles GET requests for categories with caching
  */
 const handler = async (event: H3Event): Promise<VerticalConfigDto[]> => {
-  setDomainLanguageCacheHeaders(
-    event,
-    'public, max-age=3600, s-maxage=3600'
-  )
+  setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
-  const { domainLanguage, onlyEnabled } = resolveCategoriesListCacheContext(event)
+  const { domainLanguage, onlyEnabled } =
+    resolveCategoriesListCacheContext(event)
   const categoriesService = useCategoriesService(domainLanguage)
 
   try {
@@ -79,7 +77,7 @@ const handler = async (event: H3Event): Promise<VerticalConfigDto[]> => {
 export default cachedEventHandler(handler, {
   name: 'categories-list',
   maxAge: 3600,
-  getKey: (event) => {
+  getKey: event => {
     const { domainLanguage, onlyEnabled } =
       resolveCategoriesListCacheContext(event)
 

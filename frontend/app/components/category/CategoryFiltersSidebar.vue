@@ -7,9 +7,11 @@
       :filters="props.filters"
       :impact-expanded="props.impactExpanded"
       :technical-expanded="props.technicalExpanded"
-      @update:filters="(value) => emit('update:filters', value)"
-      @update:impact-expanded="(value) => emit('update:impactExpanded', value)"
-      @update:technical-expanded="(value) => emit('update:technicalExpanded', value)"
+      @update:filters="value => emit('update:filters', value)"
+      @update:impact-expanded="value => emit('update:impactExpanded', value)"
+      @update:technical-expanded="
+        value => emit('update:technicalExpanded', value)
+      "
     />
 
     <CategoryAdminFiltersPanel
@@ -18,7 +20,7 @@
       :aggregations="props.aggregations"
       :baseline-aggregations="props.baselineAggregations"
       :filters="props.filters"
-      @update:filters="(value) => emit('update:filters', value)"
+      @update:filters="value => emit('update:filters', value)"
     />
 
     <div v-if="showMobileActions" class="category-page__filters-actions">
@@ -88,7 +90,7 @@ const props = withDefaults(
     categoryName: null,
     showAdminPanel: false,
     adminFilterFields: () => [],
-  },
+  }
 )
 
 const emit = defineEmits<{
@@ -108,6 +110,6 @@ const showMobileActions = computed(() => props.showMobileActions)
 const ecoscoreLinkAvailable = computed(() => Boolean(props.verticalHomeUrl))
 const adminFields = computed(() => props.adminFilterFields ?? [])
 const shouldShowAdminPanel = computed(
-  () => props.showAdminPanel && adminFields.value.length > 0,
+  () => props.showAdminPanel && adminFields.value.length > 0
 )
 </script>

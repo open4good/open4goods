@@ -36,7 +36,9 @@ const buildDateInfo = (timestamp?: number) => {
 
   return {
     iso: date.toISOString(),
-    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(date),
+    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(
+      date
+    ),
   }
 }
 
@@ -49,8 +51,15 @@ const updatedDate = computed(() => {
   return info
 })
 
-const rawBody = computed(() => article.value.body ?? article.value.content ?? '')
-const plainBody = computed(() => rawBody.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim())
+const rawBody = computed(
+  () => article.value.body ?? article.value.content ?? ''
+)
+const plainBody = computed(() =>
+  rawBody.value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+)
 
 const sanitizedBody = computed(() => {
   const { sanitizedHtml } = _sanitizeHtml(rawBody.value)
@@ -81,14 +90,18 @@ const readingTimeLabel = computed(() => {
   return t('blog.article.readingTime', { minutes: readingTimeMinutes.value })
 })
 
-const categories = computed(() => (article.value.category ?? []).map((item) => item.trim()).filter(Boolean))
+const categories = computed(() =>
+  (article.value.category ?? []).map(item => item.trim()).filter(Boolean)
+)
 
 const buildTagLink = (tag: string) => ({
   path: '/blog',
   query: { tag },
 })
 
-const headingId = computed(() => `blog-article-${article.value.url ?? 'detail'}`)
+const headingId = computed(
+  () => `blog-article-${article.value.url ?? 'detail'}`
+)
 
 const metaDescription = computed(() => {
   const summary = articleSummary.value
@@ -101,7 +114,9 @@ const metaDescription = computed(() => {
   }
 
   const truncated = plainBody.value.slice(0, 160)
-  return truncated.length < plainBody.value.length ? `${truncated.trimEnd()}...` : truncated
+  return truncated.length < plainBody.value.length
+    ? `${truncated.trimEnd()}...`
+    : truncated
 })
 
 let requestUrl: URL | undefined
@@ -152,7 +167,9 @@ useSeoMeta({
   ogType: 'article',
   ogImage: computed(() => article.value.image || undefined),
   articlePublishedTime: computed(() => publishedDate.value?.iso),
-  articleModifiedTime: computed(() => updatedDate.value?.iso ?? publishedDate.value?.iso),
+  articleModifiedTime: computed(
+    () => updatedDate.value?.iso ?? publishedDate.value?.iso
+  ),
   ogUrl: canonicalUrl,
 })
 
@@ -212,30 +229,56 @@ useHead(() => ({
         </ul>
       </nav>
 
-      <h1 :id="headingId" class="article-title" itemprop="headline" data-test="article-title">
+      <h1
+        :id="headingId"
+        class="article-title"
+        itemprop="headline"
+        data-test="article-title"
+      >
         {{ articleTitle }}
       </h1>
 
-      <p v-if="articleSummary" class="article-summary" itemprop="description" data-test="article-summary">
+      <p
+        v-if="articleSummary"
+        class="article-summary"
+        itemprop="description"
+        data-test="article-summary"
+      >
         {{ articleSummary }}
       </p>
 
       <ul class="article-meta" aria-label="Article metadata">
-        <li v-if="article.author" class="article-meta__item" data-test="article-author">
+        <li
+          v-if="article.author"
+          class="article-meta__item"
+          data-test="article-author"
+        >
           <v-icon icon="mdi-account" size="small" aria-hidden="true" />
-          <span itemprop="author" itemscope itemtype="https://schema.org/Person">
+          <span
+            itemprop="author"
+            itemscope
+            itemtype="https://schema.org/Person"
+          >
             <span itemprop="name">{{ article.author }}</span>
           </span>
         </li>
 
-        <li v-if="publishedDate" class="article-meta__item" data-test="article-published">
+        <li
+          v-if="publishedDate"
+          class="article-meta__item"
+          data-test="article-published"
+        >
           <v-icon icon="mdi-calendar" size="small" aria-hidden="true" />
           <time :datetime="publishedDate.iso" itemprop="datePublished">
             {{ publishedDate.label }}
           </time>
         </li>
 
-        <li v-if="readingTimeLabel" class="article-meta__item" data-test="article-reading-time">
+        <li
+          v-if="readingTimeLabel"
+          class="article-meta__item"
+          data-test="article-reading-time"
+        >
           <v-icon icon="mdi-timer" size="small" aria-hidden="true" />
           <span>{{ readingTimeLabel }}</span>
         </li>
@@ -250,7 +293,9 @@ useHead(() => ({
         height="360"
         class="article-hero__image"
       />
-      <figcaption class="d-sr-only">{{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}</figcaption>
+      <figcaption class="d-sr-only">
+        {{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}
+      </figcaption>
     </figure>
 
     <v-divider class="article-divider" role="presentation" />
@@ -263,11 +308,22 @@ useHead(() => ({
       role="region"
     >
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="article-content" data-test="article-body" v-html="sanitizedBody" />
+      <div
+        class="article-content"
+        data-test="article-body"
+        v-html="sanitizedBody"
+      />
     </section>
 
-    <section v-else class="article-body article-body--empty" aria-live="polite" data-test="article-empty">
-      <v-alert type="info" variant="tonal">{{ t('blog.article.empty') }}</v-alert>
+    <section
+      v-else
+      class="article-body article-body--empty"
+      aria-live="polite"
+      data-test="article-empty"
+    >
+      <v-alert type="info" variant="tonal">{{
+        t('blog.article.empty')
+      }}</v-alert>
     </section>
 
     <footer class="article-footer" aria-label="Article footer">

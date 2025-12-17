@@ -1,5 +1,10 @@
 <template>
-  <HeroSurface tag="section" class="contact-hero" aria-labelledby="contact-hero-heading" variant="pulse">
+  <HeroSurface
+    tag="section"
+    class="contact-hero"
+    aria-labelledby="contact-hero-heading"
+    variant="pulse"
+  >
     <v-container class="py-12">
       <v-row align="center" class="g-6" justify="space-between">
         <v-col cols="12" md="7" class="contact-hero__content">
@@ -29,7 +34,11 @@
               :key="item.text"
               class="contact-hero__highlight"
             >
-              <v-icon :icon="item.icon" size="26" class="contact-hero__highlight-icon" />
+              <v-icon
+                :icon="item.icon"
+                size="26"
+                class="contact-hero__highlight-icon"
+              />
               <span class="contact-hero__highlight-text">
                 {{ item.text }}
               </span>
@@ -50,9 +59,16 @@
             <div class="contact-hero__card-overlay" aria-hidden="true" />
             <div class="contact-hero__card-inner">
               <div class="contact-hero__badge">
-                <v-icon icon="mdi-message-badge-outline" size="34" aria-hidden="true" />
+                <v-icon
+                  icon="mdi-message-badge-outline"
+                  size="34"
+                  aria-hidden="true"
+                />
               </div>
-              <h2 id="contact-hero-card-heading" class="contact-hero__card-title">
+              <h2
+                id="contact-hero-card-heading"
+                class="contact-hero__card-title"
+              >
                 {{ channelsTitle }}
               </h2>
               <p class="contact-hero__card-description">
@@ -114,7 +130,16 @@ const props = defineProps<{
   channelsSubtitle: string
 }>()
 
-const { eyebrow, title, subtitle, description, highlights, contactChannels, channelsTitle, channelsSubtitle } = toRefs(props)
+const {
+  eyebrow,
+  title,
+  subtitle,
+  description,
+  highlights,
+  contactChannels,
+  channelsTitle,
+  channelsSubtitle,
+} = toRefs(props)
 </script>
 
 <style scoped lang="sass">

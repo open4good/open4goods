@@ -70,7 +70,7 @@ describe('PartnersAffiliationSection', () => {
 
     const visibleNames = wrapper
       .findAll('.partners-affiliation__card h3')
-      .map((card) => card.text())
+      .map(card => card.text())
 
     expect(visibleNames).toEqual(['Beta Shop'])
 

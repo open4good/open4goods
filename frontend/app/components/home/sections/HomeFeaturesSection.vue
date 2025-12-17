@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
+
 type FeatureCard = {
   icon: string
   title: string
@@ -13,41 +15,50 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section class="home-section home-features" aria-labelledby="home-features-title">
-    <v-container fluid class="home-section__container">
-      <div class="home-section__inner">
-        <header class="home-section__header">
-          <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="home-section__subtitle subtitle-text" v-html="t('home.features.subtitle')" />
-        </header>
-        <v-row class="home-features__grid" align="stretch">
-          <v-col
-            v-for="feature in props.features"
-            :key="feature.title"
-            cols="12"
-            sm="6"
-            lg="4"
-          >
-            <v-card class="home-features__card" variant="flat">
-              <v-icon class="home-features__icon" :icon="feature.icon" size="36" />
-              <h3 class="home-features__card-title">{{ feature.title }}</h3>
-              <p class="home-features__card-description">{{ feature.description }}</p>
-            </v-card>
-          </v-col>
-        </v-row>
-      </div>
-    </v-container>
-  </section>
+  <ParallaxSection
+    class="home-features"
+    aria-label="home-features-title"
+    :background-light="'/assets/themes/light/parallax/parallax-background-bubbles-transparent-1.svg'"
+    :background-dark="'/assets/themes/dark/parallax/parallax-background-bubbles-1.svg'"
+    :parallax-amount="0.12"
+  >
+    <div class="home-features__inner">
+      <header class="home-section__header">
+        <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <p
+          class="home-section__subtitle subtitle-text"
+          v-html="t('home.features.subtitle')"
+        />
+      </header>
+      <v-row class="home-features__grid" align="stretch">
+        <v-col
+          v-for="feature in props.features"
+          :key="feature.title"
+          cols="12"
+          sm="6"
+          lg="4"
+        >
+          <v-card class="home-features__card" variant="flat">
+            <v-icon
+              class="home-features__icon"
+              :icon="feature.icon"
+              size="36"
+            />
+            <h3 class="home-features__card-title">{{ feature.title }}</h3>
+            <p class="home-features__card-description">
+              {{ feature.description }}
+            </p>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
+  </ParallaxSection>
 </template>
 
 <style scoped lang="sass">
-.home-section
-  padding-block: clamp(3rem, 6vw, 5rem)
-  background: rgba(var(--v-theme-surface-default), 0.98)
-
-.home-section__container
-  padding-inline: clamp(1.5rem, 5vw, 4rem)
+// .home-features
+  // background managed by ParallaxSection
 
 .home-section__inner
   max-width: 1180px
@@ -91,4 +102,7 @@ const { t } = useI18n()
 .home-features__card-description
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
+
 </style>
+
+

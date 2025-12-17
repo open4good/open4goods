@@ -1,5 +1,5 @@
 <template>
-  <menu id="container-main-menu" class="d-none d-md-block">
+  <nav id="container-main-menu" class="d-none d-md-block" :aria-label="t('siteIdentity.menu.ariaLabel')">
     <!-- Desktop menu -->
     <div class="d-flex justify-end align-center ga-4">
       <div
@@ -69,8 +69,16 @@
             <v-list-item-title>{{ item.label }}</v-list-item-title>
           </v-list-item>
 
-          <div v-else-if="item.type === 'products'" class="main-menu-item main-menu-item--products">
-            <v-menu open-on-hover location="bottom" transition="fade-transition" :offset="[0, 12]">
+          <div
+            v-else-if="item.type === 'products'"
+            class="main-menu-item main-menu-item--products"
+          >
+            <v-menu
+              open-on-hover
+              location="bottom"
+              transition="fade-transition"
+              :offset="[0, 12]"
+            >
               <template #activator="{ props, isActive }">
                 <v-list-item
                   v-bind="props"
@@ -91,14 +99,26 @@
                 </v-list-item>
               </template>
 
-              <v-card class="products-menu" color="surface-default" elevation="8">
+              <v-card
+                class="products-menu"
+                color="surface-default"
+                elevation="8"
+              >
                 <div class="products-menu__header">
-                  <v-avatar class="products-menu__avatar" size="44" color="surface-primary-080">
+                  <v-avatar
+                    class="products-menu__avatar"
+                    size="44"
+                    color="surface-primary-080"
+                  >
                     <v-icon icon="mdi-storefront-outline" color="primary" />
                   </v-avatar>
                   <div>
-                    <p class="products-menu__title">{{ item.copy.headerTitle }}</p>
-                    <p class="products-menu__subtitle">{{ item.copy.headerSubtitle }}</p>
+                    <p class="products-menu__title">
+                      {{ item.copy.headerTitle }}
+                    </p>
+                    <p class="products-menu__subtitle">
+                      {{ item.copy.headerSubtitle }}
+                    </p>
                   </div>
                 </div>
 
@@ -106,12 +126,17 @@
 
                 <v-row class="products-menu__sections" align="stretch">
                   <v-col cols="12" sm="5" class="products-menu__section">
-                    <p class="products-menu__section-title">{{ item.copy.sections.popularTitle }}</p>
+                    <p class="products-menu__section-title">
+                      {{ item.copy.sections.popularTitle }}
+                    </p>
                     <p class="products-menu__section-description">
                       {{ item.copy.sections.popularDescription }}
                     </p>
 
-                    <div v-if="item.loading" class="products-menu__skeleton-group">
+                    <div
+                      v-if="item.loading"
+                      class="products-menu__skeleton-group"
+                    >
                       <v-skeleton-loader
                         v-for="skeletonIndex in 2"
                         :key="`products-menu-popular-skeleton-${skeletonIndex}`"
@@ -120,7 +145,10 @@
                       />
                     </div>
 
-                    <div v-else-if="item.popularCategories.length" class="products-menu__popular-list">
+                    <div
+                      v-else-if="item.popularCategories.length"
+                      class="products-menu__popular-list"
+                    >
                       <NuxtLink
                         v-for="category in item.popularCategories"
                         :key="category.id"
@@ -128,7 +156,10 @@
                         class="products-menu__popular-card"
                         role="menuitem"
                       >
-                        <v-avatar class="products-menu__popular-avatar" size="36">
+                        <v-avatar
+                          class="products-menu__popular-avatar"
+                          size="36"
+                        >
                           <v-img
                             v-if="category.image"
                             :src="category.image"
@@ -137,17 +168,29 @@
                           />
                           <v-icon v-else icon="mdi-image-outline" size="28" />
                         </v-avatar>
-                        <p class="products-menu__popular-title">{{ category.title }}</p>
-                        <v-icon icon="mdi-arrow-top-right" size="18" class="products-menu__popular-icon" />
+                        <p class="products-menu__popular-title">
+                          {{ category.title }}
+                        </p>
+                        <v-icon
+                          icon="mdi-arrow-top-right"
+                          size="18"
+                          class="products-menu__popular-icon"
+                        />
                       </NuxtLink>
                     </div>
 
-                    <p v-else class="products-menu__empty">{{ item.copy.sections.popularEmpty }}</p>
+                    <p v-else class="products-menu__empty">
+                      {{ item.copy.sections.popularEmpty }}
+                    </p>
 
                     <div class="products-menu__nudge">
                       <div class="products-menu__nudge-copy">
-                        <p class="products-menu__nudge-title">{{ item.copy.nudgeCtaTitle }}</p>
-                        <p class="products-menu__nudge-description">{{ item.copy.nudgeCtaDescription }}</p>
+                        <p class="products-menu__nudge-title">
+                          {{ item.copy.nudgeCtaTitle }}
+                        </p>
+                        <p class="products-menu__nudge-description">
+                          {{ item.copy.nudgeCtaDescription }}
+                        </p>
                       </div>
                       <v-btn
                         color="primary"
@@ -163,18 +206,25 @@
                   </v-col>
 
                   <v-col cols="12" sm="5" class="products-menu__section">
-                    <p class="products-menu__section-title">{{ item.copy.sections.taxonomyTitle }}</p>
+                    <p class="products-menu__section-title">
+                      {{ item.copy.sections.taxonomyTitle }}
+                    </p>
                     <p class="products-menu__section-description">
                       {{ item.copy.sections.taxonomyDescription }}
                     </p>
 
-                    <div v-if="item.taxonomyGroups.length" class="products-menu__taxonomy">
+                    <div
+                      v-if="item.taxonomyGroups.length"
+                      class="products-menu__taxonomy"
+                    >
                       <div
                         v-for="group in item.taxonomyGroups"
                         :key="group.id"
                         class="products-menu__taxonomy-group"
                       >
-                        <p class="products-menu__taxonomy-label">{{ group.title }}</p>
+                        <p class="products-menu__taxonomy-label">
+                          {{ group.title }}
+                        </p>
                         <v-list
                           class="products-menu__taxonomy-list"
                           bg-color="transparent"
@@ -188,7 +238,9 @@
                             class="products-menu__taxonomy-link"
                             role="menuitem"
                           >
-                            <v-list-item-title>{{ entry.title }}</v-list-item-title>
+                            <v-list-item-title>{{
+                              entry.title
+                            }}</v-list-item-title>
                             <template #append>
                               <v-icon icon="mdi-arrow-right" size="16" />
                             </template>
@@ -204,14 +256,21 @@
                       </div>
                     </div>
 
-                    <p v-else class="products-menu__empty">{{ item.copy.sections.taxonomyEmpty }}</p>
+                    <p v-else class="products-menu__empty">
+                      {{ item.copy.sections.taxonomyEmpty }}
+                    </p>
                   </v-col>
                 </v-row>
 
-                <v-divider class="products-menu__divider products-menu__divider--cta" />
+                <v-divider
+                  class="products-menu__divider products-menu__divider--cta"
+                />
 
                 <div class="products-menu__cta-wrapper">
-                  <NuxtLink :to="item.ctaHref" class="products-menu__cta-action">
+                  <NuxtLink
+                    :to="item.ctaHref"
+                    class="products-menu__cta-action"
+                  >
                     {{ item.copy.ctaLabel }}
                     <v-icon icon="mdi-arrow-right" size="18" />
                   </NuxtLink>
@@ -247,9 +306,17 @@
                 </v-list-item>
               </template>
 
-              <v-card class="community-menu" color="surface-default" elevation="8">
+              <v-card
+                class="community-menu"
+                color="surface-default"
+                elevation="8"
+              >
                 <div class="community-menu__header">
-                  <v-avatar class="community-menu__avatar" size="44" color="surface-primary-080">
+                  <v-avatar
+                    class="community-menu__avatar"
+                    size="44"
+                    color="surface-primary-080"
+                  >
                     <v-icon icon="mdi-account-group" color="primary" />
                   </v-avatar>
                   <div>
@@ -262,7 +329,11 @@
 
                 <v-divider class="community-menu__divider" />
 
-                <v-row class="community-menu__sections" justify="space-between" align="stretch">
+                <v-row
+                  class="community-menu__sections"
+                  justify="space-between"
+                  align="stretch"
+                >
                   <v-col
                     v-for="section in item.sections"
                     :key="section.id"
@@ -270,7 +341,9 @@
                     sm="5"
                     class="community-menu__section"
                   >
-                    <p class="community-menu__section-title">{{ section.title }}</p>
+                    <p class="community-menu__section-title">
+                      {{ section.title }}
+                    </p>
                     <p class="community-menu__section-description">
                       {{ section.description }}
                     </p>
@@ -286,7 +359,9 @@
                         v-for="link in section.links"
                         :key="link.id"
                         class="community-menu__link"
-                        :class="{ 'community-menu__link--external': link.external }"
+                        :class="{
+                          'community-menu__link--external': link.external,
+                        }"
                         :to="link.to"
                         :href="link.href"
                         :target="link.external ? '_blank' : undefined"
@@ -295,7 +370,11 @@
                       >
                         <template #prepend>
                           <v-avatar size="34" class="community-menu__link-icon">
-                            <v-icon :icon="link.icon" size="20" color="accent-primary-highlight" />
+                            <v-icon
+                              :icon="link.icon"
+                              size="20"
+                              color="accent-primary-highlight"
+                            />
                           </v-avatar>
                         </template>
 
@@ -310,7 +389,11 @@
                         </v-list-item-subtitle>
 
                         <template v-if="link.external" #append>
-                          <v-icon icon="mdi-open-in-new" size="18" class="community-menu__external-icon" />
+                          <v-icon
+                            icon="mdi-open-in-new"
+                            size="18"
+                            class="community-menu__external-icon"
+                          />
                         </template>
                       </v-list-item>
                     </v-list>
@@ -321,8 +404,8 @@
           </div>
         </template>
       </v-list>
-
       <ThemeToggle test-id="hero-theme-toggle" />
+      <ZoomToggle />
       <v-menu
         v-if="isLoggedIn"
         v-model="isAccountMenuOpen"
@@ -341,7 +424,9 @@
             data-testid="hero-account-menu-activator"
           >
             <v-icon icon="mdi-account-circle" start />
-            <span class="account-username text-truncate">{{ displayName }}</span>
+            <span class="account-username text-truncate">{{
+              displayName
+            }}</span>
             <v-icon icon="mdi-menu-down" end />
           </v-btn>
         </template>
@@ -401,7 +486,7 @@
         </v-card>
       </v-menu>
     </div>
-  </menu>
+  </nav>
 
   <v-dialog
     v-model="isNudgeWizardOpen"
@@ -423,13 +508,23 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 import ThemeToggle from './ThemeToggle.vue'
+import ZoomToggle from './ZoomToggle.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
 import type { CommunitySection } from './useCommunityMenu'
-import { normalizeLocale, resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 import { useCategoryNavigation } from '~/composables/categories/useCategoryNavigation'
-import type { CategoryNavigationDto, CategoryNavigationDtoChildCategoriesInner } from '~~/shared/api-client'
-import { MIN_SEARCH_QUERY_LENGTH, useMenuSearchControls } from '~/composables/menus/useMenuSearchControls'
+import type {
+  CategoryNavigationDto,
+  CategoryNavigationDtoChildCategoriesInner,
+} from '~~/shared/api-client'
+import {
+  MIN_SEARCH_QUERY_LENGTH,
+  useMenuSearchControls,
+} from '~/composables/menus/useMenuSearchControls'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -447,7 +542,11 @@ const nuxtApp = useNuxtApp()
 const { isLoggedIn, logout, username, roles } = useAuth()
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
-const { navigation: categoryNavigation, fetchNavigation, loading: navigationLoading } = useCategoryNavigation()
+const {
+  navigation: categoryNavigation,
+  fetchNavigation,
+  loading: navigationLoading,
+} = useCategoryNavigation()
 
 if (import.meta.server) {
   await fetchNavigation()
@@ -459,7 +558,9 @@ const MAX_PRODUCTS_MENU_POPULAR = 4
 const MAX_TAXONOMY_GROUP_ITEMS = 3
 
 const menuSearchRef = ref<HTMLElement | null>(null)
-const categoriesRoutePath = computed(() => resolveLocalizedRoutePath('categories', currentLocale.value))
+const categoriesRoutePath = computed(() =>
+  resolveLocalizedRoutePath('categories', currentLocale.value)
+)
 
 const {
   searchQuery,
@@ -503,7 +604,9 @@ const updateSearchQuery = (value: string) => {
   searchQuery.value = value
 }
 
-const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null => {
+const normalizeVerticalHomeUrl = (
+  raw: string | null | undefined
+): string | null => {
   if (!raw) {
     return null
   }
@@ -521,8 +624,10 @@ const normalizeVerticalHomeUrl = (raw: string | null | undefined): string | null
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
 }
 
-
-type FetchLike = (input: string, init?: Record<string, unknown>) => Promise<unknown>
+type FetchLike = (
+  input: string,
+  init?: Record<string, unknown>
+) => Promise<unknown>
 
 const resolveFetch = (): FetchLike | undefined => {
   if (typeof nuxtApp.$fetch === 'function') {
@@ -547,7 +652,9 @@ const displayName = computed(() => {
   return label && label.length > 0 ? label : 'Account'
 })
 
-const accountRoles = computed(() => roles.value.map((role) => role.trim()).filter((role) => role.length > 0))
+const accountRoles = computed(() =>
+  roles.value.map(role => role.trim()).filter(role => role.length > 0)
+)
 const hasRoles = computed(() => accountRoles.value.length > 0)
 
 const handleLogout = async () => {
@@ -564,12 +671,14 @@ const handleLogout = async () => {
   }
 }
 
-const isSuccessfulCacheResetResponse = (payload: unknown): payload is { success: true } =>
+const isSuccessfulCacheResetResponse = (
+  payload: unknown
+): payload is { success: true } =>
   Boolean(
     payload &&
-      typeof payload === 'object' &&
-      'success' in payload &&
-      (payload as { success?: boolean }).success === true,
+    typeof payload === 'object' &&
+    'success' in payload &&
+    (payload as { success?: boolean }).success === true
   )
 
 const handleClearCache = async () => {
@@ -583,14 +692,20 @@ const handleClearCache = async () => {
     const fetcher = resolveFetch()
 
     if (!fetcher) {
-      console.error('Failed to clear caches', new Error('No fetch helper available'))
+      console.error(
+        'Failed to clear caches',
+        new Error('No fetch helper available')
+      )
       return
     }
 
     const response = await fetcher('/api/admin/cache/reset', { method: 'POST' })
 
     if (!isSuccessfulCacheResetResponse(response)) {
-      console.error('Failed to clear caches', new Error('Unexpected response payload'))
+      console.error(
+        'Failed to clear caches',
+        new Error('Unexpected response payload')
+      )
       return
     }
 
@@ -632,19 +747,29 @@ interface ProductsMenuTexts {
 const productsMenuTexts = computed(() => ({
   headerTitle: String(t('siteIdentity.menu.productsMenu.title')),
   headerSubtitle: String(t('siteIdentity.menu.productsMenu.subtitle')),
-  fallbackCategoryTitle: String(t('siteIdentity.menu.productsMenu.untitledCategory')),
+  fallbackCategoryTitle: String(
+    t('siteIdentity.menu.productsMenu.untitledCategory')
+  ),
   sections: {
     popularTitle: String(t('siteIdentity.menu.productsMenu.popular.title')),
-    popularDescription: String(t('siteIdentity.menu.productsMenu.popular.description')),
+    popularDescription: String(
+      t('siteIdentity.menu.productsMenu.popular.description')
+    ),
     popularEmpty: String(t('siteIdentity.menu.productsMenu.popular.empty')),
     taxonomyTitle: String(t('siteIdentity.menu.productsMenu.taxonomy.title')),
-    taxonomyDescription: String(t('siteIdentity.menu.productsMenu.taxonomy.description')),
+    taxonomyDescription: String(
+      t('siteIdentity.menu.productsMenu.taxonomy.description')
+    ),
     taxonomyEmpty: String(t('siteIdentity.menu.productsMenu.taxonomy.empty')),
-    taxonomyShowMore: String(t('siteIdentity.menu.productsMenu.taxonomy.showMore')),
+    taxonomyShowMore: String(
+      t('siteIdentity.menu.productsMenu.taxonomy.showMore')
+    ),
   },
   ctaLabel: String(t('siteIdentity.menu.productsMenu.cta.label')),
   nudgeCtaTitle: String(t('siteIdentity.menu.productsMenu.nudge.title')),
-  nudgeCtaDescription: String(t('siteIdentity.menu.productsMenu.nudge.description')),
+  nudgeCtaDescription: String(
+    t('siteIdentity.menu.productsMenu.nudge.description')
+  ),
   nudgeCtaButton: String(t('siteIdentity.menu.productsMenu.nudge.button')),
 }))
 
@@ -670,17 +795,20 @@ interface ProductsMenuTaxonomyGroup {
 
 const normalizeNavigationCategoryTitle = (
   category: CategoryNavigationDtoChildCategoriesInner | undefined,
-  fallback: string,
-) => category?.vertical?.verticalHomeTitle?.trim() || category?.title?.trim() || fallback
+  fallback: string
+) =>
+  category?.vertical?.verticalHomeTitle?.trim() ||
+  category?.title?.trim() ||
+  fallback
 
 const flattenNavigationChildren = (
-  categories: CategoryNavigationDtoChildCategoriesInner[] | undefined,
+  categories: CategoryNavigationDtoChildCategoriesInner[] | undefined
 ): CategoryNavigationDtoChildCategoriesInner[] => {
   if (!categories?.length) {
     return []
   }
 
-  return categories.flatMap((category) => {
+  return categories.flatMap(category => {
     const children = Array.isArray(category.children)
       ? (category.children as CategoryNavigationDtoChildCategoriesInner[])
       : []
@@ -690,39 +818,51 @@ const flattenNavigationChildren = (
 }
 
 const navigationSource = computed<CategoryNavigationDto | null>(
-  () => categoryNavigation.value ?? null,
+  () => categoryNavigation.value ?? null
 )
 
-const productsMenuPopularCategories = computed<ProductsMenuPopularCategory[]>(() => {
-  const fallbackTitle = productsMenuTexts.value.fallbackCategoryTitle
-  const popularCategories = navigationSource.value?.popularCategories ?? []
+const productsMenuPopularCategories = computed<ProductsMenuPopularCategory[]>(
+  () => {
+    const fallbackTitle = productsMenuTexts.value.fallbackCategoryTitle
+    const popularCategories = navigationSource.value?.popularCategories ?? []
 
-  return popularCategories
-    .map((category, index) => {
-      const href = normalizeVerticalHomeUrl(category.vertical?.verticalHomeUrl)
-      if (!href) {
-        return null
-      }
+    return popularCategories
+      .map((category, index) => {
+        const href = normalizeVerticalHomeUrl(
+          category.vertical?.verticalHomeUrl
+        )
+        if (!href) {
+          return null
+        }
 
-      const image =
-        category.vertical?.imageSmall ??
-        category.vertical?.imageMedium ??
-        category.vertical?.imageLarge ??
-        null
+        const image =
+          category.vertical?.imageSmall ??
+          category.vertical?.imageMedium ??
+          category.vertical?.imageLarge ??
+          null
 
-      return {
-        id: category.vertical?.id ?? category.slug ?? `popular-category-${index}`,
-        title: normalizeNavigationCategoryTitle(category, fallbackTitle),
-        href,
-        image,
-        order: category.vertical?.order ?? Number.MAX_SAFE_INTEGER,
-      }
-    })
-    .filter((category): category is ProductsMenuPopularCategory & { order: number } => category !== null)
-    .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
-    .slice(0, MAX_PRODUCTS_MENU_POPULAR)
-    .map(({ order: _order, ...category }) => category)
-})
+        return {
+          id:
+            category.vertical?.id ??
+            category.slug ??
+            `popular-category-${index}`,
+          title: normalizeNavigationCategoryTitle(category, fallbackTitle),
+          href,
+          image,
+          order: category.vertical?.order ?? Number.MAX_SAFE_INTEGER,
+        }
+      })
+      .filter(
+        (
+          category
+        ): category is ProductsMenuPopularCategory & { order: number } =>
+          category !== null
+      )
+      .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
+      .slice(0, MAX_PRODUCTS_MENU_POPULAR)
+      .map(({ order: _order, ...category }) => category)
+  }
+)
 
 const descendantVerticals = computed(() => {
   const fromApi = navigationSource.value?.descendantVerticals ?? []
@@ -744,7 +884,7 @@ const productsMenuTaxonomyGroups = computed<ProductsMenuTaxonomyGroup[]>(() => {
         return null
       }
 
-      const candidateVerticals = descendantVerticals.value.filter((category) => {
+      const candidateVerticals = descendantVerticals.value.filter(category => {
         const path = category.path ?? category.slug ?? ''
         if (!path) {
           return false
@@ -759,19 +899,27 @@ const productsMenuTaxonomyGroups = computed<ProductsMenuTaxonomyGroup[]>(() => {
 
       const entries = candidateVerticals
         .map((category, entryIndex) => {
-          const href = normalizeVerticalHomeUrl(category.vertical?.verticalHomeUrl)
+          const href = normalizeVerticalHomeUrl(
+            category.vertical?.verticalHomeUrl
+          )
           if (!href) {
             return null
           }
 
           return {
-            id: category.slug ?? category.path ?? `taxonomy-entry-${parentIndex}-${entryIndex}`,
+            id:
+              category.slug ??
+              category.path ??
+              `taxonomy-entry-${parentIndex}-${entryIndex}`,
             title: normalizeNavigationCategoryTitle(category, fallbackTitle),
             href,
             order: category.vertical?.order ?? Number.MAX_SAFE_INTEGER,
           }
         })
-        .filter((entry): entry is ProductsMenuTaxonomyEntry & { order: number } => entry !== null)
+        .filter(
+          (entry): entry is ProductsMenuTaxonomyEntry & { order: number } =>
+            entry !== null
+        )
         .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
         .slice(0, MAX_TAXONOMY_GROUP_ITEMS)
         .map(({ order: _order, ...entry }) => entry)
@@ -784,7 +932,9 @@ const productsMenuTaxonomyGroups = computed<ProductsMenuTaxonomyGroup[]>(() => {
         id: parent.slug ?? parent.path ?? `taxonomy-group-${parentIndex}`,
         title: parent.title ?? fallbackTitle,
         entries,
-        showMoreHref: parent.path ? `/categories/${parent.path}` : categoriesRoutePath.value,
+        showMoreHref: parent.path
+          ? `/categories/${parent.path}`
+          : categoriesRoutePath.value,
       }
     })
     .filter((group): group is ProductsMenuTaxonomyGroup => group !== null)
@@ -793,14 +943,14 @@ const productsMenuTaxonomyGroups = computed<ProductsMenuTaxonomyGroup[]>(() => {
 const productsMenuActivePaths = computed(() => {
   const normalizedPaths = new Set<string>([categoriesRoutePath.value])
 
-  productsMenuPopularCategories.value.forEach((category) => {
+  productsMenuPopularCategories.value.forEach(category => {
     if (category.href.startsWith('/')) {
       normalizedPaths.add(category.href)
     }
   })
 
-  productsMenuTaxonomyGroups.value.forEach((group) => {
-    group.entries.forEach((entry) => {
+  productsMenuTaxonomyGroups.value.forEach(group => {
+    group.entries.forEach(entry => {
       if (entry.href.startsWith('/')) {
         normalizedPaths.add(entry.href)
       }
@@ -811,7 +961,8 @@ const productsMenuActivePaths = computed(() => {
 })
 
 const isProductsMenuLoading = computed(
-  () => navigationLoading.value && productsMenuPopularCategories.value.length === 0,
+  () =>
+    navigationLoading.value && productsMenuPopularCategories.value.length === 0
 )
 
 interface LinkMenuItemDefinition {
@@ -867,7 +1018,8 @@ interface CommunityMenuItem {
 }
 
 type MenuItem = LinkMenuItem | CommunityMenuItem | ProductsMenuItem
-const { sections: communitySections, activePaths: communityActivePaths } = useCommunityMenu(t, currentLocale)
+const { sections: communitySections, activePaths: communityActivePaths } =
+  useCommunityMenu(t, currentLocale)
 
 const baseMenuItems: MenuItemDefinition[] = [
   {
@@ -882,12 +1034,21 @@ const baseMenuItems: MenuItemDefinition[] = [
     labelKey: 'siteIdentity.menu.items.products',
     routeName: 'categories',
   },
-  { id: 'blog', type: 'link', labelKey: 'siteIdentity.menu.items.blog', routeName: 'blog' },
-  { id: 'community', type: 'community', labelKey: 'siteIdentity.menu.items.contact' },
+  {
+    id: 'blog',
+    type: 'link',
+    labelKey: 'siteIdentity.menu.items.blog',
+    routeName: 'blog',
+  },
+  {
+    id: 'community',
+    type: 'community',
+    labelKey: 'siteIdentity.menu.items.contact',
+  },
 ]
 
 const menuItems = computed<MenuItem[]>(() =>
-  baseMenuItems.map((item) => {
+  baseMenuItems.map(item => {
     const label = String(t(item.labelKey))
 
     if (item.type === 'link') {
@@ -921,7 +1082,7 @@ const menuItems = computed<MenuItem[]>(() =>
       sections: communitySections.value,
       activePaths: communityActivePaths.value,
     }
-  }),
+  })
 )
 
 const isActiveRoute = (path: string): boolean => {
@@ -945,7 +1106,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     return isActiveRoute(item.path)
   }
 
-  return item.activePaths.some((path) => isActiveRoute(path))
+  return item.activePaths.some(path => isActiveRoute(path))
 }
 </script>
 

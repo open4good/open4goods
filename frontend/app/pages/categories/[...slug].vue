@@ -8,7 +8,9 @@
       :result-summary="resultSummary"
       :search-label="t('categories.navigation.hero.searchLabel')"
       :search-placeholder="t('categories.navigation.hero.searchPlaceholder')"
-      :breadcrumb-aria-label="t('categories.navigation.hero.breadcrumbAriaLabel')"
+      :breadcrumb-aria-label="
+        t('categories.navigation.hero.breadcrumbAriaLabel')
+      "
     />
 
     <v-progress-linear
@@ -36,7 +38,10 @@
       </v-btn>
     </v-container>
 
-    <CategoryNavigationGrid v-if="navigationData" :categories="filteredCategories" />
+    <CategoryNavigationGrid
+      v-if="navigationData"
+      :categories="filteredCategories"
+    />
 
     <CategoryNavigationVerticalHighlights
       v-if="navigationData"
@@ -72,19 +77,22 @@ const slugSegments = Array.isArray(slugParam)
 
 const path = slugSegments.join('/')
 
-const { data, pending, error, refresh } = await useAsyncData<CategoryNavigationDto>(
-  () => `category-navigation-${path}`,
-  async () =>
-    $fetch<CategoryNavigationDto>('/api/categories/navigation', {
-      query: path ? { path } : undefined,
-      headers: requestHeaders,
-    }),
-)
+const { data, pending, error, refresh } =
+  await useAsyncData<CategoryNavigationDto>(
+    () => `category-navigation-${path}`,
+    async () =>
+      $fetch<CategoryNavigationDto>('/api/categories/navigation', {
+        query: path ? { path } : undefined,
+        headers: requestHeaders,
+      })
+  )
 
 if (error.value && import.meta.server) {
   throw createError({
     statusCode: (error.value as { statusCode?: number })?.statusCode ?? 500,
-    statusMessage: (error.value as { statusMessage?: string })?.statusMessage ?? 'Failed to load categories',
+    statusMessage:
+      (error.value as { statusMessage?: string })?.statusMessage ??
+      'Failed to load categories',
   })
 }
 
@@ -125,7 +133,7 @@ const breadcrumbs = computed(() => {
           ? `/categories/${breadcrumb.link}`
           : undefined,
     }))
-    .filter((breadcrumb) => breadcrumb.title.trim().length)
+    .filter(breadcrumb => breadcrumb.title.trim().length)
 
   const trail: { title: string; link?: string }[] = [
     {
@@ -166,18 +174,20 @@ const filteredCategories = computed(() => {
   }
 
   const query = searchTerm.value.trim().toLowerCase()
-  return categories.filter((category) =>
-    category.title?.toLowerCase().includes(query) ?? false,
+  return categories.filter(
+    category => category.title?.toLowerCase().includes(query) ?? false
   )
 })
 
-const highlightedVerticals = computed(() => navigationData.value?.descendantVerticals ?? [])
+const highlightedVerticals = computed(
+  () => navigationData.value?.descendantVerticals ?? []
+)
 
 const resultSummary = computed(() =>
   translatePlural(
     'categories.navigation.hero.resultsSummary',
-    filteredCategories.value.length,
-  ),
+    filteredCategories.value.length
+  )
 )
 
 const httpsOrigin = computed(() => {
@@ -220,10 +230,14 @@ const itemListJsonLd = computed(() => ({
     '@type': 'ListItem',
     position: index + 1,
     name: category.title ?? '',
-    url: buildAbsoluteUrl(category.path ? `/categories/${category.path}` : undefined),
+    url: buildAbsoluteUrl(
+      category.path ? `/categories/${category.path}` : undefined
+    ),
   })),
 }))
-const ogImageUrl = computed(() => new URL('/nudger-icon-512x512.png', requestURL.origin).toString())
+const ogImageUrl = computed(() =>
+  new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
+)
 
 useSeoMeta({
   title: () => String(heroTitle.value),
@@ -236,9 +250,7 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
   script: [
     {
       key: 'categories-detail-breadcrumb-jsonld',
