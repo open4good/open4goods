@@ -609,32 +609,45 @@ const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
 const maxContentHeight = ref(0)
+const maxHeaderHeight = ref(0)
+const maxFooterHeight = ref(0)
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
-// We only track max height for the "wizard content" steps
+const WIZARD_MIN_HEIGHT = 450
+
+// Track max heights to prevent shrinking
 watch(windowHeight, val => {
   if (val <= 0) return
-
   if (isContentMode.value) {
-    // 600px minimum or whatever current height is, to avoid jump
-    const currentMax = Math.max(maxContentHeight.value, val)
-     // Apply some minimum reasonable height for wizard part if we want
-     // But user asked for "largest screen size", so we just accumulate max
-    maxContentHeight.value = currentMax
+    maxContentHeight.value = Math.max(maxContentHeight.value, val, WIZARD_MIN_HEIGHT)
+  }
+})
+
+watch(headerHeight, val => {
+  if (isContentMode.value) {
+    maxHeaderHeight.value = Math.max(maxHeaderHeight.value, val)
+  }
+})
+
+watch(footerHeight, val => {
+  if (isContentMode.value) {
+    maxFooterHeight.value = Math.max(maxFooterHeight.value, val)
   }
 })
 
 const targetHeight = computed(() => {
   if (!isContentMode.value) {
     // In category mode, just let it be natural height
-    return headerHeight.value + windowHeight.value + footerHeight.value + 32
+    return headerHeight.value + windowHeight.value + footerHeight.value + 80
   }
 
-  // In content mode, force the max observed height for stability
-  // Uses stable maxContentHeight for the window part
-  const safeWindowHeight = Math.max(windowHeight.value, maxContentHeight.value)
-  // Padding is clamp(1.5rem, 3vw, 2rem). Max is 2rem * 2 = 64px.
-  return headerHeight.value + safeWindowHeight + footerHeight.value + 80 // 64px padding + 16px safety buffer
+  // In content mode, force the max observed heights for stability
+  // limiting jitter from any part (header/content/footer)
+  const safeHeader = Math.max(headerHeight.value, maxHeaderHeight.value)
+  const safeWindow = Math.max(windowHeight.value, maxContentHeight.value, WIZARD_MIN_HEIGHT)
+  const safeFooter = Math.max(footerHeight.value, maxFooterHeight.value)
+
+  return safeHeader + safeWindow + safeFooter + 80
 })
 
 // Use transition ONLY if we already mounted + moving between modes or growing
@@ -647,7 +660,6 @@ onMounted(() => {
   }, 50)
 })
 
-// We only animate if we are ready
 const animatedHeight = useTransition(targetHeight, {
   duration: 500,
   transition: [0.4, 0, 0.2, 1],
@@ -656,17 +668,6 @@ const animatedHeight = useTransition(targetHeight, {
 
 const formattedHeight = computed(() => {
   if (!isReady.value) return 'auto' // Natural height on server/initial client
-  
-  // If we are in category mode, we might want 'auto' or animated.
-  // User said: "First one : category page. Must appears directly"
-  // If we return specific pixel height, it will animate. 
-  // If we return 'auto' it won't.
-  
-  // Strategy:
-  // If staying in category => auto (handles resize naturally)
-  // If switching category -> wizard => animate to fixed
-  // If in wizard => fixed stable height
-  
   return `${animatedHeight.value}px`
 })
 
