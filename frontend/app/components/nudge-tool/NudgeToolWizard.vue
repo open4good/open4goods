@@ -147,6 +147,11 @@ const selectedCategory = computed(
     null
 )
 
+const resolveCategoryIcon = (category: VerticalCategoryDto | null) => {
+  const candidate = (category as Record<string, unknown> | null)?.icon
+  return typeof candidate === 'string' ? candidate : undefined
+}
+
 const nudgeConfig = computed(() => selectedCategory.value?.nudgeToolConfig)
 
 const subsetGroups = computed<NudgeToolSubsetGroupDto[]>(() => {
@@ -527,7 +532,7 @@ const categorySummary = computed(() => {
       selectedCategory.value.id ??
       '',
     image: selectedCategory.value.imageSmall,
-    icon: (selectedCategory.value as any).icon ?? 'mdi-tag', // Fallback or explicit cast if typing is missing
+    icon: resolveCategoryIcon(selectedCategory.value) ?? 'mdi-tag',
     alt:
       selectedCategory.value.verticalHomeTitle ??
       selectedCategory.value.id ??

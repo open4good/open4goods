@@ -1,4 +1,5 @@
 const GTIN_CAPTURE_PATTERN = /^(\d{6,})(?:$|[-_].*)$/
+const GTIN_INLINE_PATTERN = /(?<!\d)(\d{8,14})(?!\d)/
 
 export const isValidGtinParam = (value: unknown): value is string => {
   return typeof value === 'string' && GTIN_CAPTURE_PATTERN.test(value)
@@ -24,4 +25,13 @@ export const extractGtinParam = (value: unknown): string | null => {
   }
 
   return null
+}
+
+export const findGtinInText = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const match = value.match(GTIN_INLINE_PATTERN)
+  return match ? match[1] : null
 }

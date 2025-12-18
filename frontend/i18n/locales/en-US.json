@@ -2338,6 +2338,43 @@
       "dismiss": "Dismiss"
     }
   },
+  "share": {
+    "card": {
+      "bestPriceLabel": "Best price",
+      "ecoScoreLabel": "Eco-score",
+      "missingEcoScore": "We are still calculating this score",
+      "missingPrice": "Price unavailable",
+      "noImage": "No image found",
+      "searchMore": "See more results",
+      "sourceGtin": "Resolved from GTIN {gtin}",
+      "sourceUrl": "Resolved from shared URL",
+      "sourceQuery": "Resolved from search \"{query}\"",
+      "sourceUnknown": "Shared link",
+      "untitled": "Untitled product",
+      "viewProduct": "Open full product"
+    },
+    "empty": {
+      "cta": "Open search",
+      "helper": "Share a product name or barcode to get an instant preview.",
+      "title": "Nothing to preview yet",
+      "withQuery": "No result matched \"{query}\" yet, but you can browse all results."
+    },
+    "errors": {
+      "resolution": "We could not resolve this shared link. Please try again."
+    },
+    "landing": {
+      "badge": "Shared with Nudger",
+      "description": "Preview the eco-score and best offers for shared products, then jump into the full experience.",
+      "originUrl": "Shared URL: {url}",
+      "subtitle": "We used the shared link or text to resolve your product. Open the full page or explore more results.",
+      "timeout": "We are still resolving this link. Results may take longer than expected—try again or open search directly.",
+      "title": "Quick preview of your shared product"
+    },
+    "selection": {
+      "subtitle": "We found several possible matches. Pick the product you want to inspect.",
+      "title": "Multiple matches found"
+    }
+  },
   "nudge-tool": {
     "actions": {
       "continue": "Continue",

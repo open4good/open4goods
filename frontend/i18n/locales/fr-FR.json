@@ -2326,6 +2326,43 @@
       "dismiss": "Fermer"
     }
   },
+  "share": {
+    "card": {
+      "bestPriceLabel": "Meilleur prix",
+      "ecoScoreLabel": "Éco-score",
+      "missingEcoScore": "Le score est en cours de calcul",
+      "missingPrice": "Prix non disponible",
+      "noImage": "Aucune image trouvée",
+      "searchMore": "Voir plus de résultats",
+      "sourceGtin": "Résolu depuis le GTIN {gtin}",
+      "sourceUrl": "Résolu depuis l’URL partagée",
+      "sourceQuery": "Résolu depuis la recherche \"{query}\"",
+      "sourceUnknown": "Lien partagé",
+      "untitled": "Produit sans titre",
+      "viewProduct": "Ouvrir la fiche complète"
+    },
+    "empty": {
+      "cta": "Ouvrir la recherche",
+      "helper": "Partage un nom de produit ou un code-barres pour afficher un aperçu immédiat.",
+      "title": "Pas encore d’aperçu",
+      "withQuery": "Aucun résultat ne correspond encore à \"{query}\". Parcours les résultats disponibles."
+    },
+    "errors": {
+      "resolution": "Impossible de résoudre ce lien partagé. Merci de réessayer."
+    },
+    "landing": {
+      "badge": "Partagé avec Nudger",
+      "description": "Aperçu des éco-scores et des meilleures offres du produit partagé avant d’ouvrir la fiche complète.",
+      "originUrl": "URL partagée : {url}",
+      "subtitle": "Nous avons analysé le lien ou le texte partagé. Ouvre la fiche complète ou explore plus de résultats.",
+      "timeout": "La résolution prend plus de temps que prévu. Réessaie ou lance une recherche directe.",
+      "title": "Aperçu rapide du produit partagé"
+    },
+    "selection": {
+      "subtitle": "Plusieurs correspondances sont possibles. Choisis le produit à inspecter.",
+      "title": "Plusieurs résultats trouvés"
+    }
+  },
   "nudge-tool": {
     "actions": {
       "continue": "Continuer",
