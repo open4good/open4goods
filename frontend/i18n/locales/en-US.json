@@ -68,7 +68,11 @@
           },
           {
             "icon": "🏷️",
-            "label": "The best prices on the market"
+            "label": "The best prices on the market",
+            "segments": [
+              { "text": "Stay smart on prices with" },
+              { "text": "{partnersLink}", "to": "/partners" }
+            ]
           },
           {
             "icon": "🛡️",
@@ -91,6 +95,9 @@
             ]
           }
         ]
+        ,
+        "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
+        "partnerLinkFallback": "our partners"
       },
       "context": {
         "cornerLabel": "Impact digest",

@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import type { BlogPostDto } from '~~/shared/api-client'
+import type { AffiliationPartnerDto, BlogPostDto } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
@@ -34,6 +34,7 @@ const { t, locale, availableLocales } = useI18n()
 const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const searchQuery = ref('')
 
@@ -51,6 +52,23 @@ const heroBackgrounds = computed(() => ({
   light: '/images/home/hero-full-viewport-light.jpg',
   dark: '/images/home/hero-full-viewport-dark.jpg',
 }))
+
+const { data: affiliationPartners } = await useAsyncData<AffiliationPartnerDto[]>(
+  'home-affiliation-partners',
+  () =>
+    $fetch<AffiliationPartnerDto[]>('/api/partners/affiliation', {
+      headers: requestHeaders,
+    }).catch(() => []),
+  {
+    default: () => [],
+    server: true,
+    lazy: false,
+  }
+)
+
+const heroPartnersCount = computed(
+  () => affiliationPartners.value?.length ?? 0
+)
 
 const seasonalParallaxPack = useSeasonalParallaxPack()
 
@@ -658,6 +676,7 @@ useHead(() => ({
       :verticals="rawCategories"
       :hero-image-light="heroBackgrounds.light"
       :hero-image-dark="heroBackgrounds.dark"
+      :partners-count="heroPartnersCount"
       @submit="handleSearchSubmit"
       @select-category="handleCategorySuggestion"
       @select-product="handleProductSuggestion"
