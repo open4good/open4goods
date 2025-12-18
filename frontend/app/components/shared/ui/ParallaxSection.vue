@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, type CSSProperties } from 'vue'
-import {
-  useElementBounding,
-  usePreferredReducedMotion,
-  useWindowSize,
-} from '@vueuse/core'
+import { computed, type CSSProperties } from 'vue'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { useDisplay, useTheme } from 'vuetify'
 
 const props = withDefaults(
@@ -21,6 +17,7 @@ const props = withDefaults(
     containerPadding?: string | null
     parallaxAmount?: number
     disableParallaxBelow?: number
+    parallaxSpeed?: number
     maxWidth?: string
     contentAlign?: 'start' | 'center'
     enableAplats?: boolean
@@ -40,6 +37,7 @@ const props = withDefaults(
     containerPadding: 'clamp(1.5rem, 5vw, 4rem)',
     parallaxAmount: 0.18,
     disableParallaxBelow: 960,
+    parallaxSpeed: 1,
     maxWidth: '1180px',
     contentAlign: 'start',
     enableAplats: false,
@@ -51,10 +49,6 @@ const props = withDefaults(
 const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
 const display = useDisplay()
-const { height: viewportHeight } = useWindowSize()
-
-const sectionRef = ref<HTMLElement | null>(null)
-const { top, height } = useElementBounding(sectionRef)
 
 const isDark = computed(() => Boolean(theme.global.current.value.dark))
 
@@ -106,42 +100,34 @@ const isBelowBreakpoint = computed(
     display.width.value < props.disableParallaxBelow
 )
 
-const parallaxEnabled = computed(
+const parallaxDisabled = computed(
   () =>
-    import.meta.client &&
-    !isBelowBreakpoint.value &&
-    prefersReducedMotion.value === 'no-preference' &&
-    props.parallaxAmount > 0
+    !import.meta.client ||
+    isBelowBreakpoint.value ||
+    prefersReducedMotion.value === 'reduce' ||
+    props.parallaxAmount <= 0
 )
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max)
+const resolvedMinHeight = computed(() => props.minHeight || '75vh')
 
-const parallaxOffset = computed(() => {
-  if (!parallaxEnabled.value) {
-    return '0px'
+const primaryBackground = computed(() => resolvedBackgrounds.value[0] || '')
+const stackedBackgrounds = computed(() => resolvedBackgrounds.value.slice(1))
+
+const parallaxScale = computed(() => {
+  if (parallaxDisabled.value) {
+    return 1
   }
 
-  const viewport = viewportHeight.value || 0
-  const sectionHeight = height.value || 0
-
-  if (viewport <= 0 || sectionHeight <= 0) {
-    return '0px'
-  }
-
-  const progressRaw = (viewport - top.value) / (viewport + sectionHeight)
-  const normalizedProgress = clamp(progressRaw, 0, 1) - 0.5
-  const travel = props.parallaxAmount * 180
-
-  return `${normalizedProgress * 2 * travel}px`
+  const speed = Math.max(props.parallaxSpeed ?? 1, 0.5)
+  const base = Math.max(props.parallaxAmount, 0)
+  return Math.min(1 + base * speed * 2.4, 4)
 })
 
 const mediaStyles = computed<CSSProperties>(() => ({
   '--parallax-image': backgroundImage.value || 'none',
   '--parallax-overlay-color': props.overlayColor,
   '--parallax-overlay-opacity': props.overlayOpacity,
-  '--parallax-offset': parallaxOffset.value,
-  minHeight: props.gapless ? 'auto' : props.minHeight || undefined,
+  minHeight: resolvedMinHeight.value,
 }))
 
 const contentStyles = computed<CSSProperties>(() => ({
@@ -166,33 +152,60 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
     ? props.containerPadding ?? '0'
     : props.containerPadding || undefined,
 }))
+
+const stackedBackgroundStyle = computed<CSSProperties>(() => ({
+  backgroundImage:
+    stackedBackgrounds.value.length > 0
+      ? stackedBackgrounds.value.map(background => `url('${background}')`).join(', ')
+      : undefined,
+}))
 </script>
 
 <template>
   <section
     :id="props.id"
-    ref="sectionRef"
     class="parallax-section"
     :class="{ 'parallax-section--gapless': gapless }"
     :aria-label="ariaLabel"
   >
-    <div
-      class="parallax-section__media"
-      :style="mediaStyles"
-      aria-hidden="true"
-    >
-      <div class="parallax-section__image" />
-      <div class="parallax-section__overlay" />
-      <div v-if="enableAplats" class="parallax-section__aplats">
-        <slot name="aplats">
-          <img
-            class="parallax-section__aplat-image"
-            :src="aplatSvg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
-        </slot>
+    <div class="parallax-section__media" :style="mediaStyles" aria-hidden="true">
+      <v-parallax
+        v-if="primaryBackground"
+        class="parallax-section__parallax"
+        :src="primaryBackground"
+        :height="resolvedMinHeight"
+        :scale="parallaxScale"
+        :eager="true"
+        transition="none"
+      >
+        <div v-if="stackedBackgrounds.length" class="parallax-section__stack" :style="stackedBackgroundStyle" />
+        <div class="parallax-section__overlay" />
+        <div v-if="enableAplats" class="parallax-section__aplats">
+          <slot name="aplats">
+            <img
+              class="parallax-section__aplat-image"
+              :src="aplatSvg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </slot>
+        </div>
+      </v-parallax>
+
+      <div v-else class="parallax-section__fallback">
+        <div class="parallax-section__overlay" />
+        <div v-if="enableAplats" class="parallax-section__aplats">
+          <slot name="aplats">
+            <img
+              class="parallax-section__aplat-image"
+              :src="aplatSvg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </slot>
+        </div>
       </div>
     </div>
     <div class="parallax-section__content" :style="contentStyles">
@@ -226,15 +239,20 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   height: 100%
   pointer-events: none
 
-.parallax-section__image
+.parallax-section__parallax
+  height: 100%
+  width: 100%
+
+.parallax-section__stack,
+.parallax-section__fallback
   position: absolute
-  inset: -18%
+  inset: -8%
   background-image: var(--parallax-image)
   background-size: cover
   background-repeat: no-repeat
   background-position: center center
-  transform: translate3d(0, var(--parallax-offset), 0)
-  transition: transform 160ms ease-out
+
+.parallax-section__stack
   filter: saturate(1.05)
 
 .parallax-section__overlay
