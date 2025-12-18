@@ -48,11 +48,6 @@ const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
 
-const heroBackgrounds = computed(() => ({
-  light: '/images/home/hero-full-viewport-light.jpg',
-  dark: '/images/home/hero-full-viewport-dark.jpg',
-}))
-
 const { data: affiliationPartners } = await useAsyncData<AffiliationPartnerDto[]>(
   'home-affiliation-partners',
   () =>
@@ -674,8 +669,6 @@ useHead(() => ({
       v-model:search-query="searchQuery"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       :verticals="rawCategories"
-      :hero-image-light="heroBackgrounds.light"
-      :hero-image-dark="heroBackgrounds.dark"
       :partners-count="heroPartnersCount"
       @submit="handleSearchSubmit"
       @select-category="handleCategorySuggestion"

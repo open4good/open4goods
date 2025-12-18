@@ -1,3 +1,34 @@
+génére une thématique noel, avec des iconos adaptées de cadeau, etoiles, ...
+
+peux tu générer tous les backgrounds svg ?
+
+
+
+
+
+
+You will generate a parallax background svg image
+
+
+Keep the core gradient spanning the full canvas with a 25°–30° linear gradient and large, soft radial glows near the corners to mask edges under the parallax inset.
+
+Leave a clear central safe area (~1080×560 per your request) with most geometry pushed to edges/top/bottom; avoid hard shapes or high-contrast dots in the center since overlays will mute them.
+
+Build micro-texture via a reusable <pattern> (small circles 1–1.5px on ~20–24px grid) at 8–12% opacity to stay vector-only and lightweight.
+
+Use 2–3 blurred blobs (std dev ≤18) and a handful of stroked paths/rings for depth; cap stroke widths ≥0.75px to avoid thinning after scaling.
+
+For parallax layering, design background elements with extra bleed (10–15%) so background-size:cover + inset:-10% doesn’t expose empty space; keep dominant color stops within the outer 5–10% margins.
+
+Export without embedded images or text; keep element count well below 140 and prefer gradients/patterns over many discrete shapes.
+
+
+
+
+
+
+
+
 {
   "task": "Generate a pure vector SVG parallax background for a website section",
   "output": {
