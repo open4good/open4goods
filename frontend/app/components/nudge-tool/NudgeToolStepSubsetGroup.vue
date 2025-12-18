@@ -165,6 +165,51 @@ const toggle = (subsetId: string) => {
 
   &__card {
     .nudge-toggle-card {
+  .nudge-toggle-card {
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    background: rgb(var(--v-theme-surface-primary-050)) !important;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    box-shadow: none;
+    transition: transform 140ms ease, border-color 160ms ease,
+      box-shadow 160ms ease, background-color 160ms ease;
+    cursor: pointer;
+
+    &__body {
+      display: grid;
+      grid-template-columns: 0.32fr 1fr auto;
+      align-items: stretch;
+      height: 100%;
+    }
+
+    &__icon-rail {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--v-theme-accent-supporting), 0.08);
+      padding: 14px;
+      min-height: 100%;
+      transition: background 160ms ease;
+    }
+
+    &__icon-shell {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(var(--v-theme-accent-supporting), 0.12);
+      color: rgb(var(--v-theme-accent-supporting));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+
+    &__content {
       display: flex;
       flex-direction: column;
       height: 100%;

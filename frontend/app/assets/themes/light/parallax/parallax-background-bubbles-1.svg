@@ -1,146 +1,87 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" fill="none" role="img" aria-label="Unified light parallax background with rising bubbles on the left">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" fill="none" role="img" aria-label="Festive light parallax background with gifts and stars along the edges">
   <defs>
-    <!-- Unified base background: Light Theme -->
-    <linearGradient id="base" x1="0" y1="0" x2="0" y2="800" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF"></stop>
-      <stop offset="0.55" stop-color="#F8FAFC"></stop>
-      <stop offset="1" stop-color="#F1F5F9"></stop>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse" gradientTransform="rotate(25 0.5 0.5)">
+      <stop offset="0%" stop-color="#00DE9F" />
+      <stop offset="50%" stop-color="#00A1C2" />
+      <stop offset="100%" stop-color="#0088D6" />
     </linearGradient>
-
-    <!-- Gentle ambient wash (keeps everything unified) -->
-    <radialGradient id="ambient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(980 320) scale(980 620)">
-      <stop offset="0" stop-color="#BFDBFE" stop-opacity="0.4"></stop>
-      <stop offset="0.55" stop-color="#DBEAFE" stop-opacity="0.25"></stop>
-      <stop offset="1" stop-color="#BFDBFE" stop-opacity="0"></stop>
+    <radialGradient id="glowL" cx="0.12" cy="0.72" r="0.78">
+      <stop offset="0%" stop-color="#00A1C2" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#00A1C2" stop-opacity="0" />
     </radialGradient>
-
-    <radialGradient id="ambient2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1180 740) rotate(-10) scale(900 520)">
-      <stop offset="0" stop-color="#BBF7D0" stop-opacity="0.3"></stop>
-      <stop offset="0.7" stop-color="#DCFCE7" stop-opacity="0.15"></stop>
-      <stop offset="1" stop-color="#BBF7D0" stop-opacity="0"></stop>
+    <radialGradient id="glowR" cx="0.92" cy="0.18" r="0.85">
+      <stop offset="0%" stop-color="#0088D6" stop-opacity="0.26" />
+      <stop offset="100%" stop-color="#0088D6" stop-opacity="0" />
     </radialGradient>
-
-    <!-- Left-side bubble glow -->
-    <radialGradient id="bubbleGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 420) scale(520 560)">
-      <stop offset="0" stop-color="#BAE6FD" stop-opacity="0.35"></stop>
-      <stop offset="0.55" stop-color="#E0F2FE" stop-opacity="0.2"></stop>
-      <stop offset="1" stop-color="#BAE6FD" stop-opacity="0"></stop>
-    </radialGradient>
-
-    <!-- Bubble fill + highlight -->
-    <radialGradient id="bubbleFill" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(1 1)">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.5"></stop>
-      <stop offset="0.35" stop-color="#E0F2FE" stop-opacity="0.4"></stop>
-      <stop offset="1" stop-color="#BAE6FD" stop-opacity="0.05"></stop>
-    </radialGradient>
-
-    <linearGradient id="bubbleStroke" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
-      <stop offset="0" stop-color="#93C5FD" stop-opacity="0.4"></stop>
-      <stop offset="0.55" stop-color="#60A5FA" stop-opacity="0.45"></stop>
-      <stop offset="1" stop-color="#4ADE80" stop-opacity="0.25"></stop>
-    </linearGradient>
-
-    <!-- Subtle texture / dots -->
-    <pattern id="microDots" width="30" height="30" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="1.1" fill="#1E293B" opacity="0.03"></circle>
-      <circle cx="18" cy="12" r="0.9" fill="#1E293B" opacity="0.02"></circle>
+    <pattern id="micro" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="1.2" fill="#F4F4F4" opacity="0.1" />
     </pattern>
-
-    <!-- Soft vignette: White instead of black -->
-    <radialGradient id="vignette" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(820 380) scale(980 600)">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.6"></stop>
-    </radialGradient>
-
-    <!-- Filters -->
-    <filter id="blur28" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="28"></feGaussianBlur>
+    <filter id="blur12" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" />
     </filter>
-
-    <filter id="bubbleSoft" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="2.4" result="b"></feGaussianBlur>
-      <feMerge>
-        <feMergeNode in="b"></feMergeNode>
-        <feMergeNode in="SourceGraphic"></feMergeNode>
-      </feMerge>
-    </filter>
-
-    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="10" result="g"></feGaussianBlur>
-      <feColorMatrix in="g" type="matrix" values="1 0 0 0 0
-                0 1 0 0 0
-                0 0 1 0 0
-                0 0 0 0.25 0" result="ga"></feColorMatrix>
-      <feMerge>
-        <feMergeNode in="ga"></feMergeNode>
-        <feMergeNode in="SourceGraphic"></feMergeNode>
-      </feMerge>
-    </filter>
-
-    <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="n"></feTurbulence>
-      <feColorMatrix type="matrix" in="n" values="0 0 0 0 0
-                0 0 0 0 0
-                0 0 0 0 0
-                0 0 0 0.08 0" result="a"></feColorMatrix>
-      <feBlend in="SourceGraphic" in2="a" mode="overlay"></feBlend>
+    <filter id="blur8" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" />
     </filter>
   </defs>
 
-  <!-- Unified background -->
-  <rect width="1600" height="800" fill="url(#base)"></rect>
-  <rect width="1600" height="800" fill="url(#ambient)"></rect>
-  <rect width="1600" height="800" fill="url(#ambient2)"></rect>
-  <rect width="1600" height="800" fill="url(#microDots)" opacity="0.6"></rect>
+  <rect width="1600" height="800" fill="url(#bg)" />
+  <rect width="1600" height="800" fill="url(#glowL)" />
+  <rect width="1600" height="800" fill="url(#glowR)" />
+  <rect width="1600" height="800" fill="url(#micro)" />
 
-  <!-- Left lane glow (so bubbles feel integrated) -->
-  <g id="parallax-back">
-    <ellipse cx="230" cy="430" rx="420" ry="520" fill="url(#bubbleGlow)" filter="url(#blur28)"></ellipse>
-    <!-- faint upward current -->
-    <path d="M120 820C130 700 105 600 140 510C175 420 150 340 190 260C230 180 210 120 250 40" stroke="#38BDF8" stroke-opacity="0.12" stroke-width="10" filter="url(#blur28)"></path>
+  <g id="parallax-back" opacity="0.85">
+    <ellipse cx="200" cy="520" rx="340" ry="240" fill="#00A1C2" opacity="0.25" filter="url(#blur12)" />
+    <ellipse cx="1480" cy="120" rx="300" ry="210" fill="#0088D6" opacity="0.22" filter="url(#blur8)" />
+    <path d="M-120 640 C 140 520, 420 540, 700 690" fill="none" stroke="#F4F4F4" stroke-width="10" opacity="0.14" />
   </g>
 
-  <!-- Bubble column (move this group for parallax) -->
-  <g id="parallax-bubbles" filter="url(#glow)">
-    <!-- Large bubbles -->
-    <g transform="translate(150 650)">
-      <circle cx="0" cy="0" r="44" fill="url(#bubbleFill)" opacity="0.9"></circle>
-      <circle cx="0" cy="0" r="44" fill="none" stroke="url(#bubbleStroke)" stroke-width="2.2" opacity="0.75"></circle>
-      <circle cx="-14" cy="-16" r="10" fill="#FFFFFF" opacity="0.4" filter="url(#bubbleSoft)"></circle>
+  <g id="parallax-mid">
+    <g stroke="#FF8479" stroke-width="1.3" fill="none" opacity="0.18">
+      <circle cx="1340" cy="130" r="50" />
+      <circle cx="1460" cy="210" r="70" />
+      <circle cx="1520" cy="300" r="44" />
     </g>
-
-    <g transform="translate(230 520)">
-      <circle cx="0" cy="0" r="30" fill="url(#bubbleFill)" opacity="0.85"></circle>
-      <circle cx="0" cy="0" r="30" fill="none" stroke="url(#bubbleStroke)" stroke-width="2" opacity="0.7"></circle>
-      <circle cx="-10" cy="-12" r="7" fill="#FFFFFF" opacity="0.4" filter="url(#bubbleSoft)"></circle>
-    </g>
-
-    <g transform="translate(170 400)">
-      <circle cx="0" cy="0" r="56" fill="url(#bubbleFill)" opacity="0.75"></circle>
-      <circle cx="0" cy="0" r="56" fill="none" stroke="url(#bubbleStroke)" stroke-width="2.4" opacity="0.68"></circle>
-      <circle cx="-18" cy="-20" r="12" fill="#FFFFFF" opacity="0.4" filter="url(#bubbleSoft)"></circle>
-    </g>
-
-    <g transform="translate(260 270)">
-      <circle cx="0" cy="0" r="26" fill="url(#bubbleFill)" opacity="0.8"></circle>
-      <circle cx="0" cy="0" r="26" fill="none" stroke="url(#bubbleStroke)" stroke-width="1.9" opacity="0.7"></circle>
-      <circle cx="-8" cy="-10" r="6" fill="#FFFFFF" opacity="0.4" filter="url(#bubbleSoft)"></circle>
-    </g>
-
-    <g transform="translate(190 140)">
-      <circle cx="0" cy="0" r="38" fill="url(#bubbleFill)" opacity="0.7"></circle>
-      <circle cx="0" cy="0" r="38" fill="none" stroke="url(#bubbleStroke)" stroke-width="2.1" opacity="0.65"></circle>
-      <circle cx="-12" cy="-14" r="8" fill="#FFFFFF" opacity="0.4" filter="url(#bubbleSoft)"></circle>
-    </g>
-
-    <!-- Small bubbles (more “motion”) -->
-    <g opacity="0.75">
-      <g transform="translate(110 720)">
-        <circle cx="0" cy="0" r="12" fill="url(#bubbleFill)"></circle>
-        <circle cx="0" cy="0" r="12" fill="none" stroke="url(#bubbleStroke)" stroke-width="1.6" opacity="0.7"></circle>
-      </g>
-      <g transform="translate(270 610)">
-      </g>
+    <g fill="#F4F4F4">
+      <circle cx="160" cy="200" r="42" opacity="0.18" />
+      <circle cx="230" cy="280" r="22" opacity="0.2" />
+      <circle cx="190" cy="120" r="30" opacity="0.16" />
+      <circle cx="1480" cy="650" r="36" opacity="0.17" />
+      <circle cx="1380" cy="720" r="26" opacity="0.15" />
+      <circle cx="1540" cy="520" r="32" opacity="0.16" />
     </g>
   </g>
+
+  <g id="parallax-front">
+    <g fill="#F4F4F4" opacity="0.2">
+      <path d="M120 90 l6 10 12 2-9 8 2 12-11-6-11 6 2-12-9-8 12-2z" />
+      <path d="M1500 700 l5 8 10 2-7 6 2 10-9-5-9 5 2-10-7-6 10-2z" />
+      <path d="M240 740 l5 8 10 2-7 6 2 10-9-5-9 5 2-10-7-6 10-2z" />
+      <path d="M1540 520 l5 8 10 2-7 6 2 10-9-5-9 5 2-10-7-6 10-2z" />
+      <path d="M180 520 l5 8 10 2-7 6 2 10-9-5-9 5 2-10-7-6 10-2z" />
+    </g>
+
+    <g stroke="#FF8479" stroke-width="1.4" fill="none" opacity="0.26">
+      <rect x="88" y="600" width="76" height="64" rx="7" />
+      <path d="M88 632h76" />
+      <path d="M126 600v64" />
+      <path d="M126 600c-4-18 24-22 26-6 1 6-3 13-10 17 7-3 20-2 21 9 1 14-19 18-26 2" />
+    </g>
+    <g stroke="#5BDB3B" stroke-width="1.2" fill="none" opacity="0.24">
+      <rect x="1448" y="70" width="70" height="58" rx="7" />
+      <path d="M1448 101h70" />
+      <path d="M1483 70v58" />
+      <path d="M1483 70c-3-14 20-16 22-4 1 5-3 11-9 14 6-2 18-2 19 8 1 12-15 14-19 1" />
+    </g>
+
+    <g fill="#5BDB3B" opacity="0.16">
+      <circle cx="1320" cy="660" r="7" />
+      <circle cx="1400" cy="710" r="9" />
+      <circle cx="1470" cy="620" r="6" />
+      <circle cx="1520" cy="690" r="8" />
+      <circle cx="1560" cy="610" r="9" />
+      <circle cx="1420" cy="760" r="7" />
+    </g>
+  </g>
+
+  <!-- Safe area (center kept clear for content) -->
 </svg>

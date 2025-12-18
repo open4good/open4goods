@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Light SDG call-to-action parallax background with converging beams">
+  <defs>
+    <linearGradient id="sdgLightCtaBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E9F5FF" />
+      <stop offset="100%" stop-color="#E7FFF2" />
+    </linearGradient>
+    <linearGradient id="sdgLightCtaBeamA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2F9AE6" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#2ED18A" stop-opacity="0.34" />
+    </linearGradient>
+    <linearGradient id="sdgLightCtaBeamB" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8BD9FF" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#7FE3B4" stop-opacity="0.22" />
+    </linearGradient>
+    <radialGradient id="sdgLightCtaGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(800 260) scale(640 360)">
+      <stop offset="0%" stop-color="#8AD8FF" stop-opacity="0.34" />
+      <stop offset="100%" stop-color="#8AD8FF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sdgLightCtaBase)" />
+  <circle cx="800" cy="260" r="360" fill="url(#sdgLightCtaGlow)" />
+
+  <path d="M-40 500L520 360C780 300 980 320 1260 400L1640 500V900H-40Z" fill="url(#sdgLightCtaBeamA)" />
+  <path d="M-20 640L460 520C740 460 960 470 1260 540L1640 640V900H-20Z" fill="url(#sdgLightCtaBeamB)" />
+
+  <g fill="none" stroke="#3AA2E9" stroke-width="2.4" opacity="0.32">
+    <path d="M200 420C440 360 740 350 960 380C1200 412 1420 400 1600 360" />
+    <path d="M240 520C520 470 760 470 1000 500C1260 540 1440 520 1640 470" />
+  </g>
+
+  <g opacity="0.44" fill="#2CC08E">
+    <circle cx="360" cy="360" r="8" />
+    <circle cx="560" cy="320" r="7" />
+    <circle cx="760" cy="360" r="8" />
+    <circle cx="1040" cy="320" r="7" />
+    <circle cx="1280" cy="360" r="9" />
+  </g>
+</svg>
