@@ -6,7 +6,7 @@
     accent-corner="top-left"
     corner-variant="custom"
     :corner-size="resolvedCornerSize"
-    :style="{ height: formattedHeight }"
+    :style="wizardStyle"
     :class="{ 'nudge-wizard--content-mode': isContentMode }"
   >
     <template #corner>
@@ -51,14 +51,14 @@
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
-    <div ref="windowWrapperRef">
+    <div ref="windowWrapperRef" class="nudge-wizard__window-wrapper" :style="windowWrapperStyle">
       <v-window
         v-model="activeStepKey"
         class="nudge-wizard__window"
         :touch="false"
         :transition="windowTransition"
         :reverse-transition="windowReverseTransition"
-        :style="{ minHeight: contentMinHeight }"
+        :style="windowContentStyle"
       >
         <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
           <component
@@ -117,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDebounceFn, useElementSize, useTransition } from '@vueuse/core'
+import { useDebounceFn, useElementSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
 import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
@@ -607,7 +607,7 @@ const resetCategorySelectionState = () => {
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
-  // Don't reset maxContentHeight here to avoid jump if we return to wizard
+  // Keep locked heights intact so returning to the wizard keeps the layout stable
 }
 
 let resetTimeout: ReturnType<typeof setTimeout> | null = null
@@ -680,73 +680,63 @@ const { height: headerHeight } = useElementSize(headerRef)
 const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
-const maxContentHeight = ref(0)
-const maxHeaderHeight = ref(0)
-const maxFooterHeight = ref(0)
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
 const WIZARD_MIN_HEIGHT = 300
 
-// Track max heights to prevent shrinking
-watch(windowHeight, val => {
-  if (val <= 0) return
-  if (isContentMode.value) {
-    maxContentHeight.value = Math.max(maxContentHeight.value, val, WIZARD_MIN_HEIGHT)
-  }
-})
+const lockedLayoutHeight = ref<number | null>(null)
+const lockedWindowHeight = ref<number | null>(null)
 
-watch(headerHeight, val => {
-  if (isContentMode.value) {
-    maxHeaderHeight.value = Math.max(maxHeaderHeight.value, val)
-  }
-})
-
-watch(footerHeight, val => {
-  if (isContentMode.value) {
-    maxFooterHeight.value = Math.max(maxFooterHeight.value, val)
-  }
-})
-
-const targetHeight = computed(() => {
+const attemptLockHeights = () => {
   if (!isContentMode.value) {
-    // In category mode, just let it be natural height
-    return headerHeight.value + windowHeight.value + footerHeight.value + 80
+    return
   }
 
-  // In content mode, force the max observed heights for stability
-  // limiting jitter from any part (header/content/footer)
-  const safeHeader = Math.max(headerHeight.value, maxHeaderHeight.value)
-  const safeWindow = Math.max(windowHeight.value, maxContentHeight.value, WIZARD_MIN_HEIGHT)
-  const safeFooter = Math.max(footerHeight.value, maxFooterHeight.value)
+  if (
+    lockedLayoutHeight.value !== null ||
+    lockedWindowHeight.value !== null ||
+    headerHeight.value <= 0 ||
+    windowHeight.value <= 0 ||
+    footerHeight.value <= 0
+  ) {
+    return
+  }
 
-  return safeHeader + safeWindow + safeFooter + 80
+  const lockedWindow = Math.max(windowHeight.value, WIZARD_MIN_HEIGHT)
+  const layoutHeight = headerHeight.value + lockedWindow + footerHeight.value
+  lockedLayoutHeight.value = Math.max(layoutHeight, WIZARD_MIN_HEIGHT)
+  lockedWindowHeight.value = lockedWindow
+}
+
+watch([isContentMode, headerHeight, windowHeight, footerHeight], attemptLockHeights, {
+  immediate: true,
 })
 
-// Use transition ONLY if we already mounted + moving between modes or growing
-// But user said: "No animation on initial load side client"
-const isReady = ref(false)
-onMounted(() => {
-  // Little delay to ensure hydration matches
-  setTimeout(() => {
-    isReady.value = true
-  }, 50)
+const wizardStyle = computed(() => {
+  if (!lockedLayoutHeight.value) {
+    return undefined
+  }
+
+  return { minHeight: `${lockedLayoutHeight.value}px` }
 })
 
-const animatedHeight = useTransition(targetHeight, {
-  duration: 500,
-  transition: [0.4, 0, 0.2, 1],
-  disabled: !isReady.value, // Disable transition initially
+const windowWrapperStyle = computed(() => {
+  if (!lockedWindowHeight.value) {
+    return undefined
+  }
+
+  return {
+    minHeight: `${lockedWindowHeight.value}px`,
+    maxHeight: `${lockedWindowHeight.value}px`,
+  }
 })
 
-const formattedHeight = computed(() => {
-  if (!isReady.value) return 'auto' // Natural height on server/initial client
-  return `${animatedHeight.value}px`
-})
+const windowContentStyle = computed(() => {
+  if (!lockedWindowHeight.value) {
+    return undefined
+  }
 
-const contentMinHeight = computed(() => {
-  if (!isContentMode.value) return undefined
-  // Force min-height on the VWindow content specifically to avoid jitter inside
-  return maxContentHeight.value > 0 ? `${maxContentHeight.value}px` : undefined
+  return { minHeight: `${lockedWindowHeight.value}px` }
 })
 
 const resolvedCornerSize = computed(() =>
@@ -773,24 +763,24 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
   max-width: none;
   display: flex;
   flex-direction: column;
-  transition: height 500ms ease;
 
   &__corner-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  line-height: 1.1;
-  transition: transform 300ms ease, opacity 260ms ease;
-    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 1.1;
+    transition: transform 300ms ease, opacity 260ms ease;
+
     &--clickable {
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
     }
 
     &--expanded {
@@ -816,6 +806,13 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  &__window-wrapper {
+    width: 100%;
+    overflow: hidden;
   }
 
   &__footer {
