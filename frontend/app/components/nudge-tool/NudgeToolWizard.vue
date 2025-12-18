@@ -2,16 +2,20 @@
   <RoundedCornerCard
     class="nudge-wizard"
     rounded="xl"
-    elevation="3"
+    :elevation="3"
     accent-corner="top-left"
-    corner-size="xl"
     corner-variant="custom"
+    :corner-size="resolvedCornerSize"
     :style="{ height: formattedHeight }"
+    :class="{ 'nudge-wizard--content-mode': isContentMode }"
   >
     <template #corner>
-      <div 
+      <div
         class="nudge-wizard__corner-content"
-        :class="{ 'nudge-wizard__corner-content--clickable': shouldShowMatches }"
+        :class="{
+          'nudge-wizard__corner-content--clickable': shouldShowMatches,
+          'nudge-wizard__corner-content--expanded': isContentMode,
+        }"
         @click="handleCornerClick"
       >
         <div v-if="activeStepKey === 'category'" class="text-h5 font-weight-bold text-white">
@@ -19,39 +23,28 @@
         </div>
         <div v-else-if="categorySummary" class="d-flex flex-column align-center justify-center fill-height pt-4 pb-2">
              <div class="nudge-wizard__corner-icon mb-1">
-                <v-icon :icon="categorySummary.icon" size="32" color="white" />
+                <v-icon :icon="categorySummary.icon" :size="cornerIconSize" color="white" />
              </div>
              <div class="text-caption font-weight-bold lh-1 text-white mb-1">{{ categorySummary.label }}</div>
              <div class="text-caption text-white font-weight-black" style="font-size: 1.1em;">{{ animatedMatches }}</div>
         </div>
       </div>
     </template>
-    <div ref="headerRef" class="nudge-wizard__header">
-      <h2 class="text-h5 font-weight-bold text-center mb-1">{{ currentStepTitle }}</h2>
-      <p v-if="currentStepSubtitle" class="text-subtitle-2 text-medium-emphasis text-center mb-4">{{ currentStepSubtitle }}</p>
-      
-      <div class="nudge-wizard__actions d-flex align-center justify-space-between w-100 px-4 mb-4">
-        <v-btn
-            v-if="hasPreviousStep"
-            variant="text"
-            prepend-icon="mdi-chevron-left"
-            @click="goToPrevious"
-        >
-            {{ $t('nudge-tool.actions.previous') }}
-        </v-btn>
-        <div v-else></div>
-
-        <v-btn
-            v-if="hasNextStep"
-            color="primary"
-            variant="flat"
-            :disabled="isNextDisabled"
-            append-icon="mdi-chevron-right"
-            @click="goToNext"
-        >
-            {{ $t('nudge-tool.actions.next') }}
-        </v-btn>
-      </div>
+    <div ref="headerRef">
+      <NudgeWizardHeader
+        :title="currentStepTitle"
+        :subtitle="currentStepSubtitle"
+        :has-previous="hasPreviousStep"
+        :has-next="hasNextStep"
+        :next-disabled="isNextDisabled"
+        :accent-corner="'top-left'"
+        :corner-size="resolvedCornerSize"
+        :category-summary="categorySummary"
+        :previous-label="$t('nudge-tool.actions.previous')"
+        :next-label="$t('nudge-tool.actions.next')"
+        @previous="goToPrevious"
+        @next="goToNext"
+      />
     </div>
 
     <div v-if="loading" class="nudge-wizard__progress">
@@ -78,13 +71,56 @@
         </v-window-item>
       </v-window>
     </div>
-    <!-- Footer removed -->
+    <div ref="footerRef" class="nudge-wizard__footer">
+      <div class="nudge-wizard__progress-bubbles" :style="footerOffsetStyle">
+        <v-btn
+          v-for="step in progressSteps"
+          :key="step.key"
+          class="nudge-wizard__progress-bubble"
+          :variant="step.key === activeStepKey ? 'flat' : 'text'"
+          :color="step.key === activeStepKey ? 'primary' : undefined"
+          :aria-label="step.title"
+          :disabled="!canAccessStep(step.key)"
+          icon
+          size="44"
+          @click="() => handleProgressClick(step.key)"
+        >
+          <span class="nudge-wizard__progress-index">{{ step.index }}</span>
+        </v-btn>
+      </div>
+      <div class="nudge-wizard__footer-actions">
+        <v-btn
+          v-if="hasPreviousStep"
+          variant="text"
+          prepend-icon="mdi-chevron-left"
+          class="nudge-wizard__footer-btn"
+          @click="goToPrevious"
+        >
+          {{ $t('nudge-tool.actions.previous') }}
+        </v-btn>
+        <div v-else></div>
+
+        <v-btn
+          v-if="hasNextStep"
+          color="primary"
+          variant="flat"
+          :disabled="isNextDisabled"
+          append-icon="mdi-chevron-right"
+          class="nudge-wizard__footer-btn"
+          @click="goToNext"
+        >
+          {{ $t('nudge-tool.actions.next') }}
+        </v-btn>
+      </div>
+    </div>
   </RoundedCornerCard>
 </template>
 
 <script setup lang="ts">
 import { useDebounceFn, useElementSize, useTransition } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
+import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
+import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
 import {
   NudgeToolStepCategory,
   NudgeToolStepCondition,
@@ -111,6 +147,7 @@ import {
   buildNudgeFilterRequest,
   buildScoreFilters,
 } from '~/utils/_nudge-tool-filters'
+import { buildFilterRequestFromSubsets } from '~/utils/_subset-to-filters'
 
 const props = defineProps<{
   verticals?: VerticalConfigDto[]
@@ -118,6 +155,13 @@ const props = defineProps<{
   initialCategoryId?: string | null
   initialSubsets?: string[]
 }>()
+
+const accentCornerOffsets: Record<CornerSize, string> = {
+  sm: '46px',
+  md: '58px',
+  lg: '72px',
+  xl: '120px',
+}
 
 const emit = defineEmits<{
   (e: 'navigate', payload: { hash: string; categorySlug: string }): void
@@ -490,6 +534,25 @@ const isNextDisabled = computed(() => {
   return false
 })
 
+const canAccessStep = (stepKey: string) =>
+  stepKey === 'category' || Boolean(selectedCategoryId.value)
+
+const progressSteps = computed(() =>
+  steps.value.map((step, index) => ({
+    key: step.key,
+    title: step.title,
+    index: index + 1,
+  }))
+)
+
+const handleProgressClick = (stepKey: string) => {
+  if (!canAccessStep(stepKey)) {
+    return
+  }
+
+  activeStepKey.value = stepKey
+}
+
 const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
 )
@@ -686,6 +749,16 @@ const contentMinHeight = computed(() => {
   return maxContentHeight.value > 0 ? `${maxContentHeight.value}px` : undefined
 })
 
+const resolvedCornerSize = computed(() =>
+  isContentMode.value ? 'xl' : 'lg'
+)
+
+const footerOffsetStyle = computed(() => ({
+  paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
+}))
+
+const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
+
 </script>
 
 <style scoped lang="scss">
@@ -703,14 +776,15 @@ const contentMinHeight = computed(() => {
   transition: height 500ms ease;
 
   &__corner-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    line-height: 1.1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 1.1;
+  transition: transform 300ms ease, opacity 260ms ease;
     
     &--clickable {
         cursor: pointer;
@@ -718,21 +792,10 @@ const contentMinHeight = computed(() => {
             opacity: 0.8;
         }
     }
-  }
 
-  &__header {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  &__header-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+    &--expanded {
+      transform: translateY(2px) scale(1.04);
+    }
   }
 
   &__stepper {
@@ -756,13 +819,63 @@ const contentMinHeight = computed(() => {
   }
 
   &__footer {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    margin-top: 16px;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 12px;
+
+    @media (max-width: 960px) {
+      grid-template-columns: 1fr;
+      justify-items: stretch;
+    }
+  }
+
+  &__progress-bubbles {
+    display: flex;
+    gap: 10px;
+    align-items: center;
     flex-wrap: wrap;
   }
+
+  &__progress-bubble {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    box-shadow: none;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    transition: transform 140ms ease, border-color 140ms ease;
+
+    &:hover:not(.v-btn--disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.7);
+    }
+  }
+
+  &__progress-index {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: currentColor;
+  }
+
+  &__footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    @media (max-width: 960px) {
+      justify-content: space-between;
+    }
+  }
+
+  &__footer-btn {
+    font-weight: 700;
+  }
+}
+
+.nudge-wizard--content-mode .nudge-wizard__corner-content {
+  transform: translateY(2px) scale(1.04);
 }
 
 :deep(.nudge-wizard-slide-fade-enter-active),
