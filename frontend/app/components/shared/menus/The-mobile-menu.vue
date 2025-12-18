@@ -201,7 +201,7 @@
 
       <v-list-item class="px-6 py-4">
         <template #prepend>
-          <v-icon icon="mdi-magnify-plus-outline" class="me-4" />
+          <v-icon icon="mdi-human-cane" class="me-4" />
         </template>
         <v-list-item-title class="text-body-1">
           {{ t('siteIdentity.menu.zoom.label') }}

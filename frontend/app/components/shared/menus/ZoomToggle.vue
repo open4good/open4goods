@@ -8,11 +8,12 @@
     :size="size"
     :data-testid="testId"
     :aria-label="t('siteIdentity.menu.zoom.label')"
+    :aria-pressed="isZoomed"
     @click="toggleZoom"
   >
     <v-icon
       :icon="
-        isZoomed ? 'mdi-magnify-minus-outline' : 'mdi-magnify-plus-outline'
+        isZoomed ? 'mdi-human-walker' : 'mdi-human-cane'
       "
     />
     <v-tooltip activator="parent" location="bottom">
@@ -68,9 +69,12 @@ onMounted(() => {
 
 <style scoped lang="sass">
 .zoom-toggle
-  background-color: rgba(var(--v-theme-surface-muted), 0.6)
   color: rgb(var(--v-theme-text-neutral-strong))
 
   &.v-btn--active
     color: rgb(var(--v-theme-accent-supporting))
+
+  &:focus-visible
+    outline: 2px solid rgba(var(--v-theme-accent-supporting), 0.6)
+    outline-offset: 3px
 </style>
