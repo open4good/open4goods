@@ -25,11 +25,12 @@ const { t } = useI18n()
     <div class="home-features__inner">
       <header class="home-section__header">
         <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
-        <!-- eslint-disable-next-line vue/no-v-html -->
+        <!-- eslint-disable vue/no-v-html -->
         <p
           class="home-section__subtitle subtitle-text"
           v-html="t('home.features.subtitle')"
         />
+        <!-- eslint-enable vue/no-v-html -->
       </header>
       <v-row class="home-features__grid" align="stretch">
         <v-col

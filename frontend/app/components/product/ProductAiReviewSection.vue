@@ -88,12 +88,13 @@
               </h4>
             </header>
             <div class="product-ai-review__card-body">
-              <!-- eslint-disable-next-line vue/no-v-html -->
+              <!-- eslint-disable vue/no-v-html -->
               <div
                 ref="descriptionRef"
                 class="product-ai-review__richtext"
                 v-html="reviewContent.description"
               />
+              <!-- eslint-enable vue/no-v-html -->
             </div>
           </section>
 
@@ -109,11 +110,12 @@
                 {{ $t('product.aiReview.sections.technical') }}
               </h4>
             </header>
-            <!-- eslint-disable-next-line vue/no-v-html -->
+            <!-- eslint-disable vue/no-v-html -->
             <p
               class="product-ai-review__card-text"
               v-html="reviewContent.technicalReview"
             />
+            <!-- eslint-enable vue/no-v-html -->
           </section>
 
           <section
@@ -130,11 +132,12 @@
                 {{ $t('product.aiReview.sections.ecological') }}
               </h4>
             </header>
-            <!-- eslint-disable-next-line vue/no-v-html -->
+            <!-- eslint-disable vue/no-v-html -->
             <p
               class="product-ai-review__card-text"
               v-html="reviewContent.ecologicalReview"
             />
+            <!-- eslint-enable vue/no-v-html -->
           </section>
         </div>
       </article>
@@ -168,8 +171,9 @@
                 size="18"
                 class="product-ai-review__list-icon product-ai-review__list-icon--pros"
               />
-              <!-- eslint-disable-next-line vue/no-v-html -->
+              <!-- eslint-disable vue/no-v-html -->
               <span v-html="pro" />
+              <!-- eslint-enable vue/no-v-html -->
             </li>
           </ul>
         </section>
@@ -199,8 +203,9 @@
                 size="18"
                 class="product-ai-review__list-icon product-ai-review__list-icon--cons"
               />
-              <!-- eslint-disable-next-line vue/no-v-html -->
+              <!-- eslint-disable vue/no-v-html -->
               <span v-html="con" />
+              <!-- eslint-enable vue/no-v-html -->
             </li>
           </ul>
         </section>

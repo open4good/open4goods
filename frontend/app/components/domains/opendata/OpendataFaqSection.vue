@@ -19,12 +19,13 @@ defineProps<{
         <h2 id="opendata-faq-heading" class="opendata-faq__title">
           {{ title }}
         </h2>
-        <!-- eslint-disable-next-line vue/no-v-html -->
+        <!-- eslint-disable vue/no-v-html -->
         <p
           v-if="subtitle"
           class="opendata-faq__subtitle subtitle-text"
           v-html="subtitle"
         />
+        <!-- eslint-enable vue/no-v-html -->
       </div>
 
       <v-expansion-panels variant="accordion" class="opendata-faq__panels">
@@ -33,8 +34,9 @@ defineProps<{
             <h3 class="opendata-faq__question">{{ item.question }}</h3>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
-            <!-- eslint-disable-next-line vue/no-v-html -->
+            <!-- eslint-disable vue/no-v-html -->
             <div class="opendata-faq__answer" v-html="item.answer" />
+            <!-- eslint-enable vue/no-v-html -->
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>

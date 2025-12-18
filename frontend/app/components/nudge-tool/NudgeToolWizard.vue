@@ -527,7 +527,7 @@ const categorySummary = computed(() => {
       selectedCategory.value.id ??
       '',
     image: selectedCategory.value.imageSmall,
-    icon: (selectedCategory.value as any).icon ?? 'mdi-tag', // Fallback or explicit cast if typing is missing
+    icon: (selectedCategory.value as { icon?: string }).icon ?? 'mdi-tag', // Fallback or explicit cast if typing is missing
     alt:
       selectedCategory.value.verticalHomeTitle ??
       selectedCategory.value.id ??

@@ -88,11 +88,12 @@
 
     <span class="product-attribute-sourcing__value">
       <slot :display-value="displayValue" :display-html="sanitizedDisplayHtml">
-        <!-- eslint-disable-next-line vue/no-v-html -->
+        <!-- eslint-disable vue/no-v-html -->
         <span
           class="product-attribute-sourcing__value-text"
           v-html="sanitizedDisplayHtml || displayValue"
         />
+        <!-- eslint-enable vue/no-v-html -->
       </slot>
     </span>
   </span>

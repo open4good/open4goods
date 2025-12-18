@@ -307,12 +307,13 @@ useHead(() => ({
       aria-label="Article content"
       role="region"
     >
-      <!-- eslint-disable-next-line vue/no-v-html -->
+      <!-- eslint-disable vue/no-v-html -->
       <div
         class="article-content"
         data-test="article-body"
         v-html="sanitizedBody"
       />
+      <!-- eslint-enable vue/no-v-html -->
     </section>
 
     <section

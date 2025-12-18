@@ -11,11 +11,12 @@
             <h1 id="search-hero-heading" class="search-hero__title">
               {{ t('search.hero.title') }}
             </h1>
-            <!-- eslint-disable-next-line vue/no-v-html -->
+            <!-- eslint-disable vue/no-v-html -->
             <p
               class="search-hero__subtitle subtitle-text"
               v-html="t('search.hero.subtitle')"
             />
+            <!-- eslint-enable vue/no-v-html -->
           </div>
 
           <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
