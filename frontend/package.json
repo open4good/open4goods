@@ -61,7 +61,6 @@
     "@capacitor/android": "^8.0.0",
     "@capacitor/cli": "^8.0.0",
     "@capacitor/ios": "^8.0.0",
-    "@iconify-json/bxl": "^1.2.2",
     "@iconify-json/mdi": "^1.2.3",
     "@nuxt/devtools": "^3.0.0",
     "@nuxt/eslint": "1.12.1",
