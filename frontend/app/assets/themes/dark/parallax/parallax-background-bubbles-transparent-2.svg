@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" fill="none" role="img" aria-label="Dark transparent parallax background with bubbles on both sides">
+  <defs>
+    <linearGradient id="darkBubbleSky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1626" />
+      <stop offset="1" stop-color="#0D2337" />
+    </linearGradient>
+    <radialGradient id="darkBubbleAmbientLeft" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(320 520) scale(520 420)">
+      <stop offset="0" stop-color="#1D84D0" stop-opacity="0.32" />
+      <stop offset="1" stop-color="#1D84D0" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="darkBubbleAmbientRight" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1300 300) scale(460 360)">
+      <stop offset="0" stop-color="#1FA173" stop-opacity="0.3" />
+      <stop offset="1" stop-color="#1FA173" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="darkBubbleFillAlt" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(1 1)">
+      <stop offset="0" stop-color="#0E2232" stop-opacity="0.32" />
+      <stop offset="0.35" stop-color="#1F7FCC" stop-opacity="0.26" />
+      <stop offset="1" stop-color="#1F7FCC" stop-opacity="0.06" />
+    </radialGradient>
+    <linearGradient id="darkBubbleStrokeAlt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6AC2FF" stop-opacity="0.52" />
+      <stop offset="0.55" stop-color="#2A95E0" stop-opacity="0.6" />
+      <stop offset="1" stop-color="#21A07A" stop-opacity="0.34" />
+    </linearGradient>
+    <filter id="darkBubbleSoftAlt" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2.2" />
+    </filter>
+  </defs>
+
+  <rect width="1600" height="800" fill="url(#darkBubbleSky)" />
+  <rect width="1600" height="800" fill="url(#darkBubbleAmbientLeft)" />
+  <rect width="1600" height="800" fill="url(#darkBubbleAmbientRight)" />
+
+  <g id="parallax-bubbles-left">
+    <g transform="translate(220 560)">
+      <circle cx="0" cy="0" r="44" fill="url(#darkBubbleFillAlt)" opacity="0.9" />
+      <circle cx="0" cy="0" r="44" fill="none" stroke="url(#darkBubbleStrokeAlt)" stroke-width="2.2" opacity="0.85" />
+      <circle cx="-14" cy="-16" r="10" fill="#CDEAFE" opacity="0.12" filter="url(#darkBubbleSoftAlt)" />
+    </g>
+    <g transform="translate(320 420)">
+      <circle cx="0" cy="0" r="30" fill="url(#darkBubbleFillAlt)" opacity="0.85" />
+      <circle cx="0" cy="0" r="30" fill="none" stroke="url(#darkBubbleStrokeAlt)" stroke-width="2" opacity="0.78" />
+      <circle cx="-10" cy="-12" r="7" fill="#CDEAFE" opacity="0.12" filter="url(#darkBubbleSoftAlt)" />
+    </g>
+    <g transform="translate(260 300)">
+      <circle cx="0" cy="0" r="22" fill="url(#darkBubbleFillAlt)" opacity="0.8" />
+      <circle cx="0" cy="0" r="22" fill="none" stroke="url(#darkBubbleStrokeAlt)" stroke-width="1.8" opacity="0.72" />
+    </g>
+  </g>
+
+  <g id="parallax-bubbles-right">
+    <g transform="translate(1260 320)">
+      <circle cx="0" cy="0" r="40" fill="url(#darkBubbleFillAlt)" opacity="0.9" />
+      <circle cx="0" cy="0" r="40" fill="none" stroke="url(#darkBubbleStrokeAlt)" stroke-width="2.2" opacity="0.82" />
+      <circle cx="-12" cy="-12" r="9" fill="#CDEAFE" opacity="0.12" filter="url(#darkBubbleSoftAlt)" />
+    </g>
+    <g transform="translate(1340 420)">
+      <circle cx="0" cy="0" r="28" fill="url(#darkBubbleFillAlt)" opacity="0.86" />
+      <circle cx="0" cy="0" r="28" fill="none" stroke="url(#darkBubbleStrokeAlt)" stroke-width="1.9" opacity="0.76" />
+    </g>
+    <g transform="translate(1420 500)">
+      <circle cx="0" cy="0" r="18" fill="url(#darkBubbleFillAlt)" opacity="0.8" />
+      <circle cx="0" cy="0" r="18" fill="none" stroke="url(#darkBubbleStrokeAlt)" stroke-width="1.6" opacity="0.7" />
+    </g>
+  </g>
+</svg>
