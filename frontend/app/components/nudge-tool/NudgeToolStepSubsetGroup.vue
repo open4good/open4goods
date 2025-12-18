@@ -164,7 +164,6 @@ const toggle = (subsetId: string) => {
     font-weight: 700;
   }
 
-  &__card {
   .nudge-toggle-card {
 
     display: flex;
