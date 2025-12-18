@@ -460,7 +460,10 @@ defineExpose({
   structuredData,
 })
 
-await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+await useAsyncData('blog-ssr-init', async () => {
+  await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
+  return true
+})
 </script>
 
 <template>
@@ -627,6 +630,7 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
                 :alt="buildArticleImageAlt(article.title)"
                 height="200"
                 cover
+                :eager="index === 0"
               >
                 <template #placeholder>…</template>
               </v-img>
@@ -715,18 +719,16 @@ await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
         color="transparent"
         elevation="0"
       >
-        <ClientOnly>
-          <nav :aria-label="paginationAriaLabel">
-            <v-pagination
-              :length="totalPages"
-              :model-value="currentPage"
-              :total-visible="5"
-              :aria-label="paginationAriaLabelKey"
-              :aria-controls="articleListId"
-              @update:model-value="handlePageChange"
-            />
-          </nav>
-        </ClientOnly>
+        <nav :aria-label="paginationAriaLabel">
+          <v-pagination
+            :length="totalPages"
+            :model-value="currentPage"
+            :total-visible="5"
+            :aria-label="paginationAriaLabelKey"
+            :aria-controls="articleListId"
+            @update:model-value="handlePageChange"
+          />
+        </nav>
 
         <p
           class="text-body-2 text-medium-emphasis text-center"
