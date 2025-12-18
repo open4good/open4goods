@@ -57,30 +57,49 @@
             "icon": "🌿",
             "label": "Une évaluation écologique et environnementale unique",
             "segments": [
-              { "text": "Une évaluation écologique", "to": "/impact-score" },
-              { "text": " et environnementale unique" }
+              {
+                "text": "Une évaluation écologique",
+                "to": "/impact-score"
+              },
+              {
+                "text": " et environnementale unique"
+              }
             ]
           },
           {
             "icon": "🛡️",
             "label": "100% indépendant, logiciel libre et données ouvertes",
             "segments": [
-              { "text": "100% indépendant, " },
-              { "text": "logiciel libre", "to": "/opensource" },
-              { "text": " et " },
-              { "text": "données ouvertes", "to": "/opendata" }
+              {
+                "text": "100% indépendant, "
+              },
+              {
+                "text": "logiciel libre",
+                "to": "/opensource"
+              },
+              {
+                "text": " et "
+              },
+              {
+                "text": "données ouvertes",
+                "to": "/opendata"
+              }
             ]
           },
           {
             "icon": "🏷️",
             "label": "Sans se faire avoir sur les prix",
             "segments": [
-              { "text": "Sans se faire avoir sur les prix avec" },
-              { "text": "{partnersLink}", "to": "/partenaires" }
+              {
+                "text": "Sans se faire avoir sur les prix avec"
+              },
+              {
+                "text": "{partnersLink}",
+                "to": "/partenaires"
+              }
             ]
           }
-        ]
-        ,
+        ],
         "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
         "partnerLinkFallback": "nos partenaires"
       },
@@ -1628,12 +1647,12 @@
         "description": "Une erreur est survenue lors de l'interrogation du service de recherche. Veuillez réessayer."
       },
       "empty": {
-        "title": "Aucun résultat pour \u00ab {query} \u00bb",
+        "title": "Aucun résultat pour « {query} »",
         "description": "Essayez un autre mot-clé ou explorez le catalogue depuis la page des catégories."
       }
     },
     "results": {
-      "summary": "Affichage de {countLabel} pour \u00ab {query} \u00bb",
+      "summary": "Affichage de {countLabel} pour « {query} »",
       "count": {
         "one": "{count} résultat",
         "other": "{count} résultats"
@@ -2378,5 +2397,51 @@
       "close": "Fermer la bannière"
     }
   },
-  "welcome": "Bienvenue"
+  "welcome": "Bienvenue",
+  "share": {
+    "seo": {
+      "title": "Partager à Nudger",
+      "description": "Collez ou partagez n'importe quel lien produit pour voir son impact éco et le meilleur prix indexé."
+    },
+    "loader": {
+      "eyebrow": "Share-to",
+      "title": "Analyse en cours",
+      "pending": "Nous cherchons la meilleure correspondance…",
+      "error": "Impossible de lire ce lien.",
+      "timeout": "C'est un peu plus long que prévu.",
+      "progressAria": "Progression de l'analyse share-to",
+      "helper": "Nous tentons pendant {seconds} secondes.",
+      "standaloneHint": "Ouvert dans l'app installée",
+      "browserHint": "Gardez cet onglet ouvert pendant l'analyse"
+    },
+    "timeout": {
+      "title": "Les résultats se font attendre",
+      "body": "L'analyse a dépassé notre budget de 4s. Vous pouvez relancer pour continuer le polling."
+    },
+    "errors": {
+      "title": "Analyse impossible",
+      "generic": "Une erreur est survenue pendant la résolution du produit.",
+      "missingUrl": "Nous avons besoin de l'URL partagée pour lancer l'analyse."
+    },
+    "actions": {
+      "retry": "Réessayer"
+    },
+    "selection": {
+      "title": "Choisissez le bon produit",
+      "subtitle": "Plusieurs correspondances existent. Choisissez celle que vous avez partagée.",
+      "confidence": "{value}% de confiance",
+      "noPrice": "Prix indisponible",
+      "unknownSource": "Source inconnue",
+      "context": "{count} correspondances possibles"
+    },
+    "result": {
+      "eyebrow": "Meilleure correspondance",
+      "context": "Nous avons trouvé votre produit",
+      "helper": "Ouvrez la fiche complète pour comparer scores, historique des prix et vendeurs.",
+      "viewProduct": "Ouvrir la fiche produit",
+      "noPrice": "Pas de prix indexé",
+      "unknownSource": "Source inconnue"
+    },
+    "empty": "Aucun candidat n'est encore disponible."
+  }
 }
