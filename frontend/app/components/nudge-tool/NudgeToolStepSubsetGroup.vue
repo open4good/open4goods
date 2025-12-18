@@ -97,8 +97,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string[]): void
-  (event: 'continue'): void
-  (event: 'return-to-category'): void
+  (event: 'continue' | 'return-to-category'): void
 }>()
 
 const isSelected = (subsetId?: string | null) =>
@@ -164,6 +163,8 @@ const toggle = (subsetId: string) => {
     font-weight: 700;
   }
 
+  &__card {
+    .nudge-toggle-card {
   .nudge-toggle-card {
 
     display: flex;
@@ -211,44 +212,88 @@ const toggle = (subsetId: string) => {
     &__content {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 14px 18px;
-      justify-content: center;
-      min-height: 100%;
-    }
+      height: 100%;
+      border-radius: 16px;
+      padding: 0;
+      overflow: hidden;
+      background: rgb(var(--v-theme-surface-primary-050)) !important;
+      border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+      box-shadow: none;
+      transition: transform 140ms ease, border-color 160ms ease,
+        box-shadow 160ms ease, background-color 160ms ease;
+      cursor: pointer;
 
-    &__title {
-      margin: 0;
-      font-weight: 700;
-      line-height: 1.4;
-    }
+      &__body {
+        display: grid;
+        grid-template-columns: 0.32fr 1fr auto;
+        align-items: stretch;
+        height: 100%;
+      }
 
-    &__caption {
-      margin: 0;
-      color: rgb(var(--v-theme-text-neutral-secondary));
-      font-size: 0.95rem;
-      line-height: 1.4;
-    }
+      &__icon-rail {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--v-theme-accent-supporting), 0.08);
+        padding: 14px;
+        min-height: 100%;
+        transition: background 160ms ease;
+      }
 
-    &__indicator {
-      width: 52px;
-      display: grid;
-      place-items: center;
-      background: rgba(var(--v-theme-accent-supporting), 0.12);
-      border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-      transition: background 160ms ease, border-color 160ms ease;
-    }
+      &__icon-shell {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: rgba(var(--v-theme-accent-supporting), 0.12);
+        color: rgb(var(--v-theme-accent-supporting));
+        box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
+        transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+      }
 
-    &:hover,
-    &:focus-visible {
-      transform: translateY(-2px);
-      border-color: rgba(var(--v-theme-accent-supporting), 0.6);
-      box-shadow: 0 10px 20px rgba(var(--v-theme-shadow-primary-600), 0.08);
-      outline: none;
-    }
+      &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 14px 18px;
+        justify-content: center;
+        min-height: 100%;
+      }
 
-    &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(var(--v-theme-accent-supporting), 0.25);
+      &__title {
+        margin: 0;
+        font-weight: 700;
+        line-height: 1.4;
+      }
+
+      &__caption {
+        margin: 0;
+        color: rgb(var(--v-theme-text-neutral-secondary));
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      &__indicator {
+        width: 52px;
+        display: grid;
+        place-items: center;
+        background: rgba(var(--v-theme-accent-supporting), 0.12);
+        border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+        transition: background 160ms ease, border-color 160ms ease;
+      }
+
+      &:hover,
+      &:focus-visible {
+        transform: translateY(-2px);
+        border-color: rgba(var(--v-theme-accent-supporting), 0.6);
+        box-shadow: 0 10px 20px rgba(var(--v-theme-shadow-primary-600), 0.08);
+        outline: none;
+      }
+
+      &:focus-visible {
+        box-shadow: 0 0 0 3px rgba(var(--v-theme-accent-supporting), 0.25);
+      }
     }
   }
 

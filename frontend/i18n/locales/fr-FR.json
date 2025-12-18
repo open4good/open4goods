@@ -2331,6 +2331,68 @@
       "mobileHelper": "Le cache reste disponible, les données en direct reprendront dès le retour du réseau.",
       "cta": "Réessayer",
       "dismiss": "Fermer"
+    },
+    "landing": {
+      "hero": {
+        "eyebrow": "PWA",
+        "title": "Votre compagnon éco sur mobile",
+        "subtitle": "Scanne, compare et nudger en quelques gestes. Pensé pour la décision rapide.",
+        "meta": {
+          "title": "Nudger – Compagnon mobile de l'impact",
+          "description": "Découvrez Nudger en version mobile-first : scanner de codes-barres, assistant IA et partage d'éco-guides.",
+          "imageAlt": "Vue mobile de Nudger avec actions rapides et scanner de code-barres."
+        }
+      },
+      "search": {
+        "title": "Recherche rapide",
+        "label": "Rechercher un produit",
+        "placeholder": "Tape une marque ou un produit",
+        "cta": "Rechercher"
+      },
+      "actions": {
+        "scan": {
+          "title": "Scanner un code-barres",
+          "description": "Utilise ta caméra pour obtenir instantanément impact et prix.",
+          "helper": "Aligne le code-barres dans le cadre pour un décodage immédiat.",
+          "loading": "Démarrage du scanner…",
+          "error": "Scanner indisponible. Réessaie ou lance une recherche.",
+          "badge": "Live"
+        },
+        "wizard": {
+          "title": "Assistant IA",
+          "description": "Quelques questions pour des choix éco personnalisés.",
+          "badge": "Nouveau"
+        },
+        "search": {
+          "title": "Rechercher",
+          "description": "Parcourir les produits dans toute la base Nudger.",
+          "badge": "Rapide"
+        },
+        "share": {
+          "title": "Partager au manager",
+          "description": "Montre comment Nudger réagit instantanément sur les pages produits.",
+          "badge": "Démo"
+        }
+      },
+      "share": {
+        "title": "Partager Nudger comme astuce",
+        "description": "Envoie une capture ou un lien depuis ta page produit : le manager voit immédiatement le retour Nudger.",
+        "cta": "Voir le rendu",
+        "modalTitle": "Montrer l'éco-guide en action",
+        "preview": {
+          "title": "Éco-guide Nudger",
+          "description": "Les nudges apparaissent en temps réel quand on partage une page commerciale avec Nudger activé.",
+          "tags": {
+            "impact": "Score d'impact",
+            "feedback": "Retour instantané",
+            "ecoGuide": "Éco-guide"
+          }
+        },
+        "note": "Aucune donnée n'est partagée sans action explicite. C'est une prévisualisation pour expliquer l'expérience."
+      },
+      "actionBar": {
+        "ariaLabel": "Actions rapides mobiles"
+      }
     }
   },
   "nudge-tool": {
