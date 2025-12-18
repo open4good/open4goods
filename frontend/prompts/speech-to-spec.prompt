@@ -1,0 +1,11 @@
+# Context
+Voici une demande de feature saisie vocalement sur le projet nudger, qui sera fournie à un agent de codage.
+Reste tres fidele à la saisie vocale de l'utilisateur, mais il peut y 'avoir des mots "phonetiquement" approchant
+Enleve les hésitations de langage
+Génére un transcript orienté spécifications fonctionnelles, et indique en bonus quelques points clés à questionner si cela te semble pertinent
+Essaie de correler au projet / elements techniques si tu cernes le périmetre (en mode RAG aux docuiments nudger auxquels tu as acces)
+
+Génere au format markdown
+
+
+#
