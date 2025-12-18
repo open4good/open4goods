@@ -29,7 +29,17 @@ export type ParallaxPackName = (typeof PARALLAX_PACK_NAMES)[number]
 
 export const DEFAULT_PARALLAX_PACK: ParallaxPackName = 'default'
 
-export type ParallaxPackConfig = Partial<Record<ParallaxSectionKey, string[]>>
+export type ParallaxLayerConfig = {
+  src: string
+  speed?: number
+  blendMode?: string
+}
+
+export type ParallaxLayerSource = string | ParallaxLayerConfig
+
+export type ParallaxPackConfig = Partial<
+  Record<ParallaxSectionKey, ParallaxLayerSource[]>
+>
 
 export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   light: {

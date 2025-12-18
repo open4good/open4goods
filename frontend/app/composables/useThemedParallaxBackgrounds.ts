@@ -8,6 +8,8 @@ import {
   parallaxPacks,
   type ParallaxPackConfig,
   type ParallaxPackName,
+  type ParallaxLayerConfig,
+  type ParallaxLayerSource,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
@@ -34,21 +36,42 @@ const resolvePackForTheme = (
 }
 
 const resolveParallaxLayers = (
-  assets: string[] | undefined,
+  assets: ParallaxLayerSource[] | undefined,
   themeName: ThemeName
-) => {
+): ParallaxLayerConfig[] => {
   if (!assets?.length) {
     return []
   }
 
   return assets
-    .map(asset => resolveThemedAssetUrl(asset, themeName))
-    .filter((resolved): resolved is string => Boolean(resolved))
+    .map(asset => {
+      const source = typeof asset === 'string' ? asset : asset.src
+      const resolved = resolveThemedAssetUrl(source, themeName)
+
+      if (!resolved) {
+        return null
+      }
+
+      if (typeof asset === 'string') {
+        return { src: resolved }
+      }
+
+      const blendMode = asset.blendMode?.trim()
+
+      return {
+        src: resolved,
+        speed: asset.speed,
+        blendMode: blendMode?.length ? blendMode : undefined,
+      }
+    })
+    .filter((resolved): resolved is ParallaxLayerConfig => Boolean(resolved))
 }
 
 export const useThemedParallaxBackgrounds = (
   packName: MaybeRef<ParallaxPackName>,
-  dynamicOverrides?: MaybeRef<Partial<Record<ParallaxSectionKey, string[]>>>
+  dynamicOverrides?: MaybeRef<
+    Partial<Record<ParallaxSectionKey, ParallaxLayerSource[]>>
+  >
 ) => {
   const theme = useTheme()
 
@@ -56,7 +79,7 @@ export const useThemedParallaxBackgrounds = (
     resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
   )
 
-  return computed<Record<ParallaxSectionKey, string[]>>(() => {
+  return computed<Record<ParallaxSectionKey, ParallaxLayerConfig[]>>(() => {
     const activePackName = unref(packName)
     const overrides = unref(dynamicOverrides)
     const packConfig = resolvePackForTheme(activePackName, themeName.value)
@@ -65,7 +88,9 @@ export const useThemedParallaxBackgrounds = (
         ? packConfig
         : resolvePackForTheme(DEFAULT_PARALLAX_PACK, themeName.value)
 
-    return PARALLAX_SECTION_KEYS.reduce<Record<ParallaxSectionKey, string[]>>(
+    return PARALLAX_SECTION_KEYS.reduce<
+      Record<ParallaxSectionKey, ParallaxLayerConfig[]>
+    >(
       (acc, section) => {
         const assets =
           overrides?.[section] ?? packConfig[section] ?? fallbackPack[section]
@@ -75,7 +100,7 @@ export const useThemedParallaxBackgrounds = (
           [section]: resolveParallaxLayers(assets, themeName.value),
         }
       },
-      {} as Record<ParallaxSectionKey, string[]>
+      {} as Record<ParallaxSectionKey, ParallaxLayerConfig[]>
     )
   })
 }

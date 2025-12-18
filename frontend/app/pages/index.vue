@@ -19,10 +19,12 @@ import type {
 } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
+import { useParallaxConfig } from '~/composables/useParallaxConfig'
 import { useSeasonalParallaxPack } from '~/composables/useSeasonalParallaxPack'
 import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
 import {
   PARALLAX_SECTION_KEYS,
+  type ParallaxLayerConfig,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
 import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
@@ -72,55 +74,32 @@ const heroPartnersCount = computed(
 
 const seasonalParallaxPack = useSeasonalParallaxPack()
 
+const parallaxConfig = useParallaxConfig()
 const parallaxLayers = useThemedParallaxBackgrounds(seasonalParallaxPack)
 
-const parallaxOverlayConfig = computed<Record<ParallaxSectionKey, {
-  overlay: number
+type ParallaxSectionRenderConfig = {
+  backgrounds: ParallaxLayerConfig[]
+  overlayOpacity: number
   parallaxAmount: number
   ariaLabel: string
-}>>(() => ({
-  essentials: {
-    overlay: 0.62,
-    parallaxAmount: 0.16,
-    ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
-  },
-  features: {
-    overlay: 0.55,
-    parallaxAmount: 0.12,
-    ariaLabel: String(t('home.parallax.features.ariaLabel')),
-  },
-  blog: {
-    overlay: 0.5,
-    parallaxAmount: 0.1,
-    ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
-  },
-  objections: {
-    overlay: 0.58,
-    parallaxAmount: 0.11,
-    ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
-  },
-  cta: {
-    overlay: 0.48,
-    parallaxAmount: 0.08,
-    ariaLabel: String(t('home.parallax.cta.ariaLabel')),
-  },
-}))
+  maxOffsetRatio: number | null
+}
 
-const parallaxBackgrounds = computed(() =>
-  PARALLAX_SECTION_KEYS.reduce(
+const parallaxBackgrounds = computed<
+  Record<ParallaxSectionKey, ParallaxSectionRenderConfig>
+>(() =>
+  PARALLAX_SECTION_KEYS.reduce<Record<ParallaxSectionKey, ParallaxSectionRenderConfig>>(
     (acc, section) => ({
       ...acc,
       [section]: {
         backgrounds: parallaxLayers.value[section] || [],
-        ...parallaxOverlayConfig.value[section],
+        overlayOpacity: parallaxConfig.value[section].overlay,
+        parallaxAmount: parallaxConfig.value[section].parallaxAmount,
+        ariaLabel: parallaxConfig.value[section].ariaLabel,
+        maxOffsetRatio: parallaxConfig.value[section].maxOffsetRatio,
       },
     }),
-    {} as Record<ParallaxSectionKey, {
-      backgrounds: string[]
-      overlay: number
-      parallaxAmount: number
-      ariaLabel: string
-    }>
+    {} as Record<ParallaxSectionKey, ParallaxSectionRenderConfig>
   )
 )
 
@@ -715,9 +694,10 @@ useHead(() => ({
         id="home-essentials"
         class="home-page__parallax"
         :backgrounds="parallaxBackgrounds.essentials.backgrounds"
-        :overlay-opacity="parallaxBackgrounds.essentials.overlay"
+        :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
         :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
         :aria-label="parallaxBackgrounds.essentials.ariaLabel"
+        :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
         :enable-aplats="true"
       >
         <div class="home-page__stack">
@@ -749,9 +729,10 @@ useHead(() => ({
         id="home-features"
         class="home-page__parallax home-page__parallax--centered"
         :backgrounds="parallaxBackgrounds.features.backgrounds"
-        :overlay-opacity="parallaxBackgrounds.features.overlay"
+        :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
         :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
         :aria-label="parallaxBackgrounds.features.ariaLabel"
+        :max-offset-ratio="parallaxBackgrounds.features.maxOffsetRatio"
         content-align="center"
       >
         <div
@@ -770,9 +751,10 @@ useHead(() => ({
         id="home-knowledge-blog"
         class="home-page__parallax"
         :backgrounds="parallaxBackgrounds.blog.backgrounds"
-        :overlay-opacity="parallaxBackgrounds.blog.overlay"
+        :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
         :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
         :aria-label="parallaxBackgrounds.blog.ariaLabel"
+        :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
         :enable-aplats="true"
       >
         <div class="home-page__stack">
@@ -797,9 +779,10 @@ useHead(() => ({
         id="home-knowledge-objections"
         class="home-page__parallax"
         :backgrounds="parallaxBackgrounds.objections.backgrounds"
-        :overlay-opacity="parallaxBackgrounds.objections.overlay"
+        :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
         :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
         :aria-label="parallaxBackgrounds.objections.ariaLabel"
+        :max-offset-ratio="parallaxBackgrounds.objections.maxOffsetRatio"
         :enable-aplats="true"
       >
         <div class="home-page__stack">
@@ -820,9 +803,10 @@ useHead(() => ({
         id="home-cta"
         class="home-page__parallax home-page__parallax--centered"
         :backgrounds="parallaxBackgrounds.cta.backgrounds"
-        :overlay-opacity="parallaxBackgrounds.cta.overlay"
+        :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
         :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
         :aria-label="parallaxBackgrounds.cta.ariaLabel"
+        :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
         content-align="center"
       >
         <div class="home-page__stack home-page__stack--compact">
