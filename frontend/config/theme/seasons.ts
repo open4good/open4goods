@@ -17,6 +17,13 @@ export const seasonalParallaxSchedule: SeasonalParallaxWindow[] = [
     description: 'Earth Day activation and SDG storytelling',
   },
   {
+    id: 'christmas',
+    start: '12-10',
+    end: '12-27',
+    pack: 'christmas',
+    description: 'Festive bubble backgrounds for the holiday season',
+  },
+  {
     id: 'winter-highlights',
     start: '12-01',
     end: '01-15',

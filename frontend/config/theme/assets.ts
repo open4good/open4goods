@@ -22,7 +22,7 @@ export const PARALLAX_SECTION_KEYS = [
   'cta',
 ] as const
 
-export const PARALLAX_PACK_NAMES = ['default', 'sdg'] as const
+export const PARALLAX_PACK_NAMES = ['default', 'sdg', 'christmas'] as const
 
 export type ParallaxSectionKey = (typeof PARALLAX_SECTION_KEYS)[number]
 export type ParallaxPackName = (typeof PARALLAX_PACK_NAMES)[number]
@@ -58,25 +58,47 @@ export const parallaxPacks: Record<
 > = {
   light: {
     default: {
+      essentials: ['parallax/parallax-background-1.svg'],
+      features: ['parallax/parallax-background-2.svg'],
+      blog: ['parallax/parallax-background-3.svg'],
+      objections: ['parallax/parallax-background-1.svg'],
+      cta: ['parallax/parallax-background-2.svg'],
+    },
+    sdg: {},
+    christmas: {
       essentials: ['parallax/parallax-background-bubbles-1.svg'],
       features: ['parallax/parallax-background-bubbles-2.svg'],
       blog: ['parallax/parallax-background-bubbles-3.svg'],
       objections: ['parallax/parallax-background-bubbles-1.svg'],
       cta: ['parallax/parallax-background-bubbles-2.svg'],
     },
-    sdg: {},
   },
   dark: {
     default: {
+      essentials: ['parallax/parallax-background-1.svg'],
+      features: ['parallax/parallax-background-2.svg'],
+      blog: ['parallax/parallax-background-3.svg'],
+      objections: ['parallax/parallax-background-1.svg'],
+      cta: ['parallax/parallax-background-2.svg'],
+    },
+    sdg: {},
+    christmas: {
       essentials: ['parallax/parallax-background-bubbles-1.svg'],
       features: ['parallax/parallax-background-bubbles-2.svg'],
       blog: ['parallax/parallax-background-bubbles-3.svg'],
       objections: ['parallax/parallax-background-bubbles-1.svg'],
       cta: ['parallax/parallax-background-bubbles-2.svg'],
     },
-    sdg: {},
   },
   common: {
+    default: {
+      essentials: ['parallax/parallax-background-1.svg'],
+      features: ['parallax/parallax-background-2.svg'],
+      blog: ['parallax/parallax-background-3.svg'],
+      objections: ['parallax/parallax-background-1.svg'],
+      cta: ['parallax/parallax-background-2.svg'],
+    },
     sdg: {},
+    christmas: {},
   },
 }
