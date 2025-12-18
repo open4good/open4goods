@@ -254,11 +254,7 @@ const heroIconAnimationOptions = [
   'home-hero__icon--scale',
   'home-hero__icon--pulse',
 ] as const
-const heroIconAnimation = ref(
-  heroIconAnimationOptions[
-    Math.floor(Math.random() * heroIconAnimationOptions.length)
-  ] || heroIconAnimationOptions[0]
-)
+const heroIconAnimation = ref(heroIconAnimationOptions[0])
 const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
@@ -283,6 +279,11 @@ const handleHeroImageLoad = () => {
 }
 
 onMounted(() => {
+  heroIconAnimation.value =
+    heroIconAnimationOptions[
+      Math.floor(Math.random() * heroIconAnimationOptions.length)
+    ] || heroIconAnimationOptions[0]
+
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
@@ -682,51 +683,7 @@ useHead({
 .home-hero__wizard
   width: 100%
 
-.home-hero__media
-  display: flex
-  align-items: center
-  justify-content: center
 
-.home-hero__media-sheet
-  width: 100%
-  padding: clamp(0.5rem, 2vw, 1rem)
-  background: rgba(var(--v-theme-surface-glass), 0.85)
-  overflow: hidden
-  position: relative
-
-.home-hero__video-wrapper
-  position: relative
-  width: 100%
-  aspect-ratio: 16 / 9
-  border-radius: clamp(1.75rem, 4vw, 2.5rem)
-  overflow: hidden
-
-.home-hero__video
-  width: 100%
-  height: 100%
-  object-fit: cover
-  transform: scale(1.3)
-  transform-origin: center
-
-.home-hero__video-overlay
-  position: absolute
-  inset: 0
-  background: linear-gradient(135deg, rgba(var(--v-theme-hero-gradient-start), 0.1), rgba(var(--v-theme-hero-gradient-end), 0.2))
-  pointer-events: none
-
-.home-hero__media-link
-  margin: 0
-
-.home-hero__sr-only
-  position: absolute
-  width: 1px
-  height: 1px
-  padding: 0
-  margin: -1px
-  overflow: hidden
-  clip: rect(0, 0, 0, 0)
-  white-space: nowrap
-  border: 0
 
 @keyframes home-hero-fade-up
   from

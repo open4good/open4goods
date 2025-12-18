@@ -795,7 +795,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('objections')"
             class="home-page__section"
           >
-            <v-slide-x-reverse-transition :disabled="prefersReducedMotion">
+            <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
               <div v-show="animatedSections.objections">
                 <HomeObjectionsSection :items="objectionItems" />
               </div>
@@ -819,7 +819,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('faq')"
             class="home-page__section"
           >
-            <v-fade-transition :disabled="prefersReducedMotion">
+            <v-fade-transition :disabled="shouldReduceMotion">
               <div v-show="animatedSections.faq">
                 <HomeFaqSection :items="faqPanels" />
               </div>

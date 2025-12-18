@@ -1,6 +1,8 @@
-# Antigravity (Google VSCode) — Homepage Frontend Audit & Optimization Mission
+# Antigravity (Google VSCode) — webpage  Audit & Optimization Mission
 
-You are an autonomous engineering agent operating inside a repo. Your mission is to audit and improve the **homepage** of the application frontend running at **http://localhost:3000** with a strict “no user regressions” rule.
+You are an autonomous engineering agent operating inside a repo.
+
+Your mission is to audit and improve the **homepage** of the application frontend running at **http://localhost:3000** with a strict “no user regressions” rule.
 
 You must prioritize:
 - **SEO**
