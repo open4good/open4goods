@@ -1,5 +1,5 @@
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, unknown> = {
@@ -9,11 +9,28 @@ const messages: Record<string, unknown> = {
   'home.hero.search.cta': 'NUDGER',
   'home.hero.search.helper': '50M references',
   'home.hero.search.helpers': [
-    { icon: '🌿', label: 'A unique eco assessment' },
-    { icon: '🏷️', label: 'Best prices' },
-    { icon: '🛡️', label: 'Independent & open' },
-    { icon: '⚡', label: '50M references' },
+    {
+      icon: '🌿',
+      label: 'A unique eco assessment',
+      segments: [{ text: 'A unique eco assessment' }],
+    },
+    {
+      icon: '🏷️',
+      label: 'Best prices',
+      segments: [
+        { text: 'Pay the right price with' },
+        { text: '{partnersLink}', to: '/partners' },
+      ],
+    },
+    {
+      icon: '🛡️',
+      label: 'Independent & open',
+      segments: [{ text: 'Independent & open' }],
+    },
+    { icon: '⚡', label: '50M references', segments: [{ text: '50M references' }] },
   ],
+  'home.hero.search.partnerLinkLabel': '{formattedCount} partner | {formattedCount} partners',
+  'home.hero.search.partnerLinkFallback': 'our partners',
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Responsible choices are not a luxury',
   'home.hero.subtitle': 'Save time, stay true to your values.',
@@ -124,16 +141,47 @@ const messages: Record<string, unknown> = {
   'home.cta.button': 'Start a search',
   'home.cta.searchSubmit': 'Launch search',
   'home.cta.browseTaxonomy': 'Explore categories',
-  'home.seo.title': 'Nudger – Responsible shopping made easy',
+'home.seo.title': 'Nudger – Responsible shopping made easy',
   'home.seo.description':
     'Compare the environmental impact and prices of over 50 million products with Nudger.',
   'home.seo.imageAlt': 'Illustration of the Nudger dashboard',
   'siteIdentity.siteName': 'Nudger',
 }
 
-const translate = (key: string) => {
+const interpolate = (
+  template: string,
+  params: Record<string, unknown> = {}
+) =>
+  template.replace(/\{(\w+)\}/g, (match, token) => {
+    const value = params[token]
+    return value != null ? String(value) : match
+  })
+
+const selectPluralForm = (template: string, count?: number) => {
+  if (!template.includes('|') || typeof count !== 'number') {
+    return template
+  }
+
+  const [singular, plural] = template
+    .split('|')
+    .map(part => part.trim())
+
+  return count <= 1 ? singular : plural
+}
+
+const translate = (
+  key: string,
+  params: Record<string, unknown> = {},
+  count?: number
+) => {
   const value = messages[key]
-  return typeof value === 'string' ? value : key
+
+  if (typeof value === 'string') {
+    const template = selectPluralForm(value, count)
+    return interpolate(template, params)
+  }
+
+  return typeof value === 'number' ? String(value) : key
 }
 
 const localeRef = ref('fr-FR')
@@ -243,7 +291,25 @@ function useBlogComposable() {
 }
 
 mockNuxtImport('useI18n', () => () => ({
-  t: (key: string) => translate(key),
+  t: (
+    key: string,
+    choiceOrParams?: number | Record<string, unknown>,
+    params?: Record<string, unknown>
+  ) => {
+    const resolvedParams =
+      typeof choiceOrParams === 'object' && choiceOrParams != null
+        ? choiceOrParams
+        : params ?? {}
+
+    const count =
+      typeof choiceOrParams === 'number'
+        ? choiceOrParams
+        : typeof params === 'number'
+          ? params
+          : (resolvedParams as { count?: number }).count
+
+    return translate(key, resolvedParams, count)
+  },
   tm: (key: string) => messages[key],
   locale: localeRef,
   availableLocales: ['fr-FR', 'en-US'],
@@ -262,6 +328,16 @@ mockNuxtImport('useHead', () => (input: unknown) => {
   headSpy(value)
   return value
 })
+
+const affiliationPartnersMock = [
+  { id: 'partner-1', name: 'Partner 1' },
+  { id: 'partner-2', name: 'Partner 2' },
+  { id: 'partner-3', name: 'Partner 3' },
+]
+
+const fetchSpy = vi.fn().mockResolvedValue(affiliationPartnersMock)
+
+vi.stubGlobal('$fetch', fetchSpy)
 
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: useCategoriesComposable,
@@ -443,8 +519,13 @@ describe('Home page', () => {
     routerReplace.mockReset()
     localePathMock.mockClear()
     headSpy.mockReset()
+    fetchSpy.mockClear()
     fetchCategoriesMock.mockClear()
     fetchArticlesMock.mockClear()
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
   })
 
   it('submits the search query using the localized search route', async () => {

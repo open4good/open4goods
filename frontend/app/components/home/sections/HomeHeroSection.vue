@@ -29,6 +29,7 @@ const props = defineProps<{
   verticals?: VerticalConfigDto[]
   heroImageLight?: string
   heroImageDark?: string
+  partnersCount?: number
 }>()
 
 const emit = defineEmits<{
@@ -38,9 +39,11 @@ const emit = defineEmits<{
   'select-product': [payload: ProductSuggestionItem]
 }>()
 
-const { t, tm } = useI18n()
+const { t, tm, locale } = useI18n()
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
+
+const partnersLinkPlaceholder = '{partnersLink}'
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -123,7 +126,7 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   const translatedItems = normalizeHelperItems(tm('home.hero.search.helpers'))
 
   if (translatedItems.length > 0) {
-    return translatedItems
+    return applyPartnerLinkPlaceholder(translatedItems)
   }
 
   const fallback = String(t('home.hero.search.helper'))
@@ -133,7 +136,7 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
     return []
   }
 
-  return [
+  return applyPartnerLinkPlaceholder([
     {
       icon: '⚡',
       segments: [
@@ -142,8 +145,107 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
         },
       ],
     },
-  ]
+  ])
 })
+
+const normalizedPartnersCount = computed(() => {
+  const rawCount = Number(props.partnersCount ?? 0)
+
+  if (!Number.isFinite(rawCount)) {
+    return 0
+  }
+
+  return Math.max(0, Math.round(rawCount))
+})
+
+const formattedPartnersCount = computed(() => {
+  const count = normalizedPartnersCount.value
+
+  if (!count) {
+    return null
+  }
+
+  try {
+    return new Intl.NumberFormat(locale.value).format(count)
+  } catch {
+    return String(count)
+  }
+})
+
+const heroPartnersLinkText = computed(() => {
+  const count = normalizedPartnersCount.value
+  const formattedCount = formattedPartnersCount.value
+  const fallbackLabel = String(t('home.hero.search.partnerLinkFallback')).trim()
+
+  if (!count || !formattedCount) {
+    return fallbackLabel || null
+  }
+
+  const translated = t('home.hero.search.partnerLinkLabel', count, {
+    count,
+    formattedCount,
+  })
+
+  const normalizedTranslation =
+    typeof translated === 'string'
+      ? translated.trim()
+      : String(translated ?? '').trim()
+
+  if (
+    normalizedTranslation &&
+    normalizedTranslation !== 'home.hero.search.partnerLinkLabel'
+  ) {
+    return normalizedTranslation
+  }
+
+  if (!fallbackLabel) {
+    return formattedCount
+  }
+
+  return `${formattedCount} ${fallbackLabel}`
+})
+
+const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
+  const partnerLinkText = heroPartnersLinkText.value
+
+  if (!partnerLinkText) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithPartnerLink = item.segments
+      .map(segment => {
+        if (!segment.text.includes(partnersLinkPlaceholder)) {
+          return segment
+        }
+
+        const replacedText = segment.text.replaceAll(
+          partnersLinkPlaceholder,
+          partnerLinkText
+        )
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHelperSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithPartnerLink.length > 0
+          ? segmentsWithPartnerLink
+          : item.segments,
+    }
+  })
+}
 
 const heroIconAlt = computed(() => String(t('home.hero.iconAlt')).trim())
 const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
