@@ -159,7 +159,6 @@ const toggle = (subsetId: string) => {
     font-weight: 700;
   }
 
-  .nudge-toggle-card {
   &__card.nudge-toggle-card {
     display: flex;
     flex-direction: column;
@@ -215,13 +214,13 @@ const toggle = (subsetId: string) => {
       min-height: 100%;
     }
 
-    &__title {
+    .nudge-toggle-card__title {
       margin: 0;
       font-weight: 700;
       line-height: 1.4;
     }
 
-    &__caption {
+    .nudge-toggle-card__caption {
       margin: 0;
       color: rgb(var(--v-theme-text-neutral-secondary));
       font-size: 0.95rem;
