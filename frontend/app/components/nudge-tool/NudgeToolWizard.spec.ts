@@ -24,7 +24,8 @@ vi.mock('#components', () => ({
     NudgeToolStepCondition: { template: '<div>Condition</div>' },
     NudgeToolStepSubsetGroup: { template: '<div>SubsetGroup</div>' },
     NudgeToolStepRecommendations: { template: '<div>Recommendations</div>' },
-    RoundedCornerCard: { template: '<div><slot /><slot name="corner"/></div>' }
+    RoundedCornerCard: { template: '<div><slot /><slot name="corner"/></div>' },
+    NudgeWizardHeader: { template: '<div class="header-stub"></div>' }
 }))
 
 // Mock other imports that might cause issues
