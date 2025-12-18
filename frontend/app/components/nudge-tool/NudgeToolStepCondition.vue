@@ -1,17 +1,5 @@
 <template>
   <div class="nudge-step-condition">
-    <h2 class="nudge-step-condition__title">
-      <v-icon
-        icon="mdi-numeric-3-circle"
-        color="accent-primary-highlight"
-        size="30"
-      />
-      {{ $t('nudge-tool.steps.condition.title') }}
-    </h2>
-    <p class="nudge-step-condition__subtitle">
-      {{ $t('nudge-tool.steps.condition.subtitle') }}
-    </p>
-
     <v-row dense class="nudge-step-condition__row" justify="center">
       <v-col
         v-for="option in options"
@@ -43,10 +31,6 @@
 
             <div class="nudge-toggle-card__content">
               <p class="nudge-toggle-card__title">{{ option.label }}</p>
-            </div>
-
-            <div class="nudge-toggle-card__indicator" aria-hidden="true">
-              <v-icon v-if="isSelected(option.value)" icon="mdi-check" size="20" color="white" />
             </div>
           </div>
         </v-card>
@@ -100,17 +84,6 @@ const toggleOption = (choice: ProductConditionChoice) => {
 
 <style scoped lang="scss">
 .nudge-step-condition {
-  &__title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  &__subtitle {
-    color: rgb(var(--v-theme-text-neutral-secondary));
-    margin-bottom: 16px;
-  }
-
   &__row {
     row-gap: 12px;
   }
@@ -132,8 +105,8 @@ const toggleOption = (choice: ProductConditionChoice) => {
 
     &__body {
       display: grid;
-      grid-template-columns: 0.32fr 1fr auto;
-      align-items: stretch;
+      grid-template-columns: auto 1fr;
+      align-items: center;
       height: 100%;
     }
 
@@ -142,8 +115,10 @@ const toggleOption = (choice: ProductConditionChoice) => {
       align-items: center;
       justify-content: center;
       background: rgba(var(--v-theme-accent-supporting), 0.08);
-      padding: 14px;
-      transition: background 160ms ease;
+      padding: 14px 16px;
+      border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+      border-radius: 14px 10px 10px 14px;
+      transition: background 160ms ease, border-color 160ms ease;
     }
 
     &__icon-shell {
@@ -155,13 +130,15 @@ const toggleOption = (choice: ProductConditionChoice) => {
       background: rgba(var(--v-theme-accent-supporting), 0.12);
       color: rgb(var(--v-theme-accent-supporting));
       box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
-      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease,
+        transform 160ms ease;
     }
 
     &__content {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
       padding: 14px 18px;
       min-height: 100%;
     }
@@ -169,17 +146,7 @@ const toggleOption = (choice: ProductConditionChoice) => {
     &__title {
       margin: 0;
       font-weight: 700;
-      flex: 1;
       line-height: 1.35;
-    }
-
-    &__indicator {
-      width: 52px;
-      display: grid;
-      place-items: center;
-      background: rgba(var(--v-theme-accent-supporting), 0.12);
-      border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-      transition: background 160ms ease, border-color 160ms ease;
     }
 
     &:hover,
@@ -200,19 +167,15 @@ const toggleOption = (choice: ProductConditionChoice) => {
     border-color: rgb(var(--v-theme-accent-supporting));
 
     .nudge-toggle-card__icon-rail {
-      background: rgba(var(--v-theme-accent-supporting), 0.18);
+      background: rgba(var(--v-theme-accent-supporting), 0.2);
+      border-color: rgba(var(--v-theme-accent-supporting), 0.55);
     }
 
     .nudge-toggle-card__icon-shell {
-      background: rgba(var(--v-theme-accent-supporting), 0.2);
+      background: rgba(var(--v-theme-accent-supporting), 0.24);
       color: rgb(var(--v-theme-surface-default));
-      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.5);
-    }
-
-    .nudge-toggle-card__indicator {
-      background: rgb(var(--v-theme-accent-supporting));
-      border-color: rgb(var(--v-theme-accent-supporting));
-      color: rgb(var(--v-theme-surface-default));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.55);
+      transform: translateY(-1px);
     }
   }
 }

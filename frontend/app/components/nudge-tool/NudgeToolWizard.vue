@@ -21,12 +21,27 @@
         <div v-if="activeStepKey === 'category'" class="text-h5 font-weight-bold text-white">
           {{ $t('nudge-tool.wizard.welcome') }}
         </div>
-        <div v-else-if="categorySummary" class="d-flex flex-column align-center justify-center fill-height pt-4 pb-2">
-             <div class="nudge-wizard__corner-icon mb-1">
-                <v-icon :icon="categorySummary.icon" :size="cornerIconSize" color="white" />
-             </div>
-             <div class="text-caption font-weight-bold lh-1 text-white mb-1">{{ categorySummary.label }}</div>
-             <div class="text-caption text-white font-weight-black" style="font-size: 1.1em;">{{ animatedMatches }}</div>
+        <div v-else-if="categorySummary" class="nudge-wizard__corner-summary d-flex align-center justify-center fill-height pt-3 pb-2">
+          <div class="nudge-wizard__corner-visual d-flex align-center gap-2">
+            <v-avatar
+              v-if="categorySummary.image"
+              size="44"
+              class="nudge-wizard__corner-avatar"
+              :image="categorySummary.image"
+              :alt="categorySummary.alt"
+            >
+              <template #fallback>
+                <v-icon :icon="categorySummary.icon" size="28" color="white" />
+              </template>
+            </v-avatar>
+            <div class="nudge-wizard__corner-icon">
+              <v-icon :icon="categorySummary.icon" :size="cornerIconSize" color="white" />
+            </div>
+          </div>
+          <div class="nudge-wizard__corner-text text-white text-center">
+            <div class="text-caption font-weight-bold lh-1 mb-1">{{ categorySummary.label }}</div>
+            <div class="nudge-wizard__corner-count font-weight-black">{{ animatedMatches }}</div>
+          </div>
         </div>
       </div>
     </template>
@@ -813,6 +828,39 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     &--expanded {
       transform: translateY(2px) scale(1.04);
     }
+  }
+
+  &__corner-summary {
+    gap: 10px;
+  }
+
+  &__corner-visual {
+    gap: 8px;
+  }
+
+  &__corner-avatar {
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+    box-shadow: 0 6px 20px rgba(var(--v-theme-shadow-primary-600), 0.12);
+  }
+
+  &__corner-icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(var(--v-theme-hero-gradient-mid), 0.22);
+    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4);
+  }
+
+  &__corner-text {
+    line-height: 1.2;
+  }
+
+  &__corner-count {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    line-height: 1;
+    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   }
 
   &__stepper {
