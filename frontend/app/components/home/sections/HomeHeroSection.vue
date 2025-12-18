@@ -331,15 +331,15 @@ useHead({
           />
         </div>
       </v-fade-transition>
-      <v-img
+      <img
         class="home-hero__background-media"
         :src="heroBackgroundSrc"
-        cover
-        eager
+        alt=""
+        fetchpriority="high"
+        decoding="async"
         @load="handleHeroImageLoad"
-      >
-        <div class="home-hero__background-overlay" />
-      </v-img>
+      />
+      <div class="home-hero__background-overlay" />
     </div>
     <v-container fluid class="home-hero__container">
       <div class="home-hero__inner">
@@ -505,6 +505,7 @@ useHead({
   width: 100%
   height: 100%
   opacity: 0.98
+  object-fit: cover
 
 .home-hero__background-overlay
   position: absolute

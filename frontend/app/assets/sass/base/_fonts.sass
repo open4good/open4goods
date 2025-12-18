@@ -43,7 +43,10 @@ $font-files: (
   $resolved-file: if(sass($file-name): $file-name; else: "#{$name}-#{map.get($file-map, $weight)}")
 
   @if $file-name == null and $style == italic
-    $resolved-file: '#{$resolved-file}Italic'
+    @if $resolved-file == 'Poppins-Regular'
+      $resolved-file: 'Poppins-Italic'
+    @else
+      $resolved-file: '#{$resolved-file}Italic'
 
   @font-face
     font-family: $name

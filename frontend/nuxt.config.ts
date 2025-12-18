@@ -180,6 +180,7 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
     '@vite-pwa/nuxt',
     '@nuxtjs/plausible',
+    '@nuxtjs/device',
   ],
 
   vueuse: {
@@ -187,7 +188,7 @@ export default defineNuxtConfig({
   },
 
   device: {
-    refreshOnResize: true,
+    refreshOnResize: false,
   },
 
   plausible: {
@@ -320,10 +321,6 @@ export default defineNuxtConfig({
   // Runtime configuration for environment variables
   // These can be overridden via a .env file
   runtimeConfig: {
-    // Name of the cookie storing the JWT
-    tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
-    // Name of the cookie storing the refresh token
-    refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
     // Shared token for server-to-server authentication (server-only)
     machineToken: process.env.MACHINE_TOKEN || '',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
@@ -345,6 +342,11 @@ export default defineNuxtConfig({
 
     // Public keys (exposed to the client side)
     public: {
+      // Name of the cookie storing the JWT
+      tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
+      // Name of the cookie storing the refresh token
+      refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
+
       // Base URL of the backend API
       // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),

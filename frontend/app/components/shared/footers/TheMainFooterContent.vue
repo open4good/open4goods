@@ -165,33 +165,26 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
             {{ t('siteIdentity.footer.feedback.cta') }}
           </v-btn>
 
-          <v-list
-            density="compact"
-            bg-color="transparent"
-            class="footer-list pa-0"
-          >
-            <v-list-item
+          <nav class="d-flex flex-column ga-1 mt-2" :aria-label="t('siteIdentity.footer.feedback.title')">
+            <NuxtLink
               v-for="link in feedbackLinks"
               :key="String(link.to ?? link.href ?? link.label)"
               :to="link.to"
               :href="link.href"
-              class="footer-list-item px-0"
+              class="footer-list-item py-1 px-2 d-flex align-center"
+              :class="{ 'text-decoration-none': true }"
               :target="link.target"
               :rel="link.rel"
             >
-              <template #prepend>
-                <v-icon
-                  v-if="link.icon"
-                  :icon="link.icon"
-                  size="18"
-                  class="me-2"
-                />
-              </template>
-              <template #title>
-                <span class="text-body-2">{{ link.label }}</span>
-              </template>
-            </v-list-item>
-          </v-list>
+              <v-icon
+                v-if="link.icon"
+                :icon="link.icon"
+                size="18"
+                class="me-2"
+              />
+              <span class="text-body-2">{{ link.label }}</span>
+            </NuxtLink>
+          </nav>
         </div>
       </v-col>
 
@@ -215,23 +208,18 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.comparator.title') }}
           </div>
-          <v-list
-            density="compact"
-            bg-color="transparent"
-            class="footer-list pa-0 mt-2"
-          >
-            <v-list-item
+          <nav class="d-flex flex-column ga-1 mt-2" :aria-label="t('siteIdentity.footer.comparator.title')">
+            <NuxtLink
               v-for="link in resourceLinks"
               :key="String(link.to ?? link.href ?? link.label)"
               :to="link.to"
               :href="link.href"
-              class="footer-list-item px-0"
+              class="footer-list-item py-1 px-2 d-flex align-center"
+              :class="{ 'text-decoration-none': true }"
             >
-              <template #title>
-                <span class="text-body-2">{{ link.label }}</span>
-              </template>
-            </v-list-item>
-          </v-list>
+              <span class="text-body-2">{{ link.label }}</span>
+            </NuxtLink>
+          </nav>
         </div>
       </v-col>
 
@@ -254,23 +242,18 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.community.title') }}
           </div>
-          <v-list
-            density="compact"
-            bg-color="transparent"
-            class="footer-list pa-0 mt-2"
-          >
-            <v-list-item
+          <nav class="d-flex flex-column ga-1 mt-2" :aria-label="t('siteIdentity.footer.community.title')">
+            <NuxtLink
               v-for="link in communityLinks"
               :key="String(link.to ?? link.href ?? link.label)"
               :to="link.to"
               :href="link.href"
-              class="footer-list-item px-0"
+              class="footer-list-item py-1 px-2 d-flex align-center"
+              :class="{ 'text-decoration-none': true }"
             >
-              <template #title>
-                <span class="text-body-2">{{ link.label }}</span>
-              </template>
-            </v-list-item>
-          </v-list>
+              <span class="text-body-2">{{ link.label }}</span>
+            </NuxtLink>
+          </nav>
         </div>
       </v-col>
     </v-row>
@@ -355,15 +338,15 @@ const timeSaverModel = computed<TimeSaverModel>(() => ({
   min-height: 32px;
   border-radius: 12px;
   transition: background-color 0.2s ease;
+  color: inherit;
+  text-decoration: none;
 }
 
 .footer-list-item:hover {
   background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
+  text-decoration: none;
 }
 
-.footer-divider {
-  opacity: 0.24 !important;
-}
 
 .footer-bottom {
   position: relative;
