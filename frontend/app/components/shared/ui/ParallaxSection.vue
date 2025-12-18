@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, type CSSProperties } from 'vue'
-import { usePreferredReducedMotion, useWindowScroll } from '@vueuse/core'
+import { computed, ref, type CSSProperties } from 'vue'
+import {
+  useElementBounding,
+  usePreferredReducedMotion,
+  useWindowSize,
+} from '@vueuse/core'
 import { useDisplay, useTheme } from 'vuetify'
 
 const props = withDefaults(
@@ -47,7 +51,10 @@ const props = withDefaults(
 const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
 const display = useDisplay()
-const { y } = useWindowScroll()
+const { height: viewportHeight } = useWindowSize()
+
+const sectionRef = ref<HTMLElement | null>(null)
+const { top, height } = useElementBounding(sectionRef)
 
 const isDark = computed(() => Boolean(theme.global.current.value.dark))
 
@@ -107,9 +114,27 @@ const parallaxEnabled = computed(
     props.parallaxAmount > 0
 )
 
-const parallaxOffset = computed(() =>
-  parallaxEnabled.value ? `${-y.value * props.parallaxAmount}px` : '0px'
-)
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max)
+
+const parallaxOffset = computed(() => {
+  if (!parallaxEnabled.value) {
+    return '0px'
+  }
+
+  const viewport = viewportHeight.value || 0
+  const sectionHeight = height.value || 0
+
+  if (viewport <= 0 || sectionHeight <= 0) {
+    return '0px'
+  }
+
+  const progressRaw = (viewport - top.value) / (viewport + sectionHeight)
+  const normalizedProgress = clamp(progressRaw, 0, 1) - 0.5
+  const travel = props.parallaxAmount * 180
+
+  return `${normalizedProgress * 2 * travel}px`
+})
 
 const mediaStyles = computed<CSSProperties>(() => ({
   '--parallax-image': backgroundImage.value || 'none',
@@ -146,6 +171,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 <template>
   <section
     :id="props.id"
+    ref="sectionRef"
     class="parallax-section"
     :class="{ 'parallax-section--gapless': gapless }"
     :aria-label="ariaLabel"
@@ -202,7 +228,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 
 .parallax-section__image
   position: absolute
-  inset: -10%
+  inset: -18%
   background-image: var(--parallax-image)
   background-size: cover
   background-repeat: no-repeat

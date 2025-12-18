@@ -97,8 +97,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string[]): void
-  (event: 'continue'): void
-  (event: 'return-to-category'): void
+  (event: 'continue' | 'return-to-category'): void
 }>()
 
 const isSelected = (subsetId?: string | null) =>

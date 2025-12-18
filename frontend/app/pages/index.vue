@@ -76,27 +76,27 @@ const parallaxOverlayConfig = computed<Record<ParallaxSectionKey, {
 }>>(() => ({
   essentials: {
     overlay: 0.62,
-    parallaxAmount: 0.16,
+    parallaxAmount: 0.28,
     ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
   },
   features: {
     overlay: 0.55,
-    parallaxAmount: 0.12,
+    parallaxAmount: 0.24,
     ariaLabel: String(t('home.parallax.features.ariaLabel')),
   },
   blog: {
     overlay: 0.5,
-    parallaxAmount: 0.1,
+    parallaxAmount: 0.18,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   objections: {
     overlay: 0.58,
-    parallaxAmount: 0.11,
+    parallaxAmount: 0.2,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   cta: {
     overlay: 0.48,
-    parallaxAmount: 0.08,
+    parallaxAmount: 0.16,
     ariaLabel: String(t('home.parallax.cta.ariaLabel')),
   },
 }))
@@ -129,6 +129,9 @@ type AnimatedSectionKey =
   | 'cta'
 
 const prefersReducedMotion = usePreferredReducedMotion()
+const isReducedMotion = computed(
+  () => prefersReducedMotion.value === 'reduce'
+)
 
 const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
   problems: false,
@@ -147,7 +150,7 @@ const markAllSectionsVisible = () => {
 }
 
 watch(
-  prefersReducedMotion,
+  isReducedMotion,
   shouldReduce => {
     if (shouldReduce) {
       markAllSectionsVisible()
@@ -167,7 +170,7 @@ const createIntersectHandler =
       return
     }
 
-    if (prefersReducedMotion.value || isIntersecting) {
+    if (isReducedMotion.value || isIntersecting) {
       animatedSections[key] = true
     }
   }
@@ -683,13 +686,14 @@ useHead(() => ({
         :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
         :aria-label="parallaxBackgrounds.essentials.ariaLabel"
         :enable-aplats="true"
+        :gapless="true"
       >
         <div class="home-page__stack">
           <div
             v-intersect="createIntersectHandler('problems')"
             class="home-page__section"
           >
-            <v-slide-y-transition :disabled="prefersReducedMotion">
+            <v-slide-y-transition :disabled="isReducedMotion">
               <div v-show="animatedSections.problems">
                 <HomeProblemsSection :items="problemItems" />
               </div>
@@ -700,7 +704,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('solution')"
             class="home-page__section"
           >
-            <v-slide-y-reverse-transition :disabled="prefersReducedMotion">
+            <v-slide-y-reverse-transition :disabled="isReducedMotion">
               <div v-show="animatedSections.solution">
                 <HomeSolutionSection :benefits="solutionBenefits" />
               </div>
@@ -717,12 +721,13 @@ useHead(() => ({
         :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
         :aria-label="parallaxBackgrounds.features.ariaLabel"
         content-align="center"
+        :gapless="true"
       >
         <div
           v-intersect="createIntersectHandler('features')"
           class="home-page__section"
         >
-          <v-scale-transition :disabled="prefersReducedMotion">
+          <v-scale-transition :disabled="isReducedMotion">
             <div v-show="animatedSections.features">
               <HomeFeaturesSection :features="featureCards" />
             </div>
@@ -738,13 +743,14 @@ useHead(() => ({
         :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
         :aria-label="parallaxBackgrounds.blog.ariaLabel"
         :enable-aplats="true"
+        :gapless="true"
       >
         <div class="home-page__stack">
           <div
             v-intersect="createIntersectHandler('blog')"
             class="home-page__section"
           >
-            <v-slide-x-transition :disabled="prefersReducedMotion">
+            <v-slide-x-transition :disabled="isReducedMotion">
               <div v-show="animatedSections.blog">
                 <HomeBlogSection
                   :loading="blogLoading"
@@ -765,13 +771,14 @@ useHead(() => ({
         :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
         :aria-label="parallaxBackgrounds.objections.ariaLabel"
         :enable-aplats="true"
+        :gapless="true"
       >
         <div class="home-page__stack">
           <div
             v-intersect="createIntersectHandler('objections')"
             class="home-page__section"
           >
-            <v-slide-x-reverse-transition :disabled="prefersReducedMotion">
+            <v-slide-x-reverse-transition :disabled="isReducedMotion">
               <div v-show="animatedSections.objections">
                 <HomeObjectionsSection :items="objectionItems" />
               </div>
@@ -788,13 +795,14 @@ useHead(() => ({
         :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
         :aria-label="parallaxBackgrounds.cta.ariaLabel"
         content-align="center"
+        :gapless="true"
       >
         <div class="home-page__stack home-page__stack--compact">
           <div
             v-intersect="createIntersectHandler('faq')"
             class="home-page__section"
           >
-            <v-fade-transition :disabled="prefersReducedMotion">
+            <v-fade-transition :disabled="isReducedMotion">
               <div v-show="animatedSections.faq">
                 <HomeFaqSection :items="faqPanels" />
               </div>
@@ -805,7 +813,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('cta')"
             class="home-page__section"
           >
-            <v-slide-y-transition :disabled="prefersReducedMotion">
+            <v-slide-y-transition :disabled="isReducedMotion">
               <div v-show="animatedSections.cta">
                 <HomeCtaSection
                   v-model:search-query="searchQuery"
@@ -839,14 +847,14 @@ useHead(() => ({
 .home-page__sections
   display: flex
   flex-direction: column
-  gap: clamp(0.5rem, 2vw, 1.25rem)
-  padding-top: var(--cat-overlap)
+  gap: 0
+  padding-top: 0
   background: transparent
 
 .home-page__parallax
-  border-radius: clamp(1.25rem, 3vw, 1.85rem)
-  box-shadow: 0 22px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
-  overflow: hidden
+  border-radius: 0
+  box-shadow: none
+  overflow: visible
 
 .home-page__parallax--centered :deep(.home-section)
   text-align: center
@@ -864,7 +872,7 @@ useHead(() => ({
     grid-template-columns: repeat(2, 1fr)
 
 .home-page__card-showcase
-  margin-top: clamp(1rem, 3vw, 1.5rem)
+  margin-top: 0
 
 .home-page__section
   width: 100%
