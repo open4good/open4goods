@@ -1,0 +1,329 @@
+# Antigravity (Google VSCode) — Homepage Frontend Audit & Optimization Mission
+
+You are an autonomous engineering agent operating inside a repo. Your mission is to audit and improve the **homepage** of the application frontend running at **http://localhost:3000** with a strict “no user regressions” rule.
+
+You must prioritize:
+- **SEO**
+- **Performance**
+- **Accessibility**
+- **Hydration issues**
+- **Clean up & optimizations**
+- **Structured data audit & enhancement**
+- Removing/mutualizing **useless code styles/assets/scripts**
+
+You must produce **complete tests** and ensure they prevent regressions.
+
+---
+
+## 0) Non-negotiable constraints
+
+1. **No user regressions**:
+   - No visual/layout regressions (desktop + mobile).
+   - No functional regressions (navigation, key interactions, forms/buttons).
+   - No SEO regressions (indexing signals, metadata, canonical, robots).
+   - No accessibility regressions (ARIA semantics, focus order, keyboard).
+   - No performance regressions (LCP/INP/CLS + bundle weight).
+
+2. **Changes must be measurable**:
+   - Every change should reference a measured before/after signal:
+     - Lighthouse scores + key audits
+     - Bundle size changes
+     - Web Vitals where possible
+     - Error logs / hydration warnings count
+
+3. **Tests must be added/extended**:
+   - Unit tests for utilities/components touched.
+   - Component tests (if available).
+   - E2E tests for critical homepage journeys.
+   - Snapshot/visual tests if tooling exists; otherwise implement pragmatic screenshot diffs where feasible.
+
+4. **Keep scope bounded to homepage**:
+   - Shared code may be adjusted if it improves homepage and is safe, but do not embark on wide refactors unless unavoidable.
+
+---
+
+## 1) Clarifications you MUST ask *before* making risky assumptions
+
+Ask these questions early (and proceed with safest defaults if unanswered):
+
+1. **Framework clarification**:
+   - The prompt mentions Vue components + hydration. Is this **Vue 3 + SSR** (Nuxt 3) or **Vue SSR custom**?
+   - Confirm build tool: **Vite** / Webpack / other?
+
+2. **SEO expectations**:
+   - Is homepage intended to be **indexable**? Any locales? Any canonical rules?
+
+3. **Target devices & budgets**:
+   - Performance target (example): Lighthouse Perf ≥ 90 on mobile?
+   - Any bundle size budget or Core Web Vitals target?
+
+4. **Analytics / tags**:
+   - Are there required third-party scripts that must stay (analytics, consent, A/B)?
+   - Any legal/consent constraints?
+
+5. **Testing stack**:
+   - What is available: Vitest/Jest? Playwright/Cypress? Storybook? Percy?
+
+If answers aren’t available, proceed with conservative best practices and document assumptions.
+
+---
+
+## 2) Execution plan (do in this order, record evidence)
+
+### A) Launch & initial inspection
+1. Start frontend locally and verify homepage loads at:
+   - http://localhost:3000
+2. Open DevTools:
+   - Console (errors, warnings, hydration mismatch)
+   - Network (requests, blocking resources, third-party calls)
+   - Performance panel quick capture (long tasks, script evaluation)
+
+**Deliverable evidence**:
+- Copy/paste key logs (errors/warnings) with counts.
+- Identify hydration mismatch sources (component name + stack trace).
+
+---
+
+### B) Run Lighthouse (desktop + mobile)
+Run Lighthouse on the homepage:
+- **Mobile preset** (primary)
+- **Desktop** (secondary)
+Include:
+- Performance
+- Accessibility
+- Best Practices
+- SEO
+
+**Deliverable evidence**:
+- Lighthouse report summary tables (before & after)
+- Top opportunities + diagnostics list
+- Screenshots and filmstrip notes for LCP candidate
+
+---
+
+### C) Source-code mapping to Lighthouse findings
+For each top Lighthouse issue:
+1. Identify impacted resource(s) (image, CSS, JS, fonts, DOM, meta tags).
+2. Trace to:
+   - The **Vue component** rendering the homepage route
+   - Any **inherited/shared components** used above-the-fold
+3. Decide fix type:
+   - Render/SSR/hydration fix
+   - Asset optimization
+   - Code-splitting or dynamic import
+   - CSS reduction / critical CSS / dead CSS removal
+   - Script rationalization / third-party deferral
+
+**Deliverable**:
+- A “Finding → Component → Fix” mapping list.
+
+---
+
+## 3) Performance checklist (must attempt all relevant)
+
+### 3.1 LCP improvements (highest priority)
+- Identify LCP element (often hero image / heading / banner).
+- If image:
+  - Serve modern formats (AVIF/WebP), responsive sizes
+  - Add `width/height` to prevent CLS
+  - Ensure preload if it’s the LCP image (SSR-safe)
+- If text:
+  - Ensure font strategy doesn’t block rendering (font-display, preload critical fonts)
+
+### 3.2 INP / main thread / CPU
+- Audit long tasks: JS execution, hydration, heavy components
+- Reduce CPU:
+  - Remove unused scripts
+  - Defer non-critical scripts
+  - Replace expensive watchers/computeds in above-the-fold
+  - Avoid heavy libraries for small tasks (date libs, animation libs)
+  - Code-split below-the-fold components via dynamic import
+  - Remove unnecessary re-renders; stabilize props; memoize where relevant
+
+### 3.3 CLS
+- Ensure all images & media have intrinsic sizing
+- Reserve space for async content (banners, cookie modals, personalization blocks)
+- Avoid late-loading webfonts causing layout shift
+
+### 3.4 Bundle & network
+- Inspect bundle analyzer (if available) or Vite output
+- Remove unused deps
+- Ensure tree-shaking
+- Reduce duplicate CSS across components
+- Ensure caching headers are appropriate (if SSR server config is in scope)
+
+---
+
+## 4) Accessibility checklist (must not regress)
+
+### 4.1 ARIA & semantics
+- Ensure correct landmarks:
+  - `header`, `nav`, `main`, `footer`
+- Headings:
+  - Single H1; proper hierarchy (H2/H3)
+- Links/buttons:
+  - No clickable divs without keyboard support
+  - Accessible names for icon buttons
+- Forms:
+  - Labels, descriptions, error messages tied via `aria-describedby`
+- Focus:
+  - Visible focus indicators
+  - Logical tab order
+  - Skip-to-content link (recommended)
+- Images:
+  - Correct alt text (decorative images empty alt)
+
+### 4.2 Contrast & motion
+- Contrast ratio checks
+- Respect `prefers-reduced-motion`
+
+**Deliverable evidence**:
+- List of a11y issues found + fixes
+- Keyboard walkthrough notes (homepage top flows)
+
+---
+
+## 5) SEO checklist (homepage focus)
+
+### 5.1 Basic metadata
+- `<title>` is unique and meaningful
+- `<meta name="description">` present and not duplicated
+- Canonical URL correct
+- Robots meta appropriate
+- Open Graph + Twitter card tags (if applicable)
+
+### 5.2 Structured data audit & enhancement
+Audit existing JSON-LD or microdata:
+- Validate via schema rules:
+  - `Organization` / `WebSite` + `SearchAction` (if site has search)
+  - `WebPage` with `name`, `description`, `url`
+  - `BreadcrumbList` if breadcrumbs exist
+Enhance cautiously:
+- Only add types that are true and provable
+- Ensure URLs and logos are valid and consistent
+
+**Deliverable**:
+- Structured data block(s) shown in diff
+- Notes on validation & why types were chosen
+
+---
+
+## 6) Hydration mismatch checklist (Vue SSR)
+
+If hydration warnings exist:
+- Identify mismatching nodes and their origin component
+- Common fixes:
+  - Remove non-determinism in SSR render (Date.now, random, locale variance)
+  - Avoid client-only DOM-dependent code in SSR path
+  - Gate client-only parts behind `onMounted` or `<ClientOnly>` equivalent (framework dependent)
+  - Ensure conditional rendering matches server/client (same initial conditions)
+- Verify after fix:
+  - Zero hydration mismatch warnings on hard refresh
+
+**Deliverable**:
+- Before/after hydration warning count
+- Root cause explanation per mismatch
+
+---
+
+## 7) CSS / asset cleanup & mutualization
+
+### 7.1 Dead / redundant CSS
+- Identify unused selectors (via devtools coverage if possible)
+- Remove or consolidate:
+  - Duplicate utility classes
+  - Repeated component styles into shared tokens
+  - Legacy/unused CSS files
+
+### 7.2 Useless assets
+- Remove unused images/fonts/icons
+- Ensure only needed icon subsets are shipped
+- Optimize hero/background images
+
+### 7.3 Style hygiene
+- Normalize naming conventions
+- Avoid overly-specific selectors
+- Prefer scoped styles where appropriate (Vue SFC) unless global is intentional
+
+**Deliverable**:
+- List removed assets + where they were referenced (prove they weren’t used)
+- CSS reduction evidence (file size delta, coverage delta)
+
+---
+
+## 8) Testing requirements (must implement)
+
+### 8.1 Unit/Component tests
+Add/extend tests for:
+- Homepage component rendering stable output
+- Any utilities changed (formatting, routing, metadata builders)
+
+### 8.2 E2E tests (critical)
+At minimum, cover:
+- Homepage loads without console errors
+- Primary CTA works (navigation)
+- Key interactive elements respond with keyboard + mouse
+- Mobile viewport rendering sanity (at least one device profile)
+
+### 8.3 Regression safety net
+If possible:
+- Add screenshot-based checks (Playwright screenshots) for:
+  - Desktop homepage
+  - Mobile homepage
+If not possible, add DOM assertions to ensure key sections exist and are visible.
+
+**Deliverable**:
+- Test list + how to run
+- CI readiness notes if applicable
+
+---
+
+## 9) Deliverables format (what you MUST output)
+
+You must produce a final report with:
+
+1. **Before/After metrics**:
+   - Lighthouse mobile + desktop scores
+   - Key audits fixed
+   - Bundle size diffs (if measurable)
+
+2. **Change log**:
+   - Bullet list of changes with file paths
+
+3. **Risk assessment**:
+   - What could break, how tests cover it
+
+4. **Remaining issues**:
+   - What you didn’t fix and why
+
+5. **Commands to reproduce**:
+   - How to run app
+   - How to run Lighthouse (or how you ran it)
+   - How to run tests
+
+---
+
+## 10) Operating principles (do not skip)
+
+- Prefer the **smallest safe fix** that yields measurable benefit.
+- Avoid “clever” refactors.
+- Write clean, maintainable code.
+- Document assumptions and any trade-offs.
+- Keep PR-like discipline: atomic commits are ideal (if using git).
+
+---
+
+## Start now
+
+1. Launch the app at **http://localhost:3000**
+2. Capture console + network observations.
+3. Run Lighthouse (mobile first).
+4. Begin fixes in priority order:
+   1) Hydration warnings
+   2) LCP/CLS/INP
+   3) Accessibility
+   4) SEO + structured data
+   5) Cleanup (CSS/assets/scripts)
+5. Add tests throughout to prevent regressions.
+
+End with the full report and diffs.
