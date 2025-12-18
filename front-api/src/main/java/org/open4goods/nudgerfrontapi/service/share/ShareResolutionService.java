@@ -33,6 +33,7 @@ import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -56,7 +57,8 @@ public class ShareResolutionService {
 
     public ShareResolutionService(ShareExtractionService extractionService, SearchService searchService,
             ProductMappingService productMappingService, ShareResolutionStore store,
-            ShareResolutionProperties properties, Clock clock, Executor executor) {
+            ShareResolutionProperties properties, Clock clock,
+            @Qualifier("shareResolutionExecutor") Executor executor) {
         this.extractionService = extractionService;
         this.searchService = searchService;
         this.productMappingService = productMappingService;
