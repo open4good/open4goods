@@ -26,10 +26,10 @@ Use this document as the bible for:
 To get the project up and running locally, follow these steps:
 
 1. **Prerequisites**:
-   Ensure you have Node.js `>=20` and `pnpm 10.12.1` installed. Install it globally via:
+   Ensure you have Node.js `>=20` and `pnpm 10.26.0` installed. Install it globally via:
 
    ```bash
-   npm install -g pnpm@10.12.1
+   npm install -g pnpm@10.26.0
    ```
 
 2. **Clone the Repository**:
@@ -84,6 +84,7 @@ To get the project up and running locally, follow these steps:
    - `pnpm --offline lint` – run ESLint
    - `pnpm --offline format` – check formatting
    - `pnpm --offline test` – run tests with Vitest
+   - `pnpm test:visual` – run Playwright visual snapshots (requires dev server at `http://localhost:3000`)
    - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
    - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
    - `pnpm --offline preview` – serve the production build locally

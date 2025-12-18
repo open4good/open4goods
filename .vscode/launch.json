@@ -1,0 +1,75 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Nuxt dev (frontend)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": [
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/frontend",
+            "envFile": "${workspaceFolder}/frontend/.env.local",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "Vitest (frontend)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": [
+                "vitest",
+                "run",
+                "--inspect-brk"
+            ],
+            "cwd": "${workspaceFolder}/frontend",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "Playwright (frontend)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": [
+                "exec",
+                "playwright",
+                "test",
+                "--trace",
+                "on"
+            ],
+            "cwd": "${workspaceFolder}/frontend",
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Attach API (JDWP 5005)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005
+        },
+        {
+            "type": "java",
+            "name": "Attach front-api (JDWP 5006)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5006
+        },
+        {
+            "type": "java",
+            "name": "Attach ui (JDWP 5007)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5007
+        }
+    ]
+}
