@@ -6,7 +6,7 @@ interface JwtPayload {
 
 export const useUserRoles = () => {
   const config = useRuntimeConfig()
-  const token = useCookie<string | null>(config.tokenCookieName)
+  const token = useCookie<string | null>(config.public.tokenCookieName)
 
   const roles = computed<string[]>(() => {
     if (!token.value) return []

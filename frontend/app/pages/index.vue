@@ -27,7 +27,7 @@ import {
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
 import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
-import { useDisplay } from 'vuetify'
+
 
 definePageMeta({
   ssr: true,
@@ -38,7 +38,7 @@ const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
-const display = useDisplay()
+
 
 const searchQuery = ref('')
 
@@ -662,7 +662,8 @@ useHead(() => ({
 </script>
 
 <template>
-  <PwaMobileLanding class="d-md-none" :verticals="rawCategories" />
+  <div>
+    <PwaMobileLanding class="d-md-none" :verticals="rawCategories" />
   <div class="home-page d-none d-md-block">
     <HomeHeroSection
       v-model:search-query="searchQuery"
@@ -826,6 +827,7 @@ useHead(() => ({
       </ParallaxSection>
 
     </div>
+  </div>
   </div>
 </template>
 

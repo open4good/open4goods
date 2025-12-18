@@ -225,6 +225,21 @@ const handleFormSubmit = async (payload: ContactFormPayload) => {
   }
 }
 
+const contactPageJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: String(t('contact.seo.title')),
+  description: String(t('contact.seo.description')),
+  url: canonicalUrl.value,
+  mainEntity: {
+    '@type': 'Organization',
+    name: siteName.value,
+    url: new URL('/', requestURL.origin).toString(),
+    logo: ogImageUrl.value,
+    sameAs: [linkedinUrl.value].filter(Boolean),
+  },
+}))
+
 useSeoMeta({
   title: () => String(t('contact.seo.title')),
   description: () => String(t('contact.seo.description')),
@@ -243,7 +258,15 @@ useHead(() => ({
     { rel: 'canonical', href: canonicalUrl.value },
     ...alternateLinks.value,
   ],
+  script: [
+    {
+      key: 'contact-page-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(contactPageJsonLd.value),
+    },
+  ],
 }))
+
 </script>
 
 <style scoped lang="sass">

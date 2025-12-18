@@ -12,7 +12,7 @@ interface RefreshResponse {
 
 export default defineEventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig()
-  const refreshToken = getCookie(event, config.refreshCookieName)
+  const refreshToken = getCookie(event, config.public.refreshCookieName)
   if (!refreshToken) {
     throw createError({
       statusCode: 401,
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
       `${config.apiUrl}/auth/refresh`,
       {
         method: 'POST',
-        headers: { cookie: `${config.refreshCookieName}=${refreshToken}` },
+        headers: { cookie: `${config.public.refreshCookieName}=${refreshToken}` },
       }
     )
 
@@ -37,10 +37,10 @@ export default defineEventHandler(async (event: H3Event) => {
       secure,
       path: '/',
     }
-    setCookie(event, config.tokenCookieName, tokens.accessToken, cookieOptions)
+    setCookie(event, config.public.tokenCookieName, tokens.accessToken, cookieOptions)
     setCookie(
       event,
-      config.refreshCookieName,
+      config.public.refreshCookieName,
       tokens.refreshToken,
       cookieOptions
     )

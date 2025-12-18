@@ -92,10 +92,15 @@ const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const licenseSectionId = 'opendata-odbl-license'
 
 const { data, pending, error, refresh } =
-  await useAsyncData<OpenDataOverviewDto>('opendata-overview', () =>
-    $fetch<OpenDataOverviewDto>('/api/opendata', {
-      headers: requestHeaders,
-    })
+  useAsyncData<OpenDataOverviewDto>(
+    'opendata-overview',
+    () =>
+      $fetch<OpenDataOverviewDto>('/api/opendata', {
+        headers: requestHeaders,
+      }),
+    {
+      lazy: true,
+    }
   )
 
 const heroSubtitle = computed(() =>
@@ -261,6 +266,26 @@ useSeoMeta({
 
 useHead(() => ({
   link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'DataCatalog',
+        name: t('opendata.seo.title'),
+        description: t('opendata.seo.description'),
+        url: canonicalUrl.value,
+        dataset: datasetCards.value.map((card) => ({
+          '@type': 'Dataset',
+          name: card.title,
+          description: card.description,
+          url: new URL(card.href, requestURL.origin).toString(),
+          isAccessibleForFree: true,
+          license: 'https://opendatacommons.org/licenses/odbl/',
+        })),
+      }),
+    },
+  ],
 }))
 </script>
 

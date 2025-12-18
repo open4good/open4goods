@@ -140,7 +140,7 @@ interface DatasetPayload {
   overview: OpenDataOverviewDto
 }
 
-const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>(
+const { data, pending, error, refresh } = useAsyncData<DatasetPayload>(
   'opendata-gtin',
   async () => {
     const [dataset, overview] = await Promise.all([
@@ -153,6 +153,9 @@ const { data, pending, error, refresh } = await useAsyncData<DatasetPayload>(
     ])
 
     return { dataset, overview }
+  },
+  {
+    lazy: true,
   }
 )
 
@@ -330,6 +333,34 @@ useSeoMeta({
 
 useHead(() => ({
   link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Dataset',
+        name: t('opendata.datasets.gtin.seo.title'),
+        description: t('opendata.datasets.gtin.seo.description'),
+        url: canonicalUrl.value,
+        isAccessibleForFree: true,
+        license: 'https://opendatacommons.org/licenses/odbl/',
+        distribution: dataset.value?.downloadUrl
+          ? [
+              {
+                '@type': 'DataDownload',
+                encodingFormat: 'application/zip',
+                contentUrl: dataset.value.downloadUrl,
+              },
+            ]
+          : [],
+        creator: {
+          '@type': 'Organization',
+          name: 'Nudger',
+          url: requestURL.origin,
+        },
+      }),
+    },
+  ],
 }))
 </script>
 

@@ -11,16 +11,16 @@ const clearAuthCookies = (
 
 export default defineEventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig()
-  const token = getCookie(event, config.tokenCookieName)
-  const refreshToken = getCookie(event, config.refreshCookieName)
+  const token = getCookie(event, config.public.tokenCookieName)
+  const refreshToken = getCookie(event, config.public.refreshCookieName)
 
   try {
     const cookieHeader: string[] = []
     if (token) {
-      cookieHeader.push(`${config.tokenCookieName}=${token}`)
+      cookieHeader.push(`${config.public.tokenCookieName}=${token}`)
     }
     if (refreshToken) {
-      cookieHeader.push(`${config.refreshCookieName}=${refreshToken}`)
+      cookieHeader.push(`${config.public.refreshCookieName}=${refreshToken}`)
     }
 
     await $fetch(`${config.apiUrl}/auth/logout`, {
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event: H3Event) => {
         : undefined,
     })
   } catch (err) {
-    clearAuthCookies(event, config)
+    clearAuthCookies(event, config.public)
 
     if (err instanceof FetchError) {
       const fallbackStatusCode = 500
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event: H3Event) => {
     })
   }
 
-  clearAuthCookies(event, config)
+  clearAuthCookies(event, config.public)
 
   return { success: true }
 })

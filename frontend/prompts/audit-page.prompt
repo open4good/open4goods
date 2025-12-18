@@ -2,7 +2,7 @@
 
 You are an autonomous engineering agent operating inside a repo.
 
-Your mission is to audit and improve the **homepage** of the application frontend running at **http://localhost:3000** with a strict “no user regressions” rule.
+Your mission is to audit and improve the **contact** page of the application frontend running at **http://localhost:3000/contact** with a strict “no user regressions” rule.
 
 You must prioritize:
 - **SEO**
@@ -14,6 +14,8 @@ You must prioritize:
 - Removing/mutualizing **useless code styles/assets/scripts**
 
 You must produce **complete tests** and ensure they prevent regressions.
+
+Once done, validate with a pnpm fast (BUILDING, LINTING, TESTING)
 
 ---
 

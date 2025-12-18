@@ -217,8 +217,8 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 
 <template>
   <section
-    ref="root"
     :id="props.id"
+    ref="root"
     class="parallax-section"
     :class="{ 'parallax-section--gapless': gapless }"
     :aria-label="ariaLabel"

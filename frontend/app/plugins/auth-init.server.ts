@@ -5,7 +5,7 @@ import { authService } from '~~/shared/api-client/services/auth.services'
  */
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
-  const token = useCookie<string | null>(config.tokenCookieName)
+  const token = useCookie<string | null>(config.public.tokenCookieName)
 
   authService.syncAuthState(token.value)
 })
