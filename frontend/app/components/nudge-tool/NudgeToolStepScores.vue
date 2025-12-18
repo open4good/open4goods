@@ -40,10 +40,6 @@
                     {{ score.caption }}
                   </p>
                 </div>
-
-                <div class="nudge-toggle-card__indicator" aria-hidden="true">
-                  <v-icon v-if="isSelected(score.scoreName)" icon="mdi-check" size="20" color="white" />
-                </div>
               </div>
             </v-card>
           </template>
@@ -124,8 +120,8 @@ const toggle = (scoreName: string) => {
 
     &__body {
       display: grid;
-      grid-template-columns: 0.32fr 1fr auto;
-      align-items: stretch;
+      grid-template-columns: auto 1fr;
+      align-items: center;
       height: 100%;
     }
 
@@ -134,9 +130,11 @@ const toggle = (scoreName: string) => {
       align-items: center;
       justify-content: center;
       background: rgba(var(--v-theme-accent-supporting), 0.08);
-      padding: 14px;
+      padding: 14px 16px;
       min-height: 100%;
-      transition: background 160ms ease;
+      border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+      border-radius: 14px 10px 10px 14px;
+      transition: background 160ms ease, border-color 160ms ease;
     }
 
     &__icon-shell {
@@ -148,13 +146,14 @@ const toggle = (scoreName: string) => {
       background: rgba(var(--v-theme-accent-supporting), 0.12);
       color: rgb(var(--v-theme-accent-supporting));
       box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
-      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease,
+        transform 160ms ease;
     }
 
     &__content {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       padding: 14px 18px;
       justify-content: center;
       min-height: 100%;
@@ -171,15 +170,6 @@ const toggle = (scoreName: string) => {
       color: rgb(var(--v-theme-text-neutral-secondary));
       font-size: 0.95rem;
       line-height: 1.4;
-    }
-
-    &__indicator {
-      width: 52px;
-      display: grid;
-      place-items: center;
-      background: rgba(var(--v-theme-accent-supporting), 0.12);
-      border-left: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-      transition: background 160ms ease, border-color 160ms ease;
     }
 
     &:hover,
@@ -200,19 +190,15 @@ const toggle = (scoreName: string) => {
     border-color: rgb(var(--v-theme-accent-supporting));
 
     .nudge-toggle-card__icon-rail {
-      background: rgba(var(--v-theme-accent-supporting), 0.18);
+      background: rgba(var(--v-theme-accent-supporting), 0.2);
+      border-color: rgba(var(--v-theme-accent-supporting), 0.55);
     }
 
     .nudge-toggle-card__icon-shell {
-      background: rgba(var(--v-theme-accent-supporting), 0.2);
+      background: rgba(var(--v-theme-accent-supporting), 0.22);
       color: rgb(var(--v-theme-surface-default));
-      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.5);
-    }
-
-    .nudge-toggle-card__indicator {
-      background: rgb(var(--v-theme-accent-supporting));
-      border-color: rgb(var(--v-theme-accent-supporting));
-      color: rgb(var(--v-theme-surface-default));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.55);
+      transform: translateY(-1px);
     }
 
     .nudge-toggle-card__title {
