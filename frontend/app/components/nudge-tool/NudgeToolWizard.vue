@@ -49,9 +49,9 @@
       <NudgeWizardHeader
         :title="currentStepTitle"
         :subtitle="currentStepSubtitle"
+        :title-icon="currentStepIcon"
         :accent-corner="'top-left'"
         :corner-size="resolvedCornerSize"
-        :category-summary="categorySummary"
       />
     </div>
 
@@ -281,6 +281,7 @@ type WizardStep = {
   props: Record<string, unknown>
   title: string
   subtitle?: string
+  icon?: string | null
   onUpdate?: (value: unknown) => void
 }
 
@@ -335,7 +336,8 @@ const steps = computed<WizardStep[]>(() => {
       key: `group-${group.id}`,
       component: NudgeToolStepSubsetGroup,
       title: group.title ?? '',
-      subtitle: t('nudge-tool.steps.subset.subtitle'),
+      subtitle: group.description ?? t('nudge-tool.steps.subset.subtitle'),
+      icon: group.mdiIcon ?? 'mdi-format-list-bulleted',
       props: {
         group,
         subsets,
@@ -375,6 +377,7 @@ const currentStep = computed(() =>
 
 const currentStepTitle = computed(() => currentStep.value?.title ?? '')
 const currentStepSubtitle = computed(() => currentStep.value?.subtitle ?? '')
+const currentStepIcon = computed(() => currentStep.value?.icon ?? null)
 
 watch(
   activeStepKey,
@@ -881,13 +884,28 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     overflow-y: auto;
     height: 100%;
+
+    :deep(.v-window__container) {
+      align-items: center;
+    }
+
+    :deep(.v-window-item) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   &__window-wrapper {
     width: 100%;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.5rem, 1vw, 1rem) 0;
   }
 
   &__footer {
