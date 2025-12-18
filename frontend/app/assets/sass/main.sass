@@ -84,3 +84,10 @@
 .nudger_degrade-defaut
     background-image: linear-gradient(to left, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)))!important
     color: #ffffff!important
+
+:root.accessibility-layout
+    .v-container:not(.v-container--fluid)
+        max-width: min(1560px, 96vw)
+
+    .cms-page__container--container
+        max-width: min(1560px, 100%) !important

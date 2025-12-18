@@ -13,7 +13,7 @@
   >
     <v-icon
       :icon="
-        isZoomed ? 'mdi-human-walker' : 'mdi-human-cane'
+        isZoomed ? 'mdi-face-woman' : 'mdi-face-woman-outline'
       "
     />
     <v-tooltip activator="parent" location="bottom">
@@ -53,9 +53,14 @@ const toggleZoom = () => {
 }
 
 const applyZoom = (zoomed: boolean) => {
-  if (typeof document !== 'undefined') {
-    document.documentElement.style.fontSize = zoomed ? '120%' : ''
+  if (typeof document === 'undefined') {
+    return
   }
+
+  const rootElement = document.documentElement
+
+  rootElement.style.fontSize = zoomed ? '120%' : ''
+  rootElement.classList.toggle('accessibility-layout', zoomed)
 }
 
 watch(isZoomed, val => {
