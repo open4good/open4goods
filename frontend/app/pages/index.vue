@@ -11,7 +11,6 @@ import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
-import HomeRoundedCardShowcase from '~/components/home/sections/HomeRoundedCardShowcase.vue'
 import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 import type {
   CategorySuggestionItem,
@@ -857,7 +856,6 @@ useHead(() => ({
         </div>
       </ParallaxSection>
 
-      <HomeRoundedCardShowcase class="home-page__card-showcase" />
     </div>
   </div>
 </template>
@@ -898,9 +896,6 @@ useHead(() => ({
 @media (min-width: 1100px)
   .home-page__stack--two-columns
     grid-template-columns: repeat(2, 1fr)
-
-.home-page__card-showcase
-  margin-top: clamp(1rem, 3vw, 1.5rem)
 
 .home-page__section
   width: 100%
