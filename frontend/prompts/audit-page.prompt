@@ -224,6 +224,8 @@ If hydration warnings exist:
 - Before/after hydration warning count
 - Root cause explanation per mismatch
 
+
+
 ---
 
 ## 7) CSS / asset cleanup & mutualization
@@ -313,8 +315,9 @@ You must produce a final report with:
 
 ---
 
-## Start now
+## 11) Also get server logs from pnpm dev to get back warnings and errors, try to fix them
 
+## Start now
 1. Launch the app at **http://localhost:3000**
 2. Capture console + network observations.
 3. Run Lighthouse (mobile first).

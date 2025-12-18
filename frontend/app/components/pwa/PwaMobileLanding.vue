@@ -167,7 +167,7 @@
       <v-dialog
         v-model="isWizardOpen"
         max-width="640"
-        :fullscreen="display.smAndDown"
+        :fullscreen="display.smAndDown.value"
       >
         <v-card rounded="xl" class="pwa-landing__dialog-card">
           <v-card-title class="d-flex align-center justify-space-between">

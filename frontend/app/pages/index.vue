@@ -41,12 +41,7 @@ const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const display = useDisplay()
 
 const device = useDevice()
-const isMobileLanding = computed(() => {
-  if (import.meta.server) {
-    return device.isMobileOrTablet
-  }
-  return display.smAndDown.value
-})
+const isMobileLanding = computed(() => device.isMobileOrTablet)
 
 const searchQuery = ref('')
 
@@ -118,6 +113,7 @@ type AnimatedSectionKey =
   | 'cta'
 
 const prefersReducedMotion = usePreferredReducedMotion()
+const shouldReduceMotion = computed(() => prefersReducedMotion.value === 'reduce')
 
 const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
   problems: false,
@@ -136,7 +132,7 @@ const markAllSectionsVisible = () => {
 }
 
 watch(
-  prefersReducedMotion,
+  shouldReduceMotion,
   shouldReduce => {
     if (shouldReduce) {
       markAllSectionsVisible()
@@ -156,7 +152,7 @@ const createIntersectHandler =
       return
     }
 
-    if (prefersReducedMotion.value || isIntersecting) {
+    if (shouldReduceMotion.value || isIntersecting) {
       animatedSections[key] = true
     }
   }
@@ -714,7 +710,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('problems')"
             class="home-page__section"
           >
-            <v-slide-y-transition :disabled="prefersReducedMotion">
+            <v-slide-y-transition :disabled="shouldReduceMotion">
               <div v-show="animatedSections.problems">
                 <HomeProblemsSection :items="problemItems" />
               </div>
@@ -725,7 +721,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('solution')"
             class="home-page__section"
           >
-            <v-slide-y-reverse-transition :disabled="prefersReducedMotion">
+            <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
               <div v-show="animatedSections.solution">
                 <HomeSolutionSection :benefits="solutionBenefits" />
               </div>
@@ -748,7 +744,7 @@ useHead(() => ({
           v-intersect="createIntersectHandler('features')"
           class="home-page__section"
         >
-          <v-scale-transition :disabled="prefersReducedMotion">
+          <v-scale-transition :disabled="shouldReduceMotion">
             <div v-show="animatedSections.features">
               <HomeFeaturesSection :features="featureCards" />
             </div>
@@ -771,7 +767,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('blog')"
             class="home-page__section"
           >
-            <v-slide-x-transition :disabled="prefersReducedMotion">
+            <v-slide-x-transition :disabled="shouldReduceMotion">
               <div v-show="animatedSections.blog">
                 <HomeBlogSection
                   :loading="blogLoading"
@@ -834,7 +830,7 @@ useHead(() => ({
             v-intersect="createIntersectHandler('cta')"
             class="home-page__section"
           >
-            <v-slide-y-transition :disabled="prefersReducedMotion">
+            <v-slide-y-transition :disabled="shouldReduceMotion">
               <div v-show="animatedSections.cta">
                 <HomeCtaSection
                   v-model:search-query="searchQuery"
