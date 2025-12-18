@@ -53,93 +53,105 @@ describe('useCategoryNavigation composable', () => {
     expect(navigation.value).toBeNull()
   })
 
-  it('reuses the cached navigation payload when the server TTL has not expired', async () => {
-    vi.useFakeTimers()
+  it(
+    'reuses the cached navigation payload when the server TTL has not expired',
+    async () => {
+      console.log('DEBUG: Starting test')
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2024-01-01T00:00:00Z'))
 
-    const navigationResponse = {
-      category: { title: 'Cached root' },
-      childCategories: [],
-    }
+      const navigationResponse = {
+        category: { title: 'Cached root' },
+        childCategories: [],
+      }
 
-    const getNavigationMock = vi.fn().mockResolvedValue(navigationResponse)
+      const getNavigationMock = vi.fn().mockResolvedValue(navigationResponse)
 
-    vi.doMock('~~/shared/api-client/services/categories.services', () => ({
-      useCategoriesService: () => ({ getNavigation: getNavigationMock }),
-    }))
+      console.log('DEBUG: Setting up mocks')
+      vi.doMock('~~/shared/api-client/services/categories.services', () => ({
+        useCategoriesService: () => ({ getNavigation: getNavigationMock }),
+      }))
 
-    const caches = new Map<string, { payload: unknown; expiresAt: number }>()
+      const caches = new Map<string, { payload: unknown; expiresAt: number }>()
 
-    vi.doMock('nitropack/runtime/internal/cache', () => ({
-      cachedEventHandler: (
-        handler: (event: unknown) => unknown | Promise<unknown>,
-        options?: {
-          name?: string
-          maxAge?: number
-          getKey?: (event: unknown) => string
-        }
-      ) => {
-        const name = options?.name ?? 'default'
-        const maxAgeMs = (options?.maxAge ?? 0) * 1000
-
-        return async (event: unknown) => {
-          const keySegment = options?.getKey?.(event) ?? ''
-          const cacheKey = `${name}:${keySegment}`
-          const now = Date.now()
-          const cached = caches.get(cacheKey)
-
-          if (cached && cached.expiresAt > now) {
-            return cached.payload
+      vi.doMock('nitropack/runtime/internal/cache', () => ({
+        cachedEventHandler: (
+          handler: (event: unknown) => unknown | Promise<unknown>,
+          options?: {
+            name?: string
+            maxAge?: number
+            getKey?: (event: unknown) => string
           }
+        ) => {
+          const name = options?.name ?? 'default'
+          const maxAgeMs = (options?.maxAge ?? 0) * 1000
 
-          const payload = await handler(event)
-          caches.set(cacheKey, { payload, expiresAt: now + maxAgeMs })
-          return payload
-        }
-      },
-    }))
+          return async (event: unknown) => {
+            const keySegment = options?.getKey?.(event) ?? ''
+            const cacheKey = `${name}:${keySegment}`
+            const now = Date.now()
+            const cached = caches.get(cacheKey)
 
-    vi.doMock('h3', () => ({
-      getQuery: (event: { context?: { query?: Record<string, unknown> } }) =>
-        event.context?.query ?? {},
-      setResponseHeader: (
-        event: { node: { res: { headers: Record<string, string> } } },
-        name: string,
-        value: string
-      ) => {
-        event.node.res.headers[name.toLowerCase()] = value
-      },
-      createError: (input: unknown) => ({
-        ...(typeof input === 'object' && input ? input : {}),
-        isCreateError: true,
-      }),
-    }))
+            if (cached && cached.expiresAt > now) {
+              return cached.payload
+            }
 
-    const { default: handler } =
-      await import('../../../server/api/categories/navigation.get')
+            const payload = await handler(event)
+            caches.set(cacheKey, { payload, expiresAt: now + maxAgeMs })
+            return payload
+          }
+        },
+      }))
 
-    const event = {
-      context: { query: {} },
-      node: {
-        req: { headers: { host: 'nudger.fr' } },
-        res: { headers: {} as Record<string, string> },
-      },
-    }
+      vi.doMock('h3', () => ({
+        getQuery: (event: { context?: { query?: Record<string, unknown> } }) =>
+          event.context?.query ?? {},
+        setResponseHeader: (
+          event: { node: { res: { headers: Record<string, string> } } },
+          name: string,
+          value: string
+        ) => {
+          event.node.res.headers[name.toLowerCase()] = value
+        },
+        createError: (input: unknown) => ({
+          ...(typeof input === 'object' && input ? input : {}),
+          isCreateError: true,
+        }),
+      }))
 
-    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'))
+      console.log('DEBUG: Importing handler')
+      const { default: handler } =
+        await import('../../../server/api/categories/navigation.get')
 
-    const firstResponse = await handler(event as never)
-    expect(firstResponse).toEqual(navigationResponse)
-    expect(getNavigationMock).toHaveBeenCalledTimes(1)
+      console.log('DEBUG: Setting up event')
+      const event = {
+        context: { query: {} },
+        node: {
+          req: { headers: { host: 'nudger.fr' } },
+          res: { headers: {} as Record<string, string> },
+        },
+      }
 
-    const secondResponse = await handler(event as never)
-    expect(secondResponse).toEqual(navigationResponse)
-    expect(getNavigationMock).toHaveBeenCalledTimes(1)
+      console.log('DEBUG: Calling first handler')
+      const firstResponse = await handler(event as never)
+      expect(firstResponse).toEqual(navigationResponse)
+      expect(getNavigationMock).toHaveBeenCalledTimes(1)
 
-    vi.doUnmock('~~/shared/api-client/services/categories.services')
-    vi.doUnmock('nitropack/runtime/internal/cache')
-    vi.doUnmock('h3')
-    vi.resetModules()
+      console.log('DEBUG: Calling second handler')
+      const secondResponse = await handler(event as never)
+      expect(secondResponse).toEqual(navigationResponse)
+      expect(getNavigationMock).toHaveBeenCalledTimes(1)
 
-    vi.useRealTimers()
-  })
+      console.log('DEBUG: Cleaning up')
+      vi.doUnmock('~~/shared/api-client/services/categories.services')
+      vi.doUnmock('nitropack/runtime/internal/cache')
+      vi.doUnmock('h3')
+      vi.resetModules()
+
+      vi.useRealTimers()
+      console.log('DEBUG: Test finished')
+    },
+    30000
+  )
+
 })

@@ -18,6 +18,14 @@ export const seasonalParallaxSchedule: SeasonalParallaxWindow[] = [
   },
 
   {
+    id: 'christmas-festivities',
+    start: '12-10',
+    end: '12-31',
+    pack: 'christmas',
+    description: 'Festive visuals for the holiday season',
+  },
+
+  {
     id: 'winter-highlights',
     start: '12-01',
     end: '01-15',
@@ -26,28 +34,25 @@ export const seasonalParallaxSchedule: SeasonalParallaxWindow[] = [
   },
 ]
 
-const parseMonthDay = (value: string, year: number) => {
-  const [month, day] = value.split('-').map(part => Number.parseInt(part, 10))
-
-  return new Date(Date.UTC(year, Math.max(0, month - 1), Math.max(1, day)))
-}
-
 const isDateWithinWindow = (
   date: Date,
   window: SeasonalParallaxWindow
 ): boolean => {
-  const currentYear = date.getUTCFullYear()
-  const start = parseMonthDay(window.start, currentYear)
-  const end = parseMonthDay(window.end, currentYear)
-  const normalizedEnd = end < start ? parseMonthDay(window.end, currentYear + 1) : end
+  const month = date.getUTCMonth() + 1
+  const day = date.getUTCDate()
+  const dateStr = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
 
-  const inSameYear = date >= start && date <= normalizedEnd
-  const inSpanningYear = date <= normalizedEnd && end < start
-
-  return inSameYear || inSpanningYear
+  if (window.start <= window.end) {
+    return dateStr >= window.start && dateStr <= window.end
+  } else {
+    // Spans across year end (e.g., 12-01 to 01-15)
+    return dateStr >= window.start || dateStr <= window.end
+  }
 }
 
-export const resolveActiveParallaxPack = (date: Date = new Date()): ParallaxPackName => {
+export const resolveActiveParallaxPack = (
+  date: Date = new Date()
+): ParallaxPackName => {
   const window = seasonalParallaxSchedule.find(candidate =>
     isDateWithinWindow(date, candidate)
   )
@@ -58,3 +63,4 @@ export const resolveActiveParallaxPack = (date: Date = new Date()): ParallaxPack
 
   return DEFAULT_PARALLAX_PACK
 }
+
