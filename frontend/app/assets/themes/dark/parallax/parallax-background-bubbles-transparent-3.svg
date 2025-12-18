@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" fill="none" role="img" aria-label="Dark transparent parallax background with floating bubbles and arcs">
+  <defs>
+    <linearGradient id="darkBubbleSky3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B1626" />
+      <stop offset="1" stop-color="#0D253A" />
+    </linearGradient>
+    <radialGradient id="darkBubbleGlow3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(820 360) scale(820 460)">
+      <stop offset="0" stop-color="#2A93E0" stop-opacity="0.3" />
+      <stop offset="1" stop-color="#0B1626" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="darkBubbleArc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1E7ACB" stop-opacity="0.28" />
+      <stop offset="1" stop-color="#1FA173" stop-opacity="0.32" />
+    </linearGradient>
+    <radialGradient id="darkBubbleFill3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(1 1)">
+      <stop offset="0" stop-color="#0E2234" stop-opacity="0.32" />
+      <stop offset="0.35" stop-color="#1F7FCC" stop-opacity="0.26" />
+      <stop offset="1" stop-color="#1F7FCC" stop-opacity="0.06" />
+    </radialGradient>
+    <linearGradient id="darkBubbleStroke3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6BC5FF" stop-opacity="0.5" />
+      <stop offset="0.55" stop-color="#2B99E6" stop-opacity="0.6" />
+      <stop offset="1" stop-color="#22A276" stop-opacity="0.34" />
+    </linearGradient>
+    <filter id="darkBubbleSoft3" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2.4" />
+    </filter>
+  </defs>
+
+  <rect width="1600" height="800" fill="url(#darkBubbleSky3)" />
+  <rect width="1600" height="800" fill="url(#darkBubbleGlow3)" />
+
+  <path d="M-80 520C220 420 520 420 820 520C1120 620 1420 620 1680 520" stroke="url(#darkBubbleArc)" stroke-width="140" stroke-opacity="0.26" />
+  <path d="M-120 360C240 280 620 280 940 360C1240 430 1480 430 1700 360" stroke="url(#darkBubbleArc)" stroke-width="90" stroke-opacity="0.26" />
+
+  <g id="parallax-bubbles">
+    <g transform="translate(620 540)">
+      <circle cx="0" cy="0" r="36" fill="url(#darkBubbleFill3)" opacity="0.86" />
+      <circle cx="0" cy="0" r="36" fill="none" stroke="url(#darkBubbleStroke3)" stroke-width="2" opacity="0.78" />
+      <circle cx="-10" cy="-12" r="8" fill="#CDEAFE" opacity="0.12" filter="url(#darkBubbleSoft3)" />
+    </g>
+    <g transform="translate(760 420)">
+      <circle cx="0" cy="0" r="28" fill="url(#darkBubbleFill3)" opacity="0.82" />
+      <circle cx="0" cy="0" r="28" fill="none" stroke="url(#darkBubbleStroke3)" stroke-width="1.8" opacity="0.74" />
+    </g>
+    <g transform="translate(900 500)">
+      <circle cx="0" cy="0" r="24" fill="url(#darkBubbleFill3)" opacity="0.82" />
+      <circle cx="0" cy="0" r="24" fill="none" stroke="url(#darkBubbleStroke3)" stroke-width="1.8" opacity="0.72" />
+    </g>
+    <g transform="translate(1040 360)">
+      <circle cx="0" cy="0" r="20" fill="url(#darkBubbleFill3)" opacity="0.8" />
+      <circle cx="0" cy="0" r="20" fill="none" stroke="url(#darkBubbleStroke3)" stroke-width="1.7" opacity="0.7" />
+    </g>
+    <g transform="translate(1180 470)">
+      <circle cx="0" cy="0" r="18" fill="url(#darkBubbleFill3)" opacity="0.8" />
+      <circle cx="0" cy="0" r="18" fill="none" stroke="url(#darkBubbleStroke3)" stroke-width="1.6" opacity="0.7" />
+    </g>
+  </g>
+</svg>

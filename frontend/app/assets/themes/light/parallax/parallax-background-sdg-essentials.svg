@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Light SDG essentials parallax background with layered waves and seeds">
+  <defs>
+    <linearGradient id="sdgLightSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ECF5FF" />
+      <stop offset="45%" stop-color="#E6F8FF" />
+      <stop offset="100%" stop-color="#E9FFF4" />
+    </linearGradient>
+    <linearGradient id="sdgLightWave" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#44B5F2" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#36D28E" stop-opacity="0.28" />
+    </linearGradient>
+    <radialGradient id="sdgLightGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1250 200) scale(520 420)">
+      <stop offset="0%" stop-color="#8BD2FF" stop-opacity="0.32" />
+      <stop offset="80%" stop-color="#3BC59D" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="sdgLightHalo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(360 780) scale(820 420)">
+      <stop offset="0%" stop-color="#CFF0FF" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#CFF0FF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sdgLightSky)" />
+  <circle cx="1280" cy="200" r="320" fill="url(#sdgLightGlow)" />
+  <circle cx="280" cy="760" r="520" fill="url(#sdgLightHalo)" />
+
+  <path d="M0 610C240 560 520 520 820 550C1100 576 1380 640 1600 610V900H0Z" fill="#D7F4FF" />
+  <path d="M0 670C280 630 520 670 840 690C1140 706 1380 690 1600 660V900H0Z" fill="#D9FCEB" />
+  <path d="M0 720C220 700 520 750 820 750C1140 750 1400 700 1600 680V900H0Z" fill="url(#sdgLightWave)" />
+
+  <g opacity="0.42" fill="none" stroke="#3AA0F3" stroke-width="2.4">
+    <path d="M160 360C260 320 340 320 420 340C520 366 620 330 760 280" />
+    <path d="M1180 320C1280 300 1380 290 1520 320" />
+    <path d="M220 460C340 440 440 430 560 460C700 500 860 480 980 430" />
+  </g>
+
+  <g opacity="0.55" fill="#36C59E">
+    <circle cx="180" cy="520" r="10" />
+    <circle cx="260" cy="410" r="8" />
+    <circle cx="340" cy="560" r="12" />
+    <circle cx="1260" cy="360" r="9" />
+    <circle cx="1340" cy="430" r="7" />
+    <circle cx="1180" cy="500" r="10" />
+  </g>
+
+  <g opacity="0.28" fill="#2C7BE5">
+    <circle cx="980" cy="260" r="6" />
+    <circle cx="890" cy="320" r="5" />
+    <circle cx="1040" cy="340" r="7" />
+    <circle cx="1160" cy="420" r="6" />
+  </g>
+</svg>
