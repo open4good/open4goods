@@ -1,6 +1,34 @@
 <template>
   <div class="nudge-step-subset">
-    <!-- Header removed, moved to Wizard -->
+    <div class="nudge-step-subset__header">
+      <div class="nudge-step-subset__title-block">
+        <v-avatar
+          class="nudge-step-subset__group-avatar"
+          size="44"
+          color="rgba(var(--v-theme-surface-primary-080), 0.9)"
+        >
+          <v-icon :icon="groupIcon" size="24" />
+        </v-avatar>
+        <div class="nudge-step-subset__titles">
+          <p class="nudge-step-subset__title">{{ group.title }}</p>
+          <p v-if="group.description" class="nudge-step-subset__description">
+            {{ group.description }}
+          </p>
+        </div>
+      </div>
+
+      <v-chip
+        v-if="categoryLabel"
+        class="nudge-step-subset__category-chip"
+        color="primary"
+        variant="tonal"
+        size="small"
+        @click="emit('return-to-category')"
+      >
+        <v-icon start :icon="categoryIcon || 'mdi-tag-outline'" />
+        {{ categoryLabel }}
+      </v-chip>
+    </div>
 
     <v-row dense>
       <v-col v-for="subset in subsets" :key="subset.id" cols="12" sm="6">
@@ -52,6 +80,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type {
   NudgeToolSubsetGroupDto,
   VerticalSubsetDto,
@@ -62,11 +91,14 @@ const props = defineProps<{
   subsets: VerticalSubsetDto[]
   modelValue: string[]
   stepNumber: number
+  categoryIcon?: string | null
+  categoryLabel?: string | null
 }>()
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string[]): void
   (event: 'continue'): void
+  (event: 'return-to-category'): void
 }>()
 
 const isSelected = (subsetId?: string | null) =>
@@ -74,6 +106,8 @@ const isSelected = (subsetId?: string | null) =>
 
 const getSubsetIcon = (subset: VerticalSubsetDto) =>
   subset.mdiIcon ?? 'mdi-sprout'
+
+const groupIcon = computed(() => props.group.mdiIcon ?? 'mdi-format-list-bulleted')
 
 const toggle = (subsetId: string) => {
   const next = new Set(props.modelValue)
@@ -99,13 +133,26 @@ const toggle = (subsetId: string) => {
     margin-bottom: 16px;
   }
 
+  &__title-block {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__group-avatar {
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+  }
+
+  &__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   &__title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
     margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
 
   &__description {
@@ -113,7 +160,13 @@ const toggle = (subsetId: string) => {
     color: rgb(var(--v-theme-text-neutral-secondary));
   }
 
+  &__category-chip {
+    font-weight: 700;
+  }
+
+  &__card {
   .nudge-toggle-card {
+
     display: flex;
     flex-direction: column;
     height: 100%;
