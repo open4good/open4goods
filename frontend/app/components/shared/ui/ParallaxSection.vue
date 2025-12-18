@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, type CSSProperties } from 'vue'
-import { usePreferredReducedMotion, useWindowScroll } from '@vueuse/core'
+import { computed, ref, type CSSProperties } from 'vue'
+import {
+  useElementBounding,
+  usePreferredReducedMotion,
+  useWindowSize,
+} from '@vueuse/core'
 import { useDisplay, useTheme } from 'vuetify'
 
 type ParallaxLayerInput =
@@ -60,10 +64,13 @@ const props = withDefaults(
   }
 )
 
+const root = ref<HTMLElement | null>(null)
+const { height: windowHeight } = useWindowSize()
+const { top, height } = useElementBounding(root)
+
 const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
 const display = useDisplay()
-const { y } = useWindowScroll()
 
 const isDark = computed(() => Boolean(theme.global.current.value.dark))
 
@@ -154,11 +161,19 @@ const resolveOffset = (speed: number) => {
     return '0px'
   }
 
-  const rawOffset = -y.value * speed
+  // Calculate position relative to viewport center
+  // 0 = center of viewport
+  // positive = below center
+  // negative = above center
+  const elementCenter = top.value + height.value / 2
+  const viewportCenter = windowHeight.value / 2
+  const delta = elementCenter - viewportCenter
+
+  const rawOffset = delta * speed
   const maxOffset = props.maxOffsetRatio
 
   if (maxOffset && import.meta.client) {
-    const viewportLimit = Math.abs(window.innerHeight * maxOffset)
+    const viewportLimit = Math.abs(windowHeight.value * maxOffset)
     const clampedOffset = Math.min(
       viewportLimit,
       Math.max(-viewportLimit, rawOffset)
@@ -202,6 +217,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 
 <template>
   <section
+    ref="root"
     :id="props.id"
     class="parallax-section"
     :class="{ 'parallax-section--gapless': gapless }"
