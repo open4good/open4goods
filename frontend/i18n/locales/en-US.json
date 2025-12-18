@@ -70,8 +70,13 @@
             "icon": "🏷️",
             "label": "The best prices on the market",
             "segments": [
-              { "text": "Stay smart on prices with" },
-              { "text": "{partnersLink}", "to": "/partners" }
+              {
+                "text": "Stay smart on prices with"
+              },
+              {
+                "text": "{partnersLink}",
+                "to": "/partners"
+              }
             ]
           },
           {
@@ -94,8 +99,7 @@
               }
             ]
           }
-        ]
-        ,
+        ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners"
       },
@@ -1643,12 +1647,12 @@
         "description": "Something went wrong while contacting the search service. Please try again."
       },
       "empty": {
-        "title": "No results for \u201c{query}\u201d",
+        "title": "No results for “{query}”",
         "description": "Try another keyword or explore the catalogue from the categories page."
       }
     },
     "results": {
-      "summary": "Displaying {countLabel} for \u201c{query}\u201d",
+      "summary": "Displaying {countLabel} for “{query}”",
       "count": {
         "one": "{count} result",
         "other": "{count} results"
@@ -2452,5 +2456,51 @@
       "close": "Close banner"
     }
   },
-  "welcome": "Welcome"
+  "welcome": "Welcome",
+  "share": {
+    "seo": {
+      "title": "Share to Nudger",
+      "description": "Paste or share any product link to see its eco impact and best indexed price."
+    },
+    "loader": {
+      "eyebrow": "Share-to",
+      "title": "Analyzing your link",
+      "pending": "Looking for the best match…",
+      "error": "We could not parse this link.",
+      "timeout": "This is taking longer than expected.",
+      "progressAria": "Share-to resolution progress",
+      "helper": "We keep trying for up to {seconds} seconds.",
+      "standaloneHint": "Running in the installed app",
+      "browserHint": "Stay on this tab while we fetch results"
+    },
+    "timeout": {
+      "title": "Results are not ready yet",
+      "body": "The analysis exceeded our 4s budget. You can retry to keep polling."
+    },
+    "errors": {
+      "title": "Cannot complete the analysis",
+      "generic": "Something went wrong while resolving this product.",
+      "missingUrl": "We need the shared URL to start the analysis."
+    },
+    "actions": {
+      "retry": "Retry"
+    },
+    "selection": {
+      "title": "Pick the right product",
+      "subtitle": "We found several close matches. Choose the one you shared.",
+      "confidence": "{value}% confidence",
+      "noPrice": "Price unavailable",
+      "unknownSource": "Unknown source",
+      "context": "{count} possible matches"
+    },
+    "result": {
+      "eyebrow": "Best match",
+      "context": "We found your product",
+      "helper": "Open the full product sheet to compare scores, price history and sellers.",
+      "viewProduct": "Open full product page",
+      "noPrice": "No indexed price",
+      "unknownSource": "Unknown source"
+    },
+    "empty": "No candidates were returned yet."
+  }
 }

@@ -160,6 +160,7 @@ const toggle = (subsetId: string) => {
   }
 
   .nudge-toggle-card {
+  &__card.nudge-toggle-card {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -173,14 +174,14 @@ const toggle = (subsetId: string) => {
       box-shadow 160ms ease, background-color 160ms ease;
     cursor: pointer;
 
-    &__body {
+    .nudge-toggle-card__body {
       display: grid;
       grid-template-columns: auto 1fr;
       align-items: center;
       height: 100%;
     }
 
-    &__icon-rail {
+    .nudge-toggle-card__icon-rail {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -192,7 +193,7 @@ const toggle = (subsetId: string) => {
       transition: background 160ms ease, border-color 160ms ease;
     }
 
-    &__icon-shell {
+    .nudge-toggle-card__icon-shell {
       width: 44px;
       height: 44px;
       border-radius: 14px;
@@ -205,7 +206,7 @@ const toggle = (subsetId: string) => {
         transform 160ms ease;
     }
 
-    &__content {
+    .nudge-toggle-card__content {
       display: flex;
       flex-direction: column;
       gap: 6px;
