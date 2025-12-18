@@ -14,6 +14,23 @@ export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]
 
 export type ThemeAssetConfig = Partial<Record<ThemeAssetKey, string>>
 
+export const PARALLAX_SECTION_KEYS = [
+  'essentials',
+  'features',
+  'blog',
+  'objections',
+  'cta',
+] as const
+
+export const PARALLAX_PACK_NAMES = ['default', 'sdg'] as const
+
+export type ParallaxSectionKey = (typeof PARALLAX_SECTION_KEYS)[number]
+export type ParallaxPackName = (typeof PARALLAX_PACK_NAMES)[number]
+
+export const DEFAULT_PARALLAX_PACK: ParallaxPackName = 'default'
+
+export type ParallaxPackConfig = Partial<Record<ParallaxSectionKey, string[]>>
+
 export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   light: {
     logo: 'logo.png',
@@ -32,5 +49,34 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   common: {
     heroBackground: 'hero-background.svg',
     illustration: 'illustration-generic.svg',
+  },
+}
+
+export const parallaxPacks: Record<
+  ThemeName | 'common',
+  Partial<Record<ParallaxPackName, ParallaxPackConfig>>
+> = {
+  light: {
+    default: {
+      essentials: ['parallax/parallax-background-bubbles-1.svg'],
+      features: ['parallax/parallax-background-bubbles-2.svg'],
+      blog: ['parallax/parallax-background-bubbles-3.svg'],
+      objections: ['parallax/parallax-background-bubbles-1.svg'],
+      cta: ['parallax/parallax-background-bubbles-2.svg'],
+    },
+    sdg: {},
+  },
+  dark: {
+    default: {
+      essentials: ['parallax/parallax-background-bubbles-1.svg'],
+      features: ['parallax/parallax-background-bubbles-2.svg'],
+      blog: ['parallax/parallax-background-bubbles-3.svg'],
+      objections: ['parallax/parallax-background-bubbles-1.svg'],
+      cta: ['parallax/parallax-background-bubbles-2.svg'],
+    },
+    sdg: {},
+  },
+  common: {
+    sdg: {},
   },
 }

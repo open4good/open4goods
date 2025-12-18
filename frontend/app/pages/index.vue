@@ -19,7 +19,12 @@ import type {
 } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
-import { useThemedAsset } from '~/composables/useThemedAsset'
+import { useSeasonalParallaxPack } from '~/composables/useSeasonalParallaxPack'
+import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
+import {
+  PARALLAX_SECTION_KEYS,
+  type ParallaxSectionKey,
+} from '~~/config/theme/assets'
 
 definePageMeta({
   ssr: true,
@@ -47,65 +52,59 @@ const heroBackgrounds = computed(() => ({
   dark: '/images/home/hero-full-viewport-dark.jpg',
 }))
 
-type ParallaxSectionId =
-  | 'essentials'
-  | 'features'
-  | 'blog'
-  | 'objections'
-  | 'cta'
+const seasonalParallaxPack = useSeasonalParallaxPack()
 
-const parallaxAssetPaths: Record<ParallaxSectionId, string[]> = {
-  essentials: ['parallax/parallax-background-bubbles-1.svg'],
-  features: ['parallax/parallax-background-bubbles-2.svg'],
-  blog: ['parallax/parallax-background-bubbles-3.svg'],
-  objections: ['parallax/parallax-background-bubbles-1.svg'],
-  cta: ['parallax/parallax-background-bubbles-2.svg'],
-}
+const parallaxLayers = useThemedParallaxBackgrounds(seasonalParallaxPack)
 
-const parallaxAssets = Object.fromEntries(
-  Object.entries(parallaxAssetPaths).map(([section, assets]) => [
-    section,
-    assets.map(assetPath => useThemedAsset(assetPath)),
-  ])
-) as Record<ParallaxSectionId, ReturnType<typeof useThemedAsset>[]>
-
-const resolveParallaxLayers = (section: ParallaxSectionId) =>
-  parallaxAssets[section]
-    .map(asset => asset.value?.trim())
-    .filter((asset): asset is string => Boolean(asset))
-
-const parallaxBackgrounds = computed(() => ({
+const parallaxOverlayConfig = computed<Record<ParallaxSectionKey, {
+  overlay: number
+  parallaxAmount: number
+  ariaLabel: string
+}>>(() => ({
   essentials: {
-    backgrounds: resolveParallaxLayers('essentials'),
     overlay: 0.62,
     parallaxAmount: 0.16,
     ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
   },
   features: {
-    backgrounds: resolveParallaxLayers('features'),
     overlay: 0.55,
     parallaxAmount: 0.12,
     ariaLabel: String(t('home.parallax.features.ariaLabel')),
   },
   blog: {
-    backgrounds: resolveParallaxLayers('blog'),
     overlay: 0.5,
     parallaxAmount: 0.1,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   objections: {
-    backgrounds: resolveParallaxLayers('objections'),
     overlay: 0.58,
     parallaxAmount: 0.11,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   cta: {
-    backgrounds: resolveParallaxLayers('cta'),
     overlay: 0.48,
     parallaxAmount: 0.08,
     ariaLabel: String(t('home.parallax.cta.ariaLabel')),
   },
 }))
+
+const parallaxBackgrounds = computed(() =>
+  PARALLAX_SECTION_KEYS.reduce(
+    (acc, section) => ({
+      ...acc,
+      [section]: {
+        backgrounds: parallaxLayers.value[section] || [],
+        ...parallaxOverlayConfig.value[section],
+      },
+    }),
+    {} as Record<ParallaxSectionKey, {
+      backgrounds: string[]
+      overlay: number
+      parallaxAmount: number
+      ariaLabel: string
+    }>
+  )
+)
 
 type AnimatedSectionKey =
   | 'problems'
@@ -828,7 +827,7 @@ useHead(() => ({
 .home-page__sections
   display: flex
   flex-direction: column
-  gap: clamp(1.5rem, 3.5vw, 2.25rem)
+  gap: clamp(0.5rem, 2vw, 1.25rem)
   padding-top: var(--cat-overlap)
   background: transparent
 
