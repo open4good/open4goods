@@ -5,11 +5,12 @@
     <v-slide-group
       v-model="selected"
       class="nudge-step-category__slider"
-      show-arrows
+      :class="{ 'nudge-step-category__slider--stacked': isMobile }"
+      :show-arrows="!isMobile"
       center-active
       mandatory
     >
-      <template #prev="{ props: prevArrowProps }">
+      <template v-if="!isMobile" #prev="{ props: prevArrowProps }">
         <v-btn
           v-bind="prevArrowProps"
           class="nudge-step-category__arrow"
@@ -19,7 +20,7 @@
         />
       </template>
 
-      <template #next="{ props: nextArrowProps }">
+      <template v-if="!isMobile" #next="{ props: nextArrowProps }">
         <v-btn
           v-bind="nextArrowProps"
           class="nudge-step-category__arrow"
@@ -77,6 +78,7 @@
 
 <script setup lang="ts">
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   categories: VerticalConfigDto[]
@@ -86,6 +88,8 @@ const props = defineProps<{
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
 
 const selected = ref<string | null>(props.selectedCategoryId ?? null)
+const display = useDisplay()
+const isMobile = computed(() => display.smAndDown.value)
 
 watch(
   () => props.selectedCategoryId,
@@ -157,6 +161,21 @@ watch(
       gap: 12px;
       padding-block: 4px;
     }
+
+    &--stacked {
+      padding-inline: 0;
+
+      :deep(.v-slide-group__container) {
+        overflow: visible;
+      }
+
+      :deep(.v-slide-group__content) {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        width: 100%;
+      }
+    }
   }
 
   &__arrow {
@@ -204,6 +223,23 @@ watch(
   &__name {
     margin: 0;
     font-weight: 600;
+  }
+
+  @media (max-width: 600px) {
+    &__card {
+      min-width: 140px;
+      padding: 12px 10px;
+      gap: 6px;
+    }
+
+    &__image {
+      width: 80px;
+      border-radius: 10px;
+    }
+
+    &__name {
+      font-size: 0.95rem;
+    }
   }
 }
 </style>
