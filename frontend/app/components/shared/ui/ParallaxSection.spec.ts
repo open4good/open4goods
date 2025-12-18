@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, nextTick, ref } from 'vue'
+import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
 import ParallaxSection from './ParallaxSection.vue'
 
@@ -8,9 +8,24 @@ const scrollY = ref(0)
 const motionPreference = ref<'reduce' | 'no-preference'>('no-preference')
 const displayWidth = ref(1280)
 
+const windowHeight = ref(1000)
+const elementHeight = ref(300)
+
 vi.mock('@vueuse/core', () => ({
   usePreferredReducedMotion: () => motionPreference,
   useWindowScroll: () => ({ x: ref(0), y: scrollY }),
+  useWindowSize: () => ({ width: ref(1000), height: windowHeight }),
+  useElementBounding: () => ({
+    top: computed(() => 350 - scrollY.value),
+    height: elementHeight,
+    bottom: ref(0),
+    left: ref(0),
+    right: ref(0),
+    width: ref(1000),
+    x: ref(0),
+    y: ref(0),
+    update: () => {},
+  }),
 }))
 
 vi.mock('vuetify', () => ({
@@ -48,6 +63,8 @@ describe('ParallaxSection', () => {
     scrollY.value = 0
     motionPreference.value = 'no-preference'
     displayWidth.value = 1280
+    windowHeight.value = 1000
+    elementHeight.value = 300
   })
 
   it('applies per-layer speeds and blend modes', async () => {
