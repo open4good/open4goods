@@ -84,7 +84,7 @@ To get the project up and running locally, follow these steps:
    - `pnpm --offline lint` – run ESLint
    - `pnpm --offline format` – check formatting
    - `pnpm --offline test` – run tests with Vitest
-   - `pnpm test:visual` – run Playwright visual snapshots (requires dev server at `http://localhost:3000`)
+   - `pnpm test:visual` – run Playwright visual snapshots (requires dev server at `http://localhost:3000`; optional, not part of CI)
    - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
    - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
    - `pnpm --offline preview` – serve the production build locally

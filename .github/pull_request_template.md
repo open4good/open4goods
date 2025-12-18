@@ -8,7 +8,7 @@
 - [ ] `pnpm lint` (frontend)
 - [ ] `pnpm test --run` (frontend)
 - [ ] `pnpm generate` (frontend)
-- [ ] `pnpm exec playwright test` or visual evidence attached (screenshots/traces)
+- [ ] `pnpm test:visual` or visual evidence attached (screenshots/traces) — optional; do not block CI
 - [ ] `mvn --offline -pl front-api -am clean install` (if backend touched)
 - [ ] `scripts/dev-doctor.sh` reviewed (toolchain and env vars)
 

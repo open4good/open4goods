@@ -48,7 +48,7 @@
         {
             "label": "visual",
             "type": "shell",
-            "command": "pnpm exec playwright test",
+            "command": "pnpm test:visual",
             "options": {
                 "cwd": "${workspaceFolder}/frontend"
             },
