@@ -12,14 +12,16 @@ const props = withDefaults(
     backgroundDark?: string
     overlayColor?: string
     overlayOpacity?: number
-    minHeight?: string
-    paddingY?: string
+    minHeight?: string | null
+    paddingY?: string | null
+    containerPadding?: string | null
     parallaxAmount?: number
     disableParallaxBelow?: number
     maxWidth?: string
     contentAlign?: 'start' | 'center'
     enableAplats?: boolean
     aplatSvg?: string
+    gapless?: boolean
   }>(),
   {
     id: undefined,
@@ -31,12 +33,14 @@ const props = withDefaults(
     overlayOpacity: 0.42,
     minHeight: '75vh',
     paddingY: 'clamp(3rem, 8vw, 5.5rem)',
+    containerPadding: 'clamp(1.5rem, 5vw, 4rem)',
     parallaxAmount: 0.18,
     disableParallaxBelow: 960,
     maxWidth: '1180px',
     contentAlign: 'start',
     enableAplats: false,
     aplatSvg: '/images/home/parallax-aplats.svg',
+    gapless: false,
   }
 )
 
@@ -112,11 +116,13 @@ const mediaStyles = computed<CSSProperties>(() => ({
   '--parallax-overlay-color': props.overlayColor,
   '--parallax-overlay-opacity': props.overlayOpacity,
   '--parallax-offset': parallaxOffset.value,
-  minHeight: props.minHeight,
+  minHeight: props.gapless ? 'auto' : props.minHeight || undefined,
 }))
 
 const contentStyles = computed<CSSProperties>(() => ({
-  paddingBlock: props.paddingY,
+  paddingBlock: props.gapless
+    ? props.paddingY ?? '0'
+    : props.paddingY || undefined,
 }))
 
 const innerStyles = computed<CSSProperties>(() => ({
@@ -129,10 +135,21 @@ const contentAlignClass = computed(() =>
     ? 'parallax-section__inner--center'
     : 'parallax-section__inner--start'
 )
+
+const containerPaddingStyle = computed<CSSProperties>(() => ({
+  paddingInline: props.gapless
+    ? props.containerPadding ?? '0'
+    : props.containerPadding || undefined,
+}))
 </script>
 
 <template>
-  <section :id="props.id" class="parallax-section" :aria-label="ariaLabel">
+  <section
+    :id="props.id"
+    class="parallax-section"
+    :class="{ 'parallax-section--gapless': gapless }"
+    :aria-label="ariaLabel"
+  >
     <div
       class="parallax-section__media"
       :style="mediaStyles"
@@ -153,7 +170,11 @@ const contentAlignClass = computed(() =>
       </div>
     </div>
     <div class="parallax-section__content" :style="contentStyles">
-      <v-container fluid class="parallax-section__container">
+      <v-container
+        fluid
+        class="parallax-section__container"
+        :style="containerPaddingStyle"
+      >
         <div
           class="parallax-section__inner"
           :class="contentAlignClass"
@@ -241,6 +262,18 @@ const contentAlignClass = computed(() =>
 
 :deep(.home-section__container)
   padding-inline: 0
+
+.parallax-section--gapless
+  background-color: transparent
+
+.parallax-section--gapless .parallax-section__content
+  padding-block: 0 !important
+
+.parallax-section--gapless .parallax-section__container
+  padding-inline: 0
+
+.parallax-section--gapless .parallax-section__inner
+  gap: clamp(1rem, 2.5vw, 1.75rem)
 
 @media (max-width: 959px)
   .parallax-section__image
