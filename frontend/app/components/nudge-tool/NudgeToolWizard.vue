@@ -1,73 +1,72 @@
 <template>
-  <v-card
+  <RoundedCornerCard
     class="nudge-wizard"
     rounded="xl"
-    elevation="3"
-    :style="{ height: formattedHeight }"
+    :elevation="3"
+    accent-corner="top-left"
+    corner-variant="custom"
+    :corner-size="resolvedCornerSize"
+    :style="wizardStyle"
+    :class="{ 'nudge-wizard--content-mode': isContentMode }"
   >
-    <div ref="headerRef" class="nudge-wizard__header">
-      <div class="nudge-wizard__header-row">
-        <v-btn
-          v-if="categorySummary"
-          class="nudge-wizard__category-chip"
-          variant="tonal"
-          color="primary"
-          rounded="lg"
-          @click="resetForCategorySelection"
-        >
-          <v-avatar v-if="categorySummary.image" size="28" rounded="lg">
-            <v-img
-              :src="categorySummary.image"
+    <template #corner>
+      <div
+        class="nudge-wizard__corner-content"
+        :class="{
+          'nudge-wizard__corner-content--clickable': shouldShowMatches,
+          'nudge-wizard__corner-content--expanded': isContentMode,
+        }"
+        @click="handleCornerClick"
+      >
+        <div v-if="activeStepKey === 'category'" class="text-h5 font-weight-bold text-white">
+          {{ $t('nudge-tool.wizard.welcome') }}
+        </div>
+        <div v-else-if="categorySummary" class="nudge-wizard__corner-summary d-flex align-center justify-center fill-height pt-3 pb-2">
+          <div class="nudge-wizard__corner-visual d-flex align-center gap-2">
+            <v-avatar
+              v-if="categorySummary.image"
+              size="44"
+              class="nudge-wizard__corner-avatar"
+              :image="categorySummary.image"
               :alt="categorySummary.alt"
-              cover
-            />
-          </v-avatar>
-          <span class="nudge-wizard__category-label">{{
-            categorySummary.label
-          }}</span>
-        </v-btn>
-
-        <v-stepper
-          v-if="showStepper"
-          v-model="stepperActiveKey"
-          density="compact"
-          :alt-labels="!display.smAndDown.value"
-          :items="stepperItems"
-          :item-props="true"
-          editable
-          flat
-          hide-actions
-          class="nudge-wizard__stepper elevation-0 border-0"
-        />
+            >
+              <template #fallback>
+                <v-icon :icon="categorySummary.icon" size="28" color="white" />
+              </template>
+            </v-avatar>
+            <div class="nudge-wizard__corner-icon">
+              <v-icon :icon="categorySummary.icon" :size="cornerIconSize" color="white" />
+            </div>
+          </div>
+          <div class="nudge-wizard__corner-text text-white text-center">
+            <div class="text-caption font-weight-bold lh-1 mb-1">{{ categorySummary.label }}</div>
+            <div class="nudge-wizard__corner-count font-weight-black">{{ animatedMatches }}</div>
+          </div>
+        </div>
       </div>
-
-      <div v-if="shouldShowMatches" class="nudge-wizard__matches">
-        <v-btn
-          variant="text"
-          color="primary"
-          :disabled="!selectedCategory"
-          @click="navigateToCategoryPage"
-        >
-          {{ $t('nudge-tool.meta.matches', { count: animatedMatches }) }}
-          <template #append>
-            <v-icon icon="mdi-link-variant" />
-          </template>
-        </v-btn>
-      </div>
+    </template>
+    <div ref="headerRef">
+      <NudgeWizardHeader
+        :title="currentStepTitle"
+        :subtitle="currentStepSubtitle"
+        :accent-corner="'top-left'"
+        :corner-size="resolvedCornerSize"
+        :category-summary="categorySummary"
+      />
     </div>
 
     <div v-if="loading" class="nudge-wizard__progress">
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
-    <div ref="windowWrapperRef">
+    <div ref="windowWrapperRef" class="nudge-wizard__window-wrapper" :style="windowWrapperStyle">
       <v-window
         v-model="activeStepKey"
         class="nudge-wizard__window"
         :touch="false"
         :transition="windowTransition"
         :reverse-transition="windowReverseTransition"
-        :style="{ minHeight: contentMinHeight }"
+        :style="windowContentStyle"
       >
         <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
           <component
@@ -76,47 +75,72 @@
             @select="onCategorySelect"
             @update:model-value="(value: unknown) => step.onUpdate?.(value)"
             @continue="goToNext"
+            @return-to-category="resetForCategorySelection"
           />
         </v-window-item>
       </v-window>
     </div>
-
     <div ref="footerRef" class="nudge-wizard__footer">
-      <v-btn
-        v-if="hasPreviousStep"
-        variant="text"
-        prepend-icon="mdi-chevron-left"
-        @click="goToPrevious"
+      <div
+        v-if="progressSteps.length"
+        class="nudge-wizard__progress-bubbles"
+        :style="footerOffsetStyle"
       >
-        {{ $t('nudge-tool.actions.previous') }}
-      </v-btn>
+        <v-btn
+          v-for="step in progressSteps"
+          :key="step.key"
+          class="nudge-wizard__progress-bubble"
+          :variant="step.key === activeStepKey ? 'flat' : 'text'"
+          :color="step.key === activeStepKey ? 'primary' : undefined"
+          :aria-label="step.title"
+          :disabled="!canAccessStep(step.key)"
+          icon
+          size="44"
+          @click="() => handleProgressClick(step.key)"
+        >
+          <span class="nudge-wizard__progress-index">{{ step.index }}</span>
+        </v-btn>
+      </div>
+      <div class="nudge-wizard__footer-actions">
+        <v-btn
+          v-if="hasPreviousStep"
+          variant="text"
+          prepend-icon="mdi-chevron-left"
+          class="nudge-wizard__footer-btn"
+          @click="goToPrevious"
+        >
+          {{ $t('nudge-tool.actions.previous') }}
+        </v-btn>
+        <div v-else></div>
 
-      <v-spacer />
-
-      <v-btn
-        v-if="hasNextStep"
-        color="primary"
-        variant="flat"
-        :disabled="isNextDisabled"
-        append-icon="mdi-chevron-right"
-        @click="goToNext"
-      >
-        {{ $t('nudge-tool.actions.next') }}
-      </v-btn>
+        <v-btn
+          v-if="hasNextStep"
+          color="primary"
+          variant="flat"
+          :disabled="isNextDisabled"
+          append-icon="mdi-chevron-right"
+          class="nudge-wizard__footer-btn"
+          @click="goToNext"
+        >
+          {{ $t('nudge-tool.actions.next') }}
+        </v-btn>
+      </div>
     </div>
-  </v-card>
+  </RoundedCornerCard>
 </template>
 
 <script setup lang="ts">
-import { useDebounceFn, useElementSize, useTransition } from '@vueuse/core'
-import { useDisplay } from 'vuetify'
+import { useDebounceFn, useElementSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
+import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
+import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
 import {
   NudgeToolStepCategory,
   NudgeToolStepCondition,
   NudgeToolStepRecommendations,
   NudgeToolStepScores,
   NudgeToolStepSubsetGroup,
+  RoundedCornerCard,
 } from '#components'
 import type {
   CategoryHashState,
@@ -136,6 +160,7 @@ import {
   buildNudgeFilterRequest,
   buildScoreFilters,
 } from '~/utils/_nudge-tool-filters'
+import { buildFilterRequestFromSubsets } from '~/utils/_subset-to-filters'
 
 const props = defineProps<{
   verticals?: VerticalConfigDto[]
@@ -144,12 +169,18 @@ const props = defineProps<{
   initialSubsets?: string[]
 }>()
 
+const accentCornerOffsets: Record<CornerSize, string> = {
+  sm: '46px',
+  md: '58px',
+  lg: '72px',
+  xl: '120px',
+}
+
 const emit = defineEmits<{
   (e: 'navigate', payload: { hash: string; categorySlug: string }): void
 }>()
 
 const { t } = useI18n()
-const display = useDisplay()
 const router = useRouter()
 const { fetchCategories } = useCategories()
 
@@ -166,6 +197,7 @@ const animatedMatches = ref(0)
 
 const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
+const visitedStepKeys = ref<string[]>(['category'])
 
 const selectedCategory = computed(
   () =>
@@ -243,19 +275,12 @@ const hashState = computed<CategoryHashState>(() => ({
   activeSubsets: activeSubsetIds.value,
 }))
 
-const defaultStepIcons = {
-  category: 'mdi-shape-outline',
-  scores: 'mdi-star-check-outline',
-  condition: 'mdi-recycle-variant',
-  subset: 'mdi-tune-variant',
-  recommendations: 'mdi-lightbulb-on-outline',
-}
-
 type WizardStep = {
   key: string
   component: Component
   props: Record<string, unknown>
   title: string
+  subtitle?: string
   onUpdate?: (value: unknown) => void
 }
 
@@ -266,6 +291,7 @@ const steps = computed<WizardStep[]>(() => {
     key: 'category',
     component: NudgeToolStepCategory,
     title: t('nudge-tool.steps.category.title'),
+    subtitle: t('nudge-tool.steps.category.subtitle'),
     props: {
       categories: categories.value,
       selectedCategoryId: selectedCategoryId.value,
@@ -277,6 +303,7 @@ const steps = computed<WizardStep[]>(() => {
       key: 'scores',
       component: NudgeToolStepScores,
       title: t('nudge-tool.steps.scores.title'),
+      subtitle: t('nudge-tool.steps.scores.subtitle'),
       props: {
         modelValue: selectedScores.value,
         scores: nudgeConfig.value?.scores ?? [],
@@ -289,6 +316,7 @@ const steps = computed<WizardStep[]>(() => {
     key: 'condition',
     component: NudgeToolStepCondition,
     title: t('nudge-tool.steps.condition.title'),
+    subtitle: t('nudge-tool.steps.condition.subtitle'),
     props: { modelValue: condition.value },
     onUpdate: (value: ProductConditionSelection) => {
       condition.value = value
@@ -307,11 +335,17 @@ const steps = computed<WizardStep[]>(() => {
       key: `group-${group.id}`,
       component: NudgeToolStepSubsetGroup,
       title: group.title ?? '',
+      subtitle: t('nudge-tool.steps.subset.subtitle'),
       props: {
         group,
         subsets,
         modelValue: activeSubsetIds.value,
         stepNumber: subsetStepNumber,
+        categoryIcon: selectedCategory.value?.mdiIcon,
+        categoryLabel:
+          selectedCategory.value?.verticalHomeTitle ??
+          selectedCategory.value?.id ??
+          '',
       },
       onUpdate: (value: string[]) => (activeSubsetIds.value = value),
     })
@@ -323,6 +357,7 @@ const steps = computed<WizardStep[]>(() => {
     key: 'recommendations',
     component: NudgeToolStepRecommendations,
     title: t('nudge-tool.steps.recommendations.title'),
+    subtitle: t('nudge-tool.steps.recommendations.subtitle'),
     props: {
       products: recommendations.value,
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
@@ -334,32 +369,22 @@ const steps = computed<WizardStep[]>(() => {
   return sequence
 })
 
-const getSubsetGroupIcon = (key: string) => {
-  const groupId = key.replace('group-', '')
-  const group = subsetGroups.value.find(entry => entry.id === groupId)
+const currentStep = computed(() =>
+  steps.value.find(step => step.key === activeStepKey.value)
+)
 
-  return group?.mdiIcon || defaultStepIcons.subset
-}
+const currentStepTitle = computed(() => currentStep.value?.title ?? '')
+const currentStepSubtitle = computed(() => currentStep.value?.subtitle ?? '')
 
-const resolveStepIcon = (stepKey: string) => {
-  if (stepKey === 'category') {
-    return defaultStepIcons.category
-  }
-
-  if (stepKey === 'scores') {
-    return defaultStepIcons.scores
-  }
-
-  if (stepKey === 'condition') {
-    return defaultStepIcons.condition
-  }
-
-  if (stepKey.startsWith('group-')) {
-    return getSubsetGroupIcon(stepKey)
-  }
-
-  return defaultStepIcons.recommendations
-}
+watch(
+  activeStepKey,
+  next => {
+    if (!visitedStepKeys.value.includes(next)) {
+      visitedStepKeys.value = [...visitedStepKeys.value, next]
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   steps,
@@ -367,6 +392,11 @@ watch(
     if (!allSteps.find(step => step.key === activeStepKey.value)) {
       activeStepKey.value = allSteps[0]?.key ?? 'recommendations'
     }
+
+    const validKeys = allSteps.map(step => step.key)
+    visitedStepKeys.value = visitedStepKeys.value.filter(key =>
+      validKeys.includes(key)
+    )
   },
   { immediate: true, deep: true }
 )
@@ -510,6 +540,12 @@ const navigateToCategoryPage = () => {
   void router.push({ path: `/${slug}`, hash })
 }
 
+const handleCornerClick = () => {
+    if (shouldShowMatches.value) {
+        navigateToCategoryPage()
+    }
+}
+
 const hasPreviousStep = computed(() => {
   const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   return index > 0
@@ -532,37 +568,31 @@ const isNextDisabled = computed(() => {
   return false
 })
 
-const stepperItems = computed(() => {
-  const allSteps = steps.value
-    .filter(step => step.key !== 'category' && step.key !== 'recommendations')
-    .map(step => ({
-      title: display.smAndDown.value ? undefined : step.title,
-      value: step.key,
-      icon: resolveStepIcon(step.key),
-      disabled: false,
+const canAccessStep = (stepKey: string) =>
+  visitedStepKeys.value.includes(stepKey)
+
+const progressSteps = computed(() => {
+  if (activeStepKey.value === 'category') {
+    return []
+  }
+
+  return steps.value
+    .filter(step => step.key !== 'category')
+    .filter(step => visitedStepKeys.value.includes(step.key))
+    .map((step, index) => ({
+      key: step.key,
+      title: step.title,
+      index: index + 1,
     }))
-
-  const currentIndex = allSteps.findIndex(item => item.value === activeStepKey.value)
-  if (currentIndex === -1) return allSteps
-
-  // Show only current and previous steps
-  return allSteps.slice(0, currentIndex + 1)
 })
 
-const stepperActiveKey = computed({
-  get: () =>
-    stepperItems.value.find(item => item.value === activeStepKey.value)
-      ?.value ??
-    stepperItems.value.at(-1)?.value ??
-    activeStepKey.value,
-  set: (value: string) => {
-    activeStepKey.value = value
-  },
-})
+const handleProgressClick = (stepKey: string) => {
+  if (!canAccessStep(stepKey)) {
+    return
+  }
 
-const showStepper = computed(
-  () => activeStepKey.value !== 'category' && Boolean(selectedCategoryId.value)
-)
+  activeStepKey.value = stepKey
+}
 
 const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
@@ -601,6 +631,7 @@ const categorySummary = computed(() => {
       selectedCategory.value.id ??
       '',
     image: selectedCategory.value.imageSmall,
+    icon: selectedCategory.value.mdiIcon ?? 'mdi-tag',
     alt:
       selectedCategory.value.verticalHomeTitle ??
       selectedCategory.value.id ??
@@ -617,8 +648,8 @@ const resetCategorySelectionState = () => {
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
-  baseWindowHeight.value = 0
-  maxContentHeight.value = 0
+  visitedStepKeys.value = ['category']
+  // Keep locked heights intact so returning to the wizard keeps the layout stable
 }
 
 let resetTimeout: ReturnType<typeof setTimeout> | null = null
@@ -655,6 +686,10 @@ watch(
 
     if (next !== 'category') {
       clearResetTimeout()
+      // Lock current height as base if moving from category to content
+      if (previous === 'category') {
+         // Logic handled in height watcher
+      }
     }
   },
   { flush: 'pre' }
@@ -687,67 +722,75 @@ const { height: headerHeight } = useElementSize(headerRef)
 const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
-const baseWindowHeight = ref(0)
-const maxContentHeight = ref(0)
+const isContentMode = computed(() => activeStepKey.value !== 'category')
 
-watch(windowHeight, val => {
-  if (val <= 0) {
+const WIZARD_MIN_HEIGHT = 300
+
+const lockedLayoutHeight = ref<number | null>(null)
+const lockedWindowHeight = ref<number | null>(null)
+
+const attemptLockHeights = () => {
+  if (!isContentMode.value) {
     return
   }
 
-  if (activeStepKey.value === 'category' || baseWindowHeight.value === 0) {
-    baseWindowHeight.value = Math.max(baseWindowHeight.value, val)
+  if (
+    lockedLayoutHeight.value !== null ||
+    lockedWindowHeight.value !== null ||
+    headerHeight.value <= 0 ||
+    windowHeight.value <= 0 ||
+    footerHeight.value <= 0
+  ) {
+    return
   }
 
-  if (activeStepKey.value !== 'category') {
-    maxContentHeight.value = Math.max(maxContentHeight.value, val, baseWindowHeight.value)
-  }
+  const lockedWindow = Math.max(windowHeight.value, WIZARD_MIN_HEIGHT)
+  const layoutHeight = headerHeight.value + lockedWindow + footerHeight.value
+  lockedLayoutHeight.value = Math.max(layoutHeight, WIZARD_MIN_HEIGHT)
+  lockedWindowHeight.value = lockedWindow
+}
+
+watch([isContentMode, headerHeight, windowHeight, footerHeight], attemptLockHeights, {
+  immediate: true,
 })
 
-const stableWindowHeight = computed(() => {
-  if (activeStepKey.value === 'category') {
-    return Math.max(windowHeight.value, baseWindowHeight.value)
-  }
-
-  const floorHeight = Math.max(baseWindowHeight.value, maxContentHeight.value)
-  return Math.max(windowHeight.value, floorHeight)
-})
-
-const totalHeight = computed(
-  () => headerHeight.value + stableWindowHeight.value + footerHeight.value + 32
-) // 32 = padding
-
-const animatedHeight = useTransition(totalHeight, {
-  duration: 500,
-  transition: [0.4, 0, 0.2, 1], // Ease-out-like curve
-})
-
-// Only apply fixed height when content is ready/stable to avoid jumps during hydration
-const isReady = ref(false)
-onMounted(() => {
-  setTimeout(() => {
-    isReady.value = true
-  }, 100)
-})
-
-const formattedHeight = computed(() => {
-  if (!isReady.value) return 'auto'
-  return `${animatedHeight.value}px`
-})
-
-const contentMinHeight = computed(() => {
-  if (!isReady.value) {
+const wizardStyle = computed(() => {
+  if (!lockedLayoutHeight.value) {
     return undefined
   }
 
-  if (activeStepKey.value === 'category') {
-    const minHeight = Math.max(windowHeight.value, baseWindowHeight.value)
-    return minHeight ? `${minHeight}px` : undefined
+  return { minHeight: `${lockedLayoutHeight.value}px` }
+})
+
+const windowWrapperStyle = computed(() => {
+  if (!lockedWindowHeight.value) {
+    return undefined
   }
 
-  const minHeight = Math.max(maxContentHeight.value, baseWindowHeight.value)
-  return minHeight ? `${minHeight}px` : undefined
+  return {
+    minHeight: `${lockedWindowHeight.value}px`,
+    maxHeight: `${lockedWindowHeight.value}px`,
+  }
 })
+
+const windowContentStyle = computed(() => {
+  if (!lockedWindowHeight.value) {
+    return undefined
+  }
+
+  return { minHeight: `${lockedWindowHeight.value}px` }
+})
+
+const resolvedCornerSize = computed(() =>
+  isContentMode.value ? 'xl' : 'lg'
+)
+
+const footerOffsetStyle = computed(() => ({
+  paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
+}))
+
+const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
+
 </script>
 
 <style scoped lang="scss">
@@ -762,21 +805,62 @@ const contentMinHeight = computed(() => {
   max-width: none;
   display: flex;
   flex-direction: column;
-  transition: height 500ms ease;
 
-  &__header {
+  &__corner-content {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    margin-bottom: 12px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 1.1;
+    transition: transform 300ms ease, opacity 260ms ease;
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    &--expanded {
+      transform: translateY(2px) scale(1.04);
+    }
   }
 
-  &__header-row {
-    display: flex;
+  &__corner-summary {
     gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+  }
+
+  &__corner-visual {
+    gap: 8px;
+  }
+
+  &__corner-avatar {
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+    box-shadow: 0 6px 20px rgba(var(--v-theme-shadow-primary-600), 0.12);
+  }
+
+  &__corner-icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: rgba(var(--v-theme-hero-gradient-mid), 0.22);
+    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4);
+  }
+
+  &__corner-text {
+    line-height: 1.2;
+  }
+
+  &__corner-count {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    line-height: 1;
+    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   }
 
   &__stepper {
@@ -784,22 +868,7 @@ const contentMinHeight = computed(() => {
     min-width: 0;
   }
 
-  &__matches {
-    display: flex;
-    justify-content: center;
-  }
 
-  &__category-chip {
-    text-transform: none;
-    font-weight: 600;
-    gap: 8px;
-    padding-inline: 12px;
-  }
-
-  &__category-label {
-    white-space: nowrap;
-    color: rgb(var(--v-theme-primary));
-  }
 
   &__progress {
     position: absolute;
@@ -812,16 +881,73 @@ const contentMinHeight = computed(() => {
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  &__window-wrapper {
+    width: 100%;
+    overflow: hidden;
   }
 
   &__footer {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    margin-top: 16px;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 12px;
+
+    @media (max-width: 960px) {
+      grid-template-columns: 1fr;
+      justify-items: stretch;
+    }
+  }
+
+  &__progress-bubbles {
+    display: flex;
+    gap: 10px;
+    align-items: center;
     flex-wrap: wrap;
   }
+
+  &__progress-bubble {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    box-shadow: none;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    transition: transform 140ms ease, border-color 140ms ease;
+
+    &:hover:not(.v-btn--disabled) {
+      transform: translateY(-2px);
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.7);
+    }
+  }
+
+  &__progress-index {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: currentColor;
+  }
+
+  &__footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    @media (max-width: 960px) {
+      justify-content: space-between;
+    }
+  }
+
+  &__footer-btn {
+    font-weight: 700;
+  }
+}
+
+.nudge-wizard--content-mode .nudge-wizard__corner-content {
+  transform: translateY(2px) scale(1.04);
 }
 
 :deep(.nudge-wizard-slide-fade-enter-active),

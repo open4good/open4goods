@@ -88,12 +88,13 @@ const handleSubtitleClick = (event: MouseEvent) => {
             <h1 id="opendata-hero-heading" class="opendata-hero__title">
               {{ title }}
             </h1>
-            <!-- eslint-disable-next-line vue/no-v-html -->
+            <!-- eslint-disable vue/no-v-html -->
             <p
               class="opendata-hero__subtitle"
               @click="handleSubtitleClick"
               v-html="subtitle"
             />
+            <!-- eslint-enable vue/no-v-html -->
           </div>
 
           <div class="mt-4 opendata-hero__actions" role="group">

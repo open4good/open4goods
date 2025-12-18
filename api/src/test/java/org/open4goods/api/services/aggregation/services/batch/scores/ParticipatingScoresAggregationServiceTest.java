@@ -41,7 +41,7 @@ class ParticipatingScoresAggregationServiceTest {
     }
 
     @Test
-    void shouldSkipAggregationWhenMissingComponentScore() {
+    void shouldUseFallbackAverageWhenMissingComponentScore() {
         VerticalConfig vConf = verticalConfig();
         Product product = new Product(3L);
         Score onlyFirst = new Score("SCORE_A", 2.0);
@@ -51,11 +51,22 @@ class ParticipatingScoresAggregationServiceTest {
         ParticipatingScoresAggregationService service = new ParticipatingScoresAggregationService(
                 LoggerFactory.getLogger(ParticipatingScoresAggregationServiceTest.class));
 
-        service.init(List.of(product));
+        // Inject batch stats for the missing score (SCORE_B) into both map to ensure
+        // virtualization handles it in done()
+        Cardinality bStats = cardinality(5.0);
+        service.batchDatas.put("SCORE_B", bStats); // Avg 5.0
+        service.absoluteCardinalities.put("SCORE_B", bStats);
+
         service.onProduct(product, vConf);
         service.done(List.of(product), vConf);
 
-        assertThat(product.getScores()).doesNotContainKey("AGG");
+        assertThat(product.getScores()).containsKey("AGG");
+        // Expected:
+        // Weights: A=0.2, B=0.3 -> Normalized: A=0.4, B=0.6
+        // Score A: 2.0
+        // Score B: Missing -> Fallback to Batch Avg = 5.0
+        // Result: 0.4 * 2.0 + 0.6 * 5.0 = 0.8 + 3.0 = 3.8
+        assertThat(product.getScores().get("AGG").getAbsolute().getValue()).isCloseTo(2.3, within(0.001));
     }
 
     private VerticalConfig verticalConfig() {
@@ -98,6 +109,10 @@ class ParticipatingScoresAggregationServiceTest {
     private Cardinality cardinality(double value) {
         Cardinality cardinality = new Cardinality();
         cardinality.setValue(value);
+        cardinality.setMin(0.0);
+        cardinality.setMax(10.0);
+        cardinality.setAvg(value);
+        cardinality.setCount(1);
         return cardinality;
     }
 }

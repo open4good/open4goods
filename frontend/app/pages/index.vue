@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import type { BlogPostDto } from '~~/shared/api-client'
+import type { AffiliationPartnerDto, BlogPostDto } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
@@ -19,7 +19,14 @@ import type {
 } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
-import { useThemedAsset } from '~/composables/useThemedAsset'
+import { useSeasonalParallaxPack } from '~/composables/useSeasonalParallaxPack'
+import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
+import {
+  PARALLAX_SECTION_KEYS,
+  type ParallaxSectionKey,
+} from '~~/config/theme/assets'
+import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
+import { useDisplay } from 'vuetify'
 
 definePageMeta({
   ssr: true,
@@ -29,6 +36,10 @@ const { t, locale, availableLocales } = useI18n()
 const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const display = useDisplay()
+
+const isMobileLanding = computed(() => display.smAndDown.value)
 
 const searchQuery = ref('')
 
@@ -42,82 +53,76 @@ const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
 
-const heroBackgrounds = computed(() => ({
-  light: '/images/home/hero-full-viewport-light.jpg',
-  dark: '/images/home/hero-full-viewport-dark.jpg',
-}))
+const { data: affiliationPartners } = await useAsyncData<AffiliationPartnerDto[]>(
+  'home-affiliation-partners',
+  () =>
+    $fetch<AffiliationPartnerDto[]>('/api/partners/affiliation', {
+      headers: requestHeaders,
+    }).catch(() => []),
+  {
+    default: () => [],
+    server: true,
+    lazy: false,
+  }
+)
 
-type ParallaxSectionId =
-  | 'essentials'
-  | 'features'
-  | 'blog'
-  | 'objections'
-  | 'cta'
+const heroPartnersCount = computed(
+  () => affiliationPartners.value?.length ?? 0
+)
 
-const parallaxAssetPaths: Record<ParallaxSectionId, string[]> = {
-  essentials: [
-    'parallax/parallax-background-1.svg',
-    'parallax/parallax-background-bubbles-1.svg',
-  ],
-  features: [
-    'parallax/parallax-background-2.svg',
-    'parallax/parallax-background-bubbles-2.svg',
-  ],
-  blog: [
-    'parallax/parallax-background-3.svg',
-    'parallax/parallax-background-bubbles-3.svg',
-  ],
-  objections: [
-    'parallax/parallax-background-1.svg',
-    'parallax/parallax-background-bubbles-1.svg',
-  ],
-  cta: ['parallax/parallax-background-2.svg'],
-}
+const seasonalParallaxPack = useSeasonalParallaxPack()
 
-const parallaxAssets = Object.fromEntries(
-  Object.entries(parallaxAssetPaths).map(([section, assets]) => [
-    section,
-    assets.map(assetPath => useThemedAsset(assetPath)),
-  ])
-) as Record<ParallaxSectionId, ReturnType<typeof useThemedAsset>[]>
+const parallaxLayers = useThemedParallaxBackgrounds(seasonalParallaxPack)
 
-const resolveParallaxLayers = (section: ParallaxSectionId) =>
-  parallaxAssets[section]
-    .map(asset => asset.value?.trim())
-    .filter((asset): asset is string => Boolean(asset))
-
-const parallaxBackgrounds = computed(() => ({
+const parallaxOverlayConfig = computed<Record<ParallaxSectionKey, {
+  overlay: number
+  parallaxAmount: number
+  ariaLabel: string
+}>>(() => ({
   essentials: {
-    backgrounds: resolveParallaxLayers('essentials'),
     overlay: 0.62,
     parallaxAmount: 0.16,
     ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
   },
   features: {
-    backgrounds: resolveParallaxLayers('features'),
     overlay: 0.55,
     parallaxAmount: 0.12,
     ariaLabel: String(t('home.parallax.features.ariaLabel')),
   },
   blog: {
-    backgrounds: resolveParallaxLayers('blog'),
     overlay: 0.5,
     parallaxAmount: 0.1,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   objections: {
-    backgrounds: resolveParallaxLayers('objections'),
     overlay: 0.58,
     parallaxAmount: 0.11,
     ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
   },
   cta: {
-    backgrounds: resolveParallaxLayers('cta'),
     overlay: 0.48,
     parallaxAmount: 0.08,
     ariaLabel: String(t('home.parallax.cta.ariaLabel')),
   },
 }))
+
+const parallaxBackgrounds = computed(() =>
+  PARALLAX_SECTION_KEYS.reduce(
+    (acc, section) => ({
+      ...acc,
+      [section]: {
+        backgrounds: parallaxLayers.value[section] || [],
+        ...parallaxOverlayConfig.value[section],
+      },
+    }),
+    {} as Record<ParallaxSectionKey, {
+      backgrounds: string[]
+      overlay: number
+      parallaxAmount: number
+      ariaLabel: string
+    }>
+  )
+)
 
 type AnimatedSectionKey =
   | 'problems'
@@ -625,17 +630,47 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
   navigateToSearch(suggestion.title)
 }
 
+const seoTitle = computed(() =>
+  String(
+    t(
+      isMobileLanding.value
+        ? 'pwa.landing.hero.meta.title'
+        : 'home.seo.title'
+    )
+  )
+)
+
+const seoDescription = computed(() =>
+  String(
+    t(
+      isMobileLanding.value
+        ? 'pwa.landing.hero.meta.description'
+        : 'home.seo.description'
+    )
+  )
+)
+
+const seoImageAlt = computed(() =>
+  String(
+    t(
+      isMobileLanding.value
+        ? 'pwa.landing.hero.meta.imageAlt'
+        : 'home.seo.imageAlt'
+    )
+  )
+)
+
 useSeoMeta({
-  title: () => String(t('home.seo.title')),
-  description: () => String(t('home.seo.description')),
-  ogTitle: () => String(t('home.seo.title')),
-  ogDescription: () => String(t('home.seo.description')),
+  title: () => seoTitle.value,
+  description: () => seoDescription.value,
+  ogTitle: () => seoTitle.value,
+  ogDescription: () => seoDescription.value,
   ogUrl: () => canonicalUrl.value,
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
   ogSiteName: () => siteName.value,
   ogLocale: () => locale.value.replace('-', '_'),
-  ogImageAlt: () => String(t('home.seo.imageAlt')),
+  ogImageAlt: () => seoImageAlt.value,
 })
 
 useHead(() => ({
@@ -664,13 +699,13 @@ useHead(() => ({
 </script>
 
 <template>
-  <div class="home-page">
+  <PwaMobileLanding v-if="isMobileLanding" :verticals="rawCategories" />
+  <div v-else class="home-page">
     <HomeHeroSection
       v-model:search-query="searchQuery"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       :verticals="rawCategories"
-      :hero-image-light="heroBackgrounds.light"
-      :hero-image-dark="heroBackgrounds.dark"
+      :partners-count="heroPartnersCount"
       @submit="handleSearchSubmit"
       @select-category="handleCategorySuggestion"
       @select-product="handleProductSuggestion"
@@ -840,13 +875,13 @@ useHead(() => ({
 .home-page__sections
   display: flex
   flex-direction: column
-  gap: clamp(1.5rem, 3.5vw, 2.25rem)
+  gap: 0
   padding-top: var(--cat-overlap)
   background: transparent
 
 .home-page__parallax
-  border-radius: clamp(1.25rem, 3vw, 1.85rem)
-  box-shadow: 0 22px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  border-radius: 0
+  box-shadow: none
   overflow: hidden
 
 .home-page__parallax--centered :deep(.home-section)

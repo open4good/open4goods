@@ -8,11 +8,12 @@
     :size="size"
     :data-testid="testId"
     :aria-label="t('siteIdentity.menu.zoom.label')"
+    :aria-pressed="isZoomed"
     @click="toggleZoom"
   >
     <v-icon
       :icon="
-        isZoomed ? 'mdi-magnify-minus-outline' : 'mdi-magnify-plus-outline'
+        isZoomed ? 'mdi-face-woman' : 'mdi-face-woman-outline'
       "
     />
     <v-tooltip activator="parent" location="bottom">
@@ -52,9 +53,14 @@ const toggleZoom = () => {
 }
 
 const applyZoom = (zoomed: boolean) => {
-  if (typeof document !== 'undefined') {
-    document.documentElement.style.fontSize = zoomed ? '120%' : ''
+  if (typeof document === 'undefined') {
+    return
   }
+
+  const rootElement = document.documentElement
+
+  rootElement.style.fontSize = zoomed ? '120%' : ''
+  rootElement.classList.toggle('accessibility-layout', zoomed)
 }
 
 watch(isZoomed, val => {
@@ -68,9 +74,12 @@ onMounted(() => {
 
 <style scoped lang="sass">
 .zoom-toggle
-  background-color: rgba(var(--v-theme-surface-muted), 0.6)
   color: rgb(var(--v-theme-text-neutral-strong))
 
   &.v-btn--active
     color: rgb(var(--v-theme-accent-supporting))
+
+  &:focus-visible
+    outline: 2px solid rgba(var(--v-theme-accent-supporting), 0.6)
+    outline-offset: 3px
 </style>

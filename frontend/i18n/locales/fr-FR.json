@@ -55,17 +55,53 @@
         "helpers": [
           {
             "icon": "🌿",
-            "label": "Une évaluation écologique et environnementale unique"
+            "label": "Une évaluation écologique et environnementale unique",
+            "segments": [
+              {
+                "text": "Une évaluation écologique",
+                "to": "/impact-score"
+              },
+              {
+                "text": " et environnementale unique"
+              }
+            ]
           },
           {
             "icon": "🛡️",
-            "label": "100% indépendant, logiciel libre et données ouvertes"
+            "label": "100% indépendant, logiciel libre et données ouvertes",
+            "segments": [
+              {
+                "text": "100% indépendant, "
+              },
+              {
+                "text": "logiciel libre",
+                "to": "/opensource"
+              },
+              {
+                "text": " et "
+              },
+              {
+                "text": "données ouvertes",
+                "to": "/opendata"
+              }
+            ]
           },
           {
             "icon": "🏷️",
-            "label": "Sans se faire avoir sur les prix"
+            "label": "Sans se faire avoir sur les prix",
+            "segments": [
+              {
+                "text": "Sans se faire avoir sur les prix avec"
+              },
+              {
+                "text": "{partnersLink}",
+                "to": "/partenaires"
+              }
+            ]
           }
-        ]
+        ],
+        "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
+        "partnerLinkFallback": "nos partenaires"
       },
       "context": {
         "cornerLabel": "Résumé impact",
@@ -1611,12 +1647,12 @@
         "description": "Une erreur est survenue lors de l'interrogation du service de recherche. Veuillez réessayer."
       },
       "empty": {
-        "title": "Aucun résultat pour \u00ab {query} \u00bb",
+        "title": "Aucun résultat pour « {query} »",
         "description": "Essayez un autre mot-clé ou explorez le catalogue depuis la page des catégories."
       }
     },
     "results": {
-      "summary": "Affichage de {countLabel} pour \u00ab {query} \u00bb",
+      "summary": "Affichage de {countLabel} pour « {query} »",
       "count": {
         "one": "{count} résultat",
         "other": "{count} résultats"
@@ -2314,6 +2350,68 @@
       "mobileHelper": "Le cache reste disponible, les données en direct reprendront dès le retour du réseau.",
       "cta": "Réessayer",
       "dismiss": "Fermer"
+    },
+    "landing": {
+      "hero": {
+        "eyebrow": "PWA",
+        "title": "Votre compagnon éco sur mobile",
+        "subtitle": "Scanne, compare et nudger en quelques gestes. Pensé pour la décision rapide.",
+        "meta": {
+          "title": "Nudger – Compagnon mobile de l'impact",
+          "description": "Découvrez Nudger en version mobile-first : scanner de codes-barres, assistant IA et partage d'éco-guides.",
+          "imageAlt": "Vue mobile de Nudger avec actions rapides et scanner de code-barres."
+        }
+      },
+      "search": {
+        "title": "Recherche rapide",
+        "label": "Rechercher un produit",
+        "placeholder": "Tape une marque ou un produit",
+        "cta": "Rechercher"
+      },
+      "actions": {
+        "scan": {
+          "title": "Scanner un code-barres",
+          "description": "Utilise ta caméra pour obtenir instantanément impact et prix.",
+          "helper": "Aligne le code-barres dans le cadre pour un décodage immédiat.",
+          "loading": "Démarrage du scanner…",
+          "error": "Scanner indisponible. Réessaie ou lance une recherche.",
+          "badge": "Live"
+        },
+        "wizard": {
+          "title": "Assistant IA",
+          "description": "Quelques questions pour des choix éco personnalisés.",
+          "badge": "Nouveau"
+        },
+        "search": {
+          "title": "Rechercher",
+          "description": "Parcourir les produits dans toute la base Nudger.",
+          "badge": "Rapide"
+        },
+        "share": {
+          "title": "Partager au manager",
+          "description": "Montre comment Nudger réagit instantanément sur les pages produits.",
+          "badge": "Démo"
+        }
+      },
+      "share": {
+        "title": "Partager Nudger comme astuce",
+        "description": "Envoie une capture ou un lien depuis ta page produit : le manager voit immédiatement le retour Nudger.",
+        "cta": "Voir le rendu",
+        "modalTitle": "Montrer l'éco-guide en action",
+        "preview": {
+          "title": "Éco-guide Nudger",
+          "description": "Les nudges apparaissent en temps réel quand on partage une page commerciale avec Nudger activé.",
+          "tags": {
+            "impact": "Score d'impact",
+            "feedback": "Retour instantané",
+            "ecoGuide": "Éco-guide"
+          }
+        },
+        "note": "Aucune donnée n'est partagée sans action explicite. C'est une prévisualisation pour expliquer l'expérience."
+      },
+      "actionBar": {
+        "ariaLabel": "Actions rapides mobiles"
+      }
     }
   },
   "nudge-tool": {
@@ -2322,6 +2420,9 @@
       "seeAll": "Voir toutes les recommandations",
       "previous": "Précédent",
       "next": "Suivant"
+    },
+    "wizard": {
+      "welcome": "🤘"
     },
     "meta": {
       "matches": "{count} produits correspondent à vos choix"
@@ -2358,5 +2459,51 @@
       "close": "Fermer la bannière"
     }
   },
-  "welcome": "Bienvenue"
+  "welcome": "Bienvenue",
+  "share": {
+    "seo": {
+      "title": "Partager à Nudger",
+      "description": "Collez ou partagez n'importe quel lien produit pour voir son impact éco et le meilleur prix indexé."
+    },
+    "loader": {
+      "eyebrow": "Share-to",
+      "title": "Analyse en cours",
+      "pending": "Nous cherchons la meilleure correspondance…",
+      "error": "Impossible de lire ce lien.",
+      "timeout": "C'est un peu plus long que prévu.",
+      "progressAria": "Progression de l'analyse share-to",
+      "helper": "Nous tentons pendant {seconds} secondes.",
+      "standaloneHint": "Ouvert dans l'app installée",
+      "browserHint": "Gardez cet onglet ouvert pendant l'analyse"
+    },
+    "timeout": {
+      "title": "Les résultats se font attendre",
+      "body": "L'analyse a dépassé notre budget de 4s. Vous pouvez relancer pour continuer le polling."
+    },
+    "errors": {
+      "title": "Analyse impossible",
+      "generic": "Une erreur est survenue pendant la résolution du produit.",
+      "missingUrl": "Nous avons besoin de l'URL partagée pour lancer l'analyse."
+    },
+    "actions": {
+      "retry": "Réessayer"
+    },
+    "selection": {
+      "title": "Choisissez le bon produit",
+      "subtitle": "Plusieurs correspondances existent. Choisissez celle que vous avez partagée.",
+      "confidence": "{value}% de confiance",
+      "noPrice": "Prix indisponible",
+      "unknownSource": "Source inconnue",
+      "context": "{count} correspondances possibles"
+    },
+    "result": {
+      "eyebrow": "Meilleure correspondance",
+      "context": "Nous avons trouvé votre produit",
+      "helper": "Ouvrez la fiche complète pour comparer scores, historique des prix et vendeurs.",
+      "viewProduct": "Ouvrir la fiche produit",
+      "noPrice": "Pas de prix indexé",
+      "unknownSource": "Source inconnue"
+    },
+    "empty": "Aucun candidat n'est encore disponible."
+  }
 }

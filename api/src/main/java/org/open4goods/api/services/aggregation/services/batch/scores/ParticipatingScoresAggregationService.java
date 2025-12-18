@@ -7,6 +7,7 @@ import java.util.Map;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.ParticipatingScoreHelper;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
@@ -32,7 +33,8 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
-		Map<String, Map<String, Double>> aggregates = normalizedParticipations.computeIfAbsent(vConf.getId(), key -> ParticipatingScoreHelper.buildNormalizedParticipatingScores(vConf));
+		Map<String, Map<String, Double>> aggregates = normalizedParticipations.computeIfAbsent(vConf.getId(),
+				key -> ParticipatingScoreHelper.buildNormalizedParticipatingScores(vConf));
 
 		if (aggregates.isEmpty()) {
 			return;
@@ -44,7 +46,8 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 	private void handleAggregate(Product product, String aggregateName, Map<String, Double> participants) {
 		Double aggregatedValue = computeAggregatedValue(product, participants);
 		if (aggregatedValue == null) {
-			dedicatedLogger.warn("Skipping aggregate {} for {} due to missing sub-scores", aggregateName, product.getId());
+			dedicatedLogger.warn("Skipping aggregate {} for {} due to missing sub-scores", aggregateName,
+					product.getId());
 			return;
 		}
 
@@ -66,13 +69,27 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 		for (Map.Entry<String, Double> entry : participants.entrySet()) {
 			String scoreName = entry.getKey();
 			Score score = product.getScores().get(scoreName);
-			if (score == null) {
-				dedicatedLogger.warn("Missing participating score {} for product {}", scoreName, product.getId());
-				return null;
+			Double relativeValue = null;
+
+			if (score != null) {
+				relativeValue = resolveRelativeValue(scoreName, score);
+			} else {
+				// Fallback to batch average if score mechanism allows it (Virtualization by
+				// mean)
+				Cardinality batchStats = batchDatas.get(scoreName);
+				if (batchStats != null && batchStats.getAvg() != null) {
+					try {
+						relativeValue = relativize(batchStats.getAvg(), batchStats);
+						dedicatedLogger.debug("Using batch average fallback for missing score {} on {}", scoreName,
+								product.getId());
+					} catch (ValidationException e) {
+						dedicatedLogger.warn("Fallback relativization failed for {}", scoreName, e);
+					}
+				}
 			}
 
-			Double relativeValue = resolveRelativeValue(scoreName, score);
 			if (relativeValue == null) {
+				dedicatedLogger.warn("Missing participating score {} for product {}", scoreName, product.getId());
 				return null;
 			}
 

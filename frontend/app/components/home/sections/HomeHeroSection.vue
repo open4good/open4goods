@@ -10,9 +10,14 @@ import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 
+type HeroHelperSegment = {
+  text: string
+  to?: string
+}
+
 type HeroHelperItem = {
   icon: string
-  label: string
+  segments: HeroHelperSegment[]
 }
 
 const isHeroImageLoaded = ref(false)
@@ -24,6 +29,7 @@ const props = defineProps<{
   verticals?: VerticalConfigDto[]
   heroImageLight?: string
   heroImageDark?: string
+  partnersCount?: number
 }>()
 
 const emit = defineEmits<{
@@ -33,9 +39,11 @@ const emit = defineEmits<{
   'select-product': [payload: ProductSuggestionItem]
 }>()
 
-const { t, tm } = useI18n()
+const { t, tm, locale } = useI18n()
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
+
+const partnersLinkPlaceholder = '{partnersLink}'
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -44,6 +52,34 @@ const wizardVerticals = computed(() => props.verticals ?? [])
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
+}
+
+const normalizeHelperSegments = (segments: unknown): HeroHelperSegment[] => {
+  if (!Array.isArray(segments)) {
+    return []
+  }
+
+  return segments
+    .map(segment => {
+      if (typeof segment !== 'object' || segment == null) {
+        return null
+      }
+
+      const { text, to } = segment as { text?: unknown; to?: unknown }
+      const normalizedText = typeof text === 'string' ? text.trim() : ''
+      const normalizedTo =
+        typeof to === 'string' && to.trim().length > 0 ? to.trim() : undefined
+
+      if (!normalizedText) {
+        return null
+      }
+
+      return {
+        text: normalizedText,
+        to: normalizedTo,
+      }
+    })
+    .filter((segment): segment is HeroHelperSegment => segment != null)
 }
 
 const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
@@ -57,19 +93,30 @@ const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
         return null
       }
 
-      const { icon, label } = rawItem as { icon?: unknown; label?: unknown }
-      const normalizedLabel = typeof label === 'string' ? label.trim() : ''
-
-      if (!normalizedLabel) {
-        return null
+      const { icon, label, segments, labelParts } = rawItem as {
+        icon?: unknown
+        label?: unknown
+        segments?: unknown
+        labelParts?: unknown
       }
 
       const normalizedIcon =
         typeof icon === 'string' && icon.trim().length > 0 ? icon.trim() : '•'
+      const normalizedSegments = normalizeHelperSegments(segments ?? labelParts)
+
+      if (normalizedSegments.length === 0) {
+        const normalizedLabel = typeof label === 'string' ? label.trim() : ''
+
+        if (!normalizedLabel) {
+          return null
+        }
+
+        normalizedSegments.push({ text: normalizedLabel })
+      }
 
       return {
         icon: normalizedIcon,
-        label: normalizedLabel,
+        segments: normalizedSegments,
       }
     })
     .filter((item): item is HeroHelperItem => item != null)
@@ -79,7 +126,7 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   const translatedItems = normalizeHelperItems(tm('home.hero.search.helpers'))
 
   if (translatedItems.length > 0) {
-    return translatedItems
+    return applyPartnerLinkPlaceholder(translatedItems)
   }
 
   const fallback = String(t('home.hero.search.helper'))
@@ -89,13 +136,116 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
     return []
   }
 
-  return [
+  return applyPartnerLinkPlaceholder([
     {
       icon: '⚡',
-      label: trimmedFallback,
+      segments: [
+        {
+          text: trimmedFallback,
+        },
+      ],
     },
-  ]
+  ])
 })
+
+const normalizedPartnersCount = computed(() => {
+  const rawCount = Number(props.partnersCount ?? 0)
+
+  if (!Number.isFinite(rawCount)) {
+    return 0
+  }
+
+  return Math.max(0, Math.round(rawCount))
+})
+
+const formattedPartnersCount = computed(() => {
+  const count = normalizedPartnersCount.value
+
+  if (!count) {
+    return null
+  }
+
+  try {
+    return new Intl.NumberFormat(locale.value).format(count)
+  } catch {
+    return String(count)
+  }
+})
+
+const heroPartnersLinkText = computed(() => {
+  const count = normalizedPartnersCount.value
+  const formattedCount = formattedPartnersCount.value
+  const fallbackLabel = String(t('home.hero.search.partnerLinkFallback')).trim()
+
+  if (!count || !formattedCount) {
+    return fallbackLabel || null
+  }
+
+  const translated = t('home.hero.search.partnerLinkLabel', count, {
+    count,
+    formattedCount,
+  })
+
+  const normalizedTranslation =
+    typeof translated === 'string'
+      ? translated.trim()
+      : String(translated ?? '').trim()
+
+  if (
+    normalizedTranslation &&
+    normalizedTranslation !== 'home.hero.search.partnerLinkLabel'
+  ) {
+    return normalizedTranslation
+  }
+
+  if (!fallbackLabel) {
+    return formattedCount
+  }
+
+  return `${formattedCount} ${fallbackLabel}`
+})
+
+const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
+  const partnerLinkText = heroPartnersLinkText.value
+
+  if (!partnerLinkText) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithPartnerLink = item.segments
+      .map(segment => {
+        if (!segment.text.includes(partnersLinkPlaceholder)) {
+          return segment
+        }
+
+        const replacedText = segment.text.replaceAll(
+          partnersLinkPlaceholder,
+          partnerLinkText
+        )
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHelperSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithPartnerLink.length > 0
+          ? segmentsWithPartnerLink
+          : item.segments,
+    }
+  })
+}
 
 const heroIconAlt = computed(() => String(t('home.hero.iconAlt')).trim())
 const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
@@ -233,14 +383,12 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                     class="home-hero__context-card"
                     surface="strong"
                     accent-corner="bottom-right"
-                    corner-variant="text"
+                    corner-variant="none"
                     corner-size="lg"
                     rounded="lg"
                     :selectable="false"
                     :elevation="10"
                     :hover-elevation="14"
-                    :corner-label="t('home.hero.context.cornerLabel')"
-                    :corner-tooltip="t('home.hero.context.cornerTooltip')"
                     :aria-label="t('home.hero.context.ariaLabel')"
                   >
                     <div class="home-hero__context">
@@ -278,9 +426,23 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
                               aria-hidden="true"
                               >{{ item.icon }}</span
                             >
-                            <span class="home-hero__helper-text">{{
-                              item.label
-                            }}</span>
+                            <span class="home-hero__helper-text">
+                              <template
+                                v-for="(segment, segmentIndex) in item.segments"
+                                :key="`hero-helper-segment-${index}-${segmentIndex}`"
+                              >
+                                <NuxtLink
+                                  v-if="segment.to"
+                                  class="home-hero__helper-link"
+                                  :to="segment.to"
+                                >
+                                  {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                                </NuxtLink>
+                                <span v-else>
+                                  {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                                </span>
+                              </template>
+                            </span>
                           </li>
                         </ul>
                       </div>
@@ -396,18 +558,24 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   margin: 0
 
 .home-hero__icon-wrapper
-  width: clamp(88px, 18vw, 136px)
-  height: clamp(88px, 18vw, 136px)
+  width: clamp(62px, 14vw, 96px)
+  height: clamp(62px, 14vw, 96px)
   box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
   backdrop-filter: blur(8px)
   border-radius: 50%
+  padding: clamp(0.6rem, 1.6vw, 0.9rem)
+  box-sizing: border-box
+  background: rgba(var(--v-theme-surface-default), 0.92)
 
 .home-hero__icon
   border-radius: inherit
-  width: 100%
-  height: 100%
+  width: 92%
+  height: 92%
   transition: transform 250ms ease, filter 250ms ease
   filter: drop-shadow(0 6px 14px rgba(var(--v-theme-shadow-primary-600), 0.25))
+  object-fit: contain
+  display: block
+  margin: auto
 
 .home-hero__icon--fade
   animation: home-hero-fade-up 900ms ease-out both
@@ -466,7 +634,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 .home-hero__helper-row
   display: grid
-  gap: 0.75rem
+  gap: clamp(0.9rem, 2vw, 1.4rem)
+  column-gap: clamp(1.1rem, 3vw, 1.75rem)
   grid-template-columns: auto 1fr
   align-items: center
 
@@ -474,7 +643,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   margin: 0
   padding: 0
   display: grid
-  gap: 0.35rem
+  gap: clamp(0.4rem, 1.5vw, 0.65rem)
   list-style: none
 
 .home-hero__helper
@@ -490,6 +659,13 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 .home-hero__helper-text
   line-height: 1.35
+
+.home-hero__helper-link
+  color: rgb(var(--v-theme-text-neutral-strong))
+  font-weight: 600
+  text-decoration: underline
+  text-decoration-thickness: 0.08em
+  text-underline-offset: 0.1em
 
 .home-hero__subtitle
   margin: 0
@@ -590,13 +766,6 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
   .home-hero__content
     order: 2
-
-  .home-hero__video-wrapper
-    aspect-ratio: 4 / 5
-    min-height: 320px
-
-  .home-hero__video
-    transform: scale(1.15)
 
 @media (min-width: 960px)
   .home-hero__panel-grid

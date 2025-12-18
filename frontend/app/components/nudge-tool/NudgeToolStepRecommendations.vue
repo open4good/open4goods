@@ -1,15 +1,6 @@
 <template>
   <div class="nudge-step-recos">
-    <div class="nudge-step-recos__header">
-      <div>
-        <h2 class="nudge-step-recos__title">
-          {{ $t('nudge-tool.steps.recommendations.title') }}
-        </h2>
-        <p class="nudge-step-recos__subtitle">
-          {{ $t('nudge-tool.steps.recommendations.subtitle') }}
-        </p>
-      </div>
-    </div>
+    <!-- Header removed, moved to Wizard -->
 
     <div v-if="loading" class="py-4">
       <v-skeleton-loader type="image, article" class="mb-4" />

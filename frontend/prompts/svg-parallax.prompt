@@ -1,4 +1,4 @@
- you will a background image, in svg format.
+ you will generate a background image, in svg format.
 
  must be 800 height svg image. for a parallax section of my website
  Will be included in the dark theme, through dark assets specific resources
@@ -98,6 +98,7 @@
 
 
 Logo is provided in screenshot, it must not appears in the generated background.
-Theme directon is Theme direction:
-Do you want a futuristic tech/glassmorphism vibe
-The SVG must be ready for subtle parallax/scroll effects (e.g. layered gradients, blurred glowing shapes)?
+
+Theme directon :
+Vibe is futuristic tech/glassmorphism
+The SVG must can be enhanced with for subtle parallax/scroll effects (e.g. layered gradients, blurred glowing shapes)

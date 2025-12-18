@@ -1,17 +1,5 @@
 <template>
   <div class="nudge-step-condition">
-    <h2 class="nudge-step-condition__title">
-      <v-icon
-        icon="mdi-numeric-3-circle"
-        color="accent-primary-highlight"
-        size="30"
-      />
-      {{ $t('nudge-tool.steps.condition.title') }}
-    </h2>
-    <p class="nudge-step-condition__subtitle">
-      {{ $t('nudge-tool.steps.condition.subtitle') }}
-    </p>
-
     <v-row dense class="nudge-step-condition__row" justify="center">
       <v-col
         v-for="option in options"
@@ -21,25 +9,30 @@
         class="d-flex"
       >
         <v-card
-          class="nudge-step-condition__card nudge-option-card"
+          class="nudge-step-condition__card nudge-toggle-card"
           :class="{
-            'nudge-option-card--selected': isSelected(option.value),
+            'nudge-toggle-card--selected': isSelected(option.value),
           }"
           rounded="lg"
           role="button"
           :aria-pressed="isSelected(option.value).toString()"
+          :aria-label="option.label"
+          tabindex="0"
           @click="() => toggleOption(option.value)"
+          @keydown.enter.prevent="toggleOption(option.value)"
+          @keydown.space.prevent="toggleOption(option.value)"
         >
-          <div class="nudge-step-condition__icon-wrapper">
-            <v-icon :icon="option.icon" size="26" />
-            <v-icon
-              v-if="isSelected(option.value)"
-              icon="mdi-check-circle"
-              size="18"
-              class="nudge-step-condition__check"
-            />
+          <div class="nudge-toggle-card__body">
+            <div class="nudge-toggle-card__icon-rail">
+              <div class="nudge-toggle-card__icon-shell">
+                <v-icon :icon="option.icon" size="26" />
+              </div>
+            </div>
+
+            <div class="nudge-toggle-card__content">
+              <p class="nudge-toggle-card__title">{{ option.label }}</p>
+            </div>
           </div>
-          <p class="nudge-step-condition__label">{{ option.label }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -91,54 +84,99 @@ const toggleOption = (choice: ProductConditionChoice) => {
 
 <style scoped lang="scss">
 .nudge-step-condition {
-  &__title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  &__subtitle {
-    color: rgb(var(--v-theme-text-neutral-secondary));
-    margin-bottom: 16px;
-  }
-
   &__row {
     row-gap: 12px;
   }
 
-  &__card {
+  .nudge-toggle-card {
     width: 100%;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
     justify-content: space-between;
-    padding: 14px 16px;
+    padding: 0;
+    overflow: hidden;
+    background: rgb(var(--v-theme-surface-primary-050)) !important;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    box-shadow: none;
+    transition: transform 140ms ease, border-color 160ms ease,
+      box-shadow 160ms ease, background-color 160ms ease;
+    cursor: pointer;
+
+    &__body {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      height: 100%;
+    }
+
+    &__icon-rail {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--v-theme-accent-supporting), 0.08);
+      padding: 14px 16px;
+      border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+      border-radius: 14px 10px 10px 14px;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    &__icon-shell {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(var(--v-theme-accent-supporting), 0.12);
+      color: rgb(var(--v-theme-accent-supporting));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease,
+        transform 160ms ease;
+    }
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 18px;
+      min-height: 100%;
+    }
+
+    &__title {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(var(--v-theme-accent-supporting), 0.6);
+      box-shadow: 0 10px 20px rgba(var(--v-theme-shadow-primary-600), 0.08);
+      outline: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(var(--v-theme-accent-supporting), 0.25);
+    }
   }
 
-  &__label {
-    margin: 0;
-    font-weight: 600;
-    flex: 1;
-  }
+  .nudge-toggle-card--selected {
+    background: rgba(var(--v-theme-accent-supporting), 0.12) !important;
+    border-color: rgb(var(--v-theme-accent-supporting));
 
-  &__icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    background: rgba(var(--v-theme-primary), 0.08);
-    color: rgb(var(--v-theme-primary));
-    position: relative;
-  }
+    .nudge-toggle-card__icon-rail {
+      background: rgba(var(--v-theme-accent-supporting), 0.2);
+      border-color: rgba(var(--v-theme-accent-supporting), 0.55);
+    }
 
-  &__check {
-    position: absolute;
-    right: -6px;
-    top: -6px;
-    color: rgb(var(--v-theme-primary));
+    .nudge-toggle-card__icon-shell {
+      background: rgba(var(--v-theme-accent-supporting), 0.24);
+      color: rgb(var(--v-theme-surface-default));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.55);
+      transform: translateY(-1px);
+    }
   }
 }
 </style>

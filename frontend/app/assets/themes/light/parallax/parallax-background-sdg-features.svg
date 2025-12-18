@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Light SDG features parallax background with geometric ribbons">
+  <defs>
+    <linearGradient id="sdgLightBase" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0F7FF" />
+      <stop offset="60%" stop-color="#E8FFF7" />
+      <stop offset="100%" stop-color="#E5F3FF" />
+    </linearGradient>
+    <linearGradient id="sdgLightRibbonA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#35B9EB" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#2ED18A" stop-opacity="0.32" />
+    </linearGradient>
+    <linearGradient id="sdgLightRibbonB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9AD8FF" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#7FE1B9" stop-opacity="0.18" />
+    </linearGradient>
+    <radialGradient id="sdgLightSpark" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1180 200) scale(400 320)">
+      <stop offset="0%" stop-color="#7FDAFF" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#7FDAFF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sdgLightBase)" />
+  <circle cx="1180" cy="200" r="320" fill="url(#sdgLightSpark)" />
+
+  <path d="M-40 360L460 520C640 580 820 580 1040 520L1640 360V900H-40Z" fill="url(#sdgLightRibbonA)" />
+  <path d="M-20 520L360 640C600 720 900 760 1200 700L1650 600V900H-20Z" fill="url(#sdgLightRibbonB)" />
+
+  <g fill="none" stroke="#34A5E5" stroke-width="2.6" opacity="0.35">
+    <path d="M100 320C260 280 520 280 760 340C1000 400 1320 420 1500 360" />
+    <path d="M200 220C420 190 680 210 920 280C1180 356 1430 370 1600 330" />
+  </g>
+
+  <g opacity="0.38" fill="#2CC18F">
+    <circle cx="320" cy="360" r="9" />
+    <circle cx="480" cy="310" r="8" />
+    <circle cx="640" cy="380" r="7" />
+    <circle cx="820" cy="300" r="10" />
+    <circle cx="1000" cy="260" r="8" />
+    <circle cx="1380" cy="320" r="9" />
+  </g>
+</svg>

@@ -55,17 +55,53 @@
         "helpers": [
           {
             "icon": "🌿",
-            "label": "A unique ecological and environmental assessment"
+            "label": "A unique ecological and environmental assessment",
+            "segments": [
+              {
+                "text": "A unique ecological assessment",
+                "to": "/impact-score"
+              },
+              {
+                "text": " and environmental review"
+              }
+            ]
           },
           {
             "icon": "🏷️",
-            "label": "The best prices on the market"
+            "label": "The best prices on the market",
+            "segments": [
+              {
+                "text": "Stay smart on prices with"
+              },
+              {
+                "text": "{partnersLink}",
+                "to": "/partners"
+              }
+            ]
           },
           {
             "icon": "🛡️",
-            "label": "Independent comparator, open-source software and open data"
+            "label": "Independent comparator, open-source software and open data",
+            "segments": [
+              {
+                "text": "Independent comparator, "
+              },
+              {
+                "text": "open-source software",
+                "to": "/opensource"
+              },
+              {
+                "text": " and "
+              },
+              {
+                "text": "open data",
+                "to": "/opendata"
+              }
+            ]
           }
-        ]
+        ],
+        "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
+        "partnerLinkFallback": "our partners"
       },
       "context": {
         "cornerLabel": "Impact digest",
@@ -1611,12 +1647,12 @@
         "description": "Something went wrong while contacting the search service. Please try again."
       },
       "empty": {
-        "title": "No results for \u201c{query}\u201d",
+        "title": "No results for “{query}”",
         "description": "Try another keyword or explore the catalogue from the categories page."
       }
     },
     "results": {
-      "summary": "Displaying {countLabel} for \u201c{query}\u201d",
+      "summary": "Displaying {countLabel} for “{query}”",
       "count": {
         "one": "{count} result",
         "other": "{count} results"
@@ -2311,6 +2347,68 @@
       "mobileHelper": "Content stays cached but live data resumes when you're back online.",
       "cta": "Retry",
       "dismiss": "Dismiss"
+    },
+    "landing": {
+      "hero": {
+        "eyebrow": "PWA",
+        "title": "Your eco-companion, right on mobile",
+        "subtitle": "Scan, compare, and nudge in a few taps. Designed for quick, on-the-go decisions.",
+        "meta": {
+          "title": "Nudger – Mobile impact companion",
+          "description": "Experience Nudger as a mobile-first PWA: scan barcodes, launch the AI wizard, and share eco-guides instantly.",
+          "imageAlt": "Mobile view of Nudger with quick actions and barcode scanner."
+        }
+      },
+      "search": {
+        "title": "Quick search",
+        "label": "Search a product",
+        "placeholder": "Type a brand or product name",
+        "cta": "Search now"
+      },
+      "actions": {
+        "scan": {
+          "title": "Scan barcode",
+          "description": "Use your camera to get instant impact and price insights.",
+          "helper": "Align the barcode inside the frame to decode instantly.",
+          "loading": "Starting scanner…",
+          "error": "Scanner unavailable. Try again or search manually.",
+          "badge": "Live"
+        },
+        "wizard": {
+          "title": "AI wizard",
+          "description": "Answer a few questions and get tailored eco picks.",
+          "badge": "New"
+        },
+        "search": {
+          "title": "Search",
+          "description": "Browse products with the full Nudger database.",
+          "badge": "Quick"
+        },
+        "share": {
+          "title": "Share with your manager",
+          "description": "Show teammates how Nudger reacts instantly on product pages.",
+          "badge": "Demo"
+        }
+      },
+      "share": {
+        "title": "Share Nudger as a pro tip",
+        "description": "Send a screenshot or link from your product page: the manager sees the impact feedback instantly.",
+        "cta": "See how it looks",
+        "modalTitle": "Show the eco-guide in action",
+        "preview": {
+          "title": "Nudger eco-guide",
+          "description": "Real-time nudges appear when sharing a commercial page with Nudger enabled.",
+          "tags": {
+            "impact": "Impact score",
+            "feedback": "Instant feedback",
+            "ecoGuide": "Eco guide"
+          }
+        },
+        "note": "No data is shared without your action. It is a visual preview to explain the experience."
+      },
+      "actionBar": {
+        "ariaLabel": "Mobile quick actions"
+      }
     }
   },
   "nudge-tool": {
@@ -2319,6 +2417,9 @@
       "seeAll": "See all recommendations",
       "previous": "Previous",
       "next": "Next"
+    },
+    "wizard": {
+      "welcome": "Welcome!"
     },
     "meta": {
       "matches": "{count} products match your choices"
@@ -2355,5 +2456,51 @@
       "close": "Close banner"
     }
   },
-  "welcome": "Welcome"
+  "welcome": "Welcome",
+  "share": {
+    "seo": {
+      "title": "Share to Nudger",
+      "description": "Paste or share any product link to see its eco impact and best indexed price."
+    },
+    "loader": {
+      "eyebrow": "Share-to",
+      "title": "Analyzing your link",
+      "pending": "Looking for the best match…",
+      "error": "We could not parse this link.",
+      "timeout": "This is taking longer than expected.",
+      "progressAria": "Share-to resolution progress",
+      "helper": "We keep trying for up to {seconds} seconds.",
+      "standaloneHint": "Running in the installed app",
+      "browserHint": "Stay on this tab while we fetch results"
+    },
+    "timeout": {
+      "title": "Results are not ready yet",
+      "body": "The analysis exceeded our 4s budget. You can retry to keep polling."
+    },
+    "errors": {
+      "title": "Cannot complete the analysis",
+      "generic": "Something went wrong while resolving this product.",
+      "missingUrl": "We need the shared URL to start the analysis."
+    },
+    "actions": {
+      "retry": "Retry"
+    },
+    "selection": {
+      "title": "Pick the right product",
+      "subtitle": "We found several close matches. Choose the one you shared.",
+      "confidence": "{value}% confidence",
+      "noPrice": "Price unavailable",
+      "unknownSource": "Unknown source",
+      "context": "{count} possible matches"
+    },
+    "result": {
+      "eyebrow": "Best match",
+      "context": "We found your product",
+      "helper": "Open the full product sheet to compare scores, price history and sellers.",
+      "viewProduct": "Open full product page",
+      "noPrice": "No indexed price",
+      "unknownSource": "Unknown source"
+    },
+    "empty": "No candidates were returned yet."
+  }
 }

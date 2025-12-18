@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Dark SDG blog parallax background with grid and glow">
+  <defs>
+    <linearGradient id="sdgDarkBlogBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0B1828" />
+      <stop offset="100%" stop-color="#0C2A38" />
+    </linearGradient>
+    <linearGradient id="sdgDarkBlogBand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3AA7F2" stop-opacity="0.38" />
+      <stop offset="100%" stop-color="#2BB07D" stop-opacity="0.32" />
+    </linearGradient>
+    <radialGradient id="sdgDarkBlogGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1380 260) scale(520 420)">
+      <stop offset="0%" stop-color="#2FB2FF" stop-opacity="0.36" />
+      <stop offset="100%" stop-color="#2FB2FF" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="sdgDarkBlogGrid" width="120" height="120" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="120" y2="0" stroke="#2B77C4" stroke-opacity="0.32" stroke-width="2" />
+      <line x1="0" y1="60" x2="120" y2="60" stroke="#2B77C4" stroke-opacity="0.2" stroke-width="1.4" />
+      <line x1="0" y1="120" x2="120" y2="120" stroke="#2B77C4" stroke-opacity="0.32" stroke-width="2" />
+      <line x1="0" y1="0" x2="0" y2="120" stroke="#2B77C4" stroke-opacity="0.32" stroke-width="2" />
+      <line x1="60" y1="0" x2="60" y2="120" stroke="#2B77C4" stroke-opacity="0.2" stroke-width="1.4" />
+      <line x1="120" y1="0" x2="120" y2="120" stroke="#2B77C4" stroke-opacity="0.32" stroke-width="2" />
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sdgDarkBlogBase)" />
+  <rect width="1600" height="900" fill="url(#sdgDarkBlogGrid)" opacity="0.18" />
+  <circle cx="1380" cy="260" r="360" fill="url(#sdgDarkBlogGlow)" />
+
+  <path d="M-20 500C220 440 540 420 820 450C1080 480 1320 560 1600 540V900H-20Z" fill="url(#sdgDarkBlogBand)" />
+  <path d="M-20 640C280 600 560 640 880 650C1180 656 1400 630 1600 600V900H-20Z" fill="#0F3B3F" opacity="0.7" />
+
+  <g fill="#2CBC87" opacity="0.5">
+    <circle cx="260" cy="360" r="9" />
+    <circle cx="520" cy="300" r="7" />
+    <circle cx="740" cy="380" r="8" />
+    <circle cx="980" cy="330" r="6" />
+  </g>
+
+  <g fill="#2A8EE5" opacity="0.5">
+    <circle cx="1160" cy="360" r="7" />
+    <circle cx="1240" cy="420" r="8" />
+    <circle cx="1360" cy="360" r="6" />
+    <circle cx="1480" cy="420" r="7" />
+  </g>
+</svg>

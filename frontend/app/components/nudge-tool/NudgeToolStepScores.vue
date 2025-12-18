@@ -1,17 +1,6 @@
 <template>
   <div class="nudge-step-scores">
-    <div class="nudge-step-scores__header">
-      <div>
-        <h2 class="nudge-step-scores__title">
-          <v-icon
-            icon="mdi-numeric-2-circle"
-            color="accent-primary-highlight"
-            size="30"
-          />
-          {{ $t('nudge-tool.steps.scores.title') }}
-        </h2>
-      </div>
-    </div>
+    <!-- Header removed, moved to Wizard -->
 
     <v-row class="nudge-step-scores__grid">
       <v-col v-for="score in scores" :key="score.scoreName" cols="12" sm="6">
@@ -23,33 +12,33 @@
           <template #activator="{ props: activatorProps }">
             <v-card
               v-bind="activatorProps"
-              class="nudge-step-scores__card nudge-option-card" variant="flat" border="thin"
+              class="nudge-step-scores__card nudge-toggle-card"
+              variant="flat"
+              border="thin"
               :class="{
-                'nudge-option-card--selected': isSelected(score.scoreName),
-                'nudge-step-scores__card--selected': isSelected(
-                  score.scoreName ?? ''
-                ),
+                'nudge-toggle-card--selected': isSelected(score.scoreName),
               }"
               rounded="lg"
               role="button"
               :aria-pressed="isSelected(score.scoreName).toString()"
+              :aria-label="score.title"
+              tabindex="0"
               @click="toggle(score.scoreName ?? '')"
+              @keydown.enter.prevent="toggle(score.scoreName ?? '')"
+              @keydown.space.prevent="toggle(score.scoreName ?? '')"
             >
-              <div class="nudge-step-scores__top-row">
-                <div class="nudge-step-scores__titles">
-                  <p class="nudge-step-scores__name">{{ score.title }}</p>
-                  <p v-if="score.caption" class="nudge-step-scores__caption">
+              <div class="nudge-toggle-card__body">
+                <div class="nudge-toggle-card__icon-rail">
+                  <div class="nudge-toggle-card__icon-shell">
+                    <v-icon :icon="getScoreIcon(score)" size="28" />
+                  </div>
+                </div>
+
+                <div class="nudge-toggle-card__content">
+                  <p class="nudge-toggle-card__title">{{ score.title }}</p>
+                  <p v-if="score.caption" class="nudge-toggle-card__caption">
                     {{ score.caption }}
                   </p>
-                </div>
-                <div class="nudge-step-scores__icon-wrapper">
-                  <v-icon :icon="getScoreIcon(score)" size="28" />
-                  <v-icon
-                    v-if="isSelected(score.scoreName)"
-                    icon="mdi-check-circle"
-                    size="18"
-                    class="nudge-step-scores__check"
-                  />
                 </div>
               </div>
             </v-card>
@@ -114,62 +103,107 @@ const toggle = (scoreName: string) => {
     row-gap: 12px;
   }
 
-  &__card {
+  .nudge-toggle-card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
     height: 100%;
-    border-radius: 22px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
     position: relative;
+    background: rgb(var(--v-theme-surface-primary-050)) !important;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    box-shadow: none;
+    transition: transform 140ms ease, border-color 160ms ease,
+      box-shadow 160ms ease, background-color 160ms ease;
+    cursor: pointer;
+
+    &__body {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      height: 100%;
+    }
+
+    &__icon-rail {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--v-theme-accent-supporting), 0.08);
+      padding: 14px 16px;
+      min-height: 100%;
+      border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+      border-radius: 14px 10px 10px 14px;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    &__icon-shell {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(var(--v-theme-accent-supporting), 0.12);
+      color: rgb(var(--v-theme-accent-supporting));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease,
+        transform 160ms ease;
+    }
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 14px 18px;
+      justify-content: center;
+      min-height: 100%;
+    }
+
+    &__title {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    &__caption {
+      margin: 0;
+      color: rgb(var(--v-theme-text-neutral-secondary));
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(var(--v-theme-accent-supporting), 0.6);
+      box-shadow: 0 10px 20px rgba(var(--v-theme-shadow-primary-600), 0.08);
+      outline: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(var(--v-theme-accent-supporting), 0.25);
+    }
   }
 
-  &__card--selected {
-    background: rgba(var(--v-theme-primary), 0.08) !important;
-  }
+  .nudge-toggle-card--selected {
+    background: rgba(var(--v-theme-accent-supporting), 0.12) !important;
+    border-color: rgb(var(--v-theme-accent-supporting));
 
-  &__top-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
+    .nudge-toggle-card__icon-rail {
+      background: rgba(var(--v-theme-accent-supporting), 0.2);
+      border-color: rgba(var(--v-theme-accent-supporting), 0.55);
+    }
 
-  &__titles {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+    .nudge-toggle-card__icon-shell {
+      background: rgba(var(--v-theme-accent-supporting), 0.22);
+      color: rgb(var(--v-theme-surface-default));
+      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.55);
+      transform: translateY(-1px);
+    }
 
-  &__name {
-    margin: 0;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
-  &__caption {
-    margin: 0;
-    color: rgb(var(--v-theme-text-neutral-secondary));
-    font-size: 0.95rem;
-  }
-
-  &__icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    background: rgba(var(--v-theme-primary), 0.08);
-    position: relative;
-    color: rgb(var(--v-theme-primary));
-  }
-
-  &__check {
-    position: absolute;
-    right: -6px;
-    top: -6px;
-    color: rgb(var(--v-theme-primary));
+    .nudge-toggle-card__title {
+      color: rgb(var(--v-theme-text-neutral-strong));
+    }
   }
 }
 </style>

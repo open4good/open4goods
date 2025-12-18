@@ -1,0 +1,17 @@
+{
+    "recommendations": [
+        "Vue.volar",
+        "Vue.vscode-typescript-vue-plugin",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-playwright.playwright",
+        "ms-vscode.vscode-typescript-next",
+        "GitHub.vscode-pull-request-github",
+        "mhutchie.git-graph",
+        "ms-azuretools.vscode-docker",
+        "vscjava.vscode-java-pack",
+        "redhat.java",
+        "redhat.vscode-xml",
+        "streetsidesoftware.code-spell-checker"
+    ]
+}

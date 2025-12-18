@@ -1,37 +1,16 @@
 <template>
   <div class="nudge-step-category">
-    <v-row justify="center" class="mt-2">
-      <h2 class="align-center nudge-step-category__title">
-        {{ $t('nudge-tool.steps.category.title') }}
-      </h2>
-    </v-row>
-    <div class="nudge-step-category__header">
-      <div class="nudge-step-category__subtitle-row">
-        <div
-          class="nudge-step-category__step"
-          :aria-label="$t('nudge-tool.steps.category.step', { step: 1 })"
-        >
-          <v-icon
-            icon="mdi-numeric-1-circle"
-            color="accent-primary-highlight"
-            size="22"
-          />
-        </div>
-
-        <p class="nudge-step-category__subtitle">
-          {{ $t('nudge-tool.steps.category.subtitle') }}
-        </p>
-      </div>
-    </div>
+    <!-- Header removed, moved to Wizard -->
 
     <v-slide-group
       v-model="selected"
       class="nudge-step-category__slider"
-      show-arrows
+      :class="{ 'nudge-step-category__slider--stacked': isMobile }"
+      :show-arrows="!isMobile"
       center-active
       mandatory
     >
-      <template #prev="{ props: prevArrowProps }">
+      <template v-if="!isMobile" #prev="{ props: prevArrowProps }">
         <v-btn
           v-bind="prevArrowProps"
           class="nudge-step-category__arrow"
@@ -41,7 +20,7 @@
         />
       </template>
 
-      <template #next="{ props: nextArrowProps }">
+      <template v-if="!isMobile" #next="{ props: nextArrowProps }">
         <v-btn
           v-bind="nextArrowProps"
           class="nudge-step-category__arrow"
@@ -57,7 +36,7 @@
         :value="category.id ?? ''"
       >
         <v-card
-          class="nudge-step-category__card nudge-option-card nudge-option-card--flat"
+          class="nudge-step-category__card nudge-option-card"
           :class="{
             'nudge-option-card--selected': selected === category.id,
           }"
@@ -69,7 +48,7 @@
         >
           <div class="nudge-step-category__image">
             <v-img
-              :src="category.imageSmall"
+              :src="category.imageMedium || category.imageSmall"
               :alt="category.verticalHomeTitle ?? category.id ?? ''"
               aspect-ratio="1"
               class="nudge-step-category__img"
@@ -99,6 +78,7 @@
 
 <script setup lang="ts">
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   categories: VerticalConfigDto[]
@@ -108,6 +88,8 @@ const props = defineProps<{
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
 
 const selected = ref<string | null>(props.selectedCategoryId ?? null)
+const display = useDisplay()
+const isMobile = computed(() => display.smAndDown.value)
 
 watch(
   () => props.selectedCategoryId,
@@ -137,9 +119,15 @@ watch(
   &__header {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 6px;
-    text-align: left;
+    text-align: center;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   &__step {
@@ -151,12 +139,6 @@ watch(
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
-  }
-
-  &__subtitle-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
   }
 
   &__subtitle {
@@ -179,6 +161,21 @@ watch(
       gap: 12px;
       padding-block: 4px;
     }
+
+    &--stacked {
+      padding-inline: 0;
+
+      :deep(.v-slide-group__container) {
+        overflow: visible;
+      }
+
+      :deep(.v-slide-group__content) {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        width: 100%;
+      }
+    }
   }
 
   &__arrow {
@@ -199,10 +196,12 @@ watch(
     gap: 8px;
     min-width: 160px;
     box-shadow: none;
+    background: transparent !important;
+    border: none !important;
   }
 
   &__image {
-    width: 72px;
+    width: 96px; /* Increased for medium image */
     aspect-ratio: 1 / 1;
     border-radius: 12px;
     overflow: hidden;
@@ -225,5 +224,23 @@ watch(
     margin: 0;
     font-weight: 600;
   }
+
+  @media (max-width: 600px) {
+    &__card {
+      min-width: 140px;
+      padding: 12px 10px;
+      gap: 6px;
+    }
+
+    &__image {
+      width: 80px;
+      border-radius: 10px;
+    }
+
+    &__name {
+      font-size: 0.95rem;
+    }
+  }
 }
 </style>
+
