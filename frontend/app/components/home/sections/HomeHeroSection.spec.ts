@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { defineComponent, h, ref } from 'vue'
+import { computed, defineComponent, h, ref } from 'vue'
 import HomeHeroSection from './HomeHeroSection.vue'
 
 const messages: Record<string, string> = {
@@ -71,6 +71,11 @@ vi.mock('vue-i18n', () => ({
       key === 'home.hero.search.helpers' ? helperItems : [],
     locale: ref('fr-FR'),
   }),
+}))
+
+vi.mock('~~/app/composables/useThemedAsset', () => ({
+  useHeroBackgroundAsset: () => computed(() => ''),
+  useThemeAsset: () => computed(() => '/themed/launcher-icon.svg'),
 }))
 
 const createStub = (tag: string, className = '') =>
@@ -152,9 +157,7 @@ describe('HomeHeroSection', () => {
     const icon = wrapper.find('.home-hero__icon')
 
     expect(eyebrow.text()).toBe(messages['home.hero.eyebrow'])
-    expect(icon.attributes('src')).toBe(
-      '/pwa-assets/icons/android/android-launchericon-512-512.png'
-    )
+    expect(icon.attributes('src')).toBe('/themed/launcher-icon.svg')
     expect(icon.attributes('alt')).toBe(messages['home.hero.iconAlt'])
 
     await wrapper.unmount()

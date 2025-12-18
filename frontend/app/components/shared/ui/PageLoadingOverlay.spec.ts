@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
-import { defineComponent, h, nextTick, ref } from 'vue'
+import { computed, defineComponent, h, nextTick, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
 import PageLoadingOverlay from './PageLoadingOverlay.vue'
 
@@ -8,6 +8,10 @@ const routeLoading = ref(false)
 
 vi.mock('#imports', () => ({
   useState: vi.fn(() => routeLoading),
+}))
+
+vi.mock('~~/app/composables/useThemedAsset', () => ({
+  useThemeAsset: () => computed(() => '/themed/launcher-icon.svg'),
 }))
 
 const stubs = {
@@ -25,6 +29,33 @@ const stubs = {
           ...attrs,
           'data-testid': 'page-loading-spinner',
           'aria-label': props.ariaLabel,
+        })
+    },
+  }),
+  VAvatar: defineComponent({
+    name: 'VAvatarStub',
+    setup(_, { slots, attrs }) {
+      return () =>
+        h(
+          'div',
+          { ...attrs, 'data-testid': 'page-loading-icon-wrapper' },
+          slots.default ? slots.default() : []
+        )
+    },
+  }),
+  VImg: defineComponent({
+    name: 'VImgStub',
+    props: {
+      src: { type: String, default: '' },
+      alt: { type: String, default: '' },
+    },
+    setup(props, { attrs }) {
+      return () =>
+        h('img', {
+          ...attrs,
+          'data-testid': 'page-loading-icon',
+          src: props.src,
+          alt: props.alt,
         })
     },
   }),
@@ -56,6 +87,8 @@ const mountOverlay = () =>
 
 const findOverlay = () =>
   document.body.querySelector('[data-testid="page-loading-overlay"]')
+const findIcon = () =>
+  document.body.querySelector('[data-testid="page-loading-icon"]')
 const findSpinner = () =>
   document.body.querySelector('[data-testid="page-loading-spinner"]')
 const flushOverlay = () => nextTick()
@@ -65,10 +98,14 @@ describe('PageLoadingOverlay', () => {
     routeLoading.value = false
     document.documentElement.style.overflow = ''
     findOverlay()?.remove()
+    findIcon()?.remove()
+    document
+      .querySelector('[data-testid="page-loading-icon-wrapper"]')
+      ?.remove()
     findSpinner()?.remove()
   })
 
-  it('renders the spinner when a route is loading', async () => {
+  it('renders the launcher icon when a route is loading', async () => {
     const wrapper = mountOverlay()
 
     routeLoading.value = true
@@ -78,9 +115,10 @@ describe('PageLoadingOverlay', () => {
     expect(overlay).not.toBeNull()
     expect(overlay?.getAttribute('aria-live')).toBe('polite')
 
-    const spinner = findSpinner()
-    expect(spinner).not.toBeNull()
-    expect(spinner?.getAttribute('aria-label')).toBe('Loading page content')
+    const icon = findIcon()
+    expect(icon).not.toBeNull()
+    expect(icon?.getAttribute('alt')).toBe('Loading page content')
+    expect(findSpinner()).toBeNull()
 
     wrapper.unmount()
   })

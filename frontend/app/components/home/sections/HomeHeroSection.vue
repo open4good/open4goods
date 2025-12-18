@@ -8,7 +8,10 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
-import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
+import {
+  useHeroBackgroundAsset,
+  useThemeAsset,
+} from '~~/app/composables/useThemedAsset'
 
 type HeroHelperSegment = {
   text: string
@@ -248,7 +251,7 @@ const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
 }
 
 const heroIconAlt = computed(() => String(t('home.hero.iconAlt')).trim())
-const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
+const heroIconSrc = useThemeAsset('launcherIcon')
 const heroIconAnimationOptions = [
   'home-hero__icon--fade',
   'home-hero__icon--scale',
@@ -259,7 +262,9 @@ const heroIconAnimation = ref(
     Math.floor(Math.random() * heroIconAnimationOptions.length)
   ] || heroIconAnimationOptions[0]
 )
-const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
+const showHeroIcon = computed(
+  () => Boolean(heroIconAlt.value && heroIconSrc.value)
+)
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundSrc = computed(() => {

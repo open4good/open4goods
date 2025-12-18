@@ -10,7 +10,6 @@ import HomeFeaturesSection from '~/components/home/sections/HomeFeaturesSection.
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
-import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
 import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 import type {
   CategorySuggestionItem,
@@ -109,7 +108,6 @@ type AnimatedSectionKey =
   | 'blog'
   | 'objections'
   | 'faq'
-  | 'cta'
 
 const prefersReducedMotion = usePreferredReducedMotion()
 
@@ -120,7 +118,6 @@ const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
   blog: false,
   objections: false,
   faq: false,
-  cta: false,
 })
 
 const markAllSectionsVisible = () => {
@@ -818,24 +815,6 @@ useHead(() => ({
                 <HomeFaqSection :items="faqPanels" />
               </div>
             </v-fade-transition>
-          </div>
-
-          <div
-            v-intersect="createIntersectHandler('cta')"
-            class="home-page__section"
-          >
-            <v-slide-y-transition :disabled="prefersReducedMotion">
-              <div v-show="animatedSections.cta">
-                <HomeCtaSection
-                  v-model:search-query="searchQuery"
-                  :categories-landing-url="categoriesLandingUrl"
-                  :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-                  @submit="handleSearchSubmit"
-                  @select-category="handleCategorySuggestion"
-                  @select-product="handleProductSuggestion"
-                />
-              </div>
-            </v-slide-y-transition>
           </div>
         </div>
       </ParallaxSection>

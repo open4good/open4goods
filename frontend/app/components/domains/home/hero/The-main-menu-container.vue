@@ -7,7 +7,13 @@ const handleToggleDrawer = () => emit('toggle-drawer')
 </script>
 
 <template>
-  <v-app-bar app flat color="surface-default" class="main-menu-app-bar">
+  <v-app-bar
+    app
+    flat
+    fixed
+    color="surface-default"
+    class="main-menu-app-bar"
+  >
     <v-container fluid class="py-0 mt-2">
       <div class="d-flex align-center w-100">
         <v-app-bar-title class="d-flex align-center mt-sm">
@@ -26,6 +32,7 @@ const handleToggleDrawer = () => emit('toggle-drawer')
   background-color: rgb(var(--v-theme-surface-default))
   border-radius: 0 0 40px 40px
   box-shadow: 0 16px 28px rgba(var(--v-theme-shadow-primary-600), 0.12);
+  z-index: 10
 
 @media (max-width: 959px)
   .main-menu-app-bar

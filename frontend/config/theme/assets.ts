@@ -8,6 +8,7 @@ export const THEME_ASSET_KEYS = [
   'favicon',
   'heroBackground',
   'illustration',
+  'launcherIcon',
 ] as const
 
 export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]
@@ -48,6 +49,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     favicon: 'favicon.svg',
     heroBackground: 'hero-background.webp',
     illustration: 'illustration-generic.svg',
+    launcherIcon: 'nudger-icon-light-rot-shape-only.svg',
   },
   dark: {
     logo: 'logo.png',
@@ -55,10 +57,12 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     favicon: 'favicon.svg',
     heroBackground: 'hero-background.svg',
     illustration: 'illustration-generic.svg',
+    launcherIcon: 'nudger-icon-light-rot-shape-only.svg',
   },
   common: {
     heroBackground: 'hero-background.svg',
     illustration: 'illustration-generic.svg',
+    launcherIcon: 'nudger-icon-light-rot-shape-only.svg',
   },
 }
 

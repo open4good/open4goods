@@ -11,7 +11,24 @@
         :style="{ backgroundColor: scrimColor }"
       >
         <div class="page-loading-overlay__content">
+          <v-avatar
+            v-if="showLoaderIcon"
+            data-testid="page-loading-icon-wrapper"
+            class="page-loading-overlay__avatar"
+            color="surface-glass"
+            size="96"
+            variant="flat"
+          >
+            <v-img
+              data-testid="page-loading-icon"
+              :src="loaderIcon"
+              :alt="spinnerLabel"
+              cover
+              eager
+            />
+          </v-avatar>
           <v-progress-circular
+            v-else
             data-testid="page-loading-spinner"
             color="primary"
             size="64"
@@ -27,6 +44,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useThemeAsset } from '~~/app/composables/useThemedAsset'
 
 const routeLoading = useState<boolean>('routeLoading', () => false)
 const { t } = useI18n()
@@ -35,6 +53,8 @@ const spinnerLabel = computed(() =>
   String(t('components.pageLoadingOverlay.label'))
 )
 const scrimColor = computed(() => 'rgba(var(--v-theme-surface-default), 0.72)')
+const loaderIcon = useThemeAsset('launcherIcon')
+const showLoaderIcon = computed(() => Boolean(loaderIcon.value))
 
 const previousOverflow = ref<string | null>(null)
 
@@ -110,6 +130,10 @@ onBeforeUnmount(() => {
   border-radius: 999px
   background: rgba(var(--v-theme-surface-glass), 0.85)
   box-shadow: 0 12px 40px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+.page-loading-overlay__avatar
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.24)
+  box-shadow: inset 0 0 0 2px rgba(var(--v-theme-surface-default), 0.48)
 
 .visually-hidden
   position: absolute
