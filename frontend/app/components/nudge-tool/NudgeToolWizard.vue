@@ -1,82 +1,111 @@
 <template>
   <RoundedCornerCard
-    class="nudge-wizard"
+    :class="['nudge-wizard', { 'nudge-wizard--content-mode': isContentMode }]"
     rounded="xl"
     elevation="3"
     accent-corner="top-left"
-    corner-size="xl"
+    corner-size="lg"
     corner-variant="custom"
     :style="{ height: formattedHeight }"
   >
     <template #corner>
-      <div 
+      <div
         class="nudge-wizard__corner-content"
-        :class="{ 'nudge-wizard__corner-content--clickable': shouldShowMatches }"
+        :class="{
+          'nudge-wizard__corner-content--clickable': shouldShowMatches,
+          'nudge-wizard__corner-content--active': isContentMode,
+        }"
+        :role="shouldShowMatches ? 'button' : undefined"
+        :tabindex="cornerTabIndex"
+        :aria-label="categorySummary?.label"
         @click="handleCornerClick"
+        @keydown="handleCornerKeydown"
       >
-        <div v-if="activeStepKey === 'category'" class="text-h5 font-weight-bold text-white">
+        <span class="nudge-wizard__smiley" aria-hidden="true">😊</span>
+        <div
+          v-if="activeStepKey === 'category'"
+          class="text-subtitle-1 font-weight-bold text-white text-center nudge-wizard__corner-title"
+        >
           {{ $t('nudge-tool.wizard.welcome') }}
         </div>
-        <div v-else-if="categorySummary" class="d-flex flex-column align-center justify-center fill-height pt-4 pb-2">
-             <div class="nudge-wizard__corner-icon mb-1">
-                <v-icon :icon="categorySummary.icon" size="32" color="white" />
-             </div>
-             <div class="text-caption font-weight-bold lh-1 text-white mb-1">{{ categorySummary.label }}</div>
-             <div class="text-caption text-white font-weight-black" style="font-size: 1.1em;">{{ animatedMatches }}</div>
+        <div
+          v-else-if="categorySummary"
+          class="d-flex flex-column align-center justify-center fill-height pt-3 pb-2 gap-1 text-center"
+        >
+          <div class="text-caption font-weight-bold lh-1 text-white nudge-wizard__corner-label">
+            {{ categorySummary.label }}
+          </div>
+          <div
+            class="text-caption text-white font-weight-black nudge-wizard__corner-count"
+          >
+            {{ animatedMatches }}
+          </div>
         </div>
       </div>
     </template>
-    <div ref="headerRef" class="nudge-wizard__header">
-      <h2 class="text-h5 font-weight-bold text-center mb-1">{{ currentStepTitle }}</h2>
-      <p v-if="currentStepSubtitle" class="text-subtitle-2 text-medium-emphasis text-center mb-4">{{ currentStepSubtitle }}</p>
-      
-      <div class="nudge-wizard__actions d-flex align-center justify-space-between w-100 px-4 mb-4">
-        <v-btn
-            v-if="hasPreviousStep"
-            variant="text"
-            prepend-icon="mdi-chevron-left"
-            @click="goToPrevious"
-        >
-            {{ $t('nudge-tool.actions.previous') }}
-        </v-btn>
-        <div v-else></div>
+    <div class="nudge-wizard__layout">
+      <div class="nudge-wizard__left-zone" aria-hidden="true" />
+      <div class="nudge-wizard__right-zone">
+        <div ref="headerRef" class="nudge-wizard__header">
+          <h2 class="nudge-wizard__title text-h5 font-weight-bold mb-1 text-wrap">
+            {{ currentStepTitle }}
+          </h2>
+          <p
+            v-if="currentStepSubtitle"
+            class="nudge-wizard__subtitle text-subtitle-2 text-medium-emphasis mb-4"
+          >
+            {{ currentStepSubtitle }}
+          </p>
 
-        <v-btn
-            v-if="hasNextStep"
-            color="primary"
-            variant="flat"
-            :disabled="isNextDisabled"
-            append-icon="mdi-chevron-right"
-            @click="goToNext"
-        >
-            {{ $t('nudge-tool.actions.next') }}
-        </v-btn>
+          <div class="nudge-wizard__actions d-flex align-center justify-space-between w-100 mb-4">
+            <v-btn
+              v-if="hasPreviousStep"
+              variant="text"
+              prepend-icon="mdi-chevron-left"
+              @click="goToPrevious"
+            >
+              {{ $t('nudge-tool.actions.previous') }}
+            </v-btn>
+            <div v-else class="nudge-wizard__actions-placeholder" />
+
+            <v-btn
+              v-if="hasNextStep"
+              color="primary"
+              variant="flat"
+              :disabled="isNextDisabled"
+              append-icon="mdi-chevron-right"
+              @click="goToNext"
+            >
+              {{ $t('nudge-tool.actions.next') }}
+            </v-btn>
+          </div>
+        </div>
+
+        <div v-if="loading" class="nudge-wizard__progress">
+          <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
+        </div>
+
+        <div ref="windowWrapperRef">
+          <v-window
+            v-model="activeStepKey"
+            class="nudge-wizard__window"
+            :touch="false"
+            :transition="windowTransition"
+            :reverse-transition="windowReverseTransition"
+            :style="{ minHeight: contentMinHeight }"
+          >
+            <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
+              <component
+                :is="step.component"
+                v-bind="step.props"
+                @select="onCategorySelect"
+                @update:model-value="(value: unknown) => step.onUpdate?.(value)"
+                @continue="goToNext"
+              />
+            </v-window-item>
+          </v-window>
+        </div>
       </div>
-    </div>
-
-    <div v-if="loading" class="nudge-wizard__progress">
-      <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
-    </div>
-
-    <div ref="windowWrapperRef">
-      <v-window
-        v-model="activeStepKey"
-        class="nudge-wizard__window"
-        :touch="false"
-        :transition="windowTransition"
-        :reverse-transition="windowReverseTransition"
-        :style="{ minHeight: contentMinHeight }"
-      >
-        <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
-          <component
-            :is="step.component"
-            v-bind="step.props"
-            @select="onCategorySelect"
-            @update:model-value="(value: unknown) => step.onUpdate?.(value)"
-            @continue="goToNext"
-          />
-        </v-window-item>
-      </v-window>
     </div>
     <!-- Footer removed -->
   </RoundedCornerCard>
@@ -463,9 +492,20 @@ const navigateToCategoryPage = () => {
 }
 
 const handleCornerClick = () => {
-    if (shouldShowMatches.value) {
-        navigateToCategoryPage()
-    }
+  if (shouldShowMatches.value) {
+    navigateToCategoryPage()
+  }
+}
+
+const handleCornerKeydown = (event: KeyboardEvent) => {
+  if (!shouldShowMatches.value) {
+    return
+  }
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    navigateToCategoryPage()
+  }
 }
 
 const hasPreviousStep = computed(() => {
@@ -493,6 +533,8 @@ const isNextDisabled = computed(() => {
 const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
 )
+
+const cornerTabIndex = computed(() => (shouldShowMatches.value ? 0 : -1))
 
 const isCategoryToCondition = computed(
   () =>
@@ -694,6 +736,8 @@ const contentMinHeight = computed(() => {
 }
 
 .nudge-wizard {
+  --nudge-wizard-corner-size: var(--rounded-card-corner-size, 72px);
+  --nudge-wizard-corner-offset: calc(var(--nudge-wizard-corner-size) * 0.55);
   position: relative;
   padding: clamp(1.5rem, 3vw, 2rem);
   width: 100%;
@@ -701,6 +745,17 @@ const contentMinHeight = computed(() => {
   display: flex;
   flex-direction: column;
   transition: height 500ms ease;
+
+  :deep(.rounded-card__corner) {
+    transition:
+      transform 220ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
+  }
+
+  &--content-mode :deep(.rounded-card__corner) {
+    transform: translateX(6px);
+  }
 
   &__corner-content {
     display: flex;
@@ -711,13 +766,78 @@ const contentMinHeight = computed(() => {
     height: 100%;
     text-align: center;
     line-height: 1.1;
-    
-    &--clickable {
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
+    gap: 6px;
+
+    &--active {
+      animation: nudge-wizard-corner-drift 500ms ease both;
     }
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.92;
+      }
+
+      &:focus-visible {
+        outline: 2px solid rgba(var(--v-theme-hero-gradient-start), 0.65);
+        outline-offset: 2px;
+        border-radius: 10px;
+      }
+    }
+  }
+
+  &__smiley {
+    font-size: clamp(2.4rem, 1.6rem + 2vw, 3.4rem);
+    line-height: 1;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  }
+
+  &__corner-title {
+    line-height: 1.2;
+    max-width: 14ch;
+  }
+
+  &__corner-label {
+    max-width: 16ch;
+  }
+
+  &__corner-count {
+    font-size: 1.15em;
+    letter-spacing: 0.01em;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.28fr) minmax(0, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.25rem);
+    width: 100%;
+    align-items: start;
+  }
+
+  &__left-zone {
+    min-height: clamp(140px, 22vh, 240px);
+    background: linear-gradient(
+      180deg,
+      rgba(var(--v-theme-surface-primary-100), 0.35),
+      rgba(var(--v-theme-surface-primary-080), 0.2)
+    );
+    border-radius: clamp(18px, 3vw, 26px);
+    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.25);
+    transition: transform 320ms ease, opacity 320ms ease, width 320ms ease;
+    opacity: 0.8;
+  }
+
+  &--content-mode &__left-zone {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+
+  &__right-zone {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-inline-start: var(--nudge-wizard-corner-offset);
   }
 
   &__header {
@@ -726,6 +846,7 @@ const contentMinHeight = computed(() => {
     align-items: stretch;
     gap: 8px;
     margin-bottom: 12px;
+    padding-inline-end: clamp(0.5rem, 1vw, 1rem);
   }
 
   &__header-row {
@@ -735,12 +856,36 @@ const contentMinHeight = computed(() => {
     flex-wrap: wrap;
   }
 
+  &__title,
+  &__subtitle {
+    text-align: center;
+  }
+
+  @media (min-width: 960px) {
+    &__title,
+    &__subtitle {
+      text-align: left;
+    }
+  }
+
+  &__actions {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-inline: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  &__actions-placeholder {
+    width: 42px;
+    flex-shrink: 0;
+  }
+
   &__stepper {
     width: 100%;
     min-width: 0;
   }
-
-
 
   &__progress {
     position: absolute;
@@ -762,6 +907,50 @@ const contentMinHeight = computed(() => {
     gap: 8px;
     margin-top: 12px;
     flex-wrap: wrap;
+  }
+}
+
+@keyframes nudge-wizard-corner-drift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 960px) {
+  .nudge-wizard {
+    &__layout {
+      grid-template-columns: 1fr;
+    }
+
+    &__left-zone {
+      min-height: 12px;
+      opacity: 0.6;
+    }
+
+    &__right-zone {
+      padding-inline-start: calc(var(--nudge-wizard-corner-offset) * 0.4);
+    }
+
+    :deep(.rounded-card__corner) {
+      transform: translateX(2px);
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .rounded-card {
+    padding: clamp(0.9rem, 3vw, 1.2rem);
+  }
+
+  .rounded-card__title {
+    font-size: 1.05rem;
+  }
+
+  .rounded-card__corner {
+    --rounded-card-corner-size: 52px;
   }
 }
 
