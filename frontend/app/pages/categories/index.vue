@@ -47,8 +47,6 @@
       v-if="navigationData"
       :categories="filteredCategories"
     />
-
-
   </div>
 </template>
 

@@ -61,7 +61,6 @@
           aria-hidden="true"
         >
           {{ separator }}
-
         </span>
 
         <meta itemprop="position" :content="String(index + 1)" />
@@ -93,7 +92,7 @@ const props = withDefaults(
   {
     variant: 'inline',
     separator: '/',
-  },
+  }
 )
 
 const visibleItems = computed(() =>
@@ -115,9 +114,11 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
       return { title: item.title, type: 'external', href: rawLink }
     }
 
-    const normalized = rawLink.startsWith('/') || rawLink.startsWith('#') ? rawLink : `/${rawLink}`
+    const normalized =
+      rawLink.startsWith('/') || rawLink.startsWith('#')
+        ? rawLink
+        : `/${rawLink}`
     return { title: item.title, type: 'internal', to: normalized }
-
   })
 })
 </script>
@@ -197,7 +198,8 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   gap: 0.6rem;
 }
 
-.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__divider {
+.category-navigation-breadcrumbs--pills
+  .category-navigation-breadcrumbs__divider {
   display: none;
 }
 
@@ -211,14 +213,17 @@ const breadcrumbItems = computed<BreadcrumbRenderItem[]>(() => {
   color: rgba(var(--v-theme-hero-pill-on-dark), 1);
 }
 
-.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link--interactive:hover,
-.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link--interactive:focus-visible {
+.category-navigation-breadcrumbs--pills
+  .category-navigation-breadcrumbs__link--interactive:hover,
+.category-navigation-breadcrumbs--pills
+  .category-navigation-breadcrumbs__link--interactive:focus-visible {
   background: rgba(var(--v-theme-hero-overlay-soft), 0.3);
   color: rgba(var(--v-theme-hero-pill-on-dark), 1);
   text-decoration: none;
 }
 
-.category-navigation-breadcrumbs--pills .category-navigation-breadcrumbs__link--current {
+.category-navigation-breadcrumbs--pills
+  .category-navigation-breadcrumbs__link--current {
   background: rgba(var(--v-theme-hero-overlay-soft), 0.28);
   opacity: 0.95;
 }

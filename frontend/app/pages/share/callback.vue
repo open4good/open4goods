@@ -55,7 +55,9 @@
             {{ t('share.errors.title') }}
           </p>
           <p class="share-callback__alert-body">
-            {{ resolution?.message ?? errorMessage ?? t('share.errors.generic') }}
+            {{
+              resolution?.message ?? errorMessage ?? t('share.errors.generic')
+            }}
           </p>
           <v-btn color="primary" variant="text" @click="restart">
             {{ t('share.actions.retry') }}
@@ -140,14 +142,18 @@ const {
 
 const selectedCandidate = ref<ShareCandidateDto | null>(null)
 
-const hasCandidates = computed(() => (resolution.value?.candidates?.length ?? 0) > 0)
+const hasCandidates = computed(
+  () => (resolution.value?.candidates?.length ?? 0) > 0
+)
 const hasMultipleCandidates = computed(
   () => (resolution.value?.candidates?.length ?? 0) > 1
 )
 
 const contextLabel = computed(() =>
   hasMultipleCandidates.value
-    ? t('share.selection.context', { count: resolution.value?.candidates.length ?? 0 })
+    ? t('share.selection.context', {
+        count: resolution.value?.candidates.length ?? 0,
+      })
     : t('share.result.context')
 )
 
@@ -157,8 +163,9 @@ const extractDisplayMode = () => {
   }
 
   const media = window.matchMedia('(display-mode: standalone)')
-  const navigatorWithStandalone =
-    window.navigator as Navigator & { standalone?: boolean }
+  const navigatorWithStandalone = window.navigator as Navigator & {
+    standalone?: boolean
+  }
   const updateStandalone = () => {
     isStandalone.value =
       media.matches || navigatorWithStandalone.standalone === true

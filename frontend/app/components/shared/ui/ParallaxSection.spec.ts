@@ -42,7 +42,8 @@ const stubs = {
   VContainer: defineComponent({
     name: 'VContainerStub',
     setup(_, { slots, attrs }) {
-      return () => h('div', { class: 'v-container', ...attrs }, slots.default?.())
+      return () =>
+        h('div', { class: 'v-container', ...attrs }, slots.default?.())
     },
   }),
 }

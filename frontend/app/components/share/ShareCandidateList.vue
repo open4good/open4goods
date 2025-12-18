@@ -62,10 +62,18 @@
               {{ formatPrice(candidate.bestPrice) }}
             </span>
             <span class="share-candidates__price-source">
-              {{ candidate.bestPrice.datasourceName ?? t('share.selection.unknownSource') }}
+              {{
+                candidate.bestPrice.datasourceName ??
+                t('share.selection.unknownSource')
+              }}
             </span>
           </div>
-          <v-btn icon="mdi-chevron-right" variant="text" color="primary" aria-hidden="true" />
+          <v-btn
+            icon="mdi-chevron-right"
+            variant="text"
+            color="primary"
+            aria-hidden="true"
+          />
         </template>
       </v-list-item>
     </v-list>

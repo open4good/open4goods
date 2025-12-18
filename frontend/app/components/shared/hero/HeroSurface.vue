@@ -22,8 +22,7 @@ const props = withDefaults(
     tag: 'section',
     variant: 'aurora',
     bleed: false,
-  },
-
+  }
 )
 
 const attrs = useAttrs()

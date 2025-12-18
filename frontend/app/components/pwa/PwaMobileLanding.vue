@@ -26,7 +26,11 @@
                 {{ t('pwa.landing.hero.subtitle') }}
               </p>
 
-              <v-card class="pwa-landing__search" variant="elevated" rounded="lg">
+              <v-card
+                class="pwa-landing__search"
+                variant="elevated"
+                rounded="lg"
+              >
                 <v-card-title class="text-subtitle-1 font-weight-bold pb-1">
                   {{ t('pwa.landing.search.title') }}
                 </v-card-title>
@@ -81,7 +85,10 @@
             <v-card-item>
               <div class="d-flex align-center justify-space-between mb-2">
                 <v-avatar size="40" color="surface-primary-120">
-                  <v-icon :icon="action.icon" color="accent-primary-highlight" />
+                  <v-icon
+                    :icon="action.icon"
+                    color="accent-primary-highlight"
+                  />
                 </v-avatar>
                 <v-chip
                   v-if="action.badge"
@@ -114,13 +121,19 @@
           >
             <v-card-item class="d-flex align-center ga-3">
               <v-avatar size="56" color="surface-primary-120">
-                <v-icon icon="mdi-account-tie" size="30" color="accent-primary-highlight" />
+                <v-icon
+                  icon="mdi-account-tie"
+                  size="30"
+                  color="accent-primary-highlight"
+                />
               </v-avatar>
               <div class="flex-1">
                 <v-card-title class="text-subtitle-1 font-weight-bold px-0">
                   {{ t('pwa.landing.share.title') }}
                 </v-card-title>
-                <v-card-subtitle class="text-body-2 text-neutral-secondary px-0">
+                <v-card-subtitle
+                  class="text-body-2 text-neutral-secondary px-0"
+                >
                   {{ t('pwa.landing.share.description') }}
                 </v-card-subtitle>
               </div>
@@ -141,13 +154,21 @@
     </v-container>
 
     <ClientOnly>
-      <v-dialog v-model="isScannerOpen" max-width="520" transition="dialog-bottom-transition">
+      <v-dialog
+        v-model="isScannerOpen"
+        max-width="520"
+        transition="dialog-bottom-transition"
+      >
         <v-card rounded="xl" class="pwa-landing__dialog-card">
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-h6 font-weight-bold">
               {{ t('pwa.landing.actions.scan.title') }}
             </span>
-            <v-btn icon="mdi-close" variant="text" @click="isScannerOpen = false" />
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              @click="isScannerOpen = false"
+            />
           </v-card-title>
           <v-card-text>
             <p class="text-body-2 text-neutral-secondary mb-3">
@@ -174,7 +195,11 @@
             <span class="text-h6 font-weight-bold">
               {{ t('pwa.landing.actions.wizard.title') }}
             </span>
-            <v-btn icon="mdi-close" variant="text" @click="isWizardOpen = false" />
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              @click="isWizardOpen = false"
+            />
           </v-card-title>
           <v-card-text class="pt-0">
             <NudgeToolWizard
@@ -186,19 +211,33 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="isShareDialogOpen" max-width="520" transition="dialog-bottom-transition">
+      <v-dialog
+        v-model="isShareDialogOpen"
+        max-width="520"
+        transition="dialog-bottom-transition"
+      >
         <v-card rounded="xl" class="pwa-landing__dialog-card">
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-h6 font-weight-bold">
               {{ t('pwa.landing.share.modalTitle') }}
             </span>
-            <v-btn icon="mdi-close" variant="text" @click="isShareDialogOpen = false" />
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              @click="isShareDialogOpen = false"
+            />
           </v-card-title>
           <v-card-text>
             <div class="pwa-landing__share-preview">
               <div class="pwa-landing__share-preview__header">
-                <v-icon icon="mdi-shield-star" size="26" color="accent-primary-highlight" />
-                <span class="font-weight-bold">{{ t('pwa.landing.share.preview.title') }}</span>
+                <v-icon
+                  icon="mdi-shield-star"
+                  size="26"
+                  color="accent-primary-highlight"
+                />
+                <span class="font-weight-bold">{{
+                  t('pwa.landing.share.preview.title')
+                }}</span>
               </div>
               <p class="text-body-2 text-neutral-secondary mt-2">
                 {{ t('pwa.landing.share.preview.description') }}

@@ -87,7 +87,6 @@
                   >
                     {{ t('categories.navigation.verticals.viewPathCta') }}
                   </NuxtLink>
-
                 </div>
               </div>
             </v-sheet>

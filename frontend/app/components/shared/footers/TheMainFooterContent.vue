@@ -89,7 +89,6 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 ])
 
 const footerLogo = useFooterLogoAsset()
-
 </script>
 
 <template>
@@ -115,7 +114,10 @@ const footerLogo = useFooterLogoAsset()
             {{ t('siteIdentity.footer.feedback.cta') }}
           </v-btn>
 
-          <nav class="d-flex flex-column ga-1 mt-2" :aria-label="t('siteIdentity.footer.feedback.title')">
+          <nav
+            class="d-flex flex-column ga-1 mt-2"
+            :aria-label="t('siteIdentity.footer.feedback.title')"
+          >
             <NuxtLink
               v-for="link in feedbackLinks"
               :key="String(link.to ?? link.href ?? link.label)"
@@ -158,7 +160,10 @@ const footerLogo = useFooterLogoAsset()
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.comparator.title') }}
           </div>
-          <nav class="d-flex flex-column ga-1 mt-2" :aria-label="t('siteIdentity.footer.comparator.title')">
+          <nav
+            class="d-flex flex-column ga-1 mt-2"
+            :aria-label="t('siteIdentity.footer.comparator.title')"
+          >
             <NuxtLink
               v-for="link in resourceLinks"
               :key="String(link.to ?? link.href ?? link.label)"
@@ -192,7 +197,10 @@ const footerLogo = useFooterLogoAsset()
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.community.title') }}
           </div>
-          <nav class="d-flex flex-column ga-1 mt-2" :aria-label="t('siteIdentity.footer.community.title')">
+          <nav
+            class="d-flex flex-column ga-1 mt-2"
+            :aria-label="t('siteIdentity.footer.community.title')"
+          >
             <NuxtLink
               v-for="link in communityLinks"
               :key="String(link.to ?? link.href ?? link.label)"
@@ -291,7 +299,6 @@ const footerLogo = useFooterLogoAsset()
   background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
   text-decoration: none;
 }
-
 
 .footer-bottom {
   position: relative;

@@ -99,8 +99,11 @@ const toggleOption = (choice: ProductConditionChoice) => {
     background: rgb(var(--v-theme-surface-primary-050)) !important;
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
     box-shadow: none;
-    transition: transform 140ms ease, border-color 160ms ease,
-      box-shadow 160ms ease, background-color 160ms ease;
+    transition:
+      transform 140ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
     cursor: pointer;
 
     &__body {
@@ -118,7 +121,9 @@ const toggleOption = (choice: ProductConditionChoice) => {
       padding: 14px 16px;
       border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
       border-radius: 14px 10px 10px 14px;
-      transition: background 160ms ease, border-color 160ms ease;
+      transition:
+        background 160ms ease,
+        border-color 160ms ease;
     }
 
     &__icon-shell {
@@ -129,8 +134,12 @@ const toggleOption = (choice: ProductConditionChoice) => {
       place-items: center;
       background: rgba(var(--v-theme-accent-supporting), 0.12);
       color: rgb(var(--v-theme-accent-supporting));
-      box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.2);
-      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease,
+      box-shadow: inset 0 0 0 1px
+        rgba(var(--v-theme-border-primary-strong), 0.2);
+      transition:
+        background 160ms ease,
+        color 160ms ease,
+        box-shadow 160ms ease,
         transform 160ms ease;
     }
 

@@ -1,5 +1,8 @@
 import { computed } from 'vue'
-import { PARALLAX_SECTION_KEYS, type ParallaxSectionKey } from '~~/config/theme/assets'
+import {
+  PARALLAX_SECTION_KEYS,
+  type ParallaxSectionKey,
+} from '~~/config/theme/assets'
 
 export type ParallaxSectionConfig = {
   overlay: number
@@ -8,7 +11,9 @@ export type ParallaxSectionConfig = {
   maxOffsetRatio: number | null
 }
 
-type ParallaxSectionOverride = Partial<Omit<ParallaxSectionConfig, 'ariaLabel'>> & {
+type ParallaxSectionOverride = Partial<
+  Omit<ParallaxSectionConfig, 'ariaLabel'>
+> & {
   ariaLabel?: string
 }
 
@@ -56,7 +61,9 @@ export const useParallaxConfig = () => {
   >(() => runtimeConfig.public?.parallaxSections ?? {})
 
   return computed<Record<ParallaxSectionKey, ParallaxSectionConfig>>(() =>
-    PARALLAX_SECTION_KEYS.reduce<Record<ParallaxSectionKey, ParallaxSectionConfig>>(
+    PARALLAX_SECTION_KEYS.reduce<
+      Record<ParallaxSectionKey, ParallaxSectionConfig>
+    >(
       (acc, section) => ({
         ...acc,
         [section]: {

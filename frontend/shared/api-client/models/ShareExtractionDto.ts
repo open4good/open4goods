@@ -5,9 +5,7 @@ export interface ShareExtractionDto {
   query?: string | null
 }
 
-export function ShareExtractionDtoFromJSON(
-  json: any
-): ShareExtractionDto {
+export function ShareExtractionDtoFromJSON(json: any): ShareExtractionDto {
   return mapValues(json)
 }
 

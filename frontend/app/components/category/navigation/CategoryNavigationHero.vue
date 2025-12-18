@@ -2,7 +2,7 @@
   <HeroSurface
     class="category-navigation-hero"
     :aria-labelledby="titleId"
-     variant="orbit"
+    variant="orbit"
   >
     <v-container class="py-16 px-4" max-width="lg">
       <v-row align="center" class="g-8">
@@ -23,15 +23,26 @@
               {{ description }}
             </p>
 
-            <p v-if="resultSummary" class="category-navigation-hero__summary" aria-live="polite">
+            <p
+              v-if="resultSummary"
+              class="category-navigation-hero__summary"
+              aria-live="polite"
+            >
               {{ resultSummary }}
             </p>
           </div>
         </v-col>
 
         <v-col cols="12" md="5">
-          <v-card class="category-navigation-hero__search-card" rounded="xl" elevation="6">
-            <div class="category-navigation-hero__search-card-inner" role="search">
+          <v-card
+            class="category-navigation-hero__search-card"
+            rounded="xl"
+            elevation="6"
+          >
+            <div
+              class="category-navigation-hero__search-card-inner"
+              role="search"
+            >
               <p class="category-navigation-hero__search-label">
                 {{ searchLabel }}
               </p>

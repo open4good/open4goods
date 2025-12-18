@@ -66,9 +66,7 @@ describe('useShareResolution', () => {
   })
 
   it('forces a timeout when the SLA budget is exceeded', async () => {
-    const fetcher = vi
-      .fn()
-      .mockResolvedValue(pendingSnapshot)
+    const fetcher = vi.fn().mockResolvedValue(pendingSnapshot)
 
     const { status, startResolution } = useShareResolution({
       fetcher,

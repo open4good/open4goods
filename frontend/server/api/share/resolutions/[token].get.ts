@@ -20,7 +20,8 @@ export default defineEventHandler(async event => {
   setDomainLanguageCacheHeaders(event, 'private, max-age=0, no-store')
 
   const { token } = getRouterParams<ShareResolutionParams>(event)
-  const { domainLanguage: queryLanguage } = getQuery<ShareResolutionQuery>(event)
+  const { domainLanguage: queryLanguage } =
+    getQuery<ShareResolutionQuery>(event)
 
   if (!token) {
     throw createError({ statusCode: 400, statusMessage: 'Missing token' })

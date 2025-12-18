@@ -24,19 +24,11 @@
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "fullscreen",
-    "window-controls-overlay"
-  ],
+  "display_override": ["standalone", "fullscreen", "window-controls-overlay"],
   "orientation": "portrait",
   "background_color": "#F3FFFB",
   "theme_color": "#00DE9F",
-  "categories": [
-    "shopping",
-    "lifestyle",
-    "productivity"
-  ],
+  "categories": ["shopping", "lifestyle", "productivity"],
   "handle_links": "preferred",
   "prefer_related_applications": false,
   "icons": [

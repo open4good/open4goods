@@ -266,7 +266,6 @@ useHead(() => ({
     },
   ],
 }))
-
 </script>
 
 <style scoped lang="sass">

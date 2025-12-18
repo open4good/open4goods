@@ -5,19 +5,19 @@ export default defineConfig({
   timeout: 120000,
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.01
-    }
+      maxDiffPixelRatio: 0.01,
+    },
   },
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     headless: true,
-    trace: 'on-first-retry'
+    trace: 'on-first-retry',
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
-    }
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]]
+  reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
 })

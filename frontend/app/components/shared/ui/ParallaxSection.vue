@@ -120,8 +120,7 @@ const resolveLayer = (value: ParallaxLayerInput): ParallaxLayer | null => {
 
   return {
     src,
-    speed:
-      typeof value.speed === 'number' ? value.speed : props.parallaxAmount,
+    speed: typeof value.speed === 'number' ? value.speed : props.parallaxAmount,
     blendMode: blendMode?.length ? blendMode : undefined,
   }
 }
@@ -204,7 +203,7 @@ const mediaStyles = computed<CSSProperties>(() => ({
 
 const contentStyles = computed<CSSProperties>(() => ({
   paddingBlock: props.gapless
-    ? props.paddingY ?? '0'
+    ? (props.paddingY ?? '0')
     : props.paddingY || undefined,
 }))
 
@@ -221,7 +220,7 @@ const contentAlignClass = computed(() =>
 
 const containerPaddingStyle = computed<CSSProperties>(() => ({
   paddingInline: props.gapless
-    ? props.containerPadding ?? '0'
+    ? (props.containerPadding ?? '0')
     : props.containerPadding || undefined,
 }))
 </script>

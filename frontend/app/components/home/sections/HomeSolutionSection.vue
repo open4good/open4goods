@@ -18,9 +18,17 @@ const sectionDescription = computed(() => t('home.solution.description'))
 </script>
 
 <template>
-  <section id="home-solution" class="home-solution" aria-labelledby="home-solution-title">
+  <section
+    id="home-solution"
+    class="home-solution"
+    aria-labelledby="home-solution-title"
+  >
     <div class="home-solution__inner">
-      <v-row class="home-solution__layout" align="center" justify="space-between">
+      <v-row
+        class="home-solution__layout"
+        align="center"
+        justify="space-between"
+      >
         <v-col cols="12" md="6" class="home-solution__copy">
           <header class="home-section__header">
             <h2 id="home-solution-title">{{ sectionTitle }}</h2>
@@ -158,6 +166,4 @@ const sectionDescription = computed(() => t('home.solution.description'))
     align-items: center
   .home-solution__texts
     align-items: center
-
 </style>
-

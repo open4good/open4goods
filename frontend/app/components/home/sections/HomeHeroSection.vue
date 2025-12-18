@@ -269,7 +269,7 @@ const heroBackgroundSrc = computed(() => {
   /* We assume light theme as default for SSR unless reliable cookie sync is present. */
   // If we can't guarantee theme sync, we should force a default, then switch on mount.
   // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.
-  
+
   const isDarkMode = Boolean(theme.global.current.value.dark)
   const lightImage = props.heroImageLight?.trim()
   const darkImage = props.heroImageDark?.trim()
@@ -450,10 +450,18 @@ useHead({
                                   class="home-hero__helper-link"
                                   :to="segment.to"
                                 >
-                                  {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                                  {{
+                                    segmentIndex > 0
+                                      ? ` ${segment.text}`
+                                      : segment.text
+                                  }}
                                 </NuxtLink>
                                 <span v-else>
-                                  {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                                  {{
+                                    segmentIndex > 0
+                                      ? ` ${segment.text}`
+                                      : segment.text
+                                  }}
                                 </span>
                               </template>
                             </span>

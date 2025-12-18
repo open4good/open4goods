@@ -49,11 +49,7 @@ const article = computed(() => currentArticle.value as BlogArticle | null)
   <v-container class="py-10 px-4 mx-auto" max-width="xl">
     <v-row>
       <v-col cols="12">
-        <v-btn
-          variant="text"
-          prepend-icon="mdi-arrow-left"
-          to="/blog"
-        >
+        <v-btn variant="text" prepend-icon="mdi-arrow-left" to="/blog">
           Retour
         </v-btn>
 

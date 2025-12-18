@@ -15,9 +15,7 @@ export function ShareCandidateDtoFromJSON(json: any): ShareCandidateDto {
   return mapValues(json)
 }
 
-export function ShareCandidateDtoToJSON(
-  value?: ShareCandidateDto | null
-): any {
+export function ShareCandidateDtoToJSON(value?: ShareCandidateDto | null): any {
   if (value === undefined) {
     return undefined
   }

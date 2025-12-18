@@ -92,6 +92,4 @@ const { t } = useI18n()
 .home-features__card-description
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
-
 </style>
-

@@ -1,5 +1,9 @@
 <template>
-  <nav id="container-main-menu" class="d-none d-md-block" :aria-label="t('siteIdentity.menu.ariaLabel')">
+  <nav
+    id="container-main-menu"
+    class="d-none d-md-block"
+    :aria-label="t('siteIdentity.menu.ariaLabel')"
+  >
     <!-- Desktop menu -->
     <div class="d-flex justify-end align-center ga-4">
       <div

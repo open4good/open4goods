@@ -26,9 +26,7 @@ type UseShareResolutionOptions = {
   fetcher?: ShareResolutionFetcher
 }
 
-export const useShareResolution = (
-  options: UseShareResolutionOptions = {}
-) => {
+export const useShareResolution = (options: UseShareResolutionOptions = {}) => {
   const resolution = ref<ShareResolutionResponseDto | null>(null)
   const errorMessage = ref<string | null>(null)
   const isLoading = ref(false)
@@ -41,7 +39,11 @@ export const useShareResolution = (
   const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS
   const maxDurationMs = options.maxDurationMs ?? DEFAULT_MAX_DURATION_MS
 
-  const { pause: pausePolling, resume: resumePolling, isActive } = useIntervalFn(
+  const {
+    pause: pausePolling,
+    resume: resumePolling,
+    isActive,
+  } = useIntervalFn(
     async () => {
       if (!token.value || !lastPayload) {
         pausePolling()
@@ -116,7 +118,8 @@ export const useShareResolution = (
         resumePolling()
       }
     } catch (error) {
-      errorMessage.value = error instanceof Error ? error.message : String(error)
+      errorMessage.value =
+        error instanceof Error ? error.message : String(error)
       pausePolling()
     } finally {
       isLoading.value = false

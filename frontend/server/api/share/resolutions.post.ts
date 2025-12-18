@@ -12,9 +12,11 @@ const isSupportedDomainLanguage = (
 export default defineEventHandler(async event => {
   setDomainLanguageCacheHeaders(event, 'private, max-age=0, no-store')
 
-  const body = await readBody<ShareResolutionRequestDto & {
-    domainLanguage?: string | null
-  }>(event)
+  const body = await readBody<
+    ShareResolutionRequestDto & {
+      domainLanguage?: string | null
+    }
+  >(event)
 
   if (!body?.url) {
     throw createError({

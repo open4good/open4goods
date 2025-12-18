@@ -32,7 +32,8 @@
         {{ formatPrice(candidate.bestPrice) }}
         <span class="share-result__price-source">
           {{
-            candidate.bestPrice.datasourceName ?? t('share.result.unknownSource')
+            candidate.bestPrice.datasourceName ??
+            t('share.result.unknownSource')
           }}
         </span>
       </p>

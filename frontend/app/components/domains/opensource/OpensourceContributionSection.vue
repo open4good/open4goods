@@ -38,11 +38,7 @@ defineProps<{
       </div>
 
       <ul class="steps-grid">
-        <li
-          v-for="(step, index) in steps"
-          :key="step.title"
-          class="step-card"
-        >
+        <li v-for="(step, index) in steps" :key="step.title" class="step-card">
           <header class="step-header">
             <div class="step-index" aria-hidden="true">{{ index + 1 }}</div>
             <div class="step-icon">

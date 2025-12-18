@@ -11,7 +11,8 @@ const messages: Record<string, string> = {
   'home.hero.search.placeholder': 'Recherchez un produit ou une catégorie',
   'home.hero.search.ariaLabel': 'Rechercher un produit responsable',
   'home.hero.search.cta': 'NUDGER',
-  'home.hero.search.partnerLinkLabel': '{formattedCount} partenaire | {formattedCount} partenaires',
+  'home.hero.search.partnerLinkLabel':
+    '{formattedCount} partenaire | {formattedCount} partenaires',
   'home.hero.search.partnerLinkFallback': 'nos partenaires',
   'home.hero.iconAlt': 'Icône du lanceur PWA Nudger',
 }
@@ -45,7 +46,7 @@ vi.mock('vue-i18n', () => ({
       const resolvedParams =
         typeof choiceOrParams === 'object' && choiceOrParams != null
           ? choiceOrParams
-          : params ?? {}
+          : (params ?? {})
 
       const count =
         typeof choiceOrParams === 'number'
@@ -58,9 +59,12 @@ vi.mock('vue-i18n', () => ({
         return value
       }
 
-      const template = value.includes('|') && typeof count === 'number'
-        ? (count <= 1 ? value.split('|')[0]?.trim() : value.split('|')[1]?.trim())
-        : value
+      const template =
+        value.includes('|') && typeof count === 'number'
+          ? count <= 1
+            ? value.split('|')[0]?.trim()
+            : value.split('|')[1]?.trim()
+          : value
 
       return template.replace(/\{(\w+)\}/g, (_match, token) => {
         const replacement = (resolvedParams as Record<string, unknown>)[token]

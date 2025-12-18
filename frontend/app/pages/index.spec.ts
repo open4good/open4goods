@@ -27,9 +27,14 @@ const messages: Record<string, unknown> = {
       label: 'Independent & open',
       segments: [{ text: 'Independent & open' }],
     },
-    { icon: '⚡', label: '50M references', segments: [{ text: '50M references' }] },
+    {
+      icon: '⚡',
+      label: '50M references',
+      segments: [{ text: '50M references' }],
+    },
   ],
-  'home.hero.search.partnerLinkLabel': '{formattedCount} partner | {formattedCount} partners',
+  'home.hero.search.partnerLinkLabel':
+    '{formattedCount} partner | {formattedCount} partners',
   'home.hero.search.partnerLinkFallback': 'our partners',
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Responsible choices are not a luxury',
@@ -141,17 +146,14 @@ const messages: Record<string, unknown> = {
   'home.cta.button': 'Start a search',
   'home.cta.searchSubmit': 'Launch search',
   'home.cta.browseTaxonomy': 'Explore categories',
-'home.seo.title': 'Nudger – Responsible shopping made easy',
+  'home.seo.title': 'Nudger – Responsible shopping made easy',
   'home.seo.description':
     'Compare the environmental impact and prices of over 50 million products with Nudger.',
   'home.seo.imageAlt': 'Illustration of the Nudger dashboard',
   'siteIdentity.siteName': 'Nudger',
 }
 
-const interpolate = (
-  template: string,
-  params: Record<string, unknown> = {}
-) =>
+const interpolate = (template: string, params: Record<string, unknown> = {}) =>
   template.replace(/\{(\w+)\}/g, (match, token) => {
     const value = params[token]
     return value != null ? String(value) : match
@@ -162,9 +164,7 @@ const selectPluralForm = (template: string, count?: number) => {
     return template
   }
 
-  const [singular, plural] = template
-    .split('|')
-    .map(part => part.trim())
+  const [singular, plural] = template.split('|').map(part => part.trim())
 
   return count <= 1 ? singular : plural
 }
@@ -299,7 +299,7 @@ mockNuxtImport('useI18n', () => () => ({
     const resolvedParams =
       typeof choiceOrParams === 'object' && choiceOrParams != null
         ? choiceOrParams
-        : params ?? {}
+        : (params ?? {})
 
     const count =
       typeof choiceOrParams === 'number'

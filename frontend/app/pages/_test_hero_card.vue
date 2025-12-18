@@ -14,7 +14,10 @@ import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
           corner-icon="mdi-star"
           rounded="lg"
         >
-          <p>This is a card with surface="hero". It should display the hero background from the theme.</p>
+          <p>
+            This is a card with surface="hero". It should display the hero
+            background from the theme.
+          </p>
         </RoundedCornerCard>
       </v-col>
       <v-col cols="12" md="6">

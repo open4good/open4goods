@@ -63,4 +63,3 @@ export const resolveActiveParallaxPack = (
 
   return DEFAULT_PARALLAX_PACK
 }
-

@@ -91,17 +91,16 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const licenseSectionId = 'opendata-odbl-license'
 
-const { data, pending, error, refresh } =
-  useAsyncData<OpenDataOverviewDto>(
-    'opendata-overview',
-    () =>
-      $fetch<OpenDataOverviewDto>('/api/opendata', {
-        headers: requestHeaders,
-      }),
-    {
-      lazy: true,
-    }
-  )
+const { data, pending, error, refresh } = useAsyncData<OpenDataOverviewDto>(
+  'opendata-overview',
+  () =>
+    $fetch<OpenDataOverviewDto>('/api/opendata', {
+      headers: requestHeaders,
+    }),
+  {
+    lazy: true,
+  }
+)
 
 const heroSubtitle = computed(() =>
   String(t('opendata.hero.subtitle', { licenseId: licenseSectionId }))
@@ -275,7 +274,7 @@ useHead(() => ({
         name: t('opendata.seo.title'),
         description: t('opendata.seo.description'),
         url: canonicalUrl.value,
-        dataset: datasetCards.value.map((card) => ({
+        dataset: datasetCards.value.map(card => ({
           '@type': 'Dataset',
           name: card.title,
           description: card.description,

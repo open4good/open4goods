@@ -9,25 +9,27 @@ describe('ContactPage', () => {
         stubs: {
           ContactHero: {
             template: '<div data-testid="contact-hero" />',
-            props: ['title', 'subtitle']
+            props: ['title', 'subtitle'],
           },
           ContactDetailsSection: {
-            template: '<div data-testid="contact-details" />'
+            template: '<div data-testid="contact-details" />',
           },
           ContactFormCard: {
-            template: '<div data-testid="contact-form" />'
-          }
-        }
-      }
+            template: '<div data-testid="contact-form" />',
+          },
+        },
+      },
     })
 
     expect(component.find('[data-testid="contact-hero"]').exists()).toBe(true)
-    expect(component.find('[data-testid="contact-details"]').exists()).toBe(true)
+    expect(component.find('[data-testid="contact-details"]').exists()).toBe(
+      true
+    )
     expect(component.find('[data-testid="contact-form"]').exists()).toBe(true)
   })
 
   it('has correct SEO structure', async () => {
-    // This is hard to test in unit test as useHead side effects are global, 
+    // This is hard to test in unit test as useHead side effects are global,
     // but we can check if the code runs without error.
     const component = await mountSuspended(ContactPage)
     expect(component.vm).toBeTruthy()

@@ -18,10 +18,16 @@
         }"
         @click="handleCornerClick"
       >
-        <div v-if="activeStepKey === 'category'" class="text-h5 font-weight-bold text-white">
+        <div
+          v-if="activeStepKey === 'category'"
+          class="text-h5 font-weight-bold text-white"
+        >
           {{ $t('nudge-tool.wizard.welcome') }}
         </div>
-        <div v-else-if="categorySummary" class="nudge-wizard__corner-summary d-flex align-center justify-center fill-height pt-3 pb-2">
+        <div
+          v-else-if="categorySummary"
+          class="nudge-wizard__corner-summary d-flex align-center justify-center fill-height pt-3 pb-2"
+        >
           <div class="nudge-wizard__corner-visual d-flex align-center gap-2">
             <v-avatar
               v-if="categorySummary.image"
@@ -35,12 +41,20 @@
               </template>
             </v-avatar>
             <div class="nudge-wizard__corner-icon">
-              <v-icon :icon="categorySummary.icon" :size="cornerIconSize" color="white" />
+              <v-icon
+                :icon="categorySummary.icon"
+                :size="cornerIconSize"
+                color="white"
+              />
             </div>
           </div>
           <div class="nudge-wizard__corner-text text-white text-center">
-            <div class="text-caption font-weight-bold lh-1 mb-1">{{ categorySummary.label }}</div>
-            <div class="nudge-wizard__corner-count font-weight-black">{{ animatedMatches }}</div>
+            <div class="text-caption font-weight-bold lh-1 mb-1">
+              {{ categorySummary.label }}
+            </div>
+            <div class="nudge-wizard__corner-count font-weight-black">
+              {{ animatedMatches }}
+            </div>
           </div>
         </div>
       </div>
@@ -59,7 +73,11 @@
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
-    <div ref="windowWrapperRef" class="nudge-wizard__window-wrapper" :style="windowWrapperStyle">
+    <div
+      ref="windowWrapperRef"
+      class="nudge-wizard__window-wrapper"
+      :style="windowWrapperStyle"
+    >
       <v-window
         v-model="activeStepKey"
         class="nudge-wizard__window"
@@ -544,9 +562,9 @@ const navigateToCategoryPage = () => {
 }
 
 const handleCornerClick = () => {
-    if (shouldShowMatches.value) {
-        navigateToCategoryPage()
-    }
+  if (shouldShowMatches.value) {
+    navigateToCategoryPage()
+  }
 }
 
 const hasPreviousStep = computed(() => {
@@ -673,7 +691,7 @@ watch(
       clearResetTimeout()
       // Lock current height as base if moving from category to content
       if (previous === 'category') {
-         // Logic handled in height watcher
+        // Logic handled in height watcher
       }
     }
   },
@@ -735,9 +753,13 @@ const attemptLockHeights = () => {
   lockedWindowHeight.value = lockedWindow
 }
 
-watch([isContentMode, headerHeight, windowHeight, footerHeight], attemptLockHeights, {
-  immediate: true,
-})
+watch(
+  [isContentMode, headerHeight, windowHeight, footerHeight],
+  attemptLockHeights,
+  {
+    immediate: true,
+  }
+)
 
 const wizardStyle = computed(() => {
   if (!lockedLayoutHeight.value) {
@@ -766,16 +788,13 @@ const windowContentStyle = computed(() => {
   return { minHeight: `${lockedWindowHeight.value}px` }
 })
 
-const resolvedCornerSize = computed(() =>
-  isContentMode.value ? 'xl' : 'lg'
-)
+const resolvedCornerSize = computed(() => (isContentMode.value ? 'xl' : 'lg'))
 
 const footerOffsetStyle = computed(() => ({
   paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
 }))
 
 const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
-
 </script>
 
 <style scoped lang="scss">
@@ -800,7 +819,9 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     height: 100%;
     text-align: center;
     line-height: 1.1;
-    transition: transform 300ms ease, opacity 260ms ease;
+    transition:
+      transform 300ms ease,
+      opacity 260ms ease;
 
     &--clickable {
       cursor: pointer;
@@ -852,8 +873,6 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     width: 100%;
     min-width: 0;
   }
-
-
 
   &__progress {
     position: absolute;
@@ -916,7 +935,9 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     border-radius: 50%;
     box-shadow: none;
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-    transition: transform 140ms ease, border-color 140ms ease;
+    transition:
+      transform 140ms ease,
+      border-color 140ms ease;
 
     &:hover:not(.v-btn--disabled) {
       transform: translateY(-2px);
@@ -949,5 +970,4 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
 .nudge-wizard--content-mode .nudge-wizard__corner-content {
   transform: translateY(2px) scale(1.04);
 }
-
 </style>

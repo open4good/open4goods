@@ -25,7 +25,9 @@ export default defineEventHandler(async (event: H3Event) => {
       `${config.apiUrl}/auth/refresh`,
       {
         method: 'POST',
-        headers: { cookie: `${config.public.refreshCookieName}=${refreshToken}` },
+        headers: {
+          cookie: `${config.public.refreshCookieName}=${refreshToken}`,
+        },
       }
     )
 
@@ -37,7 +39,12 @@ export default defineEventHandler(async (event: H3Event) => {
       secure,
       path: '/',
     }
-    setCookie(event, config.public.tokenCookieName, tokens.accessToken, cookieOptions)
+    setCookie(
+      event,
+      config.public.tokenCookieName,
+      tokens.accessToken,
+      cookieOptions
+    )
     setCookie(
       event,
       config.public.refreshCookieName,
