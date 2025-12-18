@@ -54,6 +54,11 @@
       "name": "price-config",
       "type": "org.open4goods.nudgerfrontapi.config.properties.PriceRestitutionProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.PriceRestitutionProperties"
+    },
+    {
+      "name": "front.share",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.ShareResolutionProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ShareResolutionProperties"
     }
   ],
   "properties": [
@@ -192,6 +197,48 @@
       "type": "java.lang.String",
       "description": "Path appended to the base URL when triggering or polling review generation.",
       "defaultValue": "/review"
+    },
+    {
+      "name": "front.share.crawler-extraction-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable extraction through the crawler service before applying slug fallback.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.share.resolution-window",
+      "type": "java.time.Duration",
+      "description": "Maximum duration allocated to complete share resolution before timing out.",
+      "defaultValue": "PT4S"
+    },
+    {
+      "name": "front.share.store-ttl",
+      "type": "java.time.Duration",
+      "description": "Time to live applied to in-memory share resolution snapshots.",
+      "defaultValue": "PT20M"
+    },
+    {
+      "name": "front.share.max-url-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum length accepted for shared URLs.",
+      "defaultValue": 2048
+    },
+    {
+      "name": "front.share.max-text-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum length accepted for shared text snippets.",
+      "defaultValue": 2048
+    },
+    {
+      "name": "front.share.max-title-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum length accepted for optional shared titles.",
+      "defaultValue": 256
+    },
+    {
+      "name": "front.share.max-candidates",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of candidates returned per resolution.",
+      "defaultValue": 5
     },
     {
       "name": "front.contact.email",
