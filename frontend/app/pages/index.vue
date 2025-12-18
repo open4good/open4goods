@@ -40,9 +40,6 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const display = useDisplay()
 
-const device = useDevice()
-const isMobileLanding = computed(() => device.isMobileOrTablet)
-
 const searchQuery = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
@@ -615,33 +612,15 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
 }
 
 const seoTitle = computed(() =>
-  String(
-    t(
-      isMobileLanding.value
-        ? 'pwa.landing.hero.meta.title'
-        : 'home.seo.title'
-    )
-  )
+  String(t('home.seo.title'))
 )
 
 const seoDescription = computed(() =>
-  String(
-    t(
-      isMobileLanding.value
-        ? 'pwa.landing.hero.meta.description'
-        : 'home.seo.description'
-    )
-  )
+  String(t('home.seo.description'))
 )
 
 const seoImageAlt = computed(() =>
-  String(
-    t(
-      isMobileLanding.value
-        ? 'pwa.landing.hero.meta.imageAlt'
-        : 'home.seo.imageAlt'
-    )
-  )
+  String(t('home.seo.imageAlt'))
 )
 
 useSeoMeta({
@@ -683,8 +662,8 @@ useHead(() => ({
 </script>
 
 <template>
-  <PwaMobileLanding v-if="isMobileLanding" :verticals="rawCategories" />
-  <div v-else class="home-page">
+  <PwaMobileLanding class="d-md-none" :verticals="rawCategories" />
+  <div class="home-page d-none d-md-block">
     <HomeHeroSection
       v-model:search-query="searchQuery"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"

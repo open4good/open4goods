@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import HomeHeroSection from '../../app/components/home/sections/HomeHeroSection.vue'
+import HomeHeroSection from '../app/components/home/sections/HomeHeroSection.vue'
 
 // Mock sub-components to avoid heavy rendering in unit test
 const NudgeToolWizard = { template: '<div>Wizard</div>' }
