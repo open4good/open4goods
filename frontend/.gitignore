@@ -40,3 +40,8 @@ node_modules/
 
 # Generated TextContent CSS
 /openapitools.json
+/lighthouse-report-final.json
+/lighthouse-report-v2.json
+/lighthouse-report-v3.json
+/lighthouse-report.json
+/output.html
