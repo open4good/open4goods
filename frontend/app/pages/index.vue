@@ -875,13 +875,13 @@ useHead(() => ({
 .home-page__sections
   display: flex
   flex-direction: column
-  gap: clamp(0.5rem, 2vw, 1.25rem)
+  gap: 0
   padding-top: var(--cat-overlap)
   background: transparent
 
 .home-page__parallax
-  border-radius: clamp(1.25rem, 3vw, 1.85rem)
-  box-shadow: 0 22px 48px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  border-radius: 0
+  box-shadow: none
   overflow: hidden
 
 .home-page__parallax--centered :deep(.home-section)
