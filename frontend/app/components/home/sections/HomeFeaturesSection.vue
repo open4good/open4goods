@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
-
 type FeatureCard = {
   icon: string
   title: string
@@ -15,14 +13,8 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <ParallaxSection
-    class="home-features"
-    aria-label="home-features-title"
-    :background-light="'/assets/themes/light/parallax/parallax-background-bubbles-transparent-1.svg'"
-    :background-dark="'/assets/themes/dark/parallax/parallax-background-bubbles-1.svg'"
-    :parallax-amount="0.12"
-  >
-    <div class="home-features__inner">
+  <section class="home-features" aria-labelledby="home-features-title">
+    <div class="home-features__inner home-section__inner">
       <header class="home-section__header">
         <h2 id="home-features-title">{{ t('home.features.title') }}</h2>
         <!-- eslint-disable vue/no-v-html -->
@@ -54,13 +46,10 @@ const { t } = useI18n()
         </v-col>
       </v-row>
     </div>
-  </ParallaxSection>
+  </section>
 </template>
 
 <style scoped lang="sass">
-// .home-features
-  // background managed by ParallaxSection
-
 .home-section__inner
   max-width: 1180px
   margin: 0 auto
@@ -105,5 +94,4 @@ const { t } = useI18n()
   color: rgb(var(--v-theme-text-neutral-secondary))
 
 </style>
-
 

@@ -14,3 +14,8 @@ Theme-specific assets live under `app/assets/themes/<theme>/` with shared fallba
 - `common/`: neutral visuals usable across all themes (e.g., hero backgrounds, generic illustrations).
 
 Use the `useThemedAsset` composable to resolve the correct URL instead of importing assets directly.
+
+## Recommended sizes & ratios
+- **Hero & parallax backgrounds**: keep a single large viewBox such as `1600x900` or `1920x1080` with `preserveAspectRatio="xMidYMid slice"` and generous bleed (10–15%) so the image covers wide and tall viewports without revealing empty bands.
+- **Placeholders/illustrations**: max ~`1200x900`, still exported as SVG where possible.
+- Avoid fixing `height="800"` in SVG outputs; prefer `width="100%" height="100%"` and rely on the viewBox to remain crisp when parallax and overlays are applied.
