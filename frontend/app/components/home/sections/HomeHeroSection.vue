@@ -461,18 +461,19 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
   backdrop-filter: blur(8px)
   border-radius: 50%
-  padding: clamp(0.45rem, 1.2vw, 0.75rem)
+  padding: clamp(0.6rem, 1.6vw, 0.9rem)
   box-sizing: border-box
   background: rgba(var(--v-theme-surface-default), 0.92)
 
 .home-hero__icon
   border-radius: inherit
-  width: 100%
-  height: 100%
+  width: 92%
+  height: 92%
   transition: transform 250ms ease, filter 250ms ease
   filter: drop-shadow(0 6px 14px rgba(var(--v-theme-shadow-primary-600), 0.25))
   object-fit: contain
   display: block
+  margin: auto
 
 .home-hero__icon--fade
   animation: home-hero-fade-up 900ms ease-out both
