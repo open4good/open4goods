@@ -3,13 +3,27 @@ import { computed, type CSSProperties } from 'vue'
 import { usePreferredReducedMotion, useWindowScroll } from '@vueuse/core'
 import { useDisplay, useTheme } from 'vuetify'
 
+type ParallaxLayerInput =
+  | string
+  | {
+      src?: string
+      speed?: number
+      blendMode?: string
+    }
+
+type ParallaxLayer = {
+  src: string
+  speed: number
+  blendMode?: string
+}
+
 const props = withDefaults(
   defineProps<{
     id?: string
     ariaLabel?: string
-    backgrounds?: string[]
-    backgroundLight?: string
-    backgroundDark?: string
+    backgrounds?: ParallaxLayerInput[] | ParallaxLayerInput
+    backgroundLight?: ParallaxLayerInput[] | ParallaxLayerInput
+    backgroundDark?: ParallaxLayerInput[] | ParallaxLayerInput
     overlayColor?: string
     overlayOpacity?: number
     minHeight?: string | null
@@ -22,6 +36,7 @@ const props = withDefaults(
     enableAplats?: boolean
     aplatSvg?: string
     gapless?: boolean
+    maxOffsetRatio?: number | null
   }>(),
   {
     id: undefined,
@@ -41,6 +56,7 @@ const props = withDefaults(
     enableAplats: false,
     aplatSvg: '/images/home/parallax-aplats.svg',
     gapless: false,
+    maxOffsetRatio: null,
   }
 )
 
@@ -51,21 +67,57 @@ const { y } = useWindowScroll()
 
 const isDark = computed(() => Boolean(theme.global.current.value.dark))
 
-const normalizeSources = (value?: string | string[]) => {
+const normalizeSources = (
+  value?: ParallaxLayerInput | ParallaxLayerInput[]
+): ParallaxLayerInput[] => {
   if (!value) {
     return []
   }
 
-  return (Array.isArray(value) ? value : [value]).filter(item =>
-    Boolean(item?.trim())
-  )
+  return (Array.isArray(value) ? value : [value]).filter(item => {
+    if (typeof item === 'string') {
+      return Boolean(item?.trim())
+    }
+
+    return Boolean(item?.src?.trim())
+  })
 }
 
-const resolvedBackgrounds = computed(() => {
+const resolveLayer = (value: ParallaxLayerInput): ParallaxLayer | null => {
+  if (typeof value === 'string') {
+    const src = value.trim()
+
+    return src.length > 0
+      ? { src, speed: props.parallaxAmount, blendMode: undefined }
+      : null
+  }
+
+  const src = value.src?.trim()
+
+  if (!src) {
+    return null
+  }
+
+  const blendMode = value.blendMode?.trim()
+
+  return {
+    src,
+    speed:
+      typeof value.speed === 'number' ? value.speed : props.parallaxAmount,
+    blendMode: blendMode?.length ? blendMode : undefined,
+  }
+}
+
+const resolveLayers = (values: ParallaxLayerInput[]) =>
+  values
+    .map(resolveLayer)
+    .filter((layer): layer is ParallaxLayer => Boolean(layer))
+
+const resolvedBackgrounds = computed<ParallaxLayer[]>(() => {
   const themedAssets = normalizeSources(props.backgrounds)
 
   if (themedAssets.length > 0) {
-    return themedAssets
+    return resolveLayers(themedAssets)
   }
 
   const themedBackgrounds = isDark.value
@@ -77,20 +129,10 @@ const resolvedBackgrounds = computed(() => {
   )
 
   if (themedBackgrounds.length > 0) {
-    return themedBackgrounds
+    return resolveLayers(themedBackgrounds)
   }
 
-  return fallbackBackgrounds
-})
-
-const backgroundImage = computed(() => {
-  if (resolvedBackgrounds.value.length === 0) {
-    return ''
-  }
-
-  return resolvedBackgrounds.value
-    .map(background => `url('${background}')`)
-    .join(', ')
+  return resolveLayers(fallbackBackgrounds)
 })
 
 const isBelowBreakpoint = computed(
@@ -104,18 +146,33 @@ const parallaxEnabled = computed(
     import.meta.client &&
     !isBelowBreakpoint.value &&
     prefersReducedMotion.value === 'no-preference' &&
-    props.parallaxAmount > 0
+    resolvedBackgrounds.value.some(background => background.speed > 0)
 )
 
-const parallaxOffset = computed(() =>
-  parallaxEnabled.value ? `${-y.value * props.parallaxAmount}px` : '0px'
-)
+const resolveOffset = (speed: number) => {
+  if (!parallaxEnabled.value) {
+    return '0px'
+  }
+
+  const rawOffset = -y.value * speed
+  const maxOffset = props.maxOffsetRatio
+
+  if (maxOffset && import.meta.client) {
+    const viewportLimit = Math.abs(window.innerHeight * maxOffset)
+    const clampedOffset = Math.min(
+      viewportLimit,
+      Math.max(-viewportLimit, rawOffset)
+    )
+
+    return `${clampedOffset}px`
+  }
+
+  return `${rawOffset}px`
+}
 
 const mediaStyles = computed<CSSProperties>(() => ({
-  '--parallax-image': backgroundImage.value || 'none',
   '--parallax-overlay-color': props.overlayColor,
   '--parallax-overlay-opacity': props.overlayOpacity,
-  '--parallax-offset': parallaxOffset.value,
   minHeight: props.gapless ? 'auto' : props.minHeight || undefined,
 }))
 
@@ -155,7 +212,16 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
       :style="mediaStyles"
       aria-hidden="true"
     >
-      <div class="parallax-section__image" />
+      <div
+        v-for="(background, index) in resolvedBackgrounds"
+        :key="`parallax-layer-${index}-${background.src}`"
+        class="parallax-section__layer"
+        :style="{
+          backgroundImage: `url('${background.src}')`,
+          mixBlendMode: background.blendMode,
+          transform: `translate3d(0, ${resolveOffset(background.speed)}, 0)`,
+        }"
+      />
       <div class="parallax-section__overlay" />
       <div v-if="enableAplats" class="parallax-section__aplats">
         <slot name="aplats">
@@ -200,16 +266,17 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   height: 100%
   pointer-events: none
 
-.parallax-section__image
+.parallax-section__layer
   position: absolute
   inset: -10%
-  background-image: var(--parallax-image)
   background-size: cover
   background-repeat: no-repeat
   background-position: center center
-  transform: translate3d(0, var(--parallax-offset), 0)
+  transform: translate3d(0, 0, 0)
   transition: transform 160ms ease-out
   filter: saturate(1.05)
+  will-change: transform
+  z-index: 0
 
 .parallax-section__overlay
   position: absolute
@@ -222,6 +289,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   )
   mix-blend-mode: multiply
   opacity: var(--parallax-overlay-opacity)
+  z-index: 1
 
 .parallax-section__aplats
   position: absolute
@@ -231,6 +299,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   justify-content: center
   opacity: 0.45
   filter: drop-shadow(0 20px 45px rgba(var(--v-theme-shadow-primary-600), 0.22))
+  z-index: 2
 
 .parallax-section__aplat-image
   max-width: min(100%, 1024px)
@@ -239,7 +308,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 
 .parallax-section__content
   position: relative
-  z-index: 1
+  z-index: 3
 
 .parallax-section__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
@@ -276,7 +345,7 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   gap: clamp(1rem, 2.5vw, 1.75rem)
 
 @media (max-width: 959px)
-  .parallax-section__image
+  .parallax-section__layer
     transform: none !important
 
   .parallax-section__overlay
