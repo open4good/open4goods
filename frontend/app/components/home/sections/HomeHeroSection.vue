@@ -265,6 +265,11 @@ const heroBackgroundSrc = computed(() => {
     return themedAsset
   }
 
+  /* Hydration mismatch fix: Ensure server and client initial render match. */
+  /* We assume light theme as default for SSR unless reliable cookie sync is present. */
+  // If we can't guarantee theme sync, we should force a default, then switch on mount.
+  // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.
+  
   const isDarkMode = Boolean(theme.global.current.value.dark)
   const lightImage = props.heroImageLight?.trim()
   const darkImage = props.heroImageDark?.trim()

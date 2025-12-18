@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, type CSSProperties } from 'vue'
+import { computed, ref, type CSSProperties, onMounted } from 'vue'
 import {
   useElementBounding,
   usePreferredReducedMotion,
@@ -72,7 +72,18 @@ const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
 const display = useDisplay()
 
-const isDark = computed(() => Boolean(theme.global.current.value.dark))
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
+
+// Hydration mismatch fix:
+// During SSR and Client Hydration, we must match (assuming light/default).
+// We only switch to dark (if detected) after mount.
+const isDark = computed(() => {
+  if (!isMounted.value) return false // Force light during hydration
+  return Boolean(theme.global.current.value.dark)
+})
 
 const normalizeSources = (
   value?: ParallaxLayerInput | ParallaxLayerInput[]
