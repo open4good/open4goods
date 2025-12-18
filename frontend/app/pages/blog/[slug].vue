@@ -53,7 +53,7 @@ const article = computed(() => currentArticle.value as BlogArticle | null)
         <v-btn
           variant="text"
           prepend-icon="mdi-arrow-left"
-          @click="router.back()"
+          to="/blog"
         >
           Retour
         </v-btn>

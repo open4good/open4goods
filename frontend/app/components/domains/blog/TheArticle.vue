@@ -21,7 +21,7 @@ const article = computed(() => props.article)
 
 const articleTitle = computed(() => article.value.title?.trim() || 'Article')
 const articleSummary = computed(() => article.value.summary?.trim() ?? '')
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 
 const buildDateInfo = (timestamp?: number) => {
@@ -36,7 +36,7 @@ const buildDateInfo = (timestamp?: number) => {
 
   return {
     iso: date.toISOString(),
-    label: new Intl.DateTimeFormat(undefined, { dateStyle: 'long' }).format(
+    label: new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(
       date
     ),
   }
@@ -174,14 +174,25 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: canonicalUrl.value
-    ? [
-        {
-          rel: 'canonical',
-          href: canonicalUrl.value,
-        },
-      ]
-    : [],
+  link: [
+    ...(canonicalUrl.value
+      ? [
+          {
+            rel: 'canonical',
+            href: canonicalUrl.value,
+          },
+        ]
+      : []),
+    ...(article.value.image
+      ? [
+          {
+            rel: 'preload',
+            as: 'image',
+            href: article.value.image,
+          },
+        ]
+      : []),
+  ],
   script: [
     {
       type: 'application/ld+json',
@@ -290,7 +301,7 @@ useHead(() => ({
         :src="article.image"
         :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
         width="70%"
-        height="360"
+        :height="360"
         class="article-hero__image"
       />
       <figcaption class="d-sr-only">
@@ -327,7 +338,7 @@ useHead(() => ({
       }}</v-alert>
     </section>
 
-    <footer class="article-footer" aria-label="Article footer">
+    <footer class="article-footer">
       <v-btn
         v-if="isLoggedIn && article.editLink"
         :href="article.editLink"

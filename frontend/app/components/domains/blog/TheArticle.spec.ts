@@ -49,6 +49,7 @@ vi.mock('vue-i18n', () => ({
           return key
       }
     },
+    locale: ref('en-US'),
   }),
 }))
 
