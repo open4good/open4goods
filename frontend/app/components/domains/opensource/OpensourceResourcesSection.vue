@@ -155,6 +155,8 @@ withDefaults(
 <style scoped lang="sass">
 .opensource-resources
   background: rgba(var(--v-theme-surface-default), 1)
+  content-visibility: auto
+  contain-intrinsic-size: 800px
 
 .section-header
   max-width: 760px

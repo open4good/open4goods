@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { useAsyncData } from '#imports'
 import { useBlog } from '~/composables/blog/useBlog'
@@ -10,7 +10,6 @@ interface BlogArticle extends BlogPostDto {
 }
 
 const route = useRoute()
-const router = useRouter()
 const { currentArticle, loading, error, fetchArticle } = useBlog()
 
 const slug = computed(() => {

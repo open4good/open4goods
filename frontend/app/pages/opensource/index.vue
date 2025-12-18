@@ -127,7 +127,7 @@ const localePath = useLocalePath()
 const heroCtas = computed<HeroCtaDisplay[]>(() => [
   {
     label: String(t('opensource.hero.primaryCta.label')),
-    ariaLabel: String(t('opensource.hero.primaryCta.ariaLabel')),
+    ariaLabel: `${String(t('opensource.hero.primaryCta.label'))} : ${String(t('opensource.hero.primaryCta.ariaLabel'))}`,
     href: 'https://github.com/open4good/open4goods',
     icon: 'mdi-github',
     color: 'primary',
@@ -168,7 +168,7 @@ const pillarCards = computed<PillarCardDisplay[]>(() => [
     descriptionBlocId: 'webpages:opensource:pillars-transparency',
     action: {
       label: String(t('opensource.pillars.cards.transparency.cta')),
-      ariaLabel: String(t('opensource.pillars.cards.transparency.ariaLabel')),
+      ariaLabel: `${String(t('opensource.pillars.cards.transparency.cta'))} : ${String(t('opensource.pillars.cards.transparency.ariaLabel'))}`,
       href: 'https://github.com/open4good/open4goods',
       target: '_blank',
       rel: 'noopener',
@@ -180,7 +180,7 @@ const pillarCards = computed<PillarCardDisplay[]>(() => [
     descriptionBlocId: 'webpages:opensource:pillars-methodology',
     action: {
       label: String(t('opensource.pillars.cards.methodology.cta')),
-      ariaLabel: String(t('opensource.pillars.cards.methodology.ariaLabel')),
+      ariaLabel: `${String(t('opensource.pillars.cards.methodology.cta'))} : ${String(t('opensource.pillars.cards.methodology.ariaLabel'))}`,
       href: localePath('impact-score'),
     },
   },
@@ -190,7 +190,7 @@ const pillarCards = computed<PillarCardDisplay[]>(() => [
     descriptionBlocId: 'webpages:opensource:pillars-community',
     action: {
       label: String(t('opensource.pillars.cards.community.cta')),
-      ariaLabel: String(t('opensource.pillars.cards.community.ariaLabel')),
+      ariaLabel: `${String(t('opensource.pillars.cards.community.cta'))} : ${String(t('opensource.pillars.cards.community.ariaLabel'))}`,
       href: localePath('team'),
     },
   },
@@ -220,7 +220,7 @@ const resourceLinks = computed<ResourceLinkDisplay[]>(() => [
     title: String(t('opensource.resources.links.guide.title')),
     descriptionBlocId: 'webpages:opensource:resources-guide',
     href: 'https://github.com/open4good/open4goods#readme',
-    ariaLabel: String(t('opensource.resources.links.guide.ariaLabel')),
+    ariaLabel: `${String(t('opensource.resources.links.guide.title'))} : ${String(t('opensource.resources.links.guide.ariaLabel'))}`,
     target: '_blank',
     rel: 'noopener',
   },
@@ -229,7 +229,7 @@ const resourceLinks = computed<ResourceLinkDisplay[]>(() => [
     title: String(t('opensource.resources.links.issues.title')),
     descriptionBlocId: 'webpages:opensource:resources-issues',
     href: 'https://github.com/open4good/open4goods/issues',
-    ariaLabel: String(t('opensource.resources.links.issues.ariaLabel')),
+    ariaLabel: `${String(t('opensource.resources.links.issues.title'))} : ${String(t('opensource.resources.links.issues.ariaLabel'))}`,
     target: '_blank',
     rel: 'noopener',
   },
@@ -238,7 +238,7 @@ const resourceLinks = computed<ResourceLinkDisplay[]>(() => [
     title: String(t('opensource.resources.links.updates.title')),
     descriptionBlocId: 'webpages:opensource:resources-updates',
     href: localePath('blog'),
-    ariaLabel: String(t('opensource.resources.links.updates.ariaLabel')),
+    ariaLabel: `${String(t('opensource.resources.links.updates.title'))} : ${String(t('opensource.resources.links.updates.ariaLabel'))}`,
   },
 ])
 
@@ -247,7 +247,7 @@ const contactCta = computed<ContactCtaDisplay>(() => ({
   descriptionBlocId: 'webpages:opensource:community-callout',
   ctaLabel: String(t('opensource.resources.contact.cta.label')),
   ctaHref: localePath('contact'),
-  ctaAriaLabel: String(t('opensource.resources.contact.cta.ariaLabel')),
+  ctaAriaLabel: `${String(t('opensource.resources.contact.cta.label'))} : ${String(t('opensource.resources.contact.cta.ariaLabel'))}`,
 }))
 
 const feedbackCallout = computed<FeedbackCalloutDisplay>(() => ({
@@ -260,7 +260,7 @@ const feedbackCallout = computed<FeedbackCalloutDisplay>(() => ({
   ],
   ctaLabel: String(t('opensource.resources.feedback.cta.label')),
   ctaHref: localePath('feedback'),
-  ctaAriaLabel: String(t('opensource.resources.feedback.cta.ariaLabel')),
+  ctaAriaLabel: `${String(t('opensource.resources.feedback.cta.label'))} : ${String(t('opensource.resources.feedback.cta.ariaLabel'))}`,
 }))
 
 const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
@@ -268,7 +268,7 @@ const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
   description: String(t('opensource.resources.opendata.description')),
   ctaLabel: String(t('opensource.resources.opendata.cta.label')),
   ctaHref: localePath('opendata'),
-  ctaAriaLabel: String(t('opensource.resources.opendata.cta.ariaLabel')),
+  ctaAriaLabel: `${String(t('opensource.resources.opendata.cta.label'))} : ${String(t('opensource.resources.opendata.cta.ariaLabel'))}`,
 }))
 
 const canonicalUrl = computed(() =>
@@ -313,6 +313,26 @@ useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
     ...alternateLinks.value,
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: String(t('opensource.seo.title')),
+        description: String(t('opensource.seo.description')),
+        url: canonicalUrl.value,
+        publisher: {
+          '@type': 'Organization',
+          name: siteName.value,
+          logo: {
+            '@type': 'ImageObject',
+            url: ogImageUrl.value,
+          },
+        },
+      }),
+    },
   ],
 }))
 </script>

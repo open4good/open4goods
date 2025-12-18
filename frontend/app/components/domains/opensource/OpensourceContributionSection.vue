@@ -37,12 +37,11 @@ defineProps<{
         <TextContent :bloc-id="descriptionBlocId" :ipsum-length="200" />
       </div>
 
-      <div class="steps-grid" role="list">
-        <article
+      <ul class="steps-grid">
+        <li
           v-for="(step, index) in steps"
           :key="step.title"
           class="step-card"
-          role="listitem"
         >
           <header class="step-header">
             <div class="step-index" aria-hidden="true">{{ index + 1 }}</div>
@@ -52,8 +51,8 @@ defineProps<{
           </header>
           <h3 class="step-title">{{ step.title }}</h3>
           <TextContent :bloc-id="step.descriptionBlocId" :ipsum-length="150" />
-        </article>
-      </div>
+        </li>
+      </ul>
     </v-container>
   </section>
 </template>
@@ -84,6 +83,8 @@ defineProps<{
   display: grid
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))
   gap: 1.5rem
+  list-style: none
+  padding: 0
 
 .step-card
   background: rgba(var(--v-theme-surface-default), 1)
