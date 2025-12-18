@@ -40,7 +40,13 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const display = useDisplay()
 
-const isMobileLanding = computed(() => display.smAndDown.value)
+const device = useDevice()
+const isMobileLanding = computed(() => {
+  if (import.meta.server) {
+    return device.isMobileOrTablet
+  }
+  return display.smAndDown.value
+})
 
 const searchQuery = ref('')
 
@@ -63,7 +69,7 @@ const { data: affiliationPartners } = await useAsyncData<AffiliationPartnerDto[]
   {
     default: () => [],
     server: true,
-    lazy: false,
+    lazy: true,
   }
 )
 
@@ -185,18 +191,22 @@ const sanitizeBlogSummary = (value: unknown) =>
 const hasRenderableImage = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
-if (import.meta.server) {
-  await fetchCategories(true)
-  await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
-} else {
-  if (rawCategories.value.length === 0) {
-    await fetchCategories(true)
-  }
+useAsyncData(
+  'home-heavy-data',
+  async () => {
+    if (rawCategories.value.length === 0) {
+      await fetchCategories(true)
+    }
 
-  if (paginatedArticles.value.length === 0) {
-    await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
+    if (paginatedArticles.value.length === 0) {
+      await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
+    }
+    return true
+  },
+  {
+    lazy: true,
   }
-}
+)
 
 const problemItems = computed(() => [
   {

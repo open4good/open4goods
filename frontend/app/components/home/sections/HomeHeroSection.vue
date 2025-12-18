@@ -301,6 +301,16 @@ const handleCategorySelect = (payload: CategorySuggestionItem) => {
 const handleProductSelect = (payload: ProductSuggestionItem) => {
   emit('select-product', payload)
 }
+
+useHead({
+  link: [
+    {
+      rel: 'preload',
+      as: 'image',
+      href: () => heroBackgroundSrc.value,
+    },
+  ],
+})
 </script>
 
 <template>
@@ -334,11 +344,9 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" class="home-hero__content">
-            <v-slide-y-transition mode="out-in">
-              <h1 id="home-hero-title" class="home-hero__title">
-                {{ t('home.hero.title') }}
-              </h1>
-            </v-slide-y-transition>
+            <h1 id="home-hero-title" class="home-hero__title">
+              {{ t('home.hero.title') }}
+            </h1>
           </v-col>
         </v-row>
         <v-row justify="center">
