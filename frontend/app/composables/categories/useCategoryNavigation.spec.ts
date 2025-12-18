@@ -56,7 +56,6 @@ describe('useCategoryNavigation composable', () => {
   it(
     'reuses the cached navigation payload when the server TTL has not expired',
     async () => {
-      console.log('DEBUG: Starting test')
       vi.useFakeTimers()
       vi.setSystemTime(new Date('2024-01-01T00:00:00Z'))
 
@@ -67,7 +66,6 @@ describe('useCategoryNavigation composable', () => {
 
       const getNavigationMock = vi.fn().mockResolvedValue(navigationResponse)
 
-      console.log('DEBUG: Setting up mocks')
       vi.doMock('~~/shared/api-client/services/categories.services', () => ({
         useCategoriesService: () => ({ getNavigation: getNavigationMock }),
       }))
@@ -119,11 +117,9 @@ describe('useCategoryNavigation composable', () => {
         }),
       }))
 
-      console.log('DEBUG: Importing handler')
       const { default: handler } =
         await import('../../../server/api/categories/navigation.get')
 
-      console.log('DEBUG: Setting up event')
       const event = {
         context: { query: {} },
         node: {
@@ -132,26 +128,23 @@ describe('useCategoryNavigation composable', () => {
         },
       }
 
-      console.log('DEBUG: Calling first handler')
       const firstResponse = await handler(event as never)
       expect(firstResponse).toEqual(navigationResponse)
       expect(getNavigationMock).toHaveBeenCalledTimes(1)
 
-      console.log('DEBUG: Calling second handler')
       const secondResponse = await handler(event as never)
       expect(secondResponse).toEqual(navigationResponse)
       expect(getNavigationMock).toHaveBeenCalledTimes(1)
 
-      console.log('DEBUG: Cleaning up')
       vi.doUnmock('~~/shared/api-client/services/categories.services')
       vi.doUnmock('nitropack/runtime/internal/cache')
       vi.doUnmock('h3')
       vi.resetModules()
 
       vi.useRealTimers()
-      console.log('DEBUG: Test finished')
     },
-    30000
+    10000
   )
+
 
 })

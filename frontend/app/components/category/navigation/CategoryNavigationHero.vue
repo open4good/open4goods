@@ -15,7 +15,6 @@
               variant="pills"
             />
 
-
             <h1 :id="titleId" class="category-navigation-hero__title">
               {{ title }}
             </h1>

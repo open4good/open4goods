@@ -38,15 +38,14 @@
       </v-btn>
     </v-container>
 
-    <CategoryNavigationGrid
-      v-if="navigationData"
-      :categories="filteredCategories"
-    />
-
-
     <CategoryNavigationVerticalHighlights
       v-if="navigationData"
       :verticals="highlightedVerticals"
+    />
+
+    <CategoryNavigationGrid
+      v-if="navigationData"
+      :categories="filteredCategories"
     />
 
 
