@@ -2343,6 +2343,68 @@
       "mobileHelper": "Content stays cached but live data resumes when you're back online.",
       "cta": "Retry",
       "dismiss": "Dismiss"
+    },
+    "landing": {
+      "hero": {
+        "eyebrow": "PWA",
+        "title": "Your eco-companion, right on mobile",
+        "subtitle": "Scan, compare, and nudge in a few taps. Designed for quick, on-the-go decisions.",
+        "meta": {
+          "title": "Nudger – Mobile impact companion",
+          "description": "Experience Nudger as a mobile-first PWA: scan barcodes, launch the AI wizard, and share eco-guides instantly.",
+          "imageAlt": "Mobile view of Nudger with quick actions and barcode scanner."
+        }
+      },
+      "search": {
+        "title": "Quick search",
+        "label": "Search a product",
+        "placeholder": "Type a brand or product name",
+        "cta": "Search now"
+      },
+      "actions": {
+        "scan": {
+          "title": "Scan barcode",
+          "description": "Use your camera to get instant impact and price insights.",
+          "helper": "Align the barcode inside the frame to decode instantly.",
+          "loading": "Starting scanner…",
+          "error": "Scanner unavailable. Try again or search manually.",
+          "badge": "Live"
+        },
+        "wizard": {
+          "title": "AI wizard",
+          "description": "Answer a few questions and get tailored eco picks.",
+          "badge": "New"
+        },
+        "search": {
+          "title": "Search",
+          "description": "Browse products with the full Nudger database.",
+          "badge": "Quick"
+        },
+        "share": {
+          "title": "Share with your manager",
+          "description": "Show teammates how Nudger reacts instantly on product pages.",
+          "badge": "Demo"
+        }
+      },
+      "share": {
+        "title": "Share Nudger as a pro tip",
+        "description": "Send a screenshot or link from your product page: the manager sees the impact feedback instantly.",
+        "cta": "See how it looks",
+        "modalTitle": "Show the eco-guide in action",
+        "preview": {
+          "title": "Nudger eco-guide",
+          "description": "Real-time nudges appear when sharing a commercial page with Nudger enabled.",
+          "tags": {
+            "impact": "Impact score",
+            "feedback": "Instant feedback",
+            "ecoGuide": "Eco guide"
+          }
+        },
+        "note": "No data is shared without your action. It is a visual preview to explain the experience."
+      },
+      "actionBar": {
+        "ariaLabel": "Mobile quick actions"
+      }
     }
   },
   "nudge-tool": {

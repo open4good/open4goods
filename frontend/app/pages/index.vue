@@ -25,6 +25,8 @@ import {
   PARALLAX_SECTION_KEYS,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
+import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
+import { useDisplay } from 'vuetify'
 
 definePageMeta({
   ssr: true,
@@ -35,6 +37,9 @@ const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const display = useDisplay()
+
+const isMobileLanding = computed(() => display.smAndDown.value)
 
 const searchQuery = ref('')
 
@@ -625,17 +630,47 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
   navigateToSearch(suggestion.title)
 }
 
+const seoTitle = computed(() =>
+  String(
+    t(
+      isMobileLanding.value
+        ? 'pwa.landing.hero.meta.title'
+        : 'home.seo.title'
+    )
+  )
+)
+
+const seoDescription = computed(() =>
+  String(
+    t(
+      isMobileLanding.value
+        ? 'pwa.landing.hero.meta.description'
+        : 'home.seo.description'
+    )
+  )
+)
+
+const seoImageAlt = computed(() =>
+  String(
+    t(
+      isMobileLanding.value
+        ? 'pwa.landing.hero.meta.imageAlt'
+        : 'home.seo.imageAlt'
+    )
+  )
+)
+
 useSeoMeta({
-  title: () => String(t('home.seo.title')),
-  description: () => String(t('home.seo.description')),
-  ogTitle: () => String(t('home.seo.title')),
-  ogDescription: () => String(t('home.seo.description')),
+  title: () => seoTitle.value,
+  description: () => seoDescription.value,
+  ogTitle: () => seoTitle.value,
+  ogDescription: () => seoDescription.value,
   ogUrl: () => canonicalUrl.value,
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
   ogSiteName: () => siteName.value,
   ogLocale: () => locale.value.replace('-', '_'),
-  ogImageAlt: () => String(t('home.seo.imageAlt')),
+  ogImageAlt: () => seoImageAlt.value,
 })
 
 useHead(() => ({
@@ -664,7 +699,8 @@ useHead(() => ({
 </script>
 
 <template>
-  <div class="home-page">
+  <PwaMobileLanding v-if="isMobileLanding" :verticals="rawCategories" />
+  <div v-else class="home-page">
     <HomeHeroSection
       v-model:search-query="searchQuery"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
