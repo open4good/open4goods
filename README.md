@@ -85,6 +85,10 @@ can be triggered to reapply these rules to existing issues.
 3. Ensure `mvn clean install` succeeds and update documentation.
 4. Open a Pull Request describing **why** and **what**.
 
+### Hybrid GitHub ownership
+- Token guidance and the single-writer PR body policy are documented in [docs/gh-mcp-workflow.md](docs/gh-mcp-workflow.md). Use `GH_TOKEN` for gh CLI (PR body edits) and `MCP_GITHUB_TOKEN` for MCP GitHub comments/labels.
+- Run `scripts/dev-doctor.sh` to confirm toolchain (Java 21+, Node 20+, pnpm 10.26.0) and required env vars before pushing.
+
 
 # Run in dev mode
 We will see here how to run open4goods frontends and API's on tour computer.
@@ -278,4 +282,3 @@ After a space crash, elastic indexes are locked. You can get hand back on them b
 curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
 
 ```
-

@@ -1,0 +1,77 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start:frontend",
+            "type": "shell",
+            "command": "pnpm dev",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "start:api",
+            "type": "shell",
+            "command": "mvn --offline -pl api -am spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.jvmArguments=\"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005\"",
+            "problemMatcher": []
+        },
+        {
+            "label": "start:front-api",
+            "type": "shell",
+            "command": "mvn --offline -pl front-api -am spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.jvmArguments=\"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006\"",
+            "problemMatcher": []
+        },
+        {
+            "label": "start:ui",
+            "type": "shell",
+            "command": "mvn --offline -pl ui -am spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.jvmArguments=\"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007\"",
+            "problemMatcher": []
+        },
+        {
+            "label": "validate:frontend",
+            "type": "shell",
+            "command": "pnpm lint && pnpm test --run && pnpm generate",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            "problemMatcher": [
+                "$eslint-stylish"
+            ]
+        },
+        {
+            "label": "validate:backend",
+            "type": "shell",
+            "command": "mvn --offline -pl front-api -am clean install",
+            "problemMatcher": []
+        },
+        {
+            "label": "visual",
+            "type": "shell",
+            "command": "pnpm test:visual",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "doctor",
+            "type": "shell",
+            "command": "./scripts/dev-doctor.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pr-ready",
+            "dependsOn": [
+                "validate:frontend",
+                "visual",
+                "validate:backend",
+                "doctor"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
