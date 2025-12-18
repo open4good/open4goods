@@ -34,16 +34,9 @@
       <NudgeWizardHeader
         :title="currentStepTitle"
         :subtitle="currentStepSubtitle"
-        :has-previous="hasPreviousStep"
-        :has-next="hasNextStep"
-        :next-disabled="isNextDisabled"
         :accent-corner="'top-left'"
         :corner-size="resolvedCornerSize"
         :category-summary="categorySummary"
-        :previous-label="$t('nudge-tool.actions.previous')"
-        :next-label="$t('nudge-tool.actions.next')"
-        @previous="goToPrevious"
-        @next="goToNext"
       />
     </div>
 
@@ -67,12 +60,17 @@
             @select="onCategorySelect"
             @update:model-value="(value: unknown) => step.onUpdate?.(value)"
             @continue="goToNext"
+            @return-to-category="resetForCategorySelection"
           />
         </v-window-item>
       </v-window>
     </div>
     <div ref="footerRef" class="nudge-wizard__footer">
-      <div class="nudge-wizard__progress-bubbles" :style="footerOffsetStyle">
+      <div
+        v-if="progressSteps.length"
+        class="nudge-wizard__progress-bubbles"
+        :style="footerOffsetStyle"
+      >
         <v-btn
           v-for="step in progressSteps"
           :key="step.key"
@@ -184,6 +182,7 @@ const animatedMatches = ref(0)
 
 const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
+const visitedStepKeys = ref<string[]>(['category'])
 
 const selectedCategory = computed(
   () =>
@@ -327,6 +326,11 @@ const steps = computed<WizardStep[]>(() => {
         subsets,
         modelValue: activeSubsetIds.value,
         stepNumber: subsetStepNumber,
+        categoryIcon: selectedCategory.value?.mdiIcon,
+        categoryLabel:
+          selectedCategory.value?.verticalHomeTitle ??
+          selectedCategory.value?.id ??
+          '',
       },
       onUpdate: (value: string[]) => (activeSubsetIds.value = value),
     })
@@ -350,12 +354,22 @@ const steps = computed<WizardStep[]>(() => {
   return sequence
 })
 
-const currentStep = computed(() => 
-    steps.value.find(step => step.key === activeStepKey.value)
+const currentStep = computed(() =>
+  steps.value.find(step => step.key === activeStepKey.value)
 )
 
 const currentStepTitle = computed(() => currentStep.value?.title ?? '')
 const currentStepSubtitle = computed(() => currentStep.value?.subtitle ?? '')
+
+watch(
+  activeStepKey,
+  next => {
+    if (!visitedStepKeys.value.includes(next)) {
+      visitedStepKeys.value = [...visitedStepKeys.value, next]
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   steps,
@@ -363,6 +377,11 @@ watch(
     if (!allSteps.find(step => step.key === activeStepKey.value)) {
       activeStepKey.value = allSteps[0]?.key ?? 'recommendations'
     }
+
+    const validKeys = allSteps.map(step => step.key)
+    visitedStepKeys.value = visitedStepKeys.value.filter(key =>
+      validKeys.includes(key)
+    )
   },
   { immediate: true, deep: true }
 )
@@ -535,15 +554,22 @@ const isNextDisabled = computed(() => {
 })
 
 const canAccessStep = (stepKey: string) =>
-  stepKey === 'category' || Boolean(selectedCategoryId.value)
+  visitedStepKeys.value.includes(stepKey)
 
-const progressSteps = computed(() =>
-  steps.value.map((step, index) => ({
-    key: step.key,
-    title: step.title,
-    index: index + 1,
-  }))
-)
+const progressSteps = computed(() => {
+  if (activeStepKey.value === 'category') {
+    return []
+  }
+
+  return steps.value
+    .filter(step => step.key !== 'category')
+    .filter(step => visitedStepKeys.value.includes(step.key))
+    .map((step, index) => ({
+      key: step.key,
+      title: step.title,
+      index: index + 1,
+    }))
+})
 
 const handleProgressClick = (stepKey: string) => {
   if (!canAccessStep(stepKey)) {
@@ -590,7 +616,7 @@ const categorySummary = computed(() => {
       selectedCategory.value.id ??
       '',
     image: selectedCategory.value.imageSmall,
-    icon: (selectedCategory.value as { icon?: string }).icon ?? 'mdi-tag', // Fallback or explicit cast if typing is missing
+    icon: selectedCategory.value.mdiIcon ?? 'mdi-tag',
     alt:
       selectedCategory.value.verticalHomeTitle ??
       selectedCategory.value.id ??
@@ -607,6 +633,7 @@ const resetCategorySelectionState = () => {
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
+  visitedStepKeys.value = ['category']
   // Keep locked heights intact so returning to the wizard keeps the layout stable
 }
 

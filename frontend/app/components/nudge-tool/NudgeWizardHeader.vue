@@ -21,51 +21,12 @@
           </span>
         </div>
       </div>
-
-      <div
-        class="wizard-header__actions"
-        :class="{ 'wizard-header__actions--mobile': isMobile }"
-      >
-        <v-btn-group
-          class="wizard-header__action-group"
-          :class="{ 'wizard-header__action-group--mobile': isMobile }"
-          density="comfortable"
-        >
-          <v-btn
-            v-if="hasPrevious"
-            color="primary"
-            variant="outlined"
-            rounded="pill"
-            elevation="0"
-            prepend-icon="mdi-chevron-left"
-            class="wizard-header__action-btn wizard-header__action-btn--previous"
-            @click="emit('previous')"
-          >
-            {{ previousLabel }}
-          </v-btn>
-
-          <v-btn
-            v-if="hasNext"
-            color="primary"
-            variant="tonal"
-            rounded="pill"
-            elevation="0"
-            :disabled="nextDisabled"
-            append-icon="mdi-chevron-right"
-            class="wizard-header__action-btn wizard-header__action-btn--next"
-            @click="emit('next')"
-          >
-            {{ nextLabel }}
-          </v-btn>
-        </v-btn-group>
-      </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useDisplay } from 'vuetify'
 import type {
   AccentCorner,
   CornerSize,
@@ -82,11 +43,6 @@ const props = withDefaults(
   defineProps<{
     title: string
     subtitle?: string
-    hasPrevious?: boolean
-    hasNext?: boolean
-    nextDisabled?: boolean
-    previousLabel: string
-    nextLabel: string
     accentCorner?: AccentCorner
     cornerSize?: CornerSize
     categorySummary?: {
@@ -97,25 +53,13 @@ const props = withDefaults(
   }>(),
   {
     subtitle: '',
-    hasPrevious: false,
-    hasNext: false,
-    nextDisabled: false,
     accentCorner: 'top-left',
     cornerSize: 'lg',
     categorySummary: null,
   }
 )
 
-const emit = defineEmits<{
-  (e: 'previous' | 'next'): void
-}>()
-
 const isStacked = computed(() => props.accentCorner === 'top-left')
-const display = useDisplay()
-const isMobile = computed(() => {
-  const breakpoint = display && 'mdAndDown' in display ? display.mdAndDown : undefined
-  return typeof breakpoint?.value === 'boolean' ? breakpoint.value : false
-})
 
 const headerOffsetStyle = computed(() => {
   if (props.accentCorner !== 'top-left') {
@@ -199,71 +143,6 @@ const headerOffsetStyle = computed(() => {
     color: rgb(var(--v-theme-text-neutral-secondary));
   }
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  &__action-group {
-    display: inline-flex;
-    gap: 6px;
-    padding: 6px 8px;
-    border-radius: 999px;
-    background-color: rgba(var(--v-theme-surface-primary-080), 0.55);
-    border: 1px solid rgb(var(--v-theme-border-primary-strong));
-    transition: background-color 160ms ease, border-color 160ms ease;
-  }
-
-  &__action-group--mobile {
-    width: 100%;
-    max-width: 420px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-    padding: 10px;
-    gap: 10px;
-  }
-
-  &__action-btn {
-    font-weight: 700;
-
-    :deep(.v-btn) {
-      border-width: 1px;
-      transition:
-        background-color 160ms ease,
-        color 160ms ease,
-        border-color 160ms ease;
-    }
-
-    :deep(.v-btn:hover),
-    :deep(.v-btn:focus-visible) {
-      background-color: rgba(var(--v-theme-surface-primary-100), 0.75);
-      color: rgb(var(--v-theme-text-neutral-strong));
-      box-shadow: none;
-    }
-
-    :deep(.v-btn:focus-visible) {
-      outline: 2px solid rgb(var(--v-theme-accent-primary-highlight));
-      outline-offset: 2px;
-    }
-
-    :deep(.v-btn--disabled) {
-      color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-      border-color: rgba(var(--v-theme-border-primary-strong), 0.5);
-      background-color: rgba(var(--v-theme-surface-primary-080), 0.55);
-      box-shadow: none;
-    }
-  }
-
-  &__actions--mobile {
-    justify-content: center;
-  }
-
-  &__action-btn--next :deep(.v-btn) {
-    color: rgb(var(--v-theme-text-on-accent));
-  }
-
   @media (max-width: 960px) {
     grid-template-columns: 1fr;
     text-align: center;
@@ -272,15 +151,6 @@ const headerOffsetStyle = computed(() => {
     &__meta {
       justify-content: center;
       gap: 10px;
-    }
-
-    &__actions {
-      width: 100%;
-      order: 2;
-    }
-
-    &__action-group--mobile :deep(.v-btn) {
-      width: 100%;
     }
   }
 }
