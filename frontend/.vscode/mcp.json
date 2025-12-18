@@ -7,6 +7,23 @@
     "nuxt-docs": {
       "type": "sse",
       "url": "https://mcp.nuxt.com/sse"
+    },
+    "vuetify": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@vuetify/mcp"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_TOKEN_HERE"
+      }
     }
   }
 }
