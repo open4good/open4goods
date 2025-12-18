@@ -111,9 +111,6 @@ importers:
       '@capacitor/ios':
         specifier: ^8.0.0
         version: 8.0.0(@capacitor/core@8.0.0)
-      '@iconify-json/bxl':
-        specifier: ^1.2.2
-        version: 1.2.2
       '@iconify-json/mdi':
         specifier: ^1.2.3
         version: 1.2.3
@@ -1690,9 +1687,6 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
-
-  '@iconify-json/bxl@1.2.2':
-    resolution: {integrity: sha512-+cSX1abFQ2Q8jK9IdLHC05luZYq3zgNFqXsiEcKyigUdIEmGQNQp4xjnsCUmOYFvHrV7C1/D0wr/Lm/stAD3tw==}
 
   '@iconify-json/mdi@1.2.3':
     resolution: {integrity: sha512-O3cLwbDOK7NNDf2ihaQOH5F9JglnulNDFV7WprU2dSoZu3h3cWH//h74uQAB87brHmvFVxIOkuBX2sZSzYhScg==}
@@ -11245,10 +11239,6 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
-
-  '@iconify-json/bxl@1.2.2':
-    dependencies:
-      '@iconify/types': 2.0.0
 
   '@iconify-json/mdi@1.2.3':
     dependencies:
