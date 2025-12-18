@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
 
 type SolutionBenefit = {
   emoji: string
@@ -19,14 +18,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
 </script>
 
 <template>
-  <ParallaxSection
-    id="home-solution"
-    class="home-solution"
-    aria-label="home-solution-title"
-    :background-light="'/assets/themes/light/parallax/parallax-background-bubbles-transparent-1.svg'"
-    :background-dark="'/assets/themes/dark/parallax/parallax-background-bubbles-1.svg'"
-    :parallax-amount="0.16"
-  >
+  <section id="home-solution" class="home-solution" aria-labelledby="home-solution-title">
     <div class="home-solution__inner">
       <v-row class="home-solution__layout" align="center" justify="space-between">
         <v-col cols="12" md="6" class="home-solution__copy">
@@ -73,12 +65,10 @@ const sectionDescription = computed(() => t('home.solution.description'))
         </v-col>
       </v-row>
     </div>
-  </ParallaxSection>
+  </section>
 </template>
 
 <style scoped lang="sass">
-// .home-solution managed solely by ParallaxSection
-
 .home-solution__inner
   max-width: 1180px
   margin: 0 auto
@@ -131,8 +121,6 @@ const sectionDescription = computed(() => t('home.solution.description'))
   display: flex
   gap: 1rem
   align-items: flex-start
-  // Ensure transparent background for item if needed, but Sheet has default surface.
-  // We keep it as is.
 
 .home-solution__item::after
   display: none
@@ -172,5 +160,4 @@ const sectionDescription = computed(() => t('home.solution.description'))
     align-items: center
 
 </style>
-
 
