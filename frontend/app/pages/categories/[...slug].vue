@@ -53,6 +53,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { createError } from '#imports'
 import type { CategoryNavigationDto } from '~~/shared/api-client'
 
 import CategoryNavigationGrid from '~/components/category/navigation/CategoryNavigationGrid.vue'
