@@ -54,30 +54,36 @@
         :value="release.slug"
         class="release-accordion__panel"
       >
-        <v-expansion-panel-title class="release-accordion__title">
-          <div class="release-accordion__title-content">
-            <div class="release-accordion__meta">
-              <span class="release-accordion__eyebrow">
-                {{ formatPublishedDate(release.publishedAt) }}
-              </span>
-              <div class="d-flex align-center gap-2">
+        <v-expansion-panel-title class="release-accordion__title" hide-actions>
+          <template #default="{ expanded }">
+            <div class="release-accordion__title-content">
+              <div class="release-accordion__meta">
+                <span class="release-accordion__eyebrow">
+                  {{ formatPublishedDate(release.publishedAt) }}
+                </span>
                 <span class="release-accordion__name">{{ release.name }}</span>
+              </div>
+
+              <div class="release-accordion__actions">
                 <v-chip
                   v-if="index === 0"
                   color="primary"
                   size="small"
                   variant="flat"
                   density="comfortable"
+                  class="release-accordion__latest-chip"
                 >
                   {{ t('releases.latest') }}
                 </v-chip>
+
+                <v-icon
+                  icon="mdi-chevron-down"
+                  class="release-accordion__icon"
+                  :class="{ 'release-accordion__icon--expanded': expanded }"
+                />
               </div>
             </div>
-            <v-icon
-              icon="mdi-chevron-down"
-              class="release-accordion__icon"
-            />
-          </div>
+          </template>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
           <!-- eslint-disable-next-line vue/no-v-html -->
@@ -149,6 +155,14 @@ const formatPublishedDate = (isoDate: string): string => {
     align-items: center
     gap: 12px
 
+  &__actions
+    display: flex
+    align-items: center
+    gap: 12px
+
+  &__latest-chip
+    font-weight: 700
+
   &__meta
     display: flex
     flex-direction: column
@@ -167,6 +181,10 @@ const formatPublishedDate = (isoDate: string): string => {
 
   &__icon
     color: rgba(var(--v-theme-on-surface), 0.6)
+    transition: transform 0.2s ease
+
+  &__icon--expanded
+    transform: rotate(180deg)
 
   &__content
     padding: 10px 4px 20px

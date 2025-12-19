@@ -31,11 +31,13 @@ const props = withDefaults(
     subtitle: string
     primaryCta?: HeroCta
     educationCard?: HeroEducationCardProps
+    fluid?: boolean
   }>(),
   {
     eyebrow: undefined,
     primaryCta: undefined,
     educationCard: undefined,
+    fluid: false,
   }
 )
 
@@ -82,7 +84,11 @@ const handleSubtitleClick = (event: MouseEvent) => {
     aria-labelledby="opendata-hero-heading"
     variant="orbit"
   >
-    <v-container class="py-16" max-width="lg">
+    <v-container
+      class="py-16"
+      :max-width="props.fluid ? undefined : 'lg'"
+      :fluid="props.fluid"
+    >
       <v-row align="center" class="g-8">
         <v-col cols="12" md="7" class="d-flex flex-column gap-6">
           <div class="opendata-hero__header">

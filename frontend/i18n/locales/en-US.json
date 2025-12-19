@@ -2290,12 +2290,12 @@
     "cta": "Browse updates",
     "ctaLink": "/releases",
     "description": "Every release captures our latest improvements, from new impact insights to performance fixes.",
-    "eyebrow": "Product updates",
+    "eyebrow": "Nudger: its life!",
     "faqLink": "Jump to the release FAQ",
     "secondaryCta": "Contact us",
-    "subtitle": "Follow how Nudger evolves across versions.",
-    "subtitleWithLink": "Follow how Nudger evolves across versions. {{faqLink}}",
-    "title": "Release notes"
+    "subtitle": "Discover Nudger's story.",
+    "subtitleWithLink": "Discover Nudger's story.",
+    "title": "Historic"
   },
   "summary": {
     "body": "Release notes are sourced directly from our repository. Each Markdown file represents one published version.",
@@ -2314,8 +2314,8 @@
     "loadFailed": "We could not load the release notes. Please try again."
   },
   "faq": {
-    "subtitle": "Read the changelog and answers to frequent questions about our releases.",
-    "title": "Release FAQ"
+    "subtitle": "At Nudger: its boss!",
+    "title": "Historic des versions"
   },
   "seo": {
     "description": "Explore every Nudger release with publication dates and detailed changelogs.",
