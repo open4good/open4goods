@@ -43,14 +43,14 @@ export type ParallaxPackConfig = Partial<
 
 export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   light: {
-    logo: 'logo.png',
+    logo: 'logo-new.png',
     footerLogo: 'logo-footer.svg',
     favicon: 'favicon.svg',
     heroBackground: 'hero-background.webp',
     illustration: 'illustration-generic.svg',
   },
   dark: {
-    logo: 'logo.png',
+    logo: 'logo-new.png',
     footerLogo: 'logo-footer.svg',
     favicon: 'favicon.svg',
     heroBackground: 'hero-background.svg',
