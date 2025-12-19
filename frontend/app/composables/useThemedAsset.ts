@@ -6,8 +6,8 @@ import {
   seasonalThemeAssets,
   themeAssets,
   type ThemeAssetKey,
+  type ParallaxPackName,
 } from '~~/config/theme/assets'
-import { type ParallaxPackName } from '~~/config/theme/assets'
 import { useSeasonalParallaxPack } from './useSeasonalParallaxPack'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
