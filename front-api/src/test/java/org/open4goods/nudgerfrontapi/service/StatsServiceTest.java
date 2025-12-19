@@ -22,6 +22,7 @@ class StatsServiceTest {
     void categoriesCountsEnabledVerticalConfigs() throws Exception {
         SerialisationService serialisationService = new SerialisationService();
         ResourcePatternResolver resolver = mock(ResourcePatternResolver.class);
+        AffiliationPartnerService partnerSrvice = mock(AffiliationPartnerService.class);
 
         Resource defaultResource = resource("_default.yml", DEFAULT_YAML);
         Resource enabledResource = resource("enabled.yml", ENABLED_YAML);
@@ -31,7 +32,7 @@ class StatsServiceTest {
         given(resolver.getResources("classpath:/verticals/*.yml"))
                 .willReturn(new Resource[]{defaultResource, enabledResource, disabledResource});
 
-        StatsService service = new StatsService(serialisationService, resolver);
+        StatsService service = new StatsService(serialisationService, resolver, partnerSrvice);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 

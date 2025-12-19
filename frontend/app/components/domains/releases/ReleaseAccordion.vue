@@ -55,7 +55,7 @@
         class="release-accordion__panel"
       >
         <v-expansion-panel-title class="release-accordion__title" hide-actions>
-          <template #default="{ expanded }">
+          <template #default="{ expanded: isExpanded }">
             <div class="release-accordion__title-content">
               <div class="release-accordion__meta">
                 <span class="release-accordion__eyebrow">
@@ -79,7 +79,7 @@
                 <v-icon
                   icon="mdi-chevron-down"
                   class="release-accordion__icon"
-                  :class="{ 'release-accordion__icon--expanded': expanded }"
+                  :class="{ 'release-accordion__icon--expanded': isExpanded }"
                 />
               </div>
             </div>
@@ -87,7 +87,10 @@
         </v-expansion-panel-title>
         <v-expansion-panel-text>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="release-accordion__content" v-html="release.contentHtml" />
+          <div
+            class="release-accordion__content"
+            v-html="release.contentHtml"
+          />
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -113,7 +116,7 @@ const expanded = ref<string[]>([])
 
 watch(
   () => props.releases,
-  (list) => {
+  list => {
     if (list.length > 0) {
       expanded.value = [list[0]?.slug]
     }
@@ -125,10 +128,10 @@ const formatPublishedDate = (isoDate: string): string => {
   try {
     const parsed = new Date(isoDate)
 
-    return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
-      .format(parsed)
-  }
-  catch {
+    return new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'medium',
+    }).format(parsed)
+  } catch {
     return isoDate
   }
 }

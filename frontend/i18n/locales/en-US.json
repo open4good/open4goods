@@ -2285,7 +2285,6 @@
     },
     "siteName": "Nudger"
   },
-<<<<<<< HEAD
   "releases": {
     "hero": {
       "cta": "Browse updates",
@@ -2322,58 +2321,11 @@
       "description": "Explore every Nudger release with publication dates and detailed changelogs.",
       "title": "Nudger release notes"
     }
-=======
-  "siteName": "Nudger"
-},
-"releases": {
-  "hero": {
-    "cta": "Browse updates",
-    "ctaLink": "/releases",
-    "description": "Every release captures our latest improvements, from new impact insights to performance fixes.",
-    "eyebrow": "Nudger: its life!",
-    "faqLink": "Jump to the release FAQ",
-    "secondaryCta": "Contact us",
-    "subtitle": "Discover Nudger's story.",
-    "subtitleWithLink": "Discover Nudger's story.",
-    "title": "Historic"
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
   },
-<<<<<<< HEAD
   "team": {
     "callouts": {
       "contact": {
         "cta": "Contact us",
-=======
-  "summary": {
-    "body": "Release notes are sourced directly from our repository. Each Markdown file represents one published version.",
-    "count": "Published releases",
-    "countItem": "{count} published versions",
-    "eyebrow": "Snapshot",
-    "latestItem": "Latest release: {name}",
-    "latest": "Latest version",
-    "title": "Release overview"
-  },
-  "latest": "Latest",
-  "latestLabel": "Latest release: {name}",
-  "loading": "Loading release notes…",
-  "empty": "Release notes will arrive soon.",
-  "errors": {
-    "loadFailed": "We could not load the release notes. Please try again."
-  },
-  "faq": {
-    "subtitle": "At Nudger: its boss!",
-    "title": "Historic des versions"
-  },
-  "seo": {
-    "description": "Explore every Nudger release with publication dates and detailed changelogs.",
-    "title": "Nudger release notes"
-  }
-},
-"team": {
-  "callouts": {
-    "contact": {
-      "cta": "Contact us",
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
         "description": "Want to co-create the future of responsible shopping or ask us something specific? We would love to talk.",
         "title": "Curious to chat?"
       },

@@ -158,10 +158,8 @@ import {
   type ProductScoreDto,
   type ProductSearchResponseDto,
 } from '~~/shared/api-client'
-import {
-  matchProductRouteFromSegments,
-  isBackendNotFoundError,
-} from '~~/shared/utils/_product-route'
+import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
+import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import TopBanner from '~/components/shared/ui/TopBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
@@ -204,8 +202,6 @@ const isStickyBannerOpen = ref(false)
 const bannerMessage = computed(() => t('product.banner.message'))
 const bannerCtaLabel = computed(() => t('product.banner.cta'))
 const bannerAriaLabel = computed(() => t('product.banner.ariaLabel'))
-
-import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 
 const props = defineProps<{
   productRoute: ProductRouteMatch

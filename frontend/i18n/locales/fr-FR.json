@@ -2287,7 +2287,6 @@
     "siteName": "Nudger"
   },
   "releases": {
-<<<<<<< HEAD
     "hero": {
       "cta": "Parcourir les mises à jour",
       "ctaLink": "/versions",
@@ -2310,30 +2309,6 @@
     },
     "latest": "Dernière",
     "latestLabel": "Dernière version : {name}",
-=======
-  "hero": {
-    "cta": "Parcourir les mises à jour",
-    "ctaLink": "/versions",
-    "description": "Chaque publication regroupe nos dernières améliorations, des nouvelles données d'impact aux optimisations de performance.",
-    "eyebrow": "Nudger : sa vie !",
-    "faqLink": "Aller à la FAQ des versions",
-    "secondaryCta": "Nous contacter",
-    "subtitle": "Découvre l'histoire de Nudger.",
-    "subtitleWithLink": "Découvre l'histoire de Nudger.",
-    "title": "Historic"
-  },
-  "summary": {
-    "body": "Les notes de version proviennent directement de notre dépôt. Chaque fichier Markdown correspond à une version publiée.",
-    "count": "Versions publiées",
-    "countItem": "{count} versions publiées",
-    "eyebrow": "En un coup d'œil",
-    "latestItem": "Dernière version : {name}",
-    "latest": "Version la plus récente",
-    "title": "Vue d'ensemble des versions"
-  },
-  "latest": "Dernière",
-  "latestLabel": "Dernière version : {name}",
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     "loading": "Chargement des notes de version…",
     "empty": "Les notes de version seront publiées bientôt.",
     "errors": {
@@ -2348,18 +2323,7 @@
       "title": "Notes de version Nudger"
     }
   },
-<<<<<<< HEAD
-=======
-  "faq": {
-    "subtitle": "chez Nudger, sa boss !",
-    "title": "Historic des versions"
-  },
-  "seo": {
-    "description": "Découvrez chaque version de Nudger avec les dates de publication et les journaux détaillés.",
-    "title": "Notes de version Nudger"
-  }
-},
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
+
   "team": {
     "callouts": {
       "contact": {
