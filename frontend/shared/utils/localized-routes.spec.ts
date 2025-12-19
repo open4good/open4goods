@@ -21,6 +21,8 @@ describe('localized-routes utilities', () => {
   it('resolves localized static paths', () => {
     expect(resolveLocalizedRoutePath('team', 'fr-FR')).toBe('/equipe')
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
+    expect(resolveLocalizedRoutePath('releases', 'fr-FR')).toBe('/versions')
+    expect(resolveLocalizedRoutePath('releases', 'en-US')).toBe('/releases')
     expect(resolveLocalizedRoutePath('legal-notice', 'fr-FR')).toBe(
       '/mentions-legales'
     )
@@ -42,6 +44,14 @@ describe('localized-routes utilities', () => {
     })
     expect(matchLocalizedRouteByPath('/team')).toEqual({
       routeName: 'team',
+      locale: 'en-US',
+    })
+    expect(matchLocalizedRouteByPath('/versions')).toEqual({
+      routeName: 'releases',
+      locale: 'fr-FR',
+    })
+    expect(matchLocalizedRouteByPath('/releases')).toEqual({
+      routeName: 'releases',
       locale: 'en-US',
     })
     expect(matchLocalizedRouteByPath('/mentions-legales')).toEqual({

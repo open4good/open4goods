@@ -2275,20 +2275,49 @@
         "nudgerAriaLabel": "Activate Nudger signature theme",
         "nudgerTooltip": "Switch to the Nudger signature theme"
       },
-      "zoom": {
-        "label": "Toggle zoom",
-        "activate": "Zoom in (120%)",
-        "reset": "Reset zoom"
-      },
-      "themeToggle": "Toggle theme",
-      "title": "Menu"
+    "zoom": {
+      "label": "Toggle zoom",
+      "activate": "Zoom in (120%)",
+      "reset": "Reset zoom"
     },
-    "siteName": "Nudger"
+    "themeToggle": "Toggle theme",
+    "title": "Menu"
   },
-  "team": {
-    "callouts": {
-      "contact": {
-        "cta": "Contact us",
+  "siteName": "Nudger"
+},
+"releases": {
+  "hero": {
+    "cta": "Browse updates",
+    "ctaLink": "/releases",
+    "description": "Every release captures our latest improvements, from new impact insights to performance fixes.",
+    "eyebrow": "Product updates",
+    "secondaryCta": "Contact us",
+    "subtitle": "Follow how Nudger evolves across versions.",
+    "title": "Release notes"
+  },
+  "summary": {
+    "body": "Release notes are sourced directly from our repository. Each Markdown file represents one published version.",
+    "count": "Published releases",
+    "eyebrow": "Snapshot",
+    "latest": "Latest version",
+    "title": "Release overview"
+  },
+  "latest": "Latest",
+  "latestLabel": "Latest release: {name}",
+  "loading": "Loading release notes…",
+  "empty": "Release notes will arrive soon.",
+  "errors": {
+    "loadFailed": "We could not load the release notes. Please try again."
+  },
+  "seo": {
+    "description": "Explore every Nudger release with publication dates and detailed changelogs.",
+    "title": "Nudger release notes"
+  }
+},
+"team": {
+  "callouts": {
+    "contact": {
+      "cta": "Contact us",
         "description": "Want to co-create the future of responsible shopping or ask us something specific? We would love to talk.",
         "title": "Curious to chat?"
       },

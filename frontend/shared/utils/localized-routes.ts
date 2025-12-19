@@ -6,6 +6,7 @@ const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
 export type LocalizedRouteName =
   | 'compare'
   | 'partners'
+  | 'releases'
   | 'team'
   | 'search'
   | LocalizedWikiRouteName
@@ -84,6 +85,10 @@ export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
   team: {
     'fr-FR': '/equipe',
     'en-US': '/team',
+  },
+  releases: {
+    'fr-FR': '/versions',
+    'en-US': '/releases',
   },
   ...LOCALIZED_WIKI_ROUTE_PATHS,
 } satisfies LocalizedRoutePaths
