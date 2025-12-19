@@ -1,14 +1,15 @@
 <template>
-    <RoundedCornerCard
-      class="nudge-wizard"
-      rounded="xl"
-      :elevation="3"
-      :hover-elevation="3"
-      accent-corner="top-left"
-      corner-variant="custom"
+  <RoundedCornerCard
+    class="nudge-wizard"
+    rounded="xl"
+    :elevation="3"
+    :hover-elevation="3"
+    accent-corner="top-left"
+    corner-variant="custom"
     :corner-size="resolvedCornerSize"
     :style="wizardStyle"
     :class="{ 'nudge-wizard--content-mode': isContentMode }"
+    :selectable="false"
   >
     <template #corner>
       <div
@@ -27,20 +28,11 @@
         </div>
         <div
           v-else-if="categorySummary"
-          class="nudge-wizard__corner-summary d-flex align-center justify-center fill-height pt-3 pb-2"
+          class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-2 pb-2"
         >
-          <div class="nudge-wizard__corner-visual d-flex align-center gap-2">
-            <v-avatar
-              v-if="categorySummary.image"
-              size="44"
-              class="nudge-wizard__corner-avatar"
-              :image="categorySummary.image"
-              :alt="categorySummary.alt"
-            >
-              <template #fallback>
-                <v-icon :icon="categorySummary.icon" size="28" color="white" />
-              </template>
-            </v-avatar>
+          <div
+            class="nudge-wizard__corner-visual d-flex align-center justify-center mb-1"
+          >
             <div class="nudge-wizard__corner-icon">
               <v-icon
                 :icon="categorySummary.icon"
@@ -49,12 +41,14 @@
               />
             </div>
           </div>
-          <div class="nudge-wizard__corner-text text-white text-center">
-            <div class="text-caption font-weight-bold lh-1 mb-1">
-              {{ categorySummary.label }}
-            </div>
-            <div class="nudge-wizard__corner-count font-weight-black">
+          <div
+            class="nudge-wizard__corner-text text-white text-center d-flex flex-column align-center"
+          >
+            <div class="nudge-wizard__corner-count font-weight-black lh-1 mb-1">
               {{ animatedMatches }}
+            </div>
+            <div class="text-caption font-weight-bold lh-1 opacity-90">
+              {{ categorySummary.label }}
             </div>
           </div>
         </div>
@@ -70,7 +64,7 @@
       />
     </div>
 
-    <div v-if="loading" class="nudge-wizard__progress">
+    <div v-if="loading" class="nudge-wizard__progress mb-4">
       <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
     </div>
 
@@ -87,7 +81,12 @@
         :reverse-transition="windowReverseTransition"
         :style="windowContentStyle"
       >
-        <v-window-item v-for="step in steps" :key="step.key" :value="step.key">
+        <v-window-item
+          v-for="step in steps"
+          :key="step.key"
+          :value="step.key"
+          class="fill-height"
+        >
           <component
             :is="step.component"
             v-bind="step.props"
@@ -479,7 +478,9 @@ const fetchRecommendations = async () => {
           verticalId: selectedCategoryId.value,
           pageNumber: 0,
           pageSize: 3,
-          sort: { sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }] },
+          sort: {
+            sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }],
+          },
           filters: hasFilters ? filterRequest.value : undefined,
         },
       }
@@ -876,10 +877,10 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
   }
 
   &__progress {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    height: 4px; /* fixed height layout space */
   }
 
   &__window {
