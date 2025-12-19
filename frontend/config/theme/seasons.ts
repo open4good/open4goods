@@ -1,4 +1,4 @@
-import { DEFAULT_PARALLAX_PACK, type ParallaxPackName } from './assets'
+import { DEFAULT_PARALLAX_PACK, PARALLAX_PACK_NAMES, type ParallaxPackName } from './assets'
 
 export type SeasonalParallaxWindow = {
   id: string
@@ -33,6 +33,20 @@ export const seasonalParallaxSchedule: SeasonalParallaxWindow[] = [
     description: 'Winter friendly visuals without SDG overlays',
   },
 ]
+
+export const resolveParallaxPackName = (
+  value: string | string[] | undefined
+): ParallaxPackName | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  const packName = Array.isArray(value) ? value[0] : value
+
+  return (PARALLAX_PACK_NAMES as readonly string[]).includes(packName)
+    ? (packName as ParallaxPackName)
+    : undefined
+}
 
 const isDateWithinWindow = (
   date: Date,
