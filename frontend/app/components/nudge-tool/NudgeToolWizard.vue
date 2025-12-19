@@ -1,10 +1,11 @@
 <template>
-  <RoundedCornerCard
-    class="nudge-wizard"
-    rounded="xl"
-    :elevation="3"
-    accent-corner="top-left"
-    corner-variant="custom"
+    <RoundedCornerCard
+      class="nudge-wizard"
+      rounded="xl"
+      :elevation="3"
+      :hover-elevation="3"
+      accent-corner="top-left"
+      corner-variant="custom"
     :corner-size="resolvedCornerSize"
     :style="wizardStyle"
     :class="{ 'nudge-wizard--content-mode': isContentMode }"

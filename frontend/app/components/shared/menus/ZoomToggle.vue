@@ -23,9 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core'
-import { watch, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 withDefaults(
   defineProps<{
@@ -41,31 +41,9 @@ withDefaults(
 )
 
 const { t } = useI18n()
-
-const isZoomed = useStorage('is-zoomed', false)
-
-const toggleZoom = () => {
-  isZoomed.value = !isZoomed.value
-}
-
-const applyZoom = (zoomed: boolean) => {
-  if (typeof document === 'undefined') {
-    return
-  }
-
-  const rootElement = document.documentElement
-
-  rootElement.style.fontSize = zoomed ? '120%' : ''
-  rootElement.classList.toggle('accessibility-layout', zoomed)
-}
-
-watch(isZoomed, val => {
-  applyZoom(val)
-})
-
-onMounted(() => {
-  applyZoom(isZoomed.value)
-})
+const accessibilityStore = useAccessibilityStore()
+const { isZoomed } = storeToRefs(accessibilityStore)
+const { toggleZoom } = accessibilityStore
 </script>
 
 <style scoped lang="sass">
