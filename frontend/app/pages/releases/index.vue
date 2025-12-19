@@ -3,8 +3,9 @@
     <OpendataHero
       :eyebrow="t('releases.hero.eyebrow')"
       :title="t('releases.hero.title')"
-      :subtitle="heroSubtitle"
+      :subtitle="t('releases.hero.subtitle')"
       :education-card="educationCard"
+      fluid
     >
       <template #below-title>
         <LatestReleaseBadge
@@ -14,7 +15,7 @@
       </template>
     </OpendataHero>
 
-    <v-container class="releases-page__content" max-width="lg">
+    <v-container class="releases-page__content" fluid>
       <div :id="faqAnchorId" class="releases-page__anchor" aria-hidden="true" />
       <h2 class="releases-page__section-title">
         {{ t('releases.faq.title') }}
@@ -57,13 +58,6 @@ const releasesCount = computed(() => releases.value.length)
 const latestReleaseName = computed(
   () => latestRelease.value?.name ?? t('releases.empty')
 )
-
-const heroSubtitle = computed(() => {
-  const faqLink = `<a href="${faqAnchor}" data-scroll-target="${faqAnchor}">${t(
-    'releases.hero.faqLink'
-  )}</a>`
-  return String(t('releases.hero.subtitleWithLink', { faqLink }))
-})
 
 const educationCard = computed(() => ({
   icon: 'mdi-text-box-multiple-outline',

@@ -2291,12 +2291,12 @@
     "cta": "Parcourir les mises à jour",
     "ctaLink": "/versions",
     "description": "Chaque publication regroupe nos dernières améliorations, des nouvelles données d'impact aux optimisations de performance.",
-    "eyebrow": "Mises à jour produit",
+    "eyebrow": "Nudger : sa vie !",
     "faqLink": "Aller à la FAQ des versions",
     "secondaryCta": "Nous contacter",
-    "subtitle": "Suivez l'évolution de Nudger version après version.",
-    "subtitleWithLink": "Suivez l'évolution de Nudger version après version. {{faqLink}}",
-    "title": "Notes de version"
+    "subtitle": "Découvre l'histoire de Nudger.",
+    "subtitleWithLink": "Découvre l'histoire de Nudger.",
+    "title": "Historic"
   },
   "summary": {
     "body": "Les notes de version proviennent directement de notre dépôt. Chaque fichier Markdown correspond à une version publiée.",
@@ -2315,8 +2315,8 @@
     "loadFailed": "Impossible de charger les notes de version. Merci de réessayer."
   },
   "faq": {
-    "subtitle": "Parcourez le journal des versions et les réponses aux questions fréquentes.",
-    "title": "FAQ et changelog"
+    "subtitle": "chez Nudger, sa boss !",
+    "title": "Historic des versions"
   },
   "seo": {
     "description": "Découvrez chaque version de Nudger avec les dates de publication et les journaux détaillés.",
