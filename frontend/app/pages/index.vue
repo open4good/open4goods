@@ -2,7 +2,11 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import type { AffiliationPartnerDto, BlogPostDto } from '~~/shared/api-client'
+import type {
+  AffiliationPartnerDto,
+  BlogPostDto,
+  CategoriesStatsDto,
+} from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
@@ -50,6 +54,21 @@ const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
 
+const { data: categoriesStats } = await useAsyncData<
+  CategoriesStatsDto | null
+>(
+  'home-categories-stats',
+  () =>
+    $fetch<CategoriesStatsDto>('/api/stats/categories', {
+      headers: requestHeaders,
+    }).catch(() => null),
+  {
+    default: () => null,
+    server: true,
+    lazy: true,
+  }
+)
+
 const { data: affiliationPartners } = await useAsyncData<
   AffiliationPartnerDto[]
 >(
@@ -65,7 +84,15 @@ const { data: affiliationPartners } = await useAsyncData<
   }
 )
 
-const heroPartnersCount = computed(() => affiliationPartners.value?.length ?? 0)
+const heroPartnersCount = computed(() => {
+  const statsCount = categoriesStats.value?.affiliationPartnersCount
+
+  if (typeof statsCount === 'number' && Number.isFinite(statsCount)) {
+    return statsCount
+  }
+
+  return affiliationPartners.value?.length ?? 0
+})
 
 const seasonalParallaxPack = useSeasonalParallaxPack()
 
