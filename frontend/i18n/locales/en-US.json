@@ -2112,6 +2112,8 @@
   },
   "siteIdentity": {
     "logoAlt": "Return to home page via Nudger logo",
+    "title": "Nudger",
+    "subtitle": "Responsible shopping, made simple",
     "footer": {
       "accessibleTitle": "Footer information",
       "blogLink": "Our blog",

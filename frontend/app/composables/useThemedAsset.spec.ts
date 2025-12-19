@@ -8,19 +8,19 @@ import {
 
 describe('useThemedAsset utilities', () => {
   const assetIndex = {
-    'light/logo.png': '/_nuxt/light-logo.png',
+    'light/logo-new.png': '/_nuxt/light-logo-new.png',
     'common/hero-background.svg': '/_nuxt/common-hero.svg',
   }
 
   it('returns a theme-specific asset when present', () => {
     const resolved = resolveThemedAssetUrlFromIndex(
-      'logo.png',
+      'logo-new.png',
       'light',
       assetIndex,
       THEME_ASSETS_FALLBACK
     )
 
-    expect(resolved).toBe('/_nuxt/light-logo.png')
+    expect(resolved).toBe('/_nuxt/light-logo-new.png')
   })
 
   it('falls back to common assets when theme-specific files are missing', () => {
@@ -36,17 +36,17 @@ describe('useThemedAsset utilities', () => {
 
   it('falls back to the configured default theme when nothing else matches', () => {
     const resolved = resolveThemedAssetUrlFromIndex(
-      'logo.png',
+      'logo-new.png',
       'dark',
       assetIndex,
       THEME_ASSETS_FALLBACK
     )
 
-    expect(resolved).toBe('/_nuxt/light-logo.png')
+    expect(resolved).toBe('/_nuxt/light-logo-new.png')
   })
 
   it('resolves mapped asset paths for themes', () => {
-    expect(resolveAssetPathForTheme('logo', 'light')).toBe('logo.png')
+    expect(resolveAssetPathForTheme('logo', 'light')).toBe('logo-new.png')
     expect(resolveAssetPathForTheme('heroBackground', 'dark')).toBe(
       'hero-background.svg'
     )
