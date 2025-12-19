@@ -202,7 +202,6 @@
           itemprop="mainEntity"
           itemtype="https://schema.org/ItemList"
         >
-          <h2 class="sr-only">{{ $t('category.products.title') }}</h2>
           <meta itemprop="name" :content="seoTitle" />
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
 
@@ -597,8 +596,8 @@ const heroImage = computed(() => {
 
   return (
     category.value.imageMedium ??
-    category.value.imageLarge ??
     category.value.imageSmall ??
+    category.value.imageLarge ??
     null
   )
 })
