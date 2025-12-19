@@ -68,6 +68,10 @@ const props = withDefaults(
     showImage?: boolean
   }>(),
   {
+    description: null,
+    image: null,
+    breadcrumbs: () => [],
+    eyebrow: null,
     showImage: true,
   }
 )

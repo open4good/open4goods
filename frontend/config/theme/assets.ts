@@ -82,11 +82,11 @@ export const parallaxPacks: Record<
       cta: ['parallax/parallax-background-sdg-cta.svg'],
     },
     christmas: {
-      essentials: ['parallax/parallax-background-bubbles-1.svg'],
-      features: ['parallax/parallax-background-bubbles-2.svg'],
-      blog: ['parallax/parallax-background-bubbles-3.svg'],
-      objections: ['parallax/parallax-background-bubbles-1.svg'],
-      cta: ['parallax/parallax-background-bubbles-2.svg'],
+      essentials: ['parallax/parallax-background-christmas-essentials.svg'],
+      features: ['parallax/parallax-background-christmas-features.svg'],
+      blog: ['parallax/parallax-background-christmas-blog.svg'],
+      objections: ['parallax/parallax-background-christmas-objections.svg'],
+      cta: ['parallax/parallax-background-christmas-cta.svg'],
     },
   },
   dark: {
@@ -105,11 +105,11 @@ export const parallaxPacks: Record<
       cta: ['parallax/parallax-background-sdg-cta.svg'],
     },
     christmas: {
-      essentials: ['parallax/parallax-background-bubbles-1.svg'],
-      features: ['parallax/parallax-background-bubbles-2.svg'],
-      blog: ['parallax/parallax-background-bubbles-3.svg'],
-      objections: ['parallax/parallax-background-bubbles-1.svg'],
-      cta: ['parallax/parallax-background-bubbles-2.svg'],
+      essentials: ['parallax/parallax-background-christmas-essentials.svg'],
+      features: ['parallax/parallax-background-christmas-features.svg'],
+      blog: ['parallax/parallax-background-christmas-blog.svg'],
+      objections: ['parallax/parallax-background-christmas-objections.svg'],
+      cta: ['parallax/parallax-background-christmas-cta.svg'],
     },
   },
   common: {

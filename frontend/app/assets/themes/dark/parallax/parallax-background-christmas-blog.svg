@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Festive light parallax background for blog highlights with ornaments on the sides">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate(28 0.5 0.5)">
+      <stop offset="0%" stop-color="#00DE9F" />
+      <stop offset="52%" stop-color="#00A1C2" />
+      <stop offset="100%" stop-color="#0088D6" />
+    </linearGradient>
+    <radialGradient id="glowL" cx="14%" cy="58%" r="68%">
+      <stop offset="0%" stop-color="#00A1C2" stop-opacity="0.26" />
+      <stop offset="100%" stop-color="#00A1C2" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowR" cx="86%" cy="34%" r="78%">
+      <stop offset="0%" stop-color="#0088D6" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#0088D6" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="microdots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="1.2" fill="#F4F4F4" opacity="0.10" />
+    </pattern>
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" />
+    </filter>
+    <filter id="gentleBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="11" />
+    </filter>
+    <symbol id="star" viewBox="0 0 24 24">
+      <path d="M12 2.5l2.4 6.1 6.6.4-5.1 4 1.7 6.5L12 15.8 6.4 19.5l1.7-6.5-5.1-4 6.6-.4z" fill="#F4F4F4" />
+    </symbol>
+    <symbol id="gift" viewBox="0 0 32 32">
+      <rect x="3" y="10" width="26" height="18" rx="3" fill="#FF8479" opacity="0.9" />
+      <rect x="14" y="4" width="4" height="24" fill="#F4F4F4" opacity="0.85" />
+      <rect x="3" y="16" width="26" height="4" fill="#F4F4F4" opacity="0.75" />
+      <circle cx="16" cy="8" r="5" fill="#5BDB3B" opacity="0.85" />
+    </symbol>
+    <symbol id="tree" viewBox="0 0 36 40">
+      <path d="M18 2l9 11h-6l7 9h-6l6 8h-8v6h-4v-6H8l6-8H8l7-9H9z" fill="#5BDB3B" opacity="0.9" />
+      <rect x="15" y="30" width="6" height="6" fill="#FF8479" opacity="0.95" />
+    </symbol>
+  </defs>
+
+  <rect width="1600" height="800" fill="url(#bg)" />
+  <circle cx="40" cy="500" r="540" fill="url(#glowL)" />
+  <circle cx="1600" cy="280" r="620" fill="url(#glowR)" />
+  <rect width="1600" height="800" fill="url(#microdots)" />
+
+  <g id="parallax-back">
+    <circle cx="240" cy="210" r="250" fill="#00A1C2" opacity="0.18" filter="url(#gentleBlur)" />
+    <circle cx="1380" cy="630" r="250" fill="#0088D6" opacity="0.17" filter="url(#softBlur)" />
+    <path d="M-40 560 C 160 470, 220 360, 260 230" stroke="#F4F4F4" stroke-width="9.5" opacity="0.12" fill="none" />
+    <path d="M1520 160 C 1420 270, 1340 380, 1280 520" stroke="#F4F4F4" stroke-width="9" opacity="0.1" fill="none" />
+  </g>
+
+  <g id="parallax-mid">
+    <g opacity="0.84">
+      <circle cx="200" cy="620" r="62" fill="#F4F4F4" opacity="0.18" />
+      <circle cx="150" cy="160" r="42" fill="#F4F4F4" opacity="0.14" />
+      <circle cx="260" cy="190" r="28" fill="#F4F4F4" opacity="0.12" />
+      <circle cx="1400" cy="620" r="48" fill="#F4F4F4" opacity="0.16" />
+      <circle cx="1460" cy="660" r="32" fill="#F4F4F4" opacity="0.14" />
+    </g>
+    <g stroke="#FF8479" stroke-width="2.4" opacity="0.15" fill="none">
+      <circle cx="1380" cy="170" r="44" />
+      <circle cx="1300" cy="130" r="32" />
+      <circle cx="160" cy="640" r="38" />
+      <circle cx="210" cy="690" r="28" />
+    </g>
+    <g opacity="0.9">
+      <use href="#gift" x="1400" y="520" width="70" height="70" />
+      <use href="#gift" x="120" y="520" width="64" height="64" />
+      <use href="#tree" x="1460" y="80" width="78" height="78" />
+    </g>
+  </g>
+
+  <g id="parallax-front">
+    <g fill="#5BDB3B" opacity="0.12">
+      <circle cx="1500" cy="600" r="12" />
+      <circle cx="1540" cy="560" r="9" />
+      <circle cx="1280" cy="130" r="12" />
+      <circle cx="140" cy="650" r="11" />
+      <circle cx="180" cy="700" r="9" />
+    </g>
+    <g opacity="0.18">
+      <use href="#star" x="140" y="620" width="30" height="30" />
+      <use href="#star" x="1480" y="520" width="32" height="32" />
+      <use href="#star" x="1380" y="120" width="28" height="28" />
+      <use href="#star" x="120" y="140" width="32" height="32" />
+    </g>
+    <path d="M1460 740 C 1320 700, 1220 650, 1140 590" stroke="#F4F4F4" stroke-width="1.4" opacity="0.17" fill="none" />
+    <path d="M120 120 C 220 160, 300 220, 340 280" stroke="#F4F4F4" stroke-width="1.4" opacity="0.16" fill="none" />
+  </g>
+</svg>
