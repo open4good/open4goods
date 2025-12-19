@@ -1,214 +1,205 @@
 <template>
   <div class="product-gallery-wrapper" v-bind="$attrs">
-    <ClientOnly>
-      <template #default>
-        <div v-if="galleryItems.length" class="product-gallery">
-          <div
-            v-if="heroMedia"
-            class="product-gallery__stage"
-            :class="{ 'product-gallery__stage--video': heroMediaIsVideo }"
-            data-testid="product-gallery-stage"
-          >
-            <button
-              v-if="!heroMediaIsVideo"
-              type="button"
-              class="product-gallery__stage-trigger"
-              :aria-label="stageAriaLabel"
-              @click="openGallery(activeMediaIndex)"
-              @keydown.enter.prevent="openGallery(activeMediaIndex)"
-              @keydown.space.prevent="openGallery(activeMediaIndex)"
-            >
-              <NuxtImg
-                v-if="heroMedia.type === 'image'"
-                :src="heroMedia.previewUrl"
-                :alt="heroMedia.alt"
-                format="webp"
-                :width="heroMedia.width"
-                :height="heroMedia.height"
-                class="product-gallery__stage-media"
-                @error="handleImageError"
-              />
-              <NuxtImg
-                v-else-if="heroMedia.posterUrl"
-                :src="heroMedia.posterUrl"
-                :alt="heroMedia.alt"
-                format="webp"
-                :width="heroMedia.width"
-                :height="heroMedia.height"
-                class="product-gallery__stage-media"
-                @error="handleImageError"
-              />
-              <div
-                v-if="heroMedia.type === 'video'"
-                class="product-gallery__stage-overlay"
-              >
-                <v-icon
-                  icon="mdi-play-circle-outline"
-                  size="56"
-                  class="product-gallery__stage-icon"
-                />
-                <span class="product-gallery__sr-only">{{
-                  $t('product.hero.videoBadge')
-                }}</span>
-              </div>
-            </button>
-            <div v-else class="product-gallery__stage-video">
-              <video
-                ref="heroVideoElement"
-                class="product-gallery__video"
-                controls
-                playsinline
-                preload="metadata"
-                :poster="heroMedia.posterUrl || heroMedia.previewUrl"
-              >
-                <source :src="heroMedia.videoUrl" />
-              </video>
-              <div class="product-gallery__video-badge">
-                <v-icon icon="mdi-play-circle-outline" size="24" />
-                <span>{{ $t('product.hero.videoBadge') }}</span>
-              </div>
-              <div
-                class="product-gallery__stage-overlay product-gallery__stage-overlay--inline"
-                aria-hidden="true"
-              >
-                <span class="product-gallery__sr-only">{{
-                  $t('product.hero.videoBadge')
-                }}</span>
-              </div>
-              <button
-                type="button"
-                class="product-gallery__video-gallery-btn"
-                :aria-label="stageAriaLabel"
-                @click="openGalleryFromVideo(activeMediaIndex)"
-                @keydown.enter.prevent="openGalleryFromVideo(activeMediaIndex)"
-                @keydown.space.prevent="openGalleryFromVideo(activeMediaIndex)"
-              >
-                <v-icon icon="mdi-arrow-expand" size="18" />
-                <span>{{ galleryButtonLabel }}</span>
-              </button>
-            </div>
-          </div>
-
-          <div
-            class="product-gallery__thumbnails"
-            :class="{
-              'product-gallery__thumbnails--nav': showThumbnailNavigation,
-            }"
-            role="group"
-            :aria-label="thumbnailGroupLabel"
-          >
-            <button
-              v-if="showThumbnailNavigation"
-              type="button"
-              class="product-gallery__thumbnails-arrow product-gallery__thumbnails-arrow--prev"
-              :aria-label="previousThumbnailsLabel"
-              :disabled="!canScrollThumbnailsLeft"
-              @click="scrollThumbnails('left')"
-            >
-              <v-icon icon="mdi-chevron-left" size="22" />
-            </button>
-
-            <div
-              ref="thumbnailViewport"
-              class="product-gallery__thumbnails-viewport"
-              @scroll="handleThumbnailScroll"
-            >
-              <ul
-                ref="thumbnailList"
-                class="product-gallery__thumbnails-list"
-                role="list"
-              >
-                <li
-                  v-for="(item, index) in galleryItems"
-                  :key="item.id"
-                  class="product-gallery__thumbnail"
-                >
-                  <button
-                    type="button"
-                    class="product-gallery__thumbnail-button"
-                    :class="{
-                      'product-gallery__thumbnail-button--active':
-                        index === activeMediaIndex,
-                    }"
-                    data-testid="product-gallery-thumbnail"
-                    :aria-label="thumbnailAriaLabel(item, index)"
-                    :aria-pressed="index === activeMediaIndex"
-                    @click="setActiveMedia(index)"
-                    @dblclick="openGallery(index)"
-                    @keydown.enter.prevent="openGallery(index)"
-                    @keydown.space.prevent="openGallery(index)"
-                  >
-                    <NuxtImg
-                      :src="item.thumbnailUrl"
-                      :alt="item.alt"
-                      format="webp"
-                      :width="item.thumbnailWidth"
-                      :height="item.thumbnailHeight"
-                      class="product-gallery__thumbnail-image"
-                      @error="handleImageError"
-                    />
-                    <span
-                      v-if="item.type === 'video'"
-                      class="product-gallery__thumbnail-badge"
-                      aria-hidden="true"
-                    >
-                      <v-icon icon="mdi-video-outline" size="18" />
-                    </span>
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              v-if="showThumbnailNavigation"
-              type="button"
-              class="product-gallery__thumbnails-arrow product-gallery__thumbnails-arrow--next"
-              :aria-label="nextThumbnailsLabel"
-              :disabled="!canScrollThumbnailsRight"
-              @click="scrollThumbnails('right')"
-            >
-              <v-icon icon="mdi-chevron-right" size="22" />
-            </button>
-          </div>
-
-          <div
-            v-if="pictureSwipeComponent"
-            ref="pictureSwipeContainer"
-            class="product-gallery__lightbox"
-          >
-            <component
-              :is="pictureSwipeComponent"
-              ref="pictureSwipeRef"
-              :items="pictureSwipeItems"
-              :options="pictureSwipeOptions"
-            />
-          </div>
-        </div>
-        <div v-else-if="heroFallbackImage" class="product-gallery__fallback">
+    <!-- ClientOnly removed from root -->
+    <div v-if="galleryItems.length" class="product-gallery">
+      <div
+        v-if="heroMedia"
+        class="product-gallery__stage"
+        :class="{ 'product-gallery__stage--video': heroMediaIsVideo }"
+        data-testid="product-gallery-stage"
+      >
+        <button
+          v-if="!heroMediaIsVideo"
+          type="button"
+          class="product-gallery__stage-trigger"
+          :aria-label="stageAriaLabel"
+          @click="openGallery(activeMediaIndex)"
+          @keydown.enter.prevent="openGallery(activeMediaIndex)"
+          @keydown.space.prevent="openGallery(activeMediaIndex)"
+        >
           <NuxtImg
-            :src="heroFallbackImage"
-            :alt="title"
+            v-if="heroMedia.type === 'image'"
+            :src="heroMedia.previewUrl"
+            :alt="heroMedia.alt"
             format="webp"
-            :width="600"
-            :height="600"
-            class="product-hero__fallback"
+            :width="heroMedia.width"
+            :height="heroMedia.height"
+            class="product-gallery__stage-media"
+            :preload="activeMediaIndex === 0"
+            :loading="activeMediaIndex === 0 ? 'eager' : 'lazy'"
+            :fetchpriority="activeMediaIndex === 0 ? 'high' : 'auto'"
             @error="handleImageError"
           />
+          <NuxtImg
+            v-else-if="heroMedia.posterUrl"
+            :src="heroMedia.posterUrl"
+            :alt="heroMedia.alt"
+            format="webp"
+            :width="heroMedia.width"
+            :height="heroMedia.height"
+            class="product-gallery__stage-media"
+            @error="handleImageError"
+          />
+          <div
+            v-if="heroMedia.type === 'video'"
+            class="product-gallery__stage-overlay"
+          >
+            <v-icon
+              icon="mdi-play-circle-outline"
+              size="56"
+              class="product-gallery__stage-icon"
+            />
+            <span class="product-gallery__sr-only">{{
+              $t('product.hero.videoBadge')
+            }}</span>
+          </div>
+        </button>
+        <div v-else class="product-gallery__stage-video">
+          <video
+            ref="heroVideoElement"
+            class="product-gallery__video"
+            controls
+            playsinline
+            preload="metadata"
+            :poster="heroMedia.posterUrl || heroMedia.previewUrl"
+          >
+            <source :src="heroMedia.videoUrl" />
+          </video>
+          <div class="product-gallery__video-badge">
+            <v-icon icon="mdi-play-circle-outline" size="24" />
+            <span>{{ $t('product.hero.videoBadge') }}</span>
+          </div>
+          <div
+            class="product-gallery__stage-overlay product-gallery__stage-overlay--inline"
+            aria-hidden="true"
+          >
+            <span class="product-gallery__sr-only">{{
+              $t('product.hero.videoBadge')
+            }}</span>
+          </div>
+          <button
+            type="button"
+            class="product-gallery__video-gallery-btn"
+            :aria-label="stageAriaLabel"
+            @click="openGalleryFromVideo(activeMediaIndex)"
+            @keydown.enter.prevent="openGalleryFromVideo(activeMediaIndex)"
+            @keydown.space.prevent="openGalleryFromVideo(activeMediaIndex)"
+          >
+            <v-icon icon="mdi-arrow-expand" size="18" />
+            <span>{{ galleryButtonLabel }}</span>
+          </button>
         </div>
-      </template>
-      <template #fallback>
-        <NuxtImg
-          v-if="heroFallbackImage"
-          :src="heroFallbackImage"
-          :alt="title"
-          format="webp"
-          :width="600"
-          :height="600"
-          class="product-hero__fallback"
-          @error="handleImageError"
-        />
-      </template>
-    </ClientOnly>
+      </div>
+
+      <div
+        class="product-gallery__thumbnails"
+        :class="{
+          'product-gallery__thumbnails--nav': showThumbnailNavigation,
+        }"
+        role="group"
+        :aria-label="thumbnailGroupLabel"
+      >
+        <button
+          v-if="showThumbnailNavigation"
+          type="button"
+          class="product-gallery__thumbnails-arrow product-gallery__thumbnails-arrow--prev"
+          :aria-label="previousThumbnailsLabel"
+          :disabled="!canScrollThumbnailsLeft"
+          @click="scrollThumbnails('left')"
+        >
+          <v-icon icon="mdi-chevron-left" size="22" />
+        </button>
+
+        <div
+          ref="thumbnailViewport"
+          class="product-gallery__thumbnails-viewport"
+          @scroll="handleThumbnailScroll"
+        >
+          <ul
+            ref="thumbnailList"
+            class="product-gallery__thumbnails-list"
+            role="list"
+          >
+            <li
+              v-for="(item, index) in galleryItems"
+              :key="item.id"
+              class="product-gallery__thumbnail"
+            >
+              <button
+                type="button"
+                class="product-gallery__thumbnail-button"
+                :class="{
+                  'product-gallery__thumbnail-button--active':
+                    index === activeMediaIndex,
+                }"
+                data-testid="product-gallery-thumbnail"
+                :aria-label="thumbnailAriaLabel(item, index)"
+                :aria-pressed="index === activeMediaIndex"
+                @click="setActiveMedia(index)"
+                @dblclick="openGallery(index)"
+                @keydown.enter.prevent="openGallery(index)"
+                @keydown.space.prevent="openGallery(index)"
+              >
+                <NuxtImg
+                  :src="item.thumbnailUrl"
+                  :alt="item.alt"
+                  format="webp"
+                  :width="item.thumbnailWidth"
+                  :height="item.thumbnailHeight"
+                  class="product-gallery__thumbnail-image"
+                  @error="handleImageError"
+                />
+                <span
+                  v-if="item.type === 'video'"
+                  class="product-gallery__thumbnail-badge"
+                  aria-hidden="true"
+                >
+                  <v-icon icon="mdi-video-outline" size="18" />
+                </span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <button
+          v-if="showThumbnailNavigation"
+          type="button"
+          class="product-gallery__thumbnails-arrow product-gallery__thumbnails-arrow--next"
+          :aria-label="nextThumbnailsLabel"
+          :disabled="!canScrollThumbnailsRight"
+          @click="scrollThumbnails('right')"
+        >
+          <v-icon icon="mdi-chevron-right" size="22" />
+        </button>
+      </div>
+
+      <ClientOnly>
+        <div
+          v-if="pictureSwipeComponent"
+          ref="pictureSwipeContainer"
+          class="product-gallery__lightbox"
+        >
+          <component
+            :is="pictureSwipeComponent"
+            ref="pictureSwipeRef"
+            :items="pictureSwipeItems"
+            :options="pictureSwipeOptions"
+          />
+        </div>
+      </ClientOnly>
+    </div>
+    <div v-else-if="heroFallbackImage" class="product-gallery__fallback">
+      <NuxtImg
+        :src="heroFallbackImage"
+        :alt="title"
+        format="webp"
+        :width="960"
+        :height="720"
+        class="product-hero__fallback"
+        @error="handleImageError"
+      />
+    </div>
+    <!-- ClientOnly removed -->
   </div>
 </template>
 
@@ -1146,8 +1137,8 @@ onBeforeUnmount(() => {
   border: none;
   background: rgba(var(--v-theme-surface-default), 0.92);
   color: rgb(var(--v-theme-text-neutral-strong));
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -1315,8 +1306,8 @@ onBeforeUnmount(() => {
   }
 
   .product-gallery__thumbnails-arrow {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 
   .product-gallery__thumbnail-image {

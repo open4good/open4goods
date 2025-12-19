@@ -45,3 +45,4 @@ node_modules/
 /lighthouse-report-v3.json
 /lighthouse-report.json
 /output.html
+/test-results/

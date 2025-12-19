@@ -150,7 +150,7 @@
             <div ref="viewerSurfaceRef" class="product-docs__viewer-surface">
               <div class="product-docs__viewer-scroll">
                 <VuePdfEmbed
-                  v-if="activePdf?.url"
+                  v-if="activePdf?.url && !pdfError"
                   :source="activePdf.url"
                   text-layer
                   annotation-layer
@@ -158,13 +158,21 @@
                   :rotation="viewerRotation"
                   :width="viewerWidth"
                   @loaded="onPdfLoaded"
+                  @loading-failed="onPdfError"
                 />
                 <p
                   v-else
                   class="product-docs__viewer-empty"
                   data-testid="product-docs-preview-empty"
                 >
-                  {{ $t('product.docs.previewUnavailable') }}
+                  {{
+                    pdfError
+                      ? tWithFallback(
+                          'product.docs.previewError',
+                          'Preview unavailable'
+                        )
+                      : $t('product.docs.previewUnavailable')
+                  }}
                 </p>
               </div>
             </div>
@@ -236,6 +244,7 @@ const tabsOverflowing = ref(false)
 
 const rotation = ref(0)
 const pdfLoadedPageCount = ref<number | null>(null)
+const pdfError = ref(false)
 
 const MAX_TAB_TITLE_LENGTH = 35
 
@@ -536,6 +545,7 @@ watch(
   () => {
     rotation.value = 0
     pdfLoadedPageCount.value = null
+    pdfError.value = false
   },
   { immediate: true }
 )
@@ -549,6 +559,10 @@ const onPdfLoaded = (doc: { numPages?: number } | null) => {
   if (Number.isFinite(pages)) {
     pdfLoadedPageCount.value = Number(pages)
   }
+}
+
+const onPdfError = () => {
+  pdfError.value = true
 }
 </script>
 

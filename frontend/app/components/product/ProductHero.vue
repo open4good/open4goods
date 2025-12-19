@@ -527,7 +527,7 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
   display: flex;
   justify-content: center;
   margin: 0.75rem auto 0;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+  color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .product-hero__heading {
@@ -571,7 +571,7 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .product-hero__model-name {
@@ -594,20 +594,20 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
   align-items: baseline;
   gap: 0.35rem;
   font-size: 0.95rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .product-hero__attribute-label {
   font-weight: 500;
-  color: rgba(var(--v-theme-text-neutral-strong), 0.9);
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__attribute-separator {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.6);
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.8);
 }
 
 .product-hero__attribute-value {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .product-hero__attribute-value-content {

@@ -56,12 +56,14 @@
                 alternative.slug ??
                 JSON.stringify(alternative.identity)
               "
-              class="product-alternatives__slide-item"
+              v-slot="{ isSelected, toggle, selectedClass }"
             >
               <ProductAlternativeCard
                 :product="alternative"
                 :popular-attributes="normalizedPopularAttributes"
-                class="product-alternatives__card"
+                class="product-alternatives__slide-item product-alternatives__card"
+                :class="selectedClass"
+                @click="toggle"
               />
             </v-slide-group-item>
           </v-slide-group>

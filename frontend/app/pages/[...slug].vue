@@ -149,10 +149,18 @@ import TopBanner from '~/components/shared/ui/TopBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
-import ProductImpactSection from '~/components/product/ProductImpactSection.vue'
-import ProductAiReviewSection from '~/components/product/ProductAiReviewSection.vue'
-import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
-import ProductAlternatives from '~/components/product/impact/ProductAlternatives.vue'
+const ProductImpactSection = defineAsyncComponent(
+  () => import('~/components/product/ProductImpactSection.vue')
+)
+const ProductAiReviewSection = defineAsyncComponent(
+  () => import('~/components/product/ProductAiReviewSection.vue')
+)
+const ProductPriceSection = defineAsyncComponent(
+  () => import('~/components/product/ProductPriceSection.vue')
+)
+const ProductAlternatives = defineAsyncComponent(
+  () => import('~/components/product/impact/ProductAlternatives.vue')
+)
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
 import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
 import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
