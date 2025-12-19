@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useSlots } from 'vue'
+
 import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
 
 interface HeroCta {
@@ -36,6 +38,8 @@ const props = withDefaults(
     educationCard: undefined,
   }
 )
+
+const slots = useSlots()
 
 const handlePrimaryClick = (event: MouseEvent) => {
   const href = props.primaryCta?.href
@@ -95,9 +99,15 @@ const handleSubtitleClick = (event: MouseEvent) => {
               v-html="subtitle"
             />
             <!-- eslint-enable vue/no-v-html -->
+
+            <slot name="below-title" />
           </div>
 
-          <div class="mt-4 opendata-hero__actions" role="group">
+          <div
+            v-if="primaryCta || slots.actions"
+            class="mt-4 opendata-hero__actions"
+            role="group"
+          >
             <v-btn
               v-if="primaryCta"
               :href="primaryCta.href"
@@ -111,6 +121,8 @@ const handleSubtitleClick = (event: MouseEvent) => {
             >
               {{ primaryCta.label }}
             </v-btn>
+
+            <slot name="actions" />
           </div>
         </v-col>
 

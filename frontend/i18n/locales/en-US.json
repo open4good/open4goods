@@ -2291,14 +2291,18 @@
     "ctaLink": "/releases",
     "description": "Every release captures our latest improvements, from new impact insights to performance fixes.",
     "eyebrow": "Product updates",
+    "faqLink": "Jump to the release FAQ",
     "secondaryCta": "Contact us",
     "subtitle": "Follow how Nudger evolves across versions.",
+    "subtitleWithLink": "Follow how Nudger evolves across versions. {{faqLink}}",
     "title": "Release notes"
   },
   "summary": {
     "body": "Release notes are sourced directly from our repository. Each Markdown file represents one published version.",
     "count": "Published releases",
+    "countItem": "{count} published versions",
     "eyebrow": "Snapshot",
+    "latestItem": "Latest release: {name}",
     "latest": "Latest version",
     "title": "Release overview"
   },
@@ -2308,6 +2312,10 @@
   "empty": "Release notes will arrive soon.",
   "errors": {
     "loadFailed": "We could not load the release notes. Please try again."
+  },
+  "faq": {
+    "subtitle": "Read the changelog and answers to frequent questions about our releases.",
+    "title": "Release FAQ"
   },
   "seo": {
     "description": "Explore every Nudger release with publication dates and detailed changelogs.",
