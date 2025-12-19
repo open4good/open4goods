@@ -86,11 +86,12 @@
           </template>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
-          <!-- eslint-disable-next-line vue/no-v-html -->
+          <!-- eslint-disable vue/no-v-html -->
           <div
             class="release-accordion__content"
             v-html="release.contentHtml"
           />
+          <!-- eslint-enable vue/no-v-html -->
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>

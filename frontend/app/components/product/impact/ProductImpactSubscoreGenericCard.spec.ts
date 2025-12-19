@@ -1,19 +1,10 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import ProductImpactSubscoreGenericCard from './ProductImpactSubscoreGenericCard.vue'
-import type { ScoreView } from './impact-types'
 
-vi.mock('vue-echarts', () => ({
-  default: defineComponent({
-    name: 'VueEChartsStub',
-    props: ['option'],
-    setup() {
-      return () => h('div', { class: 'echart-stub' })
-    },
-  }),
-}))
+import type { ScoreView } from './impact-types'
 
 describe('ProductImpactSubscoreGenericCard', () => {
   const i18n = createI18n({
@@ -111,6 +102,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
       global: {
         plugins: [i18n],
         stubs: {
+          ProductImpactSubscoreChart: true,
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: [
@@ -207,6 +199,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
       global: {
         plugins: [i18n],
         stubs: {
+          ProductImpactSubscoreChart: true,
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: [
