@@ -1453,11 +1453,20 @@ const structuredOffers = computed(() => {
     }))
 
   return normalizedOffers.length > 0 ? normalizedOffers : undefined
+
+
+const impactScoreValue = computed(() => {
+  if (!product.value) {
+    return null
+  }
+  return resolvePrimaryImpactScore(product.value)
 })
 
 const reviewStructuredData = computed(() => {
   const review = product.value?.aiReview?.review
-  if (!review?.summary) {
+  const score = impactScoreValue.value
+
+  if (!review?.summary && !score) {
     return null
   }
 
@@ -1465,16 +1474,42 @@ const reviewStructuredData = computed(() => {
 
   return {
     '@type': 'Review',
-    reviewBody: review.summary,
-    name: review.shortTitle ?? productTitle.value,
+    reviewBody: review?.summary ?? undefined,
+    name: review?.shortTitle ?? productTitle.value,
     author: {
       '@type': 'Organization',
       name: 'Nudger IA',
     },
+    reviewRating:
+      typeof score === 'number'
+        ? {
+            '@type': 'Rating',
+            ratingValue: score,
+            bestRating: 5,
+            worstRating: 0,
+          }
+        : undefined,
     dateCreated:
       typeof createdTimestamp === 'number'
         ? new Date(createdTimestamp).toISOString()
         : undefined,
+  }
+})
+
+const breadcrumbStructuredData = computed(() => {
+  if (!productBreadcrumbs.value.length) {
+    return null
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: productBreadcrumbs.value.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.title,
+      item: crumb.link ? toAbsoluteUrl(crumb.link) : undefined,
+    })),
   }
 })
 
@@ -1511,6 +1546,21 @@ const productStructuredData = computed(() => {
       : undefined,
     review: reviewStructuredData.value ?? undefined,
     image: imageUrl ?? undefined,
+    url: canonicalUrl.value,
+    gtin13: (
+      product.value.base?.gtin ?? String(product.value.gtin ?? '')
+    ).padStart(13, '0'),
+    additionalProperty: aggregateRatingValue
+      ? [
+          {
+            '@type': 'PropertyValue',
+            name: 'EcoScore',
+            value: aggregateRatingValue,
+            minValue: 0,
+            maxValue: 100,
+          },
+        ]
+      : undefined,
   }
 })
 
@@ -1522,6 +1572,14 @@ useHead(() => {
       key: 'product-structured-data',
       type: 'application/ld+json',
       children: JSON.stringify(productStructuredData.value),
+    })
+  }
+
+  if (breadcrumbStructuredData.value) {
+    scripts.push({
+      key: 'breadcrumb-structured-data',
+      type: 'application/ld+json',
+      children: JSON.stringify(breadcrumbStructuredData.value),
     })
   }
 

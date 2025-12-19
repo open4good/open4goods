@@ -1,10 +1,7 @@
 <template>
-  <section class="product-hero" itemscope itemtype="https://schema.org/Product">
-    <meta itemprop="sku" :content="String(product.base?.gtin ?? '')" />
-    <meta itemprop="brand" :content="product.identity?.brand ?? ''" />
-
+  <section class="product-hero">
     <header v-if="heroTitle" class="product-hero__heading">
-      <h1 class="product-hero__title" itemprop="name">
+      <h1 class="product-hero__title">
         {{ heroTitle }}
       </h1>
       <CategoryNavigationBreadcrumbs
