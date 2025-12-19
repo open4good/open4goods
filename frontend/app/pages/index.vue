@@ -674,6 +674,7 @@ useHead(() => ({
         <ParallaxSection
           id="home-essentials"
           class="home-page__parallax"
+          :gapless="true"
           :backgrounds="parallaxBackgrounds.essentials.backgrounds"
           :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
           :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
