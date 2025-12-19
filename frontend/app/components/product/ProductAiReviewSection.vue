@@ -336,9 +336,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
 import type { PropType } from 'vue'
-import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 import { format } from 'date-fns'
@@ -391,6 +390,7 @@ const props = defineProps({
 
 const { locale, t } = useI18n()
 const theme = useTheme()
+const VueHcaptcha = defineAsyncComponent(() => import('@hcaptcha/vue3-hcaptcha'))
 
 const review = ref<ReviewContent | null>(normalizeReview(props.initialReview))
 const createdMs = ref<number | null>(props.reviewCreatedAt ?? null)

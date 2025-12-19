@@ -107,38 +107,48 @@
                   />
                 </v-col>
 
-                <v-col cols="12">
-                  <div class="contact-form__captcha">
-                    <VueHcaptcha
-                      v-if="hasSiteKey"
-                      ref="captchaRef"
-                      :sitekey="siteKey"
-                      :language="captchaLocale"
-                      :theme="captchaTheme"
-                      @verify="handleCaptchaVerify"
-                      @expired="handleCaptchaExpired"
-                      @error="handleCaptchaError"
-                    />
-                    <div
-                      v-else
-                      class="contact-form__captcha-placeholder"
-                      aria-hidden="true"
-                    >
-                      <v-icon
-                        icon="mdi-shield-alert-outline"
-                        size="36"
-                        color="primary"
-                      />
+                  <v-col cols="12">
+                    <div class="contact-form__captcha">
+                      <ClientOnly v-if="hasSiteKey">
+                        <VueHcaptcha
+                          ref="captchaRef"
+                          :sitekey="siteKey"
+                          :language="captchaLocale"
+                          :theme="captchaTheme"
+                          @verify="handleCaptchaVerify"
+                          @expired="handleCaptchaExpired"
+                          @error="handleCaptchaError"
+                        />
+                        <template #fallback>
+                          <div class="contact-form__captcha-placeholder" aria-hidden="true">
+                            <v-icon
+                              icon="mdi-shield-alert-outline"
+                              size="36"
+                              color="primary"
+                            />
+                          </div>
+                        </template>
+                      </ClientOnly>
+                      <div
+                        v-else
+                        class="contact-form__captcha-placeholder"
+                        aria-hidden="true"
+                      >
+                        <v-icon
+                          icon="mdi-shield-alert-outline"
+                          size="36"
+                          color="primary"
+                        />
+                      </div>
+                      <p
+                        v-if="captchaError"
+                        class="contact-form__captcha-error"
+                        role="alert"
+                      >
+                        {{ captchaError }}
+                      </p>
                     </div>
-                    <p
-                      v-if="captchaError"
-                      class="contact-form__captcha-error"
-                      role="alert"
-                    >
-                      {{ captchaError }}
-                    </p>
-                  </div>
-                </v-col>
+                  </v-col>
 
                 <v-col cols="12">
                   <div class="contact-form__actions">
@@ -175,9 +185,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
 import { useTheme } from 'vuetify'
 import { VForm } from 'vuetify/components'
 
@@ -202,6 +211,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const theme = useTheme()
+const VueHcaptcha = defineAsyncComponent(() => import('@hcaptcha/vue3-hcaptcha'))
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 

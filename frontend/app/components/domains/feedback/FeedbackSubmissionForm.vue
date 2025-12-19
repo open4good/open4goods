@@ -111,16 +111,26 @@
 
           <v-col cols="12">
             <div class="feedback-form__captcha">
-              <VueHcaptcha
-                v-if="hasSiteKey"
-                ref="captchaRef"
-                :sitekey="siteKey"
-                :language="captchaLocale"
-                :theme="captchaTheme"
-                @verify="handleCaptchaVerify"
-                @expired="handleCaptchaExpired"
-                @error="handleCaptchaError"
-              />
+              <ClientOnly v-if="hasSiteKey">
+                <VueHcaptcha
+                  ref="captchaRef"
+                  :sitekey="siteKey"
+                  :language="captchaLocale"
+                  :theme="captchaTheme"
+                  @verify="handleCaptchaVerify"
+                  @expired="handleCaptchaExpired"
+                  @error="handleCaptchaError"
+                />
+                <template #fallback>
+                  <div class="feedback-form__captcha-placeholder" aria-hidden="true">
+                    <v-icon
+                      icon="mdi-shield-alert-outline"
+                      size="36"
+                      color="primary"
+                    />
+                  </div>
+                </template>
+              </ClientOnly>
               <div
                 v-else
                 class="feedback-form__captcha-placeholder"
@@ -172,10 +182,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { VForm } from 'vuetify/components'
-import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
 
 export interface FeedbackFormSubmitPayload {
   type: string
@@ -225,6 +234,7 @@ const emit = defineEmits<{
 }>()
 
 const theme = useTheme()
+const VueHcaptcha = defineAsyncComponent(() => import('@hcaptcha/vue3-hcaptcha'))
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 
