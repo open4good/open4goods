@@ -538,6 +538,10 @@ const initialIsDesktop = useState<boolean>(
 
 const isHydrated = ref(false)
 
+const isDesktop = computed(() =>
+  isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value
+)
+
 onMounted(() => {
   isHydrated.value = true
 })
@@ -796,10 +800,6 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
 
 const filterOptions = computed(() => filterOptionsData.value ?? null)
 const sortOptions = computed(() => sortOptionsData.value ?? null)
-
-const isDesktop = computed(() =>
-  isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value
-)
 const filtersDrawer = ref(false)
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
