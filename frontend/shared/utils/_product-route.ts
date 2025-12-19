@@ -5,7 +5,7 @@ export interface ProductRouteMatch {
 }
 
 const CATEGORY_SLUG_PATTERN = /^[a-z]+(?:-[a-z]+)*$/
-const PRODUCT_SEGMENT_PATTERN = /^(?<gtin>\d{6,})-(?<slug>[\p{L}0-9-]+)$/u
+const PRODUCT_SEGMENT_PATTERN = /^(?<gtin>\d{6,})-(?<slug>.+)$/u
 const GTIN_ONLY_PATTERN = /^\d{6,}$/
 const SLUG_ONLY_PATTERN = /^[\p{L}0-9]+(?:-[\p{L}0-9]+)*$/u
 
@@ -68,7 +68,16 @@ export const matchProductRouteFromSegments = (
   if (segments.length === 1) {
     const product = matchProductSegment(segments[0])
 
-    return product ? { categorySlug: null, ...product } : null
+    if (product) {
+      return { categorySlug: null, ...product }
+    }
+
+    // Check for pure GTIN (redirect scenario)
+    if (GTIN_ONLY_PATTERN.test(segments[0])) {
+      return { categorySlug: null, gtin: segments[0], slug: '' }
+    }
+
+    return null
   }
 
   if (segments.length === 2) {

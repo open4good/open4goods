@@ -1,0 +1,1673 @@
+<template>
+  <div class="product-page">
+    <TopBanner
+      v-model:open="isStickyBannerOpen"
+      :message="bannerMessage"
+      :aria-label="bannerAriaLabel"
+      :cta-label="bannerCtaLabel"
+      :cta-aria-label="bannerCtaLabel"
+      dismissible
+      @cta-click="scrollToSection(sectionIds.price)"
+    />
+
+    <v-alert
+      v-if="errorMessage"
+      type="error"
+      variant="tonal"
+      border="start"
+      class="mb-6"
+    >
+      {{ errorMessage }}
+    </v-alert>
+
+    <v-skeleton-loader v-else-if="pending" type="article" class="mb-6" />
+
+    <div v-else-if="product" class="product-page__layout">
+      <aside
+        class="product-page__nav"
+        :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
+      >
+        <ProductSummaryNavigation
+          :sections="navigableSections"
+          :admin-sections="adminNavigableSections"
+          :admin-title="$t('product.navigation.adminPanel.title')"
+          :admin-helper="$t('product.navigation.adminPanel.helper')"
+          :active-section="activeSection"
+          :orientation="orientation"
+          :aria-label="$t('product.navigation.label')"
+          @navigate="scrollToSection"
+        />
+      </aside>
+
+      <main class="product-page__content">
+        <section :id="sectionIds.hero" class="product-page__section">
+          <ProductHero
+            :product="product"
+            :breadcrumbs="productBreadcrumbs"
+            :popular-attributes="heroPopularAttributes"
+          />
+        </section>
+
+        <section
+          v-if="categoryDetail && impactScores.length"
+          :id="sectionIds.impact"
+          class="product-page__section"
+        >
+          <ProductImpactSection
+            :scores="impactScores"
+            :radar-data="radarData"
+            :loading="loadingAggregations"
+            :product-name="productTitle"
+            :product-brand="productBrand"
+            :product-model="productModel"
+            :product-image="resolvedProductImageSource"
+            :vertical-home-url="verticalHomeUrl"
+            :vertical-title="normalizedVerticalTitle"
+          />
+        </section>
+
+        <v-alert
+          v-else-if="!categoryDetail"
+          type="info"
+          variant="tonal"
+          class="mb-8"
+        >
+          {{ $t('product.uncategorized.noScore') }}
+        </v-alert>
+
+        <section :id="sectionIds.ai" class="product-page__section">
+          <ProductAiReviewSection
+            :gtin="product.gtin ?? gtin"
+            :initial-review="product.aiReview?.review ?? null"
+            :review-created-at="product.aiReview?.createdMs ?? undefined"
+            :site-key="hcaptchaSiteKey"
+          />
+        </section>
+
+        <section :id="sectionIds.price" class="product-page__section">
+          <ProductPriceSection
+            v-if="product.offers"
+            :offers="product.offers"
+            :commercial-events="commercialEvents"
+          />
+        </section>
+
+        <section
+          v-if="showAlternativesSection"
+          :id="sectionIds.alternatives"
+          class="product-page__section"
+        >
+          <ProductAlternatives
+            :product="product"
+            :vertical-id="categoryDetail?.id ?? ''"
+            :popular-attributes="categoryDetail?.popularAttributes ?? []"
+          />
+        </section>
+
+        <section
+          v-if="showAttributesSection"
+          :id="sectionIds.attributes"
+          class="product-page__section"
+        >
+          <ProductAttributesSection :product="product" />
+        </section>
+
+        <section
+          v-if="product.resources?.pdfs?.length"
+          :id="sectionIds.docs"
+          class="product-page__section"
+        >
+          <ProductDocumentationSection :pdfs="product.resources.pdfs" />
+        </section>
+
+        <section v-if="showAdminSection" class="product-page__section">
+          <ProductAdminSection
+            :product="product"
+            :panel-id="sectionIds.adminPanel"
+            :json-section-id="sectionIds.adminJson"
+          />
+        </section>
+      </main>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useWindowScroll, useWindowSize } from '@vueuse/core'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue'
+import { createError } from 'h3'
+import {
+  AggTypeEnum,
+  type Agg,
+  type AggregationBucketDto,
+  type AggregationResponseDto,
+  type AttributeConfigDto,
+  type CommercialEvent,
+  type FilterRequestDto,
+  type ProductIndexedAttributeDto,
+  type ProductDto,
+  type ProductReferenceDto,
+  type ProductScoreDto,
+  type ProductSearchResponseDto,
+} from '~~/shared/api-client'
+import {
+  matchProductRouteFromSegments,
+  isBackendNotFoundError,
+} from '~~/shared/utils/_product-route'
+import TopBanner from '~/components/shared/ui/TopBanner.vue'
+import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
+import ProductHero from '~/components/product/ProductHero.vue'
+import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
+import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
+import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
+import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
+import { useCategories } from '~/composables/categories/useCategories'
+import { useAuth } from '~/composables/useAuth'
+import { useDisplay } from 'vuetify'
+import { useI18n } from 'vue-i18n'
+import { buildCategoryHash } from '~/utils/_category-filter-state'
+import { resolveScoreNumericValue } from '~/utils/score-values'
+
+const ProductImpactSection = defineAsyncComponent(
+  () => import('~/components/product/ProductImpactSection.vue')
+)
+const ProductAiReviewSection = defineAsyncComponent(
+  () => import('~/components/product/ProductAiReviewSection.vue')
+)
+const ProductPriceSection = defineAsyncComponent(
+  () => import('~/components/product/ProductPriceSection.vue')
+)
+const ProductAlternatives = defineAsyncComponent(
+  () => import('~/components/product/impact/ProductAlternatives.vue')
+)
+
+const route = useRoute()
+const requestURL = useRequestURL()
+const runtimeConfig = useRuntimeConfig()
+const { t, locale } = useI18n()
+const { isLoggedIn } = useAuth()
+const display = useDisplay()
+const { y: scrollY } = useWindowScroll()
+const { height: viewportHeight } = useWindowSize()
+
+const stickyBannerThresholdRatio = 0.8
+const isStickyBannerOpen = ref(false)
+
+const bannerMessage = computed(() => t('product.banner.message'))
+const bannerCtaLabel = computed(() => t('product.banner.cta'))
+const bannerAriaLabel = computed(() => t('product.banner.ariaLabel'))
+
+import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
+
+const props = defineProps<{
+  productRoute: ProductRouteMatch
+}>()
+
+const productRoute = props.productRoute
+
+if (!productRoute) {
+  throw createError({ statusCode: 404, statusMessage: 'Page not found' })
+}
+
+const { categorySlug, gtin } = productRoute
+
+const productLoadError = ref<Error | null>(null)
+
+const {
+  data: productData,
+  pending,
+  error,
+} = await useAsyncData<ProductDto | null>(
+  `product-${gtin}`,
+  async () => {
+    productLoadError.value = null
+    try {
+      return await $fetch<ProductDto>(`/api/products/${gtin}`)
+    } catch (fetchError) {
+      if (isBackendNotFoundError(fetchError)) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'Product not found',
+          cause: fetchError,
+        })
+      }
+
+      const fallbackMessage =
+        fetchError instanceof Error && fetchError.message?.trim().length
+          ? fetchError.message
+          : String(t('error.page.generic.statusMessage'))
+
+      productLoadError.value =
+        fetchError instanceof Error ? fetchError : new Error(fallbackMessage)
+
+      if (!productLoadError.value.message?.trim().length) {
+        productLoadError.value.message = fallbackMessage
+      }
+
+      console.error('Failed to load product details', fetchError)
+
+      return null
+    }
+  },
+  { server: true, immediate: true }
+)
+
+const product = computed(() => productData.value)
+
+if (product.value?.fullSlug) {
+  const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
+  const targetPath = product.value.fullSlug.startsWith('/')
+    ? product.value.fullSlug
+    : `/${product.value.fullSlug}`
+
+  // Only redirect if we are NOT on a valid uncategorized route (gtin-slug) that was intentionally requested
+  // heuristic: if we have NO categorySlug matched in the route, we allow it (uncategorized view)
+  const isUncategorizedRoute = !productRoute.categorySlug
+
+  if (targetPath !== currentPath && !isUncategorizedRoute) {
+    await navigateTo(targetPath, { replace: true, redirectCode: 301 })
+  }
+}
+
+const { selectCategoryBySlug } = useCategories()
+
+const categoryDetail = ref<Awaited<
+  ReturnType<typeof selectCategoryBySlug>
+> | null>(null)
+const loadingAggregations = ref(false)
+const aggregations = ref<Record<string, AggregationResponseDto>>({})
+
+const requestedScoreIds = computed(() => {
+  const ids: string[] = []
+
+  const pushId = (candidate: unknown) => {
+    if (typeof candidate !== 'string') {
+      return
+    }
+
+    const normalized = candidate.trim()
+    if (!normalized.length || ids.includes(normalized)) {
+      return
+    }
+
+    ids.push(normalized)
+  }
+
+  pushId('ECOSCORE')
+
+  const ponderations =
+    categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
+  Object.keys(ponderations).forEach(key => pushId(key))
+
+  return ids
+})
+
+const scoreCoefficientMap = computed<Record<string, number>>(() => {
+  const raw =
+    categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
+
+  return Object.entries(raw).reduce<Record<string, number>>(
+    (acc, [key, value]) => {
+      const normalizedKey =
+        typeof key === 'string' ? key.trim().toUpperCase() : ''
+      if (!normalizedKey.length) {
+        return acc
+      }
+
+      const numericValue = typeof value === 'number' ? value : Number(value)
+      if (!Number.isFinite(numericValue)) {
+        return acc
+      }
+
+      acc[normalizedKey] = Math.min(Math.max(numericValue, 0), 1)
+      return acc
+    },
+    {}
+  )
+})
+
+const attributeConfigMap = computed(() => {
+  const configs = categoryDetail.value?.attributesConfig?.configs ?? []
+
+  return configs.reduce((map, attribute) => {
+    const normalizedKey = attribute.key?.toString().trim().toUpperCase()
+    if (normalizedKey?.length) {
+      map.set(normalizedKey, attribute as AttributeConfigDto)
+    }
+
+    return map
+  }, new Map<string, AttributeConfigDto>())
+})
+
+const availableImpactCriteriaMap = computed(() => {
+  const criterias = categoryDetail.value?.availableImpactScoreCriterias ?? []
+
+  return criterias.reduce((map, key) => {
+    const normalizedKey = key?.toString().trim().toUpperCase()
+    if (normalizedKey?.length) {
+      const attribute = attributeConfigMap.value.get(normalizedKey)
+      map.set(normalizedKey, {
+        title: attribute?.scoreTitle ?? attribute?.name ?? normalizedKey,
+        description: attribute?.scoreDescription ?? null,
+      })
+    }
+
+    return map
+  }, new Map<string, { title: string; description: string | null }>())
+})
+
+if (categorySlug) {
+  try {
+    categoryDetail.value = await selectCategoryBySlug(categorySlug)
+  } catch (categoryError) {
+    console.error(
+      'Failed to resolve category detail for product page.',
+      categoryError
+    )
+  }
+}
+
+const scoreAggregations = async () => {
+  if (!product.value || !categoryDetail.value?.id) {
+    return
+  }
+
+  const scores = requestedScoreIds.value
+  if (!scores.length) {
+    return
+  }
+
+  loadingAggregations.value = true
+
+  const aggs: Agg[] = scores.map(scoreId => ({
+    name: `score_${scoreId}`,
+    field: `scores.${scoreId}.value`,
+    type: AggTypeEnum.Range,
+    step: 0.5,
+  }))
+
+  try {
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        body: {
+          verticalId: categoryDetail.value.id,
+          pageSize: 0,
+          aggs: { aggs },
+        },
+      }
+    )
+
+    const resolved: Record<string, AggregationResponseDto> = {}
+    ;(response.aggregations ?? []).forEach(aggregation => {
+      if (aggregation.name) {
+        resolved[aggregation.name] = aggregation
+      }
+    })
+
+    aggregations.value = resolved
+  } catch (aggregationError) {
+    console.error('Failed to fetch impact aggregations', aggregationError)
+  } finally {
+    loadingAggregations.value = false
+  }
+}
+
+await scoreAggregations()
+
+const productTitle = computed(() => {
+  return (
+    product.value?.names?.h1Title ??
+    product.value?.identity?.bestName ??
+    product.value?.slug ??
+    `GTIN ${product.value?.gtin ?? gtin}`
+  )
+})
+
+const heroPopularAttributes = computed(
+  () => categoryDetail.value?.popularAttributes ?? []
+)
+const verticalHomeUrl = computed(
+  () => categoryDetail.value?.verticalHomeUrl?.trim() ?? ''
+)
+const verticalTitle = computed(() => {
+  const candidates = [
+    categoryDetail.value?.verticalHomeTitle,
+    categoryDetail.value?.verticalMetaTitle,
+  ]
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim().length) {
+      return candidate.trim()
+    }
+  }
+
+  return ''
+})
+const normalizedVerticalTitle = computed(() => {
+  const title = verticalTitle.value
+  if (!title.length) {
+    return ''
+  }
+
+  try {
+    return title.toLocaleLowerCase(locale.value)
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to localize vertical title casing.', error)
+    }
+
+    return title.toLowerCase()
+  }
+})
+
+const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
+
+const normalizedCategoryPath = computed(() => {
+  const raw =
+    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
+    categoryDetail.value?.verticalHomeUrl ??
+    null ??
+    null
+
+  if (!raw) {
+    return null
+  }
+
+  const trimmed = raw.toString().trim()
+  if (!trimmed.length) {
+    return null
+  }
+
+  const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+  const sanitized = withLeadingSlash.split('?')[0]?.split('#')[0]
+
+  return sanitized?.length ? sanitized : withLeadingSlash
+})
+
+const productBrand = computed(() => {
+  const brand = product.value?.identity?.brand
+  return typeof brand === 'string' ? brand.trim() : ''
+})
+
+const productModel = computed(() => {
+  const model = product.value?.identity?.model
+  return typeof model === 'string' ? model.trim() : ''
+})
+
+const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
+  const brand = productBrand.value
+  if (!brand.length) {
+    return null
+  }
+
+  const basePath = normalizedCategoryPath.value
+  if (!basePath) {
+    return { title: brand }
+  }
+
+  const filters: FilterRequestDto = {
+    filters: [
+      {
+        field: BRAND_FILTER_FIELD,
+        operator: 'term',
+        terms: [brand],
+      },
+    ],
+  }
+
+  const hash = buildCategoryHash({ filters })
+  const link = `${basePath}${hash}`
+
+  return {
+    title: brand,
+    link,
+  }
+})
+
+const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
+  const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
+  const categoryFullSlug =
+    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
+    null
+
+  const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>(
+    (acc, crumb, index, array) => {
+      const rawTitle = crumb?.title ?? crumb?.link ?? ''
+      const title = rawTitle.toString().trim()
+      if (!title.length) {
+        return acc
+      }
+
+      const crumbFullSlug =
+        (crumb as { fullSlug?: string | null }).fullSlug ?? null
+      const rawLink =
+        crumbFullSlug ??
+        (index === array.length - 1
+          ? (categoryFullSlug ?? crumb?.link)
+          : crumb?.link) ??
+        null
+
+      const trimmed = rawLink?.toString().trim() ?? ''
+      const normalized = trimmed
+        ? trimmed.startsWith('http')
+          ? trimmed
+          : trimmed.startsWith('/')
+            ? trimmed
+            : `/${trimmed}`
+        : undefined
+
+      acc.push({
+        title,
+        link: normalized ?? undefined,
+      })
+
+      return acc
+    },
+    []
+  )
+
+  const brandCrumb = brandBreadcrumb.value
+  if (brandCrumb) {
+    const duplicateIndex = resolvedCategories.findIndex(
+      entry =>
+        entry.title.trim().toLowerCase() ===
+        brandCrumb.title.trim().toLowerCase()
+    )
+
+    if (duplicateIndex >= 0) {
+      resolvedCategories.splice(duplicateIndex, 1, brandCrumb)
+    } else {
+      resolvedCategories.push(brandCrumb)
+    }
+  }
+
+  // Fallback: If no category breadcrumbs (uncategorized), ensure we have Home
+  if (
+    resolvedCategories.length &&
+    (!resolvedCategories[0].link || resolvedCategories[0].link !== '/')
+  ) {
+    // Check if the first item effectively is Home (e.g. title is Home but link is something else? Unlikely)
+    // Simply check if we started with category crumbs. If categoryDetail is null, resolvedCategories came from empty array.
+    if (!categoryDetail.value) {
+      resolvedCategories.unshift({
+        title: t('navigation.home'), // Ensure key exists or use fallback
+        link: '/',
+      })
+    }
+  }
+
+  return resolvedCategories
+})
+
+const productSubtitle = computed(() => {
+  return productBrand.value.length ? productBrand.value : null
+})
+
+const productMetaDescription = computed(() => {
+  return (
+    product.value?.names?.metaDescription ??
+    productSubtitle.value ??
+    productTitle.value
+  )
+})
+
+const toAbsoluteUrl = (value?: string | null) => {
+  if (!value) {
+    return undefined
+  }
+
+  try {
+    return new URL(value, requestURL.origin).toString()
+  } catch (error) {
+    if (import.meta.dev) {
+      console.warn('Failed to build absolute URL for product asset.', error)
+    }
+
+    return undefined
+  }
+}
+
+const canonicalPath = computed(() => {
+  const fallbackPath = route.path.startsWith('/')
+    ? route.path
+    : `/${route.path}`
+  const preferredSlug = product.value?.fullSlug ?? product.value?.slug ?? null
+  const normalizedSlug = preferredSlug
+    ? preferredSlug.startsWith('/')
+      ? preferredSlug
+      : `/${preferredSlug}`
+    : fallbackPath
+
+  const sanitized = normalizedSlug.split('#')[0]?.split('?')[0]
+
+  return sanitized?.length ? sanitized : fallbackPath
+})
+
+const canonicalUrl = computed(() =>
+  new URL(canonicalPath.value, requestURL.origin).toString()
+)
+
+const resolvedProductImageSource = computed(() => {
+  const galleryImages = product.value?.resources?.images ?? []
+  const firstGalleryImage =
+    galleryImages.find(image => Boolean(image?.url))?.url ??
+    galleryImages.find(image => Boolean(image?.originalUrl))?.originalUrl
+
+  return (
+    product.value?.resources?.coverImagePath ??
+    product.value?.resources?.externalCover ??
+    product.value?.base?.coverImagePath ??
+    firstGalleryImage ??
+    null
+  )
+})
+
+const ogImageUrl = computed(() => {
+  const source = resolvedProductImageSource.value ?? '/nudger-icon-512x512.png'
+  return toAbsoluteUrl(source)
+})
+
+const ogImageAlt = computed(() => productTitle.value)
+
+useSeoMeta({
+  title: () => productTitle.value,
+  description: () => productMetaDescription.value,
+  ogTitle: () => product.value?.names?.ogTitle ?? productTitle.value,
+  ogDescription: () =>
+    product.value?.names?.ogDescription ?? productMetaDescription.value,
+  ogUrl: () => canonicalUrl.value,
+  ogType: 'product',
+  ogImage: () => ogImageUrl.value,
+  ogImageAlt: () => ogImageAlt.value,
+})
+
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+}))
+
+const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
+  () => {
+    return (product.value?.scores?.scores ?? {}) as Record<
+      string,
+      ProductScoreDto | undefined
+    >
+  }
+)
+
+const resolveProductScoreById = (scoreId: string): ProductScoreDto | null => {
+  const normalized = typeof scoreId === 'string' ? scoreId.trim() : ''
+  if (!normalized.length) {
+    return null
+  }
+
+  const scores = productScoreMap.value
+  if (scores[normalized]) {
+    return scores[normalized] ?? null
+  }
+
+  const upper = normalized.toUpperCase()
+  if (upper !== normalized && scores[upper]) {
+    return scores[upper] ?? null
+  }
+
+  const lower = normalized.toLowerCase()
+  if (lower !== normalized && scores[lower]) {
+    return scores[lower] ?? null
+  }
+
+  return null
+}
+
+const isRenderableScore = (
+  score: ProductScoreDto | undefined | null
+): score is ProductScoreDto & { id: string; name: string } => {
+  return (
+    typeof score?.id === 'string' &&
+    score.id.length > 0 &&
+    typeof score.name === 'string' &&
+    score.name.length > 0
+  )
+}
+
+const selectedProductScores = computed(() => {
+  return requestedScoreIds.value
+    .map(scoreId => resolveProductScoreById(scoreId))
+    .filter(isRenderableScore)
+})
+
+const impactScores = computed(() => {
+  const desiredScores = selectedProductScores.value
+  const coefficients = scoreCoefficientMap.value
+
+  return desiredScores.map(score => {
+    const normalizedScoreId = score.id?.toString().trim().toUpperCase() ?? ''
+    const attributeConfig = normalizedScoreId
+      ? attributeConfigMap.value.get(normalizedScoreId)
+      : undefined
+    const criterion = normalizedScoreId
+      ? availableImpactCriteriaMap.value.get(normalizedScoreId)
+      : undefined
+    const aggregation = aggregations.value[`score_${score.id}`]
+    const distribution = (aggregation?.buckets ?? [])
+      .map((bucket: AggregationBucketDto) => ({
+        label: bucket.key != null ? String(bucket.key) : '',
+        value: Number(bucket.count ?? 0),
+      }))
+      .filter(bucket => bucket.label.length > 0)
+
+    // For ECOSCORE, use the absolute value; for subscores, use relative value
+    const isEcoscore = score.id?.toUpperCase() === 'ECOSCORE'
+    const absoluteScoreValue =
+      typeof score.value === 'number' && Number.isFinite(score.value)
+        ? score.value
+        : null
+    const relativeScoreValue =
+      typeof score.relativ?.value === 'number' &&
+      Number.isFinite(score.relativ.value)
+        ? score.relativ.value
+        : null
+
+    const participateInScores = attributeConfig?.participateInScores
+      ? Array.from(attributeConfig.participateInScores)
+      : []
+    const participateInACV = attributeConfig?.participateInACV
+      ? Array.from(attributeConfig.participateInACV)
+      : []
+    const attribute = normalizedScoreId
+      ? findIndexedAttribute(normalizedScoreId)
+      : null
+    const attributeValue = attribute
+      ? resolveIndexedAttributeValue(attribute)
+      : null
+    const attributeSourcing = attribute?.sourcing ?? null
+    const attributeSuffix = attributeConfig?.suffix ?? null
+    const aggregates =
+      (
+        score as ProductScoreDto & {
+          aggregates?: Record<string, number> | null
+        }
+      ).aggregates ?? null
+
+    return {
+      id: score.id,
+      label: score.name,
+      description: score.description ?? null,
+      // For subscores, relativeValue should contain relativ.value for radar/table display
+      relativeValue: isEcoscore ? absoluteScoreValue : relativeScoreValue,
+      // For ECOSCORE, value should be the absolute value; for subscores, use relative
+      value: isEcoscore ? absoluteScoreValue : relativeScoreValue,
+      participateInScores,
+      participateInACV,
+      attributeValue,
+      attributeSourcing,
+      attributeSuffix,
+      absoluteValue: score.absoluteValue ?? null,
+      absolute: score.absolute ?? null,
+      coefficient: coefficients[normalizedScoreId] ?? null,
+      percent: score.percent ?? null,
+      ranking: score.ranking ?? null,
+      letter: score.letter ?? null,
+      on20: score.on20 ?? null,
+      distribution,
+      energyLetter:
+        score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
+      metadatas: score.metadatas ?? null,
+      unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
+      aggregates,
+      betterIs: attributeConfig?.betterIs ?? null,
+      importanceDescription: criterion?.description ?? null,
+    }
+  })
+})
+
+const formatBrandModelLabel = (
+  brand: string,
+  model: string,
+  fallback: string
+): string => {
+  const normalizedBrand = brand.trim()
+  const normalizedModel = model.trim()
+  if (normalizedBrand && normalizedModel) {
+    return `${normalizedBrand} - ${normalizedModel}`
+  }
+
+  if (normalizedBrand) {
+    return normalizedBrand
+  }
+
+  if (normalizedModel) {
+    return normalizedModel
+  }
+
+  return fallback.trim()
+}
+
+const resolveReferenceFallbackName = (
+  reference: ProductReferenceDto | null | undefined
+): string => {
+  if (!reference) {
+    return ''
+  }
+
+  const bestName =
+    typeof reference.bestName === 'string' ? reference.bestName.trim() : ''
+  if (bestName.length) {
+    return bestName
+  }
+
+  const slug =
+    typeof reference.fullSlug === 'string' ? reference.fullSlug.trim() : ''
+  if (slug.length) {
+    const segments = slug.split('/').filter(segment => segment.trim().length)
+    const lastSegment = segments[segments.length - 1]
+    if (lastSegment?.length) {
+      return lastSegment
+    }
+  }
+
+  return ''
+}
+
+const findIndexedAttribute = (
+  attributeId: string
+): ProductIndexedAttributeDto | null => {
+  const attributes = product.value?.attributes?.indexedAttributes ?? {}
+  const normalizedId = attributeId.trim()
+  const candidates = [
+    normalizedId,
+    normalizedId.toUpperCase(),
+    normalizedId.toLowerCase(),
+  ]
+
+  for (const candidate of candidates) {
+    const attribute = attributes[candidate]
+    if (attribute) {
+      return attribute
+    }
+  }
+
+  return null
+}
+
+const resolveIndexedAttributeValue = (
+  attribute?: ProductIndexedAttributeDto | null
+): string | null => {
+  if (!attribute) {
+    return null
+  }
+
+  if (
+    typeof attribute.value === 'string' &&
+    attribute.value.trim().length > 0
+  ) {
+    return attribute.value
+  }
+
+  if (
+    typeof attribute.numericValue === 'number' &&
+    Number.isFinite(attribute.numericValue)
+  ) {
+    return String(attribute.numericValue)
+  }
+
+  if (typeof attribute.booleanValue === 'boolean') {
+    return attribute.booleanValue ? 'true' : 'false'
+  }
+
+  return null
+}
+
+const findIndexedAttributeValue = (attributeId: string): string | null =>
+  resolveIndexedAttributeValue(findIndexedAttribute(attributeId))
+
+const extractAbsoluteScoreValue = (
+  score: ProductScoreDto | null | undefined
+): number | null => {
+  if (
+    typeof score?.absolute?.value === 'number' &&
+    Number.isFinite(score.absolute.value)
+  ) {
+    return score.absolute.value
+  }
+
+  return resolveScoreNumericValue(score)?.value ?? null
+}
+
+const extractReferenceScoreValue = (
+  reference: ProductReferenceDto | null | undefined,
+  scoreId: string
+): number | null => {
+  if (!reference?.scores) {
+    return null
+  }
+
+  const rawScores =
+    (reference.scores as
+      | { scores?: Record<string, unknown> }
+      | Record<string, unknown>
+      | null) ?? null
+  if (!rawScores) {
+    return null
+  }
+
+  const scoreContainer =
+    'scores' in rawScores &&
+    rawScores.scores &&
+    typeof rawScores.scores === 'object'
+      ? (rawScores.scores as Record<string, unknown>)
+      : (rawScores as Record<string, unknown>)
+
+  const normalizedId = scoreId.trim()
+  const candidates = [
+    normalizedId,
+    normalizedId.toUpperCase(),
+    normalizedId.toLowerCase(),
+  ]
+
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue
+    }
+
+    const entry = scoreContainer[candidate]
+    if (entry && typeof entry === 'object') {
+      const asScore = entry as ProductScoreDto
+      const absoluteValue =
+        typeof asScore?.absolute?.value === 'number' &&
+        Number.isFinite(asScore.absolute.value)
+          ? asScore.absolute.value
+          : null
+      const resolved = resolveScoreNumericValue(asScore)
+
+      if (absoluteValue != null) {
+        return absoluteValue
+      }
+
+      if (resolved) {
+        return resolved.value
+      }
+    }
+  }
+
+  return null
+}
+
+type RadarSeriesKey = 'current' | 'best' | 'worst'
+
+interface RadarSeriesEntry {
+  key: RadarSeriesKey
+  name: string
+  values: Array<number | null>
+}
+
+interface RadarDataset {
+  axes: Array<{ id: string; name: string; attributeValue: string | null }>
+  series: RadarSeriesEntry[]
+}
+
+const ecoscoreScore = computed(() => resolveProductScoreById('ECOSCORE'))
+const bestReferenceProduct = computed<ProductReferenceDto | null>(
+  () => ecoscoreScore.value?.highestScore ?? null
+)
+const worstReferenceProduct = computed<ProductReferenceDto | null>(
+  () => ecoscoreScore.value?.lowestScore ?? null
+)
+
+const radarData = computed<RadarDataset>(() => {
+  const scores = selectedProductScores.value
+  const filteredScores = scores.filter(
+    score => score.id?.trim().toUpperCase() !== 'ECOSCORE'
+  )
+
+  const axesDetails = filteredScores
+    .map(score => {
+      const id = score.id?.trim()
+      if (!id) {
+        return null
+      }
+
+      const name = score.name?.trim() ?? id
+      const productValue = extractAbsoluteScoreValue(score)
+
+      if (
+        !(typeof productValue === 'number' && Number.isFinite(productValue))
+      ) {
+        return null
+      }
+
+      const attributeValue = findIndexedAttributeValue(id)
+
+      return {
+        id,
+        name,
+        productValue,
+        attributeValue,
+        bestValue: extractReferenceScoreValue(bestReferenceProduct.value, id),
+        worstValue: extractReferenceScoreValue(worstReferenceProduct.value, id),
+      }
+    })
+    .filter(
+      (
+        entry
+      ): entry is {
+        id: string
+        name: string
+        productValue: number
+        attributeValue: string | null
+        bestValue: number | null
+        worstValue: number | null
+      } => Boolean(entry)
+    )
+
+  if (!axesDetails.length) {
+    return { axes: [], series: [] }
+  }
+
+  const axes = axesDetails.map(({ id, name, attributeValue }) => ({
+    id,
+    name,
+    attributeValue,
+  }))
+  const productValues = axesDetails.map(entry => entry.productValue)
+  const bestValues = axesDetails.map(entry => entry.bestValue ?? null)
+  const worstValues = axesDetails.map(entry => entry.worstValue ?? null)
+
+  const series: RadarSeriesEntry[] = []
+
+  const productSeriesLabel = formatBrandModelLabel(
+    productBrand.value,
+    productModel.value,
+    productTitle.value
+  )
+
+  if (
+    productValues.some(
+      value => typeof value === 'number' && Number.isFinite(value)
+    )
+  ) {
+    series.push({
+      key: 'current',
+      name: productSeriesLabel,
+      values: productValues,
+    })
+  }
+
+  const bestLabel = formatBrandModelLabel(
+    typeof bestReferenceProduct.value?.brand === 'string'
+      ? bestReferenceProduct.value.brand
+      : '',
+    typeof bestReferenceProduct.value?.model === 'string'
+      ? bestReferenceProduct.value.model
+      : '',
+    resolveReferenceFallbackName(bestReferenceProduct.value)
+  )
+
+  if (
+    bestValues.some(
+      value => typeof value === 'number' && Number.isFinite(value)
+    )
+  ) {
+    series.push({
+      key: 'best',
+      name: bestLabel,
+      values: bestValues,
+    })
+  }
+
+  const worstLabel = formatBrandModelLabel(
+    typeof worstReferenceProduct.value?.brand === 'string'
+      ? worstReferenceProduct.value.brand
+      : '',
+    typeof worstReferenceProduct.value?.model === 'string'
+      ? worstReferenceProduct.value.model
+      : '',
+    resolveReferenceFallbackName(worstReferenceProduct.value)
+  )
+
+  if (
+    worstValues.some(
+      value => typeof value === 'number' && Number.isFinite(value)
+    )
+  ) {
+    series.push({
+      key: 'worst',
+      name: worstLabel,
+      values: worstValues,
+    })
+  }
+
+  return {
+    axes,
+    series,
+  }
+})
+
+const { data: commercialEventsData } = await useAsyncData<
+  CommercialEvent[] | null
+>(
+  'commercial-events',
+  async () => {
+    try {
+      return await $fetch<CommercialEvent[]>('/api/commercial-events')
+    } catch (eventError) {
+      console.error('Failed to load commercial events', eventError)
+      return []
+    }
+  },
+  { server: true }
+)
+
+const commercialEvents = computed(() => commercialEventsData.value ?? [])
+
+const hcaptchaSiteKey = computed(
+  () => runtimeConfig.public.hcaptchaSiteKey ?? ''
+)
+
+const showAdminSection = computed(() => isLoggedIn.value)
+const showAttributesSection = computed(() => {
+  const currentProduct = product.value
+  if (!currentProduct) {
+    return false
+  }
+
+  const identity = currentProduct.identity
+  const hasIdentityStrings = Boolean(
+    identity &&
+    [identity.brand, identity.model, identity.bestName]
+      .filter((value): value is string => typeof value === 'string')
+      .some(value => value.trim().length > 0)
+  )
+
+  const hasCollectionValues = (input: unknown): boolean => {
+    if (input instanceof Set) {
+      return input.size > 0
+    }
+
+    if (Array.isArray(input)) {
+      return input.length > 0
+    }
+
+    return false
+  }
+
+  const hasIdentityCollections =
+    hasCollectionValues(identity?.akaBrands) ||
+    hasCollectionValues(identity?.akaModels)
+
+  const attributes = currentProduct.attributes
+  const hasIndexed = Object.keys(attributes?.indexedAttributes ?? {}).length > 0
+  const hasClassified = (attributes?.classifiedAttributes ?? []).some(group => {
+    if (!group) {
+      return false
+    }
+
+    return (
+      (group.attributes?.length ?? 0) > 0 ||
+      (group.features?.length ?? 0) > 0 ||
+      (group.unFeatures?.length ?? 0) > 0
+    )
+  })
+
+  return (
+    hasIdentityStrings || hasIdentityCollections || hasIndexed || hasClassified
+  )
+})
+const showAlternativesSection = computed(() =>
+  Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0)
+)
+
+const sectionIds = {
+  hero: 'hero',
+  impact: 'impact',
+  ai: 'synthese',
+  price: 'prix',
+  alternatives: 'alternatives',
+  attributes: 'caracteristiques',
+  docs: 'documentation',
+  adminPanel: 'admin-panel',
+  adminJson: 'admin-json',
+} as const
+
+type NavigableSection = { id: string; label: string; icon: string }
+type ConditionalSection = NavigableSection & { condition: boolean }
+
+const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
+  {
+    id: sectionIds.hero,
+    label: t('product.navigation.overview'),
+    icon: 'mdi-information-outline',
+    condition: true,
+  },
+  {
+    id: sectionIds.impact,
+    label: t('product.navigation.impact'),
+    icon: 'mdi-leaf',
+    condition: impactScores.value.length > 0,
+  },
+  {
+    id: sectionIds.ai,
+    label: t('product.navigation.ai'),
+    icon: 'mdi-robot-outline',
+    condition: true,
+  },
+  {
+    id: sectionIds.price,
+    label: t('product.navigation.price'),
+    icon: 'mdi-currency-eur',
+    condition: !!product.value?.offers,
+  },
+  {
+    id: sectionIds.alternatives,
+    label: t('product.navigation.alternatives'),
+    icon: 'mdi-compare-horizontal',
+    condition: showAlternativesSection.value,
+  },
+  {
+    id: sectionIds.attributes,
+    label: t('product.navigation.attributes'),
+    icon: 'mdi-format-list-bulleted',
+    condition: showAttributesSection.value,
+  },
+  {
+    id: sectionIds.docs,
+    label: t('product.navigation.docs'),
+    icon: 'mdi-file-document-outline',
+    condition: (product.value?.resources?.pdfs?.length ?? 0) > 0,
+  },
+])
+
+const primarySections = computed<NavigableSection[]>(() =>
+  primarySectionDefinitions.value
+    .filter(section => section.condition)
+    .map(({ condition: _condition, ...rest }) => rest)
+)
+
+const adminSections = computed<NavigableSection[]>(() => {
+  if (!showAdminSection.value) {
+    return []
+  }
+
+  return [
+    {
+      id: sectionIds.adminJson,
+      label: t('product.navigation.adminPanel.items.productJson'),
+      icon: 'mdi-code-json',
+    },
+  ]
+})
+
+const sections = computed<NavigableSection[]>(() => [
+  ...primarySections.value,
+  ...adminSections.value,
+])
+
+const navigableSections = computed(() => primarySections.value)
+const adminNavigableSections = computed(() => adminSections.value)
+
+const orientation = computed<'vertical' | 'horizontal'>(() =>
+  display.mdAndDown.value ? 'horizontal' : 'vertical'
+)
+
+const activeSection = ref<string>(sectionIds.hero)
+
+const observer = ref<IntersectionObserver | null>(null)
+const visibleSectionRatios = new Map<string, number>()
+const MIN_SECTION_RATIO = 0.6
+
+const refreshActiveSection = () => {
+  if (!visibleSectionRatios.size) {
+    activeSection.value = sections.value[0]?.id ?? sectionIds.hero
+    return
+  }
+
+  const sorted = [...visibleSectionRatios.entries()].sort((a, b) => b[1] - a[1])
+  const [nextActive] =
+    sorted.find(([, ratio]) => ratio >= MIN_SECTION_RATIO) ?? sorted[0] ?? []
+
+  if (nextActive) {
+    activeSection.value = nextActive
+  }
+}
+
+const observeSections = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  observer.value?.disconnect()
+  visibleSectionRatios.clear()
+  refreshActiveSection()
+
+  observer.value = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        const ratio = entry.intersectionRatio
+        if (ratio > 0) {
+          visibleSectionRatios.set(entry.target.id, ratio)
+        } else {
+          visibleSectionRatios.delete(entry.target.id)
+        }
+      })
+
+      refreshActiveSection()
+    },
+    {
+      rootMargin: '-15% 0px -35% 0px',
+      threshold: Array.from({ length: 11 }, (_, index) => index / 10),
+    }
+  )
+
+  nextTick(() => {
+    sections.value.forEach(section => {
+      const element = document.getElementById(section.id)
+      if (element) {
+        observer.value?.observe(element)
+      }
+    })
+  })
+}
+
+watch(
+  () => scrollY.value,
+  (current, previous) => {
+    if (!import.meta.client) {
+      return
+    }
+
+    const viewport =
+      viewportHeight.value ||
+      (typeof window !== 'undefined' ? window.innerHeight : 0)
+    if (viewport <= 0) {
+      return
+    }
+
+    const threshold = viewport * stickyBannerThresholdRatio
+    const previousValue = typeof previous === 'number' ? previous : 0
+    const isScrollingDown = current > previousValue
+    const isScrollingUp = current < previousValue
+
+    if (isScrollingDown && current > threshold) {
+      isStickyBannerOpen.value = true
+    } else if (isScrollingUp && current <= threshold) {
+      isStickyBannerOpen.value = false
+    }
+  },
+  { flush: 'post' }
+)
+
+onMounted(() => {
+  observeSections()
+})
+
+watch(
+  sections,
+  () => {
+    observeSections()
+  },
+  { flush: 'post' }
+)
+
+onBeforeUnmount(() => {
+  observer.value?.disconnect()
+  visibleSectionRatios.clear()
+})
+
+const scrollToSection = (sectionId: string) => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const element = document.getElementById(sectionId)
+  if (!element) {
+    return
+  }
+
+  activeSection.value = sectionId
+
+  const offset = orientation.value === 'horizontal' ? 96 : 120
+  const top = element.getBoundingClientRect().top + window.scrollY - offset
+  window.scrollTo({ top, behavior: 'smooth' })
+}
+
+const errorMessage = computed(() => {
+  if (error.value) {
+    if (error.value instanceof Error) {
+      return error.value.message
+    }
+
+    return String(error.value)
+  }
+
+  if (productLoadError.value) {
+    return productLoadError.value.message
+  }
+
+  return null
+})
+
+const structuredOffers = computed(() => {
+  const offersByCondition = product.value?.offers?.offersByCondition ?? {}
+  const normalizedOffers = Object.values(offersByCondition)
+    .flatMap(entries => entries ?? [])
+    .filter(
+      (
+        offer
+      ): offer is {
+        price: number
+        url: string
+        currency?: string | null
+        condition?: string | null
+        datasourceName?: string | null
+      } => typeof offer?.price === 'number' && Boolean(offer?.url)
+    )
+    .map(offer => ({
+      '@type': 'Offer',
+      price: offer.price,
+      priceCurrency: offer.currency ?? 'EUR',
+      url: offer.url,
+      availability: 'https://schema.org/InStock',
+      itemCondition:
+        offer.condition === 'NEW'
+          ? 'https://schema.org/NewCondition'
+          : 'https://schema.org/UsedCondition',
+      seller: {
+        '@type': 'Organization',
+        name: offer.datasourceName ?? 'Unknown',
+      },
+    }))
+
+  return normalizedOffers.length > 0 ? normalizedOffers : undefined
+})
+
+const impactScoreValue = computed(() => {
+  if (!product.value) {
+    return null
+  }
+  return resolvePrimaryImpactScore(product.value)
+})
+
+const reviewStructuredData = computed(() => {
+  const review = product.value?.aiReview?.review
+  const score = impactScoreValue.value
+
+  if (!review?.summary && !score) {
+    return null
+  }
+
+  const createdTimestamp = product.value?.aiReview?.createdMs
+
+  return {
+    '@type': 'Review',
+    reviewBody: review?.summary ?? undefined,
+    name: review?.shortTitle ?? productTitle.value,
+    author: {
+      '@type': 'Organization',
+      name: 'Nudger IA',
+    },
+    reviewRating:
+      typeof score === 'number'
+        ? {
+            '@type': 'Rating',
+            ratingValue: score,
+            bestRating: 5,
+            worstRating: 0,
+          }
+        : undefined,
+    dateCreated:
+      typeof createdTimestamp === 'number'
+        ? new Date(createdTimestamp).toISOString()
+        : undefined,
+  }
+})
+
+const breadcrumbStructuredData = computed(() => {
+  if (!productBreadcrumbs.value.length) {
+    return null
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: productBreadcrumbs.value.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.title,
+      item: crumb.link ? toAbsoluteUrl(crumb.link) : undefined,
+    })),
+  }
+})
+
+const productStructuredData = computed(() => {
+  if (!product.value) {
+    return null
+  }
+
+  const aggregateRatingValue =
+    typeof product.value.scores?.ecoscore?.absolute?.value === 'number'
+      ? product.value.scores.ecoscore.absolute.value
+      : null
+
+  const offers = structuredOffers.value
+  const imageUrl = ogImageUrl.value
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: productTitle.value,
+    description: productMetaDescription.value,
+    sku: product.value.base?.gtin ?? String(product.value.gtin ?? ''),
+    brand: {
+      '@type': 'Brand',
+      name: product.value.identity?.brand ?? '',
+    },
+    offers,
+    aggregateRating: aggregateRatingValue
+      ? {
+          '@type': 'AggregateRating',
+          ratingValue: aggregateRatingValue,
+          reviewCount: product.value.scores?.ranking?.globalCount ?? 1,
+        }
+      : undefined,
+    review: reviewStructuredData.value ?? undefined,
+    image: imageUrl ?? undefined,
+    url: canonicalUrl.value,
+    gtin13: String(
+      product.value.base?.gtin ?? product.value.gtin ?? ''
+    ).padStart(13, '0'),
+    additionalProperty: aggregateRatingValue
+      ? [
+          {
+            '@type': 'PropertyValue',
+            name: 'EcoScore',
+            value: aggregateRatingValue,
+            minValue: 0,
+            maxValue: 100,
+          },
+        ]
+      : undefined,
+  }
+})
+
+useHead(() => {
+  const scripts = [] as { type: string; key: string; children: string }[]
+
+  if (productStructuredData.value) {
+    scripts.push({
+      key: 'product-structured-data',
+      type: 'application/ld+json',
+      children: JSON.stringify(productStructuredData.value),
+    })
+  }
+
+  if (breadcrumbStructuredData.value) {
+    scripts.push({
+      key: 'breadcrumb-structured-data',
+      type: 'application/ld+json',
+      children: JSON.stringify(breadcrumbStructuredData.value),
+    })
+  }
+
+  return {
+    script: scripts,
+  }
+})
+</script>
+
+<style scoped>
+.product-page {
+  padding: 2rem 0;
+}
+
+.product-page__layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  gap: 2rem;
+}
+
+.product-page__nav {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  height: fit-content;
+}
+
+.product-page__nav--mobile {
+  position: static;
+}
+
+.product-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.product-page__section {
+  scroll-margin-top: 96px;
+}
+
+@media (max-width: 1280px) {
+  .product-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .product-page__nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .product-page__section {
+    scroll-margin-top: 140px;
+  }
+}
+</style>

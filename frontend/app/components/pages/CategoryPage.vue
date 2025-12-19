@@ -542,8 +542,8 @@ onMounted(() => {
   isHydrated.value = true
 })
 
-const rawParam = route.params.categorySlug
-const slug = Array.isArray(rawParam) ? (rawParam[0] ?? '') : (rawParam ?? '')
+const props = defineProps<{ slug: string }>()
+const slug = props.slug
 const slugPattern = /^[a-z-]+$/
 
 if (!slugPattern.test(slug)) {

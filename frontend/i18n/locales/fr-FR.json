@@ -42,10 +42,10 @@
     },
     "hero": {
       "eyebrow": "",
-      "title": "Réconcilier écologie et pouvoir d'achat",
+      "title": "Acheter mieux. Sans dépenser plus.",
       "subtitle": "Gagne du temps. Choisis librement.",
-      "iconAlt": "Icône du lanceur PWA Nudger",
-      "imageAlt": "Illustration d’un comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
+      "iconAlt": "Icône du lanceur de l'application Nudger",
+      "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
       "search": {
         "label": "Tu sais déjà ce que tu cherches ?",
         "placeholder": "Recherchez un produit ou une catégorie",
@@ -2284,45 +2284,45 @@
       "themeToggle": "Changer de thème",
       "title": "Menu"
     },
-  "siteName": "Nudger"
-},
+    "siteName": "Nudger"
+  },
   "releases": {
-  "hero": {
-    "cta": "Parcourir les mises à jour",
-    "ctaLink": "/versions",
-    "description": "Chaque publication regroupe nos dernières améliorations, des nouvelles données d'impact aux optimisations de performance.",
-    "eyebrow": "Mises à jour produit",
-    "faqLink": "Aller à la FAQ des versions",
-    "secondaryCta": "Nous contacter",
-    "subtitle": "Suivez l'évolution de Nudger version après version.",
-    "subtitleWithLink": "Suivez l'évolution de Nudger version après version. {{faqLink}}",
-    "title": "Notes de version"
-  },
-  "summary": {
-    "body": "Les notes de version proviennent directement de notre dépôt. Chaque fichier Markdown correspond à une version publiée.",
-    "count": "Versions publiées",
-    "countItem": "{count} versions publiées",
-    "eyebrow": "En un coup d'œil",
-    "latestItem": "Dernière version : {name}",
-    "latest": "Version la plus récente",
-    "title": "Vue d'ensemble des versions"
-  },
-  "latest": "Dernière",
-  "latestLabel": "Dernière version : {name}",
+    "hero": {
+      "cta": "Parcourir les mises à jour",
+      "ctaLink": "/versions",
+      "description": "Chaque publication regroupe nos dernières améliorations, des nouvelles données d'impact aux optimisations de performance.",
+      "eyebrow": "Mises à jour produit",
+      "faqLink": "Aller à la FAQ des versions",
+      "secondaryCta": "Nous contacter",
+      "subtitle": "Suivez l'évolution de Nudger version après version.",
+      "subtitleWithLink": "Suivez l'évolution de Nudger version après version. {{faqLink}}",
+      "title": "Notes de version"
+    },
+    "summary": {
+      "body": "Les notes de version proviennent directement de notre dépôt. Chaque fichier Markdown correspond à une version publiée.",
+      "count": "Versions publiées",
+      "countItem": "{count} versions publiées",
+      "eyebrow": "En un coup d'œil",
+      "latestItem": "Dernière version : {name}",
+      "latest": "Version la plus récente",
+      "title": "Vue d'ensemble des versions"
+    },
+    "latest": "Dernière",
+    "latestLabel": "Dernière version : {name}",
     "loading": "Chargement des notes de version…",
     "empty": "Les notes de version seront publiées bientôt.",
-  "errors": {
-    "loadFailed": "Impossible de charger les notes de version. Merci de réessayer."
+    "errors": {
+      "loadFailed": "Impossible de charger les notes de version. Merci de réessayer."
+    },
+    "faq": {
+      "subtitle": "Parcourez le journal des versions et les réponses aux questions fréquentes.",
+      "title": "FAQ et changelog"
+    },
+    "seo": {
+      "description": "Découvrez chaque version de Nudger avec les dates de publication et les journaux détaillés.",
+      "title": "Notes de version Nudger"
+    }
   },
-  "faq": {
-    "subtitle": "Parcourez le journal des versions et les réponses aux questions fréquentes.",
-    "title": "FAQ et changelog"
-  },
-  "seo": {
-    "description": "Découvrez chaque version de Nudger avec les dates de publication et les journaux détaillés.",
-    "title": "Notes de version Nudger"
-  }
-},
   "team": {
     "callouts": {
       "contact": {
@@ -2543,5 +2543,13 @@
       "unknownSource": "Source inconnue"
     },
     "empty": "Aucun candidat n'est encore disponible."
+  },
+  "navigation": {
+    "home": "Accueil"
+  },
+  "product": {
+    "uncategorized": {
+      "noScore": "Pas d'évaluation sur ce produit !"
+    }
   }
 }
