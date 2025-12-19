@@ -7,7 +7,11 @@
     variant="halo"
   >
     <v-sheet class="category-hero__wrapper" elevation="0">
-      <div v-if="image" class="category-hero__media" aria-hidden="true">
+      <div
+        v-if="image && showImage"
+        class="category-hero__media"
+        aria-hidden="true"
+      >
         <v-img :src="image" alt="" class="category-hero__image" cover>
           <template #placeholder>
             <v-skeleton-loader type="image" class="h-100" />
@@ -54,13 +58,19 @@ type HeroBreadcrumbItem = {
   link?: string
 }
 
-const props = defineProps<{
-  title: string
-  description?: string | null
-  image?: string | null
-  breadcrumbs?: CategoryBreadcrumbItemDto[]
-  eyebrow?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    description?: string | null
+    image?: string | null
+    breadcrumbs?: CategoryBreadcrumbItemDto[]
+    eyebrow?: string | null
+    showImage?: boolean
+  }>(),
+  {
+    showImage: true,
+  }
+)
 
 const headingId = useId()
 const { t } = useI18n()
@@ -133,10 +143,10 @@ defineExpose({ headingId, t })
       color: inherit
 
     :deep(.category-navigation-breadcrumbs__separator)
-      color: rgba(var(--v-theme-text-neutral-secondary), 0.6)
+      color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
 
     :deep(.category-navigation-breadcrumbs__current)
-      color: rgba(var(--v-theme-text-neutral-strong), 0.95)
+      color: rgba(var(--v-theme-text-neutral-strong), 1)
 
     :deep(.category-navigation-breadcrumbs__link)
       color: inherit

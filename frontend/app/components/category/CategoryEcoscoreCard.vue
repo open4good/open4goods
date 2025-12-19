@@ -9,7 +9,7 @@
     data-test="category-ecoscore-card"
     :aria-label="t('category.filters.ecoscore.ariaLabel')"
   >
-    <div class="category-ecoscore-card__icon" aria-hidden="true">
+    <div class="category-ecoscore-card__icon">
       <v-icon icon="mdi-star" size="32" />
     </div>
 

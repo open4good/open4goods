@@ -7,6 +7,7 @@
       :image="heroImage"
       :breadcrumbs="category.breadCrumb ?? []"
       :eyebrow="category.verticalMetaTitle"
+      :show-image="isDesktop"
     >
       <template #actions>
         <div class="category-page__hero-actions">
@@ -201,6 +202,7 @@
           itemprop="mainEntity"
           itemtype="https://schema.org/ItemList"
         >
+          <h2 class="sr-only">{{ $t('category.products.title') }}</h2>
           <meta itemprop="name" :content="seoTitle" />
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
 
@@ -714,7 +716,18 @@ type StructuredDataScript = {
 }
 
 useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
+    ...(heroImage.value && isDesktop.value
+      ? [
+          {
+            rel: 'preload',
+            as: 'image',
+            href: heroImage.value,
+          },
+        ]
+      : []),
+  ],
 }))
 
 const verticalId = computed(() => category.value?.id ?? null)

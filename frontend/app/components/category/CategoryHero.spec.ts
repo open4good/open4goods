@@ -22,6 +22,7 @@ interface MountProps {
   image?: string | null
   breadcrumbs?: CategoryBreadcrumbItemDto[]
   eyebrow?: string | null
+  showImage?: boolean
 }
 
 describe('CategoryHero', () => {
@@ -78,5 +79,18 @@ describe('CategoryHero', () => {
 
     const section = wrapper.get('section')
     expect(section.attributes('aria-labelledby')).toBeTruthy()
+  })
+
+  it('conditionally renders the image based on showImage prop', async () => {
+    const defaultProps = {
+      title: 'Test',
+      image: 'https://example.com/image.jpg',
+    }
+
+    const wrapperWithImage = await mountComponent({ ...defaultProps, showImage: true })
+    expect(wrapperWithImage.find('.category-hero__media').exists()).toBe(true)
+
+    const wrapperWithoutImage = await mountComponent({ ...defaultProps, showImage: false })
+    expect(wrapperWithoutImage.find('.category-hero__media').exists()).toBe(false)
   })
 })

@@ -17,7 +17,7 @@ const documentLanguage = computed(
 
 useHead(() => ({
   htmlAttrs: {
-    lang: documentLanguage.value,
+    lang: documentLanguage.value || 'fr',
   },
 }))
 </script>

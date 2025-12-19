@@ -129,5 +129,8 @@ export const vuetifyPalettes: Record<string, ThemeColors> = {
     'surface-callout-start': '#F4F4F4',
     'surface-callout-end': '#F4F4F4',
     'accent-callout': '#00A1C2',
+    'on-primary': '#004A63',
+    'on-secondary': '#FFFFFF',
+    'on-accent': '#004A63',
   },
 }

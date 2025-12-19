@@ -3,14 +3,14 @@
     <v-expansion-panels multiple class="category-filters__panels">
       <v-expansion-panel value="global" expand-icon="mdi-chevron-down">
         <template #title>
-          <div class="category-filters__title">
+          <h2 class="category-filters__title">
             <v-icon
               icon="mdi-tune-variant"
               size="20"
               class="category-filters__title-icon"
             />
             <span>{{ t('category.filters.globalTitle') }}</span>
-          </div>
+          </h2>
         </template>
         <template #text>
           <div class="category-filters__section">
@@ -28,14 +28,14 @@
 
       <v-expansion-panel value="impact" expand-icon="mdi-chevron-down">
         <template #title>
-          <div class="category-filters__title">
+          <h2 class="category-filters__title">
             <v-icon
               icon="mdi-leaf"
               size="20"
               class="category-filters__title-icon"
             />
             <span>{{ t('category.filters.impactTitle') }}</span>
-          </div>
+          </h2>
         </template>
         <template #text>
           <div class="category-filters__section">
@@ -82,14 +82,14 @@
 
       <v-expansion-panel value="technical" expand-icon="mdi-chevron-down">
         <template #title>
-          <div class="category-filters__title">
+          <h2 class="category-filters__title">
             <v-icon
               icon="mdi-cog"
               size="20"
               class="category-filters__title-icon"
             />
             <span>{{ t('category.filters.technicalTitle') }}</span>
-          </div>
+          </h2>
         </template>
         <template #text>
           <div class="category-filters__section">
@@ -304,6 +304,7 @@ const toggleTechnicalExpansion = () => {
     align-items: center
     gap: 0.5rem
     font-weight: 600
+    font-size: 1rem
     color: rgb(var(--v-theme-text-neutral-strong))
 
   &__title-icon
