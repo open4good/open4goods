@@ -281,10 +281,14 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [
-      VueMcp(),
-      VueDevTools({
-        launchEditor: 'code', // Antigravity is VS Code-based
-      }),
+      ...(process.env.NODE_ENV !== 'production'
+        ? [
+            VueMcp(),
+            VueDevTools({
+              launchEditor: 'code', // Antigravity is VS Code-based
+            }),
+          ]
+        : []),
     ],
   },
 
