@@ -15,11 +15,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import VueECharts from 'vue-echarts'
+import { computed, defineAsyncComponent } from 'vue'
 import type { EChartsOption } from 'echarts'
 import { useI18n } from 'vue-i18n'
-import { ensureImpactECharts } from './echarts-setup'
+import { ensureECharts } from '~/utils/echarts-loader'
 
 interface RadarAxisEntry {
   id: string
@@ -41,7 +40,17 @@ const props = defineProps<{
   productName: string
 }>()
 
-ensureImpactECharts()
+const VueECharts = defineAsyncComponent(async () => {
+  if (import.meta.client) {
+    await ensureECharts()
+  }
+
+  const module = await import(
+    /* webpackChunkName: "echarts-chunk" */ 'vue-echarts'
+  )
+
+  return module.default
+})
 
 const { t } = useI18n()
 

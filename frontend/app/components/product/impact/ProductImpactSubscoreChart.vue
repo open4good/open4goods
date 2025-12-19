@@ -15,18 +15,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import VueECharts from 'vue-echarts'
+import { computed, defineAsyncComponent } from 'vue'
 import type { EChartsOption } from 'echarts'
 import type { DistributionBucket } from './impact-types'
-import { ensureImpactECharts } from './echarts-setup'
+import { ensureECharts } from '~/utils/echarts-loader'
 
 const props = defineProps<{
   distribution: DistributionBucket[]
   label: string
 }>()
 
-ensureImpactECharts()
+const VueECharts = defineAsyncComponent(async () => {
+  if (import.meta.client) {
+    await ensureECharts()
+  }
+
+  const module = await import(
+    /* webpackChunkName: "echarts-chunk" */ 'vue-echarts'
+  )
+
+  return module.default
+})
 
 const filteredDistribution = computed(() =>
   props.distribution.filter(
