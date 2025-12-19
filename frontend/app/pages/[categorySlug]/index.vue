@@ -945,6 +945,22 @@ let initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
 let stopPointerMove: (() => void) | undefined
 let stopPointerUp: (() => void) | undefined
 let stopPointerCancel: (() => void) | undefined
+let hasPointerCapture = false
+
+const releasePointerCapture = (pointerId: number | null) => {
+  if (!hasPointerCapture || pointerId === null) {
+    hasPointerCapture = false
+    return
+  }
+
+  try {
+    filtersResizerRef.value?.releasePointerCapture?.(pointerId)
+  } catch (error) {
+    console.warn('Failed to release pointer capture.', error)
+  } finally {
+    hasPointerCapture = false
+  }
+}
 
 const removePointerListeners = () => {
   stopPointerMove?.()
@@ -954,9 +970,7 @@ const removePointerListeners = () => {
   stopPointerCancel?.()
   stopPointerCancel = undefined
 
-  if (activePointerId !== null) {
-    filtersResizerRef.value?.releasePointerCapture?.(activePointerId)
-  }
+  releasePointerCapture(activePointerId)
 }
 
 const onPointerMove = (event: PointerEvent) => {
@@ -987,9 +1001,7 @@ const onPointerEnd = (event: PointerEvent) => {
   initialPointerX = 0
   initialPanelWidth = clampFiltersPanelWidth(filtersPanelWidth.value)
 
-  if (event.pointerId !== undefined) {
-    filtersResizerRef.value?.releasePointerCapture?.(event.pointerId)
-  }
+  releasePointerCapture(event.pointerId ?? null)
 
   removePointerListeners()
 }
@@ -1013,7 +1025,13 @@ const onResizeHandlePointerDown = (event: PointerEvent) => {
 
   filtersPanelWidth.value = initialPanelWidth
 
-  filtersResizerRef.value?.setPointerCapture?.(event.pointerId)
+  try {
+    filtersResizerRef.value?.setPointerCapture?.(event.pointerId)
+    hasPointerCapture = true
+  } catch (error) {
+    console.warn('Failed to set pointer capture.', error)
+    hasPointerCapture = false
+  }
 
   if (!stopPointerMove) {
     stopPointerMove = useEventListener(window, 'pointermove', onPointerMove)
