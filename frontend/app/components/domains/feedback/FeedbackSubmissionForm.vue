@@ -172,10 +172,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { VForm } from 'vuetify/components'
-import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
+
+const VueHcaptcha = defineAsyncComponent(async () => {
+  const module = await import('@hcaptcha/vue3-hcaptcha')
+  return module.default
+})
+
+type VueHcaptchaComponent = (typeof import('@hcaptcha/vue3-hcaptcha'))['default']
 
 export interface FeedbackFormSubmitPayload {
   type: string
@@ -226,7 +232,7 @@ const emit = defineEmits<{
 
 const theme = useTheme()
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
-const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
+const captchaRef = ref<InstanceType<VueHcaptchaComponent> | null>(null)
 
 const author = ref(props.defaultAuthor)
 const titleInput = ref('')

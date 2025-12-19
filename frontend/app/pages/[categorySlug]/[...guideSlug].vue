@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import GuideStickySidebar from '~/components/category/guides/GuideStickySidebar.vue'
-import XwikiFullPageRenderer from '~/components/cms/XwikiFullPageRenderer.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import type {
   BlogPostDto,
@@ -19,6 +18,7 @@ const normaliseSlug = (value: string | null | undefined) =>
 
 definePageMeta({
   path: '/:categorySlug/:guideSlug([A-Za-z][A-Za-z0-9-]*)',
+  lazy: true,
   validate(route) {
     const raw = route.params.guideSlug
     const slug = Array.isArray(raw) ? raw.join('/') : String(raw ?? '')
@@ -52,6 +52,11 @@ definePageMeta({
 
 const route = useRoute()
 const { selectCategoryBySlug } = useCategories()
+
+const XwikiFullPageRenderer = defineAsyncComponent(async () => {
+  const module = await import('~/components/cms/XwikiFullPageRenderer.vue')
+  return module.default
+})
 
 const categorySlug = computed(() => String(route.params.categorySlug ?? ''))
 

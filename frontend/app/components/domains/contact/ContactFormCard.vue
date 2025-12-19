@@ -175,11 +175,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
 import { useTheme } from 'vuetify'
 import { VForm } from 'vuetify/components'
+
+const VueHcaptcha = defineAsyncComponent(async () => {
+  const module = await import('@hcaptcha/vue3-hcaptcha')
+  return module.default
+})
+
+type VueHcaptchaComponent = (typeof import('@hcaptcha/vue3-hcaptcha'))['default']
 
 export interface ContactFormPayload {
   name: string
@@ -203,7 +209,7 @@ const emit = defineEmits<{
 const { t, locale } = useI18n()
 const theme = useTheme()
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
-const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
+const captchaRef = ref<InstanceType<VueHcaptchaComponent> | null>(null)
 
 const name = ref('')
 const email = ref('')
