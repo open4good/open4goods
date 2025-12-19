@@ -70,9 +70,30 @@ import {
 } from './price-scale'
 import { ensureECharts } from '~/utils/echarts-loader'
 
+let echartsRegistered = false
+
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
-    await ensureECharts()
+    await ensureECharts(({ core, charts, components, renderers }) => {
+      if (echartsRegistered) {
+        return
+      }
+
+      echartsRegistered = true
+      const { use } = core
+      const { BarChart } = charts
+      const { AxisPointerComponent, GridComponent, TooltipComponent } =
+        components
+      const { CanvasRenderer } = renderers
+
+      use([
+        BarChart,
+        AxisPointerComponent,
+        GridComponent,
+        TooltipComponent,
+        CanvasRenderer,
+      ])
+    })
   }
 
   const module = await import(

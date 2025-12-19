@@ -1,13 +1,30 @@
-let registrationPromise: Promise<void> | null = null
+type EChartsModules = {
+  core: typeof import('echarts/core')
+  charts: typeof import('echarts/charts')
+  components: typeof import('echarts/components')
+  renderers: typeof import('echarts/renderers')
+}
 
-export const ensureECharts = () => {
+let registrationPromise: Promise<void> | null = null
+let loadedModules: EChartsModules | null = null
+const pendingRegistrations: Array<(modules: EChartsModules) => void> = []
+
+export const ensureECharts = (register?: (modules: EChartsModules) => void) => {
   if (import.meta.server) {
     return Promise.resolve()
   }
 
+  if (register) {
+    if (loadedModules) {
+      register(loadedModules)
+    } else {
+      pendingRegistrations.push(register)
+    }
+  }
+
   if (!registrationPromise) {
     registrationPromise = (async () => {
-      const [core, charts, components, renderer] = await Promise.all([
+      const [core, charts, components, renderers] = await Promise.all([
         import(
           /* webpackChunkName: "echarts-chunk" */ 'echarts/core'
         ),
@@ -22,30 +39,11 @@ export const ensureECharts = () => {
         ),
       ])
 
-      const { use } = core
-      const { LineChart, BarChart, RadarChart } = charts
-      const {
-        GridComponent,
-        TooltipComponent,
-        DataZoomComponent,
-        TitleComponent,
-        LegendComponent,
-        PolarComponent,
-      } = components
-      const { CanvasRenderer } = renderer
+      loadedModules = { core, charts, components, renderers }
 
-      use([
-        LineChart,
-        BarChart,
-        RadarChart,
-        GridComponent,
-        TooltipComponent,
-        DataZoomComponent,
-        TitleComponent,
-        LegendComponent,
-        PolarComponent,
-        CanvasRenderer,
-      ])
+      pendingRegistrations.splice(0).forEach(registration => {
+        registration(loadedModules as EChartsModules)
+      })
     })()
   }
 
