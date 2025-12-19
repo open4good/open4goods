@@ -1,6 +1,14 @@
 import { computed } from 'vue'
 
-import { resolveActiveParallaxPack } from '~~/config/theme/seasons'
+import {
+  resolveActiveParallaxPack,
+  resolveParallaxPackName,
+} from '~~/config/theme/seasons'
 
-export const useSeasonalParallaxPack = () =>
-  computed(() => resolveActiveParallaxPack())
+export const useSeasonalParallaxPack = () => {
+  const route = useRoute()
+
+  const forcedPack = computed(() => resolveParallaxPackName(route.query.theme))
+
+  return computed(() => forcedPack.value ?? resolveActiveParallaxPack())
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveActiveParallaxPack } from './seasons'
+import { resolveActiveParallaxPack, resolveParallaxPackName } from './seasons'
 
 describe('resolveActiveParallaxPack', () => {
   it('returns default pack when no window matches', () => {
@@ -31,5 +31,11 @@ describe('resolveActiveParallaxPack', () => {
     const date = new Date(Date.UTC(2025, 0, 10))
 
     expect(resolveActiveParallaxPack(date)).toBe('default')
+  })
+
+  it('accepts an explicit pack name from query params', () => {
+    expect(resolveParallaxPackName('christmas')).toBe('christmas')
+    expect(resolveParallaxPackName(['sdg'])).toBe('sdg')
+    expect(resolveParallaxPackName('unknown')).toBeUndefined()
   })
 })

@@ -3,9 +3,12 @@ import { useTheme } from 'vuetify'
 
 import {
   THEME_ASSETS_FALLBACK,
+  seasonalThemeAssets,
   themeAssets,
   type ThemeAssetKey,
 } from '~~/config/theme/assets'
+import { type ParallaxPackName } from '~~/config/theme/assets'
+import { useSeasonalParallaxPack } from './useSeasonalParallaxPack'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
 export type ThemedAssetIndex = Record<string, string>
@@ -34,27 +37,59 @@ const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
 
 export const resolveAssetPathForTheme = (
   assetKey: ThemeAssetKey,
-  themeName: ThemeName
-): string | undefined => {
+  themeName: ThemeName,
+  seasonalPack?: ParallaxPackName
+): string[] => {
+  const seasonalTheme = seasonalPack
+    ? seasonalThemeAssets[seasonalPack]?.[themeName]?.[assetKey]
+    : undefined
+  const seasonalCommon = seasonalPack
+    ? seasonalThemeAssets[seasonalPack]?.common?.[assetKey]
+    : undefined
+  const seasonalFallback = seasonalPack
+    ? seasonalThemeAssets[seasonalPack]?.[THEME_ASSETS_FALLBACK]?.[assetKey]
+    : undefined
+
   const fromTheme = themeAssets[themeName]?.[assetKey]
   const fromCommon = themeAssets.common?.[assetKey]
   const fallback = themeAssets[THEME_ASSETS_FALLBACK]?.[assetKey]
 
-  return fromTheme ?? fromCommon ?? fallback
+  const candidates = [
+    seasonalTheme,
+    seasonalCommon,
+    seasonalFallback,
+    fromTheme,
+    fromCommon,
+    fallback,
+  ].filter(Boolean) as string[]
+
+  return Array.from(new Set(candidates))
 }
 
 export const resolveThemedAssetUrlFromIndex = (
-  relativePath: string,
+  relativePath: string | string[],
   themeName: ThemeName,
   index: ThemedAssetIndex,
-  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK
+  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK,
+  seasonalPack?: ParallaxPackName
 ): string | undefined => {
-  const sanitizedPath = relativePath.replace(/^\//, '')
-  const candidates = [
-    `${themeName}/${sanitizedPath}`,
-    `common/${sanitizedPath}`,
-    `${fallbackTheme}/${sanitizedPath}`,
-  ]
+  const sanitizedPaths = (Array.isArray(relativePath)
+    ? relativePath
+    : [relativePath]
+  ).map(path => path.replace(/^\//, ''))
+
+  const candidates = sanitizedPaths.flatMap(path => [
+    ...(seasonalPack
+      ? [
+          `${themeName}/${seasonalPack}/${path}`,
+          `common/${seasonalPack}/${path}`,
+          `${fallbackTheme}/${seasonalPack}/${path}`,
+        ]
+      : []),
+    `${themeName}/${path}`,
+    `common/${path}`,
+    `${fallbackTheme}/${path}`,
+  ])
 
   return candidates.reduce<string | undefined>((resolved, candidate) => {
     if (resolved) {
@@ -74,30 +109,54 @@ const useCurrentThemeName = () => {
 }
 
 export const resolveThemedAssetUrl = (
-  relativePath: string,
-  themeName: ThemeName
+  relativePath: string | string[],
+  themeName: ThemeName,
+  seasonalPack?: ParallaxPackName
 ): string | undefined =>
-  resolveThemedAssetUrlFromIndex(relativePath, themeName, themedAssetIndex)
+  resolveThemedAssetUrlFromIndex(
+    relativePath,
+    themeName,
+    themedAssetIndex,
+    THEME_ASSETS_FALLBACK,
+    seasonalPack
+  )
 
 export const useThemedAsset = (relativePath: string) => {
   const themeName = useCurrentThemeName()
+  const seasonalPack = useSeasonalParallaxPack()
 
   return computed(
-    () => resolveThemedAssetUrl(relativePath, themeName.value) ?? ''
+    () =>
+      resolveThemedAssetUrl(
+        relativePath,
+        themeName.value,
+        seasonalPack.value
+      ) ?? ''
   )
 }
 
 export const useThemeAsset = (assetKey: ThemeAssetKey) => {
   const themeName = useCurrentThemeName()
+  const seasonalPack = useSeasonalParallaxPack()
 
   return computed(() => {
-    const relativePath = resolveAssetPathForTheme(assetKey, themeName.value)
+    const relativePaths = resolveAssetPathForTheme(
+      assetKey,
+      themeName.value,
+      seasonalPack.value
+    )
 
-    if (!relativePath) {
+    if (!relativePaths.length) {
       return ''
     }
 
-    return resolveThemedAssetUrl(relativePath, themeName.value) ?? ''
+    return (
+      resolveThemedAssetUrl(
+        relativePaths,
+        themeName.value,
+        seasonalPack.value
+      ) ?? ''
+    )
   })
 }
 

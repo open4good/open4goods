@@ -27,6 +27,10 @@ export const PARALLAX_PACK_NAMES = ['default', 'sdg', 'christmas'] as const
 export type ParallaxSectionKey = (typeof PARALLAX_SECTION_KEYS)[number]
 export type ParallaxPackName = (typeof PARALLAX_PACK_NAMES)[number]
 
+export type SeasonalThemeAssets = Partial<
+  Record<ParallaxPackName, Partial<Record<ThemeName | 'common', ThemeAssetConfig>>>
+>
+
 export const DEFAULT_PARALLAX_PACK: ParallaxPackName = 'default'
 
 export type ParallaxLayerConfig = {
@@ -59,6 +63,20 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   common: {
     heroBackground: 'hero-background.svg',
     illustration: 'illustration-generic.svg',
+  },
+}
+
+export const seasonalThemeAssets: SeasonalThemeAssets = {
+  christmas: {
+    light: {
+      heroBackground: 'hero-background.svg',
+      illustration: 'illustration-generic.svg',
+    },
+    dark: {
+      heroBackground: 'hero-background.svg',
+      illustration: 'illustration-generic.svg',
+    },
+    common: {},
   },
 }
 
