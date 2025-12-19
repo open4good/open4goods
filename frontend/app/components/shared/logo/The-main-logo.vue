@@ -13,7 +13,6 @@ const logoSrc = useLogoAsset()
     <img :src="logoSrc" :alt="t('siteIdentity.logoAlt')" class="main-logo" loading="lazy" />
     <div class="logo-text">
       <span class="logo-title">{{ t('siteIdentity.title') }}</span>
-      <span class="logo-subtitle">{{ t('siteIdentity.subtitle') }}</span>
     </div>
   </NuxtLink>
 </template>
@@ -52,12 +51,9 @@ const logoSrc = useLogoAsset()
 
 .logo-title
   font-weight: 700
-  font-size: 1rem
+  font-size: 1.15rem
   letter-spacing: 0.01em
-
-.logo-subtitle
-  font-size: 0.8rem
-  color: rgb(var(--v-theme-text-neutral-secondary))
+  color: rgb(var(--v-theme-text-neutral-strong))
 
 @media (min-width: 960px)
   .logo-link
@@ -68,8 +64,5 @@ const logoSrc = useLogoAsset()
     width: 2.75rem
 
   .logo-title
-    font-size: 1.1rem
-
-  .logo-subtitle
-    font-size: 0.9rem
+    font-size: 1.3rem
 </style>
