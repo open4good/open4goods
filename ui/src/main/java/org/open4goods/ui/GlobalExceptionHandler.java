@@ -122,9 +122,9 @@ public class GlobalExceptionHandler implements HealthIndicator {
      */
     private void logException(HttpStatus status, String endpoint, Exception ex) {
         if (status.is5xxServerError()) {
-            logger.error("500 Server Error on {}: {}", endpoint, ex.getMessage(), ex);
+            logger.error("500 Server Error on {}: {}", endpoint, ex.getMessage() != null ? ex.getMessage() : ex.toString(), ex);
         } else {
-            logger.warn("Error on {}: {} (HTTP {})", endpoint, ex.getMessage(), status.value());
+            logger.warn("Error on {}: {} (HTTP {})", endpoint, ex.getMessage() != null ? ex.getMessage() : ex.toString(), status.value());
         }
     }
 
@@ -152,7 +152,7 @@ public class GlobalExceptionHandler implements HealthIndicator {
                 .body(Map.of(
                         "status", String.valueOf(status.value()),
                         "error", status.getReasonPhrase(),
-                        "message", ex.getMessage()
+                        "message", ex.getMessage() != null ? ex.getMessage() : ex.toString()
                 ));
     }
 
@@ -168,7 +168,7 @@ public class GlobalExceptionHandler implements HealthIndicator {
         ModelMap model = new ModelMap();
         model.addAttribute("status", status.value());
         model.addAttribute("error", status.getReasonPhrase());
-        model.addAttribute("message", ex.getMessage());
+        model.addAttribute("message", ex.getMessage() != null ? ex.getMessage() : ex.toString());
         model.addAttribute("path", request.getRequestURI());
 
         return new ModelAndView("error/" + status.value(), model, status);

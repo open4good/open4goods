@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
         notFoundCounter.increment();
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         pd.setTitle("Not Found");
-        pd.setDetail(ex.getMessage());
+        pd.setDetail(ex.getMessage() != null ? ex.getMessage() : ex.toString());
         return pd;
     }
 
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage(), ex);
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
         pd.setTitle("Forbidden");
-        pd.setDetail(ex.getMessage());
+        pd.setDetail(ex.getMessage() != null ? ex.getMessage() : ex.toString());
         return pd;
     }
 
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
         log.warn("Invalid affiliation token: {}", exception.getMessage());
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Invalid affiliation token");
-        pd.setDetail(exception.getMessage());
+        pd.setDetail(exception.getMessage() != null ? exception.getMessage() : exception.toString());
         return pd;
     }
 
@@ -89,7 +89,7 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception", ex);
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         pd.setTitle("Internal Server Error");
-        pd.setDetail(ex.getMessage());
+        pd.setDetail(ex.getMessage() != null ? ex.getMessage() : ex.toString());
         return pd;
     }
 }

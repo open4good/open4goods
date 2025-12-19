@@ -34,9 +34,19 @@ public class GitHubHealthIndicator implements HealthIndicator {
                     .build();
         }
         try {
-            // simple ping to validate credentials
-            repository.getDirectoryContent(".");
+            java.util.concurrent.CompletableFuture<Void> future = java.util.concurrent.CompletableFuture.runAsync(() -> {
+                try {
+                    // Lighter check: just get metadata
+                    repository.getUpdatedAt();
+                } catch (Exception e) {
+                     throw new RuntimeException(e);
+                }
+            });
+            
+            future.get(3, java.util.concurrent.TimeUnit.SECONDS);
             return Health.up().build();
+        } catch (java.util.concurrent.TimeoutException e) {
+            return Health.down(e).withDetail("feedback.github", "timeout after 3s").build();
         } catch (Exception e) {
             return Health.down(e).withDetail("feedback.github", "unreachable").build();
         }

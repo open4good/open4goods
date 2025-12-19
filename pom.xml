@@ -240,10 +240,7 @@
                                 <artifactId>maven-clean-plugin</artifactId>
                                 <configuration>
                                         <filesets>
-                                                <fileset>
-							<directory>logs</directory>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
+
 						<fileset>
 							<directory>target</directory>
 							<followSymlinks>false</followSymlinks>
