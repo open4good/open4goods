@@ -112,6 +112,16 @@ process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify(STATIC_MAIN_PAGE_ROUTE
 
 const localeDomains = buildI18nLocaleDomains()
 
+const VENDOR_CHUNK_MATCHERS = [
+  { pattern: /[\\/]node_modules[\\/]echarts[\\/]/, chunkName: 'vendor-echarts' },
+  { pattern: /[\\/]node_modules[\\/]vue-echarts[\\/]/, chunkName: 'vendor-echarts' },
+  { pattern: /[\\/]node_modules[\\/]date-fns[\\/]/, chunkName: 'vendor-date-fns' },
+  { pattern: /[\\/]node_modules[\\/]vuetify[\\/]/, chunkName: 'vendor-vuetify' },
+  { pattern: /[\\/]node_modules[\\/]@vueuse[\\/]/, chunkName: 'vendor-vueuse' },
+  { pattern: /[\\/]node_modules[\\/]@vue-pdf-viewer[\\/]/, chunkName: 'vendor-pdf-viewer' },
+  { pattern: /[\\/]node_modules[\\/]vue-pdf-embed[\\/]/, chunkName: 'vendor-pdf-viewer' },
+]
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   srcDir: 'app',
@@ -290,6 +300,17 @@ export default defineNuxtConfig({
           ]
         : []),
     ],
+    build: {
+      chunkSizeWarningLimit: 3000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const matchedChunk = VENDOR_CHUNK_MATCHERS.find(({ pattern }) => pattern.test(id))
+            return matchedChunk?.chunkName
+          },
+        },
+      },
+    },
   },
 
   build: {
