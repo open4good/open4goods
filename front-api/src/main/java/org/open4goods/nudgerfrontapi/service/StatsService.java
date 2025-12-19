@@ -3,11 +3,14 @@ package org.open4goods.nudgerfrontapi.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
+import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
@@ -32,11 +35,14 @@ public class StatsService {
 
     private final SerialisationService serialisationService;
     private final ResourcePatternResolver resourceResolver;
+    private final AffiliationPartnerService affiliationPartnerService;
 
     public StatsService(SerialisationService serialisationService,
-                        ResourcePatternResolver resourceResolver) {
+                        ResourcePatternResolver resourceResolver,
+                        AffiliationPartnerService affiliationPartnerService) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
+        this.affiliationPartnerService = affiliationPartnerService;
     }
 
     /**
@@ -48,6 +54,7 @@ public class StatsService {
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
         VerticalConfig defaultConfig = loadDefaultConfig();
         Resource[] resources = loadVerticalResources();
+        AffiliationPartnersStats partnersStats = computeAffiliationPartnersStats();
 
         long enabledCount = Arrays.stream(resources)
                 .filter(resource -> !Objects.equals(resource.getFilename(), DEFAULT_CONFIG_FILENAME))
@@ -57,7 +64,19 @@ public class StatsService {
                 .filter(VerticalConfig::isEnabled)
                 .count();
 
-        return new CategoriesStatsDto(Math.toIntExact(enabledCount));
+        return new CategoriesStatsDto(Math.toIntExact(enabledCount), partnersStats.count());
+    }
+
+    /**
+     * Compute statistics about affiliation partners so the homepage can display partner counts alongside categories stats.
+     *
+     * @return immutable stats wrapper describing the partner catalogue
+     */
+    private AffiliationPartnersStats computeAffiliationPartnersStats() {
+        List<AffiliationPartner> partners = affiliationPartnerService.getPartners();
+        int partnersCount = partners == null ? 0 : partners.size();
+
+        return new AffiliationPartnersStats(partnersCount);
     }
 
     /**

@@ -25,6 +25,12 @@ export interface CategoriesStatsDto {
    * @memberof CategoriesStatsDto
    */
   enabledVerticalConfigs?: number
+  /**
+   * Number of affiliation partners available for price comparison.
+   * @type {number}
+   * @memberof CategoriesStatsDto
+   */
+  affiliationPartnersCount?: number
 }
 
 /**
@@ -52,6 +58,10 @@ export function CategoriesStatsDtoFromJSONTyped(
       json['enabledVerticalConfigs'] == null
         ? undefined
         : json['enabledVerticalConfigs'],
+    affiliationPartnersCount:
+      json['affiliationPartnersCount'] == null
+        ? undefined
+        : json['affiliationPartnersCount'],
   }
 }
 
@@ -69,5 +79,6 @@ export function CategoriesStatsDtoToJSONTyped(
 
   return {
     enabledVerticalConfigs: value['enabledVerticalConfigs'],
+    affiliationPartnersCount: value['affiliationPartnersCount'],
   }
 }
