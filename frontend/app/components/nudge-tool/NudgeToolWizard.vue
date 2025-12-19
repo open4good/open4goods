@@ -33,7 +33,11 @@
           <div
             class="nudge-wizard__corner-visual d-flex align-center justify-center mb-1"
           >
-            <div class="nudge-wizard__corner-icon">
+            <div
+              class="nudge-wizard__corner-icon"
+              :class="{ 'nudge-wizard__corner-icon--enlarged': shouldEnlargeCornerIcon }"
+              :style="cornerIconDimensions"
+            >
               <v-icon
                 :icon="categorySummary.icon"
                 :size="cornerIconSize"
@@ -64,8 +68,14 @@
       />
     </div>
 
-    <div v-if="loading" class="nudge-wizard__progress mb-4">
-      <v-progress-linear indeterminate color="primary" rounded bar-height="4" />
+    <div class="nudge-wizard__progress mb-4" aria-hidden="true">
+      <v-progress-linear
+        :indeterminate="loading"
+        :model-value="loading ? undefined : 0"
+        color="primary"
+        rounded
+        bar-height="4"
+      />
     </div>
 
     <div
@@ -221,6 +231,14 @@ const selectedCategory = computed(
   () =>
     categories.value.find(entry => entry.id === selectedCategoryId.value) ??
     null
+)
+
+const categoryIcon = computed(
+  () =>
+    selectedCategory.value?.mdiIcon ??
+    selectedCategory.value?.nudgeToolConfig?.mdiIcon ??
+    selectedCategory.value?.icon ??
+    'mdi-tag'
 )
 
 const nudgeConfig = computed(() => selectedCategory.value?.nudgeToolConfig)
@@ -621,6 +639,8 @@ const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
 )
 
+const isCategoryStep = computed(() => activeStepKey.value === 'category')
+
 const windowTransition = computed(() => undefined)
 
 const windowReverseTransition = computed(() => undefined)
@@ -636,13 +656,17 @@ const categorySummary = computed(() => {
       selectedCategory.value.id ??
       '',
     image: selectedCategory.value.imageSmall,
-    icon: selectedCategory.value.mdiIcon ?? 'mdi-tag',
+    icon: categoryIcon.value,
     alt:
       selectedCategory.value.verticalHomeTitle ??
       selectedCategory.value.id ??
       '',
   }
 })
+
+const shouldEnlargeCornerIcon = computed(
+  () => isCategoryStep.value || Boolean(categorySummary.value)
+)
 
 const windowTransitionDurationMs = 0
 
@@ -796,7 +820,29 @@ const footerOffsetStyle = computed(() => ({
   paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
 }))
 
-const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
+const cornerIconScaleFactor = 1.5
+const baseCornerIconSize = 32
+const contentCornerIconSize = 38
+const cornerIconWrapperSize = 46
+
+const cornerIconSize = computed(() => {
+  if (shouldEnlargeCornerIcon.value) {
+    return Math.round(baseCornerIconSize * cornerIconScaleFactor)
+  }
+
+  return isContentMode.value ? contentCornerIconSize : baseCornerIconSize
+})
+
+const cornerIconDimensions = computed(() => {
+  const wrapperSize = shouldEnlargeCornerIcon.value
+    ? Math.round(cornerIconWrapperSize * cornerIconScaleFactor)
+    : cornerIconWrapperSize
+
+  return {
+    width: `${wrapperSize}px`,
+    height: `${wrapperSize}px`,
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -859,6 +905,10 @@ const cornerIconSize = computed(() => (isContentMode.value ? 38 : 32))
     border-radius: 14px;
     background: rgba(var(--v-theme-hero-gradient-mid), 0.22);
     box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4);
+
+    &--enlarged {
+      border-radius: 20px;
+    }
   }
 
   &__corner-text {
