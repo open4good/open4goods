@@ -31,7 +31,7 @@ eprelGroupName: TELEVISION
 # If relativ url (starting with /), will be handled as 
 verticalImage: /images/verticals/tv.png
 
-mdiIcon: television
+mdiIcon: mdi-television
 
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: true

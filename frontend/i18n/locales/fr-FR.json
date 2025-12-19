@@ -124,8 +124,8 @@
       }
     },
     "problems": {
-      "title": "Trop de labels, pas assez de clarté ?",
-      "description": "Comparer impact, prix et fiabilité à travers une multitude d’onglets est épuisant. Nudger rassemble tout au même endroit.",
+      "title": "Trop d'infos, mais pas celle qu'il faut ?",
+      "description": "Comparer impact, prix, fiabilité... Pas toujours facile !",
       "items": {
         "labelsOverload": "Perdu dans la jungle des labels ? Difficile de comparer vraiment.",
         "budgetVsEcology": "Écologie vs pouvoir d’achat ? Marre de choisir entre les deux.",
@@ -133,7 +133,7 @@
       }
     },
     "solution": {
-      "title": "Acheter responsable, sans payer plus cher",
+      "title": "Acheter mieux, sans payer plus cher",
       "description": "Nudger analyse les données écologiques, sociétales, techniques et les prix pour simplifier vos achats.",
       "benefits": {
         "time": {
@@ -150,7 +150,7 @@
         },
         "trust": {
           "title": "Confiance",
-          "description": "Données ouvertes, recommandations indépendantes."
+          "description": "Données ouvertes, comparateur indépendant"
         }
       }
     },
