@@ -38,13 +38,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { PropType } from 'vue'
-import hljs from 'highlight.js/lib/core'
-import json from 'highlight.js/lib/languages/json'
-import 'highlight.js/styles/github-dark.css'
 import type { ProductDto } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
+import { loadHighlightJs } from '~/utils/highlight-loader'
 
 const props = defineProps({
   panelId: {
@@ -66,18 +64,31 @@ const { isLoggedIn } = useAuth()
 const showAdmin = computed(() => isLoggedIn.value)
 const formatted = computed(() => JSON.stringify(props.product, null, 2))
 
-if (!hljs.getLanguage('json')) {
-  hljs.registerLanguage('json', json)
-}
+const highlightedJson = ref(formatted.value)
 
-const highlightedJson = computed(() => {
+const highlightJson = async () => {
   const content = formatted.value
   if (!content) {
-    return ''
+    highlightedJson.value = ''
+    return
   }
 
-  return hljs.highlight(content, { language: 'json' }).value
-})
+  highlightedJson.value = content
+
+  try {
+    const hljs = await loadHighlightJs(['json'])
+
+    if (hljs) {
+      highlightedJson.value = hljs.highlight(content, { language: 'json' }).value
+    }
+  } catch (error) {
+    console.warn('Unable to highlight product JSON in admin section', error)
+  }
+}
+
+watch(formatted, () => {
+  highlightJson()
+}, { immediate: true })
 </script>
 
 <style scoped>

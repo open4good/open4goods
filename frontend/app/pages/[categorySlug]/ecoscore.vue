@@ -698,20 +698,9 @@ import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryImpactScoreOrbit from '~/components/category/CategoryImpactScoreOrbit.vue'
 import TextContent from '~/components/domains/content/TextContent.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
-import hljs from 'highlight.js/lib/core'
-import json from 'highlight.js/lib/languages/json'
-import yaml from 'highlight.js/lib/languages/yaml'
-import 'highlight.js/styles/github-dark.css'
+import { loadHighlightJs } from '~/utils/highlight-loader'
 import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
 import { useCategories } from '~/composables/categories/useCategories'
-
-if (!hljs.getLanguage('json')) {
-  hljs.registerLanguage('json', json)
-}
-
-if (!hljs.getLanguage('yaml')) {
-  hljs.registerLanguage('yaml', yaml)
-}
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -937,31 +926,56 @@ const formattedAiJson = computed(() => {
   return rawAiJson.value.length ? rawAiJson.value : null
 })
 
-const highlightedYamlPrompt = computed(() => {
-  if (!formattedYamlPrompt.value) {
-    return null
+const highlightedYamlPrompt = ref<string | null>(formattedYamlPrompt.value)
+const highlightedAiJson = ref<string | null>(formattedAiJson.value)
+
+const highlightYamlPrompt = async () => {
+  const content = formattedYamlPrompt.value
+  if (!content) {
+    highlightedYamlPrompt.value = null
+    return
   }
 
+  highlightedYamlPrompt.value = content
+
   try {
-    return hljs.highlight(formattedYamlPrompt.value, { language: 'yaml' }).value
+    const hljs = await loadHighlightJs(['yaml'])
+
+    if (hljs) {
+      highlightedYamlPrompt.value = hljs.highlight(content, { language: 'yaml' }).value
+    }
   } catch (error) {
     console.warn('Unable to highlight YAML prompt for impact score', error)
-    return formattedYamlPrompt.value
   }
-})
+}
 
-const highlightedAiJson = computed(() => {
-  if (!formattedAiJson.value) {
-    return null
+const highlightAiJson = async () => {
+  const content = formattedAiJson.value
+  if (!content) {
+    highlightedAiJson.value = null
+    return
   }
+
+  highlightedAiJson.value = content
 
   try {
-    return hljs.highlight(formattedAiJson.value, { language: 'json' }).value
+    const hljs = await loadHighlightJs(['json'])
+
+    if (hljs) {
+      highlightedAiJson.value = hljs.highlight(content, { language: 'json' }).value
+    }
   } catch (error) {
     console.warn('Unable to highlight AI JSON response for impact score', error)
-    return formattedAiJson.value
   }
-})
+}
+
+watch(formattedYamlPrompt, () => {
+  highlightYamlPrompt()
+}, { immediate: true })
+
+watch(formattedAiJson, () => {
+  highlightAiJson()
+}, { immediate: true })
 
 const aiCoefficients = computed<Record<string, number>>(() => {
   const response = parsedAiJson.value
