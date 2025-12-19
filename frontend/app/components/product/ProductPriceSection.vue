@@ -476,9 +476,39 @@ import type {
 } from '~~/shared/api-client'
 import { ensureECharts } from '~/utils/echarts-loader'
 
+let echartsRegistered = false
+
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
-    await ensureECharts()
+    await ensureECharts(({ core, charts, components, renderers }) => {
+      if (echartsRegistered) {
+        return
+      }
+
+      echartsRegistered = true
+      const { use } = core
+      const { LineChart } = charts
+      const {
+        AxisPointerComponent,
+        GridComponent,
+        TooltipComponent,
+        DataZoomComponent,
+        TitleComponent,
+        MarkAreaComponent,
+      } = components
+      const { CanvasRenderer } = renderers
+
+      use([
+        LineChart,
+        AxisPointerComponent,
+        GridComponent,
+        TooltipComponent,
+        DataZoomComponent,
+        TitleComponent,
+        MarkAreaComponent,
+        CanvasRenderer,
+      ])
+    })
   }
 
   const module = await import(

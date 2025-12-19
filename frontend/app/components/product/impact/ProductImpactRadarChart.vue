@@ -20,6 +20,8 @@ import type { EChartsOption } from 'echarts'
 import { useI18n } from 'vue-i18n'
 import { ensureECharts } from '~/utils/echarts-loader'
 
+let echartsRegistered = false
+
 interface RadarAxisEntry {
   id: string
   name: string
@@ -42,7 +44,25 @@ const props = defineProps<{
 
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
-    await ensureECharts()
+    await ensureECharts(({ core, charts, components, renderers }) => {
+      if (echartsRegistered) {
+        return
+      }
+
+      echartsRegistered = true
+      const { use } = core
+      const { RadarChart } = charts
+      const { LegendComponent, TooltipComponent, RadarComponent } = components
+      const { CanvasRenderer } = renderers
+
+      use([
+        RadarChart,
+        LegendComponent,
+        TooltipComponent,
+        RadarComponent,
+        CanvasRenderer,
+      ])
+    })
   }
 
   const module = await import(

@@ -20,6 +20,8 @@ import type { EChartsOption } from 'echarts'
 import type { DistributionBucket } from './impact-types'
 import { ensureECharts } from '~/utils/echarts-loader'
 
+let echartsRegistered = false
+
 const props = defineProps<{
   distribution: DistributionBucket[]
   label: string
@@ -27,7 +29,26 @@ const props = defineProps<{
 
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
-    await ensureECharts()
+    await ensureECharts(({ core, charts, components, renderers }) => {
+      if (echartsRegistered) {
+        return
+      }
+
+      echartsRegistered = true
+      const { use } = core
+      const { BarChart } = charts
+      const { AxisPointerComponent, GridComponent, TooltipComponent } =
+        components
+      const { CanvasRenderer } = renderers
+
+      use([
+        BarChart,
+        AxisPointerComponent,
+        GridComponent,
+        TooltipComponent,
+        CanvasRenderer,
+      ])
+    })
   }
 
   const module = await import(
