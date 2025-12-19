@@ -3,6 +3,7 @@ import type { RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
+import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
 
 import {
   normalizeLocale,
@@ -28,6 +29,9 @@ const feedbackPath = computed(() =>
 )
 const categoriesPath = computed(() =>
   resolveLocalizedRoutePath('categories', currentLocale.value)
+)
+const releasesPath = computed(() =>
+  resolveLocalizedRoutePath('releases', currentLocale.value)
 )
 const currentYear = computed(() => new Date().getFullYear())
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
@@ -229,6 +233,12 @@ const footerLogo = useFooterLogoAsset()
             cover
           />
         </NuxtLink>
+
+        <LatestReleaseBadge
+          class="footer-latest-badge"
+          dense
+          :scroll-target="releasesPath"
+        />
         <p class="footer-meta mb-0 text-body-2">
           {{ t('siteIdentity.footer.copyright', { year: currentYear }) }}
         </p>
@@ -303,6 +313,10 @@ const footerLogo = useFooterLogoAsset()
 .footer-bottom {
   position: relative;
   z-index: 1;
+}
+
+.footer-latest-badge {
+  align-self: center;
 }
 
 .footer-logo {

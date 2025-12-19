@@ -1,3 +1,4 @@
+import { createError, defineEventHandler, getQuery } from 'h3'
 import type { SearchSuggestResponseDto } from '~~/shared/api-client'
 import { useSearchService } from '~~/shared/api-client/services/search.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
@@ -46,11 +47,22 @@ export default defineEventHandler(
         backendError
       )
 
-      throw createError({
-        statusCode: backendError.statusCode,
-        statusMessage: backendError.statusMessage,
-        cause: error,
-      })
+      const isClientError =
+        backendError.isResponseError &&
+        backendError.statusCode >= 400 &&
+        backendError.statusCode < 500
+
+      if (isClientError) {
+        throw createError({
+          statusCode: backendError.statusCode,
+          statusMessage: backendError.statusMessage,
+          cause: error,
+        })
+      }
+
+      event.node.res.statusCode = 200
+
+      return emptyResponse
     }
   }
 )
