@@ -125,7 +125,15 @@
 
 <script setup lang="ts">
 import { useWindowScroll, useWindowSize } from '@vueuse/core'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue'
 import { createError } from 'h3'
 import {
   AggTypeEnum,
@@ -149,6 +157,16 @@ import TopBanner from '~/components/shared/ui/TopBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
+import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
+import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
+import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
+import { useCategories } from '~/composables/categories/useCategories'
+import { useAuth } from '~/composables/useAuth'
+import { useDisplay } from 'vuetify'
+import { useI18n } from 'vue-i18n'
+import { buildCategoryHash } from '~/utils/_category-filter-state'
+import { resolveScoreNumericValue } from '~/utils/score-values'
+
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
 )
@@ -161,15 +179,6 @@ const ProductPriceSection = defineAsyncComponent(
 const ProductAlternatives = defineAsyncComponent(
   () => import('~/components/product/impact/ProductAlternatives.vue')
 )
-import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
-import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
-import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
-import { useCategories } from '~/composables/categories/useCategories'
-import { useAuth } from '~/composables/useAuth'
-import { useDisplay } from 'vuetify'
-import { useI18n } from 'vue-i18n'
-import { buildCategoryHash } from '~/utils/_category-filter-state'
-import { resolveScoreNumericValue } from '~/utils/score-values'
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -1453,7 +1462,7 @@ const structuredOffers = computed(() => {
     }))
 
   return normalizedOffers.length > 0 ? normalizedOffers : undefined
-
+})
 
 const impactScoreValue = computed(() => {
   if (!product.value) {

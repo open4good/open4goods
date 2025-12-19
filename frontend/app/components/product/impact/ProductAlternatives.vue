@@ -56,7 +56,7 @@
                 alternative.slug ??
                 JSON.stringify(alternative.identity)
               "
-              v-slot="{ isSelected, toggle, selectedClass }"
+              v-slot="{ toggle, selectedClass }"
             >
               <ProductAlternativeCard
                 :product="alternative"
