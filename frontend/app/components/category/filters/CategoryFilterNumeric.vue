@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import type {
   AggregationResponseDto,
   FieldMetadataDto,
@@ -58,7 +59,6 @@ import type {
 } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 import { formatNumericRangeValue } from '~/utils/_number-formatting'
-import VueECharts from 'vue-echarts'
 import type { EChartsOption } from 'echarts'
 import type { CallbackDataParams } from 'echarts/types/dist/shared'
 import type { TooltipComponentOption } from 'echarts/components'
@@ -68,6 +68,19 @@ import {
   priceToSliderValue,
   sliderValueToPrice,
 } from './price-scale'
+import { ensureECharts } from '~/utils/echarts-loader'
+
+const VueECharts = defineAsyncComponent(async () => {
+  if (import.meta.client) {
+    await ensureECharts()
+  }
+
+  const module = await import(
+    /* webpackChunkName: "echarts-chunk" */ 'vue-echarts'
+  )
+
+  return module.default
+})
 
 type RangeBucketDatum = {
   value: number

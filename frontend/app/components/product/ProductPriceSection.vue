@@ -463,18 +463,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { PropType } from 'vue'
-import VueECharts from 'vue-echarts'
-import { use } from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import {
-  GridComponent,
-  TooltipComponent,
-  DataZoomComponent,
-  TitleComponent,
-} from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
 import { useI18n } from 'vue-i18n'
 import { formatDistanceToNow, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
@@ -484,15 +474,19 @@ import type {
   CommercialEvent,
   ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
+import { ensureECharts } from '~/utils/echarts-loader'
 
-use([
-  LineChart,
-  GridComponent,
-  TooltipComponent,
-  DataZoomComponent,
-  TitleComponent,
-  CanvasRenderer,
-])
+const VueECharts = defineAsyncComponent(async () => {
+  if (import.meta.client) {
+    await ensureECharts()
+  }
+
+  const module = await import(
+    /* webpackChunkName: "echarts-chunk" */ 'vue-echarts'
+  )
+
+  return module.default
+})
 
 const props = defineProps({
   sectionId: {
