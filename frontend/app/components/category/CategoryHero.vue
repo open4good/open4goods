@@ -221,7 +221,6 @@ defineExpose({ headingId, t })
   .category-hero__media
     display: flex
     grid-column: 1
-    align-self: center
 
   .category-hero__content
     grid-column: 2
