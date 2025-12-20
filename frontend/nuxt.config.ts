@@ -14,6 +14,7 @@ import { APP_ROUTES_SITEMAP_KEY, SITEMAP_PATH_PREFIX } from './shared/utils/site
 import { LOCALIZED_ROUTE_PATHS, LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
+import { mdiSvg, mdiSvgAliases } from './config/theme/icons'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -242,6 +243,13 @@ export default defineNuxtConfig({
   // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
     vuetifyOptions: {
+      icons: {
+        defaultSet: 'mdiSvg',
+        aliases: mdiSvgAliases,
+        sets: {
+          mdiSvg,
+        },
+      },
       theme: {
         defaultTheme: 'light',
         themes: {
