@@ -85,15 +85,14 @@
     background-image: linear-gradient(to left, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)))!important
     color: #ffffff!important
 
-:root.accessibility-layout
-    .v-container
-        max-width: 100% !important
-        width: 100%
-
+:root.accessibility-layout.accessibility-layout--wide
+    .v-container,
     .container
-        max-width: 100% !important
+        max-width: min(1320px, calc(100% - 48px))
         width: 100%
+        padding-inline: clamp(16px, 3vw, 32px)
 
     .cms-page__container--container
-        max-width: 100% !important
-        width: 100% !important
+        max-width: min(1320px, calc(100% - 48px))
+        width: 100%
+        padding-inline: clamp(16px, 3vw, 32px)
