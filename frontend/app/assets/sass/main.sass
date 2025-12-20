@@ -95,7 +95,14 @@
             margin-inline: auto
             padding-inline: var(--accessibility-wide-gap)
 
-        :is(.home-section__inner, .home-solution__inner, .home-card-showcase__container)
+        :is(
+            .home-section__inner,
+            .home-solution__inner,
+            .home-card-showcase__container,
+            .home-hero__container,
+            .home-hero__inner,
+            .home-hero__panel
+        )
             max-width: calc(100% - (var(--accessibility-wide-gap) * 2))
             width: 100%
             margin-inline: auto
