@@ -211,8 +211,13 @@ import type { ProductPdfDto } from '~~/shared/api-client'
 type VuePdfEmbedComponent = (typeof import('vue-pdf-embed'))['default']
 
 const VuePdfEmbed = defineAsyncComponent<VuePdfEmbedComponent>(async () => {
-  if (!import.meta.client) {
+  if (!import.meta.client && !import.meta.env?.TEST) {
     return () => null
+  }
+
+  if (import.meta.env?.TEST) {
+    const module = await import('vue-pdf-embed')
+    return module.default
   }
 
   const [module] = await Promise.all([
