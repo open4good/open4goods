@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
+import { createVuetify } from 'vuetify'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import NudgeToolWizard from './NudgeToolWizard.vue'
 
@@ -10,9 +12,13 @@ vi.mock('vue-router', () => ({
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (k: string) => k }),
 }))
-vi.mock('vuetify', () => ({
-  useDisplay: () => ({ smAndDown: { value: false } }),
-}))
+vi.mock('vuetify', async () => {
+  const actual = await vi.importActual<typeof import('vuetify')>('vuetify')
+  return {
+    ...actual,
+    useDisplay: () => ({ smAndDown: { value: false } }),
+  }
+})
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({ fetchCategories: vi.fn().mockResolvedValue([]) }),
 }))
@@ -26,7 +32,10 @@ vi.mock('#components', () => ({
   NudgeToolStepCondition: { template: '<div>Condition</div>' },
   NudgeToolStepSubsetGroup: { template: '<div>SubsetGroup</div>' },
   NudgeToolStepRecommendations: { template: '<div>Recommendations</div>' },
-  RoundedCornerCard: { template: '<div><slot /><slot name="corner"/></div>' },
+  RoundedCornerCard: {
+    template:
+      '<div class="rounded-card-stub" v-bind="$attrs"><slot /><slot name="corner"/></div>',
+  },
   NudgeWizardHeader: { template: '<div class="header-stub"></div>' },
 }))
 
@@ -44,9 +53,11 @@ vi.mock('~/utils/_nudge-tool-filters', () => ({
 }))
 vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: (...args: unknown[]) => unknown) => fn,
-  useElementSize: () => ({ height: { value: 100 } }),
+  useElementSize: () => ({ height: ref(100) }),
   useTransition: (source: unknown) => source,
 }))
+
+const vuetify = createVuetify()
 
 describe('NudgeToolWizard', () => {
   it('renders and shows active steps limited to current index', async () => {
@@ -56,6 +67,7 @@ describe('NudgeToolWizard', () => {
     // Stub components to avoid deep rendering
     const wrapper = mount(NudgeToolWizard, {
       global: {
+        plugins: [vuetify],
         mocks: {
           $t: (t: string) => t,
         },
@@ -97,5 +109,94 @@ describe('NudgeToolWizard', () => {
     expect(wrapper.exists()).toBe(true)
 
     // Header row was removed in refactor, removed assertion.
+  })
+
+  it('applies compact height on category and expands on content steps', async () => {
+    const wrapper = mount(NudgeToolWizard, {
+      global: {
+        plugins: [vuetify],
+        mocks: {
+          $t: (t: string) => t,
+        },
+        stubs: {
+          VBtn: true,
+          VAvatar: true,
+          VImg: true,
+          VIcon: true,
+          VProgressLinear: true,
+          VWindow: { template: '<div><slot /></div>' },
+          VWindowItem: { template: '<div><slot /></div>', props: ['value'] },
+        },
+      },
+      props: {
+        verticals: [
+          { id: 'v1', nudgeToolConfig: { scores: ['s1'], subsets: [] } },
+        ] as unknown as VerticalConfigDto[],
+      },
+    })
+
+    const card = wrapper.find('.nudge-wizard')
+    expect(card.attributes('style')).toContain('min-height: 454px')
+    expect(card.attributes('style')).toContain('max-height: 454px')
+
+    ;(wrapper.vm as unknown as { activeStepKey: string }).activeStepKey =
+      'condition'
+    await wrapper.vm.$nextTick()
+
+    expect(card.attributes('style')).toContain('min-height: 500px')
+    expect(card.attributes('style')).toContain('max-height: 500px')
+
+    ;(wrapper.vm as unknown as { activeStepKey: string }).activeStepKey =
+      'category'
+    await wrapper.vm.$nextTick()
+
+    expect(card.attributes('style')).toContain('min-height: 454px')
+    expect(card.attributes('style')).toContain('max-height: 454px')
+  })
+
+  it('pulses the corner emoji on category step at random intervals', async () => {
+    vi.useFakeTimers()
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0)
+
+    const wrapper = mount(NudgeToolWizard, {
+      global: {
+        plugins: [vuetify],
+        mocks: {
+          $t: (t: string) => t,
+        },
+        stubs: {
+          VBtn: true,
+          VAvatar: true,
+          VImg: true,
+          VIcon: true,
+          VProgressLinear: true,
+          VWindow: { template: '<div><slot /></div>' },
+          VWindowItem: { template: '<div><slot /></div>', props: ['value'] },
+        },
+      },
+      props: {
+        verticals: [
+          { id: 'v1', nudgeToolConfig: { scores: ['s1'], subsets: [] } },
+        ] as unknown as VerticalConfigDto[],
+      },
+    })
+
+    const vm = wrapper.vm as unknown as {
+      isCornerPulsing: boolean
+      activeStepKey: string
+    }
+
+    expect(vm.isCornerPulsing).toBe(false)
+
+    vi.advanceTimersByTime(4100)
+    await wrapper.vm.$nextTick()
+    expect(vm.isCornerPulsing).toBe(true)
+
+    vi.advanceTimersByTime(500)
+    await wrapper.vm.$nextTick()
+    expect(vm.isCornerPulsing).toBe(false)
+
+    randomSpy.mockRestore()
+    vi.useRealTimers()
   })
 })

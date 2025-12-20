@@ -24,7 +24,12 @@
           v-if="activeStepKey === 'category'"
           class="text-h5 font-weight-bold text-white"
         >
-          {{ $t('nudge-tool.wizard.welcome') }}
+          <span
+            class="nudge-wizard__corner-emoji"
+            :class="{ 'nudge-wizard__corner-emoji--pulse': isCornerPulsing }"
+          >
+            {{ $t('nudge-tool.wizard.welcome') }}
+          </span>
         </div>
         <div
           v-else-if="categorySummary"
@@ -639,8 +644,6 @@ const shouldShowMatches = computed(
   () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
 )
 
-const isCategoryStep = computed(() => activeStepKey.value === 'category')
-
 const windowTransition = computed(() => undefined)
 
 const windowReverseTransition = computed(() => undefined)
@@ -752,11 +755,61 @@ const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
 
 const isContentMode = computed(() => activeStepKey.value !== 'category')
+const isCategoryStep = computed(() => activeStepKey.value === 'category')
+
+const prefersReducedMotion = ref(false)
+const isCornerPulsing = ref(false)
+const pulseTimeoutId = ref<ReturnType<typeof setTimeout> | null>(null)
+const pulseResetTimeoutId = ref<ReturnType<typeof setTimeout> | null>(null)
+let reducedMotionMediaQuery: MediaQueryList | null = null
+let reducedMotionListener: ((event: MediaQueryListEvent) => void) | null = null
+
+const setReducedMotionFlag = () => {
+  if (typeof window === 'undefined' || !('matchMedia' in window)) {
+    prefersReducedMotion.value = false
+    return
+  }
+
+  prefersReducedMotion.value = window
+    .matchMedia('(prefers-reduced-motion: reduce)')
+    .matches
+}
+
+if (import.meta.client) {
+  setReducedMotionFlag()
+}
 
 const WIZARD_MIN_HEIGHT = 300
+const CATEGORY_WINDOW_MIN_HEIGHT = 240
+const CATEGORY_WINDOW_MAX_HEIGHT = 360
+const CATEGORY_WINDOW_FALLBACK_HEIGHT = 300
+const CATEGORY_LAYOUT_MIN_HEIGHT = 360
+const HEIGHT_TRANSITION_MS = 260
 
 const lockedLayoutHeight = ref<number | null>(null)
 const lockedWindowHeight = ref<number | null>(null)
+
+const clampValue = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max)
+
+const categoryWindowHeight = computed(() => {
+  const measuredHeight = windowHeight.value || CATEGORY_WINDOW_FALLBACK_HEIGHT
+  return clampValue(
+    measuredHeight,
+    CATEGORY_WINDOW_MIN_HEIGHT,
+    CATEGORY_WINDOW_MAX_HEIGHT
+  )
+})
+
+const categoryLayoutHeight = computed(() => {
+  const header = headerHeight.value || 0
+  const footer = footerHeight.value || 0
+  const estimatedProgressHeight = 14
+  const targetHeight =
+    header + categoryWindowHeight.value + footer + estimatedProgressHeight
+
+  return Math.max(targetHeight, CATEGORY_LAYOUT_MIN_HEIGHT)
+})
 
 const attemptLockHeights = () => {
   if (!isContentMode.value) {
@@ -788,30 +841,49 @@ watch(
 )
 
 const wizardStyle = computed(() => {
-  if (!lockedLayoutHeight.value) {
-    return undefined
+  if (isCategoryStep.value) {
+    return {
+      minHeight: `${categoryLayoutHeight.value}px`,
+      maxHeight: `${categoryLayoutHeight.value}px`,
+      transition: `min-height ${HEIGHT_TRANSITION_MS}ms ease, max-height ${HEIGHT_TRANSITION_MS}ms ease`,
+    }
   }
 
-  return { minHeight: `${lockedLayoutHeight.value}px` }
-})
-
-const windowWrapperStyle = computed(() => {
-  if (!lockedWindowHeight.value) {
-    return undefined
+  if (!lockedLayoutHeight.value) {
+    return {
+      minHeight: `${Math.max(categoryLayoutHeight.value, WIZARD_MIN_HEIGHT)}px`,
+      transition: `min-height ${HEIGHT_TRANSITION_MS}ms ease`,
+    }
   }
 
   return {
-    minHeight: `${lockedWindowHeight.value}px`,
-    maxHeight: `${lockedWindowHeight.value}px`,
+    minHeight: `${lockedLayoutHeight.value}px`,
+    maxHeight: `${lockedLayoutHeight.value}px`,
+    transition: `min-height ${HEIGHT_TRANSITION_MS}ms ease, max-height ${HEIGHT_TRANSITION_MS}ms ease`,
+  }
+})
+
+const windowWrapperStyle = computed(() => {
+  const targetHeight = isCategoryStep.value
+    ? categoryWindowHeight.value
+    : lockedWindowHeight.value ?? Math.max(categoryWindowHeight.value, WIZARD_MIN_HEIGHT)
+
+  return {
+    minHeight: `${targetHeight}px`,
+    maxHeight: `${targetHeight}px`,
+    transition: `min-height ${HEIGHT_TRANSITION_MS}ms ease, max-height ${HEIGHT_TRANSITION_MS}ms ease`,
   }
 })
 
 const windowContentStyle = computed(() => {
-  if (!lockedWindowHeight.value) {
-    return undefined
-  }
+  const targetHeight = isCategoryStep.value
+    ? categoryWindowHeight.value
+    : lockedWindowHeight.value ?? Math.max(categoryWindowHeight.value, WIZARD_MIN_HEIGHT)
 
-  return { minHeight: `${lockedWindowHeight.value}px` }
+  return {
+    minHeight: `${targetHeight}px`,
+    transition: `min-height ${HEIGHT_TRANSITION_MS}ms ease`,
+  }
 })
 
 const resolvedCornerSize = computed(() => (isContentMode.value ? 'xl' : 'lg'))
@@ -842,6 +914,102 @@ const cornerIconDimensions = computed(() => {
     width: `${wrapperSize}px`,
     height: `${wrapperSize}px`,
   }
+})
+
+const stopPulsing = () => {
+  if (pulseTimeoutId.value) {
+    clearTimeout(pulseTimeoutId.value)
+    pulseTimeoutId.value = null
+  }
+
+  if (pulseResetTimeoutId.value) {
+    clearTimeout(pulseResetTimeoutId.value)
+    pulseResetTimeoutId.value = null
+  }
+
+  isCornerPulsing.value = false
+}
+
+const triggerPulse = () => {
+  isCornerPulsing.value = true
+
+  pulseResetTimeoutId.value = setTimeout(() => {
+    isCornerPulsing.value = false
+    pulseResetTimeoutId.value = null
+    schedulePulse()
+  }, HEIGHT_TRANSITION_MS + 120)
+}
+
+const schedulePulse = () => {
+  if (prefersReducedMotion.value || !isCategoryStep.value) {
+    return
+  }
+
+  stopPulsing()
+
+  const delay = Math.round(4000 + Math.random() * 5000)
+  pulseTimeoutId.value = setTimeout(() => {
+    triggerPulse()
+  }, delay)
+}
+
+watch(
+  () => [isCategoryStep.value, prefersReducedMotion.value],
+  ([isCategory, reduce]) => {
+    if (!isCategory || reduce) {
+      stopPulsing()
+      return
+    }
+
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    schedulePulse()
+  },
+  { immediate: true }
+)
+
+const removeReducedMotionListener = () => {
+  if (reducedMotionMediaQuery && reducedMotionListener) {
+    if ('removeEventListener' in reducedMotionMediaQuery) {
+      reducedMotionMediaQuery.removeEventListener(
+        'change',
+        reducedMotionListener
+      )
+    } else if ('removeListener' in reducedMotionMediaQuery) {
+      reducedMotionMediaQuery.removeListener(reducedMotionListener)
+    }
+  }
+  reducedMotionMediaQuery = null
+  reducedMotionListener = null
+}
+
+onMounted(async () => {
+  if (import.meta.client && 'matchMedia' in window) {
+    reducedMotionMediaQuery = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    )
+    reducedMotionListener = event => {
+      prefersReducedMotion.value = event.matches
+      if (event.matches) {
+        stopPulsing()
+      } else if (isCategoryStep.value) {
+        schedulePulse()
+      }
+    }
+
+    if ('addEventListener' in reducedMotionMediaQuery) {
+      reducedMotionMediaQuery.addEventListener('change', reducedMotionListener)
+    } else if ('addListener' in reducedMotionMediaQuery) {
+      reducedMotionMediaQuery.addListener(reducedMotionListener)
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  stopPulsing()
+  removeReducedMotionListener()
 })
 </script>
 
@@ -1021,5 +1189,32 @@ const cornerIconDimensions = computed(() => {
 
 .nudge-wizard--content-mode .nudge-wizard__corner-content {
   transform: translateY(2px) scale(1.04);
+}
+
+.nudge-wizard__corner-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  transition: transform 160ms ease;
+
+  &--pulse {
+    animation: nudge-corner-pulse 380ms ease-out;
+  }
+}
+
+@keyframes nudge-corner-pulse {
+  0% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.06);
+  }
+  68% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>
