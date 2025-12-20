@@ -6,21 +6,8 @@ We hope you will appreciate the following improvements, this release <b>covers 1
 ## Included Pull Requests
 
 
-### ❓ Other (80)
+### ❓ Other (67)
 
-#2058 - Fix proxy headers for legacy sitemap route (GoulvenF)
-#2065 - Fix sitemap exclusion for offline route (GoulvenF)
-#2068 - Exclude offline route from sitemap configuration (GoulvenF)
-#2069 - Update dependency org.codehaus.mojo:versions-maven-plugin to v2.20.1 (renovate[bot])
-#2070 - Update swagger.core.v3.version to v2.2.41 (renovate[bot])
-#2071 - Add bounded caching configuration for front API (GoulvenF)
-#2072 - Align primary impact score with ecoscore value (GoulvenF)
-#2073 - Fix product radar chart values and tooltips (GoulvenF)
-#2074 - Use canonical attribute keys for score aggregation (GoulvenF)
-#2075 - Update dependency @nuxt/devtools to v3.1.1 (renovate[bot])
-#2076 - Update dependency npm to v11.6.4 (renovate[bot])
-#2077 - Fix ecoscore prerequisites and preserve cardinality statistics (GoulvenF)
-#2078 - Harden score aggregation edge cases (GoulvenF)
 #2080 - Align hero menu toggle icons with labels (GoulvenF)
 #2082 - Refactor score direction handling (GoulvenF)
 #2084 - Update dependency eslint-plugin-vue to v10.6.1 (renovate[bot])
