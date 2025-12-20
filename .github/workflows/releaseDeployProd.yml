@@ -170,21 +170,31 @@ jobs:
 
       ############################################
       # Frontend (Nuxt SSR)
-      # - Setup Node 24 + cache pnpm (gain énorme)
+      # - Setup Node 24
+      # - Install pnpm
+      # - Enable pnpm cache (setup-node requires pnpm available)
       ############################################
-      - name: Setup Node 24 (with pnpm cache)
+
+      - name: Setup Node 24
         if: env.MODE != 'test'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: "pnpm"
-          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Setup pnpm
         if: env.MODE != 'test'
         uses: pnpm/action-setup@v4
         with:
           version: 10.26.1
+
+      # ✅ Le cache pnpm DOIT être configuré après l'installation de pnpm
+      - name: Setup pnpm cache
+        if: env.MODE != 'test'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
         if: env.MODE != 'test'
