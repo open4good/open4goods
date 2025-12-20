@@ -21,6 +21,7 @@ const segments = Array.isArray(slugParam)
 const productRoute = computed(() => matchProductRouteFromSegments(segments))
 
 // Try to match category (single segment, letters/hyphens)
+
 const categoryPattern = /^[a-z-]+$/
 const categorySlug = computed(() => {
   if (productRoute.value) return null
