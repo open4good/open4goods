@@ -23,7 +23,7 @@ import type {
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
 import { useParallaxConfig } from '~/composables/useParallaxConfig'
-import { useSeasonalParallaxPack } from '~/composables/useSeasonalParallaxPack'
+import { useSeasonalEventPack } from '~/composables/useSeasonalEventPack'
 import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
 import {
   PARALLAX_SECTION_KEYS,
@@ -94,10 +94,10 @@ const heroPartnersCount = computed(() => {
   return affiliationPartners.value?.length ?? 0
 })
 
-const seasonalParallaxPack = useSeasonalParallaxPack()
+const seasonalEventPack = useSeasonalEventPack()
 
 const parallaxConfig = useParallaxConfig()
-const parallaxLayers = useThemedParallaxBackgrounds(seasonalParallaxPack)
+const parallaxLayers = useThemedParallaxBackgrounds(seasonalEventPack)
 
 type ParallaxSectionRenderConfig = {
   backgrounds: ParallaxLayerConfig[]

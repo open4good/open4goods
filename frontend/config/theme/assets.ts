@@ -22,16 +22,23 @@ export const PARALLAX_SECTION_KEYS = [
   'cta',
 ] as const
 
-export const PARALLAX_PACK_NAMES = ['default', 'sdg', 'christmas'] as const
+export const EVENT_PACK_NAMES = ['default', 'sdg', 'christmas'] as const
 
 export type ParallaxSectionKey = (typeof PARALLAX_SECTION_KEYS)[number]
-export type ParallaxPackName = (typeof PARALLAX_PACK_NAMES)[number]
+export type EventPackName = (typeof EVENT_PACK_NAMES)[number]
+
+/** @deprecated Use {@link EVENT_PACK_NAMES} instead. */
+export const PARALLAX_PACK_NAMES = EVENT_PACK_NAMES
+/** @deprecated Use {@link EventPackName} instead. */
+export type ParallaxPackName = EventPackName
 
 export type SeasonalThemeAssets = Partial<
-  Record<ParallaxPackName, Partial<Record<ThemeName | 'common', ThemeAssetConfig>>>
+  Record<EventPackName, Partial<Record<ThemeName | 'common', ThemeAssetConfig>>>
 >
 
-export const DEFAULT_PARALLAX_PACK: ParallaxPackName = 'default'
+export const DEFAULT_EVENT_PACK: EventPackName = 'default'
+/** @deprecated Use {@link DEFAULT_EVENT_PACK} instead. */
+export const DEFAULT_PARALLAX_PACK: ParallaxPackName = DEFAULT_EVENT_PACK
 
 export type ParallaxLayerConfig = {
   src: string
@@ -80,9 +87,9 @@ export const seasonalThemeAssets: SeasonalThemeAssets = {
   },
 }
 
-export const parallaxPacks: Record<
+export const eventParallaxPacks: Record<
   ThemeName | 'common',
-  Partial<Record<ParallaxPackName, ParallaxPackConfig>>
+  Partial<Record<EventPackName, ParallaxPackConfig>>
 > = {
   light: {
     default: {
@@ -142,3 +149,5 @@ export const parallaxPacks: Record<
     christmas: {},
   },
 }
+/** @deprecated Use {@link eventParallaxPacks} instead. */
+export const parallaxPacks = eventParallaxPacks

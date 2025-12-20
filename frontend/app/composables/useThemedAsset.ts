@@ -6,9 +6,9 @@ import {
   seasonalThemeAssets,
   themeAssets,
   type ThemeAssetKey,
-  type ParallaxPackName,
+  type EventPackName,
 } from '~~/config/theme/assets'
-import { useSeasonalParallaxPack } from './useSeasonalParallaxPack'
+import { useSeasonalEventPack } from './useSeasonalEventPack'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
 export type ThemedAssetIndex = Record<string, string>
@@ -38,7 +38,7 @@ const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
 export const resolveAssetPathForTheme = (
   assetKey: ThemeAssetKey,
   themeName: ThemeName,
-  seasonalPack?: ParallaxPackName
+  seasonalPack?: EventPackName
 ): string[] => {
   const seasonalTheme = seasonalPack
     ? seasonalThemeAssets[seasonalPack]?.[themeName]?.[assetKey]
@@ -71,7 +71,7 @@ export const resolveThemedAssetUrlFromIndex = (
   themeName: ThemeName,
   index: ThemedAssetIndex,
   fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK,
-  seasonalPack?: ParallaxPackName
+  seasonalPack?: EventPackName
 ): string | undefined => {
   const sanitizedPaths = (Array.isArray(relativePath)
     ? relativePath
@@ -111,7 +111,7 @@ const useCurrentThemeName = () => {
 export const resolveThemedAssetUrl = (
   relativePath: string | string[],
   themeName: ThemeName,
-  seasonalPack?: ParallaxPackName
+  seasonalPack?: EventPackName
 ): string | undefined =>
   resolveThemedAssetUrlFromIndex(
     relativePath,
@@ -123,7 +123,7 @@ export const resolveThemedAssetUrl = (
 
 export const useThemedAsset = (relativePath: string) => {
   const themeName = useCurrentThemeName()
-  const seasonalPack = useSeasonalParallaxPack()
+  const seasonalPack = useSeasonalEventPack()
 
   return computed(
     () =>
@@ -137,7 +137,7 @@ export const useThemedAsset = (relativePath: string) => {
 
 export const useThemeAsset = (assetKey: ThemeAssetKey) => {
   const themeName = useCurrentThemeName()
-  const seasonalPack = useSeasonalParallaxPack()
+  const seasonalPack = useSeasonalEventPack()
 
   return computed(() => {
     const relativePaths = resolveAssetPathForTheme(

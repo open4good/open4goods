@@ -1,14 +1,14 @@
-import { DEFAULT_PARALLAX_PACK, PARALLAX_PACK_NAMES, type ParallaxPackName } from './assets'
+import { DEFAULT_EVENT_PACK, EVENT_PACK_NAMES, type EventPackName } from './assets'
 
-export type SeasonalParallaxWindow = {
+export type SeasonalEventWindow = {
   id: string
   start: string
   end: string
-  pack: ParallaxPackName
+  pack: EventPackName
   description?: string
 }
 
-export const seasonalParallaxSchedule: SeasonalParallaxWindow[] = [
+export const seasonalEventSchedule: SeasonalEventWindow[] = [
   {
     id: 'sdg-campaign',
     start: '04-15',
@@ -34,23 +34,23 @@ export const seasonalParallaxSchedule: SeasonalParallaxWindow[] = [
   },
 ]
 
-export const resolveParallaxPackName = (
+export const resolveEventPackName = (
   value: string | string[] | undefined
-): ParallaxPackName | undefined => {
+): EventPackName | undefined => {
   if (!value) {
     return undefined
   }
 
   const packName = Array.isArray(value) ? value[0] : value
 
-  return (PARALLAX_PACK_NAMES as readonly string[]).includes(packName)
-    ? (packName as ParallaxPackName)
+  return (EVENT_PACK_NAMES as readonly string[]).includes(packName)
+    ? (packName as EventPackName)
     : undefined
 }
 
 const isDateWithinWindow = (
   date: Date,
-  window: SeasonalParallaxWindow
+  window: SeasonalEventWindow
 ): boolean => {
   const month = date.getUTCMonth() + 1
   const day = date.getUTCDate()
@@ -64,10 +64,10 @@ const isDateWithinWindow = (
   }
 }
 
-export const resolveActiveParallaxPack = (
+export const resolveActiveEventPack = (
   date: Date = new Date()
-): ParallaxPackName => {
-  const window = seasonalParallaxSchedule.find(candidate =>
+): EventPackName => {
+  const window = seasonalEventSchedule.find(candidate =>
     isDateWithinWindow(date, candidate)
   )
 
@@ -75,5 +75,14 @@ export const resolveActiveParallaxPack = (
     return window.pack
   }
 
-  return DEFAULT_PARALLAX_PACK
+  return DEFAULT_EVENT_PACK
 }
+
+/** @deprecated Use {@link resolveEventPackName} instead. */
+export const resolveParallaxPackName = resolveEventPackName
+/** @deprecated Use {@link resolveActiveEventPack} instead. */
+export const resolveActiveParallaxPack = resolveActiveEventPack
+/** @deprecated Use {@link SeasonalEventWindow} instead. */
+export type SeasonalParallaxWindow = SeasonalEventWindow
+/** @deprecated Use {@link seasonalEventSchedule} instead. */
+export const seasonalParallaxSchedule = seasonalEventSchedule
