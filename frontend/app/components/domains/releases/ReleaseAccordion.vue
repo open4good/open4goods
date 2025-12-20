@@ -54,8 +54,8 @@
         :value="release.slug"
         class="release-accordion__panel"
       >
-        <v-expansion-panel-title class="release-accordion__title" hide-actions>
-          <template #default="{ expanded: isExpanded }">
+        <v-expansion-panel-title class="release-accordion__title">
+          <template #default>
             <div class="release-accordion__title-content">
               <div class="release-accordion__meta">
                 <span class="release-accordion__eyebrow">
@@ -63,25 +63,38 @@
                 </span>
                 <span class="release-accordion__name">{{ release.name }}</span>
               </div>
+            </div>
+          </template>
+          <template #actions="{ expanded: isExpanded }">
+            <div class="release-accordion__actions">
+              <v-chip
+                v-if="index === 0"
+                color="primary"
+                size="small"
+                variant="flat"
+                density="comfortable"
+                class="release-accordion__latest-chip"
+              >
+                {{ t('releases.latest') }}
+              </v-chip>
 
-              <div class="release-accordion__actions">
-                <v-chip
-                  v-if="index === 0"
-                  color="primary"
-                  size="small"
-                  variant="flat"
-                  density="comfortable"
-                  class="release-accordion__latest-chip"
-                >
-                  {{ t('releases.latest') }}
-                </v-chip>
-
+              <v-btn
+                icon
+                variant="text"
+                color="on-surface"
+                class="release-accordion__toggle"
+                :aria-label="
+                  isExpanded
+                    ? t('releases.actions.collapse', { name: release.name })
+                    : t('releases.actions.expand', { name: release.name })
+                "
+              >
                 <v-icon
                   icon="mdi-chevron-down"
                   class="release-accordion__icon"
                   :class="{ 'release-accordion__icon--expanded': isExpanded }"
                 />
-              </div>
+              </v-btn>
             </div>
           </template>
         </v-expansion-panel-title>
