@@ -86,13 +86,14 @@
     color: #ffffff!important
 
 :root.accessibility-layout.accessibility-layout--wide
-    .v-container,
-    .container
-        max-width: min(1320px, calc(100% - 48px))
-        width: 100%
-        padding-inline: clamp(16px, 3vw, 32px)
+    .v-main
+        .v-container,
+        .container
+            max-width: min(1320px, calc(100% - 48px))
+            width: 100%
+            padding-inline: clamp(16px, 3vw, 32px)
 
-    .cms-page__container--container
-        max-width: min(1320px, calc(100% - 48px))
-        width: 100%
-        padding-inline: clamp(16px, 3vw, 32px)
+        .cms-page__container--container
+            max-width: min(1320px, calc(100% - 48px))
+            width: 100%
+            padding-inline: clamp(16px, 3vw, 32px)
