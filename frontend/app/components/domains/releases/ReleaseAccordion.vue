@@ -65,7 +65,7 @@
               </div>
             </div>
           </template>
-          <template #actions="{ expanded: isExpanded, toggle }">
+          <template #actions="{ expanded: isExpanded }">
             <div class="release-accordion__actions">
               <v-chip
                 v-if="index === 0"
@@ -88,7 +88,6 @@
                     ? t('releases.actions.collapse', { name: release.name })
                     : t('releases.actions.expand', { name: release.name })
                 "
-                @click.stop="toggle"
               >
                 <v-icon
                   icon="mdi-chevron-down"
