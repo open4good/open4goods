@@ -208,13 +208,19 @@ import {
 import { useI18n } from 'vue-i18n'
 import type { ProductPdfDto } from '~~/shared/api-client'
 
-import 'vue-pdf-embed/dist/styles/annotationLayer.css'
-import 'vue-pdf-embed/dist/styles/textLayer.css'
-
 type VuePdfEmbedComponent = (typeof import('vue-pdf-embed'))['default']
 
 const VuePdfEmbed = defineAsyncComponent<VuePdfEmbedComponent>(async () => {
-  const module = await import('vue-pdf-embed')
+  if (!import.meta.client) {
+    return () => null
+  }
+
+  const [module] = await Promise.all([
+    import('vue-pdf-embed'),
+    import('vue-pdf-embed/dist/styles/annotationLayer.css'),
+    import('vue-pdf-embed/dist/styles/textLayer.css'),
+  ])
+
   return module.default
 })
 
