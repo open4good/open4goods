@@ -480,39 +480,24 @@ let echartsRegistered = false
 
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
-    await ensureECharts(({ core, charts, components, renderers }) => {
-      if (echartsRegistered) {
-        return
-      }
+    const echarts = await ensureECharts([
+      'LineChart',
+      'GridComponent',
+      'TooltipComponent',
+      'DataZoomComponent',
+      'MarkAreaComponent',
+      'CanvasRenderer',
+    ])
 
+    if (echarts && !echartsRegistered) {
       echartsRegistered = true
-      const { use } = core
-      const { LineChart } = charts
-      const {
-        AxisPointerComponent,
-        GridComponent,
-        TooltipComponent,
-        DataZoomComponent,
-        TitleComponent,
-        MarkAreaComponent,
-      } = components
-      const { CanvasRenderer } = renderers
-
-      use([
-        LineChart,
-        AxisPointerComponent,
-        GridComponent,
-        TooltipComponent,
-        DataZoomComponent,
-        TitleComponent,
-        MarkAreaComponent,
-        CanvasRenderer,
-      ])
-    })
+      const { core, modules } = echarts
+      core.use(modules)
+    }
   }
 
   const module = await import(
-    /* webpackChunkName: "echarts-chunk" */ 'vue-echarts'
+    /* webpackChunkName: "vendor-echarts" */ 'vue-echarts'
   )
 
   return module.default
@@ -602,20 +587,12 @@ const resolvedEvents = computed(() =>
 
 const newChartOption = computed(() =>
   hasNewHistory.value
-    ? buildChartOption(
-        newHistory.value,
-        resolvedEvents.value,
-        t('product.price.newOffers')
-      )
+    ? buildChartOption(newHistory.value, resolvedEvents.value)
     : null
 )
 const occasionChartOption = computed(() =>
   hasOccasionHistory.value
-    ? buildChartOption(
-        occasionHistory.value,
-        resolvedEvents.value,
-        t('product.price.occasionOffers')
-      )
+    ? buildChartOption(occasionHistory.value, resolvedEvents.value)
     : null
 )
 
@@ -803,8 +780,7 @@ const sortedOffers = computed(() => {
 
 const buildChartOption = (
   entries: HistoryEntry[],
-  events: Array<{ start: number; end: number; label?: string }>,
-  title: string
+  events: Array<{ start: number; end: number; label?: string }>
 ) => {
   if (entries.length < MIN_HISTORY_POINTS) {
     return null
@@ -827,12 +803,6 @@ const buildChartOption = (
   ])
 
   return {
-    title: {
-      text: title,
-      left: 'center',
-      top: 10,
-      textStyle: { fontSize: 14, fontWeight: 600 },
-    },
     tooltip: {
       trigger: 'axis',
       valueFormatter: (value: number | string) =>
