@@ -55,31 +55,41 @@
         class="release-accordion__panel"
       >
         <v-expansion-panel-title class="release-accordion__title" hide-actions>
-          <template #default="{ expanded: isExpanded }">
+          <template #default="{ expanded: isExpanded, toggle }">
             <div class="release-accordion__title-content">
               <div class="release-accordion__meta">
-                <span class="release-accordion__eyebrow">
-                  {{ formatPublishedDate(release.publishedAt) }}
-                </span>
+                <div class="release-accordion__date-row">
+                  <span class="release-accordion__eyebrow">
+                    {{ formatPublishedDate(release.publishedAt) }}
+                  </span>
+                </div>
                 <span class="release-accordion__name">{{ release.name }}</span>
               </div>
 
               <div class="release-accordion__actions">
-                <v-chip
+                <span
                   v-if="index === 0"
-                  color="primary"
-                  size="small"
-                  variant="flat"
-                  density="comfortable"
-                  class="release-accordion__latest-chip"
+                  class="release-accordion__latest-badge"
+                  role="status"
                 >
-                  {{ t('releases.latest') }}
-                </v-chip>
+                  <span class="release-accordion__badge-dot" aria-hidden="true" />
+                  <span class="release-accordion__badge-label">
+                    {{ t('releases.latest') }}
+                  </span>
+                </span>
 
-                <v-icon
-                  icon="mdi-chevron-down"
-                  class="release-accordion__icon"
-                  :class="{ 'release-accordion__icon--expanded': isExpanded }"
+                <v-btn
+                  variant="text"
+                  color="primary"
+                  density="comfortable"
+                  class="release-accordion__toggle"
+                  :aria-label="
+                    isExpanded
+                      ? t('releases.actions.collapse')
+                      : t('releases.actions.expand')
+                  "
+                  :icon="isExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                  @click.stop="toggle"
                 />
               </div>
             </div>
@@ -156,21 +166,26 @@ const formatPublishedDate = (isoDate: string): string => {
   &__title-content
     display: flex
     justify-content: space-between
-    align-items: center
-    gap: 12px
+    align-items: flex-start
+    gap: 16px
+    flex-wrap: wrap
 
   &__actions
     display: flex
     align-items: center
-    gap: 12px
-
-  &__latest-chip
-    font-weight: 700
+    gap: 10px
+    flex-shrink: 0
 
   &__meta
     display: flex
     flex-direction: column
     gap: 6px
+    min-width: 0
+
+  &__date-row
+    display: flex
+    align-items: center
+    gap: 8px
 
   &__eyebrow
     text-transform: uppercase
@@ -182,13 +197,33 @@ const formatPublishedDate = (isoDate: string): string => {
     font-weight: 700
     font-size: 1.05rem
     color: rgb(var(--v-theme-on-surface))
+    word-break: break-word
 
-  &__icon
-    color: rgba(var(--v-theme-on-surface), 0.6)
-    transition: transform 0.2s ease
+  &__latest-badge
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    padding: 6px 12px
+    border-radius: 999px
+    border: 1px solid #d0d7de
+    background: linear-gradient(180deg, #f6f8fa, #eaeef2)
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 rgba(0, 0, 0, 0.04)
+    color: #24292f
+    font-weight: 700
+    font-size: 0.85rem
 
-  &__icon--expanded
-    transform: rotate(180deg)
+  &__badge-dot
+    width: 8px
+    height: 8px
+    border-radius: 50%
+    background: #2da44e
+    box-shadow: 0 0 0 2px rgba(45, 164, 78, 0.2)
+
+  &__badge-label
+    white-space: nowrap
+
+  &__toggle
+    color: rgba(var(--v-theme-on-surface), 0.72)
 
   &__content
     padding: 10px 4px 20px

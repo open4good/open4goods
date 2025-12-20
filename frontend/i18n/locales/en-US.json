@@ -2325,6 +2325,10 @@
       "latest": "Latest version",
       "title": "Release overview"
     },
+    "actions": {
+      "expand": "Show release details",
+      "collapse": "Hide release details"
+    },
     "latest": "Latest",
     "latestLabel": "Latest release: {name}",
     "loading": "Loading release notes…",

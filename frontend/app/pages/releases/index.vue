@@ -15,7 +15,7 @@
       </template>
     </OpendataHero>
 
-    <v-container class="releases-page__content" fluid>
+    <v-container class="releases-page__content" max-width="1040">
       <div :id="faqAnchorId" class="releases-page__anchor" aria-hidden="true" />
       <h2 class="releases-page__section-title">
         {{ t('releases.faq.title') }}

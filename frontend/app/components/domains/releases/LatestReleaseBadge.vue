@@ -38,12 +38,13 @@ const handleClick = (event: Event) => {
     :href="props.scrollTarget"
     class="latest-release-badge"
     :class="{ 'latest-release-badge--dense': props.dense }"
+    data-testid="latest-release-badge"
     :role="props.scrollTarget ? 'link' : undefined"
     :aria-label="badgeAriaLabel"
     @click="handleClick"
     @keydown.enter.prevent="handleClick"
   >
-    <span class="latest-release-badge__label">{{ badgeLabel }}</span>
+    <span class="latest-release-badge__pill">{{ badgeLabel }}</span>
     <span class="latest-release-badge__value">{{ latestName }}</span>
   </a>
 </template>
@@ -51,21 +52,21 @@ const handleClick = (event: Event) => {
 <style scoped lang="sass">
 .latest-release-badge
   display: inline-flex
-  align-items: stretch
+  align-items: center
   gap: 10px
-  padding: 6px 12px 6px 0
-  border-radius: 999px
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.16)
-  background: linear-gradient(90deg, rgba(var(--v-theme-surface-default), 0.85), rgba(var(--v-theme-surface-muted), 0.9))
-  color: rgb(var(--v-theme-on-surface))
+  padding: 6px 12px
+  border-radius: 12px
+  border: 1px solid #d0d7de
+  background: linear-gradient(180deg, #f6f8fa, #eaeef2)
+  color: #24292f
   text-decoration: none
-  box-shadow: 0 6px 20px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  box-shadow: inset 0 1px 0 #ffffff, 0 1px 0 rgba(0, 0, 0, 0.04)
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease
   width: fit-content
 
   &:hover
-    border-color: rgba(var(--v-theme-primary), 0.4)
-    box-shadow: 0 10px 26px rgba(var(--v-theme-shadow-primary-600), 0.18)
+    border-color: #afb8c1
+    box-shadow: inset 0 1px 0 #ffffff, 0 4px 12px rgba(0, 0, 0, 0.08)
     transform: translateY(-1px)
 
   &:active
@@ -75,23 +76,27 @@ const handleClick = (event: Event) => {
     padding-block: 4px
     gap: 8px
 
-  &__label
+  &__pill
     display: inline-flex
     align-items: center
-    gap: 6px
+    gap: 8px
     padding: 6px 12px
     border-radius: 999px
-    background: rgba(var(--v-theme-primary), 0.14)
-    color: rgb(var(--v-theme-primary))
+    background: linear-gradient(180deg, #2ea043, #238636)
+    color: #fff
     font-weight: 800
     letter-spacing: 0.08em
     text-transform: uppercase
     font-size: 0.75rem
+    border: 1px solid #1f6f3d
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2)
 
   &__value
     display: inline-flex
     align-items: center
     font-weight: 700
     letter-spacing: 0.01em
-    padding-right: 6px
+    padding-right: 4px
+    color: #24292f
+    white-space: nowrap
 </style>

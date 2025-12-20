@@ -2326,6 +2326,10 @@
       "latest": "Version la plus récente",
       "title": "Vue d'ensemble des versions"
     },
+    "actions": {
+      "expand": "Afficher le détail de la version",
+      "collapse": "Masquer le détail de la version"
+    },
     "latest": "Dernière",
     "latestLabel": "Dernière version : {name}",
     "loading": "Chargement des notes de version…",
