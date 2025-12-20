@@ -30,6 +30,7 @@
 
 <script setup lang="ts">
 import { authService } from '~~/shared/api-client/services/auth.services'
+import { useAuthStore } from '~/stores/useAuthStore'
 
 const username = ref('')
 const password = ref('')
@@ -38,6 +39,7 @@ const error = ref('')
 const valid = ref(true)
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 const canonicalUrl = useCanonicalUrl()
 
@@ -90,7 +92,11 @@ const onSubmit = async () => {
   loading.value = true
   error.value = ''
   try {
-    await authService.login(username.value, password.value)
+    const { authState } = await authService.login(
+      username.value,
+      password.value
+    )
+    authStore.$patch(authState)
     await router.replace(resolveRedirectTarget())
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Login failed'

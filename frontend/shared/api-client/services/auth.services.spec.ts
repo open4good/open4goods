@@ -18,7 +18,23 @@ vi.stubGlobal('$fetch', fetchMock)
 
 let authService: (typeof import('./auth.services'))['authService']
 
-describe('AuthService.logout', () => {
+describe('authService helpers', () => {
+  beforeEach(async () => {
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue(undefined)
+    vi.resetModules()
+    ;({ authService } = await import('./auth.services'))
+  })
+
+  it('calls the logout endpoint without mutating state', async () => {
+    await authService.logout()
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith('/auth/logout', { method: 'POST' })
+  })
+})
+
+describe('useAuthStore.logout', () => {
   beforeEach(async () => {
     setActivePinia(createPinia())
     fetchMock.mockReset()
@@ -37,7 +53,7 @@ describe('AuthService.logout', () => {
       username: 'john',
     })
 
-    await authService.logout()
+    await authStore.logout()
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(fetchMock).toHaveBeenCalledWith('/auth/logout', { method: 'POST' })

@@ -1,4 +1,6 @@
+import { authService } from '~~/shared/api-client/services/auth.services'
 import { defineStore } from 'pinia'
+import { useAuthCookies } from '~/utils/authCookies'
 
 interface AuthState {
   roles: string[]
@@ -17,9 +19,15 @@ export const useAuthStore = defineStore('auth', {
   },
   actions: {
     async logout() {
-      const { authService } =
-        await import('~~/shared/api-client/services/auth.services')
-      await authService.logout()
+      const { tokenCookie, refreshCookie } = useAuthCookies()
+
+      try {
+        await authService.logout()
+      } finally {
+        this.$reset()
+        tokenCookie.value = null
+        refreshCookie.value = null
+      }
     },
   },
 })
