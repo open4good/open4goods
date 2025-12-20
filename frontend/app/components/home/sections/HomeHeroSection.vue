@@ -655,8 +655,8 @@ useHead({
   margin: 0
 
 .home-hero__icon-wrapper
-  width: clamp(62px, 14vw, 96px)
-  height: clamp(62px, 14vw, 96px)
+  width: clamp(3.9rem, 14vw, 6rem)
+  height: clamp(3.9rem, 14vw, 6rem)
   box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
   backdrop-filter: blur(8px)
   border-radius: 50%
@@ -709,6 +709,9 @@ useHead({
   box-shadow: 0 4px 12px rgba(var(--v-theme-shadow-primary-600), 0.05)
   padding: clamp(2rem, 5vw, 3rem)
   margin-block-start: 1rem
+  width: 100%
+  max-width: clamp(56rem, 82vw, 72rem)
+  margin-inline: auto
 
 .home-hero__panel-grid
   display: grid
@@ -831,8 +834,7 @@ useHead({
   .home-hero__panel-grid
     grid-template-columns: 1fr
 
-@media (min-width: 1440px)
+@media (min-width: 90rem)
   .home-hero__panel
-    max-width: 980px
-    margin-inline: auto
+    max-width: clamp(60rem, 78vw, 74rem)
 </style>
