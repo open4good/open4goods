@@ -88,5 +88,40 @@ class ProductControllerTest {
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("scores.ENERGY_CONSUMPTION.value");
     }
+
+    @Test
+    void attributeFiltersNotListedExplicitlyArePermitted() {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("tv");
+
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("BRAND_SUSTAINABILITY");
+        config.setAttributesConfig(new AttributesConfig(List.of(attributeConfig)));
+
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(config);
+
+        Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINABILITY.value", FilterOperator.term,
+                List.of("AA"), null, null);
+        ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
+                new FilterRequestDto(List.of(filter), List.of()));
+
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
+                any()))
+                .thenReturn(responseDto);
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
+                "tv", null, DomainLanguage.fr, Locale.FRANCE, searchRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
+        verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
+                filterCaptor.capture());
+
+        assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
+                .contains("attributes.indexed.BRAND_SUSTAINABILITY.value");
+    }
 }
 
