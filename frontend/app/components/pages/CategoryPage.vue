@@ -249,34 +249,28 @@
                   class="category-page__sort-order"
                   density="comfortable"
                 >
-                  <v-tooltip
-                    location="bottom"
-                    :text="$t('category.products.tooltips.sortAscending')"
+                  <v-btn
+                    value="asc"
+                    :aria-label="$t('category.products.sortOrderAsc')"
                   >
-                    <template #activator="{ props: ascBtnProps }">
-                      <v-btn
-                        v-bind="ascBtnProps"
-                        value="asc"
-                        :aria-label="$t('category.products.sortOrderAsc')"
-                      >
-                        <v-icon icon="mdi-sort-ascending" />
-                      </v-btn>
-                    </template>
-                  </v-tooltip>
-                  <v-tooltip
-                    location="bottom"
-                    :text="$t('category.products.tooltips.sortDescending')"
+                    <v-icon icon="mdi-sort-ascending" />
+                    <v-tooltip
+                      activator="parent"
+                      location="bottom"
+                      :text="$t('category.products.tooltips.sortAscending')"
+                    />
+                  </v-btn>
+                  <v-btn
+                    value="desc"
+                    :aria-label="$t('category.products.sortOrderDesc')"
                   >
-                    <template #activator="{ props: descBtnProps }">
-                      <v-btn
-                        v-bind="descBtnProps"
-                        value="desc"
-                        :aria-label="$t('category.products.sortOrderDesc')"
-                      >
-                        <v-icon icon="mdi-sort-descending" />
-                      </v-btn>
-                    </template>
-                  </v-tooltip>
+                    <v-icon icon="mdi-sort-descending" />
+                    <v-tooltip
+                      activator="parent"
+                      location="bottom"
+                      :text="$t('category.products.tooltips.sortDescending')"
+                    />
+                  </v-btn>
                 </v-btn-toggle>
               </div>
             </div>
@@ -313,48 +307,39 @@
                 mandatory
                 class="category-page__view-toggle"
               >
-                <v-tooltip
-                  location="bottom"
-                  :text="$t('category.products.tooltips.viewCards')"
+                <v-btn
+                  value="cards"
+                  :aria-label="$t('category.products.viewCards')"
                 >
-                  <template #activator="{ props: cardsBtnProps }">
-                    <v-btn
-                      v-bind="cardsBtnProps"
-                      value="cards"
-                      :aria-label="$t('category.products.viewCards')"
-                    >
-                      <v-icon icon="mdi-view-grid" />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <v-tooltip
-                  location="bottom"
-                  :text="$t('category.products.tooltips.viewList')"
+                  <v-icon icon="mdi-view-grid" />
+                  <v-tooltip
+                    activator="parent"
+                    location="bottom"
+                    :text="$t('category.products.tooltips.viewCards')"
+                  />
+                </v-btn>
+                <v-btn
+                  value="list"
+                  :aria-label="$t('category.products.viewList')"
                 >
-                  <template #activator="{ props: listBtnProps }">
-                    <v-btn
-                      v-bind="listBtnProps"
-                      value="list"
-                      :aria-label="$t('category.products.viewList')"
-                    >
-                      <v-icon icon="mdi-view-list" />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-                <v-tooltip
-                  location="bottom"
-                  :text="$t('category.products.tooltips.viewTable')"
+                  <v-icon icon="mdi-view-list" />
+                  <v-tooltip
+                    activator="parent"
+                    location="bottom"
+                    :text="$t('category.products.tooltips.viewList')"
+                  />
+                </v-btn>
+                <v-btn
+                  value="table"
+                  :aria-label="$t('category.products.viewTable')"
                 >
-                  <template #activator="{ props: tableBtnProps }">
-                    <v-btn
-                      v-bind="tableBtnProps"
-                      value="table"
-                      :aria-label="$t('category.products.viewTable')"
-                    >
-                      <v-icon icon="mdi-table" />
-                    </v-btn>
-                  </template>
-                </v-tooltip>
+                  <v-icon icon="mdi-table" />
+                  <v-tooltip
+                    activator="parent"
+                    location="bottom"
+                    :text="$t('category.products.tooltips.viewTable')"
+                  />
+                </v-btn>
               </v-btn-toggle>
             </div>
           </div>
