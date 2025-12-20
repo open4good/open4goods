@@ -3,11 +3,16 @@
     <OpendataHero
       :eyebrow="t('opendata.hero.eyebrow')"
       :title="t('opendata.hero.title')"
-      :subtitle="heroSubtitle"
       :education-card="educationCard"
       description-bloc-id="webpages:opendata:hero-overview"
       :primary-cta="heroPrimaryCta"
-    />
+    >
+      <template #subtitle>
+        <p class="opendata-hero__subtitle">
+          {{ t('opendata.hero.subtitle') }}
+        </p>
+      </template>
+    </OpendataHero>
 
     <OpendataStatsStrip :stats="stats" />
 
@@ -39,9 +44,22 @@
     <OpendataDatasetHighlights
       id="datasets"
       :title="t('opendata.datasets.title')"
-      :subtitle="datasetsSubtitle"
       :cards="datasetCards"
-    />
+    >
+      <template #subtitle>
+        <div class="opendata-datasets__subtitle subtitle-text">
+          <i18n-t keypath="opendata.datasets.subtitle" tag="p">
+            <template #license>
+              <a
+                :href="`#${licenseSectionId}`"
+                :data-scroll-target="`#${licenseSectionId}`"
+                >ODbL</a
+              >
+            </template>
+          </i18n-t>
+        </div>
+      </template>
+    </OpendataDatasetHighlights>
 
     <OpendataLicenseSection
       :title="t('opendata.license.title')"
@@ -100,13 +118,6 @@ const { data, pending, error, refresh } = useAsyncData<OpenDataOverviewDto>(
   {
     lazy: true,
   }
-)
-
-const heroSubtitle = computed(() =>
-  String(t('opendata.hero.subtitle', { licenseId: licenseSectionId }))
-)
-const datasetsSubtitle = computed(() =>
-  String(t('opendata.datasets.subtitle', { licenseId: licenseSectionId }))
 )
 
 const formatProductCount = (count?: string | number | null) => {

@@ -28,7 +28,7 @@ const props = withDefaults(
   defineProps<{
     eyebrow?: string
     title: string
-    subtitle: string
+    subtitle?: string
     primaryCta?: HeroCta
     educationCard?: HeroEducationCardProps
     fluid?: boolean
@@ -99,11 +99,15 @@ const handleSubtitleClick = (event: MouseEvent) => {
               {{ title }}
             </h1>
             <!-- eslint-disable vue/no-v-html -->
-            <p
-              class="opendata-hero__subtitle"
-              @click="handleSubtitleClick"
-              v-html="subtitle"
-            />
+            <div class="opendata-hero__subtitle">
+              <slot name="subtitle">
+                <p
+                  v-if="subtitle"
+                  @click="handleSubtitleClick"
+                  v-html="subtitle"
+                />
+              </slot>
+            </div>
             <!-- eslint-enable vue/no-v-html -->
 
             <slot name="below-title" />
@@ -184,6 +188,7 @@ const handleSubtitleClick = (event: MouseEvent) => {
   margin: 0
   font-size: 1.2rem
   color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
+  white-space: pre-wrap
 
 .opendata-hero__actions
   display: flex

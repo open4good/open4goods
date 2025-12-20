@@ -27,8 +27,9 @@ withDefaults(
             <h2 id="opendata-license-heading" class="opendata-license__title">
               {{ title }}
             </h2>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <p class="opendata-license__description" v-html="description" />
+            <p class="opendata-license__description">
+              {{ description }}
+            </p>
           </div>
           <div class="opendata-license__cta">
             <v-btn
@@ -80,6 +81,7 @@ withDefaults(
   margin: 0
   font-size: 1rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+  white-space: pre-wrap
 
 .opendata-license__cta
   flex-shrink: 0

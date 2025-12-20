@@ -7,26 +7,28 @@
       </p>
     </div>
 
-    <ClientOnly>
-      <VueECharts
-        v-if="chartOptions"
-        :option="chartOptions"
-        :autoresize="true"
-        class="category-filter-numeric__chart"
-        role="img"
-        :aria-label="chartAriaLabel"
-        :style="{ height: chartHeight }"
-        @click="onBarClick"
-      />
-      <template #fallback>
-        <div
-          v-if="hasBuckets"
-          class="category-filter-numeric__chart-placeholder"
+    <div ref="chartContainer" class="category-filter-numeric__chart-container">
+      <ClientOnly>
+        <VueECharts
+          v-if="chartOptions && canRenderChart"
+          :option="chartOptions"
+          :autoresize="true"
+          class="category-filter-numeric__chart"
+          role="img"
+          :aria-label="chartAriaLabel"
           :style="{ height: chartHeight }"
-          aria-hidden="true"
+          @click="onBarClick"
         />
-      </template>
-    </ClientOnly>
+        <template #fallback>
+          <div
+            v-if="hasBuckets"
+            class="category-filter-numeric__chart-placeholder"
+            :style="{ height: chartHeight }"
+            aria-hidden="true"
+          />
+        </template>
+      </ClientOnly>
+    </div>
 
     <v-range-slider
       v-model="localValue"
@@ -51,7 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, ref, computed } from 'vue'
+import { useElementSize } from '@vueuse/core'
 import type {
   AggregationResponseDto,
   FieldMetadataDto,
@@ -115,6 +118,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [Filter | null] }>()
+const chartContainer = ref<HTMLElement | null>(null)
+const { width } = useElementSize(chartContainer)
+const canRenderChart = computed(() => width.value > 0)
 
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()

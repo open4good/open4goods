@@ -10,6 +10,7 @@
  * All static texts must be i18n localised
  * You will heavily respect coding guidelines defined in the AGENTS.md
  * After coding tasks, you will check conformity with pnpm build, pnpm lint and pnpm test on reasonable related tests file
+ * Test with screenshots if possible
 
 # SCOPE
  * You will craft only in the /frontend project

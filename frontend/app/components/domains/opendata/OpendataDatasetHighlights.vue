@@ -52,12 +52,11 @@ const handleSubtitleClick = (event: MouseEvent) => {
           {{ title }}
         </h2>
         <!-- eslint-disable vue/no-v-html -->
-        <p
-          v-if="subtitle"
-          class="opendata-datasets__subtitle subtitle-text"
-          @click="handleSubtitleClick"
-          v-html="subtitle"
-        ></p>
+        <div class="opendata-datasets__subtitle subtitle-text">
+          <slot name="subtitle">
+            <p v-if="subtitle" @click="handleSubtitleClick" v-html="subtitle" />
+          </slot>
+        </div>
         <!-- eslint-enable vue/no-v-html -->
       </div>
 

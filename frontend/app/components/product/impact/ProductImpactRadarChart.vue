@@ -1,8 +1,13 @@
 <template>
-  <article class="impact-radar" role="img" :aria-label="ariaLabel">
+  <article
+    ref="chartContainer"
+    class="impact-radar"
+    role="img"
+    :aria-label="ariaLabel"
+  >
     <ClientOnly>
       <VueECharts
-        v-if="option"
+        v-if="option && canRenderChart"
         :option="option"
         :autoresize="true"
         class="impact-radar__chart"
@@ -15,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
+import { useElementSize } from '@vueuse/core'
 import type { EChartsOption } from 'echarts'
 import { useI18n } from 'vue-i18n'
 import { ensureECharts } from '~/utils/echarts-loader'
@@ -41,6 +47,10 @@ const props = defineProps<{
   series: RadarSeriesEntry[]
   productName: string
 }>()
+
+const chartContainer = ref<HTMLElement | null>(null)
+const { width, height } = useElementSize(chartContainer)
+const canRenderChart = computed(() => width.value > 0 && height.value > 0)
 
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {

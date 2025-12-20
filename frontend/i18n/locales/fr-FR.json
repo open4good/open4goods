@@ -1403,7 +1403,7 @@
           "title": "Chiffres clés du dataset ISBN"
         }
       },
-      "subtitle": "Les deux exports sont mis à jour chaque semaine et publiés sous licence <a href=\"#{licenseId}\" data-scroll-target=\"#{licenseId}\">ODbL</a>.",
+      "subtitle": "Les deux exports sont mis à jour chaque semaine et publiés sous licence {license}.",
       "title": "Deux jeux de données"
     },
     "errors": {
@@ -1442,7 +1442,7 @@
         "description": "L’open data, ou « données ouvertes », désigne des informations rendues disponibles librement par des organismes pour que chacun puisse les consulter, les utiliser et les réutiliser. L’objectif est de favoriser la transparence et la connaissance, de mieux comprendre le monde qui nous entoure et de permettre à des citoyens, associations ou entreprises de créer de nouvelles idées et services utiles.",
         "title": "Open Da... Quoi ?"
       },
-      "subtitle": "Nous sommes des geeks généreux et partageurs. Pas de secrets chez nous.<br/> Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
+      "subtitle": "Nous sommes des geeks généreux et partageurs. Pas de secrets chez nous.\n Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
       "title": "Open Data"
     },
     "license": {
@@ -1451,7 +1451,7 @@
         "href": "https://spdx.org/licenses/ODbL-1.0.html#licenseText",
         "label": "Consulter la licence ODbL"
       },
-      "description": "La licence ODbL (Open Database License) permet à tout le monde d’utiliser librement une base de données : la consulter, la modifier et la redistribuer, même à des fins commerciales. <br/>Son but est clair : garantir que les données restent ouvertes et accessibles à tous, aujourd’hui comme demain.<br/> Vous pouvez donc utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
+      "description": "La licence ODbL (Open Database License) permet à tout le monde d’utiliser librement une base de données : la consulter, la modifier et la redistribuer, même à des fins commerciales. \nSon but est clair : garantir que les données restent ouvertes et accessibles à tous, aujourd’hui comme demain.\n Vous pouvez donc utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
       "title": "Open Database Licence (ODbL)"
     },
     "loading": "Chargement des informations opendata…",

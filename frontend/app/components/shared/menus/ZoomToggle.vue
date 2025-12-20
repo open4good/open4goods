@@ -1,25 +1,30 @@
 <template>
-  <v-btn
-    class="zoom-toggle ms-2"
-    :color="isZoomed ? 'primary' : 'default'"
-    :variant="isZoomed ? 'flat' : 'text'"
-    icon
-    :density="density"
-    :size="size"
-    :data-testid="testId"
-    :aria-label="t('siteIdentity.menu.zoom.label')"
-    :aria-pressed="isZoomed"
-    @click="toggleZoom"
-  >
-    <v-icon :icon="isZoomed ? 'mdi-face-woman' : 'mdi-face-woman-outline'" />
-    <v-tooltip activator="parent" location="bottom">
-      {{
-        isZoomed
-          ? t('siteIdentity.menu.zoom.reset')
-          : t('siteIdentity.menu.zoom.activate')
-      }}
-    </v-tooltip>
-  </v-btn>
+  <v-tooltip location="bottom">
+    <template #activator="{ props: tooltipProps }">
+      <v-btn
+        v-bind="tooltipProps"
+        class="zoom-toggle ms-2"
+        :color="isZoomed ? 'primary' : 'default'"
+        :variant="isZoomed ? 'flat' : 'text'"
+        icon
+        :density="density"
+        :size="size"
+        :data-testid="testId"
+        :aria-label="t('siteIdentity.menu.zoom.label')"
+        :aria-pressed="isZoomed"
+        @click="toggleZoom"
+      >
+        <v-icon
+          :icon="isZoomed ? 'mdi-face-woman' : 'mdi-face-woman-outline'"
+        />
+      </v-btn>
+    </template>
+    {{
+      isZoomed
+        ? t('siteIdentity.menu.zoom.reset')
+        : t('siteIdentity.menu.zoom.activate')
+    }}
+  </v-tooltip>
 </template>
 
 <script setup lang="ts">
