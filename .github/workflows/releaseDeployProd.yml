@@ -1,10 +1,16 @@
 name: 🚀 Release
+
 on:
   push:
     tags:
-      - '*'
+      - "*"
   workflow_dispatch:
     inputs:
+      ref:
+        description: "Tag/branch/SHA à déployer (ex: v1.2.3). Laisse 'main' pour la branche principale."
+        required: true
+        default: "main"
+        type: string
       mode:
         description: "Mode d'exécution (release ou test)"
         required: false
@@ -14,17 +20,15 @@ on:
           - release
           - test
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: write
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 concurrency:
   group: "pages"
   cancel-in-progress: false
-  
+
 jobs:
   release:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
@@ -33,19 +37,25 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     name: prod-release-deploy
     runs-on: ubuntu-latest
+
     env:
       MODE: ${{ inputs.mode || 'release' }}
+
     concurrency:
       group: deploy-prod
       cancel-in-progress: true
-    steps:
 
+    steps:
       ############################################
-      # Checkout Main Repository
+      # Checkout Main Repository (or chosen ref)
       ###########################################
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          # If manual run: deploy the chosen ref (tag/branch/SHA).
+          # If tag push run: deploy the tag that triggered the workflow.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
 
       ############################################
       # Cache Maven Dependencies
@@ -59,17 +69,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-
-
       ############################################
-      # Set up JDK 21 and Maven Cache
+      # Set up JDK 25
       ###########################################
       - name: Set up JDK 25
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: '25'
-          cache: 'maven'  # Link this to the previously cached maven dependencies
+          distribution: "temurin"
+          java-version: "25"
+          cache: "maven"
 
       ############################################
       # Set up Maven Repositories
@@ -83,14 +91,9 @@ jobs:
                 "id": "xwiki-releases",
                 "name": "xwiki-releases",
                 "url": "https://maven.xwiki.org/releases/",
-                "snapshots": {
-                  "enabled": false
-                }
+                "snapshots": { "enabled": false }
               }
             ]
-
-            
-     
 
       ############################################
       # Build Maven site and Artifacts
@@ -99,11 +102,9 @@ jobs:
         if: env.MODE != 'test'
         run: mvn --batch-mode clean install site site:stage
 
-
       ############################################
-      # Frontend
+      # Frontend (Nuxt SSR)
       ###########################################
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -123,6 +124,7 @@ jobs:
           MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           APP_ENV: production
+
       - name: Deploy SSR output to Beta server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
@@ -144,55 +146,38 @@ jobs:
           script: sh /opt/open4goods/bin/publish-frontend.sh prod
 
       ############################################
-      # Create the Release Changelog
-      # PR Oriented
+      # Create the Release Changelog (PR oriented)
       ###########################################
       - name: Build Changelog
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v6.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           fetchReleaseInformation: true
           outputFile: PR-CHANGELOG.txt
           configurationJson: |
             {
               "template": "## 🥳 Welcome to this new version !\nWe hope you will appreciate the following improvements, this release <b>covers #{{DAYS_SINCE}} day</b> (or night) of work, starting the #{{FROM_TAG_DATE}} and ending at #{{TO_TAG_DATE}}. You may want to see the <b>#{{TO_TAG}}</b> release in action here : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul>\n### File changes\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li> </ul>\n\n## Included Pull Requests\n#{{CHANGELOG}}\n\n### ❓ Other (#{{UNCATEGORIZED_COUNT}})\n\n#{{UNCATEGORIZED}}",
-              "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",            
+              "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
               "empty_template": "Nothing",
-              
               "categories": [
-                 {
-                    "title": "### 💡 Features",
-                    "labels": ["feature"]
-                },
-                {
-                    "title": "### 🔥 Bug Fixes",
-                    "labels": ["bug"]
-                },
-                {
-                    "title": "### ⚡ Performance",
-                    "labels": ["performance"]
-                },                
-                {
-                    "title": "### 💬 Documentation",
-                    "labels": ["documentation"]
-                },
-                {
-                    "title": "### 📦 Dependencies",
-                    "labels": ["dependencies"]
-                }
+                 { "title": "### 💡 Features",      "labels": ["feature"] },
+                 { "title": "### 🔥 Bug Fixes",     "labels": ["bug"] },
+                 { "title": "### ⚡ Performance",   "labels": ["performance"] },
+                 { "title": "### 💬 Documentation", "labels": ["documentation"] },
+                 { "title": "### 📦 Dependencies",  "labels": ["dependencies"] }
               ]
-            }     
+            }
 
       ############################################
-      # Create the Release Changelog (Push Oriented)
+      # Create the Release Changelog (push oriented)
       ###########################################
       - name: Build Changelog Push Oriented
         id: build_changelog_push
         uses: mikepenz/release-changelog-builder-action@v6.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           fetchReleaseInformation: true
           outputFile: PUSH-CHANGELOG.txt
@@ -203,7 +188,7 @@ jobs:
               "pr_template": "#{{TITLE}} (#{{AUTHOR}})",
               "empty_template": "Nothing",
               "categories": []
-            }     
+            }
 
       ############################################
       # Merge the Backlogs
@@ -229,8 +214,6 @@ jobs:
           mkdir -p "${NOTE_DIR}"
           cp PR-CHANGELOG.txt "${NOTE_DIR}/${VERSION}.md"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "frontend/Release/${VERSION}.md"
 
           if git diff --cached --quiet; then
@@ -295,7 +278,6 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
 
-          
       - name: Deploy front-api to Qualification Server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
@@ -305,9 +287,8 @@ jobs:
           SOURCE: "/front-api/target/front-api-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"  
-      
-                
+          TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"
+
       ############################################
       # Restart Applications
       ###########################################
@@ -327,7 +308,7 @@ jobs:
         if: env.MODE != 'test'
         uses: actions/configure-pages@v5
 
-      - name: Merge Site
+      - name: Merge Site (for Pages)
         if: env.MODE != 'test'
         run: cp -r target/staging/* src/main/site/maven/
 
@@ -335,11 +316,9 @@ jobs:
         if: env.MODE != 'test'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: './src/main/site/'
+          path: "./src/main/site/"
 
       - name: Deploy to GitHub Pages
         if: env.MODE != 'test'
         id: deployment
         uses: actions/deploy-pages@v4
-      
-
