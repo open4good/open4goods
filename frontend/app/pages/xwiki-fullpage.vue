@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import XwikiFullPageRenderer from '~/components/cms/XwikiFullPageRenderer.vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
 const route = useRoute()
+
+definePageMeta({ lazy: true })
+
+const XwikiFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+)
 
 const matchedRoute = computed(() => matchLocalizedWikiRouteByPath(route.path))
 

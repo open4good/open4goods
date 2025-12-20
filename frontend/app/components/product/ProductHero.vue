@@ -150,11 +150,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, defineAsyncComponent, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import ProductHeroGallery from '~/components/product/ProductHeroGallery.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import {
   MAX_COMPARE_ITEMS,
@@ -177,6 +176,10 @@ export interface ProductHeroBreadcrumb {
   title: string
   link?: string
 }
+
+const ProductHeroGallery = defineAsyncComponent(
+  () => import('~/components/product/ProductHeroGallery.vue')
+)
 
 const props = defineProps({
   product: {
