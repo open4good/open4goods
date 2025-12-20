@@ -86,8 +86,16 @@
     color: #ffffff!important
 
 :root.accessibility-layout.accessibility-layout--wide
+    --accessibility-wide-gap: clamp(24px, 4vw, 40px)
+
     .v-main
         :is(.v-container, .container, .cms-page__container--container)
-            max-width: min(1480px, calc(100% - 48px))
+            max-width: calc(100% - (var(--accessibility-wide-gap) * 2))
             width: 100%
-            padding-inline: clamp(16px, 3vw, 32px)
+            margin-inline: auto
+            padding-inline: var(--accessibility-wide-gap)
+
+        :is(.home-section__inner, .home-solution__inner, .home-card-showcase__container)
+            max-width: calc(100% - (var(--accessibility-wide-gap) * 2))
+            width: 100%
+            margin-inline: auto

@@ -14,9 +14,7 @@
         :aria-pressed="isZoomed"
         @click="toggleZoom"
       >
-        <v-icon
-          :icon="isZoomed ? 'mdi-face-woman' : 'mdi-face-woman-outline'"
-        />
+        <v-icon icon="mdi-sunglasses" />
       </v-btn>
     </template>
     {{
