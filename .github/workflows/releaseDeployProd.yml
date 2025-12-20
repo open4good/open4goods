@@ -247,7 +247,7 @@ jobs:
       # Create the GitHub Release
       ###########################################
       - name: Create Release
-        if: env.MODE != 'test'
+        if: env.MODE != 'test' && startsWith(github.ref, 'refs/tags/')
         uses: mikepenz/action-gh-release@v1
         with:
           body_path: ${{ github.workspace }}/PR-CHANGELOG.txt
