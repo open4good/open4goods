@@ -16,7 +16,7 @@ const markdown = new MarkdownIt({
 const DOMPurify = createDOMPurify(new JSDOM('').window as unknown as DOMWindow)
 
 const PROJECT_ROOT = path.resolve(process.cwd())
-const RELEASES_DIRECTORY = path.join(PROJECT_ROOT, 'Release')
+const RELEASES_DIRECTORY = path.join(PROJECT_ROOT, 'artifacts', 'releases')
 
 let cachedReleaseNotes: ReleaseNote[] | null = null
 
