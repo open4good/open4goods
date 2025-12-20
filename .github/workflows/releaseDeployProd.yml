@@ -25,6 +25,7 @@ permissions:
   pages: write
   id-token: write
 
+# Concurrency globale (GitHub Pages)
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -32,47 +33,73 @@ concurrency:
 jobs:
   release:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    name: prod-release-deploy
+    runs-on: ubuntu-latest
+
     environment:
       name: test-github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    name: prod-release-deploy
-    runs-on: ubuntu-latest
 
     env:
       MODE: ${{ inputs.mode || 'release' }}
 
+    # 🧨 Tu as demandé cancel-in-progress: true pour la prod.
+    # Attention: annuler un déploiement en cours peut laisser un état intermédiaire côté serveur (à surveiller).
     concurrency:
       group: deploy-prod
       cancel-in-progress: true
 
     steps:
       ############################################
-      # Checkout Main Repository (or chosen ref)
-      ###########################################
+      # 🧭 Resolve ref & versioning
+      # 1) Corrige: github.ref_name != inputs.ref en workflow_dispatch
+      # - checkout_ref: ref réellement déployée (inputs.ref, ou tag trigger)
+      # - version: nom humain (sans refs/*)
+      # - safe_version: nom safe pour fichiers (remplace / et espaces)
+      ############################################
+      - name: 🧭 Resolve refs & version
+        id: meta
+        shell: bash
+        env:
+          RAW_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+        run: |
+          set -euo pipefail
+
+          echo "checkout_ref=${RAW_REF}" >> "$GITHUB_OUTPUT"
+
+          REF_NAME="${RAW_REF#refs/heads/}"
+          REF_NAME="${REF_NAME#refs/tags/}"
+
+          # Si SHA complet, raccourci
+          if [[ "${REF_NAME}" =~ ^[0-9a-f]{40}$ ]]; then
+            REF_NAME="${REF_NAME:0:12}"
+          fi
+
+          SAFE_VERSION="$(echo "${REF_NAME}" | tr '/ ' '--')"
+
+          echo "version=${REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "safe_version=${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "is_tag=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_tag=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      ############################################
+      # Checkout repository (ref résolue)
+      ############################################
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # If manual run: deploy the chosen ref (tag/branch/SHA).
-          # If tag push run: deploy the tag that triggered the workflow.
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+          ref: ${{ steps.meta.outputs.checkout_ref }}
 
       ############################################
-      # Cache Maven Dependencies
-      ###########################################
-      - name: Cache Maven Dependencies
-        id: cache-maven
-        uses: actions/cache@v5
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
+      # Java / Maven
+      # - Cache unique Maven via setup-java (suppression du doublon actions/cache)
       ############################################
-      # Set up JDK 25
-      ###########################################
-      - name: Set up JDK 25
+      - name: Set up JDK 25 (Temurin) + Maven cache
         uses: actions/setup-java@v5
         with:
           distribution: "temurin"
@@ -80,8 +107,8 @@ jobs:
           cache: "maven"
 
       ############################################
-      # Set up Maven Repositories
-      ###########################################
+      # Maven settings / repositories
+      ############################################
       - name: Set up Maven Repositories
         uses: s4u/maven-settings-action@v4.0.0
         with:
@@ -96,16 +123,30 @@ jobs:
             ]
 
       ############################################
-      # Build Maven site and Artifacts
-      ###########################################
-      - name: Build Maven Site
+      # Maven build (optimisé)
+      # - Sépare build/test (verify) et génération du site
+      # - Ajoute -ntp (logs propres) et -T 1C (parallèle)
+      ############################################
+      - name: 🧱 Build & Test (Maven)
         if: env.MODE != 'test'
-        run: mvn --batch-mode clean install site site:stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mvn -B -ntp -T 1C clean verify
+
+      - name: 🌐 Generate Maven Site (stage)
+        if: env.MODE != 'test'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # On évite de relancer des tests ici (déjà faits dans verify)
+          mvn -B -ntp -T 1C -DskipTests site site:stage
 
       - name: Collect backend artifacts
         if: env.MODE != 'test'
+        shell: bash
         run: |
-          set -eo pipefail
+          set -euo pipefail
           ARTIFACT_ROOT="artifacts"
           MAVEN_SITE_SRC="target/staging"
           JACOCO_SRC="target/site/jacoco"
@@ -127,8 +168,18 @@ jobs:
 
       ############################################
       # Frontend (Nuxt SSR)
-      ###########################################
+      # - Setup Node 24 + cache pnpm (gain énorme)
+      ############################################
+      - name: Setup Node 24 (with pnpm cache)
+        if: env.MODE != 'test'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
       - name: Setup pnpm
+        if: env.MODE != 'test'
         uses: pnpm/action-setup@v4
         with:
           version: 10.26.1
@@ -174,66 +225,136 @@ jobs:
           script: sh /opt/open4goods/bin/publish-frontend.sh prod
 
       ############################################
-      # Create the Release Changelog (PR oriented)
-      ###########################################
-      - name: Build Changelog
+      # 📝 Release Notes (Markdown)
+      # - PRs en table + cliquables
+      # - Tickets "#1234" cliquables dans les titres
+      # - Catégories via label_extractor (conventional commits)
+      # - Patch management en dernier
+      # - "Other" dans un <details>
+      ############################################
+      - name: 📝 Build Release Notes (Markdown)
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v6.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           fetchReleaseInformation: true
-          outputFile: PR-CHANGELOG.txt
+          outputFile: RELEASE-NOTES.md
           configurationJson: |
             {
-              "template": "## 🥳 Welcome to this new version !\nWe hope you will appreciate the following improvements, this release <b>covers #{{DAYS_SINCE}} day</b> (or night) of work, starting the #{{FROM_TAG_DATE}} and ending at #{{TO_TAG_DATE}}. You may want to see the <b>#{{TO_TAG}}</b> release in action here : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul>\n### File changes\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li> </ul>\n\n## Included Pull Requests\n#{{CHANGELOG}}\n\n### ❓ Other (#{{UNCATEGORIZED_COUNT}})\n\n#{{UNCATEGORIZED}}",
-              "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
+              "sort": { "order": "ASC", "on_property": "mergedAt" },
+
+              "template": "## 🥳 Welcome to **#{{TO_TAG}}**\n\nThis release covers **#{{DAYS_SINCE}} day(s)** of work, from **#{{FROM_TAG_DATE}}** to **#{{TO_TAG_DATE}}**.\n\n🔗 Links:\n- nudger.fr: https://nudger.fr\n- documentation: https://open4good.github.io/open4goods/\n\n### 📦 Stats\n- Diff: [compare](#{{RELEASE_DIFF}})\n- Changed files: **#{{CHANGED_FILES}}**\n- Commits: **#{{COMMITS}}**\n- Additions: **#{{ADDITIONS}}** / Deletions: **#{{DELETIONS}}**\n\n---\n\n#{{CHANGELOG}}\n\n<details>\n<summary>🙈 Other changes (#{{UNCATEGORIZED_COUNT}})</summary>\n\n| PR | Title | Author |\n|---:|---|---|\n#{{UNCATEGORIZED}}\n\n</details>\n",
+
+              "pr_template": "| [PR #{{NUMBER}}](#{{URL}}) | #{{TITLE}} | @#{{AUTHOR}} |",
               "empty_template": "Nothing",
+
+              "label_extractor": [
+                {
+                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\\\([^\\\\)]*\\\\))?(!)?:",
+                  "on_property": "title",
+                  "target": "$1",
+                  "method": "match"
+                },
+                {
+                  "pattern": "^(chore|fix)\\\\(deps\\\\):",
+                  "on_property": "title",
+                  "target": "deps",
+                  "method": "match"
+                }
+              ],
+
+              "transformers": [
+                {
+                  "pattern": "(^|[\\\\s\\\\(])#(\\\\d+)\\\\b",
+                  "target": "$1[#$2](${{ github.server_url }}/${{ github.repository }}/issues/$2)",
+                  "method": "replaceAll"
+                }
+              ],
+
               "categories": [
-                 { "title": "### 💡 Features",      "labels": ["feature"] },
-                 { "title": "### 🔥 Bug Fixes",     "labels": ["bug"] },
-                 { "title": "### ⚡ Performance",   "labels": ["performance"] },
-                 { "title": "### 💬 Documentation", "labels": ["documentation"] },
-                 { "title": "### 📦 Dependencies",  "labels": ["dependencies"] }
+                {
+                  "title": "### ✨ Features\n\n| PR | Title | Author |\n|---:|---|---|",
+                  "labels": ["feat", "feature"]
+                },
+                {
+                  "title": "### 🐛 Bug Fixes\n\n| PR | Title | Author |\n|---:|---|---|",
+                  "labels": ["fix", "bug"]
+                },
+                {
+                  "title": "### ⚡ Performance\n\n| PR | Title | Author |\n|---:|---|---|",
+                  "labels": ["perf", "performance"]
+                },
+                {
+                  "title": "### 📚 Documentation\n\n| PR | Title | Author |\n|---:|---|---|",
+                  "labels": ["docs", "documentation"]
+                },
+                {
+                  "title": "### 🧹 Maintenance\n\n| PR | Title | Author |\n|---:|---|---|",
+                  "labels": ["chore", "refactor", "ci", "build", "test", "style"]
+                },
+                {
+                  "title": "### 🧰 Patch management\n\n| PR | Title | Author |\n|---:|---|---|",
+                  "labels": ["deps", "dependencies", "patch-management"]
+                }
               ]
             }
 
       ############################################
-      # Create the Release Changelog (push oriented)
-      ###########################################
-      - name: Build Changelog Push Oriented
-        id: build_changelog_push
-        uses: mikepenz/release-changelog-builder-action@v6.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          fetchReleaseInformation: true
-          outputFile: PUSH-CHANGELOG.txt
-          commitMode: true
-          configurationJson: |
-            {
-              "template": "## 🙈 Direct commits\n#{{UNCATEGORIZED}}",
-              "pr_template": "#{{TITLE}} (#{{AUTHOR}})",
-              "empty_template": "Nothing",
-              "categories": []
-            }
-
+      # 🙈 Direct commits (en plus, dans un <details>)
+      # - Tu as confirmé "Direct commits : oui"
+      # - On les ajoute après génération du RELEASE-NOTES.md
       ############################################
-      # Merge the Backlogs
-      ###########################################
-      - name: Merge Site
-        run: cat PUSH-CHANGELOG.txt >> PR-CHANGELOG.txt
+      - name: 🙈 Append direct commits (details)
+        if: env.MODE != 'test'
+        shell: bash
+        env:
+          FROM_TAG: ${{ steps.build_changelog.outputs.fromTag }}
+          TO_TAG: ${{ steps.build_changelog.outputs.toTag }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${FROM_TAG}" || -z "${TO_TAG}" ]]; then
+            echo "No tag range available (fromTag/toTag empty). Skipping direct commits section."
+            exit 0
+          fi
+
+          RANGE="${FROM_TAG}...${TO_TAG}"
+
+          # Liste de commits (inclut merges). Si tu préfères exclure merges: ajoute --no-merges
+          git log --pretty=format:"- %s (%an)" "${RANGE}" > DIRECT-COMMITS.md || true
+
+          if [[ ! -s DIRECT-COMMITS.md ]]; then
+            echo "No commits found in range ${RANGE}; skipping."
+            exit 0
+          fi
+
+          {
+            echo ""
+            echo "<details>"
+            echo "<summary>🙈 Direct commits</summary>"
+            echo ""
+            cat DIRECT-COMMITS.md
+            echo ""
+            echo "</details>"
+            echo ""
+          } >> RELEASE-NOTES.md
 
       ############################################
       # Persist Release Notes to Repository
-      ###########################################
+      # - Utilise safe_version (corrige mismatch workflow_dispatch)
+      ############################################
       - name: Publish release notes to frontend/artifacts/releases
+        if: env.MODE != 'test'
         env:
-          VERSION: ${{ github.ref_name }}
+          VERSION_SAFE: ${{ steps.meta.outputs.safe_version }}
+          VERSION_DISPLAY: ${{ steps.meta.outputs.version }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref_name }}
+          DEPLOY_REF: ${{ steps.meta.outputs.version }}
+        shell: bash
         run: |
-          set -eo pipefail
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -261,9 +382,9 @@ jobs:
             fi
 
             mkdir -p "${NOTE_DIR}"
-            cp PR-CHANGELOG.txt "${NOTE_DIR}/${VERSION}.md"
+            cp RELEASE-NOTES.md "${NOTE_DIR}/${VERSION_SAFE}.md"
 
-            git add "${NOTE_DIR}/${VERSION}.md"
+            git add "${NOTE_DIR}/${VERSION_SAFE}.md"
 
             if git diff --cached --quiet; then
               echo "Release notes already present on ${target_branch}; nothing to commit."
@@ -271,7 +392,7 @@ jobs:
               return
             fi
 
-            git commit -m "chore: add release notes for ${VERSION}"
+            git commit -m "chore: add release notes for ${VERSION_DISPLAY}"
             git push origin "${target_branch}"
           }
 
@@ -283,32 +404,15 @@ jobs:
 
           git checkout "${DEFAULT_BRANCH}"
 
-          if [[ ! "${GITHUB_REF}" =~ ^refs/tags/ ]]; then
-            echo "Skipping tag creation because workflow was not triggered by a tag (${GITHUB_REF})."
-            exit 0
-          fi
-
-          if [[ "${VERSION}" == "${DEFAULT_BRANCH}" ]]; then
-            echo "Skipping tag creation because VERSION matches the default branch (${DEFAULT_BRANCH})."
-            exit 0
-          fi
-
-          if git ls-remote --exit-code --tags origin "${VERSION}" >/dev/null 2>&1; then
-            echo "Tag ${VERSION} already exists on origin; not updating it."
-            exit 0
-          fi
-
-          git tag "${VERSION}"
-          git push origin "refs/tags/${VERSION}"
-
       - name: Commit deployment artifacts
         if: env.MODE != 'test'
         env:
-          VERSION: ${{ github.ref_name }}
-          DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref_name }}
+          VERSION_DISPLAY: ${{ steps.meta.outputs.version }}
+          DEPLOY_REF: ${{ steps.meta.outputs.version }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
         run: |
-          set -eo pipefail
+          set -euo pipefail
 
           if [[ -z "${DEPLOY_REF}" ]]; then
             echo "No deployment ref provided; skipping artifact commit."
@@ -348,75 +452,75 @@ jobs:
             exit 0
           fi
 
-          git commit -m "chore: update deployment artifacts for ${VERSION}"
+          git commit -m "chore: update deployment artifacts for ${VERSION_DISPLAY}"
           git push origin "${DEPLOY_REF}"
 
       ############################################
-      # Create the GitHub Release
-      ###########################################
+      # Create the GitHub Release (tag only)
+      ############################################
       - name: Create Release
         if: env.MODE != 'test' && startsWith(github.ref, 'refs/tags/')
         uses: mikepenz/action-gh-release@v1
         with:
-          body_path: ${{ github.workspace }}/PR-CHANGELOG.txt
-          body: ${{ steps.build_changelog.outputs.changelog }}
+          body_path: ${{ github.workspace }}/RELEASE-NOTES.md
           files: |
             LICENSE
-            ./api/target/api-0.0.1-SNAPSHOT.jar
-            ./ui/target/ui-0.0.1-SNAPSHOT.jar
-            ./target/staging/taglist/taglist.xml
+            api/target/api-0.0.1-SNAPSHOT.jar
+            ui/target/ui-0.0.1-SNAPSHOT.jar
+            target/staging/taglist/taglist.xml
 
       ############################################
       # Deploy JARs to Production Server
-      ###########################################
-      - name: Deploy SBADMIN to Server
+      # 2) Corrige: SOURCE absolus ("/...") => relatifs ("...")
+      ############################################
+      - name: 🚚 Deploy SBADMIN to Server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/admin/target/admin-0.0.1-SNAPSHOT.jar"
+          SOURCE: "admin/target/admin-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"
 
-      - name: Deploy API to Server
+      - name: 🚚 Deploy API to Server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/api/target/api-0.0.1-SNAPSHOT.jar"
+          SOURCE: "api/target/api-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
 
-      - name: Deploy UI (static server) to Production Server
+      - name: 🚚 Deploy UI (static server) to Production Server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/ui/target/ui-0.0.1-SNAPSHOT.jar"
+          SOURCE: "ui/target/ui-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
 
-      - name: Deploy front-api to Qualification Server
+      - name: 🚚 Deploy front-api to Qualification Server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/front-api/target/front-api-0.0.1-SNAPSHOT.jar"
+          SOURCE: "front-api/target/front-api-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"
 
       ############################################
       # Restart Applications
-      ###########################################
-      - name: Start Applications
+      ############################################
+      - name: 🔁 Start Applications
         if: env.MODE != 'test'
         uses: appleboy/ssh-action@v1.2.4
         with:
@@ -427,20 +531,32 @@ jobs:
 
       ############################################
       # GitHub Pages Deployment
-      ###########################################
+      # - staging propre (pages-dist), sans toucher src/main/site/
+      ############################################
       - name: Setup GitHub Pages
         if: env.MODE != 'test'
         uses: actions/configure-pages@v5
 
-      - name: Merge Site (for Pages)
+      - name: Prepare Pages content
         if: env.MODE != 'test'
-        run: cp -r target/staging/* src/main/site/maven/
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf pages-dist
+          mkdir -p pages-dist
 
-      - name: Upload Custom Site to GitHub Pages
+          # Contenu du site "source"
+          rsync -a --delete src/main/site/ pages-dist/
+
+          # Maven site généré sous /maven/
+          mkdir -p pages-dist/maven
+          rsync -a --delete target/staging/ pages-dist/maven/
+
+      - name: Upload Site to GitHub Pages
         if: env.MODE != 'test'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: "./src/main/site/"
+          path: "./pages-dist"
 
       - name: Deploy to GitHub Pages
         if: env.MODE != 'test'
