@@ -165,8 +165,6 @@ import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigat
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
-import ProductDocumentationSection from '~/components/product/ProductDocumentationSection.vue'
-import ProductAdminSection from '~/components/product/ProductAdminSection.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -185,6 +183,12 @@ const ProductPriceSection = defineAsyncComponent(
 )
 const ProductAlternatives = defineAsyncComponent(
   () => import('~/components/product/impact/ProductAlternatives.vue')
+)
+const ProductDocumentationSection = defineAsyncComponent(
+  () => import('~/components/product/ProductDocumentationSection.vue')
+)
+const ProductAdminSection = defineAsyncComponent(
+  () => import('~/components/product/ProductAdminSection.vue')
 )
 
 const route = useRoute()

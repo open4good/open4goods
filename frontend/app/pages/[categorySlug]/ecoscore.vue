@@ -702,6 +702,8 @@ import { loadHighlightJs } from '~/utils/highlight-loader'
 import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
 import { useCategories } from '~/composables/categories/useCategories'
 
+definePageMeta({ lazy: true })
+
 const route = useRoute()
 const requestURL = useRequestURL()
 const { t, locale } = useI18n()
