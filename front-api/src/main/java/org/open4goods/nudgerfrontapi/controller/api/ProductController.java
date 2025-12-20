@@ -468,6 +468,7 @@ public class ProductController {
         VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
         ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
         Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
+        augmentWithAttributesConfig(allowedFilters, config);
         augmentWithAggregatedScores(allowedFilters, config);
         Set<String> allowedSorts = collectGlobalSortMappings();
         if (hasVertical) {
@@ -487,6 +488,31 @@ public class ProductController {
         addFieldMappings(allowed, fieldOptions.impact());
         addFieldMappings(allowed, fieldOptions.technical());
         return allowed;
+    }
+
+    /**
+     * Add every attribute declared in the vertical configuration to the list of allowed
+     * filter mappings, even when the attribute is not explicitly listed as a filter. This
+     * keeps the validation layer aligned with the vertical definition so attributes such
+     * as {@code BRAND_SUSTAINABILITY} remain usable as filters.
+     *
+     * @param target collection of allowed filter mappings to update
+     * @param config vertical configuration providing attribute definitions
+     */
+    private void augmentWithAttributesConfig(Set<String> target, VerticalConfig config) {
+        LOGGER.info("Entering augmentWithAttributesConfig(targetSize={}, config={})",
+                target != null ? target.size() : 0, config);
+        if (target == null || config == null || config.getAttributesConfig() == null
+                || config.getAttributesConfig().getConfigs() == null) {
+            return;
+        }
+        for (AttributeConfig attribute : config.getAttributesConfig().getConfigs()) {
+            if (attribute == null || !StringUtils.hasText(attribute.getKey())) {
+                continue;
+            }
+            String mapping = toIndexedAttribute(attribute.getKey().trim(), config);
+            target.add(mapping);
+        }
     }
 
     /**
