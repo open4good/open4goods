@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
+    "coverage": "vitest run --coverage --coverage.reporter=lcov --coverage.reporter=html",
     "test:visual": "playwright test",
     "prepare:nuxt": "nuxt prepare",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -t ./config/openapi-templates -o shared/api-client --skip-validate-spec",

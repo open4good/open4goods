@@ -115,6 +115,11 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
+      - name: Run vitest coverage
+        if: env.MODE != 'test'
+        run: pnpm coverage
+        working-directory: frontend
+
       - name: Build Nuxt (Node SSR)
         if: env.MODE != 'test'
         run: pnpm build
@@ -208,22 +213,37 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout main
-          git pull --ff-only origin main
+          git checkout "${DEFAULT_BRANCH}"
+          git pull --ff-only origin "${DEFAULT_BRANCH}"
 
           NOTE_DIR="frontend/Release"
+          COVERAGE_SOURCE="frontend/coverage"
+          COVERAGE_TARGET_BASE="frontend/artifacts/vitest"
+          VERSION_DIR="${COVERAGE_TARGET_BASE}/${VERSION}"
+
           mkdir -p "${NOTE_DIR}"
           cp PR-CHANGELOG.txt "${NOTE_DIR}/${VERSION}.md"
 
+          if [ -d "${COVERAGE_SOURCE}" ]; then
+            mkdir -p "${COVERAGE_TARGET_BASE}"
+            rm -rf "${VERSION_DIR}"
+            cp -r "${COVERAGE_SOURCE}/." "${VERSION_DIR}"
+          else
+            echo "Coverage directory ${COVERAGE_SOURCE} not found; skipping copy."
+          fi
+
           git add "frontend/Release/${VERSION}.md"
+          if [ -d "${VERSION_DIR}" ]; then
+            git add "${VERSION_DIR}"
+          fi
 
           if git diff --cached --quiet; then
-            echo "Release notes already present; nothing to commit."
+            echo "Release artifacts already present; nothing to commit."
             exit 0
           fi
 
-          git commit -m "chore: add release notes for ${VERSION}"
-          git push origin main
+          git commit -m "chore: add release notes and vitest coverage for ${VERSION}"
+          git push origin "${DEFAULT_BRANCH}"
 
           if [[ ! "${GITHUB_REF}" =~ ^refs/tags/ ]]; then
             echo "Skipping tag creation because workflow was not triggered by a tag (${GITHUB_REF})."
