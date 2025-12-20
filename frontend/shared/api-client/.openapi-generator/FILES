@@ -11,6 +11,7 @@ apis/OpenDataApi.ts
 apis/PartnerApi.ts
 apis/ProductApi.ts
 apis/SearchApi.ts
+apis/ShareApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
 apis/index.ts
@@ -126,6 +127,10 @@ models/ScoringAggregationConfig.ts
 models/SearchSuggestCategoryDto.ts
 models/SearchSuggestProductDto.ts
 models/SearchSuggestResponseDto.ts
+models/ShareCandidateDto.ts
+models/ShareExtractionDto.ts
+models/ShareResolutionRequestDto.ts
+models/ShareResolutionResponseDto.ts
 models/SortOption.ts
 models/SortRequestDto.ts
 models/StaticPartnerDto.ts

@@ -2278,7 +2278,7 @@
       },
       "zoom": {
         "label": "Mode accessible",
-        "activate": "Zoomer (120%)",
+        "activate": "Plus simple. Plus gros.",
         "reset": "Désactiver le mode accessible"
       },
       "themeToggle": "Changer de thème",
