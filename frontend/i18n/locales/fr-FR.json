@@ -2124,6 +2124,9 @@
         "increase": "Hausse de {amount}",
         "stable": "Prix stable"
       }
+    },
+    "uncategorized": {
+      "noScore": "Pas d'évaluation sur ce produit !"
     }
   },
   "siteIdentity": {
@@ -2563,10 +2566,5 @@
   },
   "navigation": {
     "home": "Accueil"
-  },
-  "product": {
-    "uncategorized": {
-      "noScore": "Pas d'évaluation sur ce produit !"
-    }
   }
 }

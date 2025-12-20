@@ -2124,6 +2124,9 @@
         "increase": "Price increase of {amount}",
         "stable": "Price unchanged"
       }
+    },
+    "uncategorized": {
+      "noScore": "No evaluation available for this product!"
     }
   },
   "siteIdentity": {
@@ -2559,10 +2562,5 @@
   },
   "navigation": {
     "home": "Home"
-  },
-  "product": {
-    "uncategorized": {
-      "noScore": "No evaluation available for this product!"
-    }
   }
 }
