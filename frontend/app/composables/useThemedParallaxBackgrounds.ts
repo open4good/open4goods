@@ -3,26 +3,26 @@ import { useTheme } from 'vuetify'
 
 import {
   PARALLAX_SECTION_KEYS,
-  DEFAULT_PARALLAX_PACK,
   THEME_ASSETS_FALLBACK,
-  parallaxPacks,
+  DEFAULT_EVENT_PACK,
+  eventParallaxPacks,
   type ParallaxPackConfig,
-  type ParallaxPackName,
   type ParallaxLayerConfig,
   type ParallaxLayerSource,
   type ParallaxSectionKey,
+  type EventPackName,
 } from '~~/config/theme/assets'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 import { resolveThemedAssetUrl } from './useThemedAsset'
 
 const resolvePackForTheme = (
-  packName: ParallaxPackName,
+  packName: EventPackName,
   themeName: ThemeName,
-  fallbackPackName: ParallaxPackName = DEFAULT_PARALLAX_PACK
+  fallbackPackName: EventPackName = DEFAULT_EVENT_PACK
 ): ParallaxPackConfig => {
-  const themePack = parallaxPacks[themeName]?.[packName]
-  const commonPack = parallaxPacks.common?.[packName]
-  const fallbackPack = parallaxPacks[THEME_ASSETS_FALLBACK]?.[packName]
+  const themePack = eventParallaxPacks[themeName]?.[packName]
+  const commonPack = eventParallaxPacks.common?.[packName]
+  const fallbackPack = eventParallaxPacks[THEME_ASSETS_FALLBACK]?.[packName]
 
   if (themePack || commonPack || fallbackPack) {
     return themePack ?? commonPack ?? fallbackPack ?? {}
@@ -68,7 +68,7 @@ const resolveParallaxLayers = (
 }
 
 export const useThemedParallaxBackgrounds = (
-  packName: MaybeRef<ParallaxPackName>,
+  packName: MaybeRef<EventPackName>,
   dynamicOverrides?: MaybeRef<
     Partial<Record<ParallaxSectionKey, ParallaxLayerSource[]>>
   >
@@ -84,9 +84,9 @@ export const useThemedParallaxBackgrounds = (
     const overrides = unref(dynamicOverrides)
     const packConfig = resolvePackForTheme(activePackName, themeName.value)
     const fallbackPack =
-      activePackName === DEFAULT_PARALLAX_PACK
+      activePackName === DEFAULT_EVENT_PACK
         ? packConfig
-        : resolvePackForTheme(DEFAULT_PARALLAX_PACK, themeName.value)
+        : resolvePackForTheme(DEFAULT_EVENT_PACK, themeName.value)
 
     return PARALLAX_SECTION_KEYS.reduce<
       Record<ParallaxSectionKey, ParallaxLayerConfig[]>

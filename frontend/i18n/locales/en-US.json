@@ -43,6 +43,22 @@
     "hero": {
       "eyebrow": "Responsible shopping",
       "title": "Responsible choices aren’t a luxury",
+      "subtitles": {
+        "default": [
+          "Save time, stay true to your values. Compare effortlessly, choose freely.",
+          "Shop smarter without compromise. Nudger balances planet and price.",
+          "Find the responsible choice faster. Trusted data, transparent insights."
+        ],
+        "events": {
+          "christmas": [
+            "Give with intention this season. Compare prices and impact in one place.",
+            "Find gifts that respect your values and your budget."
+          ],
+          "sdg": [
+            "Small choices, global goals. Discover products aligned with the SDGs."
+          ]
+        }
+      },
       "subtitle": "Save time, stay true to your values. Compare effortlessly, choose freely.",
       "iconAlt": "Nudger PWA launcher icon",
       "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",

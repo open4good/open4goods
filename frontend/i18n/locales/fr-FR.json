@@ -43,6 +43,22 @@
     "hero": {
       "eyebrow": "",
       "title": "Acheter mieux. Sans dépenser plus.",
+      "subtitles": {
+        "default": [
+          "Gagne du temps. Choisis librement.",
+          "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
+          "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
+        ],
+        "events": {
+          "christmas": [
+            "Offre avec intention : compare prix et impact avant d'emballer.",
+            "Des idées cadeaux qui respectent tes valeurs et ton budget."
+          ],
+          "sdg": [
+            "Des choix du quotidien alignés sur les Objectifs de développement durable."
+          ]
+        }
+      },
       "subtitle": "Gagne du temps. Choisis librement.",
       "iconAlt": "Icône du lanceur de l'application Nudger",
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",

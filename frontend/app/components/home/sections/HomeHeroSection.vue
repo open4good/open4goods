@@ -9,6 +9,7 @@ import SearchSuggestField, {
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
+import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 
 type HeroHelperSegment = {
   text: string
@@ -18,6 +19,11 @@ type HeroHelperSegment = {
 type HeroHelperItem = {
   icon: string
   segments: HeroHelperSegment[]
+}
+
+type HeroSubtitleConfig = {
+  default?: unknown
+  events?: Record<string, unknown>
 }
 
 const isHeroImageLoaded = ref(false)
@@ -42,6 +48,7 @@ const emit = defineEmits<{
 const { t, tm, locale } = useI18n()
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
+const activeEventPack = useSeasonalEventPack()
 
 const partnersLinkPlaceholder = '{partnersLink}'
 
@@ -122,6 +129,16 @@ const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
     .filter((item): item is HeroHelperItem => item != null)
 }
 
+const normalizeHeroSubtitles = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
+    .filter(Boolean)
+}
+
 const heroHelperItems = computed<HeroHelperItem[]>(() => {
   const translatedItems = normalizeHelperItems(tm('home.hero.search.helpers'))
 
@@ -146,6 +163,63 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
       ],
     },
   ])
+})
+
+const heroSubtitleFallback = computed(() => {
+  const legacySubtitle = String(t('home.hero.subtitle')).trim()
+
+  if (!legacySubtitle || legacySubtitle === 'home.hero.subtitle') {
+    return ''
+  }
+
+  return legacySubtitle
+})
+
+const heroSubtitleOptions = computed<string[]>(() => {
+  const subtitles = tm('home.hero.subtitles') as unknown
+  const subtitleConfig: HeroSubtitleConfig | undefined =
+    !Array.isArray(subtitles) && typeof subtitles === 'object' && subtitles != null
+      ? (subtitles as HeroSubtitleConfig)
+      : undefined
+
+  const defaultSubtitles = normalizeHeroSubtitles(
+    Array.isArray(subtitles) ? subtitles : subtitleConfig?.default
+  )
+  const eventSubtitles = normalizeHeroSubtitles(
+    subtitleConfig?.events?.[activeEventPack.value]
+  )
+
+  const normalizedSubtitles =
+    eventSubtitles.length > 0 ? eventSubtitles : defaultSubtitles
+
+  if (normalizedSubtitles.length > 0) {
+    return normalizedSubtitles
+  }
+
+  return heroSubtitleFallback.value ? [heroSubtitleFallback.value] : []
+})
+
+const heroSubtitleSeed = useState<number | null>(
+  'home-hero-subtitle-seed',
+  () => null
+)
+
+if (heroSubtitleSeed.value == null) {
+  heroSubtitleSeed.value = Math.random()
+}
+
+const heroSubtitle = computed(() => {
+  const subtitles = heroSubtitleOptions.value
+  const fallback = heroSubtitleFallback.value
+
+  if (!subtitles.length) {
+    return fallback
+  }
+
+  const normalizedIndex = Math.floor(heroSubtitleSeed.value * subtitles.length) %
+    subtitles.length
+
+  return subtitles[normalizedIndex] ?? fallback
 })
 
 const normalizedPartnersCount = computed(() => {
@@ -407,7 +481,7 @@ useHead({
                   >
                     <div class="home-hero__context">
                       <p class="home-hero__subtitle">
-                        {{ t('home.hero.subtitle') }}
+                        {{ heroSubtitle }}
                       </p>
                       <div class="home-hero__helper-row">
                         <div class="home-hero__eyebrow-block">

@@ -1,7 +1,9 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { defineComponent, h, ref } from 'vue'
+import { computed, defineComponent, h, ref } from 'vue'
+import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
+import type { EventPackName } from '~~/config/theme/assets'
 
 const messages: Record<string, string> = {
   'home.hero.eyebrow': 'notre comparateur',
@@ -35,6 +37,30 @@ const helperItems = [
     ],
   },
 ]
+
+const subtitleCollections = {
+  default: ['Gagne du temps', 'Choisis librement'],
+  events: {
+    christmas: ['Noël responsable', 'Cadeaux en accord avec tes valeurs'],
+  },
+}
+
+const activeEventPack = ref<EventPackName>('default')
+
+const resetHeroSubtitleState = () => {
+  const nuxtApp = useNuxtApp()
+  const state = nuxtApp?.payload?.state
+
+  if (!state) {
+    return
+  }
+
+  Object.keys(state)
+    .filter(key => key.startsWith('home-hero-subtitle'))
+    .forEach(key => {
+      Reflect.deleteProperty(state as Record<string, unknown>, key)
+    })
+}
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -72,9 +98,17 @@ vi.mock('vue-i18n', () => ({
       })
     },
     tm: (key: string) =>
-      key === 'home.hero.search.helpers' ? helperItems : [],
+      key === 'home.hero.search.helpers'
+        ? helperItems
+        : key === 'home.hero.subtitles'
+          ? subtitleCollections
+          : [],
     locale: ref('fr-FR'),
   }),
+}))
+
+vi.mock('~~/app/composables/useSeasonalEventPack', () => ({
+  useSeasonalEventPack: () => computed(() => activeEventPack.value),
 }))
 
 const createStub = (tag: string, className = '') =>
@@ -119,8 +153,10 @@ const NuxtLinkStub = defineComponent({
   },
 })
 
-const mountComponent = async () =>
-  mountSuspended(HomeHeroSection, {
+const mountComponent = async () => {
+  resetHeroSubtitleState()
+
+  return mountSuspended(HomeHeroSection, {
     props: {
       searchQuery: '',
       minSuggestionQueryLength: 2,
@@ -142,8 +178,10 @@ const mountComponent = async () =>
       },
     },
   })
+}
 
 afterEach(() => {
+  activeEventPack.value = 'default'
   vi.restoreAllMocks()
 })
 
@@ -199,5 +237,57 @@ describe('HomeHeroSection', () => {
     expect(partnersLink.text()).toContain('12 partenaires')
 
     await wrapper.unmount()
+  })
+
+  it('prefers event-specific subtitles when provided', async () => {
+    activeEventPack.value = 'christmas'
+    const subtitleSeed = useState<number | null>('home-hero-subtitle-seed')
+
+    subtitleSeed.value = 0.9
+
+    const wrapper = await mountComponent()
+    const subtitle = wrapper.find('.home-hero__subtitle')
+
+    expect(subtitleSeed.value).toBeCloseTo(0.9)
+
+    expect(subtitle.text()).toBe(subtitleCollections.events.christmas[1])
+
+    await wrapper.unmount()
+  })
+
+  it('falls back to default subtitles when no event override exists', async () => {
+    activeEventPack.value = 'sdg'
+    const subtitleSeed = useState<number | null>('home-hero-subtitle-seed')
+
+    subtitleSeed.value = 0.6
+
+    const wrapper = await mountComponent()
+    const subtitle = wrapper.find('.home-hero__subtitle')
+
+    expect(subtitleSeed.value).toBeCloseTo(0.6)
+
+    expect(subtitle.text()).toBe(subtitleCollections.default[1])
+
+    await wrapper.unmount()
+  })
+
+  it('randomises the subtitle per page view', async () => {
+    const subtitleSeed = useState<number | null>('home-hero-subtitle-seed')
+
+    subtitleSeed.value = 0.01
+
+    const firstWrapper = await mountComponent()
+    const firstSubtitle = firstWrapper.find('.home-hero__subtitle').text()
+
+    await firstWrapper.unmount()
+
+    subtitleSeed.value = 0.95
+
+    const secondWrapper = await mountComponent()
+    const secondSubtitle = secondWrapper.find('.home-hero__subtitle').text()
+
+    expect(firstSubtitle).not.toBe(secondSubtitle)
+
+    await secondWrapper.unmount()
   })
 })
