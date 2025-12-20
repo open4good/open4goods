@@ -202,6 +202,7 @@ jobs:
       - name: Publish release notes to frontend/Release
         env:
           VERSION: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -eo pipefail
           git config user.name "github-actions[bot]"
@@ -224,14 +225,29 @@ jobs:
           git commit -m "chore: add release notes for ${VERSION}"
           git push origin main
 
-          git tag -f "${VERSION}"
-          git push --force-with-lease origin "${VERSION}"
+          if [[ ! "${GITHUB_REF}" =~ ^refs/tags/ ]]; then
+            echo "Skipping tag creation because workflow was not triggered by a tag (${GITHUB_REF})."
+            exit 0
+          fi
+
+          if [[ "${VERSION}" == "${DEFAULT_BRANCH}" ]]; then
+            echo "Skipping tag creation because VERSION matches the default branch (${DEFAULT_BRANCH})."
+            exit 0
+          fi
+
+          if git ls-remote --exit-code --tags origin "${VERSION}" >/dev/null 2>&1; then
+            echo "Tag ${VERSION} already exists on origin; not updating it."
+            exit 0
+          fi
+
+          git tag "${VERSION}"
+          git push origin "refs/tags/${VERSION}"
 
       ############################################
       # Create the GitHub Release
       ###########################################
       - name: Create Release
-        if: env.MODE != 'test'
+        if: env.MODE != 'test' && startsWith(github.ref, 'refs/tags/')
         uses: mikepenz/action-gh-release@v1
         with:
           body_path: ${{ github.workspace }}/PR-CHANGELOG.txt
