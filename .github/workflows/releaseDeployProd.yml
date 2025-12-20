@@ -102,6 +102,29 @@ jobs:
         if: env.MODE != 'test'
         run: mvn --batch-mode clean install site site:stage
 
+      - name: Collect backend artifacts
+        if: env.MODE != 'test'
+        run: |
+          set -eo pipefail
+          ARTIFACT_ROOT="artifacts"
+          MAVEN_SITE_SRC="target/staging"
+          JACOCO_SRC="target/site/jacoco"
+
+          mkdir -p "${ARTIFACT_ROOT}/maven-site"
+
+          if [ -d "${MAVEN_SITE_SRC}" ]; then
+            rsync -a --delete "${MAVEN_SITE_SRC}/" "${ARTIFACT_ROOT}/maven-site/"
+          else
+            echo "No Maven site staging directory found; skipping copy."
+          fi
+
+          if [ -d "${JACOCO_SRC}" ]; then
+            mkdir -p "${ARTIFACT_ROOT}/jacoco"
+            rsync -a --delete "${JACOCO_SRC}/" "${ARTIFACT_ROOT}/jacoco/"
+          else
+            echo "No JaCoCo reports found; skipping copy."
+          fi
+
       ############################################
       # Frontend (Nuxt SSR)
       ###########################################
@@ -124,6 +147,11 @@ jobs:
           MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           APP_ENV: production
+
+      - name: Run frontend tests with coverage
+        if: env.MODE != 'test'
+        run: pnpm test:coverage
+        working-directory: frontend
 
       - name: Deploy SSR output to Beta server
         if: env.MODE != 'test'
@@ -199,31 +227,61 @@ jobs:
       ############################################
       # Persist Release Notes to Repository
       ###########################################
-      - name: Publish release notes to frontend/Release
+      - name: Publish release notes to frontend/artifacts/releases
         env:
           VERSION: ${{ github.ref_name }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref_name }}
         run: |
           set -eo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout main
-          git pull --ff-only origin main
+          git fetch origin --prune
 
-          NOTE_DIR="frontend/Release"
-          mkdir -p "${NOTE_DIR}"
-          cp PR-CHANGELOG.txt "${NOTE_DIR}/${VERSION}.md"
+          NOTE_DIR="frontend/artifacts/releases"
 
-          git add "frontend/Release/${VERSION}.md"
+          publish_release_notes() {
+            local target_branch="$1"
+            local branch_exists=false
 
-          if git diff --cached --quiet; then
-            echo "Release notes already present; nothing to commit."
-            exit 0
+            if git show-ref --verify --quiet "refs/heads/${target_branch}"; then
+              branch_exists=true
+              git checkout "${target_branch}"
+              git pull --ff-only origin "${target_branch}"
+            elif git ls-remote --exit-code --heads origin "${target_branch}" >/dev/null 2>&1; then
+              branch_exists=true
+              git checkout -B "${target_branch}" "origin/${target_branch}"
+              git pull --ff-only origin "${target_branch}"
+            fi
+
+            if [[ "${branch_exists}" != true ]]; then
+              echo "Branch ${target_branch} does not exist; skipping release note publication on this ref."
+              return
+            fi
+
+            mkdir -p "${NOTE_DIR}"
+            cp PR-CHANGELOG.txt "${NOTE_DIR}/${VERSION}.md"
+
+            git add "${NOTE_DIR}/${VERSION}.md"
+
+            if git diff --cached --quiet; then
+              echo "Release notes already present on ${target_branch}; nothing to commit."
+              git reset
+              return
+            fi
+
+            git commit -m "chore: add release notes for ${VERSION}"
+            git push origin "${target_branch}"
+          }
+
+          publish_release_notes "${DEFAULT_BRANCH}"
+
+          if [[ "${DEPLOY_REF}" != "${DEFAULT_BRANCH}" ]]; then
+            publish_release_notes "${DEPLOY_REF}"
           fi
 
-          git commit -m "chore: add release notes for ${VERSION}"
-          git push origin main
+          git checkout "${DEFAULT_BRANCH}"
 
           if [[ ! "${GITHUB_REF}" =~ ^refs/tags/ ]]; then
             echo "Skipping tag creation because workflow was not triggered by a tag (${GITHUB_REF})."
@@ -242,6 +300,56 @@ jobs:
 
           git tag "${VERSION}"
           git push origin "refs/tags/${VERSION}"
+
+      - name: Commit deployment artifacts
+        if: env.MODE != 'test'
+        env:
+          VERSION: ${{ github.ref_name }}
+          DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -eo pipefail
+
+          if [[ -z "${DEPLOY_REF}" ]]; then
+            echo "No deployment ref provided; skipping artifact commit."
+            exit 0
+          fi
+
+          if [[ "${DEPLOY_REF}" == "${DEFAULT_BRANCH}" ]]; then
+            echo "Skipping artifact commit on default branch (${DEFAULT_BRANCH})."
+            exit 0
+          fi
+
+          if ! git show-ref --verify --quiet "refs/heads/${DEPLOY_REF}" && ! git ls-remote --exit-code --heads origin "${DEPLOY_REF}" >/dev/null 2>&1; then
+            echo "Deployment ref ${DEPLOY_REF} is not a branch; skipping artifact commit."
+            exit 0
+          fi
+
+          git checkout "${DEPLOY_REF}" || git checkout -B "${DEPLOY_REF}" "origin/${DEPLOY_REF}"
+          git pull --ff-only origin "${DEPLOY_REF}" || true
+
+          paths=()
+          for path in artifacts/maven-site artifacts/jacoco frontend/artifacts/coverage; do
+            if [ -e "${path}" ]; then
+              paths+=("${path}")
+            fi
+          done
+
+          if [ ${#paths[@]} -eq 0 ]; then
+            echo "No artifacts to commit; skipping."
+            exit 0
+          fi
+
+          git add "${paths[@]}"
+
+          if git diff --cached --quiet; then
+            echo "Deployment artifacts already up to date; nothing to commit."
+            git reset
+            exit 0
+          fi
+
+          git commit -m "chore: update deployment artifacts for ${VERSION}"
+          git push origin "${DEPLOY_REF}"
 
       ############################################
       # Create the GitHub Release
