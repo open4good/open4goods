@@ -132,7 +132,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mvn -B -ntp -T 1C clean verify
+          # install => les artifacts internes (serialisation, etc.) sont disponibles en repo local
+          # installAtEnd => évite les installs partiels pendant le reactor (mieux en parallèle)
+          mvn -B -ntp -T 1C -DinstallAtEnd=true clean install
 
       - name: 🌐 Generate Maven Site (stage)
         if: env.MODE != 'test'
