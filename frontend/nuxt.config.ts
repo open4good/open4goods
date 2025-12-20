@@ -20,6 +20,7 @@ const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
 const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
 const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
+const WORKBOX_GLOB_IGNORES = ['videos/**/*', '**/_payload.json']
 const PLAUSIBLE_DOMAIN = process.env.PLAUSIBLE_DOMAIN || 'nudger.fr'
 const PLAUSIBLE_API_HOST = process.env.PLAUSIBLE_API_HOST || 'https://plausible.nudger.fr'
 const PLAUSIBLE_ENABLED = process.env.NODE_ENV === 'production'
@@ -157,6 +158,10 @@ export default defineNuxtConfig({
     },
   },
 
+  experimental: {
+    payloadExtraction: false,
+  },
+
   typescript: {
     typeCheck: true,
     tsConfig: {
@@ -226,7 +231,7 @@ export default defineNuxtConfig({
     workbox: {
       cleanupOutdatedCaches: true,
       globPatterns: [PRECACHE_PATTERN],
-      globIgnores: ['videos/**/*'],
+      globIgnores: WORKBOX_GLOB_IGNORES,
       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       runtimeCaching,
     },
