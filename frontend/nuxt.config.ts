@@ -278,6 +278,7 @@ export default defineNuxtConfig({
     credits: false,
     autoLastmod: false,
     sitemapsPathPrefix: SITEMAP_PATH_PREFIX,
+	zeroRuntime: true,
     sitemaps: {
       [APP_ROUTES_SITEMAP_KEY]: {
         sitemapName: `${APP_ROUTES_SITEMAP_KEY}.xml`,
