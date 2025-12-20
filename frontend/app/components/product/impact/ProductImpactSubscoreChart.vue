@@ -29,30 +29,22 @@ const props = defineProps<{
 
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
-    await ensureECharts(({ core, charts, components, renderers }) => {
-      if (echartsRegistered) {
-        return
-      }
+    const echarts = await ensureECharts([
+      'BarChart',
+      'GridComponent',
+      'TooltipComponent',
+      'CanvasRenderer',
+    ])
 
+    if (echarts && !echartsRegistered) {
       echartsRegistered = true
-      const { use } = core
-      const { BarChart } = charts
-      const { AxisPointerComponent, GridComponent, TooltipComponent } =
-        components
-      const { CanvasRenderer } = renderers
-
-      use([
-        BarChart,
-        AxisPointerComponent,
-        GridComponent,
-        TooltipComponent,
-        CanvasRenderer,
-      ])
-    })
+      const { core, modules } = echarts
+      core.use(modules)
+    }
   }
 
   const module = await import(
-    /* webpackChunkName: "echarts-chunk" */ 'vue-echarts'
+    /* webpackChunkName: "vendor-echarts" */ 'vue-echarts'
   )
 
   return module.default
