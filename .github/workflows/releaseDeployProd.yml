@@ -231,7 +231,7 @@ jobs:
       # Frontend (tests coverage -> copy -> build)
       ############################################
       - name: Setup Node 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
 
@@ -241,7 +241,7 @@ jobs:
           version: 10.26.1
 
       - name: Setup pnpm cache
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
           cache: "pnpm"
