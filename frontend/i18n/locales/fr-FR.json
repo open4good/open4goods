@@ -35,13 +35,115 @@
     }
   },
   "home": {
+    "events": {
+      "default": {
+        "hero": {
+          "eyebrow": "Comparateur responsable",
+          "title": "Acheter mieux. Sans dépenser plus.",
+          "titleSubtitle": [
+            "Acheter mieux. Sans dépenser plus."
+          ],
+          "subtitles": [
+            "Gagne du temps. Choisis librement.",
+            "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
+            "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
+          ],
+          "iconAlt": "Icône du lanceur de l'application Nudger",
+          "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
+          "search": {
+            "label": "Tu sais déjà ce que tu cherches ?",
+            "placeholder": "Recherchez un produit ou une catégorie",
+            "ariaLabel": "Rechercher un produit responsable",
+            "cta": "NUDGER",
+            "helper": "Comparateur indépendant et open data.",
+            "helpersTitle": "Offre avec intention. Compare avec impact.",
+            "helpers": [
+              {
+                "icon": "🌿",
+                "label": "Une évaluation écologique et environnementale unique",
+                "segments": [
+                  {
+                    "text": "Une évaluation écologique",
+                    "to": "/impact-score"
+                  },
+                  {
+                    "text": " et environnementale unique"
+                  }
+                ]
+              },
+              {
+                "icon": "🛡️",
+                "label": "100% indépendant, logiciel libre et données ouvertes",
+                "segments": [
+                  {
+                    "text": "100% indépendant, "
+                  },
+                  {
+                    "text": "logiciel libre",
+                    "to": "/opensource"
+                  },
+                  {
+                    "text": " et "
+                  },
+                  {
+                    "text": "données ouvertes",
+                    "to": "/opendata"
+                  }
+                ]
+              },
+              {
+                "icon": "🏷️",
+                "label": "Sans se faire avoir sur les prix",
+                "segments": [
+                  {
+                    "text": "Sans se faire avoir sur les prix avec"
+                  },
+                  {
+                    "text": "{partnersLink}",
+                    "to": "/partenaires"
+                  }
+                ]
+              }
+            ],
+            "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
+            "partnerLinkFallback": "nos partenaires"
+          },
+          "context": {
+            "cornerLabel": "Résumé impact",
+            "cornerTooltip": "Les points forts de la méthodologie Nudger",
+            "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
+          }
+        }
+      },
+      "christmas": {
+        "hero": {
+          "titleSubtitle": [
+            "Des idées cadeaux qui respectent tes valeurs et ton budget."
+          ],
+          "subtitles": [
+            "Offre avec intention : compare prix et impact avant d'emballer.",
+            "Des idées cadeaux qui respectent tes valeurs et ton budget."
+          ]
+        }
+      },
+      "sdg": {
+        "hero": {
+          "titleSubtitle": [
+            "Des achats du quotidien alignés sur les Objectifs de développement durable."
+          ],
+          "subtitles": [
+            "Des choix du quotidien alignés sur les Objectifs de développement durable."
+          ]
+        }
+      }
+    },
     "seo": {
       "title": "Nudger – Consommer responsable n’est pas un luxe",
       "description": "Comparez l’impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
     },
     "hero": {
-      "eyebrow": "",
+      "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "titleSubtitle": {
         "default": [
@@ -81,6 +183,7 @@
         "ariaLabel": "Rechercher un produit responsable",
         "cta": "NUDGER",
         "helper": "Comparateur indépendant et open data.",
+        "helpersTitle": "Offre avec intention. Compare avec impact.",
         "helpers": [
           {
             "icon": "🌿",
