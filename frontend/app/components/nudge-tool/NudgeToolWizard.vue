@@ -20,12 +20,7 @@
         }"
         @click="handleCornerClick"
       >
-        <div
-          v-if="activeStepKey === 'category'"
-          class="text-h5 font-weight-bold text-white"
-        >
-          {{ $t('nudge-tool.wizard.welcome') }}
-        </div>
+        <NudgeToolWelcomeIcon v-if="activeStepKey === 'category'" />
         <div
           v-else-if="categorySummary"
           class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-2 pb-2"
@@ -35,7 +30,9 @@
           >
             <div
               class="nudge-wizard__corner-icon"
-              :class="{ 'nudge-wizard__corner-icon--enlarged': shouldEnlargeCornerIcon }"
+              :class="{
+                'nudge-wizard__corner-icon--enlarged': shouldEnlargeCornerIcon,
+              }"
               :style="cornerIconDimensions"
             >
               <v-icon
@@ -161,6 +158,7 @@
 import { useDebounceFn, useElementSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
+import NudgeToolWelcomeIcon from '~/components/nudge-tool/NudgeToolWelcomeIcon.vue'
 import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
 import {
   NudgeToolStepCategory,

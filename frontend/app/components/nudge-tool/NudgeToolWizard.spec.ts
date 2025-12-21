@@ -46,6 +46,7 @@ vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: (...args: unknown[]) => unknown) => fn,
   useElementSize: () => ({ height: { value: 100 } }),
   useTransition: (source: unknown) => source,
+  usePreferredReducedMotion: () => ({ value: false }),
 }))
 
 describe('NudgeToolWizard', () => {
