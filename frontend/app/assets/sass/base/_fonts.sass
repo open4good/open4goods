@@ -1,99 +1,32 @@
 @use 'sass:map'
 
-// Variables pour les fonts
-$font-family-primary: 'Poppins', 'Hanken Grotesk', sans-serif
-$font-family-signature: 'Hanken Grotesk', 'Poppins', sans-serif
+$font-family-primary: 'Hanken Grotesk', sans-serif
+$font-family-signature: 'Hanken Grotesk', sans-serif
 
 $font-weights: (
-  thin: 100,
-  light: 300,
   regular: 400,
-  medium: 500,
-  semibold: 600,
-  bold: 700,
-  extrabold: 800,
-  black: 900
 )
 
-// Mapping des poids vers les noms de fichiers
-$font-files: (
-  100: 'Thin',
-  200: 'ExtraLight',
-  300: 'Light',
-  400: 'Regular',
-  500: 'Medium',
-  600: 'SemiBold',
-  700: 'Bold',
-  800: 'ExtraBold',
-  900: 'Black'
-)
-
-// Mixin pour les @font-face
-@mixin font-face(
-  $name,
-  $weight,
-  $style: normal,
-  $font-folder: 'Poppins',
-  $file-map: $font-files,
-  $file-name: null,
-  $extension: 'ttf',
-  $format: 'truetype'
-)
-  // Résolution du nom de fichier AVANT le bloc @font-face
-  $resolved-file: if(sass($file-name): $file-name; else: "#{$name}-#{map.get($file-map, $weight)}")
-
-  @if $file-name == null and $style == italic
-    @if $resolved-file == 'Poppins-Regular'
-      $resolved-file: 'Poppins-Italic'
-    @else
-      $resolved-file: '#{$resolved-file}Italic'
-
+@mixin font-face($name, $weight, $style, $file-base)
   @font-face
     font-family: $name
     font-style: $style
     font-weight: $weight
     font-display: swap
-    src: url('~/assets/fonts/#{$font-folder}/#{$resolved-file}.#{$extension}') format($format)
+    src: url('~/assets/fonts/HankenGrotesk/#{$file-base}.woff2') format('woff2'), url('~/assets/fonts/HankenGrotesk/#{$file-base}.woff') format('woff'), url('~/assets/fonts/HankenGrotesk/#{$file-base}.ttf') format('truetype')
 
-// Génération automatique des @font-face pour Poppins (ttf)
-@each $weight-name, $weight-value in $font-weights
-  @include font-face('Poppins', $weight-value)
-  @include font-face('Poppins', $weight-value, italic)
+@include font-face('Hanken Grotesk', map.get($font-weights, 'regular'), normal, 'HankenGrotesk-Regular')
+@include font-face('Hanken Grotesk', map.get($font-weights, 'regular'), italic, 'HankenGrotesk-Italic')
 
-// Hanken Grotesk en woff2 (poids regular normal + italic)
-@include font-face(
-  'Hanken Grotesk',
-  map.get($font-weights, 'regular'),
-  normal,
-  $font-folder: 'HankenGrotesk',
-  $file-name: 'HankenGrotesk-Regular',
-  $extension: 'woff2',
-  $format: 'woff2'
-)
-
-@include font-face(
-  'Hanken Grotesk',
-  map.get($font-weights, 'regular'),
-  italic,
-  $font-folder: 'HankenGrotesk',
-  $file-name: 'HankenGrotesk-Italic',
-  $extension: 'woff2',
-  $format: 'woff2'
-)
-
-// Application des fonts via variables CSS
 :root
   --font-family-base: #{$font-family-primary}
   --font-family-signature: #{$font-family-signature}
 
-// Thème spécifique (ex : nudger)
 .v-theme--light
   --font-family-base: #{$font-family-primary}
 
 html, body
   font-family: var(--font-family-base)
 
-// Force Vuetify à utiliser la font de base
 .v-application
   font-family: var(--font-family-base) !important
-
