@@ -7,6 +7,7 @@ import type { ManifestOptions } from 'vite-plugin-pwa'
 
 import VueDevTools from 'vite-plugin-vue-devtools'
 import { VueMcp } from 'vite-plugin-vue-mcp'
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
@@ -242,6 +243,13 @@ export default defineNuxtConfig({
   // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
     vuetifyOptions: {
+      icons: {
+        defaultSet: 'mdiSvg',
+        aliases,
+        sets: {
+          mdiSvg: mdi,
+        },
+      },
       theme: {
         defaultTheme: 'light',
         themes: {
