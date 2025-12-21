@@ -128,6 +128,41 @@
           />
         </section>
       </main>
+
+      <v-dialog
+        v-model="isNudgeWizardOpen"
+        max-width="980"
+        scrollable
+        transition="dialog-bottom-transition"
+      >
+        <NudgeToolWizard
+          v-if="categoryDetail"
+          :initial-category-id="categoryDetail.id"
+          @navigate="handleNudgeNavigate"
+        />
+      </v-dialog>
+
+      <v-tooltip
+        v-if="shouldShowNudgeWizard"
+        location="left"
+        :text="nudgeFabLabel"
+      >
+        <template #activator="{ props: tooltipProps }">
+          <v-fab
+            class="product-page__fab"
+            color="primary"
+            :icon="nudgeFabIcon"
+            :extended="isFabExtended"
+            :aria-label="nudgeFabAriaLabel"
+            v-bind="tooltipProps"
+            @click="isNudgeWizardOpen = true"
+          >
+            <span v-if="isFabExtended" class="product-page__fab-label">
+              {{ nudgeFabLabel }}
+            </span>
+          </v-fab>
+        </template>
+      </v-tooltip>
     </div>
   </div>
 </template>
@@ -190,6 +225,9 @@ const ProductDocumentationSection = defineAsyncComponent(
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
 )
+const NudgeToolWizard = defineAsyncComponent(
+  () => import('~/components/nudge-tool/NudgeToolWizard.vue')
+)
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -202,6 +240,12 @@ const { height: viewportHeight } = useWindowSize()
 
 const stickyBannerThresholdRatio = 0.8
 const isStickyBannerOpen = ref(false)
+const isNudgeWizardOpen = ref(false)
+const nudgeFabIcon = 'mdi-robot-love'
+
+const nudgeFabLabel = computed(() => t('product.nudge.fabLabel'))
+const nudgeFabAriaLabel = computed(() => t('product.nudge.fabAriaLabel'))
+const isFabExtended = computed(() => display.smAndUp.value)
 
 const bannerMessage = computed(() => t('product.banner.message'))
 const bannerCtaLabel = computed(() => t('product.banner.cta'))
@@ -284,6 +328,10 @@ const categoryDetail = ref<Awaited<
 > | null>(null)
 const loadingAggregations = ref(false)
 const aggregations = ref<Record<string, AggregationResponseDto>>({})
+
+const shouldShowNudgeWizard = computed(
+  () => Boolean(product.value && categoryDetail.value?.id)
+)
 
 const requestedScoreIds = computed(() => {
   const ids: string[] = []
@@ -493,6 +541,30 @@ const normalizedCategoryPath = computed(() => {
 
   return sanitized?.length ? sanitized : withLeadingSlash
 })
+
+const handleNudgeNavigate = (payload?: { hash?: string; categorySlug?: string }) => {
+  isNudgeWizardOpen.value = false
+
+  const rawSlug =
+    payload?.categorySlug?.toString().trim() ??
+    categoryDetail.value?.verticalHomeUrl?.toString().trim() ??
+    categoryDetail.value?.id?.toString().trim() ??
+    ''
+
+  if (!rawSlug.length) {
+    return
+  }
+
+  const normalizedSlug = rawSlug.startsWith('/') ? rawSlug : `/${rawSlug}`
+  const normalizedHash = payload?.hash?.startsWith('#')
+    ? payload.hash.slice(1)
+    : payload?.hash ?? ''
+
+  void navigateTo({
+    path: normalizedSlug,
+    hash: normalizedHash || undefined,
+  })
+}
 
 const productBrand = computed(() => {
   const brand = product.value?.identity?.brand
@@ -1377,6 +1449,12 @@ const observeSections = () => {
   })
 }
 
+watch(shouldShowNudgeWizard, canShow => {
+  if (!canShow) {
+    isNudgeWizardOpen.value = false
+  }
+})
+
 watch(
   () => scrollY.value,
   (current, previous) => {
@@ -1655,6 +1733,18 @@ useHead(() => {
   scroll-margin-top: 96px;
 }
 
+.product-page__fab {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 24;
+}
+
+.product-page__fab-label {
+  font-weight: 600;
+  margin-inline-start: 0.5rem;
+}
+
 @media (max-width: 1280px) {
   .product-page__layout {
     grid-template-columns: 1fr;
@@ -1668,6 +1758,13 @@ useHead(() => {
 
   .product-page__section {
     scroll-margin-top: 140px;
+  }
+}
+
+@media (max-width: 960px) {
+  .product-page__fab {
+    right: 1rem;
+    bottom: 1rem;
   }
 }
 </style>

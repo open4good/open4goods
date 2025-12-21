@@ -2102,6 +2102,10 @@
       "alternatives": "Alternatives",
       "price": "Prix"
     },
+    "nudge": {
+      "fabAriaLabel": "Ouvrir l'assistant Nudger pour cette catégorie",
+      "fabLabel": "Besoin d'aide personnalisée ?"
+    },
     "price": {
       "condition": {
         "new": "Neuf",
