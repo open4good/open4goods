@@ -668,7 +668,19 @@ const shouldEnlargeCornerIcon = computed(
   () => isCategoryStep.value || Boolean(categorySummary.value)
 )
 
-const windowTransitionDurationMs = 0
+const HEIGHT_TRANSITION_MS = 320
+
+const shouldAnimateHeight = computed(
+  () =>
+    Boolean(
+      previousStepKey.value &&
+        (previousStepKey.value === 'category' || activeStepKey.value === 'category')
+    )
+)
+
+const windowTransitionDurationMs = computed(() =>
+  shouldAnimateHeight.value ? HEIGHT_TRANSITION_MS : 0
+)
 
 const resetCategorySelectionState = () => {
   selectedCategoryId.value = null
@@ -678,7 +690,9 @@ const resetCategorySelectionState = () => {
   recommendations.value = []
   totalMatches.value = 0
   visitedStepKeys.value = ['category']
-  // Keep locked heights intact so returning to the wizard keeps the layout stable
+  lockedLayoutHeight.value = null
+  lockedWindowHeight.value = null
+  // Unlock heights so the category view can shrink responsively
 }
 
 let resetTimeout: ReturnType<typeof setTimeout> | null = null
@@ -695,7 +709,7 @@ const scheduleCategoryReset = () => {
   resetTimeout = setTimeout(() => {
     resetCategorySelectionState()
     resetTimeout = null
-  }, windowTransitionDurationMs)
+  }, windowTransitionDurationMs.value)
 }
 
 const resetForCategorySelection = () => {
@@ -709,6 +723,8 @@ watch(
     previousStepKey.value = previous ?? null
 
     if (next === 'category' && previous !== 'category') {
+      lockedLayoutHeight.value = null
+      lockedWindowHeight.value = null
       scheduleCategoryReset()
       return
     }
@@ -754,6 +770,8 @@ const { height: footerHeight } = useElementSize(footerRef)
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
 const WIZARD_MIN_HEIGHT = 300
+const CATEGORY_MAX_HEIGHT = 350
+const CATEGORY_MIN_HEIGHT = 240
 
 const lockedLayoutHeight = ref<number | null>(null)
 const lockedWindowHeight = ref<number | null>(null)
@@ -788,30 +806,56 @@ watch(
 )
 
 const wizardStyle = computed(() => {
-  if (!lockedLayoutHeight.value) {
-    return undefined
+  const style: Record<string, string> = {
+    '--nudge-height-transition': `${windowTransitionDurationMs.value}ms`,
   }
 
-  return { minHeight: `${lockedLayoutHeight.value}px` }
+  if (lockedLayoutHeight.value && isContentMode.value) {
+    style.minHeight = `${lockedLayoutHeight.value}px`
+  }
+
+  return style
 })
 
+const categoryWindowSizing = computed(() => ({
+  minHeight: `clamp(${CATEGORY_MIN_HEIGHT}px, 60vh, 320px)`,
+  maxHeight: `min(72vh, ${CATEGORY_MAX_HEIGHT}px)`,
+}))
+
 const windowWrapperStyle = computed(() => {
-  if (!lockedWindowHeight.value) {
-    return undefined
+  const style: Record<string, string> = {
+    '--nudge-height-transition': `${windowTransitionDurationMs.value}ms`,
   }
 
-  return {
-    minHeight: `${lockedWindowHeight.value}px`,
-    maxHeight: `${lockedWindowHeight.value}px`,
+  if (isCategoryStep.value) {
+    return { ...style, ...categoryWindowSizing.value }
   }
+
+  if (lockedWindowHeight.value) {
+    return {
+      ...style,
+      minHeight: `${lockedWindowHeight.value}px`,
+      maxHeight: `${lockedWindowHeight.value}px`,
+    }
+  }
+
+  return { ...style, minHeight: `${WIZARD_MIN_HEIGHT}px` }
 })
 
 const windowContentStyle = computed(() => {
-  if (!lockedWindowHeight.value) {
-    return undefined
+  const style: Record<string, string> = {
+    '--nudge-height-transition': `${windowTransitionDurationMs.value}ms`,
   }
 
-  return { minHeight: `${lockedWindowHeight.value}px` }
+  if (isCategoryStep.value) {
+    return { ...style, minHeight: categoryWindowSizing.value.minHeight }
+  }
+
+  if (lockedWindowHeight.value) {
+    return { ...style, minHeight: `${lockedWindowHeight.value}px` }
+  }
+
+  return { ...style, minHeight: `${WIZARD_MIN_HEIGHT}px` }
 })
 
 const resolvedCornerSize = computed(() => (isContentMode.value ? 'xl' : 'lg'))
@@ -857,6 +901,8 @@ const cornerIconDimensions = computed(() => {
   max-width: none;
   display: flex;
   flex-direction: column;
+  transition: min-height var(--nudge-height-transition, 0ms) ease;
+  will-change: min-height;
 
   &__corner-content {
     display: flex;
@@ -940,6 +986,7 @@ const cornerIconDimensions = computed(() => {
     justify-content: center;
     overflow-y: auto;
     height: 100%;
+    transition: min-height var(--nudge-height-transition, 0ms) ease;
 
     :deep(.v-window__container) {
       align-items: center;
@@ -959,6 +1006,9 @@ const cornerIconDimensions = computed(() => {
     align-items: center;
     justify-content: center;
     padding: clamp(0.5rem, 1vw, 1rem) 0;
+    transition:
+      min-height var(--nudge-height-transition, 0ms) ease,
+      max-height var(--nudge-height-transition, 0ms) ease;
   }
 
   &__footer {
