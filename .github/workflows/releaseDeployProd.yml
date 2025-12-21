@@ -411,8 +411,8 @@ jobs:
           SOURCE: "frontend/public/reports/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/frontend-ssr/.output/public/reports"		  
-		  
+          TARGET: "/opt/open4goods/bin/latest/frontend-ssr/.output/public/reports"
+
       - name: Publish frontend
         if: env.MODE != 'test'
         uses: appleboy/ssh-action@v1.2.4
