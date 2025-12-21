@@ -679,6 +679,7 @@ const handleScannerDecode = (rawValue: string | null) => {
     border-radius: 1rem
     box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
     cursor: text
+    transition: box-shadow 0.25s ease, transform 0.25s ease, background-color 0.25s ease
 
   :deep(.v-field__overlay)
     cursor: text
@@ -697,6 +698,12 @@ const handleScannerDecode = (rawValue: string | null) => {
     border-radius: 1rem
     box-shadow: 0 20px 40px -24px rgba(15, 23, 42, 0.55)
     overflow: hidden
+
+  &:focus-within :deep(.v-field),
+  &:hover :deep(.v-field)
+    background-color: rgba(var(--v-theme-surface-default), 0.98)
+    box-shadow: 0 32px 72px -26px rgba(15, 23, 42, 0.7)
+    transform: translateY(-2px)
 
 .search-suggest-field__scanner-button
   min-width: auto
