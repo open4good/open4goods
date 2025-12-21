@@ -9,20 +9,49 @@ import VueDevTools from 'vite-plugin-vue-devtools'
 import { VueMcp } from 'vite-plugin-vue-mcp'
 
 import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
-import { DEFAULT_NUXT_LOCALE, buildI18nLocaleDomains } from './shared/utils/domain-language'
-import { APP_ROUTES_SITEMAP_KEY, SITEMAP_PATH_PREFIX } from './shared/utils/sitemap-config'
-import { LOCALIZED_ROUTE_PATHS, LOCALIZED_WIKI_PATHS, buildI18nPagesConfig } from './shared/utils/localized-routes'
+import {
+  DEFAULT_NUXT_LOCALE,
+  buildI18nLocaleDomains,
+} from './shared/utils/domain-language'
+import {
+  APP_ROUTES_SITEMAP_KEY,
+  SITEMAP_PATH_PREFIX,
+} from './shared/utils/sitemap-config'
+import {
+  LOCALIZED_ROUTE_PATHS,
+  LOCALIZED_WIKI_PATHS,
+  buildI18nPagesConfig,
+} from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
-const nudgerManifest = JSON.parse(readFileSync(manifestFile, 'utf-8')) as ManifestOptions
-const PRECACHE_EXTENSIONS = ['js', 'css', 'html', 'ico', 'png', 'svg', 'webp', 'jpg', 'jpeg', 'json', 'txt', 'mp4', 'webm', 'webmanifest', 'woff2']
+const nudgerManifest = JSON.parse(
+  readFileSync(manifestFile, 'utf-8')
+) as ManifestOptions
+const PRECACHE_EXTENSIONS = [
+  'js',
+  'css',
+  'html',
+  'ico',
+  'png',
+  'svg',
+  'webp',
+  'jpg',
+  'jpeg',
+  'json',
+  'txt',
+  'mp4',
+  'webm',
+  'webmanifest',
+  'woff2',
+]
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
 const WORKBOX_GLOB_IGNORES = ['videos/**/*', '**/_payload.json']
 const PLAUSIBLE_DOMAIN = process.env.PLAUSIBLE_DOMAIN || 'nudger.fr'
-const PLAUSIBLE_API_HOST = process.env.PLAUSIBLE_API_HOST || 'https://plausible.nudger.fr'
+const PLAUSIBLE_API_HOST =
+  process.env.PLAUSIBLE_API_HOST || 'https://plausible.nudger.fr'
 const PLAUSIBLE_ENABLED = process.env.NODE_ENV === 'production'
 const PLAUSIBLE_IGNORED_HOSTNAMES = ['localhost', '127.0.0.1']
 const navigationOfflineFallbackPlugin = {
@@ -45,7 +74,11 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => ['https://beta.front-api.nudger.fr', 'https://front-api.nudger.fr'].includes(url.origin),
+    urlPattern: ({ url }) =>
+      [
+        'https://beta.front-api.nudger.fr',
+        'https://front-api.nudger.fr',
+      ].includes(url.origin),
     handler: 'NetworkFirst',
     options: {
       cacheName: 'nudger-api',
@@ -58,7 +91,8 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => ['https://fonts.googleapis.com'].includes(url.origin),
+    urlPattern: ({ url }) =>
+      ['https://fonts.googleapis.com'].includes(url.origin),
     handler: 'StaleWhileRevalidate',
     options: {
       cacheName: 'nudger-font-styles',
@@ -81,7 +115,8 @@ const runtimeCaching = [
     },
   },
   {
-    urlPattern: ({ url }) => ['https://cdn.jsdelivr.net', 'https://unpkg.com'].includes(url.origin),
+    urlPattern: ({ url }) =>
+      ['https://cdn.jsdelivr.net', 'https://unpkg.com'].includes(url.origin),
     handler: 'StaleWhileRevalidate',
     options: {
       cacheName: 'nudger-static-cdn',
@@ -106,25 +141,57 @@ const STATIC_MAIN_PAGE_ROUTE_NAMES = Array.from(
   new Set([
     ...collectStaticPageRouteNames(APP_PAGES_DIR, { rootDir: APP_PAGES_DIR }),
     ...Object.keys(LOCALIZED_ROUTE_PATHS),
-  ]),
+  ])
 ).sort((a, b) => a.localeCompare(b))
 
-process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify(STATIC_MAIN_PAGE_ROUTE_NAMES)
+process.env.NUXT_STATIC_MAIN_PAGE_ROUTES = JSON.stringify(
+  STATIC_MAIN_PAGE_ROUTE_NAMES
+)
 
 const localeDomains = buildI18nLocaleDomains()
 
 const VENDOR_CHUNK_MATCHERS = [
-  { pattern: /[\\/]node_modules[\\/]echarts[\\/]/, chunkName: 'vendor-echarts' },
-  { pattern: /[\\/]node_modules[\\/]vue-echarts[\\/]/, chunkName: 'vendor-echarts' },
-  { pattern: /[\\/]node_modules[\\/]date-fns[\\/]/, chunkName: 'vendor-date-fns' },
-  { pattern: /[\\/]node_modules[\\/]@hcaptcha[\\/]vue3-hcaptcha[\\/]/, chunkName: 'vendor-hcaptcha' },
-  { pattern: /[\\/]node_modules[\\/]highlight\.js[\\/]/, chunkName: 'vendor-highlight' },
-  { pattern: /[\\/]node_modules[\\/]markdown-it[\\/]/, chunkName: 'vendor-markdown' },
-  { pattern: /[\\/]node_modules[\\/]vuetify[\\/]/, chunkName: 'vendor-vuetify' },
+  {
+    pattern: /[\\/]node_modules[\\/]echarts[\\/]/,
+    chunkName: 'vendor-echarts',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]vue-echarts[\\/]/,
+    chunkName: 'vendor-echarts',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]date-fns[\\/]/,
+    chunkName: 'vendor-date-fns',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]@hcaptcha[\\/]vue3-hcaptcha[\\/]/,
+    chunkName: 'vendor-hcaptcha',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]highlight\.js[\\/]/,
+    chunkName: 'vendor-highlight',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]markdown-it[\\/]/,
+    chunkName: 'vendor-markdown',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]vuetify[\\/]/,
+    chunkName: 'vendor-vuetify',
+  },
   { pattern: /[\\/]node_modules[\\/]@vueuse[\\/]/, chunkName: 'vendor-vueuse' },
-  { pattern: /[\\/]node_modules[\\/]@vue-pdf-viewer[\\/]/, chunkName: 'vendor-pdf-viewer' },
-  { pattern: /[\\/]node_modules[\\/]vue-pdf-embed[\\/]/, chunkName: 'vendor-pdf-viewer' },
-  { pattern: /[\\/]node_modules[\\/]vue3-picture-swipe[\\/]/, chunkName: 'vendor-gallery' },
+  {
+    pattern: /[\\/]node_modules[\\/]@vue-pdf-viewer[\\/]/,
+    chunkName: 'vendor-pdf-viewer',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]vue-pdf-embed[\\/]/,
+    chunkName: 'vendor-pdf-viewer',
+  },
+  {
+    pattern: /[\\/]node_modules[\\/]vue3-picture-swipe[\\/]/,
+    chunkName: 'vendor-gallery',
+  },
 ]
 
 export default defineNuxtConfig({
@@ -137,16 +204,36 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'icon', type: 'image/png', href: '/pwa-assets/icons/android/android-launchericon-96-96.png', sizes: '96x96' },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/pwa-assets/icons/android/android-launchericon-96-96.png',
+          sizes: '96x96',
+        },
         { rel: 'shortcut icon', href: '/favicon.ico' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/pwa-assets/icons/ios/180.png' },
+        {
+          rel: 'apple-touch-icon',
+          sizes: '180x180',
+          href: '/pwa-assets/icons/ios/180.png',
+        },
         { rel: 'manifest', href: '/site.webmanifest' },
       ],
       meta: [
-        { name: 'theme-color', content: '#00DE9F', media: '(prefers-color-scheme: light)' },
-        { name: 'theme-color', content: '#121212', media: '(prefers-color-scheme: dark)' },
+        {
+          name: 'theme-color',
+          content: '#00DE9F',
+          media: '(prefers-color-scheme: light)',
+        },
+        {
+          name: 'theme-color',
+          content: '#121212',
+          media: '(prefers-color-scheme: dark)',
+        },
         { name: 'mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        {
+          name: 'apple-mobile-web-app-status-bar-style',
+          content: 'black-translucent',
+        },
       ],
     },
   },
@@ -172,10 +259,10 @@ export default defineNuxtConfig({
         esModuleInterop: true,
         typeRoots: ['types', '../types', './node_modules/@types'],
         paths: {
-          'vue3-picture-swipe': ['../types/vue3-picture-swipe']
-        }
-      }
-    }
+          'vue3-picture-swipe': ['../types/vue3-picture-swipe'],
+        },
+      },
+    },
   },
 
   routeRules: {
@@ -190,12 +277,12 @@ export default defineNuxtConfig({
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
   },
   modules: [
-    "vuetify-nuxt-module",
-    "@nuxtjs/i18n",
-    "@nuxt/image",
+    'vuetify-nuxt-module',
+    '@nuxtjs/i18n',
+    '@nuxt/image',
     '@vueuse/nuxt',
-    "@nuxt/icon",
-    "@pinia/nuxt",
+    '@nuxt/icon',
+    '@pinia/nuxt',
     '@nuxtjs/sitemap',
     '@vite-pwa/nuxt',
     '@nuxtjs/plausible',
@@ -223,7 +310,11 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     manifest: nudgerManifest,
     manifestFilename: 'site.webmanifest',
-    includeAssets: ['pwa-assets/icons/**/*.png', 'pwa-assets/screenshots/*.png', 'resources/**/*'],
+    includeAssets: [
+      'pwa-assets/icons/**/*.png',
+      'pwa-assets/screenshots/*.png',
+      'resources/**/*',
+    ],
     client: {
       installPrompt: true,
     },
@@ -259,8 +350,18 @@ export default defineNuxtConfig({
     defaultLocale: 'fr-FR',
     langDir: '../i18n/locales',
     locales: [
-      { code: 'fr-FR', name: 'Français', file: 'fr-FR.ts', ...(localeDomains['fr-FR'] ?? {}) },
-      { code: 'en-US', name: 'English', file: 'en-US.ts', ...(localeDomains['en-US'] ?? {}) },
+      {
+        code: 'fr-FR',
+        name: 'Français',
+        file: 'fr-FR.ts',
+        ...(localeDomains['fr-FR'] ?? {}),
+      },
+      {
+        code: 'en-US',
+        name: 'English',
+        file: 'en-US.ts',
+        ...(localeDomains['en-US'] ?? {}),
+      },
     ],
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
@@ -269,16 +370,13 @@ export default defineNuxtConfig({
     pages: buildI18nPagesConfig(),
     vueI18n: './i18n.config.ts',
   },
-  css: [
-    'vuetify/styles',
-    '~/assets/sass/main.sass',
-  ],
+  css: ['vuetify/styles', '~/assets/sass/main.sass'],
 
   sitemap: {
     credits: false,
     autoLastmod: false,
     sitemapsPathPrefix: SITEMAP_PATH_PREFIX,
-	zeroRuntime: true,
+    zeroRuntime: true,
     sitemaps: {
       [APP_ROUTES_SITEMAP_KEY]: {
         sitemapName: `${APP_ROUTES_SITEMAP_KEY}.xml`,
@@ -291,9 +389,7 @@ export default defineNuxtConfig({
   postcss: {
     plugins: {
       'postcss-prefix-selector': {
-        includeFiles: [
-          /\/assets\/css\/bootstrap\.css$/i,
-        ],
+        includeFiles: [/\/assets\/css\/bootstrap\.css$/i],
         ...xwikiSandboxPrefixerOptions,
       },
     },
@@ -315,7 +411,9 @@ export default defineNuxtConfig({
       rollupOptions: {
         output: {
           manualChunks(id) {
-            const matchedChunk = VENDOR_CHUNK_MATCHERS.find(({ pattern }) => pattern.test(id))
+            const matchedChunk = VENDOR_CHUNK_MATCHERS.find(({ pattern }) =>
+              pattern.test(id)
+            )
             return matchedChunk?.chunkName
           },
         },
@@ -330,20 +428,20 @@ export default defineNuxtConfig({
     preset: 'node-server',
     publicAssets: [{ dir: 'app/public' }],
     experimental: {
-      wasm: true
-    }
+      wasm: true,
+    },
   },
   image: {
     dir: fileURLToPath(new URL('./app/public', import.meta.url)),
     // The screen sizes predefined by `@nuxt/image`:
     screens: {
-      'xs': 320,
-      'sm': 640,
-      'md': 768,
-      'lg': 1024,
-      'xl': 1280,
-      'xxl': 1536,
-      '2xl': 1536
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+      '2xl': 1536,
     },
   },
   ssr: true, // Disable SSR if you generate a static site
@@ -377,6 +475,7 @@ export default defineNuxtConfig({
 
     // Public keys (exposed to the client side)
     public: {
+      apiBase: process.env.PUBLIC_API_URL || 'http://localhost:8082',
       // Name of the cookie storing the JWT
       tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
       // Name of the cookie storing the refresh token
@@ -384,7 +483,9 @@ export default defineNuxtConfig({
 
       // Base URL of the backend API
       // Roles allowed to edit content blocks (defaults to backend role names)
-      editRoles: (process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP').split(','),
+      editRoles: (
+        process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP'
+      ).split(','),
       hcaptchaSiteKey: process.env.HCAPTCHA_SITE_KEY || '',
       staticServer: process.env.STATIC_SERVER || 'https://static.nudger.fr',
       plausible: {
@@ -395,13 +496,13 @@ export default defineNuxtConfig({
         autoOutboundTracking: true,
         ignoredHostnames: PLAUSIBLE_IGNORED_HOSTNAMES,
       },
-    }
+    },
   },
   hooks: {
     'pages:extend'(pages) {
       const normalizePath = (file?: string) => file?.split('\\').join('/')
 
-      const gtinRedirectPage = pages.find((page) =>
+      const gtinRedirectPage = pages.find(page =>
         normalizePath(page.file)?.endsWith('/app/pages/[gtin].vue')
       )
 
@@ -409,7 +510,7 @@ export default defineNuxtConfig({
         gtinRedirectPage.path = '/:gtin(\\d{6,})'
       }
 
-      const wikiSourcePage = pages.find((page) =>
+      const wikiSourcePage = pages.find(page =>
         normalizePath(page.file)?.includes('/app/pages/xwiki-fullpage.vue')
       )
 
@@ -418,12 +519,16 @@ export default defineNuxtConfig({
       }
 
       Object.entries(LOCALIZED_WIKI_PATHS).forEach(([routeName, locales]) => {
-        if (routeName === wikiSourcePage.name || pages.some(page => page.name === routeName)) {
+        if (
+          routeName === wikiSourcePage.name ||
+          pages.some(page => page.name === routeName)
+        ) {
           return
         }
 
         const clonedPage = structuredClone(wikiSourcePage)
-        const defaultLocalePath = locales[DEFAULT_NUXT_LOCALE]?.path ?? `/${routeName}`
+        const defaultLocalePath =
+          locales[DEFAULT_NUXT_LOCALE]?.path ?? `/${routeName}`
         const existingAliases = Array.isArray(wikiSourcePage.alias)
           ? wikiSourcePage.alias
           : wikiSourcePage.alias
@@ -435,7 +540,9 @@ export default defineNuxtConfig({
 
         clonedPage.name = routeName
         clonedPage.path = defaultLocalePath
-        clonedPage.alias = Array.from(new Set([...existingAliases, ...localizedAliases]))
+        clonedPage.alias = Array.from(
+          new Set([...existingAliases, ...localizedAliases])
+        )
 
         pages.push(clonedPage)
       })

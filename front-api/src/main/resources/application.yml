@@ -33,7 +33,7 @@ front:
     email: ${FRONT_CONTACT_EMAIL}
   security:
     enabled: true
-    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
+    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082,http://localhost:3000"}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
 
@@ -216,3 +216,37 @@ price-config:
       - label: "Noël"
         startDate: "2025-12-25"
         endDate: "2025-12-25"
+
+front.agent:
+  agents:
+    - id: feature-request
+      name:
+        fr: "Demande de fonctionnalité"
+        en: "Feature Request"
+      description:
+        fr: "Suggérez une nouvelle fonctionnalité ou une amélioration."
+        en: "Suggest a new feature or improvement."
+      icon: "mdi-lightbulb-on-outline"
+      tags: ["feature", "idea"]
+      public-prompt-history: true
+      prompt-template: "User Request: {{prompt}}\n\nAnalyze this request and create a GitHub Issue."
+      mail-template:
+         to: "support@example.com"
+         subject:
+           fr: "Demande de fonctionnalité"
+           en: "Feature Request"
+         body:
+           fr: "Bonjour,\n\n"
+           en: "Hello,\n\n"
+
+    - id: question
+      name:
+        fr: "Question"
+        en: "Question"
+      description:
+        fr: "Posez une question générale."
+        en: "Ask a general question."
+      icon: "mdi-help-circle-outline"
+      tags: ["question"]
+      public-prompt-history: false
+      prompt-template: "Question: {{prompt}}\n\nAnswer the user."

@@ -53,6 +53,14 @@ public class GitHubIssueService implements IssueService {
         return createIssue("Idea", title, description, urlSource, author, labels);
     }
 
+    @Override
+    public GHIssue createIssue(String title,
+                               String description,
+                               String author,
+                               Set<String> labels) throws IOException {
+        return createIssue("Issue", title, description, "Agent", author, labels);
+    }
+
     private GHIssue createIssue(String kind,
                                 String title,
                                 String description,

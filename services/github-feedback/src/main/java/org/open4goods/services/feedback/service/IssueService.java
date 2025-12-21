@@ -34,4 +34,15 @@ public interface IssueService {
      * @return list of matching open issues
      */
     List<GHIssue> listIssues(String... labels) throws IOException;
+
+    /**
+     * Create a generic issue.
+     * @param title Title of the issue
+     * @param description Body of the issue
+     * @param author Author of the issue (or representative)
+     * @param labels Labels to apply
+     * @return The created issue
+     * @throws IOException If GitHub communication fails
+     */
+    GHIssue createIssue(String title, String description, String author, Set<String> labels) throws IOException;
 }
