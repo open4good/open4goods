@@ -35,6 +35,7 @@ const props = withDefaults(
   }>(),
   {
     eyebrow: undefined,
+    subtitle: undefined,
     primaryCta: undefined,
     educationCard: undefined,
     fluid: false,

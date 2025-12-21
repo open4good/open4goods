@@ -199,6 +199,45 @@ const heroSubtitleOptions = computed<string[]>(() => {
   return heroSubtitleFallback.value ? [heroSubtitleFallback.value] : []
 })
 
+const heroTitleSubtitleFallback = computed(() => {
+  const legacySubtitle = String(t('home.hero.titleSubtitle')).trim()
+
+  if (!legacySubtitle || legacySubtitle === 'home.hero.titleSubtitle') {
+    return ''
+  }
+
+  return legacySubtitle
+})
+
+const heroTitleSubtitleOptions = computed<string[]>(() => {
+  const titleSubtitles = tm('home.hero.titleSubtitle') as unknown
+  const subtitleConfig: HeroSubtitleConfig | undefined =
+    !Array.isArray(titleSubtitles) &&
+    typeof titleSubtitles === 'object' &&
+    titleSubtitles != null
+      ? (titleSubtitles as HeroSubtitleConfig)
+      : undefined
+
+  const defaultSubtitles = normalizeHeroSubtitles(
+    Array.isArray(titleSubtitles) ? titleSubtitles : subtitleConfig?.default
+  )
+
+  const eventSubtitles = normalizeHeroSubtitles(
+    subtitleConfig?.events?.[activeEventPack.value]
+  )
+
+  const normalizedSubtitles =
+    eventSubtitles.length > 0 ? eventSubtitles : defaultSubtitles
+
+  if (normalizedSubtitles.length > 0) {
+    return normalizedSubtitles
+  }
+
+  return heroTitleSubtitleFallback.value
+    ? [heroTitleSubtitleFallback.value]
+    : []
+})
+
 const heroSubtitleSeed = useState<number | null>(
   'home-hero-subtitle-seed',
   () => null
@@ -211,6 +250,20 @@ if (heroSubtitleSeed.value == null) {
 const heroSubtitle = computed(() => {
   const subtitles = heroSubtitleOptions.value
   const fallback = heroSubtitleFallback.value
+
+  if (!subtitles.length) {
+    return fallback
+  }
+
+  const normalizedIndex = Math.floor(heroSubtitleSeed.value * subtitles.length) %
+    subtitles.length
+
+  return subtitles[normalizedIndex] ?? fallback
+})
+
+const heroTitleSubtitle = computed(() => {
+  const subtitles = heroTitleSubtitleOptions.value
+  const fallback = heroTitleSubtitleFallback.value
 
   if (!subtitles.length) {
     return fallback
@@ -427,6 +480,9 @@ useHead({
             <h1 id="home-hero-title" class="home-hero__title">
               {{ t('home.hero.title') }}
             </h1>
+            <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
+              {{ heroTitleSubtitle }}
+            </p>
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -689,6 +745,13 @@ useHead({
   margin: 0
   color: #ffffff
   text-shadow: rgb(var(--v-theme-primary)) 1px 0 10px
+
+.home-hero__title-subtitle
+  margin: clamp(0.65rem, 1.8vw, 1rem) auto 0
+  max-width: 28ch
+  color: rgba(var(--v-theme-surface-default), 0.94)
+  font-size: clamp(1rem, 2.4vw, 1.4rem)
+  line-height: 1.4
 
 .home-hero__search
   display: flex

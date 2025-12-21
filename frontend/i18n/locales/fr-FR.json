@@ -43,6 +43,19 @@
     "hero": {
       "eyebrow": "",
       "title": "Acheter mieux. Sans dépenser plus.",
+      "titleSubtitle": {
+        "default": [
+          "Acheter mieux. Sans dépenser plus."
+        ],
+        "events": {
+          "christmas": [
+            "Des idées cadeaux qui respectent tes valeurs et ton budget."
+          ],
+          "sdg": [
+            "Des achats du quotidien alignés sur les Objectifs de développement durable."
+          ]
+        }
+      },
       "subtitles": {
         "default": [
           "Gagne du temps. Choisis librement.",
