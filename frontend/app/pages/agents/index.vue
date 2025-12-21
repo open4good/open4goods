@@ -88,7 +88,7 @@
     <div class="mt-8">
       <h2 class="text-h5 mb-4">Community Activity</h2>
       <v-card variant="flat" border>
-        <v-list lines="two" v-if="activity.length > 0">
+        <v-list v-if="activity.length > 0" lines="two">
           <v-list-item
             v-for="(item, i) in activity"
             :key="item.issueId"
@@ -96,7 +96,7 @@
             target="_blank"
             :lines="undefined"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar color="surface-variant" size="40">
                 <v-icon icon="mdi-github" size="24"></v-icon>
               </v-avatar>
@@ -126,7 +126,7 @@
               </span>
             </v-list-item-subtitle>
 
-            <template v-slot:append>
+            <template #append>
               <v-icon
                 icon="mdi-open-in-new"
                 size="small"
@@ -159,7 +159,7 @@ import type {
 import AgentTemplateSelector from '@/components/agent/AgentTemplateSelector.vue'
 import AgentPromptInput from '@/components/agent/AgentPromptInput.vue'
 
-const { t, locale } = useI18n()
+const { locale } = useI18n()
 const { listTemplates, submitRequest, listActivity, getMailto } = useAgent()
 
 // Reactive state

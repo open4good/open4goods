@@ -9,12 +9,12 @@
         lg="4"
       >
         <v-card
-          @click="$emit('select', template)"
           hover
           class="h-100 d-flex flex-column"
+          @click="$emit('select', template)"
         >
           <v-card-item>
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon
                 v-if="template.icon"
                 :icon="template.icon"

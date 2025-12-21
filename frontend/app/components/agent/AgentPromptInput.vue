@@ -32,7 +32,7 @@
         color="secondary"
         hide-details
       >
-        <template v-slot:label>
+        <template #label>
           <div>
             <strong>Make my prompt private</strong>
             <div class="text-caption">
@@ -71,9 +71,9 @@
         color="primary"
         variant="flat"
         size="large"
-        @click="submit"
         :loading="loading"
         :disabled="!prompt.trim()"
+        @click="submit"
       >
         Submit Request
         <v-icon icon="mdi-send" end></v-icon>

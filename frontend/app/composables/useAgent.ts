@@ -7,7 +7,7 @@ import type {
 } from '@/types/agent'
 
 export const useAgent = () => {
-  const { $api } = useNuxtApp() // Assuming an axios/fetch wrapper exists, or use useFetch
+  // const { $api } = useNuxtApp() // Assuming an axios/fetch wrapper exists, or use useFetch
   const config = useRuntimeConfig()
 
   async function listTemplates(
