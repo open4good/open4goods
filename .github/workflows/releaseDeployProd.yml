@@ -16,35 +16,19 @@ on:
         required: false
         default: release
         type: choice
-        options:
-          - release
-          - test
+        options: [release, test]
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-# Concurrency globale (GitHub Pages)
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   release:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
-    name: prod-release-deploy
     runs-on: ubuntu-latest
-
-    environment:
-      name: test-github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     env:
       MODE: ${{ inputs.mode || 'release' }}
 
-    # 🧨 Tu as demandé cancel-in-progress: true pour la prod.
-    # Attention: annuler un déploiement en cours peut laisser un état intermédiaire côté serveur (à surveiller).
     concurrency:
       group: deploy-prod
       cancel-in-progress: true
@@ -52,10 +36,6 @@ jobs:
     steps:
       ############################################
       # 🧭 Resolve ref & versioning
-      # 1) Corrige: github.ref_name != inputs.ref en workflow_dispatch
-      # - checkout_ref: ref réellement déployée (inputs.ref, ou tag trigger)
-      # - version: nom humain (sans refs/*)
-      # - safe_version: nom safe pour fichiers (remplace / et espaces)
       ############################################
       - name: 🧭 Resolve refs & version
         id: meta
@@ -70,7 +50,6 @@ jobs:
           REF_NAME="${RAW_REF#refs/heads/}"
           REF_NAME="${REF_NAME#refs/tags/}"
 
-          # Si SHA complet, raccourci
           if [[ "${REF_NAME}" =~ ^[0-9a-f]{40}$ ]]; then
             REF_NAME="${REF_NAME:0:12}"
           fi
@@ -80,14 +59,14 @@ jobs:
           echo "version=${REF_NAME}" >> "$GITHUB_OUTPUT"
           echo "safe_version=${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
 
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          if [[ "${RAW_REF}" == refs/tags/* ]]; then
             echo "is_tag=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_tag=false" >> "$GITHUB_OUTPUT"
           fi
 
       ############################################
-      # Checkout repository (ref résolue)
+      # Checkout
       ############################################
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,8 +75,98 @@ jobs:
           ref: ${{ steps.meta.outputs.checkout_ref }}
 
       ############################################
-      # Java / Maven
-      # - Cache unique Maven via setup-java (suppression du doublon actions/cache)
+      # 🗂️ Prepare reports directories (target)
+      ############################################
+      - name: 🗂️ Prepare reports directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p frontend/public/reports/maven-site
+          mkdir -p frontend/public/reports/releases
+          mkdir -p frontend/public/reports/test-coverage/backend
+          mkdir -p frontend/public/reports/test-coverage/frontend
+
+      ############################################
+      # 📝 Release Notes
+      ############################################
+      - name: 📝 Build Release Notes (tag)
+        id: build_changelog
+        if: steps.meta.outputs.is_tag == 'true'
+        uses: mikepenz/release-changelog-builder-action@v6.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          fetchReleaseInformation: true
+          outputFile: RELEASE-NOTES.md
+          configurationJson: |
+            {
+              "sort": { "order": "ASC", "on_property": "mergedAt" },
+              "template": "## 🥳 Welcome to **#{{TO_TAG}}**\n\nThis release covers **#{{DAYS_SINCE}} day(s)** of work, from **#{{FROM_TAG_DATE}}** to **#{{TO_TAG_DATE}}**.\n\n### 📦 Stats\n- Diff: [compare](#{{RELEASE_DIFF}})\n- Changed files: **#{{CHANGED_FILES}}**\n- Commits: **#{{COMMITS}}**\n- Additions: **#{{ADDITIONS}}** / Deletions: **#{{DELETIONS}}**\n\n---\n\n#{{CHANGELOG}}\n\n<details>\n<summary>🙈 Other changes (#{{UNCATEGORIZED_COUNT}})</summary>\n\n| PR | Title | Author |\n|---:|---|---|\n#{{UNCATEGORIZED}}\n\n</details>\n",
+              "pr_template": "| [PR #{{NUMBER}}](#{{URL}}) | #{{TITLE}} | @#{{AUTHOR}} |",
+              "empty_template": "Nothing",
+              "label_extractor": [
+                {
+                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\\\([^\\\\)]*\\\\))?(!)?:",
+                  "on_property": "title",
+                  "target": "$1",
+                  "method": "match"
+                },
+                {
+                  "pattern": "^(chore|fix)\\\\(deps\\\\):",
+                  "on_property": "title",
+                  "target": "deps",
+                  "method": "match"
+                }
+              ],
+              "transformers": [
+                {
+                  "pattern": "(^|[\\\\s\\\\(])#(\\\\d+)\\\\b",
+                  "target": "$1[#$2](${{ github.server_url }}/${{ github.repository }}/issues/$2)",
+                  "method": "replaceAll"
+                }
+              ],
+              "categories": [
+                { "title": "### ✨ Features\n\n| PR | Title | Author |\n|---:|---|---|", "labels": ["feat", "feature"] },
+                { "title": "### 🐛 Bug Fixes\n\n| PR | Title | Author |\n|---:|---|---|", "labels": ["fix", "bug"] },
+                { "title": "### ⚡ Performance\n\n| PR | Title | Author |\n|---:|---|---|", "labels": ["perf", "performance"] },
+                { "title": "### 📚 Documentation\n\n| PR | Title | Author |\n|---:|---|---|", "labels": ["docs", "documentation"] },
+                { "title": "### 🧹 Maintenance\n\n| PR | Title | Author |\n|---:|---|---|", "labels": ["chore", "refactor", "ci", "build", "test", "style"] },
+                { "title": "### 🧰 Patch management\n\n| PR | Title | Author |\n|---:|---|---|", "labels": ["deps", "dependencies", "patch-management"] }
+              ]
+            }
+
+      - name: 📝 Build Release Notes (fallback, non-tag)
+        if: steps.meta.outputs.is_tag != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          LAST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          {
+            echo "## Release notes for \`${{ steps.meta.outputs.version }}\`"
+            echo ""
+            if [[ -n "${LAST_TAG}" ]]; then
+              echo "_Since ${LAST_TAG}_"
+              echo ""
+              git log --pretty=format:"- %s (%an)" "${LAST_TAG}..HEAD" || true
+            else
+              echo "_Last commits_"
+              echo ""
+              git log -n 50 --pretty=format:"- %s (%an)" || true
+            fi
+            echo ""
+          } > RELEASE-NOTES.md
+
+      - name: 📌 Write release notes into frontend/public/reports/releases
+        shell: bash
+        env:
+          SAFE_VERSION: ${{ steps.meta.outputs.safe_version }}
+        run: |
+          set -euo pipefail
+          cp RELEASE-NOTES.md "frontend/public/reports/releases/${SAFE_VERSION}.md"
+          cp RELEASE-NOTES.md "frontend/public/reports/releases/latest.md"
+
+      ############################################
+      # Java / Maven (build + site + jacoco aggregate)
       ############################################
       - name: Set up JDK 25 (Temurin) + Maven cache
         uses: actions/setup-java@v5
@@ -106,9 +175,6 @@ jobs:
           java-version: "25"
           cache: "maven"
 
-      ############################################
-      # Maven settings / repositories
-      ############################################
       - name: Set up Maven Repositories
         uses: s4u/maven-settings-action@v4.0.0
         with:
@@ -122,74 +188,57 @@ jobs:
               }
             ]
 
-      ############################################
-      # Maven build (optimisé)
-      # - Sépare build/test (verify) et génération du site
-      # - Ajoute -ntp (logs propres) et -T 1C (parallèle)
-      ############################################
       - name: 🧱 Build & Test (Maven)
-        if: env.MODE != 'test'
         shell: bash
         run: |
           set -euo pipefail
-          # install => les artifacts internes (serialisation, etc.) sont disponibles en repo local
-          # installAtEnd => évite les installs partiels pendant le reactor (mieux en parallèle)
           mvn -B -ntp -T 1C -DinstallAtEnd=true clean install
 
       - name: 🌐 Generate Maven Site (stage)
-        if: env.MODE != 'test'
         shell: bash
         run: |
           set -euo pipefail
-          # On évite de relancer des tests ici (déjà faits dans verify)
           mvn -B -ntp -T 1C -DskipTests site site:stage
 
-      - name: Collect backend artifacts
-        if: env.MODE != 'test'
+      - name: 🧾 Copy Maven site & JaCoCo aggregate into frontend/public/reports
         shell: bash
         run: |
           set -euo pipefail
-          ARTIFACT_ROOT="artifacts"
+
           MAVEN_SITE_SRC="target/staging"
-          JACOCO_SRC="target/site/jacoco"
 
-          mkdir -p "${ARTIFACT_ROOT}/maven-site"
-
-          if [ -d "${MAVEN_SITE_SRC}" ]; then
-            rsync -a --delete "${MAVEN_SITE_SRC}/" "${ARTIFACT_ROOT}/maven-site/"
+          if [[ -d "target/site/jacoco-aggregate" ]]; then
+            JACOCO_SRC="target/site/jacoco-aggregate"
           else
-            echo "No Maven site staging directory found; skipping copy."
+            JACOCO_SRC="target/site/jacoco"
           fi
 
-          if [ -d "${JACOCO_SRC}" ]; then
-            mkdir -p "${ARTIFACT_ROOT}/jacoco"
-            rsync -a --delete "${JACOCO_SRC}/" "${ARTIFACT_ROOT}/jacoco/"
+          if [[ -d "${MAVEN_SITE_SRC}" ]]; then
+            rsync -a --delete "${MAVEN_SITE_SRC}/" "frontend/public/reports/maven-site/"
           else
-            echo "No JaCoCo reports found; skipping copy."
+            echo "No Maven site staging directory found; skipping."
+          fi
+
+          if [[ -d "${JACOCO_SRC}" ]]; then
+            rsync -a --delete "${JACOCO_SRC}/" "frontend/public/reports/test-coverage/backend/"
+          else
+            echo "No JaCoCo report directory found; skipping."
           fi
 
       ############################################
-      # Frontend (Nuxt SSR)
-      # - Setup Node 24
-      # - Install pnpm
-      # - Enable pnpm cache (setup-node requires pnpm available)
+      # Frontend (tests coverage -> copy -> build)
       ############################################
-
       - name: Setup Node 24
-        if: env.MODE != 'test'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
 
       - name: Setup pnpm
-        if: env.MODE != 'test'
         uses: pnpm/action-setup@v4
         with:
           version: 10.26.1
 
-      # ✅ Le cache pnpm DOIT être configuré après l'installation de pnpm
       - name: Setup pnpm cache
-        if: env.MODE != 'test'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -197,25 +246,115 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
-        if: env.MODE != 'test'
-        run: pnpm install --frozen-lockfile
         working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Run frontend tests with coverage
+        working-directory: frontend
+        run: pnpm test:coverage
+
+      - name: 🧾 Copy frontend coverage into frontend/public/reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="frontend/app/artifacts/coverage/lcov-report"
+          if [[ -d "${SRC}" ]]; then
+            rsync -a --delete "${SRC}/" "frontend/public/reports/test-coverage/frontend/"
+          else
+            echo "No frontend coverage directory found at ${SRC}; skipping."
+          fi
 
       - name: Build Nuxt (Node SSR)
-        if: env.MODE != 'test'
-        run: pnpm build
         working-directory: frontend
+        run: pnpm build
         env:
           API_URL: ${{ secrets.API_URL }}
           MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           APP_ENV: production
 
-      - name: Run frontend tests with coverage
-        if: env.MODE != 'test'
-        run: pnpm test:coverage
-        working-directory: frontend
+      ############################################
+      # 📦 Always upload reports artifact (even in MODE=test)
+      ############################################
+      - name: 📦 Upload reports artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ steps.meta.outputs.safe_version }}
+          path: frontend/public/reports
 
+      ############################################
+      # ✅ main: release notes only
+      ############################################
+      - name: 📝 Commit release notes to default branch (only)
+        if: env.MODE != 'test'
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SAFE_VERSION: ${{ steps.meta.outputs.safe_version }}
+          VERSION_DISPLAY: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin --prune
+
+          MAIN_DIR="$(mktemp -d)"
+          git worktree add "${MAIN_DIR}" "origin/${DEFAULT_BRANCH}"
+
+          mkdir -p "${MAIN_DIR}/frontend/public/reports/releases"
+          cp "frontend/public/reports/releases/${SAFE_VERSION}.md" "${MAIN_DIR}/frontend/public/reports/releases/${SAFE_VERSION}.md"
+          cp "frontend/public/reports/releases/latest.md" "${MAIN_DIR}/frontend/public/reports/releases/latest.md"
+
+          git -C "${MAIN_DIR}" add -f "frontend/public/reports/releases/${SAFE_VERSION}.md" "frontend/public/reports/releases/latest.md"
+          if git -C "${MAIN_DIR}" diff --cached --quiet; then
+            echo "Release notes already up to date on ${DEFAULT_BRANCH}."
+          else
+            git -C "${MAIN_DIR}" commit -m "chore: add release notes for ${VERSION_DISPLAY}"
+            git -C "${MAIN_DIR}" push origin "HEAD:${DEFAULT_BRANCH}"
+          fi
+
+          git worktree remove "${MAIN_DIR}" --force
+
+      ############################################
+      # ✅ tag: publish full reports to a dedicated branch reports/<tag>
+      ############################################
+      - name: 🧾 Publish full reports to reports/<tag> branch
+        if: env.MODE != 'test' && steps.meta.outputs.is_tag == 'true'
+        shell: bash
+        env:
+          SAFE_VERSION: ${{ steps.meta.outputs.safe_version }}
+          VERSION_DISPLAY: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin --prune
+
+          REPORTS_BRANCH="reports/${SAFE_VERSION}"
+          WT_DIR="$(mktemp -d)"
+
+          if git ls-remote --exit-code --heads origin "${REPORTS_BRANCH}" >/dev/null 2>&1; then
+            git worktree add "${WT_DIR}" "origin/${REPORTS_BRANCH}"
+          else
+            git worktree add -b "${REPORTS_BRANCH}" "${WT_DIR}" HEAD
+          fi
+
+          mkdir -p "${WT_DIR}/frontend/public/reports"
+          rsync -a --delete "frontend/public/reports/" "${WT_DIR}/frontend/public/reports/"
+
+          git -C "${WT_DIR}" add -f frontend/public/reports
+          if git -C "${WT_DIR}" diff --cached --quiet; then
+            echo "Reports branch already up to date."
+          else
+            git -C "${WT_DIR}" commit -m "chore: publish reports for ${VERSION_DISPLAY}"
+            git -C "${WT_DIR}" push origin "HEAD:${REPORTS_BRANCH}"
+          fi
+
+          git worktree remove "${WT_DIR}" --force
+
+      ############################################
+      # Deploy (prod) — inchangé, seulement en release
+      ############################################
       - name: Deploy SSR output to Beta server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
@@ -237,340 +376,26 @@ jobs:
           script: sh /opt/open4goods/bin/publish-frontend.sh prod
 
       ############################################
-      # 📝 Release Notes (Markdown)
-      # - PRs en table + cliquables
-      # - Tickets "#1234" cliquables dans les titres
-      # - Catégories via label_extractor (conventional commits)
-      # - Patch management en dernier
-      # - "Other" dans un <details>
+      # GitHub Release (tag only) + attach reports archive
       ############################################
-      - name: 📝 Build Release Notes (Markdown)
-        id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v6.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          fetchReleaseInformation: true
-          outputFile: RELEASE-NOTES.md
-          configurationJson: |
-            {
-              "sort": { "order": "ASC", "on_property": "mergedAt" },
-
-              "template": "## 🥳 Welcome to **#{{TO_TAG}}**\n\nThis release covers **#{{DAYS_SINCE}} day(s)** of work, from **#{{FROM_TAG_DATE}}** to **#{{TO_TAG_DATE}}**.\n\n🔗 Links:\n- nudger.fr: https://nudger.fr\n- documentation: https://open4good.github.io/open4goods/\n\n### 📦 Stats\n- Diff: [compare](#{{RELEASE_DIFF}})\n- Changed files: **#{{CHANGED_FILES}}**\n- Commits: **#{{COMMITS}}**\n- Additions: **#{{ADDITIONS}}** / Deletions: **#{{DELETIONS}}**\n\n---\n\n#{{CHANGELOG}}\n\n<details>\n<summary>🙈 Other changes (#{{UNCATEGORIZED_COUNT}})</summary>\n\n| PR | Title | Author |\n|---:|---|---|\n#{{UNCATEGORIZED}}\n\n</details>\n",
-
-              "pr_template": "| [PR #{{NUMBER}}](#{{URL}}) | #{{TITLE}} | @#{{AUTHOR}} |",
-              "empty_template": "Nothing",
-
-              "label_extractor": [
-                {
-                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\\\([^\\\\)]*\\\\))?(!)?:",
-                  "on_property": "title",
-                  "target": "$1",
-                  "method": "match"
-                },
-                {
-                  "pattern": "^(chore|fix)\\\\(deps\\\\):",
-                  "on_property": "title",
-                  "target": "deps",
-                  "method": "match"
-                }
-              ],
-
-              "transformers": [
-                {
-                  "pattern": "(^|[\\\\s\\\\(])#(\\\\d+)\\\\b",
-                  "target": "$1[#$2](${{ github.server_url }}/${{ github.repository }}/issues/$2)",
-                  "method": "replaceAll"
-                }
-              ],
-
-              "categories": [
-                {
-                  "title": "### ✨ Features\n\n| PR | Title | Author |\n|---:|---|---|",
-                  "labels": ["feat", "feature"]
-                },
-                {
-                  "title": "### 🐛 Bug Fixes\n\n| PR | Title | Author |\n|---:|---|---|",
-                  "labels": ["fix", "bug"]
-                },
-                {
-                  "title": "### ⚡ Performance\n\n| PR | Title | Author |\n|---:|---|---|",
-                  "labels": ["perf", "performance"]
-                },
-                {
-                  "title": "### 📚 Documentation\n\n| PR | Title | Author |\n|---:|---|---|",
-                  "labels": ["docs", "documentation"]
-                },
-                {
-                  "title": "### 🧹 Maintenance\n\n| PR | Title | Author |\n|---:|---|---|",
-                  "labels": ["chore", "refactor", "ci", "build", "test", "style"]
-                },
-                {
-                  "title": "### 🧰 Patch management\n\n| PR | Title | Author |\n|---:|---|---|",
-                  "labels": ["deps", "dependencies", "patch-management"]
-                }
-              ]
-            }
-
-      ############################################
-      # 🙈 Direct commits (en plus, dans un <details>)
-      # - Tu as confirmé "Direct commits : oui"
-      # - On les ajoute après génération du RELEASE-NOTES.md
-      ############################################
-      - name: 🙈 Append direct commits (details)
-        if: env.MODE != 'test'
+      - name: 📦 Package reports for GitHub Release
+        if: env.MODE != 'test' && steps.meta.outputs.is_tag == 'true'
         shell: bash
         env:
-          FROM_TAG: ${{ steps.build_changelog.outputs.fromTag }}
-          TO_TAG: ${{ steps.build_changelog.outputs.toTag }}
+          SAFE_VERSION: ${{ steps.meta.outputs.safe_version }}
         run: |
           set -euo pipefail
+          tar -czf "reports-${SAFE_VERSION}.tgz" -C "frontend/public" "reports"
 
-          if [[ -z "${FROM_TAG}" || -z "${TO_TAG}" ]]; then
-            echo "No tag range available (fromTag/toTag empty). Skipping direct commits section."
-            exit 0
-          fi
-
-          RANGE="${FROM_TAG}...${TO_TAG}"
-
-          # Liste de commits (inclut merges). Si tu préfères exclure merges: ajoute --no-merges
-          git log --pretty=format:"- %s (%an)" "${RANGE}" > DIRECT-COMMITS.md || true
-
-          if [[ ! -s DIRECT-COMMITS.md ]]; then
-            echo "No commits found in range ${RANGE}; skipping."
-            exit 0
-          fi
-
-          {
-            echo ""
-            echo "<details>"
-            echo "<summary>🙈 Direct commits</summary>"
-            echo ""
-            cat DIRECT-COMMITS.md
-            echo ""
-            echo "</details>"
-            echo ""
-          } >> RELEASE-NOTES.md
-
-      ############################################
-      # Persist Release Notes to Repository
-      # - Utilise safe_version (corrige mismatch workflow_dispatch)
-      ############################################
-      - name: Publish release notes to frontend/artifacts/releases
-        if: env.MODE != 'test'
-        env:
-          VERSION_SAFE: ${{ steps.meta.outputs.safe_version }}
-          VERSION_DISPLAY: ${{ steps.meta.outputs.version }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          DEPLOY_REF: ${{ steps.meta.outputs.version }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin --prune
-
-          NOTE_DIR="frontend/artifacts/releases"
-
-          publish_release_notes() {
-            local target_branch="$1"
-            local branch_exists=false
-
-            if git show-ref --verify --quiet "refs/heads/${target_branch}"; then
-              branch_exists=true
-              git checkout "${target_branch}"
-              git pull --ff-only origin "${target_branch}"
-            elif git ls-remote --exit-code --heads origin "${target_branch}" >/dev/null 2>&1; then
-              branch_exists=true
-              git checkout -B "${target_branch}" "origin/${target_branch}"
-              git pull --ff-only origin "${target_branch}"
-            fi
-
-            if [[ "${branch_exists}" != true ]]; then
-              echo "Branch ${target_branch} does not exist; skipping release note publication on this ref."
-              return
-            fi
-
-            mkdir -p "${NOTE_DIR}"
-            cp RELEASE-NOTES.md "${NOTE_DIR}/${VERSION_SAFE}.md"
-
-            git add "${NOTE_DIR}/${VERSION_SAFE}.md"
-
-            if git diff --cached --quiet; then
-              echo "Release notes already present on ${target_branch}; nothing to commit."
-              git reset
-              return
-            fi
-
-            git commit -m "chore: add release notes for ${VERSION_DISPLAY}"
-            git push origin "${target_branch}"
-          }
-
-          publish_release_notes "${DEFAULT_BRANCH}"
-
-          if [[ "${DEPLOY_REF}" != "${DEFAULT_BRANCH}" ]]; then
-            publish_release_notes "${DEPLOY_REF}"
-          fi
-
-          git checkout "${DEFAULT_BRANCH}"
-
-      - name: Commit deployment artifacts
-        if: env.MODE != 'test'
-        env:
-          VERSION_DISPLAY: ${{ steps.meta.outputs.version }}
-          DEPLOY_REF: ${{ steps.meta.outputs.version }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${DEPLOY_REF}" ]]; then
-            echo "No deployment ref provided; skipping artifact commit."
-            exit 0
-          fi
-
-          if [[ "${DEPLOY_REF}" == "${DEFAULT_BRANCH}" ]]; then
-            echo "Skipping artifact commit on default branch (${DEFAULT_BRANCH})."
-            exit 0
-          fi
-
-          if ! git show-ref --verify --quiet "refs/heads/${DEPLOY_REF}" && ! git ls-remote --exit-code --heads origin "${DEPLOY_REF}" >/dev/null 2>&1; then
-            echo "Deployment ref ${DEPLOY_REF} is not a branch; skipping artifact commit."
-            exit 0
-          fi
-
-          git checkout "${DEPLOY_REF}" || git checkout -B "${DEPLOY_REF}" "origin/${DEPLOY_REF}"
-          git pull --ff-only origin "${DEPLOY_REF}" || true
-
-          paths=()
-          for path in artifacts/maven-site artifacts/jacoco frontend/artifacts/coverage; do
-            if [ -e "${path}" ]; then
-              paths+=("${path}")
-            fi
-          done
-
-          if [ ${#paths[@]} -eq 0 ]; then
-            echo "No artifacts to commit; skipping."
-            exit 0
-          fi
-
-          git add "${paths[@]}"
-
-          if git diff --cached --quiet; then
-            echo "Deployment artifacts already up to date; nothing to commit."
-            git reset
-            exit 0
-          fi
-
-          git commit -m "chore: update deployment artifacts for ${VERSION_DISPLAY}"
-          git push origin "${DEPLOY_REF}"
-
-      ############################################
-      # Create the GitHub Release (tag only)
-      ############################################
       - name: Create Release
-        if: env.MODE != 'test' && startsWith(github.ref, 'refs/tags/')
+        if: env.MODE != 'test' && steps.meta.outputs.is_tag == 'true'
         uses: mikepenz/action-gh-release@v1
         with:
           body_path: ${{ github.workspace }}/RELEASE-NOTES.md
           files: |
             LICENSE
+            admin/target/admin-0.0.1-SNAPSHOT.jar
             api/target/api-0.0.1-SNAPSHOT.jar
             ui/target/ui-0.0.1-SNAPSHOT.jar
             target/staging/taglist/taglist.xml
-
-      ############################################
-      # Deploy JARs to Production Server
-      # 2) Corrige: SOURCE absolus ("/...") => relatifs ("...")
-      ############################################
-      - name: 🚚 Deploy SBADMIN to Server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "admin/target/admin-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"
-
-      - name: 🚚 Deploy API to Server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "api/target/api-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
-
-      - name: 🚚 Deploy UI (static server) to Production Server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "ui/target/ui-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
-
-      - name: 🚚 Deploy front-api to Qualification Server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "front-api/target/front-api-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"
-
-      ############################################
-      # Restart Applications
-      ############################################
-      - name: 🔁 Start Applications
-        if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.4
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-jars.sh prod
-
-      ############################################
-      # GitHub Pages Deployment
-      # - staging propre (pages-dist), sans toucher src/main/site/
-      ############################################
-      - name: Setup GitHub Pages
-        if: env.MODE != 'test'
-        uses: actions/configure-pages@v5
-
-      - name: Prepare Pages content
-        if: env.MODE != 'test'
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf pages-dist
-          mkdir -p pages-dist
-
-          # Contenu du site "source"
-          rsync -a --delete src/main/site/ pages-dist/
-
-          # Maven site généré sous /maven/
-          mkdir -p pages-dist/maven
-          rsync -a --delete target/staging/ pages-dist/maven/
-
-      - name: Upload Site to GitHub Pages
-        if: env.MODE != 'test'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: "./pages-dist"
-
-      - name: Deploy to GitHub Pages
-        if: env.MODE != 'test'
-        id: deployment
-        uses: actions/deploy-pages@v4
+            reports-${{ steps.meta.outputs.safe_version }}.tgz
