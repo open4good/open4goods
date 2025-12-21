@@ -86,6 +86,8 @@ jobs:
           mkdir -p frontend/public/reports/test-coverage/backend
           mkdir -p frontend/public/reports/test-coverage/frontend
 
+
+
       ############################################
       # 📝 Release Notes
       ############################################
@@ -264,6 +266,28 @@ jobs:
             echo "No frontend coverage directory found at ${SRC}; skipping."
           fi
 
+
+
+      - name: 🔎 Debug reports (what exists, where)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=== Maven/Jacoco candidates ==="
+          find . -maxdepth 6 -type d \( \
+            -path "*/target/staging*" -o \
+            -path "*/target/site/jacoco*" \
+          \) -print || true
+
+          echo "=== Frontend coverage candidates ==="
+          find frontend -maxdepth 8 -type d \( -name "lcov-report" -o -name "coverage" \) -print | head -n 200 || true
+
+          echo "=== What got copied into frontend/public/reports ==="
+          find frontend/public/reports -maxdepth 6 -type f -name "index.html" -print | head -n 200 || true
+          du -sh frontend/public/reports || true
+
+
+
       - name: Build Nuxt (Node SSR)
         working-directory: frontend
         run: pnpm build
@@ -272,6 +296,19 @@ jobs:
           MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           APP_ENV: production
+
+
+      - name: 🔎 Verify Nuxt output contains reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d frontend/.output/public || (echo "No frontend/.output/public"; exit 1)
+          find frontend/.output/public/reports -maxdepth 6 -type f -name "index.html" -print | head -n 200 || true
+          du -sh frontend/.output/public/reports || true
+
+
+
+
 
       ############################################
       # 📦 Always upload reports artifact (even in MODE=test)
@@ -355,7 +392,7 @@ jobs:
       ############################################
       # Deploy (prod) — inchangé, seulement en release
       ############################################
-      - name: Deploy SSR output to Beta server
+      - name: Deploy SSR output to  server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
         env:
@@ -366,6 +403,16 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/frontend-ssr"
 
+      - name: Deploy reports (forced) to server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "frontend/public/reports/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: "/opt/open4goods/bin/latest/frontend-ssr/.output/public/reports"		  
+		  
       - name: Publish frontend
         if: env.MODE != 'test'
         uses: appleboy/ssh-action@v1.2.4
