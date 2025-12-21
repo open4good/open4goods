@@ -16,7 +16,7 @@ const markdown = new MarkdownIt({
 const DOMPurify = createDOMPurify(new JSDOM('').window as unknown as DOMWindow)
 
 const PROJECT_ROOT = path.resolve(process.cwd())
-const RELEASES_DIRECTORY = path.join(PROJECT_ROOT, 'artifacts', 'releases')
+const RELEASES_DIRECTORY = path.join(PROJECT_ROOT, 'public', 'reports', 'releases')
 
 let cachedReleaseNotes: ReleaseNote[] | null = null
 
@@ -24,12 +24,14 @@ const getCreationDateFromGit = async (
   filePath: string
 ): Promise<string | null> => {
   try {
-    const { stdout } = await execFileAsync(
+    const gitResult = await execFileAsync(
       'git',
       ['log', '--diff-filter=A', '--follow', '--format=%cI', '-1', '--', filePath],
       { cwd: PROJECT_ROOT }
     )
 
+    const stdout =
+      typeof gitResult === 'string' ? gitResult : gitResult.stdout ?? ''
     const isoDate = stdout.trim().split('\n').filter(Boolean).at(-1)
 
     return isoDate ?? null
