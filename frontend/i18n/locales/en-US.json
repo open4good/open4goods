@@ -43,6 +43,19 @@
     "hero": {
       "eyebrow": "Responsible shopping",
       "title": "Responsible choices aren’t a luxury",
+      "titleSubtitle": {
+        "default": [
+          "Buy better. Spend smarter."
+        ],
+        "events": {
+          "christmas": [
+            "Find gifts that respect your values and your budget."
+          ],
+          "sdg": [
+            "Everyday shopping aligned with the Sustainable Development Goals."
+          ]
+        }
+      },
       "subtitles": {
         "default": [
           "Save time, stay true to your values. Compare effortlessly, choose freely.",
