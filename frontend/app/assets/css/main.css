@@ -1,4 +1,4 @@
 /* Import Vuetify styles sans les fonts automatiques */
 @import 'vuetify/lib/styles/main.css';
 
-/* Les fonts sont maintenant gérées par fonts.css */
+/* Les fonts sont gérées par les styles Sass */
