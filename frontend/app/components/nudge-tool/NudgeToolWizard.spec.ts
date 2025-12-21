@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { ref } from 'vue'
 import { mount } from '@vue/test-utils'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import NudgeToolWizard from './NudgeToolWizard.vue'
@@ -44,8 +45,9 @@ vi.mock('~/utils/_nudge-tool-filters', () => ({
 }))
 vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: (...args: unknown[]) => unknown) => fn,
-  useElementSize: () => ({ height: { value: 100 } }),
+  useElementSize: () => ({ height: ref(100), width: ref(0) }),
   useTransition: (source: unknown) => source,
+  usePreferredReducedMotion: () => ({ value: false }),
 }))
 
 describe('NudgeToolWizard', () => {

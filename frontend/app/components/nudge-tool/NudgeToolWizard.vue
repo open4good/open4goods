@@ -35,8 +35,16 @@
           >
             <div
               class="nudge-wizard__corner-icon"
-              :class="{ 'nudge-wizard__corner-icon--enlarged': shouldEnlargeCornerIcon }"
-              :style="cornerIconDimensions"
+              :class="{
+                'nudge-wizard__corner-icon--enlarged': shouldEnlargeCornerIcon,
+                'nudge-wizard__corner-icon--pulsing': isCornerIconPulsing,
+              }"
+              :style="cornerIconStyle"
+              tabindex="0"
+              @mouseenter="handleCornerIconEnter"
+              @mouseleave="handleCornerIconLeave"
+              @focusin="handleCornerIconEnter"
+              @focusout="handleCornerIconLeave"
             >
               <v-icon
                 :icon="categorySummary.icon"
@@ -158,7 +166,11 @@
 </template>
 
 <script setup lang="ts">
-import { useDebounceFn, useElementSize } from '@vueuse/core'
+import {
+  useDebounceFn,
+  useElementSize,
+  usePreferredReducedMotion,
+} from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
 import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
@@ -222,6 +234,10 @@ const recommendations = ref<ProductDto[]>([])
 const totalMatches = ref(0)
 const loading = ref(false)
 const animatedMatches = ref(0)
+const isCornerIconPulsing = ref(false)
+const pulseIterations = ref(1)
+const pulseDurationMs = ref(280)
+const isCornerIconInteracting = ref(false)
 
 const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
@@ -668,6 +684,11 @@ const shouldEnlargeCornerIcon = computed(
   () => isCategoryStep.value || Boolean(categorySummary.value)
 )
 
+const prefersReducedMotion = usePreferredReducedMotion()
+const shouldAnimateCornerIcon = computed(
+  () => Boolean(categorySummary.value) && !prefersReducedMotion.value
+)
+
 const windowTransitionDurationMs = 0
 
 const resetCategorySelectionState = () => {
@@ -843,6 +864,76 @@ const cornerIconDimensions = computed(() => {
     height: `${wrapperSize}px`,
   }
 })
+
+const cornerIconStyle = computed(() => ({
+  ...cornerIconDimensions.value,
+  '--nudge-corner-pulse-duration': `${pulseDurationMs.value}ms`,
+  '--nudge-corner-pulse-iteration-count': pulseIterations.value.toString(),
+}))
+
+const clearPulseTimers = () => {
+  if (pulseStopTimeoutId) {
+    clearTimeout(pulseStopTimeoutId)
+    pulseStopTimeoutId = null
+  }
+
+  if (pulseTimeoutId) {
+    clearTimeout(pulseTimeoutId)
+    pulseTimeoutId = null
+  }
+}
+
+const randomBetween = (min: number, max: number) =>
+  Math.random() * (max - min) + min
+
+const randomIntBetween = (min: number, max: number) =>
+  Math.floor(randomBetween(min, max + 1))
+
+let pulseTimeoutId: ReturnType<typeof setTimeout> | null = null
+let pulseStopTimeoutId: ReturnType<typeof setTimeout> | null = null
+
+const schedulePulse = () => {
+  clearPulseTimers()
+
+  if (!shouldAnimateCornerIcon.value || isCornerIconInteracting.value) {
+    return
+  }
+
+  const delay = Math.round(randomBetween(3000, 5000))
+  pulseTimeoutId = setTimeout(() => {
+    if (!shouldAnimateCornerIcon.value || isCornerIconInteracting.value) {
+      schedulePulse()
+      return
+    }
+
+    pulseIterations.value = randomIntBetween(1, 3)
+    pulseDurationMs.value = Math.round(randomBetween(250, 350))
+    isCornerIconPulsing.value = true
+
+    const totalDuration = pulseIterations.value * pulseDurationMs.value
+    pulseStopTimeoutId = setTimeout(() => {
+      isCornerIconPulsing.value = false
+      schedulePulse()
+    }, totalDuration)
+  }, delay)
+}
+
+const handleCornerIconEnter = () => {
+  isCornerIconInteracting.value = true
+  isCornerIconPulsing.value = false
+  clearPulseTimers()
+}
+
+const handleCornerIconLeave = () => {
+  isCornerIconInteracting.value = false
+  schedulePulse()
+}
+
+watch(shouldAnimateCornerIcon, schedulePulse, { immediate: true })
+
+onBeforeUnmount(() => {
+  clearPulseTimers()
+})
 </script>
 
 <style scoped lang="scss">
@@ -905,9 +996,16 @@ const cornerIconDimensions = computed(() => {
     border-radius: 14px;
     background: rgba(var(--v-theme-hero-gradient-mid), 0.22);
     box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4);
+    transition: transform 220ms ease;
 
     &--enlarged {
       border-radius: 20px;
+    }
+
+    &--pulsing {
+      animation:
+        nudge-corner-pulse var(--nudge-corner-pulse-duration, 300ms)
+          ease-in-out var(--nudge-corner-pulse-iteration-count, 1);
     }
   }
 
@@ -1021,5 +1119,19 @@ const cornerIconDimensions = computed(() => {
 
 .nudge-wizard--content-mode .nudge-wizard__corner-content {
   transform: translateY(2px) scale(1.04);
+}
+
+@keyframes nudge-corner-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 </style>
