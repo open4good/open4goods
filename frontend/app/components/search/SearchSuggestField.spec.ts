@@ -100,6 +100,18 @@ const VAutocompleteStub = defineComponent({
   },
 })
 
+const VHoverStub = defineComponent({
+  name: 'VHoverStub',
+  setup(_, { slots, attrs }) {
+    return () =>
+      h(
+        'div',
+        attrs,
+        slots.default ? slots.default({ isHovering: false, props: {} }) : []
+      )
+  },
+})
+
 const createStub = (tag: string) =>
   defineComponent({
     name: `${tag}-stub`,
@@ -180,6 +192,7 @@ describe('SearchSuggestField', () => {
       },
       global: {
         stubs: {
+          VHover: VHoverStub,
           VAutocomplete: VAutocompleteStub,
           VListItem: createStub('div'),
           VAvatar: createStub('div'),
