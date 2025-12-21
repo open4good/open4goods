@@ -15,6 +15,8 @@ const messages: Record<string, unknown> = {
   'product.navigation.docs': 'Documentation',
   'product.uncategorized.noScore': "Pas d'évaluation sur ce produit !",
   'product.impact.alternatives.title': 'Alternatives',
+  'product.nudge.fabLabel': 'Open nudge',
+  'product.nudge.fabAriaLabel': 'Open nudge aria',
 }
 
 const translate = (key: string) => {
@@ -41,18 +43,20 @@ const productMockData = {
   },
 }
 
+const routeMock = {
+  params: {
+    slug: ['8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'],
+  },
+  path: '/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
+}
+
 // Mocks
 mockNuxtImport('useI18n', () => () => ({
   t: (key: string) => translate(key),
   locale: { value: 'fr-FR' },
 }))
 
-mockNuxtImport('useRoute', () => () => ({
-  params: {
-    slug: ['8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'], // User reported issue
-  },
-  path: '/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
-}))
+mockNuxtImport('useRoute', () => () => routeMock)
 
 mockNuxtImport('useRequestURL', () => () => new URL('https://nudger.test/'))
 mockNuxtImport('useRuntimeConfig', () => () => ({
@@ -90,6 +94,17 @@ const simpleStub = (name: string, tag: string = 'div') =>
   })
 
 const VAlertStub = simpleStub('VAlertStub')
+const VTooltipStub = defineComponent({
+  name: 'VTooltipStub',
+  setup(_props, { slots, attrs }) {
+    return () =>
+      h(
+        'div',
+        { class: 'v-tooltip-stub', ...attrs },
+        [slots.activator?.({ props: {} }), slots.default?.()]
+      )
+  },
+})
 
 const mountProductPage = async () => {
   const component = (await import('./[...slug].vue')).default
@@ -108,9 +123,12 @@ const mountProductPage = async () => {
           'ProductDocumentationSection-stub'
         ),
         ProductAdminSection: simpleStub('ProductAdminSection-stub'),
+        NudgeToolWizard: simpleStub('NudgeToolWizard-stub'),
         VAlert: VAlertStub,
         VSkeletonLoader: simpleStub('VSkeletonLoader-stub'),
-        VTooltip: simpleStub('VTooltip-stub'),
+        VTooltip: VTooltipStub,
+        VDialog: simpleStub('VDialog-stub'),
+        VFab: simpleStub('VFab-stub', 'button'),
       },
     },
   })
@@ -119,6 +137,13 @@ const mountProductPage = async () => {
 describe('Uncategorized Product Page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    selectCategoryBySlugMock.mockReset()
+    selectCategoryBySlugMock.mockRejectedValue(new Error('Category not found'))
+    routeMock.params.slug = [
+      '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
+    ]
+    routeMock.path =
+      '/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'
   })
 
   it('renders correctly for uncategorized product', async () => {
@@ -133,6 +158,8 @@ describe('Uncategorized Product Page', () => {
     })
     expect(impactSection.exists()).toBe(false)
 
+    expect(wrapper.find('.product-page__fab').exists()).toBe(false)
+
     // Should render the "No Score" alert
     expect(wrapper.text()).toContain(messages['product.uncategorized.noScore'])
 
@@ -145,5 +172,34 @@ describe('Uncategorized Product Page', () => {
     // We want to verify that we are handling it.
     // For now let's just log what we have or assert existence.
     expect(breadcrumbs).toBeDefined()
+  })
+
+  it('shows nudge wizard FAB when category is available', async () => {
+    selectCategoryBySlugMock.mockResolvedValue({
+      id: 'cat-123',
+      verticalHomeTitle: 'Électroménager',
+      verticalHomeUrl: 'electromenager',
+      attributesConfig: { configs: [] },
+      availableImpactScoreCriterias: [],
+      impactScoreConfig: { criteriasPonderation: {} },
+      nudgeToolConfig: { subsets: [], subsetGroups: [], scores: [] },
+    })
+    routeMock.params.slug = [
+      'electromenager',
+      '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
+    ]
+    routeMock.path =
+      '/electromenager/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'
+
+    const wrapper = await mountProductPage()
+
+    const fab = wrapper.find('.product-page__fab')
+    expect(fab.exists()).toBe(true)
+
+    await fab.trigger('click')
+
+    const wizard = wrapper.findComponent({ name: 'NudgeToolWizard-stub' })
+    expect(wizard.exists()).toBe(true)
+    expect(wizard.attributes('initial-category-id')).toBe('cat-123')
   })
 })
