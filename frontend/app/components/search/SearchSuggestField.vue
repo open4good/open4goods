@@ -1,32 +1,38 @@
 <template>
   <div class="search-suggest-field__wrapper" v-bind="attrs">
-    <v-autocomplete
-      v-model="selectedItem"
-      :search="internalSearch"
-      :items="suggestionItems"
-      item-value="id"
-      :label="label"
-      :placeholder="placeholder"
-      :aria-label="ariaLabel"
-      :loading="loading"
-      :menu-props="menuProps"
-      :hide-no-data="!showEmptyState"
-      :no-data-text="''"
-      menu-icon=""
-      prepend-inner-icon="mdi-magnify"
-      variant="solo"
-      density="comfortable"
-      clearable
-      hide-details
-      return-object
-      class="search-suggest-field"
-      @update:model-value="handleSelection"
-      @click:clear="handleClear"
-      @keydown.enter="handleEnterKey"
-      @update:search="handleSearchInput"
-      @blur="handleBlur"
-      @focus="handleFocus"
-    >
+    <v-hover v-slot="{ isHovering, props: hoverProps }">
+      <v-autocomplete
+        v-bind="hoverProps"
+        v-model="selectedItem"
+        :search="internalSearch"
+        :items="suggestionItems"
+        item-value="id"
+        :label="label"
+        :placeholder="placeholder"
+        :aria-label="ariaLabel"
+        :loading="loading"
+        :menu-props="menuProps"
+        :hide-no-data="!showEmptyState"
+        :no-data-text="''"
+        :elevation="getFieldElevation(isHovering)"
+        menu-icon=""
+        prepend-inner-icon="mdi-magnify"
+        variant="solo"
+        density="comfortable"
+        clearable
+        hide-details
+        return-object
+        :class="[
+          'search-suggest-field',
+          { 'search-suggest-field--active': isHovering || isFieldFocused },
+        ]"
+        @update:model-value="handleSelection"
+        @click:clear="handleClear"
+        @keydown.enter="handleEnterKey"
+        @update:search="handleSearchInput"
+        @blur="handleBlur"
+        @focus="handleFocus"
+      >
       <template #append-inner>
         <slot v-if="$slots['append-inner']" name="append-inner" />
         <v-btn
@@ -137,7 +143,8 @@
           </p>
         </div>
       </template>
-    </v-autocomplete>
+      </v-autocomplete>
+    </v-hover>
     <v-dialog
       v-model="isScannerDialogOpen"
       fullscreen
@@ -275,6 +282,7 @@ const pendingSubmit = ref(false)
 const isScannerDialogOpen = ref(false)
 const isScannerActive = ref(false)
 const isScannerComponentReady = ref(false)
+const isFieldFocused = ref(false)
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
@@ -294,7 +302,11 @@ const firstProductIndex = computed(() => categories.value.length)
 const menuProps = reactive({
   maxHeight: 420,
   offset: 4,
+  elevation: 16,
 })
+
+const getFieldElevation = (isHovering: boolean) =>
+  isHovering || isFieldFocused.value ? 16 : 8
 
 const suggestionItems = computed<SuggestionItem[]>(() => [
   ...categories.value,
@@ -556,6 +568,7 @@ watch(
 
 const handleBlur = () => {
   isBlurring.value = true
+  isFieldFocused.value = false
 
   if (blurResetTimeout !== null) {
     clearTimeout(blurResetTimeout)
@@ -578,6 +591,7 @@ const handleFocus = () => {
   }
 
   isBlurring.value = false
+  isFieldFocused.value = true
 }
 
 const handleSearchInput = (value: string) => {
@@ -677,9 +691,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   :deep(.v-field)
     background-color: rgba(var(--v-theme-surface-glass-strong), 0.96)
     border-radius: 1rem
-    box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.55)
     cursor: text
-    transition: box-shadow 0.25s ease, transform 0.25s ease, background-color 0.25s ease
+    transition: transform 0.25s ease, background-color 0.25s ease
 
   :deep(.v-field__overlay)
     cursor: text
@@ -696,13 +709,10 @@ const handleScannerDecode = (rawValue: string | null) => {
 
   :deep(.v-overlay__content)
     border-radius: 1rem
-    box-shadow: 0 20px 40px -24px rgba(15, 23, 42, 0.55)
     overflow: hidden
 
-  &:focus-within :deep(.v-field),
-  &:hover :deep(.v-field)
+  &--active :deep(.v-field)
     background-color: rgba(var(--v-theme-surface-default), 0.98)
-    box-shadow: 0 32px 72px -26px rgba(15, 23, 42, 0.7)
     transform: translateY(-2px)
 
 .search-suggest-field__scanner-button
