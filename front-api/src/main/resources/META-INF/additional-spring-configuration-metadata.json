@@ -59,6 +59,11 @@
       "name": "front.share",
       "type": "org.open4goods.nudgerfrontapi.config.properties.ShareResolutionProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ShareResolutionProperties"
+    },
+    {
+      "name": "front.agent",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.AgentProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.AgentProperties"
     }
   ],
   "properties": [
@@ -369,6 +374,56 @@
       "name": "price-config.events[].color",
       "type": "java.lang.String",
       "description": "CSS compatible colour hint rendered by the frontend."
+    },
+    {
+      "name": "front.agent.agents",
+      "type": "java.util.List",
+      "description": "Ordered list of configured agents available for frontend interactions."
+    },
+    {
+      "name": "front.agent.agents[].id",
+      "type": "java.lang.String",
+      "description": "Technical identifier for the agent."
+    },
+    {
+      "name": "front.agent.agents[].icon",
+      "type": "java.lang.String",
+      "description": "Icon reference used by the frontend (e.g. mdi identifier or asset path)."
+    },
+    {
+      "name": "front.agent.agents[].prompt-template",
+      "type": "java.lang.String",
+      "description": "Prompt template forwarded to the agent runtime."
+    },
+    {
+      "name": "front.agent.agents[].tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Tags helping to classify or filter the agent in the UI."
+    },
+    {
+      "name": "front.agent.agents[].allowed-roles",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Application roles allowed to access the agent."
+    },
+    {
+      "name": "front.agent.agents[].mail-template",
+      "type": "java.lang.String",
+      "description": "Optional mail template identifier associated with the agent."
+    },
+    {
+      "name": "front.agent.agents[].i18n",
+      "type": "java.util.Map<java.lang.String, org.open4goods.nudgerfrontapi.config.properties.AgentProperties.AgentLocalization>",
+      "description": "Localised labels and descriptions keyed by ISO language code."
+    },
+    {
+      "name": "front.agent.agents[].i18n.*.title",
+      "type": "java.lang.String",
+      "description": "Localised agent title displayed in the UI."
+    },
+    {
+      "name": "front.agent.agents[].i18n.*.description",
+      "type": "java.lang.String",
+      "description": "Localised description helping users understand the agent."
     }
   ]
 }

@@ -45,6 +45,24 @@ front:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
     english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
 
+  agent:
+    agents:
+      - id: default
+        icon: mdi-robot
+        prompt-template: "You are a helpful assistant."
+        tags:
+          - general
+        allowed-roles:
+          - ROLE_FRONTEND
+        mail-template: default-mail-template
+        i18n:
+          fr:
+            title: "Assistant"
+            description: "Agent générique pour assister les utilisateurs."
+          en:
+            title: "Assistant"
+            description: "Generic assistant helping users."
+
   blog:
     base-urls:
       default: "https://nudger.fr"
