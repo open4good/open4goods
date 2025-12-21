@@ -4,6 +4,8 @@ import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
+import { useEventPackI18n } from '~/composables/useEventPackI18n'
 
 type Emits = {
   'update:searchQuery': [value: string]
@@ -25,11 +27,18 @@ const props = withDefaults(
 
 const emit = defineEmits<Emits>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 const { categoriesLandingUrl, minSuggestionQueryLength } = toRefs(props)
 
 const searchQueryValue = computed(() => props.searchQuery)
+
+const activeEventPack = useSeasonalEventPack()
+const packI18n = useEventPackI18n(activeEventPack)
+
+const resolveSearchString = (path: string, fallbackKey: string) =>
+  packI18n.resolveString(path, { fallbackKeys: [fallbackKey] }) ??
+  (te(fallbackKey) ? String(t(fallbackKey)) : '')
 
 const handleSubmit = () => {
   emit('submit')
@@ -68,9 +77,24 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
               <SearchSuggestField
                 :model-value="searchQueryValue"
                 class="home-hero__search-input"
-                :label="t('home.hero.search.label')"
-                :placeholder="t('home.hero.search.placeholder')"
-                :aria-label="t('home.hero.search.ariaLabel')"
+                :label="
+                  resolveSearchString(
+                    'hero.search.label',
+                    'home.hero.search.label'
+                  )
+                "
+                :placeholder="
+                  resolveSearchString(
+                    'hero.search.placeholder',
+                    'home.hero.search.placeholder'
+                  )
+                "
+                :aria-label="
+                  resolveSearchString(
+                    'hero.search.ariaLabel',
+                    'home.hero.search.ariaLabel'
+                  )
+                "
                 :min-chars="minSuggestionQueryLength"
                 @update:model-value="handleUpdate"
                 @submit="handleSubmit"
@@ -82,13 +106,13 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
                     class="home-hero__search-submit nudger_degrade-defaut"
                     icon="mdi-arrow-right"
                     variant="flat"
-                    color="primary"
-                    size="small"
-                    type="submit"
-                    :aria-label="t('home.cta.searchSubmit')"
-                  />
-                </template>
-              </SearchSuggestField>
+                  color="primary"
+                  size="small"
+                  type="submit"
+                  :aria-label="t('home.cta.searchSubmit')"
+                />
+              </template>
+            </SearchSuggestField>
             </form>
             <div class="home-cta__actions">
               <div class="home-cta__links">

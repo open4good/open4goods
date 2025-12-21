@@ -10,6 +10,8 @@ import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
+import { DEFAULT_EVENT_PACK } from '~~/config/theme/assets'
+import { useEventPackI18n } from '~/composables/useEventPackI18n'
 
 type HeroHelperSegment = {
   text: string
@@ -19,11 +21,6 @@ type HeroHelperSegment = {
 type HeroHelperItem = {
   icon: string
   segments: HeroHelperSegment[]
-}
-
-type HeroSubtitleConfig = {
-  default?: unknown
-  events?: Record<string, unknown>
 }
 
 const isHeroImageLoaded = ref(false)
@@ -45,10 +42,11 @@ const emit = defineEmits<{
   'select-product': [payload: ProductSuggestionItem]
 }>()
 
-const { t, tm, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 const activeEventPack = useSeasonalEventPack()
+const packI18n = useEventPackI18n(activeEventPack)
 
 const partnersLinkPlaceholder = '{partnersLink}'
 
@@ -129,24 +127,21 @@ const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
     .filter((item): item is HeroHelperItem => item != null)
 }
 
-const normalizeHeroSubtitles = (value: unknown): string[] => {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value
-    .map(entry => (typeof entry === 'string' ? entry.trim() : ''))
-    .filter(Boolean)
-}
-
 const heroHelperItems = computed<HeroHelperItem[]>(() => {
-  const translatedItems = normalizeHelperItems(tm('home.hero.search.helpers'))
+  const translatedItems = normalizeHelperItems(
+    packI18n.resolveList('hero.search.helpers', {
+      fallbackKeys: ['home.hero.search.helpers'],
+    })
+  )
 
   if (translatedItems.length > 0) {
     return applyPartnerLinkPlaceholder(translatedItems)
   }
 
-  const fallback = String(t('home.hero.search.helper'))
+  const fallback =
+    packI18n.resolveString('hero.search.helper', {
+      fallbackKeys: ['home.hero.search.helper'],
+    }) ?? ''
   const trimmedFallback = fallback.trim()
 
   if (!trimmedFallback || trimmedFallback === 'home.hero.search.helper') {
@@ -165,115 +160,21 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   ])
 })
 
-const heroSubtitleFallback = computed(() => {
-  const legacySubtitle = String(t('home.hero.subtitle')).trim()
-
-  if (!legacySubtitle || legacySubtitle === 'home.hero.subtitle') {
-    return ''
-  }
-
-  return legacySubtitle
-})
-
-const heroSubtitleOptions = computed<string[]>(() => {
-  const subtitles = tm('home.hero.subtitles') as unknown
-  const subtitleConfig: HeroSubtitleConfig | undefined =
-    !Array.isArray(subtitles) && typeof subtitles === 'object' && subtitles != null
-      ? (subtitles as HeroSubtitleConfig)
-      : undefined
-
-  const defaultSubtitles = normalizeHeroSubtitles(
-    Array.isArray(subtitles) ? subtitles : subtitleConfig?.default
-  )
-  const eventSubtitles = normalizeHeroSubtitles(
-    subtitleConfig?.events?.[activeEventPack.value]
-  )
-
-  const normalizedSubtitles =
-    eventSubtitles.length > 0 ? eventSubtitles : defaultSubtitles
-
-  if (normalizedSubtitles.length > 0) {
-    return normalizedSubtitles
-  }
-
-  return heroSubtitleFallback.value ? [heroSubtitleFallback.value] : []
-})
-
-const heroTitleSubtitleFallback = computed(() => {
-  const legacySubtitle = String(t('home.hero.titleSubtitle')).trim()
-
-  if (!legacySubtitle || legacySubtitle === 'home.hero.titleSubtitle') {
-    return ''
-  }
-
-  return legacySubtitle
-})
-
-const heroTitleSubtitleOptions = computed<string[]>(() => {
-  const titleSubtitles = tm('home.hero.titleSubtitle') as unknown
-  const subtitleConfig: HeroSubtitleConfig | undefined =
-    !Array.isArray(titleSubtitles) &&
-    typeof titleSubtitles === 'object' &&
-    titleSubtitles != null
-      ? (titleSubtitles as HeroSubtitleConfig)
-      : undefined
-
-  const defaultSubtitles = normalizeHeroSubtitles(
-    Array.isArray(titleSubtitles) ? titleSubtitles : subtitleConfig?.default
-  )
-
-  const eventSubtitles = normalizeHeroSubtitles(
-    subtitleConfig?.events?.[activeEventPack.value]
-  )
-
-  const normalizedSubtitles =
-    eventSubtitles.length > 0 ? eventSubtitles : defaultSubtitles
-
-  if (normalizedSubtitles.length > 0) {
-    return normalizedSubtitles
-  }
-
-  return heroTitleSubtitleFallback.value
-    ? [heroTitleSubtitleFallback.value]
-    : []
-})
-
-const heroSubtitleSeed = useState<number | null>(
-  'home-hero-subtitle-seed',
-  () => null
+const heroSubtitle = computed(
+  () =>
+    packI18n.resolveStringVariant('hero.subtitles', {
+      fallbackKeys: ['home.hero.subtitles', 'home.hero.subtitle'],
+      stateKey: 'home-hero-subtitles',
+    }) ?? ''
 )
 
-if (heroSubtitleSeed.value == null) {
-  heroSubtitleSeed.value = Math.random()
-}
-
-const heroSubtitle = computed(() => {
-  const subtitles = heroSubtitleOptions.value
-  const fallback = heroSubtitleFallback.value
-
-  if (!subtitles.length) {
-    return fallback
-  }
-
-  const normalizedIndex = Math.floor(heroSubtitleSeed.value * subtitles.length) %
-    subtitles.length
-
-  return subtitles[normalizedIndex] ?? fallback
-})
-
-const heroTitleSubtitle = computed(() => {
-  const subtitles = heroTitleSubtitleOptions.value
-  const fallback = heroTitleSubtitleFallback.value
-
-  if (!subtitles.length) {
-    return fallback
-  }
-
-  const normalizedIndex = Math.floor(heroSubtitleSeed.value * subtitles.length) %
-    subtitles.length
-
-  return subtitles[normalizedIndex] ?? fallback
-})
+const heroTitleSubtitle = computed(
+  () =>
+    packI18n.resolveStringVariant('hero.titleSubtitle', {
+      fallbackKeys: ['home.hero.titleSubtitle'],
+      stateKey: 'home-hero-title-subtitle',
+    }) ?? ''
+)
 
 const normalizedPartnersCount = computed(() => {
   const rawCount = Number(props.partnersCount ?? 0)
@@ -302,16 +203,36 @@ const formattedPartnersCount = computed(() => {
 const heroPartnersLinkText = computed(() => {
   const count = normalizedPartnersCount.value
   const formattedCount = formattedPartnersCount.value
-  const fallbackLabel = String(t('home.hero.search.partnerLinkFallback')).trim()
+  const fallbackLabel =
+    packI18n.resolveString('hero.search.partnerLinkFallback', {
+      fallbackKeys: ['home.hero.search.partnerLinkFallback'],
+    })?.trim() ?? ''
 
   if (!count || !formattedCount) {
     return fallbackLabel || null
   }
 
-  const translated = t('home.hero.search.partnerLinkLabel', count, {
-    count,
-    formattedCount,
-  })
+  const translateKey = (key: string) => {
+    if (!te(key)) {
+      return ''
+    }
+
+    const translated = t(key, { count, formattedCount })
+    const normalized =
+      typeof translated === 'string'
+        ? translated.trim()
+        : String(translated ?? '').trim()
+
+    return normalized && normalized !== key ? normalized : ''
+  }
+
+  const packKey = `home.events.${activeEventPack.value}.hero.search.partnerLinkLabel`
+  const defaultKey = `home.events.${DEFAULT_EVENT_PACK}.hero.search.partnerLinkLabel`
+
+  const translated =
+    translateKey(packKey) ||
+    translateKey(defaultKey) ||
+    translateKey('home.hero.search.partnerLinkLabel')
 
   const normalizedTranslation =
     typeof translated === 'string'
@@ -374,7 +295,12 @@ const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
   })
 }
 
-const heroIconAlt = computed(() => String(t('home.hero.iconAlt')).trim())
+const heroIconAlt = computed(
+  () =>
+    packI18n.resolveString('hero.iconAlt', {
+      fallbackKeys: ['home.hero.iconAlt'],
+    }) ?? ''
+)
 const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
 const heroIconAnimationOptions = [
   'home-hero__icon--fade',
@@ -404,7 +330,26 @@ const heroBackgroundSrc = computed(() => {
   return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')
 })
 
-const heroEyebrow = computed(() => String(t('home.hero.eyebrow')).trim())
+const heroEyebrow = computed(
+  () =>
+    packI18n.resolveString('hero.eyebrow', {
+      fallbackKeys: ['home.hero.eyebrow'],
+    }) ?? ''
+)
+
+const heroTitle = computed(
+  () =>
+    packI18n.resolveString('hero.title', {
+      fallbackKeys: ['home.hero.title'],
+    }) ?? ''
+)
+
+const heroDescriptionTitle = computed(
+  () =>
+    packI18n.resolveString('hero.search.helpersTitle', {
+      fallbackKeys: ['home.hero.search.helpersTitle'],
+    }) ?? ''
+)
 
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
@@ -478,7 +423,7 @@ useHead({
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" class="home-hero__content">
             <h1 id="home-hero-title" class="home-hero__title">
-              {{ t('home.hero.title') }}
+              {{ heroTitle }}
             </h1>
             <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
               {{ heroTitleSubtitle }}
@@ -501,9 +446,21 @@ useHead({
                     <SearchSuggestField
                       :model-value="searchQueryValue"
                       class="home-hero__search-input"
-                      :label="t('home.hero.search.label')"
-                      :placeholder="t('home.hero.search.placeholder')"
-                      :aria-label="t('home.hero.search.ariaLabel')"
+                      :label="
+                        packI18n.resolveString('hero.search.label', {
+                          fallbackKeys: ['home.hero.search.label'],
+                        })
+                      "
+                      :placeholder="
+                        packI18n.resolveString('hero.search.placeholder', {
+                          fallbackKeys: ['home.hero.search.placeholder'],
+                        })
+                      "
+                      :aria-label="
+                        packI18n.resolveString('hero.search.ariaLabel', {
+                          fallbackKeys: ['home.hero.search.ariaLabel'],
+                        })
+                      "
                       :min-chars="minSuggestionQueryLength"
                       @update:model-value="updateSearchQuery"
                       @submit="handleSubmit"
@@ -518,7 +475,11 @@ useHead({
                           color="primary"
                           size="small"
                           type="submit"
-                          :aria-label="t('home.hero.search.cta')"
+                          :aria-label="
+                            packI18n.resolveString('hero.search.cta', {
+                              fallbackKeys: ['home.hero.search.cta'],
+                            })
+                          "
                         />
                       </template>
                     </SearchSuggestField>
@@ -533,11 +494,18 @@ useHead({
                     :selectable="false"
                     :elevation="10"
                     :hover-elevation="14"
-                    :aria-label="t('home.hero.context.ariaLabel')"
+                    :aria-label="
+                      packI18n.resolveString('hero.context.ariaLabel', {
+                        fallbackKeys: ['home.hero.context.ariaLabel'],
+                      })
+                    "
                   >
                     <div class="home-hero__context">
                       <p class="home-hero__subtitle">
                         {{ heroSubtitle }}
+                      </p>
+                      <p v-if="heroDescriptionTitle" class="home-hero__helpers-title">
+                        {{ heroDescriptionTitle }}
                       </p>
                       <div class="home-hero__helper-row">
                         <div class="home-hero__eyebrow-block">
@@ -833,6 +801,12 @@ useHead({
 .home-hero__subtitle
   margin: 0
   color: rgb(var(--v-theme-text-neutral-strong))
+
+.home-hero__helpers-title
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-weight: 600
+  letter-spacing: 0.01em
 
 .home-hero__wizard
   width: 100%

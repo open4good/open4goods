@@ -3,6 +3,52 @@ import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, unknown> = {
+  'home.events.default.hero.search.label': 'Search for a product',
+  'home.events.default.hero.search.placeholder': 'Search a product',
+  'home.events.default.hero.search.ariaLabel': 'Search input',
+  'home.events.default.hero.search.cta': 'NUDGER',
+  'home.events.default.hero.search.helper': '50M references',
+  'home.events.default.hero.search.helpersTitle':
+    'Shop with intention. Compare for impact.',
+  'home.events.default.hero.search.helpers': [
+    {
+      icon: '🌿',
+      label: 'A unique eco assessment',
+      segments: [{ text: 'A unique eco assessment' }],
+    },
+    {
+      icon: '🏷️',
+      label: 'Best prices',
+      segments: [
+        { text: 'Pay the right price with' },
+        { text: '{partnersLink}', to: '/partners' },
+      ],
+    },
+    {
+      icon: '🛡️',
+      label: 'Independent & open',
+      segments: [{ text: 'Independent & open' }],
+    },
+    {
+      icon: '⚡',
+      label: '50M references',
+      segments: [{ text: '50M references' }],
+    },
+  ],
+  'home.events.default.hero.search.partnerLinkLabel':
+    '{formattedCount} partner | {formattedCount} partners',
+  'home.events.default.hero.search.partnerLinkFallback': 'our partners',
+  'home.events.default.hero.eyebrow': 'Responsible shopping',
+  'home.events.default.hero.title': 'Responsible choices are not a luxury',
+  'home.events.default.hero.subtitles': [
+    'Save time, stay true to your values.',
+    'Shop smarter without compromise.',
+  ],
+  'home.events.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
+  'home.events.default.hero.imageAlt': 'Hero illustration',
+  'home.events.default.hero.iconAlt': 'Hero icon',
+  'home.events.default.hero.context.ariaLabel':
+    'Hero context card summarising Nudger’s promise',
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',
   'home.hero.search.ariaLabel': 'Search input',
@@ -311,6 +357,7 @@ mockNuxtImport('useI18n', () => () => ({
     return translate(key, resolvedParams, count)
   },
   tm: (key: string) => messages[key],
+  te: (key: string) => Boolean(messages[key]),
   locale: localeRef,
   availableLocales: ['fr-FR', 'en-US'],
 }))

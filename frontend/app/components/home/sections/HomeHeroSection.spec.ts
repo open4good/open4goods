@@ -5,49 +5,71 @@ import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
 import type { EventPackName } from '~~/config/theme/assets'
 
-const messages: Record<string, string> = {
-  'home.hero.eyebrow': 'notre comparateur',
-  'home.hero.title': "Réconcilier écologie et pouvoir d'achat",
-  'home.hero.subtitle': 'Gagne du temps. Choisis librement.',
-  'home.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
-  'home.hero.search.placeholder': 'Recherchez un produit ou une catégorie',
-  'home.hero.search.ariaLabel': 'Rechercher un produit responsable',
-  'home.hero.search.cta': 'NUDGER',
-  'home.hero.search.partnerLinkLabel':
+const messages: Record<string, unknown> = {
+  'home.events.default.hero.eyebrow': 'notre comparateur',
+  'home.events.default.hero.title': "Réconcilier écologie et pouvoir d'achat",
+  'home.events.default.hero.subtitles': [
+    'Gagne du temps. Choisis librement.',
+    'Choisis librement.',
+  ],
+  'home.events.christmas.hero.subtitles': [
+    'Noël responsable',
+    'Cadeaux en accord avec tes valeurs',
+  ],
+  'home.events.default.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
+  'home.events.default.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
+  'home.events.default.hero.search.placeholder':
+    'Recherchez un produit ou une catégorie',
+  'home.events.default.hero.search.ariaLabel': 'Rechercher un produit responsable',
+  'home.events.default.hero.search.cta': 'NUDGER',
+  'home.events.default.hero.search.partnerLinkLabel':
     '{formattedCount} partenaire | {formattedCount} partenaires',
-  'home.hero.search.partnerLinkFallback': 'nos partenaires',
-  'home.hero.iconAlt': 'Icône du lanceur PWA Nudger',
+  'home.events.default.hero.search.partnerLinkFallback': 'nos partenaires',
+  'home.events.default.hero.search.helper': 'Comparateur indépendant',
+  'home.events.default.hero.search.helpersTitle':
+    'Offre avec intention. Compare avec impact.',
+  'home.events.default.hero.search.helpers': [
+    {
+      icon: '🌿',
+      label: 'Une évaluation écologique et environnementale unique',
+      segments: [
+        { text: 'Une évaluation écologique', to: '/impact-score' },
+        { text: ' et environnementale unique' },
+      ],
+    },
+    {
+      icon: '🏷️',
+      label: 'Sans se faire avoir sur les prix',
+      segments: [
+        { text: 'Sans se faire avoir sur les prix avec' },
+        { text: '{partnersLink}', to: '/partenaires' },
+      ],
+    },
+  ],
+  'home.events.default.hero.iconAlt': 'Icône du lanceur PWA Nudger',
+  'home.events.default.hero.context.ariaLabel':
+    'Carte contexte du héros présentant la promesse Nudger',
 }
 
-const helperItems = [
-  {
-    icon: '🌿',
-    label: 'Une évaluation écologique et environnementale unique',
-    segments: [
-      { text: 'Une évaluation écologique', to: '/impact-score' },
-      { text: ' et environnementale unique' },
-    ],
-  },
-  {
-    icon: '🏷️',
-    label: 'Sans se faire avoir sur les prix',
-    segments: [
-      { text: 'Sans se faire avoir sur les prix avec' },
-      { text: '{partnersLink}', to: '/partenaires' },
-    ],
-  },
-]
+const helperItems = messages['home.events.default.hero.search.helpers'] as unknown[]
 
 const subtitleCollections = {
-  default: ['Gagne du temps', 'Choisis librement'],
+  default: messages['home.events.default.hero.subtitles'] as string[],
   events: {
-    christmas: ['Noël responsable', 'Cadeaux en accord avec tes valeurs'],
+    christmas: messages['home.events.christmas.hero.subtitles'] as string[],
   },
 }
 
 const activeEventPack = ref<EventPackName>('default')
 
 const resetHeroSubtitleState = () => {
+  const seedState = useState<Record<string, number>>(
+    'event-pack-variant-seeds',
+    () => ({})
+  )
+
+  seedState.value = {}
+
   const nuxtApp = useNuxtApp()
   const state = nuxtApp?.payload?.state
 
@@ -55,11 +77,10 @@ const resetHeroSubtitleState = () => {
     return
   }
 
-  Object.keys(state)
-    .filter(key => key.startsWith('home-hero-subtitle'))
-    .forEach(key => {
-      Reflect.deleteProperty(state as Record<string, unknown>, key)
-    })
+  Reflect.deleteProperty(
+    state as Record<string, unknown>,
+    'event-pack-variant-seeds'
+  )
 }
 
 vi.mock('vue-i18n', () => ({
@@ -97,12 +118,30 @@ vi.mock('vue-i18n', () => ({
         return replacement != null ? String(replacement) : _match
       })
     },
-    tm: (key: string) =>
-      key === 'home.hero.search.helpers'
-        ? helperItems
-        : key === 'home.hero.subtitles'
-          ? subtitleCollections
-          : [],
+    tm: (key: string) => {
+      if (messages[key]) {
+        return messages[key]
+      }
+
+      if (key === 'home.events.default.hero.search.helpers') {
+        return helperItems
+      }
+
+      if (key === 'home.events.default.hero.subtitles') {
+        return subtitleCollections.default
+      }
+
+      if (key === 'home.events.christmas.hero.subtitles') {
+        return subtitleCollections.events.christmas
+      }
+
+      if (key === 'home.events.default.hero.titleSubtitle') {
+        return ['Acheter mieux. Sans dépenser plus.']
+      }
+
+      return []
+    },
+    te: (key: string) => Boolean(messages[key]),
     locale: ref('fr-FR'),
   }),
 }))
@@ -153,8 +192,16 @@ const NuxtLinkStub = defineComponent({
   },
 })
 
-const mountComponent = async () => {
+const mountComponent = async (options?: { variantSeeds?: Record<string, number> }) => {
   resetHeroSubtitleState()
+
+  if (options?.variantSeeds) {
+    const seedState = useState<Record<string, number>>(
+      'event-pack-variant-seeds',
+      () => ({})
+    )
+    seedState.value = { ...(options.variantSeeds ?? {}) }
+  }
 
   return mountSuspended(HomeHeroSection, {
     props: {
@@ -193,11 +240,11 @@ describe('HomeHeroSection', () => {
     const eyebrow = wrapper.find('.home-hero__eyebrow')
     const icon = wrapper.find('.home-hero__icon')
 
-    expect(eyebrow.text()).toBe(messages['home.hero.eyebrow'])
+    expect(eyebrow.text()).toBe(messages['home.events.default.hero.eyebrow'])
     expect(icon.attributes('src')).toBe(
       '/pwa-assets/icons/android/android-launchericon-512-512.png'
     )
-    expect(icon.attributes('alt')).toBe(messages['home.hero.iconAlt'])
+    expect(icon.attributes('alt')).toBe(messages['home.events.default.hero.iconAlt'])
 
     await wrapper.unmount()
   })
@@ -241,14 +288,15 @@ describe('HomeHeroSection', () => {
 
   it('prefers event-specific subtitles when provided', async () => {
     activeEventPack.value = 'christmas'
-    const subtitleSeed = useState<number | null>('home-hero-subtitle-seed')
-
-    subtitleSeed.value = 0.9
-
-    const wrapper = await mountComponent()
+    const wrapper = await mountComponent({
+      variantSeeds: { 'home-hero-subtitles': 0.9 },
+    })
     const subtitle = wrapper.find('.home-hero__subtitle')
+    const variantState = useState<Record<string, number>>(
+      'event-pack-variant-seeds'
+    )
 
-    expect(subtitleSeed.value).toBeCloseTo(0.9)
+    expect(variantState.value['home-hero-subtitles']).toBeCloseTo(0.9)
 
     expect(subtitle.text()).toBe(subtitleCollections.events.christmas[1])
 
@@ -256,15 +304,11 @@ describe('HomeHeroSection', () => {
   })
 
   it('falls back to default subtitles when no event override exists', async () => {
-    activeEventPack.value = 'sdg'
-    const subtitleSeed = useState<number | null>('home-hero-subtitle-seed')
-
-    subtitleSeed.value = 0.6
-
-    const wrapper = await mountComponent()
+    activeEventPack.value = 'default'
+    const wrapper = await mountComponent({
+      variantSeeds: { 'home-hero-subtitles': 0.6 },
+    })
     const subtitle = wrapper.find('.home-hero__subtitle')
-
-    expect(subtitleSeed.value).toBeCloseTo(0.6)
 
     expect(subtitle.text()).toBe(subtitleCollections.default[1])
 
@@ -272,18 +316,16 @@ describe('HomeHeroSection', () => {
   })
 
   it('randomises the subtitle per page view', async () => {
-    const subtitleSeed = useState<number | null>('home-hero-subtitle-seed')
-
-    subtitleSeed.value = 0.01
-
-    const firstWrapper = await mountComponent()
+    const firstWrapper = await mountComponent({
+      variantSeeds: { 'home-hero-subtitles': 0.01 },
+    })
     const firstSubtitle = firstWrapper.find('.home-hero__subtitle').text()
 
     await firstWrapper.unmount()
 
-    subtitleSeed.value = 0.95
-
-    const secondWrapper = await mountComponent()
+    const secondWrapper = await mountComponent({
+      variantSeeds: { 'home-hero-subtitles': 0.95 },
+    })
     const secondSubtitle = secondWrapper.find('.home-hero__subtitle').text()
 
     expect(firstSubtitle).not.toBe(secondSubtitle)
