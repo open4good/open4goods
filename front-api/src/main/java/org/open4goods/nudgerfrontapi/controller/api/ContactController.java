@@ -50,7 +50,7 @@ public class ContactController {
     @PostMapping
     @Operation(
             summary = "Submit a contact message",
-            description = "Verify captcha token and forward the message to the support mailbox.",
+            description = "Verify captcha token and forward the message to the support mailbox. Supports optional template identifiers to prefill the subject and body.",
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields (future use).",
@@ -76,7 +76,7 @@ public class ContactController {
                                                      @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                                      HttpServletRequest httpRequest) {
         try {
-            contactService.submit(request, IpUtils.getIp(httpRequest));
+            contactService.submit(request, IpUtils.getIp(httpRequest), domainLanguage);
             return ResponseEntity.ok()
                     .cacheControl(CacheControl.noCache())
                     .header("X-Locale", domainLanguage.languageTag())

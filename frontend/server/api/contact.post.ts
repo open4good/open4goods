@@ -9,6 +9,11 @@ interface ContactFormPayload {
   email?: string
   message?: string
   hCaptchaResponse?: string
+  templateId?: string
+  subject?: string
+  sourceRoute?: string
+  sourceComponent?: string
+  sourcePage?: string
 }
 
 const EMAIL_PATTERN =
@@ -28,6 +33,11 @@ export default defineEventHandler(
     const email = sanitizeInput(String(body.email ?? ''))
     const message = sanitizeInput(String(body.message ?? ''))
     const hCaptchaResponse = sanitizeInput(String(body.hCaptchaResponse ?? ''))
+    const templateId = sanitizeInput(String(body.templateId ?? ''))
+    const subject = sanitizeInput(String(body.subject ?? ''))
+    const sourceRoute = sanitizeInput(String(body.sourceRoute ?? ''))
+    const sourceComponent = sanitizeInput(String(body.sourceComponent ?? ''))
+    const sourcePage = sanitizeInput(String(body.sourcePage ?? ''))
 
     if (!name) {
       throw createError({
@@ -79,6 +89,11 @@ export default defineEventHandler(
         email,
         message,
         hCaptchaResponse,
+        templateId: templateId || undefined,
+        subject: subject || undefined,
+        sourceRoute: sourceRoute || undefined,
+        sourceComponent: sourceComponent || undefined,
+        sourcePage: sourcePage || undefined,
       })
     } catch (error) {
       const backendError = await extractBackendErrorDetails(error)

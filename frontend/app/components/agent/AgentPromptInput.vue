@@ -81,11 +81,10 @@
           {{ $t('agents.promptInput.emailDescription') }}
         </p>
         <v-btn
-          :href="fallbackMailto"
-          target="_blank"
           variant="outlined"
           size="small"
           color="primary"
+          @click="emitFallbackContact"
           >{{ $t('agents.promptInput.openEmail') }}</v-btn
         >
       </div>
@@ -137,6 +136,14 @@ const emit = defineEmits<{
       captchaToken?: string
     }
   ): void
+  (
+    e: 'fallback-contact',
+    payload: {
+      prompt: string
+      attributeValues: Record<string, unknown>
+      captchaToken?: string
+    }
+  ): void
   (e: 'cancel'): void
 }>()
 
@@ -169,6 +176,17 @@ function submit() {
     isPrivate: isPrivate.value,
     attributeValues: attributeValues.value,
     captchaToken: captchaToken.value || undefined,
+  })
+}
+
+function emitFallbackContact() {
+  if (!prompt.value.trim()) {
+    return
+  }
+  emit('fallback-contact', {
+    prompt: prompt.value,
+    attributeValues: attributeValues.value,
+    captchaToken: siteKey.value ? captchaToken.value || undefined : undefined,
   })
 }
 </script>

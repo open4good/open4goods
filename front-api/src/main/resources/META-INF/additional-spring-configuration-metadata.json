@@ -246,6 +246,31 @@
       "description": "Recipient email address for contact form submissions."
     },
     {
+      "name": "front.mail-templates.templates",
+      "type": "java.util.List",
+      "description": "Collection of reusable mail templates available to the contact service."
+    },
+    {
+      "name": "front.mail-templates.templates[].id",
+      "type": "java.lang.String",
+      "description": "Unique identifier of the mail template."
+    },
+    {
+      "name": "front.mail-templates.templates[].to",
+      "type": "java.lang.String",
+      "description": "Optional recipient override for the template."
+    },
+    {
+      "name": "front.mail-templates.templates[].subject",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized subject lines keyed by language tag."
+    },
+    {
+      "name": "front.mail-templates.templates[].body",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized body content keyed by language tag."
+    },
+    {
       "name": "front.partners.ecosystem.partners",
       "type": "java.util.List",
       "description": "Configured ecosystem partners displayed on the public site."
