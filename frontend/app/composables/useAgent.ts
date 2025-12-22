@@ -6,8 +6,12 @@ import type {
 } from '~~/shared/api-client/services/agents.services'
 
 export const useAgent = () => {
-  async function listTemplates(): Promise<AgentTemplateDto[]> {
-    return await $fetch<AgentTemplateDto[]>('/api/agents/templates')
+  async function listTemplates(
+    domainLanguage?: string
+  ): Promise<AgentTemplateDto[]> {
+    return await $fetch<AgentTemplateDto[]>('/api/agents/templates', {
+      params: { domainLanguage },
+    })
   }
 
   async function submitRequest(
@@ -19,13 +23,20 @@ export const useAgent = () => {
     })
   }
 
-  async function listActivity(): Promise<AgentActivityDto[]> {
-    return await $fetch<AgentActivityDto[]>('/api/agents/activity')
+  async function listActivity(
+    domainLanguage?: string
+  ): Promise<AgentActivityDto[]> {
+    return await $fetch<AgentActivityDto[]>('/api/agents/activity', {
+      params: { domainLanguage },
+    })
   }
 
-  async function getMailto(agentId: string): Promise<string> {
+  async function getMailto(
+    agentId: string,
+    domainLanguage?: string
+  ): Promise<string> {
     return await $fetch<string>('/api/agents/mailto', {
-      params: { agentId },
+      params: { agentId, domainLanguage },
     })
   }
 

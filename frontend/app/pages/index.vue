@@ -15,7 +15,6 @@ import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
-import HomeAgentSection from '~/components/home/sections/HomeAgentSection.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
 import type {
   CategorySuggestionItem,
@@ -340,17 +339,31 @@ const faqItems = computed(() => [
   },
 ])
 
+type FaqItem = { question: string; answer: string }
+
+const userFaqEntries = ref<FaqItem[]>([])
+
+const allFaqItems = computed(() => [...faqItems.value, ...userFaqEntries.value])
+
 const faqPanels = computed(() =>
-  faqItems.value.map((item, index) => ({
+  allFaqItems.value.map((item, index) => ({
     ...item,
     blocId: `HOME:FAQ:${index + 1}`,
   }))
 )
 
+const handleAgentFaqAppend = (item: FaqItem) => {
+  if (!item.question?.trim()) {
+    return
+  }
+
+  userFaqEntries.value = [...userFaqEntries.value, item]
+}
+
 const faqJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: faqItems.value.map(item => ({
+  mainEntity: allFaqItems.value.map(item => ({
     '@type': 'Question',
     name: item.question,
     acceptedAnswer: {
@@ -831,14 +844,12 @@ useHead(() => ({
               >
                 <v-fade-transition :disabled="shouldReduceMotion">
                   <div v-show="animatedSections.faq">
-                    <HomeFaqSection :items="faqPanels" />
+                    <HomeFaqSection
+                      :items="faqPanels"
+                      @append-faq="handleAgentFaqAppend"
+                    />
                   </div>
                 </v-fade-transition>
-              </div>
-
-              <!-- Ask Agent Section -->
-              <div class="home-page__section">
-                <HomeAgentSection />
               </div>
 
               <div

@@ -467,6 +467,25 @@
           "question": "How can I suggest a product?",
           "answer": "Use our dedicated contact form."
         }
+      },
+      "agent": {
+        "eyebrow": "Your AI result here 😉",
+        "title": "Ask your question, we’ll pin it to the FAQ",
+        "subtitle": "Share your request, we’ll answer with frugal AI and surface it below for everyone.",
+        "dynamicAnswerWithLink": "See the detailed AI answer: {link}",
+        "dynamicAnswerWithState": "We’re crafting the answer ({state}).",
+        "dynamicAnswerPending": "Thanks! Your question is in the queue.",
+        "preview": {
+          "eyebrow": "Live AI feed",
+          "title": "Latest AI answer",
+          "subtitle": "The freshest public question appears here.",
+          "label": "Latest question",
+          "status": "Status: {status}",
+          "statusPending": "Status pending",
+          "cta": "Open the result",
+          "helper": "Opens the last public response in a new tab",
+          "questionFallback": "Your AI question will surface here."
+        }
       }
     },
     "roundedCards": {
