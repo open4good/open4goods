@@ -296,7 +296,7 @@ public class BatchService {
 				}
 
 			} catch (SerialisationException e) {
-				e.printStackTrace();
+				logger.error("Error serializing product to JSON: {}", p.getId(), e);
 			}
 
 		});
