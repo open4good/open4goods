@@ -173,3 +173,7 @@ sudo sysctl -w vm.max_map_count=262144
 3. Tests added/updated; coverage not reduced
 4. Docs updated (AGENTS.md, README, Javadoc)
 5. For frontend: `pnpm lint && pnpm test && pnpm generate` pass
+
+## Spring profiles
+Use profiles devsec as default profile
+
