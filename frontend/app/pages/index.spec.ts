@@ -187,6 +187,22 @@ const messages: Record<string, unknown> = {
     'Yes, refreshed regularly with quality checks.',
   'home.faq.items.suggestProduct.question': 'How can I suggest a product?',
   'home.faq.items.suggestProduct.answer': 'Use our dedicated contact form.',
+  'home.faq.agent.eyebrow': 'Your AI result here',
+  'home.faq.agent.title': 'Ask your question, we’ll pin it to the FAQ',
+  'home.faq.agent.subtitle': 'Your question and the AI result will show below.',
+  'home.faq.agent.dynamicAnswerWithLink': 'See the detailed AI answer: {link}',
+  'home.faq.agent.dynamicAnswerWithState': 'Answer in progress ({state}).',
+  'home.faq.agent.dynamicAnswerPending': 'Thanks! Your question is in queue.',
+  'home.faq.agent.preview.eyebrow': 'Live AI feed',
+  'home.faq.agent.preview.title': 'Latest AI answer',
+  'home.faq.agent.preview.subtitle': 'The freshest public question appears here.',
+  'home.faq.agent.preview.label': 'Latest question',
+  'home.faq.agent.preview.status': 'Status: {status}',
+  'home.faq.agent.preview.statusPending': 'Status pending',
+  'home.faq.agent.preview.cta': 'Open the result',
+  'home.faq.agent.preview.helper': 'Opens the last public response',
+  'home.faq.agent.preview.questionFallback':
+    'Your AI question will surface here.',
   'home.cta.title': 'Ready to buy better without overspending?',
   'home.cta.subtitle': 'Restart a search or explore the analysed offers.',
   'home.cta.button': 'Start a search',
@@ -382,7 +398,24 @@ const affiliationPartnersMock = [
   { id: 'partner-3', name: 'Partner 3' },
 ]
 
-const fetchSpy = vi.fn().mockResolvedValue(affiliationPartnersMock)
+const fetchSpy = vi.fn((url: string) => {
+  if (typeof url === 'string' && url.includes('/api/agents/templates')) {
+    return Promise.resolve([
+      {
+        id: 'question',
+        name: 'Question',
+        attributes: [],
+        publicPromptHistory: true,
+      },
+    ])
+  }
+
+  if (typeof url === 'string' && url.includes('/api/agents/activity')) {
+    return Promise.resolve([])
+  }
+
+  return Promise.resolve(affiliationPartnersMock)
+})
 
 vi.stubGlobal('$fetch', fetchSpy)
 
@@ -457,6 +490,26 @@ const SearchSuggestFieldStub = defineComponent({
         onInput,
         onKeydown,
       })
+  },
+})
+
+const AgentPromptInputStub = defineComponent({
+  name: 'AgentPromptInputStub',
+  emits: ['submit'],
+  setup(_props, { emit }) {
+    const onClick = () =>
+      emit('submit', {
+        prompt: 'stub question',
+        isPrivate: false,
+        attributeValues: {},
+      })
+
+    return () =>
+      h(
+        'button',
+        { class: 'agent-prompt-input-stub', type: 'button', onClick },
+        'Ask agent'
+      )
   },
 })
 
@@ -546,6 +599,7 @@ const mountHomePage = async () => {
         VBtn: VBtnStub,
         VTextField: VTextFieldStub,
         SearchSuggestField: SearchSuggestFieldStub,
+        AgentPromptInput: AgentPromptInputStub,
         VImg: VImgStub,
         VDivider: simpleStub('hr'),
         VExpansionPanels: simpleStub('div'),

@@ -470,6 +470,25 @@
           "question": "Comment suggérer un produit ?",
           "answer": "Via notre formulaire de contact dédié."
         }
+      },
+      "agent": {
+        "eyebrow": "Ton résultat IA ici 😉",
+        "title": "Pose ta question, on l’affiche dans la FAQ",
+        "subtitle": "Envoie ta demande, on répond avec une IA frugale et on affiche le résultat juste en dessous.",
+        "dynamicAnswerWithLink": "Découvre la réponse détaillée : {link}",
+        "dynamicAnswerWithState": "Réponse en cours ({state}).",
+        "dynamicAnswerPending": "Merci ! Ta question est dans la file.",
+        "preview": {
+          "eyebrow": "Flux IA en direct",
+          "title": "Dernière réponse IA",
+          "subtitle": "La dernière question publique apparaît ici.",
+          "label": "Dernière question",
+          "status": "Statut : {status}",
+          "statusPending": "Statut en attente",
+          "cta": "Ouvrir le résultat",
+          "helper": "Ouvre la dernière réponse publique dans un nouvel onglet",
+          "questionFallback": "Ta question IA s’affichera ici."
+        }
       }
     },
     "roundedCards": {
