@@ -2,6 +2,7 @@
 /* eslint-disable */
 export * from './AdministrationApi';
 export * from './AffiliationApi';
+export * from './AgentsApi';
 export * from './AuthenticationApi';
 export * from './BlogApi';
 export * from './CategoriesApi';

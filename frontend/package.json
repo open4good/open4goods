@@ -18,6 +18,8 @@
     "test:visual": "playwright test",
     "prepare:nuxt": "nuxt prepare",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -t ./config/openapi-templates -o shared/api-client --skip-validate-spec",
+    "generate:api-local": "openapi-generator-cli generate -i http://localhost:8086/v3/api-docs/front -g typescript-fetch -t ./config/openapi-templates -o shared/api-client --skip-validate-spec",
+
     "preprocess:css": "node ./scripts/preprocess-css.mjs",
     "semantic-release": "semantic-release",
     "postinstall": "pnpm prepare:nuxt && pnpm rebuild sharp",

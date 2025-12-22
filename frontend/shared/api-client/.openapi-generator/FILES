@@ -1,5 +1,6 @@
 apis/AdministrationApi.ts
 apis/AffiliationApi.ts
+apis/AgentsApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/CategoriesApi.ts
@@ -18,6 +19,11 @@ apis/index.ts
 index.ts
 models/AdditionalDetails.ts
 models/AffiliationPartnerDto.ts
+models/AgentActivityDto.ts
+models/AgentIssueDto.ts
+models/AgentRequestDto.ts
+models/AgentRequestResponseDto.ts
+models/AgentTemplateDto.ts
 models/Agg.ts
 models/AggregationBucketDto.ts
 models/AggregationMetadata.ts
@@ -69,6 +75,7 @@ models/ImpactScoreTexts.ts
 models/LegacyPromptConfig.ts
 models/LoginRequest.ts
 models/LogoutResponse.ts
+models/MailTemplateDto.ts
 models/Member.ts
 models/NudgeToolConfigDto.ts
 models/NudgeToolScoreDto.ts

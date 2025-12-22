@@ -2,6 +2,11 @@
 /* eslint-disable */
 export * from './AdditionalDetails';
 export * from './AffiliationPartnerDto';
+export * from './AgentActivityDto';
+export * from './AgentIssueDto';
+export * from './AgentRequestDto';
+export * from './AgentRequestResponseDto';
+export * from './AgentTemplateDto';
 export * from './Agg';
 export * from './AggregationBucketDto';
 export * from './AggregationMetadata';
@@ -53,6 +58,7 @@ export * from './ImpactScoreTexts';
 export * from './LegacyPromptConfig';
 export * from './LoginRequest';
 export * from './LogoutResponse';
+export * from './MailTemplateDto';
 export * from './Member';
 export * from './NudgeToolConfigDto';
 export * from './NudgeToolScoreDto';
