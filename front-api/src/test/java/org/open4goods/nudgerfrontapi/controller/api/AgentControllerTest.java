@@ -2,7 +2,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     })
 )
 @AutoConfigureMockMvc(addFilters = false) // Disable security filters for simple controller test
-@org.junit.jupiter.api.Disabled("Context loading issues to be resolved")
+
 class AgentControllerTest {
 
     @Autowired
@@ -54,15 +54,23 @@ class AgentControllerTest {
     @MockBean
     private org.open4goods.nudgerfrontapi.interceptor.XLocaleHeaderInterceptor xLocaleHeaderInterceptor;
 
+    @MockBean
+    private io.micrometer.core.instrument.MeterRegistry meterRegistry;
+
     @Autowired
     private ObjectMapper objectMapper;
 
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() throws Exception {
+        when(xLocaleHeaderInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
+
     @Test
-    @WithMockUser
+    @WithMockUser(authorities = "ROLE_FRONTEND")
     void listTemplates_ShouldReturnTemplates() throws Exception {
         AgentTemplateDto template = new AgentTemplateDto(
                 "agent-id", "Agent Name", "Desc", "icon", "prompt", 
-                List.of("tag"), List.of("ROLE_USER"), true, null
+                List.of("tag"), List.of("ROLE_USER"), true, null, null
         );
         when(agentService.listTemplates(any(DomainLanguage.class))).thenReturn(List.of(template));
 
@@ -74,14 +82,16 @@ class AgentControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(authorities = "ROLE_FRONTEND")
     void submitRequest_ShouldReturnCreated() throws Exception {
         AgentRequestDto request = new AgentRequestDto(
                 AgentRequestDto.AgentRequestType.FEATURE,
                 "Request content",
                 "agent-id",
                 AgentRequestDto.PromptVisibility.PUBLIC,
-                null
+                null,
+                null,
+                "token"
         );
         
         AgentRequestResponseDto response = new AgentRequestResponseDto(

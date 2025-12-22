@@ -25,11 +25,25 @@
         :rules="[v => !!v || $t('agents.promptInput.required')]"
       ></v-textarea>
 
+      <!-- Custom Attributes -->
+      <div v-if="attributes && attributes.length > 0" class="mt-4">
+        <h3 class="text-subtitle-1 mb-2 font-weight-bold">
+          {{ $t('agents.promptInput.details') }}
+        </h3>
+        <AgentAttributeRenderer
+          v-for="attr in attributes"
+          :key="attr.id"
+          v-model="attributeValues[attr.id]"
+          :attribute="attr"
+        />
+      </div>
+
       <v-checkbox
         v-if="canToggleVisibility"
         v-model="isPrivate"
         color="secondary"
         hide-details
+        class="mt-2"
       >
         <template #label>
           <div>
@@ -40,6 +54,18 @@
           </div>
         </template>
       </v-checkbox>
+
+      <!-- Captcha -->
+      <div class="d-flex justify-center mt-4">
+        <ClientOnly>
+          <VueHcaptcha
+            v-if="siteKey"
+            :sitekey="siteKey"
+            @verify="onCaptchaVerify"
+            @expired="onCaptchaExpired"
+          />
+        </ClientOnly>
+      </div>
 
       <div
         v-if="fallbackMailto"
@@ -73,7 +99,7 @@
         variant="flat"
         size="large"
         :loading="loading"
-        :disabled="!prompt.trim()"
+        :disabled="!isValid"
         @click="submit"
       >
         Submit Request
@@ -84,10 +110,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, defineAsyncComponent } from 'vue'
+import type { AgentAttributeDto } from '~/shared/api-client'
+import AgentAttributeRenderer from './AgentAttributeRenderer.vue'
+
+const VueHcaptcha = defineAsyncComponent(
+  () => import('@hcaptcha/vue3-hcaptcha')
+)
 
 const props = defineProps<{
   templateName: string
+  attributes?: AgentAttributeDto[]
   canToggleVisibility?: boolean
   defaultPublic?: boolean
   loading?: boolean
@@ -95,14 +128,47 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'submit', payload: { prompt: string; isPrivate: boolean }): void
+  (
+    e: 'submit',
+    payload: {
+      prompt: string
+      isPrivate: boolean
+      attributeValues: Record<string, unknown>
+      captchaToken?: string
+    }
+  ): void
   (e: 'cancel'): void
 }>()
 
+const runtimeConfig = useRuntimeConfig()
+const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
+
 const prompt = ref('')
 const isPrivate = ref(props.defaultPublic === false)
+const attributeValues = ref<Record<string, unknown>>({})
+const captchaToken = ref<string | null>(null)
+
+const onCaptchaVerify = (token: string) => {
+  captchaToken.value = token
+}
+
+const onCaptchaExpired = () => {
+  captchaToken.value = null
+}
+
+const isValid = computed(() => {
+  const hasPrompt = !!prompt.value.trim()
+  const hasCaptcha = siteKey.value ? !!captchaToken.value : true
+  return hasPrompt && hasCaptcha
+})
 
 function submit() {
-  emit('submit', { prompt: prompt.value, isPrivate: isPrivate.value })
+  if (!isValid.value) return
+  emit('submit', {
+    prompt: prompt.value,
+    isPrivate: isPrivate.value,
+    attributeValues: attributeValues.value,
+    captchaToken: captchaToken.value || undefined,
+  })
 }
 </script>

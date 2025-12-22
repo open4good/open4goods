@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
-import ParallaxSection from './ParallaxSection.vue'
+import ParallaxWidget from './ParallaxWidget.vue'
 
 const scrollY = ref(0)
 const motionPreference = ref<'reduce' | 'no-preference'>('no-preference')
@@ -49,7 +49,7 @@ const stubs = {
 }
 
 const mountParallax = (props?: Record<string, unknown>) =>
-  mount(ParallaxSection, {
+  mount(ParallaxWidget, {
     props: {
       backgrounds: ['/images/sample.svg'],
       ...props,
@@ -59,7 +59,7 @@ const mountParallax = (props?: Record<string, unknown>) =>
     },
   })
 
-describe('ParallaxSection', () => {
+describe('ParallaxWidget', () => {
   beforeEach(() => {
     scrollY.value = 0
     motionPreference.value = 'no-preference'
@@ -80,7 +80,7 @@ describe('ParallaxSection', () => {
 
     await nextTick()
 
-    const layers = wrapper.findAll('.parallax-section__layer')
+    const layers = wrapper.findAll('.parallax-widget__layer')
     expect(layers).toHaveLength(2)
     expect(layers[0].element.style.backgroundImage).toContain('layers/back.svg')
     expect(layers[0].element.style.transform).toBe('translate3d(0, -150px, 0)')
@@ -99,7 +99,7 @@ describe('ParallaxSection', () => {
 
     await nextTick()
 
-    const layer = wrapper.get('.parallax-section__layer')
+    const layer = wrapper.get('.parallax-widget__layer')
     expect(layer.element.style.transform).toBe('translate3d(0, 0px, 0)')
   })
 
@@ -115,7 +115,7 @@ describe('ParallaxSection', () => {
 
     await nextTick()
 
-    const layer = wrapper.get('.parallax-section__layer')
+    const layer = wrapper.get('.parallax-widget__layer')
     expect(layer.element.style.transform).toBe('translate3d(0, 0px, 0)')
   })
 
@@ -134,7 +134,7 @@ describe('ParallaxSection', () => {
 
     await nextTick()
 
-    const layer = wrapper.get('.parallax-section__layer')
+    const layer = wrapper.get('.parallax-widget__layer')
     expect(layer.element.style.transform).toBe('translate3d(0, -100px, 0)')
 
     innerHeightSpy.mockRestore()

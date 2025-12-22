@@ -238,6 +238,24 @@ front.agent:
          body:
            fr: "Bonjour,\n\n"
            en: "Hello,\n\n"
+      attributes:
+        - id: "priority"
+          type: "COMBO"
+          label:
+            fr: "Priorité"
+            en: "Priority"
+          options: ["Low", "Medium", "High"]
+        - id: "category"
+          type: "LIST"
+          label:
+            fr: "Catégorie"
+            en: "Category"
+          options: ["Interface graphique", "Backend", "Données", "Autre"]
+        - id: "newsletter"
+          type: "CHECKBOX"
+          label:
+            fr: "M'inscrire à la newsletter"
+            en: "Subscribe to newsletter"
 
     - id: question
       name:

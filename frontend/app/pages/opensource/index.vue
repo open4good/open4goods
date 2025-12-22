@@ -31,6 +31,7 @@
       :resources="resourceLinks"
       :contact="contactCta"
       :opendata-callout="opendataCallout"
+      :prompt-callout="promptCallout"
     />
   </div>
 </template>
@@ -269,6 +270,14 @@ const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
   ctaLabel: String(t('opensource.resources.opendata.cta.label')),
   ctaHref: localePath('opendata'),
   ctaAriaLabel: `${String(t('opensource.resources.opendata.cta.label'))} : ${String(t('opensource.resources.opendata.cta.ariaLabel'))}`,
+}))
+
+const promptCallout = computed(() => ({
+  title: String(t('opensource.resources.prompt.title')),
+  description: String(t('opensource.resources.prompt.description')),
+  ctaLabel: String(t('opensource.resources.prompt.cta.label')),
+  ctaHref: localePath('prompt') + '?template=feature-request',
+  ctaAriaLabel: String(t('opensource.resources.prompt.cta.ariaLabel')),
 }))
 
 const canonicalUrl = computed(() =>

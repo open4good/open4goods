@@ -14,12 +14,21 @@ public record AgentTemplateDto(
         @Schema(description = "Associated tags") List<String> tags,
         @Schema(description = "Allowed roles to access this agent") List<String> allowedRoles,
         @Schema(description = "Whether the prompt history is public") boolean publicPromptHistory,
-        @Schema(description = "Mailto template configuration") MailTemplateDto mailTemplate
+        @Schema(description = "Mailto template configuration") MailTemplateDto mailTemplate,
+        @Schema(description = "Custom attributes for the agent") List<AgentAttributeDto> attributes
 ) {
     @Schema(description = "Mailto configuration")
     public record MailTemplateDto(
             String to,
             String subject,
             String body
+    ) {}
+
+    @Schema(description = "Custom attribute definition")
+    public record AgentAttributeDto(
+            String id,
+            String type,
+            String label,
+            List<String> options
     ) {}
 }

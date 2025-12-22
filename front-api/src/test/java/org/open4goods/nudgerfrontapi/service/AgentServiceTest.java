@@ -6,11 +6,13 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doReturn;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,21 +27,23 @@ import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.feedback.service.IssueService;
+import org.open4goods.services.captcha.service.HcaptchaService;
 
 @ExtendWith(MockitoExtension.class)
-@org.junit.jupiter.api.Disabled("Mocking GHIssue internals difficult in unit test, needs refactor")
 class AgentServiceTest {
 
     @Mock
     private AgentProperties agentProperties;
     @Mock
     private IssueService issueService;
+    @Mock
+    private HcaptchaService hcaptchaService;
 
     private AgentService agentService;
 
     @BeforeEach
     void setUp() {
-        agentService = new AgentService(agentProperties, issueService);
+        agentService = new AgentService(agentProperties, issueService, hcaptchaService);
     }
 
     @Test
@@ -49,6 +53,12 @@ class AgentServiceTest {
         config.setName(Map.of("en", "Test Agent", "fr", "Agent Test"));
         config.setDescription(Map.of("en", "Description"));
         config.setTags(List.of("tag1"));
+
+        AgentProperties.AgentAttribute attr = new AgentProperties.AgentAttribute();
+        attr.setId("attr1");
+        attr.setType("TEXT");
+        attr.setLabel(Map.of("en", "Attr Label"));
+        config.setAttributes(List.of(attr));
         
         when(agentProperties.getAgents()).thenReturn(List.of(config));
 
@@ -57,10 +67,12 @@ class AgentServiceTest {
         assertThat(templates).hasSize(1);
         assertThat(templates.get(0).id()).isEqualTo("test-agent");
         assertThat(templates.get(0).name()).isEqualTo("Agent Test");
+        assertThat(templates.get(0).attributes()).hasSize(1);
+        assertThat(templates.get(0).attributes().get(0).id()).isEqualTo("attr1");
     }
 
     @Test
-    void submitRequest_ShouldCreateIssue() throws IOException {
+    void submitRequest_ShouldCreateIssue_WithAttributesAndCaptcha() throws IOException {
         AgentConfig config = new AgentConfig();
         config.setId("test-agent");
         config.setPromptTemplate("System Prompt");
@@ -69,9 +81,8 @@ class AgentServiceTest {
         when(agentProperties.getAgents()).thenReturn(List.of(config));
 
         GHIssue mockIssue = mock(GHIssue.class);
-        when(mockIssue.getNumber()).thenReturn(123);
-        when(mockIssue.getId()).thenReturn(999L);
-        when(mockIssue.getHtmlUrl()).thenReturn(new java.net.URL("https://github.com/org/repo/issues/123"));
+        doReturn(123).when(mockIssue).getNumber();
+        doReturn(java.net.URI.create("https://github.com/org/repo/issues/123").toURL()).when(mockIssue).getHtmlUrl();
 
         when(issueService.createIssue(any(), any(), any(), anySet())).thenReturn(mockIssue);
 
@@ -80,15 +91,35 @@ class AgentServiceTest {
                 "User Prompt",
                 "test-agent",
                 null,
-                null
+                "user-handle",
+                Map.of("attr1", "Value1"),
+                "valid-token"
         );
 
         AgentRequestResponseDto response = agentService.submitRequest(request, "127.0.0.1");
 
         assertThat(response.issueNumber()).isEqualTo(123);
         assertThat(response.promptVisibility()).isEqualTo(AgentRequestDto.PromptVisibility.PUBLIC);
+
+        verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "valid-token");
+    }
+
+    @Test
+    void submitRequest_ShouldFail_WhenCaptchaInvalid() {
+        AgentRequestDto request = new AgentRequestDto(
+                AgentRequestDto.AgentRequestType.FEATURE,
+                "User Prompt",
+                "test-agent",
+                null,
+                null,
+                null,
+                "bad-token"
+        );
         
-        // Verify issue creation call?
-        // verify(issueService).createIssue(eq("[test-agent] User Prompt..."), contains("System Prompt"), any(), anySet());
+        doThrow(new SecurityException("Invalid token")).when(hcaptchaService).verifyRecaptcha(any(), eq("bad-token"));
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            agentService.submitRequest(request, "127.0.0.1");
+        });
     }
 }

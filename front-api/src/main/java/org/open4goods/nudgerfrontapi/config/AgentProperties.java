@@ -32,6 +32,7 @@ public class AgentProperties {
         private boolean publicPromptHistory;
         private MailTemplateConfig mailTemplate;
         private String previewLabelKey;
+        private List<AgentAttribute> attributes;
 
         public String getId() {
             return id;
@@ -111,6 +112,53 @@ public class AgentProperties {
 
         public void setPreviewLabelKey(String previewLabelKey) {
             this.previewLabelKey = previewLabelKey;
+        }
+
+        public List<AgentAttribute> getAttributes() {
+            return attributes;
+        }
+
+        public void setAttributes(List<AgentAttribute> attributes) {
+            this.attributes = attributes;
+        }
+    }
+
+    public static class AgentAttribute {
+        private String id;
+        private String type; // TEXT, LIST, CHECKBOX, COMBO
+        private Map<String, String> label;
+        private List<String> options;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public Map<String, String> getLabel() {
+            return label;
+        }
+
+        public void setLabel(Map<String, String> label) {
+            this.label = label;
+        }
+
+        public List<String> getOptions() {
+            return options;
+        }
+
+        public void setOptions(List<String> options) {
+            this.options = options;
         }
     }
 

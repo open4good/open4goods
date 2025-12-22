@@ -23,8 +23,6 @@ type ParallaxLayer = {
 
 const props = withDefaults(
   defineProps<{
-    id?: string
-    ariaLabel?: string
     backgrounds?: ParallaxLayerInput[] | ParallaxLayerInput
     backgroundLight?: ParallaxLayerInput[] | ParallaxLayerInput
     backgroundDark?: ParallaxLayerInput[] | ParallaxLayerInput
@@ -43,8 +41,6 @@ const props = withDefaults(
     maxOffsetRatio?: number | null
   }>(),
   {
-    id: undefined,
-    ariaLabel: undefined,
     backgrounds: undefined,
     backgroundLight: undefined,
     backgroundDark: undefined,
@@ -68,6 +64,11 @@ const root = ref<HTMLElement | null>(null)
 const { height: windowHeight } = useWindowSize()
 const { top, height } = useElementBounding(root)
 
+// We want to track the parent if this widget is inside a section,
+// to ensure the parallax effect covers the section bounds if needed,
+// but usually the widget IS the background container.
+// If it is just a div taking 100% of parent, `useElementBounding(root)` is fine.
+
 const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
 const display = useDisplay()
@@ -77,11 +78,8 @@ onMounted(() => {
   isMounted.value = true
 })
 
-// Hydration mismatch fix:
-// During SSR and Client Hydration, we must match (assuming light/default).
-// We only switch to dark (if detected) after mount.
 const isDark = computed(() => {
-  if (!isMounted.value) return false // Force light during hydration
+  if (!isMounted.value) return false
   return Boolean(theme.global.current.value.dark)
 })
 
@@ -171,10 +169,6 @@ const resolveOffset = (speed: number) => {
     return '0px'
   }
 
-  // Calculate position relative to viewport center
-  // 0 = center of viewport
-  // positive = below center
-  // negative = above center
   const elementCenter = top.value + height.value / 2
   const viewportCenter = windowHeight.value / 2
   const delta = elementCenter - viewportCenter
@@ -214,8 +208,8 @@ const innerStyles = computed<CSSProperties>(() => ({
 
 const contentAlignClass = computed(() =>
   props.contentAlign === 'center'
-    ? 'parallax-section__inner--center'
-    : 'parallax-section__inner--start'
+    ? 'parallax-widget__inner--center'
+    : 'parallax-widget__inner--start'
 )
 
 const containerPaddingStyle = computed<CSSProperties>(() => ({
@@ -226,33 +220,27 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 </script>
 
 <template>
-  <section
-    :id="props.id"
+  <div
     ref="root"
-    class="parallax-section"
-    :class="{ 'parallax-section--gapless': gapless }"
-    :aria-label="ariaLabel"
+    class="parallax-widget"
+    :class="{ 'parallax-widget--gapless': gapless }"
   >
-    <div
-      class="parallax-section__media"
-      :style="mediaStyles"
-      aria-hidden="true"
-    >
+    <div class="parallax-widget__media" :style="mediaStyles" aria-hidden="true">
       <div
         v-for="(background, index) in resolvedBackgrounds"
         :key="`parallax-layer-${index}-${background.src}`"
-        class="parallax-section__layer"
+        class="parallax-widget__layer"
         :style="{
           backgroundImage: `url('${background.src}')`,
           mixBlendMode: background.blendMode,
           transform: `translate3d(0, ${resolveOffset(background.speed)}, 0)`,
         }"
       />
-      <div class="parallax-section__overlay" />
-      <div v-if="enableAplats" class="parallax-section__aplats">
+      <div class="parallax-widget__overlay" />
+      <div v-if="enableAplats" class="parallax-widget__aplats">
         <slot name="aplats">
           <img
-            class="parallax-section__aplat-image"
+            class="parallax-widget__aplat-image"
             :src="aplatSvg"
             alt=""
             loading="lazy"
@@ -261,14 +249,14 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
         </slot>
       </div>
     </div>
-    <div class="parallax-section__content" :style="contentStyles">
+    <div class="parallax-widget__content" :style="contentStyles">
       <v-container
         fluid
-        class="parallax-section__container"
+        class="parallax-widget__container"
         :style="containerPaddingStyle"
       >
         <div
-          class="parallax-section__inner"
+          class="parallax-widget__inner"
           :class="contentAlignClass"
           :style="innerStyles"
         >
@@ -276,23 +264,26 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
         </div>
       </v-container>
     </div>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="sass">
-.parallax-section
+.parallax-widget
   position: relative
   overflow: hidden
   background-color: rgb(var(--v-theme-surface-default))
+  // Ensure it fills the parent section if needed
+  width: 100%
+  height: 100%
 
-.parallax-section__media
+.parallax-widget__media
   position: absolute
   inset: 0
   width: 100%
   height: 100%
   pointer-events: none
 
-.parallax-section__layer
+.parallax-widget__layer
   position: absolute
   inset: -10%
   background-size: cover
@@ -304,20 +295,15 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   will-change: transform
   z-index: 0
 
-.parallax-section__overlay
+.parallax-widget__overlay
   position: absolute
   inset: 0
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--parallax-overlay-color) 12%, transparent) 0%,
-    color-mix(in srgb, var(--parallax-overlay-color) 65%, transparent) 42%,
-    color-mix(in srgb, var(--parallax-overlay-color) 82%, transparent) 100%
-  )
+  background: linear-gradient(180deg, color-mix(in srgb, var(--parallax-overlay-color) 12%, transparent) 0%, color-mix(in srgb, var(--parallax-overlay-color) 65%, transparent) 42%, color-mix(in srgb, var(--parallax-overlay-color) 82%, transparent) 100%)
   mix-blend-mode: multiply
   opacity: var(--parallax-overlay-opacity)
   z-index: 1
 
-.parallax-section__aplats
+.parallax-widget__aplats
   position: absolute
   inset: 0
   display: flex
@@ -327,28 +313,28 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   filter: drop-shadow(0 20px 45px rgba(var(--v-theme-shadow-primary-600), 0.22))
   z-index: 2
 
-.parallax-section__aplat-image
+.parallax-widget__aplat-image
   max-width: min(100%, 1024px)
   width: 90%
   height: auto
 
-.parallax-section__content
+.parallax-widget__content
   position: relative
   z-index: 3
 
-.parallax-section__container
+.parallax-widget__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
 
-.parallax-section__inner
+.parallax-widget__inner
   display: flex
   flex-direction: column
   gap: clamp(1.5rem, 4vw, 2.5rem)
 
-.parallax-section__inner--center
+.parallax-widget__inner--center
   align-items: center
   text-align: center
 
-.parallax-section__inner--start
+.parallax-widget__inner--start
   align-items: stretch
 
 :deep(.home-section)
@@ -358,22 +344,22 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 :deep(.home-section__container)
   padding-inline: 0
 
-.parallax-section--gapless
+.parallax-widget--gapless
   background-color: transparent
 
-.parallax-section--gapless .parallax-section__content
+.parallax-widget--gapless .parallax-widget__content
   padding-block: 0 !important
 
-.parallax-section--gapless .parallax-section__container
+.parallax-widget--gapless .parallax-widget__container
   padding-inline: 0
 
-.parallax-section--gapless .parallax-section__inner
+.parallax-widget--gapless .parallax-widget__inner
   gap: clamp(1rem, 2.5vw, 1.75rem)
 
 @media (max-width: 959px)
-  .parallax-section__layer
+  .parallax-widget__layer
     transform: none !important
 
-  .parallax-section__overlay
+  .parallax-widget__overlay
     opacity: calc(var(--parallax-overlay-opacity) + 0.08)
 </style>

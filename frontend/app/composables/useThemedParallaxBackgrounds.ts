@@ -74,26 +74,48 @@ export const useThemedParallaxBackgrounds = (
   >
 ) => {
   const theme = useTheme()
+  const { tm } = useI18n()
 
   const themeName = computed<ThemeName>(() =>
     resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
   )
 
+  const resolveI18nPack = (eventPack: EventPackName): ParallaxPackConfig => {
+    const i18nKey = `home.events.${eventPack}.parallax`
+    const entries = tm(i18nKey) as Record<string, string> | undefined
+
+    if (!entries) {
+      return {}
+    }
+
+    return Object.fromEntries(
+      Object.entries(entries).map(([section, path]) => [section, [path]])
+    )
+  }
+
   return computed<Record<ParallaxSectionKey, ParallaxLayerConfig[]>>(() => {
     const activePackName = unref(packName)
     const overrides = unref(dynamicOverrides)
+
+    // 1. Static config resolution
     const packConfig = resolvePackForTheme(activePackName, themeName.value)
     const fallbackPack =
       activePackName === DEFAULT_EVENT_PACK
         ? packConfig
         : resolvePackForTheme(DEFAULT_EVENT_PACK, themeName.value)
 
+    // 2. i18n resolution (takes precedence if present for specific sections)
+    const i18nPack = resolveI18nPack(activePackName)
+
     return PARALLAX_SECTION_KEYS.reduce<
       Record<ParallaxSectionKey, ParallaxLayerConfig[]>
     >(
       (acc, section) => {
         const assets =
-          overrides?.[section] ?? packConfig[section] ?? fallbackPack[section]
+          overrides?.[section] ??
+          i18nPack[section] ??
+          packConfig[section] ??
+          fallbackPack[section]
 
         return {
           ...acc,

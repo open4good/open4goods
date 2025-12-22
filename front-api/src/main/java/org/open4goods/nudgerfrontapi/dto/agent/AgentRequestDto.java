@@ -19,7 +19,13 @@ public record AgentRequestDto(
         PromptVisibility promptVisibility,
 
         @Schema(description = "User handle or email (optional)")
-        String userHandle
+        String userHandle,
+
+        @Schema(description = "Values for custom attributes")
+        java.util.Map<String, Object> attributeValues,
+
+        @Schema(description = "Captcha validation token")
+        String captchaToken
 ) {
     public enum AgentRequestType {
         FEATURE, QUESTION

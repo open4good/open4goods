@@ -36,6 +36,7 @@
       <div v-else-if="selectedTemplate && !submissionResult" key="input">
         <AgentPromptInput
           :template-name="selectedTemplate.name"
+          :attributes="selectedTemplate.attributes"
           :can-toggle-visibility="!selectedTemplate.publicPromptHistory"
           :default-public="selectedTemplate.publicPromptHistory"
           :fallback-mailto="mailtoLink"
@@ -233,9 +234,13 @@ async function onSelectTemplate(template: AgentTemplateDto) {
 async function onSubmit({
   prompt,
   isPrivate,
+  attributeValues,
+  captchaToken,
 }: {
   prompt: string
   isPrivate: boolean
+  attributeValues: Record<string, unknown>
+  captchaToken?: string
 }) {
   if (!selectedTemplate.value) return
   submitting.value = true
@@ -247,6 +252,8 @@ async function onSubmit({
       promptVisibility: (isPrivate
         ? 'PRIVATE'
         : 'PUBLIC') as unknown as AgentRequestDtoPromptVisibilityEnum,
+      attributeValues,
+      captchaToken,
     }
 
     submissionResult.value = await submitRequest(request, currentLang)

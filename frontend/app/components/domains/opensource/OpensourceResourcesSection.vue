@@ -27,6 +27,14 @@ interface OpendataCallout {
   ctaAriaLabel: string
 }
 
+interface PromptCallout {
+  title: string
+  description: string
+  ctaLabel: string
+  ctaHref: string
+  ctaAriaLabel: string
+}
+
 withDefaults(
   defineProps<{
     eyebrow: string
@@ -35,9 +43,11 @@ withDefaults(
     resources: ResourceLink[]
     contact: ContactCta
     opendataCallout?: OpendataCallout
+    promptCallout?: PromptCallout
   }>(),
   {
     opendataCallout: undefined,
+    promptCallout: undefined,
   }
 )
 </script>
@@ -98,6 +108,34 @@ withDefaults(
           </v-card>
         </v-col>
       </v-row>
+
+      <v-card
+        v-if="promptCallout"
+        class="opendata-card"
+        rounded="xl"
+        elevation="8"
+        role="region"
+        :aria-label="promptCallout.title"
+      >
+        <div class="opendata-content">
+          <div class="opendata-text">
+            <h2 class="opendata-title">{{ promptCallout.title }}</h2>
+            <p class="opendata-description">
+              {{ promptCallout.description }}
+            </p>
+          </div>
+          <v-btn
+            :href="promptCallout.ctaHref"
+            color="secondary"
+            variant="flat"
+            size="large"
+            :aria-label="promptCallout.ctaAriaLabel"
+            append-icon="mdi-creation"
+          >
+            {{ promptCallout.ctaLabel }}
+          </v-btn>
+        </div>
+      </v-card>
 
       <v-card
         v-if="opendataCallout"

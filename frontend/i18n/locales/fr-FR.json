@@ -176,6 +176,13 @@
               }
             ]
           }
+        },
+        "parallax": {
+          "essentials": "parallax/parallax-background-bastille-essentials.svg",
+          "features": "parallax/parallax-background-bastille-features.svg",
+          "blog": "parallax/parallax-background-bastille-blog.svg",
+          "objections": "parallax/parallax-background-bastille-objections.svg",
+          "cta": "parallax/parallax-background-bastille-cta.svg"
         }
       }
     },
@@ -272,8 +279,13 @@
             ]
           }
         ],
+
         "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
         "partnerLinkFallback": "nos partenaires"
+      },
+      "agent": {
+        "title": "Une question ?",
+        "subtitle": "Posez votre question à notre agent IA expert Nudger."
       },
       "context": {
         "cornerLabel": "Résumé impact",
@@ -1719,6 +1731,14 @@
         },
         "title": "Partagez vos idées et retours"
       },
+      "prompt": {
+        "title": "Suggérer une fonctionnalité",
+        "description": "Utilisez notre agent IA pour proposer directement une nouvelle fonctionnalité.",
+        "cta": {
+          "label": "Proposer une idée",
+          "ariaLabel": "Ouvrir l'agent de proposition de fonctionnalité"
+        }
+      },
       "links": {
         "guide": {
           "ariaLabel": "Ouvrir le guide de contribution Nudger sur GitHub dans un nouvel onglet",
@@ -2750,7 +2770,8 @@
       "privateDescription": "Le ticket sera public, mais votre texte original sera masqué.",
       "email": "Vous préférez envoyer un email ?",
       "emailDescription": "Vous pouvez utiliser votre client de messagerie par défaut.",
-      "openEmail": "Ouvrir mon email"
+      "openEmail": "Ouvrir mon email",
+      "details": "Détails supplémentaires"
     },
     "submission": {
       "success": "Demande envoyée !",

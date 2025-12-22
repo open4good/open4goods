@@ -15,7 +15,8 @@ import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
-import ParallaxSection from '~/components/shared/ui/ParallaxSection.vue'
+import HomeAgentSection from '~/components/home/sections/HomeAgentSection.vue'
+import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
 import type {
   CategorySuggestionItem,
   ProductSuggestionItem,
@@ -696,157 +697,170 @@ useHead(() => ({
         @select-product="handleProductSuggestion"
       />
       <div class="home-page__sections">
-        <ParallaxSection
-          id="home-essentials"
-          class="home-page__parallax"
-          :gapless="true"
-          :backgrounds="parallaxBackgrounds.essentials.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
-          :aria-label="parallaxBackgrounds.essentials.ariaLabel"
-          :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
-          :enable-aplats="true"
-        >
-          <div class="home-page__stack">
-            <div
-              v-intersect="createIntersectHandler('problems')"
-              class="home-page__section"
-            >
-              <v-slide-y-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.problems">
-                  <HomeProblemsSection :items="problemItems" />
-                </div>
-              </v-slide-y-transition>
-            </div>
-
-            <div
-              v-intersect="createIntersectHandler('solution')"
-              class="home-page__section"
-            >
-              <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.solution">
-                  <HomeSolutionSection :benefits="solutionBenefits" />
-                </div>
-              </v-slide-y-reverse-transition>
-            </div>
-          </div>
-        </ParallaxSection>
-
-        <ParallaxSection
-          id="home-features"
-          class="home-page__parallax home-page__parallax--centered"
-          :backgrounds="parallaxBackgrounds.features.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
-          :aria-label="parallaxBackgrounds.features.ariaLabel"
-          :max-offset-ratio="parallaxBackgrounds.features.maxOffsetRatio"
-          content-align="center"
-        >
-          <div
-            v-intersect="createIntersectHandler('features')"
-            class="home-page__section"
+        <section id="home-essentials" class="home-page__section-wrapper">
+          <ParallaxWidget
+            class="home-page__parallax"
+            :gapless="true"
+            :backgrounds="parallaxBackgrounds.essentials.backgrounds"
+            :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
+            :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
+            :aria-label="parallaxBackgrounds.essentials.ariaLabel"
+            :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
+            :enable-aplats="true"
           >
-            <v-scale-transition :disabled="shouldReduceMotion">
-              <div v-show="animatedSections.features">
-                <HomeFeaturesSection :features="featureCards" />
+            <div class="home-page__stack">
+              <div
+                v-intersect="createIntersectHandler('problems')"
+                class="home-page__section"
+              >
+                <v-slide-y-transition :disabled="shouldReduceMotion">
+                  <div v-show="animatedSections.problems">
+                    <HomeProblemsSection :items="problemItems" />
+                  </div>
+                </v-slide-y-transition>
               </div>
-            </v-scale-transition>
-          </div>
-        </ParallaxSection>
 
-        <ParallaxSection
-          id="home-knowledge-blog"
-          class="home-page__parallax"
-          :backgrounds="parallaxBackgrounds.blog.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
-          :aria-label="parallaxBackgrounds.blog.ariaLabel"
-          :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
-          :enable-aplats="true"
-        >
-          <div class="home-page__stack">
+              <div
+                v-intersect="createIntersectHandler('solution')"
+                class="home-page__section"
+              >
+                <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
+                  <div v-show="animatedSections.solution">
+                    <HomeSolutionSection :benefits="solutionBenefits" />
+                  </div>
+                </v-slide-y-reverse-transition>
+              </div>
+            </div>
+          </ParallaxWidget>
+        </section>
+
+        <section id="home-features" class="home-page__section-wrapper">
+          <ParallaxWidget
+            class="home-page__parallax home-page__parallax--centered"
+            :backgrounds="parallaxBackgrounds.features.backgrounds"
+            :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
+            :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
+            :aria-label="parallaxBackgrounds.features.ariaLabel"
+            :max-offset-ratio="parallaxBackgrounds.features.maxOffsetRatio"
+            content-align="center"
+          >
             <div
-              v-intersect="createIntersectHandler('blog')"
+              v-intersect="createIntersectHandler('features')"
               class="home-page__section"
             >
-              <v-slide-x-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.blog">
-                  <HomeBlogSection
-                    :loading="blogLoading"
-                    :featured-item="featuredBlogItem"
-                    :secondary-items="secondaryBlogItems"
-                  />
+              <v-scale-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.features">
+                  <HomeFeaturesSection :features="featureCards" />
                 </div>
-              </v-slide-x-transition>
+              </v-scale-transition>
             </div>
-          </div>
-        </ParallaxSection>
+          </ParallaxWidget>
+        </section>
 
-        <ParallaxSection
+        <section id="home-knowledge-blog" class="home-page__section-wrapper">
+          <ParallaxWidget
+            class="home-page__parallax"
+            :backgrounds="parallaxBackgrounds.blog.backgrounds"
+            :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
+            :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
+            :aria-label="parallaxBackgrounds.blog.ariaLabel"
+            :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
+            :enable-aplats="true"
+          >
+            <div class="home-page__stack">
+              <div
+                v-intersect="createIntersectHandler('blog')"
+                class="home-page__section"
+              >
+                <v-slide-x-transition :disabled="shouldReduceMotion">
+                  <div v-show="animatedSections.blog">
+                    <HomeBlogSection
+                      :loading="blogLoading"
+                      :featured-item="featuredBlogItem"
+                      :secondary-items="secondaryBlogItems"
+                    />
+                  </div>
+                </v-slide-x-transition>
+              </div>
+            </div>
+          </ParallaxWidget>
+        </section>
+
+        <section
           id="home-knowledge-objections"
-          class="home-page__parallax"
-          :backgrounds="parallaxBackgrounds.objections.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
-          :aria-label="parallaxBackgrounds.objections.ariaLabel"
-          :max-offset-ratio="parallaxBackgrounds.objections.maxOffsetRatio"
-          :enable-aplats="true"
+          class="home-page__section-wrapper"
         >
-          <div class="home-page__stack">
-            <div
-              v-intersect="createIntersectHandler('objections')"
-              class="home-page__section"
-            >
-              <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.objections">
-                  <HomeObjectionsSection :items="objectionItems" />
-                </div>
-              </v-slide-x-reverse-transition>
+          <ParallaxWidget
+            class="home-page__parallax"
+            :backgrounds="parallaxBackgrounds.objections.backgrounds"
+            :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
+            :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
+            :aria-label="parallaxBackgrounds.objections.ariaLabel"
+            :max-offset-ratio="parallaxBackgrounds.objections.maxOffsetRatio"
+            :enable-aplats="true"
+          >
+            <div class="home-page__stack">
+              <div
+                v-intersect="createIntersectHandler('objections')"
+                class="home-page__section"
+              >
+                <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
+                  <div v-show="animatedSections.objections">
+                    <HomeObjectionsSection :items="objectionItems" />
+                  </div>
+                </v-slide-x-reverse-transition>
+              </div>
             </div>
-          </div>
-        </ParallaxSection>
+          </ParallaxWidget>
+        </section>
 
-        <ParallaxSection
-          id="home-cta"
-          class="home-page__parallax home-page__parallax--centered"
-          :backgrounds="parallaxBackgrounds.cta.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
-          :aria-label="parallaxBackgrounds.cta.ariaLabel"
-          :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
-          content-align="center"
-        >
-          <div class="home-page__stack home-page__stack--compact">
-            <div
-              v-intersect="createIntersectHandler('faq')"
-              class="home-page__section"
-            >
-              <v-fade-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.faq">
-                  <HomeFaqSection :items="faqPanels" />
-                </div>
-              </v-fade-transition>
-            </div>
+        <section id="home-cta" class="home-page__section-wrapper">
+          <ParallaxWidget
+            class="home-page__parallax home-page__parallax--centered"
+            :backgrounds="parallaxBackgrounds.cta.backgrounds"
+            :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
+            :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
+            :aria-label="parallaxBackgrounds.cta.ariaLabel"
+            :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
+            content-align="center"
+          >
+            <div class="home-page__stack home-page__stack--compact">
+              <div
+                v-intersect="createIntersectHandler('faq')"
+                class="home-page__section"
+              >
+                <v-fade-transition :disabled="shouldReduceMotion">
+                  <div v-show="animatedSections.faq">
+                    <HomeFaqSection :items="faqPanels" />
+                  </div>
+                </v-fade-transition>
+              </div>
 
-            <div
-              v-intersect="createIntersectHandler('cta')"
-              class="home-page__section"
-            >
-              <v-slide-y-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.cta">
-                  <HomeCtaSection
-                    v-model:search-query="searchQuery"
-                    :categories-landing-url="categoriesLandingUrl"
-                    :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-                    @submit="handleSearchSubmit"
-                    @select-category="handleCategorySuggestion"
-                    @select-product="handleProductSuggestion"
-                  />
-                </div>
-              </v-slide-y-transition>
+              <!-- Ask Agent Section -->
+              <div class="home-page__section">
+                <HomeAgentSection />
+              </div>
+
+              <div
+                v-intersect="createIntersectHandler('cta')"
+                class="home-page__section"
+              >
+                <v-slide-y-transition :disabled="shouldReduceMotion">
+                  <div v-show="animatedSections.cta">
+                    <HomeCtaSection
+                      v-model:search-query="searchQuery"
+                      :categories-landing-url="categoriesLandingUrl"
+                      :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+                      @submit="handleSearchSubmit"
+                      @select-category="handleCategorySuggestion"
+                      @select-product="handleProductSuggestion"
+                    />
+                  </div>
+                </v-slide-y-transition>
+              </div>
             </div>
-          </div>
-        </ParallaxSection>
+          </ParallaxWidget>
+        </section>
       </div>
     </div>
   </div>
