@@ -1,6 +1,5 @@
 package org.open4goods.api.services.completion.text;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ai.djl.Application;
 import ai.djl.huggingface.translator.TextEmbeddingTranslator;
 import ai.djl.huggingface.tokenizers.HuggingFaceTokenizer;
 import ai.djl.inference.Predictor;
@@ -25,59 +25,71 @@ public class DjlTextEmbeddingService {
 
     private static final Logger logger = LoggerFactory.getLogger(DjlTextEmbeddingService.class);
 
-    // DistilCamemBERT model (HuggingFace)
-    // We can use the DJL model zoo to auto-download or point to a local path
-    // "djl://ai.djl.huggingface.pytorch/cmarkea/distilcamembert-base"
-    // For now, let's assume we use a criteria that fetches it.
     @Autowired
     private ApiProperties apiProperties;
 
-    private ZooModel<String, float[]> model;
+    private ZooModel<String, float[]> textModel;
+    private ZooModel<String, float[]> multimodalTextModel;
 
     @PostConstruct
     public void init() {
-        try {
-            logger.info("Initializing DJL text embedding model from: {}", apiProperties.getEmbedding().getModelPath());
-
-            // Create tokenizer explicitly
-            HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(Paths.get(apiProperties.getEmbedding().getModelPath()));
-
-            TextEmbeddingTranslator translator = TextEmbeddingTranslator.builder(tokenizer)
-                    .optPoolingMode("mean") // Mean pooling for sentence embedding
-                    .optNormalize(true)
-                    .build();
-
-            Criteria<String, float[]> criteria = Criteria.builder()
-                    .setTypes(String.class, float[].class)
-                    .optModelPath(Paths.get(apiProperties.getEmbedding().getModelPath()))
-                    .optTranslator(translator)
-                    .optEngine("PyTorch")
-                    .optProgress(new ProgressBar())
-                    .build();
-
-            this.model = criteria.loadModel();
-            
-            logger.info("DJL text embedding model initialized.");
-        } catch (Exception e) {
-            logger.error("Failed to initialize text embedding model", e);
-            // We don't throw to avoid crashing the app, but service won't work
-        }
+        this.textModel = loadModel(apiProperties.getEmbedding().getTextModelUrl(), "text-only");
+        this.multimodalTextModel = loadModel(apiProperties.getEmbedding().getMultimodalModelUrl(), "multimodal");
     }
 
     @PreDestroy
     public void close() {
-        if (model != null) {
-            model.close();
-        }
+        closeQuietly(textModel);
+        closeQuietly(multimodalTextModel);
     }
 
     /**
      * Computes the embedding for a single text.
      * @param text
-     * @return float[768] vector
+     * @return normalized embedding vector
      */
     public float[] embed(String text) {
-        if (model == null) {
+        float[] vector = embedWithModel(textModel, text);
+        if (vector != null) {
+            return vector;
+        }
+        return embedWithModel(multimodalTextModel, text);
+    }
+    
+    // Simple batch wrapper (real batching would require BatchPredictor)
+    public List<float[]> embedBatch(List<String> texts) {
+        return texts.stream().map(this::embed).collect(Collectors.toList());
+    }
+
+    private ZooModel<String, float[]> loadModel(String modelUrl, String label) {
+        try {
+            logger.info("Initializing DJL {} embedding model from: {}", label, modelUrl);
+
+            HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(modelUrl);
+
+            TextEmbeddingTranslator translator = TextEmbeddingTranslator.builder(tokenizer)
+                    .optPoolingMode("mean")
+                    .optNormalize(true)
+                    .build();
+
+            Criteria<String, float[]> criteria = Criteria.builder()
+                    .setTypes(String.class, float[].class)
+                    .optApplication(Application.NLP.TEXT_EMBEDDING)
+                    .optModelUrls(modelUrl)
+                    .optTranslator(translator)
+                    .optEngine("PyTorch")
+                    .optProgress(new ProgressBar())
+                    .build();
+
+            return criteria.loadModel();
+        } catch (Exception e) {
+            logger.error("Failed to initialize {} text embedding model", label, e);
+            return null;
+        }
+    }
+
+    private float[] embedWithModel(ZooModel<String, float[]> model, String text) {
+        if (model == null || text == null) {
             return null;
         }
         try (Predictor<String, float[]> predictor = model.newPredictor()) {
@@ -87,9 +99,10 @@ public class DjlTextEmbeddingService {
             return null;
         }
     }
-    
-    // Simple batch wrapper (real batching would require BatchPredictor)
-    public List<float[]> embedBatch(List<String> texts) {
-        return texts.stream().map(this::embed).collect(Collectors.toList());
+
+    private void closeQuietly(ZooModel<String, float[]> model) {
+        if (model != null) {
+            model.close();
+        }
     }
 }
