@@ -181,9 +181,9 @@ public class Product implements Standardisable {
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 
 	/**
-	 * Text embedding vector for semantic search (DistilCamemBERT = 768 dims)
+	 * Multimodal embedding vector for semantic search (CLIP = 512 dims)
 	 */
-	@Field(type = FieldType.Dense_Vector, dims = 768)
+	@Field(type = FieldType.Dense_Vector, dims = 512)
 	private float[] embedding;
 
 	//////////////////// :

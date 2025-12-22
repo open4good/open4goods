@@ -158,6 +158,12 @@
       "type": "keyword",
       "index": true
     },
+    "embedding": {
+      "type": "dense_vector",
+      "dims": 512,
+      "index": true,
+      "similarity": "cosine"
+    },
 
     "externalIds": {
       "type": "object",
@@ -263,7 +269,34 @@
     },
     "resources": {
       "type": "object",
-      "enabled": false
+      "dynamic": "false",
+      "properties": {
+        "url": {
+          "type": "keyword",
+          "index": false
+        },
+        "resourceType": {
+          "type": "keyword"
+        },
+        "imageInfo": {
+          "properties": {
+            "width": {
+              "type": "integer",
+              "index": false
+            },
+            "height": {
+              "type": "integer",
+              "index": false
+            },
+            "embedding": {
+              "type": "dense_vector",
+              "dims": 512,
+              "index": true,
+              "similarity": "cosine"
+            }
+          }
+        }
+      }
     },
     "bestsScores": {
       "type": "object",
@@ -330,13 +363,13 @@
         "upcType": {
           "type": "keyword",
           "index": false
+        },
+        "embedding": {
+          "type": "dense_vector",
+          "dims": 512,
+          "index": true,
+          "similarity": "cosine"
         }
-      },
-      "embedding": {
-        "type": "dense_vector",
-        "dims": 768,
-        "index": true,
-        "similarity": "cosine"
       }
     }
   }

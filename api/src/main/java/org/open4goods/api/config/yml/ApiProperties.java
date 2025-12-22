@@ -646,14 +646,58 @@ public class ApiProperties {
 	}
 
 	public static class EmbeddingConfig {
-		private String modelPath = "/opt/open4goods/models/distilcamembert-base";
+		/**
+		 * Multimodal (text + image) model loaded through DJL (HuggingFace provider).
+		 * Default: multilingual CLIP.
+		 */
+		private String multimodalModelUrl = "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1";
 
-		public String getModelPath() {
-			return modelPath;
+		/**
+		 * Text-only embedding model for improved semantic search.
+		 * Default: multilingual E5.
+		 */
+		private String textModelUrl = "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base";
+
+		/**
+		 * Expected embedding dimension for both text and image vectors.
+		 */
+		private int embeddingDimension = 512;
+
+		/**
+		 * Target input size for vision models.
+		 */
+		private int imageInputSize = 224;
+
+		public String getMultimodalModelUrl() {
+			return multimodalModelUrl;
 		}
 
-		public void setModelPath(String modelPath) {
-			this.modelPath = modelPath;
+		public void setMultimodalModelUrl(String multimodalModelUrl) {
+			this.multimodalModelUrl = multimodalModelUrl;
+		}
+
+		public String getTextModelUrl() {
+			return textModelUrl;
+		}
+
+		public void setTextModelUrl(String textModelUrl) {
+			this.textModelUrl = textModelUrl;
+		}
+
+		public int getEmbeddingDimension() {
+			return embeddingDimension;
+		}
+
+		public void setEmbeddingDimension(int embeddingDimension) {
+			this.embeddingDimension = embeddingDimension;
+		}
+
+		public int getImageInputSize() {
+			return imageInputSize;
+		}
+
+		public void setImageInputSize(int imageInputSize) {
+			this.imageInputSize = imageInputSize;
 		}
 	}
 

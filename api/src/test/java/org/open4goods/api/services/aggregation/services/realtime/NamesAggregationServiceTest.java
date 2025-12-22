@@ -1,69 +1,105 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
+import java.util.HashMap;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
+import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(MockitoExtension.class)
 class NamesAggregationServiceTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(NamesAggregationServiceTest.class);
+	@Mock
+	private VerticalsConfigService verticalsConfigService;
 
-    @Test
-    void testEmbeddingIntegration() throws Exception {
-        // Mocks
-        VerticalsConfigService verticalService = mock(VerticalsConfigService.class);
-        EvaluationService evaluationService = mock(EvaluationService.class);
-        BlablaService blablaService = mock(BlablaService.class);
-        DjlTextEmbeddingService embeddingService = mock(DjlTextEmbeddingService.class);
+	@Mock
+	private EvaluationService evaluationService;
 
-        // Service under test
-        NamesAggregationService service = new NamesAggregationService(
-                logger, verticalService, evaluationService, blablaService, embeddingService);
+	@Mock
+	private BlablaService blablaService;
 
-        // Data Setup
-        Product product = new Product(1L);
-        product.setVertical("electronics");
-        product.getOfferNames().add("Super TV 4K"); // bestName will pick this
+	@Mock
+	private DjlTextEmbeddingService embeddingService;
 
-        // Vertical Config Setup
-        VerticalConfig vc = new VerticalConfig();
-        vc.setId("electronics");
-        ProductI18nElements i18n = new ProductI18nElements();
-        PrefixedAttrText h1 = new PrefixedAttrText();
-        h1.setPrefix("Televiseur");
-        i18n.setH1Title(h1);
-        vc.getI18n().put("fr", i18n);
+	private NamesAggregationService service;
 
-        when(verticalService.getConfigByIdOrDefault("electronics")).thenReturn(vc);
+	@BeforeEach
+	void setUp() {
+		service = new NamesAggregationService(
+				LoggerFactory.getLogger(NamesAggregationService.class),
+				verticalsConfigService,
+				evaluationService,
+				blablaService,
+				embeddingService);
+	}
 
-        // Embedding Mock
-        float[] mockEmbedding = new float[768];
-        mockEmbedding[0] = 0.1f;
-        when(embeddingService.embed(anyString())).thenReturn(mockEmbedding);
+	@Test
+	void buildEmbeddingText_shouldBlendBrandModelOffersAndVertical() {
+		VerticalConfig config = buildVerticalConfig();
+		Product product = new Product(42L);
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
+		product.getOfferNames().add("premiere offre");
+		product.getOfferNames().add("seconde offre");
 
-        // Execution
-        service.onProduct(product, vc);
+		String combined = service.buildEmbeddingText(product, config);
 
-        // Verification
-        // Expected text: "Televiseur Super TV 4K" (Category + Name)
-        verify(embeddingService, times(1)).embed("Televiseur Super TV 4K");
-        
-        Assertions.assertNotNull(product.getEmbedding());
-        Assertions.assertEquals(0.1f, product.getEmbedding()[0]);
-    }
+		assertThat(combined)
+				.contains("Marque")
+				.contains("Modele")
+				.contains("premiere offre")
+				.contains("Cuisine");
+		assertThat(combined.length()).isLessThanOrEqualTo(1000);
+	}
+
+	@Test
+	void onProduct_shouldStoreEmbeddingWhenTextPresent() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
+		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
+
+		Product product = new Product(7L);
+		product.setVertical("vertical-id");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
+		product.getOfferNames().add("offre");
+
+		service.onProduct(product, config);
+
+		assertNotNull(product.getEmbedding());
+	}
+
+	private VerticalConfig buildVerticalConfig() {
+		VerticalConfig config = new VerticalConfig();
+		ProductI18nElements productI18nElements = new ProductI18nElements();
+		PrefixedAttrText h1 = new PrefixedAttrText();
+		h1.setPrefix("Cuisine");
+		productI18nElements.setH1Title(h1);
+
+		HashMap<String, ProductI18nElements> i18n = new HashMap<>();
+		i18n.put("fr", productI18nElements);
+		config.setI18n(i18n);
+		return config;
+	}
 }

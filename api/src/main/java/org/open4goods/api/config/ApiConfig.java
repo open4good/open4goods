@@ -302,8 +302,8 @@ public class ApiConfig {
 
 
 	@Bean
-	ImageEmbeddingService imageEmbeddingService () {
-		return new DjlImageEmbeddingService();
+	ImageEmbeddingService imageEmbeddingService(ApiProperties apiProperties) {
+		return new DjlImageEmbeddingService(apiProperties);
 	}
 	@Bean
 	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, ImageEmbeddingService imageEmbeddingService) {

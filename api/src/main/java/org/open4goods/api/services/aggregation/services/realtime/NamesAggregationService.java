@@ -1,12 +1,18 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
@@ -177,25 +183,12 @@ public class NamesAggregationService extends AbstractAggregationService {
 		// Keep behavior: attempt computation whenever vertical is present and name is non-empty.
 		if (StringUtils.isNotBlank(data.getVertical())) {
 			try {
-				final VerticalConfig vc = resolvedVertical; // already resolved above
-				if (vc != null && vc.getI18n() != null && vc.i18n("fr") != null && vc.i18n("fr").getH1Title() != null) {
+				String textToEmbed = buildEmbeddingText(data, resolvedVertical);
 
-					final String category = vc.i18n("fr").getH1Title().getPrefix();
-					final String name = data.bestName();
-
-					if (StringUtils.isNotBlank(name)) {
-						String textToEmbed = (category != null ? category + " " : "") + name;
-
-						// DistilCamemBERT is token-limited; tokenizer usually truncates,
-						// but bounding input reduces worst-case CPU/memory usage in case of noisy data.
-						if (textToEmbed.length() > 1000) {
-							textToEmbed = textToEmbed.substring(0, 1000);
-						}
-
-						final float[] embedding = embeddingService.embed(textToEmbed);
-						if (embedding != null) {
-							data.setEmbedding(embedding);
-						}
+				if (StringUtils.isNotBlank(textToEmbed)) {
+					final float[] embedding = embeddingService.embed(textToEmbed);
+					if (embedding != null) {
+						data.setEmbedding(embedding);
 					}
 				}
 			} catch (Exception ex) {
@@ -313,5 +306,75 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 		final String trimmed = name.trim();
 		return trimmed.isEmpty() ? null : trimmed;
+	}
+
+	/**
+	 * Builds a concatenated text payload for multimodal embedding:
+	 * <ul>
+	 *     <li>brand and model (referential attributes)</li>
+	 *     <li>best computed name</li>
+	 *     <li>top offer names (deduplicated)</li>
+	 *     <li>vertical-localized prefixes (if configured)</li>
+	 * </ul>
+	 * The resulting text is length-limited to prevent tokenizer overload.
+	 *
+	 * @param data  product to describe
+	 * @param vConf resolved vertical configuration (may be null)
+	 * @return concatenated text ready for embedding
+	 */
+	String buildEmbeddingText(final Product data, final VerticalConfig vConf) {
+		if (data == null) {
+			return "";
+		}
+
+		final Set<String> chunks = new LinkedHashSet<>();
+
+		// Brand / model first to anchor identity
+		if (data.getAttributes() != null && data.getAttributes().getReferentielAttributes() != null) {
+			String brand = data.getAttributes().getReferentielAttributes().get(ReferentielKey.BRAND);
+			String model = data.getAttributes().getReferentielAttributes().get(ReferentielKey.MODEL);
+			if (StringUtils.isNotBlank(brand)) {
+				chunks.add(brand);
+			}
+			if (StringUtils.isNotBlank(model)) {
+				chunks.add(model);
+			}
+		}
+
+		// Localized vertical prefix (e.g., H1 prefix)
+		if (vConf != null && vConf.getI18n() != null) {
+			vConf.getI18n().values().stream()
+					.map(ProductI18nElements::getH1Title)
+					.filter(java.util.Objects::nonNull)
+					.map(PrefixedAttrText::getPrefix)
+					.filter(StringUtils::isNotBlank)
+					.forEach(chunks::add);
+		}
+
+		// Best computed name
+		String bestName = data.bestName();
+		if (StringUtils.isNotBlank(bestName)) {
+			chunks.add(bestName);
+		}
+
+		// Offer names (deduped, limited to avoid runaway payloads)
+		if (data.getOfferNames() != null) {
+			List<String> offers = data.getOfferNames().stream()
+					.filter(StringUtils::isNotBlank)
+					.limit(5)
+					.collect(Collectors.toList());
+			chunks.addAll(offers);
+		}
+
+		// Flatten and bound length
+		String combined = chunks.stream()
+				.map(String::trim)
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.joining(" "));
+
+		if (combined.length() > 1000) {
+			return combined.substring(0, 1000);
+		}
+		return combined;
 	}
 }

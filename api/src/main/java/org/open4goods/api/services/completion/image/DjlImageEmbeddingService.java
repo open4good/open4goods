@@ -1,7 +1,6 @@
 package org.open4goods.api.services.completion.image;
 
 import ai.djl.MalformedModelException;
-import ai.djl.Model;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
@@ -10,6 +9,7 @@ import ai.djl.repository.zoo.ModelNotFoundException;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
 import ai.djl.translate.TranslateException;
+import org.open4goods.api.config.yml.ApiProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,26 +44,13 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
 
     private static final Logger logger = LoggerFactory.getLogger(DjlImageEmbeddingService.class);
 
-    /**
-     * Path to the directory or file where the model is stored.
-     * Example: file:/opt/models/vision-embedder/
-     *
-     * Adjust this to your environment.
-     */
-    // TODO : From conf
-    private static final String MODEL_URL = "file:/opt/open4goods/classification/restnet/model.onnx";
-
-    /**
-     * Optional model name inside the directory (depends on how you exported it).
-     * If your model is a single ONNX file, you may not need this.
-     */
-    private static final String MODEL_NAME = "model"; // adapt to your case
-
-    /** Target image size expected by the model (e.g. 224x224). */
-    private static final int IMAGE_SIZE = 224;
-
+    private final ApiProperties apiProperties;
     private ZooModel<Image, float[]> model;
     private Predictor<Image, float[]> predictor;
+
+    public DjlImageEmbeddingService(ApiProperties apiProperties) {
+        this.apiProperties = apiProperties;
+    }
 
     /**
      * Initializes the DJL model and predictor once at startup.
@@ -71,13 +58,15 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
      */
     @PostConstruct
     public void init() throws IOException, MalformedModelException, ModelNotFoundException {
-        logger.info("Initializing DJL image embedding model from: {}", MODEL_URL);
+        final String modelUrl = apiProperties.getEmbedding().getMultimodalModelUrl();
+        final int imageSize = apiProperties.getEmbedding().getImageInputSize();
+
+        logger.info("Initializing DJL image embedding model from: {}", modelUrl);
 
         Criteria<Image, float[]> criteria = Criteria.builder()
                 .setTypes(Image.class, float[].class)
-                .optModelUrls(MODEL_URL)
-                .optModelName(MODEL_NAME)            // can be omitted if not needed
-                .optTranslator(new EmbeddingTranslator(IMAGE_SIZE))
+                .optModelUrls(modelUrl)
+                .optTranslator(new EmbeddingTranslator(imageSize))
                 .optProgress(new ProgressBar())
                 .build();
 
