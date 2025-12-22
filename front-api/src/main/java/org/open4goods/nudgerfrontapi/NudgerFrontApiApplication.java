@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(scanBasePackages = "org.open4goods")
+@SpringBootApplication(scanBasePackages = "org.open4goods", exclude = {org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration.class})
 @ConfigurationPropertiesScan("org.open4goods")
 @EnableCaching
 @EnableScheduling

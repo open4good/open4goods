@@ -26,16 +26,38 @@
     }
   },
   "state_labels": {
-    "created": ["agent.created"],
-    "interacting": ["agent.interacting"],
-    "blocked": ["agent.interacting", "agent.blocked"],
-    "done": ["agent.done"]
+    "created": [
+      "agent.created"
+    ],
+    "interacting": [
+      "agent.interacting"
+    ],
+    "blocked": [
+      "agent.interacting",
+      "agent.blocked"
+    ],
+    "done": [
+      "agent.done"
+    ]
   },
   "behavior": {
-    "respond_on_comment_when_has_any_labels": ["agent.interacting", "agent.blocked", "agent.iteracting"],
-    "ignore_when_has_any_labels": ["agent.done"],
+    "respond_on_comment_when_has_any_labels": [
+      "agent.interacting",
+      "agent.blocked",
+      "agent.iteracting"
+    ],
+    "ignore_when_has_any_labels": [
+      "agent.done"
+    ],
     "update_single_thread_comment": true,
-    "also_post_reply_comment": true
+    "post_reply_on_comment_event": true,
+    "post_reply_on_label_event": false
+  },
+  "label_policy": {
+    "allow_any_non_agent_add": true,
+    "allow_any_non_agent_remove": true,
+    "protected_exact": [],
+    "protected_prefixes": []
   },
   "codex": {
     "model": "",

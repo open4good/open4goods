@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout (default branch or PR merge ref)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.event.repository.default_branch }}
           fetch-depth: 0
@@ -57,25 +57,20 @@ jobs:
           github-token: ${{ github.token }}
           script: |
             const fs = require("fs");
-            const path = require("path");
 
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
             // ---------- Load config ----------
             const cfgPath = ".github/codex/agent.config.json";
-            let cfg = null;
-            try {
-              cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-            } catch (e) {
-              throw new Error(`Missing/invalid ${cfgPath}: ${e.message}`);
-            }
+            const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
 
             const L = cfg.labels || {};
             const createdLabel = (L.created || "agent.created").toLowerCase();
             const interactingLabel = (L.interacting || "agent.interacting").toLowerCase();
             const iteractingAlias = (L.iteracting_alias || "agent.iteracting").toLowerCase();
             const workingLabel = (L.working || "agent.working");
+            const blockedLabel = (L.blocked || "agent.blocked").toLowerCase();
             const doneLabel = (L.done || "agent.done").toLowerCase();
 
             // ---------- Resolve target number ----------
@@ -90,6 +85,17 @@ jobs:
               throw new Error("Cannot resolve Issue/PR number");
             }
 
+            // ---------- Stop on bot comments to avoid loops ----------
+            const commentAuthor = context.payload.comment?.user?.login || "";
+            if (context.eventName === "issue_comment") {
+              const isBot = commentAuthor.endsWith("[bot]") || commentAuthor === "github-actions";
+              if (isBot) {
+                core.setOutput("should_run", "false");
+                core.setOutput("reason", `Ignoring bot comment from ${commentAuthor}`);
+                return;
+              }
+            }
+
             // ---------- Fetch issue (covers PR too) ----------
             const issue = (await github.rest.issues.get({ owner, repo, issue_number: number })).data;
             const labels = (issue.labels || [])
@@ -97,6 +103,8 @@ jobs:
               .filter(Boolean);
 
             const labelSet = new Set(labels.map(s => String(s).toLowerCase()));
+
+            // Ignore if done label present
             const ignoreWhen = new Set((cfg.behavior?.ignore_when_has_any_labels || []).map(s => String(s).toLowerCase()));
             for (const x of ignoreWhen) {
               if (labelSet.has(x)) {
@@ -111,7 +119,6 @@ jobs:
             let triggerState = forced || "";
 
             const eventLabel = String(context.payload.label?.name || "").toLowerCase();
-            const commentBody = context.payload.comment?.body || "";
 
             const respondLabels = new Set((cfg.behavior?.respond_on_comment_when_has_any_labels || []).map(s => String(s).toLowerCase()));
             const hasRespondLabel = [...respondLabels].some(l => labelSet.has(l));
@@ -121,9 +128,9 @@ jobs:
                 if (eventLabel === createdLabel) triggerState = "created";
                 else if (eventLabel === interactingLabel || eventLabel === iteractingAlias) triggerState = "interacting";
               } else if (context.eventName === "issue_comment") {
+                // Respond to EVERY new comment when interacting/blocked label is present
                 if (hasRespondLabel) {
-                  // Respond to EVERY new comment when interacting/blocked
-                  triggerState = labelSet.has(doneLabel) ? "" : (labelSet.has("agent.blocked") ? "blocked" : "interacting");
+                  triggerState = labelSet.has(blockedLabel) ? "blocked" : "interacting";
                 }
               }
             }
@@ -135,7 +142,7 @@ jobs:
             }
 
             // ---------- PR metadata if PR ----------
-            let isPr = !!issue.pull_request;
+            const isPr = !!issue.pull_request;
             let pr = null;
             if (isPr) {
               pr = (await github.rest.pulls.get({ owner, repo, pull_number: number })).data;
@@ -144,8 +151,7 @@ jobs:
             // ---------- Load prompt template file ----------
             const stateCfg = (cfg.states || {})[triggerState];
             if (!stateCfg?.prompt_file) throw new Error(`No prompt_file for state '${triggerState}' in config`);
-            const promptTplPath = stateCfg.prompt_file;
-            const promptTpl = fs.readFileSync(promptTplPath, "utf8");
+            const promptTpl = fs.readFileSync(stateCfg.prompt_file, "utf8");
 
             // ---------- Fetch recent comments ----------
             const comments = await github.paginate(github.rest.issues.listComments, {
@@ -159,17 +165,39 @@ jobs:
             }));
 
             // ---------- Compose context block ----------
-            const contextBlock = [
+            const commentBody = context.payload.comment?.body || "";
+            const contextBlockParts = [
               `Repo: ${owner}/${repo}`,
               `Issue/PR #: ${number}`,
               `Title: ${issue.title || ""}`,
               `Labels: ${(labels || []).join(", ") || "(none)"}`,
-              isPr ? `PR base: ${pr.base.ref} @ ${pr.base.sha}` : "",
-              isPr ? `PR head: ${pr.head.ref} @ ${pr.head.sha}` : "",
-              commentBody ? `Last comment:\n---\n${commentBody}\n---` : "",
-              `Recent comments (max ${MAX_COMMENTS}):`,
-              ...recent.map(c => `- ${c.author} @ ${c.created_at}:\n${c.body}\n`)
-            ].filter(Boolean).join("\n\n");
+              `Body:\n---\n${(issue.body || "").slice(0, 8000)}\n---`,
+            ];
+
+            if (isPr && pr) {
+              contextBlockParts.push(`PR base: ${pr.base.ref} @ ${pr.base.sha}`);
+              contextBlockParts.push(`PR head: ${pr.head.ref} @ ${pr.head.sha}`);
+              contextBlockParts.push(`Helpful commands:\n- git log --oneline ${pr.base.sha}...${pr.head.sha}\n- git diff ${pr.base.sha}...${pr.head.sha}`);
+              core.setOutput("base_ref", pr.base.ref);
+              core.setOutput("base_sha", pr.base.sha);
+              core.setOutput("head_sha", pr.head.sha);
+              core.setOutput("pr_number", String(pr.number));
+            } else {
+              core.setOutput("base_ref", "");
+              core.setOutput("base_sha", "");
+              core.setOutput("head_sha", "");
+              core.setOutput("pr_number", "");
+            }
+
+            if (commentBody) {
+              contextBlockParts.push(`Last comment:\n---\n${commentBody}\n---`);
+            }
+            contextBlockParts.push(`Recent comments (max ${MAX_COMMENTS}):`);
+            for (const c of recent) {
+              contextBlockParts.push(`- ${c.author} @ ${c.created_at}:\n${c.body}\n`);
+            }
+
+            const contextBlock = contextBlockParts.join("\n\n");
 
             // ---------- Output schema expected from Codex ----------
             const schema = {
@@ -189,6 +217,11 @@ jobs:
               promptTpl.trim(),
               "",
               "IMPORTANT: Réponds UNIQUEMENT avec du JSON conforme au schema fourni.",
+              "",
+              "Schema JSON attendu:",
+              "```json",
+              JSON.stringify(schema, null, 2),
+              "```",
               "",
               "Contexte:",
               "```",
@@ -211,7 +244,6 @@ jobs:
             const safetyStrategy = (cfgCodex.safety_strategy || "drop-sudo");
             const codexArgs = (cfgCodex.codex_args || "");
 
-            // Expose outputs
             core.setOutput("should_run", "true");
             core.setOutput("number", String(number));
             core.setOutput("trigger_state", triggerState);
@@ -228,6 +260,11 @@ jobs:
       - name: Exit if nothing to do
         if: steps.prep.outputs.should_run != 'true'
         run: echo "${{ steps.prep.outputs.reason }}"
+
+      - name: Pre-fetch base and head refs (PR only)
+        if: steps.prep.outputs.should_run == 'true' && steps.prep.outputs.pr_number != ''
+        run: |
+          git fetch --no-tags origin             "${{ steps.prep.outputs.base_ref }}"             "+refs/pull/${{ steps.prep.outputs.pr_number }}/head"
 
       - name: Mark agent as working (label)
         if: steps.prep.outputs.should_run == 'true'
@@ -273,14 +310,16 @@ jobs:
             const issue_number = Number("${{ steps.prep.outputs.number }}");
 
             const cfg = JSON.parse(fs.readFileSync(".github/codex/agent.config.json", "utf8"));
+
             const marker = cfg.thread_comment?.marker || "<!-- CODEX_AGENT_THREAD v1 -->";
             const title = cfg.thread_comment?.title || "🤖 Codex Agent";
 
             const L = cfg.labels || {};
             const stateLabels = cfg.state_labels || {};
-            const allStateLabels = new Set(
-              Object.values(stateLabels).flat().map(s => String(s))
-            );
+            const policy = cfg.label_policy || {};
+
+            const allStateLabels = new Set(Object.values(stateLabels).flat().map(s => String(s)));
+            const working = String(L.working || "agent.working");
 
             // Parse Codex output JSON (structured)
             let out;
@@ -297,8 +336,44 @@ jobs:
 
             const nextState = String(out.next_state || "interacting");
             const reply = String(out.reply_markdown || "").trim();
-            const extraAdd = Array.isArray(out.labels_add) ? out.labels_add.map(String) : [];
-            const extraRemove = Array.isArray(out.labels_remove) ? out.labels_remove.map(String) : [];
+
+            const requestedAdd = Array.isArray(out.labels_add) ? out.labels_add.map(String) : [];
+            const requestedRemove = Array.isArray(out.labels_remove) ? out.labels_remove.map(String) : [];
+
+            // --- Label policy enforcement (business labels allowed) ---
+            const isAgentLabel = (name) => String(name).toLowerCase().startsWith("agent.");
+            const protectedExact = new Set((policy.protected_exact || []).map(s => String(s).toLowerCase()));
+            const protectedPrefixes = (policy.protected_prefixes || []).map(s => String(s).toLowerCase());
+
+            const isProtected = (name) => {
+              const n = String(name).toLowerCase();
+              if (protectedExact.has(n)) return true;
+              return protectedPrefixes.some(p => n.startsWith(p));
+            };
+
+            const allowAnyAdd = !!policy.allow_any_non_agent_add;
+            const allowAnyRemove = !!policy.allow_any_non_agent_remove;
+
+            const filterAdd = (name) => {
+              if (!name) return false;
+              const n = String(name).trim();
+              if (!n) return false;
+              if (isProtected(n)) return false;
+              if (isAgentLabel(n)) return true;
+              return allowAnyAdd;
+            };
+
+            const filterRemove = (name) => {
+              if (!name) return false;
+              const n = String(name).trim();
+              if (!n) return false;
+              if (isProtected(n)) return false;
+              if (isAgentLabel(n)) return true;
+              return allowAnyRemove;
+            };
+
+            const extraAdd = requestedAdd.filter(filterAdd);
+            const extraRemove = requestedRemove.filter(filterRemove);
 
             // Compose thread comment body
             const now = new Date().toISOString();
@@ -319,7 +394,11 @@ jobs:
             const existing = [...comments].reverse().find(c => (c.body || "").includes(marker));
 
             const updateThread = !!cfg.behavior?.update_single_thread_comment;
-            const alsoPost = !!cfg.behavior?.also_post_reply_comment;
+            const postOnComment = !!cfg.behavior?.post_reply_on_comment_event;
+            const postOnLabel = !!cfg.behavior?.post_reply_on_label_event;
+
+            const isCommentEvent = context.eventName === "issue_comment";
+            const shouldPostReply = (isCommentEvent && postOnComment) || (!isCommentEvent && postOnLabel);
 
             if (updateThread) {
               if (existing) {
@@ -329,18 +408,16 @@ jobs:
               }
             }
 
-            if (alsoPost) {
-              // Post a regular comment as the actual reply (keeps conversational flow)
+            if (shouldPostReply) {
               await github.rest.issues.createComment({
                 owner, repo, issue_number,
                 body: reply || "(empty reply)"
               });
             }
 
-            // Labels: remove all state labels + agent.working, then add labels for next state + extras
-            const working = String(L.working || "agent.working");
+            // Labels: remove all agent state labels + agent.working, then add labels for next state + extras
+            // This guarantees: when next_state=done, agent.interacting is removed systematically.
             const toRemove = new Set([...allStateLabels, working, ...extraRemove]);
-
             for (const name of toRemove) {
               try {
                 await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
