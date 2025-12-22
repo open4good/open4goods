@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="night" x1="0%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0b1a3a" />
+      <stop offset="45%" stop-color="#0d2455" />
+      <stop offset="100%" stop-color="#0c1230" />
+    </linearGradient>
+    <radialGradient id="flare-red" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff5f52" stop-opacity="0.92" />
+      <stop offset="50%" stop-color="#ff2644" stop-opacity="0.72" />
+      <stop offset="100%" stop-color="#ff003c" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="flare-blue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7fd0ff" stop-opacity="0.9" />
+      <stop offset="55%" stop-color="#2fa8ff" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#0066ff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="flare-white" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#night)" />
+  <g opacity="0.9">
+    <circle cx="320" cy="200" r="220" fill="url(#flare-red)" />
+    <circle cx="1220" cy="260" r="240" fill="url(#flare-blue)" />
+    <circle cx="800" cy="140" r="180" fill="url(#flare-white)" />
+  </g>
+  <g stroke-width="4" stroke-linecap="round" fill="none">
+    <g stroke="#ff375f">
+      <path d="M310 210 l-40 -70" />
+      <path d="M310 210 l60 -30" />
+      <path d="M310 210 l0 80" />
+      <path d="M310 210 l-70 40" />
+    </g>
+    <g stroke="#2fb5ff">
+      <path d="M1220 250 l-45 -75" />
+      <path d="M1220 250 l70 -20" />
+      <path d="M1220 250 l15 90" />
+      <path d="M1220 250 l-85 30" />
+    </g>
+    <g stroke="#ffffff">
+      <path d="M800 140 l-30 -70" />
+      <path d="M800 140 l60 10" />
+      <path d="M800 140 l25 90" />
+      <path d="M800 140 l-70 40" />
+    </g>
+  </g>
+  <rect y="740" width="1600" height="200" fill="rgba(255,255,255,0.03)" />
+  <rect y="780" width="1600" height="160" fill="rgba(255,255,255,0.06)" />
+  <circle cx="200" cy="820" r="140" fill="rgba(255,255,255,0.04)" />
+  <circle cx="1350" cy="830" r="160" fill="rgba(46,119,255,0.08)" />
+</svg>
