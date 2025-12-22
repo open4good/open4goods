@@ -116,7 +116,7 @@ import type {
   AffiliationPartnerDto,
   StaticPartnerDto,
 } from '~~/shared/api-client'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
 import PartnersAffiliationSection from '~/components/domains/partners/PartnersAffiliationSection.vue'
 import PartnersStaticCarouselSection from '~/components/domains/partners/PartnersStaticCarouselSection.vue'
 import PartnersContactCta from '~/components/domains/partners/PartnersContactCta.vue'
@@ -133,7 +133,7 @@ definePageMeta({
   ssr: false,
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
@@ -171,12 +171,6 @@ const mentorPartners = computed(() => data.value?.mentors ?? [])
 
 const contactLink = computed(() => localePath('contact'))
 
-const canonicalUrl = computed(() =>
-  new URL(
-    resolveLocalizedRoutePath('partners', locale.value),
-    requestURL.origin
-  ).toString()
-)
 const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )

@@ -178,11 +178,11 @@ const handleIntersection = (_entries: unknown, _observer: unknown, isIntersectin
 <template>
   <component
     :is="showSurfaceVariant ? HeroSurface : 'section'"
+    v-intersect="animateOnScroll ? handleIntersection : undefined"
     :class="containerClasses"
     :style="[containerStyles, backgroundStyles]"
     v-bind="regionAttrs"
     :variant="showSurfaceVariant ? surfaceVariant : undefined"
-    v-intersect="animateOnScroll ? handleIntersection : undefined"
   >
     <!-- Background: Parallax Widget -->
     <ParallaxWidget

@@ -1,3 +1,4 @@
+
 server:
   compression:
     enabled: true
@@ -35,6 +36,8 @@ management:
       show-details: always
    
 spring:
+  profiles:
+    default: local
   docker:
     compose:
       enabled: true

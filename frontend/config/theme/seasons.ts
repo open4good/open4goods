@@ -23,16 +23,16 @@ export const seasonalEventSchedule: SeasonalEventWindow[] = [
 
   {
     id: 'bastille-day',
-    start: '12-10',
-    end: '12-31',
+    start: '07-10',
+    end: '07-16',
     pack: 'bastille-day',
     description: 'Bastille Day fireworks and civic celebrations',
   },
 
   {
     id: 'christmas-festivities',
-    start: '07-10',
-    end: '07-16',
+    start: '12-10',
+    end: '12-31',
     pack: 'christmas',
     description: 'Festive visuals for the holiday season',
   },

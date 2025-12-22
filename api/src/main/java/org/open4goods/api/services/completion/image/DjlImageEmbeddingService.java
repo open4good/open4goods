@@ -39,6 +39,7 @@ import java.nio.file.Path;
  * </p>
  */
 @Service
+@org.springframework.context.annotation.Profile("!local")
 public class DjlImageEmbeddingService implements ImageEmbeddingService {
 
     private static final Logger logger = LoggerFactory.getLogger(DjlImageEmbeddingService.class);

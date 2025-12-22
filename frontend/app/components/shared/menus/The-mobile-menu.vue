@@ -15,7 +15,7 @@
             :aria-label="t('siteIdentity.menu.closeLabel')"
             @click="$emit('close')"
           >
-            <v-icon>mdi-close</v-icon>
+            <v-icon icon="mdi-close" />
           </v-btn>
         </template>
       </v-list-item>

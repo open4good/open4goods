@@ -460,6 +460,7 @@ public class ApiConfig {
 	}
 
 	@Bean
+	@org.springframework.context.annotation.Profile("!local")
 	ProductRepository aggregatedDatasRepository(@Autowired final ApiProperties config) {
 		return new ProductRepository(config.getIndexationConfig());
 	}

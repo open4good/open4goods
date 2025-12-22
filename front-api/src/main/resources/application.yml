@@ -2,6 +2,8 @@ server:
   port: 8082
   forward-headers-strategy: framework
 spring:
+  profiles:
+    default: local
   application:
     name: open4goods-front-api
   mail:

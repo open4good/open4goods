@@ -49,7 +49,7 @@
           "iconAlt": "Icône du lanceur de l'application Nudger",
           "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
           "search": {
-            "label": "Tu sais déjà ce que tu cherches ?",
+            "label": "Une marque ou un modèle précis en tête ?",
             "placeholder": "Recherchez un produit ou une catégorie",
             "ariaLabel": "Rechercher un produit responsable",
             "cta": "NUDGER",

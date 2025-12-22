@@ -30,7 +30,7 @@
   "dependencies": {
     "@capacitor/core": "^8.0.0",
     "@hcaptcha/vue3-hcaptcha": "^1.3.0",
-    "@mdi/font": "^7.4.47",
+    "@mdi/js": "^7.4.47",
     "@nuxt/icon": "2.1.1",
     "@nuxt/image": "2.0.0",
     "@pinia/nuxt": "^0.11.2",

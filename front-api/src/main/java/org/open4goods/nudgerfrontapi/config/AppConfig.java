@@ -41,6 +41,7 @@ public class AppConfig {
     }
 
     @Bean
+    @org.springframework.context.annotation.Profile("!local")
     ProductRepository productRepository() {
         return new ProductRepository();
     }

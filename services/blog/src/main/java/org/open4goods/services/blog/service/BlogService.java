@@ -430,14 +430,13 @@ public class BlogService implements HealthIndicator {
      */
     @Override
     public Health health() {
-        Builder healthBuilder;
         if (loading.get()) {
-            healthBuilder = Health.up().withDetail("loading", true);
-        } else {
-            healthBuilder = Health.up()
-                    .withDetail("posts_count", posts.size())
-                    .withDetail("exceptions_count", exceptionsCount);
+            return Health.up().withDetail("loading", true).build();
         }
+
+        Builder healthBuilder = Health.up()
+                .withDetail("posts_count", posts.size())
+                .withDetail("exceptions_count", exceptionsCount);
 
         // Set health down if issues are detected.
         if (posts.isEmpty() || exceptionsCount > 0 || expectedBlogPagesCount != posts.size()) {

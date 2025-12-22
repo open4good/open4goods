@@ -9,16 +9,12 @@
  * You must think mobile first and responsiv
  * All static texts must be i18n localised
  * You will heavily respect coding guidelines defined in the AGENTS.md
- * After coding tasks, you will check conformity with pnpm build, pnpm lint and pnpm test on reasonable related tests file
+ * After coding tasks, you will check always validate against pnpm fast reported errors and warnings
  * Test with screenshots if possible
 
 # SCOPE
  * You will craft only in the /frontend project
  * However, you are allowed to read files in external modules if required for a better intervention.
-
-
-
-
 
 # USER DEMAND
 

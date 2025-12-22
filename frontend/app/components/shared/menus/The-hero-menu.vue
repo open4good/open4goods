@@ -504,7 +504,7 @@
   <!-- Mobile menu command -->
   <div class="d-flex justify-end d-md-none">
     <v-btn icon aria-label="Ouvrir le menu" @click="$emit('toggle-drawer')">
-      <v-icon>mdi-menu</v-icon>
+      <v-icon icon="mdi-menu" />
     </v-btn>
   </div>
 </template>

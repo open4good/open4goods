@@ -148,17 +148,6 @@ import OpensourceContributionSection from '~/components/domains/opensource/Opens
 import OpensourceResourcesSection from '~/components/domains/opensource/OpensourceResourcesSection.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
-interface HeroCtaDisplay {
-  label: string
-  href: string
-  ariaLabel: string
-  icon?: string
-  color?: string
-  variant?: 'flat' | 'outlined' | 'tonal' | 'text' | 'plain'
-  target?: string
-  rel?: string
-}
-
 interface PillarCardDisplay {
   icon: string
   title: string
@@ -224,7 +213,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, locale, availableLocales } = useI18n()
+const { t, availableLocales } = useI18n()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
 const currentVersion = 'v0.9.8'
@@ -407,19 +396,9 @@ const liveReportTabs = computed(() => [
   },
 ])
 
-const canonicalUrl = computed(() =>
-  new URL(
-    resolveLocalizedRoutePath('opensource', locale.value),
-    requestURL.origin
-  ).toString()
-)
-
-const siteName = computed(() => String(t('siteIdentity.siteName')))
-const ogLocale = computed(() => locale.value.replace('-', '_'))
 const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
-const ogImageAlt = computed(() => String(t('opensource.seo.imageAlt')))
 
 const alternateLinks = computed(() =>
   availableLocales.map(availableLocale => ({

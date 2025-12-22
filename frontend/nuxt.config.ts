@@ -1,5 +1,5 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 import { defineNuxtConfig } from 'nuxt/config'
+
 import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs'
 
@@ -330,8 +330,16 @@ export default defineNuxtConfig({
       runtimeCaching,
     },
   },
+
   // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
+    /*
+     * We disable the module's icon handling because it crashes when 'sets' is an object (required for SVG).
+     * We configure icons manually in vuetify.config.ts.
+     */
+    icons: {
+      enabled: false,
+    },
     vuetifyOptions: {
       theme: {
         defaultTheme: 'light',

@@ -37,21 +37,24 @@ public class VoteService {
     /** Cache of total votes per issue, initialized by reading the single vote comment. */
     private final ConcurrentMap<String, AtomicInteger> voteCountCache = new ConcurrentHashMap<>();
 
-    /** How many votes each IP has cast today. */
-    private final ConcurrentMap<String, Integer> ipVoteCounts = new ConcurrentHashMap<>();
-
     /** Cache of the single vote‑comment ID per issue. */
     private final ConcurrentMap<String, Long> voteCommentIdCache = new ConcurrentHashMap<>();
 
     /** The GitHub login of our bot user, used to filter the vote comment. */
     private final String botLogin;
 
+    private final org.open4goods.commons.services.IpQuotaService ipQuotaService;
+
+    private static final String QUOTA_ACTION_VOTE = "VOTE";
+
     public VoteService(FeedbackConfiguration config,
                        GHRepository repository,
-                       MeterRegistry meterRegistry) {
+                       MeterRegistry meterRegistry,
+                       org.open4goods.commons.services.IpQuotaService ipQuotaService) {
         this.config = config;
         this.repository = repository;
         this.meterRegistry = meterRegistry;
+        this.ipQuotaService = ipQuotaService;
         this.botLogin = config.getGithub().getUser();
     }
 
@@ -59,7 +62,8 @@ public class VoteService {
      * @return whether the given IP still has votes left today.
      */
     public boolean userCanVote(String ip) {
-        return getRemainingVotes(ip) > 0;
+        int max = config.getVoting().getMaxVotesPerIpPerDay();
+        return ipQuotaService.isAllowed(QUOTA_ACTION_VOTE, ip, max);
     }
 
     /**
@@ -85,14 +89,15 @@ public class VoteService {
             throw new RuntimeException("Internal error verifying votable issue", e);
         }
 
-        // 1) Increment per-IP usage (quota)
+        // 1) Check usage (quota)
         int max = config.getVoting().getMaxVotesPerIpPerDay();
-        int used = ipVoteCounts.getOrDefault(ip, 0);
-        if (used >= max) {
+        if (!ipQuotaService.isAllowed(QUOTA_ACTION_VOTE, ip, max)) {
             logger.warn("IP {} reached daily vote limit ({})", ip, max);
             throw new VotingLimitExceededException("Maximum " + max + " votes reached today");
         }
-        ipVoteCounts.merge(ip, 1, Integer::sum);
+        
+        // Increment usage
+        int newUsage = ipQuotaService.increment(QUOTA_ACTION_VOTE, ip);
 
         // 2) Increment our local total
         AtomicInteger totalCounter = voteCountCache
@@ -105,7 +110,7 @@ public class VoteService {
         // 4) Update (or create) the single vote comment on GitHub
         updateVoteCommentOnGitHub(issueId, newTotal);
 
-        int remaining = max - ipVoteCounts.get(ip);
+        int remaining = Math.max(0, max - newUsage);
         logger.info("IP {} voted on issue {} (remaining: {}, total: {})",
                     ip, issueId, remaining, newTotal);
 
@@ -118,8 +123,7 @@ public class VoteService {
      */
     public int getRemainingVotes(String ip) {
         int max = config.getVoting().getMaxVotesPerIpPerDay();
-        int used = ipVoteCounts.getOrDefault(ip, 0);
-        return Math.max(0, max - used);
+        return ipQuotaService.getRemaining(QUOTA_ACTION_VOTE, ip, max);
     }
 
     /**

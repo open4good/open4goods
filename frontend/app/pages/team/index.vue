@@ -75,14 +75,14 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { TeamProperties } from '~~/shared/api-client'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 
 const HERO_CORE_BLOC_ID = 'pages:team:hero-core-team:'
 const CONTRIBUTORS_HERO_BLOC_ID = 'pages:team:hero-contributors-team:'
 const PARTNERS_BLOC_ID = 'pages:team:partenaires:'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
@@ -113,12 +113,6 @@ const partnersLink = computed(() => {
 
 const contactLink = computed(() => localePath('contact'))
 
-const canonicalUrl = computed(() =>
-  new URL(
-    resolveLocalizedRoutePath('team', locale.value),
-    requestURL.origin
-  ).toString()
-)
 const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
