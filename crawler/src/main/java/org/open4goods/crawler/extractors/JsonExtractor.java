@@ -206,7 +206,7 @@ public class JsonExtractor extends Extractor {
 							p.addAttribute(ReferentielKey.BRAND.toString(), brand, locale.getLanguage(),null);
 				if (!StringUtils.isEmpty(brand)) {
 					//TODO(bug) : should set as referentiel from  all extractors, to avoid datafragmentcompletion to override "well set" referentiel attrs
-					p.addReferentielAttribute(ReferentielKey.BRAND.toString(),brand);
+					p.addReferentielAttribute(ReferentielKey.BRAND, brand);
 				}
 
 			}

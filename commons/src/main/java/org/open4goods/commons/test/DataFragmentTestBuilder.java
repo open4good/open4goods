@@ -21,7 +21,7 @@ public class DataFragmentTestBuilder {
 	}
 
 	public DataFragmentTestBuilder brandUid(final String brandUid) {
-		dataFragment.addReferentielAttribute(ReferentielKey.MODEL.toString(), brandUid);
+		dataFragment.addReferentielAttribute(ReferentielKey.MODEL, brandUid);
 		return this;
 	}
 
@@ -32,7 +32,7 @@ public class DataFragmentTestBuilder {
 	}
 
 	public DataFragmentTestBuilder gtin(final String gtin) {
-		dataFragment.addReferentielAttribute(ReferentielKey.GTIN.toString(), gtin);
+		dataFragment.addReferentielAttribute(ReferentielKey.GTIN, gtin);
 		return this;
 	}
 
@@ -108,7 +108,7 @@ public class DataFragmentTestBuilder {
 	}
 
 	public DataFragmentTestBuilder brand(final String brand) {
-		dataFragment.addReferentielAttribute(ReferentielKey.BRAND.toString(), brand);
+		dataFragment.addReferentielAttribute(ReferentielKey.BRAND, brand);
 		return this;
 	}
 
