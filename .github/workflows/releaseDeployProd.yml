@@ -1,5 +1,10 @@
 name: 🚀 Release
 
+# Config: set the regex controlling which tags may trigger the cloud deploy workflow.
+# By default only tags containing "cloud" or "point-cloud" are allowed.
+env:
+  CLOUD_TAG_REGEX_DEFAULT: "^refs/tags/.*(cloud|point-cloud).*$"
+
 on:
   push:
     tags:
@@ -17,17 +22,31 @@ on:
         default: release
         type: choice
         options: [release, test]
+      cloud_tag_regex:
+        description: "Expression régulière autorisant le déclenchement (par défaut: tags cloud/point-cloud)"
+        required: false
+        default: "^refs/tags/.*(cloud|point-cloud).*$"
+        type: string
+      bypass_tag_filter:
+        description: "Ignorer le filtre cloud (true pour forcer l'exécution)"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
 
 jobs:
   release:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.bypass_tag_filter == true) ||
+      (github.event_name == 'workflow_dispatch' && ((inputs.ref || '') matches (inputs.cloud_tag_regex || env.CLOUD_TAG_REGEX_DEFAULT))) ||
+      (github.event_name != 'workflow_dispatch' && (github.ref matches env.CLOUD_TAG_REGEX_DEFAULT))
     runs-on: ubuntu-latest
 
     env:
       MODE: ${{ inputs.mode || 'release' }}
+      CLOUD_TAG_REGEX: ${{ github.event_name == 'workflow_dispatch' && inputs.cloud_tag_regex || env.CLOUD_TAG_REGEX_DEFAULT }}
 
     concurrency:
       group: deploy-prod
