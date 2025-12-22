@@ -131,6 +131,52 @@
             "Des choix du quotidien alignés sur les Objectifs de développement durable."
           ]
         }
+      },
+      "bastille-day": {
+        "hero": {
+          "eyebrow": "Spécial 14 juillet",
+          "title": "Célébrez des choix responsables le 14 juillet",
+          "titleSubtitle": [
+            "Un feu d'artifice de prix justes et d'impact transparent."
+          ],
+          "subtitles": [
+            "Achetez avec liberté, égalité, durabilité en tête.",
+            "Pendant que le ciel s'illumine, orientez vos achats vers des choix responsables."
+          ],
+          "iconAlt": "Feu d'artifice célébrant des achats responsables",
+          "imageAlt": "Illustration de feux d'artifice au-dessus des toits de la ville.",
+          "search": {
+            "label": "Chercher un produit prêt pour le 14 juillet",
+            "placeholder": "Trouvez un ventilateur, un frigo ou une idée cadeau",
+            "helpersTitle": "Réflexes rapides avant le feu d'artifice",
+            "helpers": [
+              {
+                "icon": "🎆",
+                "segments": [
+                  {
+                    "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs."
+                  }
+                ]
+              },
+              {
+                "icon": "🥖",
+                "segments": [
+                  {
+                    "text": "Local et efficace ? Filtrez d'abord par réparabilité."
+                  }
+                ]
+              },
+              {
+                "icon": "🎇",
+                "segments": [
+                  {
+                    "text": "Alliez fête et économies avec des prix transparents."
+                  }
+                ]
+              }
+            ]
+          }
+        }
       }
     },
     "seo": {

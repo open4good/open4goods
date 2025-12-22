@@ -133,6 +133,52 @@
             "Small choices, global goals. Discover products aligned with the SDGs."
           ]
         }
+      },
+      "bastille-day": {
+        "hero": {
+          "eyebrow": "Bastille Day special",
+          "title": "Celebrate conscious choices on 14 July",
+          "titleSubtitle": [
+            "Fireworks of fair prices and transparent impact."
+          ],
+          "subtitles": [
+            "Shop with liberté, égalité, durabilité in mind.",
+            "Switch to responsible picks while the skyline lights up."
+          ],
+          "iconAlt": "Fireworks celebrating responsible shopping",
+          "imageAlt": "Illustration of fireworks above city rooftops.",
+          "search": {
+            "label": "Search a Bastille Day-friendly product",
+            "placeholder": "Find a fan, fridge, or festive gift",
+            "helpersTitle": "Quick wins before the fireworks",
+            "helpers": [
+              {
+                "icon": "🎆",
+                "segments": [
+                  {
+                    "text": "Use the impact score to dodge wasteful picks."
+                  }
+                ]
+              },
+              {
+                "icon": "🥖",
+                "segments": [
+                  {
+                    "text": "Local and efficient? Filter by repairability first."
+                  }
+                ]
+              },
+              {
+                "icon": "🎇",
+                "segments": [
+                  {
+                    "text": "Balance celebrations and savings with transparent prices."
+                  }
+                ]
+              }
+            ]
+          }
+        }
       }
     },
     "seo": {
