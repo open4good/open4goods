@@ -212,6 +212,11 @@ public class ApiProperties {
 	 */
 
 	private VerticalsGenerationConfig verticalsGenerationConfig = new VerticalsGenerationConfig();
+	
+	/**
+	 * Configuration for embeddings
+	 */
+	private EmbeddingConfig embedding = new EmbeddingConfig();
 
 
 
@@ -630,6 +635,26 @@ public class ApiProperties {
 
 	public void setAffiliationConfig(AffiliationConfig affiliationConfig) {
 		this.affiliationConfig = affiliationConfig;
+	}
+
+	public EmbeddingConfig getEmbedding() {
+		return embedding;
+	}
+
+	public void setEmbedding(EmbeddingConfig embedding) {
+		this.embedding = embedding;
+	}
+
+	public static class EmbeddingConfig {
+		private String modelPath = "/opt/open4goods/models/distilcamembert-base";
+
+		public String getModelPath() {
+			return modelPath;
+		}
+
+		public void setModelPath(String modelPath) {
+			this.modelPath = modelPath;
+		}
 	}
 
 

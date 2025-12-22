@@ -1,23 +1,21 @@
 package org.open4goods.api.services.completion.text;
 
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
+import org.open4goods.api.config.yml.ApiProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ai.djl.Model;
 import ai.djl.huggingface.translator.TextEmbeddingTranslator;
 import ai.djl.huggingface.tokenizers.HuggingFaceTokenizer;
 import ai.djl.inference.Predictor;
-import ai.djl.modality.cv.Image;
-import ai.djl.ndarray.NDList;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
@@ -31,17 +29,18 @@ public class DjlTextEmbeddingService {
     // We can use the DJL model zoo to auto-download or point to a local path
     // "djl://ai.djl.huggingface.pytorch/cmarkea/distilcamembert-base"
     // For now, let's assume we use a criteria that fetches it.
-    private static final String MODEL_FILTER = "cmarkea/distilcamembert-base";
+    @Autowired
+    private ApiProperties apiProperties;
 
     private ZooModel<String, float[]> model;
 
     @PostConstruct
     public void init() {
         try {
-            logger.info("Initializing DJL text embedding model: {}", MODEL_FILTER);
+            logger.info("Initializing DJL text embedding model from: {}", apiProperties.getEmbedding().getModelPath());
 
             // Create tokenizer explicitly
-            HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(MODEL_FILTER);
+            HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(Paths.get(apiProperties.getEmbedding().getModelPath()));
 
             TextEmbeddingTranslator translator = TextEmbeddingTranslator.builder(tokenizer)
                     .optPoolingMode("mean") // Mean pooling for sentence embedding
@@ -50,9 +49,9 @@ public class DjlTextEmbeddingService {
 
             Criteria<String, float[]> criteria = Criteria.builder()
                     .setTypes(String.class, float[].class)
-                    .optModelName(MODEL_FILTER)
+                    .optModelPath(Paths.get(apiProperties.getEmbedding().getModelPath()))
                     .optTranslator(translator)
-                    .optEngine("PyTorch") // or OnnxRuntime
+                    .optEngine("PyTorch")
                     .optProgress(new ProgressBar())
                     .build();
 

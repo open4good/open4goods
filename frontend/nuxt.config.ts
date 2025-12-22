@@ -24,6 +24,7 @@ import {
 } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
+import { icons } from './app/config/icons'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -333,12 +334,10 @@ export default defineNuxtConfig({
 
   // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
-    /*
-     * We disable the module's icon handling because it crashes when 'sets' is an object (required for SVG).
-     * We configure icons manually in vuetify.config.ts.
-     */
     icons: {
-      enabled: false,
+      defaultSet: 'mdi',
+      sets: ['mdi'],
+      aliases: icons,
     },
     vuetifyOptions: {
       theme: {

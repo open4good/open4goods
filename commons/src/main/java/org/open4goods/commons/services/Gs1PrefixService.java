@@ -55,6 +55,10 @@ public class Gs1PrefixService {
 			countryNames.put(country.toLowerCase(), loc);
 			logger.info("Adding locale country : {} > {}", country, loc);
 		}
+		
+		// Hardcoded fallbacks for countries with name changes or common variations
+		countryNames.put("turkey", "TR");
+		countryNames.put("türkiye", "TR");
 
 		logger.info("Loading gs1 prefix from {}", csvUri);
 		// Getting the resource

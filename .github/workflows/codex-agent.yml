@@ -1,0 +1,359 @@
+name: 🤖 Codex Agent (labels + comments)
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      target_number:
+        description: "Numéro d'Issue/PR"
+        required: true
+        type: string
+      force_state:
+        description: "Force le state (created|interacting|blocked|done) - optionnel"
+        required: false
+        default: ""
+        type: string
+      model:
+        description: "Override model (optionnel)"
+        required: false
+        default: ""
+        type: string
+      effort:
+        description: "Override effort (low|medium|high) (optionnel)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: codex-agent-${{ github.repository }}-${{ github.event.issue.number || github.event.pull_request.number || inputs.target_number }}
+  cancel-in-progress: false
+
+jobs:
+  codex-agent:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+      - name: Checkout (default branch or PR merge ref)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.number && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Resolve context + build prompt/schema
+        id: prep
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // ---------- Load config ----------
+            const cfgPath = ".github/codex/agent.config.json";
+            let cfg = null;
+            try {
+              cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+            } catch (e) {
+              throw new Error(`Missing/invalid ${cfgPath}: ${e.message}`);
+            }
+
+            const L = cfg.labels || {};
+            const createdLabel = (L.created || "agent.created").toLowerCase();
+            const interactingLabel = (L.interacting || "agent.interacting").toLowerCase();
+            const iteractingAlias = (L.iteracting_alias || "agent.iteracting").toLowerCase();
+            const workingLabel = (L.working || "agent.working");
+            const doneLabel = (L.done || "agent.done").toLowerCase();
+
+            // ---------- Resolve target number ----------
+            let number;
+            if (context.eventName === "workflow_dispatch") {
+              number = Number(core.getInput("target_number", { required: true }));
+            } else if (context.payload.issue?.number) {
+              number = context.payload.issue.number;
+            } else if (context.payload.pull_request?.number) {
+              number = context.payload.pull_request.number;
+            } else {
+              throw new Error("Cannot resolve Issue/PR number");
+            }
+
+            // ---------- Fetch issue (covers PR too) ----------
+            const issue = (await github.rest.issues.get({ owner, repo, issue_number: number })).data;
+            const labels = (issue.labels || [])
+              .map(l => (typeof l === "string" ? l : l.name))
+              .filter(Boolean);
+
+            const labelSet = new Set(labels.map(s => String(s).toLowerCase()));
+            const ignoreWhen = new Set((cfg.behavior?.ignore_when_has_any_labels || []).map(s => String(s).toLowerCase()));
+            for (const x of ignoreWhen) {
+              if (labelSet.has(x)) {
+                core.setOutput("should_run", "false");
+                core.setOutput("reason", `Ignored because label present: ${x}`);
+                return;
+              }
+            }
+
+            // ---------- Determine trigger state ----------
+            const forced = (core.getInput("force_state") || "").trim().toLowerCase();
+            let triggerState = forced || "";
+
+            const eventLabel = String(context.payload.label?.name || "").toLowerCase();
+            const commentBody = context.payload.comment?.body || "";
+
+            const respondLabels = new Set((cfg.behavior?.respond_on_comment_when_has_any_labels || []).map(s => String(s).toLowerCase()));
+            const hasRespondLabel = [...respondLabels].some(l => labelSet.has(l));
+
+            if (!triggerState) {
+              if (context.eventName === "issues" || context.eventName === "pull_request") {
+                if (eventLabel === createdLabel) triggerState = "created";
+                else if (eventLabel === interactingLabel || eventLabel === iteractingAlias) triggerState = "interacting";
+              } else if (context.eventName === "issue_comment") {
+                if (hasRespondLabel) {
+                  // Respond to EVERY new comment when interacting/blocked
+                  triggerState = labelSet.has(doneLabel) ? "" : (labelSet.has("agent.blocked") ? "blocked" : "interacting");
+                }
+              }
+            }
+
+            if (!triggerState) {
+              core.setOutput("should_run", "false");
+              core.setOutput("reason", "No matching trigger");
+              return;
+            }
+
+            // ---------- PR metadata if PR ----------
+            let isPr = !!issue.pull_request;
+            let pr = null;
+            if (isPr) {
+              pr = (await github.rest.pulls.get({ owner, repo, pull_number: number })).data;
+            }
+
+            // ---------- Load prompt template file ----------
+            const stateCfg = (cfg.states || {})[triggerState];
+            if (!stateCfg?.prompt_file) throw new Error(`No prompt_file for state '${triggerState}' in config`);
+            const promptTplPath = stateCfg.prompt_file;
+            const promptTpl = fs.readFileSync(promptTplPath, "utf8");
+
+            // ---------- Fetch recent comments ----------
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: number, per_page: 100,
+            });
+            const MAX_COMMENTS = 30;
+            const recent = comments.slice(-MAX_COMMENTS).map(c => ({
+              author: c.user?.login || "unknown",
+              created_at: c.created_at,
+              body: (c.body || "").slice(0, 4000),
+            }));
+
+            // ---------- Compose context block ----------
+            const contextBlock = [
+              `Repo: ${owner}/${repo}`,
+              `Issue/PR #: ${number}`,
+              `Title: ${issue.title || ""}`,
+              `Labels: ${(labels || []).join(", ") || "(none)"}`,
+              isPr ? `PR base: ${pr.base.ref} @ ${pr.base.sha}` : "",
+              isPr ? `PR head: ${pr.head.ref} @ ${pr.head.sha}` : "",
+              commentBody ? `Last comment:\n---\n${commentBody}\n---` : "",
+              `Recent comments (max ${MAX_COMMENTS}):`,
+              ...recent.map(c => `- ${c.author} @ ${c.created_at}:\n${c.body}\n`)
+            ].filter(Boolean).join("\n\n");
+
+            // ---------- Output schema expected from Codex ----------
+            const schema = {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                next_state: { type: "string", enum: ["interacting", "blocked", "done"] },
+                reply_markdown: { type: "string" },
+                labels_add: { type: "array", items: { type: "string" } },
+                labels_remove: { type: "array", items: { type: "string" } }
+              },
+              required: ["next_state", "reply_markdown", "labels_add", "labels_remove"]
+            };
+
+            // ---------- Final prompt ----------
+            const finalPrompt = [
+              promptTpl.trim(),
+              "",
+              "IMPORTANT: Réponds UNIQUEMENT avec du JSON conforme au schema fourni.",
+              "",
+              "Contexte:",
+              "```",
+              contextBlock,
+              "```"
+            ].join("\n");
+
+            fs.mkdirSync(".codex", { recursive: true });
+            fs.writeFileSync(".codex/prompt.md", finalPrompt, "utf8");
+            fs.writeFileSync(".codex/schema.json", JSON.stringify(schema, null, 2), "utf8");
+
+            // ---------- Codex params (config + overrides) ----------
+            const cfgCodex = cfg.codex || {};
+            const inModel = (core.getInput("model") || "").trim();
+            const inEffort = (core.getInput("effort") || "").trim();
+
+            const model = inModel || (cfgCodex.model || "");
+            const effort = inEffort || (cfgCodex.effort || "");
+            const sandbox = (cfgCodex.sandbox || "read-only");
+            const safetyStrategy = (cfgCodex.safety_strategy || "drop-sudo");
+            const codexArgs = (cfgCodex.codex_args || "");
+
+            // Expose outputs
+            core.setOutput("should_run", "true");
+            core.setOutput("number", String(number));
+            core.setOutput("trigger_state", triggerState);
+            core.setOutput("is_pr", String(isPr));
+            core.setOutput("prompt_file", ".codex/prompt.md");
+            core.setOutput("schema_file", ".codex/schema.json");
+            core.setOutput("model", model);
+            core.setOutput("effort", effort);
+            core.setOutput("sandbox", sandbox);
+            core.setOutput("safety_strategy", safetyStrategy);
+            core.setOutput("codex_args", codexArgs);
+            core.setOutput("working_label", workingLabel);
+
+      - name: Exit if nothing to do
+        if: steps.prep.outputs.should_run != 'true'
+        run: echo "${{ steps.prep.outputs.reason }}"
+
+      - name: Mark agent as working (label)
+        if: steps.prep.outputs.should_run == 'true'
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner, repo = context.repo.repo;
+            const issue_number = Number("${{ steps.prep.outputs.number }}");
+            const label = "${{ steps.prep.outputs.working_label }}";
+            try {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+            } catch (e) {
+              core.info(`Could not add ${label}: ${e.message}`);
+            }
+
+      - name: Run Codex
+        if: steps.prep.outputs.should_run == 'true'
+        id: run_codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: ${{ steps.prep.outputs.prompt_file }}
+          output-schema-file: ${{ steps.prep.outputs.schema_file }}
+          model: ${{ steps.prep.outputs.model }}
+          effort: ${{ steps.prep.outputs.effort }}
+          sandbox: ${{ steps.prep.outputs.sandbox }}
+          safety-strategy: ${{ steps.prep.outputs.safety_strategy }}
+          codex-args: ${{ steps.prep.outputs.codex_args }}
+
+      - name: Apply result (comments + labels)
+        if: steps.prep.outputs.should_run == 'true'
+        uses: actions/github-script@v8
+        env:
+          CODEX_JSON: ${{ steps.run_codex.outputs.final-message }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require("fs");
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = Number("${{ steps.prep.outputs.number }}");
+
+            const cfg = JSON.parse(fs.readFileSync(".github/codex/agent.config.json", "utf8"));
+            const marker = cfg.thread_comment?.marker || "<!-- CODEX_AGENT_THREAD v1 -->";
+            const title = cfg.thread_comment?.title || "🤖 Codex Agent";
+
+            const L = cfg.labels || {};
+            const stateLabels = cfg.state_labels || {};
+            const allStateLabels = new Set(
+              Object.values(stateLabels).flat().map(s => String(s))
+            );
+
+            // Parse Codex output JSON (structured)
+            let out;
+            try {
+              out = JSON.parse(process.env.CODEX_JSON || "");
+            } catch (e) {
+              out = {
+                next_state: "interacting",
+                reply_markdown: process.env.CODEX_JSON || "Codex output was not JSON.",
+                labels_add: [],
+                labels_remove: []
+              };
+            }
+
+            const nextState = String(out.next_state || "interacting");
+            const reply = String(out.reply_markdown || "").trim();
+            const extraAdd = Array.isArray(out.labels_add) ? out.labels_add.map(String) : [];
+            const extraRemove = Array.isArray(out.labels_remove) ? out.labels_remove.map(String) : [];
+
+            // Compose thread comment body
+            const now = new Date().toISOString();
+            const threadBody = [
+              marker,
+              `## ${title}`,
+              ``,
+              `**State:** \`${nextState}\``,
+              `**Last update:** ${now}`,
+              ``,
+              reply
+            ].join("\n");
+
+            // Find existing thread comment
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100
+            });
+            const existing = [...comments].reverse().find(c => (c.body || "").includes(marker));
+
+            const updateThread = !!cfg.behavior?.update_single_thread_comment;
+            const alsoPost = !!cfg.behavior?.also_post_reply_comment;
+
+            if (updateThread) {
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body: threadBody });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number, body: threadBody });
+              }
+            }
+
+            if (alsoPost) {
+              // Post a regular comment as the actual reply (keeps conversational flow)
+              await github.rest.issues.createComment({
+                owner, repo, issue_number,
+                body: reply || "(empty reply)"
+              });
+            }
+
+            // Labels: remove all state labels + agent.working, then add labels for next state + extras
+            const working = String(L.working || "agent.working");
+            const toRemove = new Set([...allStateLabels, working, ...extraRemove]);
+
+            for (const name of toRemove) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (_) {}
+            }
+
+            const nextLabels = (stateLabels[nextState] || []);
+            const toAdd = new Set([...nextLabels, ...extraAdd]);
+
+            if (toAdd.size) {
+              try {
+                await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [...toAdd] });
+              } catch (e) {
+                core.info(`AddLabels failed (missing labels?): ${e.message}`);
+              }
+            }

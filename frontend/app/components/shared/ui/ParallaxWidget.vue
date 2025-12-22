@@ -2,6 +2,7 @@
 import { computed, ref, type CSSProperties, onMounted } from 'vue'
 import {
   useElementBounding,
+  useIntersectionObserver,
   usePreferredReducedMotion,
   useWindowSize,
 } from '@vueuse/core'
@@ -38,6 +39,44 @@ const props = withDefaults(
     enableAplats?: boolean
     aplatSvg?: string
     gapless?: boolean
+    /**
+     * Invert the parallax direction (useful for alternating hero sections).
+     */
+    reverse?: boolean
+    /**
+     * Multiplies every layer speed. 0 disables movement; 1 is default.
+     */
+    speedFactor?: number
+    /**
+     * Extra padding (overscan) used to prevent edge gaps during parallax.
+     * This ratio contributes to the computed overscan in pixels.
+     */
+    overscanRatio?: number
+    /**
+     * Minimum overscan in pixels.
+     */
+    overscanMinPx?: number
+    /**
+     * Smooth transform interpolation (ms). Set to 0 for "crisp" scroll.
+     */
+    smoothingMs?: number
+    /**
+     * When enabled, adds the `parallax-widget--in-view` class once the widget
+     * enters the viewport (useful to trigger SVG/CSS animations).
+     */
+    revealOnView?: boolean
+    /**
+     * If true, the in-view state stays enabled once revealed.
+     */
+    revealOnce?: boolean
+    revealThreshold?: number
+    revealRootMargin?: string
+    revealDurationMs?: number
+    revealDelayMs?: number
+    /**
+     * Caps translation in absolute px. Overrides maxOffsetRatio when set.
+     */
+    maxOffsetPx?: number | null
     maxOffsetRatio?: number | null
   }>(),
   {
@@ -57,6 +96,18 @@ const props = withDefaults(
     aplatSvg: '/images/home/parallax-aplats.svg',
     gapless: false,
     maxOffsetRatio: null,
+    reverse: false,
+    speedFactor: 1,
+    overscanRatio: 0.22,
+    overscanMinPx: 180,
+    smoothingMs: 0,
+    revealOnView: false,
+    revealOnce: true,
+    revealThreshold: 0.15,
+    revealRootMargin: '0px 0px -10% 0px',
+    revealDurationMs: 500,
+    revealDelayMs: 0,
+    maxOffsetPx: null,
   }
 )
 
@@ -156,6 +207,78 @@ const isBelowBreakpoint = computed(
     display.width.value < props.disableParallaxBelow
 )
 
+const directionSign = computed(() => (props.reverse ? -1 : 1))
+const speedFactor = computed(() =>
+  Number.isFinite(props.speedFactor) ? Math.max(0, props.speedFactor) : 1
+)
+
+const maxLayerSpeed = computed(() =>
+  resolvedBackgrounds.value.reduce(
+    (acc, layer) => Math.max(acc, Math.abs(layer.speed)),
+    0
+  )
+)
+
+/**
+ * Overscan is computed to cover the worst-case translation while the section is visible,
+ * so we don't see "gaps" on the edges between sections.
+ */
+const overscanPx = computed(() => {
+  const ratio = Number.isFinite(props.overscanRatio)
+    ? Math.max(0, props.overscanRatio)
+    : 0.22
+  const minPx = Number.isFinite(props.overscanMinPx)
+    ? Math.max(0, props.overscanMinPx)
+    : 180
+  const elementH = height.value || 0
+
+  const maxVisibleDelta = windowHeight.value / 2 + elementH / 2
+  const worstOffsetPx = maxVisibleDelta * maxLayerSpeed.value * speedFactor.value
+
+  // Use both a height-based overscan and a worst-offset-based overscan, whichever is larger.
+  const fromHeight = elementH * ratio
+  const paddedWorst = worstOffsetPx * (1 + ratio)
+
+  return Math.ceil(Math.max(minPx, fromHeight, paddedWorst))
+})
+
+const smoothingMs = computed(() => {
+  if (prefersReducedMotion.value !== 'no-preference') return 0
+  return Number.isFinite(props.smoothingMs) ? Math.max(0, props.smoothingMs) : 0
+})
+
+const inView = ref(!props.revealOnView)
+if (typeof window !== 'undefined' && props.revealOnView) {
+  const { stop } = useIntersectionObserver(
+    root,
+    ([entry]) => {
+      const next = Boolean(entry?.isIntersecting)
+      if (next) {
+        inView.value = true
+        if (props.revealOnce) stop()
+      } else if (!props.revealOnce) {
+        inView.value = false
+      }
+    },
+    {
+      threshold: props.revealThreshold,
+      rootMargin: props.revealRootMargin,
+    }
+  )
+}
+
+const isInView = computed(() => !props.revealOnView || inView.value)
+
+const rootStyles = computed<CSSProperties>(() => ({
+  minHeight: props.gapless ? 'auto' : props.minHeight || undefined,
+  '--parallax-overlay-color': props.overlayColor,
+  '--parallax-overlay-opacity': props.overlayOpacity,
+  '--parallax-overscan-px': `${overscanPx.value}px`,
+  '--parallax-smoothing-ms': `${smoothingMs.value}ms`,
+  '--parallax-reveal-duration-ms': `${props.revealDurationMs}ms`,
+  '--parallax-reveal-delay-ms': `${props.revealDelayMs}ms`,
+}))
+
 const parallaxEnabled = computed(
   () =>
     import.meta.client &&
@@ -173,27 +296,27 @@ const resolveOffset = (speed: number) => {
   const viewportCenter = windowHeight.value / 2
   const delta = elementCenter - viewportCenter
 
-  const rawOffset = delta * speed
-  const maxOffset = props.maxOffsetRatio
+  const rawOffset = delta * speed * speedFactor.value * directionSign.value
 
-  if (maxOffset && import.meta.client) {
-    const viewportLimit = Math.abs(windowHeight.value * maxOffset)
+  const maxOffsetPx =
+    typeof props.maxOffsetPx === 'number' && props.maxOffsetPx !== 0
+      ? Math.abs(props.maxOffsetPx)
+      : typeof props.maxOffsetRatio === 'number' && props.maxOffsetRatio > 0
+        ? Math.abs(windowHeight.value * props.maxOffsetRatio)
+        : Math.max(0, overscanPx.value * 0.98)
+
+  if (maxOffsetPx) {
     const clampedOffset = Math.min(
-      viewportLimit,
-      Math.max(-viewportLimit, rawOffset)
+      maxOffsetPx,
+      Math.max(-maxOffsetPx, rawOffset)
     )
-
     return `${clampedOffset}px`
   }
 
   return `${rawOffset}px`
 }
 
-const mediaStyles = computed<CSSProperties>(() => ({
-  '--parallax-overlay-color': props.overlayColor,
-  '--parallax-overlay-opacity': props.overlayOpacity,
-  minHeight: props.gapless ? 'auto' : props.minHeight || undefined,
-}))
+const mediaStyles = computed<CSSProperties>(() => ({}))
 
 const contentStyles = computed<CSSProperties>(() => ({
   paddingBlock: props.gapless
@@ -223,7 +346,11 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   <div
     ref="root"
     class="parallax-widget"
-    :class="{ 'parallax-widget--gapless': gapless }"
+    :class="{
+      'parallax-widget--gapless': gapless,
+      'parallax-widget--in-view': isInView,
+    }"
+    :style="rootStyles"
   >
     <div class="parallax-widget__media" :style="mediaStyles" aria-hidden="true">
       <div
@@ -285,12 +412,12 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
 
 .parallax-widget__layer
   position: absolute
-  inset: -10%
+  inset: calc(var(--parallax-overscan-px) * -1)
   background-size: cover
   background-repeat: no-repeat
   background-position: center center
   transform: translate3d(0, 0, 0)
-  transition: transform 160ms ease-out
+  transition: transform var(--parallax-smoothing-ms) ease-out
   filter: saturate(1.05)
   will-change: transform
   z-index: 0
@@ -309,9 +436,16 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
   display: flex
   align-items: center
   justify-content: center
-  opacity: 0.45
   filter: drop-shadow(0 20px 45px rgba(var(--v-theme-shadow-primary-600), 0.22))
   z-index: 2
+  opacity: 0
+  transform: translate3d(0, 10px, 0)
+  transition: opacity var(--parallax-reveal-duration-ms) ease-out, transform var(--parallax-reveal-duration-ms) ease-out
+  transition-delay: var(--parallax-reveal-delay-ms)
+
+.parallax-widget--in-view .parallax-widget__aplats
+  opacity: 0.45
+  transform: translate3d(0, 0, 0)
 
 .parallax-widget__aplat-image
   max-width: min(100%, 1024px)

@@ -23,6 +23,9 @@ spring:
 rootFolder: ./
 datasourcesfolder: "./datasources/"
 
+embedding:
+  modelPath: ./models/distilcamembert-base
+
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
   

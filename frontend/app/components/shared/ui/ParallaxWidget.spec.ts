@@ -15,6 +15,12 @@ vi.mock('@vueuse/core', () => ({
   usePreferredReducedMotion: () => motionPreference,
   useWindowScroll: () => ({ x: ref(0), y: scrollY }),
   useWindowSize: () => ({ width: ref(1000), height: windowHeight }),
+  useIntersectionObserver: () => ({
+    isActive: ref(true),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    stop: vi.fn(),
+  }),
   useElementBounding: () => ({
     top: computed(() => 350 - scrollY.value),
     height: elementHeight,
@@ -138,5 +144,33 @@ describe('ParallaxWidget', () => {
     expect(layer.element.style.transform).toBe('translate3d(0, -100px, 0)')
 
     innerHeightSpy.mockRestore()
+  })
+
+  it('multiplies parallax translation when speedFactor is set', async () => {
+    scrollY.value = 300
+
+    const wrapper = mountParallax({
+      backgrounds: [{ src: '/layers/back.svg', speed: 0.2 }],
+      speedFactor: 2,
+    })
+
+    await nextTick()
+
+    const layer = wrapper.get('.parallax-widget__layer')
+    expect(layer.element.style.transform).toBe('translate3d(0, -120px, 0)')
+  })
+
+  it('reverses parallax direction when reverse is true', async () => {
+    scrollY.value = 300
+
+    const wrapper = mountParallax({
+      backgrounds: [{ src: '/layers/back.svg', speed: 0.2 }],
+      reverse: true,
+    })
+
+    await nextTick()
+
+    const layer = wrapper.get('.parallax-widget__layer')
+    expect(layer.element.style.transform).toBe('translate3d(0, 60px, 0)')
   })
 })

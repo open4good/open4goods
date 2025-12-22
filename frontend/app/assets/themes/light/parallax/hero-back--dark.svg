@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071425"/>
+      <stop offset="0.55" stop-color="#0B1C2F"/>
+      <stop offset="1" stop-color="#0B1023"/>
+    </linearGradient>
+    <filter id="blur18" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="800" fill="url(#bg)"/>
+
+  <g id="layer-back" opacity="0.95" filter="url(#blur18)">
+    <circle cx="230" cy="120" r="210" fill="#2A6BFF" opacity="0.22"/>
+    <circle cx="1460" cy="150" r="260" fill="#B04CFF" opacity="0.18"/>
+    <circle cx="1450" cy="720" r="300" fill="#18E0C2" opacity="0.10"/>
+    <circle cx="170" cy="680" r="260" fill="#FFB347" opacity="0.09"/>
+  </g>
+</svg>
