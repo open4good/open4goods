@@ -9,6 +9,95 @@
       :info-card="heroInfoCard"
     />
 
+    <v-container class="opensource-live" fluid>
+      <v-row class="g-4" align="stretch">
+        <v-col cols="12" md="4">
+          <v-card class="opensource-version-card h-100" color="surface-glass">
+            <v-card-title class="d-flex align-center justify-space-between">
+              <div class="text-body-1 text-uppercase font-weight-medium">
+                {{ t('opensource.live.version.title') }}
+              </div>
+              <v-chip color="primary" variant="tonal" size="small">
+                {{ t('opensource.live.version.status') }}
+              </v-chip>
+            </v-card-title>
+            <v-card-text>
+              <div class="text-h4 font-weight-bold">
+                {{ currentVersion }}
+              </div>
+              <div class="text-body-2 mt-2 text-medium-emphasis">
+                {{ t('opensource.live.version.subtitle') }}
+              </div>
+              <v-divider class="my-4" />
+              <div class="d-flex align-center ga-3">
+                <v-icon icon="mdi-source-repository" color="primary" size="32" />
+                <span class="text-body-2">
+                  {{ t('opensource.live.version.description') }}
+                </span>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" md="8">
+          <v-card class="opensource-reports-card h-100" color="surface-glass">
+            <v-card-title class="d-flex flex-column align-start">
+              <div class="text-overline text-uppercase">
+                {{ t('opensource.live.eyebrow') }}
+              </div>
+              <div class="text-h6 font-weight-bold">
+                {{ t('opensource.live.title') }}
+              </div>
+              <div class="text-body-2 text-medium-emphasis">
+                {{ t('opensource.live.subtitle') }}
+              </div>
+            </v-card-title>
+
+            <v-tabs
+              v-model="activeReportTab"
+              align-tabs="center"
+              bg-color="primary"
+              stacked
+              grow
+            >
+              <v-tab
+                v-for="report in liveReportTabs"
+                :key="report.value"
+                :value="report.value"
+              >
+                <v-icon :icon="report.icon" size="28" class="mb-1" />
+                {{ report.label }}
+              </v-tab>
+            </v-tabs>
+
+            <v-tabs-window v-model="activeReportTab">
+              <v-tabs-window-item
+                v-for="report in liveReportTabs"
+                :key="report.value"
+                :value="report.value"
+              >
+                <v-card flat>
+                  <v-card-text>
+                    <div class="text-body-2 text-medium-emphasis mb-3">
+                      {{ report.description }}
+                    </div>
+                    <div class="opensource-report-frame">
+                      <iframe
+                        :src="report.src"
+                        :title="report.label"
+                        loading="lazy"
+                        referrerpolicy="no-referrer"
+                      />
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-tabs-window-item>
+            </v-tabs-window>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
     <OpensourcePillarsSection
       :eyebrow="t('opensource.pillars.eyebrow')"
       :title="t('opensource.pillars.title')"
@@ -37,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OpensourceHero from '~/components/domains/opensource/OpensourceHero.vue'
 import OpensourcePillarsSection from '~/components/domains/opensource/OpensourcePillarsSection.vue'
@@ -124,6 +213,8 @@ definePageMeta({
 const { t, locale, availableLocales } = useI18n()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
+const currentVersion = 'v0.9.8'
+const activeReportTab = ref('frontend-coverage')
 
 const heroCtas = computed<HeroCtaDisplay[]>(() => [
   {
@@ -272,6 +363,7 @@ const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
   ctaAriaLabel: `${String(t('opensource.resources.opendata.cta.label'))} : ${String(t('opensource.resources.opendata.cta.ariaLabel'))}`,
 }))
 
+<<<<<<< HEAD
 const promptCallout = computed(() => ({
   title: String(t('opensource.resources.prompt.title')),
   description: String(t('opensource.resources.prompt.description')),
@@ -279,6 +371,31 @@ const promptCallout = computed(() => ({
   ctaHref: localePath('prompt') + '?template=feature-request',
   ctaAriaLabel: String(t('opensource.resources.prompt.cta.ariaLabel')),
 }))
+=======
+const liveReportTabs = computed(() => [
+  {
+    value: 'frontend-coverage',
+    icon: 'mdi-vuejs',
+    label: String(t('opensource.live.tabs.frontend.title')),
+    description: String(t('opensource.live.tabs.frontend.description')),
+    src: '/reports/test-coverage/frontend/index.html',
+  },
+  {
+    value: 'backend-coverage',
+    icon: 'mdi-alpha-b-box-outline',
+    label: String(t('opensource.live.tabs.backend.title')),
+    description: String(t('opensource.live.tabs.backend.description')),
+    src: '/reports/test-coverage/backend/index.html',
+  },
+  {
+    value: 'maven-site',
+    icon: 'mdi-cog-outline',
+    label: String(t('opensource.live.tabs.maven.title')),
+    description: String(t('opensource.live.tabs.maven.description')),
+    src: '/public/reports/maven-site/index.html',
+  },
+])
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 const canonicalUrl = computed(() =>
   new URL(
@@ -350,4 +467,24 @@ useHead(() => ({
 .opensource-page
   display: flex
   flex-direction: column
+
+.opensource-live
+  padding-top: 24px
+
+.opensource-version-card
+  .v-card-title
+    gap: 8px
+
+.opensource-report-frame
+  position: relative
+  border-radius: 12px
+  overflow: hidden
+  min-height: 420px
+  background: rgba(var(--v-theme-surface-muted), 0.24)
+
+  iframe
+    border: 0
+    width: 100%
+    height: 100%
+
 </style>

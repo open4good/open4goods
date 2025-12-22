@@ -1688,6 +1688,31 @@
       "subtitle": "Découvrez les coulisses de Nudger : notre code est ouvert pour que chacun puisse apprendre, comprendre et améliorer Nudger.",
       "title": "Open Source"
     },
+    "live": {
+      "eyebrow": "En direct du code",
+      "subtitle": "Les tableaux de bord sont mis à jour après chaque pipeline pour consulter les métriques en temps réel.",
+      "tabs": {
+        "backend": {
+          "description": "Couverture et mutations back-end pour valider la stabilité des services et du domaine.",
+          "title": "Couverture backend"
+        },
+        "frontend": {
+          "description": "Tests côté client couvrant la navigation, les composables et les composants partagés.",
+          "title": "Couverture frontend"
+        },
+        "maven": {
+          "description": "Site Maven généré regroupant rapports, dépendances et contrôles qualité.",
+          "title": "Site Maven"
+        }
+      },
+      "title": "Des rapports de qualité toujours frais",
+      "version": {
+        "description": "Dernière release taggée déployée sur nos environnements.",
+        "status": "En ligne",
+        "subtitle": "Suivre la version déployée facilite les échanges communautaires et les rapports de bugs.",
+        "title": "Version actuelle"
+      }
+    },
     "pillars": {
       "cards": {
         "community": {
