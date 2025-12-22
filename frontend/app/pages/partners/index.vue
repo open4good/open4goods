@@ -1,11 +1,21 @@
 <template>
   <div class="partners-page">
-    <PartnersHero
+    <PageHeader
+      variant="hero-standard"
       :eyebrow="t('partners.hero.eyebrow')"
       :title="t('partners.hero.title')"
       :subtitle="t('partners.hero.subtitle')"
-      :description="t('partners.hero.description')"
+      :description-html="t('partners.hero.description')"
       description-bloc-id="webpages:partners:hero-overview"
+      background="surface-variant"
+      surface-variant="orbit"
+      layout="2-columns"
+      container="lg"
+      show-media
+      media-type="glow"
+      heading-level="h1"
+      schema-type="AboutPage"
+      :og-image="ogImageUrl"
     />
 
     <v-progress-linear
@@ -110,7 +120,7 @@ import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import PartnersAffiliationSection from '~/components/domains/partners/PartnersAffiliationSection.vue'
 import PartnersStaticCarouselSection from '~/components/domains/partners/PartnersStaticCarouselSection.vue'
 import PartnersContactCta from '~/components/domains/partners/PartnersContactCta.vue'
-import PartnersHero from '../../components/domains/partners/PartnersHero.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 
 interface PartnersPageData {
   affiliation: AffiliationPartnerDto[]
@@ -171,19 +181,8 @@ const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-useSeoMeta({
-  title: () => String(t('partners.seo.title')),
-  description: () => String(t('partners.seo.description')),
-  ogTitle: () => String(t('partners.seo.title')),
-  ogDescription: () => String(t('partners.seo.description')),
-  ogUrl: () => canonicalUrl.value,
-  ogType: () => 'website',
-  ogImage: () => ogImageUrl.value,
-})
-
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-}))
+// Note: SEO metadata (title, description, OG tags, canonical, JSON-LD)
+// is now handled automatically by PageHeader component via useHeaderSeo composable
 </script>
 
 <style scoped lang="scss">

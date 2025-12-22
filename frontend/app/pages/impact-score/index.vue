@@ -1,36 +1,19 @@
 <template>
   <div class="impact-score-page">
-    <section
-      class="impact-score-page__hero"
-      aria-labelledby="impact-score-hero-title"
-      aria-describedby="impact-score-hero-intro"
-      role="region"
-    >
-      <v-container class="impact-score-page__hero-container">
-        <v-row
-          class="impact-score-page__hero-row"
-          align="center"
-          justify="center"
-        >
-          <v-col
-            cols="12"
-            md="10"
-            lg="8"
-            class="impact-score-page__hero-content"
-          >
-            <h1 id="impact-score-hero-title" class="impact-score-page__title">
-              {{ t('impactScorePage.hero.title') }}
-            </h1>
-            <div
-              id="impact-score-hero-intro"
-              class="impact-score-page__intro text-body-1"
-            >
-              <TextContent bloc-id="ECOSCORE:1:" />
-            </div>
-          </v-col>
-        </v-row>
-      </v-container>
-    </section>
+    <PageHeader
+      variant="section-header"
+      :title="t('impactScorePage.hero.title')"
+      description-bloc-id="ECOSCORE:1:"
+      background="gradient"
+      layout="single-column"
+      container="xl"
+      content-align="center"
+      heading-level="h1"
+      schema-type="WebPage"
+      padding-y="clamp(5rem, 9vw, 7.5rem)"
+      heading-id="impact-score-hero-title"
+      aria-described-by="impact-score-hero-intro"
+    />
 
     <v-container class="impact-score-page__content py-12">
       <div class="impact-score-page__layout">
@@ -370,6 +353,7 @@ import type { VerticalConfigDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ResponsiveCarousel from '~/components/shared/ui/ResponsiveCarousel.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 
 const props = defineProps({
   rating: { type: Number, default: 4.5 },
@@ -377,23 +361,6 @@ const props = defineProps({
 
 const { t, locale } = useI18n()
 const display = useDisplay()
-
-const canonicalUrl = useCanonicalUrl()
-
-useHead(() => ({
-  link: canonicalUrl.value
-    ? [
-        {
-          rel: 'canonical',
-          href: canonicalUrl.value,
-        },
-      ]
-    : [],
-}))
-
-useSeoMeta({
-  ogUrl: () => canonicalUrl.value || undefined,
-})
 
 const { data: fetchedVerticals } = await useAsyncData<VerticalConfigDto[]>(
   'impact-score-verticals',
@@ -612,70 +579,6 @@ function formatCoeff(n: number | null | undefined) {
   );
   color: rgb(var(--v-theme-text-neutral-strong));
   min-height: 100%;
-}
-
-.impact-score-page__hero {
-  position: relative;
-  color: white;
-  overflow: hidden;
-}
-
-.impact-score-page__hero-container {
-  position: relative;
-  width: 100%;
-  margin-inline: auto;
-  padding-block: clamp(5rem, 9vw, 7.5rem);
-  max-width: min(1320px, 92vw);
-}
-
-.impact-score-page__hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    140deg,
-    rgba(var(--v-theme-hero-gradient-start), 0.9),
-    rgba(var(--v-theme-hero-gradient-end), 0.88)
-  );
-  z-index: 0;
-}
-
-.impact-score-page__hero::after {
-  content: '';
-  position: absolute;
-  inset: 10% -25% -18% -25%;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.25),
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.impact-score-page__hero-row {
-  gap: 2.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.impact-score-page__hero-content {
-  max-width: 760px;
-  margin-inline: auto;
-  text-align: center;
-}
-
-.impact-score-page__title {
-  font-size: clamp(2.15rem, 2.6vw, 3rem);
-  font-weight: 700;
-  line-height: 1.15;
-  margin-bottom: 1.5rem;
-}
-
-.impact-score-page__intro :deep(p) {
-  margin-bottom: 1rem;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 1.05rem;
 }
 
 .impact-score-page__content {
@@ -974,16 +877,6 @@ function formatCoeff(n: number | null | undefined) {
   }
 }
 
-@media (max-width: 1080px) {
-  .impact-score-page__hero-content {
-    text-align: left;
-  }
-
-  .impact-score-page__title {
-    font-size: clamp(2rem, 2.4vw, 2.5rem);
-  }
-}
-
 @media (max-width: 960px) {
   .impact-score-page__content {
     padding-top: 2rem;
@@ -1013,19 +906,6 @@ function formatCoeff(n: number | null | undefined) {
 }
 
 @media (max-width: 600px) {
-  .impact-score-page__hero {
-    border-bottom-left-radius: 28px;
-    border-bottom-right-radius: 28px;
-  }
-
-  .impact-score-page__hero-content {
-    text-align: left;
-  }
-
-  .impact-score-page__intro :deep(p) {
-    font-size: 1rem;
-  }
-
   .impact-score-section__surface {
     padding: 1.5rem;
     border-radius: 20px;
