@@ -24,7 +24,7 @@
     "postinstall": "pnpm prepare:nuxt && pnpm rebuild sharp",
     "prebuild": "pnpm preprocess:css",
     "prepare": "husky",
-    "fast": "pnpm build && pnpm lint && pnpm test --run",
+    "fast": "pnpm lint && pnpm test --run && pnpm build",
     "mcp:vuetify": "npx @vuetify/mcp"
   },
   "dependencies": {

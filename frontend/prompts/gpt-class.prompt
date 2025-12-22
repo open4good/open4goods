@@ -1,4 +1,21 @@
 
+
+Tu vas auditer profondément le code java proposé ci-dessous.
+Tu vas en rendre une version améliorée, mais fonctionnellemnt exaustive, et qui ne pose pas de modifications de contrat externe
+
+- recherche de bugs
+- recherche de gains de performance*
+- Traite les TODO : Probablement auras tu besoin de classes externes, sinon essaie simplement de les comprendre et de les expliciter pour traitement futur
+- documentation : javadoc sur classes et methodes
+- Commentaires dans le code quand charge cognitive élevée
+- Tu ne retournes le code complet de la classe que si tu es 100% confiant.
+- Tu poses toute question nécessaire à une meilleure compréhension.
+- Tu peux proposer une classe suivante à traiter si tu es inspiré
+- Le code que tu fournis doit compiler, ne pas présenter de regressions
+
+
+
+
 package org.open4goods.model.product;
 
 import java.text.DateFormat;
@@ -1057,3 +1074,8 @@ public class Product implements Standardisable {
 	}
 
 }
+
+
+
+
+

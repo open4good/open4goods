@@ -16,6 +16,7 @@ import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.completion.image.DjlImageEmbeddingService;
 import org.open4goods.api.services.completion.image.ImageEmbeddingService;
+import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandScoreService;
@@ -329,9 +330,9 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService) {
+			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, DjlTextEmbeddingService embeddingService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				serialisationService, brandScoreService);
+				serialisationService, brandScoreService, embeddingService);
 	}
 
 	//////////////////////////////////////////////////////////
