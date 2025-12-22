@@ -28,6 +28,39 @@ $font-files: (
   900: 'Black'
 )
 
+// Font metrics overrides derived from the OS/2 sTypo metrics (unitsPerEm: 1000)
+// to stabilise layout when swapping from fallback fonts
+$font-metrics-overrides: (
+  'Poppins': (
+    400: (
+      'ascent-override': 105%,
+      'descent-override': 35%,
+      'line-gap-override': 10%,
+      'size-adjust': 100%
+    ),
+    600: (
+      'ascent-override': 105%,
+      'descent-override': 35%,
+      'line-gap-override': 10%,
+      'size-adjust': 100%
+    ),
+    700: (
+      'ascent-override': 105%,
+      'descent-override': 35%,
+      'line-gap-override': 10%,
+      'size-adjust': 100%
+    )
+  )
+)
+
+@function resolve-font-metrics($name, $weight)
+  $font-map: map.get($font-metrics-overrides, $name)
+
+  @if $font-map != null and map.has-key($font-map, $weight)
+    @return map.get($font-map, $weight)
+
+  @return null
+
 // Mixin pour les @font-face
 @mixin font-face(
   $name,
@@ -37,10 +70,18 @@ $font-files: (
   $file-map: $font-files,
   $file-name: null,
   $extension: 'ttf',
-  $format: 'truetype'
+  $format: 'truetype',
+  $metrics: null
 )
   // Résolution du nom de fichier AVANT le bloc @font-face
-  $resolved-file: if(sass($file-name): $file-name; else: "#{$name}-#{map.get($file-map, $weight)}")
+  $resolved-file: "#{$name}-#{map.get($file-map, $weight)}"
+  $resolved-metrics: resolve-font-metrics($name, $weight)
+
+  @if $file-name != null
+    $resolved-file: $file-name
+
+  @if $metrics != null
+    $resolved-metrics: $metrics
 
   @if $file-name == null and $style == italic
     @if $resolved-file == 'Poppins-Regular'
@@ -54,6 +95,11 @@ $font-files: (
     font-weight: $weight
     font-display: swap
     src: url('~/assets/fonts/#{$font-folder}/#{$resolved-file}.#{$extension}') format($format)
+    @if $resolved-metrics != null
+      ascent-override: map.get($resolved-metrics, 'ascent-override')
+      descent-override: map.get($resolved-metrics, 'descent-override')
+      line-gap-override: map.get($resolved-metrics, 'line-gap-override')
+      size-adjust: map.get($resolved-metrics, 'size-adjust')
 
 // Génération automatique des @font-face pour Poppins (ttf)
 @each $weight-name, $weight-value in $font-weights
@@ -96,4 +142,3 @@ html, body
 // Force Vuetify à utiliser la font de base
 .v-application
   font-family: var(--font-family-base) !important
-
