@@ -10,17 +10,11 @@ on:
 jobs:
   test:
     name: PR Check - Maven Build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-
-      - name: Install unzip (required for Claude Code Action)
-        run: |
-          if ! command -v unzip &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y unzip
-          fi
 
       - name: Claude Code Action Official
         uses: anthropics/claude-code-action@v1
