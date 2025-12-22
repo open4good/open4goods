@@ -113,12 +113,12 @@
           }
         }
       },
-      "christmas": {
+      "hold": {
         "hero": {
-          "titleSubtitle": ["Le nudger de Noêl"],
+          "titleSubtitle": ["Pack hérité pour les tests"],
           "subtitles": [
-            "Compare prix et impact avant d'emballer.",
-            "Des idées cadeaux qui respectent tes valeurs et ton budget."
+            "Texte placeholder pour le pack de rétention.",
+            "Ajoute une déclinaison événementielle ou reste sur le défaut."
           ]
         }
       },
@@ -197,9 +197,7 @@
       "titleSubtitle": {
         "default": ["Acheter mieux. Sans dépenser plus."],
         "events": {
-          "christmas": [
-            "Des idées cadeaux qui respectent tes valeurs et ton budget."
-          ],
+          "hold": ["Des contenus hérités pour les tests."],
           "sdg": [
             "Des achats du quotidien alignés sur les Objectifs de développement durable."
           ]
@@ -212,9 +210,9 @@
           "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
         ],
         "events": {
-          "christmas": [
-            "Offre avec intention : compare prix et impact avant d'emballer.",
-            "Des idées cadeaux qui respectent tes valeurs et ton budget."
+          "hold": [
+            "Texte placeholder pour le pack de rétention.",
+            "Reviens au défaut si aucune variante n’est définie."
           ],
           "sdg": [
             "Des choix du quotidien alignés sur les Objectifs de développement durable."

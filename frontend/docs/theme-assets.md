@@ -19,13 +19,13 @@ This page summarises how themed assets are resolved, how seasonal packs are sche
 - Missing files automatically fall back to the non-seasonal theme/common assets thanks to the ordered resolution above.
 
 ## Event packs and scheduling
-- Available packs: `default`, `sdg`, `christmas`, and `bastille-day` (see `EVENT_PACK_NAMES`).
+- Available packs: `default`, `sdg`, `bastille-day`, and `hold` (see `EVENT_PACK_NAMES`).
 
 - Date windows are defined in `config/theme/seasons.ts` and evaluated in UTC. If no window matches, the `default` pack is used.
 - `useSeasonalEventPack` exposes the active pack to components (parallax layers, hero subtitle overrides, etc.).
 
 ## Forcing an event pack for previews
 
-- Append `?event=<pack>` (or legacy `?theme=<pack>`) to any page URL (e.g., `?event=christmas` or `?event=sdg`) to force that event pack.
+- Append `?event=<pack>` (or legacy `?theme=<pack>`) to any page URL (e.g., `?event=hold` or `?event=sdg`) to force that event pack.
 - When this query parameter is present it bypasses both the calendar-based scheduling and any stored theme preference, ensuring a deterministic preview.
 - Only values listed in `EVENT_PACK_NAMES` are accepted; invalid values are ignored and the schedule is used instead.

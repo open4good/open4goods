@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Dark theme hero placeholder</title>
+  <desc id="desc">Placeholder graphic shown when no dark hero background is defined.</desc>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="50%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0B1220" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g)" />
+  <g fill="none" stroke="#FFB020" stroke-width="8" stroke-dasharray="16 20">
+    <rect x="40" y="40" width="1520" height="820" rx="48" />
+    <rect x="120" y="120" width="1360" height="660" rx="32" />
+  </g>
+  <g fill="#FFB020" font-family="'Inter', 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="800" y="430" font-size="72" font-weight="700">DARK HERO PLACEHOLDER</text>
+    <text x="800" y="500" font-size="32" font-weight="600">Define hero-background for this theme or pack</text>
+    <text x="800" y="560" font-size="24" font-weight="500">(Missing asset → using fallback)</text>
+  </g>
+</svg>

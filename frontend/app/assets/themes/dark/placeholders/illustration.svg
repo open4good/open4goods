@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" role="img" aria-labelledby="title desc">
+  <title id="title">Dark illustration placeholder</title>
+  <desc id="desc">Use a real illustration asset to replace this placeholder.</desc>
+  <rect width="900" height="700" rx="48" fill="#0B1220" stroke="#FFB020" stroke-width="10" stroke-dasharray="18 18" />
+  <g fill="#FFB020" font-family="'Inter', 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="450" y="330" font-size="52" font-weight="800">DARK ILLUSTRATION</text>
+    <text x="450" y="390" font-size="30" font-weight="600">Placeholder / Missing asset</text>
+  </g>
+  <g stroke="#FFB020" stroke-width="6" stroke-linecap="round" opacity="0.7">
+    <path d="M200 520 Q320 420 440 520 T680 520" fill="none" />
+    <path d="M240 470 Q360 370 480 470 T720 470" fill="none" />
+  </g>
+</svg>

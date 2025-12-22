@@ -25,8 +25,8 @@ export const PARALLAX_SECTION_KEYS = [
 export const EVENT_PACK_NAMES = [
   'default',
   'sdg',
-  'christmas',
   'bastille-day',
+  'hold',
 ] as const
 
 export type ParallaxSectionKey = (typeof PARALLAX_SECTION_KEYS)[number]
@@ -59,22 +59,25 @@ export type ParallaxPackConfig = Partial<
 
 export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   light: {
-    logo: 'logo-new.png',
-    footerLogo: 'logo-footer.svg',
-    favicon: 'favicon.svg',
-    heroBackground: 'hero-background.webp',
-    illustration: 'illustration-generic.svg',
+    logo: 'placeholders/logo.svg',
+    footerLogo: 'placeholders/logo-footer.svg',
+    favicon: 'placeholders/favicon.svg',
+    heroBackground: 'placeholders/hero-background.svg',
+    illustration: 'placeholders/illustration.svg',
   },
   dark: {
-    logo: 'logo-new.png',
-    footerLogo: 'logo-footer.svg',
-    favicon: 'favicon.svg',
-    heroBackground: 'hero-background.svg',
-    illustration: 'illustration-generic.svg',
+    logo: 'placeholders/logo.svg',
+    footerLogo: 'placeholders/logo-footer.svg',
+    favicon: 'placeholders/favicon.svg',
+    heroBackground: 'placeholders/hero-background.svg',
+    illustration: 'placeholders/illustration.svg',
   },
   common: {
-    heroBackground: 'hero-background.svg',
-    illustration: 'illustration-generic.svg',
+    logo: 'placeholders/asset-missing.svg',
+    footerLogo: 'placeholders/asset-missing.svg',
+    favicon: 'placeholders/asset-missing.svg',
+    heroBackground: 'placeholders/asset-missing.svg',
+    illustration: 'placeholders/asset-missing.svg',
   },
 }
 
@@ -90,16 +93,26 @@ export const seasonalThemeAssets: SeasonalThemeAssets = {
       illustration: 'bastille-day/illustration-fireworks.svg',
     },
   },
-  christmas: {
+  hold: {
     light: {
-      heroBackground: 'hero-background.svg',
+      logo: 'logo-new.png',
+      footerLogo: 'logo-footer.svg',
+      favicon: 'favicon.svg',
+      heroBackground: 'hero-background.webp',
       illustration: 'illustration-generic.svg',
     },
     dark: {
+      logo: 'logo-new.png',
+      footerLogo: 'logo-footer.svg',
+      favicon: 'favicon.svg',
+      heroBackground: 'hero-background.webp',
+      illustration: 'illustration-generic.svg',
+    },
+    common: {
+      logo: 'logo.png',
       heroBackground: 'hero-background.svg',
       illustration: 'illustration-generic.svg',
     },
-    common: {},
   },
 }
 
@@ -109,11 +122,11 @@ export const eventParallaxPacks: Record<
 > = {
   light: {
     default: {
-      essentials: ['parallax/parallax-background-1.svg'],
-      features: ['parallax/parallax-background-2.svg'],
-      blog: ['parallax/parallax-background-3.svg'],
-      objections: ['parallax/parallax-background-1.svg'],
-      cta: ['parallax/parallax-background-2.svg'],
+      essentials: ['parallax/parallax-placeholder.svg'],
+      features: ['parallax/parallax-placeholder.svg'],
+      blog: ['parallax/parallax-placeholder.svg'],
+      objections: ['parallax/parallax-placeholder.svg'],
+      cta: ['parallax/parallax-placeholder.svg'],
     },
     'bastille-day': {
       essentials: ['parallax/parallax-background-bastille-essentials.svg'],
@@ -123,27 +136,27 @@ export const eventParallaxPacks: Record<
       cta: ['parallax/parallax-background-bastille-cta.svg'],
     },
     sdg: {
-      essentials: ['parallax/parallax-background-sdg-essentials.svg'],
-      features: ['parallax/parallax-background-sdg-features.svg'],
-      blog: ['parallax/parallax-background-sdg-blog.svg'],
-      objections: ['parallax/parallax-background-sdg-objections.svg'],
-      cta: ['parallax/parallax-background-sdg-cta.svg'],
+      essentials: ['parallax/parallax-placeholder.svg'],
+      features: ['parallax/parallax-placeholder.svg'],
+      blog: ['parallax/parallax-placeholder.svg'],
+      objections: ['parallax/parallax-placeholder.svg'],
+      cta: ['parallax/parallax-placeholder.svg'],
     },
-    christmas: {
-      essentials: ['parallax/parallax-background-christmas-essentials.svg'],
-      features: ['parallax/parallax-background-christmas-features.svg'],
-      blog: ['parallax/parallax-background-christmas-blog.svg'],
-      objections: ['parallax/parallax-background-christmas-objections.svg'],
-      cta: ['parallax/parallax-background-christmas-cta.svg'],
+    hold: {
+      essentials: ['parallax/hero-back--light.svg'],
+      features: ['parallax/hero-mid--light.svg'],
+      blog: ['parallax/hero-front--light.svg'],
+      objections: ['parallax/hero-back--light.svg'],
+      cta: ['parallax/hero-mid--light.svg'],
     },
   },
   dark: {
     default: {
-      essentials: ['parallax/parallax-background-1.svg'],
-      features: ['parallax/parallax-background-2.svg'],
-      blog: ['parallax/parallax-background-3.svg'],
-      objections: ['parallax/parallax-background-1.svg'],
-      cta: ['parallax/parallax-background-2.svg'],
+      essentials: ['parallax/parallax-placeholder.svg'],
+      features: ['parallax/parallax-placeholder.svg'],
+      blog: ['parallax/parallax-placeholder.svg'],
+      objections: ['parallax/parallax-placeholder.svg'],
+      cta: ['parallax/parallax-placeholder.svg'],
     },
     'bastille-day': {
       essentials: ['parallax/parallax-background-bastille-essentials.svg'],
@@ -153,27 +166,27 @@ export const eventParallaxPacks: Record<
       cta: ['parallax/parallax-background-bastille-cta.svg'],
     },
     sdg: {
-      essentials: ['parallax/parallax-background-sdg-essentials.svg'],
-      features: ['parallax/parallax-background-sdg-features.svg'],
-      blog: ['parallax/parallax-background-sdg-blog.svg'],
-      objections: ['parallax/parallax-background-sdg-objections.svg'],
-      cta: ['parallax/parallax-background-sdg-cta.svg'],
+      essentials: ['parallax/parallax-placeholder.svg'],
+      features: ['parallax/parallax-placeholder.svg'],
+      blog: ['parallax/parallax-placeholder.svg'],
+      objections: ['parallax/parallax-placeholder.svg'],
+      cta: ['parallax/parallax-placeholder.svg'],
     },
-    christmas: {
-      essentials: ['parallax/parallax-background-christmas-essentials.svg'],
-      features: ['parallax/parallax-background-christmas-features.svg'],
-      blog: ['parallax/parallax-background-christmas-blog.svg'],
-      objections: ['parallax/parallax-background-christmas-objections.svg'],
-      cta: ['parallax/parallax-background-christmas-cta.svg'],
+    hold: {
+      essentials: ['parallax/hero-back--dark.svg'],
+      features: ['parallax/hero-mid--dark.svg'],
+      blog: ['parallax/hero-front--dark.svg'],
+      objections: ['parallax/hero-back--dark.svg'],
+      cta: ['parallax/hero-mid--dark.svg'],
     },
   },
   common: {
     default: {
-      essentials: ['parallax/parallax-background-1.svg'],
-      features: ['parallax/parallax-background-2.svg'],
-      blog: ['parallax/parallax-background-3.svg'],
-      objections: ['parallax/parallax-background-1.svg'],
-      cta: ['parallax/parallax-background-2.svg'],
+      essentials: ['parallax/parallax-placeholder.svg'],
+      features: ['parallax/parallax-placeholder.svg'],
+      blog: ['parallax/parallax-placeholder.svg'],
+      objections: ['parallax/parallax-placeholder.svg'],
+      cta: ['parallax/parallax-placeholder.svg'],
     },
     'bastille-day': {
       essentials: ['parallax/parallax-background-bastille-essentials.svg'],
@@ -183,7 +196,13 @@ export const eventParallaxPacks: Record<
       cta: ['parallax/parallax-background-bastille-cta.svg'],
     },
     sdg: {},
-    christmas: {},
+    hold: {
+      essentials: ['parallax/missing-parallax.svg'],
+      features: ['parallax/missing-parallax.svg'],
+      blog: ['parallax/missing-parallax.svg'],
+      objections: ['parallax/missing-parallax.svg'],
+      cta: ['parallax/missing-parallax.svg'],
+    },
   },
 }
 /** @deprecated Use {@link eventParallaxPacks} instead. */

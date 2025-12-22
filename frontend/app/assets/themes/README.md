@@ -9,9 +9,10 @@ Theme-specific assets live under `app/assets/themes/<theme>/` with shared fallba
 - Prefer descriptive filenames by purpose rather than brand (e.g., `hero-background.svg`, `illustration-generic.svg`).
 
 ## Current folders
-- `light/`: source of truth for brand-ready assets.
-- `dark/`: reserved for dark-specific overrides (currently falls back to light/common assets).
+- `light/`: placeholder defaults shown when no pack/theme override is provided.
+- `dark/`: placeholder defaults for dark mode (inherits from light/common otherwise).
 - `common/`: neutral visuals usable across all themes (e.g., hero backgrounds, generic illustrations).
+- `common/hold/`: archived pre-placeholder assets kept for regression testing.
 
 Use the `useThemedAsset` composable to resolve the correct URL instead of importing assets directly.
 

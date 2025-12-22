@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title desc">
+  <title id="title">Asset missing placeholder</title>
+  <desc id="desc">Neutral placeholder displayed when a themed asset cannot be found.</desc>
+  <rect width="800" height="480" rx="32" fill="#ECEFF4" stroke="#D1434B" stroke-width="10" stroke-dasharray="18 14" />
+  <text x="400" y="240" fill="#D1434B" font-family="'Inter', 'Segoe UI', sans-serif" font-size="48" font-weight="800" text-anchor="middle">MISSING ASSET</text>
+  <text x="400" y="290" fill="#D1434B" font-family="'Inter', 'Segoe UI', sans-serif" font-size="22" font-weight="600" text-anchor="middle">Provide a theme/pack override</text>
+</svg>

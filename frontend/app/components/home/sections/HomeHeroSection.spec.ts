@@ -12,9 +12,9 @@ const messages: Record<string, unknown> = {
     'Gagne du temps. Choisis librement.',
     'Choisis librement.',
   ],
-  'home.events.christmas.hero.subtitles': [
-    'Noël responsable',
-    'Cadeaux en accord avec tes valeurs',
+  'home.events.hold.hero.subtitles': [
+    'Pack retenu',
+    'Sous-titre placeholder',
   ],
   'home.events.default.hero.titleSubtitle': [
     'Acheter mieux. Sans dépenser plus.',
@@ -61,7 +61,7 @@ const helperItems = messages[
 const subtitleCollections = {
   default: messages['home.events.default.hero.subtitles'] as string[],
   events: {
-    christmas: messages['home.events.christmas.hero.subtitles'] as string[],
+    hold: messages['home.events.hold.hero.subtitles'] as string[],
   },
 }
 
@@ -136,8 +136,8 @@ vi.mock('vue-i18n', () => ({
         return subtitleCollections.default
       }
 
-      if (key === 'home.events.christmas.hero.subtitles') {
-        return subtitleCollections.events.christmas
+      if (key === 'home.events.hold.hero.subtitles') {
+        return subtitleCollections.events.hold
       }
 
       if (key === 'home.events.default.hero.titleSubtitle') {
@@ -296,7 +296,7 @@ describe('HomeHeroSection', () => {
   })
 
   it('prefers event-specific subtitles when provided', async () => {
-    activeEventPack.value = 'christmas'
+    activeEventPack.value = 'hold'
     const wrapper = await mountComponent({
       variantSeeds: { 'home-hero-subtitles': 0.9 },
     })
@@ -307,7 +307,7 @@ describe('HomeHeroSection', () => {
 
     expect(variantState.value['home-hero-subtitles']).toBeCloseTo(0.9)
 
-    expect(subtitle.text()).toBe(subtitleCollections.events.christmas[1])
+    expect(subtitle.text()).toBe(subtitleCollections.events.hold[1])
 
     await wrapper.unmount()
   })

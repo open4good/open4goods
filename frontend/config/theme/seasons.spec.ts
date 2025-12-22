@@ -15,18 +15,6 @@ describe('resolveActiveEventPack', () => {
     expect(resolveActiveEventPack(date)).toBe('sdg')
   })
 
-  it('activates christmas pack within the festive window', () => {
-    const date = new Date(Date.UTC(2024, 11, 15))
-
-    expect(resolveActiveEventPack(date)).toBe('christmas')
-  })
-
-  it('falls back to winter pack before christmas window', () => {
-    const date = new Date(Date.UTC(2024, 10, 30))
-
-    expect(resolveActiveEventPack(date)).toBe('default')
-  })
-
   it('keeps winter pack active after the new year', () => {
     const date = new Date(Date.UTC(2025, 0, 10))
 
@@ -34,8 +22,8 @@ describe('resolveActiveEventPack', () => {
   })
 
   it('accepts an explicit pack name from query params', () => {
-    expect(resolveEventPackName('christmas')).toBe('christmas')
     expect(resolveEventPackName(['sdg'])).toBe('sdg')
+    expect(resolveEventPackName('hold')).toBe('hold')
     expect(resolveEventPackName('unknown')).toBeUndefined()
   })
 })
