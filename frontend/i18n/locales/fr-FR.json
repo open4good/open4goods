@@ -40,9 +40,7 @@
         "hero": {
           "eyebrow": "Comparateur responsable",
           "title": "Acheter mieux. Sans dépenser plus.",
-          "titleSubtitle": [
-            "Acheter mieux. Sans dépenser plus."
-          ],
+          "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
           "subtitles": [
             "Gagne du temps. Choisis librement.",
             "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -117,9 +115,7 @@
       },
       "christmas": {
         "hero": {
-          "titleSubtitle": [
-            "Le nudger de Noêl"
-          ],
+          "titleSubtitle": ["Le nudger de Noêl"],
           "subtitles": [
             "Compare prix et impact avant d'emballer.",
             "Des idées cadeaux qui respectent tes valeurs et ton budget."
@@ -146,9 +142,7 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "titleSubtitle": {
-        "default": [
-          "Acheter mieux. Sans dépenser plus."
-        ],
+        "default": ["Acheter mieux. Sans dépenser plus."],
         "events": {
           "christmas": [
             "Des idées cadeaux qui respectent tes valeurs et ton budget."
@@ -2690,5 +2684,43 @@
   },
   "navigation": {
     "home": "Accueil"
+  },
+  "agents": {
+    "page": {
+      "title": "Espace Agents IA",
+      "subtitle": "Utilisez nos agents spécialisés pour soumettre des idées, signaler des bugs ou poser des questions.",
+      "availableAgents": "Agents Disponibles",
+      "active": "Actifs"
+    },
+    "selector": {
+      "select": "Sélectionner"
+    },
+    "promptInput": {
+      "description": "Décrivez votre demande ci-dessous. Nos agents IA vont la traiter et créer un ticket GitHub.",
+      "label": "Votre demande",
+      "placeholder": "ex: Je voudrais une fonctionnalité pour filtrer les produits par...",
+      "required": "La demande ne peut pas être vide",
+      "private": "Rendre ma demande privée",
+      "privateDescription": "Le ticket sera public, mais votre texte original sera masqué.",
+      "email": "Vous préférez envoyer un email ?",
+      "emailDescription": "Vous pouvez utiliser votre client de messagerie par défaut.",
+      "openEmail": "Ouvrir mon email"
+    },
+    "submission": {
+      "success": "Demande envoyée !",
+      "message": "Votre demande a été traitée avec succès par l'agent. Le ticket #{id} a été créé sur GitHub.",
+      "viewOnGithub": "Voir sur GitHub",
+      "newRequest": "Nouvelle demande"
+    },
+    "activity": {
+      "title": "Activité de la communauté",
+      "hidden": "Contenu de demande privée masqué",
+      "private": "Privé",
+      "empty": "Aucune activité récente. Soyez le premier à contribuer !"
+    },
+    "meta": {
+      "title": "Espace Agents IA - Nudger",
+      "description": "Interagissez avec les agents IA Nudger pour soumettre vos retours et questions."
+    }
   }
 }

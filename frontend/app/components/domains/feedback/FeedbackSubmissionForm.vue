@@ -122,7 +122,10 @@
                   @error="handleCaptchaError"
                 />
                 <template #fallback>
-                  <div class="feedback-form__captcha-placeholder" aria-hidden="true">
+                  <div
+                    class="feedback-form__captcha-placeholder"
+                    aria-hidden="true"
+                  >
                     <v-icon
                       icon="mdi-shield-alert-outline"
                       size="36"
@@ -234,7 +237,9 @@ const emit = defineEmits<{
 }>()
 
 const theme = useTheme()
-const VueHcaptcha = defineAsyncComponent(() => import('@hcaptcha/vue3-hcaptcha'))
+const VueHcaptcha = defineAsyncComponent(
+  () => import('@hcaptcha/vue3-hcaptcha')
+)
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 

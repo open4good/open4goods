@@ -2,7 +2,10 @@ import type { HLJSApi, LanguageFn } from 'highlight.js'
 
 export type HighlightLanguage = 'json' | 'yaml'
 
-const languageLoaders: Record<HighlightLanguage, () => Promise<{ default: LanguageFn }>> = {
+const languageLoaders: Record<
+  HighlightLanguage,
+  () => Promise<{ default: LanguageFn }>
+> = {
   json: () => import('highlight.js/lib/languages/json'),
   yaml: () => import('highlight.js/lib/languages/yaml'),
 }
@@ -19,7 +22,7 @@ export const loadHighlightJs = async (
   }
 
   if (!highlighterPromise) {
-    highlighterPromise = import('highlight.js/lib/core').then(async (module) => {
+    highlighterPromise = import('highlight.js/lib/core').then(async module => {
       const hljs = module.default
 
       if (!cssLoaded) {
@@ -34,7 +37,7 @@ export const loadHighlightJs = async (
   const hljs = await highlighterPromise
 
   await Promise.all(
-    languages.map(async (language) => {
+    languages.map(async language => {
       if (registeredLanguages.has(language)) {
         return
       }

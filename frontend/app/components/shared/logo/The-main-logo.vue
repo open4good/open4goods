@@ -9,8 +9,18 @@ const logoSrc = useLogoAsset()
 </script>
 
 <template>
-  <NuxtLink id="main-logo-link" to="/" class="logo-link" :aria-label="t('siteIdentity.logoAlt')">
-    <img :src="logoSrc" :alt="t('siteIdentity.logoAlt')" class="main-logo" loading="lazy" />
+  <NuxtLink
+    id="main-logo-link"
+    to="/"
+    class="logo-link"
+    :aria-label="t('siteIdentity.logoAlt')"
+  >
+    <img
+      :src="logoSrc"
+      :alt="t('siteIdentity.logoAlt')"
+      class="main-logo"
+      loading="lazy"
+    />
     <div class="logo-text">
       <span class="logo-title">{{ t('siteIdentity.title') }}</span>
     </div>

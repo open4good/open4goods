@@ -17,35 +17,43 @@ Toutes les chaînes dépendantes d’un pack vivent sous `home.events.<pack>.*`.
           "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
           "subtitles": [
             "Gagne du temps. Choisis librement.",
-            "Consomme mieux sans payer plus."
+            "Consomme mieux sans payer plus.",
           ],
           "search": {
             "label": "Tu sais déjà ce que tu cherches ?",
             "placeholder": "Recherchez un produit ou une catégorie",
             "helpersTitle": "Offre avec intention. Compare avec impact.",
             "helpers": [
-              { "icon": "🌿", "segments": [{ "text": "Une évaluation écologique", "to": "/impact-score" }] }
+              {
+                "icon": "🌿",
+                "segments": [
+                  {
+                    "text": "Une évaluation écologique",
+                    "to": "/impact-score",
+                  },
+                ],
+              },
             ],
             "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
-            "partnerLinkFallback": "nos partenaires"
+            "partnerLinkFallback": "nos partenaires",
           },
           "context": {
-            "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
+            "ariaLabel": "Carte contexte du héros présentant la promesse Nudger",
           },
           "iconAlt": "Icône du lanceur de l'application Nudger",
-          "imageAlt": "Illustration du comparateur Nudger..."
-        }
+          "imageAlt": "Illustration du comparateur Nudger...",
+        },
       },
       "christmas": {
         "hero": {
           "titleSubtitle": ["Des idées cadeaux qui respectent tes valeurs."],
           "subtitles": [
-            "Offre avec intention : compare prix et impact avant d'emballer."
-          ]
-        }
-      }
-    }
-  }
+            "Offre avec intention : compare prix et impact avant d'emballer.",
+          ],
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -84,13 +92,13 @@ const heroTitle = computed(() =>
 const heroSubtitle = computed(() =>
   packI18n.resolveStringVariant('hero.subtitles', {
     stateKey: 'home-hero-subtitles',
-    fallbackKeys: ['home.hero.subtitles']
+    fallbackKeys: ['home.hero.subtitles'],
   })
 )
 
 const helpers = computed(() =>
   packI18n.resolveList('hero.search.helpers', {
-    fallbackKeys: ['home.hero.search.helpers']
+    fallbackKeys: ['home.hero.search.helpers'],
   })
 )
 ```

@@ -20,7 +20,9 @@ export interface AuthStatePayload {
   username: string | null
 }
 
-const decodeAuthStateFromToken = (tokenValue: string | null): AuthStatePayload => {
+const decodeAuthStateFromToken = (
+  tokenValue: string | null
+): AuthStatePayload => {
   if (!tokenValue) {
     return { roles: [], isLoggedIn: false, username: null }
   }

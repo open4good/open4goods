@@ -13,7 +13,9 @@ export const useStatsService = (domainLanguage: DomainLanguage) => {
 
   const resolveApi = () => {
     if (!isServerRuntime) {
-      throw new Error('useStatsService() is only available on the server runtime.')
+      throw new Error(
+        'useStatsService() is only available on the server runtime.'
+      )
     }
 
     if (!api) {

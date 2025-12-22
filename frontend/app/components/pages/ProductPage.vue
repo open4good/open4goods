@@ -329,8 +329,8 @@ const categoryDetail = ref<Awaited<
 const loadingAggregations = ref(false)
 const aggregations = ref<Record<string, AggregationResponseDto>>({})
 
-const shouldShowNudgeWizard = computed(
-  () => Boolean(product.value && categoryDetail.value?.id)
+const shouldShowNudgeWizard = computed(() =>
+  Boolean(product.value && categoryDetail.value?.id)
 )
 
 const requestedScoreIds = computed(() => {
@@ -542,7 +542,10 @@ const normalizedCategoryPath = computed(() => {
   return sanitized?.length ? sanitized : withLeadingSlash
 })
 
-const handleNudgeNavigate = (payload?: { hash?: string; categorySlug?: string }) => {
+const handleNudgeNavigate = (payload?: {
+  hash?: string
+  categorySlug?: string
+}) => {
   isNudgeWizardOpen.value = false
 
   const rawSlug =
@@ -558,7 +561,7 @@ const handleNudgeNavigate = (payload?: { hash?: string; categorySlug?: string })
   const normalizedSlug = rawSlug.startsWith('/') ? rawSlug : `/${rawSlug}`
   const normalizedHash = payload?.hash?.startsWith('#')
     ? payload.hash.slice(1)
-    : payload?.hash ?? ''
+    : (payload?.hash ?? '')
 
   void navigateTo({
     path: normalizedSlug,

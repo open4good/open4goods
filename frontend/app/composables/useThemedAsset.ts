@@ -73,9 +73,8 @@ export const resolveThemedAssetUrlFromIndex = (
   fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK,
   seasonalPack?: EventPackName
 ): string | undefined => {
-  const sanitizedPaths = (Array.isArray(relativePath)
-    ? relativePath
-    : [relativePath]
+  const sanitizedPaths = (
+    Array.isArray(relativePath) ? relativePath : [relativePath]
   ).map(path => path.replace(/^\//, ''))
 
   const candidates = sanitizedPaths.flatMap(path => [

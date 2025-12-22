@@ -6,13 +6,14 @@ export const useLatestRelease = async () => {
 
   const hasExistingData = existing?.data.value !== undefined
 
-  const asyncData = hasExistingData && existing
-    ? existing
-    : await useAsyncData<ReleaseNote | null>(
-        'latest-release',
-        () => $fetch('/api/releases/latest', { headers: requestHeaders }),
-        { default: () => null }
-      )
+  const asyncData =
+    hasExistingData && existing
+      ? existing
+      : await useAsyncData<ReleaseNote | null>(
+          'latest-release',
+          () => $fetch('/api/releases/latest', { headers: requestHeaders }),
+          { default: () => null }
+        )
 
   return asyncData
 }

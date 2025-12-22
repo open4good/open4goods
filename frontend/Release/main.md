@@ -1,10 +1,12 @@
 ## 🥳 Welcome to this new version !
+
 We hope you will appreciate the following improvements, this release <b>covers 14 day</b> (or night) of work, starting the 2025-11-21T07:54:39.000Z and ending at 2025-12-05T08:40:21.000Z. You may want to see the <b>v0.9.7</b> release in action here : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul>
+
 ### File changes
+
 <ul><li><a href='https://github.com/open4good/open4goods/compare/v0.9.6...v0.9.7'>Changed files</a>  : <b>193</b> </li><li>Commits : <b>227</b> </li><li>Additions : <b>7862</b></li><li>Deletions : <b>4921</b></li> </ul>
 
 ## Included Pull Requests
-
 
 ### ❓ Other (67)
 
@@ -75,7 +77,9 @@ We hope you will appreciate the following improvements, this release <b>covers 1
 #2161 - Align impact score participants with available criterias (GoulvenF)
 #2162 - Improve product gallery responsiveness and fallbacks (GoulvenF)
 #2163 - Enhance impact details table layout and grouping (GoulvenF)
+
 ## 🙈 Direct commits
+
 docs: describe ecoscore rules (GoulvenF)
 Merge pull request #1994 from open4good/codex/documenter-les-regles-de-construction-de-l-ecoscore (GoulvenF)
 Add sitemap legacy proxy route (GoulvenF)

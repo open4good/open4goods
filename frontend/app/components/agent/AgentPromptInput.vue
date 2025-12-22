@@ -12,18 +12,17 @@
         closable
         icon="mdi-information"
       >
-        Describe your feature request or question below. Our AI agents will
-        process it and create a GitHub issue for tracking.
+        {{ $t('agents.promptInput.description') }}
       </v-alert>
 
       <v-textarea
         v-model="prompt"
-        label="Your Request"
-        placeholder="e.g., I want a feature to filter products by ..."
+        :label="$t('agents.promptInput.label')"
+        :placeholder="$t('agents.promptInput.placeholder')"
         rows="6"
         auto-grow
         variant="outlined"
-        :rules="[v => !!v || 'Request cannot be empty']"
+        :rules="[v => !!v || $t('agents.promptInput.required')]"
       ></v-textarea>
 
       <v-checkbox
@@ -34,9 +33,9 @@
       >
         <template #label>
           <div>
-            <strong>Make my prompt private</strong>
+            <strong>{{ $t('agents.promptInput.private') }}</strong>
             <div class="text-caption">
-              The issue will be public, but your prompt text will be hidden.
+              {{ $t('agents.promptInput.privateDescription') }}
             </div>
           </div>
         </template>
@@ -48,10 +47,12 @@
       >
         <div class="d-flex align-center">
           <v-icon icon="mdi-email-outline" class="mr-2"></v-icon>
-          <span class="text-body-2 font-weight-bold">Prefer email?</span>
+          <span class="text-body-2 font-weight-bold">{{
+            $t('agents.promptInput.email')
+          }}</span>
         </div>
         <p class="text-caption mt-1 mb-2">
-          You can use your default email client instead.
+          {{ $t('agents.promptInput.emailDescription') }}
         </p>
         <v-btn
           :href="fallbackMailto"
@@ -59,7 +60,7 @@
           variant="outlined"
           size="small"
           color="primary"
-          >Open Email Client</v-btn
+          >{{ $t('agents.promptInput.openEmail') }}</v-btn
         >
       </div>
     </v-card-text>

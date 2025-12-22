@@ -5,7 +5,7 @@ import type { ChildProcess } from 'node:child_process'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const execFileMock = vi.fn<
-  Parameters<typeof import('node:child_process')['execFile']>,
+  Parameters<(typeof import('node:child_process'))['execFile']>,
   ChildProcess
 >()
 
@@ -15,12 +15,12 @@ vi.mock('node:child_process', async importOriginal => {
   return {
     ...actual,
     execFile: (
-      ...args: Parameters<typeof import('node:child_process')['execFile']>
+      ...args: Parameters<(typeof import('node:child_process'))['execFile']>
     ) => execFileMock(...args),
     default: {
       ...actual,
       execFile: (
-        ...args: Parameters<typeof import('node:child_process')['execFile']>
+        ...args: Parameters<(typeof import('node:child_process'))['execFile']>
       ) => execFileMock(...args),
     },
   }
@@ -55,15 +55,10 @@ describe('release utilities', () => {
     await writeReleaseNote('newer.md', '2024-12-15T00:00:00.000Z', '# Newer')
 
     execFileMock.mockImplementation(
-      (
-        _command,
-        args,
-        _options,
-        callback
-      ): ChildProcess => {
+      (_command, args, _options, callback): ChildProcess => {
         const filePath =
           Array.isArray(args) && args.length > 0
-            ? (args as string[]).at(-1) ?? ''
+            ? ((args as string[]).at(-1) ?? '')
             : ''
         const stdout = gitDates.get(filePath) ?? ''
         if (typeof callback === 'function') {
@@ -83,16 +78,12 @@ describe('release utilities', () => {
   })
 
   it('returns release notes from the public reports directory in descending order', async () => {
-    const { getLatestRelease, getReleaseNotes } = await import(
-      '~~/server/utils/releases'
-    )
+    const { getLatestRelease, getReleaseNotes } =
+      await import('~~/server/utils/releases')
 
     const releases = await getReleaseNotes()
 
-    expect(releases.map(release => release.slug)).toEqual([
-      'newer',
-      'older',
-    ])
+    expect(releases.map(release => release.slug)).toEqual(['newer', 'older'])
     expect(releases[0]?.contentHtml).toContain('<h1>Newer</h1>')
     expect(execFileMock).toHaveBeenCalledTimes(2)
 
@@ -101,9 +92,8 @@ describe('release utilities', () => {
   })
 
   it('refreshes the cached release notes when warming the cache', async () => {
-    const { getReleaseNotes, warmReleaseCache } = await import(
-      '~~/server/utils/releases'
-    )
+    const { getReleaseNotes, warmReleaseCache } =
+      await import('~~/server/utils/releases')
 
     await getReleaseNotes()
 

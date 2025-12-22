@@ -17,7 +17,7 @@ All pack-aware strings live under `home.events.<pack>.*`. The `default` branch c
           "titleSubtitle": ["Buy better. Spend smarter."],
           "subtitles": [
             "Save time, stay true to your values. Compare effortlessly, choose freely.",
-            "Shop smarter without compromise. Nudger balances planet and price."
+            "Shop smarter without compromise. Nudger balances planet and price.",
           ],
           "search": {
             "label": "Search for a product",
@@ -26,28 +26,38 @@ All pack-aware strings live under `home.events.<pack>.*`. The `default` branch c
             "cta": "NUDGER",
             "helpersTitle": "Shop with intention. Compare for impact.",
             "helpers": [
-              { "icon": "🌿", "segments": [{ "text": "A unique ecological assessment", "to": "/impact-score" }] }
+              {
+                "icon": "🌿",
+                "segments": [
+                  {
+                    "text": "A unique ecological assessment",
+                    "to": "/impact-score",
+                  },
+                ],
+              },
             ],
             "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
-            "partnerLinkFallback": "our partners"
+            "partnerLinkFallback": "our partners",
           },
           "context": {
-            "ariaLabel": "Hero context card summarising Nudger’s promise"
+            "ariaLabel": "Hero context card summarising Nudger’s promise",
           },
           "iconAlt": "Nudger PWA launcher icon",
-          "imageAlt": "Illustration of the Nudger comparison experience..."
-        }
+          "imageAlt": "Illustration of the Nudger comparison experience...",
+        },
       },
       "christmas": {
         "hero": {
-          "titleSubtitle": ["Find gifts that respect your values and your budget."],
+          "titleSubtitle": [
+            "Find gifts that respect your values and your budget.",
+          ],
           "subtitles": [
-            "Give with intention this season. Compare prices and impact in one place."
-          ]
-        }
-      }
-    }
-  }
+            "Give with intention this season. Compare prices and impact in one place.",
+          ],
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -86,13 +96,13 @@ const heroTitle = computed(() =>
 const heroSubtitle = computed(() =>
   packI18n.resolveStringVariant('hero.subtitles', {
     stateKey: 'home-hero-subtitles',
-    fallbackKeys: ['home.hero.subtitles']
+    fallbackKeys: ['home.hero.subtitles'],
   })
 )
 
 const helpers = computed(() =>
   packI18n.resolveList('hero.search.helpers', {
-    fallbackKeys: ['home.hero.search.helpers']
+    fallbackKeys: ['home.hero.search.helpers'],
   })
 )
 ```

@@ -16,5 +16,6 @@
   "vue.features.codeActions.enabled": true,
   "githubPullRequests.pullRequestDefaults.branch": "main",
   "githubPullRequests.pullRequestDefaults.repo": "open4good/open4goods",
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

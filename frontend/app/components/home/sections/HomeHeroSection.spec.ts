@@ -16,11 +16,14 @@ const messages: Record<string, unknown> = {
     'Noël responsable',
     'Cadeaux en accord avec tes valeurs',
   ],
-  'home.events.default.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
+  'home.events.default.hero.titleSubtitle': [
+    'Acheter mieux. Sans dépenser plus.',
+  ],
   'home.events.default.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
   'home.events.default.hero.search.placeholder':
     'Recherchez un produit ou une catégorie',
-  'home.events.default.hero.search.ariaLabel': 'Rechercher un produit responsable',
+  'home.events.default.hero.search.ariaLabel':
+    'Rechercher un produit responsable',
   'home.events.default.hero.search.cta': 'NUDGER',
   'home.events.default.hero.search.partnerLinkLabel':
     '{formattedCount} partenaire | {formattedCount} partenaires',
@@ -51,7 +54,9 @@ const messages: Record<string, unknown> = {
     'Carte contexte du héros présentant la promesse Nudger',
 }
 
-const helperItems = messages['home.events.default.hero.search.helpers'] as unknown[]
+const helperItems = messages[
+  'home.events.default.hero.search.helpers'
+] as unknown[]
 
 const subtitleCollections = {
   default: messages['home.events.default.hero.subtitles'] as string[],
@@ -192,7 +197,9 @@ const NuxtLinkStub = defineComponent({
   },
 })
 
-const mountComponent = async (options?: { variantSeeds?: Record<string, number> }) => {
+const mountComponent = async (options?: {
+  variantSeeds?: Record<string, number>
+}) => {
   resetHeroSubtitleState()
 
   if (options?.variantSeeds) {
@@ -244,7 +251,9 @@ describe('HomeHeroSection', () => {
     expect(icon.attributes('src')).toBe(
       '/pwa-assets/icons/android/android-launchericon-512-512.png'
     )
-    expect(icon.attributes('alt')).toBe(messages['home.events.default.hero.iconAlt'])
+    expect(icon.attributes('alt')).toBe(
+      messages['home.events.default.hero.iconAlt']
+    )
 
     await wrapper.unmount()
   })
