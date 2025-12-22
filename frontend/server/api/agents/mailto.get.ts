@@ -4,7 +4,6 @@ import {
   extractBackendErrorDetails,
   logBackendError,
 } from '../../utils/log-backend-error'
-import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
 export default defineEventHandler(async (event): Promise<string> => {
   const rawHost =

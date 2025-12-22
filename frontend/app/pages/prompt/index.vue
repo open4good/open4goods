@@ -154,6 +154,9 @@ import type {
   AgentTemplateDto,
   AgentRequestResponseDto,
   AgentActivityDto,
+  AgentRequestDto,
+  AgentRequestDtoTypeEnum,
+  AgentRequestDtoPromptVisibilityEnum,
 } from '~~/shared/api-client/services/agents.services'
 import type { DomainLanguage } from '~~/app/types/agent'
 import AgentTemplateSelector from '@/components/agent/AgentTemplateSelector.vue'
@@ -237,15 +240,16 @@ async function onSubmit({
   if (!selectedTemplate.value) return
   submitting.value = true
   try {
-    submissionResult.value = await submitRequest(
-      {
-        type: 'FEATURE', // Fix: hardcoded string to enum if possible or fine as is if type matches
-        promptUser: prompt,
-        promptTemplateId: selectedTemplate.value.id,
-        promptVisibility: isPrivate ? 'PRIVATE' : 'PUBLIC',
-      } as any, // Temporary cast as Enum handling in manual DTO might be strict
-      currentLang
-    )
+    const request: AgentRequestDto = {
+      type: 'FEATURE' as unknown as AgentRequestDtoTypeEnum,
+      promptUser: prompt,
+      promptTemplateId: selectedTemplate.value.id,
+      promptVisibility: (isPrivate
+        ? 'PRIVATE'
+        : 'PUBLIC') as unknown as AgentRequestDtoPromptVisibilityEnum,
+    }
+
+    submissionResult.value = await submitRequest(request, currentLang)
 
     // Refresh activity after short delay to allow GitHub indexing/propagation if needed (optional)
     setTimeout(
