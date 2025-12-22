@@ -30,7 +30,11 @@
               </div>
               <v-divider class="my-4" />
               <div class="d-flex align-center ga-3">
-                <v-icon icon="mdi-source-repository" color="primary" size="32" />
+                <v-icon
+                  icon="mdi-source-repository"
+                  color="primary"
+                  size="32"
+                />
                 <span class="text-body-2">
                   {{ t('opensource.live.version.description') }}
                 </span>
@@ -363,7 +367,6 @@ const opendataCallout = computed<OpendataCalloutDisplay>(() => ({
   ctaAriaLabel: `${String(t('opensource.resources.opendata.cta.label'))} : ${String(t('opensource.resources.opendata.cta.ariaLabel'))}`,
 }))
 
-<<<<<<< HEAD
 const promptCallout = computed(() => ({
   title: String(t('opensource.resources.prompt.title')),
   description: String(t('opensource.resources.prompt.description')),
@@ -371,7 +374,7 @@ const promptCallout = computed(() => ({
   ctaHref: localePath('prompt') + '?template=feature-request',
   ctaAriaLabel: String(t('opensource.resources.prompt.cta.ariaLabel')),
 }))
-=======
+
 const liveReportTabs = computed(() => [
   {
     value: 'frontend-coverage',
@@ -395,7 +398,6 @@ const liveReportTabs = computed(() => [
     src: '/public/reports/maven-site/index.html',
   },
 ])
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 const canonicalUrl = computed(() =>
   new URL(
@@ -486,5 +488,4 @@ useHead(() => ({
     border: 0
     width: 100%
     height: 100%
-
 </style>
