@@ -1,9 +1,18 @@
 <template>
   <div class="team-page">
-    <TeamHero
+    <PageHeader
+      variant="hero-standard"
       :title="t('team.hero.title')"
       :subtitle="t('team.hero.subtitle')"
       :description-bloc-id="HERO_CORE_BLOC_ID"
+      background="gradient"
+      layout="single-column"
+      container="xl"
+      content-align="center"
+      heading-level="h1"
+      schema-type="AboutPage"
+      :og-image="ogImageUrl"
+      padding-y="clamp(3rem, 8vw, 5.5rem)"
     />
 
     <v-progress-linear
@@ -67,6 +76,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { TeamProperties } from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 
 const HERO_CORE_BLOC_ID = 'pages:team:hero-core-team:'
 const CONTRIBUTORS_HERO_BLOC_ID = 'pages:team:hero-contributors-team:'
@@ -113,19 +123,8 @@ const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-useSeoMeta({
-  title: () => String(t('team.seo.title')),
-  description: () => String(t('team.seo.description')),
-  ogTitle: () => String(t('team.seo.title')),
-  ogDescription: () => String(t('team.seo.description')),
-  ogUrl: () => canonicalUrl.value,
-  ogType: () => 'website',
-  ogImage: () => ogImageUrl.value,
-})
-
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-}))
+// Note: SEO metadata (title, description, OG tags, canonical, JSON-LD)
+// is now handled automatically by PageHeader component via useHeaderSeo composable
 </script>
 
 <style scoped lang="sass">

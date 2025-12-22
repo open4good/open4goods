@@ -1,12 +1,22 @@
 <template>
   <div class="opensource-page">
-    <OpensourceHero
+    <PageHeader
+      variant="hero-standard"
       :title="t('opensource.hero.title')"
       :subtitle="t('opensource.hero.subtitle')"
       description-bloc-id="webpages:opensource:hero-description"
-      :ctas="heroCtas"
+      background="surface-variant"
+      surface-variant="prism"
+      layout="2-columns"
+      container="lg"
+      :primary-cta="heroPrimaryCta"
       :cta-group-label="heroCtaGroupLabel"
-      :info-card="heroInfoCard"
+      show-media
+      media-type="card"
+      :hero-card="heroInfoCard"
+      heading-level="h1"
+      schema-type="AboutPage"
+      :og-image="ogImageUrl"
     />
 
     <v-container class="opensource-live" fluid>
@@ -132,7 +142,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import OpensourceHero from '~/components/domains/opensource/OpensourceHero.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpensourcePillarsSection from '~/components/domains/opensource/OpensourcePillarsSection.vue'
 import OpensourceContributionSection from '~/components/domains/opensource/OpensourceContributionSection.vue'
 import OpensourceResourcesSection from '~/components/domains/opensource/OpensourceResourcesSection.vue'
@@ -220,18 +230,16 @@ const localePath = useLocalePath()
 const currentVersion = 'v0.9.8'
 const activeReportTab = ref('frontend-coverage')
 
-const heroCtas = computed<HeroCtaDisplay[]>(() => [
-  {
-    label: String(t('opensource.hero.primaryCta.label')),
-    ariaLabel: `${String(t('opensource.hero.primaryCta.label'))} : ${String(t('opensource.hero.primaryCta.ariaLabel'))}`,
-    href: 'https://github.com/open4good/open4goods',
-    icon: 'mdi-github',
-    color: 'primary',
-    variant: 'flat',
-    target: '_blank',
-    rel: 'noopener',
-  },
-])
+const heroPrimaryCta = computed(() => ({
+  label: String(t('opensource.hero.primaryCta.label')),
+  ariaLabel: `${String(t('opensource.hero.primaryCta.label'))} : ${String(t('opensource.hero.primaryCta.ariaLabel'))}`,
+  href: 'https://github.com/open4good/open4goods',
+  icon: 'mdi-github',
+  color: 'primary',
+  variant: 'flat' as const,
+  target: '_blank',
+  rel: 'noopener',
+}))
 
 const heroCtaGroupLabel = computed(() =>
   String(t('opensource.hero.ctaGroupLabel'))
@@ -424,44 +432,12 @@ const alternateLinks = computed(() =>
   }))
 )
 
-useSeoMeta({
-  title: () => String(t('opensource.seo.title')),
-  description: () => String(t('opensource.seo.description')),
-  ogTitle: () => String(t('opensource.seo.title')),
-  ogDescription: () => String(t('opensource.seo.description')),
-  ogUrl: () => canonicalUrl.value,
-  ogType: () => 'website',
-  ogImage: () => ogImageUrl.value,
-  ogSiteName: () => siteName.value,
-  ogLocale: () => ogLocale.value,
-  ogImageAlt: () => ogImageAlt.value,
-})
+// Note: SEO metadata (title, description, OG tags, canonical, JSON-LD)
+// is now handled automatically by PageHeader component via useHeaderSeo composable
 
+// Keep alternate links in head (not handled by PageHeader)
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-    ...alternateLinks.value,
-  ],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        name: String(t('opensource.seo.title')),
-        description: String(t('opensource.seo.description')),
-        url: canonicalUrl.value,
-        publisher: {
-          '@type': 'Organization',
-          name: siteName.value,
-          logo: {
-            '@type': 'ImageObject',
-            url: ogImageUrl.value,
-          },
-        },
-      }),
-    },
-  ],
+  link: [...alternateLinks.value],
 }))
 </script>
 
