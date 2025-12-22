@@ -2542,6 +2542,18 @@
     "errors": {
       "loadFailed": "Impossible de charger les notes de version. Merci de réessayer."
     },
+    "nextRelease": {
+      "enabled": true,
+      "eyebrow": "À venir",
+      "title": "Prochaine version",
+      "description": "Nous préparons de nouvelles fonctionnalités passionnantes. Votre avis compte !",
+      "releaseVersion": "Version 2.5.0",
+      "targetDate": "Janvier 2026",
+      "linkedIn": {
+        "label": "Participer au sondage LinkedIn",
+        "url": ""
+      }
+    },
     "faq": {
       "subtitle": "Parcourez le journal des versions et les réponses aux questions fréquentes.",
       "title": "FAQ et changelog"

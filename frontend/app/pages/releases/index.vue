@@ -16,6 +16,8 @@
     </OpendataHero>
 
     <v-container class="releases-page__content">
+      <NextReleaseSection />
+
       <div :id="faqAnchorId" class="releases-page__anchor" aria-hidden="true" />
       <h2 class="releases-page__section-title">
         {{ t('releases.faq.title') }}
@@ -37,6 +39,7 @@
 import { computed } from 'vue'
 
 import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
+import NextReleaseSection from '~/components/domains/releases/NextReleaseSection.vue'
 import OpendataHero from '~/components/domains/opendata/OpendataHero.vue'
 import ReleaseAccordion from '~/components/domains/releases/ReleaseAccordion.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'

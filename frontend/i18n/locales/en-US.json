@@ -2538,6 +2538,18 @@
     "errors": {
       "loadFailed": "We could not load the release notes. Please try again."
     },
+    "nextRelease": {
+      "enabled": true,
+      "eyebrow": "Coming soon",
+      "title": "Next release",
+      "description": "We are preparing exciting new features. Your feedback matters!",
+      "releaseVersion": "Version 2.5.0",
+      "targetDate": "January 2026",
+      "linkedIn": {
+        "label": "Take the LinkedIn survey",
+        "url": ""
+      }
+    },
     "faq": {
       "subtitle": "Read the changelog and answers to frequent questions about our releases.",
       "title": "Release FAQ"
