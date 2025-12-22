@@ -163,8 +163,8 @@ public class DataFragmentCompletionService {
 					// referentiel ones
 					//
 
-					if (null == dataFragment.getReferentielAttributes().get(key.toString())) {
-						dataFragment.addReferentielAttribute(key.toString(), a.getRawValue());
+					if (null == dataFragment.getReferentielAttributes().get(key)) {
+						dataFragment.addReferentielAttribute(key, a.getRawValue());
 						dedicatedLogger.info("Adding referentiel attribute {}:{} from attribute {}",key,a.getRawValue(),a.getName());
 					} else {
 						dedicatedLogger.info("Referentiel attribute {}:{} not added because attr with value {} already exists ",key,a.getRawValue(),a.getName(),dataFragment.getReferentielAttributes().get(key));
@@ -212,7 +212,7 @@ public class DataFragmentCompletionService {
 				LOGGER.info(e.getMessage());
 			}
 			if (null != bId) {
-				dataFragment.addReferentielAttribute( ReferentielKey.MODEL.toString(), bId);
+				dataFragment.addReferentielAttribute(ReferentielKey.MODEL, bId);
 			}
 
 		}

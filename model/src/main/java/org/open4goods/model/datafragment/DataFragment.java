@@ -377,7 +377,7 @@ public class DataFragment implements Standardisable, Validable {
 
 				try {
 					final ReferentielKey refKey = ReferentielKey.valueOf(field.toUpperCase());
-					//TODO : Always this necessary toString. Should be Enum !!
+					// Fixed: Now using enum directly as map key
 					if (!StringUtils.isEmpty(referentielAttributes.get(refKey))) {
 						continue;
 					}
