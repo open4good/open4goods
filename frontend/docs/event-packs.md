@@ -1,6 +1,6 @@
 # Event packs – localization & assets (frontend)
 
-This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `default`, `christmas`, `sdg`) and fall back to `default` when a field is missing.
+This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `default`, `hold`, `sdg`) and fall back to `default` when a field is missing.
 
 ## I18n structure
 
@@ -46,13 +46,13 @@ All pack-aware strings live under `home.events.<pack>.*`. The `default` branch c
           "imageAlt": "Illustration of the Nudger comparison experience...",
         },
       },
-      "christmas": {
+      "hold": {
         "hero": {
           "titleSubtitle": [
-            "Find gifts that respect your values and your budget.",
+            "Legacy seasonal copy kept for testing.",
           ],
           "subtitles": [
-            "Give with intention this season. Compare prices and impact in one place.",
+            "Placeholder subtitles for the hold pack.",
           ],
         },
       },

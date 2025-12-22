@@ -1,6 +1,6 @@
 # Packs événementiels – localisation & assets (frontend)
 
-Ce document décrit comment les packs événementiels pilotent à la fois les assets (parallaxes, visuels) et les textes localisés de la page d’accueil. Les noms de packs (`default`, `christmas`, `sdg`, …) sont partagés avec les ressources graphiques et héritent toujours de `default` quand une clé est absente.
+Ce document décrit comment les packs événementiels pilotent à la fois les assets (parallaxes, visuels) et les textes localisés de la page d’accueil. Les noms de packs (`default`, `hold`, `sdg`, …) sont partagés avec les ressources graphiques et héritent toujours de `default` quand une clé est absente.
 
 ## Structure i18n
 
@@ -44,11 +44,11 @@ Toutes les chaînes dépendantes d’un pack vivent sous `home.events.<pack>.*`.
           "imageAlt": "Illustration du comparateur Nudger...",
         },
       },
-      "christmas": {
+      "hold": {
         "hero": {
-          "titleSubtitle": ["Des idées cadeaux qui respectent tes valeurs."],
+          "titleSubtitle": ["Des contenus hérités pour les tests."],
           "subtitles": [
-            "Offre avec intention : compare prix et impact avant d'emballer.",
+            "Sous-titres de test pour le pack de rétention.",
           ],
         },
       },

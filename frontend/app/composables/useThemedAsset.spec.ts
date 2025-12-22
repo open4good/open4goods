@@ -13,7 +13,7 @@ describe('useThemedAsset utilities', () => {
   const assetIndex = {
     'light/logo-new.png': '/_nuxt/light-logo-new.png',
     'common/hero-background.svg': '/_nuxt/common-hero.svg',
-    'light/christmas/hero-background.svg': '/_nuxt/light-christmas-hero.svg',
+    'light/hold/hero-background.svg': '/_nuxt/light-hold-hero.svg',
   }
 
   it('returns a theme-specific asset when present', () => {
@@ -50,22 +50,22 @@ describe('useThemedAsset utilities', () => {
   })
 
   it('prioritises seasonal overrides when available, then falls back', () => {
-    seasonalThemeAssets.christmas = {
-      ...seasonalThemeAssets.christmas,
+    seasonalThemeAssets.hold = {
+      ...seasonalThemeAssets.hold,
       light: {
         heroBackground: 'hero-background.svg',
       },
     }
 
     const resolved = resolveThemedAssetUrlFromIndex(
-      resolveAssetPathForTheme('heroBackground', 'light', 'christmas'),
+      resolveAssetPathForTheme('heroBackground', 'light', 'hold'),
       'light',
       assetIndex,
       THEME_ASSETS_FALLBACK,
-      'christmas'
+      'hold'
     )
 
-    expect(resolved).toBe('/_nuxt/light-christmas-hero.svg')
+    expect(resolved).toBe('/_nuxt/light-hold-hero.svg')
   })
 
   it('returns multiple path candidates ordered by fallback', () => {

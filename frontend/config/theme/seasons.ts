@@ -30,14 +30,6 @@ export const seasonalEventSchedule: SeasonalEventWindow[] = [
   },
 
   {
-    id: 'christmas-festivities',
-    start: '12-10',
-    end: '12-31',
-    pack: 'christmas',
-    description: 'Festive visuals for the holiday season',
-  },
-
-  {
     id: 'winter-highlights',
     start: '12-01',
     end: '01-15',
