@@ -713,6 +713,7 @@ useHead(() => ({
         <section id="home-essentials" class="home-page__section-wrapper">
           <ParallaxWidget
             class="home-page__parallax"
+            reverse
             :gapless="true"
             :backgrounds="parallaxBackgrounds.essentials.backgrounds"
             :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
@@ -750,6 +751,7 @@ useHead(() => ({
         <section id="home-features" class="home-page__section-wrapper">
           <ParallaxWidget
             class="home-page__parallax home-page__parallax--centered"
+            reverse
             :backgrounds="parallaxBackgrounds.features.backgrounds"
             :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
             :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
@@ -773,6 +775,7 @@ useHead(() => ({
         <section id="home-knowledge-blog" class="home-page__section-wrapper">
           <ParallaxWidget
             class="home-page__parallax"
+            reverse
             :backgrounds="parallaxBackgrounds.blog.backgrounds"
             :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
             :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
@@ -805,6 +808,7 @@ useHead(() => ({
         >
           <ParallaxWidget
             class="home-page__parallax"
+            reverse
             :backgrounds="parallaxBackgrounds.objections.backgrounds"
             :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
             :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
@@ -830,6 +834,7 @@ useHead(() => ({
         <section id="home-cta" class="home-page__section-wrapper">
           <ParallaxWidget
             class="home-page__parallax home-page__parallax--centered"
+            reverse
             :backgrounds="parallaxBackgrounds.cta.backgrounds"
             :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
             :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"

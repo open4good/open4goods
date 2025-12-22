@@ -1,0 +1,171 @@
+Génération d'un prompt de resources parallax ou SVG. Peut servir a des fonds de heros, de sections parallax,...
+
+
+
+# Utilify — Parallax SVG Prompt (export en 3 couches)
+> Objectif : produire **3 SVG** (back / mid / front) par section pour un vrai effet parallax, sans “bandes” aux bords.
+
+---
+
+## 1) Questions simples (répondez en 30 secondes)
+
+1) **Type de section**
+   - `hero` / `features` / `cta` / `footer`
+
+2) **Motif principal** (choisir 1 ou 2)
+   - `bubbles` / `rings` / `mesh` / `waves` / `sparkles`
+
+3) **Zone à laisser calme** (pour le texte/carte UI)
+   - `center` (recommandé) / `top` / `bottom` / `custom-rect`
+
+Optionnel :
+- **Mode** : `light` / `dark` / `both`
+- **Intensité parallax** : `soft` / `medium` / `strong`
+
+---
+
+## 2) Paramètres (à éditer en haut, le reste suit)
+
+```yaml
+SECTION_ID: "home-hero-01"
+MODE: "both"             # light | dark | both
+INTENSITY: "medium"      # soft | medium | strong
+
+MOTIFS: ["bubbles", "rings"]
+
+SAFE_AREA:
+  preset: "center"       # center | top | bottom | custom-rect
+  rect: { x: 260, y: 120, width: 1080, height: 560 } # utilisé si custom-rect
+
+CANVAS:
+  width: 1600
+  height: 800
+  viewBox: "0 0 1600 800"
+
+EXPORT:
+  # 1 réponse = 3 SVG. Sinon, lancer 3 fois le prompt avec EXPORT_LAYER différent.
+  filenames:
+    back_light:  "back--light.svg"
+    mid_light:   "mid--light.svg"
+    front_light: "front--light.svg"
+    back_dark:   "back--dark.svg"
+    mid_dark:    "mid--dark.svg"
+    front_dark:  "front--dark.svg"
+
+RECOMMENDED_SPEEDS:
+  soft:   { back: 0.08, mid: 0.14, front: 0.22 }
+  medium: { back: 0.10, mid: 0.18, front: 0.28 }
+  strong: { back: 0.12, mid: 0.22, front: 0.34 }
+
+# Reco composant (ParallaxWidget)
+WIDGET_RECOMMENDATIONS:
+  reverse: true                 # demandé : reverse sur les hero-sections du index.vue
+  speedFactor: 1                # pour accélérer/ralentir tout le fond
+  smoothingMs: 0                # 0 = “crisp”, sinon 80–200ms
+  revealOnView: true            # ajoute .parallax-widget--in-view (utile pour animations SVG inline)
+```
+
+---
+
+## 3) Recommandations d’export (IMPORTANT)
+
+### Export 3 couches (obligatoire)
+- **back** : gros dégradés, glows très soft (masque les bords quand ça bouge)
+- **mid** : motifs principaux low-contrast (rings/bubbles/mesh…), surtout en périphérie
+- **front** : accents (sparkles, petites particules), un poil plus contrasté mais **pas au centre**
+
+### Anti “bandes blanches”
+- Chaque SVG doit contenir **un fond full-bleed opaque** :
+  - un `<rect width="1600" height="800">` rempli par un gradient (pas de transparence sur les bords)
+- Ajouter **2–3 glows floutés** près des coins (stdDev ≤ 18) pour absorber le recadrage / overscan
+
+### Animation SVG (optionnel mais recommandé)
+- Si vous voulez animer : **préférez un SVG inline** (slot `#aplats` du widget).
+- Dans les SVG, ajoutez des groupes avec ids/classes :
+  - `<g id="layer-front" class="parallax-anim--twinkle">...</g>`
+- Ensuite, vous pouvez déclencher l’animation via la classe `parallax-widget--in-view`.
+
+---
+
+## 4) Prompt à coller dans le générateur (1 réponse = 3 SVG)
+
+> Le générateur doit **retourner 3 blocs SVG**, chacun précédé par un commentaire :
+> `<!-- FILE: back--light.svg -->`, etc.
+
+**PROMPT (copier-coller) :**
+
+You are generating **pure vector SVG** parallax backgrounds for a website section.
+
+### Global specs
+- Canvas: 1600×800
+- viewBox: "0 0 1600 800"
+- preserveAspectRatio="xMidYMid slice"
+- Output: SVG markup only (no markdown), **3 separate SVG blocks**, each preceded by `<!-- FILE: ... -->`
+- No raster images, no embedded fonts. Keep element count **< 140** per SVG.
+- Stroke widths **≥ 0.75px**.
+
+### Section
+- SECTION_ID: {{SECTION_ID}}
+- MODE: {{MODE}}
+- INTENSITY: {{INTENSITY}}
+- MOTIFS: {{MOTIFS}}
+
+### Safe area (keep it visually quiet)
+- If preset is center: keep the middle ~1080×560 mostly empty.
+- Otherwise follow the provided SAFE_AREA rect.
+
+### Must-have anti-gap background
+- Each SVG MUST begin with a full-bleed `<rect width="1600" height="800">` filled with the main gradient.
+- Add 2–3 soft blurred blobs near corners (stdDev ≤ 18) to hide cropping under parallax overscan.
+
+### Export layers (produce all three in one response)
+Generate 3 SVGs:
+1) back layer: big gradients + very soft glows; minimal shapes; ultra low contrast.
+2) mid layer: main motifs ({{MOTIFS}}) but push details to edges; keep center calm.
+3) front layer: tiny sparkles/particles near corners/edges only; slightly higher contrast but still subtle.
+
+### Light vs Dark
+If MODE is both, output 6 SVGs: back/mid/front for light and for dark, using consistent geometry but palette adapted.
+If MODE is light or dark only, output only that mode.
+
+### Naming
+Use the following file names in the `<!-- FILE: ... -->` markers:
+- back--light.svg, mid--light.svg, front--light.svg
+- back--dark.svg,  mid--dark.svg,  front--dark.svg
+
+### Optional animation hooks
+Wrap each layer content in a group:
+- `<g id="layer-back" class="parallax-layer parallax-layer--back">`
+- `<g id="layer-mid" class="parallax-layer parallax-layer--mid">`
+- `<g id="layer-front" class="parallax-layer parallax-layer--front parallax-anim--twinkle">`
+
+Return SVG markup only.
+
+---
+
+## 5) Intégration rapide dans ParallaxWidget (exemple)
+```vue
+<ParallaxWidget
+  reverse
+  :speed-factor="1"
+  :smoothing-ms="0"
+  reveal-on-view
+  :background-light="[
+    { src: '/images/home/home-hero-01/back--light.svg',  speed: 0.10 },
+    { src: '/images/home/home-hero-01/mid--light.svg',   speed: 0.18, blendMode: 'screen' },
+    { src: '/images/home/home-hero-01/front--light.svg', speed: 0.28 }
+  ]"
+  :background-dark="[
+    { src: '/images/home/home-hero-01/back--dark.svg',  speed: 0.10 },
+    { src: '/images/home/home-hero-01/mid--dark.svg',   speed: 0.18, blendMode: 'screen' },
+    { src: '/images/home/home-hero-01/front--dark.svg', speed: 0.28 }
+  ]"
+>
+  <!-- Optionnel : SVG inline animé -->
+  <!--
+  <template #aplats>
+    <svg>...</svg>
+  </template>
+  -->
+</ParallaxWidget>
+```

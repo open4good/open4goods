@@ -3,6 +3,7 @@
 export * from './AdditionalDetails';
 export * from './AffiliationPartnerDto';
 export * from './AgentActivityDto';
+export * from './AgentAttributeDto';
 export * from './AgentIssueDto';
 export * from './AgentRequestDto';
 export * from './AgentRequestResponseDto';

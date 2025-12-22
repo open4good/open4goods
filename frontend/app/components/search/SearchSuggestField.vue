@@ -1,5 +1,5 @@
 <template>
-  <div class="search-suggest-field__wrapper" v-bind="attrs">
+  <div class="search-suggest-field__wrapper" v-bind="filteredAttrs">
     <v-hover v-slot="{ isHovering, props: hoverProps }">
       <v-autocomplete
         v-bind="hoverProps"
@@ -251,6 +251,11 @@ export type { CategorySuggestionItem, ProductSuggestionItem }
 defineOptions({ inheritAttrs: false })
 
 const attrs = useAttrs()
+
+const filteredAttrs = computed(() => {
+  const { 'data-v-inspector': _, ...rest } = attrs
+  return rest
+})
 
 const props = withDefaults(
   defineProps<{
