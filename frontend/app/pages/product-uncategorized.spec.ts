@@ -98,11 +98,10 @@ const VTooltipStub = defineComponent({
   name: 'VTooltipStub',
   setup(_props, { slots, attrs }) {
     return () =>
-      h(
-        'div',
-        { class: 'v-tooltip-stub', ...attrs },
-        [slots.activator?.({ props: {} }), slots.default?.()]
-      )
+      h('div', { class: 'v-tooltip-stub', ...attrs }, [
+        slots.activator?.({ props: {} }),
+        slots.default?.(),
+      ])
   },
 })
 

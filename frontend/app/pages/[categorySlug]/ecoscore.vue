@@ -944,7 +944,9 @@ const highlightYamlPrompt = async () => {
     const hljs = await loadHighlightJs(['yaml'])
 
     if (hljs) {
-      highlightedYamlPrompt.value = hljs.highlight(content, { language: 'yaml' }).value
+      highlightedYamlPrompt.value = hljs.highlight(content, {
+        language: 'yaml',
+      }).value
     }
   } catch (error) {
     console.warn('Unable to highlight YAML prompt for impact score', error)
@@ -964,20 +966,30 @@ const highlightAiJson = async () => {
     const hljs = await loadHighlightJs(['json'])
 
     if (hljs) {
-      highlightedAiJson.value = hljs.highlight(content, { language: 'json' }).value
+      highlightedAiJson.value = hljs.highlight(content, {
+        language: 'json',
+      }).value
     }
   } catch (error) {
     console.warn('Unable to highlight AI JSON response for impact score', error)
   }
 }
 
-watch(formattedYamlPrompt, () => {
-  highlightYamlPrompt()
-}, { immediate: true })
+watch(
+  formattedYamlPrompt,
+  () => {
+    highlightYamlPrompt()
+  },
+  { immediate: true }
+)
 
-watch(formattedAiJson, () => {
-  highlightAiJson()
-}, { immediate: true })
+watch(
+  formattedAiJson,
+  () => {
+    highlightAiJson()
+  },
+  { immediate: true }
+)
 
 const aiCoefficients = computed<Record<string, number>>(() => {
   const response = parsedAiJson.value

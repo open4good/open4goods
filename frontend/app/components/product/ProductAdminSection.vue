@@ -79,16 +79,22 @@ const highlightJson = async () => {
     const hljs = await loadHighlightJs(['json'])
 
     if (hljs) {
-      highlightedJson.value = hljs.highlight(content, { language: 'json' }).value
+      highlightedJson.value = hljs.highlight(content, {
+        language: 'json',
+      }).value
     }
   } catch (error) {
     console.warn('Unable to highlight product JSON in admin section', error)
   }
 }
 
-watch(formatted, () => {
-  highlightJson()
-}, { immediate: true })
+watch(
+  formatted,
+  () => {
+    highlightJson()
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

@@ -1,41 +1,33 @@
-## 🥳 Welcome to **v0.9.7.3**
+## 🥳 Welcome to **v0.9.7.2**
 
-This release covers **1 day(s)** of work, from **2025-12-20T02:54:45.000Z** to **2025-12-22T00:11:59.000Z**.
+This release covers **1 day(s)** of work, from **2025-12-20T02:54:45.000Z** to **2025-12-21T22:31:56.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v0.9.8...v0.9.7.3)
-- Changed files: **113**
-- Commits: **65**
-- Additions: **5884** / Deletions: **1481**
+
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v0.9.8...v0.9.7.2)
+- Changed files: **53**
+- Commits: **44**
+- Additions: **2178** / Deletions: **907**
 
 ---
 
-
-
 <details>
-<summary>🙈 Other changes (19)</summary>
+<summary>🙈 Other changes (13)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
-| [PR 2387](https://github.com/open4good/open4goods/pull/2387) | Enable payload extraction for Nuxt payloads | @GoulvenF |
-| [PR 2388](https://github.com/open4good/open4goods/pull/2388) | Refactor auth helpers to update store locally | @GoulvenF |
-| [PR 2391](https://github.com/open4good/open4goods/pull/2391) | Update release workflow artifacts and coverage handling | @GoulvenF |
-| [PR 2393](https://github.com/open4good/open4goods/pull/2393) | Refine releases layout and accessibility | @GoulvenF |
-| [PR 2395](https://github.com/open4good/open4goods/pull/2395) | Allow vertical attributes to pass filter validation | @GoulvenF |
-| [PR 2394](https://github.com/open4good/open4goods/pull/2394) | Improve accessibility layout container spacing | @GoulvenF |
-| [PR 2396](https://github.com/open4good/open4goods/pull/2396) | Improve accessibility zoom on home hero | @GoulvenF |
+|                                                           PR | Title                                                                                   | Author         |
+| -----------------------------------------------------------: | --------------------------------------------------------------------------------------- | -------------- |
+| [PR 2387](https://github.com/open4good/open4goods/pull/2387) | Enable payload extraction for Nuxt payloads                                             | @GoulvenF      |
+| [PR 2388](https://github.com/open4good/open4goods/pull/2388) | Refactor auth helpers to update store locally                                           | @GoulvenF      |
+| [PR 2391](https://github.com/open4good/open4goods/pull/2391) | Update release workflow artifacts and coverage handling                                 | @GoulvenF      |
+| [PR 2393](https://github.com/open4good/open4goods/pull/2393) | Refine releases layout and accessibility                                                | @GoulvenF      |
+| [PR 2395](https://github.com/open4good/open4goods/pull/2395) | Allow vertical attributes to pass filter validation                                     | @GoulvenF      |
+| [PR 2394](https://github.com/open4good/open4goods/pull/2394) | Improve accessibility layout container spacing                                          | @GoulvenF      |
+| [PR 2396](https://github.com/open4good/open4goods/pull/2396) | Improve accessibility zoom on home hero                                                 | @GoulvenF      |
 | [PR 2398](https://github.com/open4good/open4goods/pull/2398) | fix(deps): update dependency de.malkusch.whois-server-list:public-suffix-list to v2.2.3 | @renovate[bot] |
-| [PR 2397](https://github.com/open4good/open4goods/pull/2397) | chore(deps): update dependency @nuxt/scripts to v0.13.2 - autoclosed | @renovate[bot] |
-| [PR 2403](https://github.com/open4good/open4goods/pull/2403) | Add localized home hero title subtitle | @GoulvenF |
-| [PR 2399](https://github.com/open4good/open4goods/pull/2399) | Enhance search field hover styling | @GoulvenF |
-| [PR 2404](https://github.com/open4good/open4goods/pull/2404) | Point release notes loader to public reports directory | @GoulvenF |
-| [PR 2407](https://github.com/open4good/open4goods/pull/2407) | chore(deps): update dependency vue-tsc to v3.2.0 | @renovate[bot] |
-| [PR 2412](https://github.com/open4good/open4goods/pull/2412) | chore(deps): update actions/upload-artifact action to v6 | @renovate[bot] |
-| [PR 2411](https://github.com/open4good/open4goods/pull/2411) | chore(deps): update actions/setup-node action to v6 | @renovate[bot] |
-| [PR 2410](https://github.com/open4good/open4goods/pull/2410) | Add floating nudge wizard on product page | @GoulvenF |
-| [PR 2408](https://github.com/open4good/open4goods/pull/2408) | chore(deps): update actions/checkout action to v6 | @renovate[bot] |
-| [PR 2405](https://github.com/open4good/open4goods/pull/2405) | Add event-pack aware home i18n and documentation | @GoulvenF |
-| [PR 2414](https://github.com/open4good/open4goods/pull/2414) | Remove Poppins font in frontend | @GoulvenF |
-
+| [PR 2397](https://github.com/open4good/open4goods/pull/2397) | chore(deps): update dependency @nuxt/scripts to v0.13.2 - autoclosed                    | @renovate[bot] |
+| [PR 2403](https://github.com/open4good/open4goods/pull/2403) | Add localized home hero title subtitle                                                  | @GoulvenF      |
+| [PR 2399](https://github.com/open4good/open4goods/pull/2399) | Enhance search field hover styling                                                      | @GoulvenF      |
+| [PR 2404](https://github.com/open4good/open4goods/pull/2404) | Point release notes loader to public reports directory                                  | @GoulvenF      |
+| [PR 2407](https://github.com/open4good/open4goods/pull/2407) | chore(deps): update dependency vue-tsc to v3.2.0                                        | @renovate[bot] |
 
 </details>

@@ -107,48 +107,51 @@
                   />
                 </v-col>
 
-                  <v-col cols="12">
-                    <div class="contact-form__captcha">
-                      <ClientOnly v-if="hasSiteKey">
-                        <VueHcaptcha
-                          ref="captchaRef"
-                          :sitekey="siteKey"
-                          :language="captchaLocale"
-                          :theme="captchaTheme"
-                          @verify="handleCaptchaVerify"
-                          @expired="handleCaptchaExpired"
-                          @error="handleCaptchaError"
-                        />
-                        <template #fallback>
-                          <div class="contact-form__captcha-placeholder" aria-hidden="true">
-                            <v-icon
-                              icon="mdi-shield-alert-outline"
-                              size="36"
-                              color="primary"
-                            />
-                          </div>
-                        </template>
-                      </ClientOnly>
-                      <div
-                        v-else
-                        class="contact-form__captcha-placeholder"
-                        aria-hidden="true"
-                      >
-                        <v-icon
-                          icon="mdi-shield-alert-outline"
-                          size="36"
-                          color="primary"
-                        />
-                      </div>
-                      <p
-                        v-if="captchaError"
-                        class="contact-form__captcha-error"
-                        role="alert"
-                      >
-                        {{ captchaError }}
-                      </p>
+                <v-col cols="12">
+                  <div class="contact-form__captcha">
+                    <ClientOnly v-if="hasSiteKey">
+                      <VueHcaptcha
+                        ref="captchaRef"
+                        :sitekey="siteKey"
+                        :language="captchaLocale"
+                        :theme="captchaTheme"
+                        @verify="handleCaptchaVerify"
+                        @expired="handleCaptchaExpired"
+                        @error="handleCaptchaError"
+                      />
+                      <template #fallback>
+                        <div
+                          class="contact-form__captcha-placeholder"
+                          aria-hidden="true"
+                        >
+                          <v-icon
+                            icon="mdi-shield-alert-outline"
+                            size="36"
+                            color="primary"
+                          />
+                        </div>
+                      </template>
+                    </ClientOnly>
+                    <div
+                      v-else
+                      class="contact-form__captcha-placeholder"
+                      aria-hidden="true"
+                    >
+                      <v-icon
+                        icon="mdi-shield-alert-outline"
+                        size="36"
+                        color="primary"
+                      />
                     </div>
-                  </v-col>
+                    <p
+                      v-if="captchaError"
+                      class="contact-form__captcha-error"
+                      role="alert"
+                    >
+                      {{ captchaError }}
+                    </p>
+                  </div>
+                </v-col>
 
                 <v-col cols="12">
                   <div class="contact-form__actions">
@@ -211,7 +214,9 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const theme = useTheme()
-const VueHcaptcha = defineAsyncComponent(() => import('@hcaptcha/vue3-hcaptcha'))
+const VueHcaptcha = defineAsyncComponent(
+  () => import('@hcaptcha/vue3-hcaptcha')
+)
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 

@@ -16,7 +16,12 @@ const markdown = new MarkdownIt({
 const DOMPurify = createDOMPurify(new JSDOM('').window as unknown as DOMWindow)
 
 const PROJECT_ROOT = path.resolve(process.cwd())
-const RELEASES_DIRECTORY = path.join(PROJECT_ROOT, 'public', 'reports', 'releases')
+const RELEASES_DIRECTORY = path.join(
+  PROJECT_ROOT,
+  'public',
+  'reports',
+  'releases'
+)
 
 let cachedReleaseNotes: ReleaseNote[] | null = null
 
@@ -26,17 +31,24 @@ const getCreationDateFromGit = async (
   try {
     const gitResult = await execFileAsync(
       'git',
-      ['log', '--diff-filter=A', '--follow', '--format=%cI', '-1', '--', filePath],
+      [
+        'log',
+        '--diff-filter=A',
+        '--follow',
+        '--format=%cI',
+        '-1',
+        '--',
+        filePath,
+      ],
       { cwd: PROJECT_ROOT }
     )
 
     const stdout =
-      typeof gitResult === 'string' ? gitResult : gitResult.stdout ?? ''
+      typeof gitResult === 'string' ? gitResult : (gitResult.stdout ?? '')
     const isoDate = stdout.trim().split('\n').filter(Boolean).at(-1)
 
     return isoDate ?? null
-  }
-  catch (error: unknown) {
+  } catch (error: unknown) {
     console.warn('Unable to compute release creation date from git', error)
     return null
   }
@@ -55,7 +67,9 @@ const getReleasePublishedAt = async (filePath: string): Promise<string> => {
   return fallbackDate.toISOString()
 }
 
-const buildReleaseNote = async (fileName: string): Promise<ReleaseNote | null> => {
+const buildReleaseNote = async (
+  fileName: string
+): Promise<ReleaseNote | null> => {
   if (!fileName.toLowerCase().endsWith('.md')) {
     return null
   }
@@ -83,16 +97,18 @@ export const getReleaseNotes = async (): Promise<ReleaseNote[]> => {
 
   try {
     const files = await fs.readdir(RELEASES_DIRECTORY)
-    const releases = (await Promise.all(files.map(buildReleaseNote)))
-      .filter(Boolean) as ReleaseNote[]
+    const releases = (await Promise.all(files.map(buildReleaseNote))).filter(
+      Boolean
+    ) as ReleaseNote[]
 
-    cachedReleaseNotes = releases.sort((left, right) =>
-      new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime()
+    cachedReleaseNotes = releases.sort(
+      (left, right) =>
+        new Date(right.publishedAt).getTime() -
+        new Date(left.publishedAt).getTime()
     )
 
     return cachedReleaseNotes
-  }
-  catch (error: unknown) {
+  } catch (error: unknown) {
     console.error('Failed to read release notes', error)
     cachedReleaseNotes = []
     return cachedReleaseNotes

@@ -52,7 +52,8 @@ const requestURL = useRequestURL()
 const faqAnchorId = 'releases-faq'
 const faqAnchor = `#${faqAnchorId}`
 
-const { releases, pending, error, refresh, latestRelease } = await useReleaseNotes()
+const { releases, pending, error, refresh, latestRelease } =
+  await useReleaseNotes()
 
 const releasesCount = computed(() => releases.value.length)
 const latestReleaseName = computed(
@@ -66,11 +67,15 @@ const educationCard = computed(() => ({
   items: [
     {
       icon: 'mdi-rocket-launch',
-      text: String(t('releases.summary.latestItem', { name: latestReleaseName.value })),
+      text: String(
+        t('releases.summary.latestItem', { name: latestReleaseName.value })
+      ),
     },
     {
       icon: 'mdi-format-list-bulleted-square',
-      text: String(t('releases.summary.countItem', { count: releasesCount.value })),
+      text: String(
+        t('releases.summary.countItem', { count: releasesCount.value })
+      ),
     },
   ],
 }))

@@ -2,11 +2,10 @@
   <v-container class="py-12">
     <div class="text-center mb-12">
       <h1 class="text-h3 font-weight-bold mb-4 gradient-text">
-        AI Agent Workspace
+        {{ $t('agents.page.title') }}
       </h1>
       <p class="text-subtitle-1 text-medium-emphasis">
-        Use our specialized agents to submit ideas, report bugs, or ask
-        questions.
+        {{ $t('agents.page.subtitle') }}
       </p>
     </div>
 
@@ -14,10 +13,10 @@
     <v-fade-transition mode="out-in">
       <div v-if="!selectedTemplate && !submissionResult" key="selection">
         <div class="d-flex justify-space-between align-center mb-6">
-          <h2 class="text-h5">Available Agents</h2>
-          <v-chip color="secondary" variant="outlined" size="small"
-            >{{ templates.length }} Active</v-chip
-          >
+          <h2 class="text-h5">{{ $t('agents.page.availableAgents') }}</h2>
+          <v-chip color="secondary" variant="outlined" size="small">
+            {{ templates.length }} {{ $t('agents.page.active') }}
+          </v-chip>
         </div>
 
         <v-skeleton-loader
@@ -58,11 +57,13 @@
           size="80"
           class="mb-6"
         ></v-icon>
-        <h2 class="text-h4 mb-2">Request Submitted!</h2>
+        <h2 class="text-h4 mb-2">{{ $t('agents.submission.success') }}</h2>
         <p class="text-body-1 mb-6 max-w-sm mx-auto">
-          Your request has been successfully processed by the agent. Issue
-          <strong>#{{ submissionResult.issueNumber }}</strong> has been created
-          on GitHub.
+          {{
+            $t('agents.submission.message', {
+              id: submissionResult.issueNumber,
+            })
+          }}
         </p>
         <div class="d-flex gap-4">
           <v-btn
@@ -73,11 +74,11 @@
             prepend-icon="mdi-github"
             variant="flat"
           >
-            View on GitHub
+            {{ $t('agents.submission.viewOnGithub') }}
           </v-btn>
-          <v-btn variant="outlined" size="large" @click="reset"
-            >New Request</v-btn
-          >
+          <v-btn variant="outlined" size="large" @click="reset">{{
+            $t('agents.submission.newRequest')
+          }}</v-btn>
         </div>
       </v-sheet>
     </v-fade-transition>
@@ -86,60 +87,59 @@
 
     <!-- Activity Stream -->
     <div class="mt-8">
-      <h2 class="text-h5 mb-4">Community Activity</h2>
+      <h2 class="text-h5 mb-4">{{ $t('agents.activity.title') }}</h2>
       <v-card variant="flat" border>
         <v-list v-if="activity.length > 0" lines="two">
-          <v-list-item
-            v-for="(item, i) in activity"
-            :key="item.issueId"
-            :href="item.url"
-            target="_blank"
-            :lines="undefined"
-          >
-            <template #prepend>
-              <v-avatar color="surface-variant" size="40">
-                <v-icon icon="mdi-github" size="24"></v-icon>
-              </v-avatar>
-            </template>
+          <template v-for="(item, i) in activity" :key="item.issueId">
+            <v-list-item :href="item.url" target="_blank" :lines="undefined">
+              <template #prepend>
+                <v-avatar color="surface-variant" size="40">
+                  <v-icon icon="mdi-github" size="24"></v-icon>
+                </v-avatar>
+              </template>
 
-            <v-list-item-title class="font-weight-medium">
-              <span class="text-primary mr-2">
-                #{{ getIssueNumber(item.url) }}
-              </span>
-              {{ item.summary || 'Private Request content hidden' }}
-            </v-list-item-title>
+              <v-list-item-title class="font-weight-medium">
+                <span class="text-primary mr-2">
+                  #{{ getIssueNumber(item.url) }}
+                </span>
+                {{ item.summary || $t('agents.activity.hidden') }}
+              </v-list-item-title>
 
-            <v-list-item-subtitle class="mt-1 d-flex align-center gap-2">
-              <v-chip
-                size="x-small"
-                :color="getStatusColor(item.status)"
-                label
-                >{{ item.status }}</v-chip
-              >
-              <v-chip size="x-small" variant="outlined">{{ item.type }}</v-chip>
-              <span
-                v-if="item.promptVisibility === 'PRIVATE'"
-                class="text-caption text-medium-emphasis"
-              >
-                <v-icon icon="mdi-lock" size="x-small" class="mr-1"></v-icon>
-                Private
-              </span>
-            </v-list-item-subtitle>
+              <v-list-item-subtitle class="mt-1 d-flex align-center gap-2">
+                <v-chip
+                  size="x-small"
+                  :color="getStatusColor(item.status)"
+                  label
+                >
+                  {{ item.status }}
+                </v-chip>
+                <v-chip size="x-small" variant="outlined">{{
+                  item.type
+                }}</v-chip>
+                <span
+                  v-if="item.promptVisibility === 'PRIVATE'"
+                  class="text-caption text-medium-emphasis"
+                >
+                  <v-icon icon="mdi-lock" size="x-small" class="mr-1"></v-icon>
+                  {{ $t('agents.activity.private') }}
+                </span>
+              </v-list-item-subtitle>
 
-            <template #append>
-              <v-icon
-                icon="mdi-open-in-new"
-                size="small"
-                color="medium-emphasis"
-              ></v-icon>
-            </template>
+              <template #append>
+                <v-icon
+                  icon="mdi-open-in-new"
+                  size="small"
+                  color="medium-emphasis"
+                ></v-icon>
+              </template>
+            </v-list-item>
             <v-divider v-if="i < activity.length - 1" class="mt-2"></v-divider>
-          </v-list-item>
+          </template>
         </v-list>
 
         <div v-else class="pa-8 text-center text-medium-emphasis">
           <v-icon icon="mdi-history" size="large" class="mb-2"></v-icon>
-          <div>No recent activity found. Be the first to submit!</div>
+          <div>{{ $t('agents.activity.empty') }}</div>
         </div>
       </v-card>
     </div>
@@ -154,12 +154,16 @@ import type {
   AgentTemplateDto,
   AgentRequestResponseDto,
   AgentActivityDto,
-  DomainLanguage,
-} from '@/types/agent'
+} from '~~/shared/api-client/services/agents.services'
+import type { DomainLanguage } from '~~/app/types/agent'
 import AgentTemplateSelector from '@/components/agent/AgentTemplateSelector.vue'
 import AgentPromptInput from '@/components/agent/AgentPromptInput.vue'
 
-const { locale } = useI18n()
+const { t, locale } = useI18n()
+useHead({
+  title: t('agents.meta.title'),
+  meta: [{ name: 'description', content: t('agents.meta.description') }],
+})
 const { listTemplates, submitRequest, listActivity, getMailto } = useAgent()
 
 // Reactive state
@@ -204,8 +208,6 @@ async function loadData() {
     activity.value = acts
   } catch (e) {
     console.error('Failed to load agents', e)
-    // In dev mode, mock data if API fails?
-    // templates.value = [ { id: 'mock', name: 'Mock Agent', description: 'API failed', tags: ['bug'], publicPromptHistory: true, allowedRoles: [], icon: '', promptTemplate: '' } ]
   } finally {
     loadingTemplates.value = false
   }
@@ -237,11 +239,11 @@ async function onSubmit({
   try {
     submissionResult.value = await submitRequest(
       {
-        type: 'FEATURE',
+        type: 'FEATURE', // Fix: hardcoded string to enum if possible or fine as is if type matches
         promptUser: prompt,
         promptTemplateId: selectedTemplate.value.id,
         promptVisibility: isPrivate ? 'PRIVATE' : 'PUBLIC',
-      },
+      } as any, // Temporary cast as Enum handling in manual DTO might be strict
       currentLang
     )
 

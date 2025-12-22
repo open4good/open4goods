@@ -463,7 +463,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+} from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { formatDistanceToNow, format } from 'date-fns'

@@ -87,10 +87,18 @@ describe('CategoryHero', () => {
       image: 'https://example.com/image.jpg',
     }
 
-    const wrapperWithImage = await mountComponent({ ...defaultProps, showImage: true })
+    const wrapperWithImage = await mountComponent({
+      ...defaultProps,
+      showImage: true,
+    })
     expect(wrapperWithImage.find('.category-hero__media').exists()).toBe(true)
 
-    const wrapperWithoutImage = await mountComponent({ ...defaultProps, showImage: false })
-    expect(wrapperWithoutImage.find('.category-hero__media').exists()).toBe(false)
+    const wrapperWithoutImage = await mountComponent({
+      ...defaultProps,
+      showImage: false,
+    })
+    expect(wrapperWithoutImage.find('.category-hero__media').exists()).toBe(
+      false
+    )
   })
 })

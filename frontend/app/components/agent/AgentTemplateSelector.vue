@@ -50,7 +50,9 @@
 
           <v-divider></v-divider>
           <v-card-actions>
-            <v-btn variant="text" color="primary">Select</v-btn>
+            <v-btn variant="text" color="primary">{{
+              $t('agents.selector.select')
+            }}</v-btn>
             <v-spacer></v-spacer>
             <v-icon
               v-if="template.mailTemplate"

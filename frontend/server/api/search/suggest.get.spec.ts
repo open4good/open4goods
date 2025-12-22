@@ -14,7 +14,11 @@ const setDomainLanguageCacheHeadersMock = vi.hoisted(() => vi.fn())
 const getQueryMock = vi.hoisted(() => vi.fn())
 const createErrorMock = vi.hoisted(() =>
   vi.fn(
-    (input: { statusCode: number; statusMessage: string; cause?: unknown }) => ({
+    (input: {
+      statusCode: number
+      statusMessage: string
+      cause?: unknown
+    }) => ({
       ...input,
       isCreateError: true,
     })

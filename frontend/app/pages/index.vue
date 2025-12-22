@@ -54,9 +54,7 @@ const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
 
-const { data: categoriesStats } = await useAsyncData<
-  CategoriesStatsDto | null
->(
+const { data: categoriesStats } = await useAsyncData<CategoriesStatsDto | null>(
   'home-categories-stats',
   () =>
     $fetch<CategoriesStatsDto>('/api/stats/categories', {

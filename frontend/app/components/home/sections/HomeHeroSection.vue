@@ -204,9 +204,11 @@ const heroPartnersLinkText = computed(() => {
   const count = normalizedPartnersCount.value
   const formattedCount = formattedPartnersCount.value
   const fallbackLabel =
-    packI18n.resolveString('hero.search.partnerLinkFallback', {
-      fallbackKeys: ['home.hero.search.partnerLinkFallback'],
-    })?.trim() ?? ''
+    packI18n
+      .resolveString('hero.search.partnerLinkFallback', {
+        fallbackKeys: ['home.hero.search.partnerLinkFallback'],
+      })
+      ?.trim() ?? ''
 
   if (!count || !formattedCount) {
     return fallbackLabel || null
@@ -504,7 +506,10 @@ useHead({
                       <p class="home-hero__subtitle">
                         {{ heroSubtitle }}
                       </p>
-                      <p v-if="heroDescriptionTitle" class="home-hero__helpers-title">
+                      <p
+                        v-if="heroDescriptionTitle"
+                        class="home-hero__helpers-title"
+                      >
                         {{ heroDescriptionTitle }}
                       </p>
                       <div class="home-hero__helper-row">

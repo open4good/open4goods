@@ -106,13 +106,13 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
                     class="home-hero__search-submit nudger_degrade-defaut"
                     icon="mdi-arrow-right"
                     variant="flat"
-                  color="primary"
-                  size="small"
-                  type="submit"
-                  :aria-label="t('home.cta.searchSubmit')"
-                />
-              </template>
-            </SearchSuggestField>
+                    color="primary"
+                    size="small"
+                    type="submit"
+                    :aria-label="t('home.cta.searchSubmit')"
+                  />
+                </template>
+              </SearchSuggestField>
             </form>
             <div class="home-cta__actions">
               <div class="home-cta__links">

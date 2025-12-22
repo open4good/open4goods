@@ -1,4 +1,8 @@
-import { DEFAULT_EVENT_PACK, EVENT_PACK_NAMES, type EventPackName } from './assets'
+import {
+  DEFAULT_EVENT_PACK,
+  EVENT_PACK_NAMES,
+  type EventPackName,
+} from './assets'
 
 export type SeasonalEventWindow = {
   id: string

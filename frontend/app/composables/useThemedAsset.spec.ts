@@ -13,8 +13,7 @@ describe('useThemedAsset utilities', () => {
   const assetIndex = {
     'light/logo-new.png': '/_nuxt/light-logo-new.png',
     'common/hero-background.svg': '/_nuxt/common-hero.svg',
-    'light/christmas/hero-background.svg':
-      '/_nuxt/light-christmas-hero.svg',
+    'light/christmas/hero-background.svg': '/_nuxt/light-christmas-hero.svg',
   }
 
   it('returns a theme-specific asset when present', () => {
