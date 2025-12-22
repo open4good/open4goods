@@ -1676,6 +1676,31 @@
       "subtitle": "Code, data and governance are transparent so anyone can audit and improve Nudger.",
       "title": "We build a commons for responsible shopping"
     },
+    "live": {
+      "eyebrow": "Live from the code",
+      "subtitle": "Quality dashboards are updated after each pipeline so you can explore the latest metrics.",
+      "tabs": {
+        "backend": {
+          "description": "Back-end coverage and mutations to validate the stability of services and domain logic.",
+          "title": "Backend coverage"
+        },
+        "frontend": {
+          "description": "Client-side tests covering navigation, composables and shared components.",
+          "title": "Frontend coverage"
+        },
+        "maven": {
+          "description": "Generated Maven site aggregating project reports, dependencies and code quality checks.",
+          "title": "Maven site"
+        }
+      },
+      "title": "Fresh quality reports at a glance",
+      "version": {
+        "description": "Latest tagged release deployed to our environments.",
+        "status": "Current",
+        "subtitle": "Tracking the deployed version helps align community discussions and bug reports.",
+        "title": "Current version"
+      }
+    },
     "pillars": {
       "cards": {
         "community": {
