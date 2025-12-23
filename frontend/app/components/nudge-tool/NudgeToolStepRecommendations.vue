@@ -12,6 +12,8 @@
         :products="products"
         :popular-attributes="popularAttributes"
         size="compact"
+        variant="compact-tile"
+        :max-attributes="4"
       />
       <p v-else class="nudge-step-recos__empty">
         {{ $t('nudge-tool.steps.recommendations.empty') }}
