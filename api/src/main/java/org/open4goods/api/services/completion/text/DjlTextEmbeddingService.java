@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.commons.services.TextEmbeddingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
 
 @Service
-public class DjlTextEmbeddingService {
+public class DjlTextEmbeddingService implements TextEmbeddingService {
 
     private static final Logger logger = LoggerFactory.getLogger(DjlTextEmbeddingService.class);
 
@@ -48,6 +49,7 @@ public class DjlTextEmbeddingService {
      * @param text
      * @return normalized embedding vector
      */
+    @Override
     public float[] embed(String text) {
         float[] vector = embedWithModel(textModel, text);
         if (vector != null) {
