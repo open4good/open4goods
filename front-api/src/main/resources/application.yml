@@ -231,7 +231,13 @@ front.agent:
       icon: "mdi-lightbulb-on-outline"
       tags: ["feature", "idea"]
       public-prompt-history: true
-      prompt-template: "User Request: {{prompt}}\n\nAnalyze this request and create a GitHub Issue."
+      allow-template-editing: false
+      prompt-templates:
+        - id: "default"
+          title:
+            fr: "Ticket classique"
+            en: "Standard ticket"
+          content: "User Request: {{prompt}}\n\nAnalyze this request and create a GitHub Issue."
       mail-template:
          to: "support@example.com"
          subject:
@@ -256,8 +262,8 @@ front.agent:
         - id: "newsletter"
           type: "CHECKBOX"
           label:
-            fr: "M'inscrire à la newsletter"
-            en: "Subscribe to newsletter"
+            fr: "J'accepte que mon interaction avec l'IA soit rendue publique"
+            en: "I agree for my interaction with the AI to be made public"
 
     - id: question
       name:
@@ -269,4 +275,10 @@ front.agent:
       icon: "mdi-help-circle-outline"
       tags: ["question"]
       public-prompt-history: false
-      prompt-template: "Question: {{prompt}}\n\nAnswer the user."
+      allow-template-editing: false
+      prompt-templates:
+        - id: "default"
+          title:
+            fr: "Réponse concise"
+            en: "Concise answer"
+          content: "Question: {{prompt}}\n\nAnswer the user."

@@ -60,6 +60,8 @@ export * from './LegacyPromptConfig';
 export * from './LoginRequest';
 export * from './LogoutResponse';
 export * from './MailTemplateDto';
+export * from './PromptTemplateDto';
+export * from './IssueCommentDto';
 export * from './Member';
 export * from './NudgeToolConfigDto';
 export * from './NudgeToolScoreDto';

@@ -55,6 +55,18 @@ export interface AgentRequestResponseDto {
      * @memberof AgentRequestResponseDto
      */
     promptVisibility?: AgentRequestResponseDtoPromptVisibilityEnum;
+    /**
+     * Agent template identifier
+     * @type {string}
+     * @memberof AgentRequestResponseDto
+     */
+    promptTemplateId?: string;
+    /**
+     * Prompt variant identifier
+     * @type {string}
+     * @memberof AgentRequestResponseDto
+     */
+    promptVariantId?: string;
 }
 
 
@@ -91,6 +103,8 @@ export function AgentRequestResponseDtoFromJSONTyped(json: any, ignoreDiscrimina
         'workflowState': json['workflowState'] == null ? undefined : json['workflowState'],
         'previewUrl': json['previewUrl'] == null ? undefined : json['previewUrl'],
         'promptVisibility': json['promptVisibility'] == null ? undefined : json['promptVisibility'],
+        'promptTemplateId': json['promptTemplateId'] == null ? undefined : json['promptTemplateId'],
+        'promptVariantId': json['promptVariantId'] == null ? undefined : json['promptVariantId'],
     };
 }
 
@@ -111,6 +125,7 @@ export function AgentRequestResponseDtoToJSONTyped(value?: AgentRequestResponseD
         'workflowState': value['workflowState'],
         'previewUrl': value['previewUrl'],
         'promptVisibility': value['promptVisibility'],
+        'promptTemplateId': value['promptTemplateId'],
+        'promptVariantId': value['promptVariantId'],
     };
 }
-

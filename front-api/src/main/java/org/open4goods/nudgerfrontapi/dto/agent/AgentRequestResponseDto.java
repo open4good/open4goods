@@ -9,5 +9,7 @@ public record AgentRequestResponseDto(
         @Schema(description = "URL of the created issue") String issueUrl,
         @Schema(description = "Current workflow state") String workflowState,
         @Schema(description = "Preview URL (if available)") String previewUrl,
-        @Schema(description = "Visibility of the prompt") AgentRequestDto.PromptVisibility promptVisibility
+        @Schema(description = "Visibility of the prompt") AgentRequestDto.PromptVisibility promptVisibility,
+        @Schema(description = "Agent template identifier") String promptTemplateId,
+        @Schema(description = "Prompt variant identifier") String promptVariantId
 ) {}

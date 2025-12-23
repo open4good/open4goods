@@ -20,6 +20,13 @@ import {
     MailTemplateDtoToJSON,
     MailTemplateDtoToJSONTyped,
 } from './MailTemplateDto';
+import type { PromptTemplateDto } from './PromptTemplateDto';
+import {
+    PromptTemplateDtoFromJSON,
+    PromptTemplateDtoFromJSONTyped,
+    PromptTemplateDtoToJSON,
+    PromptTemplateDtoToJSONTyped,
+} from './PromptTemplateDto';
 import type { AgentAttributeDto } from './AgentAttributeDto';
 import {
     AgentAttributeDtoFromJSON,
@@ -63,7 +70,7 @@ export interface AgentTemplateDto {
      * @type {string}
      * @memberof AgentTemplateDto
      */
-    promptTemplate?: string;
+    promptTemplates?: Array<PromptTemplateDto>;
     /**
      * Associated tags
      * @type {Array<string>}
@@ -82,6 +89,12 @@ export interface AgentTemplateDto {
      * @memberof AgentTemplateDto
      */
     publicPromptHistory?: boolean;
+    /**
+     * Whether user can edit the selected prompt template
+     * @type {boolean}
+     * @memberof AgentTemplateDto
+     */
+    allowTemplateEditing?: boolean;
     /**
      * Mailto template configuration
      * @type {MailTemplateDto}
@@ -117,10 +130,11 @@ export function AgentTemplateDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'name': json['name'] == null ? undefined : json['name'],
         'description': json['description'] == null ? undefined : json['description'],
         'icon': json['icon'] == null ? undefined : json['icon'],
-        'promptTemplate': json['promptTemplate'] == null ? undefined : json['promptTemplate'],
+        'promptTemplates': json['promptTemplates'] == null ? undefined : ((json['promptTemplates'] as Array<any>).map(PromptTemplateDtoFromJSON)),
         'tags': json['tags'] == null ? undefined : json['tags'],
         'allowedRoles': json['allowedRoles'] == null ? undefined : json['allowedRoles'],
         'publicPromptHistory': json['publicPromptHistory'] == null ? undefined : json['publicPromptHistory'],
+        'allowTemplateEditing': json['allowTemplateEditing'] == null ? undefined : json['allowTemplateEditing'],
         'mailTemplate': json['mailTemplate'] == null ? undefined : MailTemplateDtoFromJSON(json['mailTemplate']),
         'attributes': json['attributes'] == null ? undefined : ((json['attributes'] as Array<any>).map(AgentAttributeDtoFromJSON)),
     };
@@ -141,12 +155,12 @@ export function AgentTemplateDtoToJSONTyped(value?: AgentTemplateDto | null, ign
         'name': value['name'],
         'description': value['description'],
         'icon': value['icon'],
-        'promptTemplate': value['promptTemplate'],
+        'promptTemplates': value['promptTemplates'] == null ? undefined : ((value['promptTemplates'] as Array<any>).map(PromptTemplateDtoToJSON)),
         'tags': value['tags'],
         'allowedRoles': value['allowedRoles'],
         'publicPromptHistory': value['publicPromptHistory'],
+        'allowTemplateEditing': value['allowTemplateEditing'],
         'mailTemplate': MailTemplateDtoToJSON(value['mailTemplate']),
         'attributes': value['attributes'] == null ? undefined : ((value['attributes'] as Array<any>).map(AgentAttributeDtoToJSON)),
     };
 }
-
