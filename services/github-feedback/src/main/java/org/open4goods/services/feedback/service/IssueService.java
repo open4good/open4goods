@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+<<<<<<< HEAD
 import org.open4goods.services.feedback.dto.IssueDto;
+=======
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueComment;
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 /**
  * Defines operations around creating and listing GitHub issues.
@@ -44,5 +49,17 @@ public interface IssueService {
      * @return The created issue
      * @throws IOException If GitHub communication fails
      */
+<<<<<<< HEAD
     IssueDto createIssue(String title, String description, String author, Set<String> labels) throws IOException;
+=======
+    GHIssue createIssue(String title, String description, String author, Set<String> labels) throws IOException;
+
+    /**
+     * Retrieve all comments for a given issue number ordered by GitHub.
+     * @param issueNumber GitHub issue number
+     * @return list of comments
+     * @throws IOException if GitHub communication fails
+     */
+    List<GHIssueComment> listIssueComments(int issueNumber) throws IOException;
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 }

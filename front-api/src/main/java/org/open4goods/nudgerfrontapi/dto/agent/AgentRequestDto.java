@@ -15,6 +15,9 @@ public record AgentRequestDto(
         @Schema(description = "ID of the agent template used", requiredMode = Schema.RequiredMode.REQUIRED, example = "agent-feature")
         @NotBlank String promptTemplateId,
 
+        @Schema(description = "ID of the prompt variant selected", requiredMode = Schema.RequiredMode.REQUIRED, example = "default")
+        @NotBlank String promptVariantId,
+
         @Schema(description = "Override prompt visibility (PUBLIC, PRIVATE)")
         PromptVisibility promptVisibility,
 

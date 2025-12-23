@@ -38,6 +38,12 @@ export interface AgentRequestDto {
      */
     promptTemplateId: string;
     /**
+     * ID of the prompt variant selected
+     * @type {string}
+     * @memberof AgentRequestDto
+     */
+    promptVariantId: string;
+    /**
      * Override prompt visibility (PUBLIC, PRIVATE)
      * @type {string}
      * @memberof AgentRequestDto
@@ -90,6 +96,7 @@ export function instanceOfAgentRequestDto(value: object): value is AgentRequestD
     if (!('type' in value) || value['type'] === undefined) return false;
     if (!('promptUser' in value) || value['promptUser'] === undefined) return false;
     if (!('promptTemplateId' in value) || value['promptTemplateId'] === undefined) return false;
+    if (!('promptVariantId' in value) || value['promptVariantId'] === undefined) return false;
     return true;
 }
 
@@ -106,6 +113,7 @@ export function AgentRequestDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'type': json['type'],
         'promptUser': json['promptUser'],
         'promptTemplateId': json['promptTemplateId'],
+        'promptVariantId': json['promptVariantId'],
         'promptVisibility': json['promptVisibility'] == null ? undefined : json['promptVisibility'],
         'userHandle': json['userHandle'] == null ? undefined : json['userHandle'],
         'attributeValues': json['attributeValues'] == null ? undefined : json['attributeValues'],
@@ -127,10 +135,10 @@ export function AgentRequestDtoToJSONTyped(value?: AgentRequestDto | null, ignor
         'type': value['type'],
         'promptUser': value['promptUser'],
         'promptTemplateId': value['promptTemplateId'],
+        'promptVariantId': value['promptVariantId'],
         'promptVisibility': value['promptVisibility'],
         'userHandle': value['userHandle'],
         'attributeValues': value['attributeValues'],
         'captchaToken': value['captchaToken'],
     };
 }
-

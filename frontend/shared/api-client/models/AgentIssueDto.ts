@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { IssueCommentDto } from './IssueCommentDto';
+import {
+    IssueCommentDtoFromJSON,
+    IssueCommentDtoFromJSONTyped,
+    IssueCommentDtoToJSON,
+    IssueCommentDtoToJSONTyped,
+} from './IssueCommentDto';
 /**
  * Detailed view of an agent-created issue
  * @export
@@ -79,6 +86,12 @@ export interface AgentIssueDto {
      * @memberof AgentIssueDto
      */
     promptSummary?: string;
+    /**
+     * Discussion comments
+     * @type {Array<IssueCommentDto>}
+     * @memberof AgentIssueDto
+     */
+    comments?: Array<IssueCommentDto>;
 }
 
 
@@ -119,6 +132,7 @@ export function AgentIssueDtoFromJSONTyped(json: any, ignoreDiscriminator: boole
         'previewUrl': json['previewUrl'] == null ? undefined : json['previewUrl'],
         'promptVisibility': json['promptVisibility'] == null ? undefined : json['promptVisibility'],
         'promptSummary': json['promptSummary'] == null ? undefined : json['promptSummary'],
+        'comments': json['comments'] == null ? undefined : ((json['comments'] as Array<any>).map(IssueCommentDtoFromJSON)),
     };
 }
 
@@ -143,6 +157,6 @@ export function AgentIssueDtoToJSONTyped(value?: AgentIssueDto | null, ignoreDis
         'previewUrl': value['previewUrl'],
         'promptVisibility': value['promptVisibility'],
         'promptSummary': value['promptSummary'],
+        'comments': value['comments'] == null ? undefined : ((value['comments'] as Array<any>).map(IssueCommentDtoToJSON)),
     };
 }
-

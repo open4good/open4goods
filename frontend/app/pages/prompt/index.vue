@@ -36,14 +36,17 @@
       <div v-else-if="selectedTemplate && !submissionResult" key="input">
         <AgentPromptInput
           :template-name="selectedTemplate.name"
+          :prompt-templates="selectedTemplate.promptTemplates || []"
+          :selected-prompt-template-id="selectedPromptTemplateId"
+          :allow-template-editing="selectedTemplate.allowTemplateEditing"
           :attributes="selectedTemplate.attributes"
           :can-toggle-visibility="!selectedTemplate.publicPromptHistory"
           :default-public="selectedTemplate.publicPromptHistory"
           :fallback-mailto="mailtoLink"
           :loading="submitting"
           @submit="onSubmit"
+          @cancel="onCancel"
           @fallback-contact="onFallbackContact"
-          @cancel="selectedTemplate = null"
         />
       </div>
 
@@ -92,8 +95,8 @@
       <h2 class="text-h5 mb-4">{{ $t('agents.activity.title') }}</h2>
       <v-card variant="flat" border>
         <v-list v-if="activity.length > 0" lines="two">
-          <template v-for="(item, i) in activity" :key="item.issueId">
-            <v-list-item :href="item.url" target="_blank" :lines="undefined">
+          <template v-for="(item, i) in activity" :key="item.id">
+            <v-list-item :href="item.issueUrl" target="_blank" :lines="undefined">
               <template #prepend>
                 <v-avatar color="surface-variant" size="40">
                   <v-icon icon="mdi-github" size="24"></v-icon>
@@ -102,9 +105,9 @@
 
               <v-list-item-title class="font-weight-medium">
                 <span class="text-primary mr-2">
-                  #{{ getIssueNumber(item.url) }}
+                  #{{ getIssueNumber(item.issueUrl) }}
                 </span>
-                {{ item.summary || $t('agents.activity.hidden') }}
+                {{ item.promptSummary || $t('agents.activity.hidden') }}
               </v-list-item-title>
 
               <v-list-item-subtitle class="mt-1 d-flex align-center gap-2">
@@ -118,6 +121,10 @@
                 <v-chip size="x-small" variant="outlined">{{
                   item.type
                 }}</v-chip>
+                <v-chip v-if="item.commentsCount" size="x-small" color="info" variant="tonal">
+                  <v-icon icon="mdi-comment-text-outline" size="x-small" class="mr-1" />
+                  {{ item.commentsCount }}
+                </v-chip>
                 <span
                   v-if="item.promptVisibility === 'PRIVATE'"
                   class="text-caption text-medium-emphasis"
@@ -128,11 +135,20 @@
               </v-list-item-subtitle>
 
               <template #append>
-                <v-icon
-                  icon="mdi-open-in-new"
-                  size="small"
-                  color="medium-emphasis"
-                ></v-icon>
+                <div class="d-flex align-center">
+                  <v-btn
+                    icon="mdi-forum"
+                    variant="text"
+                    size="small"
+                    :title="$t('agents.activity.viewDiscussion')"
+                    @click.stop="openDiscussion(item)"
+                  />
+                  <v-icon
+                    icon="mdi-open-in-new"
+                    size="small"
+                    color="medium-emphasis"
+                  ></v-icon>
+                </div>
               </template>
             </v-list-item>
             <v-divider v-if="i < activity.length - 1" class="mt-2"></v-divider>
@@ -143,6 +159,55 @@
           <v-icon icon="mdi-history" size="large" class="mb-2"></v-icon>
           <div>{{ $t('agents.activity.empty') }}</div>
         </div>
+      </v-card>
+
+      <v-card v-if="currentDiscussion" class="mt-6" variant="text" border>
+        <v-card-title class="d-flex align-center justify-space-between">
+          <div>
+            <div class="text-caption text-medium-emphasis">
+              {{ $t('agents.discussion.title') }}
+            </div>
+            <div class="text-body-2 font-weight-medium">
+              #{{ currentDiscussion.number }} ·
+              {{ currentDiscussion.title }}
+            </div>
+          </div>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            @click="currentDiscussion = null"
+          />
+        </v-card-title>
+        <v-progress-linear
+          v-if="loadingDiscussion"
+          color="primary"
+          indeterminate
+          height="3"
+        />
+        <v-divider></v-divider>
+        <v-list lines="three">
+          <v-list-item
+            v-for="comment in currentDiscussion.comments"
+            :key="comment.id"
+            :title="comment.author"
+          >
+            <template #subtitle>
+              <div class="d-flex align-center text-caption text-medium-emphasis mb-1">
+                <v-icon icon="mdi-calendar" size="x-small" class="mr-1" />
+                {{ formatDate(comment.createdAt || comment.updatedAt) }}
+              </div>
+              <div class="text-body-2" style="white-space: pre-line;">
+                {{ comment.body }}
+              </div>
+            </template>
+          </v-list-item>
+          <v-list-item v-if="currentDiscussion.comments.length === 0">
+            <v-list-item-title class="text-medium-emphasis">
+              {{ $t('agents.discussion.empty') }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
       </v-card>
     </div>
   </v-container>
@@ -160,6 +225,7 @@ import type {
   AgentRequestDto,
   AgentRequestDtoTypeEnum,
   AgentRequestDtoPromptVisibilityEnum,
+  AgentIssueDto,
 } from '~~/shared/api-client/services/agents.services'
 import type { DomainLanguage } from '~~/app/types/agent'
 import AgentTemplateSelector from '@/components/agent/AgentTemplateSelector.vue'
@@ -171,22 +237,27 @@ useHead({
   title: t('agents.meta.title'),
   meta: [{ name: 'description', content: t('agents.meta.description') }],
 })
-const { listTemplates, submitRequest, listActivity, getMailto } = useAgent()
+const { listTemplates, submitRequest, listActivity, getMailto, getIssue } =
+  useAgent()
 
 // Reactive state
 const templates = ref<AgentTemplateDto[]>([])
 const activity = ref<AgentActivityDto[]>([])
 const loadingTemplates = ref(true)
 const selectedTemplate = ref<AgentTemplateDto | null>(null)
+const selectedPromptTemplateId = ref<string>('')
 const mailtoLink = ref<string | null>(null)
 const submitting = ref(false)
 const submissionResult = ref<AgentRequestResponseDto | null>(null)
+const currentDiscussion = ref<AgentIssueDto | null>(null)
+const loadingDiscussion = ref(false)
 
 // Computed locale for API
 const currentLang = locale.value.split('-')[0] as DomainLanguage
 
 // Helpers
-const getIssueNumber = (url: string) => {
+const getIssueNumber = (url?: string) => {
+  if (!url) return ''
   const parts = url.split('/')
   return parts[parts.length - 1]
 }
@@ -224,6 +295,7 @@ onMounted(loadData)
 
 async function onSelectTemplate(template: AgentTemplateDto) {
   selectedTemplate.value = template
+  selectedPromptTemplateId.value = template.promptTemplates?.[0]?.id ?? ''
   mailtoLink.value = null
   if (template.mailTemplate) {
     try {
@@ -241,6 +313,7 @@ async function onSubmit({
   captchaToken,
 }: {
   prompt: string
+  promptVariantId: string
   isPrivate: boolean
   attributeValues: Record<string, unknown>
   captchaToken?: string
@@ -252,6 +325,7 @@ async function onSubmit({
       type: 'FEATURE' as unknown as AgentRequestDtoTypeEnum,
       promptUser: prompt,
       promptTemplateId: selectedTemplate.value.id,
+      promptVariantId,
       promptVisibility: (isPrivate
         ? 'PRIVATE'
         : 'PUBLIC') as unknown as AgentRequestDtoPromptVisibilityEnum,
@@ -326,7 +400,38 @@ async function onFallbackContact({
 
 function reset() {
   selectedTemplate.value = null
+  selectedPromptTemplateId.value = ''
   submissionResult.value = null
+}
+
+function onCancel() {
+  selectedTemplate.value = null
+  selectedPromptTemplateId.value = ''
+}
+
+async function openDiscussion(item: AgentActivityDto) {
+  if (!item || !item.id) return
+  loadingDiscussion.value = true
+  try {
+    const discussion = await getIssue(item.id, currentLang)
+    currentDiscussion.value = {
+      ...discussion,
+      comments: discussion.comments ?? [],
+    }
+  } catch (e) {
+    console.warn('Failed to load discussion', e)
+  } finally {
+    loadingDiscussion.value = false
+  }
+}
+
+const formatDate = (value?: string) => {
+  if (!value) return ''
+  const date = new Date(value)
+  return new Intl.DateTimeFormat(locale.value, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
 }
 </script>
 

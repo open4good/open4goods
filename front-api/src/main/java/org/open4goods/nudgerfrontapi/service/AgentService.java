@@ -18,12 +18,19 @@ import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto.MailTemplateDto;
+import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto.PromptTemplateDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.springframework.stereotype.Service;
 
+<<<<<<< HEAD
+=======
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueComment;
+
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 @Service
 public class AgentService {
 
@@ -73,15 +80,27 @@ public class AgentService {
                     .collect(Collectors.toList());
         }
 
+        List<PromptTemplateDto> promptTemplates = Collections.emptyList();
+        if (config.getPromptTemplates() != null) {
+            promptTemplates = config.getPromptTemplates().stream()
+                    .map(tpl -> new PromptTemplateDto(
+                            tpl.getId(),
+                            resolveI18n(tpl.getTitle(), lang),
+                            tpl.getContent()
+                    ))
+                    .collect(Collectors.toList());
+        }
+
         return new AgentTemplateDto(
                 config.getId(),
                 name,
                 desc,
                 config.getIcon(),
-                config.getPromptTemplate(),
+                promptTemplates,
                 config.getTags(),
                 config.getAllowedRoles(),
                 config.isPublicPromptHistory(),
+                config.isAllowTemplateEditing(),
                 mailDto,
                 attributes
         );
@@ -125,7 +144,10 @@ public class AgentService {
         AgentConfig agentConfig = findAgentConfig(request.promptTemplateId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid agent template ID: " + request.promptTemplateId()));
 
-        String finalDescription = buildDescription(agentConfig, request);
+        AgentProperties.PromptTemplateConfig promptTemplate = resolvePromptTemplate(agentConfig, request.promptVariantId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid prompt variant ID: " + request.promptVariantId()));
+
+        String finalDescription = buildDescription(request, promptTemplate);
         String finalTitle = buildTitle(agentConfig, request);
         
         Set<String> labels = new HashSet<>();
@@ -155,14 +177,16 @@ public class AgentService {
                 issue.htmlUrl(),
                 "ISSUE_CREATED",
                 null,
-                isPublic ? AgentRequestDto.PromptVisibility.PUBLIC : AgentRequestDto.PromptVisibility.PRIVATE
+                isPublic ? AgentRequestDto.PromptVisibility.PUBLIC : AgentRequestDto.PromptVisibility.PRIVATE,
+                agentConfig.getId(),
+                promptTemplate.getId()
         );
     }
 
-    private String buildDescription(AgentConfig config, AgentRequestDto request) {
+    private String buildDescription(AgentRequestDto request, AgentProperties.PromptTemplateConfig promptTemplate) {
         StringBuilder sb = new StringBuilder();
-        if (config.getPromptTemplate() != null && !config.getPromptTemplate().isBlank()) {
-            sb.append("### Context / Instructions\n").append(config.getPromptTemplate()).append("\n\n");
+        if (promptTemplate != null && promptTemplate.getContent() != null && !promptTemplate.getContent().isBlank()) {
+            sb.append("### Context / Instructions\n").append(promptTemplate.getContent()).append("\n\n");
         }
         sb.append("### User Request\n").append(request.promptUser()).append("\n\n");
         
@@ -179,7 +203,7 @@ public class AgentService {
     
     private String buildTitle(AgentConfig config, AgentRequestDto request) {
         int len = Math.min(request.promptUser().length(), 50);
-        return "[" + config.getId() + "] " + request.promptUser().substring(0, len) + (request.promptUser().length() > 50 ? "..." : "");
+        return "[" + config.getId() + "/" + request.promptVariantId() + "] " + request.promptUser().substring(0, len) + (request.promptUser().length() > 50 ? "..." : "");
     }
 
     private Optional<AgentConfig> findAgentConfig(String agentId) {
@@ -188,6 +212,22 @@ public class AgentService {
         }
         return agentProperties.getAgents().stream()
                 .filter(a -> a.getId().equals(agentId))
+                .findFirst();
+    }
+
+    /**
+     * Resolve a prompt template by identifier for the provided agent configuration.
+     *
+     * @param config           agent configuration
+     * @param promptTemplateId template identifier selected by the caller
+     * @return matching prompt template, if any
+     */
+    private Optional<AgentProperties.PromptTemplateConfig> resolvePromptTemplate(AgentConfig config, String promptTemplateId) {
+        if (config.getPromptTemplates() == null) {
+            return Optional.empty();
+        }
+        return config.getPromptTemplates().stream()
+                .filter(tpl -> tpl.getId().equals(promptTemplateId))
                 .findFirst();
     }
 
@@ -210,19 +250,84 @@ public class AgentService {
         boolean isPrivate = issue.labels().contains("prompt-visibility:private");
         
         AgentRequestDto.AgentRequestType type = AgentRequestDto.AgentRequestType.FEATURE; 
+<<<<<<< HEAD
         
          return new AgentActivityDto(
                 issue.id(),
+=======
+
+        return new AgentActivityDto(
+                String.valueOf(issue.getNumber()),
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                 type,
                 issue.htmlUrl(),
                 issue.state(),
                 isPrivate ? AgentRequestDto.PromptVisibility.PRIVATE : AgentRequestDto.PromptVisibility.PUBLIC,
+<<<<<<< HEAD
                 isPrivate ? null : issue.title()
+=======
+                isPrivate ? null : issue.getTitle(),
+                issue.getCommentsCount()
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
         );
     }
 
+    /**
+     * Retrieve a specific agent issue with its associated discussion.
+     *
+     * @param issueId        GitHub issue number
+     * @param domainLanguage requested locale (currently informational)
+     * @return issue details if found
+     * @throws IOException when GitHub communication fails
+     */
     public Optional<AgentIssueDto> getIssue(String issueId, DomainLanguage domainLanguage) throws IOException {
-         return Optional.empty(); 
+        if (issueId == null) {
+            return Optional.empty();
+        }
+
+        int number;
+        try {
+            number = Integer.parseInt(issueId);
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+
+        Optional<GHIssue> match = issueService.listIssues().stream()
+                .filter(ghIssue -> ghIssue.getNumber() == number)
+                .findFirst();
+
+        if (match.isEmpty()) {
+            return Optional.empty();
+        }
+
+        GHIssue issue = match.get();
+        boolean isPrivate = issue.getLabels().stream()
+                .anyMatch(l -> l.getName().equals("prompt-visibility:private"));
+
+        List<GHIssueComment> comments = issueService.listIssueComments(number);
+        List<AgentIssueDto.IssueCommentDto> mappedComments = comments.stream()
+                .map(comment -> new AgentIssueDto.IssueCommentDto(
+                        comment.getId(),
+                        comment.getUser() != null ? comment.getUser().getLogin() : "unknown",
+                        comment.getCreatedAt() != null ? comment.getCreatedAt().toInstant() : null,
+                        comment.getUpdatedAt() != null ? comment.getUpdatedAt().toInstant() : null,
+                        comment.getBody()
+                ))
+                .toList();
+
+        return Optional.of(new AgentIssueDto(
+                issueId,
+                issue.getNumber(),
+                issue.getTitle(),
+                issue.getHtmlUrl().toString(),
+                issue.getState().toString(),
+                issue.getLabels().stream().map(l -> l.getName()).toList(),
+                "ISSUE_CREATED",
+                null,
+                isPrivate ? AgentRequestDto.PromptVisibility.PRIVATE : AgentRequestDto.PromptVisibility.PUBLIC,
+                isPrivate ? null : issue.getTitle(),
+                mappedComments
+        ));
     }
 
     public String getMailto(String agentId, DomainLanguage domainLanguage) {

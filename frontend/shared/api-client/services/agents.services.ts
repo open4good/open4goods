@@ -1,6 +1,5 @@
 import { type Configuration } from '../configuration' // Base configuration type
 import { createBackendApiConfig } from './createBackendApiConfig'
-import type { DomainLanguage } from '~~/app/types/agent'
 
 // We mimic the generated structure so we can swap it later easily.
 // DTOs (Manually defined for now, should match backend)
@@ -10,17 +9,32 @@ export interface AgentTemplateDto {
   name: string
   description: string
   icon: string
-  promptTemplate: string
+  promptTemplates: PromptTemplateDto[]
   tags: string[]
   allowedRoles: string[]
   publicPromptHistory: boolean
+  allowTemplateEditing: boolean
   mailTemplate?: MailTemplateDto
+  attributes?: AgentAttributeDto[]
+}
+
+export interface PromptTemplateDto {
+  id: string
+  title: string
+  content: string
 }
 
 export interface MailTemplateDto {
   to: string
   subject: string
   body: string
+}
+
+export interface AgentAttributeDto {
+  id: string
+  type: string
+  label: string
+  options?: string[]
 }
 
 export enum AgentRequestDtoTypeEnum {
@@ -37,38 +51,54 @@ export interface AgentRequestDto {
   type: AgentRequestDtoTypeEnum
   promptUser: string
   promptTemplateId: string
+  promptVariantId: string
   promptVisibility?: AgentRequestDtoPromptVisibilityEnum
   userHandle?: string
+  attributeValues?: Record<string, unknown>
+  captchaToken?: string
 }
 
 export interface AgentRequestResponseDto {
   issueId: string
   issueNumber: number
   issueUrl: string
-  status: string
+  workflowState: string
   previewUrl?: string
   promptVisibility: AgentRequestDtoPromptVisibilityEnum
+  promptTemplateId: string
+  promptVariantId: string
 }
 
 export interface AgentActivityDto {
-  issueId: string
+  id: string
   type: AgentRequestDtoTypeEnum
-  url: string
+  issueUrl: string
   status: string
   promptVisibility: AgentRequestDtoPromptVisibilityEnum
-  summary?: string
+  promptSummary?: string
+  commentsCount: number
 }
 
 export interface AgentIssueDto {
-  id: string
-  issueNumber: number
+  issueId: string
+  number: number
   title: string
-  body: string
-  status: string
   url: string
-  author: string
+  status: string
   labels: string[]
+  workflowState: string
+  previewUrl?: string
   promptVisibility: AgentRequestDtoPromptVisibilityEnum
+  promptSummary?: string
+  comments: IssueCommentDto[]
+}
+
+export interface IssueCommentDto {
+  id: number
+  author: string
+  createdAt?: string
+  updatedAt?: string
+  body: string
 }
 
 // Service Class Implementation
@@ -139,6 +169,12 @@ class AgentService {
   async listActivity(domainLanguage: string): Promise<AgentActivityDto[]> {
     return this.fetch<AgentActivityDto[]>(
       `/agents/activity?domainLanguage=${domainLanguage}`
+    )
+  }
+
+  async getIssue(issueId: string, domainLanguage: string): Promise<AgentIssueDto> {
+    return this.fetch<AgentIssueDto>(
+      `/agents/${issueId}?domainLanguage=${domainLanguage}`
     )
   }
 

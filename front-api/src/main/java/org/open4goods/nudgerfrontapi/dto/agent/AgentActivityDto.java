@@ -9,5 +9,6 @@ public record AgentActivityDto(
         @Schema(description = "Issue URL") String issueUrl,
         @Schema(description = "Issue Status") String status,
         @Schema(description = "Prompt Visibility") AgentRequestDto.PromptVisibility promptVisibility,
-        @Schema(description = "Prompt Summary (if public)") String promptSummary
+        @Schema(description = "Prompt Summary (if public)") String promptSummary,
+        @Schema(description = "Number of discussion comments") int commentsCount
 ) {}

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
+import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
@@ -118,6 +119,7 @@ public class GitHubIssueService implements IssueService {
                 .toList();
     }
 
+<<<<<<< HEAD
     private IssueDto mapToDto(GHIssue issue) {
         Set<String> labels = issue.getLabels().stream()
                 .map(GHLabel::getName)
@@ -131,5 +133,10 @@ public class GitHubIssueService implements IssueService {
                 issue.getTitle(),
                 labels
         );
+=======
+    @Override
+    public List<GHIssueComment> listIssueComments(int issueNumber) throws IOException {
+        return repository.getIssue(issueNumber).getComments();
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     }
 }
