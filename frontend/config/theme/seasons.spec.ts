@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveActiveEventPack, resolveEventPackName } from './seasons'
+import { resolveActiveEventPack, resolveEventPackName } from './event-packs'
 
 describe('resolveActiveEventPack', () => {
   it('returns default pack when no window matches', () => {
