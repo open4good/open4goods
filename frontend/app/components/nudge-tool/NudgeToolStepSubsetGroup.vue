@@ -1,35 +1,5 @@
 <template>
   <div class="nudge-step-subset">
-    <div class="nudge-step-subset__header">
-      <div class="nudge-step-subset__title-block">
-        <v-avatar
-          class="nudge-step-subset__group-avatar"
-          size="44"
-          color="rgba(var(--v-theme-surface-primary-080), 0.9)"
-        >
-          <v-icon :icon="groupIcon" size="24" />
-        </v-avatar>
-        <div class="nudge-step-subset__titles">
-          <p class="nudge-step-subset__title">{{ group.title }}</p>
-          <p v-if="group.description" class="nudge-step-subset__description">
-            {{ group.description }}
-          </p>
-        </div>
-      </div>
-
-      <v-chip
-        v-if="categoryLabel"
-        class="nudge-step-subset__category-chip"
-        color="primary"
-        variant="tonal"
-        size="small"
-        @click="emit('return-to-category')"
-      >
-        <v-icon start :icon="categoryIcon || 'mdi-tag-outline'" />
-        {{ categoryLabel }}
-      </v-chip>
-    </div>
-
     <v-row dense>
       <v-col v-for="subset in subsets" :key="subset.id" cols="12" sm="6">
         <v-tooltip
@@ -76,7 +46,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import type {
   NudgeToolSubsetGroupDto,
   VerticalSubsetDto,
@@ -101,10 +70,6 @@ const isSelected = (subsetId?: string | null) =>
 
 const getSubsetIcon = (subset: VerticalSubsetDto) =>
   subset.mdiIcon ?? 'mdi-sprout'
-
-const groupIcon = computed(
-  () => props.group.mdiIcon ?? 'mdi-format-list-bulleted'
-)
 
 const toggle = (subsetId: string) => {
   const next = new Set(props.modelValue)
