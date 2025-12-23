@@ -6,8 +6,8 @@ import {
   seasonalThemeAssets,
   themeAssets,
   type ThemeAssetKey,
-  type EventPackName,
 } from '~~/config/theme/assets'
+import { type EventPackName } from '~~/config/theme/event-packs'
 import { useSeasonalEventPack } from './useSeasonalEventPack'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
