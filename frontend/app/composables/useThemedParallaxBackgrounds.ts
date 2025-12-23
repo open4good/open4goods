@@ -4,14 +4,17 @@ import { useTheme } from 'vuetify'
 import {
   PARALLAX_SECTION_KEYS,
   THEME_ASSETS_FALLBACK,
-  DEFAULT_EVENT_PACK,
   eventParallaxPacks,
   type ParallaxPackConfig,
   type ParallaxLayerConfig,
   type ParallaxLayerSource,
   type ParallaxSectionKey,
-  type EventPackName,
 } from '~~/config/theme/assets'
+import {
+  DEFAULT_EVENT_PACK,
+  EVENT_PACK_I18N_BASE_KEY,
+  type EventPackName,
+} from '~~/config/theme/event-packs'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 import { resolveThemedAssetUrl } from './useThemedAsset'
 
@@ -81,7 +84,7 @@ export const useThemedParallaxBackgrounds = (
   )
 
   const resolveI18nPack = (eventPack: EventPackName): ParallaxPackConfig => {
-    const i18nKey = `home.events.${eventPack}.parallax`
+    const i18nKey = `${EVENT_PACK_I18N_BASE_KEY}.${eventPack}.parallax`
     const entries = tm(i18nKey) as Record<string, string> | undefined
 
     if (!entries) {

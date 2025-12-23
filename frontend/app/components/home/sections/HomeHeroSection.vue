@@ -10,7 +10,10 @@ import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
-import { DEFAULT_EVENT_PACK } from '~~/config/theme/assets'
+import {
+  DEFAULT_EVENT_PACK,
+  EVENT_PACK_I18N_BASE_KEY,
+} from '~~/config/theme/event-packs'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
 
 type HeroHelperSegment = {
@@ -228,8 +231,8 @@ const heroPartnersLinkText = computed(() => {
     return normalized && normalized !== key ? normalized : ''
   }
 
-  const packKey = `home.events.${activeEventPack.value}.hero.search.partnerLinkLabel`
-  const defaultKey = `home.events.${DEFAULT_EVENT_PACK}.hero.search.partnerLinkLabel`
+  const packKey = `${EVENT_PACK_I18N_BASE_KEY}.${activeEventPack.value}.hero.search.partnerLinkLabel`
+  const defaultKey = `${EVENT_PACK_I18N_BASE_KEY}.${DEFAULT_EVENT_PACK}.hero.search.partnerLinkLabel`
 
   const translated =
     translateKey(packKey) ||

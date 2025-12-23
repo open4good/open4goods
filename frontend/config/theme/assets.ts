@@ -1,4 +1,21 @@
+/**
+ * Configuration des assets thématiques (light/dark)
+ *
+ * Ce fichier définit :
+ * - Les assets de base par thème (logo, favicon, etc.)
+ * - Les assets parallax par section et par pack
+ * - Les surcharges saisonnières d'assets
+ *
+ * Pour la configuration des packs événementiels (dates, etc.),
+ * voir `event-packs.ts`
+ */
+
 import type { ThemeName } from '~~/shared/constants/theme'
+import type { EventPackName } from './event-packs'
+
+// ----------------------------------------------------------------------------
+// Types pour les assets thématiques
+// ----------------------------------------------------------------------------
 
 export const THEME_ASSETS_FALLBACK: ThemeName = 'light'
 
@@ -11,8 +28,11 @@ export const THEME_ASSET_KEYS = [
 ] as const
 
 export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]
-
 export type ThemeAssetConfig = Partial<Record<ThemeAssetKey, string>>
+
+// ----------------------------------------------------------------------------
+// Types pour les sections parallax
+// ----------------------------------------------------------------------------
 
 export const PARALLAX_SECTION_KEYS = [
   'essentials',
@@ -22,28 +42,7 @@ export const PARALLAX_SECTION_KEYS = [
   'cta',
 ] as const
 
-export const EVENT_PACK_NAMES = [
-  'default',
-  'sdg',
-  'bastille-day',
-  'hold',
-] as const
-
 export type ParallaxSectionKey = (typeof PARALLAX_SECTION_KEYS)[number]
-export type EventPackName = (typeof EVENT_PACK_NAMES)[number]
-
-/** @deprecated Use {@link EVENT_PACK_NAMES} instead. */
-export const PARALLAX_PACK_NAMES = EVENT_PACK_NAMES
-/** @deprecated Use {@link EventPackName} instead. */
-export type ParallaxPackName = EventPackName
-
-export type SeasonalThemeAssets = Partial<
-  Record<EventPackName, Partial<Record<ThemeName | 'common', ThemeAssetConfig>>>
->
-
-export const DEFAULT_EVENT_PACK: EventPackName = 'default'
-/** @deprecated Use {@link DEFAULT_EVENT_PACK} instead. */
-export const DEFAULT_PARALLAX_PACK: ParallaxPackName = DEFAULT_EVENT_PACK
 
 export type ParallaxLayerConfig = {
   src: string
@@ -56,6 +55,10 @@ export type ParallaxLayerSource = string | ParallaxLayerConfig
 export type ParallaxPackConfig = Partial<
   Record<ParallaxSectionKey, ParallaxLayerSource[]>
 >
+
+// ----------------------------------------------------------------------------
+// Assets de base par thème
+// ----------------------------------------------------------------------------
 
 export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   light: {
@@ -80,6 +83,14 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     illustration: 'placeholders/asset-missing.svg',
   },
 }
+
+// ----------------------------------------------------------------------------
+// Surcharges d'assets par pack événementiel
+// ----------------------------------------------------------------------------
+
+export type SeasonalThemeAssets = Partial<
+  Record<EventPackName, Partial<Record<ThemeName | 'common', ThemeAssetConfig>>>
+>
 
 export const seasonalThemeAssets: SeasonalThemeAssets = {
   'bastille-day': {
@@ -115,6 +126,10 @@ export const seasonalThemeAssets: SeasonalThemeAssets = {
     },
   },
 }
+
+// ----------------------------------------------------------------------------
+// Configuration des fonds parallax par pack
+// ----------------------------------------------------------------------------
 
 export const eventParallaxPacks: Record<
   ThemeName | 'common',
@@ -205,5 +220,3 @@ export const eventParallaxPacks: Record<
     },
   },
 }
-/** @deprecated Use {@link eventParallaxPacks} instead. */
-export const parallaxPacks = eventParallaxPacks

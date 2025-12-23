@@ -3,14 +3,14 @@ import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, unknown> = {
-  'home.events.default.hero.search.label': 'Search for a product',
-  'home.events.default.hero.search.placeholder': 'Search a product',
-  'home.events.default.hero.search.ariaLabel': 'Search input',
-  'home.events.default.hero.search.cta': 'NUDGER',
-  'home.events.default.hero.search.helper': '50M references',
-  'home.events.default.hero.search.helpersTitle':
+  'packs.default.hero.search.label': 'Search for a product',
+  'packs.default.hero.search.placeholder': 'Search a product',
+  'packs.default.hero.search.ariaLabel': 'Search input',
+  'packs.default.hero.search.cta': 'NUDGER',
+  'packs.default.hero.search.helper': '50M references',
+  'packs.default.hero.search.helpersTitle':
     'Shop with intention. Compare for impact.',
-  'home.events.default.hero.search.helpers': [
+  'packs.default.hero.search.helpers': [
     {
       icon: '🌿',
       label: 'A unique eco assessment',
@@ -35,19 +35,19 @@ const messages: Record<string, unknown> = {
       segments: [{ text: '50M references' }],
     },
   ],
-  'home.events.default.hero.search.partnerLinkLabel':
+  'packs.default.hero.search.partnerLinkLabel':
     '{formattedCount} partner | {formattedCount} partners',
-  'home.events.default.hero.search.partnerLinkFallback': 'our partners',
-  'home.events.default.hero.eyebrow': 'Responsible shopping',
-  'home.events.default.hero.title': 'Responsible choices are not a luxury',
-  'home.events.default.hero.subtitles': [
+  'packs.default.hero.search.partnerLinkFallback': 'our partners',
+  'packs.default.hero.eyebrow': 'Responsible shopping',
+  'packs.default.hero.title': 'Responsible choices are not a luxury',
+  'packs.default.hero.subtitles': [
     'Save time, stay true to your values.',
     'Shop smarter without compromise.',
   ],
-  'home.events.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
-  'home.events.default.hero.imageAlt': 'Hero illustration',
-  'home.events.default.hero.iconAlt': 'Hero icon',
-  'home.events.default.hero.context.ariaLabel':
+  'packs.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
+  'packs.default.hero.imageAlt': 'Hero illustration',
+  'packs.default.hero.iconAlt': 'Hero icon',
+  'packs.default.hero.context.ariaLabel':
     'Hero context card summarising Nudger’s promise',
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',

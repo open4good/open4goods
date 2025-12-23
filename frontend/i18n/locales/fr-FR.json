@@ -1,4 +1,129 @@
 {
+  "packs": {
+    "default": {
+      "hero": {
+        "eyebrow": "Comparateur responsable",
+        "title": "Acheter mieux. Sans dépenser plus.",
+        "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
+        "subtitles": [
+          "Gagne du temps. Choisis librement.",
+          "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
+          "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
+        ],
+        "iconAlt": "Icône du lanceur de l'application Nudger",
+        "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d'impact.",
+        "search": {
+          "label": "Une marque ou un modèle précis en tête ?",
+          "placeholder": "Recherchez un produit ou une catégorie",
+          "ariaLabel": "Rechercher un produit responsable",
+          "cta": "NUDGER",
+          "helper": "Comparateur indépendant et open data.",
+          "helpersTitle": "Offre avec intention. Compare avec impact.",
+          "helpers": [
+            {
+              "icon": "🌿",
+              "label": "Une évaluation écologique et environnementale unique",
+              "segments": [
+                { "text": "Une évaluation écologique", "to": "/impact-score" },
+                { "text": " et environnementale unique" }
+              ]
+            },
+            {
+              "icon": "🛡️",
+              "label": "100% indépendant, logiciel libre et données ouvertes",
+              "segments": [
+                { "text": "100% indépendant, " },
+                { "text": "logiciel libre", "to": "/opensource" },
+                { "text": " et " },
+                { "text": "données ouvertes", "to": "/opendata" }
+              ]
+            },
+            {
+              "icon": "🏷️",
+              "label": "Sans se faire avoir sur les prix",
+              "segments": [
+                { "text": "Sans se faire avoir sur les prix avec" },
+                { "text": "{partnersLink}", "to": "/partenaires" }
+              ]
+            }
+          ],
+          "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
+          "partnerLinkFallback": "nos partenaires"
+        },
+        "context": {
+          "cornerLabel": "Résumé impact",
+          "cornerTooltip": "Les points forts de la méthodologie Nudger",
+          "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
+        }
+      }
+    },
+    "hold": {
+      "hero": {
+        "titleSubtitle": ["Pack hérité pour les tests"],
+        "subtitles": [
+          "Texte placeholder pour le pack de rétention.",
+          "Ajoute une déclinaison événementielle ou reste sur le défaut."
+        ]
+      }
+    },
+    "sdg": {
+      "hero": {
+        "titleSubtitle": [
+          "Des achats du quotidien alignés sur les Objectifs de développement durable."
+        ],
+        "subtitles": [
+          "Des choix du quotidien alignés sur les Objectifs de développement durable."
+        ]
+      }
+    },
+    "bastille-day": {
+      "hero": {
+        "eyebrow": "Spécial 14 juillet",
+        "title": "Célébrez des choix responsables le 14 juillet",
+        "titleSubtitle": [
+          "Un feu d'artifice de prix justes et d'impact transparent."
+        ],
+        "subtitles": [
+          "Achetez avec liberté, égalité, durabilité en tête.",
+          "Pendant que le ciel s'illumine, orientez vos achats vers des choix responsables."
+        ],
+        "iconAlt": "Feu d'artifice célébrant des achats responsables",
+        "imageAlt": "Illustration de feux d'artifice au-dessus des toits de la ville.",
+        "search": {
+          "label": "Chercher un produit prêt pour le 14 juillet",
+          "placeholder": "Trouvez un ventilateur, un frigo ou une idée cadeau",
+          "helpersTitle": "Réflexes rapides avant le feu d'artifice",
+          "helpers": [
+            {
+              "icon": "🎆",
+              "segments": [
+                { "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs." }
+              ]
+            },
+            {
+              "icon": "🥖",
+              "segments": [
+                { "text": "Local et efficace ? Filtrez d'abord par réparabilité." }
+              ]
+            },
+            {
+              "icon": "🎇",
+              "segments": [
+                { "text": "Alliez fête et économies avec des prix transparents." }
+              ]
+            }
+          ]
+        }
+      },
+      "parallax": {
+        "essentials": "parallax/parallax-background-bastille-essentials.svg",
+        "features": "parallax/parallax-background-bastille-features.svg",
+        "blog": "parallax/parallax-background-bastille-blog.svg",
+        "objections": "parallax/parallax-background-bastille-objections.svg",
+        "cta": "parallax/parallax-background-bastille-cta.svg"
+      }
+    }
+  },
   "blog": {
     "article": {
       "edit": "Modifier cet article",
@@ -35,157 +160,6 @@
     }
   },
   "home": {
-    "events": {
-      "default": {
-        "hero": {
-          "eyebrow": "Comparateur responsable",
-          "title": "Acheter mieux. Sans dépenser plus.",
-          "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
-          "subtitles": [
-            "Gagne du temps. Choisis librement.",
-            "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
-            "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
-          ],
-          "iconAlt": "Icône du lanceur de l'application Nudger",
-          "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
-          "search": {
-            "label": "Une marque ou un modèle précis en tête ?",
-            "placeholder": "Recherchez un produit ou une catégorie",
-            "ariaLabel": "Rechercher un produit responsable",
-            "cta": "NUDGER",
-            "helper": "Comparateur indépendant et open data.",
-            "helpersTitle": "Offre avec intention. Compare avec impact.",
-            "helpers": [
-              {
-                "icon": "🌿",
-                "label": "Une évaluation écologique et environnementale unique",
-                "segments": [
-                  {
-                    "text": "Une évaluation écologique",
-                    "to": "/impact-score"
-                  },
-                  {
-                    "text": " et environnementale unique"
-                  }
-                ]
-              },
-              {
-                "icon": "🛡️",
-                "label": "100% indépendant, logiciel libre et données ouvertes",
-                "segments": [
-                  {
-                    "text": "100% indépendant, "
-                  },
-                  {
-                    "text": "logiciel libre",
-                    "to": "/opensource"
-                  },
-                  {
-                    "text": " et "
-                  },
-                  {
-                    "text": "données ouvertes",
-                    "to": "/opendata"
-                  }
-                ]
-              },
-              {
-                "icon": "🏷️",
-                "label": "Sans se faire avoir sur les prix",
-                "segments": [
-                  {
-                    "text": "Sans se faire avoir sur les prix avec"
-                  },
-                  {
-                    "text": "{partnersLink}",
-                    "to": "/partenaires"
-                  }
-                ]
-              }
-            ],
-            "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
-            "partnerLinkFallback": "nos partenaires"
-          },
-          "context": {
-            "cornerLabel": "Résumé impact",
-            "cornerTooltip": "Les points forts de la méthodologie Nudger",
-            "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
-          }
-        }
-      },
-      "hold": {
-        "hero": {
-          "titleSubtitle": ["Pack hérité pour les tests"],
-          "subtitles": [
-            "Texte placeholder pour le pack de rétention.",
-            "Ajoute une déclinaison événementielle ou reste sur le défaut."
-          ]
-        }
-      },
-      "sdg": {
-        "hero": {
-          "titleSubtitle": [
-            "Des achats du quotidien alignés sur les Objectifs de développement durable."
-          ],
-          "subtitles": [
-            "Des choix du quotidien alignés sur les Objectifs de développement durable."
-          ]
-        }
-      },
-      "bastille-day": {
-        "hero": {
-          "eyebrow": "Spécial 14 juillet",
-          "title": "Célébrez des choix responsables le 14 juillet",
-          "titleSubtitle": [
-            "Un feu d'artifice de prix justes et d'impact transparent."
-          ],
-          "subtitles": [
-            "Achetez avec liberté, égalité, durabilité en tête.",
-            "Pendant que le ciel s'illumine, orientez vos achats vers des choix responsables."
-          ],
-          "iconAlt": "Feu d'artifice célébrant des achats responsables",
-          "imageAlt": "Illustration de feux d'artifice au-dessus des toits de la ville.",
-          "search": {
-            "label": "Chercher un produit prêt pour le 14 juillet",
-            "placeholder": "Trouvez un ventilateur, un frigo ou une idée cadeau",
-            "helpersTitle": "Réflexes rapides avant le feu d'artifice",
-            "helpers": [
-              {
-                "icon": "🎆",
-                "segments": [
-                  {
-                    "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs."
-                  }
-                ]
-              },
-              {
-                "icon": "🥖",
-                "segments": [
-                  {
-                    "text": "Local et efficace ? Filtrez d'abord par réparabilité."
-                  }
-                ]
-              },
-              {
-                "icon": "🎇",
-                "segments": [
-                  {
-                    "text": "Alliez fête et économies avec des prix transparents."
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        "parallax": {
-          "essentials": "parallax/parallax-background-bastille-essentials.svg",
-          "features": "parallax/parallax-background-bastille-features.svg",
-          "blog": "parallax/parallax-background-bastille-blog.svg",
-          "objections": "parallax/parallax-background-bastille-objections.svg",
-          "cta": "parallax/parallax-background-bastille-cta.svg"
-        }
-      }
-    },
     "seo": {
       "title": "Nudger – Consommer responsable n’est pas un luxe",
       "description": "Comparez l’impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
@@ -194,31 +168,12 @@
     "hero": {
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
-      "titleSubtitle": {
-        "default": ["Acheter mieux. Sans dépenser plus."],
-        "events": {
-          "hold": ["Des contenus hérités pour les tests."],
-          "sdg": [
-            "Des achats du quotidien alignés sur les Objectifs de développement durable."
-          ]
-        }
-      },
-      "subtitles": {
-        "default": [
-          "Gagne du temps. Choisis librement.",
-          "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
-          "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
-        ],
-        "events": {
-          "hold": [
-            "Texte placeholder pour le pack de rétention.",
-            "Reviens au défaut si aucune variante n’est définie."
-          ],
-          "sdg": [
-            "Des choix du quotidien alignés sur les Objectifs de développement durable."
-          ]
-        }
-      },
+      "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
+      "subtitles": [
+        "Gagne du temps. Choisis librement.",
+        "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
+        "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
+      ],
       "subtitle": "Gagne du temps. Choisis librement.",
       "iconAlt": "Icône du lanceur de l'application Nudger",
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
