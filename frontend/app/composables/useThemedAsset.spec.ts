@@ -57,6 +57,7 @@ describe('useThemedAsset utilities', () => {
     expect(resolved).toBe('/_nuxt/light-hold-hero.svg')
   })
 
+<<<<<<< HEAD
   it('falls back to theme assets if seasonal pack asset is missing', () => {
     // 'hold' pack doesn't have logo-new.png in this mock index (only light/logo-new.png exists)
     const resolved = resolveThemedAssetUrlFromIndex(
@@ -69,4 +70,7 @@ describe('useThemedAsset utilities', () => {
 
     expect(resolved).toBe('/_nuxt/light-logo-new.png')
   })
+=======
+
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 })

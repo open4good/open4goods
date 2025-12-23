@@ -9,7 +9,6 @@
  */
 
 import type { ThemeName } from '~~/shared/constants/theme'
-import type { EventPackName } from './event-packs'
 
 // ----------------------------------------------------------------------------
 // Types pour les assets thématiques

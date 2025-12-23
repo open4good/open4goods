@@ -1,9 +1,7 @@
 import { computed, toValue, type MaybeRef } from 'vue'
 
 import {
-  DEFAULT_EVENT_PACK,
   EVENT_PACK_I18N_BASE_KEY,
-  type EventPackName,
 } from '~~/config/theme/event-packs'
 
 type ResolveOptions = {

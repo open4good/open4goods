@@ -145,145 +145,177 @@ const productTitle = computed(
 const hasAttributes = computed(() => props.attributes.length > 0)
 </script>
 
-<style scoped lang="sass">
-.product-tile-card
-  height: 100%
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.6), rgba(var(--v-theme-surface-glass), 0.85))
-  display: flex
-  text-decoration: none
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+<style scoped lang="scss">
+.product-tile-card {
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-primary-080), 0.6),
+    rgba(var(--v-theme-surface-glass), 0.85)
+  );
+  display: flex;
+  text-decoration: none;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
 
-  &__wrapper
-    display: flex
-    flex-direction: column
-    gap: 0.75rem
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 
-  &__media
-    position: relative
-    border-radius: 0.75rem
-    overflow: hidden
-    background: rgb(var(--v-theme-surface-default))
+  &__media {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: rgb(var(--v-theme-surface-default));
+  }
 
-  &__image
-    min-height: 160px
+  &__image {
+    min-height: 160px;
 
-    :deep(img)
-      object-fit: contain
-      mix-blend-mode: multiply
-      background: #fff
+    :deep(img) {
+      object-fit: contain;
+      mix-blend-mode: multiply;
+      background: #fff;
+    }
+  }
 
-  &__compare
-    position: absolute
-    top: 0.5rem
-    right: 0.5rem
-    z-index: 2
+  &__compare {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+  }
 
-  &__score
-    position: absolute
-    left: 0.75rem
-    bottom: 0.75rem
-    display: flex
-    align-items: center
-    gap: 0.35rem
-    padding: 0.35rem 0.6rem
-    border-radius: 999px
-    background: rgba(var(--v-theme-surface-default), 0.9)
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08)
+  &__score {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(var(--v-theme-surface-default), 0.9);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
 
-  &__score-fallback
-    font-size: 0.75rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
+  &__score-fallback {
+    font-size: 0.75rem;
+    color: rgb(var(--v-theme-text-neutral-secondary));
+  }
 
-  &__content
-    display: flex
-    flex-direction: column
-    gap: 0.65rem
-    padding: 0 0.35rem 0.85rem
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0 0.35rem 0.85rem;
+  }
 
-  &__title
-    font-size: 1.05rem
-    line-height: 1.35
-    margin: 0
-    color: rgb(var(--v-theme-text-neutral-strong))
-    font-weight: 700
+  &__title {
+    font-size: 1.05rem;
+    line-height: 1.35;
+    margin: 0;
+    color: rgb(var(--v-theme-text-neutral-strong));
+    font-weight: 700;
+  }
 
-  &__attributes
-    display: flex
-    gap: 0.5rem
-    overflow-x: auto
-    padding-bottom: 0.25rem
+  &__attributes {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
 
-    &::-webkit-scrollbar
-      height: 4px
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
 
-    &::-webkit-scrollbar-thumb
-      background: rgba(var(--v-theme-primary), 0.35)
-      border-radius: 999px
+    &::-webkit-scrollbar-thumb {
+      background: rgba(var(--v-theme-primary), 0.35);
+      border-radius: 999px;
+    }
+  }
 
-  &__attribute
-    border-radius: 999px
-    text-transform: none
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-strong))
-    letter-spacing: 0.01em
+  &__attribute {
+    border-radius: 999px;
+    text-transform: none;
+    font-weight: 600;
+    color: rgb(var(--v-theme-text-neutral-strong));
+    letter-spacing: 0.01em;
+  }
 
-  &__pricing
-    display: flex
-    flex-wrap: wrap
-    gap: 0.6rem
+  &__pricing {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
 
-  &__price-badge
-    flex: 1 1 160px
-    border-radius: 0.75rem
-    padding: 0.6rem 0.75rem
-    background: rgba(var(--v-theme-surface-default), 0.85)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
-    min-width: 0
+  &__price-badge {
+    flex: 1 1 160px;
+    border-radius: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: rgba(var(--v-theme-surface-default), 0.85);
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5);
+    min-width: 0;
 
-    &--new
-      border-color: rgba(var(--v-theme-primary), 0.55)
-      background: rgba(var(--v-theme-primary), 0.08)
-      color: rgb(var(--v-theme-primary))
+    &--new {
+      border-color: rgba(var(--v-theme-primary), 0.55);
+      background: rgba(var(--v-theme-primary), 0.08);
+      color: rgb(var(--v-theme-primary));
+    }
 
-    &--occasion
-      border-color: rgba(var(--v-theme-accent-supporting), 0.55)
-      background: rgba(var(--v-theme-accent-supporting), 0.08)
-      color: rgb(var(--v-theme-accent-supporting))
+    &--occasion {
+      border-color: rgba(var(--v-theme-accent-supporting), 0.55);
+      background: rgba(var(--v-theme-accent-supporting), 0.08);
+      color: rgb(var(--v-theme-accent-supporting));
+    }
 
-    &--default
-      color: rgb(var(--v-theme-text-neutral-strong))
+    &--default {
+      color: rgb(var(--v-theme-text-neutral-strong));
+    }
+  }
 
-  &__price-label
-    font-size: 0.75rem
-    letter-spacing: 0.05em
-    text-transform: uppercase
-    font-weight: 700
-    margin-bottom: 0.1rem
+  &__price-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+  }
 
-  &__price
-    font-size: 1.1rem
-    font-weight: 800
-    line-height: 1.2
+  &__price {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
 
-  &__meta
-    display: flex
-    align-items: center
-    gap: 0.75rem
-    flex-wrap: wrap
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    font-size: 0.9rem
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    color: rgb(var(--v-theme-text-neutral-secondary));
+    font-size: 0.9rem;
+  }
 
-  &__offers
-    display: inline-flex
-    align-items: center
+  &__offers {
+    display: inline-flex;
+    align-items: center;
+  }
 
-  @media (min-width: 960px)
-    &__wrapper
-      flex-direction: row
-      gap: 1rem
+  @media (min-width: 960px) {
+    &__wrapper {
+      flex-direction: row;
+      gap: 1rem;
+    }
 
-    &__media
-      flex: 0 0 220px
+    &__media {
+      flex: 0 0 220px;
+    }
 
-    &__content
-      padding: 0.5rem 0.5rem 0.85rem
+    &__content {
+      padding: 0.5rem 0.5rem 0.85rem;
+    }
+  }
+}
+</style>

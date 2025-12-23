@@ -15,18 +15,16 @@
       <div
         class="nudge-wizard__corner-content"
         :class="{
-          'nudge-wizard__corner-content--clickable': shouldShowMatches,
           'nudge-wizard__corner-content--expanded': isContentMode,
         }"
-        @click="handleCornerClick"
       >
         <NudgeToolWelcomeIcon v-if="activeStepKey === 'category'" />
         <div
           v-else-if="categorySummary"
-          class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-2 pb-2"
+          class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-1 pb-1"
         >
           <div
-            class="nudge-wizard__corner-visual d-flex align-center justify-center mb-1"
+            class="nudge-wizard__corner-visual d-flex align-center justify-center"
           >
             <div
               class="nudge-wizard__corner-icon"
@@ -45,11 +43,8 @@
           <div
             class="nudge-wizard__corner-text text-white text-center d-flex flex-column align-center"
           >
-            <div class="nudge-wizard__corner-count font-weight-black lh-1 mb-1">
+            <div class="nudge-wizard__corner-count font-weight-black lh-1">
               {{ animatedMatches }}
-            </div>
-            <div class="text-caption font-weight-bold lh-1 opacity-90">
-              {{ categorySummary.label }}
             </div>
           </div>
         </div>
@@ -169,7 +164,6 @@ import {
   RoundedCornerCard,
 } from '#components'
 import type {
-  CategoryHashState,
   Filter,
   FilterRequestDto,
   NudgeToolSubsetGroupDto,
@@ -180,7 +174,7 @@ import type {
   VerticalConfigDto,
   VerticalSubsetDto,
 } from '~/shared/api-client'
-import { buildCategoryHash } from '~/utils/_category-filter-state'
+
 import {
   buildConditionFilter,
   buildNudgeFilterRequest,
@@ -202,12 +196,8 @@ const accentCornerOffsets: Record<CornerSize, string> = {
   xl: '120px',
 }
 
-const emit = defineEmits<{
-  (e: 'navigate', payload: { hash: string; categorySlug: string }): void
-}>()
-
 const { t } = useI18n()
-const router = useRouter()
+
 const { fetchCategories } = useCategories()
 
 const categories = useState<VerticalCategoryDto[]>('nudge-categories', () => [])
@@ -299,15 +289,6 @@ const filterRequest = computed<FilterRequestDto>(() => {
     subsetGroups
   )
 })
-
-const hashState = computed<CategoryHashState>(() => ({
-  filters:
-    filterRequest.value.filters?.length ||
-    filterRequest.value.filterGroups?.length
-      ? filterRequest.value
-      : undefined,
-  activeSubsets: activeSubsetIds.value,
-}))
 
 type WizardStep = {
   key: string
@@ -563,28 +544,6 @@ const hydrateCategories = async () => {
   categories.value = result
 }
 
-const navigateToCategoryPage = () => {
-  if (!selectedCategory.value) {
-    return
-  }
-
-  const slug =
-    selectedCategory.value.verticalHomeUrl?.replace(/^\//u, '') ??
-    selectedCategory.value.id ??
-    ''
-  const hash = buildCategoryHash(hashState.value)
-
-  emit('navigate', { hash, categorySlug: slug })
-
-  void router.push({ path: `/${slug}`, hash })
-}
-
-const handleCornerClick = () => {
-  if (shouldShowMatches.value) {
-    navigateToCategoryPage()
-  }
-}
-
 const hasPreviousStep = computed(() => {
   const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   return index > 0
@@ -632,10 +591,6 @@ const handleProgressClick = (stepKey: string) => {
 
   activeStepKey.value = stepKey
 }
-
-const shouldShowMatches = computed(
-  () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
-)
 
 const isCategoryStep = computed(() => activeStepKey.value === 'category')
 
@@ -818,10 +773,10 @@ const footerOffsetStyle = computed(() => ({
   paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
 }))
 
-const cornerIconScaleFactor = 1.5
-const baseCornerIconSize = 32
-const contentCornerIconSize = 38
-const cornerIconWrapperSize = 46
+const cornerIconScaleFactor = 1.3
+const baseCornerIconSize = 26
+const contentCornerIconSize = 30
+const cornerIconWrapperSize = 40
 
 const cornerIconSize = computed(() => {
   if (shouldEnlargeCornerIcon.value) {
@@ -869,21 +824,13 @@ const cornerIconDimensions = computed(() => {
       transform 300ms ease,
       opacity 260ms ease;
 
-    &--clickable {
-      cursor: pointer;
-
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-
     &--expanded {
       transform: translateY(2px) scale(1.04);
     }
   }
 
   &__corner-summary {
-    gap: 10px;
+    gap: 2px;
   }
 
   &__corner-visual {
@@ -896,16 +843,16 @@ const cornerIconDimensions = computed(() => {
   }
 
   &__corner-icon {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     display: grid;
     place-items: center;
-    border-radius: 14px;
-    background: rgba(var(--v-theme-hero-gradient-mid), 0.22);
-    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4);
+    /* Removed background and border as per new design */
+    /* background: rgba(var(--v-theme-hero-gradient-mid), 0.22); */
+    /* box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4); */
 
     &--enlarged {
-      border-radius: 20px;
+      /* border-radius: 20px; */
     }
   }
 
@@ -914,7 +861,7 @@ const cornerIconDimensions = computed(() => {
   }
 
   &__corner-count {
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
     line-height: 1;
     text-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   }
