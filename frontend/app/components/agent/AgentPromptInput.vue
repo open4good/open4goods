@@ -4,22 +4,47 @@
       <v-icon icon="mdi-creation" class="mr-2" color="primary"></v-icon>
       {{ templateName }}
     </v-card-title>
-    <v-card-text>
-      <v-alert
-        type="info"
-        variant="tonal"
-        class="mb-4"
-        closable
-        icon="mdi-information"
-      >
-        {{ $t('agents.promptInput.description') }}
-      </v-alert>
+  <v-card-text>
+    <v-alert
+      type="info"
+      variant="tonal"
+      class="mb-4"
+      closable
+      icon="mdi-information"
+    >
+      {{ $t('agents.promptInput.description') }}
+    </v-alert>
 
-      <v-textarea
-        v-model="prompt"
-        :label="$t('agents.promptInput.label')"
-        :placeholder="$t('agents.promptInput.placeholder')"
-        rows="6"
+    <v-select
+      v-if="promptTemplates.length > 0"
+      v-model="selectedPromptTemplateId"
+      :items="promptTemplates"
+      item-title="title"
+      item-value="id"
+      :label="$t('agents.promptInput.templateLabel')"
+      variant="outlined"
+      density="comfortable"
+      class="mb-4"
+      :rules="[v => !!v || $t('agents.promptInput.templateRequired')]"
+    />
+
+    <v-textarea
+      v-if="selectedPromptTemplate"
+      v-model="promptTemplateContent"
+      :label="$t('agents.promptInput.templateContent')"
+      rows="4"
+      auto-grow
+      variant="outlined"
+      :readonly="!allowTemplateEditing"
+      :disabled="!allowTemplateEditing"
+      class="mb-6"
+    />
+
+    <v-textarea
+      v-model="prompt"
+      :label="$t('agents.promptInput.label')"
+      :placeholder="$t('agents.promptInput.placeholder')"
+      rows="6"
         auto-grow
         variant="outlined"
         :rules="[v => !!v || $t('agents.promptInput.required')]"
@@ -110,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineAsyncComponent } from 'vue'
+import { ref, computed, defineAsyncComponent, watch } from 'vue'
 import type { AgentAttributeDto } from '~/shared/api-client'
 import AgentAttributeRenderer from './AgentAttributeRenderer.vue'
 
@@ -120,6 +145,9 @@ const VueHcaptcha = defineAsyncComponent(
 
 const props = defineProps<{
   templateName: string
+  promptTemplates: { id: string; title: string; content: string }[]
+  allowTemplateEditing: boolean
+  selectedPromptTemplateId?: string
   attributes?: AgentAttributeDto[]
   canToggleVisibility?: boolean
   defaultPublic?: boolean
@@ -132,6 +160,7 @@ const emit = defineEmits<{
     e: 'submit',
     payload: {
       prompt: string
+      promptVariantId: string
       isPrivate: boolean
       attributeValues: Record<string, unknown>
       captchaToken?: string
@@ -142,6 +171,44 @@ const emit = defineEmits<{
 
 const runtimeConfig = useRuntimeConfig()
 const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
+
+const promptTemplates = computed(() => props.promptTemplates ?? [])
+const selectedPromptTemplateId = ref(
+  props.selectedPromptTemplateId || promptTemplates.value[0]?.id || ''
+)
+const selectedPromptTemplate = computed(() =>
+  promptTemplates.value.find(tpl => tpl.id === selectedPromptTemplateId.value)
+)
+const promptTemplateContent = ref(selectedPromptTemplate.value?.content ?? '')
+
+watch(
+  () => props.selectedPromptTemplateId,
+  newValue => {
+    if (newValue) {
+      selectedPromptTemplateId.value = newValue
+    }
+  }
+)
+
+watch(
+  selectedPromptTemplate,
+  tpl => {
+    if (tpl) {
+      promptTemplateContent.value = tpl.content
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  promptTemplates,
+  newTemplates => {
+    if (newTemplates.length > 0 && !selectedPromptTemplateId.value) {
+      selectedPromptTemplateId.value = newTemplates[0].id
+    }
+  },
+  { immediate: true }
+)
 
 const prompt = ref('')
 const isPrivate = ref(props.defaultPublic === false)
@@ -158,14 +225,16 @@ const onCaptchaExpired = () => {
 
 const isValid = computed(() => {
   const hasPrompt = !!prompt.value.trim()
+  const hasTemplate = !!selectedPromptTemplateId.value
   const hasCaptcha = siteKey.value ? !!captchaToken.value : true
-  return hasPrompt && hasCaptcha
+  return hasPrompt && hasTemplate && hasCaptcha
 })
 
 function submit() {
   if (!isValid.value) return
   emit('submit', {
     prompt: prompt.value,
+    promptVariantId: selectedPromptTemplateId.value,
     isPrivate: isPrivate.value,
     attributeValues: attributeValues.value,
     captchaToken: captchaToken.value || undefined,

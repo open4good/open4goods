@@ -10,10 +10,11 @@ public record AgentTemplateDto(
         @Schema(description = "Localized name of the agent") String name,
         @Schema(description = "Localized description") String description,
         @Schema(description = "Icon identifier (MDI)") String icon,
-        @Schema(description = "Prompt template text") String promptTemplate,
+        @Schema(description = "Available prompt templates") List<PromptTemplateDto> promptTemplates,
         @Schema(description = "Associated tags") List<String> tags,
         @Schema(description = "Allowed roles to access this agent") List<String> allowedRoles,
         @Schema(description = "Whether the prompt history is public") boolean publicPromptHistory,
+        @Schema(description = "Whether user can edit the selected prompt template") boolean allowTemplateEditing,
         @Schema(description = "Mailto template configuration") MailTemplateDto mailTemplate,
         @Schema(description = "Custom attributes for the agent") List<AgentAttributeDto> attributes
 ) {
@@ -30,5 +31,12 @@ public record AgentTemplateDto(
             String type,
             String label,
             List<String> options
+    ) {}
+
+    @Schema(description = "Prompt template option")
+    public record PromptTemplateDto(
+            @Schema(description = "Unique identifier of the prompt template") String id,
+            @Schema(description = "Localized title of the template") String title,
+            @Schema(description = "Prompt content in markdown/inline format") String content
     ) {}
 }

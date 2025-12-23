@@ -3,6 +3,7 @@ import type {
   AgentRequestDto,
   AgentRequestResponseDto,
   AgentActivityDto,
+  AgentIssueDto,
 } from '~~/shared/api-client/services/agents.services'
 
 export const useAgent = () => {
@@ -40,10 +41,20 @@ export const useAgent = () => {
     })
   }
 
+  async function getIssue(
+    issueId: string,
+    domainLanguage?: string
+  ): Promise<AgentIssueDto> {
+    return await $fetch<AgentIssueDto>(`/api/agents/${issueId}`, {
+      params: { domainLanguage },
+    })
+  }
+
   return {
     listTemplates,
     submitRequest,
     listActivity,
     getMailto,
+    getIssue,
   }
 }

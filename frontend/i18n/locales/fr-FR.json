@@ -2805,6 +2805,9 @@
     },
     "promptInput": {
       "description": "Décrivez votre demande ci-dessous. Nos agents IA vont la traiter et créer un ticket GitHub.",
+      "templateLabel": "Modèle de prompt",
+      "templateRequired": "Veuillez choisir un modèle de prompt",
+      "templateContent": "Détail du modèle",
       "label": "Votre demande",
       "placeholder": "ex: Je voudrais une fonctionnalité pour filtrer les produits par...",
       "required": "La demande ne peut pas être vide",
@@ -2825,7 +2828,12 @@
       "title": "Activité de la communauté",
       "hidden": "Contenu de demande privée masqué",
       "private": "Privé",
-      "empty": "Aucune activité récente. Soyez le premier à contribuer !"
+      "empty": "Aucune activité récente. Soyez le premier à contribuer !",
+      "viewDiscussion": "Voir la discussion"
+    },
+    "discussion": {
+      "title": "Discussion",
+      "empty": "Aucun commentaire pour le moment."
     },
     "meta": {
       "title": "Espace Agents IA - Nudger",

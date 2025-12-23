@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
+import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
@@ -110,5 +111,10 @@ public class GitHubIssueService implements IssueService {
                     return names.containsAll(allLabels);
                 })
                 .toList();
+    }
+
+    @Override
+    public List<GHIssueComment> listIssueComments(int issueNumber) throws IOException {
+        return repository.getIssue(issueNumber).getComments();
     }
 }

@@ -63,6 +63,27 @@
   ],
   "properties": [
     {
+      "name": "front.agent.agents[].prompt-templates[].id",
+      "type": "java.lang.String",
+      "description": "Identifier of the prompt template option for an agent"
+    },
+    {
+      "name": "front.agent.agents[].prompt-templates[].title",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized title for the prompt template"
+    },
+    {
+      "name": "front.agent.agents[].prompt-templates[].content",
+      "type": "java.lang.String",
+      "description": "Markdown/inline content for the prompt template"
+    },
+    {
+      "name": "front.agent.agents[].allow-template-editing",
+      "type": "java.lang.Boolean",
+      "description": "Whether users may edit the selected prompt template in the UI",
+      "defaultValue": false
+    },
+    {
       "name": "front.resource-root-path",
       "type": "java.lang.String",
       "description": "Base URL used by the frontend to fetch generated assets (images, documents, ...)."

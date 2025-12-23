@@ -26,13 +26,14 @@ public class AgentProperties {
         private Map<String, String> name;
         private Map<String, String> description;
         private String icon;
-        private String promptTemplate;
+        private List<PromptTemplateConfig> promptTemplates;
         private List<String> tags;
         private List<String> allowedRoles;
         private boolean publicPromptHistory;
         private MailTemplateConfig mailTemplate;
         private String previewLabelKey;
         private List<AgentAttribute> attributes;
+        private boolean allowTemplateEditing;
 
         public String getId() {
             return id;
@@ -67,11 +68,28 @@ public class AgentProperties {
         }
 
         public String getPromptTemplate() {
-            return promptTemplate;
+            return promptTemplates == null || promptTemplates.isEmpty() ? null : promptTemplates.getFirst().getContent();
         }
 
+        /**
+         * Deprecated legacy setter to preserve backward compatibility with existing configuration.
+         * When used, it seeds a single default prompt template entry.
+         */
         public void setPromptTemplate(String promptTemplate) {
-            this.promptTemplate = promptTemplate;
+            if (promptTemplate != null) {
+                PromptTemplateConfig template = new PromptTemplateConfig();
+                template.setId("default");
+                template.setContent(promptTemplate);
+                this.promptTemplates = List.of(template);
+            }
+        }
+
+        public List<PromptTemplateConfig> getPromptTemplates() {
+            return promptTemplates;
+        }
+
+        public void setPromptTemplates(List<PromptTemplateConfig> promptTemplates) {
+            this.promptTemplates = promptTemplates;
         }
 
         public List<String> getTags() {
@@ -120,6 +138,44 @@ public class AgentProperties {
 
         public void setAttributes(List<AgentAttribute> attributes) {
             this.attributes = attributes;
+        }
+
+        public boolean isAllowTemplateEditing() {
+            return allowTemplateEditing;
+        }
+
+        public void setAllowTemplateEditing(boolean allowTemplateEditing) {
+            this.allowTemplateEditing = allowTemplateEditing;
+        }
+    }
+
+    public static class PromptTemplateConfig {
+        private String id;
+        private Map<String, String> title;
+        private String content;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public Map<String, String> getTitle() {
+            return title;
+        }
+
+        public void setTitle(Map<String, String> title) {
+            this.title = title;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
         }
     }
 

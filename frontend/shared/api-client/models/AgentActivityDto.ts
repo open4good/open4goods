@@ -55,6 +55,12 @@ export interface AgentActivityDto {
      * @memberof AgentActivityDto
      */
     promptSummary?: string;
+    /**
+     * Number of discussion comments
+     * @type {number}
+     * @memberof AgentActivityDto
+     */
+    commentsCount?: number;
 }
 
 
@@ -100,6 +106,7 @@ export function AgentActivityDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'status': json['status'] == null ? undefined : json['status'],
         'promptVisibility': json['promptVisibility'] == null ? undefined : json['promptVisibility'],
         'promptSummary': json['promptSummary'] == null ? undefined : json['promptSummary'],
+        'commentsCount': json['commentsCount'] == null ? undefined : json['commentsCount'],
     };
 }
 
@@ -120,6 +127,6 @@ export function AgentActivityDtoToJSONTyped(value?: AgentActivityDto | null, ign
         'status': value['status'],
         'promptVisibility': value['promptVisibility'],
         'promptSummary': value['promptSummary'],
+        'commentsCount': value['commentsCount'],
     };
 }
-

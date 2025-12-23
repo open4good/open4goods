@@ -2800,6 +2800,9 @@
     },
     "promptInput": {
       "description": "Describe your feature request or question below. Our AI agents will process it and create a GitHub issue for tracking.",
+      "templateLabel": "Prompt template",
+      "templateRequired": "Please select a prompt template",
+      "templateContent": "Template details",
       "label": "Your Request",
       "placeholder": "e.g., I want a feature to filter products by ...",
       "required": "Request cannot be empty",
@@ -2820,7 +2823,12 @@
       "title": "Community Activity",
       "hidden": "Private Request content hidden",
       "private": "Private",
-      "empty": "No recent activity found. Be the first to submit!"
+      "empty": "No recent activity found. Be the first to submit!",
+      "viewDiscussion": "View discussion"
+    },
+    "discussion": {
+      "title": "Discussion",
+      "empty": "No comments yet."
     },
     "meta": {
       "title": "AI Agent Workspace - Nudger",
