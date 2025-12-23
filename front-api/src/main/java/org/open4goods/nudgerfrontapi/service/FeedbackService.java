@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.kohsuke.github.GHIssue;
+import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueType;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionRequestDto;
@@ -66,14 +66,14 @@ public class FeedbackService {
 
         Set<String> labels = new HashSet<>(DEFAULT_LABELS);
         // Ensure the type specific label is always present so triaging stays reliable.
-        GHIssue created = switch (request.type()) {
+        IssueDto created = switch (request.type()) {
             case BUG -> issueService.createBug(request.title(), request.message(), request.url(), request.author(), labels);
             case IDEA -> issueService.createIdea(request.title(), request.message(), request.url(), request.author(), labels);
         };
 
-        LOGGER.info("Created GitHub issue #{} of type {}", created.getNumber(), request.type());
-        return new FeedbackSubmissionResult(created.getNumber(), created.getHtmlUrl() == null ? null
-                : created.getHtmlUrl().toString());
+        LOGGER.info("Created GitHub issue #{} of type {}", created.number(), request.type());
+        return new FeedbackSubmissionResult(created.number(), created.htmlUrl() == null ? null
+                : created.htmlUrl());
     }
 
     /**
@@ -84,7 +84,7 @@ public class FeedbackService {
      * @throws IOException when GitHub communication fails
      */
     public List<FeedbackIssueDto> listIssues(FeedbackIssueType type) throws IOException {
-        List<GHIssue> issues = new ArrayList<>();
+        List<IssueDto> issues = new ArrayList<>();
         if (type == null) {
             issues.addAll(issueService.listIssues());
         } else {
@@ -99,6 +99,8 @@ public class FeedbackService {
                 .sorted(Comparator.comparingInt(FeedbackIssueDto::votes).reversed())
                 .toList();
     }
+
+    // ... (vote, remainingVotes, canVote methods unchanged) ...
 
     /**
      * Cast a vote on the requested GitHub issue and expose the new totals.
@@ -138,11 +140,11 @@ public class FeedbackService {
      * @param issue GitHub issue fetched through the REST API
      * @return immutable DTO exposing the public information about the issue
      */
-    private FeedbackIssueDto mapIssue(GHIssue issue) {
-        String issueId = String.valueOf(issue.getNumber());
-        String url = issue.getHtmlUrl() == null ? null : issue.getHtmlUrl().toString();
+    private FeedbackIssueDto mapIssue(IssueDto issue) {
+        String issueId = String.valueOf(issue.number());
+        String url = issue.htmlUrl();
         int votes = voteService.getTotalVotes(issueId);
-        return new FeedbackIssueDto(issueId, issue.getNumber(), issue.getTitle(), url, votes);
+        return new FeedbackIssueDto(issueId, issue.number(), issue.title(), url, votes);
     }
 
     /**

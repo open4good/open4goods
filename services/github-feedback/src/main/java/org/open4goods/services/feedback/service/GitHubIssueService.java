@@ -6,20 +6,25 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
+import org.open4goods.services.feedback.dto.IssueDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
  * Implementation of {@link IssueService} that publishes/reads issues on GitHub.
  */
 @Service
+@ConditionalOnProperty(prefix = "feedback.github", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GitHubIssueService implements IssueService {
 
     private static final Logger logger = LoggerFactory.getLogger(GitHubIssueService.class);
@@ -34,7 +39,7 @@ public class GitHubIssueService implements IssueService {
     }
 
     @Override
-    public GHIssue createBug(String title,
+    public IssueDto createBug(String title,
                              String description,
                              String urlSource,
                              String author,
@@ -44,7 +49,7 @@ public class GitHubIssueService implements IssueService {
     }
 
     @Override
-    public GHIssue createIdea(String title,
+    public IssueDto createIdea(String title,
                               String description,
                               String urlSource,
                               String author,
@@ -54,14 +59,14 @@ public class GitHubIssueService implements IssueService {
     }
 
     @Override
-    public GHIssue createIssue(String title,
+    public IssueDto createIssue(String title,
                                String description,
                                String author,
                                Set<String> labels) throws IOException {
         return createIssue("Issue", title, description, "Agent", author, labels);
     }
 
-    private GHIssue createIssue(String kind,
+    private IssueDto createIssue(String kind,
                                 String title,
                                 String description,
                                 String urlSource,
@@ -82,21 +87,21 @@ public class GitHubIssueService implements IssueService {
         labels.forEach(builder::label);
         GHIssue issue = builder.create();
         logger.info("Created {} issue #{} on GitHub with labels {}", kind, issue.getNumber(), labels);
-        return issue;
+        return mapToDto(issue);
     }
 
     @Override
-    public List<GHIssue> listBugs() throws IOException {
+    public List<IssueDto> listBugs() throws IOException {
         return listIssues("bug");
     }
 
     @Override
-    public List<GHIssue> listIdeas() throws IOException {
+    public List<IssueDto> listIdeas() throws IOException {
         return listIssues("feature");
     }
 
     @Override
-    public List<GHIssue> listIssues(String... labels) throws IOException {
+    public List<IssueDto> listIssues(String... labels) throws IOException {
         // Always require the configured "votable" label
         String required = config.getVoting().getRequiredLabel();
         Set<String> allLabels = new HashSet<>(Arrays.asList(labels));
@@ -105,10 +110,26 @@ public class GitHubIssueService implements IssueService {
         return repository.getIssues(GHIssueState.OPEN).stream()
                 .filter(issue -> {
                     Set<String> names = issue.getLabels().stream()
-                                             .map(l -> l.getName())
-                                             .collect(java.util.stream.Collectors.toSet());
+                                             .map(GHLabel::getName)
+                                             .collect(Collectors.toSet());
                     return names.containsAll(allLabels);
                 })
+                .map(this::mapToDto)
                 .toList();
+    }
+
+    private IssueDto mapToDto(GHIssue issue) {
+        Set<String> labels = issue.getLabels().stream()
+                .map(GHLabel::getName)
+                .collect(Collectors.toSet());
+        
+        return new IssueDto(
+                String.valueOf(issue.getId()),
+                issue.getNumber(),
+                issue.getHtmlUrl().toString(),
+                issue.getState().toString(),
+                issue.getTitle(),
+                labels
+        );
     }
 }

@@ -4,11 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.kohsuke.github.GHIssue;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.nudgerfrontapi.config.AgentProperties;
@@ -26,6 +23,7 @@ import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 
@@ -80,9 +78,7 @@ class AgentServiceTest {
         
         when(agentProperties.getAgents()).thenReturn(List.of(config));
 
-        GHIssue mockIssue = mock(GHIssue.class);
-        doReturn(123).when(mockIssue).getNumber();
-        doReturn(java.net.URI.create("https://github.com/org/repo/issues/123").toURL()).when(mockIssue).getHtmlUrl();
+        IssueDto mockIssue = new IssueDto("123", 123, "https://github.com/org/repo/issues/123", "OPEN", "Title", null);
 
         when(issueService.createIssue(any(), any(), any(), anySet())).thenReturn(mockIssue);
 

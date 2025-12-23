@@ -8,10 +8,13 @@ import org.springframework.stereotype.Component;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 /**
  * Verifies that GitHub-based feedback is properly configured and reachable.
  */
 @Component("feedbackHealthIndicator")
+@ConditionalOnProperty(prefix = "feedback.github", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GitHubHealthIndicator implements HealthIndicator {
 
     private final FeedbackConfiguration config;

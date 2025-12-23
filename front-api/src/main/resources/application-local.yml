@@ -15,3 +15,12 @@ spring:
   docker:
     compose:
       enabled: false
+
+feedback:
+  github:
+    enabled: false
+
+front:
+  review-generation:
+    api-base-url: "https://mock.generated-reviews.com"
+    api-key: "mock-key"

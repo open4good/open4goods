@@ -3,18 +3,15 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.kohsuke.github.GHIssue;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +22,7 @@ import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteEligibilityDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteResponseDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackRemainingVotesDto;
 import org.open4goods.services.captcha.service.HcaptchaService;
+import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
 import org.open4goods.services.feedback.service.VoteResponse;
 import org.open4goods.services.feedback.service.VoteService;
@@ -56,9 +54,8 @@ class FeedbackServiceTest {
                 "Jean",
                 "token");
 
-        GHIssue issue = mock(GHIssue.class);
-        when(issue.getNumber()).thenReturn(42);
-        when(issue.getHtmlUrl()).thenReturn(new URL("https://github.com/open4good/open4goods/issues/42"));
+        IssueDto issue = new IssueDto("42", 42, "https://github.com/open4good/open4goods/issues/42", "OPEN", "Un titre", null);
+        
         when(issueService.createIdea(eq("Un titre"), eq("Un message"), eq("https://nudger.fr/page"), eq("Jean"), any()))
                 .thenReturn(issue);
 
@@ -83,9 +80,8 @@ class FeedbackServiceTest {
                 null,
                 "token");
 
-        GHIssue issue = mock(GHIssue.class);
-        when(issue.getNumber()).thenReturn(7);
-        when(issue.getHtmlUrl()).thenReturn(new URL("https://github.com/open4good/open4goods/issues/7"));
+        IssueDto issue = new IssueDto("7", 7, "https://github.com/open4good/open4goods/issues/7", "OPEN", "Bug", null);
+
         when(issueService.createBug(eq("Bug"), eq("Description"), eq((String) null), eq((String) null), any()))
                 .thenReturn(issue);
 
@@ -99,15 +95,8 @@ class FeedbackServiceTest {
 
     @Test
     void shouldListIssuesSortedByVotes() throws Exception {
-        GHIssue first = mock(GHIssue.class);
-        when(first.getNumber()).thenReturn(1);
-        when(first.getTitle()).thenReturn("Idea 1");
-        when(first.getHtmlUrl()).thenReturn(new URL("https://github.com/open4good/open4goods/issues/1"));
-
-        GHIssue second = mock(GHIssue.class);
-        when(second.getNumber()).thenReturn(2);
-        when(second.getTitle()).thenReturn("Idea 2");
-        when(second.getHtmlUrl()).thenReturn(new URL("https://github.com/open4good/open4goods/issues/2"));
+        IssueDto first = new IssueDto("1", 1, "https://github.com/open4good/open4goods/issues/1", "OPEN", "Idea 1", null);
+        IssueDto second = new IssueDto("2", 2, "https://github.com/open4good/open4goods/issues/2", "OPEN", "Idea 2", null);
 
         when(issueService.listIdeas()).thenReturn(List.of(first, second));
         when(voteService.getTotalVotes("1")).thenReturn(3);

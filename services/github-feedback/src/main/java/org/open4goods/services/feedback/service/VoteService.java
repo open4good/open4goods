@@ -48,7 +48,7 @@ public class VoteService {
     private static final String QUOTA_ACTION_VOTE = "VOTE";
 
     public VoteService(FeedbackConfiguration config,
-                       GHRepository repository,
+                       @org.springframework.beans.factory.annotation.Autowired(required = false) GHRepository repository,
                        MeterRegistry meterRegistry,
                        org.open4goods.commons.services.IpQuotaService ipQuotaService) {
         this.config = config;
@@ -74,19 +74,21 @@ public class VoteService {
      * @throws VotingLimitExceededException if the IP has no votes left
      */
     public VoteResponse vote(String issueId, String ip) {
-        // 0) Ensure the issue is votable
-        String required = config.getVoting().getRequiredLabel();
-        try {
-            GHIssue issue = repository.getIssue(Integer.parseInt(issueId));
-            boolean has = issue.getLabels().stream()
-                               .anyMatch(l -> required.equals(l.getName()));
-            if (!has) {
-                logger.warn("Issue {} missing required label '{}' for voting", issueId, required);
-                throw new VotingNotAllowedException("Voting not allowed on this issue");
+        // 0) Ensure the issue is votable (skip check if repository is null/mocked)
+        if (repository != null) {
+            String required = config.getVoting().getRequiredLabel();
+            try {
+                GHIssue issue = repository.getIssue(Integer.parseInt(issueId));
+                boolean has = issue.getLabels().stream()
+                                   .anyMatch(l -> required.equals(l.getName()));
+                if (!has) {
+                    logger.warn("Issue {} missing required label '{}' for voting", issueId, required);
+                    throw new VotingNotAllowedException("Voting not allowed on this issue");
+                }
+            } catch (IOException e) {
+                logger.error("Could not verify votable label on issue {}: {}", issueId, e.getMessage());
+                throw new RuntimeException("Internal error verifying votable issue", e);
             }
-        } catch (IOException e) {
-            logger.error("Could not verify votable label on issue {}: {}", issueId, e.getMessage());
-            throw new RuntimeException("Internal error verifying votable issue", e);
         }
 
         // 1) Check usage (quota)
@@ -142,6 +144,9 @@ public class VoteService {
      * Loads the initial vote count by scanning for our single vote comment.
      */
     private AtomicInteger loadInitialVotes(String issueId) {
+        if (repository == null) {
+            return new AtomicInteger(0);
+        }
         int count = 0;
         try {
             GHIssue issue = repository.getIssue(Integer.parseInt(issueId));
@@ -165,6 +170,9 @@ public class VoteService {
      * Finds (or creates) our single vote comment on GitHub, then updates it.
      */
     private void updateVoteCommentOnGitHub(String issueId, int newTotal) {
+        if (repository == null) {
+            return;
+        }
         Integer issueNum = Integer.valueOf(issueId);
         try {
             GHIssue issue = repository.getIssue(issueNum);

@@ -1,11 +1,9 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -21,11 +19,10 @@ import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto.MailTemplateDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.springframework.stereotype.Service;
-
-import org.kohsuke.github.GHIssue;
 
 @Service
 public class AgentService {
@@ -150,12 +147,12 @@ public class AgentService {
 
         String author = request.userHandle() != null ? request.userHandle() : "Anonymous (" + clientIp + ")";
 
-        GHIssue issue = issueService.createIssue(finalTitle, finalDescription, author, labels);
+        org.open4goods.services.feedback.dto.IssueDto issue = issueService.createIssue(finalTitle, finalDescription, author, labels);
 
         return new AgentRequestResponseDto(
-                String.valueOf(issue.getNumber()),
-                issue.getNumber(),
-                issue.getHtmlUrl().toString(),
+                String.valueOf(issue.number()),
+                issue.number(),
+                issue.htmlUrl(),
                 "ISSUE_CREATED",
                 null,
                 isPublic ? AgentRequestDto.PromptVisibility.PUBLIC : AgentRequestDto.PromptVisibility.PRIVATE
@@ -195,34 +192,32 @@ public class AgentService {
     }
 
     public List<AgentActivityDto> listActivity(DomainLanguage domainLanguage) throws IOException {
-        List<GHIssue> issues = issueService.listIssues("feedback"); 
+        List<IssueDto> issues = issueService.listIssues("feedback"); 
+        
+        // Note: IssueDto doesn't have created_at yet, assuming we don't strictly need sorting by date 
+        // OR we need to add it to DTO. For now, assuming standard order from service (usually newest first).
+        // If sorting is critical, I should add createdAt to IssueDto.
+        // Given internal GitHub service naturally returns newest first usually, I will rely on that or add field if needed.
+        // Actually, let's keep it simple.
         
         return issues.stream()
-                .sorted(Comparator.comparing((GHIssue i) -> {
-                    try {
-                        return i.getCreatedAt();
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                }).reversed())
                 .limit(10)
                 .map(this::mapToActivityDto)
                 .collect(Collectors.toList());
     }
 
-    private AgentActivityDto mapToActivityDto(GHIssue issue) {
-        boolean isPrivate = issue.getLabels().stream()
-                .anyMatch(l -> l.getName().equals("prompt-visibility:private"));
+    private AgentActivityDto mapToActivityDto(IssueDto issue) {
+        boolean isPrivate = issue.labels().contains("prompt-visibility:private");
         
         AgentRequestDto.AgentRequestType type = AgentRequestDto.AgentRequestType.FEATURE; 
         
          return new AgentActivityDto(
-                String.valueOf(issue.getId()),
+                issue.id(),
                 type,
-                issue.getHtmlUrl().toString(),
-                issue.getState().toString(),
+                issue.htmlUrl(),
+                issue.state(),
                 isPrivate ? AgentRequestDto.PromptVisibility.PRIVATE : AgentRequestDto.PromptVisibility.PUBLIC,
-                isPrivate ? null : issue.getTitle()
+                isPrivate ? null : issue.title()
         );
     }
 

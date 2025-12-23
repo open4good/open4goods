@@ -140,5 +140,5 @@ describe('useCategoryNavigation composable', () => {
     vi.resetModules()
 
     vi.useRealTimers()
-  }, 10000)
+  })
 })
