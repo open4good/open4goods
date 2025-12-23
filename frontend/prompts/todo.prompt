@@ -1,0 +1,10 @@
+# Context
+User can think about stuff TODO in his project when reading / updating file or code. It mark it with a TODO pattern
+They can be quite out of scope tasks. You should get it as sometimes relativly far away the scope of the original file ppath and content.
+They should make care of a wider understanding of the code base / project documentation (*.md) to adress a pln thant can achieve them
+You will address a plan for handling it's TODO, and -nice to have- to complete / update the TODO section of the original user request file
+
+
+# File to process
+
+/frontend/docs/event-packs.md

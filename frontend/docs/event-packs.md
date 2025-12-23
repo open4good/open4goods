@@ -78,6 +78,9 @@ TODO : page header is not documented. Create a specific separate doc
 
 
 
+
+
+
 TODO : We will complete here once investigated with major pages	
     "parallax": {
       // 5. Parallax Home Page Paths
@@ -90,6 +93,26 @@ TODO : We will complete here once investigated with major pages
   }
 }
 ```
+TODO : 
+We have this error on pnpm fast : 
+
+> nudger-nuxt-front@ lint /home/goulven/git/open4goods/frontend
+> eslint .
+
+
+/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeProblemsSection.vue
+  10:27  error  Parsing error: invalid-first-character-of-tag-name  vue/no-parsing-error
+  27:1   error  Parsing error: x-invalid-end-tag                    vue/no-parsing-error
+
+/home/goulven/git/open4goods/frontend/app/components/shared/header/PageHeader.vue
+  142:77  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 3 problems (3 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.
+goulven@goulven-Ionico-IV-15:~/git/open4goods/frontend$ 
+
 
 
 
