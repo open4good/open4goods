@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 
 /**
  * REST controller exposing the global search endpoint. The controller delegates the
@@ -146,6 +147,55 @@ public class SearchController {
                 .toList();
 
         SearchSuggestResponseDto body = new SearchSuggestResponseDto(categoryMatches, productMatches);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .header("X-Locale", domainLanguage.languageTag())
+                .body(body);
+    }
+
+    @GetMapping("/semantic")
+    @Operation(
+            summary = "Execute a semantic search within a vertical",
+            description = "Runs a vector-based search on product embeddings scoped to a given vertical and filtered using standard guardrails.",
+            parameters = {
+                    @Parameter(name = "verticalId", in = ParameterIn.QUERY, required = true,
+                            description = "Vertical identifier used to constrain the semantic search scope.",
+                            schema = @Schema(type = "string", example = "smartphones")),
+                    @Parameter(name = "query", in = ParameterIn.QUERY, required = true,
+                            description = "Free-text query used to compute the embedding vector.",
+                            schema = @Schema(type = "string", example = "noise cancelling headphones")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language hint used for localisation.",
+                            schema = @Schema(implementation = DomainLanguage.class)),
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, required = false,
+                            description = "Zero-based page index for pagination.",
+                            schema = @Schema(type = "integer", minimum = "0", defaultValue = "0")),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, required = false,
+                            description = "Number of results per page.",
+                            schema = @Schema(type = "integer", minimum = "1", defaultValue = "10"))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Semantic search executed successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = GlobalSearchResultDto.class, type = "array")),
+                            headers = {
+                                    @Header(name = "X-Locale", description = "Resolved locale for the response",
+                                            schema = @Schema(type = "string", example = "fr"))
+                            })
+            }
+    )
+    public ResponseEntity<List<GlobalSearchResultDto>> semanticSearch(
+            @RequestParam(name = "verticalId") String verticalId,
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+            @RequestParam(name = "page[number]", defaultValue = "0") @Min(0) int pageNumber,
+            @RequestParam(name = "page[size]", defaultValue = "10") @Min(1) int pageSize) {
+        LOGGER.info("Entering semanticSearch(verticalId='{}', query='{}', pageNumber={}, pageSize={})", verticalId, query, pageNumber, pageSize);
+        List<GlobalSearchResultDto> body = searchService.semanticSearch(verticalId, query, domainLanguage, pageNumber, pageSize)
+                .stream()
+                .map(this::toDto)
+                .toList();
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())

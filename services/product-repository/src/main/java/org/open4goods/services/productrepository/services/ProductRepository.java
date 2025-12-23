@@ -1,5 +1,6 @@
 package org.open4goods.services.productrepository.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.KnnSearch;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
@@ -905,10 +907,50 @@ public class ProductRepository {
 	 *
 	 * @return Criteria representing recent prices
 	 */
-	public Criteria getRecentPriceQuery() {
-		return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
+    public Criteria getRecentPriceQuery() {
+                return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
 
-	}
+        }
+
+        /**
+         * Executes a KNN search on the embedding field while enforcing recency and offer availability guardrails.
+         *
+         * @param vector the embedding vector to search with
+         * @param baseFilters optional additional filters to apply
+         * @param k number of neighbours to retrieve
+         * @return search hits ordered by vector similarity
+         */
+        public SearchHits<Product> knnSearchByEmbedding(float[] vector, Criteria baseFilters, int k)
+        {
+                Objects.requireNonNull(vector, "Embedding vector is required");
+                if (vector.length == 0)
+                {
+                        throw new IllegalArgumentException("Embedding vector must not be empty");
+                }
+
+                Criteria effectiveCriteria = (baseFilters == null ? new Criteria() : baseFilters).and(getRecentPriceQuery());
+
+                List<Float> queryVector = new ArrayList<>(vector.length);
+                for (float value : vector)
+                {
+                        queryVector.add(value);
+                }
+
+                KnnSearch knnSearch = KnnSearch.of(knn -> knn
+                                .field("embedding")
+                                .queryVector(queryVector)
+                                .k(k)
+                                .numCandidates(Math.max(k * 2, 50))
+                );
+
+                NativeQuery knnQuery = new NativeQueryBuilder()
+                                .withQuery(new CriteriaQuery(effectiveCriteria))
+                                .withKnnSearches(knnSearch)
+                                .withPageable(PageRequest.of(0, k))
+                                .build();
+
+                return elasticsearchOperations.search(knnQuery, Product.class, CURRENT_INDEX);
+        }
 
 	/**
 	 *

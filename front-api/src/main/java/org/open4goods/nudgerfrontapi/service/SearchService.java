@@ -41,6 +41,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.commons.services.TextEmbeddingService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -134,14 +136,16 @@ public class SearchService {
     private final VerticalsConfigService verticalsConfigService;
     private final ProductMappingService productMappingService;
     private final ApiProperties apiProperties;
+    private final TextEmbeddingService textEmbeddingService;
     private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
     public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
-            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties) {
+            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties, TextEmbeddingService textEmbeddingService) {
         this.repository = repository;
         this.verticalsConfigService = verticalsConfigService;
         this.productMappingService = productMappingService;
         this.apiProperties = apiProperties;
+        this.textEmbeddingService = textEmbeddingService;
     }
 
     @PostConstruct
@@ -947,6 +951,29 @@ public class SearchService {
                         .toList()))
                 .sorted(Comparator.comparing((GlobalSearchVerticalGroup group) -> group.results().isEmpty() ? Double.NEGATIVE_INFINITY
                         : group.results().get(0).score()).reversed())
+                .toList();
+    }
+
+    public List<GlobalSearchHit> semanticSearch(String verticalId, String query, DomainLanguage domainLanguage, int pageNumber, int pageSize) {
+        String sanitizedQuery = sanitize(query);
+        float[] embedding = textEmbeddingService.embed(sanitizedQuery);
+
+        if (embedding == null || embedding.length == 0) {
+            LOGGER.info("Skipping semantic search because embedding is missing for query '{}'", sanitizedQuery);
+            return List.of();
+        }
+
+        Criteria criteria = new Criteria("vertical").is(verticalId)
+                .and(repository.getRecentPriceQuery());
+
+        int knnLimit = Math.max(pageSize * (pageNumber + 1), pageSize);
+        SearchHits<Product> hits = repository.knnSearchByEmbedding(embedding, criteria, knnLimit);
+
+        return hits.getSearchHits().stream()
+                .skip((long) pageNumber * pageSize)
+                .limit(pageSize)
+                .map(hit -> mapHit(hit, domainLanguage))
+                .filter(Objects::nonNull)
                 .toList();
     }
 

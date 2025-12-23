@@ -277,9 +277,10 @@ public class ApiConfig {
 
 
 	@Bean
-	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder) {
-		return new SearchService(aggregatedDataRepository, logsFolder);
-	}
+    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder,
+                    @Autowired DjlTextEmbeddingService textEmbeddingService) {
+            return new SearchService(aggregatedDataRepository, logsFolder, textEmbeddingService);
+    }
 
 	@Bean
         BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired SerialisationService serialisationService) throws Exception {
