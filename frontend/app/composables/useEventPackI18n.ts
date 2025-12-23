@@ -33,8 +33,7 @@ const toStringArray = (value: unknown): string[] => {
  *
  * Chaîne de résolution :
  * 1. packs.{packActuel}.{path}
- * 2. packs.default.{path}
- * 3. fallbackKeys (si fournis)
+ * 2. fallbackKeys (si fournis)
  *
  * @example
  * ```ts
@@ -64,12 +63,6 @@ export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
 
     if (te(packKey)) {
       return tm(packKey)
-    }
-
-    const defaultKey = buildKey(normalizedPath, DEFAULT_EVENT_PACK)
-
-    if (te(defaultKey)) {
-      return tm(defaultKey)
     }
 
     for (const key of options?.fallbackKeys ?? []) {

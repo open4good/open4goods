@@ -1,130 +1,182 @@
+TODO : Create FR version
+
 # Event Packs - Localization & Assets (Frontend)
 
-This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `default`, `hold`, `sdg`, `bastille-day`) and fall back to `default` when a field is missing.
+This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `default`, `hold`, `sdg`, `bastille-day`) based on the URL parameter `?event=` or the current date.
 
-## Configuration
+## Quick Start
+
+### Testing a Pack manually
+
+Force a specific pack via URL query parameter:
+
+```
+http://localhost:3000?event=bastille-day
+http://localhost:3000?event=sdg
+```
+
+> **Note**: Only valid pack names defined in `EVENT_PACK_NAMES` are accepted.
+
+### Adding a new pack
+
+1.  **Define the pack**:
+    Add the pack name to `EVENT_PACK_NAMES` in `frontend/config/theme/event-packs.ts`.
+
+    ```typescript
+    export const EVENT_PACK_NAMES = [
+      'default',
+      'sdg',
+      'bastille-day',
+      'christmas', // New pack
+      'hold',
+    ] as const
+    ```
+
+2.  **Schedule it (Optional)**:
+    Add the activation window in `eventPackSchedule` in the same file.
+
+    ```typescript
+    {
+      id: 'christmas',
+      start: '12-15',
+      end: '12-31',
+      pack: 'christmas',
+      description: 'Christmas period',
+    }
+    ```
+
+3.  **Add content & assets**:
+    Update `frontend/i18n/locales/fr-FR.json` (and other locales) with the pack configuration.
+
+    ```json
+    "packs": {
+      "christmas": {
+        "hero": {
+          "title": "Joyeux Noël responsable",
+          "subtitles": ["Offrez des cadeaux durables."]
+        },
+        "assets": {
+          "heroBackground": "christmas/hero-background.svg"
+        },
+        "parallax": {
+          "essentials": "parallax/christmas-essentials.svg"
+        }
+      }
+    }
+    ```
+    
+# A nice complete pack could contains :
+
+> Homepage hero background image // TODO : Check src is i18n key
+> Homepage hero subtitle
+> Todo the "Gagne du temps. Choisis librement." title 
+
+> TODO : Add parallax home pages paths
+> TODO : Check they are well pointed and src being definied fully through i18n key 
+
+TODO : get i18n samples containing those keys
+
+
+    
+
+## Architecture & Configuration
 
 ### Pack definitions
 
 Event packs are configured in:
-
-```
-frontend/config/theme/event-packs.ts
-```
+`frontend/config/theme/event-packs.ts`
 
 This file contains:
-- `EVENT_PACK_NAMES`: List of available pack names
-- `eventPackSchedule`: Date windows for automatic pack activation
-- Resolution functions (`resolveActiveEventPack`, `resolveEventPackName`)
 
-### Adding a new pack
+- `EVENT_PACK_NAMES`: List of available pack names.
+- `eventPackSchedule`: Date windows for automatic pack activation.
+- Resolution functions (`resolveActiveEventPack`, `resolveEventPackName`).
 
-1. Add the pack name to `EVENT_PACK_NAMES`:
+### I18n Structure
 
-```typescript
-export const EVENT_PACK_NAMES = [
-  'default',
-  'sdg',
-  'bastille-day',
-  'christmas',  // New pack
-  'hold',
-] as const
-```
+TODO : Ensure this i18n pack overriding mechanism is generic (can be applied on any keys) and efficient / documented
 
-2. Add the activation window in `eventPackSchedule`:
+All pack-aware strings and asset paths live under `packs.<pack>.*` at the root of locale files.
 
-```typescript
-{
-  id: 'christmas',
-  start: '12-15',
-  end: '12-31',
-  pack: 'christmas',
-  description: 'Christmas period',
-}
-```
+**Location:** `frontend/i18n/locales/fr-FR.json`
 
-## I18n Structure
-
-All pack-aware strings live under `packs.<pack>.*` at the root of locale files. The `default` branch contains the baseline values.
-
-**Location:**
-```
-frontend/i18n/locales/en-US.json
-frontend/i18n/locales/fr-FR.json
-```
-
-**Example structure:**
+**Structure:**
 
 ```jsonc
 {
   "packs": {
     "default": {
-      "hero": {
-        "eyebrow": "Responsible shopping",
-        "title": "Responsible choices aren't a luxury",
-        "titleSubtitle": ["Buy better. Spend smarter."],
-        "subtitles": [
-          "Save time, stay true to your values.",
-          "Shop smarter without compromise."
-        ],
-        "search": {
-          "label": "Search for a product",
-          "placeholder": "Search a product (e.g. television, smartphone...)",
-          "helpers": [...]
-        }
-      }
+      "hero": { ... },   // Default text content
+      "assets": { ... }, // Default static assets
+      "parallax": { ... } // Default parallax layers
     },
     "bastille-day": {
       "hero": {
-        "eyebrow": "Bastille Day special",
-        "title": "Celebrate conscious choices on 14 July",
-        "subtitles": [
-          "Shop with liberte, egalite, durabilite in mind."
-        ]
+        "eyebrow": "Spécial 14 juillet",
+        "title": "Célébrez des choix responsables"
+      },
+      "assets": {
+        "heroBackground": "bastille-day/hero-background.svg"
       },
       "parallax": {
         "essentials": "parallax/parallax-background-bastille-essentials.svg"
       }
     }
-  },
-  "blog": { ... },
-  "home": { ... }
+  }
 }
 ```
 
-### Keys you can override per pack
+### Assets Configuration
 
-- `hero.title`, `hero.eyebrow`, `hero.titleSubtitle`, `hero.subtitles`
-- `hero.search.*` (label, placeholder, aria, CTA, `helpersTitle`, `helpers`, partner link strings)
-- `hero.context.*`
-- `hero.iconAlt`, `hero.imageAlt`
-- `parallax.*` (section background paths)
+Assets are now fully managed via i18n keys. This allows different assets per locale if needed, but primarily groups all pack configuration in one place.
 
-## Fallback Rules
+#### Static Assets
 
-1. Try `packs.<activePack>.<path>`
-2. Fallback to `packs.default.<path>`
-3. Optional extra fallback keys can be provided per call (legacy `home.hero.*` is kept as a safety net)
+Defined under `packs.<pack>.assets`. common keys:
 
-## Rendering-time Randomization
+- `heroBackground`
+- `illustration`
+- `logo`, `footerLogo`, `favicon` (mostly for `hold` pack)
 
-Lists (e.g. `hero.subtitles`, `hero.titleSubtitle`) are randomized **per render**. Seeds are stored in `useState('event-pack-variant-seeds')` with a deterministic key, so SSR and CSR remain consistent for a given render.
+#### Parallax Backgrounds
 
-- Use `resolveStringVariant(path, { stateKey })` to pick one entry from a list
-- Use `resolveList(path)` to fetch arrays (e.g. helpers)
+Defined under `packs.<pack>.parallax`. Keys correspond to homepage sections:
 
-## Consuming Pack-aware Strings
+- `essentials`
+- `features`
+- `blog`
+- `objections`
+- `cta`
 
-Use the composable `useEventPackI18n(packName)`:
+**Asset File Location:**
+Place your SVG/image files in:
+`frontend/app/assets/themes/`
+
+You can organize them by theme or pack, e.g., `frontend/app/assets/themes/bastille-day/hero-background.svg`.
+The i18n value should be the relative path from `assets/themes/`.
+
+## Developer Guide
+
+### Consuming Pack Strings
+
+Use `useEventPackI18n(packName)`:
 
 ```typescript
 const activePack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(activePack)
 
+// Resolves packs.<activePack>.hero.title
+// Falls back to provided fallbackKeys if not found in the pack
 const heroTitle = computed(() =>
   packI18n.resolveString('hero.title', { fallbackKeys: ['home.hero.title'] })
 )
+```
 
+### Rendering-time Randomization
+
+Lists (e.g. `hero.subtitles`) are randomized **per render** using a consistent seed to avoid hydration mismatches.
+
+```typescript
 const heroSubtitle = computed(() =>
   packI18n.resolveStringVariant('hero.subtitles', {
     stateKey: 'home-hero-subtitles',
@@ -133,103 +185,10 @@ const heroSubtitle = computed(() =>
 )
 ```
 
-## Assets Configuration
+### Asset Resolution
 
-### Static assets
-
-Seasonal asset overrides are configured in:
-
-```
-frontend/config/theme/assets.ts
-```
+Use `useThemedAsset` or `useThemedParallaxBackgrounds`. These composables automatically look up the correct path in the i18n file for the active pack.
 
 ```typescript
-export const seasonalThemeAssets: SeasonalThemeAssets = {
-  'bastille-day': {
-    light: {
-      heroBackground: 'bastille-day/hero-background.svg',
-      illustration: 'bastille-day/illustration-fireworks.svg',
-    },
-    common: {
-      heroBackground: 'bastille-day/hero-background.svg',
-    },
-  },
-}
+const heroBackground = useHeroBackgroundAsset()
 ```
-
-### Parallax backgrounds
-
-Parallax backgrounds can be defined in two ways:
-
-1. **Via TypeScript config** (`assets.ts`):
-
-```typescript
-export const eventParallaxPacks = {
-  light: {
-    'bastille-day': {
-      essentials: ['parallax/parallax-background-bastille-essentials.svg'],
-      features: ['parallax/parallax-background-bastille-features.svg'],
-    },
-  },
-}
-```
-
-2. **Via i18n** (takes precedence):
-
-```json
-{
-  "packs": {
-    "bastille-day": {
-      "parallax": {
-        "essentials": "parallax/parallax-background-bastille-essentials.svg",
-        "features": "parallax/parallax-background-bastille-features.svg"
-      }
-    }
-  }
-}
-```
-
-### Asset file location
-
-```
-frontend/app/assets/themes/common/{pack-name}/
-  hero-background.svg
-  illustration.svg
-```
-
-## Testing a Pack
-
-### URL parameter
-
-Force a specific pack via URL query parameter:
-
-```
-https://nudger.fr?event=bastille-day
-https://nudger.fr?event=sdg
-```
-
-**Legacy parameter (still supported):**
-
-```
-https://nudger.fr?theme=bastille-day
-```
-
-Only valid pack names from `EVENT_PACK_NAMES` are accepted. Invalid values are ignored.
-
-### Development
-
-```bash
-pnpm dev
-# Open http://localhost:3000?event=bastille-day
-```
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `config/theme/event-packs.ts` | Pack definitions and date windows |
-| `config/theme/assets.ts` | Asset configurations |
-| `i18n/locales/*.json` | Localized strings (`packs` key) |
-| `composables/useSeasonalEventPack.ts` | Active pack resolution |
-| `composables/useEventPackI18n.ts` | I18n string resolution |
-| `composables/useThemedParallaxBackgrounds.ts` | Parallax asset resolution |

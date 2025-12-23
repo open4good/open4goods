@@ -10,8 +10,7 @@ import {
  *
  * Ordre de priorité :
  * 1. Paramètre URL `?event=xxx` (nouveau)
- * 2. Paramètre URL `?theme=xxx` (legacy, rétrocompatibilité)
- * 3. Résolution automatique basée sur la date courante
+ * 2. Résolution automatique basée sur la date courante
  *
  * @example
  * ```ts
@@ -22,15 +21,13 @@ import {
  * @example Test via URL
  * ```
  * https://nudger.fr?event=bastille-day
- * https://nudger.fr?theme=sdg (legacy)
+
  * ```
  */
 export const useSeasonalEventPack = () => {
   const route = useRoute()
 
-  const forcedPack = computed(() =>
-    resolveEventPackName(route.query.event ?? route.query.theme)
-  )
+  const forcedPack = computed(() => resolveEventPackName(route.query.event))
 
   return computed(() => forcedPack.value ?? resolveActiveEventPack())
 }

@@ -1,6 +1,20 @@
 {
   "packs": {
     "default": {
+      "assets": {
+        "heroBackground": "placeholders/hero-background.svg",
+        "illustration": "placeholders/illustration.svg",
+        "logo": "placeholders/logo.svg",
+        "footerLogo": "placeholders/logo-footer.svg",
+        "favicon": "placeholders/favicon.svg"
+      },
+      "parallax": {
+        "essentials": "parallax/parallax-placeholder.svg",
+        "features": "parallax/parallax-placeholder.svg",
+        "blog": "parallax/parallax-placeholder.svg",
+        "objections": "parallax/parallax-placeholder.svg",
+        "cta": "parallax/parallax-placeholder.svg"
+      },
       "hero": {
         "eyebrow": "Comparateur responsable",
         "title": "Acheter mieux. Sans dépenser plus.",
@@ -58,6 +72,20 @@
       }
     },
     "hold": {
+      "assets": {
+        "heroBackground": "hero-background.webp",
+        "illustration": "illustration-generic.svg",
+        "logo": "logo-new.png",
+        "footerLogo": "logo-footer.svg",
+        "favicon": "favicon.svg"
+      },
+      "parallax": {
+        "essentials": "parallax/hero-back--light.svg",
+        "features": "parallax/hero-mid--light.svg",
+        "blog": "parallax/hero-front--light.svg",
+        "objections": "parallax/hero-back--light.svg",
+        "cta": "parallax/hero-mid--light.svg"
+      },
       "hero": {
         "titleSubtitle": ["Pack hérité pour les tests"],
         "subtitles": [
@@ -77,6 +105,10 @@
       }
     },
     "bastille-day": {
+      "assets": {
+        "heroBackground": "bastille-day/hero-background.svg",
+        "illustration": "bastille-day/illustration-fireworks.svg"
+      },
       "hero": {
         "eyebrow": "Spécial 14 juillet",
         "title": "Célébrez des choix responsables le 14 juillet",
@@ -97,19 +129,25 @@
             {
               "icon": "🎆",
               "segments": [
-                { "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs." }
+                {
+                  "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs."
+                }
               ]
             },
             {
               "icon": "🥖",
               "segments": [
-                { "text": "Local et efficace ? Filtrez d'abord par réparabilité." }
+                {
+                  "text": "Local et efficace ? Filtrez d'abord par réparabilité."
+                }
               ]
             },
             {
               "icon": "🎇",
               "segments": [
-                { "text": "Alliez fête et économies avec des prix transparents." }
+                {
+                  "text": "Alliez fête et économies avec des prix transparents."
+                }
               ]
             }
           ]

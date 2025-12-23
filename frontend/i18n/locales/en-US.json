@@ -1,6 +1,20 @@
 {
   "packs": {
     "default": {
+      "assets": {
+        "heroBackground": "placeholders/hero-background.svg",
+        "illustration": "placeholders/illustration.svg",
+        "logo": "placeholders/logo.svg",
+        "footerLogo": "placeholders/logo-footer.svg",
+        "favicon": "placeholders/favicon.svg"
+      },
+      "parallax": {
+        "essentials": "parallax/parallax-placeholder.svg",
+        "features": "parallax/parallax-placeholder.svg",
+        "blog": "parallax/parallax-placeholder.svg",
+        "objections": "parallax/parallax-placeholder.svg",
+        "cta": "parallax/parallax-placeholder.svg"
+      },
       "hero": {
         "eyebrow": "Responsible shopping",
         "title": "Responsible choices aren't a luxury",
@@ -24,7 +38,10 @@
               "icon": "🌿",
               "label": "A unique ecological and environmental assessment",
               "segments": [
-                { "text": "A unique ecological assessment", "to": "/impact-score" },
+                {
+                  "text": "A unique ecological assessment",
+                  "to": "/impact-score"
+                },
                 { "text": " and environmental review" }
               ]
             },
@@ -58,6 +75,20 @@
       }
     },
     "hold": {
+      "assets": {
+        "heroBackground": "hero-background.webp",
+        "illustration": "illustration-generic.svg",
+        "logo": "logo-new.png",
+        "footerLogo": "logo-footer.svg",
+        "favicon": "favicon.svg"
+      },
+      "parallax": {
+        "essentials": "parallax/hero-back--light.svg",
+        "features": "parallax/hero-mid--light.svg",
+        "blog": "parallax/hero-front--light.svg",
+        "objections": "parallax/hero-back--light.svg",
+        "cta": "parallax/hero-mid--light.svg"
+      },
       "hero": {
         "titleSubtitle": ["Legacy seasonal copy kept for testing."],
         "subtitles": [
@@ -77,6 +108,10 @@
       }
     },
     "bastille-day": {
+      "assets": {
+        "heroBackground": "bastille-day/hero-background.svg",
+        "illustration": "bastille-day/illustration-fireworks.svg"
+      },
       "hero": {
         "eyebrow": "Bastille Day special",
         "title": "Celebrate conscious choices on 14 July",
@@ -101,13 +136,17 @@
             {
               "icon": "🥖",
               "segments": [
-                { "text": "Local and efficient? Filter by repairability first." }
+                {
+                  "text": "Local and efficient? Filter by repairability first."
+                }
               ]
             },
             {
               "icon": "🎇",
               "segments": [
-                { "text": "Balance celebrations and savings with transparent prices." }
+                {
+                  "text": "Balance celebrations and savings with transparent prices."
+                }
               ]
             }
           ]
