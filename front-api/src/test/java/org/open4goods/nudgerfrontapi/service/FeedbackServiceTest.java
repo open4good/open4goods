@@ -54,7 +54,7 @@ class FeedbackServiceTest {
                 "Jean",
                 "token");
 
-        IssueDto issue = new IssueDto("42", 42, "https://github.com/open4good/open4goods/issues/42", "OPEN", "Un titre", null);
+        IssueDto issue = new IssueDto("42", 42, "https://github.com/open4good/open4goods/issues/42", "OPEN", "Un titre", null, 0);
         
         when(issueService.createIdea(eq("Un titre"), eq("Un message"), eq("https://nudger.fr/page"), eq("Jean"), any()))
                 .thenReturn(issue);
@@ -80,7 +80,7 @@ class FeedbackServiceTest {
                 null,
                 "token");
 
-        IssueDto issue = new IssueDto("7", 7, "https://github.com/open4good/open4goods/issues/7", "OPEN", "Bug", null);
+        IssueDto issue = new IssueDto("7", 7, "https://github.com/open4good/open4goods/issues/7", "OPEN", "Bug", null, 0);
 
         when(issueService.createBug(eq("Bug"), eq("Description"), eq((String) null), eq((String) null), any()))
                 .thenReturn(issue);
@@ -95,8 +95,8 @@ class FeedbackServiceTest {
 
     @Test
     void shouldListIssuesSortedByVotes() throws Exception {
-        IssueDto first = new IssueDto("1", 1, "https://github.com/open4good/open4goods/issues/1", "OPEN", "Idea 1", null);
-        IssueDto second = new IssueDto("2", 2, "https://github.com/open4good/open4goods/issues/2", "OPEN", "Idea 2", null);
+        IssueDto first = new IssueDto("1", 1, "https://github.com/open4good/open4goods/issues/1", "OPEN", "Idea 1", null, 0);
+        IssueDto second = new IssueDto("2", 2, "https://github.com/open4good/open4goods/issues/2", "OPEN", "Idea 2", null, 0);
 
         when(issueService.listIdeas()).thenReturn(List.of(first, second));
         when(voteService.getTotalVotes("1")).thenReturn(3);

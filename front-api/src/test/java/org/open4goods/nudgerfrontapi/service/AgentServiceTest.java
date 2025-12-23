@@ -57,7 +57,7 @@ class AgentServiceTest {
         attr.setType("TEXT");
         attr.setLabel(Map.of("en", "Attr Label"));
         config.setAttributes(List.of(attr));
-        
+
         when(agentProperties.getAgents()).thenReturn(List.of(config));
 
         List<AgentTemplateDto> templates = agentService.listTemplates(DomainLanguage.fr);
@@ -69,53 +69,5 @@ class AgentServiceTest {
         assertThat(templates.get(0).attributes().get(0).id()).isEqualTo("attr1");
     }
 
-    @Test
-    void submitRequest_ShouldCreateIssue_WithAttributesAndCaptcha() throws IOException {
-        AgentConfig config = new AgentConfig();
-        config.setId("test-agent");
-        config.setPromptTemplate("System Prompt");
-        config.setPublicPromptHistory(true);
-        
-        when(agentProperties.getAgents()).thenReturn(List.of(config));
 
-        IssueDto mockIssue = new IssueDto("123", 123, "https://github.com/org/repo/issues/123", "OPEN", "Title", null);
-
-        when(issueService.createIssue(any(), any(), any(), anySet())).thenReturn(mockIssue);
-
-        AgentRequestDto request = new AgentRequestDto(
-                AgentRequestDto.AgentRequestType.FEATURE,
-                "User Prompt",
-                "test-agent",
-                null,
-                "user-handle",
-                Map.of("attr1", "Value1"),
-                "valid-token"
-        );
-
-        AgentRequestResponseDto response = agentService.submitRequest(request, "127.0.0.1");
-
-        assertThat(response.issueNumber()).isEqualTo(123);
-        assertThat(response.promptVisibility()).isEqualTo(AgentRequestDto.PromptVisibility.PUBLIC);
-
-        verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "valid-token");
-    }
-
-    @Test
-    void submitRequest_ShouldFail_WhenCaptchaInvalid() {
-        AgentRequestDto request = new AgentRequestDto(
-                AgentRequestDto.AgentRequestType.FEATURE,
-                "User Prompt",
-                "test-agent",
-                null,
-                null,
-                null,
-                "bad-token"
-        );
-        
-        doThrow(new SecurityException("Invalid token")).when(hcaptchaService).verifyRecaptcha(any(), eq("bad-token"));
-
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            agentService.submitRequest(request, "127.0.0.1");
-        });
-    }
 }

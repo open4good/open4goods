@@ -11,6 +11,7 @@ public record IssueDto(
         String htmlUrl,
         String state,
         String title,
-        Set<String> labels
+        Set<String> labels,
+        int commentsCount
 ) {
 }

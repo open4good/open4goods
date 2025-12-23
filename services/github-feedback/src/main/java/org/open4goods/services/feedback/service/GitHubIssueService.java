@@ -119,24 +119,24 @@ public class GitHubIssueService implements IssueService {
                 .toList();
     }
 
-<<<<<<< HEAD
+
     private IssueDto mapToDto(GHIssue issue) {
         Set<String> labels = issue.getLabels().stream()
                 .map(GHLabel::getName)
                 .collect(Collectors.toSet());
-        
+
         return new IssueDto(
                 String.valueOf(issue.getId()),
                 issue.getNumber(),
                 issue.getHtmlUrl().toString(),
                 issue.getState().toString(),
                 issue.getTitle(),
-                labels
+                labels,
+                issue.getCommentsCount()
         );
-=======
+    }
     @Override
     public List<GHIssueComment> listIssueComments(int issueNumber) throws IOException {
         return repository.getIssue(issueNumber).getComments();
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     }
 }

@@ -20,11 +20,4 @@ public record AgentIssueDto(
         @Schema(description = "Discussion comments") List<IssueCommentDto> comments
 ) {}
 
-@Schema(description = "Issue comment")
-public record IssueCommentDto(
-        @Schema(description = "Comment identifier") long id,
-        @Schema(description = "Comment author") String author,
-        @Schema(description = "Creation timestamp") Instant createdAt,
-        @Schema(description = "Last update timestamp") Instant updatedAt,
-        @Schema(description = "Markdown content") String body
-) {}
+

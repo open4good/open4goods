@@ -55,8 +55,14 @@ public class LocalMockConfig {
                         "https://github.com/mock/issue/" + id,
                         "OPEN",
                         title,
-                        labels
+                        labels,
+                        0
                 );
+            }
+
+            @Override
+            public java.util.List<org.kohsuke.github.GHIssueComment> listIssueComments(int issueNumber) {
+                return Collections.emptyList();
             }
         };
     }
