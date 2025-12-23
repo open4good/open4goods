@@ -1,7 +1,10 @@
 <template>
   <v-row
     class="category-product-card-grid"
-    :class="[`category-product-card-grid--size-${cardSize}`]"
+    :class="[
+      `category-product-card-grid--size-${cardSize}`,
+      `category-product-card-grid--variant-${variant}`,
+    ]"
     dense
   >
     <v-col
@@ -11,7 +14,20 @@
       sm="6"
       lg="4"
     >
+      <ProductTileCard
+        v-if="variant === 'compact-tile'"
+        :product="product"
+        :product-link="productLink(product)"
+        :image-src="resolveImage(product)"
+        :attributes="popularAttributesByProduct(product)"
+        :impact-score="impactScoreValue(product)"
+        :offer-badges="offerBadges(product)"
+        :offers-count-label="offersCountLabel(product)"
+        :untitled-label="$t('category.products.untitledProduct')"
+        :not-rated-label="$t('category.products.notRated')"
+      />
       <v-card
+        v-else
         class="category-product-card-grid__card"
         rounded="xl"
         elevation="2"
@@ -144,6 +160,7 @@ import type {
   ProductDto,
 } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
 import {
   formatAttributeValue,
@@ -156,6 +173,9 @@ const props = defineProps<{
   products: ProductDto[]
   popularAttributes?: AttributeConfigDto[]
   size?: 'compact' | 'comfortable'
+  variant?: 'classic' | 'compact-tile'
+  maxAttributes?: number
+  showAttributeIcons?: boolean
 }>()
 
 const { t, n } = useI18n()
@@ -200,6 +220,9 @@ const resolveCurrencySymbol = (currency?: string | null): string | null => {
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 const cardSize = computed(() => props.size ?? 'comfortable')
+const variant = computed(() => props.variant ?? 'classic')
+const maxAttributes = computed(() => props.maxAttributes)
+const showAttributeIcons = computed(() => props.showAttributeIcons ?? true)
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -249,9 +272,13 @@ const popularAttributesByProduct = (
       key: attribute.key,
       label: attribute.label,
       value,
-      icon: attribute.icon ?? null,
+      icon: showAttributeIcons.value ? attribute.icon ?? null : null,
     })
   })
+
+  if (maxAttributes.value != null) {
+    return entries.slice(0, maxAttributes.value)
+  }
 
   return entries
 }
