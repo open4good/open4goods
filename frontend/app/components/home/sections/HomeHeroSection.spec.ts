@@ -6,9 +6,9 @@ import HomeHeroSection from './HomeHeroSection.vue'
 import type { EventPackName } from '~~/config/theme/event-packs'
 
 const messages: Record<string, unknown> = {
-  'packs.default.hero.eyebrow': 'notre comparateur',
-  'packs.default.hero.title': "Réconcilier écologie et pouvoir d'achat",
-  'packs.default.hero.subtitles': [
+  'home.hero.eyebrow': 'notre comparateur',
+  'home.hero.title': "Réconcilier écologie et pouvoir d'achat",
+  'home.hero.subtitles': [
     'Gagne du temps. Choisis librement.',
     'Choisis librement.',
   ],
@@ -16,22 +16,22 @@ const messages: Record<string, unknown> = {
     'Pack retenu',
     'Sous-titre placeholder',
   ],
-  'packs.default.hero.titleSubtitle': [
+  'home.hero.titleSubtitle': [
     'Acheter mieux. Sans dépenser plus.',
   ],
-  'packs.default.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
-  'packs.default.hero.search.placeholder':
+  'home.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
+  'home.hero.search.placeholder':
     'Recherchez un produit ou une catégorie',
-  'packs.default.hero.search.ariaLabel':
+  'home.hero.search.ariaLabel':
     'Rechercher un produit responsable',
-  'packs.default.hero.search.cta': 'NUDGER',
-  'packs.default.hero.search.partnerLinkLabel':
+  'home.hero.search.cta': 'NUDGER',
+  'home.hero.search.partnerLinkLabel':
     '{formattedCount} partenaire | {formattedCount} partenaires',
-  'packs.default.hero.search.partnerLinkFallback': 'nos partenaires',
-  'packs.default.hero.search.helper': 'Comparateur indépendant',
-  'packs.default.hero.search.helpersTitle':
+  'home.hero.search.partnerLinkFallback': 'nos partenaires',
+  'home.hero.search.helper': 'Comparateur indépendant',
+  'home.hero.search.helpersTitle':
     'Offre avec intention. Compare avec impact.',
-  'packs.default.hero.search.helpers': [
+  'home.hero.search.helpers': [
     {
       icon: '🌿',
       label: 'Une évaluation écologique et environnementale unique',
@@ -49,17 +49,17 @@ const messages: Record<string, unknown> = {
       ],
     },
   ],
-  'packs.default.hero.iconAlt': 'Icône du lanceur PWA Nudger',
-  'packs.default.hero.context.ariaLabel':
+  'home.hero.iconAlt': 'Icône du lanceur PWA Nudger',
+  'home.hero.context.ariaLabel':
     'Carte contexte du héros présentant la promesse Nudger',
 }
 
 const helperItems = messages[
-  'packs.default.hero.search.helpers'
+  'home.hero.search.helpers'
 ] as unknown[]
 
 const subtitleCollections = {
-  default: messages['packs.default.hero.subtitles'] as string[],
+  default: messages['home.hero.subtitles'] as string[],
   events: {
     hold: messages['packs.hold.hero.subtitles'] as string[],
   },
@@ -128,11 +128,11 @@ vi.mock('vue-i18n', () => ({
         return messages[key]
       }
 
-      if (key === 'packs.default.hero.search.helpers') {
+      if (key === 'home.hero.search.helpers') {
         return helperItems
       }
 
-      if (key === 'packs.default.hero.subtitles') {
+      if (key === 'home.hero.subtitles') {
         return subtitleCollections.default
       }
 
@@ -140,7 +140,7 @@ vi.mock('vue-i18n', () => ({
         return subtitleCollections.events.hold
       }
 
-      if (key === 'packs.default.hero.titleSubtitle') {
+      if (key === 'home.hero.titleSubtitle') {
         return ['Acheter mieux. Sans dépenser plus.']
       }
 
@@ -247,12 +247,12 @@ describe('HomeHeroSection', () => {
     const eyebrow = wrapper.find('.home-hero__eyebrow')
     const icon = wrapper.find('.home-hero__icon')
 
-    expect(eyebrow.text()).toBe(messages['packs.default.hero.eyebrow'])
+    expect(eyebrow.text()).toBe(messages['home.hero.eyebrow'])
     expect(icon.attributes('src')).toBe(
       '/pwa-assets/icons/android/android-launchericon-512-512.png'
     )
     expect(icon.attributes('alt')).toBe(
-      messages['packs.default.hero.iconAlt']
+      messages['home.hero.iconAlt']
     )
 
     await wrapper.unmount()

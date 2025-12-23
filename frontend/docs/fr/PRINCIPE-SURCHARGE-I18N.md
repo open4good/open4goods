@@ -6,7 +6,7 @@ Ce document explique le mecanisme de surcharge des ressources i18n pour les pack
 
 ## Vue d'ensemble
 
-Le systeme de packs evenementiels permet de surcharger **n'importe quelle cle i18n** sans avoir a redefinir l'ensemble du fichier de localisation. Le mecanisme utilise une **chaine de fallback automatique** qui remonte vers la racine.
+Le systeme de packs evenementiels permet de surcharger **n'importe quelle cle i18n** sans avoir a redefinir l'ensemble du fichier de localisation. Le mecanisme utilise une **chaine de fallback simplifiee a 2 niveaux**.
 
 ---
 
@@ -16,12 +16,12 @@ Quand une cle est demandee (ex: `hero.title`), le systeme cherche dans cet ordre
 
 ```
 1. packs.{packActif}.{path}     →  packs.bastille-day.hero.title
-2. packs.default.{path}         →  packs.default.hero.title
-3. {path}                       →  hero.title (racine)
-4. fallbackKeys (optionnel)     →  cles de compatibilite
+2. {path}                       →  home.hero.title (RACINE)
 ```
 
 **Des qu'une cle est trouvee, la recherche s'arrete.**
+
+> **Note** : Il n'y a PAS de niveau `packs.default`. Les valeurs par defaut sont definies directement a la racine du fichier i18n (ex: `home.hero.*`).
 
 ---
 
@@ -37,6 +37,11 @@ Quand une cle est demandee (ex: `hero.title`), le systeme cherche dans cet ordre
         "title": "Celebrez le 14 juillet !"
       }
     }
+  },
+  "home": {
+    "hero": {
+      "title": "Acheter mieux. Sans depenser plus."
+    }
   }
 }
 ```
@@ -47,20 +52,20 @@ Demande : `hero.title` avec pack `bastille-day`
 
 ---
 
-### Exemple 2 : Cle non definie dans le pack, definie dans default
+### Exemple 2 : Cle non definie dans le pack
 
 ```json
 {
   "packs": {
-    "default": {
-      "hero": {
-        "title": "Acheter mieux. Sans depenser plus."
-      }
-    },
     "bastille-day": {
       "hero": {
         "eyebrow": "Special 14 juillet"
       }
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Acheter mieux. Sans depenser plus."
     }
   }
 }
@@ -68,35 +73,8 @@ Demande : `hero.title` avec pack `bastille-day`
 
 Demande : `hero.title` avec pack `bastille-day`
 - ✗ `packs.bastille-day.hero.title` n'existe pas
-- ✓ Trouve `packs.default.hero.title`
+- ✓ Trouve `home.hero.title` (via fallbackKeys vers la racine)
 - Resultat : `"Acheter mieux. Sans depenser plus."`
-
----
-
-### Exemple 3 : Cle non definie dans les packs, definie a la racine
-
-```json
-{
-  "packs": {
-    "default": {
-      "hero": {
-        "eyebrow": "Comparateur responsable"
-      }
-    }
-  },
-  "home": {
-    "hero": {
-      "title": "Titre depuis la racine"
-    }
-  }
-}
-```
-
-Demande : `home.hero.title` avec pack `bastille-day`
-- ✗ `packs.bastille-day.home.hero.title` n'existe pas
-- ✗ `packs.default.home.hero.title` n'existe pas
-- ✓ Trouve `home.hero.title` (racine)
-- Resultat : `"Titre depuis la racine"`
 
 ---
 
@@ -104,14 +82,13 @@ Demande : `home.hero.title` avec pack `bastille-day`
 
 ### Ce que vous devez definir
 
-**Dans `packs.default`** : Les valeurs par defaut pour les cles specifiques aux packs (hero, search, etc.)
-
 **Dans `packs.{votre-pack}`** : Uniquement les cles que vous voulez surcharger
 
-**A la racine** : Toutes les autres cles i18n (navigation, footer, pages, etc.)
+**A la racine** : Toutes les valeurs par defaut (navigation, footer, pages, hero, etc.)
 
 ### Ce que vous n'avez PAS besoin de faire
 
+- Creer un `packs.default`
 - Copier toutes les cles dans chaque pack
 - Redefinir les cles communes a chaque evenement
 - Gerer manuellement les fallbacks
@@ -126,15 +103,12 @@ Demande : `home.hero.title` avec pack `bastille-day`
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  packs:                                                     │
-│    ├── bastille-day:     ◄── 1. Cherche ici d'abord        │
-│    │     └── hero.title: "14 juillet"                       │
-│    │                                                        │
-│    └── default:          ◄── 2. Puis ici                   │
-│          └── hero.title: "Acheter mieux"                    │
+│    └── bastille-day:     ◄── 1. Cherche ici d'abord        │
+│          └── hero.title: "14 juillet"                       │
 │                                                             │
-│  home:                   ◄── 3. Puis a la racine           │
+│  home:                   ◄── 2. Puis a la racine           │
 │    └── hero:                                                │
-│          └── title: "Titre racine"                          │
+│          └── title: "Acheter mieux"                         │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -149,17 +123,15 @@ Demande : `home.hero.title` avec pack `bastille-day`
 const activeEventPack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(activeEventPack)
 
-// Resolution automatique avec fallback
-const title = packI18n.resolveString('hero.title')
-
-// Avec fallback explicite supplementaire (rare)
-const subtitle = packI18n.resolveString('hero.subtitle', {
-  fallbackKeys: ['home.hero.subtitle']
+// Resolution automatique avec fallback vers la racine
+const title = packI18n.resolveString('hero.title', {
+  fallbackKeys: ['home.hero.title']
 })
 
-// Desactiver le fallback vers la racine (rare)
-const strictValue = packI18n.resolveString('hero.custom', {
-  noRootFallback: true
+// Pour les tableaux avec selection aleatoire
+const subtitle = packI18n.resolveStringVariant('hero.subtitles', {
+  stateKey: 'home-hero-subtitles',
+  fallbackKeys: ['home.hero.subtitles']
 })
 ```
 
@@ -167,8 +139,7 @@ const strictValue = packI18n.resolveString('hero.custom', {
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `fallbackKeys` | `string[]` | Cles additionnelles a essayer apres la racine |
-| `noRootFallback` | `boolean` | Desactiver le fallback vers la racine |
+| `fallbackKeys` | `string[]` | Cles additionnelles a essayer apres le pack (racine) |
 
 ---
 
@@ -189,29 +160,23 @@ const strictValue = packI18n.resolveString('hero.custom', {
 }
 ```
 
-Les autres cles (`search`, `helpers`, etc.) viendront de `packs.default` ou de la racine.
+Les autres cles (`search`, `helpers`, etc.) viendront automatiquement de la racine.
 
-### 2. Garder `packs.default` complet pour les cles hero
+### 2. Garder la racine complete
 
 ```json
 {
-  "packs": {
-    "default": {
-      "hero": {
-        "eyebrow": "...",
-        "title": "...",
-        "titleSubtitle": ["..."],
-        "subtitles": ["...", "..."],
-        "search": { ... }
-      }
+  "home": {
+    "hero": {
+      "eyebrow": "Comparateur responsable",
+      "title": "Acheter mieux. Sans depenser plus.",
+      "titleSubtitle": ["..."],
+      "subtitles": ["...", "..."],
+      "search": { ... }
     }
   }
 }
 ```
-
-### 3. Ne pas dupliquer les cles globales
-
-Les cles comme `navigation.*`, `footer.*`, `product.*` restent a la racine et ne sont pas concernees par les packs.
 
 ---
 
@@ -237,7 +202,6 @@ console.log(packI18n.packKey.value)
 | Niveau | Cle | Quand utiliser |
 |--------|-----|----------------|
 | `packs.{pack}.*` | Surcharge specifique | Personnalisation evenementielle |
-| `packs.default.*` | Valeur par defaut | Cles communes aux packs |
-| Racine (`*`) | Fallback automatique | Toutes les autres cles |
+| Racine (`home.hero.*`, etc.) | Valeur par defaut | Toutes les autres cles |
 
-**Principe cle** : Definissez uniquement ce qui change. Le reste est herite automatiquement.
+**Principe cle** : Definissez uniquement ce qui change dans le pack. Le reste est herite de la racine.

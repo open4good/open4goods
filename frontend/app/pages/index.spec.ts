@@ -3,57 +3,13 @@ import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, unknown> = {
-  'packs.default.hero.search.label': 'Search for a product',
-  'packs.default.hero.search.placeholder': 'Search a product',
-  'packs.default.hero.search.ariaLabel': 'Search input',
-  'packs.default.hero.search.cta': 'NUDGER',
-  'packs.default.hero.search.helper': '50M references',
-  'packs.default.hero.search.helpersTitle':
-    'Shop with intention. Compare for impact.',
-  'packs.default.hero.search.helpers': [
-    {
-      icon: '🌿',
-      label: 'A unique eco assessment',
-      segments: [{ text: 'A unique eco assessment' }],
-    },
-    {
-      icon: '🏷️',
-      label: 'Best prices',
-      segments: [
-        { text: 'Pay the right price with' },
-        { text: '{partnersLink}', to: '/partners' },
-      ],
-    },
-    {
-      icon: '🛡️',
-      label: 'Independent & open',
-      segments: [{ text: 'Independent & open' }],
-    },
-    {
-      icon: '⚡',
-      label: '50M references',
-      segments: [{ text: '50M references' }],
-    },
-  ],
-  'packs.default.hero.search.partnerLinkLabel':
-    '{formattedCount} partner | {formattedCount} partners',
-  'packs.default.hero.search.partnerLinkFallback': 'our partners',
-  'packs.default.hero.eyebrow': 'Responsible shopping',
-  'packs.default.hero.title': 'Responsible choices are not a luxury',
-  'packs.default.hero.subtitles': [
-    'Save time, stay true to your values.',
-    'Shop smarter without compromise.',
-  ],
-  'packs.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
-  'packs.default.hero.imageAlt': 'Hero illustration',
-  'packs.default.hero.iconAlt': 'Hero icon',
-  'packs.default.hero.context.ariaLabel':
-    'Hero context card summarising Nudger’s promise',
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',
   'home.hero.search.ariaLabel': 'Search input',
   'home.hero.search.cta': 'NUDGER',
   'home.hero.search.helper': '50M references',
+  'home.hero.search.helpersTitle':
+    'Shop with intention. Compare for impact.',
   'home.hero.search.helpers': [
     {
       icon: '🌿',
@@ -85,7 +41,15 @@ const messages: Record<string, unknown> = {
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Responsible choices are not a luxury',
   'home.hero.subtitle': 'Save time, stay true to your values.',
+  'home.hero.subtitles': [
+    'Save time, stay true to your values.',
+    'Shop smarter without compromise.',
+  ],
+  'home.hero.titleSubtitle': ['Buy better. Spend smarter.'],
   'home.hero.imageAlt': 'Hero illustration',
+  'home.hero.iconAlt': 'Hero icon',
+  'home.hero.context.ariaLabel':
+    'Hero context card summarising Nudger\'s promise',
   'home.problems.title': 'Too many labels, not enough clarity?',
   'home.problems.items.labelsOverload':
     'Lost in the jungle of labels? Hard to truly compare.',

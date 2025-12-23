@@ -1,7 +1,6 @@
 import { computed, toValue, type MaybeRef } from 'vue'
 
 import {
-  DEFAULT_EVENT_PACK,
   EVENT_PACK_I18N_BASE_KEY,
   type EventPackName,
 } from '~~/config/theme/event-packs'
@@ -9,8 +8,6 @@ import {
 type ResolveOptions = {
   /** Cles de fallback additionnelles (apres la racine) */
   fallbackKeys?: string[]
-  /** Desactiver le fallback automatique vers la racine */
-  noRootFallback?: boolean
 }
 
 type VariantOptions = ResolveOptions & {
@@ -34,12 +31,10 @@ const toStringArray = (value: unknown): string[] => {
 /**
  * Composable pour resoudre les ressources i18n d'un pack evenementiel.
  *
- * ## Chaine de resolution (fallback automatique)
+ * ## Chaine de resolution
  *
- * 1. `packs.{packActuel}.{path}` - Valeur specifique au pack actif
- * 2. `packs.default.{path}` - Valeur par defaut des packs
- * 3. `{path}` - Fallback vers la racine du fichier i18n
- * 4. `fallbackKeys` - Cles de fallback additionnelles (optionnel)
+ * 1. `packs.{packActif}.{path}` - Surcharge evenementielle
+ * 2. `{path}` - Valeur a la racine (par defaut)
  *
  * ## Exemple
  *
@@ -48,16 +43,15 @@ const toStringArray = (value: unknown): string[] => {
  * const packI18n = useEventPackI18n(activeEventPack)
  *
  * // Cherche: packs.bastille-day.hero.title
- * //    puis: packs.default.hero.title
  * //    puis: hero.title (racine)
  * const title = packI18n.resolveString('hero.title')
  * ```
  *
  * ## Principe de surcharge
  *
- * - Les packs peuvent surcharger N'IMPORTE QUELLE cle i18n
- * - Si non definie dans le pack, on remonte vers default puis vers la racine
- * - Le fallback vers la racine permet de ne definir que les cles a personnaliser
+ * - Les packs surchargent uniquement les cles qu'ils redefinissent
+ * - Toutes les autres cles viennent de la racine du fichier i18n
+ * - Pas de niveau intermediaire "default" : simple et previsible
  */
 export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
   const { tm, te } = useI18n()
@@ -67,42 +61,33 @@ export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
     () => ({})
   )
 
-  const buildKey = (path: string, pack: EventPackName) =>
+  const buildPackKey = (path: string, pack: EventPackName) =>
     `${EVENT_PACK_I18N_BASE_KEY}.${pack}.${path}`
 
   /**
-   * Resout une valeur brute avec la chaine de fallback complete.
+   * Resout une valeur brute avec la chaine de fallback.
    *
    * Ordre de resolution:
-   * 1. packs.{pack}.{path}
-   * 2. packs.default.{path}
-   * 3. {path} (racine) - sauf si noRootFallback=true
-   * 4. fallbackKeys additionnels
+   * 1. packs.{pack}.{path} - surcharge evenementielle
+   * 2. {path} - valeur racine (defaut)
+   * 3. fallbackKeys - cles additionnelles (optionnel)
    */
   const resolveRaw = (path: string | string[], options?: ResolveOptions) => {
     const normalizedPath = toFlatPath(path)
     const pack = toValue(packName)
 
     // 1. Chercher dans le pack actif
-    const packKey = buildKey(normalizedPath, pack)
+    const packKey = buildPackKey(normalizedPath, pack)
     if (te(packKey)) {
       return tm(packKey)
     }
 
-    // 2. Chercher dans le pack default
-    if (pack !== DEFAULT_EVENT_PACK) {
-      const defaultKey = buildKey(normalizedPath, DEFAULT_EVENT_PACK)
-      if (te(defaultKey)) {
-        return tm(defaultKey)
-      }
-    }
-
-    // 3. Fallback vers la racine (comportement i18n standard)
-    if (!options?.noRootFallback && te(normalizedPath)) {
+    // 2. Fallback vers la racine
+    if (te(normalizedPath)) {
       return tm(normalizedPath)
     }
 
-    // 4. Fallback keys additionnels
+    // 3. Fallback keys additionnels (compatibilite)
     for (const key of options?.fallbackKeys ?? []) {
       if (te(key)) {
         return tm(key)

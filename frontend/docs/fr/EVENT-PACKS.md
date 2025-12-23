@@ -89,7 +89,7 @@ Les textes sont a la **racine** du fichier JSON sous la cle `packs` :
 
 ### Surcharger une cle
 
-Definissez uniquement les cles a personnaliser. Les cles non definies heritent automatiquement de `packs.default`.
+Definissez uniquement les cles a personnaliser. Les cles non definies heritent automatiquement de la racine (ex: `home.hero.*`).
 
 ```json
 {
@@ -104,9 +104,17 @@ Definissez uniquement les cles a personnaliser. Les cles non definies heritent a
         ]
       }
     }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Comparateur responsable",
+      "title": "Acheter mieux. Sans depenser plus."
+    }
   }
 }
 ```
+
+> **Note** : Il n'y a pas de niveau `packs.default`. Les valeurs par defaut sont definies directement a la racine.
 
 ### Cles disponibles
 
@@ -226,7 +234,7 @@ export const eventParallaxPacks = {
 
 1. Valeur definie dans i18n (`packs.{pack}.parallax.*`)
 2. Valeur definie dans TypeScript (`eventParallaxPacks`)
-3. Fallback vers `packs.default`
+3. Fallback vers la racine (ex: `home.hero.*`)
 
 ---
 

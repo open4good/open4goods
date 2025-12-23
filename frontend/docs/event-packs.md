@@ -1,6 +1,6 @@
 # Event Packs - Localization & Assets (Frontend)
 
-This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `default`, `hold`, `sdg`, `bastille-day`) and fall back to `default` when a field is missing.
+This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `hold`, `sdg`, `bastille-day`) and fall back to root keys when a field is missing.
 
 ## Configuration
 
@@ -45,7 +45,7 @@ export const EVENT_PACK_NAMES = [
 
 ## I18n Structure
 
-All pack-aware strings live under `packs.<pack>.*` at the root of locale files. The `default` branch contains the baseline values.
+All pack-aware strings live under `packs.<pack>.*` at the root of locale files. Default values are defined at the root (e.g., `home.hero.*`).
 
 **Location:**
 ```
@@ -58,22 +58,6 @@ frontend/i18n/locales/fr-FR.json
 ```jsonc
 {
   "packs": {
-    "default": {
-      "hero": {
-        "eyebrow": "Responsible shopping",
-        "title": "Responsible choices aren't a luxury",
-        "titleSubtitle": ["Buy better. Spend smarter."],
-        "subtitles": [
-          "Save time, stay true to your values.",
-          "Shop smarter without compromise."
-        ],
-        "search": {
-          "label": "Search for a product",
-          "placeholder": "Search a product (e.g. television, smartphone...)",
-          "helpers": [...]
-        }
-      }
-    },
     "bastille-day": {
       "hero": {
         "eyebrow": "Bastille Day special",
@@ -87,10 +71,27 @@ frontend/i18n/locales/fr-FR.json
       }
     }
   },
-  "blog": { ... },
-  "home": { ... }
+  "home": {
+    "hero": {
+      "eyebrow": "Responsible shopping",
+      "title": "Responsible choices aren't a luxury",
+      "titleSubtitle": ["Buy better. Spend smarter."],
+      "subtitles": [
+        "Save time, stay true to your values.",
+        "Shop smarter without compromise."
+      ],
+      "search": {
+        "label": "Search for a product",
+        "placeholder": "Search a product (e.g. television, smartphone...)",
+        "helpers": [...]
+      }
+    }
+  },
+  "blog": { ... }
 }
 ```
+
+> **Note**: There is no `packs.default` level. Default values are defined directly at the root of the i18n file (e.g., `home.hero.*`).
 
 ### Keys you can override per pack
 
@@ -102,9 +103,10 @@ frontend/i18n/locales/fr-FR.json
 
 ## Fallback Rules
 
+Resolution chain (2 levels only):
+
 1. Try `packs.<activePack>.<path>`
-2. Fallback to `packs.default.<path>`
-3. Optional extra fallback keys can be provided per call (legacy `home.hero.*` is kept as a safety net)
+2. Fallback to root key via `fallbackKeys` (e.g., `home.hero.*`)
 
 ## Rendering-time Randomization
 
@@ -229,7 +231,7 @@ pnpm dev
 |------|---------|
 | `config/theme/event-packs.ts` | Pack definitions and date windows |
 | `config/theme/assets.ts` | Asset configurations |
-| `i18n/locales/*.json` | Localized strings (`packs` key) |
+| `i18n/locales/*.json` | Localized strings (`packs` key for overrides, root for defaults) |
 | `composables/useSeasonalEventPack.ts` | Active pack resolution |
 | `composables/useEventPackI18n.ts` | I18n string resolution |
 | `composables/useThemedParallaxBackgrounds.ts` | Parallax asset resolution |
