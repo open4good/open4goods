@@ -363,12 +363,6 @@
         "upcType": {
           "type": "keyword",
           "index": false
-        },
-        "embedding": {
-          "type": "dense_vector",
-          "dims": 512,
-          "index": true,
-          "similarity": "cosine"
         }
       }
     }
