@@ -22,6 +22,8 @@ export const THEME_ASSET_KEYS = [
   'favicon',
   'heroBackground',
   'illustration',
+  'problemImage',
+  'solutionImage',
 ] as const
 
 export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]

@@ -1,6 +1,6 @@
-<script setup lang="ts">
 import { computed } from 'vue'
 import HomeSplitSection from './HomeSplitSection.vue'
+import { useThemeAsset } from '~/composables/useThemedAsset'
 
 type ProblemItem = {
   icon: string
@@ -15,8 +15,10 @@ const { t } = useI18n()
 
 const sectionTitle = computed(() => t('home.problems.title'))
 const sectionDescription = computed(() => t('home.problems.description'))
+const problemImageAsset = useThemeAsset('problemImage')
+
 const visualImage = computed(() => ({
-  src: '/images/home/nudger-problem.webp',
+  src: problemImageAsset.value || '/images/home/nudger-problem.webp',
   alt: sectionTitle.value,
   sizes: '(min-width: 960px) 360px, 70vw',
   width: 1024,

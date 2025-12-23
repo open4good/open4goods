@@ -6,7 +6,9 @@
         "illustration": "placeholders/illustration.svg",
         "logo": "placeholders/logo.svg",
         "footerLogo": "placeholders/logo-footer.svg",
-        "favicon": "placeholders/favicon.svg"
+        "favicon": "placeholders/favicon.svg",
+        "problemImage": "placeholders/problem.webp",
+        "solutionImage": "placeholders/solution.webp"
       },
       "parallax": {
         "essentials": "parallax/parallax-placeholder.svg",
@@ -107,7 +109,9 @@
     "bastille-day": {
       "assets": {
         "heroBackground": "bastille-day/hero-background.svg",
-        "illustration": "bastille-day/illustration-fireworks.svg"
+        "illustration": "bastille-day/illustration-fireworks.svg",
+        "problemImage": "bastille-day/problem.webp",
+        "solutionImage": "bastille-day/solution.webp"
       },
       "hero": {
         "eyebrow": "Spécial 14 juillet",

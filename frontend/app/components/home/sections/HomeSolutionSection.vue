@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useThemeAsset } from '~/composables/useThemedAsset'
 
 type SolutionBenefit = {
   emoji: string
@@ -15,6 +16,7 @@ const { t } = useI18n()
 
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
+const solutionImageAsset = useThemeAsset('solutionImage')
 </script>
 
 <template>
@@ -60,7 +62,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
             <img
-              src="/images/home/nudger-screaming.webp"
+              :src="solutionImageAsset || '/images/home/nudger-screaming.webp'"
               :alt="sectionTitle"
               class="home-solution__image"
               sizes="(min-width: 960px) 306px, 60vw"

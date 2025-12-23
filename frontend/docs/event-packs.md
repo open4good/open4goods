@@ -1,5 +1,3 @@
-TODO : Create FR version
-
 # Event Packs - Localization & Assets (Frontend)
 
 This document explains how event packs drive both assets (parallaxes, themed visuals) and **localized copy** for the home page. Packs are resolved by name (e.g. `default`, `hold`, `sdg`, `bastille-day`) based on the URL parameter `?event=` or the current date.
@@ -48,112 +46,114 @@ http://localhost:3000?event=sdg
 3.  **Add content & assets**:
     Update `frontend/i18n/locales/fr-FR.json` (and other locales) with the pack configuration.
 
-    ```json
-    "packs": {
-      "christmas": {
-        "hero": {
-          "title": "Joyeux Noël responsable",
-          "subtitles": ["Offrez des cadeaux durables."]
-        },
-        "assets": {
-          "heroBackground": "christmas/hero-background.svg"
-        },
-        "parallax": {
-          "essentials": "parallax/christmas-essentials.svg"
-        }
-      }
-    }
-    ```
-    
-# A nice complete pack could contains :
+## Checkpoints & Configuration
 
-> Homepage hero background image // TODO : Check src is i18n key
-> Homepage hero subtitle
-> Todo the "Gagne du temps. Choisis librement." title 
+Here is a **minimal pack configuration** that covers all the essential customization points (Hero, Parallax, and Section Images).
 
-> TODO : Add parallax home pages paths
-> TODO : Check they are well pointed and src being definied fully through i18n key 
+```json
+"packs": {
+  "my-event-pack": {
+    "hero": {
+      // 1. Homepage Hero Title (overrides "Acheter mieux...")
+      "title": "Achetez malin pour Noël",
 
-TODO : get i18n samples containing those keys
-
-
-    
-
-## Architecture & Configuration
-
-### Pack definitions
-
-Event packs are configured in:
-`frontend/config/theme/event-packs.ts`
-
-This file contains:
-
-- `EVENT_PACK_NAMES`: List of available pack names.
-- `eventPackSchedule`: Date windows for automatic pack activation.
-- Resolution functions (`resolveActiveEventPack`, `resolveEventPackName`).
-
-### I18n Structure
-
-TODO : Ensure this i18n pack overriding mechanism is generic (can be applied on any keys) and efficient / documented
-
-All pack-aware strings and asset paths live under `packs.<pack>.*` at the root of locale files.
-
-**Location:** `frontend/i18n/locales/fr-FR.json`
-
-**Structure:**
-
-```jsonc
-{
-  "packs": {
-    "default": {
-      "hero": { ... },   // Default text content
-      "assets": { ... }, // Default static assets
-      "parallax": { ... } // Default parallax layers
+      // 2. Homepage Hero Subtitle (overrides "Gagne du temps...")
+      "subtitles": [
+        "Des cadeaux durables pour toute la famille."
+      ]
     },
-    "bastille-day": {
-      "hero": {
-        "eyebrow": "Spécial 14 juillet",
-        "title": "Célébrez des choix responsables"
-      },
-      "assets": {
-        "heroBackground": "bastille-day/hero-background.svg"
-      },
-      "parallax": {
-        "essentials": "parallax/parallax-background-bastille-essentials.svg"
-      }
+    "assets": {
+      // 3. Homepage Hero Background Image
+      "heroBackground": "my-pack/hero-background.svg",
+
+      // 4. Pain and Gain Images (Sections after Hero)
+      "problemImage": "my-pack/problem.webp",
+      "solutionImage": "my-pack/solution.webp"
+    },
+	
+TODO : Add header background samples 
+TODO : Create an exaustiv listing of page headers versus page route mapping
+TODO : i think most /* pages headers are not using generic one
+TODO : page header is not documented. Create a specific separate doc
+
+
+
+TODO : We will complete here once investigated with major pages	
+    "parallax": {
+      // 5. Parallax Home Page Paths
+      "essentials": "parallax/my-pack-essentials.svg",
+      "features": "parallax/my-pack-features.svg",
+      "blog": "parallax/my-pack-blog.svg",
+      "objections": "parallax/my-pack-objections.svg",
+      "cta": "parallax/my-pack-cta.svg"
     }
   }
 }
 ```
 
-### Assets Configuration
 
-Assets are now fully managed via i18n keys. This allows different assets per locale if needed, but primarily groups all pack configuration in one place.
 
-#### Static Assets
+### Full Configuration Reference
 
-Defined under `packs.<pack>.assets`. common keys:
+#### Pack definitions
 
-- `heroBackground`
-- `illustration`
-- `logo`, `footerLogo`, `favicon` (mostly for `hold` pack)
+Event packs are configured in: `frontend/config/theme/event-packs.ts`
 
-#### Parallax Backgrounds
+- `EVENT_PACK_NAMES`: List of available pack names.
+- `eventPackSchedule`: Date windows for automatic pack activation.
 
-Defined under `packs.<pack>.parallax`. Keys correspond to homepage sections:
+#### I18n Structure
 
-- `essentials`
-- `features`
-- `blog`
-- `objections`
-- `cta`
+All pack-aware strings and asset paths live under `packs.<pack>.*` at the root of locale files (`frontend/i18n/locales/fr-FR.json`).
+The system prioritizes keys found in the active pack's structure.
 
-**Asset File Location:**
-Place your SVG/image files in:
-`frontend/app/assets/themes/`
+#### Assets
 
-You can organize them by theme or pack, e.g., `frontend/app/assets/themes/bastille-day/hero-background.svg`.
-The i18n value should be the relative path from `assets/themes/`.
+Assets are managed via i18n keys resolving to paths in `frontend/app/assets/themes/`.
+
+| Key              | Description              | Example Path in i18n  |
+| :--------------- | :----------------------- | :-------------------- |
+| `heroBackground` | Hero section background  | `theme/hero-bg.svg`   |
+| `illustration`   | Generic illustration     | `theme/illus.svg`     |
+| `problemImage`   | "Problems" section image | `theme/problem.webp`  |
+| `solutionImage`  | "Solution" section image | `theme/solution.webp` |
+| `logo`           | Site Logo                | `theme/logo.svg`      |
+
+#### Parallax
+
+#### Page Header Integration
+
+The generic `PageHeader` component supports event pack assets for background images and expanded container options.
+
+**Dynamic Backgrounds**
+
+To use a pack-defined asset as a header background, use `backgroundImageAssetKey`:
+
+```vue
+<PageHeader
+  title="My Page"
+  background="image"
+  background-image-asset-key="heroBackground"
+/>
+```
+
+The key (e.g., `heroBackground`) must be defined in the pack's `assets` configuration or `themeAssets`.
+
+**Container Options**
+
+`PageHeader` supports a `semi-fluid` width (max 1560px), bridging the gap between standard container (1280px) and fluid (full width).
+
+```vue
+<PageHeader title="Wide Page" container="semi-fluid" />
+```
+
+Defined under `packs.<pack>.parallax`.
+
+- `essentials`: Background for Problems/Solution stack.
+- `features`: Background for Features grid.
+- `blog`: Background for Blog section.
+- `objections`: Background for Objections section.
+- `cta`: Background for FAQ/CTA section.
 
 ## Developer Guide
 
@@ -166,7 +166,6 @@ const activePack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(activePack)
 
 // Resolves packs.<activePack>.hero.title
-// Falls back to provided fallbackKeys if not found in the pack
 const heroTitle = computed(() =>
   packI18n.resolveString('hero.title', { fallbackKeys: ['home.hero.title'] })
 )
@@ -174,7 +173,7 @@ const heroTitle = computed(() =>
 
 ### Rendering-time Randomization
 
-Lists (e.g. `hero.subtitles`) are randomized **per render** using a consistent seed to avoid hydration mismatches.
+Lists (e.g. `hero.subtitles`) are randomized **per render** using a consistent seed.
 
 ```typescript
 const heroSubtitle = computed(() =>
@@ -187,8 +186,12 @@ const heroSubtitle = computed(() =>
 
 ### Asset Resolution
 
-Use `useThemedAsset` or `useThemedParallaxBackgrounds`. These composables automatically look up the correct path in the i18n file for the active pack.
+Use `useThemeAsset` (generic) or `useThemedParallaxBackgrounds`.
 
 ```typescript
+// For generic assets defined in assets.ts
+const problemImage = useThemeAsset('problemImage')
+
+// For hero background specifically
 const heroBackground = useHeroBackgroundAsset()
 ```

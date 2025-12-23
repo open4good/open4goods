@@ -1,4 +1,4 @@
-import { computed, toValue } from 'vue'
+import { computed, toValue, type MaybeRef } from 'vue'
 import { useTheme } from 'vuetify'
 
 import {
@@ -103,14 +103,17 @@ export const useThemedAsset = (relativePath: string) => {
   )
 }
 
-export const useThemeAsset = (assetKey: ThemeAssetKey) => {
+export const useThemeAsset = (assetKey: MaybeRef<ThemeAssetKey>) => {
   const themeName = useCurrentThemeName()
   const seasonalPack = useSeasonalEventPack()
   const packI18n = useEventPackI18n(seasonalPack)
 
   return computed(() => {
+    const key = toValue(assetKey)
+    if (!key) return ''
+
     const pack = toValue(seasonalPack)
-    const i18nAsset = packI18n.resolveString(`assets.${assetKey}`)
+    const i18nAsset = packI18n.resolveString(`assets.${key}`)
 
     // 1. Resolve candidates from i18n
     const candidates: string[] = []
@@ -119,9 +122,9 @@ export const useThemeAsset = (assetKey: ThemeAssetKey) => {
     }
 
     // 2. Add fallback candidates from static themeAssets config
-    const fromTheme = themeAssets[themeName.value]?.[assetKey]
-    const fromCommon = themeAssets.common?.[assetKey]
-    const fallback = themeAssets[THEME_ASSETS_FALLBACK]?.[assetKey]
+    const fromTheme = themeAssets[themeName.value]?.[key]
+    const fromCommon = themeAssets.common?.[key]
+    const fallback = themeAssets[THEME_ASSETS_FALLBACK]?.[key]
 
     if (fromTheme) candidates.push(fromTheme)
     if (fromCommon) candidates.push(fromCommon)

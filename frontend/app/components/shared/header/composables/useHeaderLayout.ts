@@ -60,6 +60,9 @@ export function useHeaderLayout(options: UseHeaderLayoutOptions) {
   /**
    * Vuetify v-container props
    */
+  /**
+   * Vuetify v-container props
+   */
   const vuetifyContainerProps = computed(() => ({
     fluid: options.container === 'fluid',
     ...(options.container !== 'fluid' && {
@@ -72,7 +75,9 @@ export function useHeaderLayout(options: UseHeaderLayoutOptions) {
               ? '1920px'
               : options.container === 'xxl'
                 ? '2560px'
-                : undefined,
+                : options.container === 'semi-fluid'
+                  ? '1560px'
+                  : undefined,
       },
     }),
   }))
