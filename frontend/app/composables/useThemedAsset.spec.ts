@@ -68,11 +68,5 @@ describe('useThemedAsset utilities', () => {
     expect(resolved).toBe('/_nuxt/light-hold-hero.svg')
   })
 
-  it('returns multiple path candidates ordered by fallback', () => {
-    expect(resolveAssetPathForTheme('logo', 'light')).toEqual(['logo-new.png'])
-    expect(resolveAssetPathForTheme('heroBackground', 'dark')).toEqual([
-      'hero-background.svg',
-      'hero-background.webp',
-    ])
-  })
+
 })

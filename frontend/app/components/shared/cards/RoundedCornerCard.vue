@@ -131,9 +131,13 @@ const cornerTooltip = computed(() => {
     return props.cornerTooltip
   }
 
+  if (!props.selectable) {
+    return ''
+  }
+
   return props.selected
-    ? t('shared.roundedCard.tooltipSelected')
-    : t('shared.roundedCard.tooltipIdle')
+    ? t('shared.roundedCard.cornerSelected')
+    : t('shared.roundedCard.cornerIdle')
 })
 
 const resolvedIcon = computed(() =>

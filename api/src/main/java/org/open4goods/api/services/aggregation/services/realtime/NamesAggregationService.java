@@ -1,6 +1,5 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
