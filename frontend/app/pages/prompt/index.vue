@@ -46,6 +46,7 @@
           :loading="submitting"
           @submit="onSubmit"
           @cancel="onCancel"
+          @fallback-contact="onFallbackContact"
         />
       </div>
 
@@ -215,6 +216,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { useAgent } from '@/composables/useAgent'
 import type {
   AgentTemplateDto,
@@ -230,6 +232,7 @@ import AgentTemplateSelector from '@/components/agent/AgentTemplateSelector.vue'
 import AgentPromptInput from '@/components/agent/AgentPromptInput.vue'
 
 const { t, locale } = useI18n()
+const route = useRoute()
 useHead({
   title: t('agents.meta.title'),
   meta: [{ name: 'description', content: t('agents.meta.description') }],
@@ -342,6 +345,54 @@ async function onSubmit({
     alert(
       'Failed to submit request. Please try again or use the email fallback.'
     )
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function onFallbackContact({
+  prompt,
+  attributeValues,
+  captchaToken,
+}: {
+  prompt: string
+  attributeValues: Record<string, unknown>
+  captchaToken?: string
+}) {
+  if (!selectedTemplate.value || !mailtoLink.value) return
+  if (!captchaToken) {
+    alert(t('agents.promptInput.required'))
+    return
+  }
+  submitting.value = true
+  try {
+    const nameFromAttributes = String(attributeValues.name ?? '').trim()
+    const emailFromAttributes = String(attributeValues.email ?? '').trim()
+    const contactName =
+      nameFromAttributes || t('agents.promptInput.anonymousName')
+    const contactEmail = emailFromAttributes || 'contact@nudger.fr'
+    const attributeSummary =
+      Object.keys(attributeValues).length > 0
+        ? JSON.stringify(attributeValues, null, 2)
+        : t('agents.promptInput.noAttributes')
+
+    await $fetch('/api/contact', {
+      method: 'POST',
+      body: {
+        name: contactName,
+        email: contactEmail,
+        message: `${selectedTemplate.value.name}\n\n${prompt}\n\n${attributeSummary}`,
+        hCaptchaResponse: captchaToken,
+        templateId: selectedTemplate.value.id,
+        sourceRoute: route.path,
+        sourceComponent: 'AgentPromptInput',
+        sourcePage: 'Agents Prompt',
+      },
+    })
+    alert(t('agents.submission.success'))
+  } catch (error) {
+    console.error('Fallback contact failed', error)
+    alert(t('common.error'))
   } finally {
     submitting.value = false
   }

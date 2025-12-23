@@ -2808,10 +2808,12 @@
       "required": "Request cannot be empty",
       "private": "Make my prompt private",
       "privateDescription": "The issue will be public, but your prompt text will be hidden.",
-      "email": "Prefer email?",
-      "emailDescription": "You can use your default email client instead.",
-      "openEmail": "Open Email Client",
-      "details": "Additional Details"
+      "email": "Prefer something quieter?",
+      "emailDescription": "We will send your request through the Contact Service with a prefilled email.",
+      "openEmail": "Send via Contact Service",
+      "details": "Additional Details",
+      "noAttributes": "No additional information provided.",
+      "anonymousName": "Nudger User"
     },
     "submission": {
       "success": "Request Submitted!",

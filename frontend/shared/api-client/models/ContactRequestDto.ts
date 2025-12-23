@@ -43,6 +43,36 @@ export interface ContactRequestDto {
      * @memberof ContactRequestDto
      */
     hCaptchaResponse: string;
+    /**
+     * Identifier of the mail template to use for composing the email.
+     * @type {string}
+     * @memberof ContactRequestDto
+     */
+    templateId?: string | null;
+    /**
+     * Optional subject override when the template is not available.
+     * @type {string}
+     * @memberof ContactRequestDto
+     */
+    subject?: string | null;
+    /**
+     * Frontend route from which the request originates.
+     * @type {string}
+     * @memberof ContactRequestDto
+     */
+    sourceRoute?: string | null;
+    /**
+     * Component or page identifier initiating the request.
+     * @type {string}
+     * @memberof ContactRequestDto
+     */
+    sourceComponent?: string | null;
+    /**
+     * Human readable page title that initiated the request.
+     * @type {string}
+     * @memberof ContactRequestDto
+     */
+    sourcePage?: string | null;
 }
 
 /**
@@ -70,6 +100,11 @@ export function ContactRequestDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'email': json['email'],
         'message': json['message'],
         'hCaptchaResponse': json['h-captcha-response'],
+        'templateId': json['templateId'] == null ? null : json['templateId'],
+        'subject': json['subject'] == null ? null : json['subject'],
+        'sourceRoute': json['sourceRoute'] == null ? null : json['sourceRoute'],
+        'sourceComponent': json['sourceComponent'] == null ? null : json['sourceComponent'],
+        'sourcePage': json['sourcePage'] == null ? null : json['sourcePage'],
     };
 }
 
@@ -88,6 +123,10 @@ export function ContactRequestDtoToJSONTyped(value?: ContactRequestDto | null, i
         'email': value['email'],
         'message': value['message'],
         'h-captcha-response': value['hCaptchaResponse'],
+        'templateId': value['templateId'],
+        'subject': value['subject'],
+        'sourceRoute': value['sourceRoute'],
+        'sourceComponent': value['sourceComponent'],
+        'sourcePage': value['sourcePage'],
     };
 }
-

@@ -30,5 +30,20 @@ public record ContactRequestDto(
         @JsonProperty("h-captcha-response")
         @Schema(name = "h-captcha-response", description = "Token returned by the hCaptcha widget.",
                 example = "10000000-aaaa-bbbb-cccc-000000000001")
-        String captchaResponse) {
+        String captchaResponse,
+
+        @Schema(description = "Identifier of the mail template to use for composing the email.", example = "agent-question")
+        String templateId,
+
+        @Schema(description = "Optional subject override when the template is not available.", example = "[Agent] Nouvelle demande")
+        String subject,
+
+        @Schema(description = "Frontend route from which the request originates.", example = "/prompt")
+        String sourceRoute,
+
+        @Schema(description = "Component or page identifier initiating the request.", example = "AgentPromptInput")
+        String sourceComponent,
+
+        @Schema(description = "Human readable page title that initiated the request.", example = "Espace Agents IA")
+        String sourcePage) {
 }
