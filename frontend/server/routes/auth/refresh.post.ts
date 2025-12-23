@@ -38,6 +38,7 @@ export default defineEventHandler(async (event: H3Event) => {
       sameSite,
       secure,
       path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     }
     setCookie(
       event,
@@ -51,8 +52,8 @@ export default defineEventHandler(async (event: H3Event) => {
       tokens.refreshToken,
       cookieOptions
     )
-    // Return tokens to allow the client to update the auth store reactively
-    return tokens
+    // Decode JWT server-side and return only the auth state (never expose raw tokens to client)
+    return decodeAuthStateFromToken(tokens.accessToken)
   } catch (err) {
     if (err instanceof FetchError) {
       const fallbackStatusCode = 401

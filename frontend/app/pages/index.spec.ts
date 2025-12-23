@@ -195,7 +195,8 @@ const messages: Record<string, unknown> = {
   'home.faq.agent.dynamicAnswerPending': 'Thanks! Your question is in queue.',
   'home.faq.agent.preview.eyebrow': 'Live AI feed',
   'home.faq.agent.preview.title': 'Latest AI answer',
-  'home.faq.agent.preview.subtitle': 'The freshest public question appears here.',
+  'home.faq.agent.preview.subtitle':
+    'The freshest public question appears here.',
   'home.faq.agent.preview.label': 'Latest question',
   'home.faq.agent.preview.status': 'Status: {status}',
   'home.faq.agent.preview.statusPending': 'Status pending',

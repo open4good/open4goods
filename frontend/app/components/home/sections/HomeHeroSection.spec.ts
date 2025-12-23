@@ -12,18 +12,12 @@ const messages: Record<string, unknown> = {
     'Gagne du temps. Choisis librement.',
     'Choisis librement.',
   ],
-  'packs.hold.hero.subtitles': [
-    'Pack retenu',
-    'Sous-titre placeholder',
-  ],
-  'packs.default.hero.titleSubtitle': [
-    'Acheter mieux. Sans dépenser plus.',
-  ],
+  'packs.hold.hero.subtitles': ['Pack retenu', 'Sous-titre placeholder'],
+  'packs.default.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
   'packs.default.hero.search.label': 'Tu sais déjà ce que tu cherches ?',
   'packs.default.hero.search.placeholder':
     'Recherchez un produit ou une catégorie',
-  'packs.default.hero.search.ariaLabel':
-    'Rechercher un produit responsable',
+  'packs.default.hero.search.ariaLabel': 'Rechercher un produit responsable',
   'packs.default.hero.search.cta': 'NUDGER',
   'packs.default.hero.search.partnerLinkLabel':
     '{formattedCount} partenaire | {formattedCount} partenaires',
@@ -54,9 +48,7 @@ const messages: Record<string, unknown> = {
     'Carte contexte du héros présentant la promesse Nudger',
 }
 
-const helperItems = messages[
-  'packs.default.hero.search.helpers'
-] as unknown[]
+const helperItems = messages['packs.default.hero.search.helpers'] as unknown[]
 
 const subtitleCollections = {
   default: messages['packs.default.hero.subtitles'] as string[],
@@ -251,9 +243,7 @@ describe('HomeHeroSection', () => {
     expect(icon.attributes('src')).toBe(
       '/pwa-assets/icons/android/android-launchericon-512-512.png'
     )
-    expect(icon.attributes('alt')).toBe(
-      messages['packs.default.hero.iconAlt']
-    )
+    expect(icon.attributes('alt')).toBe(messages['packs.default.hero.iconAlt'])
 
     await wrapper.unmount()
   })

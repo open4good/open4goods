@@ -1,23 +1,13 @@
-import { jwtDecode } from 'jwt-decode'
+import { useAuthStore } from '~/stores/useAuthStore'
 
-interface JwtPayload {
-  roles?: string[]
-}
-
+/**
+ * Returns user roles from the auth store.
+ * Roles are populated server-side from JWT and kept in sync via refresh.
+ */
 export const useUserRoles = () => {
-  const config = useRuntimeConfig()
-  const token = useCookie<string | null>(config.public.tokenCookieName)
+  const authStore = useAuthStore()
 
-  const roles = computed<string[]>(() => {
-    if (!token.value) return []
-    try {
-      const decoded = jwtDecode<JwtPayload>(token.value)
-      return decoded.roles ?? []
-    } catch (err) {
-      console.error('Failed to decode JWT', err)
-      return []
-    }
-  })
+  const roles = computed<string[]>(() => authStore.roles)
 
   return { roles }
 }

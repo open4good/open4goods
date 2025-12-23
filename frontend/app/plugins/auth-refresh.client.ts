@@ -1,28 +1,26 @@
-import { jwtDecode } from 'jwt-decode'
 import { authService } from '~~/shared/api-client/services/auth.services'
 import { useAuthStore } from '~/stores/useAuthStore'
 
 /**
- * Periodically checks the access token and refreshes it when expired.
+ * Periodically refreshes the access token.
+ * Note: JWT expiration is checked server-side; client just refreshes periodically.
  */
 export default defineNuxtPlugin(() => {
-  const config = useRuntimeConfig()
-  const token = useCookie<string | null>(config.public.tokenCookieName)
   const authStore = useAuthStore()
 
-  const checkExpiration = async () => {
-    if (!token.value) return
+  const refreshAuth = async () => {
+    if (!authStore.isLoggedIn) return
     try {
-      const { exp } = jwtDecode<{ exp?: number }>(token.value)
-      if (exp && exp * 1000 < Date.now()) {
-        const { authState } = await authService.refresh()
-        authStore.$patch(authState)
-      }
+      const authState = await authService.refresh()
+      authStore.$patch(authState)
     } catch (err) {
-      console.error('Failed to decode JWT', err)
+      console.error('Failed to refresh auth', err)
+      // If refresh fails, clear auth state
+      authStore.$patch({ roles: [], isLoggedIn: false, username: null })
     }
   }
 
-  checkExpiration()
-  setInterval(checkExpiration, 60_000)
+  // Refresh every 5 minutes to keep session active
+  refreshAuth()
+  setInterval(refreshAuth, 5 * 60_000)
 })

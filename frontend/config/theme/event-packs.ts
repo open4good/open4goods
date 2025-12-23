@@ -98,10 +98,7 @@ export const resolveEventPackName = (
 /**
  * Vérifie si une date est dans une fenêtre événementielle.
  */
-const isDateWithinWindow = (
-  date: Date,
-  window: EventPackSchedule
-): boolean => {
+const isDateWithinWindow = (date: Date, window: EventPackSchedule): boolean => {
   const month = date.getUTCMonth() + 1
   const day = date.getUTCDate()
   const dateStr = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`

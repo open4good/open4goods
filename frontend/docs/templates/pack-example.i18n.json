@@ -29,9 +29,7 @@
         },
         {
           "icon": "🎁",
-          "segments": [
-            { "text": "Autre point fort sans lien" }
-          ]
+          "segments": [{ "text": "Autre point fort sans lien" }]
         }
       ]
     }

@@ -32,7 +32,7 @@ export const EVENT_PACK_NAMES = [
   'default',
   'sdg',
   'bastille-day',
-  'christmas',      // <-- Nouveau pack
+  'christmas', // <-- Nouveau pack
   'hold',
 ] as const
 ```
@@ -42,10 +42,10 @@ export const EVENT_PACK_NAMES = [
 ```typescript
 export const eventPackSchedule: EventPackSchedule[] = [
   {
-    id: 'christmas',           // Identifiant unique
-    start: '12-15',            // Date de debut (MM-DD)
-    end: '12-31',              // Date de fin (MM-DD)
-    pack: 'christmas',         // Nom du pack a activer
+    id: 'christmas', // Identifiant unique
+    start: '12-15', // Date de debut (MM-DD)
+    end: '12-31', // Date de fin (MM-DD)
+    pack: 'christmas', // Nom du pack a activer
     description: 'Periode de Noel',
   },
 ]
@@ -110,20 +110,20 @@ Definissez uniquement les cles a personnaliser. Les cles non definies heritent a
 
 ### Cles disponibles
 
-| Cle | Description |
-|-----|-------------|
-| `hero.eyebrow` | Texte court au-dessus du titre |
-| `hero.title` | Titre principal |
-| `hero.titleSubtitle` | Sous-titre (tableau, rotation aleatoire) |
-| `hero.subtitles` | Messages d'accroche (tableau, rotation aleatoire) |
-| `hero.iconAlt` | Description icone (accessibilite) |
-| `hero.imageAlt` | Description image hero (accessibilite) |
-| `hero.search.label` | Label du champ de recherche |
-| `hero.search.placeholder` | Placeholder du champ |
-| `hero.search.helpersTitle` | Titre des points forts |
-| `hero.search.helpers` | Liste des points forts avec icones |
-| `parallax.*` | Chemins des images parallax |
-| `assets.*` | Chemins des images hero/illustration |
+| Cle                        | Description                                       |
+| -------------------------- | ------------------------------------------------- |
+| `hero.eyebrow`             | Texte court au-dessus du titre                    |
+| `hero.title`               | Titre principal                                   |
+| `hero.titleSubtitle`       | Sous-titre (tableau, rotation aleatoire)          |
+| `hero.subtitles`           | Messages d'accroche (tableau, rotation aleatoire) |
+| `hero.iconAlt`             | Description icone (accessibilite)                 |
+| `hero.imageAlt`            | Description image hero (accessibilite)            |
+| `hero.search.label`        | Label du champ de recherche                       |
+| `hero.search.placeholder`  | Placeholder du champ                              |
+| `hero.search.helpersTitle` | Titre des points forts                            |
+| `hero.search.helpers`      | Liste des points forts avec icones                |
+| `parallax.*`               | Chemins des images parallax                       |
+| `assets.*`                 | Chemins des images hero/illustration              |
 
 ### Template de reference
 
@@ -139,21 +139,21 @@ frontend/docs/templates/pack-example.i18n.json
 
 Pour un nouveau pack, creez **au minimum** les fichiers suivants :
 
-| Ressource | Chemin relatif | Description |
-|-----------|----------------|-------------|
-| **Hero background** | `common/{pack}/hero-background.svg` | Fond de la section hero |
-| **Parallax essentials** | `common/parallax/parallax-background-{pack}-essentials.svg` | Section "problemes" |
-| **Parallax features** | `common/parallax/parallax-background-{pack}-features.svg` | Section "fonctionnalites" |
-| **Parallax blog** | `common/parallax/parallax-background-{pack}-blog.svg` | Section "blog" |
-| **Parallax objections** | `common/parallax/parallax-background-{pack}-objections.svg` | Section "objections" |
-| **Parallax cta** | `common/parallax/parallax-background-{pack}-cta.svg` | Section "call-to-action" |
+| Ressource               | Chemin relatif                                              | Description               |
+| ----------------------- | ----------------------------------------------------------- | ------------------------- |
+| **Hero background**     | `common/{pack}/hero-background.svg`                         | Fond de la section hero   |
+| **Parallax essentials** | `common/parallax/parallax-background-{pack}-essentials.svg` | Section "problemes"       |
+| **Parallax features**   | `common/parallax/parallax-background-{pack}-features.svg`   | Section "fonctionnalites" |
+| **Parallax blog**       | `common/parallax/parallax-background-{pack}-blog.svg`       | Section "blog"            |
+| **Parallax objections** | `common/parallax/parallax-background-{pack}-objections.svg` | Section "objections"      |
+| **Parallax cta**        | `common/parallax/parallax-background-{pack}-cta.svg`        | Section "call-to-action"  |
 
 **Optionnel :**
 
-| Ressource | Chemin | Description |
-|-----------|--------|-------------|
-| Illustration | `common/{pack}/illustration.svg` | Illustration personnalisee |
-| Header backgrounds | `common/{pack}/header-*.svg` | Fonds pages internes |
+| Ressource          | Chemin                           | Description                |
+| ------------------ | -------------------------------- | -------------------------- |
+| Illustration       | `common/{pack}/illustration.svg` | Illustration personnalisee |
+| Header backgrounds | `common/{pack}/header-*.svg`     | Fonds pages internes       |
 
 ### Emplacement des fichiers
 
@@ -200,7 +200,7 @@ Modifiez `config/theme/assets.ts` :
 ```typescript
 // Pour le hero et l'illustration
 export const seasonalThemeAssets: SeasonalThemeAssets = {
-  'christmas': {
+  christmas: {
     common: {
       heroBackground: 'christmas/hero-background.svg',
       illustration: 'christmas/illustration.svg',
@@ -211,7 +211,7 @@ export const seasonalThemeAssets: SeasonalThemeAssets = {
 // Pour les parallax
 export const eventParallaxPacks = {
   common: {
-    'christmas': {
+    christmas: {
       essentials: ['parallax/parallax-background-christmas-essentials.svg'],
       features: ['parallax/parallax-background-christmas-features.svg'],
       blog: ['parallax/parallax-background-christmas-blog.svg'],
@@ -242,15 +242,15 @@ frontend/prompts/prompt-background-parallax-light.prompt
 
 ### Specifications techniques
 
-| Propriete | Valeur |
-|-----------|--------|
-| Format | SVG vectoriel pur (pas de bitmap) |
-| Dimensions | `1600x800` (viewBox) |
-| preserveAspectRatio | `xMidYMid slice` |
-| Zone centrale libre | ~1080x560 px (pour le contenu) |
-| Nombre d'elements max | < 140 |
-| Epaisseur traits min | >= 0.75px |
-| Flou max | stdDev <= 18 |
+| Propriete             | Valeur                            |
+| --------------------- | --------------------------------- |
+| Format                | SVG vectoriel pur (pas de bitmap) |
+| Dimensions            | `1600x800` (viewBox)              |
+| preserveAspectRatio   | `xMidYMid slice`                  |
+| Zone centrale libre   | ~1080x560 px (pour le contenu)    |
+| Nombre d'elements max | < 140                             |
+| Epaisseur traits min  | >= 0.75px                         |
+| Flou max              | stdDev <= 18                      |
 
 ### Palette de couleurs Nudger
 
@@ -338,6 +338,7 @@ open "http://localhost:3000?event=christmas"
 ### Debuggage
 
 Dans Vue DevTools, inspectez :
+
 - `useSeasonalEventPack` : nom du pack actif
 - `useEventPackI18n` : cles i18n resolues
 - `useThemedParallaxBackgrounds` : assets parallax charges
@@ -389,17 +390,17 @@ pnpm dev
 
 ## Fichiers cles
 
-| Fichier | Role |
-|---------|------|
-| `config/theme/event-packs.ts` | Packs et periodes |
-| `config/theme/assets.ts` | Images (TypeScript) |
-| `i18n/locales/*.json` | Textes et images (i18n) |
-| `composables/useSeasonalEventPack.ts` | Resolution pack actif |
-| `composables/useEventPackI18n.ts` | Resolution textes |
-| `composables/useThemedParallaxBackgrounds.ts` | Resolution parallax |
-| `composables/useThemedAsset.ts` | Resolution assets |
-| `prompts/prompt-background-parallax-light.prompt` | Prompt generation |
-| `docs/templates/pack-example.i18n.json` | Template pack |
+| Fichier                                           | Role                    |
+| ------------------------------------------------- | ----------------------- |
+| `config/theme/event-packs.ts`                     | Packs et periodes       |
+| `config/theme/assets.ts`                          | Images (TypeScript)     |
+| `i18n/locales/*.json`                             | Textes et images (i18n) |
+| `composables/useSeasonalEventPack.ts`             | Resolution pack actif   |
+| `composables/useEventPackI18n.ts`                 | Resolution textes       |
+| `composables/useThemedParallaxBackgrounds.ts`     | Resolution parallax     |
+| `composables/useThemedAsset.ts`                   | Resolution assets       |
+| `prompts/prompt-background-parallax-light.prompt` | Prompt generation       |
+| `docs/templates/pack-example.i18n.json`           | Template pack           |
 
 ---
 

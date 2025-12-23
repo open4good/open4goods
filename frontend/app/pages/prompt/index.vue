@@ -96,7 +96,11 @@
       <v-card variant="flat" border>
         <v-list v-if="activity.length > 0" lines="two">
           <template v-for="(item, i) in activity" :key="item.id">
-            <v-list-item :href="item.issueUrl" target="_blank" :lines="undefined">
+            <v-list-item
+              :href="item.issueUrl"
+              target="_blank"
+              :lines="undefined"
+            >
               <template #prepend>
                 <v-avatar color="surface-variant" size="40">
                   <v-icon icon="mdi-github" size="24"></v-icon>
@@ -121,8 +125,17 @@
                 <v-chip size="x-small" variant="outlined">{{
                   item.type
                 }}</v-chip>
-                <v-chip v-if="item.commentsCount" size="x-small" color="info" variant="tonal">
-                  <v-icon icon="mdi-comment-text-outline" size="x-small" class="mr-1" />
+                <v-chip
+                  v-if="item.commentsCount"
+                  size="x-small"
+                  color="info"
+                  variant="tonal"
+                >
+                  <v-icon
+                    icon="mdi-comment-text-outline"
+                    size="x-small"
+                    class="mr-1"
+                  />
                   {{ item.commentsCount }}
                 </v-chip>
                 <span
@@ -193,11 +206,13 @@
             :title="comment.author"
           >
             <template #subtitle>
-              <div class="d-flex align-center text-caption text-medium-emphasis mb-1">
+              <div
+                class="d-flex align-center text-caption text-medium-emphasis mb-1"
+              >
                 <v-icon icon="mdi-calendar" size="x-small" class="mr-1" />
                 {{ formatDate(comment.createdAt || comment.updatedAt) }}
               </div>
-              <div class="text-body-2" style="white-space: pre-line;">
+              <div class="text-body-2" style="white-space: pre-line">
                 {{ comment.body }}
               </div>
             </template>

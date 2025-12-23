@@ -170,7 +170,11 @@ const handleSecondaryCta = () => {
   emit('cta:secondary')
 }
 
-const handleIntersection = (_entries: unknown, _observer: unknown, isIntersecting: boolean) => {
+const handleIntersection = (
+  _entries: unknown,
+  _observer: unknown,
+  isIntersecting: boolean
+) => {
   emit('intersection', isIntersecting)
 }
 </script>
@@ -215,10 +219,7 @@ const handleIntersection = (_entries: unknown, _observer: unknown, isIntersectin
     <slot name="background" />
 
     <!-- Main Content Container -->
-    <v-container
-      v-bind="vuetifyContainerProps"
-      class="page-header__container"
-    >
+    <v-container v-bind="vuetifyContainerProps" class="page-header__container">
       <!-- Breadcrumbs (if provided) -->
       <v-breadcrumbs
         v-if="breadcrumbs && breadcrumbs.length"
@@ -250,7 +251,11 @@ const handleIntersection = (_entries: unknown, _observer: unknown, isIntersectin
 
           <!-- Slot: title (or default heading) -->
           <slot name="title">
-            <component :is="HeadingTag" :id="headingLabelId" class="page-header__title">
+            <component
+              :is="HeadingTag"
+              :id="headingLabelId"
+              class="page-header__title"
+            >
               {{ title }}
             </component>
           </slot>
@@ -264,7 +269,10 @@ const handleIntersection = (_entries: unknown, _observer: unknown, isIntersectin
 
           <!-- Slot: description (or CMS content) -->
           <slot name="description">
-            <div v-if="descriptionBlocId || descriptionHtml" class="page-header__description">
+            <div
+              v-if="descriptionBlocId || descriptionHtml"
+              class="page-header__description"
+            >
               <TextContent
                 v-if="descriptionBlocId"
                 :bloc-id="descriptionBlocId"
@@ -347,9 +355,15 @@ const handleIntersection = (_entries: unknown, _observer: unknown, isIntersectin
             />
 
             <!-- Glow visual (from PartnersHero) -->
-            <div v-else-if="mediaType === 'glow'" class="page-header__glow" aria-hidden="true">
+            <div
+              v-else-if="mediaType === 'glow'"
+              class="page-header__glow"
+              aria-hidden="true"
+            >
               <div class="page-header__glow-ring" />
-              <div class="page-header__glow-ring page-header__glow-ring--secondary" />
+              <div
+                class="page-header__glow-ring page-header__glow-ring--secondary"
+              />
             </div>
           </slot>
         </v-col>

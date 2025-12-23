@@ -13,6 +13,7 @@ frontend/config/theme/event-packs.ts
 ```
 
 This file contains:
+
 - `EVENT_PACK_NAMES`: List of available pack names
 - `eventPackSchedule`: Date windows for automatic pack activation
 - Resolution functions (`resolveActiveEventPack`, `resolveEventPackName`)
@@ -26,7 +27,7 @@ export const EVENT_PACK_NAMES = [
   'default',
   'sdg',
   'bastille-day',
-  'christmas',  // New pack
+  'christmas', // New pack
   'hold',
 ] as const
 ```
@@ -48,6 +49,7 @@ export const EVENT_PACK_NAMES = [
 All pack-aware strings live under `packs.<pack>.*` at the root of locale files. The `default` branch contains the baseline values.
 
 **Location:**
+
 ```
 frontend/i18n/locales/en-US.json
 frontend/i18n/locales/fr-FR.json
@@ -225,11 +227,11 @@ pnpm dev
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `config/theme/event-packs.ts` | Pack definitions and date windows |
-| `config/theme/assets.ts` | Asset configurations |
-| `i18n/locales/*.json` | Localized strings (`packs` key) |
-| `composables/useSeasonalEventPack.ts` | Active pack resolution |
-| `composables/useEventPackI18n.ts` | I18n string resolution |
-| `composables/useThemedParallaxBackgrounds.ts` | Parallax asset resolution |
+| File                                          | Purpose                           |
+| --------------------------------------------- | --------------------------------- |
+| `config/theme/event-packs.ts`                 | Pack definitions and date windows |
+| `config/theme/assets.ts`                      | Asset configurations              |
+| `i18n/locales/*.json`                         | Localized strings (`packs` key)   |
+| `composables/useSeasonalEventPack.ts`         | Active pack resolution            |
+| `composables/useEventPackI18n.ts`             | I18n string resolution            |
+| `composables/useThemedParallaxBackgrounds.ts` | Parallax asset resolution         |

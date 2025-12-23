@@ -97,19 +97,25 @@
             {
               "icon": "🎆",
               "segments": [
-                { "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs." }
+                {
+                  "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs."
+                }
               ]
             },
             {
               "icon": "🥖",
               "segments": [
-                { "text": "Local et efficace ? Filtrez d'abord par réparabilité." }
+                {
+                  "text": "Local et efficace ? Filtrez d'abord par réparabilité."
+                }
               ]
             },
             {
               "icon": "🎇",
               "segments": [
-                { "text": "Alliez fête et économies avec des prix transparents." }
+                {
+                  "text": "Alliez fête et économies avec des prix transparents."
+                }
               ]
             }
           ]

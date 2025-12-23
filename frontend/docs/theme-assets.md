@@ -19,6 +19,7 @@ This page summarises how themed assets are resolved, how seasonal packs are sche
 - Missing files automatically fall back to the non-seasonal theme/common assets thanks to the ordered resolution above.
 
 ## Event packs and scheduling
+
 - Available packs: `default`, `sdg`, `bastille-day`, and `hold` (see `EVENT_PACK_NAMES`).
 
 - Date windows are defined in `config/theme/seasons.ts` and evaluated in UTC. If no window matches, the `default` pack is used.

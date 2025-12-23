@@ -124,7 +124,10 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "esbuild": ">=0.25.0"
+    }
   },
   "resolutions": {
     "vue": "3.5.26"

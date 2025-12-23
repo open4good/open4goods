@@ -24,7 +24,10 @@
               "icon": "🌿",
               "label": "A unique ecological and environmental assessment",
               "segments": [
-                { "text": "A unique ecological assessment", "to": "/impact-score" },
+                {
+                  "text": "A unique ecological assessment",
+                  "to": "/impact-score"
+                },
                 { "text": " and environmental review" }
               ]
             },
@@ -101,13 +104,17 @@
             {
               "icon": "🥖",
               "segments": [
-                { "text": "Local and efficient? Filter by repairability first." }
+                {
+                  "text": "Local and efficient? Filter by repairability first."
+                }
               ]
             },
             {
               "icon": "🎇",
               "segments": [
-                { "text": "Balance celebrations and savings with transparent prices." }
+                {
+                  "text": "Balance celebrations and savings with transparent prices."
+                }
               ]
             }
           ]
