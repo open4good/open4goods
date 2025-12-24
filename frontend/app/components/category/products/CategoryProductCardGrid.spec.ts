@@ -107,12 +107,15 @@ let pinia: Pinia
 let i18n: I18n
 let vuetify: VuetifyInstance
 
-const mountGrid = async (products: ProductDto[]) => {
+const mountGrid = async (
+  products: ProductDto[],
+  extraProps: Record<string, unknown> = {}
+) => {
   const module = await import('./CategoryProductCardGrid.vue')
   const CategoryProductCardGrid = module.default
 
   return mount(CategoryProductCardGrid, {
-    props: { products },
+    props: { products, ...extraProps },
     global: {
       plugins: [pinia, i18n, vuetify],
       stubs: {
@@ -242,6 +245,20 @@ describe('CategoryProductCardGrid', () => {
     expect(store.items).toHaveLength(1)
 
     expect((secondButton.element as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('applies disabled styling and nofollow links when requested', async () => {
+    const product = buildProduct({ fullSlug: '/products/demo' })
+    const wrapper = await mountGrid([product], {
+      isCategoryDisabled: true,
+      nofollowLinks: true,
+    })
+
+    const card = wrapper.get('.category-product-card-grid__card')
+    expect(card.classes()).toContain(
+      'category-product-card-grid__card--disabled'
+    )
+    expect(card.attributes('rel')).toBe('nofollow')
   })
 
   it('renders new and occasion badges side by side without condition text', async () => {

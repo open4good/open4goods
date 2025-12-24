@@ -112,6 +112,13 @@ export const useCategories = () => {
     return categories.value
   }
 
+  const findCategoryBySlug = (slugToFind: string) => {
+    return categories.value.find(category => {
+      const verticalSlug = category.verticalHomeUrl?.replace(/^\//, '') ?? ''
+      return verticalSlug === slugToFind
+    })
+  }
+
   /**
    * Select a category based on its slug and load its details
    * @param slug - Category slug to match against verticalHomeUrl
@@ -123,39 +130,33 @@ export const useCategories = () => {
 
     if (categories.value.length === 0) {
       await fetchCategories(true)
+    }
 
-      if (!categories.value.length) {
-        if (error.value) {
-          const fetchError = new Error(error.value)
-          fetchError.name = 'CategoryResolutionError'
-          throw fetchError
-        }
+    let matchingCategory = findCategoryBySlug(slug)
 
-        const notFoundError = new Error('Category not found')
-        notFoundError.name = 'CategoryNotFoundError'
-        error.value = notFoundError.message
-        activeCategoryId.value = null
-        currentCategory.value = null
-        throw notFoundError
+    if (!matchingCategory) {
+      await fetchCategories(false)
+      matchingCategory = findCategoryBySlug(slug)
+    }
+
+    if (!matchingCategory?.id) {
+      if (error.value) {
+        const fetchError = new Error(error.value)
+        fetchError.name = 'CategoryResolutionError'
+        throw fetchError
       }
+
+      activeCategoryId.value = null
+      currentCategory.value = null
+      const notFoundError = new Error('Category not found')
+      notFoundError.name = 'CategoryNotFoundError'
+      error.value = notFoundError.message
+      throw notFoundError
     }
 
     loading.value = true
 
     try {
-      const matchingCategory = categories.value.find(category => {
-        const verticalSlug = category.verticalHomeUrl?.replace(/^\//, '') ?? ''
-        return verticalSlug === slug
-      })
-
-      if (!matchingCategory?.id) {
-        activeCategoryId.value = null
-        currentCategory.value = null
-        const notFoundError = new Error('Category not found')
-        notFoundError.name = 'CategoryNotFoundError'
-        throw notFoundError
-      }
-
       activeCategoryId.value = matchingCategory.id
 
       const cachedDetail =

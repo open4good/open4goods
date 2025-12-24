@@ -618,6 +618,9 @@ const categoryDisplayName = computed(
     category.value?.verticalHomeDescription ??
     siteName.value
 )
+const shouldRestrictCategoryProducts = computed(
+  () => category.value?.enabled === false && !isLoggedIn.value
+)
 const canonicalUrl = computed(() =>
   new URL(route.path, requestURL.origin).toString()
 )
@@ -1663,7 +1666,15 @@ const viewComponentProps = computed(() => {
     }
   }
 
-  return base
+  if (viewMode.value === 'list') {
+    return base
+  }
+
+  return {
+    ...base,
+    isCategoryDisabled: shouldRestrictCategoryProducts.value,
+    nofollowLinks: shouldRestrictCategoryProducts.value,
+  }
 })
 
 const loadingProducts = ref(false)
