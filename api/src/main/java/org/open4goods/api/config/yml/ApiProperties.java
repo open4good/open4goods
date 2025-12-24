@@ -649,6 +649,16 @@ public class ApiProperties {
 		/**
 		 * Multimodal (text + image) model loaded through DJL (HuggingFace provider).
 		 * Default: multilingual CLIP.
+		 *
+		 * <p><strong>Note:</strong> Some CLIP models may have compatibility issues with
+		 * DJL's PyTorch engine if they include text encoder components that expect
+		 * additional parameters (e.g., attention_mask). If you encounter errors like
+		 * "missing value for argument 'attention_mask'", consider using alternative models:</p>
+		 * <ul>
+		 *     <li>Pure vision models: ResNet, EfficientNet, MobileNet</li>
+		 *     <li>Alternative CLIP exports that support image-only inference</li>
+		 *     <li>Example: "djl://ai.djl.pytorch/resnet50" (pure vision, no multimodal)</li>
+		 * </ul>
 		 */
 		private String multimodalModelUrl = "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1";
 
