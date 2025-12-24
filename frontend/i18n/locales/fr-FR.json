@@ -11,7 +11,57 @@
           "Offrez, partagez, savourez.",
           "Le meilleur de la saison, en un clic.",
           "Une touche de magie sur votre quotidien."
-        ]
+        ],
+        "search": {
+          "helpers": [
+            {
+              "icon": "🎄",
+              "label": "Une évaluation écologique et environnementale unique",
+              "segments": [
+                {
+                  "text": "Une évaluation écologique",
+                  "to": "/impact-score"
+                },
+                {
+                  "text": " et environnementale unique"
+                }
+              ]
+            },
+            {
+              "icon": "🛡️",
+              "label": "100% indépendant, logiciel libre et données ouvertes",
+              "segments": [
+                {
+                  "text": "100% indépendant, "
+                },
+                {
+                  "text": "logiciel libre",
+                  "to": "/opensource"
+                },
+                {
+                  "text": " et "
+                },
+                {
+                  "text": "données ouvertes",
+                  "to": "/opendata"
+                }
+              ]
+            },
+            {
+              "icon": "🏷️",
+              "label": "Sans se faire avoir sur les prix",
+              "segments": [
+                {
+                  "text": "Sans se faire avoir sur les prix avec"
+                },
+                {
+                  "text": "{partnersLink}",
+                  "to": "/partenaires"
+                }
+              ]
+            }
+          ]
+        }
       },
       "assets": {
         "heroBackground": "christmas/hero-background.svg",
@@ -33,22 +83,22 @@
     "default": {
       "assets": {
         "illustration": "placeholders/illustration.svg",
-        "heroBackground": "light/hero-background.svg",
+        "heroBackground": "hero-background.svg",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
-        "productBackground": "light/product-background.svg",
-        "contactBackground": "light/contact-background.svg",
-        "blogBackground": "light/blog-background.svg",
-        "categoriesBackground": "light/categories-background.svg",
-        "openSourceBackground": "light/open-source-background.svg",
-        "openDataBackground": "light/open-data-background.svg"
+        "productBackground": "product-background.svg",
+        "contactBackground": "contact-background.svg",
+        "blogBackground": "blog-background.svg",
+        "categoriesBackground": "categories-background.svg",
+        "openSourceBackground": "open-source-background.svg",
+        "openDataBackground": "open-data-background.svg"
       },
       "parallax": {
-        "essentials": "light/parallax/parallax-light-essentials.svg",
-        "features": "light/parallax/parallax-light-features.svg",
-        "blog": "light/parallax/parallax-light-blog.svg",
-        "objections": "light/parallax/parallax-light-objections.svg",
-        "cta": "light/parallax/parallax-light-cta.svg"
+        "essentials": "parallax/parallax-essentials.svg",
+        "features": "parallax/parallax-features.svg",
+        "blog": "parallax/parallax-blog.svg",
+        "objections": "parallax/parallax-objections.svg",
+        "cta": "parallax/parallax-cta.svg"
       },
       "hero": {
         "eyebrow": "Comparateur responsable",
@@ -124,26 +174,6 @@
           "cornerTooltip": "Les points forts de la méthodologie Nudger",
           "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
         }
-      }
-    },
-    "hold": {
-      "assets": {
-        "heroBackground": "hero-background.webp",
-        "illustration": "illustration-generic.svg"
-      },
-      "parallax": {
-        "essentials": "parallax/hero-back--light.svg",
-        "features": "parallax/hero-mid--light.svg",
-        "blog": "parallax/hero-front--light.svg",
-        "objections": "parallax/hero-back--light.svg",
-        "cta": "parallax/hero-mid--light.svg"
-      },
-      "hero": {
-        "titleSubtitle": ["Pack hérité pour les tests"],
-        "subtitles": [
-          "Texte placeholder pour le pack de rétention.",
-          "Ajoute une déclinaison événementielle ou reste sur le défaut."
-        ]
       }
     },
     "sdg": {

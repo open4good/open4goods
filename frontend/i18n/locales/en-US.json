@@ -73,29 +73,6 @@
         }
       }
     },
-    "hold": {
-      "assets": {
-        "heroBackground": "hero-background.webp",
-        "illustration": "illustration-generic.svg",
-        "logo": "logo-new.png",
-        "footerLogo": "logo-footer.svg",
-        "favicon": "favicon.svg"
-      },
-      "parallax": {
-        "essentials": "parallax/hero-back--light.svg",
-        "features": "parallax/hero-mid--light.svg",
-        "blog": "parallax/hero-front--light.svg",
-        "objections": "parallax/hero-back--light.svg",
-        "cta": "parallax/hero-mid--light.svg"
-      },
-      "hero": {
-        "titleSubtitle": ["Legacy seasonal copy kept for testing."],
-        "subtitles": [
-          "Placeholder subtitles for the hold pack.",
-          "Define hero copy for the event pack or rely on default."
-        ]
-      }
-    },
     "sdg": {
       "hero": {
         "titleSubtitle": [

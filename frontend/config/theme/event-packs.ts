@@ -40,7 +40,6 @@ export const EVENT_PACK_NAMES = [
   'default',
   'sdg',
   'bastille-day',
-  'hold',
   'christmas',
 ] as const
 

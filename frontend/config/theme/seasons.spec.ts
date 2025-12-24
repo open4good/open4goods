@@ -23,7 +23,6 @@ describe('resolveActiveEventPack', () => {
 
   it('accepts an explicit pack name from query params', () => {
     expect(resolveEventPackName(['sdg'])).toBe('sdg')
-    expect(resolveEventPackName('hold')).toBe('hold')
     expect(resolveEventPackName('unknown')).toBeUndefined()
   })
 })

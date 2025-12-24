@@ -1,6 +1,0 @@
-<svg width="1440" height="600" viewBox="0 0 1440 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1440" height="600" fill="#EFF6FF"/>
-  <rect x="100" y="100" width="200" height="200" rx="20" fill="#DBEAFE" transform="rotate(15 200 200)"/>
-  <rect x="1100" y="300" width="150" height="150" rx="20" fill="#DBEAFE" transform="rotate(-10 1175 375)"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="#93C5FD">Blog Background Placeholder</text>
-</svg>
