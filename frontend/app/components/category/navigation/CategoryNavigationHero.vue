@@ -1,9 +1,22 @@
 <template>
   <HeroSurface
-    class="category-navigation-hero"
     :aria-labelledby="titleId"
     variant="orbit"
+    class="category-navigation-hero"
   >
+    <div
+      v-if="backgroundAsset"
+      class="category-navigation-hero__background"
+      aria-hidden="true"
+    >
+      <img
+        :src="backgroundAsset"
+        alt=""
+        class="category-navigation-hero__background-image"
+      />
+      <div class="category-navigation-hero__background-overlay" />
+    </div>
+
     <v-container class="py-16 px-4" max-width="lg">
       <v-row align="center" class="g-8">
         <v-col cols="12" md="7" class="d-flex flex-column gap-6">
@@ -71,6 +84,7 @@
 import { useId } from 'vue'
 
 import CategoryNavigationBreadcrumbs from './CategoryNavigationBreadcrumbs.vue'
+import { useThemeAsset } from '~/composables/useThemedAsset'
 
 interface BreadcrumbItem {
   title: string
@@ -95,6 +109,9 @@ const emit = defineEmits<{
 }>()
 
 const onUpdateModelValue = (value: string) => emit('update:modelValue', value)
+
+// Moved import to top-level
+const backgroundAsset = useThemeAsset('categoriesBackground')
 </script>
 
 <style scoped lang="sass">
@@ -102,6 +119,25 @@ const onUpdateModelValue = (value: string) => emit('update:modelValue', value)
   position: relative
   overflow: hidden
   color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+
+.category-navigation-hero__background
+  position: absolute
+  inset: 0
+  z-index: 0
+  pointer-events: none
+
+.category-navigation-hero__background-image
+  position: absolute
+  inset: 0
+  width: 100%
+  height: 100%
+  object-fit: cover
+  opacity: 0.98
+
+.category-navigation-hero__background-overlay
+  position: absolute
+  inset: 0
+  background: radial-gradient(circle at 16% 24%, rgba(var(--v-theme-hero-gradient-start), 0.22), transparent 32%), linear-gradient(180deg, rgba(var(--v-theme-surface-default), 0.1) 0%, rgba(var(--v-theme-surface-default), 0.45) 100%)
 
 .category-navigation-hero__header
   display: flex

@@ -3,6 +3,7 @@ import { useRoute, useRouter } from '#app'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useI18n } from 'vue-i18n'
 import type { BlogTagDto } from '~~/shared/api-client'
+import { useThemeAsset } from '~/composables/useThemedAsset'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
@@ -15,6 +16,19 @@ const {
   selectedTag,
   fetchTags,
 } = useBlog()
+
+const blogBackgroundAsset = useThemeAsset('blogBackground')
+
+const heroStyles = computed(() => {
+  if (blogBackgroundAsset.value) {
+    return {
+      backgroundImage: `url(${blogBackgroundAsset.value})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }
+  }
+  return {}
+})
 
 const buildDateIsoString = (timestamp: number) => {
   const date = new Date(timestamp)
@@ -467,7 +481,11 @@ await useAsyncData('blog-ssr-init', async () => {
 </script>
 
 <template>
-  <section class="blog-hero" aria-labelledby="blog-hero-heading">
+  <section
+    class="blog-hero"
+    aria-labelledby="blog-hero-heading"
+    :style="heroStyles"
+  >
     <v-container class="py-0 px-4 mx-auto blog-hero__container" max-width="xl">
       <div class="blog-hero__content">
         <p class="blog-hero__eyebrow">{{ t('blog.hero.eyebrow') }}</p>

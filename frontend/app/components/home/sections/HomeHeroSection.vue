@@ -349,13 +349,6 @@ const heroTitle = computed(
     }) ?? ''
 )
 
-const heroDescriptionTitle = computed(
-  () =>
-    packI18n.resolveString('hero.search.helpersTitle', {
-      fallbackKeys: ['home.hero.search.helpersTitle'],
-    }) ?? ''
-)
-
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
 }
@@ -509,7 +502,7 @@ useHead({
                       <p class="home-hero__subtitle">
                         {{ heroSubtitle }}
                       </p>
-               
+
                       <div class="home-hero__helper-row">
                         <div class="home-hero__eyebrow-block">
                           <p v-if="heroEyebrow" class="home-hero__eyebrow">

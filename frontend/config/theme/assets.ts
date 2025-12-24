@@ -24,6 +24,10 @@ export const THEME_ASSET_KEYS = [
   'illustration',
   'problemImage',
   'solutionImage',
+  'productBackground',
+  'contactBackground',
+  'blogBackground',
+  'categoriesBackground',
 ] as const
 
 export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]
@@ -66,6 +70,10 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     favicon: 'placeholders/favicon.svg',
     heroBackground: 'placeholders/hero-background.svg',
     illustration: 'placeholders/illustration.svg',
+    productBackground: 'placeholders/product-background.svg',
+    contactBackground: 'placeholders/contact-background.svg',
+    blogBackground: 'placeholders/blog-background.svg',
+    categoriesBackground: 'placeholders/category-background.svg',
   },
   dark: {
     logo: 'placeholders/logo.svg',
@@ -73,6 +81,10 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     favicon: 'placeholders/favicon.svg',
     heroBackground: 'placeholders/hero-background.svg',
     illustration: 'placeholders/illustration.svg',
+    productBackground: 'placeholders/product-background.svg',
+    contactBackground: 'placeholders/contact-background.svg',
+    blogBackground: 'placeholders/blog-background.svg',
+    categoriesBackground: 'placeholders/category-background.svg',
   },
   common: {
     logo: 'placeholders/asset-missing.svg',
@@ -80,5 +92,9 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     favicon: 'placeholders/asset-missing.svg',
     heroBackground: 'placeholders/asset-missing.svg',
     illustration: 'placeholders/asset-missing.svg',
+    productBackground: 'placeholders/asset-missing.svg',
+    contactBackground: 'placeholders/asset-missing.svg',
+    blogBackground: 'placeholders/asset-missing.svg',
+    categoriesBackground: 'placeholders/asset-missing.svg',
   },
 }

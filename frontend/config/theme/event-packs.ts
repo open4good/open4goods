@@ -41,6 +41,7 @@ export const EVENT_PACK_NAMES = [
   'sdg',
   'bastille-day',
   'hold',
+  'christmas'
 ] as const
 
 export const DEFAULT_EVENT_PACK: EventPackName = 'default'
@@ -71,6 +72,13 @@ export const eventPackSchedule: EventPackSchedule[] = [
     end: '01-15',
     pack: 'default',
     description: 'Période hivernale sans surcharge événementielle',
+  },
+  {
+    id: 'christmas',
+    start: '12-20',
+    end: '12-30',
+    pack: 'christmas',
+    description: 'Christmas (±5 days around Dec 25)',
   },
 ]
 

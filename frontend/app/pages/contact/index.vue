@@ -3,7 +3,8 @@
     <PageHeader
       variant="hero-standard"
       layout="2-columns"
-      background="surface-variant"
+      background="image"
+      background-image-asset-key="contactBackground"
       surface-variant="pulse"
       :title="t('contact.hero.title')"
       :subtitle="t('contact.hero.subtitle')"

@@ -102,6 +102,12 @@ vi.mock('#imports', () => ({
   useHead: (...args: unknown[]) => useHeadMock(...args),
   useSeoMeta: (...args: unknown[]) => useSeoMetaMock(...args),
   useRequestURL: () => requestUrl,
+  useAsyncData: async (_key: string, handler: () => Promise<unknown>) => {
+    if (handler) {
+      await handler()
+    }
+    return { data: { value: true } }
+  },
 }))
 
 const translations: Record<
@@ -195,6 +201,13 @@ let blogComposable: MockBlogComposable
 vi.mock('~/composables/blog/useBlog', () => ({
   useBlog: () => blogComposable,
 }))
+
+vi.mock('~/composables/useThemedAsset', async () => {
+  const { ref } = await import('vue')
+  return {
+    useThemeAsset: () => ref('https://example.com/mock-bg.jpg'),
+  }
+})
 
 const createMockBlogComposable = (config: MockBlogConfig = {}) => {
   const paginatedArticles = ref<BlogArticle[]>([

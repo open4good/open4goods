@@ -1,5 +1,28 @@
 {
   "packs": {
+"christmas": {
+      "hero": {
+        "eyebrow": "Saison de Noël",
+        "title": "Un hiver tout en douceur",
+        "subtitles": [
+          "Des idées qui réchauffent le cœur.",
+          "Petites attentions, grande joie.",
+          "Offrez, partagez, savourez.",
+          "Le meilleur de la saison, en un clic.",
+          "Une touche de magie sur votre quotidien."
+        ]
+      },
+      "assets": {
+        "heroBackground": "christmas/hero-background.svg"
+      },
+      "parallax": {
+        "essentials": "parallax/parallax-background-christmas-essentials.svg",
+        "features": "parallax/parallax-background-christmas-features.svg",
+        "blog": "parallax/parallax-background-christmas-blog.svg",
+        "objections": "parallax/parallax-background-christmas-objections.svg",
+        "cta": "parallax/parallax-background-christmas-cta.svg"
+      }
+    },
     "default": {
       "assets": {
         "heroBackground": "placeholders/hero-background.svg",

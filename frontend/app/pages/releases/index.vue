@@ -1,19 +1,24 @@
 <template>
   <div class="releases-page">
-    <OpendataHero
+    <PageHeader
       :eyebrow="t('releases.hero.eyebrow')"
       :title="t('releases.hero.title')"
-      :subtitle="t('releases.hero.subtitle')"
-      :education-card="educationCard"
-      fluid
+      layout="2-columns-right-media"
+      container="fluid"
+      show-media
+      media-type="card"
+      :hero-card="educationCard"
     >
-      <template #below-title>
+      <template #subtitle>
+        <p class="page-header__subtitle">
+          {{ t('releases.hero.subtitle') }}
+        </p>
         <LatestReleaseBadge
           class="releases-page__latest-chip"
           :scroll-target="faqAnchor"
         />
       </template>
-    </OpendataHero>
+    </PageHeader>
 
     <v-container class="releases-page__content">
       <div :id="faqAnchorId" class="releases-page__anchor" aria-hidden="true" />
@@ -37,7 +42,7 @@
 import { computed } from 'vue'
 
 import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
-import OpendataHero from '~/components/domains/opendata/OpendataHero.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import ReleaseAccordion from '~/components/domains/releases/ReleaseAccordion.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 

@@ -22,13 +22,13 @@ You are generating a complete **Event Pack** for our frontend system:
 4) Minimal config snippet for pack registration + optional schedule window
 5) All outputs bundled as a **downloadable ZIP** with clean filenames and paths.
 
-You MUST follow the attached reference doc: **events-pack_FR.md** (this file is provided as a reference attachment).
+You MUST follow the attached reference doc: **events-pack_FR.md**  and ** /frontend/prompts/prompt-background-parallax-light.prompt **(this file are provided as a reference attachment).
 In particular: packs are resolved by name, i18n keys are under `packs.<pack>.*`, assets are referenced via i18n, and parallax keys map to homepage sections. (See reference attachment.)
 
 ---
 
 ## STOP-AND-ASK RULE (MANDATORY)
-Before generating the final ZIP, verify you have ALL required inputs:
+Before generating the final assets, verify you have ALL required inputs:
 - Pack slug (kebab-case) + display name
 - Whether pack must be scheduled; if yes: start/end (MM-DD)
 - Locales to generate
@@ -66,11 +66,7 @@ If you do not have its content available in context, ask the user to paste it, t
 
 ---
 
-## OUTPUT REQUIREMENTS (ZIP CONTENTS)
-Return a single ZIP named:
-`event-pack_{{PACK_SLUG}}_{{YYYY-MM-DD}}.zip`
-
-Inside, include **only minimal necessary files**, well named:
+## OUTPUT REQUIREMENTS (SVG IMAGES)
 
 ### 1) Config snippet (pack registration + optional schedule)
 Path:
@@ -81,9 +77,7 @@ Include:
 - If scheduled: add entry in `eventPackSchedule` with `{ id, start: 'MM-DD', end: 'MM-DD', pack: '{{PACK_SLUG}}', description }`
 (Do NOT rewrite the whole file; snippet only.)
 
-### 2) i18n minimal patches (per locale)
-For each locale in {{LOCALES_LIST}}, create:
-`frontend/i18n/locales/patches/{{PACK_SLUG}}/{{LOCALE}}.packs.{{PACK_SLUG}}.json`
+### 2) i18n minimal patches
 
 Sample of file:
 ```jsonc

@@ -127,7 +127,9 @@ const showParallax = computed(
 )
 
 const showImage = computed(
-  () => props.background === 'image' && props.backgroundImage
+  () =>
+    props.background === 'image' &&
+    (props.backgroundImage || resolvedBackgroundAsset.value)
 )
 
 const showGradient = computed(() => props.background === 'gradient')

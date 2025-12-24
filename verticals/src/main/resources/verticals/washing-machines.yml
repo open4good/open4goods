@@ -18,7 +18,7 @@ eprelGroupName : "Household washing machines"
 verticalImage: /images/verticals/washing-machines.png
 
 # Indicates if the vertical must be UI / sitemap / search rendered
-enabled: true
+enabled: false
 popular: true
 
 impactScoreConfig:

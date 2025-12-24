@@ -1,7 +1,9 @@
 <template>
   <v-tooltip :text="tooltipLabel" location="top">
     <template #activator="{ props: activatorProps }">
+      <!-- Stars Mode -->
       <div
+        v-if="mode === 'stars'"
         class="impact-score"
         :class="[
           `impact-score--${size}`,
@@ -28,6 +30,58 @@
           formattedScore
         }}</span>
       </div>
+
+      <!-- Combined Mode -->
+      <div
+        v-else-if="mode === 'combined'"
+        class="impact-score-combined"
+        :class="[`impact-score-combined--${size}`]"
+        v-bind="activatorProps"
+        :aria-label="tooltipLabel"
+        role="img"
+      >
+        <v-chip
+          class="impact-score-badge"
+          :class="[`impact-score-badge--${size}`]"
+          rounded="pill"
+          variant="flat"
+          :color="badgeColor"
+        >
+          <span class="impact-score-badge__value">
+            {{ formattedBadgeScore }}
+          </span>
+        </v-chip>
+
+        <v-rating
+          class="impact-score__rating"
+          :model-value="normalizedScore"
+          :length="length"
+          :size="ratingSize"
+          :color="ratingColor"
+          :bg-color="ratingBackgroundColor"
+          :density="ratingDensity"
+          half-increments
+          readonly
+          aria-hidden="true"
+        />
+      </div>
+
+      <!-- Badge Mode (Default) -->
+      <v-chip
+        v-else
+        class="impact-score-badge"
+        :class="[`impact-score-badge--${size}`]"
+        v-bind="activatorProps"
+        :aria-label="tooltipLabel"
+        role="img"
+        rounded="pill"
+        variant="flat"
+        :color="badgeColor"
+      >
+        <span class="impact-score-badge__value">
+          {{ formattedBadgeScore }}
+        </span>
+      </v-chip>
     </template>
   </v-tooltip>
 </template>
@@ -49,6 +103,10 @@ const props = defineProps({
   size: {
     type: String as PropType<'small' | 'medium' | 'large' | 'xlarge'>,
     default: 'medium',
+  },
+  mode: {
+    type: String as PropType<'badge' | 'stars' | 'combined'>,
+    default: 'badge',
   },
   color: {
     type: String,
@@ -80,6 +138,22 @@ const formattedScore = computed(
     `${n(normalizedScore.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / ${length.value}`
 )
 
+// Badge logic (out of 20)
+const scoreOutOf20 = computed(() => {
+  if (length.value === 0) return 0
+  return (normalizedScore.value / length.value) * 20
+})
+
+const formattedBadgeScore = computed(
+  () =>
+    `${n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / 20`
+)
+
+const badgeColor = computed(() => {
+  // Use a default color if none provided, or map specific ranges if needed.
+  return undefined // heavily rely on CSS class
+})
+
 const ratingSize = computed(() => {
   switch (props.size) {
     case 'small':
@@ -101,21 +175,31 @@ const ratingColor = computed(() => props.color)
 
 const ratingBackgroundColor = computed(() => props.inactiveColor)
 
-const tooltipLabel = computed(() =>
-  t('components.impactScore.tooltip', {
+const tooltipLabel = computed(() => {
+  if (props.mode === 'badge' || props.mode === 'combined') {
+    return t('components.impactScore.tooltipBadge', {
+      value: n(scoreOutOf20.value, {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 0,
+      }),
+    })
+  }
+  return t('components.impactScore.tooltip', {
     value: n(normalizedScore.value, {
       maximumFractionDigits: 1,
       minimumFractionDigits: 0,
     }),
     max: length.value,
   })
-)
+})
 
 const size = computed(() => props.size)
 const showValue = computed(() => props.showValue)
+const mode = computed(() => props.mode)
 </script>
 
 <style scoped>
+/* Stars Style */
 .impact-score {
   --impact-score-gap: 0.5rem;
   --impact-score-rating-gap: 0.375rem;
@@ -156,5 +240,49 @@ const showValue = computed(() => props.showValue)
 
 .impact-score--with-value .impact-score__rating {
   display: inline-flex;
+}
+
+/* Badge Style */
+.impact-score-badge {
+  background-color: rgba(var(--v-theme-surface-primary-080), 0.85) !important;
+  color: rgb(var(--v-theme-text-neutral-strong)) !important;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.impact-score-badge__value {
+  font-size: 0.95rem;
+}
+
+.impact-score-badge--small .impact-score-badge__value {
+  font-size: 0.85rem;
+}
+
+.impact-score-badge--large .impact-score-badge__value {
+  font-size: 1.05rem;
+}
+
+.impact-score-badge--xlarge .impact-score-badge__value {
+  font-size: 1.2rem;
+}
+
+/* Combined Style */
+.impact-score-combined {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-score-combined--small {
+  gap: 0.5rem;
+}
+
+.impact-score-combined--large {
+  gap: 1rem;
+}
+
+.impact-score-combined--xlarge {
+  gap: 1.25rem;
 }
 </style>

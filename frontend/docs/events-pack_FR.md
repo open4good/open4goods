@@ -105,7 +105,6 @@ Toutes les chaînes de caractères et chemins d'assets liés aux packs se trouve
       "parallax": {
         "essentials": "parallax/parallax-background-bastille-essentials.svg"
       }
-      TODO : ajouter docs / exemples images parallax headers
     }
   }
 }
@@ -157,9 +156,25 @@ Exemples de clés standard :
 
 Usage dans le code :
 
-```vue
 <PageHeader background-image-asset-key="productBackground" ... />
-```
+
+````
+
+#### Exemples de Page Headers
+
+Voici les assets par défaut utilisés pour les headers de pages:
+
+**Produit (`productBackground`)**
+![Product Background](/app/assets/themes/placeholders/product-background.svg)
+
+**Contact (`contactBackground`)**
+![Contact Background](/app/assets/themes/placeholders/contact-background.svg)
+
+**Blog (`blogBackground`)**
+![Blog Background](/app/assets/themes/placeholders/blog-background.svg)
+
+**Catégories (`categoriesBackground`)**
+![Categories Background](/app/assets/themes/placeholders/category-background.svg)
 
 ## Guide Développeur
 
@@ -176,7 +191,7 @@ const packI18n = useEventPackI18n(activePack)
 const heroTitle = computed(() =>
   packI18n.resolveString('hero.title', { fallbackKeys: ['home.hero.title'] })
 )
-```
+````
 
 ### Randomisation au rendu
 
