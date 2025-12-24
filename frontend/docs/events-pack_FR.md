@@ -105,6 +105,7 @@ Toutes les chaînes de caractères et chemins d'assets liés aux packs se trouve
       "parallax": {
         "essentials": "parallax/parallax-background-bastille-essentials.svg"
       }
+      TODO : ajouter docs / exemples images parallax headers
     }
   }
 }
@@ -126,6 +127,7 @@ Définis sous `packs.<pack>.assets`. Clés communes :
 
 #### Arrière-plans Parallaxes
 
+TODO : PAreil, j m'attendais à voir des extensions
 Définis sous `packs.<pack>.parallax`. Les clés correspondent aux sections de la page d'accueil :
 
 - `essentials`
@@ -140,6 +142,24 @@ Placez vos fichiers SVG/image dans :
 
 Vous pouvez les organiser par thème ou pack, ex : `frontend/app/assets/themes/bastille-day/hero-background.svg`.
 La valeur i18n doit être le chemin relatif depuis `assets/themes/`.
+
+#### Arrière-plans des Page Headers
+
+Les composants `PageHeader` peuvent utiliser des arrière-plans thémés via la prop `backgroundImageAssetKey`.
+Ces assets sont définis de la même manière dans `packs.<pack>.assets`.
+
+Exemples de clés standard :
+
+- `productBackground` : Arrière-plan pour les pages produit
+- `contactBackground` : Arrière-plan pour la page contact
+- `blogBackground` : Arrière-plan pour la page liste des articles de blog
+- `categoriesBackground` : Arrière-plan pour la page catégories
+
+Usage dans le code :
+
+```vue
+<PageHeader background-image-asset-key="productBackground" ... />
+```
 
 ## Guide Développeur
 

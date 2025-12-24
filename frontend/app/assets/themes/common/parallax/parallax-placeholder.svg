@@ -1,0 +1,5 @@
+<svg width="1440" height="800" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="800" fill="none"/>
+  <path d="M0 600 C400 500 1000 700 1440 600 V800 H0 V600 Z" fill="#E5E7EB" fill-opacity="0.2"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="32" fill="#E5E7EB">Parallax Layer Placeholder</text>
+</svg>

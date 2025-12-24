@@ -8,10 +8,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TextEmbeddingConfig
 {
-    @Bean
+
+	@Bean
     @ConditionalOnMissingBean(TextEmbeddingService.class)
     TextEmbeddingService textEmbeddingService()
     {
-        return text -> null;
+		System.err.println("No embedding service found");
+    	return text -> null;
     }
 }

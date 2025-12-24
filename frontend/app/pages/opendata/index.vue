@@ -1,18 +1,41 @@
 <template>
   <div class="opendata-page">
-    <OpendataHero
+    <PageHeader
+      variant="hero-standard"
       :eyebrow="t('opendata.hero.eyebrow')"
       :title="t('opendata.hero.title')"
-      :education-card="educationCard"
-      description-bloc-id="webpages:opendata:hero-overview"
+      :subtitle="t('opendata.hero.subtitle')"
+      :description-bloc-id="'webpages:opendata:hero-overview'"
+      layout="2-columns"
+      background="surface-variant"
+      surface-variant="orbit"
+      container="lg"
+      show-media
+      media-type="card"
+      :hero-card="educationCard"
       :primary-cta="heroPrimaryCta"
+      heading-level="h1"
+      :heading-id="'opendata-hero-heading'"
+      schema-type="DataCatalog"
+      :og-image="ogImageUrl"
     >
-      <template #subtitle>
-        <p class="opendata-hero__subtitle">
-          {{ t('opendata.hero.subtitle') }}
-        </p>
+      <template #media>
+        <div class="opendata-hero__visual">
+          <div class="opendata-hero__glow" aria-hidden="true">
+            <div class="opendata-hero__glow-ring" />
+            <div
+              class="opendata-hero__glow-ring opendata-hero__glow-ring--secondary"
+            />
+            <span v-for="index in 6" :key="index" />
+          </div>
+
+          <HeroEducationCard
+            class="opendata-hero__education-card"
+            v-bind="educationCard"
+          />
+        </div>
       </template>
-    </OpendataHero>
+    </PageHeader>
 
     <OpendataStatsStrip :stats="stats" />
 
@@ -92,7 +115,8 @@ import { useI18n } from 'vue-i18n'
 import type { OpenDataOverviewDto } from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
-import OpendataHero from '~/components/domains/opendata/OpendataHero.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
+import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
 import OpendataStatsStrip from '~/components/domains/opendata/OpendataStatsStrip.vue'
 import OpendataDatasetHighlights from '~/components/domains/opendata/OpendataDatasetHighlights.vue'
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
@@ -307,4 +331,46 @@ useHead(() => ({
 
 .opendata-page__loader
   margin: 0
+
+.opendata-hero__visual
+  display: flex
+  justify-content: center
+  align-items: center
+  position: relative
+  width: 100%
+
+.opendata-hero__glow
+  position: relative
+  width: min(320px, 100%)
+  aspect-ratio: 1
+
+.opendata-hero__glow-ring
+  position: absolute
+  inset: 10%
+  border-radius: 50%
+  border: 1px solid rgba(var(--v-theme-hero-overlay-strong), 0.35)
+  box-shadow: 0 0 60px rgba(var(--v-theme-accent-primary-highlight), 0.25)
+
+.opendata-hero__glow-ring--secondary
+  inset: 20%
+  border-color: rgba(var(--v-theme-accent-supporting), 0.3)
+  box-shadow: 0 0 40px rgba(var(--v-theme-accent-supporting), 0.22)
+
+.opendata-hero__education-card
+  position: relative
+  z-index: 1
+  margin-top: clamp(1rem, 3vw, 2rem)
+  box-shadow: 0 20px 60px rgba(var(--v-theme-shadow-primary-600), 0.18)
+
+@media (max-width: 959px)
+  .opendata-hero__visual
+    margin-top: 2rem
+    align-items: stretch
+
+  .opendata-hero__glow
+    width: 240px
+    margin-inline: auto
+
+  .opendata-hero__education-card
+    max-width: none
 </style>

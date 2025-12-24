@@ -1,14 +1,22 @@
 <template>
   <div class="dataset-page">
-    <OpendataDatasetHero
+    <PageHeader
+      variant="hero-standard"
       :eyebrow="t('opendata.datasets.gtin.hero.eyebrow')"
       :title="t('opendata.datasets.gtin.hero.title')"
-      description-bloc-id="webpages:opendata:gtin-hero-overview"
-      :breadcrumb="{
-        label: String(t('opendata.datasets.common.breadcrumb.label')),
-        ariaLabel: String(t('opendata.datasets.common.breadcrumb.ariaLabel')),
-        href: localePath('opendata'),
-      }"
+      :description-bloc-id="'webpages:opendata:gtin-hero-overview'"
+      layout="single-column"
+      background="surface-variant"
+      surface-variant="orbit"
+      container="lg"
+      heading-level="h1"
+      :heading-id="'dataset-hero-heading'"
+      :breadcrumbs="[
+        {
+          label: String(t('opendata.datasets.common.breadcrumb.label')),
+          href: localePath('opendata'),
+        },
+      ]"
     />
 
     <v-progress-linear
@@ -120,7 +128,7 @@ import type {
 } from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
-import OpendataDatasetHero from '~/components/domains/opendata/OpendataDatasetHero.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
 import OpendataDownloadComparison from '~/components/domains/opendata/OpendataDownloadComparison.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'

@@ -1,15 +1,85 @@
 <template>
   <div class="contact-page">
-    <ContactHero
-      :eyebrow="t('contact.hero.eyebrow')"
+    <PageHeader
+      variant="hero-standard"
+      layout="2-columns"
+      background="surface-variant"
+      surface-variant="pulse"
       :title="t('contact.hero.title')"
       :subtitle="t('contact.hero.subtitle')"
-      :description="t('contact.hero.description')"
-      :highlights="heroHighlights"
-      :contact-channels="heroChannels"
-      :channels-title="t('contact.hero.channels.title')"
-      :channels-subtitle="t('contact.hero.channels.subtitle')"
-    />
+      heading-level="h1"
+      :heading-id="'contact-hero-heading'"
+      :eyebrow="t('contact.hero.eyebrow')"
+    >
+      <template #description>
+        <p class="mb-6">{{ t('contact.hero.description') }}</p>
+        <ul class="contact-hero__highlights" role="list">
+          <li
+            v-for="item in heroHighlights"
+            :key="item.text"
+            class="contact-hero__highlight"
+          >
+            <v-icon
+              :icon="item.icon"
+              size="26"
+              class="contact-hero__highlight-icon"
+            />
+            <span class="contact-hero__highlight-text">{{ item.text }}</span>
+          </li>
+        </ul>
+      </template>
+
+      <template #media>
+        <v-card
+          elevation="10"
+          rounded="xl"
+          color="primary"
+          theme="dark"
+          aria-labelledby="contact-hero-card-heading"
+          role="region"
+        >
+          <div class="contact-hero__card-overlay" aria-hidden="true" />
+          <div class="contact-hero__card-inner">
+            <div class="contact-hero__badge">
+              <v-icon
+                icon="mdi-message-badge-outline"
+                size="34"
+                aria-hidden="true"
+              />
+            </div>
+            <h2 id="contact-hero-card-heading" class="contact-hero__card-title">
+              {{ t('contact.hero.channels.title') }}
+            </h2>
+            <p class="contact-hero__card-description">
+              {{ t('contact.hero.channels.subtitle') }}
+            </p>
+            <v-divider class="contact-hero__card-divider" />
+            <v-list
+              bg-color="transparent"
+              density="comfortable"
+              lines="one"
+              role="list"
+              class="pa-0"
+            >
+              <v-list-item
+                v-for="channel in heroChannels"
+                :key="channel.label"
+                :title="channel.label"
+                :subtitle="channel.description"
+                class="contact-hero__card-item rounded-lg"
+                role="listitem"
+              >
+                <template #prepend>
+                  <v-avatar color="white" size="40">
+                    <v-icon :icon="channel.icon" color="primary" size="24" />
+                  </v-avatar>
+                </template>
+              </v-list-item>
+            </v-list>
+          </div>
+        </v-card>
+      </template>
+    </PageHeader>
 
     <ContactDetailsSection
       :eyebrow="t('contact.details.eyebrow')"
@@ -35,12 +105,20 @@ import { useI18n } from 'vue-i18n'
 import { FetchError } from 'ofetch'
 import type { ContactResponseDto } from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import type { ContactFormPayload } from '~/components/domains/contact/ContactFormCard.vue'
-import type {
-  HeroHighlight,
-  HeroContactChannel,
-} from '~/components/domains/contact/ContactHero.vue'
 import type { ContactDetailItem } from '~/components/domains/contact/ContactDetailsSection.vue'
+
+interface HeroHighlight {
+  icon: string
+  text: string
+}
+
+interface HeroContactChannel {
+  icon: string
+  label: string
+  description: string
+}
 
 definePageMeta({
   ssr: true,
@@ -273,4 +351,65 @@ useHead(() => ({
   display: flex
   flex-direction: column
   gap: 0
+
+.contact-hero__highlights
+  display: grid
+  gap: 0.75rem
+  padding: 0
+  margin: 0
+  list-style: none
+
+.contact-hero__highlight
+  display: flex
+  gap: 0.75rem
+  align-items: flex-start
+
+.contact-hero__highlight-icon
+  flex-shrink: 0
+
+.contact-hero__highlight-text
+  font-size: 1.05rem
+  line-height: 1.55
+
+.contact-hero__card-overlay
+  position: absolute
+  inset: 0
+  background: linear-gradient(180deg, rgba(var(--v-theme-hero-overlay-soft), 0.08) 0%, rgba(var(--v-theme-hero-overlay-soft), 0.02) 100%)
+  pointer-events: none
+
+.contact-hero__card-inner
+  position: relative
+  padding: clamp(1.75rem, 4vw, 2.6rem)
+  display: flex
+  flex-direction: column
+  gap: 1.1rem
+
+.contact-hero__badge
+  display: inline-flex
+  width: 3.5rem
+  height: 3.5rem
+  border-radius: 50%
+  align-items: center
+  justify-content: center
+  background: rgba(var(--v-theme-hero-overlay-strong), 0.18)
+  color: white
+
+.contact-hero__card-title
+  font-size: 1.35rem
+  font-weight: 700
+  margin: 0
+
+.contact-hero__card-description
+  font-size: 1rem
+  opacity: 0.92
+  margin: 0
+
+.contact-hero__card-divider
+  opacity: 0.2
+
+.contact-hero__card-item
+  transition: background-color 0.2s ease
+
+  &:hover
+    background-color: rgba(var(--v-theme-hero-overlay-soft), 0.08)
 </style>

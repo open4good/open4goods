@@ -21,9 +21,7 @@ verticalImage: /images/verticals/washing-machines.png
 enabled: true
 popular: true
 
-impactScoreConfig:
-  criteriasPonderation:
-    CLASSE_ENERGY: 1.0
+null
 
 availableImpactScoreCriterias:
   - CLASSE_ENERGY

@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { computed } from 'vue'
 import HomeSplitSection from './HomeSplitSection.vue'
 import { useThemeAsset } from '~/composables/useThemedAsset'

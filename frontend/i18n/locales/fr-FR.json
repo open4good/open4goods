@@ -8,7 +8,11 @@
         "footerLogo": "placeholders/logo-footer.svg",
         "favicon": "placeholders/favicon.svg",
         "problemImage": "placeholders/problem.webp",
-        "solutionImage": "placeholders/solution.webp"
+        "solutionImage": "placeholders/solution.webp",
+        "productBackground": "placeholders/product-background.svg",
+        "contactBackground": "placeholders/contact-background.svg",
+        "blogBackground": "placeholders/blog-background.svg",
+        "categoriesBackground": "placeholders/category-background.svg"
       },
       "parallax": {
         "essentials": "parallax/parallax-placeholder.svg",

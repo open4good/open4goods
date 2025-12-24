@@ -509,12 +509,7 @@ useHead({
                       <p class="home-hero__subtitle">
                         {{ heroSubtitle }}
                       </p>
-                      <p
-                        v-if="heroDescriptionTitle"
-                        class="home-hero__helpers-title"
-                      >
-                        {{ heroDescriptionTitle }}
-                      </p>
+               
                       <div class="home-hero__helper-row">
                         <div class="home-hero__eyebrow-block">
                           <p v-if="heroEyebrow" class="home-hero__eyebrow">

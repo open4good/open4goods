@@ -253,13 +253,14 @@ public class VerticalsGenerationService {
 	 * Update a vertical file with  categorys from predicted ones in the vertical yaml files
 	 * @param minOffers
 	 * @param fileName
+	 * @return The new content of the file
 	 */
-	public void updateVerticalFileWithCategories(Integer minOffers, String fileName) {
+	public String updateVerticalFileWithCategories(Integer minOffers, String fileName) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
 			LOGGER.warn("Will update {}",file.getName());
-			String originalContent = FileUtils.readFileToString(file);
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("matchingCategories:");
 			int endIndex = originalContent.indexOf("\n\n", startIndex);
@@ -269,20 +270,22 @@ public class VerticalsGenerationService {
 			newContent += originalContent.substring(endIndex);
 
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			return newContent;
 
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			return "Error: " + e1.getMessage();
 		}
 	}
 
 
 
-	public void updateVerticalFileWithImpactScore(String fileName) {
+	public String updateVerticalFileWithImpactScore(String fileName) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
 			LOGGER.warn("Will update {} with impactscore",file.getName());
-			String originalContent = FileUtils.readFileToString(file);
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("impactScoreConfig:");
 			int endIndex = originalContent.indexOf("\n\n", startIndex);
@@ -302,9 +305,11 @@ public class VerticalsGenerationService {
 			newContent += originalContent.substring(endIndex);
 
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			return newContent;
 
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			return "Error: " + e1.getMessage();
 		}
 
 	}
@@ -317,13 +322,14 @@ public class VerticalsGenerationService {
 	 * @param fileName
 	 * @param minCoverage
 	 * @param containing
+	 * @return The new content of the file
 	 */
-	public void updateVerticalFileWithAttributes(String fileName, int minCoverage, String containing) {
+	public String updateVerticalFileWithAttributes(String fileName, int minCoverage, String containing) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
 			LOGGER.warn("Will update {} for attributes",file.getName());
-			String originalContent = FileUtils.readFileToString(file);
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("  configs:");
 			int endIndex = startIndex + "  configs:".length();
@@ -334,9 +340,11 @@ public class VerticalsGenerationService {
 			newContent += originalContent.substring(endIndex);
 
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			return newContent;
 
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			return "Error: " + e1.getMessage();
 		}
 	}
 
@@ -347,6 +355,29 @@ public class VerticalsGenerationService {
 	 * @param vertical
 	 * @return
 	 */
+	/**
+	 * Retrieve a set of attribute keys (and their synonyms) that are already defined in other verticals.
+	 * This helps in standardizing attributes across verticals.
+	 * @param currentVerticalId The ID of the vertical currently being processed (to exclude it).
+	 * @return A set of strings representing known attribute keys and synonyms.
+	 */
+	private Set<String> getKnownAttributesFromOtherVerticals(String currentVerticalId) {
+		Set<String> knownAttributes = new HashSet<>();
+		verticalConfigservice.getConfigsWithoutDefault().stream()
+			.filter(vc -> !vc.getId().equals(currentVerticalId)) // Exclude current vertical
+			.forEach(vc -> {
+				if (vc.getAttributesConfig() != null && vc.getAttributesConfig().getConfigs() != null) {
+					vc.getAttributesConfig().getConfigs().forEach(attr -> {
+						knownAttributes.add(attr.getKey());
+						if (attr.getSynonyms() != null) {
+							attr.getSynonyms().values().forEach(syns -> knownAttributes.addAll(syns));
+						}
+					});
+				}
+			});
+		return knownAttributes;
+	}
+
 	public String generateAttributesMapping(VerticalConfig verticalConfig, int minCoverage, String containing) {
 		LOGGER.info("Generating attributes mapping for {}", verticalConfig);
 		VerticalAttributesStats stats = attributesStats(verticalConfig.getId());
@@ -365,26 +396,29 @@ public class VerticalsGenerationService {
 			});
 		});
 
-
+		Set<String> knownAttributes = getKnownAttributesFromOtherVerticals(verticalConfig.getId());
 
 		int totalItems = stats.getTotalItems();
 
-		String ret = "";
+		StringBuilder ret = new StringBuilder();
 		for (Entry<String, AttributesStats> cat : stats.getStats().entrySet()) {
 
 			if (!exclusions.contains(cat.getKey())) {
-				if (Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue() > minCoverage) {
-					LOGGER.info("Generating template for attribute : {}", cat.getKey());
+				boolean isKnown = knownAttributes.contains(cat.getKey());
+				int coveragePercent = Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue();
+				
+				if (isKnown || coveragePercent > minCoverage) {
+					LOGGER.info("Generating template for attribute : {} (Known: {}, Coverage: {}%)", cat.getKey(), isKnown, coveragePercent);
 					// TODO(conf,p2) : numberofsamples from conf
 					if (StringUtils.isEmpty(containing) || cat.getKey().toLowerCase().contains(containing.toLowerCase())) {
-						ret += attributeConfigTemplate(cat, totalItems,10);
+						ret.append(attributeConfigTemplate(cat, totalItems,10));
 					}
 				} else {
 					LOGGER.info("Skipping {}, not enough coverage", cat.getKey());
 				}
 			}
 		}
-		return ret;
+		return ret.toString();
 
 	}
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type CSSProperties } from 'vue'
+import { computed, type CSSProperties, type MaybeRef } from 'vue'
 import HeroSurface from '~/components/shared/hero/HeroSurface.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
 import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
@@ -139,7 +139,9 @@ const showSurfaceVariant = computed(
 const backgroundImageAssetKeyRef = computed(
   () => props.backgroundImageAssetKey as ThemeAssetKey | undefined
 )
-const resolvedBackgroundAsset = useThemeAsset(backgroundImageAssetKeyRef as any)
+const resolvedBackgroundAsset = useThemeAsset(
+  backgroundImageAssetKeyRef as MaybeRef<ThemeAssetKey>
+)
 
 const backgroundImageSrc = computed(() => {
   if (props.backgroundImageAssetKey && resolvedBackgroundAsset.value) {
