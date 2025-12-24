@@ -4,47 +4,47 @@
       <v-icon icon="mdi-creation" class="mr-2" color="primary"></v-icon>
       {{ templateName }}
     </v-card-title>
-  <v-card-text>
-    <v-alert
-      type="info"
-      variant="tonal"
-      class="mb-4"
-      closable
-      icon="mdi-information"
-    >
-      {{ $t('agents.promptInput.description') }}
-    </v-alert>
+    <v-card-text>
+      <v-alert
+        type="info"
+        variant="tonal"
+        class="mb-4"
+        closable
+        icon="mdi-information"
+      >
+        {{ $t('agents.promptInput.description') }}
+      </v-alert>
 
-    <v-select
-      v-if="promptTemplates.length > 0"
-      v-model="selectedPromptTemplateId"
-      :items="promptTemplates"
-      item-title="title"
-      item-value="id"
-      :label="$t('agents.promptInput.templateLabel')"
-      variant="outlined"
-      density="comfortable"
-      class="mb-4"
-      :rules="[v => !!v || $t('agents.promptInput.templateRequired')]"
-    />
+      <v-select
+        v-if="promptTemplates.length > 0"
+        v-model="selectedPromptTemplateId"
+        :items="promptTemplates"
+        item-title="title"
+        item-value="id"
+        :label="$t('agents.promptInput.templateLabel')"
+        variant="outlined"
+        density="comfortable"
+        class="mb-4"
+        :rules="[v => !!v || $t('agents.promptInput.templateRequired')]"
+      />
 
-    <v-textarea
-      v-if="selectedPromptTemplate"
-      v-model="promptTemplateContent"
-      :label="$t('agents.promptInput.templateContent')"
-      rows="4"
-      auto-grow
-      variant="outlined"
-      :readonly="!allowTemplateEditing"
-      :disabled="!allowTemplateEditing"
-      class="mb-6"
-    />
+      <v-textarea
+        v-if="selectedPromptTemplate"
+        v-model="promptTemplateContent"
+        :label="$t('agents.promptInput.templateContent')"
+        rows="4"
+        auto-grow
+        variant="outlined"
+        :readonly="!allowTemplateEditing"
+        :disabled="!allowTemplateEditing"
+        class="mb-6"
+      />
 
-    <v-textarea
-      v-model="prompt"
-      :label="$t('agents.promptInput.label')"
-      :placeholder="$t('agents.promptInput.placeholder')"
-      rows="6"
+      <v-textarea
+        v-model="prompt"
+        :label="$t('agents.promptInput.label')"
+        :placeholder="$t('agents.promptInput.placeholder')"
+        rows="6"
         auto-grow
         variant="outlined"
         :rules="[v => !!v || $t('agents.promptInput.required')]"

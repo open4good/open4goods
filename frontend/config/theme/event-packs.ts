@@ -69,7 +69,7 @@ export const eventPackSchedule: EventPackSchedule[] = [
   {
     id: 'christmas-december',
     start: '12-01',
-    end: '12-31',
+    end: '12-02',
     pack: 'christmas',
     description: 'Noël — tout décembre',
   },

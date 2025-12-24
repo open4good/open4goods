@@ -339,31 +339,17 @@ const faqItems = computed(() => [
   },
 ])
 
-type FaqItem = { question: string; answer: string }
-
-const userFaqEntries = ref<FaqItem[]>([])
-
-const allFaqItems = computed(() => [...faqItems.value, ...userFaqEntries.value])
-
 const faqPanels = computed(() =>
-  allFaqItems.value.map((item, index) => ({
+  faqItems.value.map((item, index) => ({
     ...item,
     blocId: `HOME:FAQ:${index + 1}`,
   }))
 )
 
-const handleAgentFaqAppend = (item: FaqItem) => {
-  if (!item.question?.trim()) {
-    return
-  }
-
-  userFaqEntries.value = [...userFaqEntries.value, item]
-}
-
 const faqJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: allFaqItems.value.map(item => ({
+  mainEntity: faqItems.value.map(item => ({
     '@type': 'Question',
     name: item.question,
     acceptedAnswer: {
@@ -849,10 +835,7 @@ useHead(() => ({
               >
                 <v-fade-transition :disabled="shouldReduceMotion">
                   <div v-show="animatedSections.faq">
-                    <HomeFaqSection
-                      :items="faqPanels"
-                      @append-faq="handleAgentFaqAppend"
-                    />
+                    <HomeFaqSection :items="faqPanels" />
                   </div>
                 </v-fade-transition>
               </div>

@@ -1,6 +1,7 @@
 # UX Color Theme Brief & Engineering Guidelines
 
 ## Theme Name
+
 **Fresh Tech / Calm Energy**
 
 A modern, friendly, and trustworthy color system built around teal–green foundations, balanced with warm accents and clear functional contrasts. Designed for data-heavy, productivity, or wellbeing-oriented digital products.
@@ -20,12 +21,13 @@ A modern, friendly, and trustworthy color system built around teal–green found
 
 ### 1. Primary Brand Colors
 
-| Token | Hex | Usage |
-|-----|-----|------|
-| `brand.primary` | `#00DE9F` | Primary brand color, main CTAs, highlights, hero accents |
+| Token               | Hex       | Usage                                                         |
+| ------------------- | --------- | ------------------------------------------------------------- |
+| `brand.primary`     | `#00DE9F` | Primary brand color, main CTAs, highlights, hero accents      |
 | `brand.primary.alt` | `#00A1C2` | Secondary brand tone, navigation bars, headers, active states |
 
 **Guideline**
+
 - Use gradients between `#00DE9F → #00A1C2` for large surfaces or hero sections.
 - Avoid overusing primary color for text; prefer neutral text on primary backgrounds.
 
@@ -33,14 +35,15 @@ A modern, friendly, and trustworthy color system built around teal–green found
 
 ### 2. Supporting Greens (Success & Growth)
 
-| Token | Hex | Usage |
-|-----|-----|------|
-| `status.success.dark` | `#008879` | Success states, confirmations, positive indicators |
-| `status.success.light` | `#5BDB3B` | Growth metrics, positive trends, progress visuals |
-| `accent.green.cool` | `#00D19F` | Secondary accents, toggles, icons |
-| `accent.green.warm` | `#A6E242` | Highlights, badges, secondary emphasis |
+| Token                  | Hex       | Usage                                              |
+| ---------------------- | --------- | -------------------------------------------------- |
+| `status.success.dark`  | `#008879` | Success states, confirmations, positive indicators |
+| `status.success.light` | `#5BDB3B` | Growth metrics, positive trends, progress visuals  |
+| `accent.green.cool`    | `#00D19F` | Secondary accents, toggles, icons                  |
+| `accent.green.warm`    | `#A6E242` | Highlights, badges, secondary emphasis             |
 
 **Guideline**
+
 - Dark green (`#008879`) for text/icons on light backgrounds.
 - Light greens (`#5BDB3B`, `#A6E242`) for charts, progress bars, and decorative emphasis.
 
@@ -48,12 +51,13 @@ A modern, friendly, and trustworthy color system built around teal–green found
 
 ### 3. Informational & Neutral Accents
 
-| Token | Hex | Usage |
-|-----|-----|------|
-| `accent.info.warm` | `#FFCD90` | Tips, onboarding hints, soft warnings |
+| Token              | Hex       | Usage                                                  |
+| ------------------ | --------- | ------------------------------------------------------ |
+| `accent.info.warm` | `#FFCD90` | Tips, onboarding hints, soft warnings                  |
 | `accent.info.cool` | `#00D1CE` | Informational messages, helper UI, links (non-primary) |
 
 **Guideline**
+
 - Use warm info for human-facing guidance.
 - Use cool info for system-driven or data-driven information.
 
@@ -61,12 +65,13 @@ A modern, friendly, and trustworthy color system built around teal–green found
 
 ### 4. Feedback & Attention Colors
 
-| Token | Hex | Usage |
-|-----|-----|------|
-| `status.error` | `#FF8479` | Errors, destructive actions, alerts |
+| Token           | Hex       | Usage                                      |
+| --------------- | --------- | ------------------------------------------ |
+| `status.error`  | `#FF8479` | Errors, destructive actions, alerts        |
 | `status.action` | `#0088D6` | Focus states, active links, system actions |
 
 **Guideline**
+
 - Never use error color without an icon or text explanation.
 - Blue action color should be reserved for interactive emphasis, not decoration.
 
@@ -74,12 +79,12 @@ A modern, friendly, and trustworthy color system built around teal–green found
 
 ## Interaction States
 
-| State | Color Rule |
-|-----|-----------|
-| Hover | Increase brightness or saturation by ~8–12% |
-| Active | Shift toward darker variant |
+| State    | Color Rule                                     |
+| -------- | ---------------------------------------------- |
+| Hover    | Increase brightness or saturation by ~8–12%    |
+| Active   | Shift toward darker variant                    |
 | Disabled | Reduce opacity to 40–50% and remove saturation |
-| Focus | Use `#0088D6` outline or glow (2px min) |
+| Focus    | Use `#0088D6` outline or glow (2px min)        |
 
 ---
 
@@ -95,6 +100,7 @@ A modern, friendly, and trustworthy color system built around teal–green found
 ## Charting & Data Visualization
 
 Recommended mapping:
+
 - Positive trend → `#5BDB3B`
 - Neutral trend → `#00D1CE`
 - Warning → `#FFCD90`
@@ -106,11 +112,13 @@ Recommended mapping:
 ## Do / Don’t Summary
 
 **Do**
+
 - Use teal/green as the emotional backbone.
 - Keep warm colors rare and meaningful.
 - Validate contrast in every new component.
 
 **Don’t**
+
 - Use all colors in a single screen.
 - Use error color as decorative accent.
 - Stack saturated greens next to each other without separation.

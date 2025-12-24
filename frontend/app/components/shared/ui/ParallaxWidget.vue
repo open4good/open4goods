@@ -85,10 +85,12 @@ const rootStyles = computed<CSSProperties>(() => ({
 }))
 
 const overscanPx = computed(() => {
-  const ratio = typeof props.overscanRatio === 'number' ? props.overscanRatio : 0.1
+  const ratio =
+    typeof props.overscanRatio === 'number' ? props.overscanRatio : 0.1
   const clampRatio =
     typeof props.maxOffsetRatio === 'number' ? props.maxOffsetRatio : ratio
-  const minPx = typeof props.overscanMinPx === 'number' ? props.overscanMinPx : 80
+  const minPx =
+    typeof props.overscanMinPx === 'number' ? props.overscanMinPx : 80
   const px = windowHeight.value * clampRatio + 32
   return Math.ceil(Math.max(minPx, px))
 })

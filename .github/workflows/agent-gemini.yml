@@ -44,8 +44,8 @@ jobs:
     if: >-
       ${{ github.actor != 'github-actions[bot]' && (
            github.event_name == 'workflow_dispatch' || (
-             (github.event.issue && contains(toLower(join(github.event.issue.labels.*.name, ' ')), 'gemini')) ||
-             (github.event.pull_request && contains(toLower(join(github.event.pull_request.labels.*.name, ' ')), 'gemini'))
+             (github.event.issue && contains(join(github.event.issue.labels.*.name, ' '), 'gemini')) ||
+             (github.event.pull_request && contains(join(github.event.pull_request.labels.*.name, ' '), 'gemini'))
            )
          ) }}
     runs-on:
@@ -299,11 +299,11 @@ jobs:
         id: run_gemini
         uses: google-github-actions/run-gemini-cli@v0
         env:
-          GITHUB_TOKEN: ''  # Do not pass token to Gemini CLI (untrusted input)
+          GITHUB_TOKEN: "" # Do not pass token to Gemini CLI (untrusted input)
         with:
-          gemini_api_key: ${{ secrets.GEMINI_KEY }}  # Use Gemini API key
-          gemini_model: ${{ steps.prep.outputs.model }}  # Preserve model override if set
-          prompt: ${{ steps.prep.outputs.prompt_content }}  # Use prepared prompt with JSON schema
+          gemini_api_key: ${{ secrets.GEMINI_KEY }} # Use Gemini API key
+          gemini_model: ${{ steps.prep.outputs.model }} # Preserve model override if set
+          prompt: ${{ steps.prep.outputs.prompt_content }} # Use prepared prompt with JSON schema
           settings: |-
             {
               "coreTools": [ "run_shell_command(echo)" ]
@@ -313,7 +313,7 @@ jobs:
         if: steps.prep.outputs.should_run == 'true'
         uses: actions/github-script@v8
         env:
-          CODEX_JSON: ${{ steps.run_gemini.outputs.summary }}  # Use Gemini CLI output
+          CODEX_JSON: ${{ steps.run_gemini.outputs.summary }} # Use Gemini CLI output
         with:
           github-token: ${{ github.token }}
           script: |

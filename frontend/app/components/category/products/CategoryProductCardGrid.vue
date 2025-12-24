@@ -272,7 +272,7 @@ const popularAttributesByProduct = (
       key: attribute.key,
       label: attribute.label,
       value,
-      icon: showAttributeIcons.value ? attribute.icon ?? null : null,
+      icon: showAttributeIcons.value ? (attribute.icon ?? null) : null,
     })
   })
 

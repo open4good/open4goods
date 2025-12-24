@@ -56,5 +56,4 @@ describe('useThemedAsset utilities', () => {
 
     expect(resolved).toBe('/_nuxt/light-hold-hero.svg')
   })
-
 })

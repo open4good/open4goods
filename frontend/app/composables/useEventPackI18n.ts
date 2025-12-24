@@ -1,8 +1,6 @@
 import { computed, toValue, type MaybeRef } from 'vue'
 
-import {
-  EVENT_PACK_I18N_BASE_KEY,
-} from '~~/config/theme/event-packs'
+import { EVENT_PACK_I18N_BASE_KEY } from '~~/config/theme/event-packs'
 
 type ResolveOptions = {
   fallbackKeys?: string[]

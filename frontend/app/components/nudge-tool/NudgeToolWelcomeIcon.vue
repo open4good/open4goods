@@ -33,7 +33,8 @@ const interpolate = (start: number, end: number, ratio: number) =>
   start + (end - start) * ratio
 
 const easingForScale = (scaleValue: number) => {
-  const ratio = (scaleValue - ZOOM_SCALE_MIN) / (ZOOM_SCALE_MAX - ZOOM_SCALE_MIN)
+  const ratio =
+    (scaleValue - ZOOM_SCALE_MIN) / (ZOOM_SCALE_MAX - ZOOM_SCALE_MIN)
 
   // Starts at the current easing (ease-in-out) and gradually eases out more
   // aggressively as the scale increases for a softer landing.
@@ -46,7 +47,12 @@ const easingForScale = (scaleValue: number) => {
 }
 
 const randomScale = () =>
-  Number((ZOOM_SCALE_MIN + Math.random() * (ZOOM_SCALE_MAX - ZOOM_SCALE_MIN)).toFixed(3))
+  Number(
+    (
+      ZOOM_SCALE_MIN +
+      Math.random() * (ZOOM_SCALE_MAX - ZOOM_SCALE_MIN)
+    ).toFixed(3)
+  )
 
 const isHovered = ref(false)
 const reducedMotion = usePreferredReducedMotion()

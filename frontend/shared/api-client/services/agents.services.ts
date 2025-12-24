@@ -172,7 +172,10 @@ class AgentService {
     )
   }
 
-  async getIssue(issueId: string, domainLanguage: string): Promise<AgentIssueDto> {
+  async getIssue(
+    issueId: string,
+    domainLanguage: string
+  ): Promise<AgentIssueDto> {
     return this.fetch<AgentIssueDto>(
       `/agents/${issueId}?domainLanguage=${domainLanguage}`
     )

@@ -102,7 +102,6 @@ describe('ParallaxWidget', () => {
     expect(layer.element.style.transform).toBe('translate3d(0, 150px, 0)')
   })
 
-
   it('halts parallax when reduced motion is preferred', async () => {
     motionPreference.value = 'reduce'
     scrollY.value = 500
