@@ -21,7 +21,9 @@ verticalImage: /images/verticals/washing-machines.png
 enabled: true
 popular: true
 
-null
+impactScoreConfig:
+  criteriasPonderation:
+    CLASSE_ENERGY: 1.0
 
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
@@ -79,18 +81,7 @@ i18n:
 
 
   
-##############################################################################
-# Eco score configuration 
-# Specify here the specific ecoscore for this vertical. Format : 
-# >> EXISTING_SCORE: WEIGHT
-# Weight sum MUST BE equals to 1
-##############################################################################
 
-ecoscoreConfig:
-   CLASSE_ENERGY : 1
-#   WEIGHT: 0.3
-#   BRAND_SUSTAINABILITY: 0.3
-#   DATA_QUALITY: 0.1
 
 ##############################################################################
 # Custom search filters : the following filters
