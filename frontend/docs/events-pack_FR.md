@@ -200,3 +200,326 @@ const heroBackground = useHeroBackgroundAsset()
 // Ou générique :
 const myImage = useThemeAsset('problemImage')
 ```
+
+## Exemples Exhaustifs de PageHeader Background Images
+
+Le composant `PageHeader` supporte plusieurs types de backgrounds configurables via les props. Voici tous les cas d'usage possibles :
+
+### 1. Background: Gradient (CSS Gradients)
+
+Utilise des dégradés CSS définis par les variables de thème.
+
+**Configuration i18n :** Aucune (géré par CSS)
+
+**Utilisation :**
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="gradient"
+  title="Page avec dégradé"
+  subtitle="Gradient géré par les variables CSS du thème"
+/>
+```
+
+**Effet :** Dégradé automatique basé sur `--v-theme-hero-gradient-start` et `--v-theme-hero-gradient-end`.
+
+---
+
+### 2. Background: Image (Static Background Image)
+
+Affiche une image statique en arrière-plan avec overlay.
+
+**Configuration i18n :**
+```json
+{
+  "packs": {
+    "christmas": {
+      "assets": {
+        "heroBackground": "christmas/hero-background.svg"
+      }
+    }
+  }
+}
+```
+
+**Utilisation (via Asset Key) :**
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="image"
+  background-image-asset-key="heroBackground"
+  overlay-opacity="0.65"
+  title="Joyeux Noël responsable"
+/>
+```
+
+**Utilisation (URL directe) :**
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="image"
+  background-image="/assets/themes/common/bastille-day/hero-background.svg"
+  overlay-opacity="0.7"
+  title="Célébrez le 14 juillet"
+/>
+```
+
+**Utilisation (Light/Dark Mode) :**
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="image"
+  :background-image="{
+    light: '/assets/themes/light/hero.svg',
+    dark: '/assets/themes/dark/hero.svg'
+  }"
+  title="Image adaptée au thème"
+/>
+```
+
+---
+
+### 3. Background: Parallax (Multi-Layer Parallax Effect)
+
+Utilise le composant `ParallaxWidget` avec plusieurs calques qui se déplacent à des vitesses différentes.
+
+**Configuration i18n :**
+```json
+{
+  "packs": {
+    "bastille-day": {
+      "parallax": {
+        "essentials": "parallax/parallax-background-bastille-essentials.svg",
+        "features": "parallax/parallax-background-bastille-features.svg",
+        "blog": "parallax/parallax-background-bastille-blog.svg",
+        "objections": "parallax/parallax-background-bastille-objections.svg",
+        "cta": "parallax/parallax-background-bastille-cta.svg"
+      }
+    }
+  }
+}
+```
+
+**Utilisation :**
+```vue
+<PageHeader
+  variant="hero-fullscreen"
+  background="parallax"
+  :is-parallax="true"
+  :parallax-layers="[
+    { src: '/parallax/layer-back.svg', speed: 0.3, blendMode: 'multiply' },
+    { src: '/parallax/layer-mid.svg', speed: 0.6 },
+    { src: '/parallax/layer-front.svg', speed: 1.0 }
+  ]"
+  :parallax-amount="0.18"
+  :overlay-opacity="0.5"
+  :enable-aplats="true"
+  aplat-svg="/images/home/parallax-aplats.svg"
+  title="Hero avec parallaxe"
+/>
+```
+
+**Configuration Parallax Layers :**
+- `src` : Chemin de l'image SVG du calque
+- `speed` : Multiplicateur de vitesse (0.0 = statique, 1.0 = vitesse normale)
+- `blendMode` : Mode de fusion CSS (`multiply`, `screen`, `overlay`, etc.)
+
+---
+
+### 4. Background: Surface Variant (Animated Gradient Surfaces)
+
+Utilise le composant `HeroSurface` qui génère des effets visuels animés (aurora, halo, prism, etc.).
+
+**Configuration i18n :** Aucune (géré par props)
+
+**Variantes disponibles :**
+- `aurora` : Aurore boréale animée
+- `halo` : Halos lumineux concentriques
+- `prism` : Effet prisme multicolore
+- `pulse` : Pulsations lumineuses
+- `mesh` : Grille animée en dégradé
+- `orbit` : Cercles orbitaux
+
+**Utilisation :**
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="surface-variant"
+  surface-variant="aurora"
+  title="Hero avec effet Aurora"
+/>
+```
+
+**Exemple avec différentes variantes :**
+```vue
+<!-- Aurora -->
+<PageHeader background="surface-variant" surface-variant="aurora" />
+
+<!-- Halo -->
+<PageHeader background="surface-variant" surface-variant="halo" />
+
+<!-- Prism -->
+<PageHeader background="surface-variant" surface-variant="prism" />
+
+<!-- Pulse -->
+<PageHeader background="surface-variant" surface-variant="pulse" />
+
+<!-- Mesh -->
+<PageHeader background="surface-variant" surface-variant="mesh" />
+
+<!-- Orbit (utilisé sur /partners) -->
+<PageHeader background="surface-variant" surface-variant="orbit" />
+```
+
+---
+
+### 5. Background: Solid (Couleur Unie)
+
+Applique une couleur de fond unie personnalisée.
+
+**Configuration i18n :** Aucune (géré par props)
+
+**Utilisation :**
+```vue
+<PageHeader
+  variant="section-header"
+  background="solid"
+  background-color="#1a237e"
+  title="Section avec fond bleu"
+/>
+```
+
+**Avec variable CSS :**
+```vue
+<PageHeader
+  variant="section-header"
+  background="solid"
+  background-color="rgb(var(--v-theme-surface-default))"
+  title="Fond basé sur le thème"
+/>
+```
+
+---
+
+## Tableau Récapitulatif des Types de Background
+
+| Type | Assets i18n | Props | Cas d'usage |
+|------|-------------|-------|-------------|
+| **gradient** | ❌ Non | `background="gradient"` | Hero simple, design minimaliste |
+| **image** | ✅ Oui (`heroBackground`) | `background="image"`<br/>`background-image-asset-key` ou `background-image` | Pack événementiel avec visuel statique |
+| **parallax** | ✅ Oui (`parallax.*`) | `background="parallax"`<br/>`is-parallax`<br/>`parallax-layers` | Page d'accueil immersive, storytelling |
+| **surface-variant** | ❌ Non | `background="surface-variant"`<br/>`surface-variant="aurora\|halo\|prism..."` | Pages statiques élégantes (partners, team) |
+| **solid** | ❌ Non | `background="solid"`<br/>`background-color` | Sections internes, headers secondaires |
+
+---
+
+## Exemples Complets par Pack Événementiel
+
+### Pack "default" (Placeholder)
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="image"
+  background-image-asset-key="heroBackground"
+  title="Open4Goods"
+  subtitle="Des choix éclairés pour un monde durable"
+/>
+```
+**Résolution asset :** `packs.default.assets.heroBackground` → `placeholders/hero-background.svg`
+
+---
+
+### Pack "hold" (Logo Nudger)
+```vue
+<PageHeader
+  variant="hero-fullscreen"
+  background="image"
+  background-image-asset-key="heroBackground"
+  overlay-opacity="0.7"
+  title="Nudger"
+  subtitle="Votre assistant d'achat responsable"
+/>
+```
+**Résolution asset :** `packs.hold.assets.heroBackground` → `hero-background.webp`
+
+---
+
+### Pack "bastille-day" (14 juillet)
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="image"
+  background-image-asset-key="heroBackground"
+  overlay-opacity="0.6"
+  eyebrow="Spécial 14 juillet"
+  title="Célébrez des choix responsables"
+  subtitle="Un feu d'artifice de prix justes et d'impact transparent"
+/>
+```
+**Résolution asset :** `packs.bastille-day.assets.heroBackground` → `bastille-day/hero-background.svg`
+
+---
+
+### Pack "sdg" (Objectifs de Développement Durable)
+```vue
+<PageHeader
+  variant="hero-standard"
+  background="parallax"
+  :is-parallax="true"
+  :parallax-layers="sdgParallaxLayers"
+  :enable-aplats="true"
+  title="Objectifs de Développement Durable"
+  subtitle="Consommer en alignement avec les ODD"
+/>
+```
+
+---
+
+## Bonnes Pratiques
+
+### Optimisation des Images
+- **SVG** : Préféré pour les backgrounds (léger, vectoriel, responsive)
+- **WebP** : Pour les photos/images complexes
+- **Lazy Loading** : Activé automatiquement pour `background-image` (fetchpriority="high" désactivé)
+
+### Accessibilité
+- Toujours utiliser `overlay-opacity` pour garantir un contraste suffisant avec le texte
+- Les images de background ont automatiquement `aria-hidden="true"`
+- Fournir `alt=""` pour les images décoratives
+
+### Performance
+- **Gradient** : Plus performant (CSS pur, pas de requête réseau)
+- **Surface Variant** : Animation GPU-accelerated, léger
+- **Image** : 1 requête réseau, précharger si hero principal
+- **Parallax** : Multiple requêtes, réserver aux pages d'accueil
+
+### Responsive
+Tous les types de background sont automatiquement responsive :
+- Les images s'adaptent via `object-fit: cover`
+- Les parallaxes ajustent leur amplitude sur mobile
+- Les gradients et surfaces s'adaptent aux dimensions
+
+---
+
+## Résolution des Assets par Pack
+
+Le système résout automatiquement les chemins d'assets selon le pack actif :
+
+```typescript
+// Pack actif = "bastille-day"
+const bg = useThemeAsset('heroBackground')
+// → Résout vers: /assets/themes/common/bastille-day/hero-background.svg
+
+// Pack actif = "hold"
+const bg = useThemeAsset('heroBackground')
+// → Résout vers: /assets/themes/common/hold/hero-background.webp
+
+// Pack actif = "default"
+const bg = useThemeAsset('heroBackground')
+// → Résout vers: /assets/themes/light/placeholders/hero-background.svg
+```
+
+**Hiérarchie de résolution :**
+1. `packs.<activePack>.assets.<assetKey>`
+2. `packs.default.assets.<assetKey>` (fallback)
+3. Placeholder générique si non trouvé
