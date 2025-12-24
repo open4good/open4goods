@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice">
+  <desc>Parallax Back Layer - Essentials (Dark)</desc>
+  <defs>
+    <filter id="soft-blur-back-dark">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" />
+    </filter>
+  </defs>
+  
+  <circle cx="15%" cy="60%" r="200" fill="#00A1C2" fill-opacity="0.08" filter="url(#soft-blur-back-dark)" />
+  <circle cx="85%" cy="30%" r="250" fill="#00DE9F" fill-opacity="0.06" filter="url(#soft-blur-back-dark)" />
+  
+  <path d="M -200 700 Q 800 200 1800 700" fill="none" stroke="#0088D6" stroke-width="2" stroke-opacity="0.05" />
+</svg>

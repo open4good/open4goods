@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="orbit-grad-os-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001F25" stop-opacity="1" />
+      <stop offset="100%" stop-color="#002A22" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#orbit-grad-os-dark)" />
+  
+  <path d="M 100 150 L 50 200 L 100 250" fill="none" stroke="#0088D6" stroke-width="4" stroke-opacity="0.15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 1500 150 L 1550 200 L 1500 250" fill="none" stroke="#00DE9F" stroke-width="4" stroke-opacity="0.15" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

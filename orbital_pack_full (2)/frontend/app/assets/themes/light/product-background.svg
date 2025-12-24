@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="orbit-grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00DE9F" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#00A1C2" stop-opacity="0.15" />
+    </linearGradient>
+    <filter id="blur-header">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+  <rect width="100%" height="100%" fill="url(#orbit-grad-header)" />
+  
+  <!-- Subtle shapes focused on top right/bottom left to leave center clear -->
+  <circle cx="95%" cy="10%" r="150" fill="#00DE9F" fill-opacity="0.1" filter="url(#blur-header)" />
+  <circle cx="5%" cy="90%" r="200" fill="#00A1C2" fill-opacity="0.08" filter="url(#blur-header)" />
+  
+  <path d="M 0 350 Q 800 250 1600 350" fill="none" stroke="#0088D6" stroke-width="1" stroke-opacity="0.05" />
+</svg>

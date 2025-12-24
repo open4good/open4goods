@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="orbit-grad-header-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#002A22" stop-opacity="1" />
+      <stop offset="100%" stop-color="#001F25" stop-opacity="1" />
+    </linearGradient>
+    <filter id="blur-header-dark">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#orbit-grad-header-dark)" />
+  
+  <circle cx="95%" cy="10%" r="150" fill="#00DE9F" fill-opacity="0.05" filter="url(#blur-header-dark)" />
+  <circle cx="5%" cy="90%" r="200" fill="#00A1C2" fill-opacity="0.05" filter="url(#blur-header-dark)" />
+  
+  <path d="M 0 350 Q 800 250 1600 350" fill="none" stroke="#0088D6" stroke-width="1" stroke-opacity="0.1" />
+</svg>
