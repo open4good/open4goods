@@ -59,13 +59,18 @@ export const resolveThemedAssetUrlFromIndex = (
     `${fallbackTheme}/${path}`,
   ])
 
-  return candidates.reduce<string | undefined>((resolved, candidate) => {
-    if (resolved) {
-      return resolved
-    }
+  const result = candidates.reduce<string | undefined>(
+    (resolved, candidate) => {
+      if (resolved) {
+        return resolved
+      }
+      // console.log(`[ThemeAsset] Checking candidate: ${candidate}, exists: ${!!index[candidate]}`)
+      return index[candidate]
+    },
+    undefined
+  )
 
-    return index[candidate]
-  }, undefined)
+  return result
 }
 
 const useCurrentThemeName = () => {

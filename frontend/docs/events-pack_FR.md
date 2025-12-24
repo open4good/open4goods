@@ -126,7 +126,6 @@ Définis sous `packs.<pack>.assets`. Clés communes :
 
 #### Arrière-plans Parallaxes
 
-TODO : PAreil, j m'attendais à voir des extensions
 Définis sous `packs.<pack>.parallax`. Les clés correspondent aux sections de la page d'accueil :
 
 - `essentials`
@@ -134,6 +133,11 @@ Définis sous `packs.<pack>.parallax`. Les clés correspondent aux sections de l
 - `blog`
 - `objections`
 - `cta`
+
+Vous pouvez fournir vos propres fichiers SVG pour chaque calque ou réutiliser les placeholders existants.
+
+**Extension des Parallaxes** :
+Le système de parallaxe supporte maintenant la fusion de calques multiples. Si vous souhaitez des effets plus complexes, vous pouvez définir des couches supplémentaires dans le code du composant, mais la configuration i18n reste simple : une clé par section principale.
 
 **Emplacement des fichiers Assets :**
 Placez vos fichiers SVG/image dans :
@@ -227,6 +231,7 @@ Utilise des dégradés CSS définis par les variables de thème.
 **Configuration i18n :** Aucune (géré par CSS)
 
 **Utilisation :**
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -245,6 +250,7 @@ Utilise des dégradés CSS définis par les variables de thème.
 Affiche une image statique en arrière-plan avec overlay.
 
 **Configuration i18n :**
+
 ```json
 {
   "packs": {
@@ -258,6 +264,7 @@ Affiche une image statique en arrière-plan avec overlay.
 ```
 
 **Utilisation (via Asset Key) :**
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -269,6 +276,7 @@ Affiche une image statique en arrière-plan avec overlay.
 ```
 
 **Utilisation (URL directe) :**
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -280,13 +288,14 @@ Affiche une image statique en arrière-plan avec overlay.
 ```
 
 **Utilisation (Light/Dark Mode) :**
+
 ```vue
 <PageHeader
   variant="hero-standard"
   background="image"
   :background-image="{
     light: '/assets/themes/light/hero.svg',
-    dark: '/assets/themes/dark/hero.svg'
+    dark: '/assets/themes/dark/hero.svg',
   }"
   title="Image adaptée au thème"
 />
@@ -299,6 +308,7 @@ Affiche une image statique en arrière-plan avec overlay.
 Utilise le composant `ParallaxWidget` avec plusieurs calques qui se déplacent à des vitesses différentes.
 
 **Configuration i18n :**
+
 ```json
 {
   "packs": {
@@ -316,6 +326,7 @@ Utilise le composant `ParallaxWidget` avec plusieurs calques qui se déplacent �
 ```
 
 **Utilisation :**
+
 ```vue
 <PageHeader
   variant="hero-fullscreen"
@@ -324,7 +335,7 @@ Utilise le composant `ParallaxWidget` avec plusieurs calques qui se déplacent �
   :parallax-layers="[
     { src: '/parallax/layer-back.svg', speed: 0.3, blendMode: 'multiply' },
     { src: '/parallax/layer-mid.svg', speed: 0.6 },
-    { src: '/parallax/layer-front.svg', speed: 1.0 }
+    { src: '/parallax/layer-front.svg', speed: 1.0 },
   ]"
   :parallax-amount="0.18"
   :overlay-opacity="0.5"
@@ -335,6 +346,7 @@ Utilise le composant `ParallaxWidget` avec plusieurs calques qui se déplacent �
 ```
 
 **Configuration Parallax Layers :**
+
 - `src` : Chemin de l'image SVG du calque
 - `speed` : Multiplicateur de vitesse (0.0 = statique, 1.0 = vitesse normale)
 - `blendMode` : Mode de fusion CSS (`multiply`, `screen`, `overlay`, etc.)
@@ -348,6 +360,7 @@ Utilise le composant `HeroSurface` qui génère des effets visuels animés (auro
 **Configuration i18n :** Aucune (géré par props)
 
 **Variantes disponibles :**
+
 - `aurora` : Aurore boréale animée
 - `halo` : Halos lumineux concentriques
 - `prism` : Effet prisme multicolore
@@ -356,6 +369,7 @@ Utilise le composant `HeroSurface` qui génère des effets visuels animés (auro
 - `orbit` : Cercles orbitaux
 
 **Utilisation :**
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -366,6 +380,7 @@ Utilise le composant `HeroSurface` qui génère des effets visuels animés (auro
 ```
 
 **Exemple avec différentes variantes :**
+
 ```vue
 <!-- Aurora -->
 <PageHeader background="surface-variant" surface-variant="aurora" />
@@ -395,6 +410,7 @@ Applique une couleur de fond unie personnalisée.
 **Configuration i18n :** Aucune (géré par props)
 
 **Utilisation :**
+
 ```vue
 <PageHeader
   variant="section-header"
@@ -405,6 +421,7 @@ Applique une couleur de fond unie personnalisée.
 ```
 
 **Avec variable CSS :**
+
 ```vue
 <PageHeader
   variant="section-header"
@@ -418,19 +435,20 @@ Applique une couleur de fond unie personnalisée.
 
 ## Tableau Récapitulatif des Types de Background
 
-| Type | Assets i18n | Props | Cas d'usage |
-|------|-------------|-------|-------------|
-| **gradient** | ❌ Non | `background="gradient"` | Hero simple, design minimaliste |
-| **image** | ✅ Oui (`heroBackground`) | `background="image"`<br/>`background-image-asset-key` ou `background-image` | Pack événementiel avec visuel statique |
-| **parallax** | ✅ Oui (`parallax.*`) | `background="parallax"`<br/>`is-parallax`<br/>`parallax-layers` | Page d'accueil immersive, storytelling |
-| **surface-variant** | ❌ Non | `background="surface-variant"`<br/>`surface-variant="aurora\|halo\|prism..."` | Pages statiques élégantes (partners, team) |
-| **solid** | ❌ Non | `background="solid"`<br/>`background-color` | Sections internes, headers secondaires |
+| Type                | Assets i18n               | Props                                                                         | Cas d'usage                                |
+| ------------------- | ------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------ |
+| **gradient**        | ❌ Non                    | `background="gradient"`                                                       | Hero simple, design minimaliste            |
+| **image**           | ✅ Oui (`heroBackground`) | `background="image"`<br/>`background-image-asset-key` ou `background-image`   | Pack événementiel avec visuel statique     |
+| **parallax**        | ✅ Oui (`parallax.*`)     | `background="parallax"`<br/>`is-parallax`<br/>`parallax-layers`               | Page d'accueil immersive, storytelling     |
+| **surface-variant** | ❌ Non                    | `background="surface-variant"`<br/>`surface-variant="aurora\|halo\|prism..."` | Pages statiques élégantes (partners, team) |
+| **solid**           | ❌ Non                    | `background="solid"`<br/>`background-color`                                   | Sections internes, headers secondaires     |
 
 ---
 
 ## Exemples Complets par Pack Événementiel
 
 ### Pack "default" (Placeholder)
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -440,11 +458,13 @@ Applique une couleur de fond unie personnalisée.
   subtitle="Des choix éclairés pour un monde durable"
 />
 ```
+
 **Résolution asset :** `packs.default.assets.heroBackground` → `placeholders/hero-background.svg`
 
 ---
 
 ### Pack "hold" (Logo Nudger)
+
 ```vue
 <PageHeader
   variant="hero-fullscreen"
@@ -455,11 +475,13 @@ Applique une couleur de fond unie personnalisée.
   subtitle="Votre assistant d'achat responsable"
 />
 ```
+
 **Résolution asset :** `packs.hold.assets.heroBackground` → `hero-background.webp`
 
 ---
 
 ### Pack "bastille-day" (14 juillet)
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -471,11 +493,13 @@ Applique une couleur de fond unie personnalisée.
   subtitle="Un feu d'artifice de prix justes et d'impact transparent"
 />
 ```
+
 **Résolution asset :** `packs.bastille-day.assets.heroBackground` → `bastille-day/hero-background.svg`
 
 ---
 
 ### Pack "sdg" (Objectifs de Développement Durable)
+
 ```vue
 <PageHeader
   variant="hero-standard"
@@ -493,23 +517,28 @@ Applique une couleur de fond unie personnalisée.
 ## Bonnes Pratiques
 
 ### Optimisation des Images
+
 - **SVG** : Préféré pour les backgrounds (léger, vectoriel, responsive)
 - **WebP** : Pour les photos/images complexes
 - **Lazy Loading** : Activé automatiquement pour `background-image` (fetchpriority="high" désactivé)
 
 ### Accessibilité
+
 - Toujours utiliser `overlay-opacity` pour garantir un contraste suffisant avec le texte
 - Les images de background ont automatiquement `aria-hidden="true"`
 - Fournir `alt=""` pour les images décoratives
 
 ### Performance
+
 - **Gradient** : Plus performant (CSS pur, pas de requête réseau)
 - **Surface Variant** : Animation GPU-accelerated, léger
 - **Image** : 1 requête réseau, précharger si hero principal
 - **Parallax** : Multiple requêtes, réserver aux pages d'accueil
 
 ### Responsive
+
 Tous les types de background sont automatiquement responsive :
+
 - Les images s'adaptent via `object-fit: cover`
 - Les parallaxes ajustent leur amplitude sur mobile
 - Les gradients et surfaces s'adaptent aux dimensions
@@ -535,6 +564,7 @@ const bg = useThemeAsset('heroBackground')
 ```
 
 **Hiérarchie de résolution :**
+
 1. `packs.<activePack>.assets.<assetKey>`
 2. `packs.default.assets.<assetKey>` (fallback)
 3. Placeholder générique si non trouvé

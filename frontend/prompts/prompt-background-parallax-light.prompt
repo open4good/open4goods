@@ -11,7 +11,9 @@ Leave a clear central safe area (~1080×560 per your request) with most geometry
 Use 2–3 blurred blobs (std dev ≤18) and a handful of stroked paths/rings for depth; cap stroke widths ≥0.75px to avoid thinning after scaling.
 
 Export without embedded images or text; keep element count well below 140 and prefer gradients/patterns over many discrete shapes.
+The colors bellow are sample.
 
+Full color scheme is located at /frontend/docs/UX Color Brief.md
 
 {
   "task": "Generate a pure vector SVG parallax background for a website section",

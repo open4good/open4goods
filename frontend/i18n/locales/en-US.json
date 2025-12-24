@@ -2,7 +2,6 @@
   "packs": {
     "default": {
       "assets": {
-        "heroBackground": "placeholders/hero-background.svg",
         "illustration": "placeholders/illustration.svg",
         "logo": "placeholders/logo.svg",
         "footerLogo": "placeholders/logo-footer.svg",

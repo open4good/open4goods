@@ -41,7 +41,7 @@ export const EVENT_PACK_NAMES = [
   'sdg',
   'bastille-day',
   'hold',
-  'christmas'
+  'christmas',
 ] as const
 
 export const DEFAULT_EVENT_PACK: EventPackName = 'default'
@@ -67,18 +67,18 @@ export const eventPackSchedule: EventPackSchedule[] = [
     description: 'Fête nationale du 14 juillet',
   },
   {
+    id: 'christmas-december',
+    start: '12-01',
+    end: '12-31',
+    pack: 'christmas',
+    description: 'Noël — tout décembre',
+  },
+  {
     id: 'winter-highlights',
     start: '12-01',
     end: '01-15',
     pack: 'default',
     description: 'Période hivernale sans surcharge événementielle',
-  },
-  {
-    id: 'christmas',
-    start: '12-20',
-    end: '12-30',
-    pack: 'christmas',
-    description: 'Christmas (±5 days around Dec 25)',
   },
 ]
 
@@ -106,10 +106,7 @@ export const resolveEventPackName = (
 /**
  * Vérifie si une date est dans une fenêtre événementielle.
  */
-const isDateWithinWindow = (
-  date: Date,
-  window: EventPackSchedule
-): boolean => {
+const isDateWithinWindow = (date: Date, window: EventPackSchedule): boolean => {
   const month = date.getUTCMonth() + 1
   const day = date.getUTCDate()
   const dateStr = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`

@@ -65,10 +65,10 @@ export type ParallaxPackConfig = Partial<
 
 export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
   light: {
-    logo: 'placeholders/logo.svg',
+    logo: 'logo.svg',
     footerLogo: 'placeholders/logo-footer.svg',
     favicon: 'placeholders/favicon.svg',
-    heroBackground: 'placeholders/hero-background.svg',
+    heroBackground: 'hero-background.webp',
     illustration: 'placeholders/illustration.svg',
     productBackground: 'placeholders/product-background.svg',
     contactBackground: 'placeholders/contact-background.svg',
@@ -76,7 +76,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     categoriesBackground: 'placeholders/category-background.svg',
   },
   dark: {
-    logo: 'placeholders/logo.svg',
+    logo: 'logo.svg',
     footerLogo: 'placeholders/logo-footer.svg',
     favicon: 'placeholders/favicon.svg',
     heroBackground: 'placeholders/hero-background.svg',

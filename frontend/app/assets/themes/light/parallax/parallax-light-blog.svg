@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice">
+  <desc>Parallax Front Layer - Blog</desc>
+  
+  <!-- Sharper, closer elements -->
+  <circle cx="95%" cy="15%" r="15" fill="#00DE9F" fill-opacity="0.2" />
+  <circle cx="5%" cy="85%" r="20" fill="#00A1C2" fill-opacity="0.2" />
+  
+  <!-- Dynamic lines near edges -->
+  <line x1="94%" y1="14%" x2="96%" y2="16%" stroke="#0088D6" stroke-width="2" stroke-opacity="0.15" />
+  
+  <!-- Decorative particles -->
+  <circle cx="50%" cy="10%" r="3" fill="#00DE9F" fill-opacity="0.3" />
+  <circle cx="52%" cy="12%" r="2" fill="#00A1C2" fill-opacity="0.3" />
+</svg>

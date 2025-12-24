@@ -1,9 +1,10 @@
 {
   "packs": {
-"christmas": {
+    "christmas": {
       "hero": {
         "eyebrow": "Saison de Noël",
         "title": "Un hiver tout en douceur",
+        "titleSubtitle": ["Des cadeaux qui ont du sens."],
         "subtitles": [
           "Des idées qui réchauffent le cœur.",
           "Petites attentions, grande joie.",
@@ -13,7 +14,13 @@
         ]
       },
       "assets": {
-        "heroBackground": "christmas/hero-background.svg"
+        "heroBackground": "christmas/hero-background.svg",
+        "productBackground": "christmas/product-background.svg",
+        "contactBackground": "christmas/contact-background.svg",
+        "blogBackground": "christmas/blog-background.svg",
+        "categoriesBackground": "christmas/categories-background.svg",
+        "openSourceBackground": "christmas/open-source-background.svg",
+        "openDataBackground": "christmas/open-data-background.svg"
       },
       "parallax": {
         "essentials": "parallax/parallax-background-christmas-essentials.svg",
@@ -25,24 +32,23 @@
     },
     "default": {
       "assets": {
-        "heroBackground": "placeholders/hero-background.svg",
         "illustration": "placeholders/illustration.svg",
-        "logo": "placeholders/logo.svg",
-        "footerLogo": "placeholders/logo-footer.svg",
-        "favicon": "placeholders/favicon.svg",
+        "heroBackground": "light/hero-background.svg",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
-        "productBackground": "placeholders/product-background.svg",
-        "contactBackground": "placeholders/contact-background.svg",
-        "blogBackground": "placeholders/blog-background.svg",
-        "categoriesBackground": "placeholders/category-background.svg"
+        "productBackground": "light/product-background.svg",
+        "contactBackground": "light/contact-background.svg",
+        "blogBackground": "light/blog-background.svg",
+        "categoriesBackground": "light/categories-background.svg",
+        "openSourceBackground": "light/open-source-background.svg",
+        "openDataBackground": "light/open-data-background.svg"
       },
       "parallax": {
-        "essentials": "parallax/parallax-placeholder.svg",
-        "features": "parallax/parallax-placeholder.svg",
-        "blog": "parallax/parallax-placeholder.svg",
-        "objections": "parallax/parallax-placeholder.svg",
-        "cta": "parallax/parallax-placeholder.svg"
+        "essentials": "light/parallax/parallax-light-essentials.svg",
+        "features": "light/parallax/parallax-light-features.svg",
+        "blog": "light/parallax/parallax-light-blog.svg",
+        "objections": "light/parallax/parallax-light-objections.svg",
+        "cta": "light/parallax/parallax-light-cta.svg"
       },
       "hero": {
         "eyebrow": "Comparateur responsable",
@@ -67,26 +73,46 @@
               "icon": "🌿",
               "label": "Une évaluation écologique et environnementale unique",
               "segments": [
-                { "text": "Une évaluation écologique", "to": "/impact-score" },
-                { "text": " et environnementale unique" }
+                {
+                  "text": "Une évaluation écologique",
+                  "to": "/impact-score"
+                },
+                {
+                  "text": " et environnementale unique"
+                }
               ]
             },
             {
               "icon": "🛡️",
               "label": "100% indépendant, logiciel libre et données ouvertes",
               "segments": [
-                { "text": "100% indépendant, " },
-                { "text": "logiciel libre", "to": "/opensource" },
-                { "text": " et " },
-                { "text": "données ouvertes", "to": "/opendata" }
+                {
+                  "text": "100% indépendant, "
+                },
+                {
+                  "text": "logiciel libre",
+                  "to": "/opensource"
+                },
+                {
+                  "text": " et "
+                },
+                {
+                  "text": "données ouvertes",
+                  "to": "/opendata"
+                }
               ]
             },
             {
               "icon": "🏷️",
               "label": "Sans se faire avoir sur les prix",
               "segments": [
-                { "text": "Sans se faire avoir sur les prix avec" },
-                { "text": "{partnersLink}", "to": "/partenaires" }
+                {
+                  "text": "Sans se faire avoir sur les prix avec"
+                },
+                {
+                  "text": "{partnersLink}",
+                  "to": "/partenaires"
+                }
               ]
             }
           ],
@@ -103,10 +129,7 @@
     "hold": {
       "assets": {
         "heroBackground": "hero-background.webp",
-        "illustration": "illustration-generic.svg",
-        "logo": "logo-new.png",
-        "footerLogo": "logo-footer.svg",
-        "favicon": "favicon.svg"
+        "illustration": "illustration-generic.svg"
       },
       "parallax": {
         "essentials": "parallax/hero-back--light.svg",

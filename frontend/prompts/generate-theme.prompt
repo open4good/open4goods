@@ -58,7 +58,8 @@ You MUST apply the rules and style from:
 ### Reference documentation for events-pack (required keys / images)
 You MUST generate material required for a complete kit :
 `/frontend/docs/events-pack_FR.md`
-
+You must follow the colr UX Directive
+/frontend/docs/UX Color Brief.md
 
 
 

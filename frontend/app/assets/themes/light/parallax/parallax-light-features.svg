@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice">
+  <desc>Parallax Mid Layer - Features</desc>
+  <defs>
+    <filter id="mid-blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
+    </filter>
+  </defs>
+  
+  <!-- Mid range floating elements -->
+  <circle cx="10%" cy="20%" r="40" fill="#00DE9F" fill-opacity="0.08" filter="url(#mid-blur)" />
+  <circle cx="90%" cy="80%" r="60" fill="#00A1C2" fill-opacity="0.08" filter="url(#mid-blur)" />
+  
+  <!-- Connecting orbit lines representing features connectivity -->
+  <path d="M 0 400 Q 400 300 800 400 T 1600 400" fill="none" stroke="#0088D6" stroke-width="1.5" stroke-opacity="0.08" stroke-dasharray="10 20"/>
+</svg>
