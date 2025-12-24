@@ -2,6 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('useCategories composable', () => {
   const fetchMock = vi.fn()
+  const resolveOnlyEnabledParam = (
+    init: unknown
+  ): boolean | undefined => {
+    if (!init || typeof init !== 'object') {
+      return undefined
+    }
+
+    const params = (init as { params?: { onlyEnabled?: boolean } }).params
+    return params?.onlyEnabled
+  }
 
   beforeEach(async () => {
     vi.resetModules()
@@ -56,8 +66,60 @@ describe('useCategories composable', () => {
     expect(currentCategory.value?.subsets).toEqual(detailResponse.subsets)
   })
 
+  it('loads disabled categories on fallback when slug is missing from the enabled list', async () => {
+    const disabledCategory = {
+      id: 'category-disabled',
+      verticalHomeUrl: '/archived-category',
+      enabled: false,
+    }
+    const detailResponse = {
+      id: 'category-disabled',
+      verticalHomeTitle: 'Archived',
+    }
+
+    fetchMock.mockImplementation((request, init) => {
+      if (request === '/api/categories') {
+        const onlyEnabled = resolveOnlyEnabledParam(init)
+
+        if (onlyEnabled === true) {
+          return Promise.resolve([])
+        }
+
+        if (onlyEnabled === false) {
+          return Promise.resolve([disabledCategory])
+        }
+      }
+
+      if (request === '/api/categories/category-disabled') {
+        return Promise.resolve(detailResponse)
+      }
+
+      throw new Error(`Unexpected request: ${String(request)}`)
+    })
+
+    const { useCategories } = await import('./useCategories')
+    const { selectCategoryBySlug, currentCategory, activeCategoryId } =
+      useCategories()
+
+    const detail = await selectCategoryBySlug('archived-category')
+
+    expect(activeCategoryId.value).toBe('category-disabled')
+    expect(detail).toEqual(detailResponse)
+    expect(currentCategory.value?.enabled).toBeUndefined()
+  })
+
   it('raises a CategoryNotFoundError when the slug cannot be resolved', async () => {
-    fetchMock.mockResolvedValueOnce([])
+    fetchMock.mockImplementation((request, init) => {
+      if (request === '/api/categories') {
+        const onlyEnabled = resolveOnlyEnabledParam(init)
+
+        if (onlyEnabled === true || onlyEnabled === false) {
+          return Promise.resolve([])
+        }
+      }
+
+      throw new Error(`Unexpected request: ${String(request)}`)
+    })
 
     const { useCategories } = await import('./useCategories')
     const { selectCategoryBySlug, error, currentCategory, activeCategoryId } =

@@ -4,6 +4,7 @@
     :class="[
       `category-product-card-grid--size-${cardSize}`,
       `category-product-card-grid--variant-${variant}`,
+      { 'category-product-card-grid--disabled': isDisabledCategory },
     ]"
     dense
   >
@@ -25,14 +26,20 @@
         :offers-count-label="offersCountLabel(product)"
         :untitled-label="$t('category.products.untitledProduct')"
         :not-rated-label="$t('category.products.notRated')"
+        :disabled="isDisabledCategory"
+        :link-rel="linkRel"
       />
       <v-card
         v-else
         class="category-product-card-grid__card"
+        :class="{
+          'category-product-card-grid__card--disabled': isDisabledCategory,
+        }"
         rounded="xl"
         elevation="2"
         hover
         :to="productLink(product)"
+        :rel="linkRel"
       >
         <div class="category-product-card-grid__compare">
           <CategoryProductCompareToggle :product="product" size="compact" />
@@ -176,6 +183,8 @@ const props = defineProps<{
   variant?: 'classic' | 'compact-tile'
   maxAttributes?: number
   showAttributeIcons?: boolean
+  isCategoryDisabled?: boolean
+  nofollowLinks?: boolean
 }>()
 
 const { t, n } = useI18n()
@@ -223,6 +232,10 @@ const cardSize = computed(() => props.size ?? 'comfortable')
 const variant = computed(() => props.variant ?? 'classic')
 const maxAttributes = computed(() => props.maxAttributes)
 const showAttributeIcons = computed(() => props.showAttributeIcons ?? true)
+const isDisabledCategory = computed(() => props.isCategoryDisabled ?? false)
+const linkRel = computed(() =>
+  props.nofollowLinks ? 'nofollow' : undefined
+)
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -391,6 +404,13 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
 .category-product-card-grid
   margin: 0
 
+  &--disabled
+    .category-product-card-grid__card,
+    .product-tile-card
+      filter: grayscale(1)
+      opacity: 0.6
+
+  
   &__card
     height: 100%
     display: flex
@@ -402,6 +422,10 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     &:hover
       transform: translateY(-4px)
       box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
+
+    &--disabled
+      filter: grayscale(1)
+      opacity: 0.6
 
   &__image
     border-top-left-radius: inherit

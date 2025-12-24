@@ -1,10 +1,12 @@
 <template>
   <v-card
     class="product-tile-card"
+    :class="{ 'product-tile-card--disabled': disabled }"
     rounded="xl"
     elevation="2"
     hover
     :to="productLink"
+    :rel="linkRel"
   >
     <div class="product-tile-card__wrapper">
       <div class="product-tile-card__media">
@@ -124,6 +126,8 @@ const props = withDefaults(
     offersCountLabel: string
     untitledLabel: string
     notRatedLabel: string
+    disabled?: boolean
+    linkRel?: string
   }>(),
   {
     attributes: () => [],
@@ -131,6 +135,8 @@ const props = withDefaults(
     offerBadges: () => [],
     imageSrc: undefined,
     productLink: undefined,
+    disabled: false,
+    linkRel: undefined,
   }
 )
 
@@ -156,6 +162,15 @@ const hasAttributes = computed(() => props.attributes.length > 0)
   display: flex;
   text-decoration: none;
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+
+  &--disabled {
+    filter: grayscale(1);
+    opacity: 0.7;
+
+    .product-tile-card__image :deep(img) {
+      filter: grayscale(1);
+    }
+  }
 
   &__wrapper {
     display: flex;

@@ -349,13 +349,6 @@ const heroTitle = computed(
     }) ?? ''
 )
 
-const heroDescriptionTitle = computed(
-  () =>
-    packI18n.resolveString('hero.search.helpersTitle', {
-      fallbackKeys: ['home.hero.search.helpersTitle'],
-    }) ?? ''
-)
-
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
 }
