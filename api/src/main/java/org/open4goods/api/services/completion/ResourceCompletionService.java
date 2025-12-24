@@ -741,7 +741,17 @@ public class ResourceCompletionService extends AbstractCompletionService {
             float[] embedding = embeddingService.embed(src.toPath());
             imageInfo.setEmbedding(embedding);
         } catch (Exception e) {
-            logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl(), e);
+            logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl());
+
+            // Provide helpful hint for common issues
+            if (e.getMessage() != null && e.getMessage().contains("attention_mask")) {
+                logger.warn("Model compatibility issue detected. The configured model may not support image-only inference. " +
+                           "Consider using a pure vision model (e.g., ResNet, EfficientNet) or a different CLIP export. " +
+                           "See ApiProperties.EmbeddingConfig.multimodalModelUrl documentation for alternatives.");
+            } else if (e.getMessage() != null && e.getMessage().contains("NDManager")) {
+                logger.warn("NDManager lifecycle issue detected. This may indicate a concurrency problem or resource leak.");
+            }
+
             // Decide policy: for now we keep the image even without embedding, but
             // it will be treated as its own singleton cluster later.
         }

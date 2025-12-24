@@ -46,14 +46,14 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
 
     private final ApiProperties apiProperties;
     private ZooModel<Image, float[]> model;
-    private Predictor<Image, float[]> predictor;
 
     public DjlImageEmbeddingService(ApiProperties apiProperties) {
         this.apiProperties = apiProperties;
     }
 
     /**
-     * Initializes the DJL model and predictor once at startup.
+     * Initializes the DJL model once at startup.
+     * The model is thread-safe and can be shared, but predictors are created per-request.
      * @throws ModelNotFoundException
      */
     @PostConstruct
@@ -71,7 +71,6 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
                 .build();
 
         model = criteria.loadModel();
-        predictor = model.newPredictor();
 
         logger.info("DJL image embedding model initialized successfully.");
     }
@@ -81,9 +80,6 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
      */
     @PreDestroy
     public void close() {
-        if (predictor != null) {
-            predictor.close();
-        }
         if (model != null) {
             model.close();
         }
@@ -91,11 +87,16 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
 
     @Override
     public float[] embed(Path imagePath) throws Exception {
-        try {
+        // Create a new predictor for each request to ensure thread safety.
+        // Predictors are lightweight and manage their own NDManager lifecycle.
+        try (Predictor<Image, float[]> predictor = model.newPredictor()) {
             Image img = ImageFactory.getInstance().fromFile(imagePath);
             return predictor.predict(img);
         } catch (TranslateException e) {
             logger.error("Error while computing embedding for {}: {}", imagePath, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error while computing embedding for {}: {}", imagePath, e.getMessage(), e);
             throw e;
         }
     }
