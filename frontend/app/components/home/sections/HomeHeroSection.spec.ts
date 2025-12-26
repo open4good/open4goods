@@ -285,6 +285,18 @@ describe('HomeHeroSection', () => {
     await wrapper.unmount()
   })
 
+  it('renders the helpers title', async () => {
+    const wrapper = await mountComponent()
+    const title = wrapper.find('.home-hero__helpers-title')
+
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe(
+      messages['packs.default.hero.search.helpersTitle']
+    )
+
+    await wrapper.unmount()
+  })
+
   it('prefers event-specific subtitles when provided', async () => {
     activeEventPack.value = 'hold'
     const wrapper = await mountComponent({

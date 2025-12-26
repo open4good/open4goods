@@ -179,6 +179,13 @@ const heroTitleSubtitle = computed(
     }) ?? ''
 )
 
+const heroHelpersTitle = computed(
+  () =>
+    packI18n.resolveString('hero.search.helpersTitle', {
+      fallbackKeys: ['home.hero.search.helpersTitle'],
+    }) ?? ''
+)
+
 const normalizedPartnersCount = computed(() => {
   const rawCount = Number(props.partnersCount ?? 0)
 
@@ -520,47 +527,56 @@ useHead({
                             />
                           </div>
                         </div>
-                        <ul
+                        <div
                           v-if="heroHelperItems.length"
-                          class="home-hero__helpers"
+                          class="home-hero__helpers-wrapper"
                         >
-                          <li
-                            v-for="(item, index) in heroHelperItems"
-                            :key="`hero-helper-${index}`"
-                            class="home-hero__helper"
+                          <span
+                            v-if="heroHelpersTitle"
+                            class="home-hero__helpers-title"
+                            >{{ heroHelpersTitle }}</span
                           >
-                            <span
-                              class="home-hero__helper-icon"
-                              aria-hidden="true"
-                              >{{ item.icon }}</span
+                          <ul class="home-hero__helpers">
+                            <li
+                              v-for="(item, index) in heroHelperItems"
+                              :key="`hero-helper-${index}`"
+                              class="home-hero__helper"
                             >
-                            <span class="home-hero__helper-text">
-                              <template
-                                v-for="(segment, segmentIndex) in item.segments"
-                                :key="`hero-helper-segment-${index}-${segmentIndex}`"
+                              <span
+                                class="home-hero__helper-icon"
+                                aria-hidden="true"
+                                >{{ item.icon }}</span
                               >
-                                <NuxtLink
-                                  v-if="segment.to"
-                                  class="home-hero__helper-link"
-                                  :to="segment.to"
+                              <span class="home-hero__helper-text">
+                                <template
+                                  v-for="(
+                                    segment, segmentIndex
+                                  ) in item.segments"
+                                  :key="`hero-helper-segment-${index}-${segmentIndex}`"
                                 >
-                                  {{
-                                    segmentIndex > 0
-                                      ? ` ${segment.text}`
-                                      : segment.text
-                                  }}
-                                </NuxtLink>
-                                <span v-else>
-                                  {{
-                                    segmentIndex > 0
-                                      ? ` ${segment.text}`
-                                      : segment.text
-                                  }}
-                                </span>
-                              </template>
-                            </span>
-                          </li>
-                        </ul>
+                                  <NuxtLink
+                                    v-if="segment.to"
+                                    class="home-hero__helper-link"
+                                    :to="segment.to"
+                                  >
+                                    {{
+                                      segmentIndex > 0
+                                        ? ` ${segment.text}`
+                                        : segment.text
+                                    }}
+                                  </NuxtLink>
+                                  <span v-else>
+                                    {{
+                                      segmentIndex > 0
+                                        ? ` ${segment.text}`
+                                        : segment.text
+                                    }}
+                                  </span>
+                                </template>
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </RoundedCornerCard>
@@ -798,9 +814,11 @@ useHead({
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .home-hero__helpers-title
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.875rem
   font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  margin-bottom: 0.5rem
+  display: block
   letter-spacing: 0.01em
 
 .home-hero__wizard
