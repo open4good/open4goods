@@ -18,7 +18,7 @@
           'nudge-wizard__corner-content--expanded': isContentMode,
         }"
       >
-        <NudgeToolWelcomeIcon v-if="activeStepKey === 'category'" />
+        <NudgeToolAnimatedIcon v-if="activeStepKey === 'category'" />
         <div
           v-else-if="categorySummary"
           class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-1 pb-1"
@@ -153,7 +153,7 @@
 import { useDebounceFn, useElementSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
-import NudgeToolWelcomeIcon from '~/components/nudge-tool/NudgeToolWelcomeIcon.vue'
+import NudgeToolAnimatedIcon from '~/components/nudge-tool/NudgeToolAnimatedIcon.vue'
 import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
 import {
   NudgeToolStepCategory,
