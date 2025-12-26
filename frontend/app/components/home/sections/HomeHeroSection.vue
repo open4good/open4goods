@@ -754,7 +754,6 @@ useHead({
   display: flex
   flex-direction: column
   gap: 0.75rem
-  text-align: left
 
 .home-hero__context-card
   height: 100%

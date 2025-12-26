@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
-  <title id="title">Light favicon placeholder</title>
-  <desc id="desc">Placeholder favicon for missing light asset.</desc>
-  <rect x="2" y="2" width="60" height="60" rx="12" fill="#FFFFFF" stroke="#FF6F61" stroke-width="4" stroke-dasharray="8 6" />
-  <text x="32" y="38" fill="#FF6F61" font-size="16" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="800" text-anchor="middle">404</text>
-</svg>
