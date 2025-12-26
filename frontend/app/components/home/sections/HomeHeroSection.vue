@@ -8,6 +8,7 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
+import AnimatedSubtitle from '~/components/shared/ui/AnimatedSubtitle.vue'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
@@ -426,6 +427,13 @@ useHead({
             <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
               {{ heroTitleSubtitle }}
             </p>
+            <AnimatedSubtitle
+              class="home-hero__title-animated-subtitle"
+              i18n-key="home.hero.subtitle"
+              animation="fade"
+              :delay="500"
+              :duration-ms="420"
+            />
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -716,6 +724,13 @@ useHead({
   color: rgba(var(--v-theme-surface-default), 0.94)
   font-size: clamp(1rem, 2.4vw, 1.4rem)
   line-height: 1.4
+
+.home-hero__title-animated-subtitle
+  margin: clamp(0.5rem, 1.6vw, 0.85rem) auto 0
+  max-width: 30ch
+  font-size: clamp(0.95rem, 2.2vw, 1.2rem)
+  line-height: 1.4
+  color: rgba(var(--v-theme-surface-default), 0.9)
 
 .home-hero__search
   display: flex
