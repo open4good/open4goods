@@ -438,7 +438,7 @@ useHead({
               class="home-hero__title-animated-subtitle"
               i18n-key="home.hero.subtitle"
               animation="fade"
-              :delay="500"
+              :delay="600"
               :duration-ms="420"
             />
           </v-col>
@@ -732,7 +732,7 @@ useHead({
   line-height: 1.05
   margin: 0
   color: #ffffff
-  text-shadow: rgb(var(--v-theme-primary)) 1px 0 10px
+  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
 
 .home-hero__title-subtitle
   margin: clamp(0.65rem, 1.8vw, 1rem) auto 0
@@ -742,11 +742,10 @@ useHead({
   line-height: 1.4
 
 .home-hero__title-animated-subtitle
-  margin: clamp(0.5rem, 1.6vw, 0.85rem) auto 0
-  max-width: 30ch
   font-size: clamp(0.95rem, 2.2vw, 1.2rem)
-  line-height: 1.4
   color: rgba(var(--v-theme-surface-default), 0.9)
+  font-size: clamp(1.2rem, 5vw, 1.8rem)
+  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px  
 
 .home-hero__search
   display: flex
