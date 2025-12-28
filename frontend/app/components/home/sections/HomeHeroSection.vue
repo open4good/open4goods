@@ -604,7 +604,7 @@ useHead({
   overflow: hidden
   min-height: 100dvh
   box-sizing: border-box
-  --home-hero-padding: clamp(2.5rem, 7vw, 4.75rem)
+  --home-hero-padding: clamp(2.5rem, 7vw, 1.75rem)
   padding-block: var(--home-hero-padding)
   padding-top: calc(var(--home-hero-padding) + env(safe-area-inset-top))
   padding-bottom: calc(var(--home-hero-padding) + env(safe-area-inset-bottom))
