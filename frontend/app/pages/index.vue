@@ -215,7 +215,7 @@ useAsyncData(
   'home-heavy-data',
   async () => {
     if (rawCategories.value.length === 0) {
-      await fetchCategories(true)
+      await fetchCategories()
     }
 
     if (paginatedArticles.value.length === 0) {

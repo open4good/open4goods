@@ -31,15 +31,12 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
   }
 
   /**
-   * Fetch categories optionally filtered by enabled status
-   * @param onlyEnabled - Filter only enabled categories
+   * Fetch categories. The enabled flag is exposed for client-side handling only.
    * @returns Promise<VerticalConfigDto[]>
    */
-  const getCategories = async (
-    onlyEnabled?: boolean
-  ): Promise<VerticalConfigDto[]> => {
+  const getCategories = async (): Promise<VerticalConfigDto[]> => {
     try {
-      return await resolveApi().categories1({ domainLanguage, onlyEnabled })
+      return await resolveApi().categories1({ domainLanguage })
     } catch (error) {
       console.error('Error fetching categories:', error)
       throw error

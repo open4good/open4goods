@@ -16,6 +16,9 @@ vi.mock('vuetify', () => ({
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({ fetchCategories: vi.fn().mockResolvedValue([]) }),
 }))
+vi.mock('~/composables/useAuth', () => ({
+  useAuth: () => ({ isLoggedIn: { value: false } }),
+}))
 vi.mock('~/components/nudge-tool/NudgeWizardHeader.vue', () => ({
   default: { template: '<div class="header-stub"></div>' },
 }))

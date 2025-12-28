@@ -152,6 +152,7 @@
 <script setup lang="ts">
 import { useDebounceFn, useElementSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
+import { useAuth } from '~/composables/useAuth'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
 import NudgeToolAnimatedIcon from '~/components/nudge-tool/NudgeToolAnimatedIcon.vue'
 import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
@@ -197,6 +198,7 @@ const accentCornerOffsets: Record<CornerSize, string> = {
 }
 
 const { t } = useI18n()
+const { isLoggedIn } = useAuth()
 
 const { fetchCategories } = useCategories()
 
@@ -311,6 +313,7 @@ const steps = computed<WizardStep[]>(() => {
     props: {
       categories: categories.value,
       selectedCategoryId: selectedCategoryId.value,
+      isAuthenticated: isLoggedIn.value,
     },
   })
 
@@ -540,7 +543,7 @@ const hydrateCategories = async () => {
     return
   }
 
-  const result = await fetchCategories(true)
+  const result = await fetchCategories()
   categories.value = result
 }
 

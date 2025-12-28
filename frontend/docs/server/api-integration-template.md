@@ -322,7 +322,7 @@ const { categories, loading, error, fetchCategories } = useCategories()
 // Fetch categories on component mount
 await useAsyncData(
   'home-categories-slide',
-  () => fetchCategories(true), // Only enabled categories
+  () => fetchCategories(),
   { server: true, immediate: true }
 )
 
