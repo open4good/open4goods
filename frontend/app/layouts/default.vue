@@ -27,7 +27,7 @@
       </template>
     </ClientOnly>
 
-    <v-main>
+    <v-main class="layout-main-content">
       <slot />
     </v-main>
 
@@ -80,6 +80,14 @@ watch(
 </script>
 
 <style scoped lang="sass">
+
+.layout-main-content
+  padding-top: calc(var(--v-layout-top, 64px) + env(safe-area-inset-top))
+  background-color: transparent
+
+  @media (max-width: 959px)
+    padding-top: calc(var(--v-layout-top, 56px) + env(safe-area-inset-top))
+
 .pre-hydration-app-bar-spacer
   height: 64px
 

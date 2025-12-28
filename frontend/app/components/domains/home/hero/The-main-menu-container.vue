@@ -8,9 +8,9 @@ const handleToggleDrawer = () => emit('toggle-drawer')
 
 <template>
   <v-app-bar app flat color="surface-default" class="main-menu-app-bar">
-    <v-container fluid class="py-0 mt-2">
+    <v-container fluid class="py-0">
       <div class="d-flex align-center w-100">
-        <v-app-bar-title class="d-flex align-center mt-sm">
+        <v-app-bar-title class="d-flex align-center">
           <the-main-logo />
         </v-app-bar-title>
         <v-spacer />
