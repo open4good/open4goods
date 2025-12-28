@@ -3,7 +3,7 @@
     <template #activator="{ props: activatorProps }">
       <!-- Stars Mode -->
       <div
-        v-if="mode === 'stars'"
+        v-if="mode === 'stars' && shouldDisplayStars"
         class="impact-score"
         :class="[
           `impact-score--${size}`,
@@ -31,16 +31,20 @@
         }}</span>
       </div>
 
-      <!-- Combined Mode -->
+      <!-- Combined Mode (default) -->
       <div
         v-else-if="mode === 'combined'"
         class="impact-score-combined"
-        :class="[`impact-score-combined--${size}`]"
+        :class="[
+          `impact-score-combined--${size}`,
+          `impact-score-combined--${layout}`,
+        ]"
         v-bind="activatorProps"
         :aria-label="tooltipLabel"
         role="img"
       >
         <v-chip
+          v-if="shouldDisplayScore"
           class="impact-score-badge"
           :class="[`impact-score-badge--${size}`]"
           rounded="pill"
@@ -52,21 +56,26 @@
           </span>
         </v-chip>
 
-        <v-rating
-          class="impact-score__rating"
-          :model-value="normalizedScore"
-          :length="length"
-          :size="ratingSize"
-          :color="ratingColor"
-          :bg-color="ratingBackgroundColor"
-          :density="ratingDensity"
-          half-increments
-          readonly
-          aria-hidden="true"
-        />
+        <div v-if="shouldDisplayStars" class="impact-score-combined__rating">
+          <v-rating
+            class="impact-score__rating"
+            :model-value="normalizedScore"
+            :length="length"
+            :size="ratingSize"
+            :color="ratingColor"
+            :bg-color="ratingBackgroundColor"
+            :density="ratingDensity"
+            half-increments
+            readonly
+            aria-hidden="true"
+          />
+          <span v-if="showValue" class="impact-score__value">{{
+            formattedScore
+          }}</span>
+        </div>
       </div>
 
-      <!-- Badge Mode (Default) -->
+      <!-- Badge Mode -->
       <v-chip
         v-else
         class="impact-score-badge"
@@ -106,7 +115,11 @@ const props = defineProps({
   },
   mode: {
     type: String as PropType<'badge' | 'stars' | 'combined'>,
-    default: 'badge',
+    default: 'combined',
+  },
+  layout: {
+    type: String as PropType<'horizontal' | 'vertical'>,
+    default: 'horizontal',
   },
   color: {
     type: String,
@@ -119,6 +132,14 @@ const props = defineProps({
   showValue: {
     type: Boolean,
     default: false,
+  },
+  showScore: {
+    type: Boolean,
+    default: true,
+  },
+  showStars: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -175,8 +196,20 @@ const ratingColor = computed(() => props.color)
 
 const ratingBackgroundColor = computed(() => props.inactiveColor)
 
+const shouldDisplayScore = computed(() => {
+  if (props.mode === 'badge') return true
+  if (props.mode === 'stars') return false
+  return props.showScore
+})
+
+const shouldDisplayStars = computed(() => {
+  if (props.mode === 'badge') return false
+  if (props.mode === 'stars') return true
+  return props.showStars
+})
+
 const tooltipLabel = computed(() => {
-  if (props.mode === 'badge' || props.mode === 'combined') {
+  if ((props.mode === 'badge' || props.mode === 'combined') && shouldDisplayScore.value) {
     return t('components.impactScore.tooltipBadge', {
       value: n(scoreOutOf20.value, {
         maximumFractionDigits: 1,
@@ -184,15 +217,25 @@ const tooltipLabel = computed(() => {
       }),
     })
   }
-  return t('components.impactScore.tooltip', {
-    value: n(normalizedScore.value, {
+  if (shouldDisplayStars.value) {
+    return t('components.impactScore.tooltip', {
+      value: n(normalizedScore.value, {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 0,
+      }),
+      max: length.value,
+    })
+  }
+
+  return t('components.impactScore.tooltipBadge', {
+    value: n(scoreOutOf20.value, {
       maximumFractionDigits: 1,
       minimumFractionDigits: 0,
     }),
-    max: length.value,
   })
 })
 
+const layout = computed(() => props.layout)
 const size = computed(() => props.size)
 const showValue = computed(() => props.showValue)
 const mode = computed(() => props.mode)
@@ -270,19 +313,49 @@ const mode = computed(() => props.mode)
 .impact-score-combined {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  --impact-score-combined-gap: 0.75rem;
+  --impact-score-stack-gap: 0.6rem;
+  --impact-score-rating-gap: 0.375rem;
+  --impact-score-value-font-size: 0.95rem;
+  gap: var(--impact-score-combined-gap);
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .impact-score-combined--small {
-  gap: 0.5rem;
+  --impact-score-combined-gap: 0.5rem;
+  --impact-score-stack-gap: 0.45rem;
+  --impact-score-rating-gap: 0.25rem;
+  --impact-score-value-font-size: 0.85rem;
 }
 
 .impact-score-combined--large {
-  gap: 1rem;
+  --impact-score-combined-gap: 1rem;
+  --impact-score-stack-gap: 0.85rem;
+  --impact-score-rating-gap: 0.5rem;
+  --impact-score-value-font-size: 1.05rem;
 }
 
 .impact-score-combined--xlarge {
-  gap: 1.25rem;
+  --impact-score-combined-gap: 1.25rem;
+  --impact-score-stack-gap: 1rem;
+  --impact-score-rating-gap: 0.6rem;
+  --impact-score-value-font-size: 1.2rem;
+}
+
+.impact-score-combined--vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--impact-score-stack-gap);
+}
+
+.impact-score-combined__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--impact-score-rating-gap);
+  color: inherit;
+}
+
+.impact-score-combined__rating .impact-score__value {
+  font-size: var(--impact-score-value-font-size);
 }
 </style>

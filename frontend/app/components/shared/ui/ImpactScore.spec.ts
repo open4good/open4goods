@@ -66,7 +66,7 @@ describe('ImpactScore', () => {
     },
   }
 
-  it('renders badge mode by default', () => {
+  it('renders combined mode by default with chip and stars', () => {
     const wrapper = mount(ImpactScore, {
       props: {
         score: 4,
@@ -75,8 +75,9 @@ describe('ImpactScore', () => {
       global: globalOptions,
     })
 
+    expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.findComponent(VChipStub).exists()).toBe(true)
-    expect(wrapper.find('.impact-score').exists()).toBe(false) // .impact-score class is on the div for stars mode
+    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16 / 20') // (4/5)*20 = 16
 
     // Check tooltip text
@@ -153,5 +154,24 @@ describe('ImpactScore', () => {
     expect(wrapper.findComponent(VChipStub).exists()).toBe(true)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16 / 20')
+  })
+
+  it('supports vertical layout and toggleable elements', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 3,
+        max: 5,
+        mode: 'combined',
+        layout: 'vertical',
+        showScore: false,
+        showStars: true,
+      },
+      global: globalOptions,
+    })
+
+    const combined = wrapper.find('.impact-score-combined')
+    expect(combined.classes()).toContain('impact-score-combined--vertical')
+    expect(wrapper.findComponent(VChipStub).exists()).toBe(false)
+    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
   })
 })
