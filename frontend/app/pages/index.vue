@@ -322,20 +322,15 @@ const faqItems = computed(() => [
     answer: String(t('home.faq.items.account.answer')),
   },
   {
-    question: String(t('home.faq.items.categories.question')),
-    answer: String(t('home.faq.items.categories.answer')),
-  },
-  {
     question: String(t('home.faq.items.impactScore.question')),
     answer: String(t('home.faq.items.impactScore.answer')),
+    ctaLabel: String(t('home.faq.items.impactScore.cta')),
+    ctaAria: String(t('home.faq.items.impactScore.ctaAria')),
+    isImpactScore: true,
   },
   {
     question: String(t('home.faq.items.dataFreshness.question')),
     answer: String(t('home.faq.items.dataFreshness.answer')),
-  },
-  {
-    question: String(t('home.faq.items.suggestProduct.question')),
-    answer: String(t('home.faq.items.suggestProduct.answer')),
   },
 ])
 
