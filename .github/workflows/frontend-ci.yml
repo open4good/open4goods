@@ -21,7 +21,7 @@ jobs:
         working-directory: frontend
       - run: pnpm generate
         working-directory: frontend
-      - run: pnpm test run
+      - run: pnpm test --run
         working-directory: frontend
       - name: Verify production build
         run: pnpm build

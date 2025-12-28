@@ -671,7 +671,6 @@ useHead({
   display: flex
   flex-direction: column
   justify-content: center
-  gap: clamp(1.75rem, 4vw, 2.75rem)
 
 .home-hero__layout
   --v-gutter-x: clamp(2rem, 5vw, 3.5rem)
