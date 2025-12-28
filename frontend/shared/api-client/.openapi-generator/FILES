@@ -73,6 +73,7 @@ models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreTexts.ts
+models/IssueCommentDto.ts
 models/LegacyPromptConfig.ts
 models/LoginRequest.ts
 models/LogoutResponse.ts
@@ -126,6 +127,7 @@ models/ProductTimelineEventDto.ts
 models/ProductTimelineEventSource.ts
 models/ProductTimelineEventType.ts
 models/ProductVideoDto.ts
+models/PromptTemplateDto.ts
 models/RecommandationChoice.ts
 models/RecommandationCriteria.ts
 models/RecommandationsConfig.ts

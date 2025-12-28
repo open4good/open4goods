@@ -8,86 +8,95 @@
     :to="productLink"
     :rel="linkRel"
   >
-    <div class="product-tile-card__wrapper">
-      <div class="product-tile-card__media">
-        <v-img
-          :src="imageSrc"
-          :alt="productTitle"
-          aspect-ratio="4 / 3"
-          class="product-tile-card__image"
-          cover
-        >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
-
-        <div class="product-tile-card__compare">
-          <CategoryProductCompareToggle :product="product" size="compact" />
-        </div>
-
-        <div class="product-tile-card__score">
-          <ImpactScore
-            v-if="impactScore != null"
-            :score="impactScore"
-            :max="5"
-            size="small"
-          />
-          <span v-else class="product-tile-card__score-fallback">
-            {{ notRatedLabel }}
-          </span>
-        </div>
-      </div>
-
-      <div class="product-tile-card__content">
+    <div class="product-tile-card__container">
+      <!-- 1. Header: Title & Subtitle on full row -->
+      <div class="product-tile-card__header">
         <h3 class="product-tile-card__title">{{ productTitle }}</h3>
 
         <div
           v-if="hasAttributes"
-          class="product-tile-card__attributes"
-          role="list"
+          class="product-tile-card__subtitle text-truncate"
         >
-          <v-chip
-            v-for="attribute in attributes"
-            :key="attribute.key"
-            size="small"
-            class="product-tile-card__attribute"
-            variant="tonal"
-            color="surface-primary-080"
-            density="comfortable"
-            role="listitem"
-          >
-            <v-icon
-              v-if="attribute.icon"
-              :icon="attribute.icon"
-              size="16"
-              class="me-1"
-            />
-            <span class="text-truncate">{{ attribute.value }}</span>
-          </v-chip>
+          {{ attributesText }}
         </div>
+      </div>
 
-        <div
-          v-if="offerBadges.length"
-          class="product-tile-card__pricing"
-          role="list"
-        >
-          <div
-            v-for="badge in offerBadges"
-            :key="badge.key"
-            class="product-tile-card__price-badge"
-            :class="`product-tile-card__price-badge--${badge.appearance}`"
-            role="listitem"
+      <!-- 2. Body: Image + Pricing/Actions -->
+      <div class="product-tile-card__body">
+        <div class="product-tile-card__media">
+          <v-img
+            :src="imageSrc"
+            :alt="productTitle"
+            aspect-ratio="4 / 3"
+            class="product-tile-card__image"
+            cover
           >
-            <div class="product-tile-card__price-label">{{ badge.label }}</div>
-            <div class="product-tile-card__price">{{ badge.price }}</div>
+            <template #placeholder>
+              <v-skeleton-loader type="image" class="h-100" />
+            </template>
+          </v-img>
+
+          <div class="product-tile-card__score">
+            <ImpactScore
+              v-if="impactScore != null"
+              :score="impactScore"
+              :max="5"
+              size="small"
+            />
+            <span v-else class="product-tile-card__score-fallback">
+              {{ notRatedLabel }}
+            </span>
           </div>
         </div>
 
-        <div class="product-tile-card__meta">
-          <div class="product-tile-card__offers">
-            <v-icon icon="mdi-store" size="18" class="me-1" />
-            <span>{{ offersCountLabel }}</span>
+        <div class="product-tile-card__content">
+          <!-- New Badge Style: Simple Text -->
+          <div
+            v-if="offerBadges.length"
+            class="product-tile-card__pricing"
+            role="list"
+          >
+            <div
+              v-for="badge in offerBadges"
+              :key="badge.key"
+              class="product-tile-card__simple-badge"
+              :class="`product-tile-card__simple-badge--${badge.appearance}`"
+              role="listitem"
+            >
+              <span class="product-tile-card__badge-label me-1">{{
+                badge.label
+              }}</span>
+              <span class="product-tile-card__badge-price">{{
+                badge.price
+              }}</span>
+            </div>
+          </div>
+
+          <div class="product-tile-card__meta mt-auto">
+            <!-- Compare Button -->
+            <v-btn
+              variant="text"
+              size="small"
+              class="px-0 text-none"
+              :color="isCompared ? 'primary' : undefined"
+              @click.prevent.stop="toggleCompare"
+            >
+              <v-icon
+                :icon="isCompared ? 'mdi-check' : 'mdi-plus'"
+                start
+                size="small"
+              />
+              {{
+                isCompared
+                  ? t('category.products.compare.added')
+                  : t('category.products.compare.buttonLabel')
+              }}
+            </v-btn>
+
+            <div class="product-tile-card__offers ms-auto">
+              <v-icon icon="mdi-store" size="16" class="me-1" />
+              <span>{{ offersCountLabel }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -99,7 +108,8 @@
 import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import { useProductCompareStore } from '~/stores/useProductCompareStore'
+import { useI18n } from 'vue-i18n'
 
 export type ProductTileAttribute = {
   key: string
@@ -140,6 +150,9 @@ const props = withDefaults(
   }
 )
 
+const { t } = useI18n()
+const compareStore = useProductCompareStore()
+
 const productTitle = computed(
   () =>
     props.product.identity?.bestName ??
@@ -149,6 +162,15 @@ const productTitle = computed(
 )
 
 const hasAttributes = computed(() => props.attributes.length > 0)
+const attributesText = computed(() => {
+  return props.attributes.map(a => a.value).join(' · ')
+})
+
+const isCompared = computed(() => compareStore.hasProduct(props.product))
+
+const toggleCompare = () => {
+  compareStore.toggleProduct(props.product)
+}
 </script>
 
 <style scoped lang="scss">
@@ -160,6 +182,7 @@ const hasAttributes = computed(() => props.attributes.length > 0)
     rgba(var(--v-theme-surface-glass), 0.85)
   );
   display: flex;
+  flex-direction: column;
   text-decoration: none;
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
 
@@ -172,10 +195,43 @@ const hasAttributes = computed(() => props.attributes.length > 0)
     }
   }
 
-  &__wrapper {
+  &__container {
+    padding: 1rem;
     display: flex;
     flex-direction: column;
+    height: 100%;
     gap: 0.75rem;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__title {
+    font-size: 1.1rem;
+    line-height: 1.35;
+    margin: 0;
+    color: rgb(var(--v-theme-text-neutral-strong));
+    font-weight: 700;
+  }
+
+  &__subtitle {
+    font-size: 0.85rem;
+    color: rgb(var(--v-theme-text-neutral-secondary));
+    opacity: 0.85;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+
+    @media (min-width: 600px) {
+      flex-direction: row;
+    }
   }
 
   &__media {
@@ -183,10 +239,15 @@ const hasAttributes = computed(() => props.attributes.length > 0)
     border-radius: 0.75rem;
     overflow: hidden;
     background: rgb(var(--v-theme-surface-default));
+    flex-shrink: 0;
+
+    @media (min-width: 600px) {
+      width: 140px;
+    }
   }
 
   &__image {
-    min-height: 160px;
+    min-height: 120px;
 
     :deep(img) {
       object-fit: contain;
@@ -195,142 +256,90 @@ const hasAttributes = computed(() => props.attributes.length > 0)
     }
   }
 
-  &__compare {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 2;
-  }
-
   &__score {
     position: absolute;
-    left: 0.75rem;
-    bottom: 0.75rem;
+    left: 0.5rem;
+    bottom: 0.5rem;
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.35rem 0.6rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 999px;
     background: rgba(var(--v-theme-surface-default), 0.9);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   &__score-fallback {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: rgb(var(--v-theme-text-neutral-secondary));
   }
 
   &__content {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
-    padding: 0 0.35rem 0.85rem;
-  }
-
-  &__title {
-    font-size: 1.05rem;
-    line-height: 1.35;
-    margin: 0;
-    color: rgb(var(--v-theme-text-neutral-strong));
-    font-weight: 700;
-  }
-
-  &__attributes {
-    display: flex;
     gap: 0.5rem;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-
-    &::-webkit-scrollbar {
-      height: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(var(--v-theme-primary), 0.35);
-      border-radius: 999px;
-    }
+    flex: 1;
+    min-width: 0; /* flex fix */
   }
 
-  &__attribute {
-    border-radius: 999px;
-    text-transform: none;
-    font-weight: 600;
-    color: rgb(var(--v-theme-text-neutral-strong));
-    letter-spacing: 0.01em;
-  }
-
+  /* Simple Badge Styles */
   &__pricing {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
-  &__price-badge {
-    flex: 1 1 160px;
-    border-radius: 0.75rem;
-    padding: 0.6rem 0.75rem;
-    background: rgba(var(--v-theme-surface-default), 0.85);
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5);
-    min-width: 0;
+  &__simple-badge {
+    display: flex;
+    align-items: baseline;
+    font-size: 0.95rem;
 
     &--new {
-      border-color: rgba(var(--v-theme-primary), 0.55);
-      background: rgba(var(--v-theme-primary), 0.08);
-      color: rgb(var(--v-theme-primary));
+      .product-tile-card__badge-label {
+        color: rgb(var(--v-theme-primary));
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+      .product-tile-card__badge-price {
+        color: rgb(var(--v-theme-text-neutral-strong));
+        font-weight: 700;
+      }
     }
 
     &--occasion {
-      border-color: rgba(var(--v-theme-accent-supporting), 0.55);
-      background: rgba(var(--v-theme-accent-supporting), 0.08);
-      color: rgb(var(--v-theme-accent-supporting));
+      .product-tile-card__badge-label {
+        color: rgb(var(--v-theme-accent-supporting));
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+      .product-tile-card__badge-price {
+        color: rgb(var(--v-theme-text-neutral-strong));
+        font-weight: 700;
+      }
     }
 
     &--default {
-      color: rgb(var(--v-theme-text-neutral-strong));
+      .product-tile-card__badge-label {
+        color: rgb(var(--v-theme-text-neutral-secondary));
+      }
     }
-  }
-
-  &__price-label {
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 0.1rem;
-  }
-
-  &__price {
-    font-size: 1.1rem;
-    font-weight: 800;
-    line-height: 1.2;
   }
 
   &__meta {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    color: rgb(var(--v-theme-text-neutral-secondary));
-    font-size: 0.9rem;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
   }
 
   &__offers {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-  }
-
-  @media (min-width: 960px) {
-    &__wrapper {
-      flex-direction: row;
-      gap: 1rem;
-    }
-
-    &__media {
-      flex: 0 0 220px;
-    }
-
-    &__content {
-      padding: 0.5rem 0.5rem 0.85rem;
-    }
+    font-size: 0.85rem;
+    color: rgb(var(--v-theme-text-neutral-secondary));
   }
 }
 </style>
