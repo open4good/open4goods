@@ -636,6 +636,9 @@ const seoDescription = computed(
     category.value?.verticalHomeDescription ??
     ''
 )
+const robotsContent = computed(() =>
+  shouldRestrictCategoryProducts.value ? 'noindex, nofollow' : undefined
+)
 const ogTitle = computed(
   () => category.value?.verticalMetaOpenGraphTitle ?? seoTitle.value
 )
@@ -667,6 +670,12 @@ useSeoMeta({
   ogLocale: () => ogLocale.value,
   ogImageAlt: () => category.value?.verticalHomeTitle ?? siteName.value,
 })
+
+useHead(() => ({
+  meta: robotsContent.value
+    ? [{ name: 'robots', content: robotsContent.value }]
+    : [],
+}))
 
 useHead(() => ({
   meta: [

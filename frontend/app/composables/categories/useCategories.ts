@@ -70,15 +70,16 @@ export const useCategories = () => {
 
   /**
    * Fetch categories from the backend proxy
-   * @param onlyEnabled - Filter only enabled categories
    */
   const fetchCategories = async (
-    onlyEnabled: boolean = true
+    options?: { forceRefresh?: boolean }
   ): Promise<VerticalConfigDto[]> => {
-    const cacheKey = `list-${onlyEnabled}`
+    const forceRefresh = options?.forceRefresh ?? false
+    const cacheKey = 'list-all'
     const cachedCategories = categoriesListCache.value[cacheKey]
 
     if (
+      !forceRefresh &&
       cachedCategories &&
       Date.now() - cachedCategories.timestamp < TWO_HOURS_MS
     ) {
@@ -93,7 +94,6 @@ export const useCategories = () => {
       const headers = buildRequestHeaders()
       const response = await $fetch<VerticalConfigDto[]>('/api/categories', {
         ...(headers ? { headers } : {}),
-        params: { onlyEnabled },
       })
 
       categories.value = response ?? []
@@ -129,13 +129,13 @@ export const useCategories = () => {
     error.value = null
 
     if (categories.value.length === 0) {
-      await fetchCategories(true)
+      await fetchCategories()
     }
 
     let matchingCategory = findCategoryBySlug(slug)
 
     if (!matchingCategory) {
-      await fetchCategories(false)
+      await fetchCategories({ forceRefresh: true })
       matchingCategory = findCategoryBySlug(slug)
     }
 

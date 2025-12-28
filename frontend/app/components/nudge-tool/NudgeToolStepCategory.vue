@@ -34,17 +34,22 @@
         v-for="category in categories"
         :key="category.id"
         :value="category.id ?? ''"
+        :disabled="isCategoryDisabled(category)"
+        :aria-disabled="isCategoryDisabled(category).toString()"
       >
         <v-card
           class="nudge-step-category__card nudge-option-card"
           :class="{
             'nudge-option-card--selected': selected === category.id,
+            'nudge-option-card--disabled': isCategoryDisabled(category),
           }"
           variant="flat"
           rounded="xl"
           role="button"
           :aria-pressed="(selected === category.id).toString()"
-          @click="() => emit('select', category.id ?? '')"
+          :ripple="!isCategoryDisabled(category)"
+          :tabindex="isCategoryDisabled(category) ? -1 : 0"
+          @click="() => handleSelect(category)"
         >
           <div class="nudge-step-category__image">
             <v-img
@@ -83,6 +88,7 @@ import { useDisplay } from 'vuetify'
 const props = defineProps<{
   categories: VerticalConfigDto[]
   selectedCategoryId?: string | null
+  isAuthenticated?: boolean
 }>()
 
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
@@ -90,6 +96,18 @@ const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
 const selected = ref<string | null>(props.selectedCategoryId ?? null)
 const display = useDisplay()
 const isMobile = computed(() => display.smAndDown.value)
+const allowDisabledSelection = computed(() => props.isAuthenticated ?? false)
+
+const isCategoryDisabled = (category: VerticalConfigDto) =>
+  !allowDisabledSelection.value && category.enabled === false
+
+const handleSelect = (category: VerticalConfigDto) => {
+  if (isCategoryDisabled(category)) {
+    return
+  }
+
+  emit('select', category.id ?? '')
+}
 
 watch(
   () => props.selectedCategoryId,
@@ -223,6 +241,19 @@ watch(
   &__name {
     margin: 0;
     font-weight: 600;
+  }
+
+  &__card.nudge-option-card--disabled {
+    cursor: not-allowed;
+
+    .nudge-step-category__img {
+      filter: grayscale(1);
+      opacity: 0.55;
+    }
+
+    .nudge-step-category__name {
+      color: rgba(var(--v-theme-text-neutral-secondary), 0.7);
+    }
   }
 
   @media (max-width: 600px) {

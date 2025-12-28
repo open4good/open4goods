@@ -731,6 +731,9 @@ const canonicalPath = computed(() => {
 const canonicalUrl = computed(() =>
   new URL(canonicalPath.value, requestURL.origin).toString()
 )
+const productRobotsContent = computed(() =>
+  categoryDetail.value?.enabled === false ? 'noindex, nofollow' : undefined
+)
 
 const resolvedProductImageSource = computed(() => {
   const galleryImages = product.value?.resources?.images ?? []
@@ -765,6 +768,12 @@ useSeoMeta({
   ogImage: () => ogImageUrl.value,
   ogImageAlt: () => ogImageAlt.value,
 })
+
+useHead(() => ({
+  meta: productRobotsContent.value
+    ? [{ name: 'robots', content: productRobotsContent.value }]
+    : [],
+}))
 
 useHead(() => ({
   link: [{ rel: 'canonical', href: canonicalUrl.value }],

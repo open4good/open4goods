@@ -1,26 +1,47 @@
+import { ref } from 'vue'
+import type { VerticalConfigDto } from '~~/shared/api-client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe('useCategories composable', () => {
-  const fetchMock = vi.fn()
-  const resolveOnlyEnabledParam = (
-    init: unknown
-  ): boolean | undefined => {
-    if (!init || typeof init !== 'object') {
-      return undefined
+const fetchMock = vi.fn()
+let stateStore: Map<string, ReturnType<typeof ref>>
+
+vi.mock('#imports', () => ({
+  useState: (key: string, init: () => unknown) => {
+    if (!stateStore.has(key)) {
+      stateStore.set(key, ref(init()))
     }
 
-    const params = (init as { params?: { onlyEnabled?: boolean } }).params
-    return params?.onlyEnabled
-  }
+    return stateStore.get(key)
+  },
+  useRequestHeaders: () => undefined,
+}))
+
+vi.mock('#app', () => ({
+  useState: (key: string, init: () => unknown) => {
+    if (!stateStore.has(key)) {
+      stateStore.set(key, ref(init()))
+    }
+
+    return stateStore.get(key)
+  },
+  useRequestHeaders: () => undefined,
+}))
+
+describe('useCategories composable', () => {
 
   beforeEach(async () => {
     vi.resetModules()
     fetchMock.mockReset()
+    stateStore = new Map()
+    const globalObject = globalThis as Record<string, unknown>
+    globalObject['categories-list-cache'] = {}
+    globalObject['category-detail-cache'] = {}
     vi.stubGlobal('$fetch', fetchMock)
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    stateStore.clear()
   })
 
   it('loads category details, stores the active id and retains subsets', async () => {
@@ -43,7 +64,7 @@ describe('useCategories composable', () => {
 
     fetchMock.mockImplementation((request, init) => {
       if (request === '/api/categories') {
-        expect(init).toEqual({ params: { onlyEnabled: true } })
+        expect(init).toEqual({})
         return Promise.resolve(categoriesResponse)
       }
 
@@ -66,28 +87,24 @@ describe('useCategories composable', () => {
     expect(currentCategory.value?.subsets).toEqual(detailResponse.subsets)
   })
 
-  it('loads disabled categories on fallback when slug is missing from the enabled list', async () => {
+  it('loads disabled categories when the slug is present in the list', async () => {
     const disabledCategory = {
       id: 'category-disabled',
-      verticalHomeUrl: '/archived-category',
+      verticalHomeUrl: 'archived-category',
       enabled: false,
     }
     const detailResponse = {
       id: 'category-disabled',
       verticalHomeTitle: 'Archived',
+      enabled: false,
     }
 
     fetchMock.mockImplementation((request, init) => {
       if (request === '/api/categories') {
-        const onlyEnabled = resolveOnlyEnabledParam(init)
-
-        if (onlyEnabled === true) {
-          return Promise.resolve([])
-        }
-
-        if (onlyEnabled === false) {
-          return Promise.resolve([disabledCategory])
-        }
+        expect(init).toEqual({})
+        return Promise.resolve([
+          disabledCategory as unknown as VerticalConfigDto,
+        ])
       }
 
       if (request === '/api/categories/category-disabled') {
@@ -101,21 +118,27 @@ describe('useCategories composable', () => {
     const { selectCategoryBySlug, currentCategory, activeCategoryId } =
       useCategories()
 
+    const categoriesState = stateStore.get('categories-list')
+    if (categoriesState) {
+      categoriesState.value = [
+        disabledCategory as unknown as VerticalConfigDto,
+      ]
+      expect(categoriesState.value).toEqual([
+        disabledCategory as unknown as VerticalConfigDto,
+      ])
+    }
     const detail = await selectCategoryBySlug('archived-category')
 
     expect(activeCategoryId.value).toBe('category-disabled')
     expect(detail).toEqual(detailResponse)
-    expect(currentCategory.value?.enabled).toBeUndefined()
+    expect(currentCategory.value?.enabled).toBe(false)
   })
 
   it('raises a CategoryNotFoundError when the slug cannot be resolved', async () => {
     fetchMock.mockImplementation((request, init) => {
       if (request === '/api/categories') {
-        const onlyEnabled = resolveOnlyEnabledParam(init)
-
-        if (onlyEnabled === true || onlyEnabled === false) {
-          return Promise.resolve([])
-        }
+        expect(init).toEqual({})
+        return Promise.resolve([])
       }
 
       throw new Error(`Unexpected request: ${String(request)}`)
