@@ -52,7 +52,7 @@ importers:
         version: 11.11.1
       isomorphic-dompurify:
         specifier: ^2.28.0
-        version: 2.34.0
+        version: 2.35.0
       jsdom:
         specifier: ^27.0.0
         version: 27.4.0
@@ -6424,8 +6424,8 @@ packages:
     resolution: {integrity: sha512-LpB/54B+/2J5hqQ7imZHfdU31OlgQqx7ZicVlkm9kzg9/w8GKLEcFfJl/t7DCEDueOyBAD6zCCwTO6Fzs0NoEQ==}
     engines: {node: '>=16'}
 
-  isomorphic-dompurify@2.34.0:
-    resolution: {integrity: sha512-7VeB/tDBQ8jt1+syT563hmmejY01nuwizpUIFPfM1aw3iTgLLiVP4/Nh+PKhNoa1V/H+E6ZlNcowsXLbChPCpw==}
+  isomorphic-dompurify@2.35.0:
+    resolution: {integrity: sha512-a9+LQqylQCU8f1zmsYmg2tfrbdY2YS/Hc+xntcq/mDI2MY3Q108nq8K23BWDIg6YGC5JsUMC15fj2ZMqCzt/+A==}
     engines: {node: '>=20.19.5'}
 
   issue-parser@7.0.1:
@@ -16939,7 +16939,7 @@ snapshots:
 
   isexe@3.1.1: {}
 
-  isomorphic-dompurify@2.34.0:
+  isomorphic-dompurify@2.35.0:
     dependencies:
       dompurify: 3.3.1
       jsdom: 27.4.0
