@@ -402,7 +402,7 @@ useHead({
     tag="section"
     class="home-hero"
     aria-labelledby="home-hero-title"
-    variant="aurora"
+    variant="none"
     :bleed="true"
   >
     <div class="home-hero__background" aria-hidden="true">
