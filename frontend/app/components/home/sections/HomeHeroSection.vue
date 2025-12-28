@@ -46,7 +46,7 @@ const emit = defineEmits<{
   'select-product': [payload: ProductSuggestionItem]
 }>()
 
-const { t, te, locale } = useI18n()
+const { t, te, tm, locale } = useI18n()
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 const activeEventPack = useSeasonalEventPack()
@@ -132,51 +132,45 @@ const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
 }
 
 const heroHelperItems = computed<HeroHelperItem[]>(() => {
-  const translatedItems = normalizeHelperItems(
-    packI18n.resolveList('hero.search.helpers', {
-      fallbackKeys: ['home.hero.search.helpers'],
-    })
-  )
+  const packItems = packI18n.resolveList('hero.search.helpers', {
+    fallbackKeys: ['home.hero.search.helpers'],
+  })
+
+  // Robust check for array/object
+  const itemsToNormalize = Array.isArray(packItems)
+    ? packItems
+    : Object.values(packItems ?? {})
+
+  const translatedItems = normalizeHelperItems(itemsToNormalize)
 
   if (translatedItems.length > 0) {
     return applyPartnerLinkPlaceholder(translatedItems)
   }
 
-  const fallback =
-    packI18n.resolveString('hero.search.helper', {
-      fallbackKeys: ['home.hero.search.helper'],
-    }) ?? ''
-  const trimmedFallback = fallback.trim()
-
-  if (!trimmedFallback || trimmedFallback === 'home.hero.search.helper') {
-    return []
+  // Fallback to direct translation if pack resolution failed slightly
+  const tmItems = tm('home.hero.search.helpers')
+  if (Array.isArray(tmItems) && tmItems.length > 0) {
+    const directTranslated = normalizeHelperItems(tmItems)
+    if (directTranslated.length > 0) {
+      return applyPartnerLinkPlaceholder(directTranslated)
+    }
   }
 
-  return applyPartnerLinkPlaceholder([
-    {
-      icon: '⚡',
-      segments: [
-        {
-          text: trimmedFallback,
-        },
-      ],
-    },
-  ])
+  return []
 })
-
-const heroSubtitle = computed(
-  () =>
-    packI18n.resolveStringVariant('hero.subtitles', {
-      fallbackKeys: ['home.hero.subtitles', 'home.hero.subtitle'],
-      stateKey: 'home-hero-subtitles',
-    }) ?? ''
-)
 
 const heroTitleSubtitle = computed(
   () =>
     packI18n.resolveStringVariant('hero.titleSubtitle', {
       fallbackKeys: ['home.hero.titleSubtitle'],
       stateKey: 'home-hero-title-subtitle',
+    }) ?? ''
+)
+
+const heroContextTitle = computed(
+  () =>
+    packI18n.resolveString('hero.context.title', {
+      fallbackKeys: ['home.hero.context.title'],
     }) ?? ''
 )
 
@@ -514,8 +508,8 @@ useHead({
                     "
                   >
                     <div class="home-hero__context">
-                      <p class="home-hero__subtitle">
-                        {{ heroSubtitle }}
+                      <p class="home-hero__subtitle text-center">
+                        {{ heroContextTitle }}
                       </p>
 
                       <div class="home-hero__helper-row">
@@ -744,7 +738,7 @@ useHead({
   font-size: clamp(0.95rem, 2.2vw, 1.2rem)
   color: rgba(var(--v-theme-surface-default), 0.9)
   font-size: clamp(1.2rem, 5vw, 1.8rem)
-  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px  
+  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
 
 .home-hero__search
   display: flex
@@ -780,7 +774,6 @@ useHead({
   gap: clamp(1.25rem, 2vw, 1.75rem)
 
 .home-hero__context
-  display: flex
   flex-direction: column
   gap: 0.75rem
 
@@ -822,9 +815,17 @@ useHead({
   text-decoration-thickness: 0.08em
   text-underline-offset: 0.1em
 
+.home-hero__context
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
 .home-hero__subtitle
   margin: 0
   color: rgb(var(--v-theme-text-neutral-strong))
+  text-align: center
+  width: 100%
+
 
 .home-hero__helpers-title
   font-size: 0.875rem

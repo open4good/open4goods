@@ -101,13 +101,13 @@ const impactScorePath = computed(() => localePath('/impact-score'))
 
 .home-faq__answer
   padding-block: 0.5rem
-  display: flex
-  flex-direction: column
+  text-align: left
+  margin-left: 1.25rem
   gap: 0.375rem
   color: rgb(var(--v-theme-text-neutral-secondary))
 
   ul
-    padding-left: 1.25rem
+    padding-left: 2.25rem
     margin: 0
 
 .home-faq__cta-wrapper

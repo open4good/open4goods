@@ -101,7 +101,7 @@
         "cta": "parallax/parallax-cta.svg"
       },
       "hero": {
-        "eyebrow": "Comparateur responsable",
+        "eyebrow": "Nudger, c'est :",
         "title": "Acheter mieux. Sans dépenser plus.",
         "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
         "subtitles": [
@@ -116,7 +116,7 @@
           "placeholder": "Recherchez un produit ou une catégorie",
           "ariaLabel": "Rechercher un produit responsable",
           "cta": "NUDGER",
-          "helper": "Comparateur indépendant et open data.",
+
           "helpersTitle": "Offre avec intention. Compare avec impact.",
           "helpers": [
             {
@@ -172,6 +172,7 @@
         "context": {
           "cornerLabel": "Résumé impact",
           "cornerTooltip": "Les points forts de la méthodologie Nudger",
+          "title": "Le comparateur nouveau est arrivé !",
           "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
         }
       }
@@ -517,30 +518,30 @@
         }
       }
     },
-  "faq": {
-    "title": "FAQ",
-    "subtitle": "Les réponses rapides aux questions fréquentes.",
-    "items": {
-      "free": {
-        "question": "Nudger est-il gratuit ?",
-        "answer": "Oui, Nudger est complètement gratuit pour vous !<br/><br/>Nous gagnons de l'argent grâce au système d'affiliation. Cela signifie que nous touchons une rétro-commission quand vous cliquez sur les offres de Nudger et que vous finalisez vos achats chez nos commerçants partenaires.<br/><br/>C'est le même principe que celui utilisé par les comparateurs en ligne, et cela n'influence en rien le prix des produits disponibles sur Nudger."
+    "faq": {
+      "title": "FAQ",
+      "subtitle": "Les réponses rapides aux questions fréquentes.",
+      "items": {
+        "free": {
+          "question": "Nudger est-il gratuit ?",
+          "answer": "Oui, Nudger est complètement gratuit pour vous !<br/><br/>Nous gagnons de l'argent grâce au système d'affiliation. Cela signifie que nous touchons une rétro-commission quand vous cliquez sur les offres de Nudger et que vous finalisez vos achats chez nos commerçants partenaires.<br/><br/>C'est le même principe que celui utilisé par les comparateurs en ligne, et cela n'influence en rien le prix des produits disponibles sur Nudger."
+        },
+        "account": {
+          "question": "Besoin d’un compte ?",
+          "answer": "<b>Pas du tout !</b><br/>L'intégralité de nos fonctionnalités est disponible sans que vous ayez besoin de créer de compte sur notre plateforme.<br/>C'est ça aussi le respect de la vie privée."
+        },
+        "impactScore": {
+          "question": "Comment calculez-vous l’Impact Score ?",
+          "answer": "C'est là-dessus que Nudger se distingue.<br/><br/>Nous cherchons à vous orienter au mieux dans l'univers des possibles, pas à faire de l'évaluation de façon absolue.<br/><ul><li>Nous analysons toutes les données à notre disposition ayant un rapport avec l'impact écologique et sociétal.</li><li>Nous classons ensuite les produits les uns par rapport aux autres à l'aide de notre Impact Score.</li><li>Des systèmes d'IA avancés ajustent la pondération des différents critères.</li></ul>Et tout cela est entièrement transparent.",
+          "cta": "En savoir plus",
+          "ctaAria": "Ouvrir la page dédiée à l'Impact Score"
+        },
+        "dataFreshness": {
+          "question": "Les données sont-elles à jour ?",
+          "answer": "Oui, nos données produits sont mises à jour <b>deux fois par jour</b> pour refléter au mieux les évolutions des offres."
+        }
       },
-      "account": {
-        "question": "Besoin d’un compte ?",
-        "answer": "<b>Pas du tout !</b><br/>L'intégralité de nos fonctionnalités est disponible sans que vous ayez besoin de créer de compte sur notre plateforme.<br/>C'est ça aussi le respect de la vie privée."
-      },
-      "impactScore": {
-        "question": "Comment calculez-vous l’Impact Score ?",
-        "answer": "C'est là-dessus que Nudger se distingue.<br/><br/>Nous cherchons à vous orienter au mieux dans l'univers des possibles, pas à faire de l'évaluation de façon absolue.<br/><ul><li>Nous analysons toutes les données à notre disposition ayant un rapport avec l'impact écologique et sociétal.</li><li>Nous classons ensuite les produits les uns par rapport aux autres à l'aide de notre Impact Score.</li><li>Des systèmes d'IA avancés ajustent la pondération des différents critères.</li></ul>Et tout cela est entièrement transparent.",
-        "cta": "En savoir plus",
-        "ctaAria": "Ouvrir la page dédiée à l'Impact Score"
-      },
-      "dataFreshness": {
-        "question": "Les données sont-elles à jour ?",
-        "answer": "Oui, nos données produits sont mises à jour <b>deux fois par jour</b> pour refléter au mieux les évolutions des offres."
-      }
-    },
-    "agent": {
+      "agent": {
         "eyebrow": "Ton résultat IA ici 😉",
         "title": "Pose ta question, on l’affiche dans la FAQ",
         "subtitle": "Envoie ta demande, on répond avec une IA frugale et on affiche le résultat juste en dessous.",
