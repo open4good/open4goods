@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import TextContent from '~/components/domains/content/TextContent.vue'
+import { useLocalePath } from '#i18n'
 
 type FaqItem = {
   question: string
   answer: string
   blocId: string
+  isImpactScore?: boolean
+  ctaLabel?: string
+  ctaAria?: string
 }
 
 const props = defineProps<{
@@ -13,6 +16,8 @@ const props = defineProps<{
 }>()
 
 const hasPanels = computed(() => props.items.length > 0)
+const localePath = useLocalePath()
+const impactScorePath = computed(() => localePath('/impact-score'))
 </script>
 
 <template>
@@ -36,12 +41,19 @@ const hasPanels = computed(() => props.items.length > 0)
               <h3 class="home-faq__panel-title">{{ panel.question }}</h3>
             </v-expansion-panel-title>
             <v-expansion-panel-text class="home-faq__panel-text">
-              <TextContent
-                class="home-faq__text-content"
-                :bloc-id="panel.blocId"
-                :fallback-text="panel.answer"
-                :ipsum-length="panel.answer.length"
-              />
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <div class="home-faq__answer" v-html="panel.answer" />
+              <div v-if="panel.isImpactScore && panel.ctaLabel" class="home-faq__cta-wrapper">
+                <v-btn
+                  class="home-faq__cta"
+                  color="primary"
+                  variant="tonal"
+                  :to="impactScorePath"
+                  :aria-label="panel.ctaAria || panel.ctaLabel"
+                >
+                  {{ panel.ctaLabel }}
+                </v-btn>
+              </div>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -87,6 +99,21 @@ const hasPanels = computed(() => props.items.length > 0)
 .home-faq__panel-text
   background: rgb(var(--v-theme-surface-default))
 
-.home-faq__text-content
+.home-faq__answer
   padding-block: 0.5rem
+  display: flex
+  flex-direction: column
+  gap: 0.375rem
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+  ul
+    padding-left: 1.25rem
+    margin: 0
+
+.home-faq__cta-wrapper
+  margin-top: 0.5rem
+
+.home-faq__cta
+  width: fit-content
+  font-weight: 600
 </style>

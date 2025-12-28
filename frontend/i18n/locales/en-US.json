@@ -407,36 +407,30 @@
         }
       }
     },
-    "faq": {
-      "title": "FAQ",
-      "subtitle": "Quick answers to the most common questions.",
-      "items": {
-        "free": {
-          "question": "Is Nudger free?",
-          "answer": "Yes, searching is free to use."
-        },
-        "account": {
-          "question": "Do I need an account?",
-          "answer": "No for searching; an account is optional if you want lists or alerts."
-        },
-        "categories": {
-          "question": "Which categories are covered?",
-          "answer": "Electronics & Appliances today, more to come."
-        },
-        "impactScore": {
-          "question": "How do you calculate the Impact Score?",
-          "answer": "Five weighted criteria + lean AI, fully open methodology."
-        },
-        "dataFreshness": {
-          "question": "Are the data kept up to date?",
-          "answer": "Yes, refreshed regularly with quality checks."
-        },
-        "suggestProduct": {
-          "question": "How can I suggest a product?",
-          "answer": "Use our dedicated contact form."
-        }
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Quick answers to the most common questions.",
+    "items": {
+      "free": {
+        "question": "Is Nudger free?",
+        "answer": "Yes, Nudger is completely free for you!<br/><br/>We earn money through affiliate partnerships. That means we receive a commission when you click Nudger offers and complete your purchase with our partner merchants.<br/><br/>It's the same model used by comparison sites and it never changes the price of the products you see on Nudger."
       },
-      "agent": {
+      "account": {
+        "question": "Do I need an account?",
+        "answer": "<b>Not at all!</b><br/>Every feature is available without creating an account on our platform.<br/>That's how we protect your privacy, too."
+      },
+      "impactScore": {
+        "question": "How do you calculate the Impact Score?",
+        "answer": "This is where Nudger shines.<br/><br/>We aim to guide you through the realm of possibilities rather than provide absolute judgments.<br/><ul><li>We analyse every data point we have related to ecological and societal impact.</li><li>We compare products against each other using our Impact Score.</li><li>Advanced AI systems adjust how each criterion is weighted.</li></ul>And the whole process stays fully transparent.",
+        "cta": "Learn more",
+        "ctaAria": "Open the detailed Impact Score page"
+      },
+      "dataFreshness": {
+        "question": "Are the data kept up to date?",
+        "answer": "Yes, our product data is refreshed <b>twice a day</b> to track offer changes as closely as possible."
+      }
+    },
+    "agent": {
         "eyebrow": "Your AI result here 😉",
         "title": "Ask your question, we’ll pin it to the FAQ",
         "subtitle": "Share your request, we’ll answer with frugal AI and surface it below for everyone.",
