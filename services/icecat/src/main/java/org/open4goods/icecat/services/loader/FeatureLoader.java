@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
+import org.open4goods.icecat.client.IcecatHttpClient;
+import org.open4goods.icecat.client.exception.IcecatApiException;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureGroup;
@@ -17,50 +18,65 @@ import org.open4goods.icecat.model.IcecatModel;
 import org.open4goods.icecat.model.IcecatSupplier;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.helper.IdHelper;
-import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-@Service
+/**
+ * Loads Icecat features, feature groups, and brands from XML files.
+ * Uses IcecatHttpClient for downloading and caching files.
+ */
 public class FeatureLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureLoader.class);
 
     private final XmlMapper xmlMapper;
-    private final IcecatConfiguration iceCatConfig;
-    private final RemoteFileCachingService fileCachingService;
-    private final String remoteCachingFolder;
+    private final IcecatConfiguration icecatConfig;
+    private final IcecatHttpClient httpClient;
     private final BrandService brandService;
 
     private final Map<Integer, IcecatFeature> featuresById = new HashMap<>();
     private final Map<String, Set<Integer>> featuresByNames = new HashMap<>();
     private final Map<Integer, IcecatFeatureGroup> featureGroupsById = new HashMap<>();
 
+    /**
+     * Constructor for FeatureLoader.
+     *
+     * @param xmlMapper     the XML mapper for parsing
+     * @param icecatConfig  the Icecat configuration
+     * @param httpClient    the HTTP client for file downloads
+     * @param brandService  the brand service for brand management
+     */
     public FeatureLoader(XmlMapper xmlMapper,
-                         IcecatConfiguration iceCatConfig,
-                         RemoteFileCachingService fileCachingService,
-                         String remoteCachingFolder,
+                         IcecatConfiguration icecatConfig,
+                         IcecatHttpClient httpClient,
                          BrandService brandService) {
         this.xmlMapper = xmlMapper;
-        this.iceCatConfig = iceCatConfig;
-        this.fileCachingService = fileCachingService;
-        this.remoteCachingFolder = remoteCachingFolder;
+        this.icecatConfig = icecatConfig;
+        this.httpClient = httpClient;
         this.brandService = brandService;
     }
 
+    /**
+     * Loads features from the Icecat XML file.
+     *
+     * @throws TechnicalException if loading fails
+     */
     public void loadFeatures() throws TechnicalException {
-        if (iceCatConfig.getFeaturesListFileUri() == null) {
+        if (icecatConfig.getFeaturesListFileUri() == null) {
             LOGGER.error("No features list file uri configured");
             return;
         }
-        LOGGER.info("Getting file from {}", iceCatConfig.getFeaturesListFileUri());
-        File icecatFile = getCachedFile(iceCatConfig.getFeaturesListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+        String uri = icecatConfig.getFeaturesListFileUri();
+        LOGGER.info("Loading features from {}", uri);
+
         try {
+            File icecatFile = httpClient.downloadAndDecompressGzip(uri, null);
             List<IcecatFeature> features = xmlMapper.readValue(icecatFile, IcecatModel.class)
                     .getResponse().getFeaturesList().getFeatures();
+
             features.forEach(feature -> {
                 Integer id = Integer.valueOf(feature.getID());
                 featuresById.put(id, feature);
@@ -70,75 +86,82 @@ public class FeatureLoader {
                     fIds.add(id);
                 });
             });
+
+            LOGGER.info("Loaded {} features from {}", features.size(), uri);
+        } catch (IcecatApiException e) {
+            throw new TechnicalException("Failed to download features file: " + uri, e);
         } catch (Exception e) {
             LOGGER.error("Error while loading features", e);
+            throw new TechnicalException("Error parsing features file: " + uri, e);
         }
-        LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
     }
 
+    /**
+     * Loads feature groups from the Icecat XML file.
+     *
+     * @throws TechnicalException if loading fails
+     */
     public void loadFeatureGroups() throws TechnicalException {
-        if (iceCatConfig.getFeatureGroupsFileUri() == null) {
+        if (icecatConfig.getFeatureGroupsFileUri() == null) {
             LOGGER.error("No features group list file uri configured");
             return;
         }
-        LOGGER.info("Getting file from {}", iceCatConfig.getFeatureGroupsFileUri());
-        File icecatFile = getCachedFile(iceCatConfig.getFeatureGroupsFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+        String uri = icecatConfig.getFeatureGroupsFileUri();
+        LOGGER.info("Loading feature groups from {}", uri);
+
         try {
+            File icecatFile = httpClient.downloadAndDecompressGzip(uri, null);
             List<IcecatFeatureGroup> groups = xmlMapper.readValue(icecatFile, IcecatModel.class)
                     .getResponse().getFeatureGroupsList().getFeatureGroups();
+
             for (IcecatFeatureGroup fg : groups) {
                 featureGroupsById.put(fg.getID(), fg);
             }
+
+            LOGGER.info("Loaded {} feature groups from {}", groups.size(), uri);
+        } catch (IcecatApiException e) {
+            throw new TechnicalException("Failed to download feature groups file: " + uri, e);
         } catch (Exception e) {
             LOGGER.error("Error while loading feature groups", e);
+            throw new TechnicalException("Error parsing feature groups file: " + uri, e);
         }
-        LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
     }
 
+    /**
+     * Loads brands from the Icecat XML file.
+     *
+     * @throws TechnicalException if loading fails
+     */
     public void loadBrands() throws TechnicalException {
-        if (iceCatConfig.getBrandsListFileUri() == null) {
+        if (icecatConfig.getBrandsListFileUri() == null) {
             LOGGER.error("No brands list file uri configured");
             return;
         }
-        LOGGER.info("Getting brands file from {}", iceCatConfig.getBrandsListFileUri());
-        File icecatFile = getCachedFile(iceCatConfig.getBrandsListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+        String uri = icecatConfig.getBrandsListFileUri();
+        LOGGER.info("Loading brands from {}", uri);
+
         try {
+            File icecatFile = httpClient.downloadAndDecompressGzip(uri, null);
             List<IcecatSupplier> suppliers = xmlMapper.readValue(icecatFile, IcecatModel.class)
                     .getResponse().getSuppliersList().getSuppliers();
+
             for (IcecatSupplier supplier : suppliers) {
                 Brand brand = brandService.resolve(supplier.getName());
                 if (brand == null) {
                     brand = new Brand();
                     brand.setBrandName(IdHelper.brandName(supplier.getName()));
                 }
-                // TODO handle brand logos
-                // brandService.saveBrand(brand);
+                // TODO: handle brand logos
             }
-        } catch (Exception e) {
-            LOGGER.error("Error while loading features", e);
-        }
-        LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
-    }
 
-    private File getCachedFile(String url, String user, String password) throws TechnicalException {
-        LOGGER.info("Retrieving file : {}", url);
-        File destFile = new File(remoteCachingFolder + File.separator + IdHelper.getHashedName(url));
-        if (destFile.exists()) {
-            LOGGER.info("File {} already cached", url);
-            return destFile;
-        }
-        File tmpFile = new File(remoteCachingFolder + File.separator + "tmp-" + IdHelper.getHashedName(url));
-        try {
-            LOGGER.info("Starting download : {}", url);
-            fileCachingService.downloadTo(user, password, url, tmpFile);
-            LOGGER.info("Uncompressing file : {}", tmpFile);
-            fileCachingService.decompressGzipFile(tmpFile, destFile);
-            LOGGER.info("File {} uncompressed", url);
-            return destFile;
+            LOGGER.info("Loaded {} brands from {}", suppliers.size(), uri);
+        } catch (IcecatApiException e) {
+            throw new TechnicalException("Failed to download brands file: " + uri, e);
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving resource", e);
-        } finally {
-            FileUtils.deleteQuietly(tmpFile);
+            LOGGER.error("Error while loading brands", e);
+            throw new TechnicalException("Error parsing brands file: " + uri, e);
         }
     }
 

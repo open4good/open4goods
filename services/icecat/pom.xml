@@ -59,6 +59,20 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- WireMock for HTTP mocking in tests -->
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>3.3.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Guava for RateLimiter -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
