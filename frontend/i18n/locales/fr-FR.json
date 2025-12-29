@@ -2775,7 +2775,8 @@
       "continue": "Continuer",
       "seeAll": "Voir toutes les recommandations",
       "previous": "Précédent",
-      "next": "Suivant"
+      "next": "Suivant",
+      "viewCategoryResults": "Ouvrir {category} avec vos filtres"
     },
     "wizard": {
       "welcome": "🤘"

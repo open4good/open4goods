@@ -2660,7 +2660,8 @@
       "continue": "Continue",
       "seeAll": "See all recommendations",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "viewCategoryResults": "Open {category} with your filters"
     },
     "wizard": {
       "welcome": "Welcome!"
