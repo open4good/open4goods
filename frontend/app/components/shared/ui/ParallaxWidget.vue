@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, type CSSProperties, onMounted } from 'vue'
+import { computed, ref, type CSSProperties, onMounted, onUnmounted } from 'vue'
 import {
   useElementBounding,
   usePreferredReducedMotion,
+  useWindowScroll,
   useWindowSize,
 } from '@vueuse/core'
 import { useDisplay, useTheme } from 'vuetify'
@@ -78,7 +79,9 @@ const props = withDefaults(
 
 const root = ref<HTMLElement | null>(null)
 const { height: windowHeight } = useWindowSize()
-const { top, height } = useElementBounding(root)
+// We only use height from useElementBounding. Top is calculated manually relative to document.
+const { height } = useElementBounding(root)
+const { y: scrollY } = useWindowScroll()
 
 const rootStyles = computed<CSSProperties>(() => ({
   minHeight: props.gapless ? 'auto' : props.minHeight || undefined,
@@ -97,20 +100,26 @@ const overscanPx = computed(() => {
 
 const layerInset = computed(() => `-${overscanPx.value}px`)
 
-// We want to track the parent if this widget is inside a section,
-// to ensure the parallax effect covers the section bounds if needed,
-// but usually the widget IS the background container.
-// If it is just a div taking 100% of parent, `useElementBounding(root)` is fine.
-
 const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
 const display = useDisplay()
 
 const isMounted = ref(false)
 const isInView = ref(!props.revealOnView)
+const elementAbsoluteTop = ref(0)
+
+const updateAbsoluteTop = () => {
+  if (root.value) {
+    const box = root.value.getBoundingClientRect()
+    // absolute top = current scroll + viewport relative top
+    elementAbsoluteTop.value = window.scrollY + box.top
+  }
+}
 
 onMounted(() => {
   isMounted.value = true
+  updateAbsoluteTop()
+  window.addEventListener('resize', updateAbsoluteTop)
 
   if (!props.revealOnView) {
     isInView.value = true
@@ -143,6 +152,12 @@ onMounted(() => {
   )
 
   observer.observe(el)
+})
+
+onUnmounted(() => {
+  if (import.meta.client) {
+    window.removeEventListener('resize', updateAbsoluteTop)
+  }
 })
 
 const isDark = computed(() => {
@@ -236,7 +251,9 @@ const resolveOffset = (speed: number) => {
     return '0px'
   }
 
-  const elementCenter = top.value + height.value / 2
+  // Calculate current top relative to viewport dynamically
+  const currentTop = elementAbsoluteTop.value - scrollY.value
+  const elementCenter = currentTop + height.value / 2
   const viewportCenter = windowHeight.value / 2
   const delta = elementCenter - viewportCenter
 
