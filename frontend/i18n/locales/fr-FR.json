@@ -2804,7 +2804,7 @@
       },
       "recommendations": {
         "title": "Nos propositions",
-        "subtitle": "Les meilleurs résultats selon vos filtres",
+        "subtitle": "Le top 3 qui vous correspond",
         "empty": "Aucun produit ne correspond à ces filtres pour le moment.",
         "total": "{count} résultats disponibles"
       }

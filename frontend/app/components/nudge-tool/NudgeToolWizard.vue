@@ -110,10 +110,13 @@
           v-for="step in progressSteps"
           :key="step.key"
           location="top"
-          :text="step.title"
+          :text="step.key === 'category' ? step.subtitle : step.title"
         >
           <template #activator="{ props: tooltipProps }">
-            <span class="nudge-wizard__progress-bubble-wrapper" v-bind="tooltipProps">
+            <span
+              class="nudge-wizard__progress-bubble-wrapper"
+              v-bind="tooltipProps"
+            >
               <v-btn
                 class="nudge-wizard__progress-bubble"
                 :variant="step.key === activeStepKey ? 'flat' : 'text'"
@@ -124,7 +127,9 @@
                 size="44"
                 @click="() => handleProgressClick(step.key)"
               >
-                <span class="nudge-wizard__progress-index">{{ step.index }}</span>
+                <span class="nudge-wizard__progress-index">{{
+                  step.index
+                }}</span>
               </v-btn>
             </span>
           </template>
@@ -332,7 +337,7 @@ const steps = computed<WizardStep[]>(() => {
       component: NudgeToolStepScores,
       title: t('nudge-tool.steps.scores.title'),
       subtitle: t('nudge-tool.steps.scores.subtitle'),
-      icon: 'mdi-leaf-circle-outline',
+      icon: 'mdi-earth',
       props: {
         modelValue: selectedScores.value,
         scores: nudgeConfig.value?.scores ?? [],
@@ -389,6 +394,7 @@ const steps = computed<WizardStep[]>(() => {
     component: NudgeToolStepRecommendations,
     title: t('nudge-tool.steps.recommendations.title'),
     subtitle: t('nudge-tool.steps.recommendations.subtitle'),
+    icon: 'mdi-lightbulb-on',
     props: {
       products: recommendations.value,
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
@@ -584,11 +590,14 @@ const canAccessStep = (stepKey: string) =>
   visitedStepKeys.value.includes(stepKey)
 
 const progressSteps = computed(() =>
-  steps.value.map((step, index) => ({
-    key: step.key,
-    title: step.title,
-    index: index + 1,
-  }))
+  steps.value
+    .map((step, index) => ({
+      key: step.key,
+      title: step.title,
+      subtitle: step.subtitle ?? '',
+      index: index + 1,
+    }))
+    .filter(step => visitedStepKeys.value.includes(step.key))
 )
 
 const handleProgressClick = (stepKey: string) => {
