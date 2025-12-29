@@ -35,7 +35,6 @@
         :key="category.id"
         :value="category.id ?? ''"
         :disabled="isCategoryDisabled(category)"
-        :aria-disabled="isCategoryDisabled(category).toString()"
       >
         <v-card
           class="nudge-step-category__card nudge-option-card"

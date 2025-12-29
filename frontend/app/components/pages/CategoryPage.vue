@@ -550,6 +550,11 @@ onMounted(() => {
   isHydrated.value = true
 })
 
+const isDesktop = computed(() =>
+  isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value
+)
+const filtersDrawer = ref(false)
+
 const props = defineProps<{ slug: string }>()
 const slug = props.slug
 const slugPattern = /^[a-z-]+$/
@@ -570,6 +575,7 @@ const { data: categoryData } = await useAsyncData(
     try {
       return await selectCategoryBySlug(slug)
     } catch (err) {
+      console.error('Error resolving category detail for slug:', slug, err)
       if (err instanceof Error && err.name === 'CategoryNotFoundError') {
         throw createError({
           statusCode: 404,
@@ -816,11 +822,6 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
 
 const filterOptions = computed(() => filterOptionsData.value ?? null)
 const sortOptions = computed(() => sortOptionsData.value ?? null)
-
-const isDesktop = computed(() =>
-  isHydrated.value ? display.lgAndUp.value : initialIsDesktop.value
-)
-const filtersDrawer = ref(false)
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
 const DEFAULT_FILTERS_COLLAPSED_STATE = true
@@ -1957,17 +1958,24 @@ onMounted(async () => {
   }
 
   if (verticalId.value) {
-    await Promise.all([loadFilterOptions(), loadSortOptions()])
-
-    if (!sortField.value) {
-      applyDefaultSort()
+    try {
+      await Promise.all([loadFilterOptions(), loadSortOptions()])
+      if (!sortField.value) {
+        applyDefaultSort()
+      }
+    } catch (err) {
+      console.error('Failed to load filter/sort options:', err)
     }
   }
 
   hasHydrated.value = true
 
   if (verticalId.value && !isUsingInitialProductsData.value) {
-    await fetchProducts()
+    try {
+      await fetchProducts()
+    } catch (err) {
+      console.error('Failed to fetch initial products:', err)
+    }
   }
 })
 

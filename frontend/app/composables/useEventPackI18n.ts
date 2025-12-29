@@ -128,12 +128,6 @@ export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
   ): T[] => {
     const raw = resolveRaw(path, options)
 
-    console.log('[DEBUG] resolveList raw:', {
-      path,
-      raw,
-      isArray: Array.isArray(raw),
-    })
-
     if (!Array.isArray(raw)) {
       return []
     }

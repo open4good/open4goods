@@ -253,8 +253,7 @@ defineOptions({ inheritAttrs: false })
 const attrs = useAttrs()
 
 const filteredAttrs = computed(() => {
-  const { 'data-v-inspector': _, ...rest } = attrs
-  return rest
+  return attrs
 })
 
 const props = withDefaults(
