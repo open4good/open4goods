@@ -100,6 +100,14 @@ class VerticalYamlValidationTest {
     }
 
     @Test
+    void shouldExposeEprelGroupNamesAsList()
+    {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        assertThat(tvConfig.getEprelGroupNames()).contains("TELEVISION");
+        assertThat(tvConfig.getEprelGroupName()).isEqualTo("TELEVISION");
+    }
+
+    @Test
     void shouldFailWhenAttributeDefinitionIsMissing() throws Exception {
         Resource tvResource = verticalResources.stream()
             .filter(resource -> "tv.yml".equals(resource.getFilename()))

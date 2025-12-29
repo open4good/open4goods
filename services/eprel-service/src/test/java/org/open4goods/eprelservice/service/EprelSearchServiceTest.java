@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.PrefixQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
@@ -54,6 +55,25 @@ class EprelSearchServiceTest
         TermQuery termQuery = query.term();
         assertThat(termQuery.field()).isEqualTo("numericGtin");
         assertThat(termQuery.value().longValue()).isEqualTo(123456L);
+    }
+
+    @Test
+    @DisplayName("searchByGtin should filter on any provided EPREL categories")
+    void searchByGtinShouldFilterByMultipleCategories()
+    {
+        service.searchByGtin("123456", java.util.List.of("TV", "MONITOR"));
+
+        Query query = capturedQuery();
+        assertThat(query.isBool()).isTrue();
+        assertThat(query.bool().must()).hasSize(1);
+        assertThat(query.bool().filter()).hasSize(1);
+
+        Query categoryFilter = query.bool().filter().getFirst();
+        assertThat(categoryFilter.isTerms()).isTrue();
+        assertThat(categoryFilter.terms().field()).isEqualTo("eprelCategory");
+        assertThat(categoryFilter.terms().terms().value())
+            .extracting(FieldValue::stringValue)
+            .containsExactly("TV", "MONITOR");
     }
 
     @Test

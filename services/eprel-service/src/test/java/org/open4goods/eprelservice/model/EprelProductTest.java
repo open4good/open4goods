@@ -31,6 +31,7 @@ class EprelProductTest
         EprelProduct product = objectMapper.readValue(json, EprelProduct.class);
         long expectedEpoch = LocalDate.of(2024, 1, 31).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
         assertThat(product.getOnMarketStartDate()).isEqualTo(expectedEpoch);
+        assertThat(product.getEprelCategories()).containsExactly("MONITOR");
         assertThat(product.getEprelCategory()).isEqualTo("MONITOR");
     }
 
