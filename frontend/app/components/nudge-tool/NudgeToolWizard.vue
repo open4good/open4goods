@@ -106,20 +106,29 @@
         class="nudge-wizard__progress-bubbles"
         :style="footerOffsetStyle"
       >
-        <v-btn
+        <v-tooltip
           v-for="step in progressSteps"
           :key="step.key"
-          class="nudge-wizard__progress-bubble"
-          :variant="step.key === activeStepKey ? 'flat' : 'text'"
-          :color="step.key === activeStepKey ? 'primary' : undefined"
-          :aria-label="step.title"
-          :disabled="!canAccessStep(step.key)"
-          icon
-          size="44"
-          @click="() => handleProgressClick(step.key)"
+          location="top"
+          :text="step.title"
         >
-          <span class="nudge-wizard__progress-index">{{ step.index }}</span>
-        </v-btn>
+          <template #activator="{ props: tooltipProps }">
+            <span class="nudge-wizard__progress-bubble-wrapper" v-bind="tooltipProps">
+              <v-btn
+                class="nudge-wizard__progress-bubble"
+                :variant="step.key === activeStepKey ? 'flat' : 'text'"
+                :color="step.key === activeStepKey ? 'primary' : undefined"
+                :aria-label="step.title"
+                :disabled="!canAccessStep(step.key)"
+                icon
+                size="44"
+                @click="() => handleProgressClick(step.key)"
+              >
+                <span class="nudge-wizard__progress-index">{{ step.index }}</span>
+              </v-btn>
+            </span>
+          </template>
+        </v-tooltip>
       </div>
       <div class="nudge-wizard__footer-actions">
         <v-btn
@@ -323,6 +332,7 @@ const steps = computed<WizardStep[]>(() => {
       component: NudgeToolStepScores,
       title: t('nudge-tool.steps.scores.title'),
       subtitle: t('nudge-tool.steps.scores.subtitle'),
+      icon: 'mdi-leaf-circle-outline',
       props: {
         modelValue: selectedScores.value,
         scores: nudgeConfig.value?.scores ?? [],
@@ -336,6 +346,7 @@ const steps = computed<WizardStep[]>(() => {
     component: NudgeToolStepCondition,
     title: t('nudge-tool.steps.condition.title'),
     subtitle: t('nudge-tool.steps.condition.subtitle'),
+    icon: 'mdi-compare-horizontal',
     props: { modelValue: condition.value },
     onUpdate: (value: ProductConditionSelection) => {
       condition.value = value
@@ -572,20 +583,13 @@ const isNextDisabled = computed(() => {
 const canAccessStep = (stepKey: string) =>
   visitedStepKeys.value.includes(stepKey)
 
-const progressSteps = computed(() => {
-  if (activeStepKey.value === 'category') {
-    return []
-  }
-
-  return steps.value
-    .filter(step => step.key !== 'category')
-    .filter(step => visitedStepKeys.value.includes(step.key))
-    .map((step, index) => ({
-      key: step.key,
-      title: step.title,
-      index: index + 1,
-    }))
-})
+const progressSteps = computed(() =>
+  steps.value.map((step, index) => ({
+    key: step.key,
+    title: step.title,
+    index: index + 1,
+  }))
+)
 
 const handleProgressClick = (stepKey: string) => {
   if (!canAccessStep(stepKey)) {
@@ -927,6 +931,10 @@ const cornerIconDimensions = computed(() => {
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
+  }
+
+  &__progress-bubble-wrapper {
+    display: inline-flex;
   }
 
   &__progress-bubble {

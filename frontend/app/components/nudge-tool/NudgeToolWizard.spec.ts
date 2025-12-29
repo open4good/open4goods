@@ -75,6 +75,11 @@ describe('NudgeToolWizard', () => {
           VWindow: { template: '<div><slot /></div>' },
           VWindowItem: { template: '<div><slot /></div>', props: ['value'] },
           VSpacer: true,
+          VTooltip: {
+            props: ['text', 'location'],
+            template:
+              '<div class="v-tooltip-stub"><slot name="activator" :props="{}" /><slot /></div>',
+          },
           // We keep VStepper stubbed but check its props if possible,
           // or we can use a component that renders keys
           VStepper: {
