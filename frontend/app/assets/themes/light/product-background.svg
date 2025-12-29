@@ -1,21 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice">
+<svg width="1440" height="400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="orbit-grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00DE9F" stop-opacity="0.1" />
-      <stop offset="100%" stop-color="#00A1C2" stop-opacity="0.15" />
-    </linearGradient>
-    <filter id="blur-header">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
-    </filter>
+    <pattern id="small-leafs" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M30 0 C45 0 60 15 60 30 C60 45 45 60 30 60 C15 60 0 45 0 30 C0 15 15 0 30 0 Z" fill="#e0f2f1" opacity="0.4"/>
+    </pattern>
   </defs>
-
-  <!-- Background -->
-  <rect width="100%" height="100%" fill="#FFFFFF" />
-  <rect width="100%" height="100%" fill="url(#orbit-grad-header)" />
-  
-  <!-- Subtle shapes focused on top right/bottom left to leave center clear -->
-  <circle cx="95%" cy="10%" r="150" fill="#00DE9F" fill-opacity="0.1" filter="url(#blur-header)" />
-  <circle cx="5%" cy="90%" r="200" fill="#00A1C2" fill-opacity="0.08" filter="url(#blur-header)" />
-  
-  <path d="M 0 350 Q 800 250 1600 350" fill="none" stroke="#0088D6" stroke-width="1" stroke-opacity="0.05" />
+  <rect width="1440" height="400" fill="#ffffff"/>
+  <rect width="1440" height="400" fill="url(#small-leafs)"/>
+  <path d="M0 350 Q300 300 600 350 T1200 350 T1440 300 V400 H0 Z" fill="#b2dfdb" opacity="0.2"/>
 </svg>

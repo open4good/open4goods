@@ -83,7 +83,7 @@
     "default": {
       "assets": {
         "illustration": "placeholders/illustration.svg",
-        "heroBackground": "hero-background.webp",
+        "heroBackground": "hero-background.svg",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
         "productBackground": "product-background.svg",
@@ -175,75 +175,6 @@
           "title": "Le comparateur nouveau est arrivé !",
           "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
         }
-      }
-    },
-    "sdg": {
-      "hero": {
-        "titleSubtitle": [
-          "Des achats du quotidien alignés sur les Objectifs de développement durable."
-        ],
-        "subtitles": [
-          "Des choix du quotidien alignés sur les Objectifs de développement durable."
-        ]
-      }
-    },
-    "bastille-day": {
-      "assets": {
-        "heroBackground": "bastille-day/hero-background.svg",
-        "illustration": "bastille-day/illustration-fireworks.svg",
-        "problemImage": "bastille-day/problem.webp",
-        "solutionImage": "bastille-day/solution.webp"
-      },
-      "hero": {
-        "eyebrow": "Spécial 14 juillet",
-        "title": "Célébrez des choix responsables le 14 juillet",
-        "titleSubtitle": [
-          "Un feu d'artifice de prix justes et d'impact transparent."
-        ],
-        "subtitles": [
-          "Achetez avec liberté, égalité, durabilité en tête.",
-          "Pendant que le ciel s'illumine, orientez vos achats vers des choix responsables."
-        ],
-        "iconAlt": "Feu d'artifice célébrant des achats responsables",
-        "imageAlt": "Illustration de feux d'artifice au-dessus des toits de la ville.",
-        "search": {
-          "label": "Chercher un produit prêt pour le 14 juillet",
-          "placeholder": "Trouvez un ventilateur, un frigo ou une idée cadeau",
-          "helpersTitle": "Réflexes rapides avant le feu d'artifice",
-          "helpers": [
-            {
-              "icon": "🎆",
-              "segments": [
-                {
-                  "text": "Servez-vous de l'impact score pour éviter les produits gaspilleurs."
-                }
-              ]
-            },
-            {
-              "icon": "🥖",
-              "segments": [
-                {
-                  "text": "Local et efficace ? Filtrez d'abord par réparabilité."
-                }
-              ]
-            },
-            {
-              "icon": "🎇",
-              "segments": [
-                {
-                  "text": "Alliez fête et économies avec des prix transparents."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parallax": {
-        "essentials": "parallax/parallax-background-bastille-essentials.svg",
-        "features": "parallax/parallax-background-bastille-features.svg",
-        "blog": "parallax/parallax-background-bastille-blog.svg",
-        "objections": "parallax/parallax-background-bastille-objections.svg",
-        "cta": "parallax/parallax-background-bastille-cta.svg"
       }
     }
   },

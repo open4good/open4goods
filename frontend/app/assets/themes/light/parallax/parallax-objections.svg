@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice">
-  <desc>Parallax Layer - Objections</desc>
-  
-  <!-- Reassuring, stable shapes -->
-  <rect x="10%" y="70%" width="100" height="100" rx="20" transform="rotate(15 160 560)" fill="#0088D6" fill-opacity="0.03" />
-  
-  <!-- Shield-like subtle curves -->
-  <path d="M 1400 300 Q 1500 500 1400 700" fill="none" stroke="#00A1C2" stroke-width="3" stroke-opacity="0.05" />
+<svg width="1440" height="900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="small-objections" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="2" fill="#ffcc80" opacity="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="1440" height="900" fill="url(#small-objections)"/>
+  <rect x="0" y="0" width="1440" height="900" fill="url(#small-objections)" transform="rotate(45 720 450)"/>
 </svg>

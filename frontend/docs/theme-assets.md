@@ -25,6 +25,9 @@ This page summarises how themed assets are resolved, how seasonal packs are sche
 - Place the files under `app/assets/themes/<theme>/<pack>/` (or `common/<pack>/`) using the same filenames as their non-seasonal counterparts.
 - Missing files automatically fall back to the non-seasonal theme/common assets thanks to the ordered resolution above.
 
+> [!NOTE]
+> A default theme kit must include not only standard page backgrounds but also the **5 parallax layers** used on the homepage (essentials, features, blog, objections, cta).
+
 ## Event packs and scheduling
 
 - Available packs: `default`, `sdg`, `bastille-day`, and `hold` (see `EVENT_PACK_NAMES`).

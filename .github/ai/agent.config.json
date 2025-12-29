@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "providers": {
+    "codex": {
+      "kind": "openai",
+      "model": "gpt-5.1-codex-max",
+      "reasoning_effort": "medium",
+      "max_output_tokens_by_state": {
+        "UNDERSTANDING": 600,
+        "PLANNING": 1100,
+        "READY_TO_CODE": 1200
+      }
+    },
+    "claude": {
+      "kind": "anthropic",
+      "model": "claude-sonnet-4-5",
+      "max_tokens_by_state": {
+        "UNDERSTANDING": 700,
+        "PLANNING": 1200,
+        "READY_TO_CODE": 1300
+      },
+      "betas": [
+        "structured-outputs-2025-11-13"
+      ]
+    },
+    "gemini": {
+      "kind": "gemini",
+      "model": "gemini-2.5-flash",
+      "max_output_tokens_by_state": {
+        "UNDERSTANDING": 700,
+        "PLANNING": 1200,
+        "READY_TO_CODE": 1300
+      }
+    }
+  },
+  "labels": {
+    "agent_on": "agent:on",
+    "working": "agent:working",
+    "needs_human": "agent:needs_human"
+  },
+  "provider_labels": [
+    "codex",
+    "claude",
+    "gemini"
+  ],
+  "state_labels": {
+    "UNDERSTANDING": "agent:UNDERSTANDING",
+    "PLANNING": "agent:PLANNING",
+    "READY_TO_CODE": "agent:READY_TO_CODE"
+  },
+  "capability_label_prefix": "cap:",
+  "label_allowlist_prefixes": [
+    "agent:",
+    "cap:"
+  ],
+  "label_allowlist_exact": [
+    "codex",
+    "claude",
+    "gemini"
+  ],
+  "trigger_phrases": [
+    "/agent",
+    "@agent"
+  ],
+  "comment_thread": {
+    "marker": "<!-- AI_MULTI_AGENT_THREAD v1 -->",
+    "title": "\ud83e\udd16 Multi\u2011LLM Agent"
+  },
+  "context": {
+    "max_comments": 30,
+    "max_chars_per_comment": 2500,
+    "max_body_chars": 12000
+  }
+}

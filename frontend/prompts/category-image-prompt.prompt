@@ -28,7 +28,7 @@ Generate a SVG transparent image for a {productEnglish}.
 "source": "Three-point softbox lighting"
 },
 
-    "master_prompt": "A professional 3D render of a {productEnglish}, isometric view, centered composition, minimalist design. High-end product web icon representation style. Clean smooth matte materials. The background is transparent. Soft studio lighting, soft shadows, 4k resolution, highly detailed, sleek aesthetics.",
+    "master_prompt": "A professional 3D render of a realistic {productEnglish}, isometric view, centered composition, minimalist design. High-end product representation style. Clean smooth matte materials. The background is transparent. Soft studio lighting, soft shadows, 4k resolution, highly detailed, sleek aesthetics.",
 
     "negative_prompt": "text, watermark, label, logo, human, hands, cluttered background, distorted, blurry, low resolution, sketch, cartoon, vibrant colors, messy, dark background, complex details, noise"
 

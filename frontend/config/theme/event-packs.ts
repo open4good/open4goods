@@ -36,12 +36,7 @@ export type EventPackSchedule = {
  * Liste des packs événementiels disponibles.
  * 'default' est le pack par défaut utilisé hors période événementielle.
  */
-export const EVENT_PACK_NAMES = [
-  'default',
-  'sdg',
-  'bastille-day',
-  'christmas',
-] as const
+export const EVENT_PACK_NAMES = ['default', 'christmas'] as const
 
 export const DEFAULT_EVENT_PACK: EventPackName = 'default'
 
@@ -52,27 +47,12 @@ export const DEFAULT_EVENT_PACK: EventPackName = 'default'
  */
 export const eventPackSchedule: EventPackSchedule[] = [
   {
-    id: 'sdg-campaign',
-    start: '04-15',
-    end: '05-02',
-    pack: 'sdg',
-    description: 'Journée de la Terre et sensibilisation aux ODD',
-  },
-  {
-    id: 'bastille-day',
-    start: '07-10',
-    end: '07-16',
-    pack: 'bastille-day',
-    description: 'Fête nationale du 14 juillet',
-  },
-  {
     id: 'christmas-december',
     start: '12-08',
     end: '12-08',
     pack: 'christmas',
     description: 'Noël — tout décembre',
   },
-
 ]
 
 // ----------------------------------------------------------------------------

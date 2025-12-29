@@ -1,14 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice">
-  <defs>
-    <linearGradient id="orbit-grad-blog" x1="0%" y1="50%" x2="100%" y2="50%">
-      <stop offset="0%" stop-color="#0088D6" stop-opacity="0.08" />
-      <stop offset="100%" stop-color="#00DE9F" stop-opacity="0.12" />
-    </linearGradient>
-  </defs>
-
-  <rect width="100%" height="100%" fill="#FFFFFF" />
-  <rect width="100%" height="100%" fill="url(#orbit-grad-blog)" />
-  
-  <!-- Content/Writing flow representation -->
-  <path d="M -100 100 C 400 150, 1200 50, 1700 100" fill="none" stroke="#00A1C2" stroke-width="40" stroke-opacity="0.03" />
+<svg width="1440" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="400" fill="#f3e5f5"/>
+  <circle cx="1400" cy="50" r="100" fill="#e1bee7" opacity="0.4"/>
+  <path d="M0 300 Q200 250 400 300 T800 300 T1440 350 V400 H0 Z" fill="#ce93d8" opacity="0.2"/>
 </svg>
