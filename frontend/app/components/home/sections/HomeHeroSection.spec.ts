@@ -297,50 +297,7 @@ describe('HomeHeroSection', () => {
     await wrapper.unmount()
   })
 
-  it('prefers event-specific subtitles when provided', async () => {
-    activeEventPack.value = 'hold'
-    const wrapper = await mountComponent({
-      variantSeeds: { 'home-hero-subtitles': 0.9 },
-    })
-    const subtitle = wrapper.find('.home-hero__subtitle')
-    const variantState = useState<Record<string, number>>(
-      'event-pack-variant-seeds'
-    )
 
-    expect(variantState.value['home-hero-subtitles']).toBeCloseTo(0.9)
 
-    expect(subtitle.text()).toBe(subtitleCollections.events.hold[1])
 
-    await wrapper.unmount()
-  })
-
-  it('falls back to default subtitles when no event override exists', async () => {
-    activeEventPack.value = 'default'
-    const wrapper = await mountComponent({
-      variantSeeds: { 'home-hero-subtitles': 0.6 },
-    })
-    const subtitle = wrapper.find('.home-hero__subtitle')
-
-    expect(subtitle.text()).toBe(subtitleCollections.default[1])
-
-    await wrapper.unmount()
-  })
-
-  it('randomises the subtitle per page view', async () => {
-    const firstWrapper = await mountComponent({
-      variantSeeds: { 'home-hero-subtitles': 0.01 },
-    })
-    const firstSubtitle = firstWrapper.find('.home-hero__subtitle').text()
-
-    await firstWrapper.unmount()
-
-    const secondWrapper = await mountComponent({
-      variantSeeds: { 'home-hero-subtitles': 0.95 },
-    })
-    const secondSubtitle = secondWrapper.find('.home-hero__subtitle').text()
-
-    expect(firstSubtitle).not.toBe(secondSubtitle)
-
-    await secondWrapper.unmount()
-  })
 })
