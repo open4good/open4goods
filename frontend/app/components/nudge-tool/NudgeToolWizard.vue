@@ -19,9 +19,14 @@
         }"
       >
         <NudgeToolAnimatedIcon v-if="activeStepKey === 'category'" />
-        <div
+        <v-btn
           v-else-if="categorySummary"
           class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-1 pb-1"
+          variant="text"
+          color="white"
+          :aria-label="cornerSummaryLabel"
+          :ripple="false"
+          @click="navigateToCategoryResults"
         >
           <div
             class="nudge-wizard__corner-visual d-flex align-center justify-center"
@@ -47,7 +52,7 @@
               {{ animatedMatches }}
             </div>
           </div>
-        </div>
+        </v-btn>
       </div>
     </template>
     <div ref="headerRef">
@@ -190,6 +195,8 @@ import type {
   VerticalSubsetDto,
 } from '~/shared/api-client'
 
+import { buildCategoryHash } from '~/utils/_category-filter-state'
+
 import {
   buildConditionFilter,
   buildNudgeFilterRequest,
@@ -204,6 +211,8 @@ const props = defineProps<{
   initialSubsets?: string[]
 }>()
 
+const emit = defineEmits<{ (event: 'navigate', target: string): void }>()
+
 const accentCornerOffsets: Record<CornerSize, string> = {
   sm: '46px',
   md: '58px',
@@ -213,6 +222,7 @@ const accentCornerOffsets: Record<CornerSize, string> = {
 
 const { t } = useI18n()
 const { isLoggedIn } = useAuth()
+const router = useRouter()
 
 const { fetchCategories } = useCategories()
 
@@ -463,6 +473,15 @@ const goToPrevious = () => {
   }
 }
 
+const navigateToCategoryResults = () => {
+  if (!categoryNavigationTarget.value) {
+    return
+  }
+
+  emit('navigate', categoryNavigationTarget.value)
+  void router.push(categoryNavigationTarget.value)
+}
+
 const getFirstContentStepKey = () =>
   steps.value.find(step => step.key !== 'category')?.key
 
@@ -636,6 +655,54 @@ const categorySummary = computed(() => {
 const shouldEnlargeCornerIcon = computed(
   () => isCategoryStep.value || Boolean(categorySummary.value)
 )
+
+const categorySlug = computed(() => {
+  if (!selectedCategory.value) {
+    return null
+  }
+
+  const slug =
+    selectedCategory.value.verticalHomeUrl?.replace(/^\/+/, '') ??
+    selectedCategory.value.id ??
+    null
+
+  return slug && slug.trim().length > 0 ? slug : null
+})
+
+const categoryHash = computed(() => {
+  if (!selectedCategoryId.value) {
+    return ''
+  }
+
+  const hash = buildCategoryHash({
+    filters: filterRequest.value,
+    activeSubsets: activeSubsetIds.value.length
+      ? activeSubsetIds.value
+      : undefined,
+  })
+
+  return hash ?? ''
+})
+
+const categoryNavigationTarget = computed(() => {
+  if (!categorySlug.value) {
+    return null
+  }
+
+  return categoryHash.value
+    ? `/${categorySlug.value}${categoryHash.value}`
+    : `/${categorySlug.value}`
+})
+
+const cornerSummaryLabel = computed(() => {
+  if (!categorySummary.value) {
+    return ''
+  }
+
+  return t('nudge-tool.actions.viewCategoryResults', {
+    category: categorySummary.value.label,
+  })
+})
 
 const windowTransitionDurationMs = 0
 
@@ -847,6 +914,22 @@ const cornerIconDimensions = computed(() => {
 
   &__corner-summary {
     gap: 2px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding-inline: 4px;
+    text-transform: none;
+
+    :deep(.v-btn__content) {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    :deep(.v-btn__overlay) {
+      display: none;
+    }
   }
 
   &__corner-visual {
