@@ -41,8 +41,12 @@ excludingTokensFromCategoriesMatching:
   - ACCESSOIRE
   - QUINCAILLERIE
   - CABLE
+  - MEUBLE
 
-         
+# The scores that are available to build the impact score
+availableImpactScoreCriterias:
+    - ESG
+    - DATA_QUALITY
             
 subsets:
   ################
@@ -256,6 +260,9 @@ brandsAlias:
   
 attributesConfig:
 
+  configs:
+    - key: "WARRANTY"
+    - key: "ESG"
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
 # Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)    

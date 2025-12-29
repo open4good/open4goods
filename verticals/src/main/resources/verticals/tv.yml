@@ -15,11 +15,12 @@ resourcesConfig:
 id: tv
 
 order: 1
+
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404
 
-
+#The icecat category id. Set -1 if unknown
 icecatTaxonomyId: 1584
 
 eprelGroupName: TELEVISION
@@ -38,6 +39,7 @@ enabled: true
 
 popular: true
 
+# The mainly presented attributes for this category
 popularAttributes:
   - DIAGONALE_POUCES
   - DISPLAY_TECHNOLOGY
@@ -47,17 +49,10 @@ genAiConfig:
   # If false, will bypass the generativ ia texts generation  
   enabled: false
 
-
-
 #####################################################################################################################################
 # ImpacScore configuration.
+# Auto generated, see /prompts/impactscore-generation.yml
 #####################################################################################################################################
-
-
-
-
-
-
 
 impactScoreConfig:
   criteriasPonderation:
@@ -104,16 +99,15 @@ impactScoreConfig:
 
 
 
-# The scores that are available to build the impact score
+# The scores that are available to build the impact score. They come from scored attributes. 
+# Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - DIAGONALE_POUCES
 #  - CLASSE_ENERGY
 #  - WEIGHT
 #  - POWER_CONSUMPTION_TYPICAL
-  - ESG
   - CLASSE_ENERGY_HDR
   - CLASSE_ENERGY_SDR
-  - DATA_QUALITY
   - DIAGONALE_POUCES
   - MINGUARANTEEDSUPPORTYEARS
   - MINAVAILABILITYSPAREPARTSYEARS
@@ -655,7 +649,6 @@ attributesConfig:
     - key: "MINAVAILABILITYSPAREPARTSYEARS"
     - key: "MINGUARANTEEDSUPPORTYEARS"
     - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
-    - key: "WARRANTY"
     - key: "DIAGONALE_POUCES"
     - key: "DISPLAY_TECHNOLOGY"
     - key: "FREQUENCY_RATE"
@@ -665,7 +658,6 @@ attributesConfig:
     - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
     - key: "POWER_CONSUMPTION_SDR"
     - key: "POWER_CONSUMPTION_HDR"
-    - key: "ESG"
     - key: "CLASSE_ENERGY_HDR"
     - key: "CLASSE_ENERGY_SDR"
 ##############################################################################
@@ -752,7 +744,7 @@ attributesConfig:
 
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
-  - MEUBLE
+#  - MEUBLE
   
 matchingCategories:
      all: []
