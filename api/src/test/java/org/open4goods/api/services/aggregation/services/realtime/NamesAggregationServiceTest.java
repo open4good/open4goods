@@ -18,7 +18,10 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -90,16 +93,52 @@ class NamesAggregationServiceTest {
 		assertNotNull(product.getEmbedding());
 	}
 
+	@Test
+	void onProduct_shouldComputePrettyNameWithSuffix() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(9L);
+		product.setVertical("tv");
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName("DIAGONALE_POUCES");
+		attr.setValue("55");
+		product.getAttributes().getAll().put("DIAGONALE_POUCES", attr);
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getPrettyName().get("fr"))
+				.isEqualTo("TV 55 \"");
+	}
+
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
 		ProductI18nElements productI18nElements = new ProductI18nElements();
 		PrefixedAttrText h1 = new PrefixedAttrText();
 		h1.setPrefix("Cuisine");
 		productI18nElements.setH1Title(h1);
+		PrefixedAttrText pretty = new PrefixedAttrText();
+		pretty.setPrefix("Cuisine");
+		pretty.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
+		productI18nElements.setPrettyName(pretty);
 
 		HashMap<String, ProductI18nElements> i18n = new HashMap<>();
 		i18n.put("fr", productI18nElements);
 		config.setI18n(i18n);
+		config.setAttributesConfig(buildAttributesConfig());
 		return config;
+	}
+
+	private AttributesConfig buildAttributesConfig() {
+		AttributeConfig diagonale = new AttributeConfig();
+		diagonale.setKey("DIAGONALE_POUCES");
+		Localisable<String, String> suffix = new Localisable<>();
+		suffix.put("default", "\"");
+		suffix.put("fr", "\"");
+		diagonale.setSuffix(suffix);
+		AttributesConfig attributesConfig = new AttributesConfig();
+		attributesConfig.setConfigs(java.util.List.of(diagonale));
+		return attributesConfig;
 	}
 }

@@ -143,6 +143,12 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    prettyName:
+      prefix: "|| TV | Télévision | Téléviseur ||"
+      attrs:
+        - BRAND
+        - DIAGONALE_POUCES
+        - DISPLAY_TECHNOLOGY
     # TODO : Generate short title (for cards restitution, with popular attributes)
 
     ##################################
@@ -188,6 +194,12 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    prettyName:
+      prefix: "|| TV | Television ||"
+      attrs:
+        - BRAND
+        - DIAGONALE_POUCES
+        - DISPLAY_TECHNOLOGY
 
     ##################################
     # Vertical page elements

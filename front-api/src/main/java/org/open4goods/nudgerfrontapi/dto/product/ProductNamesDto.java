@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ProductNamesDto(
         @Schema(description = "H1 title for the requested language", example = "Casque Bluetooth haut de gamme")
         String h1Title,
+        @Schema(description = "Pretty name for the requested language", example = "Télévision Samsung 55 \"")
+        String prettyName,
         @Schema(description = "Meta description aligned with the requested language")
         String metaDescription,
         @Schema(description = "OpenGraph title for social sharing")
