@@ -404,8 +404,14 @@ const fetchSpy = vi.fn((url: string) => {
       {
         id: 'question',
         name: 'Question',
+        description: 'Test agent',
+        icon: 'mdi-robot',
+        promptTemplates: [],
+        tags: [],
+        allowedRoles: [],
         attributes: [],
         publicPromptHistory: true,
+        allowTemplateEditing: true,
       },
     ])
   }

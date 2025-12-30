@@ -56,6 +56,7 @@ export interface AgentRequestDto {
   userHandle?: string
   attributeValues?: Record<string, unknown>
   captchaToken?: string
+  tags?: string[]
 }
 
 export interface AgentRequestResponseDto {

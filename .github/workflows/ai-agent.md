@@ -30,9 +30,21 @@ Dans Settings → Secrets and variables → Actions:
 - Le LLM ne reçoit jamais le `GITHUB_TOKEN`.
 - Les labels appliqués sont filtrés via allowlist (`agent:` / `cap:` + provider exact).
 
-## TODO (phase 2)
-- Ajouter un workflow séparé "dev" qui checkout le code PR (sans secrets) et exécute:
-  - `mvn test`
-  - `pnpm lint`
-  - `pnpm test`
-Puis republie les résultats via un job `pull_request_target` qui ne checkout que la branche par défaut.
+## Workflow de validation PR (dev)
+
+Le workflow `.github/workflows/ai-agent-dev.yml` complète l'agent en exécutant des
+tests reproductibles sur les PRs ciblant la branche par défaut.
+
+- Déclencheur : `pull_request_target` (events `opened`, `synchronize`,
+  `reopened`, `ready_for_review`), ignoré pour les brouillons.
+- Job `checks` (fork-safe) :
+  - checkout du head de la PR **sans credentials**
+  - `mvn -B -ntp test`
+  - `pnpm lint` (frontend)
+  - `pnpm test --run` (frontend)
+  - export des journaux dans un artefact `agent-dev-logs`
+- Job `report` :
+  - s'exécute sur la branche par défaut
+  - télécharge les artefacts et poste un commentaire de synthèse sur la PR
+  - applique le label `agent:DEV_CHECKS` en cas de succès ou `agent:needs_human`
+    si un contrôle échoue
