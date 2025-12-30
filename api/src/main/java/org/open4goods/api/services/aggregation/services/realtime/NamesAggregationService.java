@@ -16,6 +16,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -165,6 +166,19 @@ public class NamesAggregationService extends AbstractAggregationService {
 						}
 					}
 
+					// ---- Pretty Name ----
+					final boolean prettyMissing =
+							data.getNames() == null
+							|| data.getNames().getPrettyName() == null
+							|| data.getNames().getPrettyName().get(lang) == null;
+
+					if ((vConf != null && vConf.isForceNameGeneration()) || prettyMissing) {
+						if (data.getNames() != null && data.getNames().getPrettyName() != null) {
+							data.getNames().getPrettyName().put(lang,
+									computePrettyName(data, tConf.getPrettyName(), vConf, lang, " "));
+						}
+					}
+
 					// SEO meta generation intentionally left commented-out (as in original),
 					// because of previous disk-space / stack-trace issues and template evaluation failures.
 					// Keeping behavior unchanged.
@@ -291,6 +305,70 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		return sb.toString();
+	}
+
+	/**
+	 * Computes a pretty name made of an optional prefix and a list of attributes,
+	 * appending attribute suffixes when configured in the vertical catalog.
+	 *
+	 * @param data product
+	 * @param config configuration (prefix + list of attributes)
+	 * @param vConf vertical configuration used to resolve attribute suffixes
+	 * @param lang current language key
+	 * @param separator separator between chunks (e.g. " ")
+	 * @return computed pretty name
+	 * @throws InvalidParameterException if template evaluation fails
+	 */
+	private String computePrettyName(final Product data, final PrefixedAttrText config, final VerticalConfig vConf,
+			final String lang, final String separator) throws InvalidParameterException {
+
+		if (data == null || config == null) {
+			return "";
+		}
+
+		final StringBuilder sb = new StringBuilder();
+
+		final String p = config.getPrefix();
+		if (StringUtils.isNotBlank(p)) {
+			final String prefix = blablaService.generateBlabla(p, data);
+			if (StringUtils.isNotBlank(prefix)) {
+				sb.append(prefix);
+			}
+		}
+
+		if (config.getAttrs() != null) {
+			for (String attr : config.getAttrs()) {
+				if (StringUtils.isBlank(attr) || data.getAttributes() == null) {
+					continue;
+				}
+				final String refVal = data.getAttributes().val(attr);
+				if (refVal != null) {
+					if (sb.length() > 0) {
+						sb.append(separator);
+					}
+					sb.append(IdHelper.azCharAndDigits(refVal).toLowerCase());
+
+					String suffix = resolveAttributeSuffix(vConf, attr, lang);
+					if (StringUtils.isNotBlank(suffix)) {
+						sb.append(" ").append(suffix);
+					}
+				}
+			}
+		}
+
+		return StringUtils.normalizeSpace(sb.toString());
+	}
+
+	private String resolveAttributeSuffix(final VerticalConfig vConf, final String attr, final String lang) {
+		if (vConf == null || vConf.getAttributesConfig() == null) {
+			return "";
+		}
+		AttributeConfig attributeConfig = vConf.getAttributesConfig().getAttributeConfigByKey(attr);
+		if (attributeConfig == null || attributeConfig.getSuffix() == null) {
+			return "";
+		}
+		String suffix = attributeConfig.getSuffix().i18n(lang);
+		return StringUtils.defaultString(suffix);
 	}
 
 	/**
