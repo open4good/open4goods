@@ -10,5 +10,11 @@ public record CategoriesStatsDto(
         int enabledVerticalConfigs,
 
         @Schema(description = "Number of affiliation partners available for price comparison.", example = "18")
-        Integer affiliationPartnersCount
+        Integer affiliationPartnersCount,
+
+        @Schema(description = "Total number of GTIN items available in the OpenData exports.", example = "1250000")
+        long gtinOpenDataItemsCount,
+
+        @Schema(description = "Total number of ISBN items available in the OpenData exports.", example = "870000")
+        long isbnOpenDataItemsCount
 ) { }

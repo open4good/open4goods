@@ -42,7 +42,7 @@ public class StatsController {
     @GetMapping("/categories")
     @Operation(
             summary = "Get categories statistics",
-            description = "Return aggregated statistics about vertical category mappings and affiliation partners.",
+            description = "Return aggregated statistics about vertical category mappings, affiliation partners and available OpenData items.",
             parameters = {
                     @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields (future use).",
