@@ -299,9 +299,15 @@ public class EprelProduct implements Serializable
     private AdditionalDetails additionalDetails;
 
     /**
-     * EPREL category associated with the product.
+     * EPREL categories associated with the product.
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, name = "eprelCategory")
+    private List<String> eprelCategories = new ArrayList<>();
+
+    /**
+     * @deprecated kept for backward compatibility with legacy single-value payloads.
+     */
+    @Deprecated
     private String eprelCategory;
 
     /**
@@ -787,20 +793,79 @@ public class EprelProduct implements Serializable
         }
     }
 
-    public String getEprelCategory()
+    public List<String> getEprelCategories()
     {
-        return eprelCategory;
+        return eprelCategories;
     }
 
-    @JsonProperty("category")
+    public void setEprelCategories(List<String> eprelCategories)
+    {
+        this.eprelCategories = sanitizeCategories(eprelCategories);
+        this.eprelCategory = this.eprelCategories.isEmpty() ? null : this.eprelCategories.getFirst();
+    }
+
+    /**
+     * @deprecated prefer {@link #getEprelCategories()}.
+     */
+    @Deprecated
+    public String getEprelCategory()
+    {
+        if (eprelCategory != null)
+        {
+            return eprelCategory;
+        }
+        return eprelCategories.isEmpty() ? null : eprelCategories.getFirst();
+    }
+
+    /**
+     * @deprecated prefer {@link #setEprelCategories(List)}.
+     */
+    @Deprecated
     public void setEprelCategory(String eprelCategory)
     {
-        this.eprelCategory = eprelCategory;
+        setEprelCategories(eprelCategory == null ? null : List.of(eprelCategory));
+    }
+
+    @JsonSetter("category")
+    public void setEprelCategoriesFromPayload(Object categoryPayload)
+    {
+        if (categoryPayload == null)
+        {
+            setEprelCategories(null);
+            return;
+        }
+
+        if (categoryPayload instanceof List<?> listPayload)
+        {
+            List<String> categories = listPayload.stream()
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .toList();
+            setEprelCategories(categories);
+            return;
+        }
+
+        setEprelCategories(List.of(categoryPayload.toString()));
     }
 
     public Map<String, Object> getCategorySpecificAttributes()
     {
         return categorySpecificAttributes;
+    }
+
+    private List<String> sanitizeCategories(List<String> categories)
+    {
+        if (categories == null)
+        {
+            return new ArrayList<>();
+        }
+
+        return categories.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .filter(value -> !value.isEmpty())
+            .distinct()
+            .toList();
     }
 
     private Long toEpoch(List<?> dateParts)

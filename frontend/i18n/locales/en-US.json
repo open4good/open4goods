@@ -431,24 +431,35 @@
       }
     },
     "agent": {
-        "eyebrow": "Your AI result here 😉",
-        "title": "Ask your question, we’ll pin it to the FAQ",
-        "subtitle": "Share your request, we’ll answer with frugal AI and surface it below for everyone.",
-        "dynamicAnswerWithLink": "See the detailed AI answer: {link}",
-        "dynamicAnswerWithState": "We’re crafting the answer ({state}).",
-        "dynamicAnswerPending": "Thanks! Your question is in the queue.",
-        "preview": {
-          "eyebrow": "Live AI feed",
-          "title": "Latest AI answer",
-          "subtitle": "The freshest public question appears here.",
-          "label": "Latest question",
-          "status": "Status: {status}",
-          "statusPending": "Status pending",
-          "cta": "Open the result",
-          "helper": "Opens the last public response in a new tab",
-          "questionFallback": "Your AI question will surface here."
-        }
+      "eyebrow": "Your AI result here 😉",
+      "title": "Ask your question, we’ll pin it to the FAQ",
+      "subtitle": "Share your request, we’ll answer with frugal AI and surface it below for everyone.",
+      "dynamicAnswerWithLink": "See the detailed AI answer: {link}",
+      "dynamicAnswerWithState": "We’re crafting the answer ({state}).",
+      "dynamicAnswerPending": "Thanks! Your question is in the queue.",
+      "preview": {
+        "eyebrow": "Live AI feed",
+        "title": "Latest AI answer",
+        "subtitle": "The freshest public question appears here.",
+        "label": "Latest question",
+        "status": "Status: {status}",
+        "statusPending": "Status pending",
+        "cta": "Open the result",
+        "helper": "Opens the last public response in a new tab",
+        "questionFallback": "Your AI question will surface here."
       }
+    },
+    "contactRedirect": {
+      "eyebrow": "Need help?",
+      "title": "Can’t find your answer?",
+      "subtitle": "Type a few words and we’ll take you straight to the contact form.",
+      "inputLabel": "Your request in a few words",
+      "placeholder": "e.g. I need an invoice or product info",
+      "cta": "Go to Contact",
+      "secondaryCta": "Open the Contact page",
+      "helper": "We’ll prefill the contact form to save you time.",
+      "prefilledSubject": "Question from the FAQ"
+    }
     },
     "roundedCards": {
       "eyebrow": "Design system",
@@ -913,6 +924,10 @@
           "invalid": "Please enter a valid email address.",
           "required": "Please enter your email address."
         },
+        "subject": {
+          "length": "Please provide a subject with at least 3 characters.",
+          "required": "Please add a subject to your message."
+        },
         "message": {
           "length": "Your message must be at least 10 characters long.",
           "required": "Please describe your request."
@@ -941,6 +956,10 @@
         "name": {
           "label": "Your name",
           "placeholder": "e.g. Alex Martin"
+        },
+        "subject": {
+          "label": "Subject",
+          "placeholder": "e.g. Question about a product or offer"
         }
       },
       "privacy": "We only use your contact details to answer your request and never share them with third parties.",
@@ -2251,7 +2270,9 @@
         "TRANSPORTATION": "Transport & logistics",
         "USE": "Product use"
       },
-      "aggregateScores": {},
+      "aggregateScores": {
+        "DIVERS": "Miscellaneous"
+      },
       "showDetails": "Show detailed indicators",
       "hideDetails": "Hide detailed indicators",
       "title": "Environmental impact"
@@ -2765,7 +2786,12 @@
       "active": "Active"
     },
     "selector": {
-      "select": "Select"
+      "select": "Select",
+      "restricted": "Restricted",
+      "roles": "Requires: {roles}",
+      "mailTitle": "Includes Email fallback",
+      "notAuthorized": "You need one of these roles to run this agent: {roles}",
+      "noRoles": "an eligible role"
     },
     "promptInput": {
       "description": "Describe your feature request or question below. Our AI agents will process it and create a GitHub issue for tracking.",
@@ -2782,13 +2808,20 @@
       "openEmail": "Send via Contact Service",
       "details": "Additional Details",
       "noAttributes": "No additional information provided.",
-      "anonymousName": "Nudger User"
+      "anonymousName": "Nudger User",
+      "submit": "Submit Request",
+      "back": "Back",
+      "restrictedAccess": "This agent is limited to {roles}. If you need access, contact an administrator.",
+      "locked": "This agent is restricted with your current role.",
+      "usageLimits": "{remaining} / {total} actions remaining",
+      "usageRemaining": "{remaining} actions remaining"
     },
     "submission": {
       "success": "Request Submitted!",
       "message": "Your request has been successfully processed by the agent. Issue #{id} has been created on GitHub.",
       "viewOnGithub": "View on GitHub",
-      "newRequest": "New Request"
+      "newRequest": "New Request",
+      "error": "Unable to submit your request right now. Please try again or use the email fallback."
     },
     "activity": {
       "title": "Community Activity",

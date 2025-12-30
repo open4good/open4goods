@@ -44,6 +44,7 @@ public class DefaultTextModelFactory implements EmbeddingModelFactory
     private String resolveTokenizerName(String modelLocation)
     {
         if (modelLocation.startsWith("file:"))
+
         {
             try
             {
@@ -68,8 +69,11 @@ public class DefaultTextModelFactory implements EmbeddingModelFactory
             int firstSlash = withoutScheme.indexOf('/');
             if (firstSlash > 0 && firstSlash < withoutScheme.length() - 1)
             {
-                return withoutScheme.substring(firstSlash + 1);
+                String result = withoutScheme.substring(firstSlash + 1);
+                LOGGER.info("Resolved tokenizer name '{}' from model location '{}'", result, modelLocation);
+                return result;
             }
+            LOGGER.warn("Could not find separator '/' in djl URL '{}', returning full path", modelLocation);
         }
         return modelLocation;
     }

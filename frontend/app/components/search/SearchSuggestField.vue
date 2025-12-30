@@ -58,7 +58,9 @@
             @click="toggleVoiceListening"
           >
             <v-icon
-              :icon="isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'"
+              :icon="
+                isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'
+              "
               size="20"
               aria-hidden="true"
             />
@@ -452,18 +454,44 @@ watch(isScannerDialogOpen, isOpen => {
   }
 })
 
+const stopVoiceListening = () => {
+  isVoiceListening.value = false
+  speechRecognition.value?.stop()
+}
+
+const handleVoiceResult = (event: SpeechRecognitionEvent) => {
+  const transcript = event.results?.[0]?.[0]?.transcript?.trim()
+
+  if (!transcript) {
+    return
+  }
+
+  lastCommittedValue.value = transcript
+  internalSearch.value = transcript
+  emit('update:modelValue', transcript)
+}
+
+const handleVoiceError = () => {
+  voiceError.value = t('search.suggestions.voice.error')
+  stopVoiceListening()
+}
+
 const initializeSpeechRecognition = () => {
   if (!import.meta.client) {
     return
   }
 
   const SpeechRecognitionConstructor =
-    (globalThis as typeof globalThis & {
-      webkitSpeechRecognition?: typeof SpeechRecognition
-    }).SpeechRecognition ||
-    (globalThis as typeof globalThis & {
-      webkitSpeechRecognition?: typeof SpeechRecognition
-    }).webkitSpeechRecognition
+    (
+      globalThis as typeof globalThis & {
+        webkitSpeechRecognition?: typeof SpeechRecognition
+      }
+    ).SpeechRecognition ||
+    (
+      globalThis as typeof globalThis & {
+        webkitSpeechRecognition?: typeof SpeechRecognition
+      }
+    ).webkitSpeechRecognition
 
   if (!SpeechRecognitionConstructor) {
     voiceError.value = t('search.suggestions.voice.unsupported')
@@ -487,6 +515,37 @@ const initializeSpeechRecognition = () => {
   speechRecognition.value = recognition
   isVoiceSupported.value = true
 }
+
+const startVoiceListening = () => {
+  if (!speechRecognition.value) {
+    voiceError.value = t('search.suggestions.voice.unsupported')
+    return
+  }
+
+  voiceError.value = null
+  speechRecognition.value.lang = locale.value
+  speechRecognition.value.start()
+  isVoiceListening.value = true
+}
+
+const toggleVoiceListening = () => {
+  if (isVoiceListening.value) {
+    stopVoiceListening()
+    return
+  }
+
+  startVoiceListening()
+}
+
+watch(
+  () => shouldShowVoiceButton.value,
+  allowed => {
+    if (allowed) {
+      initializeSpeechRecognition()
+    }
+  },
+  { immediate: true }
+)
 
 const staticServerBase = computed(() => {
   const configured = runtimeConfig.public?.staticServer
@@ -706,16 +765,6 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => shouldShowVoiceButton.value,
-  allowed => {
-    if (allowed) {
-      initializeSpeechRecognition()
-    }
-  },
-  { immediate: true }
-)
-
 const handleBlur = () => {
   isBlurring.value = true
   isFieldFocused.value = false
@@ -753,49 +802,6 @@ const handleSearchInput = (value: string) => {
 }
 
 let submitTimeout: ReturnType<typeof setTimeout> | null = null
-
-const stopVoiceListening = () => {
-  isVoiceListening.value = false
-  speechRecognition.value?.stop()
-}
-
-const handleVoiceResult = (event: SpeechRecognitionEvent) => {
-  const transcript = event.results?.[0]?.[0]?.transcript?.trim()
-
-  if (!transcript) {
-    return
-  }
-
-  lastCommittedValue.value = transcript
-  internalSearch.value = transcript
-  emit('update:modelValue', transcript)
-}
-
-const handleVoiceError = () => {
-  voiceError.value = t('search.suggestions.voice.error')
-  stopVoiceListening()
-}
-
-const startVoiceListening = () => {
-  if (!speechRecognition.value) {
-    voiceError.value = t('search.suggestions.voice.unsupported')
-    return
-  }
-
-  voiceError.value = null
-  speechRecognition.value.lang = locale.value
-  speechRecognition.value.start()
-  isVoiceListening.value = true
-}
-
-const toggleVoiceListening = () => {
-  if (isVoiceListening.value) {
-    stopVoiceListening()
-    return
-  }
-
-  startVoiceListening()
-}
 
 const cancelPendingSubmit = () => {
   pendingSubmit.value = false

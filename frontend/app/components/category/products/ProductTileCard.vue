@@ -37,57 +37,77 @@
 
       <div class="product-tile-card__content">
         <div class="product-tile-card__header">
-          <h3 class="product-tile-card__title text-truncate">
-            {{ headerTitle }}
-          </h3>
+          <div class="product-tile-card__header-top">
+            <h3 class="product-tile-card__title text-truncate">
+              {{ headerTitle }}
+            </h3>
+            <div
+              v-if="hasAttributes"
+              class="product-tile-card__attributes"
+              role="list"
+            >
+              <v-chip
+                v-for="attribute in attributes"
+                :key="attribute.key"
+                class="product-tile-card__attribute"
+                variant="tonal"
+                size="small"
+                color="surface-primary-080"
+                role="listitem"
+              >
+                <v-icon
+                  v-if="attribute.icon"
+                  :icon="attribute.icon"
+                  size="16"
+                  class="me-1"
+                />
+                <span class="product-tile-card__attribute-value">{{
+                  attribute.value
+                }}</span>
+              </v-chip>
+            </div>
+          </div>
           <p class="product-tile-card__subtitle text-truncate">{{ subtitle }}</p>
         </div>
 
         <div
-          v-if="hasAttributes"
-          class="product-tile-card__attributes"
-          role="list"
-        >
-          <v-chip
-            v-for="attribute in attributes"
-            :key="attribute.key"
-            class="product-tile-card__attribute"
-            variant="tonal"
-            size="small"
-            color="surface-primary-080"
-            role="listitem"
-          >
-            <v-icon
-              v-if="attribute.icon"
-              :icon="attribute.icon"
-              size="16"
-              class="me-1"
-            />
-            <span class="product-tile-card__attribute-value">{{
-              attribute.value
-            }}</span>
-          </v-chip>
-        </div>
-
-        <div
           v-if="offerBadges.length"
-          class="product-tile-card__pricing"
-          :class="{ 'product-tile-card__pricing--stacked': offerBadges.length > 1 }"
-          role="list"
+          class="product-tile-card__pricing-row"
         >
-          <div
-            v-for="badge in offerBadges"
-            :key="badge.key"
-            class="product-tile-card__price-badge"
-            :class="`product-tile-card__price-badge--${badge.appearance}`"
-            role="listitem"
+          <v-img
+            v-if="imageSrc"
+            :src="imageSrc"
+            :alt="headerTitle"
+            width="52"
+            height="52"
+            class="product-tile-card__thumbnail"
+            contain
           >
-            <span class="product-tile-card__price-badge-label">{{
-              badge.label
-            }}</span>
-            <span class="product-tile-card__price-badge-price">{{
-              badge.price
-            }}</span>
+            <template #placeholder>
+              <v-skeleton-loader type="image" class="h-100" />
+            </template>
+          </v-img>
+          <div
+            class="product-tile-card__pricing"
+            :class="{
+              'product-tile-card__pricing--stacked': offerBadges.length > 1,
+            }"
+            role="list"
+          >
+            <div
+              v-for="badge in offerBadges"
+              :key="badge.key"
+              class="product-tile-card__price-badge"
+              :class="`product-tile-card__price-badge--${badge.appearance}`"
+              role="listitem"
+            >
+              <span class="product-tile-card__price-badge-label">{{
+                badge.label
+              }}</span>
+              <span class="product-tile-card__price-badge-price">{{
+                badge.price
+              }}</span>
+            </div>
           </div>
         </div>
 
@@ -186,13 +206,8 @@ const subtitle = computed(
 )
 
 const hasAttributes = computed(() => props.attributes.length > 0)
-const attributesText = computed(() => props.attributes.map(a => a.value).join(' · '))
 
-const headerTitle = computed(() =>
-  attributesText.value
-    ? `${productBrand.value} – ${attributesText.value}`
-    : productBrand.value
-)
+const headerTitle = computed(() => productBrand.value)
 
 const isCompared = computed(() => compareStore.hasProduct(props.product))
 
@@ -279,6 +294,14 @@ const toggleCompare = () => {
     gap: 0.15rem;
   }
 
+  &__header-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
   &__title {
     margin: 0;
     font-size: 1.05rem;
@@ -298,6 +321,8 @@ const toggleCompare = () => {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
+    justify-content: flex-end;
+    flex: 1;
   }
 
   &__attribute {
@@ -309,6 +334,20 @@ const toggleCompare = () => {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+  }
+
+  &__pricing-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  &__thumbnail {
+    border-radius: 0.65rem;
+    overflow: hidden;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+    background: rgb(var(--v-theme-surface-default));
   }
 
   &__pricing {

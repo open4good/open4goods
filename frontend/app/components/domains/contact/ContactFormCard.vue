@@ -92,6 +92,21 @@
                 </v-col>
 
                 <v-col cols="12">
+                  <v-text-field
+                    v-model="subject"
+                    :label="t('contact.form.fields.subject.label')"
+                    :placeholder="t('contact.form.fields.subject.placeholder')"
+                    :counter="180"
+                    :rules="subjectRules"
+                    :disabled="submitting"
+                    autocomplete="on"
+                    required
+                    prepend-inner-icon="mdi-form-textbox"
+                    variant="outlined"
+                  />
+                </v-col>
+
+                <v-col cols="12">
                   <v-textarea
                     v-model="message"
                     :label="t('contact.form.fields.message.label')"
@@ -196,6 +211,7 @@ import { VForm } from 'vuetify/components'
 export interface ContactFormPayload {
   name: string
   email: string
+  subject: string
   message: string
   hCaptchaResponse: string
 }
@@ -205,6 +221,8 @@ const props = defineProps<{
   success: boolean
   errorMessage: string | null
   siteKey: string
+  initialSubject?: string
+  initialMessage?: string
 }>()
 
 const emit = defineEmits<{
@@ -222,6 +240,7 @@ const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 
 const name = ref('')
 const email = ref('')
+const subject = ref('')
 const message = ref('')
 const captchaToken = ref('')
 const captchaError = ref<string | null>(null)
@@ -250,6 +269,14 @@ const emailRules = computed(() => [
   (value: string) =>
     emailPattern.test(value?.trim() ?? '') ||
     t('contact.form.errors.email.invalid'),
+])
+
+const subjectRules = computed(() => [
+  (value: string) =>
+    !!value?.trim() || t('contact.form.errors.subject.required'),
+  (value: string) =>
+    (value?.trim().length ?? 0) >= 3 ||
+    t('contact.form.errors.subject.length'),
 ])
 
 const messageRules = computed(() => [
@@ -286,6 +313,7 @@ const resetCaptcha = () => {
 const clearFormFields = () => {
   name.value = ''
   email.value = ''
+  subject.value = ''
   message.value = ''
   formRef.value?.resetValidation()
   resetCaptcha()
@@ -314,10 +342,27 @@ const handleSubmit = async () => {
   emit('submit', {
     name: name.value.trim(),
     email: email.value.trim(),
+    subject: subject.value.trim(),
     message: message.value.trim(),
     hCaptchaResponse: captchaToken.value,
   })
 }
+
+watch(
+  () => props.initialSubject,
+  value => {
+    subject.value = value?.trim() ?? ''
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.initialMessage,
+  value => {
+    message.value = value?.trim() ?? ''
+  },
+  { immediate: true }
+)
 
 watch(
   () => props.success,

@@ -95,6 +95,8 @@
       :submitting="submitting"
       :success="success"
       :error-message="formError"
+      :initial-subject="initialSubject"
+      :initial-message="initialMessage"
       @submit="handleFormSubmit"
       @reset-feedback="handleResetFeedback"
     />
@@ -127,6 +129,7 @@ definePageMeta({
 })
 
 const { t, locale, availableLocales } = useI18n()
+const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
@@ -136,6 +139,30 @@ const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
 const submitting = ref(false)
 const success = ref(false)
 const formError = ref<string | null>(null)
+
+const MAX_SUBJECT_LENGTH = 180
+const MAX_MESSAGE_LENGTH = 1200
+
+const normalizePrefillValue = (value: unknown, maxLength: number) => {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  const trimmed = value.trim()
+
+  if (!trimmed) {
+    return ''
+  }
+
+  return trimmed.slice(0, maxLength)
+}
+
+const initialSubject = computed(() =>
+  normalizePrefillValue(route.query.subject, MAX_SUBJECT_LENGTH)
+)
+const initialMessage = computed(() =>
+  normalizePrefillValue(route.query.message, MAX_MESSAGE_LENGTH)
+)
 
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
 

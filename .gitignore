@@ -9,3 +9,4 @@ ui/src/main/resources/application-devsec.yml
 apache-maven-*-bin.tar.gz
 /frontend/components/dev/generations
 /logs/
+/jstack.log

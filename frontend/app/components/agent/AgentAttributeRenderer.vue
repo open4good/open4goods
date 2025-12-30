@@ -7,6 +7,7 @@
       :label="attribute.label || attribute.id"
       variant="outlined"
       hide-details="auto"
+      :disabled="disabled"
     ></v-text-field>
 
     <!-- LIST (Select multiple) -->
@@ -19,6 +20,7 @@
       chips
       variant="outlined"
       hide-details="auto"
+      :disabled="disabled"
     ></v-select>
 
     <!-- COMBO (Select single) -->
@@ -29,6 +31,7 @@
       :label="attribute.label || attribute.id"
       variant="outlined"
       hide-details="auto"
+      :disabled="disabled"
     ></v-select>
 
     <!-- CHECKBOX -->
@@ -38,17 +41,25 @@
       :label="attribute.label || attribute.id"
       hide-details="auto"
       density="compact"
+      :disabled="disabled"
     ></v-checkbox>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted } from 'vue'
 import type { AgentAttributeDto } from '~/shared/api-client'
 
-const props = defineProps<{
-  attribute: AgentAttributeDto
-  modelValue: unknown
-}>()
+const props = withDefaults(
+  defineProps<{
+    attribute: AgentAttributeDto
+    modelValue: unknown
+    disabled?: boolean
+  }>(),
+  {
+    disabled: false,
+  }
+)
 
 const emit = defineEmits(['update:modelValue'])
 

@@ -287,6 +287,21 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### exposed-docs
+
+**Purpose**: Exposes embedded documentation and prompt resources for browsing.
+
+**Key Responsibilities**:
+- Index embedded `.md`, `.prompt`, and documentation assets from the classpath
+- Provide navigation trees, content retrieval, and search endpoints
+- Support configurable categories and optional authentication
+
+**Configuration**:
+- Configure resource categories and extensions via `exposed-docs.*`
+- Toggle public access and security with `exposed-docs.security.enabled`
+
+---
+
 ### remotefilecaching
 
 **Purpose**: Remote file fetching and caching service.
