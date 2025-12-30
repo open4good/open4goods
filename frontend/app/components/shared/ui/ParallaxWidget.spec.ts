@@ -166,4 +166,23 @@ describe('ParallaxWidget', () => {
 
     innerHeightSpy.mockRestore()
   })
+
+  it('handles invalid input gracefully and ignores non-string sources', async () => {
+    const wrapper = mountParallax({
+      backgrounds: [
+        { src: 123 as any, speed: 0.5 }, // invalid src
+        { src: '/valid.svg', speed: 0.2 },
+        '  ', // empty string
+        null as any,
+        undefined as any,
+      ],
+    })
+
+    await nextTick()
+
+    const layers = wrapper.findAll('.parallax-widget__layer')
+    // Should only have 1 valid layer
+    expect(layers).toHaveLength(1)
+    expect(layers[0].element.style.backgroundImage).toContain('/valid.svg')
+  })
 })

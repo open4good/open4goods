@@ -2,15 +2,16 @@
   <div class="contact-page">
     <PageHeader
       variant="hero-standard"
-      layout="2-columns"
-      background="image"
-      background-image-asset-key="contactBackground"
-      surface-variant="pulse"
       :title="t('contact.hero.title')"
       :subtitle="t('contact.hero.subtitle')"
       heading-level="h1"
       :heading-id="'contact-hero-heading'"
       :eyebrow="t('contact.hero.eyebrow')"
+      background="image"
+      background-image-asset-key="contactBackground"
+      surface-variant="pulse"
+      layout="2-columns"
+      container="xl"
     >
       <template #description>
         <p class="mb-6">{{ t('contact.hero.description') }}</p>

@@ -177,7 +177,7 @@ const normalizeSources = (
       return Boolean(item?.trim())
     }
 
-    return Boolean(item?.src?.trim())
+    return typeof item?.src === 'string' && Boolean(item.src.trim())
   })
 }
 
@@ -190,13 +190,15 @@ const resolveLayer = (value: ParallaxLayerInput): ParallaxLayer | null => {
       : null
   }
 
-  const src = value.src?.trim()
+  const src = typeof value.src === 'string' ? value.src.trim() : undefined
 
   if (!src) {
     return null
   }
 
-  const blendMode = value.blendMode?.trim()
+  const rawBlendMode = value.blendMode
+  const blendMode =
+    typeof rawBlendMode === 'string' ? rawBlendMode.trim() : undefined
 
   return {
     src,

@@ -568,3 +568,17 @@ const bg = useThemeAsset('heroBackground')
 1. `packs.<activePack>.assets.<assetKey>`
 2. `packs.default.assets.<assetKey>` (fallback)
 3. Placeholder générique si non trouvé
+
+## Placeholders générés
+
+Un système de placeholders générés automatiquement est disponible pour garantir que chaque route dispose d'un visuel par défaut cohérent avec le thème.
+
+Ces assets sont situés dans `assets/themes/common/placeholders/generated/` et portent le nom de la route ou du concept (ex: `contact.svg`, `opensource.svg`).
+
+Ils sont configurés dans `fr-FR.json` pour être utilisés via les clés d'assets habituelles (`contactBackground`, etc.), permettant de les surcharger facilement par des packs événementiels si nécessaire.
+
+## Parallax
+
+Pour les pages `opensource` et `opendata`, un effet parallax à 3 couches est configuré. Les couches sont chargées via `useThemedAsset` pour permettre leur personnalisation par thème, mais utilisent par défaut des placeholders générés (`_layer1.svg`, `_layer2.svg`, `_layer3.svg`).
+
+La configuration se fait dans le composant de page via la prop `parallaxLayers` du `PageHeader`.

@@ -65,12 +65,15 @@
       },
       "assets": {
         "heroBackground": "christmas/hero-background.svg",
-        "productBackground": "christmas/product-background.svg",
-        "contactBackground": "christmas/contact-background.svg",
-        "blogBackground": "christmas/blog-background.svg",
-        "categoriesBackground": "christmas/categories-background.svg",
-        "openSourceBackground": "christmas/open-source-background.svg",
-        "openDataBackground": "christmas/open-data-background.svg"
+        "productBackground": "placeholders/generated/product.svg",
+        "contactBackground": "placeholders/generated/contact.svg",
+        "blogBackground": "placeholders/generated/blog.svg",
+        "categoriesBackground": "placeholders/generated/categories.svg",
+        "openSourceBackground": "placeholders/generated/opensource.svg",
+        "openDataBackground": "placeholders/generated/opendata.svg",
+        "teamBackground": "placeholders/generated/team.svg",
+        "impactScoreBackground": "placeholders/generated/impact-score.svg",
+        "partnersBackground": "placeholders/generated/partners.svg"
       },
       "parallax": {
         "essentials": "parallax/parallax-background-christmas-essentials.svg",
@@ -86,12 +89,15 @@
         "heroBackground": "hero-background.svg",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
-        "productBackground": "product-background.svg",
-        "contactBackground": "contact-background.svg",
-        "blogBackground": "blog-background.svg",
-        "categoriesBackground": "categories-background.svg",
-        "openSourceBackground": "open-source-background.svg",
-        "openDataBackground": "open-data-background.svg"
+        "productBackground": "placeholders/generated/product.svg",
+        "contactBackground": "placeholders/generated/contact.svg",
+        "blogBackground": "placeholders/generated/blog.svg",
+        "categoriesBackground": "placeholders/generated/categories.svg",
+        "openSourceBackground": "placeholders/generated/opensource.svg",
+        "openDataBackground": "placeholders/generated/opendata.svg",
+        "teamBackground": "placeholders/generated/team.svg",
+        "impactScoreBackground": "placeholders/generated/impact-score.svg",
+        "partnersBackground": "placeholders/generated/partners.svg"
       },
       "parallax": {
         "essentials": "parallax/parallax-essentials.svg",
