@@ -6,6 +6,7 @@ import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.open4goods.nudgerfrontapi.config.properties.ExposedDocsProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,11 +47,14 @@ import io.jsonwebtoken.security.Keys;
 public class WebSecurityConfig {
 
     private final SecurityProperties securityProperties;
+    private final ExposedDocsProperties exposedDocsProperties;
     private final AuthenticationProvider authenticationProvider;
 
     public WebSecurityConfig(SecurityProperties securityProperties,
+                             ExposedDocsProperties exposedDocsProperties,
                              AuthenticationProvider authenticationProvider) {
         this.securityProperties = securityProperties;
+        this.exposedDocsProperties = exposedDocsProperties;
         this.authenticationProvider = authenticationProvider;
     }
 
@@ -81,9 +85,13 @@ public class WebSecurityConfig {
             .setSharedObject(LocaleResolver.class, localeResolver);
 
         if (securityProperties.isEnabled()) {
-            http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/v3/api-docs/front",  "/auth/**", "/actuator/**").permitAll()
-                    .anyRequest().authenticated())
+            http.authorizeHttpRequests(auth -> {
+                    if (exposedDocsProperties.isPublicAccess()) {
+                        auth.requestMatchers("/exposed/**").permitAll();
+                    }
+                    auth.requestMatchers("/", "/v3/api-docs/front",  "/auth/**", "/actuator/**").permitAll()
+                            .anyRequest().authenticated();
+                })
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())

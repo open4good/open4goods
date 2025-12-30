@@ -1,0 +1,42 @@
+{
+  "properties": [
+    {
+      "name": "exposed-docs.controller-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the exposed docs REST controller is enabled.",
+      "defaultValue": true
+    },
+    {
+      "name": "exposed-docs.service-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the exposed docs indexing service is enabled.",
+      "defaultValue": true
+    },
+    {
+      "name": "exposed-docs.categories[].id",
+      "type": "java.lang.String",
+      "description": "Identifier for the exposed category."
+    },
+    {
+      "name": "exposed-docs.categories[].label",
+      "type": "java.lang.String",
+      "description": "Display label for the exposed category."
+    },
+    {
+      "name": "exposed-docs.categories[].classpath-root",
+      "type": "java.lang.String",
+      "description": "Classpath root folder scanned for the category."
+    },
+    {
+      "name": "exposed-docs.categories[].extensions",
+      "type": "java.util.List<java.lang.String>",
+      "description": "File extensions included in the category."
+    },
+    {
+      "name": "exposed-docs.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable authentication on exposed docs endpoints.",
+      "defaultValue": false
+    }
+  ]
+}
