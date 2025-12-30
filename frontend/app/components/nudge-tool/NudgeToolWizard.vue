@@ -410,6 +410,8 @@ const steps = computed<WizardStep[]>(() => {
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
       totalCount: totalMatches.value,
       loading: loading.value,
+      categoryLink: categoryNavigationTarget.value,
+      categoryLinkLabel: cornerSummaryLabel.value,
     },
   })
 
