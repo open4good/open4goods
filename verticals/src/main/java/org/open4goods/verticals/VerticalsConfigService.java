@@ -183,6 +183,15 @@ public class VerticalsConfigService {
 					logger.warn("Vertical {} (from {}) has a NULL impact score configuration. It might not behave as expected.", 
 							config.getId(), r.getFilename());
 				}
+				
+				// Check if ID is unique in the current list
+				boolean exists = ret.stream().anyMatch(v -> v.getId().equals(config.getId()));
+				if (exists) {
+					logger.error("DUPLICATE VERTICAL ID DETECTED: '{}' is already defined in another file. Ignoring definition from '{}'.", 
+							config.getId(), r.getFilename());
+					continue;
+				}
+				
 				ret.add(config);
 			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
