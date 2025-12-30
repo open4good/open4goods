@@ -42,6 +42,7 @@ const props = defineProps<{
   heroImageLight?: string
   heroImageDark?: string
   partnersCount?: number
+  openDataMillions?: number
   heroBackgroundI18nKey?: string
 }>()
 
@@ -62,6 +63,7 @@ const themeName = computed(() =>
 )
 
 const partnersLinkPlaceholder = '{partnersLink}'
+const openDataMillionsPlaceholder = '{millions}'
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -153,7 +155,9 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   const translatedItems = normalizeHelperItems(itemsToNormalize)
 
   if (translatedItems.length > 0) {
-    return applyPartnerLinkPlaceholder(translatedItems)
+    return applyOpenDataMillionsPlaceholder(
+      applyPartnerLinkPlaceholder(translatedItems)
+    )
   }
 
   // Fallback to direct translation if pack resolution failed slightly
@@ -161,7 +165,9 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
   if (Array.isArray(tmItems) && tmItems.length > 0) {
     const directTranslated = normalizeHelperItems(tmItems)
     if (directTranslated.length > 0) {
-      return applyPartnerLinkPlaceholder(directTranslated)
+      return applyOpenDataMillionsPlaceholder(
+        applyPartnerLinkPlaceholder(directTranslated)
+      )
     }
   }
 
@@ -262,6 +268,20 @@ const heroPartnersLinkText = computed(() => {
   return `${formattedCount} ${fallbackLabel}`
 })
 
+const formattedOpenDataMillions = computed(() => {
+  const value = props.openDataMillions
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    return null
+  }
+
+  try {
+    return new Intl.NumberFormat(locale.value).format(value)
+  } catch {
+    return String(value)
+  }
+})
+
 const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
   const partnerLinkText = heroPartnersLinkText.value
 
@@ -299,6 +319,48 @@ const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
       segments:
         segmentsWithPartnerLink.length > 0
           ? segmentsWithPartnerLink
+          : item.segments,
+    }
+  })
+}
+
+const applyOpenDataMillionsPlaceholder = (items: HeroHelperItem[]) => {
+  const millionsLabel = formattedOpenDataMillions.value
+
+  if (!millionsLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithOpenDataMillions = item.segments
+      .map(segment => {
+        if (!segment.text.includes(openDataMillionsPlaceholder)) {
+          return segment
+        }
+
+        const replacedText = segment.text.replaceAll(
+          openDataMillionsPlaceholder,
+          millionsLabel
+        )
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHelperSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithOpenDataMillions.length > 0
+          ? segmentsWithOpenDataMillions
           : item.segments,
     }
   })

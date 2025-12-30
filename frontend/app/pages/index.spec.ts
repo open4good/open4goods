@@ -13,15 +13,21 @@ const messages: Record<string, unknown> = {
   'packs.default.hero.search.helpers': [
     {
       icon: '🌿',
-      label: 'A unique eco assessment',
-      segments: [{ text: 'A unique eco assessment' }],
+      label: 'Impact Score: a unique ecological and environmental assessment',
+      segments: [
+        { text: 'Impact Score: a' },
+        {
+          text: 'unique ecological and environmental assessment',
+          to: '/impact-score',
+        },
+      ],
     },
     {
       icon: '🏷️',
-      label: 'Best prices',
+      label: '100% independent, open-source, and {millions}+ open-data products',
       segments: [
-        { text: 'Pay the right price with' },
-        { text: '{partnersLink}', to: '/partners' },
+        { text: '100% independent, open-source, and' },
+        { text: '{millions}+ open-data products' },
       ],
     },
     {
@@ -57,15 +63,21 @@ const messages: Record<string, unknown> = {
   'home.hero.search.helpers': [
     {
       icon: '🌿',
-      label: 'A unique eco assessment',
-      segments: [{ text: 'A unique eco assessment' }],
+      label: 'Impact Score: a unique ecological and environmental assessment',
+      segments: [
+        { text: 'Impact Score: a' },
+        {
+          text: 'unique ecological and environmental assessment',
+          to: '/impact-score',
+        },
+      ],
     },
     {
       icon: '🏷️',
-      label: 'Best prices',
+      label: '100% independent, open-source, and {millions}+ open-data products',
       segments: [
-        { text: 'Pay the right price with' },
-        { text: '{partnersLink}', to: '/partners' },
+        { text: '100% independent, open-source, and' },
+        { text: '{millions}+ open-data products' },
       ],
     },
     {
