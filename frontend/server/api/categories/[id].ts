@@ -1,5 +1,6 @@
 import { useCategoriesService } from '~~/shared/api-client/services/categories.services'
 import type { VerticalConfigFullDto } from '~~/shared/api-client'
+import { VerticalConfigFullDtoToJSON } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
@@ -26,7 +27,8 @@ export default defineEventHandler(
     const categoriesService = useCategoriesService(domainLanguage)
 
     try {
-      return await categoriesService.getCategoryById(categoryId)
+      const category = await categoriesService.getCategoryById(categoryId)
+      return VerticalConfigFullDtoToJSON(category)
     } catch (error) {
       const backendError = await extractBackendErrorDetails(error)
       console.error(

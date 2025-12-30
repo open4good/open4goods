@@ -2,6 +2,7 @@ import { cachedEventHandler } from 'nitropack/runtime/internal/cache'
 import type { H3Event } from 'h3'
 import { useCategoriesService } from '~~/shared/api-client/services/categories.services'
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import { VerticalConfigDtoToJSON } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
@@ -47,7 +48,8 @@ const handler = async (event: H3Event): Promise<VerticalConfigDto[]> => {
   const categoriesService = useCategoriesService(domainLanguage)
 
   try {
-    return await categoriesService.getCategories()
+    const categories = await categoriesService.getCategories()
+    return categories.map(category => VerticalConfigDtoToJSON(category))
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
     console.error(
