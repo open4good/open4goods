@@ -145,6 +145,7 @@ public class OpenDataMappingService {
         return new OpenDataDatasetDto(
                 type,
                 formatInteger(recordCount, locale),
+                recordCount,
                 formatTimestamp(file, locale),
                 formatDataSize(safeLength(file), locale),
                 buildDownloadUrl(relativeDownloadPath),
