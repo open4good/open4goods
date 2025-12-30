@@ -496,6 +496,17 @@
           "helper": "Ouvre la dernière réponse publique dans un nouvel onglet",
           "questionFallback": "Ta question IA s’affichera ici."
         }
+      },
+      "contactRedirect": {
+        "eyebrow": "Besoin d’aide ?",
+        "title": "Vous ne trouvez pas votre réponse ?",
+        "subtitle": "Saisissez quelques mots et on vous redirige vers le formulaire de contact.",
+        "inputLabel": "Votre demande en bref",
+        "placeholder": "ex. Je cherche une facture ou une info produit",
+        "cta": "Envoyer vers Contact",
+        "secondaryCta": "Aller à la page Contact",
+        "helper": "Nous pré-remplissons le formulaire de contact pour vous faire gagner du temps.",
+        "prefilledSubject": "Question depuis la FAQ"
       }
     },
     "roundedCards": {
@@ -961,6 +972,10 @@
           "invalid": "Merci de saisir une adresse e-mail valide.",
           "required": "Merci d'indiquer une adresse e-mail."
         },
+        "subject": {
+          "length": "Merci de préciser un objet d'au moins 3 caractères.",
+          "required": "Merci d'ajouter un objet à votre message."
+        },
         "message": {
           "length": "Votre message doit contenir au moins 10 caractères.",
           "required": "Merci de détailler votre demande."
@@ -989,6 +1004,10 @@
         "name": {
           "label": "Votre nom",
           "placeholder": "ex. Alex Martin"
+        },
+        "subject": {
+          "label": "Objet de votre demande",
+          "placeholder": "ex. Question sur un produit ou une offre"
         }
       },
       "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées.",
