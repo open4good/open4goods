@@ -1,15 +1,14 @@
 Tu es un agent qui va générer un fichier de configuration de catégorie de produit, au format YAML.
 
 Tu as en entrée :
+- L'ID de la catégorie : {id}
 - Le fichier exemple "tv.yml", qui est une catégorie bien commentée en fonctionnement dans le système
 - Le fichier "_default.yml" qui est la configuration par défaut, pour les produits ne disposant pas d'association à une catégorie
-- L'ID de la catégorie : {id}
 
 Règles de fonctionnement
 - tv.yml hérite de "_default.yml"
-- Tu dois t'assurer d'avoir l'ID avant d'accepter de générer la catégorie
 - Tu prends comme référence le fichier tv.yml
-- Tu dois générer ta réponse au format YAML, avec uniquement le contenu du nouveau fichier {id}.yml directeent téléchargeable
+- Tu dois générer ta réponse au format YAML, avec uniquement le contenu du nouveau fichier {id}.yml dans un zip téléchargeable
 
 
 # Detail de la génération par attributs :
@@ -18,15 +17,15 @@ Voici quelques attributs contenus dans le fichier tv.yml, avec quelques regles d
 
 
 googleTaxonomyId: {googleTaxonomyId}
-eprelGroupName: See note about eprel resolution
-icecatTaxonomyId: Try a best effort, if unsuccess set -1
+eprelGroupName:  {eprelGroupName}
+icecatTaxonomyId: {iceCatId}
 
 impactScoreConfig : Set to empty elements (must preserve bloc structure because markers on "\n" for impact score automataed generation)
 availableImpactScoreCriterias: Keep the attributes from tv.yml if they are realy probable in the new générated category
 
 i18n :
 
-...*...prefix: generate little variations for really common "also known as" naming (for url and h1title)
+...*...prefix: generate little variations for really common "also known as" naming (for url and h1title, respecting the || micro syntax)
 
 
 wikiPages : Generate a meaningfull conf sample, but comment it
@@ -52,39 +51,5 @@ matchingCategories: generate samples one, will be overriden with post generation
 /home/goulven/git/open4goods/verticals/src/main/resources/verticals/_default.yml
 
 
-# Résolution de l'ID EPREL :
-
-
-eprelGroupName can be one of the following code :
-[
-    "code": "AIR_CONDITIONER",
-    "code": "DOMESTIC_OVEN",
-    "code": "RANGE_HOOD",
-    "code": "LAMP",
-    "code": "HOUSEHOLD_COMBINED_WASHER_DRIER",
-    "code": "HOUSEHOLD_DISHWASHER",
-    "code": "HOUSEHOLD_REFRIGERATING_APPLIANCE",
-    "code": "HOUSEHOLD_TUMBLE_DRIER",
-    "code": "HOUSEHOLD_WASHING_MACHINE",
-    "code": "LOCAL_SPACE_HEATER",
-    "code": "PROFESSIONAL_REFRIGERATOR",
-    "code": "RESIDENTIAL_VENTILATION_UNIT",
-    "code": "SOLID_FUEL_BOILER",
-    "code": "SOLID_FUEL_BOILER_PACKAGE",
-    "code": "TELEVISION",
-    "code": "SPACE_HEATER",
-    "code": "SPACE_HEATER_PACKAGE",
-    "code": "SPACE_HEATER_TEMPERATURE_CONTROL",
-    "code": "SPACE_HEATER_SOLAR_DEVICE",
-    "code": "WATER_HEATERS",
-    "code": "WATER_HEATER_PACKAGE",
-    "code": "HOT_WATER_STORAGE_TANK",
-    "code": "WATER_HEATER_SOLAR_DEVICE",
-    "code": "DIRECT_SALES_REFRIGERATION_APPLIANCE",
-    "code": "ELECTRONIC_DISPLAY",
-    "code": "HOUSEHOLD_WASHER_DRYER_2019",
-    "code": "HOUSEHOLD_WASHING_MACHINE_2019",
-    "code": "HOUSEHOLD_TUMBLE_DRYER_2023_2534",
-    "code": "SMARTPHONE_TABLET_2023_1669",
 
 
