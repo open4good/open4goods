@@ -99,6 +99,24 @@ const heroPartnersCount = computed(() => {
   return affiliationPartners.value?.length ?? 0
 })
 
+const openDataMillions = computed(() => {
+  const gtinCount = categoriesStats.value?.gtinOpenDataItemsCount
+  const isbnCount = categoriesStats.value?.isbnOpenDataItemsCount
+  const resolvedGtinCount =
+    typeof gtinCount === 'number' && Number.isFinite(gtinCount) ? gtinCount : 0
+  const resolvedIsbnCount =
+    typeof isbnCount === 'number' && Number.isFinite(isbnCount) ? isbnCount : 0
+  const totalCount = resolvedGtinCount + resolvedIsbnCount
+
+  if (totalCount <= 0) {
+    return null
+  }
+
+  const roundedMillions = Math.round(totalCount / 1_000_000)
+
+  return roundedMillions > 0 ? roundedMillions : null
+})
+
 const seasonalEventPack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(seasonalEventPack)
 const theme = useTheme()
@@ -774,6 +792,7 @@ useHead(() => ({
         :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
         :verticals="rawCategories"
         :partners-count="heroPartnersCount"
+        :open-data-millions="openDataMillions"
         hero-background-i18n-key="hero.background"
         @submit="handleSearchSubmit"
         @select-category="handleCategorySuggestion"

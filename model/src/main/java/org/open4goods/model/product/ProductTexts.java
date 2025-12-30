@@ -7,6 +7,8 @@ public class ProductTexts {
 	private Localisable<String,String> url = new Localisable<>();
 	
 	private Localisable<String,String> h1Title = new Localisable<>();
+
+	private Localisable<String,String> prettyName = new Localisable<>();
 	
 	private Localisable<String,String> metaDescription = new Localisable<>();
 	
@@ -33,6 +35,14 @@ public class ProductTexts {
 
 	public void setH1Title(Localisable<String, String> h1Title) {
 		this.h1Title = h1Title;
+	}
+
+	public Localisable<String, String> getPrettyName() {
+		return prettyName;
+	}
+
+	public void setPrettyName(Localisable<String, String> prettyName) {
+		this.prettyName = prettyName;
 	}
 
 	public Localisable<String, String> getMetaDescription() {

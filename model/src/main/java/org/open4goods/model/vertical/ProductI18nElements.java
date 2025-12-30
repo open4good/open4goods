@@ -10,6 +10,8 @@ public class ProductI18nElements {
 	private PrefixedAttrText url = new PrefixedAttrText();
 	@JsonMerge
 	private PrefixedAttrText h1Title = new PrefixedAttrText();
+	@JsonMerge
+	private PrefixedAttrText prettyName = new PrefixedAttrText();
 
 
 
@@ -80,6 +82,14 @@ public class ProductI18nElements {
 
 	public void setH1Title(PrefixedAttrText h1Title) {
 		this.h1Title = h1Title;
+	}
+
+	public PrefixedAttrText getPrettyName() {
+		return prettyName;
+	}
+
+	public void setPrettyName(PrefixedAttrText prettyName) {
+		this.prettyName = prettyName;
 	}
 
 

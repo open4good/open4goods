@@ -28,18 +28,19 @@ const messages: Record<string, unknown> = {
   'packs.default.hero.search.helpers': [
     {
       icon: '🌿',
-      label: 'Une évaluation écologique et environnementale unique',
+      label: "L'impact Score : une évaluation écologique et environnementale unique",
       segments: [
-        { text: 'Une évaluation écologique', to: '/impact-score' },
-        { text: ' et environnementale unique' },
+        { text: "L'impact Score : une" },
+        { text: 'évaluation écologique et environnementale', to: '/impact-score' },
+        { text: ' unique' },
       ],
     },
     {
       icon: '🏷️',
-      label: 'Sans se faire avoir sur les prix',
+      label: '100% indépendant, logiciel libre et {millions}+ produits en données ouvertes',
       segments: [
-        { text: 'Sans se faire avoir sur les prix avec' },
-        { text: '{partnersLink}', to: '/partenaires' },
+        { text: '100% indépendant, logiciel libre et' },
+        { text: '{millions}+ produits en données ouvertes' },
       ],
     },
   ],
@@ -208,6 +209,7 @@ const mountComponent = async (options?: {
       searchQuery: '',
       minSuggestionQueryLength: 2,
       partnersCount: 12,
+      openDataMillions: 42,
     },
     global: {
       stubs: {
@@ -270,17 +272,15 @@ describe('HomeHeroSection', () => {
     expect(impactHelperLink.exists()).toBe(true)
     expect(impactHelperLink.attributes('href')).toBe('/impact-score')
 
-    const partnersHelper = helpers[1]
-    const partnersHelperText = partnersHelper.find('.home-hero__helper-text')
-    const partnersLink = partnersHelper.find('.home-hero__helper-link')
+    const openDataHelper = helpers[1]
+    const openDataHelperText = openDataHelper.find('.home-hero__helper-text')
 
-    expect(partnersHelperText.text()).toContain(
-      'Sans se faire avoir sur les prix avec'
+    expect(openDataHelperText.text()).toContain(
+      '100% indépendant, logiciel libre et'
     )
-    expect(partnersHelperText.text()).toContain('12 partenaires')
-    expect(partnersLink.exists()).toBe(true)
-    expect(partnersLink.attributes('href')).toBe('/partenaires')
-    expect(partnersLink.text()).toContain('12 partenaires')
+    expect(openDataHelperText.text()).toContain(
+      '42+ produits en données ouvertes'
+    )
 
     await wrapper.unmount()
   })
