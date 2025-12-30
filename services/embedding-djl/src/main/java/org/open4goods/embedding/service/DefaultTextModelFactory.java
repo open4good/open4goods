@@ -22,7 +22,8 @@ public class DefaultTextModelFactory implements EmbeddingModelFactory
     {
         LOGGER.info("Loading DJL embedding model from {} with pooling {}", modelLocation, poolingMode);
 
-        HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(modelLocation);
+        String tokenizerName = resolveTokenizerName(modelLocation);
+        HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(tokenizerName);
         TextEmbeddingTranslator translator = TextEmbeddingTranslator.builder(tokenizer)
                 .optPoolingMode(poolingMode)
                 .optNormalize(normalize)
@@ -38,5 +39,38 @@ public class DefaultTextModelFactory implements EmbeddingModelFactory
                 .build();
 
         return criteria.loadModel();
+    }
+
+    private String resolveTokenizerName(String modelLocation)
+    {
+        if (modelLocation.startsWith("file:"))
+        {
+            try
+            {
+                return java.nio.file.Path.of(java.net.URI.create(modelLocation)).toAbsolutePath().toString();
+            }
+            catch (Exception e)
+            {
+                LOGGER.warn("Failed to parse file URI {}, falling back to original string", modelLocation);
+                return modelLocation;
+            }
+        }
+        else if (modelLocation.startsWith("djl://"))
+        {
+            // Format is usually djl://ai.djl.huggingface.pytorch/MODEL_ID
+            // or djl://ai.djl.huggingface.pytorch/GROUP_ID/ARTIFACT_ID
+            // HuggingFaceTokenizer needs "GROUP_ID/ARTIFACT_ID"
+            
+            // Remove the scheme
+            String withoutScheme = modelLocation.substring("djl://".length());
+            
+            // Find the first slash which separates the DJL repository key (e.g. ai.djl.huggingface.pytorch) from the rest
+            int firstSlash = withoutScheme.indexOf('/');
+            if (firstSlash > 0 && firstSlash < withoutScheme.length() - 1)
+            {
+                return withoutScheme.substring(firstSlash + 1);
+            }
+        }
+        return modelLocation;
     }
 }
