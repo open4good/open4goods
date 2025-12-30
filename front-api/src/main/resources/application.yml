@@ -38,6 +38,9 @@ front:
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082,http://localhost:3000"}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
+  exposed-docs:
+    base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}
+    public-access: ${FRONT_EXPOSED_DOCS_PUBLIC_ACCESS:true}
 
   affiliation-partners:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:https://api.open4goods.org}
