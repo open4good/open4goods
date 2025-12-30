@@ -97,7 +97,7 @@ i18n:
 
     # Vertical page elements
     verticalHomeUrl: "laves-vaisselles"
-    verticalHomeTitle: "LAves-Vaisselles"
+    verticalHomeTitle: "Laves-Vaisselles"
     verticalHomeDescription: "Comparez les laves vaisselles (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)

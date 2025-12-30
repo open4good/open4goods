@@ -183,13 +183,6 @@ const heroContextTitle = computed(
     }) ?? ''
 )
 
-const heroHelpersTitle = computed(
-  () =>
-    packI18n.resolveString('hero.search.helpersTitle', {
-      fallbackKeys: ['home.hero.search.helpersTitle'],
-    }) ?? ''
-)
-
 const normalizedPartnersCount = computed(() => {
   const rawCount = Number(props.partnersCount ?? 0)
 
@@ -381,13 +374,6 @@ const heroBackgroundSrc = computed(() => {
   return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')
 })
 
-const heroEyebrow = computed(
-  () =>
-    packI18n.resolveString('hero.eyebrow', {
-      fallbackKeys: ['home.hero.eyebrow'],
-    }) ?? ''
-)
-
 const heroTitle = computed(
   () =>
     packI18n.resolveString('hero.title', {
@@ -563,7 +549,10 @@ useHead({
                       </p>
 
                       <v-row class="home-hero__helper-row">
-                        <v-col cols="4" class="align-center home-hero__eyebrow-block">
+                        <v-col
+                          cols="4"
+                          class="align-center home-hero__eyebrow-block"
+                        >
                           <div
                             v-if="showHeroIcon"
                             class="home-hero__icon-wrapper"

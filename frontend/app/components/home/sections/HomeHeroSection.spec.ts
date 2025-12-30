@@ -233,14 +233,13 @@ afterEach(() => {
 })
 
 describe('HomeHeroSection', () => {
-  it('renders the eyebrow copy without trailing punctuation and shows the launcher icon', async () => {
+  it('shows the launcher icon', async () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.1)
 
     const wrapper = await mountComponent()
-    const eyebrow = wrapper.find('.home-hero__eyebrow')
+
     const icon = wrapper.find('.home-hero__icon')
 
-    expect(eyebrow.text()).toBe(messages['packs.default.hero.eyebrow'])
     expect(icon.attributes('src')).toBe(
       '/pwa-assets/icons/android/android-launchericon-512-512.png'
     )
@@ -285,20 +284,4 @@ describe('HomeHeroSection', () => {
 
     await wrapper.unmount()
   })
-
-  it('renders the helpers title', async () => {
-    const wrapper = await mountComponent()
-    const title = wrapper.find('.home-hero__helpers-title')
-
-    expect(title.exists()).toBe(true)
-    expect(title.text()).toBe(
-      messages['packs.default.hero.search.helpersTitle']
-    )
-
-    await wrapper.unmount()
-  })
-
-
-
-
 })
