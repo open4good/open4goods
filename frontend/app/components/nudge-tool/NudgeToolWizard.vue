@@ -194,6 +194,8 @@ import type {
   VerticalConfigDto,
   VerticalSubsetDto,
 } from '~/shared/api-client'
+import type { NudgeToolCategory } from '~/types/nudge-tool'
+import unknownCategoryIcon from '~/assets/nudge-tool/unknown-category.svg?url'
 
 import { buildCategoryHash } from '~/utils/_category-filter-state'
 
@@ -256,6 +258,20 @@ const categoryIcon = computed(
 )
 
 const nudgeConfig = computed(() => selectedCategory.value?.nudgeToolConfig)
+
+const unknownCategory = computed<NudgeToolCategory>(() => ({
+  id: 'unknown-category',
+  verticalHomeTitle: t('nudge-tool.categories.unknown.title'),
+  imageSmall: unknownCategoryIcon,
+  imageMedium: unknownCategoryIcon,
+  tooltip: t('nudge-tool.categories.unknown.tooltip'),
+  externalLink: 'https://www.linkedin.com/company/105517334/',
+}))
+
+const displayCategories = computed<NudgeToolCategory[]>(() => [
+  ...categories.value,
+  unknownCategory.value,
+])
 
 const subsetGroups = computed<NudgeToolSubsetGroupDto[]>(() => {
   const explicit = nudgeConfig.value?.subsetGroups ?? []
@@ -408,11 +424,11 @@ const steps = computed<WizardStep[]>(() => {
 
   sequence.push({
     key: 'category',
-    component: NudgeToolStepCategory,
+      component: NudgeToolStepCategory,
     title: t('nudge-tool.steps.category.title'),
     subtitle: t('nudge-tool.steps.category.subtitle'),
     props: {
-      categories: categories.value,
+      categories: displayCategories.value,
       selectedCategoryId: selectedCategoryId.value,
       isAuthenticated: isLoggedIn.value,
     },
