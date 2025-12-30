@@ -87,7 +87,7 @@
     "default": {
       "assets": {
         "illustration": "placeholders/illustration.svg",
-        "heroBackground": "hero-background.svg",
+        "heroBackground": "hero-background.webp",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
         "productBackground": "placeholders/generated/product.svg",
@@ -119,6 +119,7 @@
         ],
         "iconAlt": "Icône du lanceur de l'application Nudger",
         "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d'impact.",
+        "background": "hero-background.webp",
         "search": {
           "label": "Une marque ou un modèle précis en tête ?",
           "placeholder": "Recherchez un produit ou une catégorie",
@@ -236,10 +237,11 @@
         "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
         "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
       ],
-      "subtitle": "Et oui, c'est possible.",
-      "iconAlt": "Icône du lanceur de l'application Nudger",
-      "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
-      "search": {
+    "subtitle": "Et oui, c'est possible.",
+    "iconAlt": "Icône du lanceur de l'application Nudger",
+    "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
+    "background": "hero-background.webp",
+    "search": {
         "label": "Tu sais déjà ce que tu cherches ?",
         "placeholder": "Recherchez un produit ou une catégorie",
         "ariaLabel": "Rechercher un produit responsable",

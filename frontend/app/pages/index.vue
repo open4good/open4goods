@@ -772,6 +772,7 @@ useHead(() => ({
         :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
         :verticals="rawCategories"
         :partners-count="heroPartnersCount"
+        hero-background-i18n-key="hero.background"
         @submit="handleSearchSubmit"
         @select-category="handleCategorySuggestion"
         @select-product="handleProductSuggestion"

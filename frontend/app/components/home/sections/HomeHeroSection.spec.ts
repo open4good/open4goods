@@ -44,6 +44,7 @@ const messages: Record<string, unknown> = {
     },
   ],
   'packs.default.hero.iconAlt': 'Icône du lanceur PWA Nudger',
+  'packs.default.hero.background': 'hero-background.webp',
   'packs.default.hero.context.ariaLabel':
     'Carte contexte du héros présentant la promesse Nudger',
 }

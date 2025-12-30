@@ -9,13 +9,18 @@ import SearchSuggestField, {
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import AnimatedSubtitle from '~/components/shared/ui/AnimatedSubtitle.vue'
-import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
+import {
+  resolveThemedAssetUrl,
+  useHeroBackgroundAsset,
+} from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
   DEFAULT_EVENT_PACK,
   EVENT_PACK_I18N_BASE_KEY,
 } from '~~/config/theme/event-packs'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
+import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'
+import { resolveThemeName } from '~~/shared/constants/theme'
 
 type HeroHelperSegment = {
   text: string
@@ -37,6 +42,7 @@ const props = defineProps<{
   heroImageLight?: string
   heroImageDark?: string
   partnersCount?: number
+  heroBackgroundI18nKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -51,6 +57,9 @@ const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 const activeEventPack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(activeEventPack)
+const themeName = computed(() =>
+  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
+)
 
 const partnersLinkPlaceholder = '{partnersLink}'
 
@@ -318,11 +327,50 @@ const heroIconAnimation = ref(heroIconAnimationOptions[0])
 const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
+const heroBackgroundI18nKey = computed(
+  () => props.heroBackgroundI18nKey?.trim() || 'hero.background'
+)
+const heroBackgroundI18nValue = computed(
+  () =>
+    packI18n.resolveString(heroBackgroundI18nKey.value, {
+      fallbackKeys: ['home.hero.background'],
+    }) ?? ''
+)
+
+const resolveHeroBackgroundSource = (value?: string): string | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {
+    return trimmed
+  }
+
+  return resolveThemedAssetUrl(
+    trimmed,
+    themeName.value,
+    activeEventPack.value
+  )
+}
+
+const heroBackgroundOverride = computed(() =>
+  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)
+)
 const heroBackgroundSrc = computed(() => {
-  const themedAsset = heroBackgroundAsset.value?.trim()
+  const themedAsset = heroBackgroundOverride.value?.trim()
 
   if (themedAsset) {
     return themedAsset
+  }
+
+  const fallbackAsset = heroBackgroundAsset.value?.trim()
+  if (fallbackAsset) {
+    return fallbackAsset
   }
 
   /* Hydration mismatch fix: Ensure server and client initial render match. */
