@@ -18,7 +18,7 @@ Voici quelques attributs contenus dans le fichier tv.yml, avec quelques regles d
 
 
 googleTaxonomyId: {googleTaxonomyId}
-eprelGroupName: See note about eprel resolution
+eprelGroupName: {eprelGroupName}
 icecatTaxonomyId: Try a best effort, if unsuccess set -1
 
 impactScoreConfig : Set to empty elements (must preserve bloc structure because markers on "\n" for impact score automataed generation)
