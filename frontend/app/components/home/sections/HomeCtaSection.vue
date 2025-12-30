@@ -96,6 +96,12 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
                   )
                 "
                 :min-chars="minSuggestionQueryLength"
+                :enable-scan="true"
+                :scan-mobile="true"
+                :scan-desktop="false"
+                :enable-voice="true"
+                :voice-mobile="true"
+                :voice-desktop="true"
                 @update:model-value="handleUpdate"
                 @submit="handleSubmit"
                 @select-category="handleCategorySelect"

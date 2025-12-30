@@ -1923,6 +1923,12 @@
         "loading": "Initialisation de la caméra…",
         "helper": "Alignez le code-barres dans le cadre pour lancer la recherche automatiquement.",
         "error": "Impossible d'accéder à votre caméra. Saisissez le GTIN manuellement."
+      },
+      "voice": {
+        "startLabel": "Démarrer la recherche vocale",
+        "stopLabel": "Arrêter la recherche vocale",
+        "unsupported": "La recherche vocale n'est pas disponible sur cet appareil.",
+        "error": "Nous n'avons pas compris votre voix. Réessayez ou saisissez votre requête."
       }
     },
     "groups": {
