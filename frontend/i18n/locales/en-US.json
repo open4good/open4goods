@@ -2030,6 +2030,26 @@
       "title": "Technical specifications",
       "subtitle": "Browse every specification and filter with keywords.",
       "searchPlaceholder": "Search a specification",
+      "audit": {
+        "title": "Attribute sourcing audit",
+        "subtitle": "Compare indexed attributes with their synonyms and data sources.",
+        "searchPlaceholder": "Search attributes",
+        "filters": {
+          "indexed": "Indexed",
+          "notIndexed": "Not indexed"
+        },
+        "columns": {
+          "attribute": "Attribute",
+          "bestValue": "Best value",
+          "sources": "Sources",
+          "indexed": "Status"
+        },
+        "indexed": "Indexed",
+        "notIndexed": "Not indexed",
+        "noBestValue": "No value",
+        "empty": "No attribute configuration is available yet.",
+        "emptyFiltered": "No attributes match the current filters."
+      },
       "main": {
         "title": "Key specifications",
         "identity": {
