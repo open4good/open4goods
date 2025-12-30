@@ -1,0 +1,329 @@
+resourcesConfig:
+  overrideResources: true
+
+# Unique identifier for this vertical.
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: dishwasher
+
+order: 4
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 680
+
+#The icecat category id. Set -1 if unknown
+icecatTaxonomyId: -1
+
+# EPREL group code
+eprelGroupNames: 
+  - HOUSEHOLD_DISHWASHER
+	
+
+# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
+verticalImage: /images/verticals/dishwasher.png
+
+mdiIcon: mdi-dishwasher
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: true
+
+popular: true
+
+# The mainly presented attributes for this category
+popularAttributes:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation
+  enabled: false
+
+#####################################################################################################################################
+# ImpacScore configuration.
+# Must stay structurally present; content will be auto-generated later.
+#####################################################################################################################################
+impactScoreConfig:
+  criteriasPonderation:
+    CLASSE_ENERGY: 0.4
+    POWER_CONSUMPTION_TYPICAL: 0.3
+    WEIGHT: 0.2
+    WARRANTY: 0.1
+  texts:
+    fr:
+      purpose: "Mock purpose for dishwashers"
+      availlableDatas: "Mock data availability"
+      criticalReview: "Mock critical review"
+      criteriasAnalysis:
+        CLASSE_ENERGY: "Analysis for CLASSE_ENERGY"
+        POWER_CONSUMPTION_TYPICAL: "Analysis for POWER_CONSUMPTION_TYPICAL"
+        WEIGHT: "Analysis for WEIGHT"
+        WARRANTY: "Analysis for WARRANTY"
+
+# The scores that are available to build the impact score. They come from scored attributes.
+# Scores from _default.yml are merged
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+  - WEIGHT
+  - WARRANTY
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+######################################################################################################################################
+i18n:
+  fr:
+    # Product URL & H1
+    url:
+      prefix: "|| four | fours | four encastrable | four electrique | four pyrolyse ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| Four | Fours | Four encastrable | Four électrique | Four pyrolyse ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    # Product metas (generic templates reused)
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphType: "product"
+
+    # Vertical page elements
+    verticalHomeUrl: "fours"
+    verticalHomeTitle: "Fours"
+    verticalHomeDescription: "Comparez les fours (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
+
+    # A mapping beetween custom page names behind this vertical and wiki pages (sample)
+  #    wikiPages:
+  #      - wikiUrl: verticals:dishwashers:guide-achat-fours:WebHome
+  #        verticalUrl: "guide-achat-four-encastrable"
+  #        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
+  #        faIcon: "mdi-star"
+
+  en:
+    url:
+      prefix: "|| lave-vaisselle | lave vaisselle ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "Lave Vaisselle"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphType: "product"
+
+    verticalHomeUrl: "dishwashers"
+    verticalHomeTitle: "Dishwashers"
+    verticalHomeDescription: "Compare dishwashers (built-in, convection, self-cleaning…) by eco-score and price."
+
+#####################################################################################################################################
+# NUDGE TOOL CONFIGURATION
+#####################################################################################################################################
+nudgeToolConfig:
+  scores:
+    - scoreName: "ENERGY_CONSUMPTION"
+      scoreMinValue: 3
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation énergétique"
+      description:
+        en: "dishwashers with a low energy consumption"
+        fr: "Laves vaisselles avec une faible consommation énergétique"
+
+    - scoreName: "DURABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "dishwashers with a good durability"
+        fr: "Lave-vaisselles avec une bonne durabilité"
+
+    - scoreName: "REPARABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-tools"
+      title:
+        en: "Reparability"
+        fr: "Réparabilité"
+      description:
+        en: "dishwashers with a good reparability"
+        fr: "Laves vaisselles avec une bonne réparabilité"
+
+    - scoreName: "BRAND_SUSTAINABILITY"
+      scoreMinValue: 4
+      mdiIcon: "mdi-scale-balance"
+      title:
+        en: "ESG criterias"
+        fr: "Critères ESG"
+      description:
+        en: "Models with a brand having good ESG rating"
+        fr: "Modèles dont la marque dispose d'un bon indice ESG"
+
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "mdi-currency-eur"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Pick a price comfort zone."
+        fr: "Votre budget"
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+
+  subsets:
+    - id: "price_lower_400"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "0"
+      image: "example-image.png"
+      url:
+        en: "low-price"
+        fr: "petits-prix"
+      caption:
+        en: "< 400 €"
+        fr: "< 400 €"
+      title:
+        en: "Affordable dishwashers"
+        fr: "Laves vaisselles pas chers"
+      description:
+        en: "dishwashers priced under €400."
+        fr: "Les laves vaisselles dont le prix est inférieur à 400€."
+
+    - id: "price_400_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "dishwasher-400-800-euros"
+        fr: "lave-vaisselle-400-800-euros"
+      caption:
+        en: "400 - 800 €"
+        fr: "400 - 800 €"
+      title:
+        en: "Mid-range dishwashers"
+        fr: "Laves vaisselles milieu de gamme"
+      description:
+        en: "dishwashers priced between €400 and €800."
+        fr: "Les laves-vaisselle dont le prix est compris entre 400€ et 800€."
+
+    - id: "price_greater_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "premium-price"
+        fr: "haut-de-gamme"
+      caption:
+        en: "> 800 €"
+        fr: "> 800 €"
+      title:
+        en: "Premium dishwashers"
+        fr: "Laves vaisselles haut de gamme"
+      description:
+        en: "dishwashers priced over €800."
+        fr: "Les Laves-vaisselles dont le prix est supérieur à 800€."
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 250
+    buckets: 12
+  "scores.WEIGHT.value":
+    interval: 2
+    buckets: 12
+  "scores.BRAND_SUSTAINABILITY.value":
+    interval: 1
+    buckets: 5
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "scores.DATA_QUALITY.value":
+    interval: 1
+    buckets: 5
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 250
+    buckets: 12
+  "attributes.indexed.WEIGHT":
+    interval: 2
+    buckets: 12
+  "price.minPrice.price":
+    interval: 50
+    buckets: 30
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+
+technicalFilters:
+  - "POWER_CONSUMPTION_TYPICAL"
+  - "WEIGHT"
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+  configs:
+    - key: "CLASSE_ENERGY"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "WEIGHT"
+    - key: "WARRANTY"
+    - key: "YEAR"
+    - key: "COLOR"
+    - key: "FEATURES"
+    - key: "BRAND_SUSTAINABILITY"
+    - key: "DATA_QUALITY"
+
+####################################################################################
+# Product classification from categories (samples, will be overridden post-generation)
+####################################################################################
+matchingCategories:
+  all: []
+  darty.com:
+    - "GROS ELECTROMENAGER / CUISSON / Laves vaisselle"
+  boulanger.com:
+    - "CUISSON / FOUR"
+  cdiscount.com:
+    - "Electroménager / Cuisson / Laves vaisselle"
+  rueducommerce.fr:
+    - "Four"
+  Electrodepot - Guides et Comparateurs:
+    - "ELECTRO DEPOT | CUISSON | Laves vaisselle"

@@ -33,6 +33,7 @@ eprelGroupNames:
 # If relativ url (starting with /), will be handled as 
 verticalImage: /images/verticals/tv.png
 
+# The mdi corresponding icon : https://pictogrammers.com/library/mdi/
 mdiIcon: mdi-television
 
 # Indicates if the vertical must be UI / sitemap / search rendered
@@ -143,7 +144,7 @@ i18n:
           - BRAND
           - MODEL
           - YEAR
-        
+     # TODO : Generate short title (for cards restitution, with popular attributes)   
 
 
       ##################################
