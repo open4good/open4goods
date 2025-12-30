@@ -16,12 +16,29 @@
       elevation="0"
       border
     >
+      <v-alert
+        v-if="!isAuthorized"
+        type="warning"
+        variant="tonal"
+        class="ma-4"
+      >
+        {{
+          $t('agents.selector.notAuthorized', {
+            roles: template.allowedRoles?.join(', ') || $t('agents.selector.noRoles'),
+          })
+        }}
+      </v-alert>
       <AgentPromptInput
         :template-name="template.name"
+        :prompt-templates="template.promptTemplates || []"
+        :allow-template-editing="template.allowTemplateEditing"
         :attributes="template.attributes"
         :can-toggle-visibility="!template.publicPromptHistory"
         :default-public="template.publicPromptHistory"
         :loading="submitting"
+        :tags="template.tags"
+        :allowed-roles="template.allowedRoles"
+        :is-authorized="isAuthorized"
         @submit="onSubmit"
       />
     </v-card>
@@ -52,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAgent } from '@/composables/useAgent'
 import AgentPromptInput from '@/components/agent/AgentPromptInput.vue'
@@ -63,16 +80,24 @@ import type {
   AgentRequestDtoPromptVisibilityEnum,
   AgentRequestResponseDto,
 } from '~/shared/api-client'
-import type { DomainLanguage } from '~~/app/types/agent'
+import type { DomainLanguage } from '~~/shared/utils/domain-language'
+import { useUserRoles } from '@/composables/auth/useUserRoles'
+import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const { locale } = useI18n()
 const { listTemplates, submitRequest } = useAgent()
 const currentLang = locale.value.split('-')[0] as DomainLanguage
+const { roles } = useUserRoles()
 
 const template = ref<AgentTemplateDto | null>(null)
 const submitting = ref(false)
 const showSuccess = ref(false)
 const submissionResult = ref<AgentRequestResponseDto | null>(null)
+const isAuthorized = computed(
+  () =>
+    !template.value?.allowedRoles?.length ||
+    hasAdminAccess(roles.value, { allowedRoles: template.value?.allowedRoles })
+)
 
 onMounted(async () => {
   try {
@@ -85,11 +110,13 @@ onMounted(async () => {
 
 async function onSubmit({
   prompt,
+  promptVariantId,
   isPrivate,
   attributeValues,
   captchaToken,
 }: {
   prompt: string
+  promptVariantId?: string
   isPrivate: boolean
   attributeValues: Record<string, unknown>
   captchaToken?: string
@@ -101,11 +128,13 @@ async function onSubmit({
       type: 'QUESTION' as unknown as AgentRequestDtoTypeEnum,
       promptUser: prompt,
       promptTemplateId: template.value.id,
+      promptVariantId: promptVariantId ?? template.value.promptTemplates?.[0]?.id ?? '',
       promptVisibility: (isPrivate
         ? 'PRIVATE'
         : 'PUBLIC') as unknown as AgentRequestDtoPromptVisibilityEnum,
       attributeValues,
       captchaToken,
+      tags: template.value.tags,
     }
     submissionResult.value = await submitRequest(request, currentLang)
     showSuccess.value = true

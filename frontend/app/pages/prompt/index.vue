@@ -15,9 +15,21 @@
         <div class="d-flex justify-space-between align-center mb-6">
           <h2 class="text-h5">{{ $t('agents.page.availableAgents') }}</h2>
           <v-chip color="secondary" variant="outlined" size="small">
-            {{ templates.length }} {{ $t('agents.page.active') }}
+            {{ accessibleTemplates.length }} / {{ templates.length }}
+            {{ $t('agents.page.active') }}
           </v-chip>
         </div>
+
+        <v-alert
+          v-if="accessWarning"
+          type="warning"
+          variant="tonal"
+          class="mb-4"
+          closable
+          @click:close="accessWarning = null"
+        >
+          {{ accessWarning }}
+        </v-alert>
 
         <v-skeleton-loader
           v-if="loadingTemplates"
@@ -29,6 +41,7 @@
           v-else
           :templates="templates"
           @select="onSelectTemplate"
+          @blocked="onBlockedTemplate"
         />
       </div>
 
@@ -44,6 +57,9 @@
           :default-public="selectedTemplate.publicPromptHistory"
           :fallback-mailto="mailtoLink"
           :loading="submitting"
+          :tags="selectedTemplate.tags"
+          :allowed-roles="selectedTemplate.allowedRoles"
+          :is-authorized="selectedTemplate.isAuthorized"
           @submit="onSubmit"
           @cancel="onCancel"
           @fallback-contact="onFallbackContact"
@@ -229,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useAgent } from '@/composables/useAgent'
@@ -242,9 +258,11 @@ import type {
   AgentRequestDtoPromptVisibilityEnum,
   AgentIssueDto,
 } from '~~/shared/api-client/services/agents.services'
-import type { DomainLanguage } from '~~/app/types/agent'
+import type { DomainLanguage } from '~~/shared/utils/domain-language'
 import AgentTemplateSelector from '@/components/agent/AgentTemplateSelector.vue'
 import AgentPromptInput from '@/components/agent/AgentPromptInput.vue'
+import { useUserRoles } from '@/composables/auth/useUserRoles'
+import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -254,18 +272,25 @@ useHead({
 })
 const { listTemplates, submitRequest, listActivity, getMailto, getIssue } =
   useAgent()
+const { roles } = useUserRoles()
+
+type AgentTemplateWithAccess = AgentTemplateDto & { isAuthorized: boolean }
 
 // Reactive state
-const templates = ref<AgentTemplateDto[]>([])
+const templates = ref<AgentTemplateWithAccess[]>([])
+const accessibleTemplates = computed(() =>
+  templates.value.filter(template => template.isAuthorized)
+)
 const activity = ref<AgentActivityDto[]>([])
 const loadingTemplates = ref(true)
-const selectedTemplate = ref<AgentTemplateDto | null>(null)
+const selectedTemplate = ref<AgentTemplateWithAccess | null>(null)
 const selectedPromptTemplateId = ref<string>('')
 const mailtoLink = ref<string | null>(null)
 const submitting = ref(false)
 const submissionResult = ref<AgentRequestResponseDto | null>(null)
 const currentDiscussion = ref<AgentIssueDto | null>(null)
 const loadingDiscussion = ref(false)
+const accessWarning = ref<string | null>(null)
 
 // Computed locale for API
 const currentLang = locale.value.split('-')[0] as DomainLanguage
@@ -290,6 +315,16 @@ const getStatusColor = (status: string) => {
   }
 }
 
+const mapTemplatesWithAccess = (
+  tpls: AgentTemplateDto[]
+): AgentTemplateWithAccess[] =>
+  tpls.map(template => ({
+    ...template,
+    isAuthorized:
+      !template.allowedRoles?.length ||
+      hasAdminAccess(roles.value, { allowedRoles: template.allowedRoles }),
+  }))
+
 // Data loading
 async function loadData() {
   try {
@@ -297,7 +332,7 @@ async function loadData() {
       listTemplates(currentLang),
       listActivity(currentLang),
     ])
-    templates.value = tpls
+    templates.value = mapTemplatesWithAccess(tpls)
     activity.value = acts
   } catch (e) {
     console.error('Failed to load agents', e)
@@ -308,7 +343,33 @@ async function loadData() {
 
 onMounted(loadData)
 
-async function onSelectTemplate(template: AgentTemplateDto) {
+watch(
+  roles,
+  () => {
+    templates.value = mapTemplatesWithAccess(templates.value)
+    if (selectedTemplate.value && !selectedTemplate.value.isAuthorized) {
+      selectedTemplate.value = null
+      selectedPromptTemplateId.value = ''
+    }
+  },
+  { immediate: false }
+)
+
+function onBlockedTemplate(template: AgentTemplateWithAccess) {
+  const roleSummary = template.allowedRoles?.length
+    ? template.allowedRoles.join(', ')
+    : t('agents.selector.noRoles')
+  accessWarning.value = t('agents.selector.notAuthorized', {
+    roles: roleSummary,
+  })
+}
+
+async function onSelectTemplate(template: AgentTemplateWithAccess) {
+  if (!template.isAuthorized) {
+    onBlockedTemplate(template)
+    return
+  }
+  accessWarning.value = null
   selectedTemplate.value = template
   selectedPromptTemplateId.value = template.promptTemplates?.[0]?.id ?? ''
   mailtoLink.value = null
@@ -323,6 +384,7 @@ async function onSelectTemplate(template: AgentTemplateDto) {
 
 async function onSubmit({
   prompt,
+  promptVariantId,
   isPrivate,
   attributeValues,
   captchaToken,
@@ -346,6 +408,7 @@ async function onSubmit({
         : 'PUBLIC') as unknown as AgentRequestDtoPromptVisibilityEnum,
       attributeValues,
       captchaToken,
+      tags: selectedTemplate.value.tags,
     }
 
     submissionResult.value = await submitRequest(request, currentLang)
@@ -357,9 +420,7 @@ async function onSubmit({
     )
   } catch (e) {
     console.error('Submission failed', e)
-    alert(
-      'Failed to submit request. Please try again or use the email fallback.'
-    )
+    alert(t('agents.submission.error'))
   } finally {
     submitting.value = false
   }

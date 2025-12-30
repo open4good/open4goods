@@ -16,11 +16,13 @@ export const useAgent = () => {
   }
 
   async function submitRequest(
-    request: AgentRequestDto
+    request: AgentRequestDto,
+    domainLanguage?: string
   ): Promise<AgentRequestResponseDto> {
     return await $fetch<AgentRequestResponseDto>('/api/agents', {
       method: 'POST',
       body: request,
+      params: { domainLanguage },
     })
   }
 
