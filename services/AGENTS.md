@@ -341,6 +341,17 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### embedding-djl
+
+**Purpose**: Shared DJL-based embedding starter.
+
+**Key Responsibilities**:
+- Provide reusable auto-configuration for text embeddings.
+- Centralise DJL model loading and health checks for downstream services.
+- Expose configuration properties for local vs remote models so applications fail fast when assets are missing.
+
+---
+
 ### urlfetching
 
 **Purpose**: URL fetching with retry logic and error handling.

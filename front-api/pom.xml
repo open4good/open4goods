@@ -61,6 +61,12 @@
 
     <dependency>
       <groupId>org.open4goods</groupId>
+      <artifactId>embedding-djl</artifactId>
+      <version>${global.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.open4goods</groupId>
       <artifactId>icecat</artifactId>
       <version>${global.version}</version>
     </dependency>
