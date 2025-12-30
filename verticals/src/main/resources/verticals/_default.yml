@@ -260,9 +260,6 @@ brandsAlias:
   
 attributesConfig:
 
-  configs:
-    - key: "WARRANTY"
-    - key: "ESG"
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
 # Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)    
@@ -393,3 +390,5 @@ attributesConfig:
   - key: "FEATURES"
   - key: "BRAND_SUSTAINABILITY"
   - key: "DATA_QUALITY"
+  - key: "WARRANTY"
+  - key: "ESG"  

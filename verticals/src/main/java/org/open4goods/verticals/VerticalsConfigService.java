@@ -178,7 +178,12 @@ public class VerticalsConfigService {
 				continue;
 			}
 			try {
-				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
+				VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
+				if (config.getImpactScoreConfig() == null) {
+					logger.warn("Vertical {} (from {}) has a NULL impact score configuration. It might not behave as expected.", 
+							config.getId(), r.getFilename());
+				}
+				ret.add(config);
 			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
 			}

@@ -50,10 +50,14 @@ impactScoreConfig:
     WARRANTY: 0.1
   texts:
     fr:
-      CLASSE_ENERGY: "Classe énergétique prioritaire pour l'évaluation des fours."
-      POWER_CONSUMPTION_TYPICAL: "Consommation typique en fonctionnement."
-      WEIGHT: "Impact du poids sur la durabilité et la logistique."
-      WARRANTY: "Durée de garantie comme indicateur de fiabilité."
+      purpose: "Mock purpose for ovens"
+      availlableDatas: "Mock data availability"
+      criticalReview: "Mock critical review"
+      criteriasAnalysis:
+        CLASSE_ENERGY: "Analysis for CLASSE_ENERGY"
+        POWER_CONSUMPTION_TYPICAL: "Analysis for POWER_CONSUMPTION_TYPICAL"
+        WEIGHT: "Analysis for WEIGHT"
+        WARRANTY: "Analysis for WARRANTY"
 
 # The scores that are available to build the impact score. They come from scored attributes.
 # Scores from _default.yml are merged
@@ -95,11 +99,11 @@ i18n:
     verticalHomeDescription: "Comparez les fours (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
-#    wikiPages:
-#      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
-#        verticalUrl: "guide-achat-four-encastrable"
-#        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
-#        faIcon: "mdi-star"
+  #    wikiPages:
+  #      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
+  #        verticalUrl: "guide-achat-four-encastrable"
+  #        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
+  #        faIcon: "mdi-star"
 
   en:
     url:
