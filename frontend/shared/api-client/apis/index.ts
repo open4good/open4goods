@@ -9,6 +9,7 @@ export * from './CategoriesApi';
 export * from './CommercialEventsApi';
 export * from './ContactApi';
 export * from './ContentApi';
+export * from './ExposedDocsApi';
 export * from './FeedbackApi';
 export * from './OpenDataApi';
 export * from './PartnerApi';

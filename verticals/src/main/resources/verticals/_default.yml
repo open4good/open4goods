@@ -1,13 +1,12 @@
 #####################################################################################################################################
 #  													VERTICAL DEFAULT CONFUGURATION FILE
-# Verticals definition works on an inheritance mode : 
+# Verticals definition works on an inheritance mode :
 #    > All verticals inherits properties from the "_default.yml" configuration file
 #    > All verticals can override settings by redefining them in the dedicated vertical configuration file
 #####################################################################################################################################
 
-# If true, products url will be regenerated on each batch. Should not move too much, but... 
+# If true, products url will be regenerated on each batch. Should not move too much, but...
 forceNameGeneration: true
-
 
 # These datasources will be excluded from categories matching (for generation assistance)
 generationExcludedFromCategoriesMatching:
@@ -34,7 +33,7 @@ generationExcludedFromAttributesMatching:
   - TITRE,
   - PRICE
   - SIZE_STOCK_STATUS
-  - PRICE_NOREBATE  
+  - PRICE_NOREBATE
 
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
@@ -45,162 +44,154 @@ excludingTokensFromCategoriesMatching:
 
 # The scores that are available to build the impact score
 availableImpactScoreCriterias:
-    - ESG
-    - DATA_QUALITY
-            
+  - ESG
+  - DATA_QUALITY
+
 subsets:
   ################
   # Impact Score
   ################
- - id: "impact_high"  # Unique identifier for the subset
-   group: "impactscore"
-   criterias:
-     - field: "scores.ECOSCORE.value"
-       operator: "LOWER_THAN"
-       value: "2"
-   image: "example-image.png"
-   url:
-     en: "high-impact"
-     fr: "petit-impact"
-   caption:
-     en: "< 2"
-     fr: "< 2"
-   title:
-     en: "Terrible impact "
-     fr: "Impact très mauvais"
-   description:
-     en: "Products with an ImpactScore lower than 2/5"
-     fr: "Produits avec un ImpactScore inférieur à 2/5"
+  - id: "impact_high" # Unique identifier for the subset
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.value"
+        operator: "LOWER_THAN"
+        value: "2"
+    image: "example-image.png"
+    url:
+      en: "high-impact"
+      fr: "petit-impact"
+    caption:
+      en: "< 2"
+      fr: "< 2"
+    title:
+      en: "Terrible impact "
+      fr: "Impact très mauvais"
+    description:
+      en: "Products with an ImpactScore lower than 2/5"
+      fr: "Produits avec un ImpactScore inférieur à 2/5"
 
- - id: "impact_medium"
-   group: "impactscore"
-   criterias:
-     - field: "scores.ECOSCORE.value"
-       operator: "GREATER_THAN"
-       value: "2"
-     - field: "scores.ECOSCORE.value"
-       operator: "LOWER_THAN"
-       value: "4"
-   image: "example-image.png"
-   url:
-     en: "medium-impact"
-     fr: "impact-moyen"
-   caption:
-     en: "> 2 < 4"
-     fr: "> 2 < 4"
-   title:
-     en: "Relativ impact"
-     fr: "Impact moyen"
-   description:
-     en: "Products with an ImpactScore between 2/5 and 4/5"
-     fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
+  - id: "impact_medium"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.value"
+        operator: "GREATER_THAN"
+        value: "2"
+      - field: "scores.ECOSCORE.value"
+        operator: "LOWER_THAN"
+        value: "4"
+    image: "example-image.png"
+    url:
+      en: "medium-impact"
+      fr: "impact-moyen"
+    caption:
+      en: "> 2 < 4"
+      fr: "> 2 < 4"
+    title:
+      en: "Relativ impact"
+      fr: "Impact moyen"
+    description:
+      en: "Products with an ImpactScore between 2/5 and 4/5"
+      fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
 
- - id: "impact_low"
-   group: "impactscore"
-   criterias:
-     - field: "scores.ECOSCORE.value"
-       operator: "GREATER_THAN"
-       value: "4"
-   image: "example-image.png"
-   url:
-     en: "impact-moderate"
-     fr: "impact-modere"
-   caption:
-     en: "> 4"
-     fr: "> 4"
-   title:
-     en: "Moderated impact"
-     fr: "Impact modéré"
-   description:
-     en: "Products with an ImpactScore greater than 4/5"
-     fr: "Produits avec un ImpactScore supérieur à 4/5"  
+  - id: "impact_low"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.value"
+        operator: "GREATER_THAN"
+        value: "4"
+    image: "example-image.png"
+    url:
+      en: "impact-moderate"
+      fr: "impact-modere"
+    caption:
+      en: "> 4"
+      fr: "> 4"
+    title:
+      en: "Moderated impact"
+      fr: "Impact modéré"
+    description:
+      en: "Products with an ImpactScore greater than 4/5"
+      fr: "Produits avec un ImpactScore supérieur à 4/5"
 
-              
-                
-      
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
-# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts
 ######################################################################################################################################
 i18n:
   # Apply for the default site / language (english, on the .com website)
   fr:
-      url: 
-        prefix: ""
-        attrs:
-          - BRAND
-          - MODEL
-      
-      h1Title:  
-        prefix: ""
-        attrs:
-          - BRAND
-          - MODEL
-        
-      productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."              
-      productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
-      productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
-      productMetaTwitterTitle: "productMetaTwitterTitle"
-      productMetaTwitterDescription: "productMetaTwitterDescription"
+    url:
+      prefix: ""
+      attrs:
+        - BRAND
+        - MODEL
 
+    h1Title:
+      prefix: ""
+      attrs:
+        - BRAND
+        - MODEL
 
-      ####################################################################################
-      # AI TEXTS CONFIGS
-      ####################################################################################  
-#      aiConfig:
-#        - key: "global-description" 
-#          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
-#        - key: "ecological-description" 
-#          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
+    productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
+    productMetaTwitterTitle: "productMetaTwitterTitle"
+    productMetaTwitterDescription: "productMetaTwitterDescription"
 
-  ####################################################################################
-   # AI TEXTS CONFIGS
-   ####################################################################################  
-      aiConfigs:
-         override: false
-         pauseDurationMs: 1000
-         rootPrompt: |
-             Tu es un expert en [(${VERTICAL_TITLE})]. Fais une recherche d'information, une analyse technique, fonctionnelle et écologique pour le produit suivant : 
-              
-             Caractéristiques : 
-             [(${p.caracteristics()})]
-           
-             Génère un fichier JSON clé-valeur, textes en français uniquement, pour l'objet concerné répondant uniquement et strictement aux prompts suivants :      
-    
-         prompts: 
-            - key: "global-description"
-              prompt: |           
-                 : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-    
-            - key: "ecological-description"
-              prompt: |           
-                 : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-    
-            - key: "pros"
-              prompt: |           
-                 : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-    
-            - key: "cons"
-              prompt: |           
-                 : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+    ####################################################################################
+    # AI TEXTS CONFIGS
+    ####################################################################################
+    #      aiConfig:
+    #        - key: "global-description"
+    #          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+    #        - key: "ecological-description"
+    #          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
 
+    ####################################################################################
+    # AI TEXTS CONFIGS
+    ####################################################################################
+    aiConfigs:
+      override: false
+      pauseDurationMs: 1000
+      rootPrompt: |
+        Tu es un expert en [(${VERTICAL_TITLE})]. Fais une recherche d'information, une analyse technique, fonctionnelle et écologique pour le produit suivant : 
+         
+        Caractéristiques : 
+        [(${p.caracteristics()})]
 
-                 
+        Génère un fichier JSON clé-valeur, textes en français uniquement, pour l'objet concerné répondant uniquement et strictement aux prompts suivants :
+
+      prompts:
+        - key: "global-description"
+          prompt: |
+            : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+
+        - key: "ecological-description"
+          prompt: |
+            : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+
+        - key: "pros"
+          prompt: |
+            : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+
+        - key: "cons"
+          prompt: |
+            : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+
 # GenAiConfig for this vertical
 genAiConfig:
-   # If false, will bypass the generativ ia texts generation  
-   enabled: false
+  # If false, will bypass the generativ ia texts generation
+  enabled: false
 
-   
-        
 requiredAttributes:
 #  - WEIGHT
 
 ####################################################################################
 # RESOURCES CONFIGURATION
-####################################################################################  
+####################################################################################
 
 resourcesConfig:
   # In case of images, the min number of pixels the img must have
@@ -211,72 +202,66 @@ resourcesConfig:
     - de819179308dcec8c172e72d06b9e757
     - f4011cbc1e2082616017952f76c0e2d1
 
-
 ####################################################################################
 # BARCODE CONFIG
-####################################################################################    
+####################################################################################
 
-barcodeConfig:  
+barcodeConfig:
   qrCodeSize: 300
   gtinSize: 300
   datamatrixSize: 600
 
 ####################################################################################
 # EXTERNAL DESCRIPTIONS CONFIG
-####################################################################################    
+####################################################################################
 
 descriptionsAggregationConfig:
   descriptionsTruncationLength: 4000
   descriptionsTruncationSuffix: "..."
 
-  
-        
 ####################################################################################
 #                       GLOBALLY APPLIED FILTERS
-####################################################################################  
+####################################################################################
 
-        
 globalTechnicalFilters:
   - "WARRANTY"
   - "YEAR"
   - "COLOR"
   - "WEIGHT"
-      
+
 ####################################################################################
 # Brands configuration
-####################################################################################      
+####################################################################################
 brandsExclusion:
-  - NON COMMUNIQUE    
+  - NON COMMUNIQUE
   - GENERIQUE
   - INCONNU
 
 brandsAlias:
-  "LG ELECTRONICS" : LG 
+  "LG ELECTRONICS": LG
 
-        
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION
-####################################################################################  
-  
-attributesConfig:
+####################################################################################
 
+attributesConfig:
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
-# Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)    
+    # Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)
     - "FEED_URL"
 
     - "PRODUCT_MODEL"
     - "PRODUCT_TYPE"
     - "IDPRODUIT"
     - "PRODUCT_GTIN"
-    
+
     - "EAN GGSHOPPING"
     - "EAN"
 
-#    - "BRAND_ID"
-#    - "BRAND_NAME"
+    #    - "BRAND_ID"
+    #    - "BRAND_NAME"
 
-            # USED TO BUILD categories path (concat all CSV fields that contains "catego*"") 
+    # USED TO BUILD categories path (concat all CSV fields that contains "catego*"")
     - "SOUSCATEGORIE"
     - "MERCHANT_PRODUCT_SECOND_CATEGORY"
     - "MERCHANT_PRODUCT_THIRD_CATEGORY"
@@ -284,21 +269,19 @@ attributesConfig:
     - "MERCHANT_PRODUCT_CATEGORY_PATH"
     - "CATEGORY_ID"
 
-    
-    
-# TODO : Check pertinence    
-#    - "DESCRIPTION"
-#    - "PRODUCT_SHORT_DESCRIPTION"
-    
-#    - "CUSTOM_1"
-#    - "CUSTOM_2"
-#    - "CUSTOM_3"
-#    - "CUSTOM_4"
-#    - "CUSTOM_5"
-#    - "CUSTOM_6"
-#    - "CUSTOM_7"
-#    - "CUSTOM_8"
-#    - "CUSTOM_9"
+    # TODO : Check pertinence
+    #    - "DESCRIPTION"
+    #    - "PRODUCT_SHORT_DESCRIPTION"
+
+    #    - "CUSTOM_1"
+    #    - "CUSTOM_2"
+    #    - "CUSTOM_3"
+    #    - "CUSTOM_4"
+    #    - "CUSTOM_5"
+    #    - "CUSTOM_6"
+    #    - "CUSTOM_7"
+    #    - "CUSTOM_8"
+    #    - "CUSTOM_9"
 
     # TODO Will one day be used to complete offers, better than deleting them
     - "DELIVERY_COST"
@@ -317,11 +300,11 @@ attributesConfig:
     - "ETAT_PRODUIT"
     - "DISPONIBILITE"
     - "SIZE_STOCK_STATUS"
- 
-    # Noisy items   
+
+    # Noisy items
     - "ADVERT_RAKUPON_AMOUNT"
     - "PRICE_WITH_RAKUPON"
-    - "ADVERT_RAKUPON_CONDITION"    
+    - "ADVERT_RAKUPON_CONDITION"
     - "CNET INLINE CONTENT"
     - "ADVERT_RAKUPON_NAME"
     - "AW_THUMB_URL"
@@ -371,24 +354,22 @@ attributesConfig:
     - OUI
     - Y
 
-
-  
-####################################################################################
-# ATTRIBUTES DEFINITIONS
-# Those attributes will be availlable for all products if found
-####################################################################################      
+  ####################################################################################
+  # ATTRIBUTES DEFINITIONS
+  # Those attributes will be availlable for all products if found
+  ####################################################################################
   configs:
-  ## TODO : HAUTEUR, PROFONDEUR, LARGEUR, ...
-  - key: "CLASSE_ENERGY"
-  - key: "REPAIRABILITY_INDEX"
-  - key: "YEAR"
-  - key: "HDMI_PORTS_QUANTITY"
-  - key: "COLOR"
-  - key: "WEIGHT"
-  - key: "POWER_CONSUMPTION_TYPICAL"
-  - key: "POWER_CONSUMPTION_OFF"
-  - key: "FEATURES"
-  - key: "BRAND_SUSTAINABILITY"
-  - key: "DATA_QUALITY"
-  - key: "WARRANTY"
-  - key: "ESG"  
+    ## TODO : HAUTEUR, PROFONDEUR, LARGEUR, ...
+    - key: "CLASSE_ENERGY"
+    - key: "REPAIRABILITY_INDEX"
+    - key: "YEAR"
+    - key: "HDMI_PORTS_QUANTITY"
+    - key: "COLOR"
+    - key: "WEIGHT"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "POWER_CONSUMPTION_OFF"
+    - key: "FEATURES"
+    - key: "BRAND_SUSTAINABILITY"
+    - key: "DATA_QUALITY"
+    - key: "WARRANTY"
+    - key: "ESG"

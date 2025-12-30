@@ -237,6 +237,19 @@ export interface ProductEprelDto {
     numericGtin?: number;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof ProductEprelDto
+     */
+    eprelCategories?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProductEprelDto
+     * @deprecated
+     */
+    eprelCategory?: string;
+    /**
+     * 
      * @type {{ [key: string]: any; }}
      * @memberof ProductEprelDto
      */
@@ -315,10 +328,10 @@ export interface ProductEprelDto {
     additionalDetails?: AdditionalDetails;
     /**
      * 
-     * @type {string}
+     * @type {any}
      * @memberof ProductEprelDto
      */
-    category?: string;
+    category?: any | null;
 }
 
 /**
@@ -368,6 +381,8 @@ export function ProductEprelDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         'placementCountries': json['placementCountries'] == null ? undefined : ((json['placementCountries'] as Array<any>).map(PlacementCountryFromJSON)),
         'organisation': json['organisation'] == null ? undefined : OrganisationFromJSON(json['organisation']),
         'numericGtin': json['numericGtin'] == null ? undefined : json['numericGtin'],
+        'eprelCategories': json['eprelCategories'] == null ? undefined : json['eprelCategories'],
+        'eprelCategory': json['eprelCategory'] == null ? undefined : json['eprelCategory'],
         'categorySpecificAttributes': json['categorySpecificAttributes'] == null ? undefined : json['categorySpecificAttributes'],
         'onMarketStartDate': json['onMarketStartDate'] == null ? undefined : json['onMarketStartDate'],
         'onMarketStartDateTS': json['onMarketStartDateTS'] == null ? undefined : json['onMarketStartDateTS'],
@@ -426,6 +441,8 @@ export function ProductEprelDtoToJSONTyped(value?: ProductEprelDto | null, ignor
         'placementCountries': value['placementCountries'] == null ? undefined : ((value['placementCountries'] as Array<any>).map(PlacementCountryToJSON)),
         'organisation': OrganisationToJSON(value['organisation']),
         'numericGtin': value['numericGtin'],
+        'eprelCategories': value['eprelCategories'],
+        'eprelCategory': value['eprelCategory'],
         'categorySpecificAttributes': value['categorySpecificAttributes'],
         'onMarketStartDate': value['onMarketStartDate'],
         'onMarketStartDateTS': value['onMarketStartDateTS'],

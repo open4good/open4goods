@@ -1,11 +1,11 @@
 ####################################################################################################################################################################
 #
-# This is the configuration for the WASHING-MACHINES vertical. 
+# This is the configuration for the WASHING-MACHINES vertical.
 # Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
 # @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
 ###################################################################################################################################################################
 
-# Unique identifier for this vertical. 
+# Unique identifier for this vertical.
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
 id: washing-machine
@@ -35,122 +35,113 @@ availableImpactScoreCriterias:
 
 # GenAiConfig for this vertical
 genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
+  # If false, will bypass the generativ ia texts generation
   enabled: true
-  
+
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
-# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts
 ######################################################################################################################################
 i18n:
   fr:
-      # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
-      url: 
-        # We can add a custom prefix (with our conditional templating language if we want)
-        prefix: "|| lave-linge | machine-a-laver ||"
-        # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
-        attrs:
-          - BRAND
-          - MODEL
-      ##################################
-      # Product page meta and h1 title 
-      ##################################
-      # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-      h1Title:  
-        prefix: "|| Lave-linge | Machine à laver | Lave linge ||"
-        attrs:
-          - BRAND
-          - MODEL
-          - YEAR
-        
-      ##################################
-      # Vertical page elements 
-      ##################################
-      
-      # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "laves-linges"
-      # Text displaid as title for the vertical
-      # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-      verticalHomeTitle: "Machines à laver"
-      # Text displaid as jumbotron for the vertical
-      verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le plus responsable, tout en répondant parfaitement à vos besoins du quotidien."
+    # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+    url:
+      # We can add a custom prefix (with our conditional templating language if we want)
+      prefix: "|| lave-linge | machine-a-laver ||"
+      # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+      attrs:
+        - BRAND
+        - MODEL
+    ##################################
+    # Product page meta and h1 title
+    ##################################
+    # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+    h1Title:
+      prefix: "|| Lave-linge | Machine à laver | Lave linge ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
 
-     # A mapping beetween custom page names behind this vertical and wiki pages
-     # Copy and paste the wiki wiew url, without the "bin/view" prefix
+    ##################################
+    # Vertical page elements
+    ##################################
+
+    # url for vertical (appened to baseUrl). No templating here
+    verticalHomeUrl: "laves-linges"
+    # Text displaid as title for the vertical
+    # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+    verticalHomeTitle: "Machines à laver"
+    # Text displaid as jumbotron for the vertical
+    verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le plus responsable, tout en répondant parfaitement à vos besoins du quotidien."
+
+    # A mapping beetween custom page names behind this vertical and wiki pages
+    # Copy and paste the wiki wiew url, without the "bin/view" prefix
 #      wikiPages:
 #        - wikiUrl: /verticals/tv/technologies-tv/WebHome
 #          verticalUrl: "oled-qled-lcd-que-choisir"
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
 
-
-  
-
-
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)
 ##############################################################################
 
-
-
 ecoFilters:
-#    - "REPAIRABILITY_INDEX" 
-#    - "CLASSE_ENERGY"   
+#    - "REPAIRABILITY_INDEX"
+#    - "CLASSE_ENERGY"
 
 technicalFilters:
+  #  - "PARTS_AVAILLABILITY"
+  #  - "DATA_QUALITY"
+  #  - "BRAND-SUSTAINABILITY"
 
-#  - "PARTS_AVAILLABILITY"
-#  - "DATA_QUALITY"  
-#  - "BRAND-SUSTAINABILITY"
+  # If set, all products that do not have this attribute will be marked as excluded
+  #requiredAttributes:
+  #  - ""
 
-# If set, all products that do not have this attribute will be marked as excluded
-#requiredAttributes:
-#  - ""
-
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
+  ##############################################################################
+  # Product classification from categories
+  ##############################################################################
+  # Will associate to this vertical if one of the following categorie is present for the product
 
 matchingCategories:
-
-      Darty Pro - Cashback:
-      - "GROS ELECTROMENAGER | LAVE-LINGE"
-      rueducommerce.fr:
-      - "LAVE-LINGE"
-      darty.com:
-      - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER"
-      - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
-      rakuten.com-csv.yml:
-      - "ELECTROMENAGER | LAVE-LINGE"
-      RueDuCommerce FR:
-      - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-LINGE"
-      - "LAVE-LINGE"
-      Cdiscount FR:
-      - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
-      cdiscount.com:
-      - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
-      ManoMano FR:
-      - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
-      icecat.biz.yml:
-      - "MACHINES A LAVER"
-      UNDERDOG FR:
-      - "535 | WASHING MACHINES | LAVE-LINGE"
-      R&eacute;f&eacute;rentiel produits - Darty Pro:
-      - "GROS ELECTROMENAGER | LAVE-LINGE"
-      manomano.fr:
-      - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
-      Darty FR:
-      - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
-      - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
+  Darty Pro - Cashback:
+    - "GROS ELECTROMENAGER | LAVE-LINGE"
+  rueducommerce.fr:
+    - "LAVE-LINGE"
+  darty.com:
+    - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER"
+    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
+  rakuten.com-csv.yml:
+    - "ELECTROMENAGER | LAVE-LINGE"
+  RueDuCommerce FR:
+    - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-LINGE"
+    - "LAVE-LINGE"
+  Cdiscount FR:
+    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+  cdiscount.com:
+    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+  ManoMano FR:
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
+  icecat.biz.yml:
+    - "MACHINES A LAVER"
+  UNDERDOG FR:
+    - "535 | WASHING MACHINES | LAVE-LINGE"
+  R&eacute;f&eacute;rentiel produits - Darty Pro:
+    - "GROS ELECTROMENAGER | LAVE-LINGE"
+  manomano.fr:
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
+  Darty FR:
+    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
+    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
 
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
 attributesConfig:
-
   ###################################################################################################################
   # ATTRIBUTES MAPPINGS
   # Those attributes will be availlable for all products if one is found.
@@ -158,8 +149,3 @@ attributesConfig:
   ##################################################################################################################
   configs:
     - key: CLASSE_ENERGY
-  
-
-
-
-

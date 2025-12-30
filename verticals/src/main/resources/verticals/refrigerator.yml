@@ -110,13 +110,13 @@ i18n:
 
   en:
     url:
-      prefix: "|| oven | refrigerators | built-in oven | electric oven ||"
+      prefix: "|| refrigerators | fridges ||"
       attrs:
         - BRAND
         - MODEL
         - YEAR
     h1Title:
-      prefix: "|| Oven | refrigerators | Built-in oven | Electric oven ||"
+      prefix: "|| fridge | refrigerators | Built-in fridge | Electric fridge ||"
       attrs:
         - BRAND
         - MODEL
@@ -226,7 +226,7 @@ nudgeToolConfig:
           value: "800"
       image: "example-image.png"
       url:
-        en: "oven-400-800-euros"
+        en: "fridge-400-800-euros"
         fr: "frigo-400-800-euros"
       caption:
         en: "400 - 800 €"

@@ -7,6 +7,7 @@ apis/CategoriesApi.ts
 apis/CommercialEventsApi.ts
 apis/ContactApi.ts
 apis/ContentApi.ts
+apis/ExposedDocsApi.ts
 apis/FeedbackApi.ts
 apis/OpenDataApi.ts
 apis/PartnerApi.ts
@@ -54,6 +55,11 @@ models/ContactDetails.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
 models/DescriptionsAggregationConfig.ts
+models/ExposedDocsCategoryDto.ts
+models/ExposedDocsContentDto.ts
+models/ExposedDocsOverviewDto.ts
+models/ExposedDocsSearchResultDto.ts
+models/ExposedDocsTreeNodeDto.ts
 models/FeatureGroupDto.ts
 models/FeedbackErrorResponseDto.ts
 models/FeedbackIssueDto.ts

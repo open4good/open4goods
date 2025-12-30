@@ -74,13 +74,13 @@ i18n:
   fr:
     # Product URL & H1
     url:
-      prefix: "|| four | fours | four encastrable | four electrique | four pyrolyse ||"
+      prefix: "|| four | fours ||"
       attrs:
         - BRAND
         - MODEL
         - YEAR
     h1Title:
-      prefix: "|| Four | Fours | Four encastrable | Four électrique | Four pyrolyse ||"
+      prefix: "|| Four | Fours ||"
       attrs:
         - BRAND
         - MODEL
@@ -107,13 +107,13 @@ i18n:
 
   en:
     url:
-      prefix: "|| oven | ovens | built-in oven | electric oven ||"
+      prefix: "|| oven | ovens ||"
       attrs:
         - BRAND
         - MODEL
         - YEAR
     h1Title:
-      prefix: "|| Oven | Ovens | Built-in oven | Electric oven ||"
+      prefix: "Oven"
       attrs:
         - BRAND
         - MODEL

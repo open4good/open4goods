@@ -16,9 +16,9 @@ googleTaxonomyId: 680
 icecatTaxonomyId: -1
 
 # EPREL group code
-eprelGroupNames: 
+eprelGroupNames:
   - HOUSEHOLD_DISHWASHER
-	
+  - HOUSEHOLD_DISHWASHER
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 verticalImage: /images/verticals/dishwasher.png
@@ -76,13 +76,13 @@ i18n:
   fr:
     # Product URL & H1
     url:
-      prefix: "|| four | fours | four encastrable | four electrique | four pyrolyse ||"
+      prefix: "|| lave-vaisselle | lave-vaisselles ||"
       attrs:
         - BRAND
         - MODEL
         - YEAR
     h1Title:
-      prefix: "|| Four | Fours | Four encastrable | Four électrique | Four pyrolyse ||"
+      prefix: "|| lave vaisselle | lave-vaisselles ||"
       attrs:
         - BRAND
         - MODEL
@@ -96,9 +96,9 @@ i18n:
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
-    verticalHomeUrl: "fours"
-    verticalHomeTitle: "Fours"
-    verticalHomeDescription: "Comparez les fours (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
+    verticalHomeUrl: "laves-vaisselles"
+    verticalHomeTitle: "LAves-Vaisselles"
+    verticalHomeDescription: "Comparez les laves vaisselles (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
