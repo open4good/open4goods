@@ -2078,6 +2078,26 @@
       "title": "Caractéristiques techniques",
       "subtitle": "Explorez toutes les caractéristiques et filtrez par mots-clés.",
       "searchPlaceholder": "Rechercher une caractéristique",
+      "audit": {
+        "title": "Audit des attributs indexés",
+        "subtitle": "Comparez les attributs indexés avec leurs synonymes et leurs sources.",
+        "searchPlaceholder": "Rechercher des attributs",
+        "filters": {
+          "indexed": "Indexés",
+          "notIndexed": "Non indexés"
+        },
+        "columns": {
+          "attribute": "Attribut",
+          "bestValue": "Meilleure valeur",
+          "sources": "Sources",
+          "indexed": "Statut"
+        },
+        "indexed": "Indexé",
+        "notIndexed": "Non indexé",
+        "noBestValue": "Aucune valeur",
+        "empty": "Aucune configuration d'attribut n'est disponible pour le moment.",
+        "emptyFiltered": "Aucun attribut ne correspond aux filtres actuels."
+      },
       "main": {
         "title": "Caractéristiques principales",
         "identity": {

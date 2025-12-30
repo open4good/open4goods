@@ -109,7 +109,10 @@
           :id="sectionIds.attributes"
           class="product-page__section"
         >
-          <ProductAttributesSection :product="product" />
+          <ProductAttributesSection
+            :product="product"
+            :attribute-configs="categoryDetail?.attributesConfig?.configs ?? []"
+          />
         </section>
 
         <section
