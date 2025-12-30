@@ -1,9 +1,11 @@
 package org.open4goods.model.ai;
 
+import java.util.Date;
+
 /**
  * Simple holder for AI generated text along with its creation timestamp.
  */
-public record AiDescription(long ts, String content) {
+public record AiDescription(Date ts, String content) {
 
     /**
      * Convenience constructor initializing the timestamp to the current time.
@@ -11,7 +13,7 @@ public record AiDescription(long ts, String content) {
      * @param content the generated text
      */
     public AiDescription(String content) {
-        this(System.currentTimeMillis(), content);
+        this(new Date(), content);
     }
 
     /**
@@ -19,7 +21,7 @@ public record AiDescription(long ts, String content) {
      *
      * @return the timestamp of creation
      */
-    public long getTs() {
+    public Date getTs() {
         return ts;
     }
 

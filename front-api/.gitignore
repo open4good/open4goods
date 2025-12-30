@@ -3,3 +3,7 @@
 /.project
 /.classpath
 /.factorypath
+/run.log
+/run_verify.log
+/run_verify_2.log
+/config_dump.txt

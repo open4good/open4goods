@@ -101,6 +101,7 @@ public class PromptService implements HealthIndicator {
         // Check if the service is enabled (if supported by configuration)
         if (!genAiConfig.isEnabled()) {
             logger.error("GenAiService is disabled via configuration.");
+            return;
         }
 
         // Load prompt templates and initialize chat models
