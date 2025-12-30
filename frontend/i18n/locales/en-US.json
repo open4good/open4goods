@@ -26,6 +26,7 @@
         ],
         "iconAlt": "Nudger PWA launcher icon",
         "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
+        "background": "hero-background.webp",
         "search": {
           "label": "Search for a product",
           "placeholder": "Search a product (e.g. television, smartphone...)",
@@ -189,10 +190,11 @@
         "Shop smarter without compromise. Nudger balances planet and price.",
         "Find the responsible choice faster. Trusted data, transparent insights."
       ],
-      "subtitle": "Yes, it's possible.",
-      "iconAlt": "Nudger PWA launcher icon",
-      "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
-      "search": {
+    "subtitle": "Yes, it's possible.",
+    "iconAlt": "Nudger PWA launcher icon",
+    "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
+    "background": "hero-background.webp",
+    "search": {
         "label": "Search for a product",
         "placeholder": "Search a product (e.g. television, smartphone…)",
         "ariaLabel": "Search for a responsible product",
