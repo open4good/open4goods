@@ -16,6 +16,20 @@ import {
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 import { resolveThemedAssetUrl } from './useThemedAsset'
 
+const normalizeParallaxAsset = (value: string): string => {
+  const trimmed = value.trim()
+
+  if (!trimmed || trimmed.startsWith('/') || trimmed.startsWith('http')) {
+    return trimmed
+  }
+
+  if (trimmed.includes('/')) {
+    return trimmed
+  }
+
+  return `parallax/${trimmed}`
+}
+
 const resolveParallaxLayers = (
   assets: ParallaxLayerSource[] | undefined,
   themeName: ThemeName
@@ -27,7 +41,12 @@ const resolveParallaxLayers = (
   return assets
     .map(asset => {
       const source = typeof asset === 'string' ? asset : asset.src
-      const resolved = resolveThemedAssetUrl(source, themeName)
+      const normalized = normalizeParallaxAsset(source)
+      if (!normalized) {
+        return null
+      }
+
+      const resolved = resolveThemedAssetUrl(normalized, themeName)
 
       if (!resolved) {
         return null
