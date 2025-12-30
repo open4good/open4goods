@@ -60,13 +60,13 @@
             >
               <template #placeholder>
                 <div class="nudge-step-category__fallback">
-                  <v-icon icon="mdi-tag" size="28" />
+                  <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
                 </div>
               </template>
 
               <template #error>
                 <div class="nudge-step-category__fallback">
-                  <v-icon icon="mdi-tag" size="28" />
+                  <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
                 </div>
               </template>
             </v-img>

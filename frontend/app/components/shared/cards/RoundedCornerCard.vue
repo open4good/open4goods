@@ -314,7 +314,6 @@ const hasHeader = computed(() =>
   --rounded-card-radius: 18px;
 
   position: relative;
-  display: flex;
   padding: clamp(1rem, 3vw, 1.5rem) clamp(1.1rem, 3vw, 1.6rem);
   border-radius: var(--rounded-card-radius);
   border: 1px solid var(--rounded-card-border);

@@ -237,18 +237,11 @@
         "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
         "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
       ],
-<<<<<<< HEAD
       "subtitle": "Notre coup de pouce pour mieux consommer",
       "iconAlt": "Icône du lanceur de l'application Nudger",
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
+      "background": "hero-background.webp",
       "search": {
-=======
-    "subtitle": "Et oui, c'est possible.",
-    "iconAlt": "Icône du lanceur de l'application Nudger",
-    "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
-    "background": "hero-background.webp",
-    "search": {
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
         "label": "Tu sais déjà ce que tu cherches ?",
         "placeholder": "Recherchez un produit ou une catégorie",
         "ariaLabel": "Rechercher un produit responsable",

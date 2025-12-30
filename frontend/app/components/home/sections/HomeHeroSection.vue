@@ -351,11 +351,7 @@ const resolveHeroBackgroundSource = (value?: string): string | undefined => {
     return trimmed
   }
 
-  return resolveThemedAssetUrl(
-    trimmed,
-    themeName.value,
-    activeEventPack.value
-  )
+  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)
 }
 
 const heroBackgroundOverride = computed(() =>
@@ -566,11 +562,8 @@ useHead({
                         {{ heroContextTitle }}
                       </p>
 
-                      <div class="home-hero__helper-row">
-                        <div class="home-hero__eyebrow-block">
-                          <p v-if="heroEyebrow" class="home-hero__eyebrow">
-                            {{ heroEyebrow }}
-                          </p>
+                      <v-row class="home-hero__helper-row">
+                        <v-col cols="4" class="align-center home-hero__eyebrow-block">
                           <div
                             v-if="showHeroIcon"
                             class="home-hero__icon-wrapper"
@@ -582,16 +575,12 @@ useHead({
                               loading="lazy"
                             />
                           </div>
-                        </div>
-                        <div
+                        </v-col>
+                        <v-col
                           v-if="heroHelperItems.length"
+                          cols="6"
                           class="home-hero__helpers-wrapper"
                         >
-                          <span
-                            v-if="heroHelpersTitle"
-                            class="home-hero__helpers-title"
-                            >{{ heroHelpersTitle }}</span
-                          >
                           <ul class="home-hero__helpers">
                             <li
                               v-for="(item, index) in heroHelperItems"
@@ -632,8 +621,8 @@ useHead({
                               </span>
                             </li>
                           </ul>
-                        </div>
-                      </div>
+                        </v-col>
+                      </v-row>
                     </div>
                   </RoundedCornerCard>
                 </div>
@@ -746,8 +735,8 @@ useHead({
   margin: 0
 
 .home-hero__icon-wrapper
-  width: clamp(3.9rem, 14vw, 6rem)
-  height: clamp(3.9rem, 14vw, 6rem)
+  width: clamp(4.5rem, 16vw, 7.5rem)
+  height: clamp(4.5rem, 16vw, 7.5rem)
   box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
   backdrop-filter: blur(8px)
   border-radius: 50%
@@ -835,10 +824,8 @@ useHead({
   height: 100%
 
 .home-hero__helper-row
-  display: grid
-  gap: clamp(0.9rem, 2vw, 1.4rem)
-  column-gap: clamp(1.1rem, 3vw, 1.75rem)
-  grid-template-columns: auto 1fr
+  display: flex
+  flex-wrap: wrap
   align-items: center
 
 .home-hero__helpers
