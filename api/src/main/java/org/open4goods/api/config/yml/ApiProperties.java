@@ -660,13 +660,36 @@ public class ApiProperties {
 		 *     <li>Example: "djl://ai.djl.pytorch/resnet50" (pure vision, no multimodal)</li>
 		 * </ul>
 		 */
-		private String multimodalModelUrl = "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1";
+                private String multimodalModelUrl = "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1";
 
-		/**
-		 * Text-only embedding model for improved semantic search.
-		 * Default: multilingual E5.
-		 */
-		private String textModelUrl = "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base";
+                /**
+                 * Text-only embedding model for improved semantic search.
+                 * Default: multilingual E5.
+                 */
+                private String textModelUrl = "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base";
+
+                /**
+                 * Local filesystem path to the text embedding model. When populated and
+                 * {@link #preferLocalModels} is true, this path is validated and used in
+                 * priority over the remote URL.
+                 */
+                private String textModelPath = "/opt/open4goods/models/text-embedding";
+
+                /**
+                 * Local filesystem path to the multimodal embedding model.
+                 */
+                private String multimodalModelPath = "/opt/open4goods/models/multimodal-embedding";
+
+                /**
+                 * Whether to prefer local filesystem models over remote ones when available.
+                 */
+                private boolean preferLocalModels = true;
+
+                /**
+                 * If true, application startup fails when neither the text nor the multimodal model
+                 * can be loaded (after applying local/remote selection rules).
+                 */
+                private boolean failOnMissingModel = true;
 
 		/**
 		 * Expected embedding dimension for both text and image vectors.
@@ -686,17 +709,49 @@ public class ApiProperties {
 			this.multimodalModelUrl = multimodalModelUrl;
 		}
 
-		public String getTextModelUrl() {
-			return textModelUrl;
-		}
+                public String getTextModelUrl() {
+                        return textModelUrl;
+                }
 
-		public void setTextModelUrl(String textModelUrl) {
-			this.textModelUrl = textModelUrl;
-		}
+                public void setTextModelUrl(String textModelUrl) {
+                        this.textModelUrl = textModelUrl;
+                }
 
-		public int getEmbeddingDimension() {
-			return embeddingDimension;
-		}
+                public String getTextModelPath() {
+                        return textModelPath;
+                }
+
+                public void setTextModelPath(String textModelPath) {
+                        this.textModelPath = textModelPath;
+                }
+
+                public String getMultimodalModelPath() {
+                        return multimodalModelPath;
+                }
+
+                public void setMultimodalModelPath(String multimodalModelPath) {
+                        this.multimodalModelPath = multimodalModelPath;
+                }
+
+                public boolean isPreferLocalModels() {
+                        return preferLocalModels;
+                }
+
+                public void setPreferLocalModels(boolean preferLocalModels) {
+                        this.preferLocalModels = preferLocalModels;
+                }
+
+                public boolean isFailOnMissingModel() {
+                        return failOnMissingModel;
+                }
+
+                public void setFailOnMissingModel(boolean failOnMissingModel) {
+                        this.failOnMissingModel = failOnMissingModel;
+                }
+
+                public int getEmbeddingDimension() {
+                        return embeddingDimension;
+                }
 
 		public void setEmbeddingDimension(int embeddingDimension) {
 			this.embeddingDimension = embeddingDimension;

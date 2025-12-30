@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "embedding.text-model-path",
+      "type": "java.lang.String",
+      "description": "Filesystem path to the preferred text embedding model.",
+      "defaultValue": "/opt/open4goods/models/text-embedding"
+    },
+    {
+      "name": "embedding.multimodal-model-path",
+      "type": "java.lang.String",
+      "description": "Filesystem path to the preferred multimodal embedding model.",
+      "defaultValue": "/opt/open4goods/models/multimodal-embedding"
+    },
+    {
+      "name": "embedding.prefer-local-models",
+      "type": "java.lang.Boolean",
+      "description": "Prefer loading local embedding assets before remote URLs.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.fail-on-missing-model",
+      "type": "java.lang.Boolean",
+      "description": "Fail startup when neither text nor multimodal embedding models can be loaded.",
+      "defaultValue": true
+    }
+  ]
+}

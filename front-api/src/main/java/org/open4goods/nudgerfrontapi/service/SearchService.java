@@ -956,7 +956,13 @@ public class SearchService {
 
     public List<GlobalSearchHit> semanticSearch(String verticalId, String query, DomainLanguage domainLanguage, int pageNumber, int pageSize) {
         String sanitizedQuery = sanitize(query);
-        float[] embedding = textEmbeddingService.embed(sanitizedQuery);
+        float[] embedding;
+        try {
+            embedding = textEmbeddingService.embed(sanitizedQuery);
+        } catch (IllegalStateException ex) {
+            LOGGER.warn("Semantic search unavailable because no embedding model is loaded: {}", ex.getMessage());
+            return List.of();
+        }
 
         if (embedding == null || embedding.length == 0) {
             LOGGER.info("Skipping semantic search because embedding is missing for query '{}'", sanitizedQuery);

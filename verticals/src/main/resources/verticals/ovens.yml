@@ -43,9 +43,17 @@ genAiConfig:
 # Must stay structurally present; content will be auto-generated later.
 #####################################################################################################################################
 impactScoreConfig:
-  criteriasPonderation: {}
+  criteriasPonderation:
+    CLASSE_ENERGY: 0.4
+    POWER_CONSUMPTION_TYPICAL: 0.3
+    WEIGHT: 0.2
+    WARRANTY: 0.1
   texts:
-    fr: {}
+    fr:
+      CLASSE_ENERGY: "Classe énergétique prioritaire pour l'évaluation des fours."
+      POWER_CONSUMPTION_TYPICAL: "Consommation typique en fonctionnement."
+      WEIGHT: "Impact du poids sur la durabilité et la logistique."
+      WARRANTY: "Durée de garantie comme indicateur de fiabilité."
 
 # The scores that are available to build the impact score. They come from scored attributes.
 # Scores from _default.yml are merged

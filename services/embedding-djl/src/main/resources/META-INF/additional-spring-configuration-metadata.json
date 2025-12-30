@@ -1,0 +1,70 @@
+{
+  "properties": [
+    {
+      "name": "embedding.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the DJL text embedding auto-configuration.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.prefer-local-models",
+      "type": "java.lang.Boolean",
+      "description": "Prefer local filesystem models when paths are configured.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.text-model-path",
+      "type": "java.lang.String",
+      "description": "Filesystem path to the text embedding model.",
+      "defaultValue": "/opt/open4goods/models/text-embedding"
+    },
+    {
+      "name": "embedding.multimodal-model-path",
+      "type": "java.lang.String",
+      "description": "Filesystem path to the multimodal text embedding model.",
+      "defaultValue": "/opt/open4goods/models/multimodal-embedding"
+    },
+    {
+      "name": "embedding.text-model-url",
+      "type": "java.lang.String",
+      "description": "Remote identifier or URL for the text embedding model.",
+      "defaultValue": "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base"
+    },
+    {
+      "name": "embedding.multimodal-model-url",
+      "type": "java.lang.String",
+      "description": "Remote identifier or URL for the multimodal embedding model.",
+      "defaultValue": "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1"
+    },
+    {
+      "name": "embedding.fail-on-missing-model",
+      "type": "java.lang.Boolean",
+      "description": "Fail application startup when no embedding model can be loaded.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.embedding-dimension",
+      "type": "java.lang.Integer",
+      "description": "Expected embedding dimension for diagnostic logging.",
+      "defaultValue": 512
+    },
+    {
+      "name": "embedding.pooling-mode",
+      "type": "java.lang.String",
+      "description": "Pooling strategy for the DJL text translator.",
+      "defaultValue": "mean"
+    },
+    {
+      "name": "embedding.normalize-outputs",
+      "type": "java.lang.Boolean",
+      "description": "Normalise embedding vectors produced by DJL translator.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.engine",
+      "type": "java.lang.String",
+      "description": "Engine name supplied to DJL when loading models.",
+      "defaultValue": "PyTorch"
+    }
+  ]
+}
