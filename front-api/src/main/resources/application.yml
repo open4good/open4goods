@@ -6,6 +6,8 @@ spring:
     default: local
   application:
     name: open4goods-front-api
+embedding:
+  enabled: false
   mail:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:25}
@@ -22,6 +24,10 @@ springdoc:
 front:
   resourceRootPath: "https://static.nudger.fr"
   max-page-size: 50
+  embedding-client:
+    base-url: ${FRONT_EMBEDDING_GATEWAY_BASE_URL:http://localhost:8090}
+    connect-timeout: 2s
+    read-timeout: 5s
   cache:
     path: ./cache
     one-minute-ttl: 1m

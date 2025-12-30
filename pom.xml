@@ -101,6 +101,7 @@
         <module>services/image-processing</module>
         <module>services/icecat</module>
         <module>services/embedding-djl</module>
+        <module>services/embedding-gateway</module>
         <module>services/blog</module>
         <module>services/gtinservice</module>
         <module>services/feedservice</module>

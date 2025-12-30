@@ -1,0 +1,29 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: embedding-gateway
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+embedding:
+  prefer-local-models: true
+  enabled: true
+  text-model-url: djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base
+  multimodal-model-url: djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1
+embedding.gateway:
+  max-concurrent-text-requests: 16
+  max-concurrent-image-requests: 8
+  text-request-timeout: 5s
+  image-request-timeout: 10s
+  image-download-timeout: 10s
+  image-model-url: djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1
+  image-input-size: 224

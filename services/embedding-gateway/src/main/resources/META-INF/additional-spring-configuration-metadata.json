@@ -1,0 +1,53 @@
+{
+  "groups": [
+    {
+      "name": "embedding.gateway",
+      "type": "org.open4goods.embeddinggateway.config.EmbeddingGatewayProperties",
+      "sourceType": "org.open4goods.embeddinggateway.config.EmbeddingGatewayProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "embedding.gateway.max-concurrent-text-requests",
+      "type": "java.lang.Integer",
+      "description": "Maximum concurrent text embedding requests.",
+      "defaultValue": 16
+    },
+    {
+      "name": "embedding.gateway.max-concurrent-image-requests",
+      "type": "java.lang.Integer",
+      "description": "Maximum concurrent image embedding requests.",
+      "defaultValue": 8
+    },
+    {
+      "name": "embedding.gateway.text-request-timeout",
+      "type": "java.time.Duration",
+      "description": "Semaphore acquisition timeout for text requests.",
+      "defaultValue": "PT5S"
+    },
+    {
+      "name": "embedding.gateway.image-request-timeout",
+      "type": "java.time.Duration",
+      "description": "Semaphore acquisition timeout for image requests.",
+      "defaultValue": "PT10S"
+    },
+    {
+      "name": "embedding.gateway.image-download-timeout",
+      "type": "java.time.Duration",
+      "description": "HTTP connect/read timeout when downloading images.",
+      "defaultValue": "PT10S"
+    },
+    {
+      "name": "embedding.gateway.image-model-url",
+      "type": "java.lang.String",
+      "description": "DJL model location used for image embeddings.",
+      "defaultValue": "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1"
+    },
+    {
+      "name": "embedding.gateway.image-input-size",
+      "type": "java.lang.Integer",
+      "description": "Input size expected by the image embedding model.",
+      "defaultValue": 224
+    }
+  ]
+}

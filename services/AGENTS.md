@@ -350,6 +350,15 @@ Each service has unique responsibilities and may have specific conventions beyon
 - Centralise DJL model loading and health checks for downstream services.
 - Expose configuration properties for local vs remote models so applications fail fast when assets are missing.
 
+### embedding-gateway
+
+**Purpose**: Dedicated gateway exposing REST endpoints for text and image embeddings.
+
+**Key Responsibilities**:
+- Load and host shared DJL models to avoid duplicate warm-up in api/front-api.
+- Enforce configurable concurrency/timeouts on `/embeddings/text` and `/embeddings/image` (URL payload).
+- Publish actuator health for text + image models for upstream readiness checks.
+
 ---
 
 ### urlfetching

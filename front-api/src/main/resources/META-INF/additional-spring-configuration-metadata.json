@@ -59,6 +59,11 @@
       "name": "front.share",
       "type": "org.open4goods.nudgerfrontapi.config.properties.ShareResolutionProperties",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.ShareResolutionProperties"
+    },
+    {
+      "name": "front.embedding-client",
+      "type": "org.open4goods.nudgerfrontapi.config.properties.EmbeddingClientProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.EmbeddingClientProperties"
     }
   ],
   "properties": [
@@ -180,6 +185,24 @@
       "type": "java.lang.Integer",
       "description": "Maximum requests per minute for authenticated users.",
       "defaultValue": 1000
+    },
+    {
+      "name": "front.embedding-client.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the embedding gateway serving text and image embeddings.",
+      "defaultValue": "http://localhost:8090"
+    },
+    {
+      "name": "front.embedding-client.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout used by the embedding gateway client.",
+      "defaultValue": "PT2S"
+    },
+    {
+      "name": "front.embedding-client.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout used by the embedding gateway client.",
+      "defaultValue": "PT5S"
     },
     {
       "name": "front.rate-limit.counter-ttl",
