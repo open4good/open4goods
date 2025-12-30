@@ -1,64 +1,107 @@
 <template>
-  <section class="product-hero">
-    <header v-if="heroTitle" class="product-hero__heading">
-      <h1 class="product-hero__title">
-        {{ heroTitle }}
-      </h1>
-      <CategoryNavigationBreadcrumbs
-        v-if="heroBreadcrumbs.length"
-        v-bind="heroBreadcrumbProps"
-        class="product-hero__breadcrumbs"
+  <section class="product-hero" :class="heroClasses">
+    <div class="product-hero__background" aria-hidden="true">
+      <div class="product-hero__bg-gradient" />
+      <div
+        v-if="heroBackgroundSrc"
+        class="product-hero__bg-image"
+        :style="heroBackgroundStyle"
       />
-    </header>
+      <div class="product-hero__bg-grid" />
+      <div class="product-hero__bg-glow product-hero__bg-glow--primary" />
+      <div class="product-hero__bg-glow product-hero__bg-glow--accent" />
+    </div>
 
-    <ProductHeroGallery
-      class="product-hero__gallery"
-      :product="product"
-      :title="heroTitle"
-    />
-
-    <div class="product-hero__details">
-      <div v-if="impactScore !== null" class="product-hero__impact-overview">
-        <ImpactScore
-          :score="impactScore"
-          :max="5"
-          size="xlarge"
-          :show-value="true"
+    <div class="product-hero__content">
+      <header v-if="heroTitle" class="product-hero__heading">
+        <div v-if="heroEyebrow" class="product-hero__eyebrow">{{ heroEyebrow }}</div>
+        <h1 class="product-hero__title">{{ heroTitle }}</h1>
+        <CategoryNavigationBreadcrumbs
+          v-if="heroBreadcrumbs.length"
+          v-bind="heroBreadcrumbProps"
+          class="product-hero__breadcrumbs"
         />
-      </div>
+      </header>
 
-      <div v-if="hasBrandOrModel" class="product-hero__brand-line">
-        <span v-if="productBrandName" class="product-hero__brand-name">{{
-          productBrandName
-        }}</span>
-        <span v-if="productModelName" class="product-hero__model-name">{{
-          productModelName
-        }}</span>
-      </div>
+      <div class="product-hero__grid">
+        <div class="product-hero__panel product-hero__panel--gallery">
+          <ProductHeroGallery
+            class="product-hero__gallery"
+            :product="product"
+            :title="heroTitle"
+          />
+        </div>
 
-      <ul
-        v-if="heroAttributes.length"
-        class="product-hero__attributes"
-        role="list"
-      >
-        <li
-          v-for="attribute in heroAttributes"
-          :key="attribute.key"
-          class="product-hero__attribute"
-          role="listitem"
-        >
-          <template v-if="attribute.showLabel !== false">
-            <span class="product-hero__attribute-label">{{
-              attribute.label
-            }}</span>
-            <span class="product-hero__attribute-separator" aria-hidden="true"
-              >:</span
+        <div class="product-hero__panel product-hero__panel--details">
+          <div v-if="impactScore !== null" class="product-hero__impact-overview">
+            <ImpactScore
+              :score="impactScore"
+              :max="5"
+              size="xlarge"
+              :show-value="true"
+            />
+            <div v-if="hasBrandOrModel" class="product-hero__brand-line">
+              <span v-if="productBrandName" class="product-hero__brand-name">{{
+                productBrandName
+              }}</span>
+              <span v-if="productModelName" class="product-hero__model-name">{{
+                productModelName
+              }}</span>
+            </div>
+          </div>
+
+          <ul
+            v-if="heroAttributes.length"
+            class="product-hero__attributes"
+            role="list"
+          >
+            <li
+              v-for="attribute in heroAttributes"
+              :key="attribute.key"
+              class="product-hero__attribute"
+              role="listitem"
             >
-          </template>
-          <span class="product-hero__attribute-value">
-            <template v-if="attribute.tooltip">
-              <v-tooltip location="bottom" :text="attribute.tooltip">
-                <template #activator="{ props: tooltipProps }">
+              <template v-if="attribute.showLabel !== false">
+                <span class="product-hero__attribute-label">{{
+                  attribute.label
+                }}</span>
+                <span class="product-hero__attribute-separator" aria-hidden="true"
+                  >:</span
+                >
+              </template>
+              <span class="product-hero__attribute-value">
+                <template v-if="attribute.tooltip">
+                  <v-tooltip location="bottom" :text="attribute.tooltip">
+                    <template #activator="{ props: tooltipProps }">
+                      <ProductAttributeSourcingLabel
+                        class="product-hero__attribute-value-label"
+                        :sourcing="attribute.sourcing"
+                        :value="attribute.value"
+                        :enable-tooltip="attribute.enableTooltip !== false"
+                      >
+                        <template #default="{ displayValue, displayHtml }">
+                          <span
+                            class="product-hero__attribute-value-content"
+                            v-bind="tooltipProps"
+                          >
+                            <NuxtImg
+                              v-if="attribute.flag"
+                              :src="attribute.flag"
+                              :alt="displayValue"
+                              width="32"
+                              height="24"
+                              class="product-hero__flag"
+                            />
+                            <!-- eslint-disable-next-line vue/no-v-html -->
+                            <span v-if="displayHtml" v-html="displayHtml" />
+                            <span v-else>{{ displayValue }}</span>
+                          </span>
+                        </template>
+                      </ProductAttributeSourcingLabel>
+                    </template>
+                  </v-tooltip>
+                </template>
+                <template v-else>
                   <ProductAttributeSourcingLabel
                     class="product-hero__attribute-value-label"
                     :sourcing="attribute.sourcing"
@@ -66,10 +109,7 @@
                     :enable-tooltip="attribute.enableTooltip !== false"
                   >
                     <template #default="{ displayValue, displayHtml }">
-                      <span
-                        class="product-hero__attribute-value-content"
-                        v-bind="tooltipProps"
-                      >
+                      <span class="product-hero__attribute-value-content">
                         <NuxtImg
                           v-if="attribute.flag"
                           :src="attribute.flag"
@@ -85,67 +125,43 @@
                     </template>
                   </ProductAttributeSourcingLabel>
                 </template>
-              </v-tooltip>
-            </template>
-            <template v-else>
-              <ProductAttributeSourcingLabel
-                class="product-hero__attribute-value-label"
-                :sourcing="attribute.sourcing"
-                :value="attribute.value"
-                :enable-tooltip="attribute.enableTooltip !== false"
-              >
-                <template #default="{ displayValue, displayHtml }">
-                  <span class="product-hero__attribute-value-content">
-                    <NuxtImg
-                      v-if="attribute.flag"
-                      :src="attribute.flag"
-                      :alt="displayValue"
-                      width="32"
-                      height="24"
-                      class="product-hero__flag"
-                    />
-                    <!-- eslint-disable-next-line vue/no-v-html -->
-                    <span v-if="displayHtml" v-html="displayHtml" />
-                    <span v-else>{{ displayValue }}</span>
-                  </span>
-                </template>
-              </ProductAttributeSourcingLabel>
-            </template>
-          </span>
-        </li>
-      </ul>
+              </span>
+            </li>
+          </ul>
 
-      <div class="product-hero__meta-group">
-        <div class="product-hero__meta-bottom">
-          <v-btn
-            class="product-hero__compare-button"
-            :class="{
-              'product-hero__compare-button--active': isCompareSelected,
-            }"
-            color="primary"
-            variant="flat"
-            :aria-pressed="isCompareSelected"
-            :aria-label="compareButtonAriaLabel"
-            :title="compareButtonTitle"
-            :disabled="isCompareDisabled"
-            @click="toggleCompare"
-          >
-            <v-icon
-              :icon="compareButtonIcon"
-              size="20"
-              class="product-hero__compare-icon"
-            />
-            <span class="product-hero__compare-label">{{
-              compareButtonText
-            }}</span>
-          </v-btn>
+          <div class="product-hero__meta-group">
+            <div class="product-hero__meta-bottom">
+              <v-btn
+                class="product-hero__compare-button"
+                :class="{
+                  'product-hero__compare-button--active': isCompareSelected,
+                }"
+                color="primary"
+                variant="flat"
+                :aria-pressed="isCompareSelected"
+                :aria-label="compareButtonAriaLabel"
+                :title="compareButtonTitle"
+                :disabled="isCompareDisabled"
+                @click="toggleCompare"
+              >
+                <v-icon
+                  :icon="compareButtonIcon"
+                  size="20"
+                  class="product-hero__compare-icon"
+                />
+                <span class="product-hero__compare-label">{{
+                  compareButtonText
+                }}</span>
+              </v-btn>
+            </div>
+          </div>
         </div>
+
+        <aside class="product-hero__panel product-hero__panel--pricing">
+          <ProductHeroPricing :product="product" />
+        </aside>
       </div>
     </div>
-
-    <aside class="product-hero__pricing">
-      <ProductHeroPricing :product="product" />
-    </aside>
   </section>
 </template>
 
@@ -166,6 +182,7 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { useHeroBackgroundAsset } from '~/composables/useThemedAsset'
 import type {
   AttributeConfigDto,
   ProductAttributeSourceDto,
@@ -193,6 +210,10 @@ const props = defineProps({
   popularAttributes: {
     type: Array as PropType<AttributeConfigDto[]>,
     default: () => [],
+  },
+  variant: {
+    type: String as PropType<'classic' | 'orbital'>,
+    default: 'orbital',
   },
 })
 
@@ -506,62 +527,243 @@ const gtinCountry = computed(() => {
 })
 
 const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
+
+const heroEyebrow = computed(() =>
+  brandModelLine.value.length ? brandModelLine.value : heroTitle.value
+)
+
+const heroVariant = computed(() =>
+  props.variant === 'classic' ? 'classic' : 'orbital'
+)
+
+const heroClasses = computed(() => [
+  `product-hero--${heroVariant.value}`,
+  { 'product-hero--has-background': heroVariant.value === 'orbital' },
+])
+
+const heroBackgroundAsset = useHeroBackgroundAsset()
+
+const heroBackgroundSrc = computed(() => heroBackgroundAsset.value?.trim())
+
+const heroBackgroundStyle = computed(() => {
+  if (!heroBackgroundSrc.value) {
+    return {}
+  }
+
+  return {
+    backgroundImage: `url('${heroBackgroundSrc.value}')`,
+  }
+})
 </script>
 
 <style scoped>
 .product-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.8fr);
-  gap: 2.5rem;
-  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 3rem);
   border-radius: 32px;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-surface-ice-050), 0.9),
-    rgba(var(--v-theme-surface-glass), 0.95)
-  );
-  box-shadow: 0 32px 70px rgba(15, 23, 42, 0.08);
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(var(--v-theme-hero-gradient-start), 0.12),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(var(--v-theme-hero-gradient-end), 0.08),
+      transparent 40%
+    ),
+    linear-gradient(
+      140deg,
+      rgba(var(--v-theme-surface-ice-050), 0.82),
+      rgba(var(--v-theme-surface-glass), 0.94)
+    );
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+  isolation: isolate;
 }
 
-.product-hero__breadcrumbs {
+.product-hero__background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.product-hero__bg-gradient {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    circle at 50% 20%,
+    rgba(var(--v-theme-hero-overlay-strong), 0.08),
+    rgba(var(--v-theme-hero-gradient-mid), 0.06),
+    transparent 70%
+  );
+  transform: translateZ(0);
+}
+
+.product-hero__bg-image {
+  position: absolute;
+  inset: -10%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  filter: saturate(1.15) blur(2px);
+  transform: translate3d(0, 0, 0) scale(1.05);
+  background-attachment: fixed;
+}
+
+.product-hero__bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+      rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
+      transparent 1px
+    );
+  background-size: 120px 120px;
+  mask-image: radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.6), transparent 70%);
+}
+
+.product-hero__bg-glow {
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+}
+
+.product-hero__bg-glow--primary {
+  top: -80px;
+  left: -120px;
+  background: rgba(var(--v-theme-hero-gradient-start), 0.35);
+}
+
+.product-hero__bg-glow--accent {
+  bottom: -180px;
+  right: -140px;
+  background: rgba(var(--v-theme-hero-gradient-end), 0.38);
+}
+
+.product-hero__content {
+  position: relative;
   display: flex;
-  justify-content: center;
-  margin: 0.75rem auto 0;
-  color: rgb(var(--v-theme-text-neutral-secondary));
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  z-index: 1;
 }
 
 .product-hero__heading {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  gap: 0.6rem;
+  text-align: left;
+  align-items: start;
+}
+
+.product-hero__eyebrow {
+  display: inline-flex;
   align-items: center;
-  text-align: center;
-  margin-bottom: 1.5rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(var(--v-theme-hero-overlay-soft), 0.6);
+  color: rgb(var(--v-theme-text-neutral-secondary));
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
+  width: fit-content;
 }
 
 .product-hero__title {
-  font-size: clamp(2rem, 2.8vw, 3rem);
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: clamp(2.1rem, 3vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.05;
   margin: 0;
   color: rgb(var(--v-theme-text-neutral-strong));
+  text-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.product-hero__breadcrumbs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  margin: 0.35rem 0 0;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-default), 0.6);
+  backdrop-filter: blur(12px);
+  color: rgb(var(--v-theme-text-neutral-secondary));
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
+  width: fit-content;
+}
+
+.product-hero__grid {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  align-items: stretch;
+}
+
+.product-hero__panel {
+  position: relative;
+  height: 100%;
+  padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  border-radius: 24px;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.66);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(16px);
+}
+
+.product-hero__panel--gallery {
+  background: rgba(var(--v-theme-surface-glass), 0.7);
+}
+
+.product-hero__panel--details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: linear-gradient(
+      180deg,
+      rgba(var(--v-theme-hero-overlay-soft), 0.75),
+      rgba(var(--v-theme-surface-glass), 0.9)
+    ),
+    rgba(var(--v-theme-surface-default), 0.5);
+}
+
+.product-hero__panel--pricing {
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+  background: linear-gradient(
+      135deg,
+      rgba(var(--v-theme-hero-gradient-start), 0.12),
+      rgba(var(--v-theme-hero-gradient-end), 0.1)
+    ),
+    rgba(var(--v-theme-surface-default), 0.86);
+  border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.35);
+  box-shadow: 0 24px 52px rgba(var(--v-theme-shadow-primary-600), 0.18);
 }
 
 .product-hero__gallery {
   min-width: 0;
 }
 
-.product-hero__details {
+.product-hero__impact-overview {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__brand-line {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   margin: 0;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
@@ -569,7 +771,7 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 .product-hero__brand-name {
   font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
@@ -583,22 +785,22 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 .product-hero__attributes {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
   padding: 0;
-  margin: 0 0 1.25rem;
+  margin: 0;
   list-style: none;
 }
 
 .product-hero__attribute {
   display: flex;
   align-items: baseline;
-  gap: 0.35rem;
-  font-size: 0.95rem;
+  gap: 0.4rem;
+  font-size: 0.97rem;
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
 .product-hero__attribute-label {
-  font-weight: 500;
+  font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
@@ -613,33 +815,24 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 .product-hero__attribute-value-content {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .product-hero__flag {
-  border-radius: 4px;
+  border-radius: 6px;
   width: 32px;
   height: 24px;
   object-fit: cover;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
-}
-
-.product-hero__impact-overview {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  color: rgb(var(--v-theme-text-neutral-strong));
-  margin-block-end: clamp(1rem, 2vh, 1.5rem);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
 }
 
 .product-hero__meta-group {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
   flex: 1 1 auto;
   min-height: 0;
-  margin-block-start: clamp(1.25rem, 2.5vh, 2rem);
+  margin-block-start: clamp(0.75rem, 2vh, 1.25rem);
 }
 
 .product-hero__meta-bottom {
@@ -650,42 +843,50 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
   gap: 0.75rem;
 }
 
-@media (max-width: 960px) {
-  .product-hero__impact-overview {
-    justify-content: flex-start;
-  }
-}
-
 .product-hero__compare-button {
   text-transform: none;
-  font-weight: 600;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding-inline: 1.2rem;
-  background-color: rgba(var(--v-theme-surface-default), 0.92);
+  gap: 0.65rem;
+  padding-inline: 1.4rem;
+  background: linear-gradient(
+      120deg,
+      rgba(var(--v-theme-surface-default), 0.98),
+      rgba(var(--v-theme-surface-glass-strong), 0.86)
+    );
   color: rgb(var(--v-theme-text-neutral-strong));
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.16),
+    0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.35) inset;
   transition:
     background-color 0.2s ease,
     color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .product-hero__compare-button:hover {
+  transform: translateY(-2px);
   background-color: rgba(var(--v-theme-surface-default), 1);
 }
 
 .product-hero__compare-button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(var(--v-theme-accent-primary-highlight), 0.45);
+  box-shadow:
+    0 0 0 3px rgba(var(--v-theme-accent-primary-highlight), 0.45),
+    0 10px 28px rgba(15, 23, 42, 0.16);
 }
 
 .product-hero__compare-button--active {
-  background-color: rgba(var(--v-theme-primary), 0.16);
+  background: linear-gradient(
+      120deg,
+      rgba(var(--v-theme-primary), 0.16),
+      rgba(var(--v-theme-primary), 0.2)
+    );
   color: rgb(var(--v-theme-primary));
-  box-shadow: 0 14px 32px rgba(var(--v-theme-primary), 0.18);
+  box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.2);
 }
 
 .product-hero__compare-icon {
@@ -693,29 +894,51 @@ const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 }
 
 .product-hero__compare-label {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
 }
 
-.product-hero__pricing {
-  align-self: stretch;
+.product-hero--classic {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-ice-050), 0.9),
+    rgba(var(--v-theme-surface-glass), 0.95)
+  );
 }
 
-@media (max-width: 1280px) {
-  .product-hero {
+.product-hero--classic .product-hero__background {
+  display: none;
+}
+
+.product-hero--classic .product-hero__panel {
+  background: rgba(var(--v-theme-surface-default), 0.82);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+@media (max-width: 1400px) {
+  .product-hero__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto auto;
   }
 
-  .product-hero__pricing {
-    grid-column: 1 / -1;
+  .product-hero__panel--pricing {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 960px) {
   .product-hero {
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+  }
+
+  .product-hero__grid {
     grid-template-columns: 1fr;
-    padding: 1.5rem;
-    gap: 1.5rem;
+  }
+
+  .product-hero__panel--pricing {
+    grid-column: auto;
+  }
+
+  .product-hero__bg-image {
+    background-attachment: scroll;
   }
 }
 </style>
