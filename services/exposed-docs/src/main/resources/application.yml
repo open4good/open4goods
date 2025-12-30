@@ -1,0 +1,24 @@
+server:
+  port: 8086
+spring:
+  application:
+    name: open4goods-exposed-docs
+
+exposed-docs:
+  controller-enabled: true
+  service-enabled: true
+  categories:
+    - id: docs
+      label: Documentation
+      classpath-root: docs
+      extensions:
+        - md
+        - yml
+        - yaml
+    - id: prompts
+      label: Prompts
+      classpath-root: docs
+      extensions:
+        - prompt
+  security:
+    enabled: false

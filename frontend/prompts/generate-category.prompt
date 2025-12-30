@@ -17,8 +17,13 @@ Voici quelques attributs contenus dans le fichier tv.yml, avec quelques regles d
 
 
 googleTaxonomyId: {googleTaxonomyId}
+<<<<<<< HEAD
 eprelGroupName:  {eprelGroupName}
 icecatTaxonomyId: {iceCatId}
+=======
+eprelGroupName: {eprelGroupName}
+icecatTaxonomyId: Try a best effort, if unsuccess set -1
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 impactScoreConfig : Set to empty elements (must preserve bloc structure because markers on "\n" for impact score automataed generation)
 availableImpactScoreCriterias: Keep the attributes from tv.yml if they are realy probable in the new générated category

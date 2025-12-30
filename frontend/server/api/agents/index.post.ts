@@ -47,6 +47,7 @@ export default defineEventHandler(
           userHandle: body.userHandle,
           attributeValues: body.attributeValues,
           captchaToken: body.captchaToken,
+          tags: body.tags,
         },
         domainLanguage
       )

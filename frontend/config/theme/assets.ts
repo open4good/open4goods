@@ -28,6 +28,7 @@ export const THEME_ASSET_KEYS = [
   'contactBackground',
   'blogBackground',
   'categoriesBackground',
+  'parallaxAplat',
 ] as const
 
 export type ThemeAssetKey = (typeof THEME_ASSET_KEYS)[number]
@@ -74,6 +75,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'contact-background.svg',
     blogBackground: 'blog-background.svg',
     categoriesBackground: 'categories-background.svg',
+    parallaxAplat: 'parallax/parallax-aplats.svg',
   },
   dark: {
     logo: 'logo.svg',
@@ -85,6 +87,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'contact-background.svg',
     blogBackground: 'blog-background.svg',
     categoriesBackground: 'categories-background.svg',
+    parallaxAplat: 'parallax/parallax-aplats.svg',
   },
   common: {
     logo: 'placeholders/asset-missing.svg',
@@ -96,5 +99,6 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'placeholders/asset-missing.svg',
     blogBackground: 'placeholders/asset-missing.svg',
     categoriesBackground: 'placeholders/asset-missing.svg',
+    parallaxAplat: 'parallax/parallax-aplats.svg',
   },
 }

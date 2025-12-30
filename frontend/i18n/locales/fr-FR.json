@@ -80,7 +80,8 @@
         "features": "parallax/parallax-background-christmas-features.svg",
         "blog": "parallax/parallax-background-christmas-blog.svg",
         "objections": "parallax/parallax-background-christmas-objections.svg",
-        "cta": "parallax/parallax-background-christmas-cta.svg"
+        "cta": "parallax/parallax-background-christmas-cta.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       }
     },
     "default": {
@@ -104,7 +105,8 @@
         "features": "parallax/parallax-features.svg",
         "blog": "parallax/parallax-blog.svg",
         "objections": "parallax/parallax-objections.svg",
-        "cta": "parallax/parallax-cta.svg"
+        "cta": "parallax/parallax-cta.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       },
       "hero": {
         "eyebrow": "Nudger, c'est :",
@@ -2838,7 +2840,12 @@
       "active": "Actifs"
     },
     "selector": {
-      "select": "Sélectionner"
+      "select": "Sélectionner",
+      "restricted": "Accès restreint",
+      "roles": "Requiert : {roles}",
+      "mailTitle": "Inclut un fallback email",
+      "notAuthorized": "Vous devez disposer d'un de ces rôles pour lancer cet agent : {roles}",
+      "noRoles": "un rôle autorisé"
     },
     "promptInput": {
       "description": "Décrivez votre demande ci-dessous. Nos agents IA vont la traiter et créer un ticket GitHub.",
@@ -2855,13 +2862,20 @@
       "openEmail": "Envoyer via Contact Service",
       "details": "Détails supplémentaires",
       "noAttributes": "Aucune information complémentaire fournie.",
-      "anonymousName": "Utilisateur Nudger"
+      "anonymousName": "Utilisateur Nudger",
+      "submit": "Envoyer la demande",
+      "back": "Retour",
+      "restrictedAccess": "Cet agent est réservé aux rôles suivants : {roles}. Contactez un administrateur pour obtenir un accès.",
+      "locked": "Vous ne pouvez pas utiliser cet agent avec votre rôle actuel.",
+      "usageLimits": "{remaining} / {total} actions restantes",
+      "usageRemaining": "{remaining} actions restantes"
     },
     "submission": {
       "success": "Demande envoyée !",
       "message": "Votre demande a été traitée avec succès par l'agent. Le ticket #{id} a été créé sur GitHub.",
       "viewOnGithub": "Voir sur GitHub",
-      "newRequest": "Nouvelle demande"
+      "newRequest": "Nouvelle demande",
+      "error": "Impossible d'envoyer votre demande pour le moment. Réessayez ou utilisez le fallback email."
     },
     "activity": {
       "title": "Activité de la communauté",

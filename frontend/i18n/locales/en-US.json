@@ -12,7 +12,8 @@
         "features": "parallax/parallax-placeholder.svg",
         "blog": "parallax/parallax-placeholder.svg",
         "objections": "parallax/parallax-placeholder.svg",
-        "cta": "parallax/parallax-placeholder.svg"
+        "cta": "parallax/parallax-placeholder.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       },
       "hero": {
         "eyebrow": "Responsible shopping",
@@ -133,7 +134,8 @@
         "features": "parallax/parallax-background-bastille-features.svg",
         "blog": "parallax/parallax-background-bastille-blog.svg",
         "objections": "parallax/parallax-background-bastille-objections.svg",
-        "cta": "parallax/parallax-background-bastille-cta.svg"
+        "cta": "parallax/parallax-background-bastille-cta.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       }
     }
   },
@@ -2786,7 +2788,12 @@
       "active": "Active"
     },
     "selector": {
-      "select": "Select"
+      "select": "Select",
+      "restricted": "Restricted",
+      "roles": "Requires: {roles}",
+      "mailTitle": "Includes Email fallback",
+      "notAuthorized": "You need one of these roles to run this agent: {roles}",
+      "noRoles": "an eligible role"
     },
     "promptInput": {
       "description": "Describe your feature request or question below. Our AI agents will process it and create a GitHub issue for tracking.",
@@ -2803,13 +2810,20 @@
       "openEmail": "Send via Contact Service",
       "details": "Additional Details",
       "noAttributes": "No additional information provided.",
-      "anonymousName": "Nudger User"
+      "anonymousName": "Nudger User",
+      "submit": "Submit Request",
+      "back": "Back",
+      "restrictedAccess": "This agent is limited to {roles}. If you need access, contact an administrator.",
+      "locked": "This agent is restricted with your current role.",
+      "usageLimits": "{remaining} / {total} actions remaining",
+      "usageRemaining": "{remaining} actions remaining"
     },
     "submission": {
       "success": "Request Submitted!",
       "message": "Your request has been successfully processed by the agent. Issue #{id} has been created on GitHub.",
       "viewOnGithub": "View on GitHub",
-      "newRequest": "New Request"
+      "newRequest": "New Request",
+      "error": "Unable to submit your request right now. Please try again or use the email fallback."
     },
     "activity": {
       "title": "Community Activity",
