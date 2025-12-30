@@ -12,3 +12,4 @@
 /.cached/
 /logs/
 /target/
+/startup*.log
