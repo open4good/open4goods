@@ -316,6 +316,83 @@ const filterRequest = computed<FilterRequestDto>(() => {
   )
 })
 
+const isCategoryStep = computed(() => activeStepKey.value === 'category')
+
+const windowTransition = computed(() => undefined)
+
+const windowReverseTransition = computed(() => undefined)
+
+const categorySummary = computed(() => {
+  if (!selectedCategory.value || activeStepKey.value === 'category') {
+    return null
+  }
+
+  return {
+    label:
+      selectedCategory.value.verticalHomeTitle ??
+      selectedCategory.value.id ??
+      '',
+    image: selectedCategory.value.imageSmall,
+    icon: categoryIcon.value,
+    alt:
+      selectedCategory.value.verticalHomeTitle ??
+      selectedCategory.value.id ??
+      '',
+  }
+})
+
+const shouldEnlargeCornerIcon = computed(
+  () => isCategoryStep.value || Boolean(categorySummary.value)
+)
+
+const categorySlug = computed(() => {
+  if (!selectedCategory.value) {
+    return null
+  }
+
+  const slug =
+    selectedCategory.value.verticalHomeUrl?.replace(/^\/+/, '') ??
+    selectedCategory.value.id ??
+    null
+
+  return slug && slug.trim().length > 0 ? slug : null
+})
+
+const categoryHash = computed(() => {
+  if (!selectedCategoryId.value) {
+    return ''
+  }
+
+  const hash = buildCategoryHash({
+    filters: filterRequest.value,
+    activeSubsets: activeSubsetIds.value.length
+      ? activeSubsetIds.value
+      : undefined,
+  })
+
+  return hash ?? ''
+})
+
+const categoryNavigationTarget = computed(() => {
+  if (!categorySlug.value) {
+    return null
+  }
+
+  return categoryHash.value
+    ? `/${categorySlug.value}${categoryHash.value}`
+    : `/${categorySlug.value}`
+})
+
+const cornerSummaryLabel = computed(() => {
+  if (!categorySummary.value) {
+    return ''
+  }
+
+  return t('nudge-tool.actions.viewCategoryResults', {
+    category: categorySummary.value.label,
+  })
+})
+
 type WizardStep = {
   key: string
   component: Component
@@ -628,83 +705,6 @@ const handleProgressClick = (stepKey: string) => {
 
   activeStepKey.value = stepKey
 }
-
-const isCategoryStep = computed(() => activeStepKey.value === 'category')
-
-const windowTransition = computed(() => undefined)
-
-const windowReverseTransition = computed(() => undefined)
-
-const categorySummary = computed(() => {
-  if (!selectedCategory.value || activeStepKey.value === 'category') {
-    return null
-  }
-
-  return {
-    label:
-      selectedCategory.value.verticalHomeTitle ??
-      selectedCategory.value.id ??
-      '',
-    image: selectedCategory.value.imageSmall,
-    icon: categoryIcon.value,
-    alt:
-      selectedCategory.value.verticalHomeTitle ??
-      selectedCategory.value.id ??
-      '',
-  }
-})
-
-const shouldEnlargeCornerIcon = computed(
-  () => isCategoryStep.value || Boolean(categorySummary.value)
-)
-
-const categorySlug = computed(() => {
-  if (!selectedCategory.value) {
-    return null
-  }
-
-  const slug =
-    selectedCategory.value.verticalHomeUrl?.replace(/^\/+/, '') ??
-    selectedCategory.value.id ??
-    null
-
-  return slug && slug.trim().length > 0 ? slug : null
-})
-
-const categoryHash = computed(() => {
-  if (!selectedCategoryId.value) {
-    return ''
-  }
-
-  const hash = buildCategoryHash({
-    filters: filterRequest.value,
-    activeSubsets: activeSubsetIds.value.length
-      ? activeSubsetIds.value
-      : undefined,
-  })
-
-  return hash ?? ''
-})
-
-const categoryNavigationTarget = computed(() => {
-  if (!categorySlug.value) {
-    return null
-  }
-
-  return categoryHash.value
-    ? `/${categorySlug.value}${categoryHash.value}`
-    : `/${categorySlug.value}`
-})
-
-const cornerSummaryLabel = computed(() => {
-  if (!categorySummary.value) {
-    return ''
-  }
-
-  return t('nudge-tool.actions.viewCategoryResults', {
-    category: categorySummary.value.label,
-  })
-})
 
 const windowTransitionDurationMs = 0
 
