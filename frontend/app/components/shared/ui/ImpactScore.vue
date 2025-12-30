@@ -182,7 +182,7 @@ const ratingSize = computed(() => {
     case 'large':
       return 32
     case 'xlarge':
-      return 40
+      return 48
     default:
       return 24
   }
@@ -209,7 +209,10 @@ const shouldDisplayStars = computed(() => {
 })
 
 const tooltipLabel = computed(() => {
-  if ((props.mode === 'badge' || props.mode === 'combined') && shouldDisplayScore.value) {
+  if (
+    (props.mode === 'badge' || props.mode === 'combined') &&
+    shouldDisplayScore.value
+  ) {
     return t('components.impactScore.tooltipBadge', {
       value: n(scoreOutOf20.value, {
         maximumFractionDigits: 1,
@@ -266,9 +269,9 @@ const mode = computed(() => props.mode)
 }
 
 .impact-score--xlarge {
-  --impact-score-gap: 0.75rem;
-  --impact-score-rating-gap: 0.6rem;
-  --impact-score-value-font-size: 1.2rem;
+  --impact-score-gap: 1rem;
+  --impact-score-rating-gap: 0.8rem;
+  --impact-score-value-font-size: 1.6rem;
 }
 
 .impact-score__rating :deep(.v-rating__wrapper) {

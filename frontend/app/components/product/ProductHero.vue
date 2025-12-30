@@ -1,25 +1,16 @@
 <template>
   <section class="product-hero" :class="heroClasses">
     <div class="product-hero__background" aria-hidden="true">
-      <div class="product-hero__bg-gradient" />
-      <div
-        v-if="heroBackgroundSrc"
-        class="product-hero__bg-image"
-        :style="heroBackgroundStyle"
-      />
-      <div class="product-hero__bg-grid" />
-      <div class="product-hero__bg-glow product-hero__bg-glow--primary" />
-      <div class="product-hero__bg-glow product-hero__bg-glow--accent" />
+      <ProductHeroBackground :product="product" />
     </div>
 
     <div class="product-hero__content">
       <header v-if="heroTitle" class="product-hero__heading">
-        <div v-if="heroEyebrow" class="product-hero__eyebrow">{{ heroEyebrow }}</div>
-        <h1 class="product-hero__title">{{ heroTitle }}</h1>
+        <h1 class="product-hero__title text-center">{{ heroTitle }}</h1>
         <CategoryNavigationBreadcrumbs
           v-if="heroBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
-          class="product-hero__breadcrumbs"
+          class="product-hero__breadcrumbs text-center"
         />
       </header>
 
@@ -33,12 +24,15 @@
         </div>
 
         <div class="product-hero__panel product-hero__panel--details">
-          <div v-if="impactScore !== null" class="product-hero__impact-overview">
+          <div
+            v-if="impactScore !== null"
+            class="product-hero__impact-overview"
+          >
             <ImpactScore
               :score="impactScore"
               :max="5"
               size="xlarge"
-              :show-value="true"
+              :show-value="false"
             />
             <div v-if="hasBrandOrModel" class="product-hero__brand-line">
               <span v-if="productBrandName" class="product-hero__brand-name">{{
@@ -65,7 +59,9 @@
                 <span class="product-hero__attribute-label">{{
                   attribute.label
                 }}</span>
-                <span class="product-hero__attribute-separator" aria-hidden="true"
+                <span
+                  class="product-hero__attribute-separator"
+                  aria-hidden="true"
                   >:</span
                 >
               </template>
@@ -182,7 +178,7 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { useHeroBackgroundAsset } from '~/composables/useThemedAsset'
+
 import type {
   AttributeConfigDto,
   ProductAttributeSourceDto,
@@ -196,6 +192,9 @@ export interface ProductHeroBreadcrumb {
 
 const ProductHeroGallery = defineAsyncComponent(
   () => import('~/components/product/ProductHeroGallery.vue')
+)
+const ProductHeroBackground = defineAsyncComponent(
+  () => import('~/components/product/ProductHeroBackground.vue')
 )
 
 const props = defineProps({
@@ -528,10 +527,6 @@ const gtinCountry = computed(() => {
 
 const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
 
-const heroEyebrow = computed(() =>
-  brandModelLine.value.length ? brandModelLine.value : heroTitle.value
-)
-
 const heroVariant = computed(() =>
   props.variant === 'classic' ? 'classic' : 'orbital'
 )
@@ -540,20 +535,6 @@ const heroClasses = computed(() => [
   `product-hero--${heroVariant.value}`,
   { 'product-hero--has-background': heroVariant.value === 'orbital' },
 ])
-
-const heroBackgroundAsset = useHeroBackgroundAsset()
-
-const heroBackgroundSrc = computed(() => heroBackgroundAsset.value?.trim())
-
-const heroBackgroundStyle = computed(() => {
-  if (!heroBackgroundSrc.value) {
-    return {}
-  }
-
-  return {
-    backgroundImage: `url('${heroBackgroundSrc.value}')`,
-  }
-})
 </script>
 
 <style scoped>
@@ -562,7 +543,8 @@ const heroBackgroundStyle = computed(() => {
   overflow: hidden;
   padding: clamp(1.5rem, 4vw, 3rem);
   border-radius: 32px;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 20%,
       rgba(var(--v-theme-hero-gradient-start), 0.12),
       transparent 45%
@@ -615,7 +597,8 @@ const heroBackgroundStyle = computed(() => {
 .product-hero__bg-grid {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(
+  background-image:
+    linear-gradient(
       rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
       transparent 1px
     ),
@@ -625,7 +608,11 @@ const heroBackgroundStyle = computed(() => {
       transparent 1px
     );
   background-size: 120px 120px;
-  mask-image: radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.6), transparent 70%);
+  mask-image: radial-gradient(
+    circle at 50% 30%,
+    rgba(0, 0, 0, 0.6),
+    transparent 70%
+  );
 }
 
 .product-hero__bg-glow {
@@ -699,7 +686,11 @@ const heroBackgroundStyle = computed(() => {
   backdrop-filter: blur(12px);
   color: rgb(var(--v-theme-text-neutral-secondary));
   box-shadow: 0 8px 26px rgba(15, 23, 42, 0.08);
+  justify-content: center;
+  text-align: center;
   width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .product-hero__grid {
@@ -728,7 +719,8 @@ const heroBackgroundStyle = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       180deg,
       rgba(var(--v-theme-hero-overlay-soft), 0.75),
       rgba(var(--v-theme-surface-glass), 0.9)
@@ -738,7 +730,8 @@ const heroBackgroundStyle = computed(() => {
 
 .product-hero__panel--pricing {
   padding: clamp(1rem, 1.8vw, 1.5rem);
-  background: linear-gradient(
+  background:
+    linear-gradient(
       135deg,
       rgba(var(--v-theme-hero-gradient-start), 0.12),
       rgba(var(--v-theme-hero-gradient-end), 0.1)
@@ -853,10 +846,10 @@ const heroBackgroundStyle = computed(() => {
   gap: 0.65rem;
   padding-inline: 1.4rem;
   background: linear-gradient(
-      120deg,
-      rgba(var(--v-theme-surface-default), 0.98),
-      rgba(var(--v-theme-surface-glass-strong), 0.86)
-    );
+    120deg,
+    rgba(var(--v-theme-surface-default), 0.98),
+    rgba(var(--v-theme-surface-glass-strong), 0.86)
+  );
   color: rgb(var(--v-theme-text-neutral-strong));
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.16),
@@ -881,10 +874,10 @@ const heroBackgroundStyle = computed(() => {
 
 .product-hero__compare-button--active {
   background: linear-gradient(
-      120deg,
-      rgba(var(--v-theme-primary), 0.16),
-      rgba(var(--v-theme-primary), 0.2)
-    );
+    120deg,
+    rgba(var(--v-theme-primary), 0.16),
+    rgba(var(--v-theme-primary), 0.2)
+  );
   color: rgb(var(--v-theme-primary));
   box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.2);
 }

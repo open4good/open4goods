@@ -11,7 +11,8 @@ type CompareListBlockReason =
   | 'missing-identifier'
 
 vi.mock('~/composables/useThemedAsset', () => ({
-  useHeroBackgroundAsset: () => computed(() => 'https://assets.example/hero.jpg'),
+  useHeroBackgroundAsset: () =>
+    computed(() => 'https://assets.example/hero.jpg'),
 }))
 
 vi.mock('~/stores/useProductCompareStore', () => {
@@ -20,7 +21,10 @@ vi.mock('~/stores/useProductCompareStore', () => {
   return {
     MAX_COMPARE_ITEMS: 4,
     useProductCompareStore: () => ({
-      canAddProduct: () => ({ success: true, reason: undefined as CompareListBlockReason | undefined }),
+      canAddProduct: () => ({
+        success: true,
+        reason: undefined as CompareListBlockReason | undefined,
+      }),
       hasProduct: () => isSelected,
       toggleProduct: () => {
         isSelected = !isSelected
@@ -58,7 +62,10 @@ const createI18nInstance = () =>
 const stubs = {
   CategoryNavigationBreadcrumbs: defineComponent({
     name: 'CategoryNavigationBreadcrumbsStub',
-    props: { items: { type: Array, default: () => [] }, ariaLabel: { type: String, default: '' } },
+    props: {
+      items: { type: Array, default: () => [] },
+      ariaLabel: { type: String, default: '' },
+    },
     setup(props) {
       return () =>
         h(
@@ -90,16 +97,37 @@ const stubs = {
   }),
   ProductAttributeSourcingLabel: defineComponent({
     name: 'ProductAttributeSourcingLabelStub',
-    props: { value: { type: String, default: '' }, sourcing: { type: Object, default: null }, enableTooltip: { type: Boolean, default: true } },
+    props: {
+      value: { type: String, default: '' },
+      sourcing: { type: Object, default: null },
+      enableTooltip: { type: Boolean, default: true },
+    },
     setup(_, { slots }) {
-      return () => h('span', { class: 'attribute-sourcing-stub' }, slots.default?.({ displayValue: 'value', displayHtml: '' }))
+      return () =>
+        h(
+          'span',
+          { class: 'attribute-sourcing-stub' },
+          slots.default?.({ displayValue: 'value', displayHtml: '' })
+        )
     },
   }),
   NuxtImg: defineComponent({
     name: 'NuxtImgStub',
-    props: { src: { type: String, default: '' }, alt: { type: String, default: '' } },
+    props: {
+      src: { type: String, default: '' },
+      alt: { type: String, default: '' },
+    },
     setup(props) {
-      return () => h('img', { class: 'nuxt-img-stub', src: props.src, alt: props.alt })
+      return () =>
+        h('img', { class: 'nuxt-img-stub', src: props.src, alt: props.alt })
+    },
+  }),
+  ProductHeroBackground: defineComponent({
+    name: 'ProductHeroBackgroundStub',
+    props: { product: { type: Object, default: () => ({}) } },
+    setup() {
+      return () =>
+        h('div', { class: 'product-hero-background-stub' }, 'background')
     },
   }),
   'v-tooltip': defineComponent({
@@ -146,7 +174,10 @@ const baseProduct: ProductDto = {
   identity: { brand: 'Orbit', model: 'X1', bestName: 'Orbit X1' },
   base: {
     bestName: 'Orbit X1',
-    gtinInfo: { countryName: 'France', countryFlagUrl: 'https://flag.example/fr.png' },
+    gtinInfo: {
+      countryName: 'France',
+      countryFlagUrl: 'https://flag.example/fr.png',
+    },
   },
   aiReview: { review: { mediumTitle: 'Next-gen Orbit X1' } },
 }
@@ -171,13 +202,15 @@ describe('ProductHero', () => {
 
     expect(wrapper.classes()).toContain('product-hero--orbital')
     expect(wrapper.classes()).toContain('product-hero--has-background')
-    expect(wrapper.get('.product-hero__title').text()).toContain('Next-gen Orbit X1')
-    expect(wrapper.get('.product-hero__eyebrow').text()).toContain('Orbit - X1')
+    expect(wrapper.get('.product-hero__title').text()).toContain(
+      'Next-gen Orbit X1'
+    )
     expect(wrapper.find('.product-hero__panel--pricing').exists()).toBe(true)
     expect(wrapper.find('.product-hero__panel--details').exists()).toBe(true)
 
-    const background = wrapper.get('.product-hero__bg-image')
-    expect(background.attributes('style')).toContain('https://assets.example/hero.jpg')
+    expect(
+      wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()
+    ).toBe(true)
 
     await wrapper.unmount()
   })
@@ -187,7 +220,10 @@ describe('ProductHero', () => {
 
     expect(wrapper.classes()).toContain('product-hero--classic')
     expect(wrapper.classes()).not.toContain('product-hero--has-background')
-    expect(wrapper.find('.product-hero__bg-image').exists()).toBe(true)
+    // Background component is still rendered in structure, but CSS class on parent is different
+    expect(
+      wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()
+    ).toBe(true)
 
     await wrapper.unmount()
   })

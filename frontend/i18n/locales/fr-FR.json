@@ -287,7 +287,7 @@
             "label": "Sans se faire avoir sur les prix",
             "segments": [
               {
-                "text": "Sans se faire avoir sur les prix avec"
+                "text": "Sans se faire avoir sur les prix avec plus de "
               },
               {
                 "text": "{partnersLink}",
@@ -328,13 +328,13 @@
       "title": "Trop d'infos, mais pas celle qu'il faut ?",
       "description": "Comparer impact, prix, fiabilité... Pas toujours facile !",
       "items": {
-        "labelsOverload": "Perdu dans la jungle des labels ? Difficile de comparer vraiment.",
-        "budgetVsEcology": "Écologie vs pouvoir d’achat ? Marre de choisir entre les deux.",
+        "labelsOverload": "Trop d'infos technique ? Perdu dans la jungle des labels ? Pas facile de vraiment comparer...",
+        "budgetVsEcology": "Écologie vs pouvoir d’achat ? Je dois vraiment choisir entre les deux ?",
         "tooManyTabs": "8 sites ouverts ? Un seul endroit suffit."
       }
     },
     "solution": {
-      "title": "Acheter mieux, sans payer plus cher",
+      "title": "Acheter informé, simplement",
       "description": "Nudger analyse les données écologiques, sociétales, techniques et les prix pour simplifier vos achats.",
       "benefits": {
         "time": {
@@ -342,16 +342,16 @@
           "description": "On analyse pour vous."
         },
         "savings": {
-          "title": "Économisez",
-          "description": "Comparateur de prix intégré."
+          "title": "Payez le juste prix",
+          "description": "Un produit qui consomme moins ou tombe moins en panne vous coutera moins cher à l'usage."
         },
         "planet": {
           "title": "Consommez mieux",
-          "description": "Repérez les produits les plus responsables."
+          "description": "Acheter en ligne ne sera jamais bon pour la planète. Mais cela peut quand même un acte politique. Repérez les produits les plus vertueux, comparez le coût d'usage."
         },
         "trust": {
-          "title": "Confiance",
-          "description": "Données ouvertes, comparateur indépendant"
+          "title": "0 Données personnells collectées",
+          "description": "Transparent, sobres et indépendants. Données en open-data, code en open-source."
         }
       }
     },
@@ -361,11 +361,11 @@
       "cards": {
         "impactScore": {
           "title": "Impact Score IA",
-          "description": "Un score écologique clair (5 critères, IA utilisée avec sobriété)."
+          "description": "Un score écologique qui englobe des dizaines de criteres d'impact"
         },
         "priceComparison": {
           "title": "Comparateur de prix + historique",
-          "description": "Payer le juste prix, au bon moment."
+          "description": "Regardez comment évoluent les prix en neuf et en occasion, pour payer le juste prix, au bon moment."
         },
         "openIndependent": {
           "title": "Ouvert & indépendant",
@@ -377,7 +377,7 @@
         },
         "massiveBase": {
           "title": "Base massive",
-          "description": "La plus grande base open data du marché : 50 millions de références."
+          "description": "La plus grande base open data du marché : +60 millions de références."
         }
       }
     },
@@ -442,16 +442,16 @@
       }
     },
     "objections": {
-      "title": "Questions directes, réponses transparentes",
-      "subtitle": "Les sujets qui reviennent le plus souvent.",
+      "title": "On va nous dire...",
+      "subtitle": "Les questions légitimes.",
       "items": {
         "aiEnergy": {
-          "question": "L’IA consomme beaucoup d’énergie ?",
-          "answer": "IA frugale, calculs optimisés, valeur nette positive."
+          "question": "Un coup de pouce écologique à grand renfort d'IA ????",
+          "answer": "Ces outils changent la donne, et vont changer beaucoup de choses. Nous pensons démontrer ici un cas d'usage 'AI 4 good', ou ces outils peuvent être utilisés pour de la contribution et de l'impact sociétal. Pour autant, nous sommes dans une démarche sobre en limitant le nombre d'appels et la taille des modèles utilisés !"
         },
         "reuse": {
           "question": "La vraie frugalité c’est le réemploi ?",
-          "answer": "On encourage d’abord consommer moins, puis mieux ; durabilité et reconditionné quand disponibles."
+          "answer": "Tout à fait d'accord, mais Nudger laisse le choix. C'est pour ça que nous mettons toujours en avant les offres d'occasion quand il y'en a de disponibles."
         },
         "independence": {
           "question": "Êtes-vous indépendants ?",
@@ -500,18 +500,18 @@
           "helper": "Ouvre la dernière réponse publique dans un nouvel onglet",
           "questionFallback": "Ta question IA s’affichera ici."
         }
-      },
-      "contactRedirect": {
-        "eyebrow": "Besoin d’aide ?",
-        "title": "Vous ne trouvez pas votre réponse ?",
-        "subtitle": "Saisissez quelques mots et on vous redirige vers le formulaire de contact.",
-        "inputLabel": "Votre demande en bref",
-        "placeholder": "ex. Je cherche une facture ou une info produit",
-        "cta": "Envoyer vers Contact",
-        "secondaryCta": "Aller à la page Contact",
-        "helper": "Nous pré-remplissons le formulaire de contact pour vous faire gagner du temps.",
-        "prefilledSubject": "Question depuis la FAQ"
       }
+    },
+    "contactRedirect": {
+      "eyebrow": "Besoin d’aide ?",
+      "title": "Vous ne trouvez pas votre réponse ?",
+      "subtitle": "Saisissez quelques mots et on vous redirige vers le formulaire de contact.",
+      "inputLabel": "Votre demande en bref",
+      "placeholder": "ex. Je cherche une facture ou une info produit",
+      "cta": "Envoyer vers Contact",
+      "secondaryCta": "Aller à la page Contact",
+      "helper": "Nous pré-remplissons le formulaire de contact pour vous faire gagner du temps.",
+      "prefilledSubject": "Question depuis la FAQ"
     },
     "roundedCards": {
       "eyebrow": "Design system",

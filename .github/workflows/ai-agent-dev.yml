@@ -32,8 +32,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -43,7 +43,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
           cache: maven
 
       - name: Run agent dev checks
@@ -119,33 +119,33 @@ jobs:
           fi
 
           python - <<'PY'
-import json
-import os
-from pathlib import Path
+          import json
+          import os
+          from pathlib import Path
 
-results_file = Path('agent-dev-artifacts/results.txt')
-results = []
-for line in results_file.read_text().splitlines():
-    parts = line.split('|', 2)
-    if len(parts) != 3:
-        continue
-    name, status, log_path = parts
-    results.append({'name': name, 'status': status, 'log': log_path})
+          results_file = Path('agent-dev-artifacts/results.txt')
+          results = []
+          for line in results_file.read_text().splitlines():
+              parts = line.split('|', 2)
+              if len(parts) != 3:
+                  continue
+              name, status, log_path = parts
+              results.append({'name': name, 'status': status, 'log': log_path})
 
-has_failures = any(item.get('status') != 'success' for item in results)
-summary_lines = []
-for item in results:
-    emoji = '✅' if item['status'] == 'success' else '❌'
-    summary_lines.append(f"{emoji} {item['name']}")
+          has_failures = any(item.get('status') != 'success' for item in results)
+          summary_lines = []
+          for item in results:
+              emoji = '✅' if item['status'] == 'success' else '❌'
+              summary_lines.append(f"{emoji} {item['name']}")
 
-summary_path = Path('agent-dev-artifacts/summary.md')
-summary_path.write_text('\n'.join(summary_lines))
+          summary_path = Path('agent-dev-artifacts/summary.md')
+          summary_path.write_text('\n'.join(summary_lines))
 
-with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
-    fh.write(f"results={json.dumps(results)}\n")
-    fh.write(f"has_failures={'true' if has_failures else 'false'}\n")
-    fh.write(f"summary_file={summary_path}\n")
-PY
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"results={json.dumps(results)}\n")
+              fh.write(f"has_failures={'true' if has_failures else 'false'}\n")
+              fh.write(f"summary_file={summary_path}\n")
+          PY
 
       - name: Post PR comment and labels
         uses: actions/github-script@v8

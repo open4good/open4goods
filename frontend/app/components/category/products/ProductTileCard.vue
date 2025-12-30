@@ -111,7 +111,7 @@
           </div>
         </div>
 
-        <div class="product-tile-card__meta">
+        <v-row class="product-tile-card__meta">
           <div class="product-tile-card__offers">
             <v-icon icon="mdi-store" size="16" class="me-1" />
             <span>{{ offersCountLabel }}</span>
@@ -137,7 +137,7 @@
                 : t('category.products.compare.buttonLabel')
             }}
           </v-btn>
-        </div>
+        </v-row>
       </div>
     </div>
   </v-card>

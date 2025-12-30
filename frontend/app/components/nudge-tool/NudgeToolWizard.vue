@@ -107,7 +107,7 @@
     </div>
     <div ref="footerRef" class="nudge-wizard__footer">
       <div
-        v-if="progressSteps.length"
+        v-if="progressSteps.length > 1"
         class="nudge-wizard__progress-bubbles"
         :style="footerOffsetStyle"
       >
