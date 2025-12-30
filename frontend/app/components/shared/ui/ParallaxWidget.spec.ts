@@ -66,6 +66,19 @@ describe('ParallaxWidget', () => {
     displayWidth.value = 1280
     windowHeight.value = 1000
     elementHeight.value = 300
+
+    // Mock getBoundingClientRect to simulate element position at 350px top
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      top: 350,
+      left: 0,
+      width: 1000,
+      height: 300,
+      bottom: 650,
+      right: 1000,
+      x: 0,
+      y: 350,
+      toJSON: () => {},
+    } as DOMRect)
   })
 
   it('applies per-layer speeds and blend modes', async () => {
