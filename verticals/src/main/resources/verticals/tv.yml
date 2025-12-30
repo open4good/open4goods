@@ -23,7 +23,8 @@ googleTaxonomyId: 404
 #The icecat category id. Set -1 if unknown
 icecatTaxonomyId: 1584
 
-eprelGroupName: TELEVISION
+eprelGroupNames:
+  - TELEVISION
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). 
 # Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
