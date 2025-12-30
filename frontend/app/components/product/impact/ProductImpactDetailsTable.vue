@@ -136,7 +136,7 @@ type GroupedRows = {
     aggregate: DetailedScore | null
     subscores: DetailedScore[]
   }>
-  standalone: DetailedScore[]
+  divers: DetailedScore[]
 }
 type TableRow = {
   id: string
@@ -197,6 +197,17 @@ const lifecycleColors: Record<string, string> = {
   TRANSPORTATION: 'info',
   USE: 'primary',
   END_OF_LIFE: 'success',
+}
+
+const DIVERS_AGGREGATE_ID = 'DIVERS'
+
+const toFiniteNumber = (value: number | null | undefined): number | null => {
+  if (value == null) {
+    return null
+  }
+
+  const parsed = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(parsed) ? parsed : null
 }
 
 const normalizeParticipations = (participations?: string[] | null): string[] =>
@@ -288,7 +299,7 @@ const groupedScores = computed<GroupedRows>(() => {
     return normalizedId && !aggregateSet.has(normalizedId)
   })
 
-  return { groups, standalone: filteredStandalone }
+  return { groups, divers: filteredStandalone }
 })
 
 const headers = computed(() => [
@@ -334,14 +345,52 @@ const buildTableRow = (
   parentId,
 })
 
+const resolveAverage = (values: number[]) =>
+  values.reduce((sum, value) => sum + value, 0) / values.length
+
+const resolveAggregateDisplayValue = (
+  aggregateId: string,
+  aggregateScore: DetailedScore | null,
+  subscores: DetailedScore[]
+): number | null => {
+  const directValue = resolveScoreValue(aggregateScore)
+  if (directValue != null) {
+    return directValue
+  }
+
+  const aggregateValues = subscores
+    .map(score => score.aggregates?.[aggregateId])
+    .map(toFiniteNumber)
+    .filter((value): value is number => value != null)
+
+  if (aggregateValues.length) {
+    return resolveAverage(aggregateValues)
+  }
+
+  const childValues = subscores
+    .map(score => score.displayValue)
+    .filter((value): value is number => value != null)
+
+  if (childValues.length) {
+    return resolveAverage(childValues)
+  }
+
+  return null
+}
+
 const buildAggregateRow = (
   aggregateId: string,
-  aggregateScore: DetailedScore | null
+  aggregateScore: DetailedScore | null,
+  subscores: DetailedScore[]
 ): TableRow => ({
   id: aggregateId,
   label: resolveAggregateLabel(aggregateId, aggregateScore),
   attributeValue: '—',
-  displayValue: resolveScoreValue(aggregateScore),
+  displayValue: resolveAggregateDisplayValue(
+    aggregateId,
+    aggregateScore,
+    subscores
+  ),
   coefficient: aggregateScore?.coefficient ?? null,
   lifecycle: aggregateScore?.participateInACV ?? [],
   rowType: 'aggregate',
@@ -352,7 +401,7 @@ const tableItems = computed<TableRow[]>(() => {
   const expanded = new Set(expandedGroups.value)
 
   groupedScores.value.groups.forEach(group => {
-    rows.push(buildAggregateRow(group.id, group.aggregate))
+    rows.push(buildAggregateRow(group.id, group.aggregate, group.subscores))
 
     if (expanded.has(group.id)) {
       rows.push(
@@ -363,11 +412,23 @@ const tableItems = computed<TableRow[]>(() => {
     }
   })
 
-  rows.push(
-    ...groupedScores.value.standalone.map(score =>
-      buildTableRow(score, 'standalone')
+  if (groupedScores.value.divers.length) {
+    rows.push(
+      buildAggregateRow(
+        DIVERS_AGGREGATE_ID,
+        null,
+        groupedScores.value.divers
+      )
     )
-  )
+
+    if (expanded.has(DIVERS_AGGREGATE_ID)) {
+      rows.push(
+        ...groupedScores.value.divers.map(score =>
+          buildTableRow(score, 'subscore', DIVERS_AGGREGATE_ID)
+        )
+      )
+    }
+  }
 
   return rows
 })

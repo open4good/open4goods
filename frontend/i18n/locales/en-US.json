@@ -2270,7 +2270,9 @@
         "TRANSPORTATION": "Transport & logistics",
         "USE": "Product use"
       },
-      "aggregateScores": {},
+      "aggregateScores": {
+        "DIVERS": "Miscellaneous"
+      },
       "showDetails": "Show detailed indicators",
       "hideDetails": "Hide detailed indicators",
       "title": "Environmental impact"

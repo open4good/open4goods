@@ -2318,7 +2318,9 @@
         "TRANSPORTATION": "Transport & logistique",
         "USE": "Usage du produit"
       },
-      "aggregateScores": {},
+      "aggregateScores": {
+        "DIVERS": "Divers"
+      },
       "showDetails": "Afficher les indicateurs détaillés",
       "hideDetails": "Masquer les indicateurs détaillés",
       "title": "Impact écologique"
